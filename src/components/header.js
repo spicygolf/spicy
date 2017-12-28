@@ -22,7 +22,7 @@ import
  */
 var styles = StyleSheet.create({
   header: {
-    marginTop: 20,
+    paddingTop: 34, // TODO: use react-native-safe-area?
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center'

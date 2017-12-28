@@ -1,0 +1,84 @@
+'use strict';
+
+import React from 'react';
+
+import {
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+
+import { List, ListItem } from "react-native-elements";
+
+const url = "http://localhost:3000/v1/player/anderson/games";
+
+class GameList extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      games: []
+    };
+  }
+
+  async _fetchData() {
+    try {
+      let response = await fetch(url);
+      let responseJson = await response.json();
+      this._updateData(responseJson);
+    } catch(error) {
+      console.error(error);
+    }
+  }
+
+  _updateData(data) {
+    this.setState((prevState, props) => {
+      prevState.data = data;
+      return prevState;
+    });
+  }
+
+  _renderItem({item}) {
+    return (
+      <ListItem
+        roundAvatar
+        title={item.name || ''}
+        subtitle={item.gametype || ''}
+        onPress={() => console.log('pressed ' + item.name)}
+      />
+    );
+  }
+
+  componentWillMount() {
+    this._fetchData();
+  }
+
+  render() {
+    var content;
+
+    if( this.state && this.state.data ) {
+      content = (
+        <List>
+          <FlatList
+            data={this.state.data}
+            renderItem={this._renderItem}
+            keyExtractor={item => item._key}
+          />
+        </List>
+      );
+    } else {
+      content = (
+        <Text>Loading...</Text>
+      );
+    }
+
+    return (
+      <View>
+        {content}
+      </View>
+    );
+  }
+};
+
+export default GameList;

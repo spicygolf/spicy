@@ -7,6 +7,10 @@
 
 import React from 'react';
 
+import {
+  StyleSheet
+} from 'react-native';
+
 import { TabNavigator } from 'react-navigation';
 
 import { NavigationComponent } from 'react-native-material-bottom-navigation';
@@ -25,6 +29,12 @@ import Feed from '../containers/feed';
 import Games from '../containers/games';
 import Profile from '../containers/profile';
 
+const styles = StyleSheet.create({
+  bottomNav: { // TODO: get Safe Area somehow
+    paddingBottom: 34,
+    height: 56 + 34
+  }
+});
 
 /**
  * ## Main App class
@@ -45,6 +55,7 @@ const Main = TabNavigator(
         activeLabelColor: tabActive,
         rippleColor: 'white',
         shifting: false,
+        style: styles.bottomNav,
         tabs: {
           Feed: {
             label: 'Feed',
@@ -72,5 +83,3 @@ const Main = TabNavigator(
 
 // note anon function to export the navigator
 export default () => <Main />;
-
-//export default Main;
