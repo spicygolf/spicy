@@ -9,7 +9,11 @@ import {
   View
 } from 'react-native';
 
-import { List, ListItem } from "react-native-elements";
+import {
+  Actions
+} from 'react-native-router-flux';
+
+import { List, ListItem } from 'react-native-elements';
 
 const url = "http://localhost:3000/v1/player/anderson/games";
 
@@ -45,7 +49,7 @@ class GameList extends React.Component {
         roundAvatar
         title={item.name || ''}
         subtitle={item.gametype || ''}
-        onPress={() => console.log('pressed ' + item.name)}
+        onPress={() => Actions.game({game: {id: item._key, name: item.name}})}
       />
     );
   }

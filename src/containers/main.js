@@ -11,9 +11,13 @@ import {
   StyleSheet
 } from 'react-native';
 
-import { TabNavigator } from 'react-navigation';
-
-import { NavigationComponent } from 'react-native-material-bottom-navigation';
+import {
+  Reducer,
+  Router,
+  Scene,
+  Stack,
+  Tabs
+} from 'react-native-router-flux';
 
 import Icon from '@expo/vector-icons/MaterialIcons';
 
@@ -26,8 +30,17 @@ import {
 } from '../lib/colors';
 
 import Feed from '../containers/feed';
+import Game from '../containers/game';
 import Games from '../containers/games';
 import Profile from '../containers/profile';
+
+const reducerCreate = params => {
+  const defaultReducer = new Reducer(params);
+  return (state, action) => {
+    console.log('ACTION:', action);
+    return defaultReducer(state, action);
+  };
+};
 
 const styles = StyleSheet.create({
   bottomNav: { // TODO: get Safe Area somehow
@@ -36,50 +49,64 @@ const styles = StyleSheet.create({
   }
 });
 
+const TabIcon = ({name, color}) => {
+  return (
+    <Icon size={24} color={color} name={name} />
+  );
+};
+
 /**
  * ## Main App class
  */
-const Main = TabNavigator(
-  {
-    Feed   : { screen: Feed    },
-    Games  : { screen: Games   },
-    Profile: { screen: Profile }
-  },
-  {
-    initialRouteName: 'Games', // TODO: for development only
-    tabBarComponent: NavigationComponent,
-    tabBarPosition: 'bottom',
-    tabBarOptions: {
-      bottomNavigationOptions: {
-        labelColor: tabInactive,
-        activeLabelColor: tabActive,
-        rippleColor: 'white',
-        shifting: false,
-        style: styles.bottomNav,
-        tabs: {
-          Feed: {
-            label: 'Feed',
-            barBackgroundColor: blue,
-            icon: <Icon size={24} color={tabInactive} name='message' />,
-            activeIcon: <Icon size={24} color={tabActive} name='message' />
-          },
-          Games: {
-            label: 'Games',
-            barBackgroundColor: green,
-            icon: <Icon size={24} color={tabInactive} name='playlist-add-check' />,
-            activeIcon: <Icon size={24} color={tabActive} name='playlist-add-check' />
-          },
-          Profile: {
-            label: 'Profile',
-            barBackgroundColor: red,
-            icon: <Icon size={24} color={tabInactive} name='account-box' />,
-            activeIcon: <Icon size={24} color={tabActive} name='account-box' />
-          }
-        }
-      }
-    }
-  }
-);
+export default class Main extends React.Component {
 
-// note anon function to export the navigator
-export default () => <Main />;
+  render() {
+    return (
+      <Router
+        createReducer={reducerCreate}
+      >
+        <Stack key='root'>
+          <Scene key='main' hideNavBar panHandlers={null}>
+            <Tabs
+              key='main_tabs'
+              inactiveTintColor={tabInactive}
+              activeTintColor={tabInactive}
+            >
+              <Scene
+                key='feed'
+                component={Feed}
+                icon={() => <TabIcon color={blue} name='message'/>}
+                tabBarLabel="Feed"
+                hideNavBar
+              />
+              <Stack
+                key='games'
+                initial
+                icon={() => <TabIcon color={green} name='playlist-add-check'/>}
+                tabBarLabel="Games"
+              >
+                <Scene
+                  key='games_home'
+                  component={Games}
+                  hideNavBar
+                  initial
+                />
+                <Scene
+                  key='game'
+                  component={Game}
+                />
+              </Stack>
+              <Scene
+                key='profile'
+                component={Profile}
+                icon={() => <TabIcon color={red} name='account-box'/>}
+                tabBarLabel="Profile"
+                hideNavBar
+              />
+            </Tabs>
+          </Scene>
+        </Stack>
+      </Router>
+    );
+  }
+};
