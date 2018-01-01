@@ -20,7 +20,6 @@ class Games extends React.Component {
 
     return (
       <View>
-        <Header title='Games' color={green} />
         <GameList username='anderson'/>
       </View>
     );

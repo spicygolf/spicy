@@ -20,6 +20,9 @@ import { List, ListItem } from 'react-native-elements';
  * ## Styles
  */
 var styles = StyleSheet.create({
+  LeaderboardContainer: {
+    marginTop: 0
+  },
   ScoreItemContainer: {
     flex: 2,
     flexDirection: 'row'
@@ -45,12 +48,8 @@ var styles = StyleSheet.create({
   },
   Holes: {
     color: '#aaa'
-  },
-
-  title: {
-    fontSize: 18,
-    textAlign: 'center'
   }
+
 });
 
 
@@ -141,17 +140,13 @@ class Leaderboard extends React.Component {
   }
 
   render () {
-    var title, content;
-
-    title = (
-      <Text style={styles.title}>{this.props.game.name}</Text>
-    );
+    var content;
 
     if( this.state && this.state.scores ) {
       var scores = this._score(this.state.scores);
-      console.log(scores);
       content = (
-        <List>
+        <List
+          containerStyle={styles.LeaderboardContainer}>
           <FlatList
             data={scores}
             renderItem={this._renderScoreItem}
@@ -167,7 +162,6 @@ class Leaderboard extends React.Component {
     }
     return (
       <View>
-        {title}
         {content}
       </View>
     );

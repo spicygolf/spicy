@@ -34,6 +34,9 @@ import Game from '../containers/game';
 import Games from '../containers/games';
 import Profile from '../containers/profile';
 
+import GamesHeader from '../components/games_header';
+
+
 const reducerCreate = params => {
   const defaultReducer = new Reducer(params);
   return (state, action) => {
@@ -88,12 +91,13 @@ export default class Main extends React.Component {
                 <Scene
                   key='games_home'
                   component={Games}
-                  hideNavBar
+                  navBar={GamesHeader}
                   initial
                 />
                 <Scene
                   key='game'
                   component={Game}
+                  navBar={GamesHeader}
                 />
               </Stack>
               <Scene
