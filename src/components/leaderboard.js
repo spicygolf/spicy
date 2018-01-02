@@ -66,7 +66,7 @@ class Leaderboard extends React.Component {
   }
 
   async _fetchScores() {
-    const url = 'http://localhost:3000/v1/game/'+this.props.game.id+'/scores';
+    const url = 'https://api.druid.golf/v1/game/'+this.props.game.id+'/scores';
     try {
       let response = await fetch(url);
       let responseJson = await response.json();
