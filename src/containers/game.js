@@ -13,7 +13,7 @@ import {
   Actions
 } from 'react-native-router-flux';
 
-import Icon from '@expo/vector-icons/MaterialIcons';
+import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 
 import Header from '../components/header';
 
@@ -64,6 +64,11 @@ class Game extends React.Component {
             <Text style={styles.title}>{this.props.game.name}</Text>
           </View>
           <View style={styles.right}>
+            <TouchableOpacity
+              onPress={() => Actions.score({game: this.props.game})}
+            >
+              <Icon name='lead-pencil' size={30} color='#666' />
+            </TouchableOpacity>
           </View>
         </View>
         <Leaderboard game={this.props.game} />

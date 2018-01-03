@@ -31,6 +31,7 @@ import {
 
 import Feed from '../containers/feed';
 import Game from '../containers/game';
+import Score from '../containers/score';
 import Games from '../containers/games';
 import Profile from '../containers/profile';
 
@@ -82,7 +83,7 @@ export default class Main extends React.Component {
                 tabBarLabel="Games"
               >
                 <Scene
-                  key='games_home'
+                  key='games'
                   component={Games}
                   navBar={GamesHeader}
                   initial
@@ -90,6 +91,11 @@ export default class Main extends React.Component {
                 <Scene
                   key='game'
                   component={Game}
+                  navBar={GamesHeader}
+                />
+                <Scene
+                  key='score'
+                  component={Score}
                   navBar={GamesHeader}
                 />
               </Stack>
