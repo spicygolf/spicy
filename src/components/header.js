@@ -13,18 +13,26 @@ import React from 'react';
 
 import
 {
+  Platform,
   StyleSheet,
   Text,
   View
 } from 'react-native';
+
+import { ifIphoneX } from 'react-native-iphone-x-helper'
+
+const paddingTopIphoneX = ifIphoneX(14, 0);
+//const paddingTopAndroid = Platform.OS === 'android' ? 20 : 0;
 
 /**
  * ## Styles
  */
 var styles = StyleSheet.create({
   header: {
-    paddingTop: 34, // TODO: use react-native-safe-area?
-    padding: 10,
+    paddingTop: 20 + paddingTopIphoneX,
+    paddingBottom: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
     justifyContent: 'center',
     alignItems: 'center'
   },

@@ -40,17 +40,10 @@ import GamesHeader from '../components/games_header';
 const reducerCreate = params => {
   const defaultReducer = new Reducer(params);
   return (state, action) => {
-    console.log('ACTION:', action);
+    //console.log('ACTION:', action);
     return defaultReducer(state, action);
   };
 };
-
-const styles = StyleSheet.create({
-  bottomNav: { // TODO: get Safe Area somehow
-    paddingBottom: 34,
-    height: 56 + 34
-  }
-});
 
 const TabIcon = ({name, color}) => {
   return (
