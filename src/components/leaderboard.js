@@ -16,6 +16,8 @@ import
 
 import { List, ListItem } from 'react-native-elements';
 
+import { baseUrl } from '../config/config';
+
 /**
  * ## Styles
  */
@@ -66,7 +68,7 @@ class Leaderboard extends React.Component {
   }
 
   async _fetchScores() {
-    const url = 'https://api.druid.golf/v1/game/'+this.props.game.id+'/scores';
+    const url = baseUrl + '/game/'+this.props.game.id+'/scores';
     try {
       let response = await fetch(url);
       let responseJson = await response.json();

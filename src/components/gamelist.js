@@ -15,7 +15,9 @@ import {
 
 import { List, ListItem } from 'react-native-elements';
 
-const url = "https://api.druid.golf/v1/player/anderson/games";
+import { baseUrl } from '../config/config';
+
+const url = baseUrl + "/player/anderson/games";
 
 class GameList extends React.Component {
 
