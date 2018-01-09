@@ -15,7 +15,7 @@ import {
 
 import { List, ListItem } from 'react-native-elements';
 
-import { baseUrl } from '../config/config';
+import { baseUrl } from '../lib/config';
 
 const url = baseUrl + "/player/anderson/games";
 
