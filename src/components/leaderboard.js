@@ -16,8 +16,6 @@ import
 
 import { List, ListItem } from 'react-native-elements';
 
-import { baseUrl } from '../lib/config';
-
 /**
  * ## Styles
  */
@@ -60,31 +58,6 @@ var styles = StyleSheet.create({
  */
 class Leaderboard extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      scores: []
-    };
-  }
-
-  async _fetchScores() {
-    const url = baseUrl + '/game/'+this.props.game.id+'/scores';
-    try {
-      let response = await fetch(url);
-      let responseJson = await response.json();
-      this._updateData('scores', responseJson);
-    } catch(error) {
-      console.error(error);
-    }
-  }
-
-  _updateData(type, data) {
-    this.setState((prevState, props) => {
-      prevState[type] = data;
-      return prevState;
-    });
-  }
-
   _scoreTeam(data) {
     var total = 0;
     var holes = [];
@@ -101,7 +74,8 @@ class Leaderboard extends React.Component {
     // get team/player scores from scoring function
     var scores = data.map((score) => {
       return {
-        player: score.players[0],
+        player: score.players[0].player,
+        round: score.players[0].round,
         score: this._scoreTeam(score.scores[0])
       };
     });
@@ -136,36 +110,19 @@ class Leaderboard extends React.Component {
     );
   }
 
-
-  componentWillMount() {
-    this._fetchScores();
-  }
-
   render () {
-    var content;
 
-    if( this.state && this.state.scores ) {
-      var scores = this._score(this.state.scores);
-      content = (
-        <List
-          containerStyle={styles.LeaderboardContainer}>
-          <FlatList
-            data={scores}
-            renderItem={this._renderScoreItem}
-            keyExtractor={item => item.player.short}
-          />
-        </List>
-      );
+    var scores = this._score(this.props.scores);
 
-    } else {
-      content = (
-        <Text>Loading...</Text>
-      );
-    }
     return (
-      <View>
-        {content}
-      </View>
+      <List
+        containerStyle={styles.LeaderboardContainer}>
+        <FlatList
+          data={scores}
+          renderItem={this._renderScoreItem}
+          keyExtractor={item => item.player.short}
+        />
+      </List>
     );
   }
 }

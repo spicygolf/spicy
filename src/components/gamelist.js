@@ -50,8 +50,14 @@ class GameList extends React.Component {
       <ListItem
         roundAvatar
         title={item.name || ''}
-        subtitle={item.gametype || ''}
-        onPress={() => Actions.game({game: {id: item._key, name: item.name}})}
+        subtitle={item.gametype + ' - ' + item.start || ''}
+        onPress={() => Actions.game({
+            game: {
+              id    : item._key,
+              name  : item.name,
+              start : item.start
+            }
+          })}
       />
     );
   }

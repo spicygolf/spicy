@@ -20,6 +20,7 @@ import Header from '../components/header';
 import Leaderboard from '../components/leaderboard';
 
 import { green } from '../lib/colors';
+import { baseUrl } from '../lib/config';
 
 const styles = StyleSheet.create({
   GameNav: {
@@ -48,32 +49,81 @@ const styles = StyleSheet.create({
 
 class Game extends React.Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      scores: []
+    };
+  }
+
+  async _fetchScores() {
+    const url = baseUrl + '/game/'+this.props.game.id+'/scores';
+    try {
+      let response = await fetch(url);
+      let responseJson = await response.json();
+      this._updateData('scores', responseJson);
+    } catch(error) {
+      console.error(error);
+    }
+  }
+
+  _updateData(type, data) {
+    this.setState((prevState, props) => {
+      prevState[type] = data;
+      return prevState;
+    });
+  }
+
+  componentWillMount() {
+    this._fetchScores();
+  }
+
   render() {
+
+    var content;
+
+    if( this.state && this.state.scores ) {
+      content = (
+        <View>
+          <View style={styles.GameNav}>
+            <View style={styles.left}>
+              <TouchableOpacity
+                onPress={Actions.pop}
+              >
+                <Icon name='chevron-left' size={30} color='#bbb' />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.middle}>
+              <Text style={styles.title}>{this.props.game.name}</Text>
+            </View>
+            <View style={styles.right}>
+              <TouchableOpacity
+                onPress={() => Actions.score({
+                    game: this.props.game
+                  })}
+              >
+                <Icon name='lead-pencil' size={30} color='#666' />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <Leaderboard
+            game={this.props.game}
+            scores={this.state.scores}
+          />
+        </View>
+      );
+    } else {
+      content = (
+        <Text>Loading...</Text>
+      );
+    }
 
     return (
       <View>
-        <View style={styles.GameNav}>
-          <View style={styles.left}>
-            <TouchableOpacity
-              onPress={Actions.pop}
-            >
-              <Icon name='chevron-left' size={30} color='#bbb' />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.middle}>
-            <Text style={styles.title}>{this.props.game.name}</Text>
-          </View>
-          <View style={styles.right}>
-            <TouchableOpacity
-              onPress={() => Actions.score({game: this.props.game})}
-            >
-              <Icon name='lead-pencil' size={30} color='#666' />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <Leaderboard game={this.props.game} />
+        {content}
       </View>
     );
+
   }
 };
 
