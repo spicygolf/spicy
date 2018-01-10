@@ -11,10 +11,17 @@ import
   FlatList,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View
 } from 'react-native';
 
 import { List, ListItem } from 'react-native-elements';
+
+import {
+  Actions
+} from 'react-native-router-flux';
+
+import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 
 /**
  * ## Styles
@@ -25,7 +32,9 @@ var styles = StyleSheet.create({
   },
   ScoreItemContainer: {
     flex: 2,
-    flexDirection: 'row'
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderColor: '#aaa'
   },
   ScoreItemCell: {
     padding: 5
@@ -35,23 +44,50 @@ var styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 10
   },
+  MiddleCell: {
+    flex: 9
+  },
   RightCell: {
-    flex: 10
+    flex: 1,
+    justifyContent: 'center'
   },
   Total: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'right'
   },
   Player: {
     fontWeight: 'bold'
   },
-  Holes: {
-    color: '#aaa'
+  nine: {
+    flexDirection: 'row',
+    flex: 9
+  },
+  holeContainer: {
+    flex: 9
+  },
+  hole: {
+    paddingRight: 2,
+    minWidth: 28
+  },
+  holeText: {
+    textAlign: 'right'
+  },
+  yes: {
+    color: '#000',
+    fontWeight: 'bold'
+  },
+  no: {
+    color: '#bbb'
   }
 
 });
 
+// TODO: supply course details
+const courseHoles = [
+  [ '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9'],
+  ['10', '11', '12', '13', '14', '15', '16', '17', '18']
+];
 
 /**
  * ### Class
@@ -91,26 +127,51 @@ class Leaderboard extends React.Component {
   }
 
   _renderScoreItem({item}) {
-    var holes = item.score.holes.join(', ');
+    var holes = (
+      <View style={styles.holeContainer}>
+        {courseHoles.map((nine, i) => (
+          <View key={i} style={styles.nine}>
+            {nine.map((hole) => {
+              var gotit = item.score.holes.includes(hole) ?
+                styles.yes : styles.no;
+              return (
+                <View key={hole} style={styles.hole}>
+                  <Text style={[styles.holeText, gotit]}>{hole}</Text>
+                </View>
+              );
+            })}
+          </View>
+        ))}
+      </View>
+    );
 
     return (
       <View style={styles.ScoreItemContainer}>
         <View style={[styles.ScoreItemCell, styles.LeftCell]}>
           <Text style={styles.Total}>{item.score.total}</Text>
         </View>
-        <View style={[styles.ScoreItemCell, styles.RightCell]}>
+        <View style={[styles.ScoreItemCell, styles.MiddleCell]}>
           <View>
             <Text style={styles.Player}>{item.player.name}</Text>
           </View>
-          <View>
-            <Text style={styles.Holes}>{holes}</Text>
-          </View>
+          {holes}
+        </View>
+        <View style={[styles.ScoreItemCell, styles.RightCell]}>
+          <TouchableOpacity
+            onPress={() => Actions.score({
+                player: item.player,
+                round: item.round,
+                scores: item.scores
+              })}
+          >
+            <Icon name='lead-pencil' size={25} color='#666' />
+          </TouchableOpacity>
         </View>
       </View>
     );
   }
 
-  render () {
+  render() {
 
     var scores = this._score(this.props.scores);
 

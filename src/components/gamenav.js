@@ -43,13 +43,13 @@ const styles = StyleSheet.create({
 
 const GameNav = (
   {
-    game,
+    title,
     scores,
-    back,
-    score
+    showBack,
+    showScore
   }) => {
 
-    var left = back ? (
+    var left = showBack ? (
       <TouchableOpacity
         onPress={Actions.pop}
       >
@@ -57,7 +57,7 @@ const GameNav = (
       </TouchableOpacity>
     ) : <Text></Text>;
 
-    var right = score ? (
+    var right = showScore ? (
       <TouchableOpacity
         onPress={() => Actions.score({
             game   : game,
@@ -74,7 +74,7 @@ const GameNav = (
           {left}
         </View>
         <View style={styles.middle}>
-          <Text style={styles.title}>{game.name}</Text>
+          <Text style={styles.title}>{title}</Text>
         </View>
         <View style={styles.right}>
           {right}

@@ -52,10 +52,10 @@ class Game extends React.Component {
       content = (
         <View>
           <GameNav
-            game={this.props.game}
+            title={this.props.game.name}
             scores={this.state.scores}
-            back={true}
-            score={true}
+            showBack={true}
+            showScore={false}
           />
           <Leaderboard
             game={this.props.game}
