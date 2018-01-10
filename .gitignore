@@ -74,6 +74,3 @@ coverage
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# app configuration
-src/lib/config.js
