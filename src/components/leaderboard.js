@@ -31,7 +31,6 @@ var styles = StyleSheet.create({
     marginTop: 0
   },
   ScoreItemContainer: {
-    flex: 2,
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderColor: '#aaa'
@@ -161,7 +160,8 @@ class Leaderboard extends React.Component {
             onPress={() => Actions.score({
                 player: item.player,
                 round: item.round,
-                scores: item.scores
+                holes: item.score.holes,
+                courseHoles: courseHoles
               })}
           >
             <Icon name='lead-pencil' size={25} color='#666' />
