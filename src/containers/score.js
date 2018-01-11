@@ -9,6 +9,8 @@ import {
   View
 } from 'react-native';
 
+import { baseUrl } from '../lib/config';
+
 import Header from '../components/header';
 import GameNav from '../components/gamenav';
 
@@ -52,24 +54,35 @@ var styles = StyleSheet.create({
 
 class Score extends React.Component {
 
-  score(round, hole, value) {
-    console.log({
-      round: round,
-      hole: hole,
-      value: value
-    });
+  async postScore(round, hole, value) {
+
+    const url = baseUrl + '/round/' + round + '/scores';
+    try {
+      let response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          hole: hole,
+          birdie: value
+        })
+      });
+      let responseJson = await response.json();
+      console.log('postScore fetch response: ', responseJson);
+
+      // TODO: reset this component or reset state in entire game container
+
+    } catch(e) {
+      // TODO: handle better in app ('disconnected' icon or notice)
+      console.error(e);
+    }
   }
 
   scorecard() {
 
     const { player, round, holes, courseHoles } = this.props;
-
-//    console.log({
-//      player: player,
-//      round: round,
-//      holes: holes,
-//      courseHoles: courseHoles
-//    });
 
     return (
       <View style={styles.ninesContainer}>
@@ -85,7 +98,7 @@ class Score extends React.Component {
                   return (
                     <View key={hole} style={[styles.hole, gotitStyle]}>
                       <TouchableOpacity
-                        onPress={() => this.score(round, hole, !gotit)}
+                        onPress={() => this.postScore(round, hole, !gotit)}
                       >
                         <Text style={[styles.holeText, gotitTextStyle]}>{hole}</Text>
                       </TouchableOpacity>
