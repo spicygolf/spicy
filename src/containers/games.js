@@ -20,7 +20,9 @@ class Games extends React.Component {
 
     return (
       <View>
-        <GameList username='anderson'/>
+        <GameList
+          {...this.props}
+          username='anderson'/>
       </View>
     );
   }

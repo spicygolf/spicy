@@ -11,6 +11,10 @@ import {
   StyleSheet
 } from 'react-native';
 
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { ActionCreators } from '../actions';
+
 import {
   Reducer,
   Router,
@@ -55,7 +59,7 @@ const TabIcon = ({name, color}) => {
 /**
  * ## Main App class
  */
-export default class Main extends React.Component {
+class Main extends React.Component {
 
   render() {
     return (
@@ -83,6 +87,7 @@ export default class Main extends React.Component {
                 tabBarLabel="Games"
               >
                 <Scene
+                  {...this.props}
                   key='games'
                   component={Games}
                   navBar={GamesHeader}
@@ -113,3 +118,9 @@ export default class Main extends React.Component {
     );
   }
 };
+
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(ActionCreators, dispatch);
+}
+
+export default connect(() => { return {}; }, mapDispatchToProps)(Main);

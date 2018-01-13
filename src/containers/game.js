@@ -7,6 +7,8 @@ import {
   View
 } from 'react-native';
 
+import { connect } from 'react-redux';
+
 import Header from '../components/header';
 import GameNav from '../components/gamenav';
 import Leaderboard from '../components/leaderboard';
@@ -15,51 +17,26 @@ import { baseUrl } from '../lib/config';
 
 class Game extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      scores: []
-    };
-  }
-
-  async _fetchScores() {
-    const url = baseUrl + '/game/'+this.props.game.id+'/scores';
-    try {
-      let response = await fetch(url);
-      let responseJson = await response.json();
-      this._updateData('scores', responseJson);
-    } catch(error) {
-      console.error(error);
-    }
-  }
-
-  _updateData(type, data) {
-    this.setState((prevState, props) => {
-      prevState[type] = data;
-      return prevState;
-    });
-  }
-
   componentWillMount() {
-    this._fetchScores();
+    this.props.fetchGameScores(this.props.game);
   }
 
   render() {
 
     var content;
 
-    if( this.state && this.state.scores ) {
+    if( this.props.gameScores ) {
       content = (
         <View>
           <GameNav
             title={this.props.game.name}
-            scores={this.state.scores}
             showBack={true}
             showScore={false}
           />
           <Leaderboard
+            {...this.props}
             game={this.props.game}
-            scores={this.state.scores}
+            scores={this.props.gameScores}
           />
         </View>
       );
@@ -78,4 +55,10 @@ class Game extends React.Component {
   }
 };
 
-export default Game;
+function mapStateToProps(state) {
+  return {
+    gameScores: state.gameScores
+  };
+}
+
+export default connect(mapStateToProps)(Game);

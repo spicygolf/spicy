@@ -23,10 +23,14 @@
     "expo": "^23.0.4",
     "moment": "^2.20.1",
     "react": "16.0.0",
+    "react-logger": "^1.1.0",
     "react-native": "0.50.3",
     "react-native-elements": "^0.18.5",
     "react-native-iphone-x-helper": "^1.0.1",
     "react-native-router-flux": "^4.0.0-beta.25",
-    "react-navigation": "^1.0.0-beta.22"
+    "react-navigation": "^1.0.0-beta.22",
+    "react-redux": "^5.0.6",
+    "redux": "^3.7.2",
+    "redux-thunk": "^2.2.0"
   }
 }

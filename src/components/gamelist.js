@@ -9,40 +9,20 @@ import {
   View
 } from 'react-native';
 
+import { connect } from 'react-redux';
+
 import {
   Actions
 } from 'react-native-router-flux';
 
 import { List, ListItem } from 'react-native-elements';
 
-import { baseUrl } from '../lib/config';
-
-const url = baseUrl + "/player/anderson/games";
 
 class GameList extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      games: []
-    };
-  }
-
-  async _fetchData() {
-    try {
-      let response = await fetch(url);
-      let responseJson = await response.json();
-      this._updateData(responseJson);
-    } catch(error) {
-      console.error(error);
-    }
-  }
-
-  _updateData(data) {
-    this.setState((prevState, props) => {
-      prevState.data = data;
-      return prevState;
-    });
+    this._renderItem = this._renderItem.bind(this);
   }
 
   _renderItem({item}) {
@@ -52,6 +32,7 @@ class GameList extends React.Component {
         title={item.name || ''}
         subtitle={item.gametype + ' - ' + item.start || ''}
         onPress={() => Actions.game({
+            ...this.props,
             game: {
               id    : item._key,
               name  : item.name,
@@ -63,17 +44,17 @@ class GameList extends React.Component {
   }
 
   componentWillMount() {
-    this._fetchData();
+    this.props.fetchActiveGames();
   }
 
   render() {
     var content;
 
-    if( this.state && this.state.data ) {
+    if( this.props.activeGames ) {
       content = (
         <List>
           <FlatList
-            data={this.state.data}
+            data={this.props.activeGames}
             renderItem={this._renderItem}
             keyExtractor={item => item._key}
           />
@@ -93,4 +74,11 @@ class GameList extends React.Component {
   }
 };
 
-export default GameList;
+
+function mapStateToProps(state) {
+  return {
+    activeGames: state.activeGames
+  };
+}
+
+export default connect(mapStateToProps)(GameList);

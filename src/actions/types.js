@@ -1,0 +1,2 @@
+export const SET_ACTIVE_GAMES = 'SET_ACTIVE_GAMES';
+export const SET_GAME_SCORES = 'SET_GAME_SCORES';
