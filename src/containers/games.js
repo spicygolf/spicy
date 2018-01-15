@@ -3,29 +3,81 @@
 import React from 'react';
 
 import {
+  FlatList,
+  Text,
+  TouchableOpacity,
   View
 } from 'react-native';
 
-import Header from '../components/header';
-import GameList from '../components/gamelist';
+import { connect } from 'react-redux';
 
-import { green } from '../lib/colors';
+import {
+  Actions
+} from 'react-native-router-flux';
+
+import { List, ListItem } from 'react-native-elements';
+
 
 class Games extends React.Component {
 
-  render() {
+  constructor(props) {
+    super(props);
+    this._renderItem = this._renderItem.bind(this);
+  }
 
-    // TODO: tabs for active, done, etc.?
-    // TODO: search? scroll back thru dates, opponents?
+  _renderItem({item}) {
+    return (
+      <ListItem
+        roundAvatar
+        title={item.name || ''}
+        subtitle={item.gametype + ' - ' + item.start || ''}
+        onPress={() => Actions.game({
+            game: {
+              id    : item._key,
+              name  : item.name,
+              start : item.start
+            }
+          })}
+      />
+    );
+  }
+
+  componentWillMount() {
+    this.props.fetchActiveGames();
+  }
+
+  render() {
+    var content;
+
+    if( this.props.activeGames ) {
+      content = (
+        <List>
+          <FlatList
+            data={this.props.activeGames}
+            renderItem={this._renderItem}
+            keyExtractor={item => item._key}
+          />
+        </List>
+      );
+    } else {
+      content = (
+        <Text>Loading...</Text>
+      );
+    }
 
     return (
       <View>
-        <GameList
-          {...this.props}
-          username='anderson'/>
+        {content}
       </View>
     );
   }
 };
 
-export default Games;
+
+function mapStateToProps(state) {
+  return {
+    activeGames: state.activeGames
+  };
+}
+
+export default connect(mapStateToProps)(Games);

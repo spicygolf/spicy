@@ -93,6 +93,11 @@ const courseHoles = [
  */
 class Leaderboard extends React.Component {
 
+  constructor(props) {
+    super(props);
+    this._renderScoreItem = this._renderScoreItem.bind(this);
+  }
+
   _scoreTeam(data) {
     var total = 0;
     var holes = [];
@@ -173,7 +178,7 @@ class Leaderboard extends React.Component {
 
   render() {
 
-    var scores = this._score(this.props.scores);
+    var scores = this._score(this.props.gameScores);
 
     return (
       <List

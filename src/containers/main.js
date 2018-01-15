@@ -94,11 +94,13 @@ class Main extends React.Component {
                   initial
                 />
                 <Scene
+                  {...this.props}
                   key='game'
                   component={Game}
                   navBar={GamesHeader}
                 />
                 <Scene
+                  {...this.props}
                   key='score'
                   component={Score}
                   navBar={GamesHeader}

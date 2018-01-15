@@ -33,11 +33,7 @@ class Game extends React.Component {
             showBack={true}
             showScore={false}
           />
-          <Leaderboard
-            {...this.props}
-            game={this.props.game}
-            scores={this.props.gameScores}
-          />
+          <Leaderboard {...this.props} />
         </View>
       );
     } else {
