@@ -1,6 +1,6 @@
 'use strict';
 
-import { baseUrl } from '../lib/config';
+import { baseUrl } from '../../lib/config';
 import * as types from './types';
 
 //

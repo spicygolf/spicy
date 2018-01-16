@@ -1,6 +1,6 @@
 'use strict';
 
-import { baseUrl } from '../lib/config';
+import { baseUrl } from '../../lib/config';
 import * as types from './types';
 
 //
@@ -10,6 +10,13 @@ import * as types from './types';
 export function postScore(score) {
   return (dispatch, getState) => {
     return dispatch(addPostedScore( {score: score} ));
+  };
+}
+
+export function addPostedScore( { score } ) {
+  return {
+    type: types.ADD_POSTED_SCORE,
+    score
   };
 }
 
@@ -43,11 +50,4 @@ export function sendPostedScore( {round, hole, values} ) {
 
   };
 
-}
-
-export function addPostedScore( { score } ) {
-  return {
-    type: types.ADD_POSTED_SCORE,
-    score
-  };
 }
