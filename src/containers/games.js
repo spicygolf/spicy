@@ -17,6 +17,8 @@ import {
 
 import { List, ListItem } from 'react-native-elements';
 
+import { gamesSelector } from '../state/lib/selectors';
+
 
 class Games extends React.Component {
 
@@ -49,11 +51,11 @@ class Games extends React.Component {
   render() {
     var content;
 
-    if( this.props.activeGames ) {
+    if( this.props && this.props.games ) {
       content = (
         <List>
           <FlatList
-            data={this.props.activeGames}
+            data={this.props.games}
             renderItem={this._renderItem}
             keyExtractor={item => item._key}
           />
@@ -76,7 +78,7 @@ class Games extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    activeGames: state.activeGames
+    games: gamesSelector(state)
   };
 }
 
