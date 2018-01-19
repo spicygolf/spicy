@@ -34,31 +34,50 @@ export function setActiveGames( { activeGames } ) {
 }
 
 //
-// game scores
+// current game
 //
-export function fetchGameScores(game) {
+
+export function setCurrentGame(game) {
+  return {
+    type: types.SET_CURRENT_GAME,
+    game
+  };
+}
+
+
+//
+// game rounds
+//
+export function fetchGameRounds(game) {
 
   return (dispatch, getState) => {
 
-    const url = baseUrl + '/game/' + game.id + '/scores';
+    const url = baseUrl + '/game/' + game._key + '/rounds';
 
     try {
       fetch(url).then(resp => {
-        return resp.json().then(json => {
-          return dispatch(setGameScores({gameScores: json}));
-        });
+        if( resp.statusCode == 200 ) {
+          return resp.json().then(json => {
+            console.log('gameRounds response', json);
+            return dispatch(setGameRounds({gameRounds: json}));
+          });
+        } else {
+          console.log('game rounds not found', url);
+          // TODO: required?  should we send to visible msg component in app?
+          return dispatch(setGameRounds({gameRounds: []}));
+        }
       });
     } catch(error) {
-      console.error(error);
+      console.log(error);
     }
 
   };
 
 }
 
-export function setGameScores( { gameScores } ) {
+export function setGameRounds( { gameRounds } ) {
   return {
-    type: types.SET_GAME_SCORES,
-    gameScores
+    type: types.SET_GAME_ROUNDS,
+    gameRounds
   };
 }

@@ -9,6 +9,7 @@ import createLogger from 'redux-logger';
 import { createReducer } from 'redux-orm';
 
 import orm from './src/state/lib/orm';
+import { currentGameReducer } from './src/state/reducers';
 import Main from './src/containers/main';
 
 
@@ -16,7 +17,10 @@ const loggerMiddleware = createLogger({
   predicate: (getState, action) => __DEV__
 });
 
-const reducer = createReducer(orm);
+const rootReducer = combineReducers({
+  orm: createReducer(orm),
+  currentGame: currentGameReducer
+});
 
 function configureStore(initialState) {
   const enhancer = compose(
@@ -25,10 +29,13 @@ function configureStore(initialState) {
       loggerMiddleware
     )
   );
-  return createStore(reducer, initialState, enhancer);
+  return createStore(rootReducer, initialState, enhancer);
 }
 
-const store = configureStore(orm.getEmptyState());
+const store = configureStore({
+  orm: orm.getEmptyState(),
+  currentGame: {}
+});
 
 export default class App extends React.Component {
   render() {

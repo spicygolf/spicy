@@ -178,7 +178,7 @@ class Leaderboard extends React.Component {
 
   render() {
 
-    var scores = this._score(this.props.gameScores);
+    var scores = this._score(this.props.roundsPlayers);
 
     return (
       <List

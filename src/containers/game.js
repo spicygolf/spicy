@@ -14,18 +14,20 @@ import GameNav from '../components/gamenav';
 import Leaderboard from '../components/leaderboard';
 
 import { baseUrl } from '../lib/config';
+import { roundsPlayersSelector } from '../state/lib/selectors';
+
 
 class Game extends React.Component {
 
   componentWillMount() {
-    this.props.fetchGameScores(this.props.game);
+    this.props.fetchGameRounds(this.props.currentGame);
   }
 
   render() {
 
     var content;
 
-    if( this.props.gameScores ) {
+    if( this.props.gameRounds ) {
       content = (
         <View>
           <GameNav
@@ -53,7 +55,8 @@ class Game extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    gameScores: state.gameScores
+    roundsPlayers: roundsPlayersSelector(state),
+    currentGame: state.currentGame
   };
 }
 

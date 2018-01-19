@@ -19,6 +19,9 @@ class Game extends Model {
           Game.create(game);
         });
         break;
+      case types.SET_CURRENT_GAME:
+        //session
+        break;
       case types.SET_GAME_ROUNDS:
         action.gameRounds.map(round => {
           Round.createOrUpdate(round);
@@ -40,7 +43,8 @@ class Game extends Model {
       '_rev': attr(),
       name: attr(),
       start: attr(),
-      gametype: attr()
+      gametype: attr(),
+      rounds: many('Round', 'rounds')
     };
   }
 
@@ -65,7 +69,6 @@ Round.modelName = 'Round';
 Round.fields = {
   id: attr(),
   scores: attr(),
-  games: many('Game', 'rounds'),
   player: fk('Player', 'rounds')
 };
 

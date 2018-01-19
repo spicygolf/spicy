@@ -27,19 +27,24 @@ class Games extends React.Component {
     this._renderItem = this._renderItem.bind(this);
   }
 
+  _itemPressed(item) {
+    this.props.setCurrentGame(item);
+    Actions.game({
+      game: {
+        id    : item._key,
+        name  : item.name,
+        start : item.start
+      }
+    });
+  }
+
   _renderItem({item}) {
     return (
       <ListItem
         roundAvatar
         title={item.name || ''}
         subtitle={item.gametype + ' - ' + item.start || ''}
-        onPress={() => Actions.game({
-            game: {
-              id    : item._key,
-              name  : item.name,
-              start : item.start
-            }
-          })}
+        onPress={() => this._itemPressed(item)}
       />
     );
   }
