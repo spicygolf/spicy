@@ -46,25 +46,26 @@ export function setCurrentGame(game) {
 
 
 //
-// game rounds
+// game rounds & players
 //
-export function fetchGameRounds(game) {
+export function fetchGameRoundsPlayers(game) {
 
   return (dispatch, getState) => {
 
-    const url = baseUrl + '/game/' + game._key + '/rounds';
+    const url = baseUrl + '/game/' + game._key + '/rounds_players';
 
     try {
       fetch(url).then(resp => {
-        if( resp.statusCode == 200 ) {
+        if( resp.status === 200 ) {
           return resp.json().then(json => {
-            console.log('gameRounds response', json);
-            return dispatch(setGameRounds({gameRounds: json}));
+            return dispatch(setGameRoundsPlayers({
+              game_id: game._key, gameRoundsPlayers: json
+            }));
           });
         } else {
-          console.log('game rounds not found', url);
+          console.log('game rounds not found');
           // TODO: required?  should we send to visible msg component in app?
-          return dispatch(setGameRounds({gameRounds: []}));
+          return dispatch(setGameRoundsPlayers({gameRoundsPlayers: []}));
         }
       });
     } catch(error) {
@@ -75,9 +76,9 @@ export function fetchGameRounds(game) {
 
 }
 
-export function setGameRounds( { gameRounds } ) {
+export function setGameRoundsPlayers( payload ) {
   return {
-    type: types.SET_GAME_ROUNDS,
-    gameRounds
+    type: types.SET_GAME_ROUNDS_PLAYERS,
+    payload
   };
 }

@@ -3,6 +3,19 @@
 import { baseUrl } from '../../lib/config';
 import * as types from './types';
 
+
+//
+// current round
+//
+
+export function setCurrentRound(round) {
+  return {
+    type: types.SET_CURRENT_ROUND,
+    round
+  };
+}
+
+
 //
 // post score
 //

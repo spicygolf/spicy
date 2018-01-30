@@ -51,7 +51,7 @@ var styles = StyleSheet.create({
     justifyContent: 'center'
   },
   Total: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
     textAlign: 'right'
   },
@@ -88,9 +88,8 @@ const courseHoles = [
   ['10', '11', '12', '13', '14', '15', '16', '17', '18']
 ];
 
-/**
- * ### Class
- */
+// TODO: this is the leaderboard component and scoring functions for
+//       birdie-em-all only at this point.
 class Leaderboard extends React.Component {
 
   constructor(props) {
@@ -114,9 +113,9 @@ class Leaderboard extends React.Component {
     // get team/player scores from scoring function
     var scores = data.map((score) => {
       return {
-        player: score.players[0].player,
-        round: score.players[0].round,
-        score: this._scoreTeam(score.scores[0])
+        player: score.player,
+        round: score._key,
+        score: this._scoreTeam(score.scores)
       };
     });
 
@@ -128,6 +127,16 @@ class Leaderboard extends React.Component {
     });
 
     return scores;
+  }
+
+  _itemPressed(item, courseHoles) {
+    const {player, round} = item;
+    this.props.setCurrentRound(round);
+    Actions.score({
+      player: player,
+      round_id: round,
+      courseHoles: courseHoles
+    });
   }
 
   _renderScoreItem({item}) {
@@ -162,12 +171,7 @@ class Leaderboard extends React.Component {
         </View>
         <View style={[styles.ScoreItemCell, styles.RightCell]}>
           <TouchableOpacity
-            onPress={() => Actions.score({
-                player: item.player,
-                round: item.round,
-                holes: item.score.holes,
-                courseHoles: courseHoles
-              })}
+            onPress={() => this._itemPressed(item, courseHoles)}
           >
             <Icon name='lead-pencil' size={25} color='#666' />
           </TouchableOpacity>

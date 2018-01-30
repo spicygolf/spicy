@@ -9,7 +9,10 @@ import createLogger from 'redux-logger';
 import { createReducer } from 'redux-orm';
 
 import orm from './src/state/lib/orm';
-import { currentGameReducer } from './src/state/reducers';
+import {
+  currentGameReducer,
+  currentRoundReducer
+} from './src/state/reducers';
 import Main from './src/containers/main';
 
 
@@ -19,7 +22,8 @@ const loggerMiddleware = createLogger({
 
 const rootReducer = combineReducers({
   orm: createReducer(orm),
-  currentGame: currentGameReducer
+  currentGame: currentGameReducer,
+  currentRound: currentRoundReducer
 });
 
 function configureStore(initialState) {

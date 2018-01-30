@@ -9,10 +9,13 @@ import {
   View
 } from 'react-native';
 
+import { connect } from 'react-redux';
+
 import { baseUrl } from '../lib/config';
 
-import Header from '../components/header';
 import GameNav from '../components/gamenav';
+
+import { roundSelector } from '../state/lib/selectors';
 
 var styles = StyleSheet.create({
   cardContainer: {
@@ -61,7 +64,8 @@ class Score extends React.Component {
 
   scorecard() {
 
-    const { player, round, holes, courseHoles } = this.props;
+    const { player, round_id, courseHoles } = this.props;
+    const r = this.props.round;
 
     return (
       <View style={styles.ninesContainer}>
@@ -70,7 +74,7 @@ class Score extends React.Component {
             <View key={i} style={styles.nine}>
               {
                 nine.map((hole) => {
-                  var gotit = holes.includes(hole);
+                  var gotit = r.scores[hole] && r.scores[hole].birdie === true;
                   var gotitStyle = gotit ? styles.yes : styles.no;
                   var gotitTextStyle = gotit ? styles.yesText : styles.noText;
 
@@ -78,7 +82,7 @@ class Score extends React.Component {
                     <View key={hole} style={[styles.hole, gotitStyle]}>
                       <TouchableOpacity
                         onPress={() => this.props.postScore({
-                                  round: round,
+                                  round: round_id,
                                   hole: hole,
                                   values: {
                                     birdie: !gotit
@@ -119,4 +123,11 @@ class Score extends React.Component {
   }
 };
 
-export default Score;
+function mapStateToProps(state) {
+  return {
+    round: roundSelector(state),
+    currentRound: state.currentRound
+  };
+}
+
+export default connect(mapStateToProps)(Score);

@@ -20,18 +20,18 @@ import { roundsPlayersSelector } from '../state/lib/selectors';
 class Game extends React.Component {
 
   componentWillMount() {
-    this.props.fetchGameRounds(this.props.currentGame);
+    this.props.fetchGameRoundsPlayers(this.props.currentGame);
   }
 
   render() {
 
     var content;
 
-    if( this.props.gameRounds ) {
+    if( this.props.roundsPlayers ) {
       content = (
         <View>
           <GameNav
-            title={this.props.game.name}
+            title={this.props.currentGame.name}
             showBack={true}
             showScore={false}
           />
@@ -51,7 +51,7 @@ class Game extends React.Component {
     );
 
   }
-};
+}
 
 function mapStateToProps(state) {
   return {
