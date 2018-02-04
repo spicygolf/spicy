@@ -1,5 +1,6 @@
 import * as types from './actions/types';
 
+
 export function currentGameReducer(state = {}, action) {
   const { type, game } = action;
   switch (type) {
@@ -10,7 +11,7 @@ export function currentGameReducer(state = {}, action) {
   }
 };
 
-export function currentRoundReducer(state = {}, action) {
+export function currentRoundReducer(state = '', action) {
   const { type, round } = action;
   switch (type) {
     case types.SET_CURRENT_ROUND:

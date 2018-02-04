@@ -68,13 +68,18 @@ class Round extends Model {
         });
         break;
       case types.ADD_POSTED_SCORE:
-        var r = Round.withId(action.score.round);
-        Object.entries(action.score.values).forEach(([key, value]) => {
-          if( !r.scores[action.score.hole] ) r.scores[action.score.hole] = {};
-          r.scores[action.score.hole][key] = value;
-          r.scores[action.score.hole]['dt'] = 'UTC datetime from moment';
-        });
-        //r.save();
+        const score = action.score;
+
+        var r = Round.withId(score.round);
+        var mergeObj = {
+          'scores': Object.assign({}, r.scores)
+        };
+        mergeObj.scores[score.hole] = {
+          ...score.values,
+          'date': 'UTC date from moment'
+        };
+        r.update(mergeObj);
+
         break;
     }
     // return value is ignored

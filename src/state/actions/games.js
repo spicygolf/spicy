@@ -48,7 +48,7 @@ export function setCurrentGame(game) {
 //
 // game rounds & players
 //
-export function fetchGameRoundsPlayers(game) {
+export function fetchGameRoundsPlayers( game ) {
 
   return (dispatch, getState) => {
 

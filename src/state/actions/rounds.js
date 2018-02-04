@@ -8,7 +8,7 @@ import * as types from './types';
 // current round
 //
 
-export function setCurrentRound(round) {
+export function setCurrentRound( round ) {
   return {
     type: types.SET_CURRENT_ROUND,
     round
@@ -20,13 +20,7 @@ export function setCurrentRound(round) {
 // post score
 //
 
-export function postScore(score) {
-  return (dispatch, getState) => {
-    return dispatch(addPostedScore( {score: score} ));
-  };
-}
-
-export function addPostedScore( { score } ) {
+export function postScore( score ) {
   return {
     type: types.ADD_POSTED_SCORE,
     score

@@ -62,10 +62,18 @@ class Score extends React.Component {
     this.scorecard = this.scorecard.bind(this);
   }
 
-  scorecard() {
+  _itemPress(round_id, hole, gotit) {
+    //console.log('props round', this.props.round);
+    this.props.postScore({
+      round: round_id,
+      hole: hole,
+      values: {
+        birdie: !gotit
+      }
+    });
+  }
 
-    const { player, round_id, courseHoles } = this.props;
-    const r = this.props.round;
+  scorecard(player, round, courseHoles) {
 
     return (
       <View style={styles.ninesContainer}>
@@ -74,20 +82,14 @@ class Score extends React.Component {
             <View key={i} style={styles.nine}>
               {
                 nine.map((hole) => {
-                  var gotit = r.scores[hole] && r.scores[hole].birdie === true;
+                  var gotit = round.scores[hole] && round.scores[hole].birdie === true;
                   var gotitStyle = gotit ? styles.yes : styles.no;
                   var gotitTextStyle = gotit ? styles.yesText : styles.noText;
 
                   return (
                     <View key={hole} style={[styles.hole, gotitStyle]}>
                       <TouchableOpacity
-                        onPress={() => this.props.postScore({
-                                  round: round_id,
-                                  hole: hole,
-                                  values: {
-                                    birdie: !gotit
-                                  }
-                                })}
+                        onPress={() => this._itemPress(round._key, hole, gotit)}
                       >
                         <Text style={[styles.holeText, gotitTextStyle]}>{hole}</Text>
                       </TouchableOpacity>
@@ -104,9 +106,9 @@ class Score extends React.Component {
 
   render() {
 
-    const { player } = this.props;
+    const { player, round, courseHoles } = this.props;
 
-    var scorecard = this.props ? this.scorecard() : {};
+    var scorecard = this.scorecard(player, round, courseHoles);
 
     return (
       <View>

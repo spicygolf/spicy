@@ -19,11 +19,11 @@ const roundSelector = createSelector(
   orm,
   state => state.orm,
   state => state.currentRound,
-  (session, round) => session.Round.withId(round)
+  (session, round) => session.Round.withId(round).ref
 );
 
 export {
   gamesSelector,
   roundsPlayersSelector,
   roundSelector
-}
+};
