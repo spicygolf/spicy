@@ -1,6 +1,6 @@
 /**
- * # main.js
- *  This is the main app screen
+ * #
+ *  This is the main (Tabs) app screen
  *
  */
 'use strict';
@@ -13,10 +13,8 @@ import {
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { ActionCreators } from '../state/actions';
 
 import {
-  Reducer,
   Router,
   Scene,
   Stack,
@@ -31,24 +29,21 @@ import {
   green,
   red,
   blue
-} from '../lib/colors';
+} from 'common/colors';
 
-import Feed from '../containers/feed';
-import Game from '../containers/game';
-import Score from '../containers/score';
-import Games from '../containers/games';
-import Profile from '../containers/profile';
+import Feed from 'features/feed/feed';
 
-import GamesHeader from '../components/games_header';
+import Games from 'features/games/games';
+import Game from 'features/games/game';
+import GamesHeader from 'features/games/header';
+
+import Score from 'features/scores/score';
+
+import Profile from 'features/profile/profile';
 
 
-const reducerCreate = params => {
-  const defaultReducer = new Reducer(params);
-  return (state, action) => {
-    //console.log('ACTION:', action);
-    return defaultReducer(state, action);
-  };
-};
+import { createTabsReducer } from './TabsReducer';
+
 
 const TabIcon = ({name, color}) => {
   return (
@@ -56,15 +51,13 @@ const TabIcon = ({name, color}) => {
   );
 };
 
-/**
- * ## Main App class
- */
-class Main extends React.Component {
+
+class TabsContainer extends React.Component {
 
   render() {
     return (
       <Router
-        createReducer={reducerCreate}
+        createReducer={createTabsReducer}
       >
         <Stack key='root'>
           <Scene key='main' hideNavBar panHandlers={null}>
@@ -121,8 +114,12 @@ class Main extends React.Component {
   }
 };
 
-function mapDispatchToProps(dispatch) {
-  return bindActionCreators(ActionCreators, dispatch);
+const mapState = (state) => {
+  // TODO: maybe stick currentTab into state?
+  return {};
 }
 
-export default connect(() => { return {}; }, mapDispatchToProps)(Main);
+// TODO: maybe stick selectTab in here?
+const actions = {};
+
+export default connect(mapState, actions)(TabsContainer);

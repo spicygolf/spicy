@@ -6,9 +6,9 @@ import {
   View
 } from 'react-native';
 
-import Header from '../components/header';
+import Header from 'common/components/header';
 
-import { red } from '../lib/colors';
+import { red } from 'common/colors';
 
 class Profile extends React.Component {
 

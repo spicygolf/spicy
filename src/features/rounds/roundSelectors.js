@@ -1,29 +1,17 @@
 import { createSelector } from 'redux-orm';
-import orm from './orm';
+import orm from 'app/schema';
 
 
-const gamesSelector = createSelector(
-  orm,
-  state => state.orm,
-  session => session.Game.all().toModelArray()
-);
-
-const roundsPlayersSelector = createSelector(
+export const selectRoundsPlayers = createSelector(
   orm,
   state => state.orm,
   state => state.currentGame,
   (session, game) => session.Game.withId(game._key).rounds.toModelArray()
 );
 
-const roundSelector = createSelector(
+export const selectRound = createSelector(
   orm,
   state => state.orm,
   state => state.currentRound,
   (session, round) => session.Round.withId(round).ref
 );
-
-export {
-  gamesSelector,
-  roundsPlayersSelector,
-  roundSelector
-};

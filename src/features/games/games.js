@@ -17,7 +17,8 @@ import {
 
 import { List, ListItem } from 'react-native-elements';
 
-import { gamesSelector } from '../state/lib/selectors';
+import { fetchActiveGames } from 'features/games/gameActions';
+import { selectGames } from 'features/games/gameSelectors';
 
 
 class Games extends React.Component {
@@ -81,10 +82,14 @@ class Games extends React.Component {
 };
 
 
-function mapStateToProps(state) {
+function mapState(state) {
   return {
-    games: gamesSelector(state)
+    games: selectGames(state)
   };
 }
 
-export default connect(mapStateToProps)(Games);
+const actions = {
+  fetchActiveGames
+};
+
+export default connect(mapState, actions)(Games);

@@ -11,11 +11,11 @@ import {
 
 import { connect } from 'react-redux';
 
-import { baseUrl } from '../lib/config';
+import { baseUrl } from 'common/config';
 
-import GameNav from '../components/gamenav';
+import GameNav from 'features/games/gamenav';
 
-import { roundSelector } from '../state/lib/selectors';
+import { selectRound } from 'features/rounds/roundSelectors';
 
 var styles = StyleSheet.create({
   cardContainer: {
@@ -127,7 +127,7 @@ class Score extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    round: roundSelector(state),
+    round: selectRound(state),
     currentRound: state.currentRound
   };
 }

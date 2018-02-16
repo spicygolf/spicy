@@ -9,12 +9,12 @@ import {
 
 import { connect } from 'react-redux';
 
-import Header from '../components/header';
-import GameNav from '../components/gamenav';
-import Leaderboard from '../components/leaderboard';
+import Header from 'common/components/header';
+import GameNav from 'features/games/gamenav';
+import Leaderboard from 'features/games/leaderboard';
 
-import { baseUrl } from '../lib/config';
-import { roundsPlayersSelector } from '../state/lib/selectors';
+import { baseUrl } from 'common/config';
+import { selectRoundsPlayers } from 'features/rounds/roundSelectors';
 
 
 class Game extends React.Component {
@@ -55,7 +55,7 @@ class Game extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    roundsPlayers: roundsPlayersSelector(state),
+    roundsPlayers: selectRoundsPlayers(state),
     currentGame: state.currentGame
   };
 }

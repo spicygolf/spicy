@@ -7,10 +7,10 @@ import {
   View
 } from 'react-native';
 
-import Header from '../components/header';
+import Header from 'common/components/header';
 
 
-import { blue } from '../lib/colors';
+import { blue } from 'common/colors';
 
 /**
  * ## Styles

@@ -1,7 +1,11 @@
 'use strict';
 
-import { baseUrl } from '../../lib/config';
-import * as types from './types';
+import { baseUrl } from 'common/config';
+import {
+  SET_ACTIVE_GAMES,
+  SET_CURRENT_GAME,
+  SET_GAME_ROUNDS_PLAYERS
+} from 'features/games/gameConstants';
 
 //
 // active games
@@ -28,7 +32,7 @@ export function fetchActiveGames() {
 
 export function setActiveGames( { activeGames } ) {
   return {
-    type: types.SET_ACTIVE_GAMES,
+    type: SET_ACTIVE_GAMES,
     activeGames
   };
 }
@@ -39,7 +43,7 @@ export function setActiveGames( { activeGames } ) {
 
 export function setCurrentGame(game) {
   return {
-    type: types.SET_CURRENT_GAME,
+    type: SET_CURRENT_GAME,
     game
   };
 }
@@ -78,7 +82,7 @@ export function fetchGameRoundsPlayers( game ) {
 
 export function setGameRoundsPlayers( payload ) {
   return {
-    type: types.SET_GAME_ROUNDS_PLAYERS,
+    type: SET_GAME_ROUNDS_PLAYERS,
     payload
   };
 }

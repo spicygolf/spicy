@@ -1,0 +1,2 @@
+export const SET_CURRENT_ROUND = 'SET_CURRENT_ROUND';
+export const ADD_POSTED_SCORE = 'ADD_POSTED_SCORE';
