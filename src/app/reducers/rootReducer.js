@@ -1,17 +1,21 @@
 import { combineReducers } from 'redux';
 
-import { createReducer } from 'redux-orm';
+import { reduceReducers } from 'common/utils/reducerUtils';
 
-import orm from 'app/schema';
+import entitiesReducer from './entitiesReducer';
+import gamesReducer from 'features/games/gameReducers';
+import roundsReducer from 'features/rounds/roundReducers';
+import entityCrudReducer from 'features/entities/entityReducer';
 
-import { currentGameReducer } from 'features/games/gameReducers';
-import { currentRoundReducer } from 'features/rounds/roundReducers';
-
-
-const rootReducer = combineReducers({
-  orm: createReducer(orm),
-  currentGame: currentGameReducer,
-  currentRound: currentRoundReducer
+const combinedReducer = combineReducers({
+  entities: entitiesReducer,
+  games: gamesReducer,
+  rounds: roundsReducer
 });
+
+const rootReducer = reduceReducers(
+  combinedReducer,
+  entityCrudReducer
+);
 
 export default rootReducer;

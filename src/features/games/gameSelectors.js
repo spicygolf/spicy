@@ -4,6 +4,6 @@ import orm from 'app/schema';
 
 export const selectGames = createSelector(
   orm,
-  state => state.orm,
+  state => state.entities,
   session => session.Game.all().toModelArray()
 );

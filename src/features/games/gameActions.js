@@ -1,8 +1,12 @@
 'use strict';
 
 import { baseUrl } from 'common/config';
+
 import {
-  SET_ACTIVE_GAMES,
+  createEntity
+} from 'features/entities/entityActions';
+
+import {
   SET_CURRENT_GAME,
   SET_GAME_ROUNDS_PLAYERS
 } from 'features/games/gameConstants';
@@ -10,16 +14,18 @@ import {
 //
 // active games
 //
-export function fetchActiveGames() {
+export function fetchActiveGames(player) {
 
   return (dispatch, getState) => {
 
-    const url = baseUrl + "/player/anderson/games";
+    const url = baseUrl + '/player/' + player + '/games';
 
     try {
       fetch(url).then(resp => {
-        return resp.json().then(json => {
-          return dispatch(setActiveGames({activeGames: json}));
+        return resp.json().then(games => {
+          games.map((game) => {
+            dispatch(createEntity("Game", game));
+          });
         });
       });
     } catch(error) {
@@ -30,12 +36,6 @@ export function fetchActiveGames() {
 
 }
 
-export function setActiveGames( { activeGames } ) {
-  return {
-    type: SET_ACTIVE_GAMES,
-    activeGames
-  };
-}
 
 //
 // current game

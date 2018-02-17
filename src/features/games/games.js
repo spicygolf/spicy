@@ -17,7 +17,10 @@ import {
 
 import { List, ListItem } from 'react-native-elements';
 
-import { fetchActiveGames } from 'features/games/gameActions';
+import {
+  fetchActiveGames,
+  setCurrentGame
+} from 'features/games/gameActions';
 import { selectGames } from 'features/games/gameSelectors';
 
 
@@ -51,7 +54,7 @@ class Games extends React.Component {
   }
 
   componentWillMount() {
-    this.props.fetchActiveGames();
+    this.props.fetchActiveGames('anderson');
   }
 
   render() {
@@ -89,7 +92,8 @@ function mapState(state) {
 }
 
 const actions = {
-  fetchActiveGames
+  fetchActiveGames,
+  setCurrentGame
 };
 
 export default connect(mapState, actions)(Games);
