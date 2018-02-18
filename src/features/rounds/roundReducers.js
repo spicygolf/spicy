@@ -11,9 +11,9 @@ const initialState = {
 };
 
 export function setCurrentRound(state, payload) {
-  const { round } = payload;
+  const { round_id } = payload;
   return {
-    currentRound: round
+    currentRound: round_id
   };
 };
 

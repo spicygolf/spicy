@@ -1,16 +1,16 @@
 'use strict';
 
 import { baseUrl } from 'common/config';
-
+import { SET_CURRENT_ROUND } from './roundConstants';
 
 //
 // current round
 //
 
-export function setCurrentRound( round ) {
+export function setCurrentRound(round) {
   return {
     type: SET_CURRENT_ROUND,
-    round
+    payload: round
   };
 }
 

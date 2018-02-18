@@ -23,6 +23,13 @@ import {
 
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 
+import { connect } from 'react-redux';
+
+import {
+  setCurrentRound
+} from 'features/rounds/roundActions';
+
+
 /**
  * ## Styles
  */
@@ -131,7 +138,7 @@ class Leaderboard extends React.Component {
 
   _itemPressed(item, courseHoles) {
     const {player, round} = item;
-    this.props.setCurrentRound(round);
+    this.props.setCurrentRound({round_id: round});
     Actions.score({
       player: player,
       round_id: round,
@@ -197,4 +204,12 @@ class Leaderboard extends React.Component {
   }
 }
 
-export default Leaderboard;
+const mapState = (state) => {
+  return {};
+};
+
+const actions = {
+  setCurrentRound: setCurrentRound
+};
+
+export default connect(mapState, actions)(Leaderboard);
