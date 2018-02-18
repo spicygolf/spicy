@@ -14,8 +14,9 @@ import { connect } from 'react-redux';
 import { baseUrl } from 'common/config';
 
 import GameNav from 'features/games/gamenav';
-
 import { selectRound } from 'features/rounds/roundSelectors';
+import { postScore } from 'features/rounds/roundActions';
+
 
 var styles = StyleSheet.create({
   cardContainer: {
@@ -63,9 +64,8 @@ class Score extends React.Component {
   }
 
   _itemPress(round_id, hole, gotit) {
-    //console.log('props round', this.props.round);
     this.props.postScore({
-      round: round_id,
+      round_id: round_id,
       hole: hole,
       values: {
         birdie: !gotit
@@ -82,7 +82,8 @@ class Score extends React.Component {
             <View key={i} style={styles.nine}>
               {
                 nine.map((hole) => {
-                  var gotit = round.scores[hole] && round.scores[hole].birdie === true;
+                  var gotit = (round.scores[hole] &&
+                               round.scores[hole].birdie === true) || false;
                   var gotitStyle = gotit ? styles.yes : styles.no;
                   var gotitTextStyle = gotit ? styles.yesText : styles.noText;
 
@@ -125,11 +126,14 @@ class Score extends React.Component {
   }
 };
 
-function mapStateToProps(state) {
+const mapState = (state) => {
   return {
-    round: selectRound(state),
-    currentRound: state.currentRound
+    round: selectRound(state)
   };
-}
+};
 
-export default connect(mapStateToProps)(Score);
+const actions = {
+  postScore: postScore
+};
+
+export default connect(mapState, actions)(Score);

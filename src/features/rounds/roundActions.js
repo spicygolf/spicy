@@ -1,7 +1,10 @@
 'use strict';
 
+import moment from 'moment';
 import { baseUrl } from 'common/config';
 import { SET_CURRENT_ROUND } from './roundConstants';
+import { updateEntity } from 'features/entities/entityActions';
+import { getEntitiesSession } from 'features/entities/entitySelectors';
 
 //
 // current round
@@ -19,18 +22,31 @@ export function setCurrentRound(round) {
 // post score
 //
 
-export function postScore( score ) {
-  return {
-    type: ADD_POSTED_SCORE,
-    score
-  };
-}
+export function postScore(payload) {
 
-export function sendPostedScore( {round, hole, values} ) {
+  const { round_id, hole, values } = payload;
+
+  return (dispatch, getState) => {
+    const session = getEntitiesSession(getState());
+    const { Round } = session;
+    var round = Round.withId(round_id);
+    var newItemAttributes = {
+      'scores' : Object.assign({}, round.scores)
+    };
+    newItemAttributes.scores[hole] = {
+      ...values,
+      'date': moment.utc().format()
+    };
+    dispatch(updateEntity("Round", round_id, newItemAttributes));
+  };
+};
+
+
+export function sendPostedScore( {round_id, hole, values} ) {
 
   return (dispatch, getState) => {
 
-    const url = baseUrl + '/round/' + round + '/scores';
+    const url = baseUrl + '/round/' + round_id + '/scores';
 
     // TODO: make src/lib/api.js do all of this, and provide convenience methods
     try {
