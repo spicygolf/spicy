@@ -20,18 +20,3 @@ export function setCurrentGame(state, payload) {
 export default createReducer(initialState, {
   [SET_CURRENT_GAME] : setCurrentGame
 });
-
-
-
-
-
-/*
-
-case SET_GAME_ROUNDS_PLAYERS:
-
-action.payload.gameRoundsPlayers.map(rps => {
-  Game.withId(action.payload.game_id).rounds.add(rps.round._key);
-      });
-      break;
-
-*/

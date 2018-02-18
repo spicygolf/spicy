@@ -3,12 +3,13 @@
 import { baseUrl } from 'common/config';
 
 import {
-  createEntity
+  createEntity,
+  updateEntity,
+  upsertEntity
 } from 'features/entities/entityActions';
 
 import {
-  SET_CURRENT_GAME,
-  SET_GAME_ROUNDS_PLAYERS
+  SET_CURRENT_GAME
 } from 'features/games/gameConstants';
 
 //
@@ -61,10 +62,19 @@ export function fetchGameRoundsPlayers(game) {
     try {
       fetch(url).then(resp => {
         if( resp.status === 200 ) {
-          return resp.json().then(json => {
-            return dispatch(setGameRoundsPlayers({
-              game_id: game._key, gameRoundsPlayers: json
-            }));
+          return resp.json().then(rps => {
+            var round_ids = [];
+            rps.map((rp) => {
+              // keep track of round ids for game update below
+              round_ids.push(rp.round._key);
+              // fk round -> player field
+              rp.round.player = rp.player._key;
+              // add round & player objects
+              dispatch(upsertEntity("Round", rp.round._key, rp.round));
+              dispatch(upsertEntity("Player", rp.player._key, rp.player));
+            });
+            // update game with round ids
+            dispatch(updateEntity("Game", game._key, { rounds: round_ids }));
           });
         } else {
           console.log('game rounds not found');
@@ -78,11 +88,4 @@ export function fetchGameRoundsPlayers(game) {
 
   };
 
-}
-
-export function setGameRoundsPlayers( payload ) {
-  return {
-    type: SET_GAME_ROUNDS_PLAYERS,
-    payload
-  };
 }

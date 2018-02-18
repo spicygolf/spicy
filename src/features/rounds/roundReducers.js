@@ -1,10 +1,6 @@
 import { createReducer } from 'common/utils/reducerUtils';
 
 import {
-  SET_GAME_ROUNDS_PLAYERS,
-} from 'features/games/gameConstants';
-
-import {
   SET_CURRENT_ROUND,
   ADD_POSTED_SCORE
 } from 'features/rounds/roundConstants';
@@ -28,12 +24,7 @@ export default createReducer(initialState, {
 
 
 /*
-case SET_GAME_ROUNDS_PLAYERS:
-action.payload.gameRoundsPlayers.map(rps => {
-  rps.round.player = rps.player._key; // fk player field
-  Round.create(rps.round);
-});
-break;
+
 case ADD_POSTED_SCORE:
 const score = action.score;
 
