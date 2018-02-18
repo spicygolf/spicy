@@ -2,6 +2,7 @@ import {
   ENTITY_UPDATE,
   ENTITY_DELETE,
   ENTITY_CREATE,
+  ENTITY_UPSERT
 } from "./entityConstants";
 
 import {createConditionalSliceReducer} from "common/utils/reducerUtils";
@@ -53,10 +54,28 @@ export function createEntity(state, payload) {
 }
 
 
+export function upsertEntity(state, payload) {
+  const {itemType, itemID, newItemAttributes} = payload;
+
+  const session = orm.session(state);
+  const ModelClass = session[itemType];
+
+  if(ModelClass.hasId(itemID)) {
+    const modelInstance = ModelClass.withId(itemID);
+    modelInstance.update(newItemAttributes);
+  } else {
+    ModelClass.create(newItemAttributes);
+  }
+
+  return session.state;
+}
+
+
 const entityHandlers = {
   [ENTITY_UPDATE] : updateEntity,
   [ENTITY_CREATE] : createEntity,
-  [ENTITY_DELETE] : deleteEntity
+  [ENTITY_DELETE] : deleteEntity,
+  [ENTITY_UPSERT] : upsertEntity
 };
 
 const entityCrudFeatureReducer = createConditionalSliceReducer("entities", entityHandlers);
