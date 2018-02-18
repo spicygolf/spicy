@@ -1,7 +1,6 @@
 'use strict';
 
-import { baseUrl } from '../../lib/config';
-import * as types from './types';
+import { baseUrl } from 'common/config';
 
 
 //
@@ -10,7 +9,7 @@ import * as types from './types';
 
 export function setCurrentRound( round ) {
   return {
-    type: types.SET_CURRENT_ROUND,
+    type: SET_CURRENT_ROUND,
     round
   };
 }
@@ -22,7 +21,7 @@ export function setCurrentRound( round ) {
 
 export function postScore( score ) {
   return {
-    type: types.ADD_POSTED_SCORE,
+    type: ADD_POSTED_SCORE,
     score
   };
 }

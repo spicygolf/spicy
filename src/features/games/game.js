@@ -14,6 +14,7 @@ import GameNav from 'features/games/gamenav';
 import Leaderboard from 'features/games/leaderboard';
 
 import { baseUrl } from 'common/config';
+import { fetchGameRoundsPlayers } from 'features/games/gameActions';
 import { selectRoundsPlayers } from 'features/rounds/roundSelectors';
 
 
@@ -53,11 +54,15 @@ class Game extends React.Component {
   }
 }
 
-function mapStateToProps(state) {
+function mapState(state) {
   return {
     roundsPlayers: selectRoundsPlayers(state),
-    currentGame: state.currentGame
+    currentGame: state.games.currentGame
   };
 }
 
-export default connect(mapStateToProps)(Game);
+const actions = {
+  fetchGameRoundsPlayers
+};
+
+export default connect(mapState, actions)(Game);

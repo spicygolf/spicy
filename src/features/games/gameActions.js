@@ -44,7 +44,7 @@ export function fetchActiveGames(player) {
 export function setCurrentGame(game) {
   return {
     type: SET_CURRENT_GAME,
-    game
+    payload: game
   };
 }
 
@@ -52,7 +52,7 @@ export function setCurrentGame(game) {
 //
 // game rounds & players
 //
-export function fetchGameRoundsPlayers( game ) {
+export function fetchGameRoundsPlayers(game) {
 
   return (dispatch, getState) => {
 
