@@ -89,3 +89,28 @@ export function fetchGameRoundsPlayers(game) {
   };
 
 }
+
+//
+//  gamepecs
+//
+export function fetchGameSpecs(player) {
+
+  return (dispatch, getState) => {
+
+    const url = baseUrl + '/gamespecs?player=' + player;
+
+    try {
+      fetch(url).then(resp => {
+        return resp.json().then(gamespecs => {
+          gamespecs.map((gs) => {
+            dispatch(upsertEntity("GameSpec", gs._key, gs));
+          });
+        });
+      });
+    } catch(error) {
+      console.error(error);
+    }
+
+  };
+
+}

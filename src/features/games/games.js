@@ -3,7 +3,9 @@
 import React from 'react';
 
 import {
+  Button,
   FlatList,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View
@@ -23,12 +25,18 @@ import {
 } from 'features/games/gameActions';
 import { selectGames } from 'features/games/gameSelectors';
 
+import { blue } from 'common/colors';
+
 
 class Games extends React.Component {
 
   constructor(props) {
     super(props);
     this._renderItem = this._renderItem.bind(this);
+  }
+
+  _newGamePressed() {
+    Actions.newGame();
   }
 
   _itemPressed(item) {
@@ -62,13 +70,26 @@ class Games extends React.Component {
 
     if( this.props && this.props.games ) {
       content = (
-        <List>
-          <FlatList
-            data={this.props.games}
-            renderItem={this._renderItem}
-            keyExtractor={item => item._key}
-          />
-        </List>
+        <View>
+          <View style={styles.gamesSubMenu}>
+            <View style={styles.gamesSubMenuSpacer} />
+            <View style={styles.newGameButton}>
+              <Button
+                onPress={this._newGamePressed}
+                title="New Game"
+                accessibilityLabel="New Game"
+                color={blue}
+              />
+            </View>
+          </View>
+          <List>
+            <FlatList
+              data={this.props.games}
+              renderItem={this._renderItem}
+              keyExtractor={item => item._key}
+            />
+          </List>
+        </View>
       );
     } else {
       content = (
@@ -97,3 +118,17 @@ const actions = {
 };
 
 export default connect(mapState, actions)(Games);
+
+var styles = StyleSheet.create({
+  gamesSubMenu: {
+    flexDirection: 'row',
+    flex: 3,
+    minHeight: 25
+  },
+  gamesSubMenuSpacer: {
+    flex: 2
+  },
+  newGameButton: {
+    flex: 1
+  }
+})

@@ -7,3 +7,9 @@ export const selectGames = createSelector(
   state => state.entities,
   session => session.Game.all().toModelArray()
 );
+
+export const selectGameSpecs = createSelector(
+  orm,
+  state => state.entities,
+  session => session.GameSpec.all().toModelArray()
+);
