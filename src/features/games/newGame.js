@@ -12,9 +12,9 @@ import { List, ListItem } from 'react-native-elements';
 
 import { connect } from 'react-redux';
 
-import Header from 'common/components/header';
+import { Actions } from 'react-native-router-flux';
+
 import GameNav from 'features/games/gamenav';
-import Leaderboard from 'features/games/leaderboard';
 
 import { baseUrl } from 'common/config';
 import { selectGameSpecs } from 'features/games/gameSelectors';
@@ -34,13 +34,10 @@ class NewGame extends React.Component {
   _itemPressed(item) {
     console.log(item);
     //    this.props.setCurrentGame(item);
-    //    Actions.game({
-    //      game: {
-    //        id    : item._key,
-    //        name  : item.name,
-    //        start : item.start
-    //      }
-    //    });
+    Actions.game_setup({
+      game: null,
+      gamespec: item
+    });
   }
 
   _renderItem({item}) {

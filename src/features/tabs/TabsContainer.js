@@ -34,10 +34,11 @@ import {
 import Feed from 'features/feed/feed';
 
 import Games from 'features/games/games';
-import NewGame from 'features/games/newGame';
 import Game from 'features/games/game';
 import GamesHeader from 'features/games/header';
 import Score from 'features/scores/score';
+import NewGame from 'features/games/newGame';
+import GameSetup from 'features/games/gameSetup';
 
 import Profile from 'features/profile/profile';
 
@@ -90,6 +91,12 @@ class TabsContainer extends React.Component {
                   {...this.props}
                   key='newGame'
                   component={NewGame}
+                  navBar={GamesHeader}
+                />
+                <Scene
+                  {...this.props}
+                  key='game_setup'
+                  component={GameSetup}
                   navBar={GamesHeader}
                 />
                 <Scene

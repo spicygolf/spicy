@@ -13,9 +13,7 @@ import {
 
 import { connect } from 'react-redux';
 
-import {
-  Actions
-} from 'react-native-router-flux';
+import { Actions } from 'react-native-router-flux';
 
 import { List, ListItem } from 'react-native-elements';
 
