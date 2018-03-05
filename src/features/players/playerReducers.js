@@ -1,11 +1,23 @@
-/*
+import { createReducer } from 'common/utils/reducerUtils';
+
+import {
+  SET_CURRENT_USER
+} from 'features/players/playerConstants';
 
 
-  switch( action.type ) {
-    case types.SET_GAME_ROUNDS_PLAYERS:
-      action.payload.gameRoundsPlayers.map(rps => Player.create(rps.player));
-      break;
-  }
+const initialState = {
+  currentUser: null
+};
 
 
-*/
+export function setCurrentUser(state, payload) {
+  const player = payload;
+  return {
+    currentUser: player
+  };
+};
+
+
+export default createReducer(initialState, {
+  [SET_CURRENT_USER] : setCurrentUser
+});

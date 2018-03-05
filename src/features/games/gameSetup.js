@@ -43,7 +43,8 @@ class GameSetup extends React.Component {
             <View style={styles.gname}>
               <Text style={styles.name_txt}>{this.props.gamespec.name}</Text>
             </View>
-            <Card title="Players">
+
+            <Card title="Players, Course, Tees">
               {
                 players.map((p, i) => {
                   return (
@@ -62,10 +63,10 @@ class GameSetup extends React.Component {
                 title='Add Player'
               />
             </Card>
-            <Card title="Course & Tees">
-            </Card>
+
             <Card title="Options">
             </Card>
+
           </View>
         </View>
       );

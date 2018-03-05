@@ -3,14 +3,16 @@ import { combineReducers } from 'redux';
 import { reduceReducers } from 'common/utils/reducerUtils';
 
 import entitiesReducer from './entitiesReducer';
-import gamesReducer from 'features/games/gameReducers';
-import roundsReducer from 'features/rounds/roundReducers';
+import gameReducers from 'features/games/gameReducers';
+import roundReducers from 'features/rounds/roundReducers';
+import playerReducers from 'features/players/playerReducers';
 import entityCrudReducer from 'features/entities/entityReducer';
 
 const combinedReducer = combineReducers({
   entities: entitiesReducer,
-  games: gamesReducer,
-  rounds: roundsReducer
+  games: gameReducers,
+  rounds: roundReducers,
+  players: playerReducers
 });
 
 const rootReducer = reduceReducers(
