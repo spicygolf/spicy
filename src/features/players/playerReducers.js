@@ -11,9 +11,8 @@ const initialState = {
 
 
 export function setCurrentUser(state, payload) {
-  const player = payload;
   return {
-    currentUser: player
+    currentUser: payload
   };
 };
 

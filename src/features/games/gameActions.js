@@ -1,6 +1,6 @@
 'use strict';
 
-import { baseUrl } from 'common/config';
+import { get } from 'common/api';
 
 import {
   createEntity,
@@ -17,23 +17,13 @@ import {
 //
 export function fetchActiveGames(player) {
 
-  return (dispatch, getState) => {
+  const url = '/player/' + player + '/games';
 
-    const url = baseUrl + '/player/' + player + '/games';
-
-    try {
-      fetch(url).then(resp => {
-        return resp.json().then(games => {
-          games.map((game) => {
-            dispatch(createEntity("Game", game));
-          });
-        });
-      });
-    } catch(error) {
-      console.error(error);
-    }
-
-  };
+  get(url, (games) => {
+    games.map((game) => {
+      dispatch(createEntity("Game", game));
+    });
+  });
 
 }
 
@@ -57,34 +47,25 @@ export function fetchGameRoundsPlayers(game) {
 
   return (dispatch, getState) => {
 
-    const url = baseUrl + '/game/' + game._key + '/rounds_players';
+    const url = '/game/' + game._key + '/rounds_players';
 
-    try {
-      fetch(url).then(resp => {
-        if( resp.status === 200 ) {
-          return resp.json().then(rps => {
-            var round_ids = [];
-            rps.map((rp) => {
-              // keep track of round ids for game update below
-              round_ids.push(rp.round._key);
-              // fk round -> player field
-              rp.round.player = rp.player._key;
-              // add round & player objects
-              dispatch(upsertEntity("Round", rp.round._key, rp.round));
-              dispatch(upsertEntity("Player", rp.player._key, rp.player));
-            });
-            // update game with round ids
-            dispatch(updateEntity("Game", game._key, { rounds: round_ids }));
-          });
-        } else {
-          console.log('game rounds not found');
-          // TODO: required?  should we send to visible msg component in app?
-          return dispatch(setGameRoundsPlayers({gameRoundsPlayers: []}));
-        }
+    get(url, (rps) => {
+      var round_ids = [];
+      rps.map((rp) => {
+        // keep track of round ids for game update below
+        round_ids.push(rp.round._key);
+        // fk round -> player field
+        rp.round.player = rp.player._key;
+        // add round & player objects
+        dispatch(upsertEntity("Round", rp.round._key, rp.round));
+        dispatch(upsertEntity("Player", rp.player._key, rp.player));
       });
-    } catch(error) {
-      console.log(error);
-    }
+      // update game with round ids
+      dispatch(updateEntity("Game", game._key, { rounds: round_ids }));
+    });
+
+    // errorFn ?
+    // return dispatch(setGameRoundsPlayers({gameRoundsPlayers: []}));
 
   };
 

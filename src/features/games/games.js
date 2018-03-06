@@ -59,10 +59,6 @@ class Games extends React.Component {
     );
   }
 
-  componentWillMount() {
-    this.props.fetchActiveGames('anderson');
-  }
-
   render() {
     var content;
 

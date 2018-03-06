@@ -9,6 +9,7 @@ const initialState = {
   currentGame: null
 };
 
+
 export function setCurrentGame(state, payload) {
   const game = payload.ref;
   return {
