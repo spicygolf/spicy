@@ -15,13 +15,17 @@ import {
 //
 // active games
 //
-export function fetchActiveGames(player) {
+export function fetchActiveGames(store) {
 
-  const url = '/player/' + player + '/games';
+  console.log('fetchActiveGames state', store.getState());
+  // TODO: get this from state.player.currentUser (when it's populated)
+  const player = 'anderson';
+  const uri = '/player/' + player + '/games';
 
-  get(url, (games) => {
+  get(uri, (games) => {
     games.map((game) => {
-      dispatch(createEntity("Game", game));
+      // TODO: upserts?  or clear out and replace?
+      store.dispatch(createEntity("Game", game));
     });
   });
 

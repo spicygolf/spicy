@@ -1,7 +1,7 @@
 import { baseUrl } from 'common/config';
 
 
-export function get(uri, dispatchFn) {
+export async function get(uri, dispatchFn) {
   try {
     fetch(baseUrl + uri).then(resp => {
       if( resp.status === 200 ) {
@@ -19,7 +19,7 @@ export function get(uri, dispatchFn) {
 };
 
 
-export function post(uri, body, dispatchFn) {
+export async function post(uri, body, dispatchFn) {
   try {
     fetch(baseUrl + uri, {
       method: 'POST',

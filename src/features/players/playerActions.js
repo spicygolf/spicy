@@ -5,7 +5,6 @@ import {
   SET_CURRENT_USER
 } from 'features/players/playerConstants';
 
-
 import {
   upsertEntity
 } from 'features/entities/entityActions';
@@ -18,9 +17,10 @@ export function fetchCurrentUser(store) {
 
   const uri = '/player/' + userFromStorage;
 
-  get(uri, (player) => {
-    store.dispatch(upsertEntity("Player", player._key, player));
-    store.dispatch(setCurrentUser(player));
+  return get(uri, async (player) => {
+    let a = await store.dispatch(upsertEntity("Player", player._key, player));
+    let b = await store.dispatch(setCurrentUser(player));
+    return player;
   });
 
 }
