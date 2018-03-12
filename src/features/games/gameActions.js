@@ -82,19 +82,13 @@ export function fetchGameSpecs(player) {
 
   return (dispatch, getState) => {
 
-    const url = baseUrl + '/gamespecs?player=' + player;
+    const url = '/gamespecs?player=' + player;
 
-    try {
-      fetch(url).then(resp => {
-        return resp.json().then(gamespecs => {
-          gamespecs.map((gs) => {
-            dispatch(upsertEntity("GameSpec", gs._key, gs));
-          });
-        });
+    get(url, (gamespecs) => {
+      gamespecs.map((gs) => {
+        dispatch(upsertEntity("GameSpec", gs._key, gs));
       });
-    } catch(error) {
-      console.error(error);
-    }
+    });
 
   };
 

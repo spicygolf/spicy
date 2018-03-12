@@ -16,7 +16,6 @@ import { Actions } from 'react-native-router-flux';
 
 import GameNav from 'features/games/gamenav';
 
-import { baseUrl } from 'common/config';
 import { selectGameSpecs } from 'features/games/gameSelectors';
 import { fetchGameSpecs } from 'features/games/gameActions';
 import { selectRoundsPlayers } from 'features/rounds/roundSelectors';
