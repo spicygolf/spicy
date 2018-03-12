@@ -16,7 +16,6 @@ export function fetchInitialData(store) {
   // App's current user/player
   fetchCurrentUser(store)
     .then((p) => {
-      console.log('p', p);
       fetchActiveGames(store);
     })
     .catch((error) => console.error(error));

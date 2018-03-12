@@ -17,10 +17,9 @@ export function fetchCurrentUser(store) {
 
   const uri = '/player/' + userFromStorage;
 
-  return get(uri, async (player) => {
-    let a = await store.dispatch(upsertEntity("Player", player._key, player));
-    let b = await store.dispatch(setCurrentUser(player));
-    return player;
+  return get(uri).then((player) => {
+    store.dispatch(upsertEntity("Player", player._key, player));
+    store.dispatch(setCurrentUser(player));
   });
 
 }

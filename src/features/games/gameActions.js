@@ -17,17 +17,20 @@ import {
 //
 export function fetchActiveGames(store) {
 
-  console.log('fetchActiveGames state', store.getState());
   // TODO: get this from state.player.currentUser (when it's populated)
   const player = 'anderson';
   const uri = '/player/' + player + '/games';
 
-  get(uri, (games) => {
-    games.map((game) => {
-      // TODO: upserts?  or clear out and replace?
-      store.dispatch(createEntity("Game", game));
+  get(uri)
+    .then((games) => {
+      games.map((game) => {
+        // TODO: upserts?  or clear out and replace?
+        store.dispatch(createEntity("Game", game));
+      });
+    })
+    .catch((e) => {
+      console.error(e);
     });
-  });
 
 }
 
@@ -53,24 +56,24 @@ export function fetchGameRoundsPlayers(game) {
 
     const url = '/game/' + game._key + '/rounds_players';
 
-    get(url, (rps) => {
-      var round_ids = [];
-      rps.map((rp) => {
-        // keep track of round ids for game update below
-        round_ids.push(rp.round._key);
-        // fk round -> player field
-        rp.round.player = rp.player._key;
-        // add round & player objects
-        dispatch(upsertEntity("Round", rp.round._key, rp.round));
-        dispatch(upsertEntity("Player", rp.player._key, rp.player));
+    get(url)
+      .then((rps) => {
+        var round_ids = [];
+        rps.map((rp) => {
+          // keep track of round ids for game update below
+          round_ids.push(rp.round._key);
+          // fk round -> player field
+          rp.round.player = rp.player._key;
+          // add round & player objects
+          dispatch(upsertEntity("Round", rp.round._key, rp.round));
+          dispatch(upsertEntity("Player", rp.player._key, rp.player));
+        });
+        // update game with round ids
+        dispatch(updateEntity("Game", game._key, { rounds: round_ids }));
+      })
+      .catch((error) => {
+        console.error(error);
       });
-      // update game with round ids
-      dispatch(updateEntity("Game", game._key, { rounds: round_ids }));
-    });
-
-    // errorFn ?
-    // return dispatch(setGameRoundsPlayers({gameRoundsPlayers: []}));
-
   };
 
 }
@@ -84,11 +87,12 @@ export function fetchGameSpecs(player) {
 
     const url = '/gamespecs?player=' + player;
 
-    get(url, (gamespecs) => {
-      gamespecs.map((gs) => {
-        dispatch(upsertEntity("GameSpec", gs._key, gs));
+    get(url)
+      .then((gamespecs) => {
+        gamespecs.map((gs) => {
+          dispatch(upsertEntity("GameSpec", gs._key, gs));
+        });
       });
-    });
 
   };
 
