@@ -13,11 +13,11 @@ import {
 export function fetchCurrentUser(store) {
 
   // TODO: get this user _key from local storage
-  const userFromStorage = 'anderson';
-
-  const uri = '/player/' + userFromStorage;
-
-  return get(uri).then((player) => {
+  const userFromStorage = '9552287';
+  const q = `query getPlayer($player: String!) {
+    getPlayer(_key: $player) { name, short }
+   }`;
+  return get(q, {player: userFromStorage}).then((player) => {
     store.dispatch(upsertEntity("Player", player._key, player));
     store.dispatch(setCurrentUser(player));
   });
