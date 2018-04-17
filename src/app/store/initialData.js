@@ -8,15 +8,15 @@ import {
 } from 'features/games/gameActions';
 
 
-export function fetchInitialData(store) {
+export function fetchInitialData(client, store) {
 
   // begin pre-fetching data from the server
   // dispatch proper actions when done w each.
 
   // App's current user/player
-  fetchCurrentUser(store)
+  fetchCurrentUser(client, store)
     .then((p) => {
-      fetchActiveGames(store);
+      fetchActiveGames(client, store);
     })
     .catch((error) => console.error(error));
 

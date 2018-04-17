@@ -21,7 +21,7 @@ import {
   Actions
 } from 'react-native-router-flux';
 
-import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { connect } from 'react-redux';
 

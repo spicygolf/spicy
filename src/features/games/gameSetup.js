@@ -9,10 +9,7 @@ import {
   View
 } from 'react-native';
 
-import {
-  Button,
-  Card
-} from 'react-native-elements';
+import { Button, Card } from 'react-native-elements';
 
 import { connect } from 'react-redux';
 

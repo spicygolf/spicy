@@ -15,14 +15,20 @@ import {
 //
 // active games
 //
-export function fetchActiveGames(store) {
+export function fetchActiveGames(client, store) {
 
   // TODO: get this from state.player.currentUser (when it's populated)
-  const player = 'anderson';
-  const uri = '/player/' + player + '/games';
+  const state = store.getState();
+  console.log('state', state);
+  const pkey = "9552287";
 
-  get(uri)
-    .then((games) => {
+  const q = `query ActiveGamesForPlayer($pkey: String!) {
+    activeGamesForPlayer(pkey: $pkey) { _key name start end gametype }
+   }`;
+
+  return get(client, q, {pkey: pkey})
+    .then((res) => {
+      const games = res.data.activeGamesForPlayer;
       games.map((game) => {
         // TODO: upserts?  or clear out and replace?
         store.dispatch(createEntity("Game", game));

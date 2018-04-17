@@ -10,17 +10,20 @@ import {
 } from 'features/entities/entityActions';
 
 
-export function fetchCurrentUser(store) {
+export function fetchCurrentUser(client, store) {
 
   // TODO: get this user _key from local storage
   const userFromStorage = '9552287';
-  const q = `query getPlayer($player: String!) {
-    getPlayer(_key: $player) { name, short }
+  const q = `query GetPlayer($player: String!) {
+    getPlayer(_key: $player) { _key name short }
    }`;
-  return get(q, {player: userFromStorage}).then((player) => {
-    store.dispatch(upsertEntity("Player", player._key, player));
-    store.dispatch(setCurrentUser(player));
-  });
+
+  return get(client, q, {player: userFromStorage})
+    .then((res) => {
+      const player = res.data.getPlayer;
+      store.dispatch(upsertEntity("Player", player._key, player));
+      store.dispatch(setCurrentUser(player));
+    });
 
 }
 

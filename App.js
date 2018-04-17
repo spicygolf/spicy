@@ -1,6 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { ApolloClient } from 'apollo-client';
+import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from 'react-apollo';
 
 import { baseUrl } from 'common/config';
@@ -14,7 +14,7 @@ const client = new ApolloClient({
   uri: `${baseUrl}/graphql`
 });
 
-fetchInitialData(store);
+fetchInitialData(client, store);
 
 export default class App extends React.Component {
   render() {

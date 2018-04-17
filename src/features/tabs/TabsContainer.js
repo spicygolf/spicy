@@ -21,7 +21,7 @@ import {
   Tabs
 } from 'react-native-router-flux';
 
-import Icon from '@expo/vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {
   tabActive,

@@ -1,7 +1,11 @@
 import gql from 'graphql-tag';
 
-export function get(query, variables) {
 
+export function get(client, query, variables) {
+  return client.query({
+    query: gql`${query}`,
+    variables: variables
+  });
 }
 
 /* export function get(uri) {
