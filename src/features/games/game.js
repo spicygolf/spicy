@@ -8,50 +8,62 @@ import {
 } from 'react-native';
 
 import { connect } from 'react-redux';
+import gql from "graphql-tag";
+import { Query } from "react-apollo";
 
-import Header from 'common/components/header';
 import GameNav from 'features/games/gamenav';
 import Leaderboard from 'features/games/leaderboard';
 
-import { baseUrl } from 'common/config';
-import { fetchGameRoundsPlayers } from 'features/games/gameActions';
 import { selectRoundsPlayers } from 'features/rounds/roundSelectors';
+
+
+const GAME_QUERY = gql`
+  query GetGame($game: String!) {
+    getGame(_key: $game) {
+      rounds {
+        _key date seq scores {
+          hole values {
+            k v ts
+          }
+        }
+      }
+    }
+  }
+`;
 
 
 class Game extends React.Component {
 
-  componentWillMount() {
-    this.props.fetchGameRoundsPlayers(this.props.currentGame);
-  }
-
   render() {
 
-    var content;
-
-    if( this.props.roundsPlayers ) {
-      content = (
-        <View>
-          <GameNav
-            title={this.props.currentGame.name}
-            showBack={true}
-            showScore={false}
-          />
-          <Leaderboard {...this.props} />
-        </View>
-      );
-    } else {
-      content = (
-        <Text>Loading...</Text>
-      );
-    }
+    const vars = {game: this.props.currentGame._key};
 
     return (
-      <View>
-        {content}
-      </View>
-    );
+      <Query query={GAME_QUERY} variables={vars}>
+        {({ loading, error, data}) => {
+          if( loading ) return (<Text>Loading...</Text>);
+          if( error ) {
+            console.error(error);
+            return (<Text>Error!</Text>);
+          }
 
+          console.log('data', data);
+          console.log('game type', this.props.currentGame.gametype);
+
+          return (
+            <View>
+              <GameNav
+                title={this.props.currentGame.name}
+                showBack={true}
+                showScore={false}
+              />
+            </View>
+          );
+        }}
+      </Query>
+    );
   }
+
 }
 
 function mapState(state) {
@@ -61,8 +73,6 @@ function mapState(state) {
   };
 }
 
-const actions = {
-  fetchGameRoundsPlayers
-};
+const actions = {};
 
 export default connect(mapState, actions)(Game);
