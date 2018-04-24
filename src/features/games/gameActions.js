@@ -19,7 +19,6 @@ export function fetchActiveGames(client, store) {
 
   // TODO: get this from state.player.currentUser (when it's populated)
   const state = store.getState();
-  console.log('state', state);
   const pkey = "9552287";
 
   const q = `query ActiveGamesForPlayer($pkey: String!) {
@@ -60,9 +59,9 @@ export function fetchGameRoundsPlayers(game) {
 
   return (dispatch, getState) => {
 
-    const url = '/game/' + game._key + '/rounds_players';
+    const q = `query`;
 
-    get(url)
+    get(null, q, {gkey: game._key})
       .then((rps) => {
         var round_ids = [];
         rps.map((rp) => {
