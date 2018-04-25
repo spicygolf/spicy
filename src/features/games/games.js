@@ -53,7 +53,7 @@ class Games extends React.Component {
       <ListItem
         roundAvatar
         title={item.name || ''}
-        subtitle={item.gametype + ' - ' + item.start || ''}
+        subtitle={item.start || ''}
         onPress={() => this._itemPressed(item)}
       />
     );
