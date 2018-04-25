@@ -52,6 +52,21 @@ export function setCurrentGame(game) {
 }
 
 
+export function storeRound(round) {
+  return (dispatch, getState) => {
+    // build proper round and player objects, and upsert them to state
+    let r = Object.assign({}, round);
+    let p = Object.assign({}, round.player[0]);
+    // fk round -> player field
+    r.player = p._key;
+    // upserts
+    dispatch(upsertEntity("Round", r._key, r));
+    dispatch(upsertEntity("Player", p._key, p));
+  };
+}
+
+/*
+
 //
 // game rounds & players
 //
@@ -82,6 +97,8 @@ export function fetchGameRoundsPlayers(game) {
   };
 
 }
+
+*/
 
 //
 //  gamepecs
