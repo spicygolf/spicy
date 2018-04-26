@@ -65,6 +65,12 @@ export function storeRound(round) {
   };
 }
 
+export function storeRoundIDsInGame(gkey, round_ids) {
+  return (dispatch, getState) => {
+    dispatch(updateEntity("Game", gkey, { rounds: round_ids }));
+  };
+}
+
 /*
 
 //

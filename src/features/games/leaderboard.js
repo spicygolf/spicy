@@ -30,65 +30,6 @@ import {
 } from 'features/rounds/roundActions';
 
 
-/**
- * ## Styles
- */
-var styles = StyleSheet.create({
-  LeaderboardContainer: {
-    marginTop: 0
-  },
-  ScoreItemContainer: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderColor: '#aaa'
-  },
-  ScoreItemCell: {
-    padding: 5
-  },
-  LeftCell: {
-    flex: 1,
-    justifyContent: 'center',
-    marginRight: 10
-  },
-  MiddleCell: {
-    flex: 9
-  },
-  RightCell: {
-    flex: 1,
-    justifyContent: 'center'
-  },
-  Total: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    textAlign: 'right'
-  },
-  Player: {
-    fontWeight: 'bold'
-  },
-  nine: {
-    flexDirection: 'row',
-    flex: 9
-  },
-  holeContainer: {
-    flex: 9
-  },
-  hole: {
-    paddingRight: 2,
-    minWidth: 28
-  },
-  holeText: {
-    textAlign: 'right'
-  },
-  yes: {
-    color: '#000',
-    fontWeight: 'bold'
-  },
-  no: {
-    color: '#bbb'
-  }
-
-});
-
 // TODO: supply course details
 const courseHoles = [
   [ '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9'],
@@ -107,11 +48,13 @@ class Leaderboard extends React.Component {
   _scoreTeam(data) {
     var total = 0;
     var holes = [];
-    Object.entries(data).forEach(([hole, score]) => {
-      if( score.birdie === true ) {
-        total += 1;
-        holes.push(hole);
-      }
+    data.map(({hole, values}) => {
+      values.map(value => {
+        if( value.k === 'birdie' && value.v === 'true' ) {
+          total += 1;
+          holes.push(hole);
+        }
+      });
     });
     return {total: total, holes: holes};
   }
@@ -188,7 +131,6 @@ class Leaderboard extends React.Component {
   }
 
   render() {
-
     var scores = this._score(this.props.roundsPlayers);
 
     return (
@@ -213,3 +155,63 @@ const actions = {
 };
 
 export default connect(mapState, actions)(Leaderboard);
+
+
+/**
+ * ## Styles
+ */
+var styles = StyleSheet.create({
+  LeaderboardContainer: {
+    marginTop: 0
+  },
+  ScoreItemContainer: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderColor: '#aaa'
+  },
+  ScoreItemCell: {
+    padding: 5
+  },
+  LeftCell: {
+    flex: 1,
+    justifyContent: 'center',
+    marginRight: 10
+  },
+  MiddleCell: {
+    flex: 9
+  },
+  RightCell: {
+    flex: 1,
+    justifyContent: 'center'
+  },
+  Total: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    textAlign: 'right'
+  },
+  Player: {
+    fontWeight: 'bold'
+  },
+  nine: {
+    flexDirection: 'row',
+    flex: 9
+  },
+  holeContainer: {
+    flex: 9
+  },
+  hole: {
+    paddingRight: 2,
+    minWidth: 28
+  },
+  holeText: {
+    textAlign: 'right'
+  },
+  yes: {
+    color: '#000',
+    fontWeight: 'bold'
+  },
+  no: {
+    color: '#bbb'
+  }
+
+});

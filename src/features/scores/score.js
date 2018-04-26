@@ -10,50 +10,13 @@ import {
 } from 'react-native';
 
 import { connect } from 'react-redux';
+import { find } from 'lodash';
 
 import { baseUrl } from 'common/config';
 
 import GameNav from 'features/games/gamenav';
 import { selectRound } from 'features/rounds/roundSelectors';
 import { postScore } from 'features/rounds/roundActions';
-
-
-var styles = StyleSheet.create({
-  cardContainer: {
-    padding: 15
-  },
-  ninesContainer: {
-    alignItems: 'center'
-  },
-  nine: {
-    flexDirection: 'row',
-    paddingBottom: 10
-  },
-  hole: {
-    margin: 3,
-    flex: 1
-  },
-  yes: {
-    borderColor: '#000',
-    borderWidth: 2
-  },
-  no: {
-    borderColor: '#aaa',
-    borderWidth: 1
-  },
-  holeText: {
-    textAlign: 'center',
-    fontSize: 20
-  },
-  yesText: {
-    color: '#000',
-    fontWeight: 'bold'
-  },
-  noText: {
-    color: "#aaa"
-  }
-});
-
 
 
 class Score extends React.Component {
@@ -73,8 +36,16 @@ class Score extends React.Component {
     });
   }
 
-  scorecard(player, round, courseHoles) {
+  _gotBirdie(hole, scores) {
+    var h = find(scores, {hole: hole});
+    if( !h ) return false;
+    var b = find(h.values, {k: 'birdie', v: 'true'});
+    if( !b ) return false;
+    return true;
+  }
 
+  scorecard(player, round, courseHoles) {
+    console.log('score.js round', round);
     return (
       <View style={styles.ninesContainer}>
         {
@@ -82,8 +53,7 @@ class Score extends React.Component {
             <View key={i} style={styles.nine}>
               {
                 nine.map((hole) => {
-                  var gotit = (round.scores[hole] &&
-                               round.scores[hole].birdie === true) || false;
+                  var gotit = this._gotBirdie(hole, round.scores);
                   var gotitStyle = gotit ? styles.yes : styles.no;
                   var gotitTextStyle = gotit ? styles.yesText : styles.noText;
 
@@ -137,3 +107,40 @@ const actions = {
 };
 
 export default connect(mapState, actions)(Score);
+
+
+var styles = StyleSheet.create({
+  cardContainer: {
+    padding: 15
+  },
+  ninesContainer: {
+    alignItems: 'center'
+  },
+  nine: {
+    flexDirection: 'row',
+    paddingBottom: 10
+  },
+  hole: {
+    margin: 3,
+    flex: 1
+  },
+  yes: {
+    borderColor: '#000',
+    borderWidth: 2
+  },
+  no: {
+    borderColor: '#aaa',
+    borderWidth: 1
+  },
+  holeText: {
+    textAlign: 'center',
+    fontSize: 20
+  },
+  yesText: {
+    color: '#000',
+    fontWeight: 'bold'
+  },
+  noText: {
+    color: "#aaa"
+  }
+});
