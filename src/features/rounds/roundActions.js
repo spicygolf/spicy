@@ -1,6 +1,8 @@
 'use strict';
 
 import moment from 'moment';
+import { cloneDeep, findIndex } from 'lodash';
+
 import { baseUrl } from 'common/config';
 import { SET_CURRENT_ROUND } from './roundConstants';
 import { updateEntity } from 'features/entities/entityActions';
@@ -29,14 +31,34 @@ export function postScore(payload) {
   return (dispatch, getState) => {
     const session = getEntitiesSession(getState());
     const { Round } = session;
-    var round = Round.withId(round_id);
+    let round = Round.withId(round_id);
+    let newScores = cloneDeep(round.scores);
+    let i = findIndex(newScores, {hole: hole});
+    if( i >= 0 ) {
+      let newValues = cloneDeep(newScores[i].values);
+      console.log('newValues', newValues);
+      values.map(value => {
+        value.ts = moment.utc().format();
+        let j = findIndex(newValues, {k: value.k});
+        if( j >= 0 ) {
+          newValues[j] = value;
+        } else {
+          newValues.push(value);
+        }
+      });
+      newScores[i] = {hole: hole, values: newValues};
+    } else {
+      let tsValues = values.map(value => ({
+        k: value.k,
+        v: value.v,
+        ts: moment.utc().format()
+      }));
+      newScores.push({hole: hole, values: tsValues});
+    }
     var newItemAttributes = {
-      'scores' : Object.assign({}, round.scores)
+      'scores' : newScores
     };
-    newItemAttributes.scores[hole] = {
-      ...values,
-      'date': moment.utc().format()
-    };
+
     dispatch(updateEntity("Round", round_id, newItemAttributes));
   };
 };

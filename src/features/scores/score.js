@@ -27,12 +27,11 @@ class Score extends React.Component {
   }
 
   _itemPress(round_id, hole, gotit) {
+    const v = String(!gotit);
     this.props.postScore({
       round_id: round_id,
       hole: hole,
-      values: {
-        birdie: !gotit
-      }
+      values: [{ k: 'birdie', v: v }]
     });
   }
 
@@ -107,6 +106,8 @@ const actions = {
 };
 
 export default connect(mapState, actions)(Score);
+
+
 
 
 var styles = StyleSheet.create({
