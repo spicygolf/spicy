@@ -36,7 +36,6 @@ export function postScore(payload) {
     let i = findIndex(newScores, {hole: hole});
     if( i >= 0 ) {
       let newValues = cloneDeep(newScores[i].values);
-      console.log('newValues', newValues);
       values.map(value => {
         value.ts = moment.utc().format();
         let j = findIndex(newValues, {k: value.k});

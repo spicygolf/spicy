@@ -44,7 +44,7 @@ class Score extends React.Component {
   }
 
   scorecard(player, round, courseHoles) {
-    console.log('score.js round', round);
+
     return (
       <View style={styles.ninesContainer}>
         {
