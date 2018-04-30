@@ -69,8 +69,6 @@ class Game extends React.Component {
 
   render() {
 
-    console.log('game type', this.props.currentGame.gametype);
-
     return (
       <View>
         <GameNav

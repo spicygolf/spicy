@@ -19,7 +19,7 @@ import { selectRound } from 'features/rounds/roundSelectors';
 import { postScore } from 'features/rounds/roundActions';
 
 
-class Score extends React.Component {
+class BirdieEmAllScore extends React.Component {
 
   constructor(props) {
     super(props);
@@ -105,7 +105,7 @@ const actions = {
   postScore: postScore
 };
 
-export default connect(mapState, actions)(Score);
+export default connect(mapState, actions)(BirdieEmAllScore);
 
 
 
