@@ -11,7 +11,7 @@
   "scripts": {
     "start": "react-native start",
     "android": "react-native run-android",
-    "ios": "react-native run-ios",
+    "ios": "react-native run-ios --simulator \"iPhone X\"",
     "test": "node node_modules/jest/bin/jest.js --watch"
   },
   "jest": {
