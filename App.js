@@ -37,3 +37,7 @@ export default class App extends React.Component {
     );
   }
 };
+
+// temporary for RN #3965
+import { YellowBox } from 'react-native';
+YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader']);
