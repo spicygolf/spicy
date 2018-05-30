@@ -13,7 +13,7 @@ import {
 export function fetchCurrentUser(client, store) {
 
   // TODO: get this user _key from local storage
-  const userFromStorage = '9552287';    // local dev
+  const userFromStorage = '11155149';    // local dev
   //const userFromStorage = '16257780'; // server
 
   const q = `query GetPlayer($player: String!) {
@@ -21,10 +21,18 @@ export function fetchCurrentUser(client, store) {
    }`;
 
   return get(client, q, {player: userFromStorage})
-    .then((res) => {
+    .then(res => {
       const player = res.data.getPlayer;
+      if( !player ) {
+        // TODO: this shouldn't happen, as local storage should always
+        //       have a valid user/player from the server.
+        throw "Current user not found on server.";
+      }
       store.dispatch(upsertEntity("Player", player._key, player));
       store.dispatch(setCurrentUser(player));
+    })
+    .catch(err => {
+      console.error(err);
     });
 
 }

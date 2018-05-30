@@ -63,7 +63,9 @@ export function postScore(payload) {
 };
 
 
-export function sendPostedScore( {round_id, hole, values} ) {
+export function sendPostedScore(payload) {
+
+  const { round_id, hole, values } = payload;
 
   return (dispatch, getState) => {
 
