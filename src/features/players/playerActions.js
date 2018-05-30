@@ -13,7 +13,9 @@ import {
 export function fetchCurrentUser(client, store) {
 
   // TODO: get this user _key from local storage
-  const userFromStorage = '9552287';
+  const userFromStorage = '9552287';    // local dev
+  //const userFromStorage = '16257780'; // server
+
   const q = `query GetPlayer($player: String!) {
     getPlayer(_key: $player) { _key name short }
    }`;

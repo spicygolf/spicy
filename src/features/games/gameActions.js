@@ -17,9 +17,8 @@ import {
 //
 export function fetchActiveGames(client, store) {
 
-  // TODO: get this from state.player.currentUser (when it's populated)
   const state = store.getState();
-  const pkey = "9552287";
+  const pkey = state.players.currentUser._key;
 
   const q = `query ActiveGamesForPlayer($pkey: String!) {
     activeGamesForPlayer(pkey: $pkey) { _key name start end gametype }
@@ -71,40 +70,6 @@ export function storeRoundIDsInGame(gkey, round_ids) {
   };
 }
 
-/*
-
-//
-// game rounds & players
-//
-export function fetchGameRoundsPlayers(game) {
-
-  return (dispatch, getState) => {
-
-    const q = `query`;
-
-    get(null, q, {gkey: game._key})
-      .then((rps) => {
-        var round_ids = [];
-        rps.map((rp) => {
-          // keep track of round ids for game update below
-          round_ids.push(rp.round._key);
-          // fk round -> player field
-          rp.round.player = rp.player._key;
-          // add round & player objects
-          dispatch(upsertEntity("Round", rp.round._key, rp.round));
-          dispatch(upsertEntity("Player", rp.player._key, rp.player));
-        });
-        // update game with round ids
-        dispatch(updateEntity("Game", game._key, { rounds: round_ids }));
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
-
-}
-
-*/
 
 //
 //  gamepecs

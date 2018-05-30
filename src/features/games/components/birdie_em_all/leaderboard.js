@@ -29,8 +29,6 @@ const courseHoles = [
   ['10', '11', '12', '13', '14', '15', '16', '17', '18']
 ];
 
-// TODO: this is the leaderboard component and scoring functions for
-//       birdie-em-all only at this point.
 class BirdieEmAllLeaderboard extends React.Component {
 
   constructor(props) {
@@ -179,7 +177,7 @@ var styles = StyleSheet.create({
     justifyContent: 'center'
   },
   Total: {
-    fontSize: 26,
+    fontSize: 25,
     fontWeight: 'bold',
     textAlign: 'right'
   },
