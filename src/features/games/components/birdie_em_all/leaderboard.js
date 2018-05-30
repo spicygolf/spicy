@@ -132,7 +132,8 @@ class BirdieEmAllLeaderboard extends React.Component {
           data={scores}
           renderItem={this._renderScoreItem}
           keyExtractor={item => item.player.short}
-        />
+          ListFooterComponent={<View style={styles.ListFooter}></View>}
+      />
       </List>
     );
   }
@@ -155,6 +156,10 @@ export default connect(mapState, actions)(BirdieEmAllLeaderboard);
 var styles = StyleSheet.create({
   LeaderboardContainer: {
     marginTop: 0
+  },
+  ListFooter: {
+    height: 0,
+    marginBottom: 90
   },
   ScoreItemContainer: {
     flexDirection: 'row',
