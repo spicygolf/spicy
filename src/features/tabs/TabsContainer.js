@@ -11,15 +11,15 @@ import {
   StyleSheet
 } from 'react-native';
 
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-
 import {
   Router,
   Scene,
   Stack,
   Tabs
 } from 'react-native-router-flux';
+import {
+  ApolloConsumer
+} from 'react-apollo';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -42,6 +42,7 @@ import GameSetup from 'features/games/gameSetup';
 
 import Profile from 'features/profile/profile';
 
+import { getPlayer } from 'features/players/graphql';
 
 import { createTabsReducer } from './TabsReducer';
 
@@ -127,12 +128,4 @@ class TabsContainer extends React.Component {
   }
 };
 
-const mapState = (state) => {
-  // TODO: maybe stick currentTab into state?
-  return {};
-}
-
-// TODO: maybe stick selectTab in here?
-const actions = {};
-
-export default connect(mapState, actions)(TabsContainer);
+export default TabsContainer;

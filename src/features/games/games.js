@@ -11,11 +11,19 @@ import {
   View
 } from 'react-native';
 
-import { connect } from 'react-redux';
+import { Query, withApollo } from 'react-apollo';
+import gql from 'graphql-tag';
 
 import { Actions } from 'react-native-router-flux';
 
 import { List, ListItem } from 'react-native-elements';
+
+import {
+  currentPlayer
+} from 'features/players/graphql';
+import {
+  activeGamesForPlayer
+} from 'features/games/graphql';
 
 import {
   fetchActiveGames,
@@ -59,59 +67,59 @@ class Games extends React.Component {
     );
   }
 
+  componentWillMount() {
+    console.log('cache', this.props.client.cache.data.data);
+    const rq = this.props.client.readQuery({
+      query: currentPlayer
+    });
+    this.currentPlayer = rq.currentPlayer;
+  }
+
   render() {
-    var content;
-
-    if( this.props && this.props.games ) {
-      content = (
-        <View>
-          <View style={styles.gamesSubMenu}>
-            <View style={styles.gamesSubMenuSpacer} />
-            <View style={styles.newGameButton}>
-              <Button
-                onPress={this._newGamePressed}
-                title="New Game"
-                accessibilityLabel="New Game"
-                color={blue}
-              />
-            </View>
-          </View>
-          <List>
-            <FlatList
-              data={this.props.games}
-              renderItem={this._renderItem}
-              keyExtractor={item => item._key}
-            />
-          </List>
-        </View>
-      );
-    } else {
-      content = (
-        <Text>Loading...</Text>
-      );
-    }
-
     return (
-      <View>
-        {content}
-      </View>
+      <Query
+        query={activeGamesForPlayer}
+        variables={{pkey: this.currentPlayer}}>
+        {({data, loading, error}) => {
+          if( loading ) return (<Text>Loading...</Text>);
+
+          // TODO: error component instead of below...
+          if( error ) {
+            console.log(error);
+            return (<Text>Error</Text>);
+          }
+
+          return (
+            <View>
+              <View style={styles.gamesSubMenu}>
+                <View style={styles.gamesSubMenuSpacer} />
+                <View style={styles.newGameButton}>
+                  <Button
+                    onPress={this._newGamePressed}
+                    title="New Game"
+                    accessibilityLabel="New Game"
+                    color={blue}
+                  />
+                </View>
+              </View>
+              <List>
+                <FlatList
+                  data={data.activeGamesForPlayer}
+                  renderItem={this._renderItem}
+                  keyExtractor={item => item._key}
+                />
+              </List>
+            </View>
+          )
+        }}
+      </Query>
     );
   }
-};
 
-
-function mapState(state) {
-  return {
-    games: selectGames(state)
-  };
 }
 
-const actions = {
-  fetchActiveGames,
-  setCurrentGame
-};
+export default withApollo(Games);
 
-export default connect(mapState, actions)(Games);
 
 var styles = StyleSheet.create({
   gamesSubMenu: {

@@ -29,7 +29,7 @@ export function fetchActiveGames(client, store) {
       const games = res.data.activeGamesForPlayer;
       games.map((game) => {
         // TODO: upserts?  or clear out and replace?
-        store.dispatch(createEntity("Game", game));
+        store.dispatch(upsertEntity("Game", game._key, game));
       });
     })
     .catch((e) => {

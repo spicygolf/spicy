@@ -7,8 +7,8 @@ import {
   View
 } from 'react-native';
 
-import { connect } from 'react-redux';
-import gql from "graphql-tag";
+//import { connect } from 'react-redux';
+//import gql from "graphql-tag";
 import { withApollo } from "react-apollo";
 
 import GameNav from 'features/games/gamenav';
@@ -19,30 +19,6 @@ import {
   storeRoundIDsInGame
 } from 'features/games/gameActions';
 import { selectRoundsPlayers } from 'features/rounds/roundSelectors';
-
-
-const GAME_QUERY = gql`
-  query GetGame($game: String!) {
-    getGame(_key: $game) {
-      rounds {
-        _key
-        date
-        seq
-        scores {
-          hole
-          values {
-            k v ts
-          }
-        }
-        player {
-          _key
-          name
-          short
-        }
-      }
-    }
-  }
-`;
 
 
 class Game extends React.Component {
@@ -96,4 +72,4 @@ const actions = {
   storeRoundIDsInGame
 };
 
-export default withApollo(connect(mapState, actions)(Game));
+export default Game;

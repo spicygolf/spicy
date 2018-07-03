@@ -1,30 +1,35 @@
-import React from 'react';
-import { Provider } from 'react-redux';
-import { ApolloProvider } from 'react-apollo';
+import React, { Component } from 'react';
+//import { Provider } from 'react-redux';
+import {
+  ApolloProvider,
+} from 'react-apollo';
 
-import configureStore from 'app/store/configureStore';
+//import configureStore from 'app/store/configureStore';
 import configureClient from 'app/client/configureClient';
-import { fetchInitialData } from 'app/store/initialData';
+import InitialData from 'common/components/initialData';
 import TabsContainer from 'features/tabs/TabsContainer';
 
 
-const store = configureStore();
-
+//const store = configureStore();
 const client = configureClient();
 
-fetchInitialData(client, store);
+// TODO: get this user _key from local storage
+const currentPlayer = '11155149';    // local dev
+//const currentPlayer = '16257780'; // server
 
-export default class App extends React.Component {
+
+class App extends Component {
   render() {
     return (
-      <Provider store={store}>
-        <ApolloProvider client={client}>
-          <TabsContainer />
-        </ApolloProvider>
-      </Provider>
+      <ApolloProvider client={client}>
+        <InitialData player={currentPlayer} />
+        <TabsContainer />
+      </ApolloProvider>
     );
   }
 };
+
+export default App;
 
 // temporary for RN #3965
 import { YellowBox } from 'react-native';

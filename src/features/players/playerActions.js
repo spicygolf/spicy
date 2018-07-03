@@ -1,5 +1,17 @@
 
-import { get } from 'common/api';
+
+//
+//  Do we make an <InitialData> component to do these?
+//  Would that match the apollo-link-state tutorial vid better?
+//
+
+
+import { graphql } from 'react-apollo';
+import {
+  getCurrentUser
+} from './graphql';
+
+//import { get } from 'common/api';
 
 import {
   SET_CURRENT_USER
@@ -10,15 +22,13 @@ import {
 } from 'features/entities/entityActions';
 
 
-export function fetchCurrentUser(client, store) {
+export function fetchCurrentUser() {
 
-  // TODO: get this user _key from local storage
-  const userFromStorage = '11155149';    // local dev
-  //const userFromStorage = '16257780'; // server
 
-  const q = `query GetPlayer($player: String!) {
-    getPlayer(_key: $player) { _key name short }
-   }`;
+  return graphql(getCurrentUser, { player: userFromStorage });
+
+/*
+  const q = ``;
 
   return get(client, q, {player: userFromStorage})
     .then(res => {
@@ -34,7 +44,7 @@ export function fetchCurrentUser(client, store) {
     .catch(err => {
       console.error(err);
     });
-
+*/
 }
 
 
