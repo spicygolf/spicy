@@ -1,23 +1,66 @@
 'use strict';
 
 import React from 'react';
-
 import {
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
-
-import { connect } from 'react-redux';
-import { find } from 'lodash';
+import { Mutation, withApollo } from 'react-apollo';
+import moment from 'moment';
 
 import { baseUrl } from 'common/config';
-
 import GameNav from 'features/games/gamenav';
-import { selectRound } from 'features/rounds/roundSelectors';
-import { postScore } from 'features/rounds/roundActions';
+import { postScore } from 'features/rounds/graphql';
 
+
+const ToggleHole = ({round_id, hole, type, gotit}) => {
+  const gotitStyle = gotit ? styles.yes : styles.no;
+  const gotitTextStyle = gotit ? styles.yesText : styles.noText;
+
+  return (
+    <Mutation
+      mutation={postScore}
+      update={
+        (cache, { data: { postScore } }) => {
+          console.log('postScore cache', cache);
+        }
+      }
+    >
+      {(postScore, { loading, error, data }) => {
+        if( loading ) console.log('loading');
+        if( error ) console.log('error', error);
+        if( data && data.postScore ) {
+          //console.log('mutation', data.postScore);
+        }
+        return (
+          <View style={[styles.hole, gotitStyle]}>
+            <TouchableOpacity
+              onPress={() => postScore({
+                variables: {
+                  round: round_id,
+                  score: {
+                    hole: hole,
+                    values: [{
+                      k: type,
+                      v: !gotit,
+                      ts: moment.utc().format()
+                    }]
+                  }
+                }
+              })
+            }
+            >
+              <Text style={[styles.holeText, gotitTextStyle]}>{hole}</Text>
+            </TouchableOpacity>
+          </View>
+        )
+      }}
+    </Mutation>
+  );
+
+}
 
 class BirdieEmAllScore extends React.Component {
 
@@ -26,24 +69,8 @@ class BirdieEmAllScore extends React.Component {
     this.scorecard = this.scorecard.bind(this);
   }
 
-  _itemPress(round_id, hole, gotit) {
-    const v = String(!gotit);
-    this.props.postScore({
-      round_id: round_id,
-      hole: hole,
-      values: [{ k: 'birdie', v: v }]
-    });
-  }
-
-  _gotBirdie(hole, scores) {
-    var h = find(scores, {hole: hole});
-    if( !h ) return false;
-    var b = find(h.values, {k: 'birdie', v: 'true'});
-    if( !b ) return false;
-    return true;
-  }
-
-  scorecard(player, round, courseHoles) {
+  scorecard() {
+    const { player, round_id, score, courseHoles } = this.props;
 
     return (
       <View style={styles.ninesContainer}>
@@ -51,19 +78,16 @@ class BirdieEmAllScore extends React.Component {
           courseHoles.map((nine, i) => (
             <View key={i} style={styles.nine}>
               {
-                nine.map((hole) => {
-                  var gotit = this._gotBirdie(hole, round.scores);
-                  var gotitStyle = gotit ? styles.yes : styles.no;
-                  var gotitTextStyle = gotit ? styles.yesText : styles.noText;
-
+                nine.map(hole => {
+                  const gotit = (score.holes.indexOf(hole) >= 0);
                   return (
-                    <View key={hole} style={[styles.hole, gotitStyle]}>
-                      <TouchableOpacity
-                        onPress={() => this._itemPress(round._key, hole, gotit)}
-                      >
-                        <Text style={[styles.holeText, gotitTextStyle]}>{hole}</Text>
-                      </TouchableOpacity>
-                    </View>
+                    <ToggleHole
+                      key={hole}
+                      round_id={round_id}
+                      hole={hole}
+                      type='birdie'
+                      gotit={gotit}
+                    />
                   );
                 })
               }
@@ -75,11 +99,7 @@ class BirdieEmAllScore extends React.Component {
   }
 
   render() {
-
-    const { player, round, courseHoles } = this.props;
-
-    var scorecard = this.scorecard(player, round, courseHoles);
-
+    const { player } = this.props;
     return (
       <View>
         <GameNav
@@ -88,24 +108,14 @@ class BirdieEmAllScore extends React.Component {
           showScore={false}
         />
         <View style={styles.cardContainer}>
-          {scorecard}
+          {this.scorecard()}
         </View>
       </View>
     );
   }
 };
 
-const mapState = (state) => {
-  return {
-    round: selectRound(state)
-  };
-};
-
-const actions = {
-  postScore: postScore
-};
-
-export default connect(mapState, actions)(BirdieEmAllScore);
+export default withApollo(BirdieEmAllScore);
 
 
 

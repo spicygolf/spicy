@@ -7,69 +7,66 @@ import {
   View
 } from 'react-native';
 
-//import { connect } from 'react-redux';
-//import gql from "graphql-tag";
-import { withApollo } from "react-apollo";
+import { Query, withApollo } from 'react-apollo';
+import { currentGame, getGame } from 'features/games/graphql';
 
 import GameNav from 'features/games/gamenav';
 import Leaderboard from 'features/games/leaderboard';
 
-import {
-  storeRound,
-  storeRoundIDsInGame
-} from 'features/games/gameActions';
-import { selectRoundsPlayers } from 'features/rounds/roundSelectors';
-
 
 class Game extends React.Component {
 
-  async componentWillMount() {
-    const gkey = this.props.currentGame._key;
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentGame: null,
+      refresh: true
+    };
+  }
 
-    // query for rounds/players in this game
-    const { data } = await this.props.client.query({
-      query: GAME_QUERY,
-      variables: {game: gkey}
+  componentWillMount() {
+    // get currentGame from cache
+    const rq = this.props.client.readQuery({
+      query: currentGame
     });
-
-    // save rounds to state
-    let round_ids = [];
-    data.getGame.rounds.map(round => {
-      round_ids.push(round._key);
-      this.props.storeRound(round);
-    });
-
-    // add round ids to game
-    this.props.storeRoundIDsInGame(gkey, round_ids);
+    this.setState(prev => (
+      {currentGame: rq.currentGame}
+    ));
   }
 
   render() {
 
     return (
-      <View>
-        <GameNav
-          title={this.props.currentGame.name}
-          showBack={true}
-          showScore={false}
-        />
-        <Leaderboard {...this.props} />
-      </View>
+      <Query
+        query={getGame}
+        variables={{game: this.state.currentGame._key}}
+        fetchPolicy='cache-and-network'
+      >
+        {({ loading, error, data }) => {
+          if( loading ) return (<Text>Loading...</Text>);
+          if( error ) {
+            console.log(error);
+            return (<Text>Error</Text>);
+          }
+          return (
+            <View>
+              <GameNav
+                title={this.state.currentGame.name}
+                showBack={true}
+                showScore={false}
+              />
+              <Leaderboard
+                currentGame={this.state.currentGame}
+                roundsPlayers={data.getGame.rounds}
+              />
+            </View>
+          )
+        }}
+      </Query>
     );
 
   }
 
 }
 
-function mapState(state) {
-  return {
-    roundsPlayers: selectRoundsPlayers(state),
-    currentGame: state.games.currentGame
-  };
-}
-
-const actions = {
-  storeRound,
-  storeRoundIDsInGame
-};
-
-export default Game;
+export default withApollo(Game);

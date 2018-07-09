@@ -22,14 +22,15 @@ import {
   currentPlayer
 } from 'features/players/graphql';
 import {
+  currentGame,
   activeGamesForPlayer
 } from 'features/games/graphql';
 
-import {
-  fetchActiveGames,
-  setCurrentGame
-} from 'features/games/gameActions';
-import { selectGames } from 'features/games/gameSelectors';
+//import {
+//  fetchActiveGames,
+//  setCurrentGame
+//} from 'features/games/gameActions';
+//import { selectGames } from 'features/games/gameSelectors';
 
 import { blue } from 'common/colors';
 
@@ -45,8 +46,17 @@ class Games extends React.Component {
     Actions.newGame();
   }
 
+  _setCurrentGame(game) {
+    this.props.client.writeQuery({
+      query: currentGame,
+      data: {
+        currentGame: game
+      }
+    });
+  }
+
   _itemPressed(item) {
-    this.props.setCurrentGame(item);
+    this._setCurrentGame(item);
     Actions.game({
       game: {
         id    : item._key,
@@ -68,7 +78,6 @@ class Games extends React.Component {
   }
 
   componentWillMount() {
-    console.log('cache', this.props.client.cache.data.data);
     const rq = this.props.client.readQuery({
       query: currentPlayer
     });

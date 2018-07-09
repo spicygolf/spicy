@@ -10,17 +10,13 @@ import
   View
 } from 'react-native';
 
+import { withApollo } from 'react-apollo';
+
 import { List, ListItem } from 'react-native-elements';
 
 import { Actions } from 'react-native-router-flux';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
-import { connect } from 'react-redux';
-
-import {
-  setCurrentRound
-} from 'features/rounds/roundActions';
 
 
 // TODO: supply course details
@@ -71,12 +67,12 @@ class BirdieEmAllLeaderboard extends React.Component {
   }
 
   _itemPressed(item, courseHoles) {
-    const {player, round} = item;
-    this.props.setCurrentRound({round_id: round});
+    const { player, round, score } = item;
     Actions.score({
       currentGame: this.props.currentGame,
-      player: player,
+      player: player[0],
       round_id: round,
+      score: score,
       courseHoles: courseHoles
     });
   }
@@ -107,7 +103,7 @@ class BirdieEmAllLeaderboard extends React.Component {
         </View>
         <View style={[styles.ScoreItemCell, styles.MiddleCell]}>
           <View>
-            <Text style={styles.Player}>{item.player.name}</Text>
+            <Text style={styles.Player}>{item.player[0].name}</Text>
           </View>
           {holes}
         </View>
@@ -131,7 +127,7 @@ class BirdieEmAllLeaderboard extends React.Component {
         <FlatList
           data={scores}
           renderItem={this._renderScoreItem}
-          keyExtractor={item => item.player.short}
+          keyExtractor={item => item.player[0].short}
           ListFooterComponent={<View style={styles.ListFooter}></View>}
       />
       </List>
@@ -139,15 +135,7 @@ class BirdieEmAllLeaderboard extends React.Component {
   }
 }
 
-const mapState = (state) => {
-  return {};
-};
-
-const actions = {
-  setCurrentRound: setCurrentRound
-};
-
-export default connect(mapState, actions)(BirdieEmAllLeaderboard);
+export default withApollo(BirdieEmAllLeaderboard);
 
 
 /**
