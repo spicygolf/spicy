@@ -11,8 +11,6 @@ import {
 
 import { Button, Card } from 'react-native-elements';
 
-import { connect } from 'react-redux';
-
 import GameNav from 'features/games/gamenav';
 
 
@@ -82,15 +80,7 @@ class GameSetup extends React.Component {
   }
 }
 
-function mapState(state) {
-  return {
-  };
-}
-
-const actions = {
-};
-
-export default connect(mapState, actions)(GameSetup);
+export default GameSetup;
 
 
 const styles = StyleSheet.create({

@@ -26,12 +26,6 @@ import {
   activeGamesForPlayer
 } from 'features/games/graphql';
 
-//import {
-//  fetchActiveGames,
-//  setCurrentGame
-//} from 'features/games/gameActions';
-//import { selectGames } from 'features/games/gameSelectors';
-
 import { blue } from 'common/colors';
 
 

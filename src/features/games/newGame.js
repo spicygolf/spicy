@@ -10,15 +10,9 @@ import {
 
 import { List, ListItem } from 'react-native-elements';
 
-import { connect } from 'react-redux';
-
 import { Actions } from 'react-native-router-flux';
 
 import GameNav from 'features/games/gamenav';
-
-import { selectGameSpecs } from 'features/games/gameSelectors';
-import { fetchGameSpecs } from 'features/games/gameActions';
-import { selectRoundsPlayers } from 'features/rounds/roundSelectors';
 
 
 class NewGame extends React.Component {
@@ -87,14 +81,4 @@ class NewGame extends React.Component {
   }
 }
 
-function mapState(state) {
-  return {
-    gamespecs: selectGameSpecs(state)
-  };
-}
-
-const actions = {
-  fetchGameSpecs: fetchGameSpecs
-};
-
-export default connect(mapState, actions)(NewGame);
+export default NewGame;
