@@ -47,6 +47,7 @@ class BirdieEmAllLeaderboard extends React.Component {
   }
 
   _score(data) {
+    if( !data ) return [];
     // get team/player scores from scoring function
     var scores = data.map((score) => {
       return {

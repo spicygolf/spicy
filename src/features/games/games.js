@@ -33,6 +33,9 @@ class Games extends React.Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      currentPlayer: null
+    };
     this._renderItem = this._renderItem.bind(this);
   }
 
@@ -75,14 +78,16 @@ class Games extends React.Component {
     const rq = this.props.client.readQuery({
       query: currentPlayer
     });
-    this.currentPlayer = rq.currentPlayer;
+    this.setState(prev => (
+      {currentPlayer: rq.currentPlayer}
+    ));
   }
 
   render() {
     return (
       <Query
         query={activeGamesForPlayer}
-        variables={{pkey: this.currentPlayer}}>
+        variables={{pkey: this.state.currentPlayer}}>
         {({data, loading, error}) => {
           if( loading ) return (<Text>Loading...</Text>);
 

@@ -8,6 +8,7 @@ import {
   View
 } from 'react-native';
 import { Mutation, withApollo } from 'react-apollo';
+import gql from 'graphql-tag';
 import moment from 'moment';
 
 import { baseUrl } from 'common/config';
@@ -24,7 +25,7 @@ const ToggleHole = ({round_id, hole, type, gotit}) => {
       mutation={postScore}
       update={
         (cache, { data: { postScore } }) => {
-          console.log('postScore cache', cache);
+          console.log('postScore update - cache', cache);
         }
       }
     >
