@@ -1,9 +1,8 @@
 import { AsyncStorage } from 'react-native';
 import { ApolloLink } from 'apollo-link';
 import ApolloClient from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { Hermes } from 'apollo-cache-hermes';
 import { persistCache } from 'apollo-cache-persist';
-import { withClientState } from 'apollo-link-state';
 import { HttpLink } from 'apollo-link-http';
 
 import { baseUrl } from 'common/config';
@@ -12,27 +11,8 @@ import { resolvers } from './resolvers';
 
 export default function configureClient() {
 
-  const cache = new InMemoryCache({
-    dataIdFromObject: object => object.key || null
-  });
-
-  const defaults = {
-    watchQuery: {
-      __typename: 'watchQuery',
-      errorPolicy: 'ignore'
-    },
-    query: {
-      __typename: 'query',
-      errorPolicy: 'all'
-    },
-    mutate: {
-      __typename: 'mutate',
-      errorPolicy: 'all'
-    },
-  };
-
-  const stateLink = withClientState({
-    cache, resolvers, defaults,
+  const cache = new Hermes({
+    entityIdForNode: object => object._key || undefined
   });
 
   // NOTE: This must go after the call to withClientState. Otherwise that will
@@ -52,7 +32,6 @@ export default function configureClient() {
   const client = new ApolloClient({
     cache,
     link: ApolloLink.from([
-        stateLink,
         httpLink
     ])
   });
