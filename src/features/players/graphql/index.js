@@ -1,2 +1,2 @@
-export { default as currentPlayer } from './currentPlayer';
-export { default as getPlayer } from './getPlayer';
+export { default as CURRENT_PLAYER_QUERY } from './currentPlayer';
+export { default as GET_PLAYER_QUERY } from './getPlayer';

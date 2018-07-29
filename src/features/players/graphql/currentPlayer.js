@@ -1,7 +1,11 @@
 import gql from 'graphql-tag';
 
 export default gql`
-  {
-    currentPlayer @client
+  query CurrentPlayer  {
+    currentPlayer {
+      _key
+      name
+      short
+    }
   }
 `;

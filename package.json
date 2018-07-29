@@ -26,10 +26,13 @@
     "apollo-cache-hermes": "^0.6.2",
     "apollo-cache-persist": "^0.1.1",
     "apollo-client": "^2.3.5",
+    "apollo-link-context": "^1.0.8",
+    "apollo-link-error": "^1.1.0",
     "apollo-link-http": "^1.5.4",
     "apollo-link-state": "^0.4.1",
     "graphql": "^0.13.2",
     "graphql-tag": "^2.9.2",
+    "jwt-decode": "^2.2.0",
     "lodash": "^4.17.10",
     "moment": "^2.20.1",
     "react": "16.3.1",
@@ -40,6 +43,7 @@
     "react-native-iphone-x-helper": "^1.0.1",
     "react-native-router-flux": "^4.0.0-beta.25",
     "react-native-vector-icons": "^4.6.0",
-    "react-navigation": "^1.0.0-beta.22"
+    "react-navigation": "^1.0.0-beta.22",
+    "tcomb-form-native": "^0.6.15"
   }
 }
