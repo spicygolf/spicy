@@ -6,12 +6,13 @@ import {
   Text,
   View
 } from 'react-native';
-import { withApollo } from 'react-apollo';
+import { Query, withApollo } from 'react-apollo';
 import moment from 'moment';
 
 import { ToggleHole } from 'common/components/toggle_hole';
 import { upsertScore } from 'common/utils/upsertScore';
 import GameNav from 'features/games/gamenav';
+import { roundFragment } from 'features/rounds/graphql';
 
 
 class BirdieEmAllScore extends React.Component {
@@ -39,9 +40,11 @@ class BirdieEmAllScore extends React.Component {
                       hole={hole}
                       type='birdie'
                       gotit={gotit}
-                      updateCache={scores => (
-                        upsertScore(scores, hole, 'birdie', !gotit)
-                      )}
+                      updateCache={scores => {
+                        const ns = upsertScore(scores, hole, 'birdie', !gotit);
+                        // TODO: affect change in leaderboard props or state?
+                        return ns;
+                      }}
                     />
                   );
                 })
@@ -55,6 +58,7 @@ class BirdieEmAllScore extends React.Component {
 
   render() {
     const { player } = this.props;
+
     return (
       <View>
         <GameNav

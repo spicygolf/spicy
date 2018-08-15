@@ -11,18 +11,12 @@ import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 import moment from 'moment';
 
-import { postScore } from 'features/rounds/graphql';
+import { postScore, roundFragment } from 'features/rounds/graphql';
 
 
 export const ToggleHole = ({round_id, hole, type, gotit, updateCache}) => {
   const gotitStyle = gotit ? styles.yes : styles.no;
   const gotitTextStyle = gotit ? styles.yesText : styles.noText;
-
-  const scoreFragment = gql`
-      fragment my_round on Round {
-        scores
-      }
-  `;
 
   return (
     <Mutation
@@ -33,19 +27,19 @@ export const ToggleHole = ({round_id, hole, type, gotit, updateCache}) => {
           // read existing score fragment
           const { scores } = cache.readFragment({
             id: postScore._key,
-            fragment: scoreFragment
+            fragment: roundFragment
           });
           // update scores
           const newScores = updateCache(scores);
           // write updated score fragment
           let res = cache.writeFragment({
             id: postScore._key,
-            fragment: scoreFragment,
+            fragment: roundFragment,
             data: {
+              _key: postScore._key,
               scores: newScores
             }
           });
-          console.log('res', res);
         }
       }
     >

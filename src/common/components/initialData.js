@@ -3,8 +3,8 @@ import { View } from 'react-native'
 import { Query, withApollo } from 'react-apollo';
 
 import {
-  currentPlayer,
-  getPlayer
+  CURRENT_PLAYER_QUERY,
+  GET_PLAYER_QUERY
 } from 'features/players/graphql';
 
 import {
@@ -30,19 +30,40 @@ const Q = ({q, v}) => {
 
 const InitialData = ({player, client}) => {
 
-  client.writeQuery({
-    query: currentPlayer,
-    data: {
-      currentPlayer: player
-    }
-  });
+  // for DEV
+  client.resetStore();
 
-  return (
-    <React.Fragment>
-      <Q q={getPlayer} v={{player: player}} />
-      <Q q={activeGamesForPlayer} v={{pkey: player}} />
-    </React.Fragment>
+  client.query({
+    query: GET_PLAYER_QUERY,
+    variables: {
+      player: player
+    }
+  })
+    .then((res) => {
+      console.log('res', res);
+    });
+
+/*
+  const ret = (
+    <Query query={GET_PLAYER_QUERY} variables={{player: player}}>
+      {({ loading, error, data }) => {
+        if( loading ) return null;
+
+        console.log('getPlayer data', data);
+        client.writeQuery({
+          query: CURRENT_PLAYER_QUERY,
+          data: {
+            currentPlayer: getPlayer
+          }
+        });
+        return (
+          <Q q={activeGamesForPlayer} v={{pkey: player}} />
+        );
+      }}
+    </Query>
   );
-}
+  return ret;
+*/
+};
 
 export default withApollo(InitialData);

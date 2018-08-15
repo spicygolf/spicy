@@ -19,7 +19,7 @@ import { Actions } from 'react-native-router-flux';
 import { List, ListItem } from 'react-native-elements';
 
 import {
-  currentPlayer
+  CURRENT_PLAYER_QUERY
 } from 'features/players/graphql';
 import {
   currentGame,
@@ -33,9 +33,6 @@ class Games extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      currentPlayer: null
-    };
     this._renderItem = this._renderItem.bind(this);
   }
 
@@ -74,52 +71,48 @@ class Games extends React.Component {
     );
   }
 
-  componentWillMount() {
-    const rq = this.props.client.readQuery({
-      query: currentPlayer
-    });
-    this.setState(prev => (
-      {currentPlayer: rq.currentPlayer}
-    ));
-  }
-
   render() {
+    console.log('games render client', this.props.client.cache._queryable);
     return (
-      <Query
-        query={activeGamesForPlayer}
-        variables={{pkey: this.state.currentPlayer}}>
-        {({data, loading, error}) => {
-          if( loading ) return (<Text>Loading...</Text>);
+      <Query query={CURRENT_PLAYER_QUERY}>
+        {({ data: { currentPlayer } = {} }) => (
+          <Query
+            query={activeGamesForPlayer}
+            variables={{pkey: currentPlayer._key}}>
+            {({data, loading, error}) => {
+              if( loading ) return (<Text>Loading...</Text>);
 
-          // TODO: error component instead of below...
-          if( error ) {
-            console.log(error);
-            return (<Text>Error</Text>);
-          }
+              // TODO: error component instead of below...
+              if( error ) {
+                console.log(error);
+                return (<Text>Error</Text>);
+              }
 
-          return (
-            <View>
-              <View style={styles.gamesSubMenu}>
-                <View style={styles.gamesSubMenuSpacer} />
-                <View style={styles.newGameButton}>
-                  <Button
-                    onPress={this._newGamePressed}
-                    title="New Game"
-                    accessibilityLabel="New Game"
-                    color={blue}
-                  />
+              return (
+                <View>
+                  <View style={styles.gamesSubMenu}>
+                    <View style={styles.gamesSubMenuSpacer} />
+                    <View style={styles.newGameButton}>
+                      <Button
+                        onPress={this._newGamePressed}
+                        title="New Game"
+                        accessibilityLabel="New Game"
+                        color={blue}
+                      />
+                    </View>
+                  </View>
+                  <List>
+                    <FlatList
+                      data={data.activeGamesForPlayer}
+                      renderItem={this._renderItem}
+                      keyExtractor={item => item._key}
+                    />
+                  </List>
                 </View>
-              </View>
-              <List>
-                <FlatList
-                  data={data.activeGamesForPlayer}
-                  renderItem={this._renderItem}
-                  keyExtractor={item => item._key}
-                />
-              </List>
-            </View>
-          )
-        }}
+              )
+            }}
+          </Query>
+        )}
       </Query>
     );
   }

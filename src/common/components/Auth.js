@@ -43,7 +43,10 @@ class Auth extends Component {
 
     // no token, so render Login component
     if( !token ) {
-      this.state.show = 'Login';
+      this.setState(prev => {
+        prev.show = 'Login';
+        return prev;
+      });
       return;
     };
 
@@ -57,11 +60,17 @@ class Auth extends Component {
       }
     });
     // go to TabsContainer
-    this.state.show = 'Tabs';
+    this.setState(prev => {
+      prev.show = 'Tabs';
+      return prev;
+    });
   }
 
   _onChange(values) {
-    this.state.values = values;
+    this.setState(prev => {
+      prev.values = values;
+      return prev;
+    });
   }
 
   async _onLogin() {
