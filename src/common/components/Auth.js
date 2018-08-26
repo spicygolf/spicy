@@ -116,7 +116,7 @@ class Auth extends Component {
     };
 
     let title, content;
-    console.log('show', this.state.show);
+
     switch ( this.state.show ) {
       case 'Tabs':
         return <TabsContainer />

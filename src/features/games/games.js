@@ -3,6 +3,7 @@
 import React from 'react';
 
 import {
+  AsyncStorage,
   Button,
   FlatList,
   StyleSheet,
@@ -19,11 +20,11 @@ import { Actions } from 'react-native-router-flux';
 import { List, ListItem } from 'react-native-elements';
 
 import {
-  CURRENT_PLAYER_QUERY
+  GET_PLAYER_QUERY
 } from 'features/players/graphql';
 import {
   currentGame,
-  activeGamesForPlayer
+  ACTIVE_GAMES_FOR_PLAYER_QUERY
 } from 'features/games/graphql';
 
 import { blue } from 'common/colors';
@@ -31,10 +32,9 @@ import { blue } from 'common/colors';
 
 class Games extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this._renderItem = this._renderItem.bind(this);
-  }
+  state = {
+    currentPlayerKey: null
+  };
 
   _newGamePressed() {
     Actions.newGame();
@@ -71,50 +71,70 @@ class Games extends React.Component {
     );
   }
 
+  componentDidMount() {
+    const _asyncRequest = AsyncStorage.getItem('currentPlayer')
+      .then(data => {
+        this.setState(_prev => ({
+          currentPlayerKey: data
+        }));
+      });
+  }
+
   render() {
-    console.log('games render client', this.props.client.cache._queryable);
-    return (
-      <Query query={CURRENT_PLAYER_QUERY}>
-        {({ data: { currentPlayer } = {} }) => (
-          <Query
-            query={activeGamesForPlayer}
-            variables={{pkey: currentPlayer._key}}>
-            {({data, loading, error}) => {
-              if( loading ) return (<Text>Loading...</Text>);
+    const { currentPlayerKey } = this.state;
 
-              // TODO: error component instead of below...
-              if( error ) {
-                console.log(error);
-                return (<Text>Error</Text>);
-              }
+    if( currentPlayerKey ) {
+      //console.log('games render client', this.props.client.cache._queryable);
+      return (
+        <Query query={GET_PLAYER_QUERY} variables={{player: currentPlayerKey}}>
+          {({ data: { getPlayer: currentPlayer } }) => {
+            return (
+              <Query
+                query={ACTIVE_GAMES_FOR_PLAYER_QUERY}
+                variables={{pkey: currentPlayer._key}}>
+                {({data, loading, error}) => {
+                  console.log('triplets', data, loading, error);
+                  if( loading ) return (<Text>Loading...</Text>);
 
-              return (
-                <View>
-                  <View style={styles.gamesSubMenu}>
-                    <View style={styles.gamesSubMenuSpacer} />
-                    <View style={styles.newGameButton}>
-                      <Button
-                        onPress={this._newGamePressed}
-                        title="New Game"
-                        accessibilityLabel="New Game"
-                        color={blue}
-                      />
+                  // TODO: error component instead of below...
+                  if( error ) {
+                    console.log(error);
+                    return (<Text>Error</Text>);
+                  }
+
+                  return (
+                    <View>
+                      <View style={styles.gamesSubMenu}>
+                        <View style={styles.gamesSubMenuSpacer} />
+                        <View style={styles.newGameButton}>
+                          <Button
+                            onPress={this._newGamePressed}
+                            title="New Game"
+                            accessibilityLabel="New Game"
+                            color={blue}
+                          />
+                        </View>
+                      </View>
+                      <List>
+                        <FlatList
+                          data={data.activeGamesForPlayer}
+                          renderItem={this._renderItem}
+                          keyExtractor={item => item._key}
+                        />
+                      </List>
                     </View>
-                  </View>
-                  <List>
-                    <FlatList
-                      data={data.activeGamesForPlayer}
-                      renderItem={this._renderItem}
-                      keyExtractor={item => item._key}
-                    />
-                  </List>
-                </View>
-              )
-            }}
-          </Query>
-        )}
-      </Query>
-    );
+                  );
+                }}
+              </Query>
+            );
+          }}
+        </Query>
+      );
+    } else {
+      return (
+        <Text>Loading...</Text>
+      );
+    }
   }
 
 }

@@ -8,7 +8,6 @@ import { onError } from 'apollo-link-error';
 import { HttpLink } from 'apollo-link-http';
 
 import { baseUrl } from 'common/config';
-import { resolvers } from './resolvers';
 
 
 export default function configureClient() {
