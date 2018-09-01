@@ -31,7 +31,7 @@ export default function configureClient() {
     return AsyncStorage.getItem('token')
       // return the headers to the context so httpLink can read them
       .then(token => {
-        console.log('token', token);
+        //console.log('token', token);
         return ({
           headers: {
             ...headers,

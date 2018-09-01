@@ -32,9 +32,13 @@ import { blue } from 'common/colors';
 
 class Games extends React.Component {
 
-  state = {
-    currentPlayerKey: null
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentPlayerKey: null
+    };
+    this._renderItem = this._renderItem.bind(this);
+  }
 
   _newGamePressed() {
     Actions.newGame();
@@ -83,58 +87,54 @@ class Games extends React.Component {
   render() {
     const { currentPlayerKey } = this.state;
 
-    if( currentPlayerKey ) {
-      //console.log('games render client', this.props.client.cache._queryable);
-      return (
-        <Query query={GET_PLAYER_QUERY} variables={{player: currentPlayerKey}}>
-          {({ data: { getPlayer: currentPlayer } }) => {
-            return (
-              <Query
-                query={ACTIVE_GAMES_FOR_PLAYER_QUERY}
-                variables={{pkey: currentPlayer._key}}>
-                {({data, loading, error}) => {
-                  console.log('triplets', data, loading, error);
-                  if( loading ) return (<Text>Loading...</Text>);
-
-                  // TODO: error component instead of below...
-                  if( error ) {
-                    console.log(error);
-                    return (<Text>Error</Text>);
-                  }
-
-                  return (
-                    <View>
-                      <View style={styles.gamesSubMenu}>
-                        <View style={styles.gamesSubMenuSpacer} />
-                        <View style={styles.newGameButton}>
-                          <Button
-                            onPress={this._newGamePressed}
-                            title="New Game"
-                            accessibilityLabel="New Game"
-                            color={blue}
-                          />
-                        </View>
-                      </View>
-                      <List>
-                        <FlatList
-                          data={data.activeGamesForPlayer}
-                          renderItem={this._renderItem}
-                          keyExtractor={item => item._key}
-                        />
-                      </List>
-                    </View>
-                  );
-                }}
-              </Query>
-            );
-          }}
-        </Query>
-      );
-    } else {
+    if( !currentPlayerKey ) {
       return (
         <Text>Loading...</Text>
       );
     }
+
+    //console.log('games render client', this.props.client.cache._queryable);
+    return (
+      <Query
+        query={ACTIVE_GAMES_FOR_PLAYER_QUERY}
+        variables={{pkey: currentPlayerKey}}
+        fetchPolicy='cache-and-network'
+      >
+        {({ data: { activeGamesForPlayer: games }, loading, error}) => {
+          if( loading ) return (<Text>Loading...</Text>);
+
+          // TODO: error component instead of below...
+          if( error ) {
+            console.log(error);
+            return (<Text>Error</Text>);
+          }
+
+          return (
+            <View>
+              <View style={styles.gamesSubMenu}>
+                <View style={styles.gamesSubMenuSpacer} />
+                <View style={styles.newGameButton}>
+                  <Button
+                    onPress={this._newGamePressed}
+                    title="New Game"
+                    accessibilityLabel="New Game"
+                    color={blue}
+                  />
+                </View>
+              </View>
+              <List>
+                <FlatList
+                  data={games}
+                  renderItem={this._renderItem}
+                  keyExtractor={item => item._key}
+                />
+              </List>
+            </View>
+          );
+        }}
+      </Query>
+    );
+
   }
 
 }
