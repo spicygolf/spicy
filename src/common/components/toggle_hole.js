@@ -11,7 +11,7 @@ import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 import moment from 'moment';
 
-import { postScore, roundFragment } from 'features/rounds/graphql';
+import { POST_SCORE_MUTATION, roundFragment } from 'features/rounds/graphql';
 
 
 export const ToggleHole = ({round_id, hole, type, gotit, updateCache}) => {
@@ -20,10 +20,10 @@ export const ToggleHole = ({round_id, hole, type, gotit, updateCache}) => {
 
   return (
     <Mutation
-      mutation={postScore}
+      mutation={POST_SCORE_MUTATION}
       update={
         (cache, { data: { postScore } }) => {
-          console.log('update cache', cache);
+          console.log('update cache', cache._queryable._snapshot);
           // read existing score fragment
           const { scores } = cache.readFragment({
             id: postScore._key,

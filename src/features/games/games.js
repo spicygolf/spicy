@@ -55,13 +55,7 @@ class Games extends React.Component {
 
   _itemPressed(item) {
     this._setCurrentGame(item);
-    Actions.game({
-      game: {
-        id    : item._key,
-        name  : item.name,
-        start : item.start
-      }
-    });
+    Actions.game();
   }
 
   _renderItem({item}) {
