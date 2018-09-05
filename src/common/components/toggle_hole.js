@@ -10,31 +10,29 @@ import {
 import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 import moment from 'moment';
+import { find } from 'lodash';
 
-import { POST_SCORE_MUTATION, roundFragment } from 'features/rounds/graphql';
+import { POST_SCORE_MUTATION, ROUND_FRAGMENT } from 'features/rounds/graphql';
 
 
 export const ToggleHole = ({round_id, hole, type, gotit, updateCache}) => {
-  const gotitStyle = gotit ? styles.yes : styles.no;
-  const gotitTextStyle = gotit ? styles.yesText : styles.noText;
-
   return (
     <Mutation
       mutation={POST_SCORE_MUTATION}
       update={
         (cache, { data: { postScore } }) => {
-          console.log('update cache', cache._queryable._snapshot);
+          //console.log('update cache', cache._queryable._snapshot);
           // read existing score fragment
           const { scores } = cache.readFragment({
             id: postScore._key,
-            fragment: roundFragment
+            fragment: ROUND_FRAGMENT
           });
           // update scores
           const newScores = updateCache(scores);
           // write updated score fragment
           let res = cache.writeFragment({
             id: postScore._key,
-            fragment: roundFragment,
+            fragment: ROUND_FRAGMENT,
             data: {
               _key: postScore._key,
               scores: newScores
@@ -43,12 +41,28 @@ export const ToggleHole = ({round_id, hole, type, gotit, updateCache}) => {
         }
       }
     >
-      {(postScore, { loading, error, data }) => {
-        if( loading ) console.log('loading');
+      {(postScore, { loading, error, data, client }) => {
+        //if( loading ) console.log('loading');
         if( error ) console.log('error', error);
         if( data && data.postScore ) {
-          //console.log('mutation', data.postScore);
+          // requery fragment after a mutation
+          const { scores } = client.cache.readFragment({
+            id: round_id,
+            fragment: ROUND_FRAGMENT
+          });
+          const h = find(scores, {hole: hole});
+          if( h ) {
+            const v = find(h.values, {k: type});
+            if( v ) {
+              gotit = v.v
+            }
+          }
+
         }
+
+        const gotitStyle = gotit ? styles.yes : styles.no;
+        const gotitTextStyle = gotit ? styles.yesText : styles.noText;
+
         return (
           <View style={[styles.hole, gotitStyle]}>
             <TouchableOpacity
@@ -64,13 +78,14 @@ export const ToggleHole = ({round_id, hole, type, gotit, updateCache}) => {
                     }]
                   }
                 }
-              })
-            }
+              })}
             >
-              <Text style={[styles.holeText, gotitTextStyle]}>{hole}</Text>
+              <Text style={[styles.holeText, gotitTextStyle]}>
+                {hole}
+              </Text>
             </TouchableOpacity>
           </View>
-        )
+        );
       }}
     </Mutation>
   );
