@@ -10,7 +10,8 @@ import
   View
 } from 'react-native';
 
-import { withApollo } from 'react-apollo';
+import { Query, withApollo } from 'react-apollo';
+import { GET_GAME_QUERY } from 'features/games/graphql';
 
 import { List, ListItem } from 'react-native-elements';
 
@@ -120,18 +121,37 @@ class BirdieEmAllLeaderboard extends React.Component {
   }
 
   render() {
-    var scores = this._score(this.props.roundsPlayers);
-
     return (
-      <List
-        containerStyle={styles.LeaderboardContainer}>
-        <FlatList
-          data={scores}
-          renderItem={this._renderScoreItem}
-          keyExtractor={item => item.player[0].short}
-          ListFooterComponent={<View style={styles.ListFooter}></View>}
-      />
-      </List>
+      <Query
+        query={GET_GAME_QUERY}
+        variables={{game: this.props.currentGame._key}}
+      >
+        {({ loading, error, data }) => {
+          if( loading ) return (<Text>Loading...</Text>);
+          if( error ) {
+            console.log(error);
+            return (<Text>Error</Text>);
+          }
+          if( data && data.getGame && data.getGame.rounds ) {
+            //console.log('rounds', data.getGame.rounds);
+            let scores = this._score(data.getGame.rounds);
+
+            return (
+              <List
+                containerStyle={styles.LeaderboardContainer}>
+                <FlatList
+                  data={scores}
+                  renderItem={this._renderScoreItem}
+                  keyExtractor={item => item.player[0].short}
+                  ListFooterComponent={<View style={styles.ListFooter}></View>}
+              />
+              </List>
+            );
+          } else {
+            return (<Text>Error, no scores</Text>);
+          }
+        }}
+      </Query>
     );
   }
 }

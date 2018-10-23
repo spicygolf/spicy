@@ -12,7 +12,6 @@ import moment from 'moment';
 import { ToggleHole } from 'common/components/toggle_hole';
 import { upsertScore } from 'common/utils/upsertScore';
 import GameNav from 'features/games/gamenav';
-import { roundFragment } from 'features/rounds/graphql';
 
 
 class BirdieEmAllScore extends React.Component {
