@@ -568,9 +568,9 @@ anymatch@^2.0.0:
     micromatch "^3.1.4"
     normalize-path "^2.1.1"
 
-apollo-cache-hermes@^0.6.2:
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/apollo-cache-hermes/-/apollo-cache-hermes-0.6.2.tgz#288f75d3fc9bce45af9783565a1d129d605ee3f0"
+apollo-cache-hermes@^0.7.1:
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/apollo-cache-hermes/-/apollo-cache-hermes-0.7.1.tgz#bf45d43061251ff29edfa63e3f19a5cf24dfb465"
   dependencies:
     apollo-cache "^1.0.0"
     apollo-utilities "^1.0.0"

@@ -19,7 +19,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
-    "apollo-cache-hermes": "^0.6.2",
+    "apollo-cache-hermes": "^0.7.1",
     "apollo-cache-persist": "^0.1.1",
     "apollo-client": "^2.3.5",
     "apollo-link-context": "^1.0.8",
