@@ -37,18 +37,18 @@ class Auth extends Component {
     this._onLogin = this._onLogin.bind(this);
   }
 
-  async componentWillMount() {
+  async componentDidMount() {
 
     const token = await AsyncStorage.getItem('token');
 
-    // no token, so render Login component
+    // if no token, render Login component
     if( !token ) {
       this.setState(prev => {
         prev.show = 'Login';
         return prev;
       });
       return;
-    };
+    }
 
     // we have token, so get current player (from server or cache) and then
     // render TabsContainer
@@ -59,6 +59,7 @@ class Auth extends Component {
         player: pkey
       }
     });
+
     // go to TabsContainer
     this.setState(prev => {
       prev.show = 'Tabs';
@@ -67,8 +68,9 @@ class Auth extends Component {
   }
 
   _onChange(values) {
+    const k = Object.keys(values)[0];
     this.setState(prev => {
-      prev.values = values;
+      prev.values[k] = values[k];
       return prev;
     });
   }
@@ -121,7 +123,7 @@ class Auth extends Component {
       case 'Tabs':
         return <TabsContainer />
         break;
-      case 'login':
+      case 'Login':
         const options = {
           fields: {
             email: email,
