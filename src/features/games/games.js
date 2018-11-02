@@ -23,7 +23,7 @@ import {
   GET_PLAYER_QUERY
 } from 'features/players/graphql';
 import {
-  currentGame,
+  CURRENT_GAME_QUERY,
   ACTIVE_GAMES_FOR_PLAYER_QUERY
 } from 'features/games/graphql';
 
@@ -46,7 +46,7 @@ class Games extends React.Component {
 
   _setCurrentGame(game) {
     this.props.client.writeQuery({
-      query: currentGame,
+      query: CURRENT_GAME_QUERY,
       data: {
         currentGame: game
       }
