@@ -51,7 +51,7 @@ const GameNav = (
 
     var left = showBack ? (
       <TouchableOpacity
-        onPress={Actions.pop}
+        onPress={() => Actions.pop({refresh:{test: Math.random()}})}
       >
         <Icon name='chevron-left' size={30} color='#bbb' />
       </TouchableOpacity>

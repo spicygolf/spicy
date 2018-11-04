@@ -56,7 +56,6 @@ class Game extends React.Component {
                 />
                 <Leaderboard
                   currentGame={this.state.currentGame}
-                  roundsPlayers={data.getGame.rounds}
                 />
               </View>
             )

@@ -120,20 +120,28 @@ class BirdieEmAllLeaderboard extends React.Component {
     );
   }
 
+  componentDidUpdate(prev_props) {
+      console.log('cDU prev_props', prev_props);
+      console.log('cDU props', this.props);
+  }
+
   render() {
     return (
       <Query
         query={GET_GAME_QUERY}
         variables={{game: this.props.currentGame._key}}
       >
-        {({ loading, error, data }) => {
-          if( loading ) return (<Text>Loading...</Text>);
+        {({ loading, error, data, client }) => {
+          console.log('cache', client.cache._queryable._snapshot.baseline._values['15697341'].data.scores[17].values[0]);
+          if( loading ) {
+            //console.log('get game query, loading - data:', data, loading);
+            return (<Text>Loading...</Text>);
+          }
           if( error ) {
             console.log(error);
             return (<Text>Error</Text>);
           }
           if( data && data.getGame && data.getGame.rounds ) {
-            //console.log('rounds', data.getGame.rounds);
             let scores = this._score(data.getGame.rounds);
 
             return (
@@ -150,6 +158,7 @@ class BirdieEmAllLeaderboard extends React.Component {
           } else {
             return (<Text>Error, no scores</Text>);
           }
+          return;
         }}
       </Query>
     );
