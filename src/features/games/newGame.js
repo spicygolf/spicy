@@ -8,20 +8,31 @@ import {
   View
 } from 'react-native';
 
+import { Query, withApollo } from 'react-apollo';
+import gql from 'graphql-tag';
+
 import { List, ListItem } from 'react-native-elements';
 
 import { Actions } from 'react-native-router-flux';
 
 import GameNav from 'features/games/gamenav';
 
+import {
+  GAMESPECS_FOR_PLAYER_QUERY
+} from 'features/games/graphql';
+
 
 class NewGame extends React.Component {
 
-  componentWillMount() {
-    // TODO: send this.props.player to endpoint for tailored game choices
-    this.props.fetchGameSpecs();
+  constructor(props) {
+    super(props);
     this._renderItem = this._renderItem.bind(this);
     this._itemPressed = this._itemPressed.bind(this);
+  }
+
+  componentDidMount() {
+    // TODO: send this.props.player to endpoint for tailored game choices
+    // this.props.fetchGameSpecs();
   }
 
   _itemPressed(item) {
@@ -46,39 +57,43 @@ class NewGame extends React.Component {
 
 
   render() {
-
-    var content;
-
-    if( this.props.gamespecs ) {
-      content = (
-        <View>
-          <GameNav
-            title='New Game'
-            showBack={true}
-            showScore={false}
-          />
-          <List>
-            <FlatList
-              data={this.props.gamespecs}
-              renderItem={this._renderItem}
-              keyExtractor={item => item._key}
-            />
-          </List>
-        </View>
-      );
-    } else {
-      content = (
-        <Text>Loading...</Text>
-      );
-    }
-
+    const { currentPlayerKey } = this.props;
     return (
-      <View>
-        {content}
-      </View>
-    );
+      <Query
+        query={GAMESPECS_FOR_PLAYER_QUERY}
+        variables={{pkey: currentPlayerKey}}
+        fetchPolicy='cache-and-network'
+      >
+        {({ data, loading, error}) => {
+          if( loading ) return (<Text>Loading...</Text>);
 
+          // TODO: error component instead of below...
+          if( error || !data.gameSpecsForPlayer ) {
+            console.log(error);
+            return (<Text>Error</Text>);
+          }
+
+          console.log('data', data);
+          return (
+            <View>
+              <GameNav
+                title='New Game'
+                showBack={true}
+                showScore={false}
+              />
+              <List>
+                <FlatList
+                  data={gamespecs}
+                  renderItem={this._renderItem}
+                  keyExtractor={item => item._key}
+                />
+              </List>
+            </View>
+          );
+        }}
+      </Query>
+    );
   }
 }
 
-export default NewGame;
+export default withApollo(NewGame);
