@@ -58,6 +58,7 @@ class NewGame extends React.Component {
 
   render() {
     const { currentPlayerKey } = this.props;
+    console.log('currentPlayerKey', currentPlayerKey);
     return (
       <Query
         query={GAMESPECS_FOR_PLAYER_QUERY}
@@ -83,7 +84,7 @@ class NewGame extends React.Component {
               />
               <List>
                 <FlatList
-                  data={gamespecs}
+                  data={data.gameSpecsForPlayer}
                   renderItem={this._renderItem}
                   keyExtractor={item => item._key}
                 />

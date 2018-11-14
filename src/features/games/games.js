@@ -43,7 +43,7 @@ class Games extends React.Component {
 
   _newGamePressed() {
     const { currentPlayerKey } = this.state;
-    Actions.newGame({player: currentPlayerKey});
+    Actions.newGame({currentPlayerKey: currentPlayerKey});
   }
 
   _setCurrentGame(game) {
