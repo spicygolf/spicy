@@ -139,6 +139,7 @@ class Auth extends Component {
               options={options}
               value={this.props.value}
               onChange={this._onChange}
+              testId="login_form"
             />
             <Button
               style={styles.button}
