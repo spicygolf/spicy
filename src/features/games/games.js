@@ -20,9 +20,6 @@ import { Actions } from 'react-native-router-flux';
 import { List, ListItem } from 'react-native-elements';
 
 import {
-  GET_PLAYER_QUERY
-} from 'features/players/graphql';
-import {
   CURRENT_GAME_QUERY,
   ACTIVE_GAMES_FOR_PLAYER_QUERY
 } from 'features/games/graphql';

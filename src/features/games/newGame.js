@@ -30,14 +30,7 @@ class NewGame extends React.Component {
     this._itemPressed = this._itemPressed.bind(this);
   }
 
-  componentDidMount() {
-    // TODO: send this.props.player to endpoint for tailored game choices
-    // this.props.fetchGameSpecs();
-  }
-
   _itemPressed(item) {
-    console.log(item);
-    //    this.props.setCurrentGame(item);
     Actions.game_setup({
       game: null,
       gamespec: item
@@ -58,7 +51,7 @@ class NewGame extends React.Component {
 
   render() {
     const { currentPlayerKey } = this.props;
-    console.log('currentPlayerKey', currentPlayerKey);
+    //console.log('currentPlayerKey', currentPlayerKey);
     return (
       <Query
         query={GAMESPECS_FOR_PLAYER_QUERY}
@@ -74,7 +67,7 @@ class NewGame extends React.Component {
             return (<Text>Error</Text>);
           }
 
-          console.log('data', data);
+          //console.log('data', data);
           return (
             <View>
               <GameNav

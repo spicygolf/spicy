@@ -3,11 +3,17 @@
 import React from 'react';
 
 import {
+  AsyncStorage,
   Image,
   StyleSheet,
   Text,
   View
 } from 'react-native';
+
+import { withApollo } from 'react-apollo';
+import {
+  GET_PLAYER_QUERY
+} from 'features/players/graphql';
 
 import { Button, Card } from 'react-native-elements';
 
@@ -16,17 +22,46 @@ import GameNav from 'features/games/gamenav';
 
 class GameSetup extends React.Component {
 
-  _itemPressed(item) {
-    console.log(item);
+  constructor(props) {
+    super(props);
+    this.state = {
+      players: [],
+      courses: [],
+    };
+  }
+
+  _addPlayerPressed() {
+    console.log('add player pressed');
+  }
+
+  async componentDidMount() {
+
+    // if players is blank (new game getting set up), then add the
+    // current logged in player
+    if( this.state.players.length == 0 ) {
+
+      const cpkey = await AsyncStorage.getItem('currentPlayer');
+
+      const cp = await this.props.client.query({
+        query: GET_PLAYER_QUERY,
+        variables: {
+          player: cpkey
+        }
+      });
+
+      if( cp && cp.data && cp.data.getPlayer ) {
+        this.setState(_prev => ({
+          players: [
+            cp.data.getPlayer
+          ]
+        }));
+      }
+    }
   }
 
   render() {
 
     var content;
-    // TODO: if players is blank (new game getting set up), then add the
-    //       current logged in player
-    var players = [];
-
     if( this.props.gamespec ) {
       content = (
         <View>
@@ -41,7 +76,7 @@ class GameSetup extends React.Component {
 
             <Card title="Players, Course, Tees">
               {
-                players.map((p, i) => {
+                this.state.players.map((p, i) => {
                   return (
                     <View key={i} style={styles.player}>
                       <Image
@@ -56,6 +91,7 @@ class GameSetup extends React.Component {
               }
               <Button
                 title='Add Player'
+                onPress={() => this._addPlayerPressed()}
               />
             </Card>
 
@@ -80,7 +116,7 @@ class GameSetup extends React.Component {
   }
 }
 
-export default GameSetup;
+export default withApollo(GameSetup);
 
 
 const styles = StyleSheet.create({
