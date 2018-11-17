@@ -4,18 +4,24 @@ import React from 'react';
 
 import {
   AsyncStorage,
-  Image,
+  FlatList,
   StyleSheet,
   Text,
   View
 } from 'react-native';
 
+import {
+  Button,
+  Card,
+  Icon,
+  List,
+  ListItem
+} from 'react-native-elements';
+
 import { withApollo } from 'react-apollo';
 import {
   GET_PLAYER_QUERY
 } from 'features/players/graphql';
-
-import { Button, Card } from 'react-native-elements';
 
 import GameNav from 'features/games/gamenav';
 
@@ -28,10 +34,28 @@ class GameSetup extends React.Component {
       players: [],
       courses: [],
     };
+    this._addPlayerPressed = this._addPlayerPressed.bind(this);
+    this._removePlayerPressed = this._removePlayerPressed.bind(this);
+    this._renderItem = this._renderItem.bind(this);
   }
 
   _addPlayerPressed() {
     console.log('add player pressed');
+  }
+
+  _removePlayerPressed(item) {
+      console.log('remove player pressed', item);
+  }
+
+  _renderItem({item}) {
+    return (
+      <ListItem
+        title={item.name || ''}
+        subtitle={item.handicap || ''}
+        rightIcon={{name: 'remove-circle', color: 'red'}}
+        onPressRightIcon={() => this._removePlayerPressed(item)}
+      />
+    );
   }
 
   async componentDidMount() {
@@ -74,20 +98,18 @@ class GameSetup extends React.Component {
               <Text style={styles.name_txt}>{this.props.gamespec.name}</Text>
             </View>
 
-            <Card title="Players, Course, Tees">
-              {
-                this.state.players.map((p, i) => {
-                  return (
-                    <View key={i} style={styles.player}>
-                      <Image
-                        style={styles.image}
-                        resizeMode="cover"
-                        source={{ uri: p.avatar }}
-                      />
-                      <Text style={styles.pname}>{p.name}</Text>
-                    </View>
-                  );
-                })
+            <Card title="Course, Tees">
+            </Card>
+
+            <Card title="Players">
+                  {
+                <List>
+                  <FlatList
+                    data={this.state.players}
+                    renderItem={this._renderItem}
+                    keyExtractor={item => item._key}
+                  />
+                </List>
               }
               <Button
                 title='Add Player'
