@@ -18,6 +18,8 @@ import {
   ListItem
 } from 'react-native-elements';
 
+import { remove } from 'lodash';
+
 import { withApollo } from 'react-apollo';
 import {
   GET_PLAYER_QUERY
@@ -39,19 +41,31 @@ class GameSetup extends React.Component {
     this._renderItem = this._renderItem.bind(this);
   }
 
+  _addCoursePressed() {
+      console.log('add course pressed');
+  }
+
   _addPlayerPressed() {
     console.log('add player pressed');
+    console.log('players', this.state.players);
+    console.log('max players', this.props.gamespec.max_players);
   }
 
   _removePlayerPressed(item) {
-      console.log('remove player pressed', item);
+    this.setState(prev => {
+      prev.players = remove(prev.players, (p) => (
+        p._key != item._key
+      ));
+      console.log('removePlayer newState', prev);
+      return prev;
+    });
   }
 
   _renderItem({item}) {
     return (
       <ListItem
         title={item.name || ''}
-        subtitle={item.handicap || ''}
+        subtitle={item.handicap || '5.5'}
         rightIcon={{name: 'remove-circle', color: 'red'}}
         onPressRightIcon={() => this._removePlayerPressed(item)}
       />
@@ -87,6 +101,18 @@ class GameSetup extends React.Component {
 
     var content;
     if( this.props.gamespec ) {
+      const gs = this.props.gamespec;
+
+      const courseSection = ( gs.location_type && gs.location_type == 'local' ) ?
+       (
+        <Card title="Course, Tees">
+          <Button
+            title='Add Course'
+            onPress={() => this._addCoursePressed()}
+          />
+        </Card>
+      ) : null;
+
       content = (
         <View>
           <GameNav
@@ -95,12 +121,9 @@ class GameSetup extends React.Component {
             showScore={false} />
           <View style={styles.container}>
             <View style={styles.gname}>
-              <Text style={styles.name_txt}>{this.props.gamespec.name}</Text>
+              <Text style={styles.name_txt}>{gs.name}</Text>
             </View>
-
-            <Card title="Course, Tees">
-            </Card>
-
+            { courseSection }
             <Card title="Players">
                   {
                 <List>
