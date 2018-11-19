@@ -38,7 +38,7 @@ import Game from 'features/games/game';
 import GamesHeader from 'features/games/header';
 import Score from 'features/games/score';
 import NewGame from 'features/games/newGame';
-import GameSetup from 'features/games/gameSetup';
+import GameSetup from 'features/gameSetup/gameSetup';
 
 import Profile from 'features/profile/profile';
 

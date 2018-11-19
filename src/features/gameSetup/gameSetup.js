@@ -25,6 +25,7 @@ import {
   GET_PLAYER_QUERY
 } from 'features/players/graphql';
 
+import ItemCard from 'features/gameSetup/itemcard';
 import GameNav from 'features/games/gamenav';
 
 
@@ -36,40 +37,6 @@ class GameSetup extends React.Component {
       players: [],
       courses: [],
     };
-    this._addPlayerPressed = this._addPlayerPressed.bind(this);
-    this._removePlayerPressed = this._removePlayerPressed.bind(this);
-    this._renderItem = this._renderItem.bind(this);
-  }
-
-  _addCoursePressed() {
-      console.log('add course pressed');
-  }
-
-  _addPlayerPressed() {
-    console.log('add player pressed');
-    console.log('players', this.state.players);
-    console.log('max players', this.props.gamespec.max_players);
-  }
-
-  _removePlayerPressed(item) {
-    this.setState(prev => {
-      prev.players = remove(prev.players, (p) => (
-        p._key != item._key
-      ));
-      console.log('removePlayer newState', prev);
-      return prev;
-    });
-  }
-
-  _renderItem({item}) {
-    return (
-      <ListItem
-        title={item.name || ''}
-        subtitle={item.handicap || '5.5'}
-        rightIcon={{name: 'remove-circle', color: 'red'}}
-        onPressRightIcon={() => this._removePlayerPressed(item)}
-      />
-    );
   }
 
   async componentDidMount() {
@@ -99,19 +66,33 @@ class GameSetup extends React.Component {
 
   render() {
 
-    var content;
+    let content;
     if( this.props.gamespec ) {
+
       const gs = this.props.gamespec;
 
       const courseSection = ( gs.location_type && gs.location_type == 'local' ) ?
        (
-        <Card title="Course, Tees">
-          <Button
-            title='Add Course'
-            onPress={() => this._addCoursePressed()}
-          />
-        </Card>
+        <ItemCard
+         title="Course, Tees"
+         buttonTitle='Add Course'
+         items={this.state.courses}
+         showButton={ true }
+         itemTitleField='name'
+         itemSubTitleField='city'
+        />
       ) : null;
+
+      const playerSection = (
+        <ItemCard
+         title="Players"
+         buttonTitle='Add Player'
+         items={this.state.players}
+         showButton={ this.state.players.length <= gs.max_players || gs.max_players < 0 }
+         itemTitleField='name'
+         itemSubTitleField='handicap'
+        />
+      );
 
       content = (
         <View>
@@ -124,22 +105,7 @@ class GameSetup extends React.Component {
               <Text style={styles.name_txt}>{gs.name}</Text>
             </View>
             { courseSection }
-            <Card title="Players">
-                  {
-                <List>
-                  <FlatList
-                    data={this.state.players}
-                    renderItem={this._renderItem}
-                    keyExtractor={item => item._key}
-                  />
-                </List>
-              }
-              <Button
-                title='Add Player'
-                onPress={() => this._addPlayerPressed()}
-              />
-            </Card>
-
+            { playerSection }
             <Card title="Options">
             </Card>
 
@@ -167,7 +133,10 @@ export default withApollo(GameSetup);
 const styles = StyleSheet.create({
   container: {},
   gname: {
-    alignItems: 'center',
-
+    alignItems: 'center'
+  },
+  listContainer: {
+    marginTop: 0,
+    marginBottom: 10
   }
 });
