@@ -68,13 +68,11 @@ class Games extends React.Component {
     );
   }
 
-  componentDidMount() {
-    const _asyncRequest = AsyncStorage.getItem('currentPlayer')
-      .then(data => {
-        this.setState(_prev => ({
-          currentPlayerKey: data
-        }));
-      });
+  async componentDidMount() {
+    const data = await AsyncStorage.getItem('currentPlayer');
+    this.setState(_prev => ({
+      currentPlayerKey: data
+    }));
   }
 
   render() {

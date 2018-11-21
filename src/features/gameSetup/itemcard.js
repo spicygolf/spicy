@@ -34,14 +34,14 @@ class ItemCard extends React.Component {
   }
 
   _removePressed(item) {
-    console.log('remove pressed');
+    this.props.removeFn(item);
   }
 
   _renderItem({item}) {
     return (
       <ListItem
         title={item[this.props.itemTitleField] || ''}
-        subtitle={item[this.props.itemSubtitleField] || ''}
+        subtitle={item[this.props.itemSubTitleField] || ''}
         rightIcon={{name: 'remove-circle', color: 'red'}}
         onPressRightIcon={() => this._removePressed(item)}
       />

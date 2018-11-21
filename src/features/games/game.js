@@ -28,9 +28,9 @@ class Game extends React.Component {
     const rq = this.props.client.readQuery({
       query: CURRENT_GAME_QUERY
     });
-    this.setState(prev => (
-      {currentGame: rq.currentGame}
-    ));
+    this.setState(prev => ({
+      currentGame: rq.currentGame
+    }));
   }
 
   render() {
