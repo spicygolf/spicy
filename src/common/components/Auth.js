@@ -91,6 +91,12 @@ class Auth extends Component {
       await AsyncStorage.setItem('currentPlayer', payload.pkey);
       await AsyncStorage.setItem('token', payload.token);
 
+      // go to TabsContainer
+      this.setState(prev => {
+        prev.show = 'Tabs';
+        return prev;
+      });
+
     } catch(err) {
       console.error(err);
       // TODO: handle me
