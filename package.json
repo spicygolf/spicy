@@ -4,10 +4,10 @@
   "private": true,
   "devDependencies": {
     "@babel/core": "7.0.0-beta.54",
-    "babel-core": "7.0.0-bridge.0",
     "babel-bridge": "^1.12.11",
-    "babel-preset-react-native": "^5.0.2",
+    "babel-core": "7.0.0-bridge.0",
     "babel-jest": "23.6.0",
+    "babel-preset-react-native": "^5.0.2",
     "detox": "^9.0.6",
     "flow-bin": "^0.67.1",
     "jest": "^23.6.0",
@@ -33,9 +33,9 @@
     }
   },
   "dependencies": {
-    "apollo-cache-hermes": "^0.7.1",
+    "apollo-cache-hermes": "^0.8.6",
     "apollo-cache-persist": "^0.1.1",
-    "apollo-client": "^2.3.5",
+    "apollo-client": "^2.4.7",
     "apollo-link-context": "^1.0.8",
     "apollo-link-error": "^1.1.0",
     "apollo-link-http": "^1.5.4",
@@ -49,6 +49,7 @@
     "react-apollo": "^2.1.8",
     "react-logger": "^1.1.0",
     "react-native": "^0.56.0",
+    "react-native-dropdownalert": "^3.7.1",
     "react-native-elements": "^0.19.1",
     "react-native-iphone-x-helper": "^1.0.1",
     "react-native-router-flux": "^4.0.5",

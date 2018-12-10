@@ -29,18 +29,10 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      show: 'Loading',
       values: {}
     };
     this._onChange = this._onChange.bind(this);
     this._onLogin = this._onLogin.bind(this);
-  }
-
-  _showPage(page) {
-    this.setState(prev => {
-      prev.show = page;
-      return prev;
-    });
   }
 
   _onChange(values) {

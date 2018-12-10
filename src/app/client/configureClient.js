@@ -8,6 +8,7 @@ import { onError } from 'apollo-link-error';
 import { HttpLink } from 'apollo-link-http';
 
 import { baseUrl } from 'common/config';
+import { logout } from 'common/utils/auth';
 
 
 export default function configureClient() {
@@ -23,7 +24,7 @@ export default function configureClient() {
     storage: AsyncStorage,
     maxSize: false, // set to unlimited (default is 1MB
     // https://github.com/apollographql/apollo-cache-persist)
-    debug: true // enables console logging
+    debug: true // enables console logging // TODO: remove me
   });
 
   const authLink = setContext((_, { headers }) => {
@@ -44,7 +45,12 @@ export default function configureClient() {
       });
   });
 
-  const errorLink = onError(({ graphQLErrors, networkError }) => {
+  const errorLink = onError(({
+      graphQLErrors,
+      networkError,
+      operation,
+      forward
+    }) => {
     if (graphQLErrors)
       graphQLErrors.map(({ message, locations, path }) =>
         console.log(
@@ -55,7 +61,13 @@ export default function configureClient() {
         ),
       );
 
-    if (networkError) console.log(`[Network error]: ${networkError}`);
+    if (networkError) {
+      if( networkError.statusCode == 401 ) {
+        console.log('logged out');
+        logout(cache.client);
+      }
+      console.log(`[Network error]: ${networkError}`);
+    }
   });
 
   const httpLink = new HttpLink({
