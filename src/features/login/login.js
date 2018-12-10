@@ -6,15 +6,14 @@ import {
   Text,
   View
 } from 'react-native';
-import jwtDecode from 'jwt-decode';
-import { withApollo } from 'react-apollo';
+import {
+  Actions
+} from 'react-native-router-flux';
 import t from 'tcomb-form-native';
 
-import TabsContainer from 'features/tabs/TabsContainer';
 import Header from 'common/components/header';
 import { green } from 'common/colors';
 import { baseUrl } from 'common/config';
-import { GET_PLAYER_QUERY } from 'features/players/graphql';
 
 
 const Form = t.form.Form;
@@ -25,7 +24,7 @@ const loginForm = t.struct({
 });
 
 
-class Auth extends Component {
+class Login extends Component {
 
   constructor(props) {
     super(props);
@@ -37,32 +36,9 @@ class Auth extends Component {
     this._onLogin = this._onLogin.bind(this);
   }
 
-  async componentDidMount() {
-
-    const token = await AsyncStorage.getItem('token');
-
-    // if no token, render Login component
-    if( !token ) {
-      this.setState(prev => {
-        prev.show = 'Login';
-        return prev;
-      });
-      return;
-    }
-
-    // we have token, so get current player (from server or cache) and then
-    // render TabsContainer
-    const { pkey } = jwtDecode(token);
-    await this.props.client.query({
-      query: GET_PLAYER_QUERY,
-      variables: {
-        player: pkey
-      }
-    });
-
-    // go to TabsContainer
+  _showPage(page) {
     this.setState(prev => {
-      prev.show = 'Tabs';
+      prev.show = page;
       return prev;
     });
   }
@@ -91,11 +67,7 @@ class Auth extends Component {
       await AsyncStorage.setItem('currentPlayer', payload.pkey);
       await AsyncStorage.setItem('token', payload.token);
 
-      // go to TabsContainer
-      this.setState(prev => {
-        prev.show = 'Tabs';
-        return prev;
-      });
+      Actions.main();
 
     } catch(err) {
       console.error(err);
@@ -123,43 +95,33 @@ class Auth extends Component {
       autoCapitalize: 'none'
     };
 
-    let title, content;
-
-    switch ( this.state.show ) {
-      case 'Tabs':
-        return <TabsContainer />
-        break;
-      case 'Login':
-        const options = {
-          fields: {
-            email: email,
-            password: password
-          }
-        };
-        title='Login';
-        content = (
-          <View style={styles.loginView}>
-            <Form
-              ref='form'
-              type={loginForm}
-              options={options}
-              value={this.props.value}
-              onChange={this._onChange}
-              testId="login_form"
-            />
-            <Button
-              style={styles.button}
-              onPress={this._onLogin}
-              title='Login'
-              accessibilityLabel='Login'
-            />
-          </View>
-        );
-        break;
-      default:
-        title='Loading';
-        content=(<Text>Loading...</Text>);
+    const options = {
+      fields: {
+        email: email,
+        password: password
+      }
     };
+
+    const title='Login';
+    const content = (
+      <View style={styles.loginView}>
+        <Form
+          ref='form'
+          type={loginForm}
+          options={options}
+          value={this.props.value}
+          onChange={this._onChange}
+          testId="login_form"
+        />
+        <Button
+          style={styles.button}
+          onPress={this._onLogin}
+          title='Login'
+          accessibilityLabel='Login'
+        />
+      </View>
+    );
+
     return (
       <View>
         <Header title={title} color={green}/>
@@ -170,7 +132,7 @@ class Auth extends Component {
 
 }
 
-export default withApollo(Auth);
+export default Login;
 
 
 var styles = StyleSheet.create({

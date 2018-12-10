@@ -4,7 +4,7 @@ import {
 } from 'react-apollo';
 
 import configureClient from 'app/client/configureClient';
-import Auth from 'common/components/Auth';
+import TabsContainer from 'features/tabs/TabsContainer';
 
 
 class App extends Component {
@@ -12,7 +12,7 @@ class App extends Component {
     const client = configureClient();
     return (
       <ApolloProvider client={client}>
-        <Auth />
+        <TabsContainer />
       </ApolloProvider>
     );
   }

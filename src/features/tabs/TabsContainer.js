@@ -1,17 +1,12 @@
-/**
- * #
- *  This is the main (Tabs) app screen
- *
- */
-'use strict';
-
 import React from 'react';
 
 import {
+  AsyncStorage,
   StyleSheet
 } from 'react-native';
 
 import {
+  Actions,
   Router,
   Scene,
   Stack,
@@ -30,6 +25,11 @@ import {
   red,
   blue
 } from 'common/colors';
+import jwtDecode from 'jwt-decode';
+import { withApollo } from 'react-apollo';
+import { GET_PLAYER_QUERY } from 'features/players/graphql';
+
+import Login from 'features/login/login';
 
 import Feed from 'features/feed/feed';
 
@@ -56,12 +56,35 @@ const TabIcon = ({name, color}) => {
 
 class TabsContainer extends React.Component {
 
+  async componentDidMount() {
+
+    const token = await AsyncStorage.getItem('token');
+
+    // if no token, render Login component
+    if( !token ) {
+      Actions.login();
+    }
+
+    // we have token, so get current player (from server or cache) and then
+    // render TabsContainer
+    const { pkey } = jwtDecode(token);
+    await this.props.client.query({
+      query: GET_PLAYER_QUERY,
+      variables: {
+        player: pkey
+      }
+    });
+
+    Actions.main();
+  }
+
   render() {
     return (
       <Router
         createReducer={createTabsReducer}
       >
         <Stack key='root'>
+          <Scene key='login' component={Login} hideNavBar panHandlers={null} />
           <Scene key='main' hideNavBar panHandlers={null}>
             <Tabs
               key='main_tabs'
@@ -128,4 +151,4 @@ class TabsContainer extends React.Component {
   }
 };
 
-export default TabsContainer;
+export default withApollo(TabsContainer);

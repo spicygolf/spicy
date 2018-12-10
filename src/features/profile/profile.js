@@ -1,24 +1,37 @@
 'use strict';
 
 import React from 'react';
-
 import {
   View
 } from 'react-native';
+import { withApollo } from 'react-apollo';
+import {
+  Button
+} from 'react-native-elements';
 
 import Header from 'common/components/header';
-
 import { red } from 'common/colors';
+import { logout } from 'common/utils/auth';
+
 
 class Profile extends React.Component {
 
+  _logoutPressed() {
+    logout(this.props.client);
+  }
+
   render() {
+    console.log('profile client', this.props.client);
     return (
       <View>
         <Header title='Profile' color={red} />
+        <Button
+          title='Logout'
+          onPress={() => this._logoutPressed()}
+        />
       </View>
     );
   }
 };
 
-export default Profile;
+export default withApollo(Profile);
