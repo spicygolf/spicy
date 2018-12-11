@@ -36,7 +36,7 @@ class GameSetup extends React.Component {
     this.state = {
       players: [],
       courses: [
-        {_key: '1', name: 'Druid Hills Golf Club', city: 'Atlanta, GA'}
+        {_key: '1', name: 'Druid Hills Golf Club', tee: 'Presidents'}
       ],
     };
     this._addCourse = this._addCourse.bind(this);
@@ -109,7 +109,7 @@ class GameSetup extends React.Component {
          items={this.state.courses}
          showButton={ true }
          itemTitleField='name'
-         itemSubTitleField='city'
+         itemSubTitleField='tee'
          addFn={(item) => this._addCourse(item)}
          removeFn={(item) => this._removeCourse(item)}
         />

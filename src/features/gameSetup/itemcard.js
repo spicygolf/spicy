@@ -25,12 +25,17 @@ class ItemCard extends React.Component {
   constructor(props) {
     super(props);
     this._addPressed = this._addPressed.bind(this);
+    this._itemPressed = this._itemPressed.bind(this);
     this._removePressed = this._removePressed.bind(this);
     this._renderItem = this._renderItem.bind(this);
   }
 
   _addPressed() {
     console.log('add pressed');
+  }
+
+  _itemPressed(item) {
+    console.log('item pressed', item);
   }
 
   _removePressed(item) {
@@ -41,8 +46,10 @@ class ItemCard extends React.Component {
     return (
       <ListItem
         title={item[this.props.itemTitleField] || ''}
-        subtitle={item[this.props.itemSubTitleField] || ''}
+        subtitle={item[this.props.itemSubTitleField] ||
+          `no ${this.props.itemSubTitleField}`}
         rightIcon={{name: 'remove-circle', color: 'red'}}
+        onPress={() => this._itemPressed(item)}
         onPressRightIcon={() => this._removePressed(item)}
       />
     );
