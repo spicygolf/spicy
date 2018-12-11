@@ -3,6 +3,7 @@
 import React from 'react';
 
 import {
+  ActivityIndicator,
   FlatList,
   Text,
   View
@@ -59,7 +60,7 @@ class NewGame extends React.Component {
         fetchPolicy='cache-and-network'
       >
         {({ data, loading, error}) => {
-          if( loading ) return (<Text>Loading...</Text>);
+          if( loading ) return (<ActivityIndicator />);
 
           // TODO: error component instead of below...
           if( error || !data.gameSpecsForPlayer ) {

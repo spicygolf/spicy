@@ -3,6 +3,7 @@
 import React from 'react';
 
 import {
+  ActivityIndicator,
   AsyncStorage,
   Button,
   FlatList,
@@ -80,7 +81,7 @@ class Games extends React.Component {
 
     if( !currentPlayerKey ) {
       return (
-        <Text>Loading...</Text>
+        <ActivityIndicator />
       );
     }
 
@@ -92,7 +93,7 @@ class Games extends React.Component {
         fetchPolicy='cache-and-network'
       >
         {({ data: { activeGamesForPlayer: games }, loading, error}) => {
-          if( loading ) return (<Text>Loading...</Text>);
+          if( loading ) return (<ActivityIndicator />);
 
           // TODO: error component instead of below...
           if( error ) {

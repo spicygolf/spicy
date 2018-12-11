@@ -3,6 +3,7 @@
 import React from 'react';
 
 import {
+  ActivityIndicator,
   AsyncStorage,
   FlatList,
   StyleSheet,
@@ -148,7 +149,7 @@ class GameSetup extends React.Component {
       );
     } else {
       content = (
-        <Text>Loading...</Text>
+        <ActivityIndicator />
       );
     }
 
