@@ -39,6 +39,7 @@ import GamesHeader from 'features/games/header';
 import Score from 'features/games/score';
 import NewGame from 'features/games/newGame';
 import GameSetup from 'features/gameSetup/gameSetup';
+import PlayerItem from 'features/players/playerItem';
 
 import Profile from 'features/profile/profile';
 
@@ -121,6 +122,12 @@ class TabsContainer extends React.Component {
                   {...this.props}
                   key='game_setup'
                   component={GameSetup}
+                  navBar={GamesHeader}
+                />
+                <Scene
+                  {...this.props}
+                  key='player_item'
+                  component={PlayerItem}
                   navBar={GamesHeader}
                 />
                 <Scene

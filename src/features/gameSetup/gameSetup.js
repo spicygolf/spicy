@@ -86,9 +86,18 @@ class GameSetup extends React.Component {
       });
 
       if( cp && cp.data && cp.data.getPlayer ) {
+        // ugh, first we have to flatten the player object a bit
+        // so we can have shared code in itemcard
+        const handicap = cp.data.getPlayer.handicap.display || 'no handicap';
+        const player = {
+          _key: cp.data.getPlayer._key,
+          name: cp.data.getPlayer.name,
+          short: cp.data.getPlayer.short,
+          handicap: handicap
+        };
         this.setState(_prev => ({
           players: [
-            cp.data.getPlayer
+            player
           ]
         }));
       }
@@ -126,6 +135,7 @@ class GameSetup extends React.Component {
          itemSubTitleField='handicap'
          addFn={(item) => this._addPlayer(item)}
          removeFn={(item) => this._removePlayer(item)}
+         itemComponent='player_item'
         />
       );
 

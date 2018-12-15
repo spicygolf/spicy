@@ -17,6 +17,8 @@ import {
   ListItem
 } from 'react-native-elements';
 
+import { Actions } from 'react-native-router-flux';
+
 import { remove } from 'lodash';
 
 
@@ -35,7 +37,9 @@ class ItemCard extends React.Component {
   }
 
   _itemPressed(item) {
-    console.log('item pressed', item);
+    if( this.props.itemComponent ) {
+      Actions[this.props.itemComponent]({item: item});
+    }
   }
 
   _removePressed(item) {
