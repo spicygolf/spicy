@@ -115,20 +115,23 @@ class GameSetup extends React.Component {
        (
         <ItemCard
          title="Course, Tees"
-         buttonTitle='Add Course'
+         addButtonTitle='Add Course'
+         addKey='add_course'
          items={this.state.courses}
          showButton={ true }
          itemTitleField='name'
          itemSubTitleField='tee'
          addFn={(item) => this._addCourse(item)}
          removeFn={(item) => this._removeCourse(item)}
+         itemComponent='course_tee_item'
         />
       ) : null;
 
       const playerSection = (
         <ItemCard
          title="Players"
-         buttonTitle='Add Player'
+         addButtonTitle='Add Player'
+         addKey='add_player'
          items={this.state.players}
          showButton={ this.state.players.length <= gs.max_players || gs.max_players < 0 }
          itemTitleField='name'

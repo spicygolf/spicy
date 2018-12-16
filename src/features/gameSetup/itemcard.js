@@ -32,8 +32,8 @@ class ItemCard extends React.Component {
     this._renderItem = this._renderItem.bind(this);
   }
 
-  _addPressed() {
-    console.log('add pressed');
+  _addPressed(key) {
+      Actions[key]();
   }
 
   _itemPressed(item) {
@@ -65,8 +65,8 @@ class ItemCard extends React.Component {
     const addButton = ( this.props.showButton ) ?
       (
         <Button
-          title={this.props.buttonTitle}
-          onPress={() => this._addPressed()}
+          title={this.props.addButtonTitle}
+          onPress={() => this._addPressed(this.props.addKey)}
         />
       ) : null;
 
