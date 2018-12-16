@@ -74,13 +74,28 @@ export default function configureClient() {
     uri: `${baseUrl}/graphql`
   });
 
+  const defaultOptions = {
+    watchQuery: {
+      fetchPolicy: 'cache-and-network',
+      errorPolicy: 'all',
+    },
+    query: {
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all',
+    },
+    mutate: {
+      errorPolicy: 'all'
+    }
+  };
+
   const client = new ApolloClient({
     cache,
     link: ApolloLink.from([
         errorLink,
         authLink,
         httpLink
-    ])
+    ]),
+    defaultOptions: defaultOptions
   });
 
   return client;

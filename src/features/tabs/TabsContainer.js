@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {
+  ActivityIndicator,
   AsyncStorage,
   StyleSheet
 } from 'react-native';
@@ -12,9 +13,6 @@ import {
   Stack,
   Tabs
 } from 'react-native-router-flux';
-import {
-  ApolloConsumer
-} from 'react-apollo';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -25,9 +23,8 @@ import {
   red,
   blue
 } from 'common/colors';
-import jwtDecode from 'jwt-decode';
-import { withApollo } from 'react-apollo';
-import { GET_PLAYER_QUERY } from 'features/players/graphql';
+
+import Splash from 'features/splash/splash';
 
 import Login from 'features/login/login';
 
@@ -47,8 +44,6 @@ import PlayerItem from 'features/players/playerItem';
 
 import Profile from 'features/profile/profile';
 
-import { getPlayer } from 'features/players/graphql';
-
 import { createTabsReducer } from './TabsReducer';
 
 
@@ -61,6 +56,13 @@ const TabIcon = ({name, color}) => {
 
 class TabsContainer extends React.Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      cpKey: null
+    };
+  }
+
   async componentDidMount() {
 
     const token = await AsyncStorage.getItem('token');
@@ -70,17 +72,8 @@ class TabsContainer extends React.Component {
       Actions.login();
     }
 
-    // we have token, so get current player (from server or cache) and then
-    // render TabsContainer
-    const { pkey } = jwtDecode(token);
-    await this.props.client.query({
-      query: GET_PLAYER_QUERY,
-      variables: {
-        player: pkey
-      }
-    });
-
-    Actions.main();
+    // we have token, so render tabs
+    Actions.tabs();
   }
 
   render() {
@@ -89,8 +82,9 @@ class TabsContainer extends React.Component {
         createReducer={createTabsReducer}
       >
         <Stack key='root'>
+          <Scene key='splash' component={Splash} hideNavBar panHandlers={null} />
           <Scene key='login' component={Login} hideNavBar panHandlers={null} />
-          <Scene key='main' hideNavBar panHandlers={null}>
+          <Scene key='tabs' hideNavBar panHandlers={null}>
             <Tabs
               key='main_tabs'
               inactiveTintColor={tabInactive}
@@ -174,4 +168,4 @@ class TabsContainer extends React.Component {
   }
 };
 
-export default withApollo(TabsContainer);
+export default TabsContainer;
