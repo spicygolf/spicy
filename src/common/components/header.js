@@ -54,7 +54,7 @@ class Header extends React.Component {
 
     return (
       <View style={[styles.header, bg]}>
-        <Text style={styles.title} testID="title">{title}</Text>
+        <Text style={styles.title} testID='title'>{title}</Text>
       </View>
     );
   }

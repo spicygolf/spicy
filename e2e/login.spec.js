@@ -4,15 +4,15 @@ describe('SpicyGolf', () => {
   });
 
   it('should have login screen', async () => {
-    await expect(element(by.id('title'))).toBeVisible();
+    await expect(element(by.id('login_form_view'))).toExist();
 
-    await element(by.label('Email').and(by.type('RCTUITextField')))
+    await element(by.id('email_field'))
       .replaceText('brad@sankatygroup.com');
 
-    await element(by.label('Password').and(by.type('RCTUITextField')))
+    await element(by.id('password_field'))
       .replaceText('2fingers');
 
-    await element(by.label('Login').and(by.traits(['button'])))
+    await element(by.id('login_button'))
       .tap();
 
   });

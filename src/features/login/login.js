@@ -75,7 +75,8 @@ class Login extends Component {
       hasError: false,
       error: '',
       keyboardType: 'email-address',
-      autoCapitalize: 'none'
+      autoCapitalize: 'none',
+      testID: 'email_field'
     };
 
     let password = {
@@ -84,7 +85,8 @@ class Login extends Component {
       editable: true,
       hasError: false,
       error: '',
-      autoCapitalize: 'none'
+      autoCapitalize: 'none',
+      testID: 'password_field'
     };
 
     const options = {
@@ -96,20 +98,20 @@ class Login extends Component {
 
     const title='Login';
     const content = (
-      <View style={styles.loginView}>
+      <View style={styles.loginView} testID='login_form_view'>
         <Form
           ref='form'
           type={loginForm}
           options={options}
           value={this.props.value}
           onChange={this._onChange}
-          testId="login_form"
         />
         <Button
           style={styles.button}
           onPress={this._onLogin}
           title='Login'
           accessibilityLabel='Login'
+          testID='login_button'
         />
       </View>
     );
