@@ -3,6 +3,7 @@
 import React from 'react';
 
 import {
+  ActivityIndicator,
   Text,
   View
 } from 'react-native';
@@ -35,14 +36,14 @@ class Game extends React.Component {
 
   render() {
     if( this.state.currentGame ) {
+      console.log('game render currentGame key', this.state.currentGame._key);
       return (
         <Query
           query={GET_GAME_QUERY}
           variables={{game: this.state.currentGame._key}}
-          fetchPolicy='cache-and-network'
         >
           {({ loading, error, data }) => {
-            if( loading ) return (<Text>Loading...</Text>);
+            if( loading ) return (<ActivityIndicator />);
             if( error ) {
               console.log(error);
               return (<Text>Error</Text>);
@@ -63,7 +64,7 @@ class Game extends React.Component {
         </Query>
       );
     } else {
-      return (<Text>Loading...</Text>);
+      return (<ActivityIndicator />);
     }
   }
 

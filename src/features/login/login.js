@@ -59,7 +59,7 @@ class Login extends Component {
       await AsyncStorage.setItem('currentPlayer', payload.pkey);
       await AsyncStorage.setItem('token', payload.token);
 
-      Actions.main();
+      Actions.tabs();
 
     } catch(err) {
       console.error(err);

@@ -3,6 +3,7 @@
 import React from 'react';
 
 import {
+  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -87,7 +88,7 @@ class ItemCard extends React.Component {
 
     } else {
       content = (
-        <Text>Loading...</Text>
+        <ActivityIndicator />
       );
     }
 

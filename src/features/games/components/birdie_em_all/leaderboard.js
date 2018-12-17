@@ -3,6 +3,7 @@ import React from 'react';
 
 import
 {
+  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -132,10 +133,9 @@ class BirdieEmAllLeaderboard extends React.Component {
         variables={{game: this.props.currentGame._key}}
       >
         {({ loading, error, data, client }) => {
-          console.log('cache', client.cache._queryable._snapshot.baseline._values['15697341'].data.scores[17].values[0]);
           if( loading ) {
             //console.log('get game query, loading - data:', data, loading);
-            return (<Text>Loading...</Text>);
+            return (<ActivityIndicator />);
           }
           if( error ) {
             console.log(error);
