@@ -8,13 +8,20 @@ import {
   View
 } from 'react-native';
 
+import GameNav from 'features/games/gamenav';
 
 
 class AddPlayer extends React.Component {
 
   render() {
     return (
-      <Text>add player</Text>
+      <View>
+        <GameNav
+          title='Add Player'
+          showBack={true}
+        />
+        <Text>add player</Text>
+      </View>
     );
   }
 

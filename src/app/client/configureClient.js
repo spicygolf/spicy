@@ -80,7 +80,7 @@ export default function configureClient() {
       errorPolicy: 'all',
     },
     query: {
-      fetchPolicy: 'network-only',
+      fetchPolicy: 'cache-only',
       errorPolicy: 'all',
     },
     mutate: {
