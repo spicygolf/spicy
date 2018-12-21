@@ -47,21 +47,14 @@ import Profile from 'features/profile/profile';
 import { createTabsReducer } from './TabsReducer';
 
 
-const TabIcon = ({name, color}) => {
+const TabIcon = ({name, color, testID}) => {
   return (
-    <Icon size={24} color={color} name={name} />
+    <Icon size={24} color={color} name={name} testID={testID}/>
   );
 };
 
 
 class TabsContainer extends React.Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      cpKey: null
-    };
-  }
 
   async componentDidMount() {
 
@@ -82,9 +75,26 @@ class TabsContainer extends React.Component {
         createReducer={createTabsReducer}
       >
         <Stack key='root'>
-          <Scene key='splash' component={Splash} hideNavBar panHandlers={null} />
-          <Scene key='login' component={Login} hideNavBar panHandlers={null} />
-          <Scene key='tabs' hideNavBar panHandlers={null}>
+          <Scene
+            key='splash'
+            component={Splash}
+            type='replace'
+            hideNavBar
+            panHandlers={null}
+          />
+          <Scene
+            key='login'
+            component={Login}
+            type='replace'
+            hideNavBar
+            panHandlers={null}
+          />
+          <Scene
+            key='tabs'
+            type='replace'
+            hideNavBar
+            panHandlers={null}
+          >
             <Tabs
               key='main_tabs'
               inactiveTintColor={tabInactive}
@@ -93,14 +103,22 @@ class TabsContainer extends React.Component {
               <Scene
                 key='feed'
                 component={Feed}
-                icon={() => <TabIcon color={blue} name='message'/>}
+                icon={() => <TabIcon
+                  color={blue}
+                  name='message'
+                  testID='feed_tab'
+                />}
                 tabBarLabel="Feed"
                 hideNavBar
               />
               <Stack
                 key='games'
                 initial
-                icon={() => <TabIcon color={green} name='playlist-add-check'/>}
+                icon={() => <TabIcon
+                  color={green}
+                  name='playlist-add-check'
+                  testID='games_tab'
+                />}
                 tabBarLabel="Games"
               >
                 <Scene
@@ -156,7 +174,11 @@ class TabsContainer extends React.Component {
               <Scene
                 key='profile'
                 component={Profile}
-                icon={() => <TabIcon color={red} name='account-box'/>}
+                icon={() => <TabIcon
+                  color={red}
+                  name='account-box'
+                  testID='profile_tab'
+                  />}
                 tabBarLabel="Profile"
                 hideNavBar
               />

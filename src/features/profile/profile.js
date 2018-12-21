@@ -27,6 +27,7 @@ class Profile extends React.Component {
         <Header title='Profile' color={red} />
         <Button
           title='Logout'
+          testID='logout_button'
           onPress={() => this._logoutPressed()}
         />
       </View>
