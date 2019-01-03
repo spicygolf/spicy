@@ -9,10 +9,6 @@ import {
   View
 } from 'react-native';
 
-import {
-  Actions
-} from 'react-native-router-flux';
-
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 
@@ -51,7 +47,7 @@ const GameNav = (
 
     var left = showBack ? (
       <TouchableOpacity
-        onPress={() => Actions.pop({refresh:{test: Math.random()}})}
+        onPress={() => this.props.navigation.goBack()}
       >
         <Icon name='chevron-left' size={30} color='#bbb' />
       </TouchableOpacity>
@@ -59,7 +55,7 @@ const GameNav = (
 
     var right = showScore ? (
       <TouchableOpacity
-        onPress={() => Actions.score({
+        onPress={() => this.props.navigation.navigate('Score', {
             game   : game,
             scores : scores
           })}

@@ -16,8 +16,6 @@ import {
 import { Query, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 
-import { Actions } from 'react-native-router-flux';
-
 import { List, ListItem } from 'react-native-elements';
 
 import {
@@ -41,7 +39,10 @@ class Games extends React.Component {
 
   _newGamePressed() {
     const { currentPlayerKey } = this.state;
-    Actions.newGame({currentPlayerKey: currentPlayerKey});
+    this.props.navigation.navigate(
+      'NewGame',
+      {currentPlayerKey: currentPlayerKey}
+    );
   }
 
   _setCurrentGame(game) {
@@ -55,7 +56,7 @@ class Games extends React.Component {
 
   _itemPressed(item) {
     this._setCurrentGame(item);
-    Actions.game();
+    this.props.navigation.navigate('Game');
   }
 
   _renderItem({item}) {

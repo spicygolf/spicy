@@ -18,8 +18,6 @@ import {
   ListItem
 } from 'react-native-elements';
 
-import { Actions } from 'react-native-router-flux';
-
 import { remove } from 'lodash';
 
 
@@ -34,12 +32,12 @@ class ItemCard extends React.Component {
   }
 
   _addPressed(key) {
-      Actions[key]();
+      this.props.navigation.navigate(key);
   }
 
   _itemPressed(item) {
     if( this.props.itemComponent ) {
-      Actions[this.props.itemComponent]({item: item});
+      this.props.navigation.navigate(this.props.itemComponent, {item: item});
     }
   }
 

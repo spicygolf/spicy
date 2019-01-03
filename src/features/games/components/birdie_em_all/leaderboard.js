@@ -16,8 +16,6 @@ import { GET_GAME_QUERY } from 'features/games/graphql';
 
 import { List, ListItem } from 'react-native-elements';
 
-import { Actions } from 'react-native-router-flux';
-
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 
@@ -71,7 +69,7 @@ class BirdieEmAllLeaderboard extends React.Component {
 
   _itemPressed(item, courseHoles) {
     const { player, round, score } = item;
-    Actions.score({
+    this.props.navigation.navigate('Score', {
       currentGame: this.props.currentGame,
       player: player[0],
       round_id: round,

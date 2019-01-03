@@ -17,7 +17,7 @@ import { logout } from 'common/utils/auth';
 class Profile extends React.Component {
 
   _logoutPressed() {
-    logout(this.props.client);
+    logout(this.props);
   }
 
   render() {

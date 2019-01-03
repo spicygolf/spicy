@@ -6,9 +6,6 @@ import {
   Text,
   View
 } from 'react-native';
-import {
-  Actions
-} from 'react-native-router-flux';
 import t from 'tcomb-form-native';
 
 import Header from 'common/components/header';
@@ -59,7 +56,7 @@ class Login extends Component {
       await AsyncStorage.setItem('currentPlayer', payload.pkey);
       await AsyncStorage.setItem('token', payload.token);
 
-      Actions.tabs();
+      this.props.navigation.navigate('App');
 
     } catch(err) {
       console.error(err);

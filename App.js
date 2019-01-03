@@ -4,7 +4,7 @@ import {
 } from 'react-apollo';
 
 import configureClient from 'app/client/configureClient';
-import TabsContainer from 'features/tabs/TabsContainer';
+import AppContainer from 'app/components/appcontainer';
 
 
 class App extends Component {
@@ -12,7 +12,9 @@ class App extends Component {
     const client = configureClient();
     return (
       <ApolloProvider client={client}>
-        <TabsContainer />
+        <AppContainer
+          uriPrefix='/spicygolf'
+        />
       </ApolloProvider>
     );
   }

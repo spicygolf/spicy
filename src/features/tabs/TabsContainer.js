@@ -7,12 +7,9 @@ import {
 } from 'react-native';
 
 import {
-  Actions,
-  Router,
-  Scene,
-  Stack,
-  Tabs
-} from 'react-native-router-flux';
+  createStackNavigator,
+  createAppContainer
+} from "react-navigation";
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -56,19 +53,7 @@ const TabIcon = ({name, color, testID}) => {
 
 class TabsContainer extends React.Component {
 
-  async componentDidMount() {
-
-    const token = await AsyncStorage.getItem('token');
-
-    // if no token, render Login component
-    if( !token ) {
-      Actions.login();
-    }
-
-    // we have token, so render tabs
-    Actions.tabs();
-  }
-
+/*
   render() {
     return (
       <Router
@@ -188,6 +173,7 @@ class TabsContainer extends React.Component {
       </Router>
     );
   }
+*/
 };
 
 export default TabsContainer;

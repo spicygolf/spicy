@@ -14,8 +14,6 @@ import gql from 'graphql-tag';
 
 import { List, ListItem } from 'react-native-elements';
 
-import { Actions } from 'react-native-router-flux';
-
 import GameNav from 'features/games/gamenav';
 
 import {
@@ -32,7 +30,7 @@ class NewGame extends React.Component {
   }
 
   _itemPressed(item) {
-    Actions.game_setup({
+    this.props.navigation.navigate('GameSetup', {
       game: null,
       gamespec: item
     });

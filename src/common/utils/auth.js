@@ -1,8 +1,7 @@
 import { AsyncStorage } from 'react-native';
-import { Actions } from 'react-native-router-flux';
 
 
-export const logout = async (client) => {
+export const logout = async ({navigation, client}) => {
 
   // zap local storage
   await AsyncStorage.removeItem('token');
@@ -23,5 +22,5 @@ export const logout = async (client) => {
   // TODO: ^
 
   // navigate to login page
-  Actions.login();
+  navigation.navigate('Auth');
 };
