@@ -26,7 +26,7 @@ class Splash extends React.Component {
 
   render() {
     return (
-      <View>
+      <View style={styles.container}>
         <Text>Spicy Golf</Text>
         <Text>Splash Page</Text>
       </View>
@@ -36,3 +36,12 @@ class Splash extends React.Component {
 }
 
 export default Splash;
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

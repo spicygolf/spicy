@@ -8,8 +8,6 @@ import {
 } from 'react-native';
 
 import Header from 'common/components/header';
-
-
 import { blue } from 'common/colors';
 
 /**

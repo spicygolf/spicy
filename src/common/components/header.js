@@ -27,7 +27,7 @@ const paddingTopIphoneX = ifIphoneX(14, 0);
 /**
  * ## Styles
  */
-var styles = StyleSheet.create({
+const styles = StyleSheet.create({
   header: {
     paddingTop: 20 + paddingTopIphoneX,
     paddingBottom: 10,
