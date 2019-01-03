@@ -18,10 +18,10 @@ class Splash extends React.Component {
     // if no token, render Login component
     if( !token ) {
       this.props.navigation.navigate('Auth');
+      return;
     }
-
     // we have token, so render tabs
-      this.props.navigation.navigate('App');
+    this.props.navigation.navigate('App');
   }
 
   render() {
