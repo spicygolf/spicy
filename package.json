@@ -51,10 +51,10 @@
     "react-native": "^0.56.0",
     "react-native-dropdownalert": "^3.7.1",
     "react-native-elements": "^0.19.1",
+    "react-native-gesture-handler": "^1.0.12",
     "react-native-iphone-x-helper": "^1.0.1",
-    "react-native-router-flux": "^4.0.5",
     "react-native-vector-icons": "^4.6.0",
-    "react-navigation": "^2.18.2",
+    "react-navigation": "^3.0.9",
     "tcomb-form-native": "^0.6.20"
   }
 }
