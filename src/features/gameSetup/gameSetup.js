@@ -77,30 +77,36 @@ class GameSetup extends React.Component {
     if( this.state.players.length == 0 ) {
 
       const cpkey = await AsyncStorage.getItem('currentPlayer');
+      console.log('cpkey', cpkey);
 
-      const cp = await this.props.client.query({
+      const q = await this.props.client.watchQuery({
         query: GET_PLAYER_QUERY,
         variables: {
           player: cpkey
+        },
+        onCompleted: (data) => {
+          console.log('hai');
+          if( data && data.getPlayer ) {
+            // ugh, first we have to flatten the player object a bit
+            // so we can have shared code in itemcard
+            const handicap = data.getPlayer.handicap.display || 'no handicap';
+            const player = {
+              _key: data.getPlayer._key,
+              name: data.getPlayer.name,
+              short: data.getPlayer.short,
+              handicap: handicap
+            };
+            console.log('player', player);
+            this.setState(_prev => ({
+              players: [ player ]
+            }));
+          }
+        },
+        onError: (err) => {
+          console.error(err);
         }
       });
-
-      if( cp && cp.data && cp.data.getPlayer ) {
-        // ugh, first we have to flatten the player object a bit
-        // so we can have shared code in itemcard
-        const handicap = cp.data.getPlayer.handicap.display || 'no handicap';
-        const player = {
-          _key: cp.data.getPlayer._key,
-          name: cp.data.getPlayer.name,
-          short: cp.data.getPlayer.short,
-          handicap: handicap
-        };
-        this.setState(_prev => ({
-          players: [
-            player
-          ]
-        }));
-      }
+      console.log('q', q);
     }
   }
 
