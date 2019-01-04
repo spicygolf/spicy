@@ -32,8 +32,14 @@ const GameStack = createStackNavigator(
     initialRouteName: 'Games',
     defaultNavigationOptions: {
       title: 'Games',
+      headerBackTitle: null,
       headerStyle: {
-        backgroundColor: green
+        backgroundColor: green,
+        marginTop: -22
+      },
+      headerTitleStyle: {
+        fontSize: 18,
+        fontWeight: 'bold'
       },
       headerTintColor: 'white'
     }

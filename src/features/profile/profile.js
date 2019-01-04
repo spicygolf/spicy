@@ -2,6 +2,7 @@
 
 import React from 'react';
 import {
+  StyleSheet,
   View
 } from 'react-native';
 import { withApollo } from 'react-apollo';
@@ -26,6 +27,7 @@ class Profile extends React.Component {
       <View>
         <Header title='Profile' color={red} />
         <Button
+          style={styles.logout_button}
           title='Logout'
           testID='logout_button'
           onPress={() => this._logoutPressed()}
@@ -36,3 +38,10 @@ class Profile extends React.Component {
 };
 
 export default withApollo(Profile);
+
+
+const styles = StyleSheet.create({
+  logout_button: {
+    marginTop: 10
+  }
+});

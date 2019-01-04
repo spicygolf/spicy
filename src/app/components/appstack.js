@@ -27,30 +27,71 @@ const TabIcon = ({name, color, testID}) => {
 const AppStack = createBottomTabNavigator(
   {
     Feed: {
-      screen: Feed
+      screen: Feed,
+      navigationOptions: {
+        title: 'Feed',
+        tabBarIcon: ({ focused, horizontal, tintColor }) => {
+          return (
+            <TabIcon
+              color={focused ? 'white' : blue }
+              name='message'
+            />
+          );
+        },
+        tabBarOptions: {
+            activeBackgroundColor: blue,
+            activeTintColor: 'white'
+        },
+        tabBarTestID: 'feed_tab'
+      }
     },
     GameStack: {
       screen: GameStack,
       navigationOptions: {
         title: 'Games',
         tabBarIcon: ({ focused, horizontal, tintColor }) => {
-          console.log('Games focused', focused);
           return (
             <TabIcon
-              color={green}
+              color={focused ? 'white' : green }
               name='playlist-add-check'
-              testID='games_tab'
             />
           );
-        }
+        },
+        tabBarOptions: {
+          activeBackgroundColor: green,
+          activeTintColor: 'white'
+        },
+        tabBarTestID: 'games_tab'
       }
     },
     Profile: {
-      screen: Profile
+      screen: Profile,
+      navigationOptions: {
+        title: 'Profile',
+        tabBarIcon: ({ focused, horizontal, tintColor }) => {
+          return (
+            <TabIcon
+              color={focused ? 'white' : red }
+              name='account-box'
+            />
+          );
+        },
+        tabBarOptions: {
+            activeBackgroundColor: red,
+            activeTintColor: 'white'
+        },
+        tabBarTestID: 'profile_tab'
+      }
     }
   },
   {
-    initialRouteName: 'GameStack'
+    initialRouteName: 'GameStack',
+    defaultNavigationOptions: {
+      tabBarOptions: {
+        inactiveBackgroundColor: 'white',
+        inactiveTintColor: '#333'
+      }
+    }
   }
 );
 
