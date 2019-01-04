@@ -54,6 +54,7 @@ class Game extends React.Component {
                   title={this.state.currentGame.name}
                   showBack={true}
                   showScore={false}
+                  navigation={this.props.navigation}
                 />
                 <Leaderboard
                   currentGame={this.state.currentGame}

@@ -19,6 +19,7 @@ class AddPlayer extends React.Component {
         <GameNav
           title='Add Player'
           showBack={true}
+          navigation={this.props.navigation}
         />
         <Text>add player</Text>
       </View>

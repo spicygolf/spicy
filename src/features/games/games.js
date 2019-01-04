@@ -38,10 +38,9 @@ class Games extends React.Component {
   }
 
   _newGamePressed() {
-    const { currentPlayerKey } = this.state;
     this.props.navigation.navigate(
       'NewGame',
-      {currentPlayerKey: currentPlayerKey}
+      {currentPlayerKey: this.state.currentPlayerKey}
     );
   }
 
@@ -72,9 +71,9 @@ class Games extends React.Component {
 
   async componentDidMount() {
     const data = await AsyncStorage.getItem('currentPlayer');
-    this.setState(_prev => ({
+    this.setState({
       currentPlayerKey: data
-    }));
+    });
   }
 
   render() {

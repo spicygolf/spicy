@@ -107,9 +107,11 @@ class GameSetup extends React.Component {
   render() {
 
     let content;
-    if( this.props.gamespec ) {
+    const gamespec = this.props.navigation.getParam('gamespec');
 
-      const gs = this.props.gamespec;
+    if( gamespec ) {
+
+      const gs = gamespec;
 
       const courseSection = ( gs.location_type && gs.location_type == 'local' ) ?
        (
@@ -124,6 +126,7 @@ class GameSetup extends React.Component {
          addFn={(item) => this._addCourse(item)}
          removeFn={(item) => this._removeCourse(item)}
          itemComponent='course_tee_item'
+         navigation={this.props.navigation}
         />
       ) : null;
 
@@ -139,6 +142,7 @@ class GameSetup extends React.Component {
          addFn={(item) => this._addPlayer(item)}
          removeFn={(item) => this._removePlayer(item)}
          itemComponent='player_item'
+         navigation={this.props.navigation}
         />
       );
 
@@ -147,7 +151,9 @@ class GameSetup extends React.Component {
           <GameNav
             title='Game Setup'
             showBack={true}
-            showScore={false} />
+            showScore={false}
+            navigation={this.props.navigation}
+          />
           <View style={styles.container}>
             <View style={styles.gname}>
               <Text style={styles.name_txt}>{gs.name}</Text>

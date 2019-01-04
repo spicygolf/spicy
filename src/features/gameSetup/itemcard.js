@@ -32,7 +32,7 @@ class ItemCard extends React.Component {
   }
 
   _addPressed(key) {
-      this.props.navigation.navigate(key);
+    this.props.navigation.navigate(key);
   }
 
   _itemPressed(item) {

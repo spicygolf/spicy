@@ -49,8 +49,8 @@ class NewGame extends React.Component {
 
 
   render() {
-    const { currentPlayerKey } = this.props;
-    //console.log('currentPlayerKey', currentPlayerKey);
+    const currentPlayerKey = this.props.navigation.getParam('currentPlayerKey');
+
     return (
       <Query
         query={GAMESPECS_FOR_PLAYER_QUERY}
@@ -73,6 +73,7 @@ class NewGame extends React.Component {
                 title='New Game'
                 showBack={true}
                 showScore={false}
+                navigation={this.props.navigation}
               />
               <List>
                 <FlatList

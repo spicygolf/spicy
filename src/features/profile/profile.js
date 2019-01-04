@@ -22,7 +22,7 @@ class Profile extends React.Component {
   }
 
   render() {
-    console.log('profile client', this.props.client);
+    //console.log('profile client', this.props.client);
     return (
       <View>
         <Header title='Profile' color={red} />

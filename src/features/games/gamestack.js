@@ -24,8 +24,8 @@ const GameStack = createStackNavigator(
     Score: Score,
     NewGame: NewGame,
     GameSetup: GameSetup,
-    AddCourse: AddCourse,
-    AddPlayer: AddPlayer,
+    add_course: AddCourse,
+    add_player: AddPlayer,
     PlayerItem: PlayerItem
   },
   {
