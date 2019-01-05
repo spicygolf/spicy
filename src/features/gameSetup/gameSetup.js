@@ -37,6 +37,8 @@ class GameSetup extends React.Component {
     super(props);
     this.state = {
       players: [],
+      currentPlayerKey: null,
+      addCurrentPlayer: true,
       courses: [
         {_key: '1', name: 'Druid Hills Golf Club', tee: 'Presidents'}
       ],
@@ -67,8 +69,14 @@ class GameSetup extends React.Component {
 
   _removePlayer(item) {
     this.setState(prev => ({
-      players: filter(prev.players, (p) => (p._key !== item._key))
+      players: filter(prev.players, (p) => (p._key !== item._key)),
+      addCurrentPlayer: !(item._key == this.state.currentPlayerKey)
     }));
+  }
+
+  async componentDidMount() {
+    const cpkey = await AsyncStorage.getItem('currentPlayer');
+    this.setState({currentPlayerKey: cpkey});
   }
 
   render() {
@@ -97,6 +105,7 @@ class GameSetup extends React.Component {
          showButton={ this.state.players.length <= gs.max_players || gs.max_players < 0 }
          addFn={(item) => this._addPlayer(item)}
          removeFn={(item) => this._removePlayer(item)}
+         addCurrentPlayer={this.state.addCurrentPlayer}
          navigation={this.props.navigation}
         />
       );

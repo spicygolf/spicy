@@ -100,7 +100,7 @@ class Players extends React.Component {
 
           // if players is blank (new game getting set up), then add the
           // current logged in player
-          if( players.length == 0 ) {
+          if( players.length == 0 && this.props.addCurrentPlayer ) {
             if( data && data.getPlayer ) {
               // ugh, first we have to flatten the player object a bit
               // so we can have shared code in itemcard
