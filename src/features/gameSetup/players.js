@@ -4,6 +4,7 @@ import React from 'react';
 
 import {
   ActivityIndicator,
+  AsyncStorage,
   FlatList,
   StyleSheet,
   Text,
@@ -20,11 +21,21 @@ import {
 
 import { remove } from 'lodash';
 
+import { Query } from 'react-apollo';
+
+import {
+  GET_PLAYER_QUERY
+} from 'features/players/graphql';
+
+
 
 class Players extends React.Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      currentPlayerKey: null
+    };
     this._addPressed = this._addPressed.bind(this);
     this._itemPressed = this._itemPressed.bind(this);
     this._removePressed = this._removePressed.bind(this);
@@ -56,9 +67,15 @@ class Players extends React.Component {
     );
   }
 
+  async componentDidMount() {
+    const cpkey = await AsyncStorage.getItem('currentPlayer');
+    this.setState({currentPlayerKey: cpkey});
+  }
+
   render() {
 
-    let content;
+    if( !this.state.currentPlayerKey ) return (<ActivityIndicator />);
+
     const addButton = ( this.props.showButton ) ?
       (
         <Button
@@ -67,29 +84,52 @@ class Players extends React.Component {
         />
       ) : null;
 
-    if( this.props.players ) {
+    return (
+      <Query
+        query={GET_PLAYER_QUERY}
+        variables={{ player: this.state.currentPlayerKey }}
+      >
+        {({ loading, error, data }) => {
+          if( loading ) return (<ActivityIndicator />);
+          if( error ) {
+            console.log(error);
+            return (<Text>Error</Text>);
+          }
 
-      content = (
-        <Card title={this.props.title}>
-          <List containerStyle={styles.listContainer}>
-            <FlatList
-              data={this.props.players}
-              renderItem={this._renderItem}
-              keyExtractor={item => item._key}
-            />
-          </List>
-          { addButton }
-        </Card>
-      );
+          let players = this.props.players;
 
-    } else {
-      content = (
-        <ActivityIndicator />
-      );
-    }
+          // if players is blank (new game getting set up), then add the
+          // current logged in player
+          if( players.length == 0 ) {
+            if( data && data.getPlayer ) {
+              // ugh, first we have to flatten the player object a bit
+              // so we can have shared code in itemcard
+              const handicap = data.getPlayer.handicap.display || 'no handicap';
+              const player = {
+                _key: data.getPlayer._key,
+                name: data.getPlayer.name,
+                short: data.getPlayer.short,
+                handicap: handicap
+              };
+              players = [ player ];
+            }
+          }
 
-    return content;
-
+          return (
+            <Card title='Players'>
+              <List containerStyle={styles.listContainer}>
+                <FlatList
+                  data={players}
+                  renderItem={this._renderItem}
+                  keyExtractor={item => item._key}
+                />
+              </List>
+              { addButton }
+            </Card>
+          );
+        }}
+      </Query>
+    );
   }
 }
 

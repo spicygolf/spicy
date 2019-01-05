@@ -60,7 +60,7 @@ class Game extends React.Component {
                   currentGame={this.state.currentGame}
                 />
               </View>
-            )
+            );
           }}
         </Query>
       );

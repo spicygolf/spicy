@@ -71,46 +71,6 @@ class GameSetup extends React.Component {
     }));
   }
 
-  async componentDidMount() {
-
-    // if players is blank (new game getting set up), then add the
-    // current logged in player
-    if( this.state.players.length == 0 ) {
-
-      const cpkey = await AsyncStorage.getItem('currentPlayer');
-      console.log('cpkey', cpkey);
-
-      const q = await this.props.client.watchQuery({
-        query: GET_PLAYER_QUERY,
-        variables: {
-          player: cpkey
-        },
-        onCompleted: (data) => {
-          console.log('hai');
-          if( data && data.getPlayer ) {
-            // ugh, first we have to flatten the player object a bit
-            // so we can have shared code in itemcard
-            const handicap = data.getPlayer.handicap.display || 'no handicap';
-            const player = {
-              _key: data.getPlayer._key,
-              name: data.getPlayer.name,
-              short: data.getPlayer.short,
-              handicap: handicap
-            };
-            console.log('player', player);
-            this.setState(_prev => ({
-              players: [ player ]
-            }));
-          }
-        },
-        onError: (err) => {
-          console.error(err);
-        }
-      });
-      console.log('q', q);
-    }
-  }
-
   render() {
 
     let content;
@@ -141,6 +101,11 @@ class GameSetup extends React.Component {
         />
       );
 
+      const optionsSection = (
+        <Card title="Options">
+        </Card>
+      );
+
       content = (
         <View>
           <GameNav
@@ -155,9 +120,7 @@ class GameSetup extends React.Component {
             </View>
             { courseSection }
             { playerSection }
-            <Card title="Options">
-            </Card>
-
+            { optionsSection }
           </View>
         </View>
       );
