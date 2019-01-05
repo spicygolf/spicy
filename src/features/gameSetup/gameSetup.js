@@ -26,7 +26,8 @@ import {
   GET_PLAYER_QUERY
 } from 'features/players/graphql';
 
-import ItemCard from 'features/gameSetup/itemcard';
+import Courses from 'features/gameSetup/courses';
+import Players from 'features/gameSetup/players';
 import GameNav from 'features/games/gamenav';
 
 
@@ -121,33 +122,21 @@ class GameSetup extends React.Component {
 
       const courseSection = ( gs.location_type && gs.location_type == 'local' ) ?
        (
-        <ItemCard
-         title="Course, Tees"
-         addButtonTitle='Add Course'
-         addKey='add_course'
-         items={this.state.courses}
+        <Courses
+         courses={this.state.courses}
          showButton={ true }
-         itemTitleField='name'
-         itemSubTitleField='tee'
          addFn={(item) => this._addCourse(item)}
          removeFn={(item) => this._removeCourse(item)}
-         itemComponent='course_tee_item'
          navigation={this.props.navigation}
         />
       ) : null;
 
       const playerSection = (
-        <ItemCard
-         title="Players"
-         addButtonTitle='Add Player'
-         addKey='add_player'
-         items={this.state.players}
+        <Players
+         players={this.state.players}
          showButton={ this.state.players.length <= gs.max_players || gs.max_players < 0 }
-         itemTitleField='name'
-         itemSubTitleField='handicap'
          addFn={(item) => this._addPlayer(item)}
          removeFn={(item) => this._removePlayer(item)}
-         itemComponent='player_item'
          navigation={this.props.navigation}
         />
       );

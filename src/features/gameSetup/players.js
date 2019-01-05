@@ -21,7 +21,7 @@ import {
 import { remove } from 'lodash';
 
 
-class ItemCard extends React.Component {
+class Players extends React.Component {
 
   constructor(props) {
     super(props);
@@ -31,14 +31,12 @@ class ItemCard extends React.Component {
     this._renderItem = this._renderItem.bind(this);
   }
 
-  _addPressed(key) {
-    this.props.navigation.navigate(key);
+  _addPressed() {
+    this.props.navigation.navigate('add_player');
   }
 
-  _itemPressed(item) {
-    if( this.props.itemComponent ) {
-      this.props.navigation.navigate(this.props.itemComponent, {item: item});
-    }
+  _itemPressed(player) {
+    this.props.navigation.navigate('player_item', {player: player});
   }
 
   _removePressed(item) {
@@ -48,9 +46,9 @@ class ItemCard extends React.Component {
   _renderItem({item}) {
     return (
       <ListItem
-        title={item[this.props.itemTitleField] || ''}
-        subtitle={item[this.props.itemSubTitleField] ||
-          `no ${this.props.itemSubTitleField}`}
+        title={item.name || ''}
+        subtitle={item.handicap ||
+          `no handicap`}
         rightIcon={{name: 'remove-circle', color: 'red'}}
         onPress={() => this._itemPressed(item)}
         onPressRightIcon={() => this._removePressed(item)}
@@ -64,18 +62,18 @@ class ItemCard extends React.Component {
     const addButton = ( this.props.showButton ) ?
       (
         <Button
-          title={this.props.addButtonTitle}
-          onPress={() => this._addPressed(this.props.addKey)}
+          title='Add Player'
+          onPress={() => this._addPressed()}
         />
       ) : null;
 
-    if( this.props.items ) {
+    if( this.props.players ) {
 
       content = (
         <Card title={this.props.title}>
           <List containerStyle={styles.listContainer}>
             <FlatList
-              data={this.props.items}
+              data={this.props.players}
               renderItem={this._renderItem}
               keyExtractor={item => item._key}
             />
@@ -95,7 +93,7 @@ class ItemCard extends React.Component {
   }
 }
 
-export default ItemCard;
+export default Players;
 
 
 const styles = StyleSheet.create({
