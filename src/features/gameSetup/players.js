@@ -55,11 +55,12 @@ class Players extends React.Component {
   }
 
   _renderItem({item}) {
+    const handicap = (item && item.handicap && item.handicap.display) ?
+      item.handicap.display : 'no handicap';
     return (
       <ListItem
         title={item.name || ''}
-        subtitle={item.handicap ||
-          `no handicap`}
+        subtitle={handicap}
         rightIcon={{name: 'remove-circle', color: 'red'}}
         onPress={() => this._itemPressed(item)}
         onPressRightIcon={() => this._removePressed(item)}
@@ -98,21 +99,13 @@ class Players extends React.Component {
 
           let players = this.props.players;
 
-          // if players is blank (new game getting set up), then add the
-          // current logged in player
-          if( players.length == 0 && this.props.addCurrentPlayer ) {
-            if( data && data.getPlayer ) {
-              // ugh, first we have to flatten the player object a bit
-              // so we can have shared code in itemcard
-              const handicap = data.getPlayer.handicap.display || 'no handicap';
-              const player = {
-                _key: data.getPlayer._key,
-                name: data.getPlayer.name,
-                short: data.getPlayer.short,
-                handicap: handicap
-              };
-              players = [ player ];
-            }
+          // if players is blank, i.e. new game getting set up, then add the
+          // current logged in player, unless they've already been removed once
+          if( players.length == 0 &&
+              this.props.addCurrentPlayer &&
+              data &&
+              data.getPlayer ) {
+            players = [ data.getPlayer ];
           }
 
           return (
