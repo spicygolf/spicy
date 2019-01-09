@@ -1,14 +1,11 @@
 import React from 'react';
 
 import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
   View
 } from 'react-native';
 
 import GameNav from 'features/games/gamenav';
+import SearchPlayers from 'features/gameSetup/searchPlayers'
 
 
 class AddPlayer extends React.Component {
@@ -21,7 +18,7 @@ class AddPlayer extends React.Component {
           showBack={true}
           navigation={this.props.navigation}
         />
-        <Text>add player</Text>
+        <SearchPlayers />
       </View>
     );
   }
