@@ -97,6 +97,7 @@ class SearchPlayers extends React.Component {
         <Query
           query={SEARCH_PLAYER_QUERY}
           variables={{q: q}}
+          fetchPolicy='no-cache'
         >
           {({ loading, error, data }) => {
             if( loading ) return (<ActivityIndicator />);
@@ -122,6 +123,7 @@ class SearchPlayers extends React.Component {
         <Query
           query={SEARCH_GHIN_PLAYER_QUERY}
           variables={{q: q}}
+          fetchPolicy='no-cache'
         >
           {({ loading, error, data }) => {
             if( loading ) return (<ActivityIndicator />);
