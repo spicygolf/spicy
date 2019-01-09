@@ -5,6 +5,7 @@ import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Keyboard,
   StyleSheet,
   Text,
   TextInput,
@@ -43,6 +44,7 @@ class SearchPlayers extends React.Component {
 
   _itemPressed(player) {
     console.log('searchPlayer itemPressed', player);
+    Keyboard.dismiss();
   }
 
   _renderPlayer({item}) {
@@ -112,6 +114,7 @@ class SearchPlayers extends React.Component {
                 renderItem={this._renderPlayer}
                 ListHeaderComponent={header}
                 keyExtractor={item => item._key}
+                keyboardShouldPersistTaps={'handled'}
               />
             );
           }}
@@ -136,6 +139,7 @@ class SearchPlayers extends React.Component {
                 renderItem={this._renderGhinPlayer}
                 ListHeaderComponent={header}
                 keyExtractor={item => item._key}
+                keyboardShouldPersistTaps={'handled'}
               />
             );
           }}
