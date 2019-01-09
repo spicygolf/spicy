@@ -43,6 +43,7 @@ class NewGame extends React.Component {
         title={item.name || ''}
         subtitle={item.type || ''}
         onPress={() => this._itemPressed(item)}
+        testID={`new_${item._key}`}
       />
     );
   }

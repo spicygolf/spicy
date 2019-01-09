@@ -111,6 +111,7 @@ class Games extends React.Component {
                     title="New Game"
                     accessibilityLabel="New Game"
                     color={blue}
+                    testID='new_game'
                   />
                 </View>
               </View>

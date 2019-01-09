@@ -82,6 +82,7 @@ class Players extends React.Component {
         <Button
           title='Add Player'
           onPress={() => this._addPressed()}
+          testID='add_player_button'
         />
       ) : null;
 
