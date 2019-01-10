@@ -58,7 +58,9 @@ class GameSetup extends React.Component {
 
   _addPlayer(pkey) {
     this.setState(prev => {
-      prev.players.push(pkey);
+      if( !prev.players.includes(pkey) ) {
+        prev.players.push(pkey);
+      }
       return {
         players: prev.players
       };
