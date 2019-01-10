@@ -52,6 +52,7 @@ class Players extends React.Component {
   _renderItem({item}) {
     const handicap = (item && item.handicap && item.handicap.display) ?
       item.handicap.display : 'no handicap';
+
     return (
       <ListItem
         key={item._key}
@@ -81,6 +82,7 @@ class Players extends React.Component {
     const playersList = this.props.players.map(pkey => (
       <GetPlayer
         pkey={pkey}
+        key={pkey}
       >
         {({ loading, player }) => {
           if( loading ) return null;
