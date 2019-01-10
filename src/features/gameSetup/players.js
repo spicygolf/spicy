@@ -21,11 +21,7 @@ import {
 
 import { remove } from 'lodash';
 
-import { Query } from 'react-apollo';
-
-import {
-  GET_PLAYER_QUERY
-} from 'features/players/graphql';
+import { GetPlayer } from 'features/players/graphql';
 
 
 
@@ -33,9 +29,6 @@ class Players extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      currentPlayerKey: null
-    };
     this._addPressed = this._addPressed.bind(this);
     this._itemPressed = this._itemPressed.bind(this);
     this._removePressed = this._removePressed.bind(this);
@@ -43,7 +36,9 @@ class Players extends React.Component {
   }
 
   _addPressed() {
-    this.props.navigation.navigate('add_player');
+    this.props.navigation.navigate('add_player', {
+      addFn: this.props.addFn
+    });
   }
 
   _itemPressed(player) {
@@ -59,6 +54,7 @@ class Players extends React.Component {
       item.handicap.display : 'no handicap';
     return (
       <ListItem
+        key={item._key}
         title={item.name || ''}
         subtitle={handicap}
         rightIcon={{name: 'remove-circle', color: 'red'}}
@@ -68,14 +64,9 @@ class Players extends React.Component {
     );
   }
 
-  async componentDidMount() {
-    const cpkey = await AsyncStorage.getItem('currentPlayer');
-    this.setState({currentPlayerKey: cpkey});
-  }
-
   render() {
 
-    if( !this.state.currentPlayerKey ) return (<ActivityIndicator />);
+    if( !this.props.players ) return (<ActivityIndicator />);
 
     const addButton = ( this.props.showButton ) ?
       (
@@ -86,43 +77,27 @@ class Players extends React.Component {
         />
       ) : null;
 
-    return (
-      <Query
-        query={GET_PLAYER_QUERY}
-        variables={{ player: this.state.currentPlayerKey }}
+    console.log('render players', this.props.players);
+    const playersList = this.props.players.map(pkey => (
+      <GetPlayer
+        pkey={pkey}
       >
-        {({ loading, error, data }) => {
-          if( loading ) return (<ActivityIndicator />);
-          if( error ) {
-            console.log(error);
-            return (<Text>Error</Text>);
-          }
-
-          let players = this.props.players;
-
-          // if players is blank, i.e. new game getting set up, then add the
-          // current logged in player, unless they've already been removed once
-          if( players.length == 0 &&
-              this.props.addCurrentPlayer &&
-              data &&
-              data.getPlayer ) {
-            players = [ data.getPlayer ];
-          }
-
-          return (
-            <Card title='Players'>
-              <List containerStyle={styles.listContainer}>
-                <FlatList
-                  data={players}
-                  renderItem={this._renderItem}
-                  keyExtractor={item => item._key}
-                />
-              </List>
-              { addButton }
-            </Card>
-          );
+        {({ loading, player }) => {
+          if( loading ) return null;
+          return this._renderItem({item: player});
         }}
-      </Query>
+      </GetPlayer>
+    ));
+
+    console.log('playersList', playersList);
+
+    return (
+      <Card title='Players'>
+        <List containerStyle={styles.listContainer}>
+          {playersList}
+        </List>
+        { addButton }
+      </Card>
     );
   }
 }

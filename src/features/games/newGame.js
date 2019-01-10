@@ -32,7 +32,8 @@ class NewGame extends React.Component {
   _itemPressed(item) {
     this.props.navigation.navigate('GameSetup', {
       game: null,
-      gamespec: item
+      gamespec: item,
+      players: []
     });
   }
 

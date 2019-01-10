@@ -18,7 +18,10 @@ class AddPlayer extends React.Component {
           showBack={true}
           navigation={this.props.navigation}
         />
-        <SearchPlayers />
+        <SearchPlayers
+          addFn={this.props.navigation.getParam('addFn')}
+          navigation={this.props.navigation}
+        />
       </View>
     );
   }

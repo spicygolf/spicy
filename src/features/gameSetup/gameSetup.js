@@ -21,11 +21,6 @@ import {
 
 import { filter } from 'lodash';
 
-import { withApollo } from 'react-apollo';
-import {
-  GET_PLAYER_QUERY
-} from 'features/players/graphql';
-
 import Courses from 'features/gameSetup/courses';
 import Players from 'features/gameSetup/players';
 import GameNav from 'features/games/gamenav';
@@ -36,7 +31,7 @@ class GameSetup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      players: [],
+      players: this.props.navigation.getParam('players'),
       currentPlayerKey: null,
       addCurrentPlayer: true,
       courses: [
@@ -61,22 +56,33 @@ class GameSetup extends React.Component {
     }));
   }
 
-  _addPlayer(item) {
-    this.setState(prev => ({
-      players: prev.players.push(item)
-    }));
+  _addPlayer(pkey) {
+    this.setState(prev => {
+      prev.players.push(pkey);
+      return {
+        players: prev.players
+      };
+    });
   }
 
-  _removePlayer(item) {
+  _removePlayer(pkey) {
     this.setState(prev => ({
-      players: filter(prev.players, (p) => (p._key !== item._key)),
-      addCurrentPlayer: !(item._key == this.state.currentPlayerKey)
+      players: filter(prev.players, (p) => (p !== pkey)),
+      addCurrentPlayer: !(pkey == this.state.currentPlayerKey)
     }));
   }
 
   async componentDidMount() {
+    // TODO: check nav.getParam('players') (cuz gameSetup could be entered for an
+    //       existing game) and only add current user if it's a new game
     const cpkey = await AsyncStorage.getItem('currentPlayer');
-    this.setState({currentPlayerKey: cpkey});
+    this.setState(prev => {
+      prev.players.push(cpkey);
+      return {
+        currentPlayerKey: cpkey,
+        players: prev.players
+      };
+    });
   }
 
   render() {
@@ -139,16 +145,11 @@ class GameSetup extends React.Component {
       );
     }
 
-    return (
-      <View>
-        {content}
-      </View>
-    );
-
+    return content;
   }
 }
 
-export default withApollo(GameSetup);
+export default GameSetup;
 
 
 const styles = StyleSheet.create({

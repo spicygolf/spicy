@@ -43,8 +43,9 @@ class SearchPlayers extends React.Component {
   }
 
   _itemPressed(player) {
-    console.log('searchPlayer itemPressed', player);
     Keyboard.dismiss();
+    this.props.addFn(player._key);
+    this.props.navigation.goBack();
   }
 
   _renderPlayer({item}) {
@@ -106,7 +107,10 @@ class SearchPlayers extends React.Component {
               return (<Text>Error</Text>);
             }
 
-            const header = data.searchPlayer.length ?
+            const header = (
+                data &&
+                data.searchPlayer &&
+                data.searchPlayer.length) ?
               (<ListHeader title='Registered Players' />) : null;
 
             return (
@@ -132,7 +136,10 @@ class SearchPlayers extends React.Component {
               return (<Text>Error</Text>);
             }
 
-            const header = data.searchGhinPlayer.length ?
+            const header = (
+                data &&
+                data.searchGhinPlayer &&
+                data.searchGhinPlayer.length) ?
               (<ListHeader title='Other Players' />) : null;
 
             return (

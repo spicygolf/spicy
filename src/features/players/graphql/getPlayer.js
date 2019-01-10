@@ -1,6 +1,12 @@
+import React from 'react';
+
+import { Query } from 'react-apollo';
+
 import gql from 'graphql-tag';
 
-export default gql`
+
+
+export const GET_PLAYER_QUERY = gql`
   query GetPlayer($player: String!) {
     getPlayer(_key: $player) {
       _key
@@ -15,3 +21,26 @@ export default gql`
     }
   }
 `;
+
+export class GetPlayer extends React.PureComponent {
+  render() {
+    const { children, pkey } = this.props;
+    return (
+      <Query
+        query={GET_PLAYER_QUERY}
+        variables={{player: pkey}}
+      >
+        {({ data, loading }) => {
+          let player = {};
+          if (data && data.getPlayer) {
+            player = data.getPlayer;
+          }
+          return children({
+            player,
+            loading
+          });
+        }}
+      </Query>
+    );
+  }
+}
