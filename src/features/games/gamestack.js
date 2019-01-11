@@ -26,7 +26,7 @@ const GameStack = createStackNavigator(
     GameSetup: GameSetup,
     add_course: AddCourse,
     add_player: AddPlayer,
-    PlayerItem: PlayerItem
+    player_item: PlayerItem
   },
   {
     initialRouteName: 'Games',

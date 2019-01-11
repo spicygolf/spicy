@@ -10,8 +10,10 @@ import {
 class PlayerItem extends React.Component {
 
   render() {
-    console.log(this.props.item);
-    return (<Text>{this.props.item.name}</Text>);
+    const player = this.props.navigation.getParam('player');
+    console.log('player_item', player);
+
+    return (<Text>{player.name}</Text>);
   }
 }
 
