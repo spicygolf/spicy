@@ -18,8 +18,12 @@ import {
 
 import { Query } from 'react-apollo';
 
-import { SEARCH_PLAYER_QUERY } from 'features/players/graphql';
-import { SEARCH_GHIN_PLAYER_QUERY } from 'features/players/graphql';
+import {
+  AddPlayerMutation,
+  linkGhinPlayer2Player,
+  SEARCH_PLAYER_QUERY,
+  SEARCH_GHIN_PLAYER_QUERY
+} from 'features/players/graphql';
 
 
 
@@ -37,16 +41,27 @@ class SearchPlayers extends React.Component {
     this.state = {
       q: ''
     };
-    this._itemPressed = this._itemPressed.bind(this);
+    this._playerPressed = this._playerPressed.bind(this);
     this._renderPlayer = this._renderPlayer.bind(this);
     this._renderGhinPlayer = this._renderGhinPlayer.bind(this);
   }
 
-  _itemPressed(player) {
+  _playerPressed(player) {
     Keyboard.dismiss();
     this.props.addFn(player._key);
     this.props.navigation.goBack();
   }
+
+/*
+  async _ghinPlayerPressed(gp) {
+    // ghin player clicked, so make a new ghost player
+    const pkey = await addPlayer();
+    // link ghost player to ghin player clicked
+    await linkGhinPlayer2Player(gp._key, pkey);
+    // then act like the ghost player was clicked and add them to game
+    this._playerPressed({_key: pkey});
+  }
+*/
 
   _renderPlayer({item}) {
     const handicap = (item && item.handicap && item.handicap.display) ?
@@ -60,7 +75,7 @@ class SearchPlayers extends React.Component {
       <ListItem
         title={item.name || ''}
         subtitle={`${handicap} - ${club}`}
-        onPress={() => this._itemPressed(item)}
+        onPress={() => this._playerPressed(item)}
       />
     );
   }
@@ -73,12 +88,26 @@ class SearchPlayers extends React.Component {
     const club = (item && item.clubs && item.clubs.length ) ?
       `${item.clubs[0].name} - ${item.clubs[0].state}` : '';
 
+    const player = {
+      email: '*****',
+      name: item.playerName,
+      short: item.firstName,
+      password: '*****'
+    };
+
     return (
-      <ListItem
-        title={item.playerName || ''}
-        subtitle={`${handicap} - ${club}`}
-        onPress={() => this._itemPressed(item)}
-      />
+      <AddPlayerMutation player={player}>
+        {addPlayerMutation => {
+          console.log('addPlayerMutation in searchPlayers', addPlayerMutation);
+          return (
+            <ListItem
+              title={item.playerName || ''}
+              subtitle={`${handicap} - ${club}`}
+              onPress={() => {addPlayerMutation}}
+            />
+          );
+        }}
+      </AddPlayerMutation>
     );
   }
 
@@ -101,6 +130,7 @@ class SearchPlayers extends React.Component {
           fetchPolicy='no-cache'
         >
           {({ loading, error, data }) => {
+            console.log(q, loading, error, data);
             if( loading ) return (<ActivityIndicator />);
             if( error ) {
               console.log(error);

@@ -60,7 +60,7 @@ class Players extends React.Component {
         subtitle={handicap}
         rightIcon={{name: 'remove-circle', color: 'red'}}
         onPress={() => this._itemPressed(item)}
-        onPressRightIcon={() => this._removePressed(item)}
+        onPressRightIcon={() => this._removePressed(item._key)}
       />
     );
   }
