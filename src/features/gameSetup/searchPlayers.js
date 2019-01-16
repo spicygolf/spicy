@@ -97,13 +97,20 @@ class SearchPlayers extends React.Component {
 
     return (
       <AddPlayerMutation player={player}>
-        {addPlayerMutation => {
-          console.log('addPlayerMutation in searchPlayers', addPlayerMutation);
+        {({addPlayerMutation}) => {
           return (
             <ListItem
               title={item.playerName || ''}
               subtitle={`${handicap} - ${club}`}
-              onPress={() => {addPlayerMutation}}
+              onPress={async () => {
+                console.log('addPlayerMutation pressed', addPlayerMutation);
+                const {data, errors} = await addPlayerMutation({variables: {
+                  player: player
+                }});
+                console.log('data', data);
+                console.log('errors', errors);
+                this._playerPressed({_key: data.addPlayer._key});
+              }}
             />
           );
         }}

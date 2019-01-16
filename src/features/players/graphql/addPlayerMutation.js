@@ -23,19 +23,13 @@ export class AddPlayerMutation extends React.PureComponent {
         mutation={ADD_PLAYER_MUTATION}
         variables={{player: player}}
         update={(store, args) => {
-          console.log('update args', args);
+          console.log('addPlayerMutation update store, args', store, args);
         }}
       >
-        {(mutate, {loading, error, data}) => {
-/*
-          console.log('props', this.props);
-          console.log('renderProp mutate', mutate);
-          console.log('renderProp loading', loading);
-          console.log('renderProp error', error);
-          console.log('renderProp data', data);
-*/
-          //mutate({player: player});
-          return children(mutate, {loading, error, data});
+        {mutate => {
+          return children({
+            addPlayerMutation: mutate
+          });
         }}
       </Mutation>
     );
