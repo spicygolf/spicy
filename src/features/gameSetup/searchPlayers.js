@@ -24,6 +24,9 @@ import {
   SEARCH_PLAYER_QUERY,
   SEARCH_GHIN_PLAYER_QUERY
 } from 'features/players/graphql';
+import {
+  AddLinkMutation
+} from 'common/graphql/link';
 
 
 
@@ -52,17 +55,6 @@ class SearchPlayers extends React.Component {
     this.props.navigation.goBack();
   }
 
-/*
-  async _ghinPlayerPressed(gp) {
-    // ghin player clicked, so make a new ghost player
-    const pkey = await addPlayer();
-    // link ghost player to ghin player clicked
-    await linkGhinPlayer2Player(gp._key, pkey);
-    // then act like the ghost player was clicked and add them to game
-    this._playerPressed({_key: pkey});
-  }
-*/
-
   _renderPlayer({item}) {
     const handicap = (item && item.handicap && item.handicap.display) ?
       item.handicap.display : 'no handicap';
@@ -88,32 +80,63 @@ class SearchPlayers extends React.Component {
     const club = (item && item.clubs && item.clubs.length ) ?
       `${item.clubs[0].name} - ${item.clubs[0].state}` : '';
 
+    const gpkey = item._key;
+    const clubkey = item.clubs[0]._key;
+
     const player = {
-      email: '*****',
+      email: `@@@_${gpkey}`,
       name: item.playerName,
       short: item.firstName,
-      password: '*****'
+      password: `@@@_${gpkey}`
     };
 
+    // this is kind of a nested mess.
+    // first, we add a player and get the pkey back from the Mutation
+    // then we add two edges (link mutations), one for gp2p and one for p2c
     return (
-      <AddPlayerMutation player={player}>
-        {({addPlayerMutation}) => {
-          return (
-            <ListItem
-              title={item.playerName || ''}
-              subtitle={`${handicap} - ${club}`}
-              onPress={async () => {
-                console.log('addPlayerMutation pressed', addPlayerMutation);
-                const {data, errors} = await addPlayerMutation({variables: {
-                  player: player
-                }});
-                console.log('data', data);
-                console.log('errors', errors);
-                this._playerPressed({_key: data.addPlayer._key});
-              }}
-            />
-          );
-        }}
+      <AddPlayerMutation>
+        {({addPlayerMutation}) => (
+          <AddLinkMutation>
+            {({addLinkMutation : gp2p}) => (
+              <AddLinkMutation>
+                {({addLinkMutation : p2c}) => (
+                  <ListItem
+                    title={item.playerName || ''}
+                    subtitle={`${handicap} - ${club}`}
+                    onPress={async () => {
+                      const {data, errors} = await addPlayerMutation({
+                        variables: {
+                          player: player
+                        }
+                      });
+                      if( data && data.addPlayer && data.addPlayer._key &&
+                          (!errors || errors.length == 0 ) ) {
+                        const pkey = data.addPlayer._key;
+                        const gp2p_res = await gp2p({
+                          variables: {
+                            from: {type: 'ghin_player', value: gpkey},
+                            to: {type: 'player', value: pkey}
+                          }
+                        });
+                        console.log('gp2p_res', gp2p_res);
+                        const p2c_res = await p2c({
+                          variables: {
+                            from: {type: 'player', value: pkey},
+                            to: {type: 'club', value: clubkey}
+                          }
+                        });
+                        console.log('p2c_res', p2c_res);
+                        this._playerPressed({_key: pkey});
+                      } else {
+                        console.log('addPlayer did not work', errors);
+                      }
+                    }}
+                  />
+                )}
+              </AddLinkMutation>
+            )}
+          </AddLinkMutation>
+        )}
       </AddPlayerMutation>
     );
   }
@@ -137,7 +160,7 @@ class SearchPlayers extends React.Component {
           fetchPolicy='no-cache'
         >
           {({ loading, error, data }) => {
-            console.log(q, loading, error, data);
+            console.log('search typing', q, loading, error, data);
             if( loading ) return (<ActivityIndicator />);
             if( error ) {
               console.log(error);

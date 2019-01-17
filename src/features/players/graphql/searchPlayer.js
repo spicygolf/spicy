@@ -10,6 +10,7 @@ export default gql`
         display
       }
       clubs {
+        _key
         name
         state
       }

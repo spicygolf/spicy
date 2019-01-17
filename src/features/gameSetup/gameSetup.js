@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   AsyncStorage,
   FlatList,
+  ScrollView,
   StyleSheet,
   Text,
   View
@@ -110,7 +111,8 @@ class GameSetup extends React.Component {
       const playerSection = (
         <Players
          players={this.state.players}
-         showButton={ this.state.players.length <= gs.max_players || gs.max_players < 0 }
+         showButton={ this.state.players.length < gs.max_players ||
+                      gs.max_players < 0 }
          addFn={(item) => this._addPlayer(item)}
          removeFn={(item) => this._removePlayer(item)}
          addCurrentPlayer={this.state.addCurrentPlayer}
@@ -135,9 +137,11 @@ class GameSetup extends React.Component {
             <View style={styles.gname}>
               <Text style={styles.name_txt}>{gs.name}</Text>
             </View>
-            { courseSection }
-            { playerSection }
-            { optionsSection }
+            <ScrollView>
+              { courseSection }
+              { playerSection }
+              { optionsSection }
+            </ScrollView>
           </View>
         </View>
       );
@@ -155,7 +159,9 @@ export default GameSetup;
 
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    marginBottom: 100
+  },
   gname: {
     alignItems: 'center'
   },
