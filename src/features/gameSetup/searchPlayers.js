@@ -145,7 +145,7 @@ class SearchPlayers extends React.Component {
     const { q } = this.state;
 
     return (
-      <View>
+      <View style={styles.container}>
         <TextInput
           style={styles.searchTextInput}
           placeholder='search players...'
@@ -154,65 +154,67 @@ class SearchPlayers extends React.Component {
           onChangeText={text => this.setState({q: text})}
           value={q}
         />
-        <Query
-          query={SEARCH_PLAYER_QUERY}
-          variables={{q: q}}
-          fetchPolicy='no-cache'
-        >
-          {({ loading, error, data }) => {
-            console.log('search typing', q, loading, error, data);
-            if( loading ) return (<ActivityIndicator />);
-            if( error ) {
-              console.log(error);
-              return (<Text>Error</Text>);
-            }
+        <View style={styles.searchResultsContainer}>
+          <Query
+            query={SEARCH_PLAYER_QUERY}
+            variables={{q: q}}
+            fetchPolicy='no-cache'
+          >
+            {({ loading, error, data }) => {
+              console.log('search typing', q, loading, error, data);
+              if( loading ) return (<ActivityIndicator />);
+              if( error ) {
+                console.log(error);
+                return (<Text>Error</Text>);
+              }
 
-            const header = (
-                data &&
-                data.searchPlayer &&
-                data.searchPlayer.length) ?
-              (<ListHeader title='Registered Players' />) : null;
+              const header = (
+                  data &&
+                  data.searchPlayer &&
+                  data.searchPlayer.length) ?
+                (<ListHeader title='Registered Players' />) : null;
 
-            return (
-              <FlatList
-                data={data.searchPlayer}
-                renderItem={this._renderPlayer}
-                ListHeaderComponent={header}
-                keyExtractor={item => item._key}
-                keyboardShouldPersistTaps={'handled'}
-              />
-            );
-          }}
-        </Query>
-        <Query
-          query={SEARCH_GHIN_PLAYER_QUERY}
-          variables={{q: q}}
-          fetchPolicy='no-cache'
-        >
-          {({ loading, error, data }) => {
-            if( loading ) return (<ActivityIndicator />);
-            if( error ) {
-              console.log(error);
-              return (<Text>Error</Text>);
-            }
+              return (
+                <FlatList
+                  data={data.searchPlayer}
+                  renderItem={this._renderPlayer}
+                  ListHeaderComponent={header}
+                  keyExtractor={item => item._key}
+                  keyboardShouldPersistTaps={'handled'}
+                />
+              );
+            }}
+          </Query>
+          <Query
+            query={SEARCH_GHIN_PLAYER_QUERY}
+            variables={{q: q}}
+            fetchPolicy='no-cache'
+          >
+            {({ loading, error, data }) => {
+              if( loading ) return (<ActivityIndicator />);
+              if( error ) {
+                console.log(error);
+                return (<Text>Error</Text>);
+              }
 
-            const header = (
-                data &&
-                data.searchGhinPlayer &&
-                data.searchGhinPlayer.length) ?
-              (<ListHeader title='Other Players' />) : null;
+              const header = (
+                  data &&
+                  data.searchGhinPlayer &&
+                  data.searchGhinPlayer.length) ?
+                (<ListHeader title='Other Players' />) : null;
 
-            return (
-              <FlatList
-                data={data.searchGhinPlayer}
-                renderItem={this._renderGhinPlayer}
-                ListHeaderComponent={header}
-                keyExtractor={item => item._key}
-                keyboardShouldPersistTaps={'handled'}
-              />
-            );
-          }}
-        </Query>
+              return (
+                <FlatList
+                  data={data.searchGhinPlayer}
+                  renderItem={this._renderGhinPlayer}
+                  ListHeaderComponent={header}
+                  keyExtractor={item => item._key}
+                  keyboardShouldPersistTaps={'handled'}
+                />
+              );
+            }}
+          </Query>
+        </View>
       </View>
     );
   }
@@ -223,17 +225,23 @@ export default SearchPlayers;
 
 
 const styles = StyleSheet.create({
-  searchTextInput: {
-    fontSize: 20,
-    width: '100%',
-    paddingLeft: 20,
-    paddingRight: 20
-  },
   header: {
     paddingTop: 10,
     paddingLeft: 20,
     paddingRight: 20,
     fontSize: 20,
     fontWeight: 'bold'
-  }
+  },
+  container: {
+
+  },
+  searchTextInput: {
+    fontSize: 20,
+    width: '100%',
+    paddingLeft: 20,
+    paddingRight: 20
+  },
+  searchResultsContainer: {
+
+  },
 });

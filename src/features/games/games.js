@@ -5,13 +5,16 @@ import React from 'react';
 import {
   ActivityIndicator,
   AsyncStorage,
-  Button,
   FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
+
+import {
+  Icon
+} from 'react-native-elements';
 
 import { Query, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
@@ -104,13 +107,13 @@ class Games extends React.Component {
           return (
             <View>
               <View style={styles.gamesSubMenu}>
-                <View style={styles.gamesSubMenuSpacer} />
                 <View style={styles.newGameButton}>
-                  <Button
-                    onPress={this._newGamePressed}
-                    title="New Game"
-                    accessibilityLabel="New Game"
+                  <Icon
+                    name='add-circle'
                     color={blue}
+                    size={40}
+                    onPress={this._newGamePressed}
+                    accessibilityLabel="New Game"
                     testID='new_game'
                   />
                 </View>
@@ -137,14 +140,12 @@ export default withApollo(Games);
 
 var styles = StyleSheet.create({
   gamesSubMenu: {
-    flexDirection: 'row',
-    flex: 3,
-    minHeight: 25
+    alignItems: 'flex-end',
+    paddingRight: 10,
+    paddingTop: 10,
   },
   gamesSubMenuSpacer: {
-    flex: 2
   },
   newGameButton: {
-    flex: 1
   }
 })
