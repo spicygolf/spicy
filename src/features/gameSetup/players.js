@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 
 import {
-  Button,
   Card,
   Icon,
   List,
@@ -22,6 +21,8 @@ import {
 import { remove } from 'lodash';
 
 import { GetPlayer } from 'features/players/graphql';
+
+import { blue } from 'common/colors';
 
 
 
@@ -71,14 +72,17 @@ class Players extends React.Component {
 
     const addButton = ( this.props.showButton ) ?
       (
-        <Button
+        <Icon
+          name='add-circle'
+          color={blue}
+          size={40}
+          iconStyle={styles.addIcon}
           title='Add Player'
           onPress={() => this._addPressed()}
           testID='add_player_button'
         />
-      ) : null;
+      ) : (<Icon name='add-circle' size={40} color='#fff'/>);
 
-    console.log('render players', this.props.players);
     const playersList = this.props.players.map(pkey => (
       <GetPlayer
         pkey={pkey}
@@ -94,11 +98,15 @@ class Players extends React.Component {
     console.log('playersList', playersList);
 
     return (
-      <Card title='Players'>
+      <Card>
+        <View style={styles.cardTitle}>
+          <Icon name='add-circle' size={40} color='#fff'/>
+          <Text style={styles.title}>Players</Text>
+          { addButton }
+        </View>
         <List containerStyle={styles.listContainer}>
           {playersList}
         </List>
-        { addButton }
       </Card>
     );
   }
@@ -108,8 +116,19 @@ export default Players;
 
 
 const styles = StyleSheet.create({
+  cardTitle: {
+    flexDirection: 'row',
+    flex: 3,
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#555'
+  },
   listContainer: {
     marginTop: 0,
     marginBottom: 10
-  }
+  },
 });

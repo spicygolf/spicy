@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 
 import {
-  Button,
   Card,
   Icon,
   List,
@@ -19,6 +18,9 @@ import {
 } from 'react-native-elements';
 
 import { remove } from 'lodash';
+
+import { blue } from 'common/colors';
+
 
 
 class Courses extends React.Component {
@@ -61,16 +63,25 @@ class Courses extends React.Component {
     let content;
     const addButton = ( this.props.showButton ) ?
       (
-        <Button
-          title='Add Course'
+        <Icon
+          name='add-circle'
+          color={blue}
+          size={40}
+          iconStyle={styles.addIcon}
           onPress={() => this._addPressed()}
+          testID='add_course_button'
         />
-      ) : null;
+      ) : (<Icon name='add-circle' size={40} color='#fff'/>);
 
     if( this.props.courses ) {
 
       content = (
-        <Card title='Course, Tees'>
+        <Card>
+          <View style={styles.cardTitle}>
+            <Icon name='add-circle' size={40} color='#fff'/>
+            <Text style={styles.title}>Course, Tees</Text>
+            { addButton }
+          </View>
           <List containerStyle={styles.listContainer}>
             <FlatList
               data={this.props.courses}
@@ -78,7 +89,6 @@ class Courses extends React.Component {
               keyExtractor={item => item._key}
             />
           </List>
-          { addButton }
         </Card>
       );
 
@@ -97,8 +107,19 @@ export default Courses;
 
 
 const styles = StyleSheet.create({
+  cardTitle: {
+    flexDirection: 'row',
+    flex: 3,
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#555'
+  },
   listContainer: {
     marginTop: 0,
     marginBottom: 10
-  }
+  },
 });
