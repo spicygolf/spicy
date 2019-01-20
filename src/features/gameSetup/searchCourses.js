@@ -145,32 +145,29 @@ class SearchCourses extends React.Component {
                      ['desc',   'desc',   'desc']);
 
       const cardHeader = (
-        <View style={styles.cardTitle}>
-          <Icon name='add-circle' size={40} color='#fff'/>
-          <View>
-            <Text style={styles.title}>{course.name}</Text>
-            <Text style={styles.citystate}>{course.city}, {course.state}</Text>
-          </View>
-          <Icon
-            name='remove-circle'
-            size={40}
-            color='red'
-            onPress={() => this._removeCourse()}
+        <ListItem
+          title={course.name}
+          subtitle={`${course.city}, ${course.state}`}
+          rightIcon={{name: 'remove-circle', color: 'red'}}
+          onPressRightIcon={() => this._removeCourse()}
+        />
+      );
+
+      const cardList = (
+        <List containerStyle={styles.listContainer}>
+          <FlatList
+            data={tees}
+            renderItem={this._renderTee}
+            keyExtractor={item => item._key}
+            keyboardShouldPersistTaps={'handled'}
           />
-        </View>
+        </List>
       );
 
       return (
         <Card>
           { cardHeader }
-          <List containerStyle={styles.listContainer}>
-            <FlatList
-              data={tees}
-              renderItem={this._renderTee}
-              keyExtractor={item => item._key}
-              keyboardShouldPersistTaps={'handled'}
-            />
-          </List>
+          { cardList }
         </Card>
       );
     }

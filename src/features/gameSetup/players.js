@@ -76,7 +76,6 @@ class Players extends React.Component {
           name='add-circle'
           color={blue}
           size={40}
-          iconStyle={styles.addIcon}
           title='Add Player'
           onPress={() => this._addPressed()}
           testID='add_player_button'
