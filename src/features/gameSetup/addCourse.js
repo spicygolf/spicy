@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 
 import GameNav from 'features/games/gamenav';
+import SearchCourses from 'features/gameSetup/searchCourses'
 
 
 class AddCourse extends React.Component {
@@ -21,7 +22,10 @@ class AddCourse extends React.Component {
           showBack={true}
           navigation={this.props.navigation}
         />
-        <Text>add course</Text>
+        <SearchCourses
+          addFn={this.props.navigation.getParam('addFn')}
+          navigation={this.props.navigation}
+        />
       </View>
     );
   }

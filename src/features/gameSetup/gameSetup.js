@@ -32,12 +32,10 @@ class GameSetup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      players: this.props.navigation.getParam('players'),
+      players: this.props.navigation.getParam('players') || [],
       currentPlayerKey: null,
       addCurrentPlayer: true,
-      courses: [
-        {_key: '1', name: 'Druid Hills Golf Club', tee: 'Presidents'}
-      ],
+      courses: this.props.navigation.getParam('courses') || [],
     };
     this._addCourse = this._addCourse.bind(this);
     this._removeCourse = this._removeCourse.bind(this);
@@ -45,10 +43,13 @@ class GameSetup extends React.Component {
     this.removePlayer = this._removePlayer.bind(this);
   }
 
-  _addCourse(item) {
-    this.setState(prev => ({
-      courses: prev.courses.push(item)
-    }));
+  _addCourse(coursetee) {
+    this.setState(prev => {
+      // TODO: check for dupes with lodash
+      return {
+        courses: prev.courses.push(coursetee)
+      };
+    });
   }
 
   _removeCourse(item) {
