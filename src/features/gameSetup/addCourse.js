@@ -18,7 +18,7 @@ class AddCourse extends React.Component {
     return (
       <View>
         <GameNav
-          title='Add Course'
+          title='Add Course, Tees'
           showBack={true}
           navigation={this.props.navigation}
         />

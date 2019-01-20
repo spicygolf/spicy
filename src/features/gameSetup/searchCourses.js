@@ -13,10 +13,15 @@ import {
 } from 'react-native';
 
 import {
+  Card,
+  Icon,
+  List,
   ListItem
 } from 'react-native-elements';
 
 import { Query } from 'react-apollo';
+
+import { orderBy } from 'lodash';
 
 import {
   SEARCH_COURSE_QUERY
@@ -36,20 +41,30 @@ class SearchCourses extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      q: ''
+      q: '',
+      course: null
     };
     this._coursePressed = this._coursePressed.bind(this);
+    this._teePressed = this._teePressed.bind(this);
+    this._removeCourse = this._removeCourse.bind(this);
     this._renderCourse = this._renderCourse.bind(this);
+    this._renderTee = this._renderTee.bind(this);
   }
 
   _coursePressed(course) {
     Keyboard.dismiss();
+    this.setState({course: course});
+  }
 
-    // now choose tees
+  _teePressed(tee) {
+    Keyboard.dismiss();
+    console.log('tee pressed', tee);
+  }
 
-
-//    this.props.addFn(course._key);
-//    this.props.navigation.goBack();
+  _removeCourse() {
+    this.setState({
+      course: null
+    });
   }
 
   _renderCourse({item}) {
@@ -62,51 +77,103 @@ class SearchCourses extends React.Component {
     );
   }
 
-  render() {
-    const { q } = this.state;
-
+  _renderTee({item}) {
     return (
-      <View style={styles.container}>
-        <TextInput
-          style={styles.searchTextInput}
-          placeholder='search courses...'
-          autoCapitalize='none'
-          autoFocus={true}
-          onChangeText={text => this.setState({q: text})}
-          value={q}
-        />
-        <View style={styles.searchResultsContainer}>
-          <Query
-            query={SEARCH_COURSE_QUERY}
-            variables={{q: q}}
-          >
-            {({ loading, error, data }) => {
-              if( loading ) return (<ActivityIndicator />);
-              if( error ) {
-                console.log(error);
-                return (<Text>Error</Text>);
-              }
-
-              const header = (
-                  data &&
-                  data.searchCourse &&
-                  data.searchCourse.length) ?
-                (<ListHeader title='Courses' />) : null;
-
-              return (
-                <FlatList
-                  data={data.searchCourse}
-                  renderItem={this._renderCourse}
-                  ListHeaderComponent={header}
-                  keyExtractor={item => item._key}
-                  keyboardShouldPersistTaps={'handled'}
-                />
-              );
-            }}
-          </Query>
-        </View>
-      </View>
+      <ListItem
+        title={item.name || ''}
+        subtitle={`${item.gender} - rating: ${item.rating}, slope: ${item.slope}`}
+        onPress={() => this._teePressed(item)}
+      />
     );
+  }
+
+  render() {
+    const { q, course } = this.state;
+
+    if( !course ) {
+      return (
+        <View style={styles.container}>
+          <TextInput
+            style={styles.searchTextInput}
+            placeholder='search courses...'
+            autoCapitalize='none'
+            autoFocus={true}
+            onChangeText={text => this.setState({q: text})}
+            value={q}
+          />
+          <View>
+            <Query
+              query={SEARCH_COURSE_QUERY}
+              variables={{q: q}}
+            >
+              {({ loading, error, data }) => {
+                if( loading ) return (<ActivityIndicator />);
+                if( error ) {
+                  console.log(error);
+                  return (<Text>Error</Text>);
+                }
+
+                const header = (
+                    data &&
+                    data.searchCourse &&
+                    data.searchCourse.length) ?
+                  (<ListHeader title='Courses' />) : null;
+
+                return (
+                  <FlatList
+                    data={data.searchCourse}
+                    renderItem={this._renderCourse}
+                    ListHeaderComponent={header}
+                    keyExtractor={item => item._key}
+                    keyboardShouldPersistTaps={'handled'}
+                  />
+                );
+              }}
+            </Query>
+          </View>
+        </View>
+      );
+    } else {
+      //console.log('course selected', course);
+      let tees = course.tees.map(tee => ({
+        ...tee,
+        slope: tee.slope.all18 ? tee.slope.all18 : tee.slope.front9,
+        rating: tee.rating.all18 ? tee.rating.all18 : tee.rating.front9,
+      }));
+      tees = orderBy(tees,
+                     ['gender', 'rating', 'slope'],
+                     ['desc',   'desc',   'desc']);
+
+      const cardHeader = (
+        <View style={styles.cardTitle}>
+          <Icon name='add-circle' size={40} color='#fff'/>
+          <View>
+            <Text style={styles.title}>{course.name}</Text>
+            <Text style={styles.citystate}>{course.city}, {course.state}</Text>
+          </View>
+          <Icon
+            name='remove-circle'
+            size={40}
+            color='red'
+            onPress={() => this._removeCourse()}
+          />
+        </View>
+      );
+
+      return (
+        <Card>
+          { cardHeader }
+          <List containerStyle={styles.listContainer}>
+            <FlatList
+              data={tees}
+              renderItem={this._renderTee}
+              keyExtractor={item => item._key}
+              keyboardShouldPersistTaps={'handled'}
+            />
+          </List>
+        </Card>
+      );
+    }
   }
 }
 
@@ -122,16 +189,29 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold'
   },
-  container: {
-
-  },
   searchTextInput: {
     fontSize: 20,
     width: '100%',
     paddingLeft: 20,
     paddingRight: 20
   },
-  searchResultsContainer: {
-
+  cardTitle: {
+    flexDirection: 'row',
+    flex: 3,
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#555'
+  },
+  citystate: {
+    fontSize: 12,
+    color: '#555'
+  },
+  listContainer: {
+    marginTop: 0,
+    marginBottom: 50
   },
 });

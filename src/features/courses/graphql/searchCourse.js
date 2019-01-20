@@ -8,6 +8,7 @@ export default gql`
       city
       state
       tees {
+        _key
         name
         gender
         rating {

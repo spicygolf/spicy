@@ -95,8 +95,6 @@ class Players extends React.Component {
       </GetPlayer>
     ));
 
-    console.log('playersList', playersList);
-
     return (
       <Card>
         <View style={styles.cardTitle}>
@@ -129,6 +127,6 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     marginTop: 0,
-    marginBottom: 10
+    marginBottom: 50
   },
 });
