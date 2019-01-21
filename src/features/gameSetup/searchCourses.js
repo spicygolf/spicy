@@ -57,8 +57,12 @@ class SearchCourses extends React.Component {
   }
 
   _teePressed(tee) {
-    Keyboard.dismiss();
-    console.log('tee pressed', tee);
+    console.log('this.props.addFn', this.props.addFn);
+    this.props.addFn({
+      courseKey: this.state.course._key,
+      tkey: tee._key
+    });
+    this.props.navigation.goBack();
   }
 
   _removeCourse() {

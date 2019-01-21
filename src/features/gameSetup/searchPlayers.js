@@ -160,7 +160,6 @@ class SearchPlayers extends React.Component {
             variables={{q: q}}
           >
             {({ loading, error, data }) => {
-              console.log('search typing', q, loading, error, data);
               if( loading ) return (<ActivityIndicator />);
               if( error ) {
                 console.log(error);
