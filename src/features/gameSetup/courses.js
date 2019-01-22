@@ -64,9 +64,6 @@ class Courses extends React.Component {
 
   render() {
 
-    if( !this.props.courses ) return (<ActivityIndicator />);
-    console.log('courses', this.props.courses);
-
     const addButton = ( this.props.showButton ) ?
       (
         <Icon
@@ -79,19 +76,23 @@ class Courses extends React.Component {
         />
       ) : (<Icon name='add-circle' size={40} color='#fff'/>);
 
-    const courseList = this.props.courses.map(c => (
-      <GetCourse
-        courseKey={c.courseKey}
-        key={c.courseKey}
-      >
-        {({ loading, course }) => {
-          if( loading ) return null;
-          const tee = find(course.tees, ['_key', c.tkey]);
-          let newCourse = {...course, tee: tee};
-          return this._renderItem({item: newCourse});
-        }}
-      </GetCourse>
-    ));
+    let courseList = null;
+    if( this.props.course ) {
+      const c = this.props.course;
+      courseList = (
+        <GetCourse
+          courseKey={c.courseKey}
+          key={c.courseKey}
+        >
+          {({ loading, course }) => {
+            if( loading ) return null;
+            const tee = find(course.tees, ['_key', c.tkey]);
+            let newCourse = {...course, tee: tee};
+            return this._renderItem({item: newCourse});
+          }}
+        </GetCourse>
+      );
+    }
 
     return (
       <Card>

@@ -44,19 +44,15 @@ class GameSetup extends React.Component {
   }
 
   _addCourse(coursetee) {
-    this.setState(prev => {
-      // TODO: check for dupes with lodash
-      prev.courses.push(coursetee);
-      return {
-        courses: prev.courses
-      };
+    this.setState({
+      course: coursetee
     });
   }
 
   _removeCourse(item) {
-    this.setState(prev => ({
-      courses: filter(prev.courses, (c) => (c._key !== item._key))
-    }));
+    this.setState({
+      course: null
+    });
   }
 
   _addPlayer(pkey) {
@@ -102,8 +98,8 @@ class GameSetup extends React.Component {
       const courseSection = ( gs.location_type && gs.location_type == 'local' ) ?
        (
         <Courses
-         courses={this.state.courses}
-         showButton={ true }
+         course={this.state.course}
+         showButton={ !this.state.course }
          addFn={(item) => this._addCourse(item)}
          removeFn={(item) => this._removeCourse(item)}
          navigation={this.props.navigation}
