@@ -126,6 +126,6 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     marginTop: 0,
-    marginBottom: 50
+    marginBottom: 10
   },
 });

@@ -17,7 +17,9 @@ import {
   ListItem
 } from 'react-native-elements';
 
-import { remove } from 'lodash';
+import { find, remove } from 'lodash';
+
+import { GetCourse } from 'features/courses/graphql';
 
 import { blue } from 'common/colors';
 
@@ -34,7 +36,9 @@ class Courses extends React.Component {
   }
 
   _addPressed() {
-    this.props.navigation.navigate('add_course');
+    this.props.navigation.navigate('add_course', {
+      addFn: this.props.addFn
+    });
   }
 
   _itemPressed(course) {
@@ -49,7 +53,7 @@ class Courses extends React.Component {
     return (
       <ListItem
         title={item.name || ''}
-        subtitle={item.tee ||
+        subtitle={item.tee.name ||
           'no Tee selected'}
         rightIcon={{name: 'remove-circle', color: 'red'}}
         onPress={() => this._itemPressed(item)}
@@ -60,46 +64,47 @@ class Courses extends React.Component {
 
   render() {
 
-    let content;
+    if( !this.props.courses ) return (<ActivityIndicator />);
+    console.log('courses', this.props.courses);
+
     const addButton = ( this.props.showButton ) ?
       (
         <Icon
           name='add-circle'
           color={blue}
           size={40}
-          iconStyle={styles.addIcon}
+          title='Add Course,Tees'
           onPress={() => this._addPressed()}
           testID='add_course_button'
         />
       ) : (<Icon name='add-circle' size={40} color='#fff'/>);
 
-    if( this.props.courses ) {
+    const courseList = this.props.courses.map(c => (
+      <GetCourse
+        courseKey={c.courseKey}
+        key={c.courseKey}
+      >
+        {({ loading, course }) => {
+          if( loading ) return null;
+          const tee = find(course.tees, ['_key', c.tkey]);
+          let newCourse = {...course, tee: tee};
+          return this._renderItem({item: newCourse});
+        }}
+      </GetCourse>
+    ));
 
-      content = (
-        <Card>
-          <View style={styles.cardTitle}>
-            <Icon name='add-circle' size={40} color='#fff'/>
-            <Text style={styles.title}>Course, Tees</Text>
-            { addButton }
-          </View>
-          <List containerStyle={styles.listContainer}>
-            <FlatList
-              data={this.props.courses}
-              renderItem={this._renderItem}
-              keyExtractor={item => item._key}
-            />
-          </List>
-        </Card>
-      );
-
-    } else {
-      content = (
-        <ActivityIndicator />
-      );
-    }
-
-    return content;
-
+    return (
+      <Card>
+        <View style={styles.cardTitle}>
+          <Icon name='add-circle' size={40} color='#fff'/>
+          <Text style={styles.title}>Course, Tees</Text>
+          { addButton }
+        </View>
+        <List containerStyle={styles.listContainer}>
+          {courseList}
+        </List>
+      </Card>
+    );
   }
 }
 

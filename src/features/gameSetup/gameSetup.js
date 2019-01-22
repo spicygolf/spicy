@@ -46,8 +46,9 @@ class GameSetup extends React.Component {
   _addCourse(coursetee) {
     this.setState(prev => {
       // TODO: check for dupes with lodash
+      prev.courses.push(coursetee);
       return {
-        courses: prev.courses.push(coursetee)
+        courses: prev.courses
       };
     });
   }
