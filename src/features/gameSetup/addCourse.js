@@ -1,15 +1,12 @@
 import React from 'react';
-
 import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
   View
 } from 'react-native';
 
 import GameNav from 'features/games/gamenav';
-import SearchCourses from 'features/gameSetup/searchCourses'
+
+import AddCourseTabs from 'features/gameSetup/addCourseTabs';
+
 
 
 class AddCourse extends React.Component {
@@ -22,14 +19,15 @@ class AddCourse extends React.Component {
           showBack={true}
           navigation={this.props.navigation}
         />
-        <SearchCourses
-          addFn={this.props.navigation.getParam('addFn')}
-          navigation={this.props.navigation}
+        <AddCourseTabs
+          addFn={this.props.addFn}
         />
       </View>
     );
   }
 
 }
+
+
 
 export default AddCourse;

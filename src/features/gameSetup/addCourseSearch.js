@@ -36,7 +36,7 @@ const ListHeader = ({title}) => (
 );
 
 
-class SearchCourses extends React.Component {
+class AddCourseSearch extends React.Component {
 
   constructor(props) {
     super(props);
@@ -178,7 +178,7 @@ class SearchCourses extends React.Component {
 }
 
 
-export default SearchCourses;
+export default AddCourseSearch;
 
 
 const styles = StyleSheet.create({
