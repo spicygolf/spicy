@@ -128,8 +128,6 @@ class GameSetup extends React.Component {
           <GameNav
             title='Game Setup'
             showBack={true}
-            showScore={false}
-            navigation={this.props.navigation}
           />
           <View style={styles.container}>
             <View style={styles.gname}>
@@ -158,6 +156,7 @@ export default GameSetup;
 
 const styles = StyleSheet.create({
   container: {
+    height: '100%',
     marginBottom: 100
   },
   gname: {

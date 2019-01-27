@@ -5,6 +5,7 @@ import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  StyleSheet,
   Text,
   View
 } from 'react-native';
@@ -68,14 +69,11 @@ class NewGame extends React.Component {
             return (<Text>Error</Text>);
           }
 
-          //console.log('data', data);
           return (
             <View>
               <GameNav
                 title='New Game'
                 showBack={true}
-                showScore={false}
-                navigation={this.props.navigation}
               />
               <List>
                 <FlatList

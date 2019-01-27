@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  StyleSheet,
   View
 } from 'react-native';
 
@@ -11,16 +12,24 @@ import AddCourseTabs from 'features/gameSetup/addCourseTabs';
 
 class AddCourse extends React.Component {
 
+  // https://stackoverflow.com/questions/54038075/v1-to-v3-migration-nested-tabs
+  static router = {
+    ...AddCourseTabs.router,
+    getStateForAction: (action, lastState) => {
+      return AddCourseTabs.router.getStateForAction(action, lastState);
+    },
+  };
+
   render() {
     return (
-      <View>
+      <View style={styles.container}>
         <GameNav
           title='Add Course, Tees'
           showBack={true}
-          navigation={this.props.navigation}
         />
         <AddCourseTabs
           addFn={this.props.addFn}
+          navigation={this.props.navigation}
         />
       </View>
     );
@@ -31,3 +40,11 @@ class AddCourse extends React.Component {
 
 
 export default AddCourse;
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'flex-start'
+  },
+});

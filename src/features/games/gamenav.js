@@ -11,6 +11,7 @@ import {
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
+import { goBack } from 'common/components/navigationService';
 
 
 class GameNav extends React.Component {
@@ -18,7 +19,7 @@ class GameNav extends React.Component {
   render() {
     const left = this.props.showBack ? (
       <TouchableOpacity
-        onPress={() => this.props.navigation.goBack()}
+        onPress={() => goBack()}
       >
         <Icon name='chevron-left' size={30} color='#bbb' />
       </TouchableOpacity>
@@ -36,15 +37,17 @@ class GameNav extends React.Component {
     ) : <Text></Text>;
 
     return (
-      <View style={styles.GameNav}>
-        <View style={styles.left}>
-          {left}
-        </View>
-        <View style={styles.middle}>
-          <Text style={styles.title}>{this.props.title}</Text>
-        </View>
-        <View style={styles.right}>
-          {right}
+      <View style={styles.container}>
+        <View style={styles.GameNav}>
+          <View style={styles.left}>
+            {left}
+          </View>
+          <View style={styles.middle}>
+            <Text style={styles.title}>{this.props.title}</Text>
+          </View>
+          <View style={styles.right}>
+            {right}
+          </View>
         </View>
       </View>
     );
@@ -56,6 +59,10 @@ export default GameNav;
 
 
 const styles = StyleSheet.create({
+  container: {
+    flex: -1,
+    minHeight: 50
+  },
   GameNav: {
     flex: 3,
     flexDirection: 'row',

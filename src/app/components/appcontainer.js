@@ -1,7 +1,10 @@
+import React from 'react';
 import {
   createSwitchNavigator,
   createAppContainer
 } from 'react-navigation';
+
+import { setTopLevelNavigator } from 'common/components/navigationService';
 
 import Splash from 'features/splash/splash';
 import AppStack from 'app/components/appstack';
@@ -21,4 +24,14 @@ const AppContainer = createAppContainer(createSwitchNavigator(
 ));
 
 
-export default AppContainer;
+export default class App extends React.Component {
+  render() {
+    return (
+      <AppContainer
+        ref={navigatorRef => {
+          setTopLevelNavigator(navigatorRef);
+        }}
+      />
+    );
+  }
+};

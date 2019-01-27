@@ -42,13 +42,15 @@ class AddCourseSearch extends React.Component {
     super(props);
     this.state = {
       q: '',
-      course: null
+      course: null,
+      searchInput: null
     };
     this._coursePressed = this._coursePressed.bind(this);
     this._teePressed = this._teePressed.bind(this);
     this._removeCourse = this._removeCourse.bind(this);
     this._renderCourse = this._renderCourse.bind(this);
     this._renderTee = this._renderTee.bind(this);
+    this.searchInput = null;
   }
 
   _coursePressed(course) {
@@ -90,6 +92,18 @@ class AddCourseSearch extends React.Component {
     );
   }
 
+  componentDidMount() {
+    this.didFocusListener = this.props.navigation.addListener('didFocus', () => {
+      if( this.searchInput ) {
+        this.searchInput.focus();
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    this.didFocusListener.remove();
+  }
+
   render() {
     const { q, course } = this.state;
 
@@ -97,10 +111,10 @@ class AddCourseSearch extends React.Component {
       return (
         <View style={styles.container}>
           <TextInput
+            ref={(input) => { this.searchInput = input; }}
             style={styles.searchTextInput}
             placeholder='search courses...'
             autoCapitalize='none'
-            autoFocus={true}
             onChangeText={text => this.setState({q: text})}
             value={q}
           />
@@ -182,6 +196,10 @@ export default AddCourseSearch;
 
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginTop: 15
+  },
   header: {
     paddingTop: 10,
     paddingLeft: 20,
