@@ -20,3 +20,5 @@ export const goBack = () => {
     NavigationActions.back()
   );
 }
+
+// found at https://reactnavigation.org/docs/en/navigating-without-navigation-prop.html

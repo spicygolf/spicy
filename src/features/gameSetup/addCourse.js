@@ -44,7 +44,6 @@ export default AddCourse;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'flex-start'
+    flex: 1
   },
 });

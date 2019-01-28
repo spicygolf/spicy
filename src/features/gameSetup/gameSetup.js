@@ -22,6 +22,7 @@ import {
 
 import { filter } from 'lodash';
 
+import { setGameSetupRef } from 'features/gameSetup/gameSetupFns';
 import Courses from 'features/gameSetup/courses';
 import Players from 'features/gameSetup/players';
 import GameNav from 'features/games/gamenav';
@@ -48,7 +49,7 @@ class GameSetup extends React.Component {
       course: coursetee
     });
   }
-
+  
   _removeCourse(item) {
     this.setState({
       course: null
