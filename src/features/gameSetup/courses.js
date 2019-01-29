@@ -23,30 +23,21 @@ import { GetCourse } from 'features/courses/graphql';
 
 import { blue } from 'common/colors';
 
+import { navigate } from 'common/components/navigationService';
+import { removeCourse } from 'features/gameSetup/gameSetupFns';
+
 
 
 class Courses extends React.Component {
 
   constructor(props) {
     super(props);
-    this._addPressed = this._addPressed.bind(this);
     this._itemPressed = this._itemPressed.bind(this);
-    this._removePressed = this._removePressed.bind(this);
     this._renderItem = this._renderItem.bind(this);
   }
 
-  _addPressed() {
-    this.props.navigation.navigate('add_course', {
-      addFn: this.props.addFn
-    });
-  }
-
   _itemPressed(course) {
-    this.props.navigation.navigate('course_tee_item', {course: course});
-  }
-
-  _removePressed(course) {
-    this.props.removeFn(course);
+    navigate('course_tee_item', {course: course});
   }
 
   _renderItem({item}) {
@@ -57,7 +48,7 @@ class Courses extends React.Component {
           'no Tee selected'}
         rightIcon={{name: 'remove-circle', color: 'red'}}
         onPress={() => this._itemPressed(item)}
-        onPressRightIcon={() => this._removePressed(item)}
+        onPressRightIcon={() => removeCourse()}
       />
     );
   }
@@ -71,7 +62,7 @@ class Courses extends React.Component {
           color={blue}
           size={40}
           title='Add Course,Tees'
-          onPress={() => this._addPressed()}
+          onPress={() => navigate('add_course')}
           testID='add_course_button'
         />
       ) : (<Icon name='add-circle' size={40} color='#fff'/>);

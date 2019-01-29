@@ -16,10 +16,8 @@ class AddPlayer extends React.Component {
         <GameNav
           title='Add Player'
           showBack={true}
-          navigation={this.props.navigation}
         />
         <SearchPlayers
-          addFn={this.props.navigation.getParam('addFn')}
           navigation={this.props.navigation}
         />
       </View>

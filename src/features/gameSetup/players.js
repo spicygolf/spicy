@@ -24,30 +24,16 @@ import { GetPlayer } from 'features/players/graphql';
 
 import { blue } from 'common/colors';
 
+import { navigate } from 'common/components/navigationService';
+import { removePlayer } from 'features/gameSetup/gameSetupFns';
+
 
 
 class Players extends React.Component {
 
   constructor(props) {
     super(props);
-    this._addPressed = this._addPressed.bind(this);
-    this._itemPressed = this._itemPressed.bind(this);
-    this._removePressed = this._removePressed.bind(this);
     this._renderItem = this._renderItem.bind(this);
-  }
-
-  _addPressed() {
-    this.props.navigation.navigate('add_player', {
-      addFn: this.props.addFn
-    });
-  }
-
-  _itemPressed(player) {
-    this.props.navigation.navigate('player_item', {player: player});
-  }
-
-  _removePressed(item) {
-    this.props.removeFn(item);
   }
 
   _renderItem({item}) {
@@ -60,8 +46,8 @@ class Players extends React.Component {
         title={item.name || ''}
         subtitle={handicap}
         rightIcon={{name: 'remove-circle', color: 'red'}}
-        onPress={() => this._itemPressed(item)}
-        onPressRightIcon={() => this._removePressed(item._key)}
+        onPress={() => navigate('player_item', {player: item})}
+        onPressRightIcon={() => removePlayer(item._key)}
       />
     );
   }
@@ -77,7 +63,7 @@ class Players extends React.Component {
           color={blue}
           size={40}
           title='Add Player'
-          onPress={() => this._addPressed()}
+          onPress={() => navigate('add_player')}
           testID='add_player_button'
         />
       ) : (<Icon name='add-circle' size={40} color='#fff'/>);

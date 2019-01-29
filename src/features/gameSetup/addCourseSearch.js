@@ -27,6 +27,9 @@ import {
   SEARCH_COURSE_QUERY
 } from 'features/courses/graphql';
 
+import { goBack } from 'common/components/navigationService';
+import { addCourse } from 'features/gameSetup/gameSetupFns';
+
 
 
 const ListHeader = ({title}) => (
@@ -59,11 +62,11 @@ class AddCourseSearch extends React.Component {
   }
 
   _teePressed(tee) {
-    this.props.addFn({
+    addCourse({
       courseKey: this.state.course._key,
       tkey: tee._key
     });
-    this.props.navigation.goBack();
+    goBack();
   }
 
   _removeCourse() {

@@ -28,6 +28,9 @@ import {
   AddLinkMutation
 } from 'common/graphql/link';
 
+import { goBack } from 'common/components/navigationService';
+import { addPlayer } from 'features/gameSetup/gameSetupFns';
+
 
 
 const ListHeader = ({title}) => (
@@ -51,8 +54,8 @@ class SearchPlayers extends React.Component {
 
   _playerPressed(player) {
     Keyboard.dismiss();
-    this.props.addFn(player._key);
-    this.props.navigation.goBack();
+    addPlayer(player._key);
+    goBack();
   }
 
   _renderPlayer({item}) {

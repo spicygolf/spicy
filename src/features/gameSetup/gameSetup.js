@@ -33,10 +33,10 @@ class GameSetup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      players: this.props.navigation.getParam('players') || [],
+      players: this.props.players || [],
       currentPlayerKey: null,
       addCurrentPlayer: true,
-      courses: this.props.navigation.getParam('courses') || [],
+      coursetee: this.props.coursetee,
     };
     this._addCourse = this._addCourse.bind(this);
     this._removeCourse = this._removeCourse.bind(this);
@@ -46,13 +46,13 @@ class GameSetup extends React.Component {
 
   _addCourse(coursetee) {
     this.setState({
-      course: coursetee
+      coursetee: coursetee
     });
   }
-  
-  _removeCourse(item) {
+
+  _removeCourse() {
     this.setState({
-      course: null
+      coursetee: null
     });
   }
 
@@ -75,7 +75,7 @@ class GameSetup extends React.Component {
   }
 
   async componentDidMount() {
-    // TODO: check nav.getParam('players') (cuz gameSetup could be entered for an
+    // TODO: check this.props.players (cuz gameSetup could be entered for an
     //       existing game) and only add current user if it's a new game
     const cpkey = await AsyncStorage.getItem('currentPlayer');
     this.setState(prev => {
@@ -90,20 +90,16 @@ class GameSetup extends React.Component {
   render() {
 
     let content;
-    const gamespec = this.props.navigation.getParam('gamespec');
 
-    if( gamespec ) {
+    if( this.props.gamespec ) {
 
-      const gs = gamespec;
+      const gs = this.props.gamespec;
 
       const courseSection = ( gs.location_type && gs.location_type == 'local' ) ?
        (
         <Courses
-         course={this.state.course}
+         course={this.state.coursetee}
          showButton={ !this.state.course }
-         addFn={(item) => this._addCourse(item)}
-         removeFn={(item) => this._removeCourse(item)}
-         navigation={this.props.navigation}
         />
       ) : null;
 
@@ -112,10 +108,7 @@ class GameSetup extends React.Component {
          players={this.state.players}
          showButton={ this.state.players.length < gs.max_players ||
                       gs.max_players < 0 }
-         addFn={(item) => this._addPlayer(item)}
-         removeFn={(item) => this._removePlayer(item)}
          addCurrentPlayer={this.state.addCurrentPlayer}
-         navigation={this.props.navigation}
         />
       );
 
