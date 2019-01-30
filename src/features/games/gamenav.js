@@ -11,15 +11,19 @@ import {
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { goBack } from 'common/components/navigationService';
+import { goBack, navigate } from 'common/components/navigationService';
 
 
 class GameNav extends React.Component {
 
   render() {
+    const back = this.props.backTo ?
+      () => navigate(this.props.backTo) :
+      () => goBack();
+
     const left = this.props.showBack ? (
       <TouchableOpacity
-        onPress={() => goBack()}
+        onPress={() => back()}
       >
         <Icon name='chevron-left' size={30} color='#bbb' />
       </TouchableOpacity>

@@ -27,7 +27,7 @@ import {
   SEARCH_COURSE_QUERY
 } from 'features/courses/graphql';
 
-import { goBack } from 'common/components/navigationService';
+import { navigate } from 'common/components/navigationService';
 import { addCourse } from 'features/gameSetup/gameSetupFns';
 
 
@@ -66,7 +66,7 @@ class AddCourseSearch extends React.Component {
       courseKey: this.state.course._key,
       tkey: tee._key
     });
-    goBack();
+    navigate('GameSetup');
   }
 
   _removeCourse() {

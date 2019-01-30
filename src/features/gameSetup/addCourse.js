@@ -26,7 +26,7 @@ class AddCourse extends React.Component {
         <GameNav
           title='Add Course, Tees'
           showBack={true}
-          backTo={this.props.navigation.getParam('backTo')}
+          backTo={'GameSetup'}
         />
         <AddCourseTabs
           navigation={this.props.navigation}
