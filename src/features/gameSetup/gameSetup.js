@@ -99,7 +99,7 @@ class GameSetup extends React.Component {
        (
         <Courses
          course={this.state.coursetee}
-         showButton={ !this.state.course }
+         showButton={ !this.state.coursetee }
         />
       ) : null;
 
