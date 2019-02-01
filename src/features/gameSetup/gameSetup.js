@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 
 import {
-  Button,
   Card,
   Icon,
   List,
@@ -21,20 +20,13 @@ import {
 } from 'react-native-elements';
 
 import { filter } from 'lodash';
-import { withApollo } from 'react-apollo';
 
 import { setGameSetupRef } from 'features/gameSetup/gameSetupFns';
 import Courses from 'features/gameSetup/courses';
 import Players from 'features/gameSetup/players';
 import GameNav from 'features/games/gamenav';
 
-import {
-  AddGameMutation,
-  CURRENT_GAME_QUERY
-} from 'features/games/graphql';
-
-import { navigate } from 'common/components/navigationService';
-import { green } from 'common/colors';
+import AddGameButton from 'features/gameSetup/addGameButton';
 
 
 
@@ -53,7 +45,6 @@ class GameSetup extends React.Component {
     this._removeCourse = this._removeCourse.bind(this);
     this._addPlayer = this._addPlayer.bind(this);
     this._removePlayer = this._removePlayer.bind(this);
-    this._startGame = this._startGame.bind(this);
   }
 
   _addCourse(coursetee) {
@@ -86,6 +77,7 @@ class GameSetup extends React.Component {
     }));
   }
 
+/*
   _startGame() {
     navigate('Game', {
       players: this.state.players,
@@ -94,6 +86,7 @@ class GameSetup extends React.Component {
       gamespec: this.props.gamespec
     });
   }
+*/
 
   async componentDidMount() {
     // TODO: check this.props.players (cuz gameSetup could be entered for an
@@ -138,45 +131,6 @@ class GameSetup extends React.Component {
         </Card>
       );
 
-      const playGameButton = (
-        <AddGameMutation>
-          {({addGameMutation}) => (
-            <Button
-              title='Play Game'
-              onPress={async () => {
-                const {data, errors} = await addGameMutation({
-                  variables: {
-                    game: {
-                      name: this.props.gamespec.name,
-                      start: '2019-01-01',
-                      end: '2019-01-01',
-                      gametype: this.props.gamespec._key
-                    }
-                  }
-                });
-
-                if( data && data.addGame && data.addGame._key &&
-                    (!errors || errors.length == 0 ) ) {
-                  const res = this.props.client.writeQuery({
-                    query: CURRENT_GAME_QUERY,
-                    data: {
-                      currentGame: data.addGame._key
-                    }
-                  });
-                  console.log('writeQuery res', res);
-                  navigate('Game');
-                } else {
-                  console.log('addGame did not work', errors);
-                }
-              }}
-              color='white'
-              backgroundColor={green}
-              fontWeight='bold'
-            />
-          )}
-        </AddGameMutation>
-      );
-
       content = (
         <View style={styles.container}>
           <GameNav
@@ -194,7 +148,9 @@ class GameSetup extends React.Component {
             </ScrollView>
           </View>
           <View style={styles.playButtonView}>
-            { playGameButton }
+            <AddGameButton
+              gamespec={this.props.gamespec}
+            />
           </View>
         </View>
       );
@@ -208,7 +164,7 @@ class GameSetup extends React.Component {
   }
 }
 
-export default withApollo(GameSetup);
+export default GameSetup;
 
 
 const styles = StyleSheet.create({
