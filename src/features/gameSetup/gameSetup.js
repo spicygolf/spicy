@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 
 import {
+  Button,
   Card,
   Icon,
   List,
@@ -26,7 +27,7 @@ import Courses from 'features/gameSetup/courses';
 import Players from 'features/gameSetup/players';
 import GameNav from 'features/games/gamenav';
 
-import AddGameButton from 'features/gameSetup/addGameButton';
+import { green } from 'common/colors';
 
 
 
@@ -38,19 +39,11 @@ class GameSetup extends React.Component {
       players: this.props.players || [],
       currentPlayerKey: null,
       addCurrentPlayer: true,
-      coursetee: this.props.coursetee,
       options: []
     };
-    this._addCourse = this._addCourse.bind(this);
     this._removeCourse = this._removeCourse.bind(this);
     this._addPlayer = this._addPlayer.bind(this);
     this._removePlayer = this._removePlayer.bind(this);
-  }
-
-  _addCourse(coursetee) {
-    this.setState({
-      coursetee: coursetee
-    });
   }
 
   _removeCourse() {
@@ -77,17 +70,6 @@ class GameSetup extends React.Component {
     }));
   }
 
-/*
-  _startGame() {
-    navigate('Game', {
-      players: this.state.players,
-      coursetee: this.state.coursetee,
-      options: this.state.options,
-      gamespec: this.props.gamespec
-    });
-  }
-*/
-
   async componentDidMount() {
     // TODO: check this.props.players (cuz gameSetup could be entered for an
     //       existing game) and only add current user if it's a new game
@@ -112,8 +94,8 @@ class GameSetup extends React.Component {
       const courseSection = ( gs.location_type && gs.location_type == 'local' ) ?
        (
         <Courses
-         course={this.state.coursetee}
-         showButton={ !this.state.coursetee }
+         game={this.props.game}
+         showButton={true}
         />
       ) : null;
 
@@ -148,8 +130,10 @@ class GameSetup extends React.Component {
             </ScrollView>
           </View>
           <View style={styles.playButtonView}>
-            <AddGameButton
-              gamespec={this.props.gamespec}
+            <Button
+              title='Play Game'
+              backgroundColor={green}
+              color='white'
             />
           </View>
         </View>

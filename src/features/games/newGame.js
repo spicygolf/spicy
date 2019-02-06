@@ -21,32 +21,51 @@ import {
   GAMESPECS_FOR_PLAYER_QUERY
 } from 'features/games/graphql';
 
+import {
+  AddGameMutation
+} from 'features/games/graphql';
+
+
 
 class NewGame extends React.Component {
 
   constructor(props) {
     super(props);
     this._renderItem = this._renderItem.bind(this);
-    this._itemPressed = this._itemPressed.bind(this);
-  }
-
-  _itemPressed(item) {
-    this.props.navigation.navigate('GameSetup', {
-      game: null,
-      gamespec: item,
-      players: []
-    });
   }
 
   _renderItem({item}) {
     return (
-      <ListItem
-        roundAvatar
-        title={item.name || ''}
-        subtitle={item.type || ''}
-        onPress={() => this._itemPressed(item)}
-        testID={`new_${item._key}`}
-      />
+      <AddGameMutation>
+        {({addGameMutation}) => (
+          <ListItem
+            roundAvatar
+            title={item.name || ''}
+            subtitle={item.type || ''}
+            onPress={async () => {
+              const {data, errors} = await addGameMutation({
+                variables: {
+                  game: {
+                    name: item.name,
+                    start: '2019-01-01',  // TODO: moment & current timestamp
+                    gametype: item._key
+                  }
+                }
+              });
+              if( data && data.addGame && data.addGame._key &&
+                  (!errors || errors.length == 0 ) ) {
+                this.props.navigation.navigate('GameSetup', {
+                  game: data.addGame._key,
+                  gamespec: item
+                });
+              } else {
+                console.log('addGameMutation did not work', errors);
+              }
+            }}
+            testID={`new_${item._key}`}
+          />
+        )}
+      </AddGameMutation>
     );
   }
 
