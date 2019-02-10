@@ -80,7 +80,7 @@ class Courses extends React.Component {
           return (
             <Card>
               <View style={styles.cardTitle}>
-                <Icon name='add-circle' size={40} color='#fff'/>
+                { noAddButton }
                 <Text style={styles.title}>Course/Tee</Text>
                 { showButton ? addButton : noAddButton }
               </View>
