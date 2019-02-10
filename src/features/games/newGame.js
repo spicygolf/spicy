@@ -55,7 +55,7 @@ class NewGame extends React.Component {
               if( data && data.addGame && data.addGame._key &&
                   (!errors || errors.length == 0 ) ) {
                 this.props.navigation.navigate('GameSetup', {
-                  game: data.addGame._key,
+                  gkey: data.addGame._key,
                   gamespec: item
                 });
               } else {

@@ -19,12 +19,11 @@ import {
 
 import { find, remove } from 'lodash';
 
-import { GetCourse } from 'features/courses/graphql';
+import { GetTeeForGame } from 'features/courses/graphql';
 
 import { blue } from 'common/colors';
 
 import { navigate } from 'common/components/navigationService';
-import { removeCourse } from 'features/gameSetup/gameSetupFns';
 
 
 
@@ -36,26 +35,31 @@ class Courses extends React.Component {
     this._renderItem = this._renderItem.bind(this);
   }
 
-  _itemPressed(course) {
-    navigate('course_tee_item', {course: course});
+  _itemPressed(tee) {
+    navigate('course_tee_item', {tee: tee});
   }
 
   _renderItem({item}) {
-    return (
-      <ListItem
-        title={item.name || ''}
-        subtitle={item.tee.name ||
-          'no Tee selected'}
-        rightIcon={{name: 'remove-circle', color: 'red'}}
-        onPress={() => this._itemPressed(item)}
-        onPressRightIcon={() => removeCourse()}
-      />
-    );
+    if( item && item.name && item.course && item.course.name ) {
+      return (
+        <ListItem
+          title={item.course.name || ''}
+          subtitle={item.name || 'no Tee selected'}
+          rightIcon={{name: 'remove-circle', color: 'red'}}
+          onPress={() => this._itemPressed(item)}
+          onPressRightIcon={() => null} //removeTee(this.props.gkey)
+        />
+      );
+    } else {
+      return null;
+    }
   }
 
   render() {
 
-    const addButton = ( this.props.showButton ) ?
+    const { gkey, showButton } = this.props;
+
+    const addButton = ( showButton ) ?
       (
         <Icon
           name='add-circle'
@@ -67,33 +71,32 @@ class Courses extends React.Component {
         />
       ) : (<Icon name='add-circle' size={40} color='#fff'/>);
 
-    let courseList = null;
-    if( this.props.course ) {
-      const c = this.props.course;
-      courseList = (
-        <GetCourse
-          courseKey={c.courseKey}
-          key={c.courseKey}
+    let t;
+    if( gkey ) {
+      t = (
+        <GetTeeForGame
+          gkey={gkey}
         >
-          {({ loading, course }) => {
+          {({ loading, tee }) => {
             if( loading ) return null;
-            const tee = find(course.tees, ['_key', c.tkey]);
-            let newCourse = {...course, tee: tee};
-            return this._renderItem({item: newCourse});
+            return this._renderItem({item: tee});
           }}
-        </GetCourse>
+        </GetTeeForGame>
       );
+    } else {
+      t = (<Text>Error</Text>); // TODO: error component
+      console.log('error, game not set in courses from gameSetup');
     }
 
     return (
       <Card>
         <View style={styles.cardTitle}>
           <Icon name='add-circle' size={40} color='#fff'/>
-          <Text style={styles.title}>Course, Tees</Text>
+          <Text style={styles.title}>Course/Tee</Text>
           { addButton }
         </View>
         <List containerStyle={styles.listContainer}>
-          {courseList}
+        {t}
         </List>
       </Card>
     );

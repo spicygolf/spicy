@@ -22,7 +22,10 @@ import {
 
 import { filter } from 'lodash';
 
-import { setGameSetupRef } from 'features/gameSetup/gameSetupFns';
+import { GET_TEE_FOR_GAME_QUERY } from 'features/courses/graphql';
+import { AddLinkMutation } from 'common/graphql/link';
+import { navigate } from 'common/components/navigationService';
+
 import Courses from 'features/gameSetup/courses';
 import Players from 'features/gameSetup/players';
 import GameNav from 'features/games/gamenav';
@@ -41,18 +44,52 @@ class GameSetup extends React.Component {
       addCurrentPlayer: true,
       options: []
     };
-    this._removeCourse = this._removeCourse.bind(this);
-    this._addPlayer = this._addPlayer.bind(this);
-    this._removePlayer = this._removePlayer.bind(this);
+    this.renderTee = this.renderTee.bind(this);
+
+    this.addPlayer = this.addPlayer.bind(this);
+    this.removePlayer = this.removePlayer.bind(this);
   }
 
-  _removeCourse() {
-    this.setState({
-      coursetee: null
-    });
+  getGameKey() {
+    return this.props.gkey;
   }
 
-  _addPlayer(pkey) {
+  renderTee({item}) {
+    const { gkey } = this.props;
+    return (
+      <AddLinkMutation>
+        {({addLinkMutation}) => (
+          <ListItem
+            title={item.name || ''}
+            subtitle={`${item.gender} - rating: ${item.rating}, slope: ${item.slope}`}
+            onPress={async () => {
+              const {data, errors} = await addLinkMutation({
+                variables: {
+                  from: {type: 'game', value: gkey},
+                  to: {type: 'tee', value: item._key}
+                },
+                refetchQueries: [
+                  {
+                    query: GET_TEE_FOR_GAME_QUERY,
+                    variables: {
+                      gkey: gkey
+                    }
+                  }
+                ]
+              });
+              if( errors ) {
+                console.log('error adding tee to game', errors);
+                return (<Text>Error</Text>);
+              }
+              navigate('GameSetup');
+            }}
+          />
+        )}
+      </AddLinkMutation>
+    );
+  }
+
+  addPlayer(pkey) {
     this.setState(prev => {
       if( !prev.players.includes(pkey) ) {
         prev.players.push(pkey);
@@ -63,7 +100,7 @@ class GameSetup extends React.Component {
     });
   }
 
-  _removePlayer(pkey) {
+  removePlayer(pkey) {
     this.setState(prev => ({
       players: filter(prev.players, (p) => (p !== pkey)),
       addCurrentPlayer: !(pkey == this.state.currentPlayerKey)
@@ -94,8 +131,8 @@ class GameSetup extends React.Component {
       const courseSection = ( gs.location_type && gs.location_type == 'local' ) ?
        (
         <Courses
-         game={this.props.game}
-         showButton={true}
+          gkey={this.props.gkey}
+          showButton={true}
         />
       ) : null;
 

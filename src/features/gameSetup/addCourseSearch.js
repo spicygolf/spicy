@@ -27,9 +27,7 @@ import {
   SEARCH_COURSE_QUERY
 } from 'features/courses/graphql';
 
-import { navigate } from 'common/components/navigationService';
-import { addCourse } from 'features/gameSetup/gameSetupFns';
-
+import { renderTee } from 'features/gameSetup/gameSetupFns';
 
 
 const ListHeader = ({title}) => (
@@ -45,28 +43,17 @@ class AddCourseSearch extends React.Component {
     super(props);
     this.state = {
       q: '',
-      course: null,
-      searchInput: null
+      course: null
     };
     this._coursePressed = this._coursePressed.bind(this);
-    this._teePressed = this._teePressed.bind(this);
     this._removeCourse = this._removeCourse.bind(this);
     this._renderCourse = this._renderCourse.bind(this);
-    this._renderTee = this._renderTee.bind(this);
     this.searchInput = null;
   }
 
   _coursePressed(course) {
     Keyboard.dismiss();
     this.setState({course: course});
-  }
-
-  _teePressed(tee) {
-    addCourse({
-      courseKey: this.state.course._key,
-      tkey: tee._key
-    });
-    navigate('GameSetup');
   }
 
   _removeCourse() {
@@ -81,16 +68,6 @@ class AddCourseSearch extends React.Component {
         title={item.name || ''}
         subtitle={`${item.city}, ${item.state}`}
         onPress={() => this._coursePressed(item)}
-      />
-    );
-  }
-
-  _renderTee({item}) {
-    return (
-      <ListItem
-        title={item.name || ''}
-        subtitle={`${item.gender} - rating: ${item.rating}, slope: ${item.slope}`}
-        onPress={() => this._teePressed(item)}
       />
     );
   }
@@ -162,7 +139,7 @@ class AddCourseSearch extends React.Component {
       }));
       tees = orderBy(tees,
                      ['gender', 'rating', 'slope'],
-                     ['desc',   'desc',   'desc']);
+                     ['desc',   'desc',   'desc' ]);
 
       const cardHeader = (
         <ListItem
@@ -177,7 +154,7 @@ class AddCourseSearch extends React.Component {
         <List containerStyle={styles.listContainer}>
           <FlatList
             data={tees}
-            renderItem={this._renderTee}
+            renderItem={renderTee}
             keyExtractor={item => item._key}
             keyboardShouldPersistTaps={'handled'}
           />

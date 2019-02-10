@@ -25,9 +25,6 @@ export class AddLinkMutation extends React.PureComponent {
           from: from,
           to: to
         }}
-        update={(store, args) => {
-          console.log('addLinkMutation update store, args', store, args);
-        }}
       >
         {mutate => {
           return children({

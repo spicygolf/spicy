@@ -4,18 +4,22 @@ export const setGameSetupRef = (gameSetupRef) => {
   _gameSetupRef = gameSetupRef;
 };
 
-export const addCourse = (coursetee) => {
-  _gameSetupRef._addCourse(coursetee);
+export const getGameKey = () => (
+  _gameSetupRef.getGameKey()
+);
+
+export const renderTee = (tee) => {
+  return _gameSetupRef.renderTee(tee);
 };
 
-export const removeCourse = () => {
-  _gameSetupRef._removeCourse();
+export const removeTee = () => {
+  _gameSetupRef.removeCourse();
 };
 
 export const addPlayer = (pkey) => {
-  _gameSetupRef._addPlayer(pkey);
+  _gameSetupRef.addPlayer(pkey);
 };
 
 export const removePlayer = (pkey) => {
-  _gameSetupRef._removePlayer(pkey);
+  _gameSetupRef.removePlayer(pkey);
 };
