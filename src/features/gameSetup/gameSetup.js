@@ -44,7 +44,11 @@ class GameSetup extends React.Component {
       addCurrentPlayer: true,
       options: []
     };
+
+    this.getGameKey = this.getGameKey.bind(this);
+
     this.renderTee = this.renderTee.bind(this);
+    this.removeTee = this.removeTee.bind(this);
 
     this.addPlayer = this.addPlayer.bind(this);
     this.removePlayer = this.removePlayer.bind(this);
@@ -87,6 +91,12 @@ class GameSetup extends React.Component {
         )}
       </AddLinkMutation>
     );
+  }
+
+  removeTee(tkey) {
+    const { gkey } = this.props;
+
+    console.log('removeTee', tkey, gkey);
   }
 
   addPlayer(pkey) {

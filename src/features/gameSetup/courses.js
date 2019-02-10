@@ -24,6 +24,7 @@ import { GetTeeForGame } from 'features/courses/graphql';
 import { blue } from 'common/colors';
 
 import { navigate } from 'common/components/navigationService';
+import { removeTee } from 'features/gameSetup/gameSetupFns';
 
 
 
@@ -47,7 +48,7 @@ class Courses extends React.Component {
           subtitle={tee.name || 'no Tee selected'}
           rightIcon={{name: 'remove-circle', color: 'red'}}
           onPress={() => this._itemPressed(tee)}
-          onPressRightIcon={() => null} //removeTee(this.props.gkey)
+          onPressRightIcon={() => removeTee(tee._key)}
         />
       );
     } else {
