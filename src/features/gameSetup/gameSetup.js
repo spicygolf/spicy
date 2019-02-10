@@ -132,7 +132,6 @@ class GameSetup extends React.Component {
        (
         <Courses
           gkey={this.props.gkey}
-          showButton={true}
         />
       ) : null;
 

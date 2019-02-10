@@ -39,14 +39,14 @@ class Courses extends React.Component {
     navigate('course_tee_item', {tee: tee});
   }
 
-  _renderItem({item}) {
-    if( item && item.name && item.course && item.course.name ) {
+  _renderItem(tee) {
+    if( tee && tee.name && tee.course && tee.course.name ) {
       return (
         <ListItem
-          title={item.course.name || ''}
-          subtitle={item.name || 'no Tee selected'}
+          title={tee.course.name || ''}
+          subtitle={tee.name || 'no Tee selected'}
           rightIcon={{name: 'remove-circle', color: 'red'}}
-          onPress={() => this._itemPressed(item)}
+          onPress={() => this._itemPressed(tee)}
           onPressRightIcon={() => null} //removeTee(this.props.gkey)
         />
       );
@@ -57,50 +57,43 @@ class Courses extends React.Component {
 
   render() {
 
-    const { gkey, showButton } = this.props;
+    const { gkey } = this.props;
 
-    const addButton = ( showButton ) ?
-      (
-        <Icon
-          name='add-circle'
-          color={blue}
-          size={40}
-          title='Add Course,Tees'
-          onPress={() => navigate('add_course')}
-          testID='add_course_button'
-        />
-      ) : (<Icon name='add-circle' size={40} color='#fff'/>);
-
-    let t;
-    if( gkey ) {
-      t = (
-        <GetTeeForGame
-          gkey={gkey}
-        >
-          {({ loading, tee }) => {
-            if( loading ) return null;
-            return this._renderItem({item: tee});
-          }}
-        </GetTeeForGame>
-      );
-    } else {
-      t = (<Text>Error</Text>); // TODO: error component
-      console.log('error, game not set in courses from gameSetup');
-    }
+    const addButton = (
+      <Icon
+        name='add-circle'
+        color={blue}
+        size={40}
+        title='Add Course,Tees'
+        onPress={() => navigate('add_course')}
+        testID='add_course_button'
+      />
+    );
+    const noAddButton = (<Icon name='add-circle' size={40} color='#fff'/>);
 
     return (
-      <Card>
-        <View style={styles.cardTitle}>
-          <Icon name='add-circle' size={40} color='#fff'/>
-          <Text style={styles.title}>Course/Tee</Text>
-          { addButton }
-        </View>
-        <List containerStyle={styles.listContainer}>
-        {t}
-        </List>
-      </Card>
+      <GetTeeForGame gkey={gkey}>
+        {({ loading, tee }) => {
+          let showButton = true;
+          if( loading ) return (<ActivityIndicator />);
+          if( tee && tee._key ) showButton = false;
+          return (
+            <Card>
+              <View style={styles.cardTitle}>
+                <Icon name='add-circle' size={40} color='#fff'/>
+                <Text style={styles.title}>Course/Tee</Text>
+                { showButton ? addButton : noAddButton }
+              </View>
+              <List containerStyle={styles.listContainer}>
+              { this._renderItem(tee) }
+              </List>
+            </Card>
+          );
+        }}
+      </GetTeeForGame>
     );
   }
+
 }
 
 export default Courses;
