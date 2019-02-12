@@ -47,24 +47,44 @@ class GameSetup extends React.Component {
 
     this.getGameKey = this.getGameKey.bind(this);
 
-    this.renderTee = this.renderTee.bind(this);
+    this._renderTee = this._renderTee.bind(this);
 
     this.addPlayer = this.addPlayer.bind(this);
     this.removePlayer = this.removePlayer.bind(this);
+  }
+
+  getCurrentPlayerKey() {
+    return this.state.currentPlayerKey;
   }
 
   getGameKey() {
     return this.props.gkey;
   }
 
-  renderTee({item}) {
+  renderCourseTee({item}) {
+    return this._renderTee(
+      item,
+      item.name,
+      `${item.gender} - rating: ${item.rating}, slope: ${item.slope}`
+    );
+  }
+
+  renderFavoritesTee({item}) {
+    return this._renderTee(
+      item,
+      item.course.name,
+      `${item.name} - rating: ${item.rating.all18}, slope: ${item.slope.all18}`
+    );
+  }
+
+  _renderTee(item, title, subtitle) {
     const { gkey } = this.props;
     return (
       <AddLinkMutation>
         {({addLinkMutation}) => (
           <ListItem
-            title={item.name || ''}
-            subtitle={`${item.gender} - rating: ${item.rating}, slope: ${item.slope}`}
+            title={title}
+            subtitle={subtitle}
             onPress={async () => {
               const {data, errors} = await addLinkMutation({
                 variables: {

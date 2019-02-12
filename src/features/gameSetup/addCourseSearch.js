@@ -27,7 +27,7 @@ import {
   SEARCH_COURSE_QUERY
 } from 'features/courses/graphql';
 
-import { renderTee } from 'features/gameSetup/gameSetupFns';
+import { renderCourseTee } from 'features/gameSetup/gameSetupFns';
 
 
 const ListHeader = ({title}) => (
@@ -154,7 +154,7 @@ class AddCourseSearch extends React.Component {
         <List containerStyle={styles.listContainer}>
           <FlatList
             data={tees}
-            renderItem={renderTee}
+            renderItem={renderCourseTee}
             keyExtractor={item => item._key}
             keyboardShouldPersistTaps={'handled'}
           />
