@@ -48,7 +48,6 @@ class GameSetup extends React.Component {
     this.getGameKey = this.getGameKey.bind(this);
 
     this.renderTee = this.renderTee.bind(this);
-    this.removeTee = this.removeTee.bind(this);
 
     this.addPlayer = this.addPlayer.bind(this);
     this.removePlayer = this.removePlayer.bind(this);
@@ -83,7 +82,6 @@ class GameSetup extends React.Component {
               });
               if( errors ) {
                 console.log('error adding tee to game', errors);
-                return (<Text>Error</Text>);
               }
               navigate('GameSetup');
             }}
@@ -91,12 +89,6 @@ class GameSetup extends React.Component {
         )}
       </AddLinkMutation>
     );
-  }
-
-  removeTee(tkey) {
-    const { gkey } = this.props;
-
-    console.log('removeTee', tkey, gkey);
   }
 
   addPlayer(pkey) {

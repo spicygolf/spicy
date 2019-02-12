@@ -12,10 +12,6 @@ export const renderTee = (tee) => {
   return _gameSetupRef.renderTee(tee);
 };
 
-export const removeTee = (tkey) => {
-  _gameSetupRef.removeTee(tkey);
-};
-
 export const addPlayer = (pkey) => {
   _gameSetupRef.addPlayer(pkey);
 };

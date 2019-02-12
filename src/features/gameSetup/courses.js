@@ -24,7 +24,8 @@ import { GetTeeForGame } from 'features/courses/graphql';
 import { blue } from 'common/colors';
 
 import { navigate } from 'common/components/navigationService';
-import { removeTee } from 'features/gameSetup/gameSetupFns';
+import { RemoveLinkMutation } from 'common/graphql/unlink';
+import { GET_TEE_FOR_GAME_QUERY } from 'features/courses/graphql';
 
 
 
@@ -42,14 +43,38 @@ class Courses extends React.Component {
 
   _renderItem(tee) {
     if( tee && tee.name && tee.course && tee.course.name ) {
+      const { gkey } = this.props;
+      console.log('courses gkey', gkey);
       return (
-        <ListItem
-          title={tee.course.name || ''}
-          subtitle={tee.name || 'no Tee selected'}
-          rightIcon={{name: 'remove-circle', color: 'red'}}
-          onPress={() => this._itemPressed(tee)}
-          onPressRightIcon={() => removeTee(tee._key)}
-        />
+        <RemoveLinkMutation>
+          {({removeLinkMutation}) => (
+            <ListItem
+              title={tee.course.name || ''}
+              subtitle={tee.name || 'no Tee selected'}
+              rightIcon={{name: 'remove-circle', color: 'red'}}
+              onPress={() => this._itemPressed(tee)}
+              onPressRightIcon={async () => {
+                const {data, errors} = await removeLinkMutation({
+                  variables: {
+                    from: {type: 'game', value: gkey},
+                    to: {type: 'tee', value: tee._key}
+                  },
+                  update: (cache, result) => {
+                    cache.writeQuery({
+                      query: GET_TEE_FOR_GAME_QUERY,
+                      variables: { gkey: gkey },
+                      data: {GetTeeForGame: {}}
+                    });
+                  },
+                  ignoreResults: true
+                });
+                if( errors ) {
+                  console.log('error removing tee from game', errors);
+                }
+              }}
+            />
+          )}
+        </RemoveLinkMutation>
       );
     } else {
       return null;
@@ -86,7 +111,7 @@ class Courses extends React.Component {
                 { showButton ? addButton : noAddButton }
               </View>
               <List containerStyle={styles.listContainer}>
-              { this._renderItem(tee) }
+                { this._renderItem(tee) }
               </List>
             </Card>
           );
