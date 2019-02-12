@@ -12,6 +12,8 @@ import {
 
 import { Query, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
+import moment from 'moment';
+
 
 import { List, ListItem } from 'react-native-elements';
 
@@ -47,7 +49,7 @@ class NewGame extends React.Component {
                 variables: {
                   game: {
                     name: item.name,
-                    start: '2019-01-01',  // TODO: moment & current timestamp
+                    start: moment.utc().format(),
                     gametype: item._key
                   }
                 }

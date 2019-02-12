@@ -88,7 +88,6 @@ class Games extends React.Component {
       );
     }
 
-    //console.log('games render client', this.props.client.cache._queryable);
     return (
       <Query
         query={ACTIVE_GAMES_FOR_PLAYER_QUERY}

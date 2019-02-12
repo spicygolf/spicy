@@ -8,6 +8,8 @@ import {
   View
 } from 'react-native';
 
+import { renderTee } from 'features/gameSetup/gameSetupFns';
+
 
 
 class AddCourseFavorites extends React.Component {
@@ -15,7 +17,7 @@ class AddCourseFavorites extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>Add Course from Favorites</Text>
+
       </View>
     );
   }
