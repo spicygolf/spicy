@@ -23,7 +23,10 @@ import {
 import { filter } from 'lodash';
 
 import { GET_TEE_FOR_GAME_QUERY } from 'features/courses/graphql';
-import { AddLinkMutation } from 'common/graphql/link';
+import {
+  AddLinkMutation,
+  RemoveLinkMutation
+} from 'common/graphql/link';
 import { navigate } from 'common/components/navigationService';
 
 import Courses from 'features/gameSetup/courses';
@@ -71,7 +74,10 @@ class GameSetup extends React.Component {
 
   renderFavoritesTee({item}) {
     return this._renderTee(
-      item,
+      {
+        ...item,
+        faved: true
+      },
       item.course.name,
       `${item.name} - ${item.rating.all18}/${item.slope.all18}`
     );
@@ -105,10 +111,38 @@ class GameSetup extends React.Component {
               }
               navigate('GameSetup');
             }}
+            leftIcon={this.favoriteTeeIcon(item.faved)}
           />
         )}
       </AddLinkMutation>
     );
+  }
+
+  favoriteTeeIcon(faved, from, to) {
+    if( faved ) {
+      return (
+        <RemoveLinkMutation>
+          {({removeLinkMutation}) => (
+            <Icon
+              type='fontawesome'
+              name='star'
+            />
+          )}
+        </RemoveLinkMutation>
+      );
+    } else {
+      return (
+        <AddLinkMutation>
+          {({addLinkMutation}) => (
+            <Icon
+              type='fontawesome'
+              name='star-o'
+            />
+          )}
+        </AddLinkMutation>
+      );
+
+    }
   }
 
   addPlayer(pkey) {

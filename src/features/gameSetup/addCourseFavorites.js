@@ -25,14 +25,12 @@ class AddCourseFavorites extends React.Component {
   render() {
 
     const pkey = getCurrentPlayerKey();
-    console.log('pkey', pkey);
 
     return (
       <View style={styles.container}>
         <GetFavoriteTeesForPlayer pkey={pkey}>
           {({loading, tees}) => {
             if( loading ) return (<ActivityIndicator />);
-            console.log('tees', tees);
             return (
               <List containerStyle={styles.listContainer}>
                 <FlatList
