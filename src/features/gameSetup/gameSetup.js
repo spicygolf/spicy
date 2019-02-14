@@ -65,7 +65,7 @@ class GameSetup extends React.Component {
     return this._renderTee(
       item,
       item.name,
-      `${item.gender} - rating: ${item.rating}, slope: ${item.slope}`
+      `${item.gender} - ${item.rating}/${item.slope}`
     );
   }
 
@@ -73,7 +73,7 @@ class GameSetup extends React.Component {
     return this._renderTee(
       item,
       item.course.name,
-      `${item.name} - rating: ${item.rating.all18}, slope: ${item.slope.all18}`
+      `${item.name} - ${item.rating.all18}/${item.slope.all18}`
     );
   }
 
