@@ -62,7 +62,7 @@ class Courses extends React.Component {
                   update: (cache, result) => {
                     cache.writeQuery({
                       query: GET_TEE_FOR_GAME_QUERY,
-                      variables: { gkey: gkey },
+                      variables: {gkey: gkey},
                       data: {GetTeeForGame: {}}
                     });
                   },

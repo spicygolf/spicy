@@ -16,7 +16,10 @@ import {
   getCurrentPlayerKey,
   renderFavoritesTee
 } from 'features/gameSetup/gameSetupFns';
-import { GetFavoriteTeesForPlayer } from 'features/courses/graphql';
+import {
+  GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
+  GetFavoriteTeesForPlayer
+} from 'features/courses/graphql';
 
 
 
@@ -31,10 +34,24 @@ class AddCourseFavorites extends React.Component {
         <GetFavoriteTeesForPlayer pkey={pkey}>
           {({loading, tees}) => {
             if( loading ) return (<ActivityIndicator />);
+            const newTees = tees.map(tee => ({
+              ...tee,
+              fave: {
+                faved: true,
+                from: {type: 'player', value: pkey},
+                to:   {type: 'tee', value: tee._key},
+                refetchQueries: [{
+                  query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
+                  variables: {
+                    pkey: pkey
+                  }
+                }]
+              }
+            }));
             return (
               <List containerStyle={styles.listContainer}>
                 <FlatList
-                  data={tees}
+                  data={newTees}
                   renderItem={renderFavoritesTee}
                   keyExtractor={item => item._key}
                   keyboardShouldPersistTaps={'handled'}

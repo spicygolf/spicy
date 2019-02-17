@@ -7,8 +7,8 @@ import gql from 'graphql-tag';
 
 
 export const ADD_LINK_MUTATION = gql`
-  mutation link($from: LinkInput!, $to: LinkInput!) {
-    link(from: $from, to: $to) {
+  mutation link($from: LinkInput!, $to: LinkInput!, $other: [KV]) {
+    link(from: $from, to: $to, other: $other) {
       _key
     }
   }
@@ -17,13 +17,14 @@ export const ADD_LINK_MUTATION = gql`
 export class AddLinkMutation extends React.PureComponent {
 
   render() {
-    const { children, from, to } = this.props;
+    const { children, from, to, other } = this.props;
     return (
       <Mutation
         mutation={ADD_LINK_MUTATION}
         variables={{
           from: from,
-          to: to
+          to: to,
+          other: other
         }}
       >
         {mutate => {

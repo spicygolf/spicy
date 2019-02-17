@@ -21,13 +21,20 @@ import {
 
 import { Query } from 'react-apollo';
 
-import { orderBy } from 'lodash';
+import { find, orderBy } from 'lodash';
 
 import {
   SEARCH_COURSE_QUERY
 } from 'features/courses/graphql';
 
-import { renderCourseTee } from 'features/gameSetup/gameSetupFns';
+import {
+  getCurrentPlayerKey,
+  renderCourseTee
+} from 'features/gameSetup/gameSetupFns';
+import {
+  GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
+  GetFavoriteTeesForPlayer
+} from 'features/courses/graphql';
 
 
 const ListHeader = ({title}) => (
@@ -131,41 +138,61 @@ class AddCourseSearch extends React.Component {
         </View>
       );
     } else {
-      //console.log('course selected', course);
-      let tees = course.tees.map(tee => ({
-        ...tee,
-        slope: tee.slope.all18 ? tee.slope.all18 : tee.slope.front9,
-        rating: tee.rating.all18 ? tee.rating.all18 : tee.rating.front9,
-      }));
-      tees = orderBy(tees,
-                     ['gender', 'rating', 'slope'],
-                     ['desc',   'desc',   'desc' ]);
-
-      const cardHeader = (
-        <ListItem
-          title={course.name}
-          subtitle={`${course.city}, ${course.state}`}
-          rightIcon={{name: 'remove-circle', color: 'red'}}
-          onPressRightIcon={() => this._removeCourse()}
-        />
-      );
-
-      const cardList = (
-        <List containerStyle={styles.listContainer}>
-          <FlatList
-            data={tees}
-            renderItem={renderCourseTee}
-            keyExtractor={item => item._key}
-            keyboardShouldPersistTaps={'handled'}
-          />
-        </List>
-      );
+      const pkey = getCurrentPlayerKey();
 
       return (
-        <Card>
-          { cardHeader }
-          { cardList }
-        </Card>
+        <GetFavoriteTeesForPlayer pkey={pkey}>
+          {({loading, tees:faveTees}) => {
+            if( loading ) return (<ActivityIndicator />);
+            let tees = course.tees.map(tee => ({
+              ...tee,
+              slope: tee.slope.all18 ? tee.slope.all18 : tee.slope.front9,
+              rating: tee.rating.all18 ? tee.rating.all18 : tee.rating.front9,
+              fave: {
+                faved: (find(faveTees, {_key: tee._key}) ? true : false),
+                from: {type: 'player', value: pkey},
+                to:   {type: 'tee', value: tee._key},
+                refetchQueries: [{
+                  query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
+                  variables: {
+                    pkey: pkey
+                  }
+                }]
+              }
+            }));
+            tees = orderBy(tees,
+                           ['gender', 'rating', 'slope'],
+                           ['desc',   'desc',   'desc' ]);
+
+            const cardHeader = (
+              <ListItem
+                title={course.name}
+                subtitle={`${course.city}, ${course.state}`}
+                rightIcon={{name: 'remove-circle', color: 'red'}}
+                onPressRightIcon={() => this._removeCourse()}
+              />
+            );
+
+            const cardList = (
+              <List containerStyle={styles.listContainer}>
+                <FlatList
+                  data={tees}
+                  renderItem={renderCourseTee}
+                  keyExtractor={item => item._key}
+                  keyboardShouldPersistTaps={'handled'}
+                />
+              </List>
+            );
+
+            return (
+              <Card>
+                { cardHeader }
+                { cardList }
+              </Card>
+            );
+
+          }}
+        </GetFavoriteTeesForPlayer>
       );
     }
   }

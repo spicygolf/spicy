@@ -47,7 +47,7 @@ export class GetFavoriteTeesForPlayer extends React.PureComponent {
           if( error ) console.log('getFavoriteTeesForPlayer error', error);
           return children({
             tees: ( data && data.getFavoriteTeesForPlayer ) ?
-              data.getFavoriteTeesForPlayer : {},
+              data.getFavoriteTeesForPlayer : [],
             loading
           });
         }}
