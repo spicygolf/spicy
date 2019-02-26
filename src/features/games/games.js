@@ -20,6 +20,7 @@ import { Query, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 
 import { List, ListItem } from 'react-native-elements';
+import moment from 'moment';
 
 import {
   CURRENT_GAME_QUERY,
@@ -62,12 +63,19 @@ class Games extends React.Component {
   }
 
   _renderItem({item}) {
+    const startTime = moment(item.start).format('llll');
     return (
       <ListItem
         roundAvatar
         title={item.name || ''}
-        subtitle={item.start || ''}
+        subtitle={startTime || ''}
         onPress={() => this._itemPressed(item)}
+        rightIcon={{name: 'settings', color: '#999'}}
+        onPressRightIcon={() => {
+          this.props.navigation.navigate('GameSetup', {
+            gkey: item._key
+          });
+        }}
       />
     );
   }

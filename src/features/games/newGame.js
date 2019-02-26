@@ -20,12 +20,10 @@ import { List, ListItem } from 'react-native-elements';
 import GameNav from 'features/games/gamenav';
 
 import {
-  GAMESPECS_FOR_PLAYER_QUERY
-} from 'features/games/graphql';
-
-import {
+  GAMESPECS_FOR_PLAYER_QUERY,
   AddGameMutation
 } from 'features/games/graphql';
+import { AddLinkMutation } from 'common/graphql/link';
 
 
 
@@ -33,6 +31,9 @@ class NewGame extends React.Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      currentPlayerKey: props.navigation.getParam('currentPlayerKey')
+    };
     this._renderItem = this._renderItem.bind(this);
   }
 
@@ -40,32 +41,44 @@ class NewGame extends React.Component {
     return (
       <AddGameMutation>
         {({addGameMutation}) => (
-          <ListItem
-            roundAvatar
-            title={item.name || ''}
-            subtitle={item.type || ''}
-            onPress={async () => {
-              const {data, errors} = await addGameMutation({
-                variables: {
-                  game: {
-                    name: item.name,
-                    start: moment.utc().format(),
-                    gametype: item._key
+          <AddLinkMutation>
+            {({addLinkMutation}) => (
+              <ListItem
+                roundAvatar
+                title={item.name || ''}
+                subtitle={item.type || ''}
+                onPress={async () => {
+                  const {data: game_data, errors: game_errors} = await addGameMutation({
+                    variables: {
+                      game: {
+                        name: item.name,
+                        start: moment.utc().format(),
+                        gametype: item._key
+                      }
+                    }
+                  });
+                  const { _key: gkey } = game_data.addGame;
+                  const {data: gp_data, errors: gp_errors} = await addLinkMutation({
+                    variables: {
+                      from: {type: 'game', value: gkey},
+                      to: {type: 'player', value: this.state.currentPlayerKey},
+                      other: [{key: 'created_by', value: 'true'}]
+                    }
+                  });
+                  if( (!game_errors || game_errors.length == 0 ) &&
+                      (!gp_errors || gp_errors.length == 0 ) ) {
+                    this.props.navigation.navigate('GameSetup', {
+                      gkey: gkey,
+                      gamespec: item
+                    });
+                  } else {
+                    console.log('addGameMutation did not work', errors);
                   }
-                }
-              });
-              if( data && data.addGame && data.addGame._key &&
-                  (!errors || errors.length == 0 ) ) {
-                this.props.navigation.navigate('GameSetup', {
-                  gkey: data.addGame._key,
-                  gamespec: item
-                });
-              } else {
-                console.log('addGameMutation did not work', errors);
-              }
-            }}
-            testID={`new_${item._key}`}
-          />
+                }}
+                testID={`new_${item._key}`}
+              />
+            )}
+          </AddLinkMutation>
         )}
       </AddGameMutation>
     );
@@ -73,12 +86,11 @@ class NewGame extends React.Component {
 
 
   render() {
-    const currentPlayerKey = this.props.navigation.getParam('currentPlayerKey');
 
     return (
       <Query
         query={GAMESPECS_FOR_PLAYER_QUERY}
-        variables={{pkey: currentPlayerKey}}
+        variables={{pkey: this.state.currentPlayerKey}}
         fetchPolicy='cache-and-network'
       >
         {({ data, loading, error}) => {

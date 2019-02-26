@@ -40,6 +40,7 @@ class GameSetup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      gamespec: this._getGamespec(),
       players: this.props.players || [],
       currentPlayerKey: null,
       addCurrentPlayer: true,
@@ -47,11 +48,10 @@ class GameSetup extends React.Component {
     };
 
     this.getGameKey = this.getGameKey.bind(this);
-
     this._renderTee = this._renderTee.bind(this);
-
     this.addPlayer = this.addPlayer.bind(this);
     this.removePlayer = this.removePlayer.bind(this);
+    this._getGamespec = this._getGamespec.bind(this);
   }
 
   getCurrentPlayerKey() {
@@ -135,16 +135,15 @@ class GameSetup extends React.Component {
     }));
   }
 
+  _getGamespec() {
+    if( this.props.gamespec ) return this.props.gamespec;
+    return {};
+  }
+
   async componentDidMount() {
-    // TODO: check this.props.players (cuz gameSetup could be entered for an
-    //       existing game) and only add current user if it's a new game
     const cpkey = await AsyncStorage.getItem('currentPlayer');
-    this.setState(prev => {
-      prev.players.push(cpkey);
-      return {
-        currentPlayerKey: cpkey,
-        players: prev.players
-      };
+    this.setState({
+      currentPlayerKey: cpkey
     });
   }
 
@@ -152,9 +151,9 @@ class GameSetup extends React.Component {
 
     let content;
 
-    if( this.props.gamespec ) {
+    if( this.state.gamespec ) {
 
-      const gs = this.props.gamespec;
+      const gs = this.state.gamespec;
 
       const courseSection = ( gs.location_type && gs.location_type == 'local' ) ?
        (
