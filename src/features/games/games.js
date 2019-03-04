@@ -73,7 +73,8 @@ class Games extends React.Component {
         rightIcon={{name: 'settings', color: '#999'}}
         onPressRightIcon={() => {
           this.props.navigation.navigate('GameSetup', {
-            gkey: item._key
+            gkey: item._key,
+            gametype: item.gametype
           });
         }}
       />

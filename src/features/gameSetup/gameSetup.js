@@ -20,6 +20,7 @@ import {
   ListItem
 } from 'react-native-elements';
 
+import { withNavigation } from 'react-navigation';
 import { filter } from 'lodash';
 
 import { GET_TEE_FOR_GAME_QUERY } from 'features/courses/graphql';
@@ -137,6 +138,9 @@ class GameSetup extends React.Component {
 
   _getGamespec() {
     if( this.props.gamespec ) return this.props.gamespec;
+
+    const gametype = this.props.navigation.getParam('gametype');
+    if( gametype ) console.log('gametype', gametype);
     return {};
   }
 
@@ -211,7 +215,7 @@ class GameSetup extends React.Component {
   }
 }
 
-export default GameSetup;
+export default withNavigation(GameSetup);
 
 
 const styles = StyleSheet.create({
