@@ -44,7 +44,6 @@ class Courses extends React.Component {
   _renderItem(tee) {
     if( tee && tee.name && tee.course && tee.course.name ) {
       const { gkey } = this.props;
-      console.log('courses gkey', gkey);
       return (
         <RemoveLinkMutation>
           {({removeLinkMutation}) => (

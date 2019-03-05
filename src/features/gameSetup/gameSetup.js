@@ -20,11 +20,12 @@ import {
   ListItem
 } from 'react-native-elements';
 
-import { withNavigation } from 'react-navigation';
 import { filter } from 'lodash';
 
+import { Query } from 'react-apollo';
 import { GET_TEE_FOR_GAME_QUERY } from 'features/courses/graphql';
 import { AddLinkMutation } from 'common/graphql/link';
+import { GET_GAMESPEC_QUERY } from 'features/games/graphql';
 import { navigate } from 'common/components/navigationService';
 
 import Courses from 'features/gameSetup/courses';
@@ -41,18 +42,17 @@ class GameSetup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      gamespec: this._getGamespec(),
+      gametype: this.props.gametype,
       players: this.props.players || [],
-      currentPlayerKey: null,
       addCurrentPlayer: true,
       options: []
     };
 
     this.getGameKey = this.getGameKey.bind(this);
+    this.getCurrentPlayerKey = this.getCurrentPlayerKey.bind(this);
     this._renderTee = this._renderTee.bind(this);
     this.addPlayer = this.addPlayer.bind(this);
     this.removePlayer = this.removePlayer.bind(this);
-    this._getGamespec = this._getGamespec.bind(this);
   }
 
   getCurrentPlayerKey() {
@@ -136,14 +136,6 @@ class GameSetup extends React.Component {
     }));
   }
 
-  _getGamespec() {
-    if( this.props.gamespec ) return this.props.gamespec;
-
-    const gametype = this.props.navigation.getParam('gametype');
-    if( gametype ) console.log('gametype', gametype);
-    return {};
-  }
-
   async componentDidMount() {
     const cpkey = await AsyncStorage.getItem('currentPlayer');
     this.setState({
@@ -153,69 +145,81 @@ class GameSetup extends React.Component {
 
   render() {
 
-    let content;
+    if( this.state.gametype ) {
+      return (
+        <Query
+          query={GET_GAMESPEC_QUERY}
+          variables={{
+            gamespec: this.state.gametype
+          }}
+        >
+          {({data, loading, error }) => {
+            if( loading ) return (<ActivityIndicator />);
 
-    if( this.state.gamespec ) {
+            // TODO: error component instead of below...
+            if( error ) {
+              console.log(error);
+              return (<Text>Error</Text>);
+            }
+            const { getGameSpec: gamespec } = data;
+            const gs = gamespec;
+            const courseSection = ( gs.location_type && gs.location_type == 'local' ) ?
+            (
+              <Courses
+                gkey={this.props.gkey}
+              />
+            ) : null;
 
-      const gs = this.state.gamespec;
+            const playerSection = (
+              <Players
+                players={this.state.players}
+                showButton={ this.state.players.length < gs.max_players ||
+                  gs.max_players < 0 }
+                addCurrentPlayer={this.state.addCurrentPlayer}
+              />
+            );
 
-      const courseSection = ( gs.location_type && gs.location_type == 'local' ) ?
-       (
-        <Courses
-          gkey={this.props.gkey}
-        />
-      ) : null;
+            const optionsSection = (
+              <Card title="Options">
+              </Card>
+            );
 
-      const playerSection = (
-        <Players
-         players={this.state.players}
-         showButton={ this.state.players.length < gs.max_players ||
-                      gs.max_players < 0 }
-         addCurrentPlayer={this.state.addCurrentPlayer}
-        />
-      );
-
-      const optionsSection = (
-        <Card title="Options">
-        </Card>
-      );
-
-      content = (
-        <View style={styles.container}>
-          <GameNav
-            title='Game Setup'
-            showBack={true}
-          />
-          <View style={styles.setupContainer}>
-            <View style={styles.gname}>
-              <Text style={styles.name_txt}>{gs.name}</Text>
-            </View>
-            <ScrollView>
-              { courseSection }
-              { playerSection }
-              { optionsSection }
-            </ScrollView>
-          </View>
-          <View style={styles.playButtonView}>
-            <Button
-              title='Play Game'
-              backgroundColor={green}
-              color='white'
-            />
-          </View>
-        </View>
+            return (
+              <View style={styles.container}>
+                <GameNav
+                  title='Game Setup'
+                  showBack={true}
+                />
+                <View style={styles.setupContainer}>
+                  <View style={styles.gname}>
+                    <Text style={styles.name_txt}>{gs.name}</Text>
+                  </View>
+                  <ScrollView>
+                    { courseSection }
+                    { playerSection }
+                    { optionsSection }
+                  </ScrollView>
+                </View>
+                <View style={styles.playButtonView}>
+                  <Button
+                    title='Play Game'
+                    backgroundColor={green}
+                    color='white'
+                  />
+                </View>
+              </View>
+            );
+          }}
+        </Query>
       );
     } else {
-      content = (
-        <ActivityIndicator />
-      );
+      return (<ActivityIndicator />); // TODO: error, no gametype/spec?
     }
-
-    return content;
   }
+
 }
 
-export default withNavigation(GameSetup);
+export default GameSetup;
 
 
 const styles = StyleSheet.create({

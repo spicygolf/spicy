@@ -69,7 +69,7 @@ class NewGame extends React.Component {
                       (!gp_errors || gp_errors.length == 0 ) ) {
                     this.props.navigation.navigate('GameSetup', {
                       gkey: gkey,
-                      gamespec: item
+                      gametype: item._key
                     });
                   } else {
                     console.log('addGameMutation did not work', errors);
