@@ -24,6 +24,7 @@ import { filter } from 'lodash';
 
 import { Query } from 'react-apollo';
 import { GET_TEE_FOR_GAME_QUERY } from 'features/courses/graphql';
+import { GET_PLAYERS_FOR_GAME_QUERY } from 'features/players/graphql';
 import { AddLinkMutation } from 'common/graphql/link';
 import { GET_GAMESPEC_QUERY } from 'features/games/graphql';
 import { navigate } from 'common/components/navigationService';
@@ -51,8 +52,9 @@ class GameSetup extends React.Component {
     this.getGameKey = this.getGameKey.bind(this);
     this.getCurrentPlayerKey = this.getCurrentPlayerKey.bind(this);
     this._renderTee = this._renderTee.bind(this);
-    this.addPlayer = this.addPlayer.bind(this);
-    this.removePlayer = this.removePlayer.bind(this);
+    this.renderPlayer = this.renderPlayer.bind(this);
+    //this.addPlayer = this.addPlayer.bind(this);
+    //this.removePlayer = this.removePlayer.bind(this);
   }
 
   getCurrentPlayerKey() {
@@ -118,6 +120,7 @@ class GameSetup extends React.Component {
     );
   }
 
+/*
   addPlayer(pkey) {
     this.setState(prev => {
       if( !prev.players.includes(pkey) ) {
@@ -134,6 +137,52 @@ class GameSetup extends React.Component {
       players: filter(prev.players, (p) => (p !== pkey)),
       addCurrentPlayer: !(pkey == this.state.currentPlayerKey)
     }));
+  }
+*/
+
+  renderPlayer({item}) {
+    const { gkey } = this.props;
+
+    const handicap = (item && item.handicap && item.handicap.display) ?
+      item.handicap.display : 'no handicap';
+    const club = (item && item.clubs && item.clubs[0]) ?
+      ` - ${item.clubs[0].name}` : '';
+
+    return (
+      <AddLinkMutation>
+        {({addLinkMutation}) => (
+          <ListItem
+            title={item.name}
+            subtitle={`${handicap}${club}`}
+            onPress={async () => {
+              const {data, errors} = await addLinkMutation({
+                variables: {
+                  from: {type: 'player', value: gkey},
+                  to: {type: 'game', value: item._key}
+                },
+                refetchQueries: [
+                  {
+                    query: GET_PLAYERS_FOR_GAME_QUERY,
+                    variables: {
+                      gkey: gkey
+                    }
+                  }
+                ]
+              });
+              if( errors ) {
+                console.log('error adding player to game', errors);
+              }
+              navigate('GameSetup');
+            }}
+            leftIcon={(
+              <FavoriteIcon
+                fave={item.fave}
+              />
+            )}
+          />
+        )}
+      </AddLinkMutation>
+    );
   }
 
   async componentDidMount() {

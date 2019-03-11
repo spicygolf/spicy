@@ -1,23 +1,34 @@
 import React from 'react';
-
 import {
+  StyleSheet,
   View
 } from 'react-native';
 
 import GameNav from 'features/games/gamenav';
-import SearchPlayers from 'features/gameSetup/searchPlayers'
+
+import AddPlayerTabs from 'features/gameSetup/addPlayerTabs';
+
 
 
 class AddPlayer extends React.Component {
 
+  // https://stackoverflow.com/questions/54038075/v1-to-v3-migration-nested-tabs
+  static router = {
+    ...AddPlayerTabs.router,
+    getStateForAction: (action, lastState) => {
+      return AddPlayerTabs.router.getStateForAction(action, lastState);
+    },
+  };
+
   render() {
     return (
-      <View>
+      <View style={styles.container}>
         <GameNav
           title='Add Player'
           showBack={true}
+          backTo={'GameSetup'}
         />
-        <SearchPlayers
+        <AddPlayerTabs
           navigation={this.props.navigation}
         />
       </View>
@@ -26,4 +37,13 @@ class AddPlayer extends React.Component {
 
 }
 
+
+
 export default AddPlayer;
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
+});

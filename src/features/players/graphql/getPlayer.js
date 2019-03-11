@@ -18,6 +18,10 @@ export const GET_PLAYER_QUERY = gql`
         display
         tournamentScoreCount
       }
+      clubs {
+        name
+        state
+      }
     }
   }
 `;

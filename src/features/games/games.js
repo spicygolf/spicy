@@ -63,6 +63,7 @@ class Games extends React.Component {
   }
 
   _renderItem({item}) {
+    if( !item || !item.gametype ) return null;
     const startTime = moment(item.start).format('llll');
     return (
       <ListItem
@@ -111,7 +112,6 @@ class Games extends React.Component {
             console.log(error);
             return (<Text>Error</Text>);
           }
-
           return (
             <View>
               <View style={styles.gamesSubMenu}>

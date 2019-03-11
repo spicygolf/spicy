@@ -4,7 +4,6 @@ import React from 'react';
 
 import {
   ActivityIndicator,
-  AsyncStorage,
   FlatList,
   StyleSheet,
   Text,
@@ -18,14 +17,14 @@ import {
   ListItem
 } from 'react-native-elements';
 
-import { remove } from 'lodash';
+import { find, remove } from 'lodash';
 
 import { GetPlayer } from 'features/players/graphql';
 
 import { blue } from 'common/colors';
 
 import { navigate } from 'common/components/navigationService';
-import { removePlayer } from 'features/gameSetup/gameSetupFns';
+import { RemoveLinkMutation } from 'common/graphql/unlink';
 
 
 
@@ -33,23 +32,60 @@ class Players extends React.Component {
 
   constructor(props) {
     super(props);
+    this._itemPressed = this._itemPressed.bind(this);
     this._renderItem = this._renderItem.bind(this);
   }
 
-  _renderItem({item}) {
-    const handicap = (item && item.handicap && item.handicap.display) ?
-      item.handicap.display : 'no handicap';
+  _itemPressed(tee) {
+    navigate('player_item', {tee: tee});
+  }
 
-    return (
-      <ListItem
-        key={item._key}
-        title={item.name || ''}
-        subtitle={handicap}
-        rightIcon={{name: 'remove-circle', color: 'red'}}
-        onPress={() => navigate('player_item', {player: item})}
-        onPressRightIcon={() => removePlayer(item._key)}
-      />
-    );
+  _renderItem(player) {
+    if( player && player.name ) {
+      const { gkey } = this.props;
+      return (
+        <RemoveLinkMutation>
+          {({removeLinkMutation}) => {
+            const handicap = (item && item.handicap && item.handicap.display) ?
+              item.handicap.display : 'no handicap';
+
+            return (
+              <ListItem
+                key={item._key}
+                title={item.name || ''}
+                subtitle={handicap}
+                rightIcon={{name: 'remove-circle', color: 'red'}}
+                onPress={() => this._itemPressed(player)}
+                onPressRightIcon={async () => {
+                  const {data, errors} = await removeLinkMutation({
+                    variables: {
+                      from: {type: 'game', value: gkey},
+                      to: {type: 'player', value: player._key}
+                    },
+                    update: (cache, result) => {
+                      // TODO: all wrong for players
+                      /*
+                      cache.writeQuery({
+                        query: GET_PLAYER_FOR_GAME_QUERY,
+                        variables: {gkey: gkey},
+                        data: {GetPlayerForGame: {}}
+                      });
+                      */
+                    },
+                    ignoreResults: true
+                  });
+                  if( errors ) {
+                    console.log('error removing player from game', errors);
+                  }
+                }}
+              />
+            );
+          }}
+        </RemoveLinkMutation>
+      );
+    } else {
+      return null;
+    }
   }
 
   render() {
