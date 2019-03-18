@@ -44,7 +44,6 @@ class GameSetup extends React.Component {
     super(props);
     this.state = {
       gametype: this.props.gametype,
-      players: this.props.players || [],
       addCurrentPlayer: true,
       options: []
     };
@@ -221,9 +220,8 @@ class GameSetup extends React.Component {
 
             const playerSection = (
               <Players
-                players={this.state.players}
-                showButton={ this.state.players.length < gs.max_players ||
-                  gs.max_players < 0 }
+                gkey={this.props.gkey}
+                gamespec={gs}
                 addCurrentPlayer={this.state.addCurrentPlayer}
               />
             );

@@ -19,13 +19,15 @@ import {
 
 import { find, remove } from 'lodash';
 
-import { GetTeeForGame } from 'features/courses/graphql';
+import {
+  GetTeeForGame,
+  GET_TEE_FOR_GAME_QUERY
+} from 'features/courses/graphql';
 
 import { blue } from 'common/colors';
 
 import { navigate } from 'common/components/navigationService';
 import { RemoveLinkMutation } from 'common/graphql/unlink';
-import { GET_TEE_FOR_GAME_QUERY } from 'features/courses/graphql';
 
 
 

@@ -19,7 +19,10 @@ import {
 
 import { find, remove } from 'lodash';
 
-import { GetPlayer } from 'features/players/graphql';
+import {
+  GetPlayersForGame,
+  GET_PLAYERS_FOR_GAME_QUERY
+} from 'features/players/graphql';
 
 import { blue } from 'common/colors';
 
@@ -33,6 +36,7 @@ class Players extends React.Component {
   constructor(props) {
     super(props);
     this._itemPressed = this._itemPressed.bind(this);
+    this._shouldShowButton = this._shouldShowButton.bind(this);
     this._renderItem = this._renderItem.bind(this);
   }
 
@@ -40,8 +44,14 @@ class Players extends React.Component {
     navigate('player_item', {tee: tee});
   }
 
-  _renderItem(player) {
-    if( player && player.name ) {
+  _shouldShowButton(players) {
+    console.log('shouldShowButton players', players);
+    // TODO: implement me
+    return true;
+  }
+
+  _renderItem({item}) {
+    if( item && item.name ) {
       const { gkey } = this.props;
       return (
         <RemoveLinkMutation>
@@ -55,23 +65,19 @@ class Players extends React.Component {
                 title={item.name || ''}
                 subtitle={handicap}
                 rightIcon={{name: 'remove-circle', color: 'red'}}
-                onPress={() => this._itemPressed(player)}
+                onPress={() => this._itemPressed(item)}
                 onPressRightIcon={async () => {
                   const {data, errors} = await removeLinkMutation({
                     variables: {
                       from: {type: 'game', value: gkey},
-                      to: {type: 'player', value: player._key}
+                      to: {type: 'player', value: item._key}
                     },
-                    update: (cache, result) => {
-                      // TODO: all wrong for players
-                      /*
-                      cache.writeQuery({
-                        query: GET_PLAYER_FOR_GAME_QUERY,
-                        variables: {gkey: gkey},
-                        data: {GetPlayerForGame: {}}
-                      });
-                      */
-                    },
+                    refetchQueries: [{
+                      query: GET_PLAYERS_FOR_GAME_QUERY,
+                      variables: {
+                        gkey: gkey
+                      }
+                    }],
                     ignoreResults: true
                   });
                   if( errors ) {
@@ -90,43 +96,43 @@ class Players extends React.Component {
 
   render() {
 
-    if( !this.props.players ) return (<ActivityIndicator />);
+    const { gkey } = this.props;
 
-    const addButton = ( this.props.showButton ) ?
-      (
-        <Icon
-          name='add-circle'
-          color={blue}
-          size={40}
-          title='Add Player'
-          onPress={() => navigate('add_player')}
-          testID='add_player_button'
-        />
-      ) : (<Icon name='add-circle' size={40} color='#fff'/>);
-
-    const playersList = this.props.players.map(pkey => (
-      <GetPlayer
-        pkey={pkey}
-        key={pkey}
-      >
-        {({ loading, player }) => {
-          if( loading ) return null;
-          return this._renderItem({item: player});
-        }}
-      </GetPlayer>
-    ));
+    const addButton = (
+      <Icon
+        name='add-circle'
+        color={blue}
+        size={40}
+        title='Add Player'
+        onPress={() => navigate('add_player')}
+        testID='add_player_button'
+      />
+    );
+    const noAddButton = (<Icon name='add-circle' size={40} color='#fff'/>);
 
     return (
-      <Card>
-        <View style={styles.cardTitle}>
-          <Icon name='add-circle' size={40} color='#fff'/>
-          <Text style={styles.title}>Players</Text>
-          { addButton }
-        </View>
-        <List containerStyle={styles.listContainer}>
-          {playersList}
-        </List>
-      </Card>
+      <GetPlayersForGame gkey={gkey}>
+        {({ loading, players }) => {
+          if( loading ) return (<ActivityIndicator />);
+          const showButton = this._shouldShowButton(players);
+          return (
+            <Card>
+              <View style={styles.cardTitle}>
+                { noAddButton }
+                <Text style={styles.title}>Players</Text>
+                { showButton ? addButton : noAddButton }
+              </View>
+              <List containerStyle={styles.listContainer}>
+                <FlatList
+                  data={players}
+                  renderItem={this._renderItem}
+                  keyExtractor={item => item._key}
+                />
+              </List>
+            </Card>
+          );
+        }}
+      </GetPlayersForGame>
     );
   }
 }
