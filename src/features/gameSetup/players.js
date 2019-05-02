@@ -69,8 +69,8 @@ class Players extends React.Component {
                 onPressRightIcon={async () => {
                   const {data, errors} = await removeLinkMutation({
                     variables: {
-                      from: {type: 'game', value: gkey},
-                      to: {type: 'player', value: item._key}
+                      from: {type: 'player', value: item._key},
+                      to: {type: 'game', value: gkey}
                     },
                     refetchQueries: [{
                       query: GET_PLAYERS_FOR_GAME_QUERY,

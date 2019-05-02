@@ -2,7 +2,7 @@ import { AsyncStorage } from 'react-native';
 import { ApolloLink } from 'apollo-link';
 import ApolloClient from 'apollo-client';
 import { Hermes } from 'apollo-cache-hermes';
-import { persistCache } from 'apollo-cache-persist';
+import { CachePersistor } from 'apollo-cache-persist';
 import { setContext } from 'apollo-link-context';
 import { onError } from 'apollo-link-error';
 import { HttpLink } from 'apollo-link-http';
@@ -19,7 +19,7 @@ export default function configureClient() {
 
   // NOTE: This must go after the call to withClientState. Otherwise that will
   //       overwrite the cache with defaults.
-  persistCache({
+  const persistor = new CachePersistor({
     cache,
     storage: AsyncStorage,
     maxSize: false, // set to unlimited (default is 1MB
@@ -98,6 +98,9 @@ export default function configureClient() {
     defaultOptions: defaultOptions
   });
 
-  return client;
+  return {
+    client: client,
+    persistor: persistor
+  };
 
 };

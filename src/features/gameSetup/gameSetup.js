@@ -5,7 +5,6 @@ import React from 'react';
 import {
   ActivityIndicator,
   AsyncStorage,
-  FlatList,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,12 +14,8 @@ import {
 import {
   Button,
   Card,
-  Icon,
-  List,
   ListItem
 } from 'react-native-elements';
-
-import { filter } from 'lodash';
 
 import { Query } from 'react-apollo';
 import { GET_TEE_FOR_GAME_QUERY } from 'features/courses/graphql';
@@ -94,14 +89,12 @@ class GameSetup extends React.Component {
                   from: {type: 'game', value: gkey},
                   to: {type: 'tee', value: item._key}
                 },
-                refetchQueries: [
-                  {
-                    query: GET_TEE_FOR_GAME_QUERY,
-                    variables: {
-                      gkey: gkey
-                    }
+                refetchQueries: [{
+                  query: GET_TEE_FOR_GAME_QUERY,
+                  variables: {
+                    gkey: gkey
                   }
-                ]
+                }]
               });
               if( errors ) {
                 console.log('error adding tee to game', errors);
@@ -156,17 +149,15 @@ class GameSetup extends React.Component {
             onPress={async () => {
               const {data, errors} = await addLinkMutation({
                 variables: {
-                  from: {type: 'player', value: gkey},
-                  to: {type: 'game', value: item._key}
+                  from: {type: 'player', value: item._key},
+                  to: {type: 'game', value: gkey}
                 },
-                refetchQueries: [
-                  {
-                    query: GET_PLAYERS_FOR_GAME_QUERY,
-                    variables: {
-                      gkey: gkey
-                    }
+                refetchQueries: [{
+                  query: GET_PLAYERS_FOR_GAME_QUERY,
+                  variables: {
+                    gkey: gkey
                   }
-                ]
+                }]
               });
               if( errors ) {
                 console.log('error adding player to game', errors);

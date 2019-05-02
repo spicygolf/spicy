@@ -9,7 +9,7 @@ import AppContainer from 'app/components/appcontainer';
 
 class App extends Component {
   render() {
-    const client = configureClient();
+    const { client, persistor } = configureClient();
     return (
       <ApolloProvider client={client}>
         <AppContainer
