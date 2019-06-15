@@ -31,6 +31,7 @@
     }
   },
   "dependencies": {
+    "@react-native-community/async-storage": "^1.5.0",
     "apollo-cache-hermes": "^0.8.9",
     "apollo-cache-persist": "^0.1.1",
     "apollo-client": "^2.6.2",

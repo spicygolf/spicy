@@ -1,12 +1,12 @@
 import React from 'react';
 
 import {
-  AsyncStorage,
   StyleSheet,
   Text,
   View
 } from 'react-native';
 
+import AsyncStorage from '@react-native-community/async-storage';
 
 
 class Splash extends React.Component {

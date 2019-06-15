@@ -1,4 +1,4 @@
-import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import { ApolloLink } from 'apollo-link';
 import ApolloClient from 'apollo-client';
 import { Hermes } from 'apollo-cache-hermes';

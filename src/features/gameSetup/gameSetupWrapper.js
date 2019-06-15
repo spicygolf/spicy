@@ -1,5 +1,4 @@
 import React from 'react';
-import { AsyncStorage } from 'react-native';
 import GameSetup from 'features/gameSetup/gameSetup';
 import { setGameSetupRef } from 'features/gameSetup/gameSetupFns';
 

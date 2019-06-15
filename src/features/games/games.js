@@ -4,13 +4,14 @@ import React from 'react';
 
 import {
   ActivityIndicator,
-  AsyncStorage,
   FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
+
+import AsyncStorage from '@react-native-community/async-storage';
 
 import {
   Icon

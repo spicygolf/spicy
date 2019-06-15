@@ -2,9 +2,10 @@ import React from 'react';
 
 import {
   ActivityIndicator,
-  AsyncStorage,
   StyleSheet
 } from 'react-native';
+
+import AsyncStorage from '@react-native-community/async-storage';
 
 import {
   createStackNavigator,

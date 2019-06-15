@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import {
-  AsyncStorage,
   Button,
   StyleSheet,
   Text,
   View
 } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import t from 'tcomb-form-native';
 
 import Header from 'common/components/header';

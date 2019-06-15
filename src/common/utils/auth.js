@@ -1,5 +1,4 @@
-import { AsyncStorage } from 'react-native';
-
+import AsyncStorage from '@react-native-community/async-storage';
 
 export const logout = async ({navigation, client}) => {
 
