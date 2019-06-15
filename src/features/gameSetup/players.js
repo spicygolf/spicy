@@ -13,7 +13,6 @@ import {
 import {
   Card,
   Icon,
-  List,
   ListItem
 } from 'react-native-elements';
 
@@ -122,13 +121,13 @@ class Players extends React.Component {
                 <Text style={styles.title}>Players</Text>
                 { showButton ? addButton : noAddButton }
               </View>
-              <List containerStyle={styles.listContainer}>
+              <View style={styles.listContainer}>
                 <FlatList
                   data={players}
                   renderItem={this._renderItem}
                   keyExtractor={item => item._key}
                 />
-              </List>
+              </View>
             </Card>
           );
         }}

@@ -14,8 +14,6 @@ import {
 
 import {
   Card,
-  Icon,
-  List,
   ListItem
 } from 'react-native-elements';
 
@@ -174,14 +172,14 @@ class AddCourseSearch extends React.Component {
             );
 
             const cardList = (
-              <List containerStyle={styles.listContainer}>
+              <View style={styles.listContainer}>
                 <FlatList
                   data={tees}
                   renderItem={renderCourseTee}
                   keyExtractor={item => item._key}
                   keyboardShouldPersistTaps={'handled'}
                 />
-              </List>
+              </View>
             );
 
             return (

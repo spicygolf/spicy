@@ -14,8 +14,6 @@ import
 import { Query, withApollo } from 'react-apollo';
 import { GET_GAME_QUERY } from 'features/games/graphql';
 
-import { List, ListItem } from 'react-native-elements';
-
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 
@@ -143,15 +141,14 @@ class BirdieEmAllLeaderboard extends React.Component {
             let scores = this._score(data.getGame.rounds);
 
             return (
-              <List
-                containerStyle={styles.LeaderboardContainer}>
+              <View style={styles.LeaderboardContainer}>
                 <FlatList
                   data={scores}
                   renderItem={this._renderScoreItem}
                   keyExtractor={item => item.player[0].short}
                   ListFooterComponent={<View style={styles.ListFooter}></View>}
               />
-              </List>
+              </View>
             );
           } else {
             return (<Text>Error, no scores</Text>);

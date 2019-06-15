@@ -15,7 +15,7 @@ import gql from 'graphql-tag';
 import moment from 'moment';
 
 
-import { List, ListItem } from 'react-native-elements';
+import { ListItem } from 'react-native-elements';
 
 import GameNav from 'features/games/gamenav';
 
@@ -108,13 +108,11 @@ class NewGame extends React.Component {
                 title='New Game'
                 showBack={true}
               />
-              <List>
-                <FlatList
-                  data={data.gameSpecsForPlayer}
-                  renderItem={this._renderItem}
-                  keyExtractor={item => item._key}
-                />
-              </List>
+              <FlatList
+                data={data.gameSpecsForPlayer}
+                renderItem={this._renderItem}
+                keyExtractor={item => item._key}
+              />
             </View>
           );
         }}

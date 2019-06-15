@@ -13,7 +13,6 @@ import {
 import {
   Card,
   Icon,
-  List,
   ListItem
 } from 'react-native-elements';
 
@@ -111,9 +110,9 @@ class Courses extends React.Component {
                 <Text style={styles.title}>Course/Tee</Text>
                 { showButton ? addButton : noAddButton }
               </View>
-              <List containerStyle={styles.listContainer}>
+              <View style={styles.listContainer}>
                 { this._renderItem(tee) }
-              </List>
+              </View>
             </Card>
           );
         }}

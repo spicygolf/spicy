@@ -9,10 +9,6 @@ import {
 } from 'react-native';
 
 import {
-  List,
-} from 'react-native-elements';
-
-import {
   getCurrentPlayerKey,
   renderFavoritesTee
 } from 'features/gameSetup/gameSetupFns';
@@ -49,14 +45,14 @@ class AddCourseFavorites extends React.Component {
               }
             }));
             return (
-              <List containerStyle={styles.listContainer}>
+              <View style={styles.listContainer}>
                 <FlatList
                   data={newTees}
                   renderItem={renderFavoritesTee}
                   keyExtractor={item => item._key}
                   keyboardShouldPersistTaps={'handled'}
                 />
-              </List>
+              </View>
             );
           }}
         </GetFavoriteTeesForPlayer>

@@ -20,7 +20,7 @@ import {
 import { Query, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 
-import { List, ListItem } from 'react-native-elements';
+import { ListItem } from 'react-native-elements';
 import moment from 'moment';
 
 import {
@@ -127,13 +127,11 @@ class Games extends React.Component {
                   />
                 </View>
               </View>
-              <List>
-                <FlatList
-                  data={games}
-                  renderItem={this._renderItem}
-                  keyExtractor={item => item._key}
-                />
-              </List>
+              <FlatList
+                data={games}
+                renderItem={this._renderItem}
+                keyExtractor={item => item._key}
+              />
             </View>
           );
         }}

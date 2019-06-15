@@ -6,7 +6,6 @@ import {
   View
 } from 'react-native';
 import {
-  List,
   ListItem,
   SearchBar
 } from 'react-native-elements';
@@ -95,7 +94,7 @@ class SearchableList extends Component {
       );
     }
     return (
-      <List containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}>
+      <View style={{ borderTopWidth: 0, borderBottomWidth: 0 }}>
         <FlatList
           data={this.state.data}
           renderItem={({ item }) => (
@@ -111,7 +110,7 @@ class SearchableList extends Component {
           ItemSeparatorComponent={this.renderSeparator}
           ListHeaderComponent={this.renderHeader}
         />
-      </List>
+      </View>
     );
   }
 }
