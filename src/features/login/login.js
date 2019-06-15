@@ -26,18 +26,14 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      values: {}
+      value: {}
     };
     this._onChange = this._onChange.bind(this);
     this._onLogin = this._onLogin.bind(this);
   }
 
-  _onChange(values) {
-    const k = Object.keys(values)[0];
-    this.setState(prev => {
-      prev.values[k] = values[k];
-      return prev;
-    });
+  _onChange(value) {
+    this.setState({value});
   }
 
   async _onLogin() {
@@ -46,7 +42,7 @@ class Login extends Component {
     try {
       const res = await fetch(uri, {
         method: 'POST',
-        body: JSON.stringify(this.state.values),
+        body: JSON.stringify(this.state.value),
         headers: {
           'Cache-Control': 'no-cache',
           'Content-Type': 'application/json'
@@ -100,7 +96,7 @@ class Login extends Component {
           ref='form'
           type={loginForm}
           options={options}
-          value={this.props.value}
+          value={this.state.value}
           onChange={this._onChange}
         />
         <Button
