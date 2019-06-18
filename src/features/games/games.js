@@ -72,13 +72,19 @@ class Games extends React.Component {
         title={item.name || ''}
         subtitle={startTime || ''}
         onPress={() => this._itemPressed(item)}
-        rightIcon={{name: 'settings', color: '#999'}}
-        onPressRightIcon={() => {
-          this.props.navigation.navigate('GameSetup', {
-            gkey: item._key,
-            gametype: item.gametype
-          });
-        }}
+        rightIcon={
+          <Icon
+            name='settings'
+            color='#999'
+            onPress={() => {
+              console.log('right icon pressed');
+              this.props.navigation.navigate('GameSetup', {
+                gkey: item._key,
+                gametype: item.gametype
+              });
+            }}
+          />
+        }
       />
     );
   }
