@@ -41,7 +41,8 @@ class AddPlayerFavorites extends React.Component {
                   variables: {
                     pkey: pkey
                   }
-                }]
+                }],
+                awaitRefetchQueries: true
               }
             }));
             return (

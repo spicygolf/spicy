@@ -90,12 +90,13 @@ class GameSetup extends React.Component {
                   from: {type: 'game', value: gkey},
                   to: {type: 'tee', value: item._key}
                 },
-                refetchQueries: [{
+                refetchQueries: () => [{
                   query: GET_TEE_FOR_GAME_QUERY,
                   variables: {
                     gkey: gkey
                   }
-                }]
+                }],
+                awaitRefetchQueries: true
               });
               if( errors ) {
                 console.log('error adding tee to game', errors);
@@ -113,26 +114,6 @@ class GameSetup extends React.Component {
     );
   }
 
-/*
-  addPlayer(pkey) {
-    this.setState(prev => {
-      if( !prev.players.includes(pkey) ) {
-        prev.players.push(pkey);
-      }
-      return {
-        players: prev.players
-      };
-    });
-  }
-
-  removePlayer(pkey) {
-    this.setState(prev => ({
-      players: filter(prev.players, (p) => (p !== pkey)),
-      addCurrentPlayer: !(pkey == this.state.currentPlayerKey)
-    }));
-  }
-*/
-
   renderPlayer({item}) {
     const { gkey } = this.props;
 
@@ -148,17 +129,19 @@ class GameSetup extends React.Component {
             title={item.name}
             subtitle={`${handicap}${club}`}
             onPress={async () => {
+              console.log('adding player ', item);
               const {data, errors} = await addLinkMutation({
                 variables: {
                   from: {type: 'player', value: item._key},
                   to: {type: 'game', value: gkey}
                 },
-                refetchQueries: [{
+                refetchQueries: () => [{
                   query: GET_PLAYERS_FOR_GAME_QUERY,
                   variables: {
                     gkey: gkey
                   }
-                }]
+                }],
+                awaitRefetchQueries: true
               });
               if( errors ) {
                 console.log('error adding player to game', errors);

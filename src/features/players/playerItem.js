@@ -13,7 +13,7 @@ class PlayerItem extends React.Component {
     const player = this.props.navigation.getParam('player');
     console.log('player_item', player);
 
-    return (<Text>{player.name}</Text>);
+    return (<Text>{player.name || 'no player'}</Text>);
   }
 }
 

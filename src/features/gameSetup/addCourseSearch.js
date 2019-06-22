@@ -14,7 +14,8 @@ import {
 
 import {
   Card,
-  ListItem
+  ListItem,
+  Icon
 } from 'react-native-elements';
 
 import { Query } from 'react-apollo';
@@ -166,8 +167,15 @@ class AddCourseSearch extends React.Component {
               <ListItem
                 title={course.name}
                 subtitle={`${course.city}, ${course.state}`}
-                rightIcon={{name: 'remove-circle', color: 'red'}}
-                onPressRightIcon={() => this._removeCourse()}
+                rightIcon={
+                  <Icon
+                    name='remove-circle'
+                    color='red'
+                    onPress={() => {
+                      this._removeCourse();
+                    }}
+                  />
+                }
               />
             );
 

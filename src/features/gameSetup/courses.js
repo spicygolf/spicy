@@ -51,27 +51,33 @@ class Courses extends React.Component {
             <ListItem
               title={tee.course.name || ''}
               subtitle={tee.name || 'no Tee selected'}
-              rightIcon={{name: 'remove-circle', color: 'red'}}
               onPress={() => this._itemPressed(tee)}
-              onPressRightIcon={async () => {
-                const {data, errors} = await removeLinkMutation({
-                  variables: {
-                    from: {type: 'game', value: gkey},
-                    to: {type: 'tee', value: tee._key}
-                  },
-                  update: (cache, result) => {
-                    cache.writeQuery({
-                      query: GET_TEE_FOR_GAME_QUERY,
-                      variables: {gkey: gkey},
-                      data: {GetTeeForGame: {}}
+              rightIcon={
+                <Icon
+                  name='remove-circle'
+                  color='red'
+                  onPress={async () => {
+                    //console.log('removing course from game');
+                    const {data, errors} = await removeLinkMutation({
+                      variables: {
+                        from: {type: 'game', value: gkey},
+                        to: {type: 'tee', value: tee._key}
+                      },
+                      update: (cache, result) => {
+                        cache.writeQuery({
+                          query: GET_TEE_FOR_GAME_QUERY,
+                          variables: {gkey: gkey},
+                          data: {GetTeeForGame: {}}
+                        });
+                      },
+                      ignoreResults: true
                     });
-                  },
-                  ignoreResults: true
-                });
-                if( errors ) {
-                  console.log('error removing tee from game', errors);
-                }
-              }}
+                    if( errors ) {
+                      console.log('error removing tee from game', errors);
+                    }
+                  }}
+                />
+              }
             />
           )}
         </RemoveLinkMutation>

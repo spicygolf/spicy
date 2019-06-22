@@ -17,16 +17,9 @@ export const ADD_LINK_MUTATION = gql`
 export class AddLinkMutation extends React.PureComponent {
 
   render() {
-    const { children, from, to, other } = this.props;
+    const { children } = this.props;
     return (
-      <Mutation
-        mutation={ADD_LINK_MUTATION}
-        variables={{
-          from: from,
-          to: to,
-          other: other
-        }}
-      >
+      <Mutation mutation={ADD_LINK_MUTATION}>
         {mutate => {
           return children({
             addLinkMutation: mutate

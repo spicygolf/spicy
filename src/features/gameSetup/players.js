@@ -63,26 +63,33 @@ class Players extends React.Component {
                 key={item._key}
                 title={item.name || ''}
                 subtitle={handicap}
-                rightIcon={{name: 'remove-circle', color: 'red'}}
                 onPress={() => this._itemPressed(item)}
-                onPressRightIcon={async () => {
-                  const {data, errors} = await removeLinkMutation({
-                    variables: {
-                      from: {type: 'player', value: item._key},
-                      to: {type: 'game', value: gkey}
-                    },
-                    refetchQueries: [{
-                      query: GET_PLAYERS_FOR_GAME_QUERY,
-                      variables: {
-                        gkey: gkey
+                rightIcon={
+                  <Icon
+                    name='remove-circle'
+                    color='red'
+                    onPress={async () => {
+                      //console.log('removing player from game', removeLinkMutation);
+                      const {data, errors} = await removeLinkMutation({
+                        variables: {
+                          from: {type: 'player', value: item._key},
+                          to: {type: 'game', value: gkey}
+                        },
+                        refetchQueries: [{
+                          query: GET_PLAYERS_FOR_GAME_QUERY,
+                          variables: {
+                            gkey: gkey
+                          }
+                        }],
+                        awaitRefetchQueries: true,
+                        ignoreResults: true
+                      });
+                      if( errors ) {
+                        console.log('error removing player from game', errors);
                       }
-                    }],
-                    ignoreResults: true
-                  });
-                  if( errors ) {
-                    console.log('error removing player from game', errors);
-                  }
-                }}
+                    }}
+                  />
+                }
               />
             );
           }}

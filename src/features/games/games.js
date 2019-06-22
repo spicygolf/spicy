@@ -77,7 +77,6 @@ class Games extends React.Component {
             name='settings'
             color='#999'
             onPress={() => {
-              console.log('right icon pressed');
               this.props.navigation.navigate('GameSetup', {
                 gkey: item._key,
                 gametype: item.gametype
