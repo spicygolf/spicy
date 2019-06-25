@@ -39,12 +39,17 @@ class Players extends React.Component {
     this._renderItem = this._renderItem.bind(this);
   }
 
-  _itemPressed(tee) {
-    navigate('player_item', {tee: tee});
+  _itemPressed(player) {
+    // TODO: maybe implement me?
+    // I could see this being used for choosing a round of multiple that the
+    // player may have going that current day.
+    //
+    //navigate('player_item', {player: player});
   }
 
   _shouldShowAddButton(players) {
     let ret = true;
+    if( this.props.gamespec.max_players < 1 ) return true;
     try {
       const player_count = players.length;
       ret = (player_count < this.props.gamespec.max_players);
