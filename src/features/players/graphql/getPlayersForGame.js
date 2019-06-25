@@ -19,6 +19,7 @@ export const GET_PLAYERS_FOR_GAME_QUERY = gql`
         tournamentScoreCount
       }
       clubs {
+        _key
         name
         state
       }
