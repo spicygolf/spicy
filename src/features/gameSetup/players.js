@@ -35,7 +35,7 @@ class Players extends React.Component {
   constructor(props) {
     super(props);
     this._itemPressed = this._itemPressed.bind(this);
-    this._shouldShowButton = this._shouldShowButton.bind(this);
+    this._shouldShowAddButton = this._shouldShowAddButton.bind(this);
     this._renderItem = this._renderItem.bind(this);
   }
 
@@ -43,10 +43,15 @@ class Players extends React.Component {
     navigate('player_item', {tee: tee});
   }
 
-  _shouldShowButton(players) {
-    console.log('shouldShowButton players', players);
-    // TODO: implement me
-    return true;
+  _shouldShowAddButton(players) {
+    let ret = true;
+    try {
+      const player_count = players.length;
+      ret = (player_count < this.props.gamespec.max_players);
+    } catch(e) {
+      console.log('error in shouldShowButton', e);
+    }
+    return ret;
   }
 
   _renderItem({item}) {
@@ -69,7 +74,6 @@ class Players extends React.Component {
                     name='remove-circle'
                     color='red'
                     onPress={async () => {
-                      //console.log('removing player from game', removeLinkMutation);
                       const {data, errors} = await removeLinkMutation({
                         variables: {
                           from: {type: 'player', value: item._key},
@@ -120,7 +124,7 @@ class Players extends React.Component {
       <GetPlayersForGame gkey={gkey}>
         {({ loading, players }) => {
           if( loading ) return (<ActivityIndicator />);
-          const showButton = this._shouldShowButton(players);
+          const showButton = this._shouldShowAddButton(players);
           return (
             <Card>
               <View style={styles.cardTitle}>
