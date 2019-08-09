@@ -11,13 +11,12 @@ import NewGame from 'features/games/newGame';
 import GameSetupWrapper from 'features/gameSetup/gameSetupWrapper';
 import AddCourse from 'features/gameSetup/addCourse';
 import AddPlayer from 'features/gameSetup/addPlayer';
-import PlayerItem from 'features/players/playerItem';
+//import PlayerItem from 'features/players/playerItem';
 
-import Header from 'common/components/header';
 import { green } from 'common/colors';
 
 
-const GameStack = createStackNavigator(
+const GamesStack = createStackNavigator(
   {
     Games: Games,
     Game: Game,
@@ -26,7 +25,9 @@ const GameStack = createStackNavigator(
     GameSetup: GameSetupWrapper,
     add_course: AddCourse,
     add_player: AddPlayer,
-    player_item: PlayerItem
+    //Leaderboard: Leaderboard,
+
+    //player_item: PlayerItem
   },
   {
     initialRouteName: 'Games',
@@ -47,4 +48,4 @@ const GameStack = createStackNavigator(
 );
 
 
-export default GameStack;
+export default GamesStack;

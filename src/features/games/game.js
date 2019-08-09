@@ -36,7 +36,6 @@ class Game extends React.Component {
 
   render() {
     if( this.state.currentGame ) {
-      console.log('game render currentGame key', this.state.currentGame._key);
       return (
         <Query
           query={GET_GAME_QUERY}
@@ -48,6 +47,7 @@ class Game extends React.Component {
               console.log(error);
               return (<Text>Error</Text>);
             }
+            console.log('game data', data);
             return (
               <View>
                 <GameNav

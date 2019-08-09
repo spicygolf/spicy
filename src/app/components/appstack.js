@@ -6,7 +6,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import Feed from 'features/feed/feed';
-import GameStack from 'features/games/gamestack';
+import GamesStack from 'features/games/gamesstack';
 import Profile from 'features/profile/profile';
 
 import {
@@ -45,8 +45,8 @@ const AppStack = createBottomTabNavigator(
         tabBarTestID: 'feed_tab'
       }
     },
-    GameStack: {
-      screen: GameStack,
+    GamesStack: {
+      screen: GamesStack,
       navigationOptions: {
         title: 'Games',
         tabBarIcon: ({ focused, horizontal, tintColor }) => {
@@ -85,7 +85,7 @@ const AppStack = createBottomTabNavigator(
     }
   },
   {
-    initialRouteName: 'GameStack',
+    initialRouteName: 'GamesStack',
     defaultNavigationOptions: {
       tabBarOptions: {
         inactiveBackgroundColor: 'white',

@@ -17,12 +17,6 @@ import { GET_GAME_QUERY } from 'features/games/graphql';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 
-// TODO: supply course details
-const courseHoles = [
-  [ '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9'],
-  ['10', '11', '12', '13', '14', '15', '16', '17', '18']
-];
-
 class FivePointsLeaderboard extends React.Component {
 
   constructor(props) {
