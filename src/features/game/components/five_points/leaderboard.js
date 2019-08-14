@@ -21,6 +21,7 @@ class FivePointsLeaderboard extends React.Component {
 
   constructor(props) {
     super(props);
+    console.log('5pts LB props', props);
   }
 
   _scoreTeam(data) {

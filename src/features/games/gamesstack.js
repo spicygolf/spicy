@@ -3,15 +3,13 @@ import {
   createStackNavigator
 } from 'react-navigation';
 
-import Games from 'features/games/games';
-import Game from 'features/games/game';
-import Score from 'features/games/score';
+import Game from 'features/game/game';
 
+import Games from 'features/games/games';
 import NewGame from 'features/games/newGame';
 import GameSetupWrapper from 'features/gameSetup/gameSetupWrapper';
 import AddCourse from 'features/gameSetup/addCourse';
 import AddPlayer from 'features/gameSetup/addPlayer';
-//import PlayerItem from 'features/players/playerItem';
 
 import { green } from 'common/colors';
 
@@ -20,13 +18,12 @@ const GamesStack = createStackNavigator(
   {
     Games: Games,
     Game: Game,
-    Score: Score,
     NewGame: NewGame,
     GameSetup: GameSetupWrapper,
     add_course: AddCourse,
     add_player: AddPlayer,
+    //Score: Score,
     //Leaderboard: Leaderboard,
-
     //player_item: PlayerItem
   },
   {

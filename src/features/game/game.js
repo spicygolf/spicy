@@ -4,18 +4,19 @@ import React from 'react';
 
 import {
   ActivityIndicator,
-  Text,
-  View
+  Text
 } from 'react-native';
 
 import { Query, withApollo } from 'react-apollo';
 import { CURRENT_GAME_QUERY, GET_GAME_QUERY } from 'features/games/graphql';
 
-import GameNav from 'features/games/gamenav';
-import Leaderboard from 'features/games/leaderboard';
+import GameStack from 'features/game/gamestack';
 
 
 class Game extends React.Component {
+
+  // https://reactnavigation.org/docs/en/common-mistakes.html#explicitly-rendering-more-than-one-navigator
+  static router = GameStack.router;
 
   constructor(props) {
     super(props);
@@ -47,19 +48,15 @@ class Game extends React.Component {
               console.log(error);
               return (<Text>Error</Text>);
             }
-            console.log('game data', data);
+            //console.log('game data', data);
             return (
-              <View>
-                <GameNav
-                  title={this.state.currentGame.name}
-                  showBack={true}
-                  showScore={false}
-                  navigation={this.props.navigation}
-                />
-                <Leaderboard
-                  currentGame={this.state.currentGame}
-                />
-              </View>
+              <GameStack
+                navigation={this.props.navigation}
+                screenProps={{
+                  currentGame: this.state.currentGame,
+                  data: data
+                }}
+              />
             );
           }}
         </Query>
