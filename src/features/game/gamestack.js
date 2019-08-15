@@ -1,17 +1,17 @@
 import React from 'react';
 import {
-  createStackNavigator
+  createMaterialTopTabNavigator
 } from 'react-navigation';
 
 import Leaderboard from 'features/game/leaderboard';
 import Score from 'features/game/score';
 import GameSetup from 'features/gameSetup/gameSetup';
 
-
 import { green } from 'common/colors';
 
 
-const GameStack = createStackNavigator(
+
+const GameStack = createMaterialTopTabNavigator(
   {
     Leaderboard: Leaderboard,
     Score: Score,
@@ -19,18 +19,14 @@ const GameStack = createStackNavigator(
   },
   {
     initialRouteName: 'Leaderboard',
-    defaultNavigationOptions: {
-      title: 'Game',
-      headerLeft: null,
-      headerStyle: {
-        backgroundColor: green,
-        marginTop: -22
-      },
-      headerTitleStyle: {
-        fontSize: 18,
-        fontWeight: 'bold'
-      },
-      headerTintColor: 'white'
+    tabBarOptions: {
+      upperCaseLabel: false,
+      inactiveTintColor: '#ccc',
+      inactiveBackgroundColor: '#666',
+      activeTintColor: '#fff',
+      style: {
+        backgroundColor: green
+      }
     }
   }
 );

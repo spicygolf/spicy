@@ -54,7 +54,7 @@ class Game extends React.Component {
                 navigation={this.props.navigation}
                 screenProps={{
                   currentGame: this.state.currentGame,
-                  data: data
+                  game: data.getGame
                 }}
               />
             );

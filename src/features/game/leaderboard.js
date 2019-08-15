@@ -10,7 +10,7 @@ const Leaderboard = (props) => {
 
   let Component = null;
 
-  switch(props.screenProps.currentGame.gametype) {
+  switch(props.screenProps.game.gametype) {
     case "birdie_em_all":
       Component = BirdieEmAllLeaderboard;
       break;
@@ -19,7 +19,7 @@ const Leaderboard = (props) => {
       break;
     default:
       Component = GameNotFound;
-    }
+  }
 
   return <Component {...props}/>;
 
