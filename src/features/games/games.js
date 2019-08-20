@@ -17,15 +17,11 @@ import {
 } from 'react-native-elements';
 
 import { Query, withApollo } from 'react-apollo';
-import gql from 'graphql-tag';
 
 import { ListItem } from 'react-native-elements';
 import moment from 'moment';
 
-import {
-  CURRENT_GAME_QUERY,
-  ACTIVE_GAMES_FOR_PLAYER_QUERY
-} from 'features/games/graphql';
+import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
 
 import { blue } from 'common/colors';
 
@@ -48,18 +44,10 @@ class Games extends React.Component {
     );
   }
 
-  _setCurrentGame(game) {
-    this.props.client.writeQuery({
-      query: CURRENT_GAME_QUERY,
-      data: {
-        currentGame: game
-      }
-    });
-  }
-
   _itemPressed(item) {
-    this._setCurrentGame(item);
-    this.props.navigation.navigate('Game');
+    this.props.navigation.navigate('Game', {
+      currentGame: item._key
+    });
   }
 
   _renderItem({item}) {
