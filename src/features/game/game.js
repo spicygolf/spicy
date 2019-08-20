@@ -20,9 +20,22 @@ class Game extends React.Component {
 
   constructor(props) {
     super(props);
+    const currentGameKey = props.navigation.getParam('currentGame')
     this.state = {
+      currentGameKey: currentGameKey,
       currentGame: null
     };
+    this._setCurrentGame = this._setCurrentGame.bind(this);
+    this._setCurrentGame();
+  }
+
+  _setCurrentGame() {
+    this.props.client.writeQuery({
+      query: CURRENT_GAME_QUERY,
+      data: {
+        currentGame: {_key: this.state.currentGameKey}
+      }
+    });
   }
 
   componentDidMount() {

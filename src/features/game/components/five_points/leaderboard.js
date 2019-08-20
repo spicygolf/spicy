@@ -112,8 +112,8 @@ class FivePointsLeaderboard extends React.Component {
   }
 
   componentDidUpdate(prev_props) {
-      console.log('cDU prev_props', prev_props);
-      console.log('cDU props', this.props);
+    //console.log('cDU prev_props', prev_props);
+    //console.log('cDU props', this.props);
   }
 
   render() {

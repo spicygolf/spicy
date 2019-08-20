@@ -18,12 +18,11 @@ import {
   ListItem
 } from 'react-native-elements';
 
-import { Query, withApollo } from 'react-apollo';
+import { Query } from 'react-apollo';
 import { GET_TEE_FOR_GAME_QUERY } from 'features/courses/graphql';
 import { GET_PLAYERS_FOR_GAME_QUERY } from 'features/players/graphql';
 import { AddLinkMutation } from 'common/graphql/link';
 import {
-  CURRENT_GAME_QUERY,
   GET_GAMESPEC_QUERY,
 } from 'features/games/graphql';
 import { navigate } from 'common/components/navigationService';
@@ -50,11 +49,8 @@ class GameSetup extends React.Component {
     this.getGameKey = this.getGameKey.bind(this);
     this.getCurrentPlayerKey = this.getCurrentPlayerKey.bind(this);
     this._renderTee = this._renderTee.bind(this);
-    this._setCurrentGame = this._setCurrentGame.bind(this);
     this.renderPlayer = this.renderPlayer.bind(this);
     this._playGame = this._playGame.bind(this);
-    //this.addPlayer = this.addPlayer.bind(this);
-    //this.removePlayer = this.removePlayer.bind(this);
   }
 
   getCurrentPlayerKey() {
@@ -65,18 +61,10 @@ class GameSetup extends React.Component {
     return this.props.gkey;
   }
 
-  _setCurrentGame(gkey) {
-    this.props.client.writeQuery({
-      query: CURRENT_GAME_QUERY,
-      data: {
-        currentGame: {_key: gkey}
-      }
-    });
-  }
-
   _playGame(args) {
-    this._setCurrentGame(this.getGameKey());
-    navigate('Game');
+    navigate('Game', {
+      currentGame: this.getGameKey()
+    });
   }
 
   renderCourseTee({item}) {
@@ -261,7 +249,7 @@ class GameSetup extends React.Component {
 
 }
 
-export default withApollo(GameSetup);
+export default GameSetup;
 
 
 const styles = StyleSheet.create({
