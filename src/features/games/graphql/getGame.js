@@ -8,6 +8,9 @@ export default gql`
       start
       end
       gametype
+      tees {
+        name
+      }
       rounds {
         _key
         date
@@ -18,11 +21,11 @@ export default gql`
             k v ts
           }
         }
-        player {
-          _key
-          name
-          short
-        }
+      }
+      players {
+        _key
+        name
+        short
       }
     }
   }

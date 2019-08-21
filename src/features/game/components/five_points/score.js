@@ -7,6 +7,8 @@ import {
   View
 } from 'react-native';
 
+import HoleNav from 'features/game/holenav';
+
 
 
 class FivePointsScore extends React.Component {
@@ -14,12 +16,19 @@ class FivePointsScore extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log('5pts Score props', props);
+    console.log('5pts Score game', props.screenProps.game);
   }
 
   render() {
+    const holes = [];
+    const currentHole = '1';
+
     return (
       <View>
+        <HoleNav
+          holes={holes}
+          currentHole={currentHole}
+        />
         <Text>FivePoints Score</Text>
       </View>
     );

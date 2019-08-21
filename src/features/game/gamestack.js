@@ -18,7 +18,7 @@ const GameStack = createMaterialTopTabNavigator(
     Setup: GameSetup
   },
   {
-    initialRouteName: 'Leaderboard',
+    initialRouteName: 'Score',
     tabBarOptions: {
       upperCaseLabel: false,
       inactiveTintColor: '#ccc',
