@@ -20,7 +20,7 @@ class AddPlayerFavorites extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log('addPlayerFavorites props', props);
+    //console.log('addPlayerFavorites props', props);
     this._renderFavoritesPlayer = this._renderFavoritesPlayer.bind(this);
   }
 
@@ -35,7 +35,7 @@ class AddPlayerFavorites extends React.Component {
         gkey={this.props.screenProps.gkey}
         item={item}
         title={item.name}
-        subtitle={`${handicap} - ${club}`}
+        subtitle={`${handicap}${club}`}
       />
     );
   }

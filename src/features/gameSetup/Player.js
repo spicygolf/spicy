@@ -26,7 +26,6 @@ class Player extends React.Component {
             title={title}
             subtitle={subtitle}
             onPress={async () => {
-              //console.log('adding player ', item);
               const {data, errors} = await addLinkMutation({
                 variables: {
                   from: {type: 'player', value: item._key},

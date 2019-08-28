@@ -19,6 +19,7 @@ export const GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY = gql`
         tournamentScoreCount
       }
       clubs {
+        _key
         name
         state
       }
@@ -29,6 +30,7 @@ export const GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY = gql`
 export class GetFavoritePlayersForPlayer extends React.PureComponent {
   render() {
     const { children, pkey } = this.props;
+
     return (
       <Query
         query={GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY}
@@ -40,8 +42,8 @@ export class GetFavoritePlayersForPlayer extends React.PureComponent {
         {({ data, loading, error }) => {
           if( error ) console.log('GetFavoritePlayersForPlayer error', error);
           return children({
-            players: ( data && data.GetFavoritePlayersForPlayer ) ?
-              data.GetFavoritePlayersForPlayer : [],
+            players: ( data && data.getFavoritePlayersForPlayer ) ?
+              data.getFavoritePlayersForPlayer : [],
             loading
           });
         }}

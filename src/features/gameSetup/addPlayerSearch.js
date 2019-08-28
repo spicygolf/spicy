@@ -14,8 +14,12 @@ import {
 
 import { Query } from 'react-apollo';
 
+import { find, orderBy } from 'lodash';
+
 import {
-  SEARCH_PLAYER_QUERY
+  SEARCH_PLAYER_QUERY,
+  GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
+  GetFavoritePlayersForPlayer
 } from 'features/players/graphql';
 
 import Player from 'features/gameSetup/Player';
@@ -52,7 +56,7 @@ class AddPlayerSearch extends React.Component {
         gkey={this.props.screenProps.gkey}
         item={item}
         title={item.name}
-        subtitle={`${handicap} - ${club}`}
+        subtitle={`${handicap}${club}`}
       />
     );
   }
@@ -71,6 +75,7 @@ class AddPlayerSearch extends React.Component {
 
   render() {
     const { q } = this.state;
+    const pkey = this.props.screenProps.currentPlayerKey;
 
     return (
       <View style={styles.container}>
@@ -94,21 +99,50 @@ class AddPlayerSearch extends React.Component {
                 return (<Text>Error</Text>);
               }
 
-              const header = (
-                  data &&
-                  data.searchPlayer &&
-                  data.searchPlayer.length) ?
-                (<ListHeader title='Registered Players' />) : null;
+              if(
+                data &&
+                data.searchPlayer &&
+                data.searchPlayer.length) {
+                return (
+                  <GetFavoritePlayersForPlayer pkey={pkey}>
+                    {({loading, players:favePlayers}) => {
+                      if( loading ) return (<ActivityIndicator />);
+                      let players = data.searchPlayer.map(player => ({
+                        ...player,
+                        fave: {
+                          faved: (find(favePlayers, {_key: player._key}) ? true : false),
+                          from: {type: 'player', value: pkey},
+                          to:   {type: 'player', value: player._key},
+                          refetchQueries: [{
+                            query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
+                            variables: {
+                              pkey: pkey
+                            }
+                          }]
+                        }
+                      }));
+                      //players = orderBy(players,
+                      //              ['gender', 'rating', 'slope'],
+                      //              ['desc',   'desc',   'desc' ]);
 
-              return (
-                <FlatList
-                  data={data.searchPlayer}
-                  renderItem={this._renderPlayer}
-                  ListHeaderComponent={header}
-                  keyExtractor={item => item._key}
-                  keyboardShouldPersistTaps={'handled'}
-                />
-              );
+                      const header = (<ListHeader title='Registered Players' />);
+
+                      return (
+                        <FlatList
+                          data={players}
+                          renderItem={this._renderPlayer}
+                          ListHeaderComponent={header}
+                          keyExtractor={item => item._key}
+                          keyboardShouldPersistTaps={'handled'}
+                        />
+                      );
+
+                    }}
+                  </GetFavoritePlayersForPlayer>
+                );
+              } else {
+                return null;
+              }
             }}
           </Query>
         </View>
