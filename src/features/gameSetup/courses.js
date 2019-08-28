@@ -4,7 +4,6 @@ import React from 'react';
 
 import {
   ActivityIndicator,
-  FlatList,
   StyleSheet,
   Text,
   View
@@ -16,7 +15,7 @@ import {
   ListItem
 } from 'react-native-elements';
 
-import { find, remove } from 'lodash';
+import { withNavigation } from 'react-navigation';
 
 import {
   GetTeeForGame,
@@ -25,7 +24,6 @@ import {
 
 import { blue } from 'common/colors';
 
-import { navigate } from 'common/components/navigationService';
 import { RemoveLinkMutation } from 'common/graphql/unlink';
 
 
@@ -39,7 +37,7 @@ class Courses extends React.Component {
   }
 
   _itemPressed(tee) {
-    navigate('course_tee_item', {tee: tee});
+    //this.props.navigation.navigate('course_tee_item', {tee: tee});
   }
 
   _renderItem(tee) {
@@ -97,7 +95,7 @@ class Courses extends React.Component {
         color={blue}
         size={40}
         title='Add Course,Tees'
-        onPress={() => navigate('add_course')}
+        onPress={() => this.props.navigation.navigate('AddCourse')}
         testID='add_course_button'
       />
     );
@@ -108,7 +106,11 @@ class Courses extends React.Component {
         {({ loading, tee }) => {
           let showButton = true;
           if( loading ) return (<ActivityIndicator />);
+
+          // this limits us to one course...
+          // how do we handle 2 nines, or multi-course events?
           if( tee && tee._key ) showButton = false;
+
           return (
             <Card>
               <View style={styles.cardTitle}>
@@ -128,7 +130,7 @@ class Courses extends React.Component {
 
 }
 
-export default Courses;
+export default withNavigation(Courses);
 
 
 const styles = StyleSheet.create({

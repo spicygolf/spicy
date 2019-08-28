@@ -4,26 +4,46 @@ import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
-  Text,
   View
 } from 'react-native';
 
-import {
-  getCurrentPlayerKey,
-  renderPlayer
-} from 'features/gameSetup/gameSetupFns';
 import {
   GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
   GetFavoritePlayersForPlayer
 } from 'features/players/graphql';
 
+import Player from 'features/gameSetup/Player';
+
 
 
 class AddPlayerFavorites extends React.Component {
 
+  constructor(props) {
+    super(props);
+    console.log('addPlayerFavorites props', props);
+    this._renderFavoritesPlayer = this._renderFavoritesPlayer.bind(this);
+  }
+
+  _renderFavoritesPlayer({item}) {
+    const handicap = (item && item.handicap && item.handicap.display) ?
+    item.handicap.display : 'no handicap';
+    const club = (item && item.clubs && item.clubs[0]) ?
+    ` - ${item.clubs[0].name}` : '';
+
+    return (
+      <Player
+        gkey={this.props.screenProps.gkey}
+        item={item}
+        title={item.name}
+        subtitle={`${handicap} - ${club}`}
+      />
+    );
+  }
+
+
   render() {
 
-    const pkey = getCurrentPlayerKey();
+    const pkey = this.props.screenProps.currentPlayerKey;
 
     return (
       <View style={styles.container}>
@@ -49,7 +69,7 @@ class AddPlayerFavorites extends React.Component {
               <View style={styles.listContainer}>
                 <FlatList
                   data={newPlayers}
-                  renderItem={renderPlayer}
+                  renderItem={this._renderFavoritesPlayer}
                   keyExtractor={item => item._key}
                   keyboardShouldPersistTaps={'handled'}
                 />

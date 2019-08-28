@@ -15,7 +15,7 @@ const GameStack = createMaterialTopTabNavigator(
   {
     Leaderboard: Leaderboard,
     Score: Score,
-    Setup: GameSetup
+    Setup: GameSetup,
   },
   {
     initialRouteName: 'Score',

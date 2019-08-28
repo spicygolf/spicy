@@ -16,7 +16,7 @@ import {
   ListItem
 } from 'react-native-elements';
 
-import { find, remove } from 'lodash';
+import { withNavigation } from 'react-navigation';
 
 import {
   GetPlayersForGame,
@@ -25,7 +25,6 @@ import {
 
 import { blue } from 'common/colors';
 
-import { navigate } from 'common/components/navigationService';
 import { RemoveLinkMutation } from 'common/graphql/unlink';
 
 
@@ -119,7 +118,7 @@ class Players extends React.Component {
         color={blue}
         size={40}
         title='Add Player'
-        onPress={() => navigate('add_player')}
+        onPress={() => this.props.navigation.navigate('AddPlayer')}
         testID='add_player_button'
       />
     );
@@ -152,7 +151,7 @@ class Players extends React.Component {
   }
 }
 
-export default Players;
+export default withNavigation(Players);
 
 
 const styles = StyleSheet.create({

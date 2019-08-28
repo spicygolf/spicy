@@ -8,21 +8,36 @@ import {
 } from 'react-native';
 
 import {
-  getCurrentPlayerKey,
-  renderFavoritesTee
-} from 'features/gameSetup/gameSetupFns';
-import {
   GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
   GetFavoriteTeesForPlayer
 } from 'features/courses/graphql';
+
+import Tee from 'features/gameSetup/Tee';
 
 
 
 class AddCourseFavorites extends React.Component {
 
+  constructor(props) {
+    super(props);
+    //console.log('addCourseFavorite props', props);
+    this._renderFavoritesTee = this._renderFavoritesTee.bind(this);
+  }
+
+  _renderFavoritesTee({item}) {
+    return (
+      <Tee
+        gkey={this.props.screenProps.gkey}
+        item={item}
+        title={item.course.name}
+        subtitle={`${item.name} - ${item.rating.all18}/${item.slope.all18}`}
+      />
+    );
+  }
+
   render() {
 
-    const pkey = getCurrentPlayerKey();
+    const pkey = this.props.screenProps.currentPlayerKey;
 
     return (
       <View style={styles.container}>
@@ -47,7 +62,7 @@ class AddCourseFavorites extends React.Component {
               <View style={styles.listContainer}>
                 <FlatList
                   data={newTees}
-                  renderItem={renderFavoritesTee}
+                  renderItem={this._renderFavoritesTee}
                   keyExtractor={item => item._key}
                   keyboardShouldPersistTaps={'handled'}
                 />

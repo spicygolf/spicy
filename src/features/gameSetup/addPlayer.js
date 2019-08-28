@@ -20,6 +20,11 @@ class AddPlayer extends React.Component {
     },
   };
 
+  constructor(props) {
+    super(props);
+    //console.log('addPlayer props', props);
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -30,6 +35,7 @@ class AddPlayer extends React.Component {
         />
         <AddPlayerTabs
           navigation={this.props.navigation}
+          screenProps={this.props.screenProps}
         />
       </View>
     );

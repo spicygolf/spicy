@@ -20,6 +20,11 @@ class AddCourse extends React.Component {
     },
   };
 
+  constructor(props) {
+    super(props);
+    //console.log('addCourse props', props);
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -30,6 +35,7 @@ class AddCourse extends React.Component {
         />
         <AddCourseTabs
           navigation={this.props.navigation}
+          screenProps={this.props.screenProps}
         />
       </View>
     );

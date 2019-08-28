@@ -1,6 +1,8 @@
+
 let _gameSetupRef;
 
 export const setGameSetupRef = (gameSetupRef) => {
+  console.log('setGameSetupRef');
   _gameSetupRef = gameSetupRef;
 };
 

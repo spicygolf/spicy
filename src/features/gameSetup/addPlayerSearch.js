@@ -12,29 +12,14 @@ import {
   View
 } from 'react-native';
 
-import {
-  Card,
-  Icon,
-  List,
-  ListItem
-} from 'react-native-elements';
-
 import { Query } from 'react-apollo';
-
-import { find, orderBy } from 'lodash';
 
 import {
   SEARCH_PLAYER_QUERY
 } from 'features/players/graphql';
 
-import {
-  getCurrentPlayerKey,
-  renderPlayer
-} from 'features/gameSetup/gameSetupFns';
-import {
-  GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
-  GetFavoritePlayersForPlayer
-} from 'features/players/graphql';
+import Player from 'features/gameSetup/Player';
+
 
 
 const ListHeader = ({title}) => (
@@ -42,6 +27,7 @@ const ListHeader = ({title}) => (
     <Text style={styles.header}>{title}</Text>
   </View>
 );
+
 
 
 class AddPlayerSearch extends React.Component {
@@ -52,6 +38,23 @@ class AddPlayerSearch extends React.Component {
       q: ''
     };
     this.searchInput = null;
+    this._renderPlayer = this._renderPlayer.bind(this);
+  }
+
+  _renderPlayer({item}) {
+    const handicap = (item && item.handicap && item.handicap.display) ?
+    item.handicap.display : 'no handicap';
+    const club = (item && item.clubs && item.clubs[0]) ?
+    ` - ${item.clubs[0].name}` : '';
+
+    return (
+      <Player
+        gkey={this.props.screenProps.gkey}
+        item={item}
+        title={item.name}
+        subtitle={`${handicap} - ${club}`}
+      />
+    );
   }
 
   componentDidMount() {
@@ -100,7 +103,7 @@ class AddPlayerSearch extends React.Component {
               return (
                 <FlatList
                   data={data.searchPlayer}
-                  renderItem={renderPlayer}
+                  renderItem={this._renderPlayer}
                   ListHeaderComponent={header}
                   keyExtractor={item => item._key}
                   keyboardShouldPersistTaps={'handled'}

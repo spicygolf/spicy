@@ -18,6 +18,8 @@ import {
   Icon
 } from 'react-native-elements';
 
+import Tee from 'features/gameSetup/Tee';
+
 import { Query } from 'react-apollo';
 
 import { find, orderBy } from 'lodash';
@@ -26,10 +28,6 @@ import {
   SEARCH_COURSE_QUERY
 } from 'features/courses/graphql';
 
-import {
-  getCurrentPlayerKey,
-  renderCourseTee
-} from 'features/gameSetup/gameSetupFns';
 import {
   GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
   GetFavoriteTeesForPlayer
@@ -47,6 +45,7 @@ class AddCourseSearch extends React.Component {
 
   constructor(props) {
     super(props);
+    console.log('addCourseSearch props', props);
     this.state = {
       q: '',
       course: null
@@ -54,6 +53,7 @@ class AddCourseSearch extends React.Component {
     this._coursePressed = this._coursePressed.bind(this);
     this._removeCourse = this._removeCourse.bind(this);
     this._renderCourse = this._renderCourse.bind(this);
+    this._renderCourseTee = this._renderCourseTee.bind(this);
     this.searchInput = null;
   }
 
@@ -74,6 +74,17 @@ class AddCourseSearch extends React.Component {
         title={item.name || ''}
         subtitle={`${item.city}, ${item.state}`}
         onPress={() => this._coursePressed(item)}
+      />
+    );
+  }
+
+  _renderCourseTee({item}) {
+    return (
+      <Tee
+        gkey={this.props.screenProps.gkey}
+        item={item}
+        title={item.name}
+        subtitle={`${item.gender} - ${item.rating}/${item.slope}`}
       />
     );
   }
@@ -137,7 +148,7 @@ class AddCourseSearch extends React.Component {
         </View>
       );
     } else {
-      const pkey = getCurrentPlayerKey();
+      const pkey = this.props.screenProps.currentPlayerKey;
 
       return (
         <GetFavoriteTeesForPlayer pkey={pkey}>
@@ -183,7 +194,7 @@ class AddCourseSearch extends React.Component {
               <View style={styles.listContainer}>
                 <FlatList
                   data={tees}
-                  renderItem={renderCourseTee}
+                  renderItem={this._renderCourseTee}
                   keyExtractor={item => item._key}
                   keyboardShouldPersistTaps={'handled'}
                 />
