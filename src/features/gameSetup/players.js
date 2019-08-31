@@ -39,6 +39,8 @@ class Players extends React.Component {
   }
 
   _itemPressed(player) {
+    console.log('pressed player', player);
+
     // TODO: maybe implement me?
     // I could see this being used for choosing a round of multiple that the
     // player may have going that current day.

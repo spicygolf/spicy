@@ -53,7 +53,8 @@ class NewGame extends React.Component {
                       game: {
                         name: item.name,
                         start: moment.utc().format(),
-                        gametype: item._key
+                        gametype: item._key,
+                        options: item.defaultOptions || {}
                       }
                     }
                   });
@@ -69,7 +70,8 @@ class NewGame extends React.Component {
                       (!gp_errors || gp_errors.length == 0 ) ) {
                     this.props.navigation.navigate('GameSetup', {
                       gkey: gkey,
-                      gametype: item._key
+                      gametype: item._key,
+                      options: item.defaultOptions || {}
                     });
                   } else {
                     console.log('addGameMutation did not work', errors);
