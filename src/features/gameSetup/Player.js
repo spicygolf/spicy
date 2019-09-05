@@ -18,6 +18,7 @@ class Player extends React.Component {
 
   render() {
     const { gkey, item, title, subtitle } = this.props;
+    const pkey = item._key;
 
     return (
       <AddLinkMutation>
@@ -26,9 +27,10 @@ class Player extends React.Component {
             title={title}
             subtitle={subtitle}
             onPress={async () => {
+              // link player to game
               const {data, errors} = await addLinkMutation({
                 variables: {
-                  from: {type: 'player', value: item._key},
+                  from: {type: 'player', value: pkey},
                   to: {type: 'game', value: gkey}
                 },
                 refetchQueries: () => [{
@@ -42,7 +44,11 @@ class Player extends React.Component {
               if( errors ) {
                 console.log('error adding player to game', errors);
               }
-              this.props.navigation.navigate('GameSetup');
+              // setup round for player
+              this.props.navigation.navigate('LinkRound', {
+                pkey: pkey,
+                gkey: gkey
+              });
             }}
             leftIcon={(
               <FavoriteIcon

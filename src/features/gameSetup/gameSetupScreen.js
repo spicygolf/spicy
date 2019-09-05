@@ -25,7 +25,6 @@ import { navigate } from 'common/components/navigationService';
 import Courses from 'features/gameSetup/courses';
 import Players from 'features/gameSetup/players';
 import GameNav from 'features/games/gamenav';
-import FavoriteIcon from 'common/components/favoriteIcon';
 
 import { green } from 'common/colors';
 

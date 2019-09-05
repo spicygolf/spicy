@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 
 import { Query, withApollo } from 'react-apollo';
-import gql from 'graphql-tag';
 import moment from 'moment';
 
 
