@@ -5,56 +5,50 @@ import {
   View
 } from 'react-native';
 
+import { useQuery } from '@apollo/react-hooks';
+
 import moment from 'moment';
 
-import { GetRoundsForPlayerDay } from 'features/rounds/graphql';
+import {
+  AddRoundMutation,
+  GET_ROUNDS_FOR_PLAYER_DAY_QUERY
+} from 'features/rounds/graphql';
 import Rounds from './rounds';
 
 
 
-class LinkRound extends React.Component {
+const LinkRound = (props) => {
 
-  constructor(props) {
-    super(props);
-    const game_start = props.navigation.getParam('game_start');
-    const pkey = props.navigation.getParam('pkey');
-    const gkey = props.navigation.getParam('gkey');
+  const game_start = props.navigation.getParam('game_start');
+  const pkey = props.navigation.getParam('pkey');
+  const gkey = props.navigation.getParam('gkey');
 
-    this.state = {
-      game_start: moment.utc(game_start).format('YYYY-MM-DD'),
+  const { loading, error, data } = useQuery(GET_ROUNDS_FOR_PLAYER_DAY_QUERY,  {
+    variables: {
       pkey: pkey,
-      gkey: gkey,
-    };
-  }
+      day: game_start,
+    }
+  });
 
-  render() {
-    const { game_start, pkey, gkey } = this.state;
+  if( loading ) return (<ActivityIndicator />);
+  if (error) return (<Text>Error! ${error.message}</Text>);
 
-    // see if player already has round(s) for the day of this game
+  const rounds = (data && data.getRoundsForPlayerDay ) ?
+    data.getRoundsForPlayerDay : [];
+
+  if( rounds && Array.isArray(rounds) ) {
     return (
-      <GetRoundsForPlayerDay
-        day={game_start}
+      <Rounds
+        rounds={rounds}
+        game_start={game_start}
         pkey={pkey}
-      >
-        {({ loading, rounds }) => {
-          if( loading ) return (<ActivityIndicator />);
-          if( rounds && Array.isArray(rounds) ) {
-            return (
-              <Rounds
-                rounds={rounds}
-                game_start={game_start}
-                pkey={pkey}
-                gkey={gkey}
-                navigation={this.props.navigation}
-              />
-            );
-          }
-          return null;
-        }}
-      </GetRoundsForPlayerDay>
+        gkey={gkey}
+        navigation={props.navigation}
+      />
     );
   }
+  return null;
 
-}
+};
 
 export default LinkRound;

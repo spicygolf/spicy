@@ -19,6 +19,8 @@ class Player extends React.Component {
   render() {
     const { gkey, item, title, subtitle } = this.props;
     const pkey = item._key;
+    // TODO: game_start needs to be here somehow
+    const game_start = '2019-06-15T16:44:35Z';
 
     return (
       <AddLinkMutation>
@@ -46,6 +48,7 @@ class Player extends React.Component {
               }
               // setup round for player
               this.props.navigation.navigate('LinkRound', {
+                game_start: game_start,
                 pkey: pkey,
                 gkey: gkey
               });

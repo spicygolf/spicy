@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import {
-  ApolloProvider,
-} from 'react-apollo';
+import { ApolloProvider } from 'react-apollo';
+import { ApolloProvider as ApolloHooksProvider } from '@apollo/react-hooks';
 
 import configureClient from 'app/client/configureClient';
 import AppContainer from 'app/components/appcontainer';
@@ -12,9 +11,11 @@ class App extends Component {
     const { client, persistor } = configureClient();
     return (
       <ApolloProvider client={client}>
-        <AppContainer
-          uriPrefix='/spicygolf'
-        />
+        <ApolloHooksProvider client={client}>
+          <AppContainer
+            uriPrefix='/spicygolf'
+          />
+        </ApolloHooksProvider>
       </ApolloProvider>
     );
   }

@@ -1,62 +1,45 @@
 import React from 'react';
+import {
+  ActivityIndicator,
+  Text
+} from 'react-native';
 
 import moment from 'moment';
 
-import { AddRoundMutation } from 'features/rounds/graphql';
+import { useMutation } from '@apollo/react-hooks';
+
+import {
+  ADD_ROUND_MUTATION
+} from 'features/rounds/graphql';
 
 
 
-class Rounds extends React.Component {
 
-  constructor(props) {
-    super(props);
-    console.log('Rounds props', props);
-    if( props.rounds.length == 0 ) {
-      this._createRound();
-    }
-    this._createRound = this._createRound.bind(this);
-    this._linkRound = this._linkRound.bind(this);
+const Rounds = (props) => {
+
+  const [ addRound, { loading, error, data } ] = useMutation(ADD_ROUND_MUTATION);
+
+
+  if( props.rounds.length === 0 ) {
+/*
+    addRound({
+      variables: {
+        round: {
+          date: props.game_start,
+          seq: 1,
+          scores: []
+        }
+      }
+    });
+    if( loading ) return (<ActivityIndicator />);
+    if (error) return (<Text>Error! ${error.message}</Text>);
+    console.log('Rounds addRound data', data);
+*/
+    return (<Text>No Rounds, so added one</Text>);
   }
 
-  _createRound() {
-    return (
-      <AddRoundMutation>
-        {async ({addRoundMutation}) => {
-          const {data, errors} = await addRoundMutation({
-            variables: {
-              round: {
-                date: moment.utc().format(this.props.day),
-                seq: 1,
-                scores: []
-              }
-            }
-          });
-          console.log('mutation', data, errors);
-          if( !errors || errors.length == 0 ) {
-            this._linkRound(data.addRound._key);
-          } else {
-            console.log(`addRoundMutation didn't work`, errors);
-          }
-          return;
-        }}
-      </AddRoundMutation>
-    );
-  }
+  return (<Text>Rounds List</Text>);
 
-  _linkRound(rkey) {
-    console.log(
-      `linking round ${rkey}
-       to player ${this.props.pkey}
-       and game ${this.props.gkey}`);
-
-    this.props.navigation.navigate('GameSetup');
-  }
-
-  render() {
-
-
-    return (null);
-  }
-}
+};
 
 export default Rounds;
