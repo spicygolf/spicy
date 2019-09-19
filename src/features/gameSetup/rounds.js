@@ -59,6 +59,7 @@ const Rounds = (props) => {
               }
             });
             //console.log('r2pData', r2pData);
+            props.navigation.navigate('GameSetup');
           }}
         />
       </View>

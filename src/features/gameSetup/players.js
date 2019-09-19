@@ -16,16 +16,17 @@ import {
   ListItem
 } from 'react-native-elements';
 
+import { withApollo } from 'react-apollo';
 import { withNavigation } from 'react-navigation';
 
 import {
   GetPlayersForGame,
   GET_PLAYERS_FOR_GAME_QUERY
 } from 'features/players/graphql';
+import { RemoveLinkMutation } from 'common/graphql/unlink';
+import { FindRound } from 'features/rounds/graphql';
 
 import { blue } from 'common/colors';
-
-import { RemoveLinkMutation } from 'common/graphql/unlink';
 
 
 
@@ -35,6 +36,7 @@ class Players extends React.Component {
     super(props);
     this._itemPressed = this._itemPressed.bind(this);
     this._shouldShowAddButton = this._shouldShowAddButton.bind(this);
+    this._removePlayerFromGame = this._removePlayerFromGame.bind(this);
     this._renderItem = this._renderItem.bind(this);
   }
 
@@ -60,50 +62,82 @@ class Players extends React.Component {
     return ret;
   }
 
+  async _removePlayerFromGame({ removeLinkMutation, pkey, rkey }) {
+
+    const { gkey } = this.props;
+
+    // remove player2game link
+    const { errors: p2gErrors } = await removeLinkMutation({
+      variables: {
+        from: {type: 'player', value: pkey},
+        to: {type: 'game', value: gkey}
+      },
+      refetchQueries: [{
+        query: GET_PLAYERS_FOR_GAME_QUERY,
+        variables: {
+          gkey: gkey
+        }
+      }],
+      awaitRefetchQueries: true,
+      ignoreResults: true
+    });
+    if( p2gErrors ) {
+      console.log('error removing player from game', p2gErrors);
+    }
+
+    // remove round2game link
+    const { errors: r2gErrors } = await removeLinkMutation({
+      variables: {
+        from: {type: 'round', value: rkey},
+        to: {type: 'game', value: gkey}
+      },
+      ignoreResults: true
+    });
+    if( r2gErrors ) {
+      console.log('error unlinking round from game', r2gErrors);
+    }
+
+  }
+
   _renderItem({item}) {
     if( item && item.name ) {
-      const { gkey } = this.props;
       return (
-        <RemoveLinkMutation>
-          {({removeLinkMutation}) => {
-            const handicap = (item && item.handicap && item.handicap.display) ?
-              item.handicap.display : 'no handicap';
-
+        <FindRound
+          gkey={this.props.gkey}
+          pkey={item._key}
+        >
+          {({loading, findRound}) => {
+            if( loading ) return null;
+            const rkey = findRound._key;
             return (
-              <ListItem
-                key={item._key}
-                title={item.name || ''}
-                subtitle={handicap}
-                onPress={() => this._itemPressed(item)}
-                rightIcon={
-                  <Icon
-                    name='remove-circle'
-                    color='red'
-                    onPress={async () => {
-                      const {data, errors} = await removeLinkMutation({
-                        variables: {
-                          from: {type: 'player', value: item._key},
-                          to: {type: 'game', value: gkey}
-                        },
-                        refetchQueries: [{
-                          query: GET_PLAYERS_FOR_GAME_QUERY,
-                          variables: {
-                            gkey: gkey
-                          }
-                        }],
-                        awaitRefetchQueries: true,
-                        ignoreResults: true
-                      });
-                      if( errors ) {
-                        console.log('error removing player from game', errors);
+              <RemoveLinkMutation>
+                {({removeLinkMutation}) => {
+                  const handicap = (item && item.handicap && item.handicap.display) ?
+                    item.handicap.display : 'no handicap';
+                  return (
+                    <ListItem
+                      key={item._key}
+                      title={item.name || ''}
+                      subtitle={handicap}
+                      onPress={() => this._itemPressed(item)}
+                      rightIcon={
+                        <Icon
+                          name='remove-circle'
+                          color='red'
+                          onPress={() => this._removePlayerFromGame({
+                            removeLinkMutation: removeLinkMutation,
+                            pkey: item._key,
+                            rkey: rkey
+                          })}
+                        />
                       }
-                    }}
-                  />
-                }
-              />
+                    />
+                  );
+                }}
+              </RemoveLinkMutation>
             );
           }}
-        </RemoveLinkMutation>
+        </FindRound>
       );
     } else {
       return null;
@@ -153,7 +187,7 @@ class Players extends React.Component {
   }
 }
 
-export default withNavigation(Players);
+export default withNavigation(withApollo(Players));
 
 
 const styles = StyleSheet.create({
