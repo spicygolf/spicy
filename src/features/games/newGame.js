@@ -60,8 +60,8 @@ class NewGame extends React.Component {
                   const { _key: gkey } = game_data.addGame;
                   const {data: gp_data, errors: gp_errors} = await addLinkMutation({
                     variables: {
-                      from: {type: 'game', value: gkey},
-                      to: {type: 'player', value: this.state.currentPlayerKey},
+                      from: {type: 'player', value: this.state.currentPlayerKey},
+                      to: {type: 'game', value: gkey},
                       other: [{key: 'created_by', value: 'true'}]
                     }
                   });

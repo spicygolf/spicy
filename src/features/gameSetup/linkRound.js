@@ -21,6 +21,7 @@ const LinkRound = (props) => {
 
   const game_start = props.navigation.getParam('game_start');
   const pkey = props.navigation.getParam('pkey');
+  const player = props.navigation.getParam('player');
   const gkey = props.navigation.getParam('gkey');
 
   const { loading, error, data } = useQuery(GET_ROUNDS_FOR_PLAYER_DAY_QUERY,  {
@@ -42,6 +43,7 @@ const LinkRound = (props) => {
         rounds={rounds}
         game_start={game_start}
         pkey={pkey}
+        player={player}
         gkey={gkey}
         navigation={props.navigation}
       />

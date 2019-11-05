@@ -1,10 +1,15 @@
 import React from 'react';
 import {
   ActivityIndicator,
+  FlatList,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+
+import {
+  ListItem
+} from 'react-native-elements';
 
 import moment from 'moment';
 
@@ -24,48 +29,87 @@ const Rounds = (props) => {
   const [ linkRoundToGame ] = useMutation(ADD_LINK_MUTATION);
   const [ linkRoundToPlayer ] = useMutation(ADD_LINK_MUTATION);
 
+  const linkRoundToGameAndPlayer = async (rkey, isNew) => {
+    // link round to game
+    let { loading: r2gLoading, error: r2gError, data: r2gData } = await linkRoundToGame({
+      variables: {
+        from: {type: 'round', value: rkey},
+        to:   {type: 'game', value: props.gkey},
+      }
+    });
+    //console.log('r2gData', r2gData);
+
+    if( isNew ) {
+      // link round to player
+      let { loading: r2pLoading, error: r2pError, data: r2pData } = await linkRoundToPlayer({
+        variables: {
+          from: {type: 'round', value: rkey},
+          to:   {type: 'player', value: props.pkey},
+        }
+      });
+      //console.log('r2pData', r2pData);
+    }
+
+    props.navigation.navigate('GameSetup');
+
+  };
+
+  const addButton = (
+    <Button
+      title="Add New Round"
+      onPress={async () => {
+        // add round
+        let { loading: arLoading, error: arError, data: arData } = await addRound({
+          variables: {
+            round: {
+              date: props.game_start,
+              seq: 1,
+              scores: []
+            }
+          }
+        });
+        //console.log('arData', arData);
+
+        linkRoundToGameAndPlayer(arData.addRound._key, true);
+      }}
+    />
+  );
+
   if( props.rounds.length === 0 ) {
     content = (
       <View>
-        <Button
-          title="Add Round"
-          onPress={async () => {
-            // add round
-            let { loading: arLoading, error: arError, data: arData } = await addRound({
-              variables: {
-                round: {
-                  date: props.game_start,
-                  seq: 1,
-                  scores: []
-                }
-              }
-            });
-            //console.log('arData', arData);
-
-            // link round to game
-            let { loading: r2gLoading, error: r2gError, data: r2gData } = await linkRoundToGame({
-              variables: {
-                from: {type: 'round', value: arData.addRound._key},
-                to:   {type: 'game', value: props.gkey},
-              }
-            });
-            //console.log('r2gData', r2gData);
-
-            // link round to player
-            let { loading: r2pLoading, error: r2pError, data: r2pData } = await linkRoundToPlayer({
-              variables: {
-                from: {type: 'round', value: arData.addRound._key},
-                to:   {type: 'player', value: props.pkey},
-              }
-            });
-            //console.log('r2pData', r2pData);
-            props.navigation.navigate('GameSetup');
-          }}
-        />
+        {addButton}
       </View>
     );
   } else {
-    content = (<Text>Rounds List</Text>);
+    console.log('rounds props', props);
+    content = (
+      <View>
+        <Text>
+          {props.player.name} is already playing round(s) today.
+          Please choose one from the list or create a new round.
+        </Text>
+
+        <FlatList
+          data={props.rounds}
+          renderItem={({item, index}) => {
+            return (
+              <ListItem
+                key={index}
+                title={moment(item.date).format('llll')}
+                onPress={() => {
+                  console.log('round clicked', item);
+                  linkRoundToGameAndPlayer(item._key, false);
+                }}
+              />
+            );
+          }}
+          keyExtractor={(_item, index) => index.toString()}
+        />
+
+        {addButton}
+      </View>
+    );
   }
 
   return (

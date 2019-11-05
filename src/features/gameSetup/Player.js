@@ -50,6 +50,7 @@ class Player extends React.Component {
               this.props.navigation.navigate('LinkRound', {
                 game_start: game_start,
                 pkey: pkey,
+                player: item,
                 gkey: gkey
               });
             }}
