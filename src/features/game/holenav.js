@@ -9,7 +9,7 @@ import {
 
 import { Icon } from 'react-native-elements';
 
-import { sortBy } from 'lodash';
+import { findIndex, sortBy } from 'lodash';
 
 
 
@@ -26,21 +26,37 @@ const sortHoles = h => {
 };
 
 
-const HoleNav = ({holes:holesOrig, currentHole}) => {
+const HoleNav = ({holes:holesOrig, currentHole, changeHole}) => {
 
   const holes = sortBy(holesOrig, sortHoles);
-  console.log('holes', holes);
+  const currentHoleIndex = findIndex(holes, h => { return h.hole == currentHole })
 
   return (
     <View style={styles.container}>
       <View style={styles.direction}>
-        <Icon name='chevron-left' size={40} />
+        <Icon
+          name='chevron-left'
+          size={40}
+          onPress={() => {
+            let newHoleIndex = currentHoleIndex - 1;
+            if( newHoleIndex < 0 ) newHoleIndex = holes.length - 1;
+            changeHole(holes[newHoleIndex].hole);
+          }}
+        />
       </View>
       <View style={styles.currentHole}>
         <Text style={styles.holeText}>{currentHole}</Text>
         </View>
       <View style={styles.direction}>
-      <Icon name='chevron-right' size={40} />
+      <Icon
+        name='chevron-right'
+        size={40}
+        onPress={() => {
+          let newHoleIndex = currentHoleIndex + 1;
+          if( newHoleIndex >= holes.length ) newHoleIndex = 0;
+          changeHole(holes[newHoleIndex].hole);
+        }}
+      />
       </View>
     </View>
   );
