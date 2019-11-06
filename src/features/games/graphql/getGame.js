@@ -10,6 +10,9 @@ export default gql`
       gametype
       tees {
         name
+        rating { all18 }
+        slope { all18 }
+        holes { hole seq length par handicap }
       }
       rounds {
         _key
@@ -21,11 +24,11 @@ export default gql`
             k v ts
           }
         }
-      }
-      players {
-        _key
-        name
-        short
+        player {
+          _key
+          name
+          short
+        }
       }
     }
   }

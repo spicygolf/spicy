@@ -11,29 +11,25 @@ import HoleNav from 'features/game/holenav';
 
 
 
-class FivePointsScore extends React.Component {
+const FivePointsScore = (props) => {
 
 
-  constructor(props) {
-    super(props);
-    console.log('5pts Score game', props.screenProps.game);
-  }
+  const game = props.screenProps.game;
+  const currentHole = props.screenProps.currentHole || '1';
 
-  render() {
-    const holes = [];
-    const currentHole = '1';
+  console.log('5pts - Score - game: ', game);
 
-    return (
-      <View>
-        <HoleNav
-          holes={holes}
-          currentHole={currentHole}
-        />
-        <Text>FivePoints Score</Text>
-      </View>
-    );
-  }
-}
+  return (
+    <View>
+      <HoleNav
+        holes={game.tees[0].holes}
+        currentHole={currentHole}
+      />
+      <Text>FivePoints Score</Text>
+    </View>
+  );
+
+};
 
 export default FivePointsScore;
 
