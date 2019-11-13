@@ -19,6 +19,8 @@ import {
 import { withApollo } from 'react-apollo';
 import { withNavigation } from 'react-navigation';
 
+import { orderBy, pick, uniqBy } from 'lodash';
+
 import {
   GetPlayersForGame,
   GET_PLAYERS_FOR_GAME_QUERY
@@ -28,16 +30,19 @@ import { FindRound } from 'features/rounds/graphql';
 
 import { blue } from 'common/colors';
 
+import Teams from 'features/gameSetup/teams';
+
 
 
 class Players extends React.Component {
 
   constructor(props) {
     super(props);
+    //console.log('Players props', props);
     this._itemPressed = this._itemPressed.bind(this);
     this._shouldShowAddButton = this._shouldShowAddButton.bind(this);
     this._removePlayerFromGame = this._removePlayerFromGame.bind(this);
-    this._renderItem = this._renderItem.bind(this);
+    this._renderPlayer = this._renderPlayer.bind(this);
   }
 
   _itemPressed(player) {
@@ -52,6 +57,7 @@ class Players extends React.Component {
 
   _shouldShowAddButton(players) {
     let ret = true;
+    if( this.props.gamespec.team_size > 1 ) return false;
     if( this.props.gamespec.max_players < 1 ) return true;
     try {
       const player_count = players.length;
@@ -99,7 +105,7 @@ class Players extends React.Component {
 
   }
 
-  _renderItem({item}) {
+  _renderPlayer({item}) {
     if( item && item.name ) {
       return (
         <FindRound
@@ -164,6 +170,33 @@ class Players extends React.Component {
       <GetPlayersForGame gkey={gkey}>
         {({ loading, players }) => {
           if( loading ) return (<ActivityIndicator />);
+
+          let teams = null, content = null;
+          if( this.props.gamespec.team_size &&
+              this.props.gamespec.team_size > 1 ) {
+            teams = orderBy(
+              uniqBy(players, 'team')
+                .map(p => pick(p, ['team'])),
+              ['team'],
+              ['asc']
+            );
+            content = (
+              <Teams
+                teams={teams}
+                players={players}
+                renderPlayer={this._renderPlayer}
+              />
+            );
+          } else {
+            content = (
+              <FlatList
+                data={players}
+                renderItem={this._renderPlayer}
+                keyExtractor={item => item._key}
+              />
+            );
+          }
+
           const showButton = this._shouldShowAddButton(players);
           return (
             <Card>
@@ -173,11 +206,7 @@ class Players extends React.Component {
                 { showButton ? addButton : noAddButton }
               </View>
               <View style={styles.listContainer}>
-                <FlatList
-                  data={players}
-                  renderItem={this._renderItem}
-                  keyExtractor={item => item._key}
-                />
+                {content}
               </View>
             </Card>
           );

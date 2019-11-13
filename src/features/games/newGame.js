@@ -47,30 +47,39 @@ class NewGame extends React.Component {
                 title={item.name || ''}
                 subtitle={item.type || ''}
                 onPress={async () => {
+                  // add new game
                   const {data: game_data, errors: game_errors} = await addGameMutation({
                     variables: {
                       game: {
                         name: item.name,
                         start: moment.utc().format(),
                         gametype: item._key,
-                        options: item.defaultOptions || {}
+                        options: item.defaultOptions || []
                       }
                     }
                   });
+                  // now add current logged in player to game via edge
                   const { _key: gkey } = game_data.addGame;
+                  let others = [
+                    {key: 'created_by', value: 'true'},
+                  ];
+                  if( item.team_size > 1 ) {
+                    others.push({key: 'team', value: 1})
+                  }
                   const {data: gp_data, errors: gp_errors} = await addLinkMutation({
                     variables: {
                       from: {type: 'player', value: this.state.currentPlayerKey},
                       to: {type: 'game', value: gkey},
-                      other: [{key: 'created_by', value: 'true'}]
+                      other: others
                     }
                   });
+                  // redirect to game setup
                   if( (!game_errors || game_errors.length == 0 ) &&
                       (!gp_errors || gp_errors.length == 0 ) ) {
                     this.props.navigation.navigate('GameSetup', {
                       gkey: gkey,
                       gametype: item._key,
-                      options: item.defaultOptions || {}
+                      options: item.defaultOptions || []
                     });
                   } else {
                     console.log('addGameMutation did not work', errors);

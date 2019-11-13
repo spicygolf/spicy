@@ -12,6 +12,7 @@ export const GET_PLAYERS_FOR_GAME_QUERY = gql`
       _key
       name
       short
+      team
       handicap {
         value
         revDate
