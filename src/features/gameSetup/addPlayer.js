@@ -22,6 +22,7 @@ class AddPlayer extends React.Component {
 
   constructor(props) {
     super(props);
+    this.props.screenProps.team = this.props.navigation.getParam('team');
     //console.log('addPlayer props', props);
   }
 

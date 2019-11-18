@@ -19,7 +19,7 @@ import {
 import { withApollo } from 'react-apollo';
 import { withNavigation } from 'react-navigation';
 
-import { orderBy, pick, uniqBy } from 'lodash';
+import { findIndex, orderBy, pick, uniqBy } from 'lodash';
 
 import {
   GetPlayersForGame,
@@ -43,6 +43,7 @@ class Players extends React.Component {
     this._shouldShowAddButton = this._shouldShowAddButton.bind(this);
     this._removePlayerFromGame = this._removePlayerFromGame.bind(this);
     this._renderPlayer = this._renderPlayer.bind(this);
+    this._getTeams = this._getTeams.bind(this);
   }
 
   _itemPressed(player) {
@@ -56,12 +57,13 @@ class Players extends React.Component {
   }
 
   _shouldShowAddButton(players) {
+    const { gamespec } = this.props;
     let ret = true;
-    if( this.props.gamespec.team_size > 1 ) return false;
-    if( this.props.gamespec.max_players < 1 ) return true;
+    if( gamespec.team_size > 1 ) return false;
+    if( gamespec.max_players < 1 ) return true;
     try {
       const player_count = players.length;
-      ret = (player_count < this.props.gamespec.max_players);
+      ret = (player_count < gamespec.max_players);
     } catch(e) {
       console.log('error in shouldShowButton', e);
     }
@@ -103,6 +105,23 @@ class Players extends React.Component {
       console.log('error unlinking round from game', r2gErrors);
     }
 
+  }
+
+  _getTeams(players, gamespec) {
+    let teams = orderBy(
+      uniqBy(players, 'team')
+        .map(p => pick(p, ['team'])),
+      ['team'],
+      ['asc']
+    );
+    const max_teams = Math.floor(gamespec.max_players / gamespec.team_size);
+    for( let t=1; t<= max_teams; t++ ) {
+      if( findIndex(teams, {team: t}) < 0 ) {
+        teams.push({team: t});
+      }
+    }
+
+    return teams;
   }
 
   _renderPlayer({item}) {
@@ -152,7 +171,7 @@ class Players extends React.Component {
 
   render() {
 
-    const { gkey } = this.props;
+    const { gkey, gamespec, navigation } = this.props;
 
     const addButton = (
       <Icon
@@ -160,7 +179,7 @@ class Players extends React.Component {
         color={blue}
         size={40}
         title='Add Player'
-        onPress={() => this.props.navigation.navigate('AddPlayer')}
+        onPress={() => navigation.navigate('AddPlayer')}
         testID='add_player_button'
       />
     );
@@ -171,20 +190,16 @@ class Players extends React.Component {
         {({ loading, players }) => {
           if( loading ) return (<ActivityIndicator />);
 
-          let teams = null, content = null;
-          if( this.props.gamespec.team_size &&
-              this.props.gamespec.team_size > 1 ) {
-            teams = orderBy(
-              uniqBy(players, 'team')
-                .map(p => pick(p, ['team'])),
-              ['team'],
-              ['asc']
-            );
+          let content = null;
+          if( gamespec.team_size && gamespec.team_size > 1 ) {
+            const teams = this._getTeams(players, gamespec);
             content = (
               <Teams
                 teams={teams}
                 players={players}
+                gamespec={gamespec}
                 renderPlayer={this._renderPlayer}
+                nav={navigation}
               />
             );
           } else {

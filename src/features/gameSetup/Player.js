@@ -16,9 +16,18 @@ import FavoriteIcon from 'common/components/favoriteIcon';
 
 class Player extends React.Component {
 
+//  constructor(props) {
+//    super(props);
+//    console.log('Player props', props);
+//  }
+
   render() {
-    const { gkey, item, title, subtitle } = this.props;
+    const { gkey, team, item, title, subtitle } = this.props;
     const pkey = item._key;
+
+    let others = [];
+    if( team ) others.push({key: 'team', value: team});
+
     // TODO: game_start needs to be here somehow
     const game_start = '2019-06-15T16:44:35Z';
 
@@ -33,7 +42,8 @@ class Player extends React.Component {
               const {data, errors} = await addLinkMutation({
                 variables: {
                   from: {type: 'player', value: pkey},
-                  to: {type: 'game', value: gkey}
+                  to: {type: 'game', value: gkey},
+                  other: others
                 },
                 refetchQueries: () => [{
                   query: GET_PLAYERS_FOR_GAME_QUERY,

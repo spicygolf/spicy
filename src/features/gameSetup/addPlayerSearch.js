@@ -54,6 +54,7 @@ class AddPlayerSearch extends React.Component {
     return (
       <Player
         gkey={this.props.screenProps.gkey}
+        team={this.props.screenProps.team}
         item={item}
         title={item.name}
         subtitle={`${handicap}${club}`}

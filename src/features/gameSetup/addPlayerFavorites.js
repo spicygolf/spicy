@@ -21,6 +21,11 @@ class AddPlayerFavorites extends React.Component {
   constructor(props) {
     super(props);
     //console.log('addPlayerFavorites props', props);
+    // not sure why props don't work for these, but /shrug
+    this.state = {
+      gkey: this.props.screenProps.gkey,
+      team: this.props.screenProps.team,
+    };
     this._renderFavoritesPlayer = this._renderFavoritesPlayer.bind(this);
   }
 
@@ -32,7 +37,8 @@ class AddPlayerFavorites extends React.Component {
 
     return (
       <Player
-        gkey={this.props.screenProps.gkey}
+        gkey={this.state.gkey}
+        team={this.state.team}
         item={item}
         title={item.name}
         subtitle={`${handicap}${club}`}
