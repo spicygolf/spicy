@@ -58,8 +58,10 @@ class NewGame extends React.Component {
                       }
                     }
                   });
+                  //console.log('newGame game_data', game_data);
+
                   // now add current logged in player to game via edge
-                  const { _key: gkey } = game_data.addGame;
+                  const { _key: gkey, start: game_start } = game_data.addGame;
                   let others = [
                     {key: 'created_by', value: 'true'},
                   ];
@@ -79,6 +81,7 @@ class NewGame extends React.Component {
                     this.props.navigation.navigate('GameSetup', {
                       gkey: gkey,
                       gametype: item._key,
+                      game_start: game_start,
                       options: item.defaultOptions || []
                     });
                   } else {

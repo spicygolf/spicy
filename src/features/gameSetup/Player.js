@@ -16,20 +16,19 @@ import FavoriteIcon from 'common/components/favoriteIcon';
 
 class Player extends React.Component {
 
-//  constructor(props) {
-//    super(props);
-//    console.log('Player props', props);
-//  }
+/*
+  constructor(props) {
+    super(props);
+    console.log('Player props', props);
+  }
+*/
 
   render() {
-    const { gkey, team, item, title, subtitle } = this.props;
+    const { gkey, team, game_start, item, title, subtitle } = this.props;
     const pkey = item._key;
 
     let others = [];
     if( team ) others.push({key: 'team', value: team});
-
-    // TODO: game_start needs to be here somehow
-    const game_start = '2019-06-15T16:44:35Z';
 
     return (
       <AddLinkMutation>

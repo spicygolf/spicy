@@ -18,7 +18,7 @@ class GameSetup extends React.Component {
 
   constructor(props) {
     super(props);
-    //console.log('gSW props', props);
+    //console.log('gameSetup props', props);
     if(    props.screenProps
         && props.screenProps.currentGame
         && props.screenProps.game
@@ -28,6 +28,7 @@ class GameSetup extends React.Component {
       this.state = {
         gkey: game._key,
         gametype: game.gametype,
+        game_start: game.game_start,
         inGame: true,
         currentPlayerKey: null,
       };
@@ -36,6 +37,7 @@ class GameSetup extends React.Component {
       this.state = {
         gkey: this.props.navigation.getParam('gkey') || [],
         gametype: this.props.navigation.getParam('gametype') || [],
+        game_start: this.props.navigation.getParam('game_start') || '',
         inGame: false,
         currentPlayerKey: null,
       };
@@ -57,6 +59,7 @@ class GameSetup extends React.Component {
         screenProps={{
           gkey: this.state.gkey,
           gametype: this.state.gametype,
+          game_start: this.state.game_start,
           inGame: this.state.inGame,
           currentPlayerKey: this.state.currentPlayerKey
         }}

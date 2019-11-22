@@ -66,7 +66,8 @@ class Games extends React.Component {
             onPress={() => {
               this.props.navigation.navigate('GameSetup', {
                 gkey: item._key,
-                gametype: item.gametype
+                gametype: item.gametype,
+                game_start: item.start,
               });
             }}
           />

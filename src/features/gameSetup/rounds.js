@@ -23,6 +23,7 @@ import { Button } from 'react-native-elements';
 
 const Rounds = (props) => {
 
+  //console.log('Rounds props', props);
   let content = null;
 
   const [ addRound ] = useMutation(ADD_ROUND_MUTATION);
@@ -82,7 +83,7 @@ const Rounds = (props) => {
       </View>
     );
   } else {
-    console.log('rounds props', props);
+    //console.log('rounds props', props);
     content = (
       <View>
         <Text>
@@ -98,7 +99,7 @@ const Rounds = (props) => {
                 key={index}
                 title={moment(item.date).format('llll')}
                 onPress={() => {
-                  console.log('round clicked', item);
+                  //console.log('round clicked', item);
                   linkRoundToGameAndPlayer(item._key, false);
                 }}
               />

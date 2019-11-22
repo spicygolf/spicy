@@ -25,6 +25,7 @@ class AddPlayerFavorites extends React.Component {
     this.state = {
       gkey: this.props.screenProps.gkey,
       team: this.props.screenProps.team,
+      game_start: this.props.screenProps.game_start,
     };
     this._renderFavoritesPlayer = this._renderFavoritesPlayer.bind(this);
   }
@@ -39,6 +40,7 @@ class AddPlayerFavorites extends React.Component {
       <Player
         gkey={this.state.gkey}
         team={this.state.team}
+        game_start={this.state.game_start}
         item={item}
         title={item.name}
         subtitle={`${handicap}${club}`}

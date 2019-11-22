@@ -50,7 +50,7 @@ class Players extends React.Component {
     console.log('pressed player', player);
 
     // TODO: maybe implement me?
-    // I could see this being used for choosing a round of multiple that the
+    // I could see this being used for choosing a round or multiple that the
     // player may have going that current day.
     //
     //navigate('player_item', {player: player});
@@ -171,7 +171,7 @@ class Players extends React.Component {
 
   render() {
 
-    const { gkey, gamespec, navigation } = this.props;
+    const { gkey, gamespec, game_start, navigation } = this.props;
 
     const addButton = (
       <Icon
@@ -179,7 +179,9 @@ class Players extends React.Component {
         color={blue}
         size={40}
         title='Add Player'
-        onPress={() => navigation.navigate('AddPlayer')}
+        onPress={() => navigation.navigate('AddPlayer', {
+          game_start: game_start,
+        })}
         testID='add_player_button'
       />
     );

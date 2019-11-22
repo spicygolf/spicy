@@ -23,9 +23,9 @@ import { blue } from 'common/colors';
 
 const Teams = ({teams, players, gamespec, renderPlayer, nav}) => {
 
-  //console.log('teams', teams);
-  //console.log('players', players);
-  //console.log('gamespec', gamespec);
+  //console.log('Teams teams', teams);
+  //console.log('Teams players', players);
+  //console.log('Teams gamespec', gamespec);
 
   const addButton = team => (
     <Icon

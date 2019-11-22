@@ -39,6 +39,7 @@ class GameSetupScreen extends React.Component {
     this.state = {
       gkey: sp.gkey,
       gametype: sp.gametype,
+      game_start: sp.game_start,
       addCurrentPlayer: true,
       options: [],
       inGame: sp.inGame,
@@ -91,6 +92,7 @@ class GameSetupScreen extends React.Component {
             const playerSection = (
               <Players
                 gkey={this.state.gkey}
+                game_start={this.state.game_start}
                 gamespec={gs}
                 addCurrentPlayer={this.state.addCurrentPlayer}
                 navigation={this.props.navigation}
