@@ -179,9 +179,6 @@ android {
 }
 
 dependencies {
-    implementation project(':@react-native-community_async-storage')
-    compile project(':react-native-gesture-handler')
-    api project(':react-native-vector-icons')
     api fileTree(dir: "libs", include: ["*.jar"])
     api "com.android.support:appcompat-v7:23.0.1"
     api "com.facebook.react:react-native:+"  // From node_modules
