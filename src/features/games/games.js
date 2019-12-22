@@ -1,79 +1,25 @@
 'use strict';
 
 import React from 'react';
-
 import {
   ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
-  View
 } from 'react-native';
-
 import AsyncStorage from '@react-native-community/async-storage';
 
-import {
-  Icon
-} from 'react-native-elements';
-
-import { Query, withApollo } from 'react-apollo';
-
-import { ListItem } from 'react-native-elements';
-import moment from 'moment';
-
-import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
-
-import { blue } from 'common/colors';
+import GameList from './gamelist';
 
 
+
+// TODO: put most of this in a render-only component GameList, to use
+//       useQuery hook.  Can we further get rid of the rest of this?
 class Games extends React.Component {
 
   constructor(props) {
     super(props);
+    console.log('games props', props);
     this.state = {
       currentPlayerKey: null
     };
-    this._newGamePressed = this._newGamePressed.bind(this);
-    this._renderItem = this._renderItem.bind(this);
-  }
-
-  _newGamePressed() {
-    this.props.navigation.navigate(
-      'NewGame',
-      {currentPlayerKey: this.state.currentPlayerKey}
-    );
-  }
-
-  _itemPressed(item) {
-    this.props.navigation.navigate('Game', {
-      currentGame: item._key
-    });
-  }
-
-  _renderItem({item}) {
-    if( !item || !item.gametype ) return null;
-    const startTime = moment(item.start).format('llll');
-    return (
-      <ListItem
-        roundAvatar
-        title={item.name || ''}
-        subtitle={startTime || ''}
-        onPress={() => this._itemPressed(item)}
-        rightIcon={
-          <Icon
-            name='settings'
-            color='#999'
-            onPress={() => {
-              this.props.navigation.navigate('GameSetup', {
-                gkey: item._key,
-                gametype: item.gametype,
-                game_start: item.start,
-              });
-            }}
-          />
-        }
-      />
-    );
   }
 
   async componentDidMount() {
@@ -93,59 +39,14 @@ class Games extends React.Component {
     }
 
     return (
-      <Query
-        query={ACTIVE_GAMES_FOR_PLAYER_QUERY}
-        variables={{pkey: currentPlayerKey}}
-        fetchPolicy='cache-and-network'
-      >
-        {({ data: { activeGamesForPlayer: games }, loading, error}) => {
-          if( loading ) return (<ActivityIndicator />);
-
-          // TODO: error component instead of below...
-          if( error ) {
-            console.log(error);
-            return (<Text>Error</Text>);
-          }
-          return (
-            <View>
-              <View style={styles.gamesSubMenu}>
-                <View style={styles.newGameButton}>
-                  <Icon
-                    name='add-circle'
-                    color={blue}
-                    size={40}
-                    onPress={this._newGamePressed}
-                    accessibilityLabel="New Game"
-                    testID='new_game'
-                  />
-                </View>
-              </View>
-              <FlatList
-                data={games}
-                renderItem={this._renderItem}
-                keyExtractor={item => item._key}
-              />
-            </View>
-          );
-        }}
-      </Query>
+      <GameList
+        currentPlayerKey={this.state.currentPlayerKey}
+        navigation={this.props.navigation}
+      />
     );
 
   }
 
 }
 
-export default withApollo(Games);
-
-
-var styles = StyleSheet.create({
-  gamesSubMenu: {
-    alignItems: 'flex-end',
-    paddingRight: 10,
-    paddingTop: 10,
-  },
-  gamesSubMenuSpacer: {
-  },
-  newGameButton: {
-  }
-})
+export default Games;
