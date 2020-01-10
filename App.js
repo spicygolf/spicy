@@ -27,5 +27,6 @@ export default App;
 import { YellowBox } from 'react-native';
 YellowBox.ignoreWarnings([
   'Warning: isMounted(...) is deprecated',
-  'Module RCTImageLoader'
+  'Module RCTImageLoader',
+  'VirtualizedLists should never be nested',
 ]);
