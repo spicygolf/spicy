@@ -9,6 +9,7 @@ import {
 import { useQuery } from '@apollo/react-hooks';
 import { Icon, ListItem } from 'react-native-elements';
 import moment from 'moment';
+import { reverse, sortBy } from 'lodash';
 
 import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
 import { blue } from 'common/colors';
@@ -67,6 +68,8 @@ const GameList = ({currentPlayerKey, navigation}) => {
 
   const games = (data && data.activeGamesForPlayer ) ?
     data.activeGamesForPlayer : [];
+  // sort games descending by start time
+    const sorted_games = reverse(sortBy(games, ['start']));
 
   return (
     <View>
@@ -83,7 +86,7 @@ const GameList = ({currentPlayerKey, navigation}) => {
         </View>
       </View>
       <FlatList
-        data={games}
+        data={sorted_games}
         renderItem={renderItem}
         keyExtractor={item => item._key}
       />

@@ -10,9 +10,7 @@ import {
 } from 'react-native';
 
 import {
-  Card,
   Icon,
-  ListItem
 } from 'react-native-elements';
 
 import { filter } from 'lodash';
