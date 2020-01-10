@@ -16,12 +16,10 @@ import FavoriteIcon from 'common/components/favoriteIcon';
 
 class Player extends React.Component {
 
-/*
   constructor(props) {
     super(props);
-    console.log('Player props', props);
+    //console.log('Player props', props);
   }
-*/
 
   render() {
     const { gkey, team, game_start, item, title, subtitle } = this.props;

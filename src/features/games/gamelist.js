@@ -35,7 +35,6 @@ const GameList = ({currentPlayerKey, navigation}) => {
     const startTime = moment(item.start).format('llll');
     return (
       <ListItem
-        roundAvatar
         title={item.name || ''}
         subtitle={startTime || ''}
         onPress={() => itemPressed(item)}

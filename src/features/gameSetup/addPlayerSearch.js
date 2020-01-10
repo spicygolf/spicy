@@ -39,7 +39,10 @@ class AddPlayerSearch extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      q: ''
+      q: '',
+      gkey: this.props.screenProps.gkey,
+      team: this.props.screenProps.team,
+      game_start: this.props.screenProps.game_start,
     };
     this.searchInput = null;
     this._renderPlayer = this._renderPlayer.bind(this);
@@ -53,8 +56,9 @@ class AddPlayerSearch extends React.Component {
 
     return (
       <Player
-        gkey={this.props.screenProps.gkey}
-        team={this.props.screenProps.team}
+        gkey={this.state.gkey}
+        team={this.state.team}
+        game_start={this.state.game_start}
         item={item}
         title={item.name}
         subtitle={`${handicap}${club}`}
