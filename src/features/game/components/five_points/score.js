@@ -3,11 +3,17 @@
 import React from 'react';
 import {
   StyleSheet,
-  Text,
   View
 } from 'react-native';
 
+import {
+  ListItem
+} from 'react-native-elements';
+
+
+import { getTeams } from 'common/utils/teams';
 import HoleNav from 'features/game/holenav';
+import Teams from 'features/games/teams';
 
 
 
@@ -15,20 +21,64 @@ class FivePointsScore extends React.Component {
 
   constructor(props) {
     super(props);
+    console.log('5pts Score - game', props.screenProps.game);
     this.state = {
+      gamespec: { team_size: 2, max_players: 4 }, // TODO: fetch this from game setup / db
       game: props.screenProps.game,
       currentHole: props.screenProps.currentHole || '1'
     };
     this.changeHole = this.changeHole.bind(this);
+    this._renderPlayer = this._renderPlayer.bind(this);
   }
 
+  // TODO: candidate for a base class?
   changeHole(newHole) {
     this.setState({
       currentHole: newHole
     });
   }
 
+  _renderPlayer({item}) {
+    if( item && item.name ) {
+      const handicap = (item && item.handicap && item.handicap.display) ?
+        item.handicap.display : 'no handicap';
+      return (
+        <ListItem
+          key={item._key}
+          title={item.name || ''}
+          subtitle={handicap}
+        />
+      );
+    } else {
+      return null;
+    }
+  }
+
   render() {
+
+    const { game, gamespec } = this.state;
+
+    let content = null;
+    if( gamespec.team_size && gamespec.team_size > 1 ) {
+      const teams = getTeams(game.players, gamespec);
+      console.log('teams', teams);
+      content = (
+        <Teams
+          teams={teams}
+          players={game.players}
+          gamespec={gamespec}
+          renderPlayer={this._renderPlayer}
+        />
+      );
+    } else {
+      content = (
+        <FlatList
+          data={game.players}
+          renderItem={this._renderPlayer}
+          keyExtractor={item => item._key}
+        />
+      );
+    }
 
     return (
       <View>
@@ -37,7 +87,7 @@ class FivePointsScore extends React.Component {
           currentHole={this.state.currentHole}
           changeHole={this.changeHole}
         />
-        <Text>FivePoints Score for {this.state.currentHole}</Text>
+        {content}
       </View>
     );
   }

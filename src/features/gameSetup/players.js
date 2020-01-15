@@ -19,8 +19,6 @@ import {
 import { withApollo } from 'react-apollo';
 import { withNavigation } from 'react-navigation';
 
-import { findIndex, orderBy, pick, uniqBy } from 'lodash';
-
 import {
   GetPlayersForGame,
   GET_PLAYERS_FOR_GAME_QUERY
@@ -29,7 +27,7 @@ import { RemoveLinkMutation } from 'common/graphql/unlink';
 import { FindRound } from 'features/rounds/graphql';
 
 import { blue } from 'common/colors';
-
+import { getTeams } from 'common/utils/teams';
 import Teams from 'features/gameSetup/teams';
 
 
@@ -43,7 +41,6 @@ class Players extends React.Component {
     this._shouldShowAddButton = this._shouldShowAddButton.bind(this);
     this._removePlayerFromGame = this._removePlayerFromGame.bind(this);
     this._renderPlayer = this._renderPlayer.bind(this);
-    this._getTeams = this._getTeams.bind(this);
   }
 
   _itemPressed(player) {
@@ -105,23 +102,6 @@ class Players extends React.Component {
       console.log('error unlinking round from game', r2gErrors);
     }
 
-  }
-
-  _getTeams(players, gamespec) {
-    let teams = orderBy(
-      uniqBy(players, 'team')
-        .map(p => pick(p, ['team'])),
-      ['team'],
-      ['asc']
-    );
-    const max_teams = Math.floor(gamespec.max_players / gamespec.team_size);
-    for( let t=1; t<= max_teams; t++ ) {
-      if( findIndex(teams, {team: t}) < 0 ) {
-        teams.push({team: t});
-      }
-    }
-
-    return teams;
   }
 
   _renderPlayer({item}) {
@@ -194,7 +174,7 @@ class Players extends React.Component {
 
           let content = null;
           if( gamespec.team_size && gamespec.team_size > 1 ) {
-            const teams = this._getTeams(players, gamespec);
+            const teams = getTeams(players, gamespec);
             content = (
               <Teams
                 teams={teams}

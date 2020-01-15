@@ -27,8 +27,13 @@ export default gql`
         player {
           _key
           name
-          short
         }
+      }
+      players {
+        _key
+        name
+        short
+        team
       }
     }
   }
