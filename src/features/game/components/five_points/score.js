@@ -61,7 +61,7 @@ class FivePointsScore extends React.Component {
     let content = null;
     if( gamespec.team_size && gamespec.team_size > 1 ) {
       const teams = getTeams(game.players, gamespec);
-      console.log('teams', teams);
+      //console.log('teams', teams);
       content = (
         <Teams
           teams={teams}

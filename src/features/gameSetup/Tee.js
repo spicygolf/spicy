@@ -11,6 +11,7 @@ import { withNavigation } from 'react-navigation';
 import { AddLinkMutation } from 'common/graphql/link';
 import { GET_TEE_FOR_GAME_QUERY } from 'features/courses/graphql';
 import FavoriteIcon from 'common/components/favoriteIcon';
+import { calc_course_handicaps } from 'common/utils/handicap';
 
 
 
@@ -42,6 +43,9 @@ class Tee extends React.Component {
               if( errors ) {
                 console.log('error adding tee to game', errors);
               }
+              // TODO: here is one place we should calc the course_handicap
+              //       on the round2game edges
+              calc_course_handicaps(item, gkey);
               this.props.navigation.navigate('GameSetup');
             }}
             leftIcon={(

@@ -19,16 +19,16 @@ import { filter } from 'lodash';
 
 const Teams = ({teams, players, gamespec, renderPlayer}) => {
 
-  console.log('Teams teams', teams);
-  console.log('Teams players', players);
-  console.log('Teams gamespec', gamespec);
+  //console.log('Teams teams', teams);
+  //console.log('Teams players', players);
+  //console.log('Teams gamespec', gamespec);
 
   const _renderTeam = ({item}) => {
 
     const playersOnTeam = filter(players, p => {
       return (p.team == item.team);
     });
-    console.log('playersOnTeam', item.team, playersOnTeam);
+    //console.log('playersOnTeam', item.team, playersOnTeam);
 
     return (
       <View>

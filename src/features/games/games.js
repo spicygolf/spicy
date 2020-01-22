@@ -16,7 +16,7 @@ class Games extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log('games props', props);
+    //console.log('games props', props);
     this.state = {
       currentPlayerKey: null
     };

@@ -117,13 +117,17 @@ class Players extends React.Component {
             return (
               <RemoveLinkMutation>
                 {({removeLinkMutation}) => {
+
                   const handicap = (item && item.handicap && item.handicap.display) ?
                     item.handicap.display : 'no handicap';
+                  const game_handicap = findRound.game_handicap || '';
+                  const handicap_subtitle = `${handicap} - ${game_handicap}`;
+
                   return (
                     <ListItem
                       key={item._key}
                       title={item.name || ''}
-                      subtitle={handicap}
+                      subtitle={handicap_subtitle}
                       onPress={() => this._itemPressed(item)}
                       rightIcon={
                         <Icon

@@ -18,6 +18,8 @@ export default gql`
         _key
         date
         seq
+        game_handicap
+        course_handicap
         scores {
           hole
           values {
