@@ -4,7 +4,7 @@ Druid Golf mobile app written in React Native
 
 ## Development Setup
 
- * Install NodeJS, NPM, Yarn, Watchman, probably via `brew`
+ * Install node npm yarn watchman cocoapods, probably via `brew`
  * Install XCode
  * Install command-line developer tools
 
@@ -13,18 +13,22 @@ Druid Golf mobile app written in React Native
     You might have to set XCode | Preferences | Locations | Command Line Tools dropdown to something if it's blank.
 
  * Install React Native CLI and Detox
- 
+
         sudo npm install -g react-native-cli detox
- 
- * Install dependencies
+
+ * Install Yarn dependencies
 
         yarn install
-         
+
+ * Install Pods dependencies (in `ios` folder)
+
+        pod install
+
  * Start up the App
- 
+
         yarn run ios
 or
- 
+
         yarn run android
 
 
