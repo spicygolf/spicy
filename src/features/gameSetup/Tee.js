@@ -16,7 +16,6 @@ import { calc_course_handicaps } from 'common/utils/handicap';
 
 
 class Tee extends React.Component {
-
   render() {
     const { gkey, item, title, subtitle } = this.props;
 
@@ -43,9 +42,9 @@ class Tee extends React.Component {
               if( errors ) {
                 console.log('error adding tee to game', errors);
               }
-              // TODO: here is one place we should calc the course_handicap
-              //       on the round2game edges
-              calc_course_handicaps(item, gkey);
+              // here is one place we calc the course_handicap
+              // on the round2game edges
+              calc_course_handicaps(gkey);
               this.props.navigation.navigate('GameSetup');
             }}
             leftIcon={(

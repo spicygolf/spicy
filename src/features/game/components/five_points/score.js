@@ -14,6 +14,7 @@ import {
 import { getTeams } from 'common/utils/teams';
 import HoleNav from 'features/game/holenav';
 import Teams from 'features/games/teams';
+import { get_round_for_player } from 'common/utils/rounds';
 
 
 
@@ -40,13 +41,17 @@ class FivePointsScore extends React.Component {
 
   _renderPlayer({item}) {
     if( item && item.name ) {
-      const handicap = (item && item.handicap && item.handicap.display) ?
-        item.handicap.display : 'no handicap';
+      const index = (item && item.handicap && item.handicap.display) ?
+        item.handicap.display : null;
+      const round = get_round_for_player(this.state.game.rounds, item._key);
+      const handicap = round.game_handicap ?
+        round.game_handicap : round.course_handicap;
+
       return (
         <ListItem
           key={item._key}
           title={item.name || ''}
-          subtitle={handicap}
+          subtitle={handicap || 'NH'}
         />
       );
     } else {
