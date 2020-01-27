@@ -13,23 +13,13 @@ import { findIndex, sortBy } from 'lodash';
 
 
 
-const sortHoles = h => {
-  let ret = null;
-  // try to use sequence first
-  if( h.seq ) ret = parseInt(h.seq);
-  if( Number.isInteger(ret) ) return ret;
-  // fall back to hole
-  ret = parseInt(h.hole);
-  if( Number.isInteger(ret) ) return ret;
-  // didn't find any sortable seq or hole, so punt by returning 0
-  return 0;
-};
+const sortNumber = (a, b) => (a - b);
 
 
 const HoleNav = ({holes:holesOrig, currentHole, changeHole}) => {
 
-  const holes = sortBy(holesOrig, sortHoles);
-  const currentHoleIndex = findIndex(holes, h => { return h.hole == currentHole })
+  const holes = holesOrig.sort(sortNumber);
+  const currentHoleIndex = findIndex(holes, h => { return h == currentHole })
 
   return (
     <View style={styles.container}>
@@ -40,7 +30,7 @@ const HoleNav = ({holes:holesOrig, currentHole, changeHole}) => {
           onPress={() => {
             let newHoleIndex = currentHoleIndex - 1;
             if( newHoleIndex < 0 ) newHoleIndex = holes.length - 1;
-            changeHole(holes[newHoleIndex].hole);
+            changeHole(holes[newHoleIndex]);
           }}
         />
       </View>
@@ -54,7 +44,7 @@ const HoleNav = ({holes:holesOrig, currentHole, changeHole}) => {
         onPress={() => {
           let newHoleIndex = currentHoleIndex + 1;
           if( newHoleIndex >= holes.length ) newHoleIndex = 0;
-          changeHole(holes[newHoleIndex].hole);
+          changeHole(holes[newHoleIndex]);
         }}
       />
       </View>

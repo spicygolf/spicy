@@ -85,10 +85,12 @@ class FivePointsScore extends React.Component {
       );
     }
 
+    const holes = Array.from(Array(18).keys()).map(x => ++x);
+
     return (
       <View>
         <HoleNav
-          holes={this.state.game.tees[0].holes}
+          holes={holes}
           currentHole={this.state.currentHole}
           changeHole={this.changeHole}
         />
