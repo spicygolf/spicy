@@ -79,9 +79,14 @@ class AddCourseSearch extends React.Component {
   }
 
   _renderCourseTee({item}) {
+    const tee = this.props.navigation.getParam('tee');
+    const rkey = this.props.navigation.getParam('rkey');
+    //console.log('addCourseSearch tee', tee, 'rkey', rkey);
     return (
       <Tee
-        gkey={this.props.screenProps.gkey}
+      gkey={this.props.screenProps.gkey}
+      rkey={rkey}
+        oldTee={tee}
         item={item}
         title={item.name}
         subtitle={`${item.gender} - ${item.rating}/${item.slope}`}

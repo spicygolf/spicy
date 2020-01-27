@@ -13,7 +13,6 @@ import {
 import {
   Button,
   Card,
-  ListItem
 } from 'react-native-elements';
 
 import { Query } from 'react-apollo';
@@ -22,7 +21,6 @@ import {
 } from 'features/games/graphql';
 import { navigate } from 'common/components/navigationService';
 
-import Courses from 'features/gameSetup/courses';
 import Players from 'features/gameSetup/players';
 import GameNav from 'features/games/gamenav';
 
@@ -82,13 +80,6 @@ class GameSetupScreen extends React.Component {
               />
             );
 
-            const courseSection = ( gs.location_type && gs.location_type == 'local' ) ? (
-              <Courses
-                gkey={this.state.gkey}
-                navigation={this.props.navigation}
-              />
-            ) : null;
-
             const playerSection = (
               <Players
                 gkey={this.state.gkey}
@@ -123,7 +114,6 @@ class GameSetupScreen extends React.Component {
                     <Text style={styles.name_txt}>{gs.name}</Text>
                   </View>
                   <ScrollView>
-                    { courseSection }
                     { playerSection }
                     { optionsSection }
                   </ScrollView>

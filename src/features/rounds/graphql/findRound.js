@@ -12,6 +12,15 @@ export const FIND_ROUND_QUERY = gql`
       _key
       date
       seq
+      tee {
+        _key
+        name
+        assigned
+        course {
+          name
+        }
+      }
+      game_handicap
     }
   }
 `;

@@ -29,6 +29,7 @@ import { FindRound } from 'features/rounds/graphql';
 import { blue } from 'common/colors';
 import { getTeams } from 'common/utils/teams';
 import Teams from 'features/gameSetup/teams';
+import TeeSelector from 'features/gameSetup/teeSelector';
 
 
 
@@ -121,11 +122,22 @@ class Players extends React.Component {
                   const handicap = (item && item.handicap && item.handicap.display) ?
                     item.handicap.display : 'no handicap';
 
+                  const subtitle = (
+                    <TeeSelector
+                      tee={findRound.tee}
+                      rkey={rkey}
+                      navigation={this.props.navigation}
+                    />
+                  );
+
                   return (
                     <ListItem
                       key={item._key}
                       title={item.name || ''}
-                      subtitle={handicap}
+                      subtitle={subtitle}
+                      badge={{
+                        value: handicap,
+                      }}
                       onPress={() => this._itemPressed(item)}
                       rightIcon={
                         <Icon

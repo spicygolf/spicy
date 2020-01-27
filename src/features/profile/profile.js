@@ -21,6 +21,11 @@ class Profile extends React.Component {
     logout(this.props);
   }
 
+  _clearCache() {
+    console.log('Profile props', this.props);
+    this.props.client.resetStore();
+  }
+
   render() {
     //console.log('profile client', this.props.client);
     return (
@@ -31,6 +36,12 @@ class Profile extends React.Component {
           title='Logout'
           testID='logout_button'
           onPress={() => this._logoutPressed()}
+        />
+        <Button
+          style={styles.logout_button}
+          title='Clear Cache'
+          testID='clear_cache_button'
+          onPress={() => this._clearCache()}
         />
       </View>
     );

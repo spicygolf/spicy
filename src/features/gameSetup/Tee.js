@@ -9,7 +9,7 @@ import {
 import { withNavigation } from 'react-navigation';
 
 import { AddLinkMutation } from 'common/graphql/link';
-import { GET_TEE_FOR_GAME_QUERY } from 'features/courses/graphql';
+import { GET_PLAYERS_FOR_GAME_QUERY } from 'features/players/graphql';
 import FavoriteIcon from 'common/components/favoriteIcon';
 import { calc_course_handicaps } from 'common/utils/handicap';
 
@@ -17,7 +17,14 @@ import { calc_course_handicaps } from 'common/utils/handicap';
 
 class Tee extends React.Component {
   render() {
-    const { gkey, item, title, subtitle } = this.props;
+    const { gkey, rkey, oldTee, item, title, subtitle } = this.props;
+    //console.log('Tee props', this.props);
+    const assigned = oldTee ? "manual" : "first";
+
+    // TODO: RemoveLinkMutation - (if oldTee != null)
+
+    // TODO: move this to Apollo Hooks instead of React.Component?
+    //       maybe not due to withNavigation...
 
     return (
       <AddLinkMutation>
@@ -28,23 +35,30 @@ class Tee extends React.Component {
             onPress={async () => {
               const {data, errors} = await addLinkMutation({
                 variables: {
-                  from: {type: 'game', value: gkey},
-                  to: {type: 'tee', value: item._key}
+                  from: {type: 'round', value: rkey},
+                  to: {type: 'tee', value: item._key},
+                  other: [{key: "assigned", value: assigned}],
                 },
                 refetchQueries: () => [{
-                  query: GET_TEE_FOR_GAME_QUERY,
+                  query: GET_PLAYERS_FOR_GAME_QUERY,
                   variables: {
                     gkey: gkey
                   }
                 }],
-                awaitRefetchQueries: true
+                awaitRefetchQueries: true,
               });
               if( errors ) {
-                console.log('error adding tee to game', errors);
+                console.log('error adding tee to round', errors);
               }
+
+              // TODO: add the same tee to the other players' rounds in this
+              //       game, unless they have round2tee already.
+
+
               // here is one place we calc the course_handicap
               // on the round2game edges
-              calc_course_handicaps(gkey);
+              //calc_course_handicaps(gkey);
+
               this.props.navigation.navigate('GameSetup');
             }}
             leftIcon={(

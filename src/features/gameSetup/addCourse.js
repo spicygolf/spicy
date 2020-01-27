@@ -23,6 +23,10 @@ class AddCourse extends React.Component {
   constructor(props) {
     super(props);
     //console.log('addCourse props', props);
+    //console.log('addCourse screenProps', props.screenProps);
+    //const tee  = props.navigation.getParam('tee');
+    //const rkey = props.navigation.getParam('rkey');
+    //console.log('tee', tee, 'rkey', rkey);
   }
 
   render() {
