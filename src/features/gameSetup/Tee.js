@@ -1,5 +1,3 @@
-'use strict';
-
 import React from 'react';
 
 import {
@@ -7,8 +5,10 @@ import {
 } from 'react-native-elements';
 
 import { withNavigation } from 'react-navigation';
+import { useMutation } from '@apollo/react-hooks';
 
-import { AddLinkMutation } from 'common/graphql/link';
+import { ADD_LINK_MUTATION } from 'common/graphql/link';
+import { REMOVE_LINK_MUTATION } from 'common/graphql/unlink';
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import FavoriteIcon from 'common/components/favoriteIcon';
 import { calc_course_handicaps } from 'common/utils/handicap';
@@ -18,62 +18,85 @@ import { calc_course_handicaps } from 'common/utils/handicap';
 const Tee = props => {
 
   //console.log('Tee props', props);
-  const { gkey, rkey, oldTee, item, title, subtitle, rounds } = props;
+  const { game, rkey, oldTee, item, title, subtitle } = props;
   const assigned = oldTee ? "manual" : "first";
 
-  // TODO: RemoveLinkMutation - (if oldTee != null)
-  if( oldTee ) {
-    // we need to remove this edge and replace with new one
-    console.log('oldTee', oldTee);
-  }
+  const [ linkRoundToTee ] = useMutation(ADD_LINK_MUTATION);
+  const [ unlinkRoundToTee ] = useMutation(REMOVE_LINK_MUTATION);
 
-  // TODO: move this to Apollo Hooks instead of React.Component?
-  //       maybe not due to withNavigation...
+  const add = (rkey, tkey, other) => {
+    const { loading, error, data } = linkRoundToTee({
+      variables: {
+        from: {type: 'round', value: rkey},
+        to: {type: 'tee', value: tkey},
+        other: other,
+      },
+      refetchQueries: () => [{
+        query: GET_GAME_QUERY,
+        variables: {
+          gkey: game._key
+        }
+      }],
+      awaitRefetchQueries: true,
+    });
+    if( error ) {
+      console.log('error adding tee to round', error);
+    }
+  };
+
+
+  const rm = (rkey, tkey) => {
+    const { loading, error, data } = unlinkRoundToTee({
+      variables: {
+        from: {type: 'round', value: rkey},
+        to: {type: 'tee', value: tkey},
+      },
+      refetchQueries: () => [{
+        query: GET_GAME_QUERY,
+        variables: {
+          gkey: game._key
+        }
+      }],
+      awaitRefetchQueries: true,
+    });
+    if( error ) {
+      console.log('error removing tee to round', error);
+    }
+  };
 
   return (
-    <AddLinkMutation>
-      {({addLinkMutation}) => (
-        <ListItem
-          title={title}
-          subtitle={subtitle}
-          onPress={async () => {
-            const {data, errors} = await addLinkMutation({
-              variables: {
-                from: {type: 'round', value: rkey},
-                to: {type: 'tee', value: item._key},
-                other: [{key: "assigned", value: assigned}],
-              },
-              refetchQueries: () => [{
-                query: GET_GAME_QUERY,
-                variables: {
-                  gkey: gkey
-                }
-              }],
-              awaitRefetchQueries: true,
-            });
-            if( errors ) {
-              console.log('error adding tee to round', errors);
-            }
+    <ListItem
+      title={title}
+      subtitle={subtitle}
+      onPress={() => {
+        if( oldTee ) {
+          // we need to remove this edge and replace with new one
+          rm(rkey, oldTee._key);
+        }
 
-            // TODO: add the same tee to the other players' rounds in this
-            //       game, unless they have round2tee already.
+        add(rkey, item._key, [{key: "assigned", value: assigned}]);
 
+        // add the same tee to the other players' rounds in this
+        // game, unless they have round2tee already.
+        game.rounds.map(round => {
+          if( !round.tee ) {
+            add(round._key, item._key, [{key: "assigned", value: "auto"}]);
+          }
+        });
 
-            // here is one place we calc the course_handicap
-            // on the round2game edges
-            //calc_course_handicaps(gkey);
+        // here is one place we can calculate the course_handicap
+        // on the round2game edges
+        //calc_course_handicaps(gkey);
 
-            // after all that, go back to GameSetup
-            props.navigation.navigate('GameSetup');
-          }}
-          leftIcon={(
-            <FavoriteIcon
-              fave={item.fave}
-            />
-          )}
+        // after all that, go back to GameSetup
+        props.navigation.navigate('GameSetup');
+      }}
+      leftIcon={(
+        <FavoriteIcon
+          fave={item.fave}
         />
       )}
-    </AddLinkMutation>
+    />
   );
 
 };

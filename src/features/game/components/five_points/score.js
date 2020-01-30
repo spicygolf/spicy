@@ -67,8 +67,6 @@ class FivePointsScore extends React.Component {
 
   render() {
 
-    console.log('context', this.context);
-
     const { game, gamespec } = this.context;
 
     let content = null;

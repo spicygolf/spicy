@@ -12,7 +12,7 @@ import { acronym } from 'common/utils/text';
 
 const TeeSelector = (props) => {
 
-  console.log('TeeSelector props', props);
+  //console.log('TeeSelector props', props);
   const { game, tee, rkey, pkey, navigation } = props;
   const course = (tee && tee.course && tee.name) ?
     ' - ' + acronym(tee.course.name) : '';
