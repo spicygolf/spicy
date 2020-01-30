@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 
 import {
-  Button,
   Card,
 } from 'react-native-elements';
 
@@ -19,12 +18,8 @@ import { Query } from 'react-apollo';
 import {
   GET_GAMESPEC_QUERY,
 } from 'features/games/graphql';
-import { navigate } from 'common/components/navigationService';
 
 import Players from 'features/gameSetup/players';
-import GameNav from 'features/games/gamenav';
-
-import { green } from 'common/colors';
 
 
 
@@ -35,31 +30,20 @@ class GameSetupScreen extends React.Component {
     //console.log('gameSetupScreen props', props);
     const sp = this.props.screenProps;
     this.state = {
-      gkey: sp.gkey,
-      gametype: sp.gametype,
-      game_start: sp.game_start,
+      game: sp.game,
       addCurrentPlayer: true,
       options: [],
-      inGame: sp.inGame,
     };
-
-    this._playGame = this._playGame.bind(this);
-  }
-
-  _playGame(args) {
-    navigate('Game', {
-      currentGame: this.state.gkey
-    });
   }
 
   render() {
 
-    if( this.state.gametype ) {
+    if( this.state.game.gametype ) {
       return (
         <Query
           query={GET_GAMESPEC_QUERY}
           variables={{
-            gamespec: this.state.gametype
+            gamespec: this.state.game.gametype
           }}
         >
           {({data, loading, error }) => {
@@ -73,17 +57,9 @@ class GameSetupScreen extends React.Component {
             const { getGameSpec: gamespec } = data;
             const gs = gamespec;
 
-            const gamenav = this.state.inGame ? null : (
-              <GameNav
-                title='Game Setup'
-                showBack={true}
-              />
-            );
-
             const playerSection = (
               <Players
-                gkey={this.state.gkey}
-                game_start={this.state.game_start}
+                game={this.state.game}
                 gamespec={gs}
                 addCurrentPlayer={this.state.addCurrentPlayer}
                 navigation={this.props.navigation}
@@ -95,20 +71,8 @@ class GameSetupScreen extends React.Component {
               </Card>
             );
 
-            const playGameButton = this.state.inGame ? null : (
-              <View style={styles.playButtonView}>
-                <Button
-                  title='Play Game'
-                  backgroundColor={green}
-                  color='white'
-                  onPress={this._playGame}
-                />
-              </View>
-            );
-
             return (
               <View style={styles.container}>
-                {gamenav}
                 <View style={styles.setupContainer}>
                   <View style={styles.gname}>
                     <Text style={styles.name_txt}>{gs.name}</Text>
@@ -118,7 +82,6 @@ class GameSetupScreen extends React.Component {
                     { optionsSection }
                   </ScrollView>
                 </View>
-                {playGameButton}
               </View>
             );
           }}
@@ -141,10 +104,6 @@ const styles = StyleSheet.create({
   },
   setupContainer: {
     flex: 12
-  },
-  playButtonView: {
-    flex: 1,
-    margin: 10
   },
   gname: {
     alignItems: 'center'

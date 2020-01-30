@@ -20,22 +20,25 @@ class AddCourseFavorites extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log('addCourseFavorite props', props);
+    //console.log('addCourseFavorite props', props);
     this._renderFavoritesTee = this._renderFavoritesTee.bind(this);
   }
 
   _renderFavoritesTee({item}) {
+    const { game } = this.props.screenProps;
+    const { _key:gkey } = game;
     const tee = this.props.navigation.getParam('tee');
     const rkey = this.props.navigation.getParam('rkey');
-    //console.log('addCourseFavorites tee', tee, 'rkey', rkey);
+    console.log('addCourseFavorites gkey', gkey, 'tee', tee, 'rkey', rkey);
     return (
       <Tee
-        gkey={this.props.screenProps.gkey}
+        gkey={gkey}
         rkey={rkey}
         oldTee={tee}
         item={item}
         title={item.course.name}
         subtitle={`${item.name} - ${item.rating.all18}/${item.slope.all18}`}
+        rounds={[]}
       />
     );
   }

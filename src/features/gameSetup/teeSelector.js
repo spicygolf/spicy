@@ -12,23 +12,37 @@ import { acronym } from 'common/utils/text';
 
 const TeeSelector = (props) => {
 
-  //console.log('TeeSelector props', props);
-  const { tee, rkey, navigation } = props;
+  console.log('TeeSelector props', props);
+  const { game, tee, rkey, pkey, navigation } = props;
   const course = (tee && tee.course && tee.name) ?
     ' - ' + acronym(tee.course.name) : '';
-  const teeName = (tee && tee.name) ? `${tee.name}${course}`
+  let buttonName = (tee && tee.name) ? `${tee.name}${course}`
     : 'Select Course/Tee';
+  let pressFn;
+
+  // if we have round key, cool.  If for some reason we don't go to LinkRound
+  if( rkey ) {
+    pressFn = () => navigation.navigate('AddCourse', {
+      tee: tee,
+      rkey: rkey
+    })
+  } else {
+    pressFn = () => navigation.navigate('LinkRound', {
+      game_start: game.start,
+      pkey: pkey,
+      player: pkey,
+      gkey: game._key,
+    });
+    buttonName = 'Select Round';
+  }
 
   return (
     <View>
       <Button
-        title={teeName}
+        title={buttonName}
         type="clear"
         buttonStyle={styles.button}
-        onPress={() => navigation.navigate('AddCourse', {
-          tee: tee,
-          rkey: rkey
-        })}
+        onPress={pressFn}
       />
     </View>
   );

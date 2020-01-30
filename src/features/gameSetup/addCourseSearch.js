@@ -79,17 +79,20 @@ class AddCourseSearch extends React.Component {
   }
 
   _renderCourseTee({item}) {
+    const { game } = this.props.screenProps;
+    const { _key:gkey } = game;
     const tee = this.props.navigation.getParam('tee');
     const rkey = this.props.navigation.getParam('rkey');
     //console.log('addCourseSearch tee', tee, 'rkey', rkey);
     return (
       <Tee
-      gkey={this.props.screenProps.gkey}
-      rkey={rkey}
+        gkey={gkey}
+        rkey={rkey}
         oldTee={tee}
         item={item}
         title={item.name}
         subtitle={`${item.gender} - ${item.rating}/${item.slope}`}
+        rounds={[]}
       />
     );
   }

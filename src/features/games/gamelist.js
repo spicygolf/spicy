@@ -25,9 +25,10 @@ const GameList = ({currentPlayerKey, navigation}) => {
     );
   };
 
-  const itemPressed = (item) => {
+  const itemPressed = (item, setup) => {
     navigation.navigate('Game', {
-      currentGame: item._key
+      currentGame: item._key,
+      setup: setup
     });
   };
 
@@ -38,18 +39,12 @@ const GameList = ({currentPlayerKey, navigation}) => {
       <ListItem
         title={item.name || ''}
         subtitle={startTime || ''}
-        onPress={() => itemPressed(item)}
+        onPress={() => itemPressed(item, false)}
         rightIcon={
           <Icon
             name='settings'
             color='#999'
-            onPress={() => {
-              navigation.navigate('GameSetup', {
-                gkey: item._key,
-                gametype: item.gametype,
-                game_start: item.start,
-              });
-            }}
+            onPress={() => itemPressed(item, true)}
           />
         }
       />

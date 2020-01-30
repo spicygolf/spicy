@@ -1,19 +1,13 @@
 import gql from 'graphql-tag';
 
 export default gql`
-  query GetGame($game: String!) {
-    getGame(_key: $game) {
+  query GetGame($gkey: String!) {
+    getGame(_key: $gkey) {
       _key
       name
       start
       end
       gametype
-      tees {
-        name
-        rating { all18 }
-        slope { all18 }
-        holes { hole seq length par handicap }
-      }
       rounds {
         _key
         date
@@ -30,12 +24,33 @@ export default gql`
           _key
           name
         }
+        tee {
+          _key
+          name
+          assigned
+          course {
+            name
+          }
+          holes {
+            hole
+            length
+            par
+            handicap
+            seq
+          }
+        }
       }
       players {
         _key
         name
         short
         team
+        handicap {
+          value
+          revDate
+          display
+          tournamentScoreCount
+        }
       }
     }
   }

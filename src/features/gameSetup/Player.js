@@ -9,7 +9,7 @@ import {
 import { withNavigation } from 'react-navigation';
 
 import { AddLinkMutation } from 'common/graphql/link';
-import { GET_PLAYERS_FOR_GAME_QUERY } from 'features/players/graphql';
+import { GET_GAME_QUERY } from 'features/games/graphql';
 import FavoriteIcon from 'common/components/favoriteIcon';
 
 
@@ -18,11 +18,12 @@ class Player extends React.Component {
 
   constructor(props) {
     super(props);
-    //console.log('Player props', props);
+    console.log('Player props', props);
   }
 
   render() {
-    const { gkey, team, game_start, item, title, subtitle } = this.props;
+    const { game, team, item, title, subtitle } = this.props;
+    const { _key:gkey, start:game_start } = game;
     const pkey = item._key;
 
     let others = [];
@@ -43,7 +44,7 @@ class Player extends React.Component {
                   other: others
                 },
                 refetchQueries: () => [{
-                  query: GET_PLAYERS_FOR_GAME_QUERY,
+                  query: GET_GAME_QUERY,
                   variables: {
                     gkey: gkey
                   }

@@ -19,7 +19,7 @@ const GameSetupStack = createStackNavigator(
   },
   {
     initialRouteName: 'GameSetup',
-    headerMode: "none"
+    headerMode: "none",
   }
 );
 

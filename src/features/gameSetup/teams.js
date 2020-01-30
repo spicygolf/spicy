@@ -54,7 +54,7 @@ const Teams = ({teams, players, gamespec, renderPlayer, nav}) => {
         <FlatList
           data={playersOnTeam}
           renderItem={renderPlayer}
-          keyExtractor={item => item._key}
+          keyExtractor={i => i._key}
         />
         {button(item.team)}
       </View>

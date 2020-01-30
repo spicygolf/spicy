@@ -6,7 +6,6 @@ import {
 import Game from 'features/game/game';
 import Games from 'features/games/games';
 import NewGame from 'features/games/newGame';
-import GameSetup from 'features/gameSetup/gameSetup';
 
 import { green } from 'common/colors';
 
@@ -17,7 +16,6 @@ const GamesStack = createStackNavigator(
     Games: Games,
     Game: Game,
     NewGame: NewGame,
-    GameSetup: GameSetup,
   },
   {
     initialRouteName: 'Games',

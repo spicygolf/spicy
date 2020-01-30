@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 
 import { Query, withApollo } from 'react-apollo';
-import { CURRENT_GAME_QUERY, GET_GAME_QUERY } from 'features/games/graphql';
+import { GET_GAME_QUERY } from 'features/games/graphql';
 
 import GameStack from 'features/game/gamestack';
 
@@ -20,63 +20,39 @@ class Game extends React.Component {
 
   constructor(props) {
     super(props);
-    const currentGameKey = props.navigation.getParam('currentGame')
-    this.state = {
-      currentGameKey: currentGameKey,
-      currentGame: null
-    };
-    this._setCurrentGame = this._setCurrentGame.bind(this);
-    this._setCurrentGame();
-  }
-
-  _setCurrentGame() {
-    this.props.client.writeQuery({
-      query: CURRENT_GAME_QUERY,
-      data: {
-        currentGame: {_key: this.state.currentGameKey}
-      }
-    });
-  }
-
-  componentDidMount() {
-    // get currentGame from cache
-    const rq = this.props.client.readQuery({
-      query: CURRENT_GAME_QUERY
-    });
-    this.setState(prev => ({
-      currentGame: rq.currentGame
-    }));
   }
 
   render() {
-    if( this.state.currentGame ) {
-      return (
-        <Query
-          query={GET_GAME_QUERY}
-          variables={{game: this.state.currentGame._key}}
-        >
-          {({ loading, error, data }) => {
-            if( loading ) return (<ActivityIndicator />);
-            if( error ) {
-              console.log(error);
-              return (<Text>Error</Text>);
-            }
-            //console.log('game data', data);
-            return (
-              <GameStack
-                navigation={this.props.navigation}
-                screenProps={{
-                  currentGame: this.state.currentGame,
-                  game: data.getGame
-                }}
-              />
-            );
-          }}
-        </Query>
-      );
-    } else {
-      return (<ActivityIndicator />);
-    }
+
+    const setup = this.props.navigation.getParam('setup');
+    const currentGameKey = this.props.navigation.getParam('currentGame');
+
+    return (
+      <Query
+        query={GET_GAME_QUERY}
+        variables={{
+          gkey: currentGameKey
+        }}
+      >
+        {({ loading, error, data }) => {
+          if( loading ) return (<ActivityIndicator />);
+          if( error ) {
+            console.log(error);
+            return (<Text>Error</Text>);
+          }
+          //console.log('game data', data);
+          return (
+            <GameStack
+              navigation={this.props.navigation}
+              screenProps={{
+                game: data.getGame,
+                setup: setup
+              }}
+            />
+          );
+        }}
+      </Query>
+    );
   }
 
 }

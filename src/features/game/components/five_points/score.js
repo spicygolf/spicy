@@ -44,14 +44,19 @@ class FivePointsScore extends React.Component {
       const index = (item && item.handicap && item.handicap.display) ?
         item.handicap.display : null;
       const round = get_round_for_player(this.state.game.rounds, item._key);
-      const handicap = round.game_handicap ?
-        round.game_handicap : round.course_handicap;
+      let handicap = 'NH';
+
+      if( round ) {
+        handicap = round.game_handicap ?
+          round.game_handicap : round.course_handicap;
+        handicap = handicap ? handicap.toString() : 'NH';
+      }
 
       return (
         <ListItem
           key={item._key}
           title={item.name || ''}
-          subtitle={handicap || 'NH'}
+          subtitle={handicap}
         />
       );
     } else {
@@ -85,6 +90,7 @@ class FivePointsScore extends React.Component {
       );
     }
 
+    // TODO: get 9 or 18 from game / gameSetup somehow
     const holes = Array.from(Array(18).keys()).map(x => ++x);
 
     return (

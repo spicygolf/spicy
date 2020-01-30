@@ -19,29 +19,18 @@ class GameSetup extends React.Component {
   constructor(props) {
     super(props);
     //console.log('gameSetup props', props);
-    if(    props.screenProps
-        && props.screenProps.currentGame
-        && props.screenProps.game
-      ) {
-      // coming from 'game' so use screenProps
-      const game = props.screenProps.game;
-      this.state = {
-        gkey: game._key,
-        gametype: game.gametype,
-        game_start: game.game_start,
-        inGame: true,
-        currentPlayerKey: null,
-      };
-    } else {
-      // coming from 'games' so use navigation
-      this.state = {
-        gkey: this.props.navigation.getParam('gkey') || [],
-        gametype: this.props.navigation.getParam('gametype') || [],
-        game_start: this.props.navigation.getParam('game_start') || '',
-        inGame: false,
-        currentPlayerKey: null,
-      };
+
+    const game = props.screenProps.game;
+    this.state = {
+      game: game,
+      currentPlayerKey: null,
+    };
+
+    if( props.screenProps.setup ) {
+      props.navigation.navigate('Setup');
+      return;
     }
+
   }
 
   async componentDidMount() {
@@ -56,13 +45,7 @@ class GameSetup extends React.Component {
     return (
       <GameSetupStack
         navigation={this.props.navigation}
-        screenProps={{
-          gkey: this.state.gkey,
-          gametype: this.state.gametype,
-          game_start: this.state.game_start,
-          inGame: this.state.inGame,
-          currentPlayerKey: this.state.currentPlayerKey
-        }}
+        screenProps={this.state}
       />
     );
   }

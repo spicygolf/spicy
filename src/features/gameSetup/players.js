@@ -19,17 +19,14 @@ import {
 import { withApollo } from 'react-apollo';
 import { withNavigation } from 'react-navigation';
 
-import {
-  GetPlayersForGame,
-  GET_PLAYERS_FOR_GAME_QUERY
-} from 'features/players/graphql';
+import { GET_GAME_QUERY } from 'features/games/graphql';
 import { RemoveLinkMutation } from 'common/graphql/unlink';
-import { FindRound } from 'features/rounds/graphql';
 
-import { blue } from 'common/colors';
-import { getTeams } from 'common/utils/teams';
 import Teams from 'features/gameSetup/teams';
 import TeeSelector from 'features/gameSetup/teeSelector';
+import { getTeams } from 'common/utils/teams';
+import { get_round_for_player } from 'common/utils/rounds';
+import { blue } from 'common/colors';
 
 
 
@@ -70,94 +67,101 @@ class Players extends React.Component {
 
   async _removePlayerFromGame({ removeLinkMutation, pkey, rkey }) {
 
-    const { gkey } = this.props;
+    const { _key:gkey } = this.props.game;
 
     // remove player2game link
-    const { errors: p2gErrors } = await removeLinkMutation({
-      variables: {
-        from: {type: 'player', value: pkey},
-        to: {type: 'game', value: gkey}
-      },
-      refetchQueries: [{
-        query: GET_PLAYERS_FOR_GAME_QUERY,
+    if( pkey && gkey ) {
+      const { errors: p2gErrors } = await removeLinkMutation({
         variables: {
-          gkey: gkey
-        }
-      }],
-      awaitRefetchQueries: true,
-      ignoreResults: true
-    });
-    if( p2gErrors ) {
-      console.log('error removing player from game', p2gErrors);
+          from: {type: 'player', value: pkey},
+          to: {type: 'game', value: gkey}
+        },
+        refetchQueries: [{
+          query: GET_GAME_QUERY,
+          variables: {
+            gkey: gkey
+          }
+        }],
+        awaitRefetchQueries: true,
+        ignoreResults: true
+      });
+      if( p2gErrors ) {
+        console.log('error removing player from game', p2gErrors);
+      }
+    } else {
+      console.log('error removing player from game', pkey, gkey);
     }
 
     // remove round2game link
-    const { errors: r2gErrors } = await removeLinkMutation({
-      variables: {
-        from: {type: 'round', value: rkey},
-        to: {type: 'game', value: gkey}
-      },
-      ignoreResults: true
-    });
-    if( r2gErrors ) {
-      console.log('error unlinking round from game', r2gErrors);
+    if( rkey && gkey ) {
+      const { errors: r2gErrors } = await removeLinkMutation({
+        variables: {
+          from: {type: 'round', value: rkey},
+          to: {type: 'game', value: gkey}
+        },
+        ignoreResults: true
+      });
+      if( r2gErrors ) {
+        console.log('error unlinking round from game', r2gErrors);
+      }
+    } else {
+      console.log('error unlinking round from game', rkey, gkey);
     }
-
   }
 
   _renderPlayer({item}) {
     if( item && item.name ) {
+      const { game } = this.props;
+      const pkey = item._key;
+
+      const { rounds } = this.props.game;
+      const round = get_round_for_player(rounds, pkey);
+      const rkey = (round && round._key) ? round._key : null;
+      const tee =  (round && round.tee ) ? round.tee : null;
+
       return (
-        <FindRound
-          gkey={this.props.gkey}
-          pkey={item._key}
-        >
-          {({loading, findRound}) => {
-            if( loading ) return null;
-            const rkey = findRound._key;
+        <RemoveLinkMutation>
+          {({removeLinkMutation}) => {
+
+            const handicap = (item && item.handicap && item.handicap.display) ?
+              item.handicap.display : 'no handicap';
+
+            const subtitle = (
+              <TeeSelector
+                game={game}
+                tee={tee}
+                rkey={rkey}
+                pkey={pkey}
+                navigation={this.props.navigation}
+              />
+            );
+
             return (
-              <RemoveLinkMutation>
-                {({removeLinkMutation}) => {
-
-                  const handicap = (item && item.handicap && item.handicap.display) ?
-                    item.handicap.display : 'no handicap';
-
-                  const subtitle = (
-                    <TeeSelector
-                      tee={findRound.tee}
-                      rkey={rkey}
-                      navigation={this.props.navigation}
-                    />
-                  );
-
-                  return (
-                    <ListItem
-                      key={item._key}
-                      title={item.name || ''}
-                      subtitle={subtitle}
-                      badge={{
-                        value: handicap,
-                      }}
-                      onPress={() => this._itemPressed(item)}
-                      rightIcon={
-                        <Icon
-                          name='remove-circle'
-                          color='red'
-                          onPress={() => this._removePlayerFromGame({
-                            removeLinkMutation: removeLinkMutation,
-                            pkey: item._key,
-                            rkey: rkey
-                          })}
-                        />
-                      }
-                    />
-                  );
+              <ListItem
+                key={pkey}
+                title={item.name || ''}
+                subtitle={subtitle}
+                badge={{
+                  value: handicap,
                 }}
-              </RemoveLinkMutation>
+                onPress={() => this._itemPressed(item)}
+                rightIcon={
+                  <Icon
+                    name='remove-circle'
+                    color='red'
+                    onPress={() => this._removePlayerFromGame({
+                      removeLinkMutation: removeLinkMutation,
+                      pkey: pkey,
+                      rkey: rkey
+                    })}
+                  />
+                }
+              />
             );
           }}
-        </FindRound>
+        </RemoveLinkMutation>
       );
+
     } else {
       return null;
     }
@@ -165,7 +169,8 @@ class Players extends React.Component {
 
   render() {
 
-    const { gkey, gamespec, game_start, navigation } = this.props;
+    const { game, gamespec, navigation } = this.props;
+    const { players, game_start } = game;
 
     const addButton = (
       <Icon
@@ -180,49 +185,41 @@ class Players extends React.Component {
       />
     );
     const noAddButton = (<Icon name='add-circle' size={40} color='#fff'/>);
+    const showButton = this._shouldShowAddButton(players);
+
+    let content = null;
+    if( gamespec.team_size && gamespec.team_size > 1 ) {
+      const teams = getTeams(players, gamespec);
+      content = (
+        <Teams
+          teams={teams}
+          players={players}
+          gamespec={gamespec}
+          renderPlayer={this._renderPlayer}
+          nav={navigation}
+        />
+      );
+    } else {
+      content = (
+        <FlatList
+          data={players}
+          renderItem={this._renderPlayer}
+          keyExtractor={item => item._key}
+        />
+      );
+    }
 
     return (
-      <GetPlayersForGame gkey={gkey}>
-        {({ loading, players }) => {
-          if( loading ) return (<ActivityIndicator />);
-
-          let content = null;
-          if( gamespec.team_size && gamespec.team_size > 1 ) {
-            const teams = getTeams(players, gamespec);
-            content = (
-              <Teams
-                teams={teams}
-                players={players}
-                gamespec={gamespec}
-                renderPlayer={this._renderPlayer}
-                nav={navigation}
-              />
-            );
-          } else {
-            content = (
-              <FlatList
-                data={players}
-                renderItem={this._renderPlayer}
-                keyExtractor={item => item._key}
-              />
-            );
-          }
-
-          const showButton = this._shouldShowAddButton(players);
-          return (
-            <Card>
-              <View style={styles.cardTitle}>
-                { noAddButton }
-                <Text style={styles.title}>Players</Text>
-                { showButton ? addButton : noAddButton }
-              </View>
-              <View style={styles.listContainer}>
-                {content}
-              </View>
-            </Card>
-          );
-        }}
-      </GetPlayersForGame>
+      <Card>
+        <View style={styles.cardTitle}>
+          { noAddButton }
+          <Text style={styles.title}>Players</Text>
+          { showButton ? addButton : noAddButton }
+        </View>
+        <View style={styles.listContainer}>
+          {content}
+        </View>
+      </Card>
     );
   }
 }
