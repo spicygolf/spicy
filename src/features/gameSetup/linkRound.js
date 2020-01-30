@@ -10,7 +10,6 @@ import { useQuery } from '@apollo/react-hooks';
 import moment from 'moment';
 
 import {
-  AddRoundMutation,
   GET_ROUNDS_FOR_PLAYER_DAY_QUERY
 } from 'features/rounds/graphql';
 import Rounds from './rounds';

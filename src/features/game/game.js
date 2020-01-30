@@ -1,6 +1,6 @@
 'use strict';
 
-import React from 'react';
+import React, { createContext } from 'react';
 
 import {
   ActivityIndicator,
@@ -9,7 +9,7 @@ import {
 
 import { Query, withApollo } from 'react-apollo';
 import { GET_GAME_QUERY } from 'features/games/graphql';
-
+import { GameContext } from 'features/game/gamecontext';
 import GameStack from 'features/game/gamestack';
 
 
@@ -24,8 +24,8 @@ class Game extends React.Component {
 
   render() {
 
-    const setup = this.props.navigation.getParam('setup');
-    const currentGameKey = this.props.navigation.getParam('currentGame');
+    const currentGameKey = this.props.navigation.getParam('currentGameKey');
+    const currentPlayerKey = this.props.navigation.getParam('currentPlayerKey');
 
     return (
       <Query
@@ -42,13 +42,15 @@ class Game extends React.Component {
           }
           //console.log('game data', data);
           return (
-            <GameStack
-              navigation={this.props.navigation}
-              screenProps={{
-                game: data.getGame,
-                setup: setup
-              }}
-            />
+            <GameContext.Provider value={{
+              game: data.getGame,
+              gamespec: { team_size: 2, max_players: 4 }, // TODO: fetch this from game setup / db
+              currentPlayerKey: currentPlayerKey,
+            }}>
+              <GameStack
+                navigation={this.props.navigation}
+             />
+            </GameContext.Provider>
           );
         }}
       </Query>

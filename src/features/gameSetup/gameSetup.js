@@ -20,32 +20,18 @@ class GameSetup extends React.Component {
     super(props);
     //console.log('gameSetup props', props);
 
-    const game = props.screenProps.game;
-    this.state = {
-      game: game,
-      currentPlayerKey: null,
-    };
-
-    if( props.screenProps.setup ) {
-      props.navigation.navigate('Setup');
-      return;
-    }
+    // TODO: with Nav5, do this dynamically
+//    if( props.setup ) {
+//      props.navigation.navigate('Setup');
+//      return;
+//    }
 
   }
-
-  async componentDidMount() {
-    const cpkey = await AsyncStorage.getItem('currentPlayer');
-    this.setState({
-      currentPlayerKey: cpkey
-    });
-  }
-
 
   render() {
     return (
       <GameSetupStack
         navigation={this.props.navigation}
-        screenProps={this.state}
       />
     );
   }

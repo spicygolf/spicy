@@ -20,17 +20,18 @@ import {
 } from 'features/games/graphql';
 
 import Players from 'features/gameSetup/players';
+import { GameContext } from 'features/game/gamecontext';
 
 
 
 class GameSetupScreen extends React.Component {
 
+  static contextType = GameContext;
+
   constructor(props) {
     super(props);
     //console.log('gameSetupScreen props', props);
-    const sp = this.props.screenProps;
     this.state = {
-      game: sp.game,
       addCurrentPlayer: true,
       options: [],
     };
@@ -38,58 +39,59 @@ class GameSetupScreen extends React.Component {
 
   render() {
 
-    if( this.state.game.gametype ) {
-      return (
-        <Query
-          query={GET_GAMESPEC_QUERY}
-          variables={{
-            gamespec: this.state.game.gametype
-          }}
-        >
-          {({data, loading, error }) => {
-            if( loading ) return (<ActivityIndicator />);
+    const { game } = this.context;
 
-            // TODO: error component instead of below...
-            if( error ) {
-              console.log(error);
-              return (<Text>Error</Text>);
-            }
-            const { getGameSpec: gamespec } = data;
-            const gs = gamespec;
+    // TODO: maybe query for the gamespec earlier, like in game.js and
+    //       get rid of this query here?
+    return (
+      <Query
+        query={GET_GAMESPEC_QUERY}
+        variables={{
+          gamespec: game.gametype
+        }}
+      >
+        {({data, loading, error }) => {
+          if( loading ) return (<ActivityIndicator />);
 
-            const playerSection = (
-              <Players
-                game={this.state.game}
-                gamespec={gs}
-                addCurrentPlayer={this.state.addCurrentPlayer}
-                navigation={this.props.navigation}
-              />
-            );
+          // TODO: error component instead of below...
+          if( error ) {
+            console.log(error);
+            return (<Text>Error</Text>);
+          }
+          const { getGameSpec: gamespec } = data;
+          const gs = gamespec;
 
-            const optionsSection = (
-              <Card title="Options">
-              </Card>
-            );
+          const playerSection = (
+            <Players
+              game={game}
+              gamespec={gs}
+              addCurrentPlayer={this.state.addCurrentPlayer}
+              navigation={this.props.navigation}
+            />
+          );
 
-            return (
-              <View style={styles.container}>
-                <View style={styles.setupContainer}>
-                  <View style={styles.gname}>
-                    <Text style={styles.name_txt}>{gs.name}</Text>
-                  </View>
-                  <ScrollView>
-                    { playerSection }
-                    { optionsSection }
-                  </ScrollView>
+          const optionsSection = (
+            <Card title="Options">
+            </Card>
+          );
+
+          return (
+            <View style={styles.container}>
+              <View style={styles.setupContainer}>
+                <View style={styles.gname}>
+                  <Text style={styles.name_txt}>{gs.name}</Text>
                 </View>
+                <ScrollView>
+                  { playerSection }
+                  { optionsSection }
+                </ScrollView>
               </View>
-            );
-          }}
-        </Query>
-      );
-    } else {
-      return (<ActivityIndicator />); // TODO: error, no gametype/spec?
-    }
+            </View>
+          );
+        }}
+      </Query>
+    );
+
   }
 
 }

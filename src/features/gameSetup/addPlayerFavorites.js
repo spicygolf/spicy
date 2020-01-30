@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import {
   ActivityIndicator,
@@ -13,23 +13,18 @@ import {
 } from 'features/players/graphql';
 
 import Player from 'features/gameSetup/Player';
+import { GameContext } from 'features/game/gamecontext';
+import { AddPlayerContext } from 'features/gameSetup/addPlayerContext';
 
 
 
-class AddPlayerFavorites extends React.Component {
+const AddPlayerFavorites = (props) => {
 
-  constructor(props) {
-    super(props);
-    //console.log('addPlayerFavorites props', props);
-    // not sure why props don't work for these, but /shrug
-    this.state = {
-      game: this.props.screenProps.game,
-      team: this.props.screenProps.team,
-    };
-    this._renderFavoritesPlayer = this._renderFavoritesPlayer.bind(this);
-  }
+  const { game, currentPlayerKey } = useContext(GameContext);
+  const { team } = useContext(AddPlayerContext);
 
-  _renderFavoritesPlayer({item}) {
+  const _renderFavoritesPlayer = ({item}) => {
+
     const handicap = (item && item.handicap && item.handicap.display) ?
     item.handicap.display : 'no handicap';
     const club = (item && item.clubs && item.clubs[0]) ?
@@ -37,8 +32,8 @@ class AddPlayerFavorites extends React.Component {
 
     return (
       <Player
-        game={this.state.game}
-        team={this.state.team}
+        game={game}
+        team={team}
         item={item}
         title={item.name}
         subtitle={`${handicap}${club}`}
@@ -46,48 +41,42 @@ class AddPlayerFavorites extends React.Component {
     );
   }
 
+  return (
+    <View style={styles.container}>
+      <GetFavoritePlayersForPlayer pkey={currentPlayerKey}>
+        {({loading, players}) => {
+          if( loading ) return (<ActivityIndicator />);
+          const newPlayers = players.map(player => ({
+            ...player,
+            fave: {
+              faved: true,
+              from: {type: 'player', value: currentPlayerKey},
+              to:   {type: 'player', value: player._key},
+              refetchQueries: [{
+                query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
+                variables: {
+                  pkey: currentPlayerKey
+                }
+              }],
+              awaitRefetchQueries: true
+            }
+          }));
+          return (
+            <View style={styles.listContainer}>
+              <FlatList
+                data={newPlayers}
+                renderItem={_renderFavoritesPlayer}
+                keyExtractor={item => item._key}
+                keyboardShouldPersistTaps={'handled'}
+              />
+            </View>
+          );
+        }}
+      </GetFavoritePlayersForPlayer>
+    </View>
+  );
 
-  render() {
-
-    const pkey = this.props.screenProps.currentPlayerKey;
-
-    return (
-      <View style={styles.container}>
-        <GetFavoritePlayersForPlayer pkey={pkey}>
-          {({loading, players}) => {
-            if( loading ) return (<ActivityIndicator />);
-            const newPlayers = players.map(player => ({
-              ...player,
-              fave: {
-                faved: true,
-                from: {type: 'player', value: pkey},
-                to:   {type: 'player', value: player._key},
-                refetchQueries: [{
-                  query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
-                  variables: {
-                    pkey: pkey
-                  }
-                }],
-                awaitRefetchQueries: true
-              }
-            }));
-            return (
-              <View style={styles.listContainer}>
-                <FlatList
-                  data={newPlayers}
-                  renderItem={this._renderFavoritesPlayer}
-                  keyExtractor={item => item._key}
-                  keyboardShouldPersistTaps={'handled'}
-                />
-              </View>
-            );
-          }}
-        </GetFavoritePlayersForPlayer>
-      </View>
-    );
-  }
-
-}
+};
 
 export default AddPlayerFavorites;
 

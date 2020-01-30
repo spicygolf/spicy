@@ -1,6 +1,4 @@
-'use strict';
-
-import React from 'react';
+import React, { useContext, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -14,7 +12,7 @@ import {
 
 import { Query } from 'react-apollo';
 
-import { find, orderBy } from 'lodash';
+import { find } from 'lodash';
 
 import {
   SEARCH_PLAYER_QUERY,
@@ -23,31 +21,26 @@ import {
 } from 'features/players/graphql';
 
 import Player from 'features/gameSetup/Player';
+import { GameContext } from 'features/game/gamecontext';
+import { AddPlayerContext } from 'features/gameSetup/addPlayerContext';
 
 
 
-const ListHeader = ({title}) => (
-  <View>
-    <Text style={styles.header}>{title}</Text>
-  </View>
-);
+const AddPlayerSearch = (props) => {
 
+  const [ search, setSearch ] = useState('');
+  let searchInput;
 
+  const { game, currentPlayerKey } = useContext(GameContext);
+  const { team } = useContext(AddPlayerContext);
 
-class AddPlayerSearch extends React.Component {
+  const ListHeader = ({title}) => (
+    <View>
+      <Text style={styles.header}>{title}</Text>
+    </View>
+  );
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      q: '',
-      game: this.props.screenProps.game,
-      team: this.props.screenProps.team,
-    };
-    this.searchInput = null;
-    this._renderPlayer = this._renderPlayer.bind(this);
-  }
-
-  _renderPlayer({item}) {
+  const _renderPlayer = ({item}) => {
     const handicap = (item && item.handicap && item.handicap.display) ?
     item.handicap.display : 'no handicap';
     const club = (item && item.clubs && item.clubs[0]) ?
@@ -55,15 +48,15 @@ class AddPlayerSearch extends React.Component {
 
     return (
       <Player
-        game={this.state.game}
-        team={this.state.team}
+        game={game}
+        team={team}
         item={item}
         title={item.name}
         subtitle={`${handicap}${club}`}
       />
     );
   }
-
+/*
   componentDidMount() {
     this.didFocusListener = this.props.navigation.addListener('didFocus', () => {
       if( this.searchInput ) {
@@ -75,85 +68,81 @@ class AddPlayerSearch extends React.Component {
   componentWillUnmount() {
     this.didFocusListener.remove();
   }
+*/
 
-  render() {
-    const { q } = this.state;
-    const pkey = this.props.screenProps.currentPlayerKey;
+  return (
+    <View style={styles.container}>
+      <TextInput
+        ref={(input) => { searchInput = input; }}
+        style={styles.searchTextInput}
+        placeholder='search players...'
+        autoCapitalize='none'
+        onChangeText={text => setSearch(text)}
+        value={search}
+      />
+      <View>
+        <Query
+          query={SEARCH_PLAYER_QUERY}
+          variables={{q: search}}
+        >
+          {({ loading, error, data }) => {
+            if( loading ) return (<ActivityIndicator />);
+            if( error ) {
+              console.log(error);
+              return (<Text>Error</Text>);
+            }
 
-    return (
-      <View style={styles.container}>
-        <TextInput
-          ref={(input) => { this.searchInput = input; }}
-          style={styles.searchTextInput}
-          placeholder='search players...'
-          autoCapitalize='none'
-          onChangeText={text => this.setState({q: text})}
-          value={q}
-        />
-        <View>
-          <Query
-            query={SEARCH_PLAYER_QUERY}
-            variables={{q: q}}
-          >
-            {({ loading, error, data }) => {
-              if( loading ) return (<ActivityIndicator />);
-              if( error ) {
-                console.log(error);
-                return (<Text>Error</Text>);
-              }
+            if(
+              data &&
+              data.searchPlayer &&
+              data.searchPlayer.length) {
+              return (
+                <GetFavoritePlayersForPlayer pkey={currentPlayerKey}>
+                  {({loading, players:favePlayers}) => {
+                    if( loading ) return (<ActivityIndicator />);
+                    let players = data.searchPlayer.map(player => ({
+                      ...player,
+                      fave: {
+                        faved: (find(favePlayers, {_key: player._key}) ? true : false),
+                        from: {type: 'player', value: currentPlayerKey},
+                        to:   {type: 'player', value: player._key},
+                        refetchQueries: [{
+                          query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
+                          variables: {
+                            pkey: currentPlayerKey
+                          }
+                        }]
+                      }
+                    }));
+                    //players = orderBy(players,
+                    //              ['gender', 'rating', 'slope'],
+                    //              ['desc',   'desc',   'desc' ]);
 
-              if(
-                data &&
-                data.searchPlayer &&
-                data.searchPlayer.length) {
-                return (
-                  <GetFavoritePlayersForPlayer pkey={pkey}>
-                    {({loading, players:favePlayers}) => {
-                      if( loading ) return (<ActivityIndicator />);
-                      let players = data.searchPlayer.map(player => ({
-                        ...player,
-                        fave: {
-                          faved: (find(favePlayers, {_key: player._key}) ? true : false),
-                          from: {type: 'player', value: pkey},
-                          to:   {type: 'player', value: player._key},
-                          refetchQueries: [{
-                            query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
-                            variables: {
-                              pkey: pkey
-                            }
-                          }]
-                        }
-                      }));
-                      //players = orderBy(players,
-                      //              ['gender', 'rating', 'slope'],
-                      //              ['desc',   'desc',   'desc' ]);
+                    const header = (<ListHeader title='Registered Players' />);
 
-                      const header = (<ListHeader title='Registered Players' />);
+                    return (
+                      <FlatList
+                        data={players}
+                        renderItem={_renderPlayer}
+                        ListHeaderComponent={header}
+                        keyExtractor={item => item._key}
+                        keyboardShouldPersistTaps={'handled'}
+                      />
+                    );
 
-                      return (
-                        <FlatList
-                          data={players}
-                          renderItem={this._renderPlayer}
-                          ListHeaderComponent={header}
-                          keyExtractor={item => item._key}
-                          keyboardShouldPersistTaps={'handled'}
-                        />
-                      );
-
-                    }}
-                  </GetFavoritePlayersForPlayer>
-                );
-              } else {
-                return null;
-              }
-            }}
-          </Query>
-        </View>
+                  }}
+                </GetFavoritePlayersForPlayer>
+              );
+            } else {
+              return null;
+            }
+          }}
+        </Query>
       </View>
-    );
-  }
+    </View>
+  );
 
-}
+};
 
 
 export default AddPlayerSearch;

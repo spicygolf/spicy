@@ -27,7 +27,8 @@ const GameList = ({currentPlayerKey, navigation}) => {
 
   const itemPressed = (item, setup) => {
     navigation.navigate('Game', {
-      currentGame: item._key,
+      currentGameKey: item._key,
+      currentPlayerKey: currentPlayerKey,
       setup: setup
     });
   };

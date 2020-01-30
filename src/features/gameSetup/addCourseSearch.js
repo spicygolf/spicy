@@ -1,5 +1,3 @@
-'use strict';
-
 import React from 'react';
 
 import {
@@ -33,6 +31,9 @@ import {
   GetFavoriteTeesForPlayer
 } from 'features/courses/graphql';
 
+import { GameContext } from 'features/game/gamecontext';
+
+
 
 const ListHeader = ({title}) => (
   <View>
@@ -42,6 +43,8 @@ const ListHeader = ({title}) => (
 
 
 class AddCourseSearch extends React.Component {
+
+  static contextType = GameContext;
 
   constructor(props) {
     super(props);
@@ -79,7 +82,7 @@ class AddCourseSearch extends React.Component {
   }
 
   _renderCourseTee({item}) {
-    const { game } = this.props.screenProps;
+    const { game } = this.context;
     const { _key:gkey } = game;
     const tee = this.props.navigation.getParam('tee');
     const rkey = this.props.navigation.getParam('rkey');
@@ -156,10 +159,10 @@ class AddCourseSearch extends React.Component {
         </View>
       );
     } else {
-      const pkey = this.props.screenProps.currentPlayerKey;
+      const { currentPlayerKey } = this.context;
 
       return (
-        <GetFavoriteTeesForPlayer pkey={pkey}>
+        <GetFavoriteTeesForPlayer pkey={currentPlayerKey}>
           {({loading, tees:faveTees}) => {
             if( loading ) return (<ActivityIndicator />);
             let tees = course.tees.map(tee => ({
@@ -168,12 +171,12 @@ class AddCourseSearch extends React.Component {
               rating: tee.rating.all18 ? tee.rating.all18 : tee.rating.front9,
               fave: {
                 faved: (find(faveTees, {_key: tee._key}) ? true : false),
-                from: {type: 'player', value: pkey},
+                from: {type: 'player', value: currentPlayerKey},
                 to:   {type: 'tee', value: tee._key},
                 refetchQueries: [{
                   query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
                   variables: {
-                    pkey: pkey
+                    pkey: currentPlayerKey
                   }
                 }]
               }
@@ -222,7 +225,6 @@ class AddCourseSearch extends React.Component {
     }
   }
 }
-
 
 export default AddCourseSearch;
 

@@ -7,6 +7,7 @@ import {
 import GameNav from 'features/games/gamenav';
 
 import AddPlayerTabs from 'features/gameSetup/addPlayerTabs';
+import { AddPlayerContext } from 'features/gameSetup/addPlayerContext';
 
 
 
@@ -22,7 +23,6 @@ class AddPlayer extends React.Component {
 
   constructor(props) {
     super(props);
-    this.props.screenProps.team = this.props.navigation.getParam('team');
     //console.log('addPlayer props', props);
   }
 
@@ -34,10 +34,15 @@ class AddPlayer extends React.Component {
           showBack={true}
           backTo={'GameSetup'}
         />
-        <AddPlayerTabs
-          navigation={this.props.navigation}
-          screenProps={this.props.screenProps}
-        />
+        <AddPlayerContext.Provider
+          value={{
+            team: this.props.navigation.getParam('team')
+          }}
+        >
+          <AddPlayerTabs
+            navigation={this.props.navigation}
+          />
+        </AddPlayerContext.Provider>
       </View>
     );
   }

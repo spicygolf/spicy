@@ -13,10 +13,13 @@ import {
 } from 'features/courses/graphql';
 
 import Tee from 'features/gameSetup/Tee';
+import { GameContext } from 'features/game/gamecontext';
 
 
 
 class AddCourseFavorites extends React.Component {
+
+  static contextType = GameContext;
 
   constructor(props) {
     super(props);
@@ -25,7 +28,7 @@ class AddCourseFavorites extends React.Component {
   }
 
   _renderFavoritesTee({item}) {
-    const { game } = this.props.screenProps;
+    const { game } = this.context;
     const { _key:gkey } = game;
     const tee = this.props.navigation.getParam('tee');
     const rkey = this.props.navigation.getParam('rkey');
@@ -45,11 +48,11 @@ class AddCourseFavorites extends React.Component {
 
   render() {
 
-    const pkey = this.props.screenProps.currentPlayerKey;
+    const { currentPlayerKey } = this.context;
 
     return (
       <View style={styles.container}>
-        <GetFavoriteTeesForPlayer pkey={pkey}>
+        <GetFavoriteTeesForPlayer pkey={currentPlayerKey}>
           {({loading, tees}) => {
             if( loading ) return (<ActivityIndicator />);
             //console.log('fave tees', tees, pkey);
@@ -57,12 +60,12 @@ class AddCourseFavorites extends React.Component {
               ...tee,
               fave: {
                 faved: true,
-                from: {type: 'player', value: pkey},
+                from: {type: 'player', value: currentPlayerKey},
                 to:   {type: 'tee', value: tee._key},
                 refetchQueries: [{
                   query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
                   variables: {
-                    pkey: pkey
+                    pkey: currentPlayerKey
                   }
                 }]
               }

@@ -14,19 +14,19 @@ import {
 import { getTeams } from 'common/utils/teams';
 import HoleNav from 'features/game/holenav';
 import Teams from 'features/games/teams';
+import { GameContext } from 'features/game/gamecontext';
 import { get_round_for_player } from 'common/utils/rounds';
 
 
 
 class FivePointsScore extends React.Component {
 
+  static contextType = GameContext;
+
   constructor(props) {
     super(props);
-    console.log('5pts Score - game', props.screenProps.game);
     this.state = {
-      gamespec: { team_size: 2, max_players: 4 }, // TODO: fetch this from game setup / db
-      game: props.screenProps.game,
-      currentHole: props.screenProps.currentHole || '1'
+      currentHole: props.currentHole || '1'
     };
     this.changeHole = this.changeHole.bind(this);
     this._renderPlayer = this._renderPlayer.bind(this);
@@ -40,10 +40,11 @@ class FivePointsScore extends React.Component {
   }
 
   _renderPlayer({item}) {
+    const { game } = this.context;
     if( item && item.name ) {
       const index = (item && item.handicap && item.handicap.display) ?
         item.handicap.display : null;
-      const round = get_round_for_player(this.state.game.rounds, item._key);
+      const round = get_round_for_player(game.rounds, item._key);
       let handicap = 'NH';
 
       if( round ) {
@@ -66,7 +67,9 @@ class FivePointsScore extends React.Component {
 
   render() {
 
-    const { game, gamespec } = this.state;
+    console.log('context', this.context);
+
+    const { game, gamespec } = this.context;
 
     let content = null;
     if( gamespec.team_size && gamespec.team_size > 1 ) {

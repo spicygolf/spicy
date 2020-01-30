@@ -17,6 +17,7 @@ import { useMutation } from '@apollo/react-hooks';
 
 import { ADD_LINK_MUTATION } from 'common/graphql/link'
 import { ADD_ROUND_MUTATION } from 'features/rounds/graphql';
+import { GET_GAME_QUERY } from 'features/games/graphql';
 import { Button } from 'react-native-elements';
 
 
@@ -36,7 +37,14 @@ const Rounds = (props) => {
       variables: {
         from: {type: 'round', value: rkey},
         to:   {type: 'game', value: props.gkey},
-      }
+      },
+      refetchQueries: () => [{
+        query: GET_GAME_QUERY,
+        variables: {
+          gkey: props.gkey
+        }
+      }],
+
     });
     //console.log('r2gData', r2gData);
 
@@ -46,7 +54,13 @@ const Rounds = (props) => {
         variables: {
           from: {type: 'round', value: rkey},
           to:   {type: 'player', value: props.pkey},
-        }
+        },
+        refetchQueries: () => [{
+          query: GET_GAME_QUERY,
+          variables: {
+            gkey: props.gkey
+          }
+        }],
       });
       //console.log('r2pData', r2pData);
     }
