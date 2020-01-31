@@ -40,7 +40,7 @@ class Game extends React.Component {
             console.log(error);
             return (<Text>Error</Text>);
           }
-          //console.log('game data', data);
+          console.log('game data', data.getGame);
           return (
             <GameContext.Provider value={{
               game: data.getGame,

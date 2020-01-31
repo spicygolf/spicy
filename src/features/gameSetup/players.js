@@ -1,9 +1,6 @@
-'use strict';
-
 import React from 'react';
 
 import {
-  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -19,9 +16,7 @@ import {
 import { withApollo } from 'react-apollo';
 import { withNavigation } from 'react-navigation';
 
-import { GET_GAME_QUERY } from 'features/games/graphql';
-import { RemoveLinkMutation } from 'common/graphql/unlink';
-
+import RemovePlayer from 'features/gameSetup/removePlayer';
 import Teams from 'features/gameSetup/teams';
 import TeeSelector from 'features/gameSetup/teeSelector';
 import { getTeams } from 'common/utils/teams';
@@ -37,7 +32,6 @@ class Players extends React.Component {
     //console.log('Players props', props);
     this._itemPressed = this._itemPressed.bind(this);
     this._shouldShowAddButton = this._shouldShowAddButton.bind(this);
-    this._removePlayerFromGame = this._removePlayerFromGame.bind(this);
     this._renderPlayer = this._renderPlayer.bind(this);
   }
 
@@ -65,53 +59,10 @@ class Players extends React.Component {
     return ret;
   }
 
-  async _removePlayerFromGame({ removeLinkMutation, pkey, rkey }) {
-
-    const { _key:gkey } = this.props.game;
-
-    // remove player2game link
-    if( pkey && gkey ) {
-      const { errors: p2gErrors } = await removeLinkMutation({
-        variables: {
-          from: {type: 'player', value: pkey},
-          to: {type: 'game', value: gkey}
-        },
-        refetchQueries: [{
-          query: GET_GAME_QUERY,
-          variables: {
-            gkey: gkey
-          }
-        }],
-        awaitRefetchQueries: true,
-        ignoreResults: true
-      });
-      if( p2gErrors ) {
-        console.log('error removing player from game', p2gErrors);
-      }
-    } else {
-      console.log('error removing player from game', pkey, gkey);
-    }
-
-    // remove round2game link
-    if( rkey && gkey ) {
-      const { errors: r2gErrors } = await removeLinkMutation({
-        variables: {
-          from: {type: 'round', value: rkey},
-          to: {type: 'game', value: gkey}
-        },
-        ignoreResults: true
-      });
-      if( r2gErrors ) {
-        console.log('error unlinking round from game', r2gErrors);
-      }
-    } else {
-      console.log('error unlinking round from game', rkey, gkey);
-    }
-  }
-
   _renderPlayer({item}) {
     if( item && item.name ) {
       const { game } = this.props;
+      const { _key: gkey } = game;
       const pkey = item._key;
 
       const { rounds } = this.props.game;
@@ -119,47 +70,36 @@ class Players extends React.Component {
       const rkey = (round && round._key) ? round._key : null;
       const tee =  (round && round.tee ) ? round.tee : null;
 
+      const handicap = (item && item.handicap && item.handicap.display) ?
+        item.handicap.display : 'no handicap';
+
+      const subtitle = (
+        <TeeSelector
+          game={game}
+          tee={tee}
+          rkey={rkey}
+          pkey={pkey}
+          navigation={this.props.navigation}
+        />
+      );
+
       return (
-        <RemoveLinkMutation>
-          {({removeLinkMutation}) => {
-
-            const handicap = (item && item.handicap && item.handicap.display) ?
-              item.handicap.display : 'no handicap';
-
-            const subtitle = (
-              <TeeSelector
-                game={game}
-                tee={tee}
-                rkey={rkey}
-                pkey={pkey}
-                navigation={this.props.navigation}
-              />
-            );
-
-            return (
-              <ListItem
-                key={pkey}
-                title={item.name || ''}
-                subtitle={subtitle}
-                badge={{
-                  value: handicap,
-                }}
-                onPress={() => this._itemPressed(item)}
-                rightIcon={
-                  <Icon
-                    name='remove-circle'
-                    color='red'
-                    onPress={() => this._removePlayerFromGame({
-                      removeLinkMutation: removeLinkMutation,
-                      pkey: pkey,
-                      rkey: rkey
-                    })}
-                  />
-                }
-              />
-            );
+        <ListItem
+          key={pkey}
+          title={item.name || ''}
+          subtitle={subtitle}
+          badge={{
+            value: handicap,
           }}
-        </RemoveLinkMutation>
+          onPress={() => this._itemPressed(item)}
+          rightIcon={
+            <RemovePlayer
+              gkey={gkey}
+              pkey={pkey}
+              rkey={rkey}
+            />
+          }
+        />
       );
 
     } else {

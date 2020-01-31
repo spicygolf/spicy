@@ -18,7 +18,7 @@ class Player extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log('Player props', props);
+    //console.log('Player props', props);
   }
 
   render() {
