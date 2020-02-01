@@ -1,21 +1,21 @@
-'use strict';
-
 import React from 'react';
 import {
   StyleSheet,
-  View
+  Text,
+  View,
 } from 'react-native';
 
-import {
-  ListItem
-} from 'react-native-elements';
-
-
 import { getTeams } from 'common/utils/teams';
+import HoleScore from 'common/components/holeScore';
 import HoleNav from 'features/game/holenav';
 import Teams from 'features/games/teams';
 import { GameContext } from 'features/game/gamecontext';
-import { get_round_for_player } from 'common/utils/rounds';
+import {
+  get_gross,
+  get_hole,
+  get_round_for_player,
+  get_score,
+} from 'common/utils/rounds';
 
 
 
@@ -41,28 +41,41 @@ class FivePointsScore extends React.Component {
 
   _renderPlayer({item}) {
     const { game } = this.context;
-    if( item && item.name ) {
-      const index = (item && item.handicap && item.handicap.display) ?
-        item.handicap.display : null;
-      const round = get_round_for_player(game.rounds, item._key);
-      let handicap = 'NH';
+    const { currentHole } = this.state;
+    const round = get_round_for_player(game.rounds, item._key);
 
-      if( round ) {
-        handicap = round.game_handicap ?
-          round.game_handicap : round.course_handicap;
-        handicap = handicap ? handicap.toString() : 'NH';
-      }
+    const hole = get_hole(currentHole, round);
 
-      return (
-        <ListItem
-          key={item._key}
-          title={item.name || ''}
-          subtitle={handicap}
-        />
-      );
-    } else {
-      return null;
+    let handicap = 'NH';
+    const index = (item && item.handicap && item.handicap.display) ?
+      item.handicap.display : null;
+    if( round ) {
+      handicap = round.game_handicap ?
+        round.game_handicap : round.course_handicap;
+      handicap = handicap ? handicap.toString() : 'NH';
     }
+
+    let gross = null;
+    const score = get_score(currentHole, round);
+    if( score  ) {
+      gross = get_gross(score);
+    }
+
+    return (
+      <View style={styles.player_score_container}>
+        <View style={styles.player_name}>
+          <Text>{item.name || ''}</Text>
+          <Text>{handicap}</Text>
+        </View>
+        <View style={styles.hole_score}>
+          <HoleScore
+            hole={hole}
+            gross={gross}
+          />
+        </View>
+      </View>
+    );
+
   }
 
   render() {
@@ -95,13 +108,15 @@ class FivePointsScore extends React.Component {
     const holes = Array.from(Array(18).keys()).map(x => ++x);
 
     return (
-      <View>
+      <View style={styles.score_container}>
         <HoleNav
           holes={holes}
           currentHole={this.state.currentHole}
           changeHole={this.changeHole}
         />
-        {content}
+        <View style={styles.content_container}>
+          {content}
+        </View>
       </View>
     );
   }
@@ -114,14 +129,21 @@ export default FivePointsScore;
 
 
 var styles = StyleSheet.create({
-  cardContainer: {
-    padding: 15
+  score_container: {
+    padding: 5,
   },
-  ninesContainer: {
-    alignItems: 'center'
+  content_container: {
+    paddingTop: 15,
   },
-  nine: {
+  player_score_container: {
+    padding: 15,
     flexDirection: 'row',
-    paddingBottom: 10
-  }
+    flex: 2,
+  },
+  player_name: {
+    flex: 1,
+  },
+  hole_score: {
+    flex: 1,
+  },
 });
