@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import {
   ActivityIndicator,
@@ -7,32 +7,24 @@ import {
   View
 } from 'react-native';
 
-import {
-  GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
-  GetFavoriteTeesForPlayer
-} from 'features/courses/graphql';
+import { useQuery } from 'react-apollo';
+
+import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
 
 import Tee from 'features/gameSetup/Tee';
 import { GameContext } from 'features/game/gamecontext';
 
 
 
-class AddCourseFavorites extends React.Component {
+const AddCourseFavorites = props => {
 
-  static contextType = GameContext;
+  const { game, currentPlayerKey } = useContext(GameContext);
+  const { _key:gkey } = game;
+  const tee = props.navigation.getParam('tee');
+  const rkey = props.navigation.getParam('rkey');
+  //console.log('addCourseFavorites gkey', gkey, 'tee', tee, 'rkey', rkey);
 
-  constructor(props) {
-    super(props);
-    //console.log('addCourseFavorite props', props);
-    this._renderFavoritesTee = this._renderFavoritesTee.bind(this);
-  }
-
-  _renderFavoritesTee({item}) {
-    const { game } = this.context;
-    const { _key:gkey } = game;
-    const tee = this.props.navigation.getParam('tee');
-    const rkey = this.props.navigation.getParam('rkey');
-    console.log('addCourseFavorites gkey', gkey, 'tee', tee, 'rkey', rkey);
+  const _renderFavoritesTee = ({item}) => {
     return (
       <Tee
         gkey={gkey}
@@ -46,47 +38,53 @@ class AddCourseFavorites extends React.Component {
     );
   }
 
-  render() {
+  const { loading, error, data, client } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
+    variables: {
+      pkey: currentPlayerKey
+    },
+    fetchPolicy: 'cache-and-network',
+  });
 
-    const { currentPlayerKey } = this.context;
+  if( loading ) return (<ActivityIndicator />);
+  if (error) return (<Text>Error! ${error.message}</Text>);
 
-    return (
-      <View style={styles.container}>
-        <GetFavoriteTeesForPlayer pkey={currentPlayerKey}>
-          {({loading, tees}) => {
-            if( loading ) return (<ActivityIndicator />);
-            //console.log('fave tees', tees, pkey);
-            const newTees = tees.map(tee => ({
-              ...tee,
-              fave: {
-                faved: true,
-                from: {type: 'player', value: currentPlayerKey},
-                to:   {type: 'tee', value: tee._key},
-                refetchQueries: [{
-                  query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
-                  variables: {
-                    pkey: currentPlayerKey
-                  }
-                }]
-              }
-            }));
-            return (
-              <View style={styles.listContainer}>
-                <FlatList
-                  data={newTees}
-                  renderItem={this._renderFavoritesTee}
-                  keyExtractor={item => item._key}
-                  keyboardShouldPersistTaps={'handled'}
-                />
-              </View>
-            );
-          }}
-        </GetFavoriteTeesForPlayer>
+  console.log('client', client);
+  console.log('data', data);
+
+  const tees = (data && data.getFavoriteTeesForPlayer) ?
+    data.getFavoriteTeesForPlayer : [];
+  console.log('tees', tees, currentPlayerKey);
+
+  const newTees = tees.map(tee => ({
+    ...tee,
+    fave: {
+      faved: true,
+      from: {type: 'player', value: currentPlayerKey},
+      to:   {type: 'tee', value: tee._key},
+      refetchQueries: [{
+        query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
+        variables: {
+          pkey: currentPlayerKey
+        }
+      }]
+    }
+  }));
+  console.log('newTees', newTees);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.listContainer}>
+        <FlatList
+          data={newTees}
+          renderItem={_renderFavoritesTee}
+          keyExtractor={item => item._key}
+          keyboardShouldPersistTaps={'handled'}
+        />
       </View>
-    );
-  }
+    </View>
+  );
 
-}
+};
 
 export default AddCourseFavorites;
 
