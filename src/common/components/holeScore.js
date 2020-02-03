@@ -1,18 +1,31 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   StyleSheet,
   Text,
+  TouchableHighlight,
   View,
 } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
+import { useMutation } from '@apollo/react-hooks';
 
+import { get_gross } from 'common/utils/rounds';
+import { upsertScore } from 'common/utils/upsertScore';
 import { blue } from 'common/colors';
+import { GET_GAME_QUERY } from 'features/games/graphql';
+import { POST_SCORE_MUTATION } from 'features/rounds/graphql';
+import { GameContext } from 'features/game/gamecontext';
 
 
 
 const HoleScore = props => {
 
-  const { hole, gross } = props;
+  const [ postScore ] = useMutation(POST_SCORE_MUTATION);
+
+  const { game } = useContext(GameContext);
+  const { _key: gkey } = game;
+  const { hole, score, rkey } = props;
+  const gross = get_gross(score);
+
   const par = parseInt(hole.par);
   const first = (par - 2 >= 0 ? par - 2 : 0);
 
@@ -26,7 +39,6 @@ const HoleScore = props => {
     })
   }
 
-
   const renderScore = item => {
     //console.log('item', item);
     let classes = [styles.score_option];
@@ -37,10 +49,34 @@ const HoleScore = props => {
     }
 
     return (
-      <View style={classes}>
-        <Text style={styles.hole_score_text}>{item.key}</Text>
-      </View>
+      <TouchableHighlight onPress={() => setScore(item)}>
+        <View style={classes}>
+          <Text style={styles.hole_score_text}>{item.key}</Text>
+        </View>
+      </TouchableHighlight>
     )
+  };
+
+  const setScore = ({ key:newGross, toPar, selected }) => {
+
+    const newScore = upsertScore([score], hole.hole, 'gross', newGross);
+    //console.log('setting score to ', newGross);
+    //console.log('score', score);
+    //console.log('newScore', newScore);
+
+    const { loading, error, data } = postScore({
+      variables: {
+        round: rkey,
+        score: newScore[0] || [],
+      },
+      refetchQueries: [{
+        query: GET_GAME_QUERY,
+        variables: {
+          gkey: gkey
+        }
+      }],
+    });
+
   };
 
   return (
@@ -49,6 +85,7 @@ const HoleScore = props => {
       data={score_options}
       renderItem={({item}) => renderScore(item)}
       initialScrollIndex={first}
+      initialNumToRender={20}
     />
   );
 

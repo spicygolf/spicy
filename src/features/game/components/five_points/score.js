@@ -11,7 +11,6 @@ import HoleNav from 'features/game/holenav';
 import Teams from 'features/games/teams';
 import { GameContext } from 'features/game/gamecontext';
 import {
-  get_gross,
   get_hole,
   get_round_for_player,
   get_score,
@@ -55,11 +54,7 @@ class FivePointsScore extends React.Component {
       handicap = handicap ? handicap.toString() : 'NH';
     }
 
-    let gross = null;
     const score = get_score(currentHole, round);
-    if( score  ) {
-      gross = get_gross(score);
-    }
 
     return (
       <View style={styles.player_score_container}>
@@ -70,7 +65,8 @@ class FivePointsScore extends React.Component {
         <View style={styles.hole_score}>
           <HoleScore
             hole={hole}
-            gross={gross}
+            score={score}
+            rkey={round._key}
           />
         </View>
       </View>
