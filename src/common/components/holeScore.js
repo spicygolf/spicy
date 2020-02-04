@@ -62,9 +62,6 @@ const HoleScore = props => {
 
     const { key:newGross } = item;
     const newScore = upsertScore([score], hole.hole, 'gross', newGross);
-    //console.log('setting score to ', newGross);
-    //console.log('score', score);
-    //console.log('newScore', newScore);
 
     const { loading, error, data } = postScore({
       variables: {
@@ -82,30 +79,25 @@ const HoleScore = props => {
   };
 
   // after component has rendered, either center 'par' or player's gross score
-  useEffect(() => {
-    //console.log('gross', gross, 'first', first);
-    if( gross ) {
-        flatlistRef.scrollToIndex({
-          index: parseInt(gross)-1,
-          viewPosition: 0.5,
-        });
-      } else {
+  useEffect(
+    () => {
+      //console.log('gross', gross, 'first', first);
+      const index = gross ? parseInt(gross) - 1 : first;
       flatlistRef.scrollToIndex({
-        index: first,
+        index: index,
         viewPosition: 0.5,
       });
     }
-  });
+  );
 
   return (
     <FlatList
       horizontal={true}
       data={score_options}
       renderItem={({item}) => renderScore(item)}
-      initialNumToRender={19}
       ref={(ref => flatlistRef = ref)}
       onScrollToIndexFailed={(e) => {
-        console.log(e);
+        console.log('onScrollToIndexFailed e', e);
       }}
     />
   );
