@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -27,7 +27,8 @@ const HoleScore = props => {
   const gross = get_gross(score);
 
   const par = parseInt(hole.par);
-  const first = (par - 2 >= 0 ? par - 2 : 0);
+  const first = (par - 2 >= 0 ? par - 1 : 0);
+  let flatlistRef;
 
   // populate array of score options
   let score_options = [];
@@ -57,8 +58,9 @@ const HoleScore = props => {
     )
   };
 
-  const setScore = ({ key:newGross, toPar, selected }) => {
+  const setScore = (item) => {
 
+    const { key:newGross } = item;
     const newScore = upsertScore([score], hole.hole, 'gross', newGross);
     //console.log('setting score to ', newGross);
     //console.log('score', score);
@@ -79,13 +81,32 @@ const HoleScore = props => {
 
   };
 
+  // after component has rendered, either center 'par' or player's gross score
+  useEffect(() => {
+    //console.log('gross', gross, 'first', first);
+    if( gross ) {
+        flatlistRef.scrollToIndex({
+          index: parseInt(gross)-1,
+          viewPosition: 0.5,
+        });
+      } else {
+      flatlistRef.scrollToIndex({
+        index: first,
+        viewPosition: 0.5,
+      });
+    }
+  });
+
   return (
     <FlatList
       horizontal={true}
       data={score_options}
       renderItem={({item}) => renderScore(item)}
-      initialScrollIndex={first}
-      initialNumToRender={20}
+      initialNumToRender={19}
+      ref={(ref => flatlistRef = ref)}
+      onScrollToIndexFailed={(e) => {
+        console.log(e);
+      }}
     />
   );
 
