@@ -7,6 +7,7 @@ import {
 
 import { getTeams } from 'common/utils/teams';
 import HoleScore from 'common/components/holeScore';
+import HoleJunk from 'common/components/holeJunk';
 import HoleNav from 'features/game/holenav';
 import Teams from 'features/games/teams';
 import { GameContext } from 'features/game/gamecontext';
@@ -55,15 +56,25 @@ class FivePointsScore extends React.Component {
     }
 
     const score = get_score(currentHole, round);
+    console.log('score', score);
 
     return (
-      <View style={styles.player_score_container}>
-        <View style={styles.player_name}>
-          <Text>{item.name || ''}</Text>
-          <Text>{handicap}</Text>
+      <View style={styles.player_container}>
+        <View style={styles.player_score_container}>
+          <View style={styles.player_name}>
+            <Text>{item.name || ''}</Text>
+            <Text>{handicap}</Text>
+          </View>
+          <View style={styles.hole_score}>
+            <HoleScore
+              hole={hole}
+              score={score}
+              rkey={round._key}
+            />
+          </View>
         </View>
-        <View style={styles.hole_score}>
-          <HoleScore
+        <View style={styles.player_junk_container}>
+          <HoleJunk
             hole={hole}
             score={score}
             rkey={round._key}
@@ -131,10 +142,15 @@ var styles = StyleSheet.create({
   content_container: {
     paddingTop: 15,
   },
-  player_score_container: {
+  player_container: {
     padding: 15,
+  },
+  player_score_container: {
     flexDirection: 'row',
     flex: 2,
+  },
+  player_junk_container: {
+
   },
   player_name: {
     flex: 1,

@@ -1,5 +1,3 @@
-'use strict';
-
 import React, { createContext } from 'react';
 
 import {
