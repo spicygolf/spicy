@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   createMaterialTopTabNavigator
-} from 'react-navigation';
+} from '@react-navigation/material-top-tabs';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -18,51 +18,60 @@ const TabIcon = ({name, color}) => {
   );
 };
 
-const AddPlayerTabs = createMaterialTopTabNavigator(
-  {
-    AddPlayerFavorites: {
-      screen: AddPlayerFavorites,
-      navigationOptions: {
-        title: 'Favorites',
-        tabBarIcon: ({ focused, horizontal, tintColor }) => {
-          return (
-            <TabIcon
-              color={focused ? green : '#555' }
-              name='star'
-            />
-          );
-        },
-      },
-    },
-    AddPlayerSearch: {
-      screen: AddPlayerSearch,
-      navigationOptions: {
-        title: 'Search',
-        tabBarIcon: ({ focused, horizontal, tintColor }) => {
-          return (
-            <TabIcon
-              color={focused ? green : '#555' }
-              name='search'
-            />
-          );
-        },
-      },
-    },
-  }, {
-    initialRouteName: 'AddPlayerFavorites',
-    tabBarOptions: {
-      activeTintColor: green,
-      inactiveTintColor: '#555',
-      style: {
-        backgroundColor: 'none',
-      },
-      indicatorStyle: {
-        backgroundColor: green
-      },
-      showIcon: true
-    }
-  }
-);
+const AddPlayerTabs = props => {
 
+  const Tab = createMaterialTopTabNavigator();
+
+  return (
+    <Tab.Navigator
+      initialRouteName='AddPlayerFavorites'
+      screenOptions={{
+        tabBarOptions: {
+          activeTintColor: green,
+          inactiveTintColor: '#555',
+          style: {
+            backgroundColor: 'none',
+          },
+          indicatorStyle: {
+            backgroundColor: green
+          },
+          showIcon: true
+        }
+      }}
+    >
+      <Tab.Screen
+        name='AddPlayerFavorites'
+        component={AddPlayerFavorites}
+        options={{
+          title: 'Favorites',
+          tabBarIcon: ({ focused}) => {
+            return (
+              <TabIcon
+                color={focused ? green : '#555' }
+                name='star'
+              />
+            );
+          },
+        }}
+      />
+      <Tab.Screen
+        name='AddPlayerSearch'
+        component={AddPlayerSearch}
+        options={{
+          title: 'Search',
+          tabBarIcon: ({ focused }) => {
+            return (
+              <TabIcon
+                color={focused ? green : '#555' }
+                name='search'
+              />
+            );
+          },
+        }}
+      />
+    </Tab.Navigator>
+  );
+
+};
 
 export default AddPlayerTabs;

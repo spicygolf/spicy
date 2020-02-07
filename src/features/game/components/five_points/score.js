@@ -10,7 +10,7 @@ import HoleScore from 'common/components/holeScore';
 import HoleJunk from 'common/components/holeJunk';
 import HoleNav from 'features/game/holenav';
 import Teams from 'features/games/teams';
-import { GameContext } from 'features/game/gamecontext';
+import { GameContext } from 'features/game/gameContext';
 import {
   get_hole,
   get_round_for_player,
@@ -57,6 +57,7 @@ class FivePointsScore extends React.Component {
 
     const score = get_score(currentHole, round);
     console.log('score', score);
+    console.log('HoleScore', HoleScore);
 
     return (
       <View style={styles.player_container}>

@@ -12,7 +12,7 @@ import { useQuery } from 'react-apollo';
 import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
 
 import Tee from 'features/gameSetup/Tee';
-import { GameContext } from 'features/game/gamecontext';
+import { GameContext } from 'features/game/gameContext';
 
 
 

@@ -13,27 +13,28 @@ import {
   Icon,
 } from 'react-native-elements';
 
+import { useNavigation } from '@react-navigation/native';
 import { filter } from 'lodash';
 
 import { blue } from 'common/colors';
 
 
 
-const Teams = ({teams, players, gamespec, renderPlayer, nav}) => {
+const Teams = ({teams, players, gamespec, renderPlayer }) => {
 
-  //console.log('Teams teams', teams);
-  //console.log('Teams players', players);
-  //console.log('Teams gamespec', gamespec);
+  const navigation = useNavigation()
 
   const addButton = team => (
-    <Icon
-      name='add-circle'
-      color={blue}
-      size={40}
-      title='Add Player'
-      onPress={() => nav.navigate('AddPlayer', {team: team})}
-      testID='add_player_button'
-    />
+    <AddPlayerContext.Provider value={{team: team}}>
+      <Icon
+        name='add-circle'
+        color={blue}
+        size={40}
+        title='Add Player'
+        onPress={() => navigation.navigate('AddPlayer')}
+        testID='add_player_button'
+      />
+    </AddPlayerContext.Provider>
   );
   const noAddButton = _ => (<Icon name='add-circle' size={40} color='#fff'/>);
 

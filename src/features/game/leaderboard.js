@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import BirdieEmAllLeaderboard from './components/birdie_em_all/leaderboard';
 import FivePointsLeaderboard from './components/five_points/leaderboard';
 import GameNotFound from './components/general/notfound';
-import { GameContext } from 'features/game/gamecontext';
+import { GameContext } from 'features/game/gameContext';
 
 
 

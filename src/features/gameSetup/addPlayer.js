@@ -5,51 +5,24 @@ import {
 } from 'react-native';
 
 import GameNav from 'features/games/gamenav';
-
 import AddPlayerTabs from 'features/gameSetup/addPlayerTabs';
-import { AddPlayerContext } from 'features/gameSetup/addPlayerContext';
 
 
 
-class AddPlayer extends React.Component {
+const AddPlayer = props => {
 
-  // https://stackoverflow.com/questions/54038075/v1-to-v3-migration-nested-tabs
-  static router = {
-    ...AddPlayerTabs.router,
-    getStateForAction: (action, lastState) => {
-      return AddPlayerTabs.router.getStateForAction(action, lastState);
-    },
-  };
+  return (
+    <View style={styles.container}>
+      <GameNav
+        title='Add Player'
+        showBack={true}
+        backTo={'GameSetup'}
+      />
+      <AddPlayerTabs />
+    </View>
+  );
 
-  constructor(props) {
-    super(props);
-    //console.log('addPlayer props', props);
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <GameNav
-          title='Add Player'
-          showBack={true}
-          backTo={'GameSetup'}
-        />
-        <AddPlayerContext.Provider
-          value={{
-            team: this.props.navigation.getParam('team')
-          }}
-        >
-          <AddPlayerTabs
-            navigation={this.props.navigation}
-          />
-        </AddPlayerContext.Provider>
-      </View>
-    );
-  }
-
-}
-
-
+};
 
 export default AddPlayer;
 

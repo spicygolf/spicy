@@ -10,25 +10,23 @@ import {
 import Header from 'common/components/header';
 import { blue } from 'common/colors';
 
-/**
- * ## Styles
- */
-var styles = StyleSheet.create({
-  container: {
-    flex: 1
-  }
-});
 
 
-class Feed extends React.Component {
+const Feed = props => {
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Header title='Feed' color={blue} />
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container}>
+      <Header title='Feed' color={blue} />
+    </View>
+  );
+
 };
 
 export default Feed;
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

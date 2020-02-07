@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -21,7 +21,7 @@ import {
 } from 'features/players/graphql';
 
 import Player from 'features/gameSetup/Player';
-import { GameContext } from 'features/game/gamecontext';
+import { GameContext } from 'features/game/gameContext';
 import { AddPlayerContext } from 'features/gameSetup/addPlayerContext';
 
 
@@ -31,7 +31,7 @@ const AddPlayerSearch = (props) => {
   const [ search, setSearch ] = useState('');
   let searchInput;
 
-  const { game, currentPlayerKey } = useContext(GameContext);
+  const { currentPlayerKey } = useContext(GameContext);
   const { team } = useContext(AddPlayerContext);
 
   const ListHeader = ({title}) => (
@@ -48,7 +48,6 @@ const AddPlayerSearch = (props) => {
 
     return (
       <Player
-        game={game}
         team={team}
         item={item}
         title={item.name}
@@ -56,24 +55,17 @@ const AddPlayerSearch = (props) => {
       />
     );
   }
-/*
-  componentDidMount() {
-    this.didFocusListener = this.props.navigation.addListener('didFocus', () => {
-      if( this.searchInput ) {
-        this.searchInput.focus();
-      }
-    });
-  }
 
-  componentWillUnmount() {
-    this.didFocusListener.remove();
-  }
-*/
+  useEffect(
+    () => {
+      searchInput.focus();
+    }
+  );
 
   return (
     <View style={styles.container}>
       <TextInput
-        ref={(input) => { searchInput = input; }}
+        ref={input => { searchInput = input; }}
         style={styles.searchTextInput}
         placeholder='search players...'
         autoCapitalize='none'
@@ -96,6 +88,8 @@ const AddPlayerSearch = (props) => {
               data &&
               data.searchPlayer &&
               data.searchPlayer.length) {
+
+              // TODO: useQuery
               return (
                 <GetFavoritePlayersForPlayer pkey={currentPlayerKey}>
                   {({loading, players:favePlayers}) => {

@@ -6,7 +6,7 @@ import {
   View,
 } from 'react-native';
 
-import { GameContext } from 'features/game/gamecontext';
+import { GameContext } from 'features/game/gameContext';
 
 
 

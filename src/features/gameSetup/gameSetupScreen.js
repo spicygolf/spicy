@@ -1,100 +1,52 @@
-'use strict';
-
-import React from 'react';
-
+import React, { useContext } from 'react';
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
 } from 'react-native';
-
 import {
   Card,
 } from 'react-native-elements';
 
-import { Query } from 'react-apollo';
-import {
-  GET_GAMESPEC_QUERY,
-} from 'features/games/graphql';
+import moment from 'moment';
 
 import Players from 'features/gameSetup/players';
-import { GameContext } from 'features/game/gamecontext';
+import { GameContext } from 'features/game/gameContext';
 
 
 
-class GameSetupScreen extends React.Component {
+const GameSetupScreen = props => {
 
-  static contextType = GameContext;
+  const { game, gamespec:gs } = useContext(GameContext);
+  const start = moment(game.start).format('llll');
 
-  constructor(props) {
-    super(props);
-    //console.log('gameSetupScreen props', props);
-    this.state = {
-      addCurrentPlayer: true,
-      options: [],
-    };
-  }
+  const playerSection = (
+    <Players
+      addCurrentPlayer={true}
+    />
+  );
 
-  render() {
+  const optionsSection = (
+    <Card title="Options">
+    </Card>
+  );
 
-    const { game } = this.context;
+  return (
+    <View style={styles.container}>
+      <View style={styles.setupContainer}>
+        <View style={styles.gname}>
+          <Text style={styles.name_txt}>{gs.name} - {start}</Text>
+        </View>
+        <ScrollView>
+          { playerSection }
+          { optionsSection }
+        </ScrollView>
+      </View>
+    </View>
+  );
 
-    // TODO: maybe query for the gamespec earlier, like in game.js and
-    //       get rid of this query here?
-    return (
-      <Query
-        query={GET_GAMESPEC_QUERY}
-        variables={{
-          gamespec: game.gametype
-        }}
-      >
-        {({data, loading, error }) => {
-          if( loading ) return (<ActivityIndicator />);
-
-          // TODO: error component instead of below...
-          if( error ) {
-            console.log(error);
-            return (<Text>Error</Text>);
-          }
-          const { getGameSpec: gamespec } = data;
-          const gs = gamespec;
-
-          const playerSection = (
-            <Players
-              game={game}
-              gamespec={gs}
-              addCurrentPlayer={this.state.addCurrentPlayer}
-              navigation={this.props.navigation}
-            />
-          );
-
-          const optionsSection = (
-            <Card title="Options">
-            </Card>
-          );
-
-          return (
-            <View style={styles.container}>
-              <View style={styles.setupContainer}>
-                <View style={styles.gname}>
-                  <Text style={styles.name_txt}>{gs.name}</Text>
-                </View>
-                <ScrollView>
-                  { playerSection }
-                  { optionsSection }
-                </ScrollView>
-              </View>
-            </View>
-          );
-        }}
-      </Query>
-    );
-
-  }
-
-}
+};
 
 export default GameSetupScreen;
 

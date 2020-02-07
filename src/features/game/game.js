@@ -1,60 +1,52 @@
-import React, { createContext } from 'react';
+import React from 'react';
 
 import {
   ActivityIndicator,
   Text
 } from 'react-native';
 
-import { Query, withApollo } from 'react-apollo';
+import { useQuery } from '@apollo/react-hooks';
 import { GET_GAME_QUERY } from 'features/games/graphql';
-import { GameContext } from 'features/game/gamecontext';
-import GameStack from 'features/game/gamestack';
+import GameSpec from 'features/game/gamespec';
 
 
-class Game extends React.Component {
+const Game = props => {
 
-  // https://reactnavigation.org/docs/en/common-mistakes.html#explicitly-rendering-more-than-one-navigator
-  static router = GameStack.router;
+  const { route } = props;
+  const { currentGameKey } = route.params;
+  //console.log('currentGameKey', currentGameKey);
 
-  constructor(props) {
-    super(props);
+  // get game
+  const { loading, error, data } = useQuery(GET_GAME_QUERY, {
+    variables: {
+      gkey: currentGameKey
+    },
+  });
+  if( loading ) return (<ActivityIndicator />);
+  if( error ) {
+    console.log(error);
+    return (<Text>Error</Text>);
   }
 
-  render() {
+  if( data ) {
+    // got game
+    //console.log('g_data', g_data);
+    const game = data.getGame;
+    console.log('game', game);
 
-    const currentGameKey = this.props.navigation.getParam('currentGameKey');
-    const currentPlayerKey = this.props.navigation.getParam('currentPlayerKey');
-
+    // le sigh, we have to pass game and currentPlayerKey onto <GameSpec>
+    // because RN doesn't like an increasing or decreasing number of hooks run
+    // for different renders.
     return (
-      <Query
-        query={GET_GAME_QUERY}
-        variables={{
-          gkey: currentGameKey
-        }}
-      >
-        {({ loading, error, data }) => {
-          if( loading ) return (<ActivityIndicator />);
-          if( error ) {
-            console.log(error);
-            return (<Text>Error</Text>);
-          }
-          console.log('game data', data.getGame);
-          return (
-            <GameContext.Provider value={{
-              game: data.getGame,
-              gamespec: { team_size: 2, max_players: 4 }, // TODO: fetch this from game setup / db
-              currentPlayerKey: currentPlayerKey,
-            }}>
-              <GameStack
-                navigation={this.props.navigation}
-             />
-            </GameContext.Provider>
-          );
-        }}
-      </Query>
+      <GameSpec
+        game={game}
+      />
     );
+
+  } else {
+    return (<ActivityIndicator />);
   }
 
-}
+};
 
-export default withApollo(Game);
+export default Game;

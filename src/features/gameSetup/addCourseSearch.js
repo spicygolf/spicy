@@ -31,7 +31,7 @@ import {
   GetFavoriteTeesForPlayer
 } from 'features/courses/graphql';
 
-import { GameContext } from 'features/game/gamecontext';
+import { GameContext } from 'features/game/gameContext';
 
 
 

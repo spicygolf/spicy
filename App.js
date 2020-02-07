@@ -1,24 +1,40 @@
 import React, { Component } from 'react';
+import { NavigationNativeContainer } from '@react-navigation/native';
 import { ApolloProvider } from 'react-apollo';
 import { ApolloProvider as ApolloHooksProvider } from '@apollo/react-hooks';
+import { createStackNavigator } from '@react-navigation/stack';
+
+import Splash from 'features/splash/splash';
+import AppStack from 'app/components/appstack';
+import AuthStack from 'app/components/authstack';
 
 import configureClient from 'app/client/configureClient';
-import AppContainer from 'app/components/appcontainer';
 
 
-class App extends Component {
-  render() {
-    const { client, persistor } = configureClient();
-    return (
-      <ApolloProvider client={client}>
-        <ApolloHooksProvider client={client}>
-          <AppContainer
-            uriPrefix='/spicygolf'
-          />
-        </ApolloHooksProvider>
-      </ApolloProvider>
-    );
-  }
+const App = props => {
+
+  const { client, persistor } = configureClient();
+  const Stack = createStackNavigator();
+
+  return (
+    <ApolloProvider client={client}>
+      <ApolloHooksProvider client={client}>
+        <NavigationNativeContainer>
+          <Stack.Navigator
+            initialRouteName='Splash'
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name='Splash' component={Splash} />
+            <Stack.Screen name='AppStack' component={AppStack} />
+            <Stack.Screen name='AuthStack' component={AuthStack} />
+          </Stack.Navigator>
+        </NavigationNativeContainer>
+      </ApolloHooksProvider>
+    </ApolloProvider>
+  );
+
 };
 
 export default App;

@@ -4,9 +4,10 @@ import {
   ListItem
 } from 'react-native-elements';
 
-import { withNavigation } from 'react-navigation';
+import { useNavigation } from '@react-navigation/native';
 import { useMutation } from '@apollo/react-hooks';
 
+import { GameContext } from 'features/game/gameContext';
 import { ADD_LINK_MUTATION } from 'common/graphql/link';
 import { REMOVE_LINK_MUTATION } from 'common/graphql/unlink';
 import { GET_GAME_QUERY } from 'features/games/graphql';
@@ -17,12 +18,14 @@ import { calc_course_handicaps } from 'common/utils/handicap';
 
 const Tee = props => {
 
-  //console.log('Tee props', props);
-  const { game, rkey, oldTee, item, title, subtitle } = props;
-  const assigned = oldTee ? "manual" : "first";
+  const navigation = useNavigation();
+  const { game } = useContext(GameContext);
 
   const [ linkRoundToTee ] = useMutation(ADD_LINK_MUTATION);
   const [ unlinkRoundToTee ] = useMutation(REMOVE_LINK_MUTATION);
+
+  const { rkey, oldTee, item, title, subtitle } = props;
+  const assigned = oldTee ? "manual" : "first";
 
   const add = (rkey, tkey, other) => {
     const { loading, error, data } = linkRoundToTee({
@@ -86,10 +89,11 @@ const Tee = props => {
 
         // here is one place we can calculate the course_handicap
         // on the round2game edges
+        // TODO: enable me
         //calc_course_handicaps(gkey);
 
         // after all that, go back to GameSetup
-        props.navigation.navigate('GameSetup');
+        navigation.navigate('GameSetup');
       }}
       leftIcon={(
         <FavoriteIcon
@@ -101,4 +105,4 @@ const Tee = props => {
 
 };
 
-export default withNavigation(Tee);
+export default Tee;

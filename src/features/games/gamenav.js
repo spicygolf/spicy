@@ -1,5 +1,3 @@
-'use strict';
-
 import React from 'react';
 
 import {
@@ -11,51 +9,53 @@ import {
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { goBack, navigate } from 'common/components/navigationService';
+import { useNavigation } from '@react-navigation/native';
 
 
-class GameNav extends React.Component {
 
-  render() {
-    const back = this.props.backTo ?
-      () => navigate(this.props.backTo) :
-      () => goBack();
+const GameNav = props => {
 
-    const left = this.props.showBack ? (
-      <TouchableOpacity
-        onPress={() => back()}
-      >
-        <Icon name='chevron-left' size={30} color='#bbb' />
-      </TouchableOpacity>
-    ) : <Text></Text>;
+  const { backTo, showBack, showScore, game, scores } = props;
+  const navigation = useNavigation();
 
-    const right = this.props.showScore ? (
-      <TouchableOpacity
-        onPress={() => this.props.navigation.navigate('Score', {
-            game   : this.props.game,
-            scores : this.props.scores
-          })}
-      >
-        <Icon name='lead-pencil' size={30} color='#666' />
-      </TouchableOpacity>
-    ) : <Text></Text>;
+  const back = backTo ?
+    () => navigation.navigate(this.props.backTo) :
+    () => navigation.goBack();
 
-    return (
-      <View style={styles.container}>
-        <View style={styles.GameNav}>
-          <View style={styles.left}>
-            {left}
-          </View>
-          <View style={styles.middle}>
-            <Text style={styles.title}>{this.props.title}</Text>
-          </View>
-          <View style={styles.right}>
-            {right}
-          </View>
+  const left = showBack ? (
+    <TouchableOpacity
+      onPress={() => back()}
+    >
+      <Icon name='chevron-left' size={30} color='#bbb' />
+    </TouchableOpacity>
+  ) : <Text></Text>;
+
+  const right = showScore ? (
+    <TouchableOpacity
+      onPress={() => navigation.navigate('Score', {
+          game   : game,
+          scores : scores
+        })}
+    >
+      <Icon name='lead-pencil' size={30} color='#666' />
+    </TouchableOpacity>
+  ) : <Text></Text>;
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.GameNav}>
+        <View style={styles.left}>
+          {left}
+        </View>
+        <View style={styles.middle}>
+          <Text style={styles.title}>{this.props.title}</Text>
+        </View>
+        <View style={styles.right}>
+          {right}
         </View>
       </View>
-    );
-  }
+    </View>
+  );
 
 }
 

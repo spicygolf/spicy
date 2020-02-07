@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -9,31 +9,42 @@ import {
 import AsyncStorage from '@react-native-community/async-storage';
 
 
-class Splash extends React.Component {
+const Splash = props => {
 
-  async componentDidMount() {
+  useEffect(
+    () => {
 
-    const token = await AsyncStorage.getItem('token');
+      const getCurrentPlayerData = async () => {
+        const currentPlayerKey = await AsyncStorage.getItem('currentPlayer');
+        const token = await AsyncStorage.getItem('token');
 
-    // if no token, render Login component
-    if( !token ) {
-      this.props.navigation.navigate('Auth');
-      return;
-    }
-    // we have token, so render tabs
-    this.props.navigation.navigate('App');
-  }
+        const currentPlayerData = {
+          currentPlayerKey: currentPlayerKey,
+          token: token,
+        };
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text>Spicy Golf</Text>
-        <Text>Splash Page</Text>
-      </View>
-    );
-  }
+        if( token ) {
+          // we have token, so render tabs
+          props.navigation.navigate('AppStack', currentPlayerData);
+        } else {
+          // if no token, render Login component
+          props.navigation.navigate('AuthStack');
+        }
 
-}
+
+      };
+      getCurrentPlayerData();
+    }, []
+  );
+
+  return (
+    <View style={styles.container}>
+      <Text>Spicy Golf</Text>
+      <Text>Splash Page</Text>
+    </View>
+  );
+
+};
 
 export default Splash;
 

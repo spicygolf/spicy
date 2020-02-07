@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import {
   FlatList,
@@ -13,29 +13,26 @@ import {
   ListItem
 } from 'react-native-elements';
 
-import { withApollo } from 'react-apollo';
-import { withNavigation } from 'react-navigation';
+import { useNavigation } from '@react-navigation/native';
 
 import RemovePlayer from 'features/gameSetup/removePlayer';
 import Teams from 'features/gameSetup/teams';
 import TeeSelector from 'features/gameSetup/teeSelector';
+import { GameContext } from 'features/game/gameContext';
 import { getTeams } from 'common/utils/teams';
 import { get_round_for_player } from 'common/utils/rounds';
 import { blue } from 'common/colors';
 
 
 
-class Players extends React.Component {
+const Players = props => {
 
-  constructor(props) {
-    super(props);
-    //console.log('Players props', props);
-    this._itemPressed = this._itemPressed.bind(this);
-    this._shouldShowAddButton = this._shouldShowAddButton.bind(this);
-    this._renderPlayer = this._renderPlayer.bind(this);
-  }
+  const navigation = useNavigation();
+  const { game, gamespec } = useContext(GameContext);
+  const { _key: gkey, rounds, players, start } = game;
 
-  _itemPressed(player) {
+
+  const _itemPressed = player => {
     console.log('pressed player', player);
 
     // TODO: maybe implement me?
@@ -43,10 +40,9 @@ class Players extends React.Component {
     // player may have going that current day.
     //
     //navigate('player_item', {player: player});
-  }
+  };
 
-  _shouldShowAddButton(players) {
-    const { gamespec } = this.props;
+  const _shouldShowAddButton = players => {
     let ret = true;
     if( gamespec.team_size > 1 ) return false;
     if( gamespec.max_players < 1 ) return true;
@@ -59,13 +55,10 @@ class Players extends React.Component {
     return ret;
   }
 
-  _renderPlayer({item}) {
+  const _renderPlayer = ({item}) => {
     if( item && item.name ) {
-      const { game } = this.props;
-      const { _key: gkey } = game;
       const pkey = item._key;
 
-      const { rounds } = this.props.game;
       const round = get_round_for_player(rounds, pkey);
       const rkey = (round && round._key) ? round._key : null;
       const tee =  (round && round.tee ) ? round.tee : null;
@@ -79,7 +72,6 @@ class Players extends React.Component {
           tee={tee}
           rkey={rkey}
           pkey={pkey}
-          navigation={this.props.navigation}
         />
       );
 
@@ -91,7 +83,7 @@ class Players extends React.Component {
           badge={{
             value: handicap,
           }}
-          onPress={() => this._itemPressed(item)}
+          onPress={() => _itemPressed(item)}
           rightIcon={
             <RemovePlayer
               gkey={gkey}
@@ -105,66 +97,58 @@ class Players extends React.Component {
     } else {
       return null;
     }
-  }
+  };
 
-  render() {
+  const addButton = (
+    <Icon
+      name='add-circle'
+      color={blue}
+      size={40}
+      title='Add Player'
+      onPress={() => navigation.navigate('AddPlayer')}
+      testID='add_player_button'
+    />
+  );
+  const noAddButton = (<Icon name='add-circle' size={40} color='#fff'/>);
+  const showButton = _shouldShowAddButton(players);
 
-    const { game, gamespec, navigation } = this.props;
-    const { players, game_start } = game;
-
-    const addButton = (
-      <Icon
-        name='add-circle'
-        color={blue}
-        size={40}
-        title='Add Player'
-        onPress={() => navigation.navigate('AddPlayer', {
-          game_start: game_start,
-        })}
-        testID='add_player_button'
+  let content = null;
+  if( gamespec.team_size && gamespec.team_size > 1 ) {
+    const teams = getTeams(players, gamespec);
+    content = (
+      <Teams
+        teams={teams}
+        players={players}
+        gamespec={gamespec}
+        renderPlayer={_renderPlayer}
       />
     );
-    const noAddButton = (<Icon name='add-circle' size={40} color='#fff'/>);
-    const showButton = this._shouldShowAddButton(players);
-
-    let content = null;
-    if( gamespec.team_size && gamespec.team_size > 1 ) {
-      const teams = getTeams(players, gamespec);
-      content = (
-        <Teams
-          teams={teams}
-          players={players}
-          gamespec={gamespec}
-          renderPlayer={this._renderPlayer}
-          nav={navigation}
-        />
-      );
-    } else {
-      content = (
-        <FlatList
-          data={players}
-          renderItem={this._renderPlayer}
-          keyExtractor={item => item._key}
-        />
-      );
-    }
-
-    return (
-      <Card>
-        <View style={styles.cardTitle}>
-          { noAddButton }
-          <Text style={styles.title}>Players</Text>
-          { showButton ? addButton : noAddButton }
-        </View>
-        <View style={styles.listContainer}>
-          {content}
-        </View>
-      </Card>
+  } else {
+    content = (
+      <FlatList
+        data={players}
+        renderItem={this._renderPlayer}
+        keyExtractor={item => item._key}
+      />
     );
   }
-}
 
-export default withNavigation(withApollo(Players));
+  return (
+    <Card>
+      <View style={styles.cardTitle}>
+        { noAddButton }
+        <Text style={styles.title}>Players</Text>
+        { showButton ? addButton : noAddButton }
+      </View>
+      <View style={styles.listContainer}>
+        {content}
+      </View>
+    </Card>
+  );
+
+};
+
+export default Players;
 
 
 const styles = StyleSheet.create({

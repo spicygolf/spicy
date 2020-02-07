@@ -1,52 +1,117 @@
-'use strict';
-
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
-import AsyncStorage from '@react-native-community/async-storage';
+import {
+  Icon,
+  ListItem
+} from 'react-native-elements';
+import { useNavigation } from '@react-navigation/native';
+import { useQuery } from '@apollo/react-hooks';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import moment from 'moment';
+import { reverse, sortBy } from 'lodash';
 
-import GameList from './gamelist';
+import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
+import { blue } from 'common/colors';
 
 
 
-// TODO: put most of this in a render-only component GameList, to use
-//       useQuery hook.  Can we further get rid of the rest of this?
-class Games extends React.Component {
+const Games = props => {
 
-  constructor(props) {
-    super(props);
-    //console.log('games props', props);
-    this.state = {
-      currentPlayerKey: null
-    };
-  }
+  const navigation = useNavigation();
+  const { currentPlayerKey } = useContext(CurrentPlayerContext);
 
-  async componentDidMount() {
-    const data = await AsyncStorage.getItem('currentPlayer');
-    this.setState({
-      currentPlayerKey: data
+  const newGamePressed = () => {
+    navigation.navigate('NewGame');
+  };
+
+  const itemPressed = (item, setup) => {
+    navigation.navigate('Game', {
+      currentGameKey: item._key,
+      setup: setup
     });
-  }
+  };
 
-  render() {
-    const { currentPlayerKey } = this.state;
-
-    if( !currentPlayerKey ) {
-      return (
-        <ActivityIndicator />
-      );
-    }
-
+  const renderItem = ({item}) => {
+    if( !item || !item.gametype ) return null;
+    const startTime = moment(item.start).format('llll');
     return (
-      <GameList
-        currentPlayerKey={this.state.currentPlayerKey}
-        navigation={this.props.navigation}
+      <ListItem
+        title={item.name || ''}
+        subtitle={startTime || ''}
+        onPress={() => itemPressed(item, false)}
+        rightIcon={
+          <Icon
+            name='settings'
+            color='#999'
+            onPress={() => itemPressed(item, true)}
+          />
+        }
       />
     );
-
   }
+
+  const { loading, error, data } = useQuery(ACTIVE_GAMES_FOR_PLAYER_QUERY,  {
+    variables: {
+      pkey: currentPlayerKey,
+    },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  if( loading ) return (<ActivityIndicator />);
+  if (error) return (<Text>Error! ${error.message}</Text>);
+
+  const games = (data && data.activeGamesForPlayer ) ?
+    data.activeGamesForPlayer : [];
+  // sort games descending by start time
+    const sorted_games = reverse(sortBy(games, ['start']));
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.gamesSubMenu}>
+        <View style={styles.newGameButton}>
+          <Icon
+            name='add-circle'
+            color={blue}
+            size={40}
+            onPress={newGamePressed}
+            accessibilityLabel="New Game"
+            testID='new_game'
+          />
+        </View>
+      </View>
+      <FlatList
+        data={sorted_games}
+        renderItem={renderItem}
+        keyExtractor={item => item._key}
+      />
+    </View>
+  );
 
 }
 
 export default Games;
+
+
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  gamesSubMenu: {
+    alignItems: 'flex-end',
+    paddingRight: 10,
+    paddingTop: 10,
+  },
+  gamesSubMenuSpacer: {
+  },
+  newGameButton: {
+  }
+});

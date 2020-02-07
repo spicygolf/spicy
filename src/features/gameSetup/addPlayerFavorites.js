@@ -13,14 +13,14 @@ import {
 } from 'features/players/graphql';
 
 import Player from 'features/gameSetup/Player';
-import { GameContext } from 'features/game/gamecontext';
+import { GameContext } from 'features/game/gameContext';
 import { AddPlayerContext } from 'features/gameSetup/addPlayerContext';
 
 
 
 const AddPlayerFavorites = (props) => {
 
-  const { game, currentPlayerKey } = useContext(GameContext);
+  const { currentPlayerKey } = useContext(GameContext);
   const { team } = useContext(AddPlayerContext);
 
   const _renderFavoritesPlayer = ({item}) => {
@@ -32,7 +32,6 @@ const AddPlayerFavorites = (props) => {
 
     return (
       <Player
-        game={game}
         team={team}
         item={item}
         title={item.name}
@@ -41,6 +40,7 @@ const AddPlayerFavorites = (props) => {
     );
   }
 
+  // TODO: useQuery
   return (
     <View style={styles.container}>
       <GetFavoritePlayersForPlayer pkey={currentPlayerKey}>

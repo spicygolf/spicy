@@ -1,11 +1,11 @@
 import React, { useContext, useEffect } from 'react';
 import {
+  FlatList,
   StyleSheet,
   Text,
   TouchableHighlight,
   View,
 } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
 import { useMutation } from '@apollo/react-hooks';
 
 import { get_gross } from 'common/utils/rounds';
@@ -13,7 +13,7 @@ import { upsertScore } from 'common/utils/upsertScore';
 import { blue } from 'common/colors';
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import { POST_SCORE_MUTATION } from 'features/rounds/graphql';
-import { GameContext } from 'features/game/gamecontext';
+import { GameContext } from 'features/game/gameContext';
 
 
 
