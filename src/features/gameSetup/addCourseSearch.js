@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import {
   ActivityIndicator,
@@ -15,23 +15,14 @@ import {
   ListItem,
   Icon
 } from 'react-native-elements';
-
-import Tee from 'features/gameSetup/Tee';
-
-import { Query } from 'react-apollo';
-
+import { useQuery } from '@apollo/react-hooks';
 import { find, orderBy } from 'lodash';
 
-import {
-  SEARCH_COURSE_QUERY
-} from 'features/courses/graphql';
-
-import {
-  GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
-  GetFavoriteTeesForPlayer
-} from 'features/courses/graphql';
-
+import { SEARCH_COURSE_QUERY } from 'features/courses/graphql';
+import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
+import Tee from 'features/gameSetup/Tee';
 import { GameContext } from 'features/game/gameContext';
+import { AddCourseContext } from 'features/gameSetup/addCourseContext';
 
 
 
@@ -42,55 +33,39 @@ const ListHeader = ({title}) => (
 );
 
 
-class AddCourseSearch extends React.Component {
 
-  static contextType = GameContext;
+const AddCourseSearch = props => {
 
-  constructor(props) {
-    super(props);
-    console.log('addCourseSearch props', props);
-    this.state = {
-      q: '',
-      course: null
-    };
-    this._coursePressed = this._coursePressed.bind(this);
-    this._removeCourse = this._removeCourse.bind(this);
-    this._renderCourse = this._renderCourse.bind(this);
-    this._renderCourseTee = this._renderCourseTee.bind(this);
-    this.searchInput = null;
-  }
+  const { currentPlayerKey } = useContext(GameContext);
+  //console.log('currentPlayerKey', currentPlayerKey);
 
-  _coursePressed(course) {
+  const [ q, setQ ] = useState('');
+  const [ course, setCourse ] = useState(null);
+
+  let searchInput = null;
+
+  const _coursePressed = course => {
     Keyboard.dismiss();
-    this.setState({course: course});
+    setCourse(course);
   }
 
-  _removeCourse() {
-    this.setState({
-      course: null
-    });
+  const _removeCourse = () => {
+    setCourse(null);
   }
 
-  _renderCourse({item}) {
+  const _renderCourse = ({item}) => {
     return (
       <ListItem
         title={item.name || ''}
         subtitle={`${item.city}, ${item.state}`}
-        onPress={() => this._coursePressed(item)}
+        onPress={() => _coursePressed(item)}
       />
     );
   }
 
-  _renderCourseTee({item}) {
-    const { game } = this.context;
-    const tee = this.props.navigation.getParam('tee');
-    const rkey = this.props.navigation.getParam('rkey');
-    //console.log('addCourseSearch tee', tee, 'rkey', rkey);
+  const _renderCourseTee = ({item}) => {
     return (
       <Tee
-        game={game}
-        rkey={rkey}
-        oldTee={tee}
         item={item}
         title={item.name}
         subtitle={`${item.gender} - ${item.rating}/${item.slope}`}
@@ -98,131 +73,128 @@ class AddCourseSearch extends React.Component {
     );
   }
 
-  componentDidMount() {
-    this.didFocusListener = this.props.navigation.addListener('didFocus', () => {
-      if( this.searchInput ) {
-        this.searchInput.focus();
+  useEffect(
+    () => {
+      if( searchInput ) searchInput.focus();
+    }
+  );
+
+  if( !course ) {
+
+    const { loading, error, data } = useQuery(SEARCH_COURSE_QUERY, {
+      variables: {
+        q: q,
       }
     });
-  }
-
-  componentWillUnmount() {
-    this.didFocusListener.remove();
-  }
-
-  render() {
-    const { q, course } = this.state;
-
-    if( !course ) {
-      return (
-        <View style={styles.container}>
-          <TextInput
-            ref={(input) => { this.searchInput = input; }}
-            style={styles.searchTextInput}
-            placeholder='search courses...'
-            autoCapitalize='none'
-            onChangeText={text => this.setState({q: text})}
-            value={q}
-          />
-          <View>
-            <Query
-              query={SEARCH_COURSE_QUERY}
-              variables={{q: q}}
-            >
-              {({ loading, error, data }) => {
-                if( loading ) return (<ActivityIndicator />);
-                if( error ) {
-                  console.log(error);
-                  return (<Text>Error</Text>);
-                }
-
-                const header = (
-                    data &&
-                    data.searchCourse &&
-                    data.searchCourse.length) ?
-                  (<ListHeader title='Courses' />) : null;
-
-                return (
-                  <FlatList
-                    data={data.searchCourse}
-                    renderItem={this._renderCourse}
-                    ListHeaderComponent={header}
-                    keyExtractor={item => item._key}
-                    keyboardShouldPersistTaps={'handled'}
-                  />
-                );
-              }}
-            </Query>
-          </View>
-        </View>
-      );
-    } else {
-      const { currentPlayerKey } = this.context;
-
-      return (
-        <GetFavoriteTeesForPlayer pkey={currentPlayerKey}>
-          {({loading, tees:faveTees}) => {
-            if( loading ) return (<ActivityIndicator />);
-            let tees = course.tees.map(tee => ({
-              ...tee,
-              slope: tee.slope.all18 ? tee.slope.all18 : tee.slope.front9,
-              rating: tee.rating.all18 ? tee.rating.all18 : tee.rating.front9,
-              fave: {
-                faved: (find(faveTees, {_key: tee._key}) ? true : false),
-                from: {type: 'player', value: currentPlayerKey},
-                to:   {type: 'tee', value: tee._key},
-                refetchQueries: [{
-                  query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
-                  variables: {
-                    pkey: currentPlayerKey
-                  }
-                }]
-              }
-            }));
-            tees = orderBy(tees,
-                           ['gender', 'rating', 'slope'],
-                           ['desc',   'desc',   'desc' ]);
-
-            const cardHeader = (
-              <ListItem
-                title={course.name}
-                subtitle={`${course.city}, ${course.state}`}
-                rightIcon={
-                  <Icon
-                    name='remove-circle'
-                    color='red'
-                    onPress={() => {
-                      this._removeCourse();
-                    }}
-                  />
-                }
-              />
-            );
-
-            const cardList = (
-              <View style={styles.listContainer}>
-                <FlatList
-                  data={tees}
-                  renderItem={this._renderCourseTee}
-                  keyExtractor={item => item._key}
-                  keyboardShouldPersistTaps={'handled'}
-                />
-              </View>
-            );
-
-            return (
-              <Card>
-                { cardHeader }
-                { cardList }
-              </Card>
-            );
-
-          }}
-        </GetFavoriteTeesForPlayer>
-      );
+    if( loading ) return (<ActivityIndicator />);
+    if( error ) {
+      console.log(error);
+      return (<Text>Error</Text>);
     }
+
+    const header = (
+      data &&
+      data.searchCourse &&
+      data.searchCourse.length) ?
+    (<ListHeader title='Courses' />) : null;
+
+    return (
+      <View style={styles.container}>
+        <TextInput
+          ref={(input) => { searchInput = input; }}
+          style={styles.searchTextInput}
+          placeholder='search courses...'
+          autoCapitalize='none'
+          onChangeText={text => setQ(text)}
+          value={q}
+        />
+        <FlatList
+          data={data.searchCourse}
+          renderItem={_renderCourse}
+          ListHeaderComponent={header}
+          keyExtractor={item => item._key}
+          keyboardShouldPersistTaps={'handled'}
+        />
+      </View>
+    );
+
+  } else {
+
+    const { loading, error, data } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
+      variables: {
+        pkey: currentPlayerKey,
+      }
+    });
+
+    if( loading ) return (<ActivityIndicator />);
+    if( error ) {
+      console.log(error);
+      return (<Text>Error</Text>);
+    }
+
+    console.log('faves data', data);
+    const faveTees = (data && data.getFavoriteTeesForPlayer ?
+      data.getFavoriteTeesForPlayer : []);
+
+    let tees = course.tees.map(tee => ({
+      ...tee,
+      slope: tee.slope.all18 ? tee.slope.all18 : tee.slope.front9,
+      rating: tee.rating.all18 ? tee.rating.all18 : tee.rating.front9,
+      fave: {
+        faved: (find(faveTees, {_key: tee._key}) ? true : false),
+        from: {type: 'player', value: currentPlayerKey},
+        to:   {type: 'tee', value: tee._key},
+        refetchQueries: [{
+          query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
+          variables: {
+            pkey: currentPlayerKey
+          }
+        }]
+      }
+    }));
+    tees = orderBy(
+      tees,
+      ['gender', 'rating', 'slope'],
+      ['desc',   'desc',   'desc' ]
+    );
+
+    const cardHeader = (
+      <ListItem
+        title={course.name}
+        subtitle={`${course.city}, ${course.state}`}
+        rightIcon={
+          <Icon
+            name='remove-circle'
+            color='red'
+            onPress={() => {
+              _removeCourse();
+            }}
+          />
+        }
+      />
+    );
+
+    const cardList = (
+      <View style={styles.listContainer}>
+        <FlatList
+          data={tees}
+          renderItem={_renderCourseTee}
+          keyExtractor={item => item._key}
+          keyboardShouldPersistTaps={'handled'}
+        />
+      </View>
+    );
+
+    return (
+      <Card>
+        { cardHeader }
+        { cardList }
+      </Card>
+    );
+
   }
-}
+
+};
 
 export default AddCourseSearch;
 

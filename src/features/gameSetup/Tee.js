@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import {
   ListItem
@@ -8,10 +8,12 @@ import { useNavigation } from '@react-navigation/native';
 import { useMutation } from '@apollo/react-hooks';
 
 import { GameContext } from 'features/game/gameContext';
+import { AddCourseContext } from 'features/gameSetup/addCourseContext';
 import { ADD_LINK_MUTATION } from 'common/graphql/link';
 import { REMOVE_LINK_MUTATION } from 'common/graphql/unlink';
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import FavoriteIcon from 'common/components/favoriteIcon';
+import { get_round_for_player } from 'common/utils/rounds';
 import { calc_course_handicaps } from 'common/utils/handicap';
 
 
@@ -20,11 +22,13 @@ const Tee = props => {
 
   const navigation = useNavigation();
   const { game } = useContext(GameContext);
+  const { rkey, oldTee } = useContext(AddCourseContext);
 
   const [ linkRoundToTee ] = useMutation(ADD_LINK_MUTATION);
   const [ unlinkRoundToTee ] = useMutation(REMOVE_LINK_MUTATION);
 
-  const { rkey, oldTee, item, title, subtitle } = props;
+  const { item, title, subtitle } = props;
+
   const assigned = oldTee ? "manual" : "first";
 
   const add = (rkey, tkey, other) => {

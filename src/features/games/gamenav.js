@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const GameNav = props => {
 
-  const { backTo, showBack, showScore, game, scores } = props;
+  const { backTo, showBack, showScore, game, scores, title } = props;
   const navigation = useNavigation();
 
   const back = backTo ?
@@ -48,7 +48,7 @@ const GameNav = props => {
           {left}
         </View>
         <View style={styles.middle}>
-          <Text style={styles.title}>{this.props.title}</Text>
+          <Text style={styles.title}>{title}</Text>
         </View>
         <View style={styles.right}>
           {right}

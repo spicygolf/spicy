@@ -13,23 +13,17 @@ import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
 
 import Tee from 'features/gameSetup/Tee';
 import { GameContext } from 'features/game/gameContext';
+import { AddCourseContext } from 'features/gameSetup/addCourseContext';
 
 
 
 const AddCourseFavorites = props => {
 
   const { game, currentPlayerKey } = useContext(GameContext);
-  const { _key:gkey } = game;
-  const tee = props.navigation.getParam('tee');
-  const rkey = props.navigation.getParam('rkey');
-  //console.log('addCourseFavorites gkey', gkey, 'tee', tee, 'rkey', rkey);
 
   const _renderFavoritesTee = ({item}) => {
     return (
       <Tee
-        gkey={gkey}
-        rkey={rkey}
-        oldTee={tee}
         item={item}
         title={item.course.name}
         subtitle={`${item.name} - ${item.rating.all18}/${item.slope.all18}`}
@@ -38,7 +32,7 @@ const AddCourseFavorites = props => {
     );
   }
 
-  const { loading, error, data, client } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
+  const { loading, error, data } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
     variables: {
       pkey: currentPlayerKey
     },
@@ -48,8 +42,8 @@ const AddCourseFavorites = props => {
   if( loading ) return (<ActivityIndicator />);
   if (error) return (<Text>Error! ${error.message}</Text>);
 
-  console.log('client', client);
-  console.log('data', data);
+  //console.log('client', client);
+  console.log('faveTees data', data);
 
   const tees = (data && data.getFavoriteTeesForPlayer) ?
     data.getFavoriteTeesForPlayer : [];

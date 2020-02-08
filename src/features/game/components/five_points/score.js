@@ -56,8 +56,7 @@ class FivePointsScore extends React.Component {
     }
 
     const score = get_score(currentHole, round);
-    console.log('score', score);
-    console.log('HoleScore', HoleScore);
+    //console.log('score', score);
 
     return (
       <View style={styles.player_container}>

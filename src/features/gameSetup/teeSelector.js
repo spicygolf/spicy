@@ -7,31 +7,33 @@ import {
   View
 } from 'react-native';
 import { Button } from 'react-native-elements';
+import { useNavigation } from '@react-navigation/native';
+
 import { acronym } from 'common/utils/text';
+
 
 
 const TeeSelector = (props) => {
 
-  //console.log('TeeSelector props', props);
-  const { game, tee, rkey, pkey, navigation } = props;
+  const navigation = useNavigation();
+
+  const { tee, rkey, pkey } = props;
   const course = (tee && tee.course && tee.name) ?
     ' - ' + acronym(tee.course.name) : '';
   let buttonName = (tee && tee.name) ? `${tee.name}${course}`
     : 'Select Course/Tee';
   let pressFn;
 
-  // if we have round key, cool.  If for some reason we don't go to LinkRound
+  // if we have round key, go to AddCourse.
+  // If for some reason we don't go to LinkRound
   if( rkey ) {
     pressFn = () => navigation.navigate('AddCourse', {
-      tee: tee,
-      rkey: rkey
+      rkey: rkey,
+      oldTee: tee,
     })
   } else {
     pressFn = () => navigation.navigate('LinkRound', {
-      game_start: game.start,
       pkey: pkey,
-      player: pkey,
-      gkey: game._key,
     });
     buttonName = 'Select Round';
   }

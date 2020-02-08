@@ -5,40 +5,32 @@ import {
 } from 'react-native';
 
 import GameNav from 'features/games/gamenav';
-
 import AddCourseTabs from 'features/gameSetup/addCourseTabs';
+import { AddCourseContext } from 'features/gameSetup/addCourseContext';
 
 
 
-class AddCourse extends React.Component {
+const AddCourse = props => {
 
-  // https://stackoverflow.com/questions/54038075/v1-to-v3-migration-nested-tabs
-  static router = {
-    ...AddCourseTabs.router,
-    getStateForAction: (action, lastState) => {
-      return AddCourseTabs.router.getStateForAction(action, lastState);
-    },
-  };
+  const { route } = props;
+  const { rkey, oldTee } = route.params;
+//  console.log('AddCourse', rkey, tee);
 
-  constructor(props) {
-    super(props);
-    //console.log('addCourse props', props);
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <GameNav
-          title='Add Course, Tees'
-          showBack={true}
-          backTo={'GameSetup'}
-        />
-        <AddCourseTabs
-          navigation={this.props.navigation}
-        />
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container}>
+      <GameNav
+        title='Add Course, Tees'
+        showBack={true}
+        backTo={'GameSetup'}
+      />
+      <AddCourseContext.Provider value={{
+        rkey: rkey,
+        oldTee: oldTee,
+      }}>
+        <AddCourseTabs />
+      </AddCourseContext.Provider>
+    </View>
+  );
 
 }
 
