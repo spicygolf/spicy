@@ -25,19 +25,21 @@ const AddCourseTabs = props => {
   return (
     <Tab.Navigator
       initialRouteName='AddCourseFavorites'
-      screenOptions={{
-        tabBarOptions: {
-          activeTintColor: green,
-          inactiveTintColor: '#555',
-          style: {
-            backgroundColor: 'none',
-          },
-          indicatorStyle: {
-            backgroundColor: green
-          },
-          showIcon: true
-        }
-      }}
+      screenOptions={{}}
+      tabBarOptions={{
+        activeTintColor: green,
+        inactiveTintColor: '#555',
+        style: {
+          backgroundColor: 'none',
+        },
+        indicatorStyle: {
+          backgroundColor: green
+        },
+        showIcon: true,
+        labelStyle: {
+          textTransform: 'capitalize',
+        },
+    }}
     >
       <Tab.Screen
         name='AddCourseFavorites'
