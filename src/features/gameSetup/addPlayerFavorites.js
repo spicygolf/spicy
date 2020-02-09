@@ -18,7 +18,7 @@ import { AddPlayerContext } from 'features/gameSetup/addPlayerContext';
 
 
 
-const AddPlayerFavorites = (props) => {
+const AddPlayerFavorites = props => {
 
   const { currentPlayerKey } = useContext(GameContext);
   const { team } = useContext(AddPlayerContext);

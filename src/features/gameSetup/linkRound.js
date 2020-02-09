@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   ActivityIndicator,
   Text,
@@ -7,21 +7,20 @@ import {
 
 import { useQuery } from '@apollo/react-hooks';
 
-import moment from 'moment';
-
-import {
-  GET_ROUNDS_FOR_PLAYER_DAY_QUERY
-} from 'features/rounds/graphql';
-import Rounds from './rounds';
+import { GameContext } from 'features/game/gameContext';
+import { GET_ROUNDS_FOR_PLAYER_DAY_QUERY } from 'features/rounds/graphql';
+import Rounds from 'features/gameSetup/rounds';
 
 
 
 const LinkRound = (props) => {
 
-  const game_start = props.navigation.getParam('game_start');
-  const pkey = props.navigation.getParam('pkey');
-  const player = props.navigation.getParam('player');
-  const gkey = props.navigation.getParam('gkey');
+  const { route } = props;
+  const { player } = route.params;
+  const { _key:pkey } = player;
+
+  const { game } = useContext(GameContext);
+  const { start: game_start } = game;
 
   const { loading, error, data } = useQuery(GET_ROUNDS_FOR_PLAYER_DAY_QUERY,  {
     variables: {
@@ -40,11 +39,7 @@ const LinkRound = (props) => {
     return (
       <Rounds
         rounds={rounds}
-        game_start={game_start}
-        pkey={pkey}
         player={player}
-        gkey={gkey}
-        navigation={props.navigation}
       />
     );
   }

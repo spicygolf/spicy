@@ -55,7 +55,10 @@ class FivePointsScore extends React.Component {
       handicap = handicap ? handicap.toString() : 'NH';
     }
 
+    //console.log('FivePointsScore round', round);
+    // TODO: if Round is null here, we need to Link / Create a round
     const score = get_score(currentHole, round);
+    const rkey = (round && round._key) ? round._key : null;
     //console.log('score', score);
 
     return (
@@ -69,7 +72,7 @@ class FivePointsScore extends React.Component {
             <HoleScore
               hole={hole}
               score={score}
-              rkey={round._key}
+              rkey={rkey}
             />
           </View>
         </View>
@@ -77,7 +80,7 @@ class FivePointsScore extends React.Component {
           <HoleJunk
             hole={hole}
             score={score}
-            rkey={round._key}
+            rkey={rkey}
           />
         </View>
       </View>

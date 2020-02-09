@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import {
   ListItem
@@ -7,6 +7,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useMutation } from '@apollo/react-hooks';
 
+import { GameContext } from 'features/game/gameContext';
 import { ADD_LINK_MUTATION } from 'common/graphql/link';
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import FavoriteIcon from 'common/components/favoriteIcon';
@@ -19,9 +20,9 @@ const Player = props => {
   const [ link ] = useMutation(ADD_LINK_MUTATION);
 
   const { game } = useContext(GameContext);
-  const { _key:gkey, start:game_start } = game;
+  const { _key:gkey } = game;
 
-  const { team, item, title, subtitle } = this.props;
+  const { team, item, title, subtitle } = props;
   const pkey = item._key;
 
   let others = [];
@@ -52,10 +53,7 @@ const Player = props => {
         }
         // setup round for player
         navigation.navigate('LinkRound', {
-          game_start: game_start,
-          pkey: pkey,
           player: item,
-          gkey: gkey
         });
       }}
       leftIcon={(

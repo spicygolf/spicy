@@ -71,7 +71,7 @@ const Players = props => {
           game={game}
           tee={tee}
           rkey={rkey}
-          pkey={pkey}
+          player={item}
         />
       );
 
@@ -99,18 +99,18 @@ const Players = props => {
     }
   };
 
-  const addButton = (
+  const addButton = team => (
     <Icon
       name='add-circle'
       color={blue}
       size={40}
       title='Add Player'
-      onPress={() => navigation.navigate('AddPlayer')}
+      onPress={() => navigation.navigate('AddPlayer', {team: team})}
       testID='add_player_button'
     />
   );
-  const noAddButton = (<Icon name='add-circle' size={40} color='#fff'/>);
-  const showButton = _shouldShowAddButton(players);
+  const noAddButton = () => (<Icon name='add-circle' size={40} color='#fff'/>);
+  const button = _shouldShowAddButton(players) ? addButton : noAddButton;
 
   let content = null;
   if( gamespec.team_size && gamespec.team_size > 1 ) {
@@ -136,9 +136,9 @@ const Players = props => {
   return (
     <Card>
       <View style={styles.cardTitle}>
-        { noAddButton }
+        { noAddButton() }
         <Text style={styles.title}>Players</Text>
-        { showButton ? addButton : noAddButton }
+        { button(1) }
       </View>
       <View style={styles.listContainer}>
         {content}

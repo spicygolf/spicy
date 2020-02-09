@@ -25,16 +25,14 @@ const Teams = ({teams, players, gamespec, renderPlayer }) => {
   const navigation = useNavigation()
 
   const addButton = team => (
-    <AddPlayerContext.Provider value={{team: team}}>
-      <Icon
-        name='add-circle'
-        color={blue}
-        size={40}
-        title='Add Player'
-        onPress={() => navigation.navigate('AddPlayer')}
-        testID='add_player_button'
-      />
-    </AddPlayerContext.Provider>
+    <Icon
+      name='add-circle'
+      color={blue}
+      size={40}
+      title='Add Player'
+      onPress={() => navigation.navigate('AddPlayer', {team: team})}
+      testID='add_player_button'
+    />
   );
   const noAddButton = _ => (<Icon name='add-circle' size={40} color='#fff'/>);
 

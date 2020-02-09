@@ -6,10 +6,15 @@ import {
 
 import GameNav from 'features/games/gamenav';
 import AddPlayerTabs from 'features/gameSetup/addPlayerTabs';
+import { AddPlayerContext } from 'features/gameSetup/addPlayerContext';
 
 
 
 const AddPlayer = props => {
+
+  const { route } = props;
+  const { team } = route.params;
+  //console.log('AddPlayer team', team);
 
   return (
     <View style={styles.container}>
@@ -18,7 +23,9 @@ const AddPlayer = props => {
         showBack={true}
         backTo={'GameSetup'}
       />
-      <AddPlayerTabs />
+      <AddPlayerContext.Provider value={{team: team}}>
+        <AddPlayerTabs />
+      </AddPlayerContext.Provider>
     </View>
   );
 

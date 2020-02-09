@@ -24,6 +24,14 @@ const HoleScore = props => {
   const { game } = useContext(GameContext);
   const { _key: gkey } = game;
   const { hole, score, rkey } = props;
+
+  // TODO: this is possibly from not having a round linked
+  //       maybe the warnings icon in Game Setup tab?
+  //
+  // TODO: this also could be because the course/tee has no holes.
+  //
+  if( !hole ) return null;
+
   const gross = get_gross(score);
 
   const par = parseInt(hole.par);

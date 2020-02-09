@@ -22,6 +22,7 @@ export const get_hole = (hole, round) => {
 
 
 export const get_score = (hole, round) => {
+  if( !round ) return null;
   const ret = find(round.scores, s => s.hole == hole);
   if( !ret ) return null;
   //console.log('get_score', ret);

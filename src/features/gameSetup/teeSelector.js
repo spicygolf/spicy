@@ -17,7 +17,8 @@ const TeeSelector = (props) => {
 
   const navigation = useNavigation();
 
-  const { tee, rkey, pkey } = props;
+  const { tee, rkey, player } = props;
+
   const course = (tee && tee.course && tee.name) ?
     ' - ' + acronym(tee.course.name) : '';
   let buttonName = (tee && tee.name) ? `${tee.name}${course}`
@@ -33,7 +34,7 @@ const TeeSelector = (props) => {
     })
   } else {
     pressFn = () => navigation.navigate('LinkRound', {
-      pkey: pkey,
+      player: player,
     });
     buttonName = 'Select Round';
   }
