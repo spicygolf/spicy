@@ -14,7 +14,7 @@ const AuthStack = props => {
 
   return (
     <Stack.Navigator>
-      <Stack.Screen name='Logn' component={Login} />
+      <Stack.Screen name='Login' component={Login} />
     </Stack.Navigator>
   );
 

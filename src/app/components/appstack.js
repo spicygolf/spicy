@@ -3,9 +3,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import Feed from 'features/feed/feed';
+import FeedStack from 'features/feed/feedstack';
 import GamesStack from 'features/games/gamesstack';
-import Profile from 'features/profile/profile';
+import ProfileStack from 'features/profile/profilestack';
 
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 
@@ -14,7 +14,6 @@ import {
   red,
   blue
 } from 'common/colors';
-import AsyncStorage from '@react-native-community/async-storage';
 
 
 
@@ -42,8 +41,8 @@ const AppStack = props => {
   }}
     >
       <Tab.Screen
-        name='Feed'
-        component={Feed}
+        name='FeedStack'
+        component={FeedStack}
         options={{
           title: 'Feed',
           tabBarIcon: ({ focused }) => {
@@ -82,8 +81,8 @@ const AppStack = props => {
         }}
       />
       <Tab.Screen
-        name='Profile'
-        component={Profile}
+        name='ProfileStack'
+        component={ProfileStack}
         options={{
           title: 'Profile',
           tabBarIcon: ({ focused }) => {

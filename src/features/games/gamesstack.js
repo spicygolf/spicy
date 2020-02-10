@@ -11,29 +11,29 @@ import { green } from 'common/colors';
 
 const GamesStack = props => {
 
-const Stack = createStackNavigator();
+  const Stack = createStackNavigator();
 
-return (
-  <Stack.Navigator
-    initialRouteName='Games'
-    screenOptions={{
-      title: 'Games',
-      headerLeft: null,
-      headerStyle: {
-        backgroundColor: green,
-      },
-      headerTitleStyle: {
-        fontSize: 18,
-        fontWeight: 'bold'
-      },
-      headerTintColor: 'white'
-    }}
-  >
-    <Stack.Screen name='Games' component={Games} />
-    <Stack.Screen name='Game' component={Game} />
-    <Stack.Screen name='NewGame' component={NewGame} />
-  </Stack.Navigator>
-);
+  return (
+    <Stack.Navigator
+      initialRouteName='Games'
+      screenOptions={{
+        title: 'Games',
+        headerLeft: null,
+        headerStyle: {
+          backgroundColor: green,
+        },
+        headerTitleStyle: {
+          fontSize: 18,
+          fontWeight: 'bold'
+        },
+        headerTintColor: 'white'
+      }}
+    >
+      <Stack.Screen name='Games' component={Games} />
+      <Stack.Screen name='Game' component={Game} />
+      <Stack.Screen name='NewGame' component={NewGame} />
+    </Stack.Navigator>
+  );
 
 };
 

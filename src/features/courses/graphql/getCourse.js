@@ -31,28 +31,3 @@ export const GET_COURSE_QUERY = gql`
     }
   }
 `;
-
-export class GetCourse extends React.PureComponent {
-  render() {
-    const { children, courseKey} = this.props;
-    return (
-      <Query
-        query={GET_COURSE_QUERY}
-        variables={{
-          courseKey: courseKey
-        }}
-      >
-        {({ data, loading }) => {
-          let course = {};
-          if (data && data.getCourse) {
-            course = data.getCourse;
-          }
-          return children({
-            course,
-            loading
-          });
-        }}
-      </Query>
-    );
-  }
-}

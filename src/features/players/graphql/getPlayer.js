@@ -25,26 +25,3 @@ export const GET_PLAYER_QUERY = gql`
     }
   }
 `;
-
-export class GetPlayer extends React.PureComponent {
-  render() {
-    const { children, pkey } = this.props;
-    return (
-      <Query
-        query={GET_PLAYER_QUERY}
-        variables={{player: pkey}}
-      >
-        {({ data, loading }) => {
-          let player = {};
-          if (data && data.getPlayer) {
-            player = data.getPlayer;
-          }
-          return children({
-            player,
-            loading
-          });
-        }}
-      </Query>
-    );
-  }
-}

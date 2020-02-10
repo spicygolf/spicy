@@ -13,20 +13,3 @@ export const ADD_ROUND_MUTATION = gql`
     }
   }
 `;
-
-export class AddRoundMutation extends React.PureComponent {
-
-  render() {
-    const { children } = this.props;
-    return (
-      <Mutation mutation={ADD_ROUND_MUTATION}>
-        {mutate => {
-          return children({
-            addRoundMutation: mutate
-          });
-        }}
-      </Mutation>
-    );
-  }
-
-};

@@ -1,5 +1,5 @@
-export { ADD_PLAYER_MUTATION, AddPlayerMutation } from './addPlayerMutation';
-export { GET_PLAYER_QUERY, GetPlayer } from './getPlayer';
+export { ADD_PLAYER_MUTATION } from './addPlayerMutation';
+export { GET_PLAYER_QUERY } from './getPlayer';
 export { default as SEARCH_PLAYER_QUERY } from './searchPlayer';
 export { default as SEARCH_GHIN_PLAYER_QUERY } from './searchGhinPlayer';
 export {

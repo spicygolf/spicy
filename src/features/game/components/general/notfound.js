@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 import
@@ -10,28 +9,18 @@ import
 
 
 
-class GameNotFound extends React.Component {
+const GameNotFound = props => {
 
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <View style={styles.LeaderboardContainer}>
-        <Text>Game Type Not Found</Text>
-      </View>
-    );
-  }
+  return (
+    <View style={styles.LeaderboardContainer}>
+      <Text>Game Type Not Found</Text>
+    </View>
+  );
 
 }
 
 export default GameNotFound;
 
-
-/**
- * ## Styles
- */
 var styles = StyleSheet.create({
 
 });

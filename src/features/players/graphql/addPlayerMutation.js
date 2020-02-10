@@ -13,23 +13,3 @@ export const ADD_PLAYER_MUTATION = gql`
     }
   }
 `;
-
-export class AddPlayerMutation extends React.PureComponent {
-
-  render() {
-    const { children, player } = this.props;
-    return (
-      <Mutation
-        mutation={ADD_PLAYER_MUTATION}
-        variables={{player: player}}
-      >
-        {mutate => {
-          return children({
-            addPlayerMutation: mutate
-          });
-        }}
-      </Mutation>
-    );
-  }
-
-};

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -19,29 +19,13 @@ import {
 
 
 
-class FivePointsScore extends React.Component {
+const FivePointsScore = props => {
 
-  static contextType = GameContext;
+  const { game, gamespec } = useContext(GameContext);
+  const [ currentHole, setCurrentHole ] = useState('1');
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      currentHole: props.currentHole || '1'
-    };
-    this.changeHole = this.changeHole.bind(this);
-    this._renderPlayer = this._renderPlayer.bind(this);
-  }
 
-  // TODO: candidate for a base class?
-  changeHole(newHole) {
-    this.setState({
-      currentHole: newHole
-    });
-  }
-
-  _renderPlayer({item}) {
-    const { game } = this.context;
-    const { currentHole } = this.state;
+  const _renderPlayer = ({item}) => {
     const round = get_round_for_player(game.rounds, item._key);
 
     const hole = get_hole(currentHole, round);
@@ -86,56 +70,49 @@ class FivePointsScore extends React.Component {
       </View>
     );
 
-  }
+  };
 
-  render() {
-
-    const { game, gamespec } = this.context;
-
-    let content = null;
-    if( gamespec.team_size && gamespec.team_size > 1 ) {
-      const teams = getTeams(game.players, gamespec);
-      //console.log('teams', teams);
-      content = (
-        <Teams
-          teams={teams}
-          players={game.players}
-          gamespec={gamespec}
-          renderPlayer={this._renderPlayer}
-        />
-      );
-    } else {
-      content = (
-        <FlatList
-          data={game.players}
-          renderItem={this._renderPlayer}
-          keyExtractor={item => item._key}
-        />
-      );
-    }
-
-    // TODO: get 9 or 18 from game / gameSetup somehow
-    const holes = Array.from(Array(18).keys()).map(x => ++x);
-
-    return (
-      <View style={styles.score_container}>
-        <HoleNav
-          holes={holes}
-          currentHole={this.state.currentHole}
-          changeHole={this.changeHole}
-        />
-        <View style={styles.content_container}>
-          {content}
-        </View>
-      </View>
+  let content = null;
+  if( gamespec.team_size && gamespec.team_size > 1 ) {
+    const teams = getTeams(game.players, gamespec);
+    //console.log('teams', teams);
+    content = (
+      <Teams
+        teams={teams}
+        players={game.players}
+        gamespec={gamespec}
+        renderPlayer={_renderPlayer}
+      />
+    );
+  } else {
+    content = (
+      <FlatList
+        data={game.players}
+        renderItem={_renderPlayer}
+        keyExtractor={item => item._key}
+      />
     );
   }
+
+  // TODO: get 9 or 18 from game / gameSetup somehow
+  const holes = Array.from(Array(18).keys()).map(x => ++x);
+
+  return (
+    <View style={styles.score_container}>
+      <HoleNav
+        holes={holes}
+        currentHole={currentHole}
+        changeHole={hole => setCurrentHole(hole)}
+      />
+      <View style={styles.content_container}>
+        {content}
+      </View>
+    </View>
+  );
 
 };
 
 export default FivePointsScore;
-
-
 
 
 var styles = StyleSheet.create({

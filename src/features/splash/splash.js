@@ -25,10 +25,10 @@ const Splash = props => {
 
         if( token ) {
           // we have token, so render tabs
-          props.navigation.navigate('AppStack', currentPlayerData);
+          props.navigation.navigate('App', currentPlayerData);
         } else {
           // if no token, render Login component
-          props.navigation.navigate('AuthStack');
+          props.navigation.navigate('Auth');
         }
 
 

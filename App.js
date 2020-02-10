@@ -27,8 +27,8 @@ const App = props => {
             }}
           >
             <Stack.Screen name='Splash' component={Splash} />
-            <Stack.Screen name='AppStack' component={AppStack} />
-            <Stack.Screen name='AuthStack' component={AuthStack} />
+            <Stack.Screen name='App' component={AppStack} />
+            <Stack.Screen name='Auth' component={AuthStack} />
           </Stack.Navigator>
         </NavigationNativeContainer>
       </ApolloHooksProvider>

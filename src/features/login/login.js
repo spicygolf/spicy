@@ -8,7 +8,6 @@ import {
 import AsyncStorage from '@react-native-community/async-storage';
 import t from 'tcomb-form-native';
 
-import Header from 'common/components/header';
 import { green } from 'common/colors';
 import { baseUrl } from 'common/config';
 
@@ -52,7 +51,10 @@ class Login extends Component {
       await AsyncStorage.setItem('currentPlayer', payload.pkey);
       await AsyncStorage.setItem('token', payload.token);
 
-      this.props.navigation.navigate('App');
+      this.props.navigation.navigate('App', {
+        currentPlayerKey: payload.pkey,
+        token: payload.token,
+      });
 
     } catch(err) {
       console.error(err);
@@ -90,7 +92,7 @@ class Login extends Component {
     };
 
     const title='Login';
-    const content = (
+    return (
       <View style={styles.loginView} testID='login_form_view'>
         <Form
           ref='form'
@@ -106,13 +108,6 @@ class Login extends Component {
           accessibilityLabel='Login'
           testID='login_button'
         />
-      </View>
-    );
-
-    return (
-      <View>
-        <Header title={title} color={green}/>
-        {content}
       </View>
     );
   }
