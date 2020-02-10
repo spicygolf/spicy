@@ -12,7 +12,7 @@ import moment from 'moment';
 import { GameContext } from 'features/game/gameContext';
 import Leaderboard from 'features/game/leaderboard';
 import Score from 'features/game/score';
-import GameSetup from 'features/gameSetup/gameSetup';
+import GameSetupStack from 'features/gameSetup/gameSetupStack';
 
 import { green } from 'common/colors';
 
@@ -62,7 +62,7 @@ const GameStack = props => {
         />
         <Tab.Screen
           name='GameSetup'
-          component={GameSetup}
+          component={GameSetupStack}
           options={{
             title: 'Setup'
           }}
