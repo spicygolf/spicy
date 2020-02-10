@@ -39,8 +39,6 @@ const AppStack = props => {
       tabBarOptions={{
         inactiveBackgroundColor: 'white',
         inactiveTintColor: '#333',
-        activeBackgroundColor: green,
-        activeTintColor: 'white'
   }}
     >
       <Tab.Screen
