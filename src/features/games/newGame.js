@@ -1,5 +1,3 @@
-'use strict';
-
 import React from 'react';
 
 import {
@@ -10,128 +8,128 @@ import {
   View
 } from 'react-native';
 
-import { Query, withApollo } from 'react-apollo';
-import moment from 'moment';
-
-
 import { ListItem } from 'react-native-elements';
+import { useQuery, useMutation } from '@apollo/react-hooks';
+import { useNavigation } from '@react-navigation/native';
+import moment from 'moment';
 
 import GameNav from 'features/games/gamenav';
 
 import {
+  ACTIVE_GAMES_FOR_PLAYER_QUERY,
   GAMESPECS_FOR_PLAYER_QUERY,
-  AddGameMutation
+  ADD_GAME_MUTATION,
 } from 'features/games/graphql';
-import { AddLinkMutation } from 'common/graphql/link';
+import { ADD_LINK_MUTATION } from 'common/graphql/link';
 
 
 
-class NewGame extends React.Component {
+const NewGame = props => {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      currentPlayerKey: props.navigation.getParam('currentPlayerKey')
-    };
-    this._renderItem = this._renderItem.bind(this);
-  }
+  const { route } = props;
+  const { currentPlayerKey } = route.params;
 
-  _renderItem({item}) {
+  const navigation = useNavigation();
+  const [ addGameMutation ] = useMutation(ADD_GAME_MUTATION);
+  const [ addLinkMutation ] = useMutation(ADD_LINK_MUTATION);
+
+  const gamespecPressed = async gamespec => {
+    const game = await addGame(gamespec);
+    const link = await linkCurrentPlayerToGame(gamespec, game);
+    const { _key: gkey } = game;
+    navigation.navigate('Game', {
+      currentGameKey: gkey,
+      setup: true,
+    });
+  };
+
+  const addGame = async gamespec => {
+    // add new game
+    const { loading, error, data } = await addGameMutation({
+      variables: {
+        game: {
+          name: gamespec.name,
+          start: moment.utc().format(),
+          gametype: gamespec._key,
+          options: gamespec.defaultOptions || []
+        },
+      },
+    });
+    // TODO: handle loading, error?
+    //console.log('newGame data', data);
+    return data.addGame;
+  };
+
+  const linkCurrentPlayerToGame = async (gamespec, game) => {
+    // now add current logged in player to game via edge
+    const { _key: gkey } = game;
+    let others = [
+      {key: 'created_by', value: 'true'},
+    ];
+    if( gamespec.team_size > 1 ) {
+      others.push({key: 'team', value: 1});
+    }
+    const { loading, error, data } = await addLinkMutation({
+      variables: {
+        from: {type: 'player', value: currentPlayerKey},
+        to: {type: 'game', value: gkey},
+        other: others,
+      },
+      refetchQueries: () => [{
+        query: ACTIVE_GAMES_FOR_PLAYER_QUERY,
+        variables: {
+          pkey: currentPlayerKey,
+        },
+        fetchPolicy: 'cache-and-network',
+      }],
+    });
+    // TODO: handle loading, error?
+    //console.log('newGame link', data);
+    return data.link;
+  };
+
+  // `item` is a gamespec
+  const _renderItem = ({item}) => {
     return (
-      <AddGameMutation>
-        {({addGameMutation}) => (
-          <AddLinkMutation>
-            {({addLinkMutation}) => (
-              <ListItem
-                roundAvatar
-                title={item.name || ''}
-                subtitle={item.type || ''}
-                onPress={async () => {
-                  // add new game
-                  const {data: game_data, errors: game_errors} = await addGameMutation({
-                    variables: {
-                      game: {
-                        name: item.name,
-                        start: moment.utc().format(),
-                        gametype: item._key,
-                        options: item.defaultOptions || []
-                      }
-                    }
-                  });
-                  //console.log('newGame game_data', game_data);
-
-                  // now add current logged in player to game via edge
-                  const { _key: gkey, start: game_start } = game_data.addGame;
-                  let others = [
-                    {key: 'created_by', value: 'true'},
-                  ];
-                  if( item.team_size > 1 ) {
-                    others.push({key: 'team', value: 1})
-                  }
-                  const {data: gp_data, errors: gp_errors} = await addLinkMutation({
-                    variables: {
-                      from: {type: 'player', value: this.state.currentPlayerKey},
-                      to: {type: 'game', value: gkey},
-                      other: others
-                    }
-                  });
-                  // redirect to game setup
-                  if( (!game_errors || game_errors.length == 0 ) &&
-                      (!gp_errors || gp_errors.length == 0 ) ) {
-                    this.props.navigation.navigate('GameSetup', {
-                      gkey: gkey,
-                      gametype: item._key,
-                      game_start: game_start,
-                      options: item.defaultOptions || []
-                    });
-                  } else {
-                    console.log('addGameMutation did not work', errors);
-                  }
-                }}
-                testID={`new_${item._key}`}
-              />
-            )}
-          </AddLinkMutation>
-        )}
-      </AddGameMutation>
+      <ListItem
+        roundAvatar
+        title={item.name || ''}
+        subtitle={item.type || ''}
+        onPress={() => gamespecPressed(item)}
+        testID={`new_${item._key}`}
+      />
     );
+  };
+
+  const { data, loading, error} = useQuery(GAMESPECS_FOR_PLAYER_QUERY, {
+    variables: {
+      pkey: currentPlayerKey,
+    },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  if( loading ) return (<ActivityIndicator />);
+
+  // TODO: error component instead of below...
+  if( error || !data.gameSpecsForPlayer ) {
+    console.log(error);
+    return (<Text>Error</Text>);
   }
 
+  return (
+    <View>
+      <GameNav
+        title='New Game'
+        showBack={true}
+      />
+      <FlatList
+        data={data.gameSpecsForPlayer}
+        renderItem={_renderItem}
+        keyExtractor={item => item._key}
+      />
+    </View>
+  );
 
-  render() {
+};
 
-    return (
-      <Query
-        query={GAMESPECS_FOR_PLAYER_QUERY}
-        variables={{pkey: this.state.currentPlayerKey}}
-        fetchPolicy='cache-and-network'
-      >
-        {({ data, loading, error}) => {
-          if( loading ) return (<ActivityIndicator />);
-
-          // TODO: error component instead of below...
-          if( error || !data.gameSpecsForPlayer ) {
-            console.log(error);
-            return (<Text>Error</Text>);
-          }
-
-          return (
-            <View>
-              <GameNav
-                title='New Game'
-                showBack={true}
-              />
-              <FlatList
-                data={data.gameSpecsForPlayer}
-                renderItem={this._renderItem}
-                keyExtractor={item => item._key}
-              />
-            </View>
-          );
-        }}
-      </Query>
-    );
-  }
-}
-
-export default withApollo(NewGame);
+export default NewGame;

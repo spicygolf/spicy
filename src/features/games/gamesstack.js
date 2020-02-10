@@ -31,7 +31,7 @@ return (
   >
     <Stack.Screen name='Games' component={Games} />
     <Stack.Screen name='Game' component={Game} />
-    <Stack.Screen name='New Game' component={NewGame} />
+    <Stack.Screen name='NewGame' component={NewGame} />
   </Stack.Navigator>
 );
 
