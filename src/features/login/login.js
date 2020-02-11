@@ -36,6 +36,7 @@ class Login extends Component {
   }
 
   async _onLogin() {
+    //console.log('login state', this.state.value);
     // REST call to API to get token and store it in AsyncStorage
     const uri = `${baseUrl}/account/login`;
     try {
@@ -48,6 +49,8 @@ class Login extends Component {
         }
       });
       const payload = await res.json();
+      console.log('payload', payload);
+      // TODO: handle anything other than 200 here.
       await AsyncStorage.setItem('currentPlayer', payload.pkey);
       await AsyncStorage.setItem('token', payload.token);
 
