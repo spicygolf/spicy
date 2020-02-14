@@ -30,13 +30,14 @@ export const get_score = (hole, round) => {
 };
 
 
-export const get_gross = score => {
+export const get_score_value = (name, score) => {
   if( score && score.values ) {
-    const ret = find(score.values, val => val.k == 'gross');
+    const ret = find(score.values, val => val.k == name);
     if( !ret || !ret.v ) return null;
-    //console.log('get_gross', ret);
+    //console.log('get_score_value', ret);
     return ret.v;
   } else {
     return null;
   }
 };
+

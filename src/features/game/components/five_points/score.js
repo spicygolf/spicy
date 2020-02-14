@@ -130,7 +130,10 @@ var styles = StyleSheet.create({
     flex: 2,
   },
   player_junk_container: {
-
+    paddingTop: 5,
+    flex: 4,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   player_name: {
     flex: 1,

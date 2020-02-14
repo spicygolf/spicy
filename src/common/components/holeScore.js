@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useMutation } from '@apollo/react-hooks';
 
-import { get_gross } from 'common/utils/rounds';
+import { get_score_value } from 'common/utils/rounds';
 import { upsertScore } from 'common/utils/upsertScore';
 import { blue } from 'common/colors';
 import { GET_GAME_QUERY } from 'features/games/graphql';
@@ -32,7 +32,7 @@ const HoleScore = props => {
   //
   if( !hole ) return null;
 
-  const gross = get_gross(score);
+  const gross = get_score_value('gross', score);
 
   const par = parseInt(hole.par);
   const first = (par - 2 >= 0 ? par - 1 : 0);
@@ -50,17 +50,20 @@ const HoleScore = props => {
 
   const renderScore = item => {
     //console.log('item', item);
-    let classes = [styles.score_option];
+    let score_styles = [styles.score_option];
+    let hole_score_styles = [styles.hole_score_text];
     if( item.selected ) {
-      classes.push(styles.score_option_selected);
+      score_styles.push(styles.score_option_selected);
+      hole_score_styles.push(styles.hole_score_text_selected);
     } else {
-      classes.push(styles.score_option_not_selected);
+      score_styles.push(styles.score_option_not_selected);
+      hole_score_styles.push(styles.hole_score_text_not_selected);
     }
 
     return (
       <TouchableHighlight onPress={() => setScore(item)}>
-        <View style={classes}>
-          <Text style={styles.hole_score_text}>{item.key}</Text>
+        <View style={score_styles}>
+          <Text style={hole_score_styles}>{item.key}</Text>
         </View>
       </TouchableHighlight>
     )
@@ -130,6 +133,12 @@ const styles = StyleSheet.create({
   },
   hole_score_text: {
     fontSize: 30,
+  },
+  hole_score_text_selected: {
+    color: 'white',
+  },
+  hole_score_text_not_selected: {
+    color: '#111',
   },
 
 });
