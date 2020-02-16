@@ -23,6 +23,7 @@ export const GET_GAME_QUERY = gql`
           values {
             k v ts
           }
+          pops
         }
         player {
           _key

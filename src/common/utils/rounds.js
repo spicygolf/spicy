@@ -41,3 +41,11 @@ export const get_score_value = (name, score) => {
   }
 };
 
+
+export const get_net_score = (gross, score) => {
+  if( !score || !score.pops ) return gross;
+  const g = parseFloat(gross);
+  const p = parseFloat(score.pops);
+  //console.log('g', g, 'p', p);
+  return (g-p).toString();
+}

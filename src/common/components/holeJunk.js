@@ -16,6 +16,7 @@ import { GET_GAME_QUERY } from 'features/games/graphql';
 import { POST_SCORE_MUTATION } from 'features/rounds/graphql';
 import { blue } from 'common/colors';
 import {
+  get_net_score,
   get_score,
   get_score_value
 } from 'common/utils/rounds';
@@ -55,7 +56,7 @@ const HoleJunk = props => {
 
     if( junk.limit == 'one_per_group' && newValue == true ) {
       // We just set this junk to 'true', and it's a limit of one per group, so
-      // we have to set the other players in group to not have this junk set.
+      // we have to set the other players in group to false.
 
       const otherRounds = filter(game.rounds, r => (r._key != rkey));
       otherRounds.map(r => {
@@ -83,6 +84,38 @@ const HoleJunk = props => {
 
 
   const renderJunk = junk => {
+
+    // if junk shouldn't be rendered except if a condition is achieved, then
+    // return null
+    if( junk.show_in == 'score' ) {
+
+      const based_on = junk.based_on || 'gross';
+      let s = get_score_value('gross', score);
+      if( based_on == 'net' ) {
+        s = get_net_score(gross, score);
+      }
+      console.log(junk.name, junk.based_on, s, hole.par);
+
+      if( !junk.score_to_par ) {
+        console.log(`Invalid game setup.  Junk '${junk.name}' doesn't have 'score_to_par' set properly.`);
+      }
+
+      const [fit, amount] = junk.score_to_par.split(' ');
+      switch( fit ) {
+        case 'exactly':
+          break;
+        case 'less_than':
+          break;
+        case 'greater_than':
+          break;
+        default:
+          break;
+      }
+
+      // if condition not achieved, return null
+      return null;
+    }
+
 
     // TODO: junk.name needs l10n, i18n - use junk.name as slug
     let type = 'outline';

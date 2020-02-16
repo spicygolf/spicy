@@ -33,6 +33,8 @@ query GetGameSpec($gamespec: String!) {
           scope
           icon
           show_in
+          score_to_par
+          based_on
       }
       options {
           name
