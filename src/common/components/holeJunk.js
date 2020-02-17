@@ -91,6 +91,9 @@ const HoleJunk = props => {
     let type = 'outline';
     let color = blue;
 
+    // don't show team junk here
+    if( junk.show_in == 'team' ) return null;
+
     // TODO: are all junk true/false?
     const val = get_score_value(junk.name, score);
     let selected = (val && (val == true || val == 'true')) ? true : false;
