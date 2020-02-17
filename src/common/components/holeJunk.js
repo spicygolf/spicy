@@ -29,6 +29,7 @@ const HoleJunk = props => {
   const [ postScore ] = useMutation(POST_SCORE_MUTATION);
 
   const { hole, score, rkey } = props;
+  const par = parseFloat(hole.par) || 0.0;
 
   const { game, gamespec } = useContext(GameContext);
   const { _key: gkey } = game;
@@ -38,6 +39,7 @@ const HoleJunk = props => {
 
 
   const setJunk = (junk, newValue) => {
+
     //console.log('setJunk', hole, score, rkey, junk, newValue);
     let newScore = upsertScore([score], hole.hole, junk.name, newValue);
 
@@ -85,6 +87,14 @@ const HoleJunk = props => {
 
   const renderJunk = junk => {
 
+    // TODO: junk.name needs l10n, i18n - use junk.name as slug
+    let type = 'outline';
+    let color = blue;
+
+    // TODO: are all junk true/false?
+    const val = get_score_value(junk.name, score);
+    let selected = (val && (val == true || val == 'true')) ? true : false;
+
     // if junk shouldn't be rendered except if a condition is achieved, then
     // return null
     if( junk.show_in == 'score' ) {
@@ -94,36 +104,32 @@ const HoleJunk = props => {
       if( based_on == 'net' ) {
         s = get_net_score(gross, score);
       }
-      console.log(junk.name, junk.based_on, s, hole.par);
 
       if( !junk.score_to_par ) {
         console.log(`Invalid game setup.  Junk '${junk.name}' doesn't have 'score_to_par' set properly.`);
       }
 
+      // assumes junk.score_to_par is in form '{fit} {amount}' like 'exactly -2'
       const [fit, amount] = junk.score_to_par.split(' ');
+      //console.log(junk.name, junk.based_on, s, hole.par, fit, amount);
       switch( fit ) {
         case 'exactly':
+          if( (s - par) != parseFloat(amount) ) return null;
+          selected = true;
           break;
         case 'less_than':
+          console.log('less_than');
           break;
         case 'greater_than':
+          console.log('greater_than');
           break;
         default:
-          break;
+          // if condition not achieved, return null
+          return null;
       }
 
-      // if condition not achieved, return null
-      return null;
     }
 
-
-    // TODO: junk.name needs l10n, i18n - use junk.name as slug
-    let type = 'outline';
-    let color = blue;
-
-    // TODO: are all junk true/false?
-    const val = get_score_value(junk.name, score);
-    const selected = (val && (val == true || val == 'true')) ? true : false;
 
     if( selected ) {
       type = 'solid';
@@ -143,7 +149,10 @@ const HoleJunk = props => {
         type={type}
         buttonStyle={styles.button}
         titleStyle={styles.buttonTitle}
-        onPress={() => setJunk(junk, !selected)}
+        onPress={() => {
+          // only set in DB if junk is based on user input
+          if( junk.based_on == 'user') setJunk(junk, !selected);
+        }}
       />
     );
 
@@ -170,6 +179,7 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 2,
+    marginRight: 5,
     borderColor: blue,
   },
   buttonTitle: {

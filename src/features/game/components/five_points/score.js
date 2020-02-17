@@ -133,7 +133,6 @@ var styles = StyleSheet.create({
     paddingTop: 5,
     flex: 4,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
   player_name: {
     flex: 1,
