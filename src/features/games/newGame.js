@@ -51,6 +51,7 @@ const NewGame = props => {
           name: gamespec.name,
           start: moment.utc().format(),
           gametype: gamespec._key,
+          holes: 'all18',
           options: gamespec.defaultOptions || []
         },
       },

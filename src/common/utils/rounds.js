@@ -42,10 +42,14 @@ export const get_score_value = (name, score) => {
 };
 
 
-export const get_net_score = (gross, score) => {
-  if( !score || !score.pops ) return gross;
+export const get_net_score = (gross, score, gkey) => {
+  if( !score || !score.pops || !gkey ) return gross;
+  const pops = find(score.pops, { gkey: gkey });
+  if( !pops ) return gross;
+  //console.log('pops', pops);
+
   const g = parseFloat(gross);
-  const p = parseFloat(score.pops);
+  const p = parseFloat(pops.pops);
   //console.log('g', g, 'p', p);
   return (g-p).toString();
 }

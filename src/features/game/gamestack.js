@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
     flex: 12
   },
   gname: {
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: 'white',
   },
 })

@@ -22,9 +22,14 @@ export const GET_GAME_QUERY = gql`
         scores {
           hole
           values {
-            k v ts
+            k
+            v
+            ts
           }
-          pops
+          pops {
+            gkey
+            pops
+          }
         }
         player {
           _key
