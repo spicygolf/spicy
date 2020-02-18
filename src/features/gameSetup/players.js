@@ -18,7 +18,9 @@ import { useNavigation } from '@react-navigation/native';
 import RemovePlayer from 'features/gameSetup/removePlayer';
 import Teams from 'features/gameSetup/teams';
 import TeeSelector from 'features/gameSetup/teeSelector';
+import HandicapBadge from 'common/components/handicapBadge';
 import { GameContext } from 'features/game/gameContext';
+import { course_handicap } from 'common/utils/handicap';
 import { getTeams } from 'common/utils/teams';
 import { get_round_for_player } from 'common/utils/rounds';
 import { blue } from 'common/colors';
@@ -63,8 +65,12 @@ const Players = props => {
       const rkey = (round && round._key) ? round._key : null;
       const tee =  (round && round.tee ) ? round.tee : null;
 
-      const handicap = (item && item.handicap && item.handicap.display) ?
-        item.handicap.display : 'no handicap';
+      const ch = (round && round.course_handicap) ?
+        round.course_handicap : null;
+      const gh = (round && round.game_handicap) ?
+        round.game_handicap : null;
+      const hi = (item && item.handicap && item.handicap.display) ?
+        item.handicap.display : null;
 
       const subtitle = (
         <TeeSelector
@@ -80,17 +86,24 @@ const Players = props => {
           key={pkey}
           title={item.name || ''}
           subtitle={subtitle}
-          badge={{
-            value: handicap,
-          }}
           onPress={() => _itemPressed(item)}
-          rightIcon={
+          rightElement={
             <RemovePlayer
               gkey={gkey}
               pkey={pkey}
               rkey={rkey}
             />
           }
+          rightIcon={
+            <HandicapBadge
+              game_handicap={gh}
+              course_handicap={ch}
+              handicap_index={hi}
+            />
+          }
+          contentContainerStyle={{
+            flex: 6,
+          }}
         />
       );
 

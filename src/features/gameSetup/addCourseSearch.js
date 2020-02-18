@@ -64,11 +64,13 @@ const AddCourseSearch = props => {
   }
 
   const _renderCourseTee = ({item}) => {
+    const rating = item.rating.all18 ? item.rating.all18 : item.rating.front9;
+    const slope = item.slope.all18 ? item.slope.all18 : item.slope.front9;
     return (
       <Tee
         item={item}
         title={item.name}
-        subtitle={`${item.gender} - ${item.rating}/${item.slope}`}
+        subtitle={`${item.gender} - ${rating}/${slope}`}
       />
     );
   }
@@ -138,8 +140,7 @@ const AddCourseSearch = props => {
 
     let tees = course.tees.map(tee => ({
       ...tee,
-      slope: tee.slope.all18 ? tee.slope.all18 : tee.slope.front9,
-      rating: tee.rating.all18 ? tee.rating.all18 : tee.rating.front9,
+      order: tee.rating.all18 ? tee.rating.all18 : tee.rating.front9,
       fave: {
         faved: (find(faveTees, {_key: tee._key}) ? true : false),
         from: {type: 'player', value: currentPlayerKey},
@@ -154,7 +155,7 @@ const AddCourseSearch = props => {
     }));
     tees = orderBy(
       tees,
-      ['gender', 'rating', 'slope'],
+      ['gender', 'rating', 'order'],
       ['desc',   'desc',   'desc' ]
     );
 

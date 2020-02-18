@@ -14,6 +14,12 @@ export const ADD_LINK_MUTATION = gql`
   }
 `;
 
+export const UPDATE_LINK_MUTATION = gql`
+  mutation update($from: LinkInput!, $to: LinkInput!, $other: [KV]) {
+    update(from: $from, to: $to, other: $other)
+  }
+`;
+
 export class AddLinkMutation extends React.PureComponent {
 
   render() {

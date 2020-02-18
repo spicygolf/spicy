@@ -12,6 +12,7 @@ export const GET_GAME_QUERY = gql`
       start
       end
       gametype
+      holes
       rounds {
         _key
         date
@@ -32,6 +33,17 @@ export const GET_GAME_QUERY = gql`
         tee {
           _key
           name
+          gender
+          rating {
+            front9
+            back9
+            all18
+          }
+          slope {
+            front9
+            back9
+            all18
+          }
           assigned
           course {
             name

@@ -9,12 +9,11 @@ import { useMutation } from '@apollo/react-hooks';
 
 import { GameContext } from 'features/game/gameContext';
 import { AddCourseContext } from 'features/gameSetup/addCourseContext';
-import { ADD_LINK_MUTATION } from 'common/graphql/link';
+import { ADD_LINK_MUTATION, UPDATE_LINK_MUTATION } from 'common/graphql/link';
 import { REMOVE_LINK_MUTATION } from 'common/graphql/unlink';
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import FavoriteIcon from 'common/components/favoriteIcon';
-import { get_round_for_player } from 'common/utils/rounds';
-import { calc_course_handicaps } from 'common/utils/handicap';
+import { course_handicap } from '../../common/utils/handicap';
 
 
 
@@ -22,10 +21,12 @@ const Tee = props => {
 
   const navigation = useNavigation();
   const { game } = useContext(GameContext);
+  const { _key: gkey } = game;
   const { rkey, oldTee } = useContext(AddCourseContext);
 
   const [ linkRoundToTee ] = useMutation(ADD_LINK_MUTATION);
   const [ unlinkRoundToTee ] = useMutation(REMOVE_LINK_MUTATION);
+  const [ updateLink ] = useMutation(UPDATE_LINK_MUTATION);
 
   const { item, title, subtitle } = props;
 
@@ -41,7 +42,7 @@ const Tee = props => {
       refetchQueries: () => [{
         query: GET_GAME_QUERY,
         variables: {
-          gkey: game._key
+          gkey: gkey
         }
       }],
       awaitRefetchQueries: true,
@@ -50,7 +51,6 @@ const Tee = props => {
       console.log('error adding tee to round', error);
     }
   };
-
 
   const rm = (rkey, tkey) => {
     const { loading, error, data } = unlinkRoundToTee({
@@ -61,13 +61,33 @@ const Tee = props => {
       refetchQueries: () => [{
         query: GET_GAME_QUERY,
         variables: {
-          gkey: game._key
+          gkey: gkey
         }
       }],
       awaitRefetchQueries: true,
     });
     if( error ) {
       console.log('error removing tee to round', error);
+    }
+  };
+
+  const update = (rkey, other) => {
+    const { loading, error, data } = updateLink({
+      variables: {
+        from: {type: 'round', value: rkey},
+        to: {type: 'game', value: gkey},
+        other: other,
+      },
+      refetchQueries: () => [{
+        query: GET_GAME_QUERY,
+        variables: {
+          gkey: gkey
+        }
+      }],
+      awaitRefetchQueries: true,
+    });
+    if( error ) {
+      console.log('error updating round2game', error);
     }
   };
 
@@ -93,8 +113,28 @@ const Tee = props => {
 
         // here is one place we can calculate the course_handicap
         // on the round2game edges
-        // TODO: enable me
-        //calc_course_handicaps(gkey);
+        game.rounds.map(round => {
+          if(
+              round &&
+              round.player &&
+              round.player[0] &&
+              round.player[0].handicap &&
+              round.player[0].handicap.value ) {
+
+            const index = round.player[0].handicap.value;
+            //console.log('index', index)
+
+            // tee is 'item' if it's the one being changed
+            // otherwise, it's round.tee
+            const tee = (round._key == rkey) ? item : round.tee;
+
+            const ch = course_handicap(index, tee, game.holes);
+            if( ch && ch != round.course_handicap ) {
+              //console.log('updating course_handicap to ', ch);
+              update(round._key, [{key: 'course_handicap', value: ch}]);
+            }
+          }
+        });
 
         // after all that, go back to GameSetup
         navigation.navigate('GameSetup');

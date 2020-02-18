@@ -22,12 +22,13 @@ const AddCourseFavorites = props => {
   const { game, currentPlayerKey } = useContext(GameContext);
 
   const _renderFavoritesTee = ({item}) => {
+    const rating = item.rating.all18 ? item.rating.all18 : item.rating.front9;
+    const slope = item.slope.all18 ? item.slope.all18 : item.slope.front9;
     return (
       <Tee
         item={item}
         title={item.course.name}
-        subtitle={`${item.name} - ${item.rating.all18}/${item.slope.all18}`}
-        rounds={[]}
+        subtitle={`${item.name} - ${rating}/${slope}`}
       />
     );
   }

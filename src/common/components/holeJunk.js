@@ -29,7 +29,7 @@ const HoleJunk = props => {
   const [ postScore ] = useMutation(POST_SCORE_MUTATION);
 
   const { hole, score, rkey } = props;
-  const par = parseFloat(hole.par) || 0.0;
+  const par = (hole && hole.par) ? parseFloat(hole.par) : 0.0;
 
   const { game, gamespec } = useContext(GameContext);
   const { _key: gkey } = game;
