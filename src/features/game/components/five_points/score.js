@@ -45,6 +45,22 @@ const FivePointsScore = props => {
     const rkey = (round && round._key) ? round._key : null;
     //console.log('score', score);
 
+    const holeScore = hole ? (
+      <HoleScore
+        hole={hole}
+        score={score}
+        rkey={rkey}
+      />
+    ) : null;
+
+    const holeJunk = hole ? (
+      <HoleJunk
+        hole={hole}
+        score={score}
+        rkey={rkey}
+      />
+    ) : null;
+
     return (
       <View style={styles.player_container}>
         <View style={styles.player_score_container}>
@@ -53,19 +69,11 @@ const FivePointsScore = props => {
             <Text>{handicap}</Text>
           </View>
           <View style={styles.hole_score}>
-            <HoleScore
-              hole={hole}
-              score={score}
-              rkey={rkey}
-            />
+            {holeScore}
           </View>
         </View>
         <View style={styles.player_junk_container}>
-          <HoleJunk
-            hole={hole}
-            score={score}
-            rkey={rkey}
-          />
+          {holeJunk}
         </View>
       </View>
     );

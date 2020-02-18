@@ -41,9 +41,10 @@ const Rounds = props => {
 
   const navigation = useNavigation();
 
-  const linkRoundToGameAndPlayer = async (rkey, isNew) => {
+  const linkRoundToGameAndPlayer = (rkey, isNew) => {
+    console.log('linking round to game and player');
     // link round to game
-    let { loading: r2gLoading, error: r2gError, data: r2gData } = await linkRoundToGame({
+    let { loading: r2gLoading, error: r2gError, data: r2gData } = linkRoundToGame({
       variables: {
         from: {type: 'round', value: rkey},
         to:   {type: 'game', value: gkey},
@@ -54,13 +55,13 @@ const Rounds = props => {
           gkey: gkey
         }
       }],
-
+      awaitRefetchQueries: true,
     });
     //console.log('r2gData', r2gData);
 
     if( isNew ) {
       // link round to player
-      let { loading: r2pLoading, error: r2pError, data: r2pData } = await linkRoundToPlayer({
+      let { loading: r2pLoading, error: r2pError, data: r2pData } = linkRoundToPlayer({
         variables: {
           from: {type: 'round', value: rkey},
           to:   {type: 'player', value: pkey},
@@ -71,6 +72,7 @@ const Rounds = props => {
             gkey: gkey
           }
         }],
+        awaitRefetchQueries: true,
       });
       //console.log('r2pData', r2pData);
     }
@@ -82,16 +84,23 @@ const Rounds = props => {
   const addButton = (
     <Button
       title="Add New Round"
-      onPress={async () => {
+      onPress={() => {
         // add round
-        let { loading: arLoading, error: arError, data: arData } = await addRound({
+        let { loading: arLoading, error: arError, data: arData } = addRound({
           variables: {
             round: {
               date: game_start,
               seq: 1,
               scores: []
             }
-          }
+          },
+          refetchQueries: () => [{
+            query: GET_GAME_QUERY,
+            variables: {
+              gkey: gkey
+            }
+          }],
+          awaitRefetchQueries: true,
         });
         //console.log('arData', arData);
 

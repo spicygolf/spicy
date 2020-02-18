@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -30,13 +30,16 @@ const HoleScore = props => {
   //
   // TODO: this also could be because the course/tee has no holes.
   //
-  if( !hole ) return null;
+  if( !hole ) {
+    console.log('no hole', score, rkey);
+    return null;
+  }
 
   const gross = get_score_value('gross', score);
 
   const par = parseInt(hole.par);
   const first = (par - 2 >= 0 ? par - 1 : 0);
-  let flatlistRef;
+  const flatlistRef = useRef(null);
 
   // populate array of score options
   let score_options = [];
@@ -94,7 +97,7 @@ const HoleScore = props => {
     () => {
       //console.log('gross', gross, 'first', first);
       const index = gross ? parseInt(gross) - 1 : first;
-      flatlistRef.scrollToIndex({
+      flatlistRef.current.scrollToIndex({
         index: index,
         viewPosition: 0.5,
       });
@@ -106,7 +109,7 @@ const HoleScore = props => {
       horizontal={true}
       data={score_options}
       renderItem={({item}) => renderScore(item)}
-      ref={(ref => flatlistRef = ref)}
+      ref={flatlistRef}
       onScrollToIndexFailed={(e) => {
         console.log('onScrollToIndexFailed e', e);
       }}
