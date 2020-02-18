@@ -92,15 +92,20 @@ const HoleScore = props => {
 
   };
 
+  const _scrollTo = index => {
+    if( !index || !flatlistRef || !flatlistRef.current ) return;
+    flatlistRef.current.scrollToIndex({
+      index: index,
+      viewPosition: 0.5,
+    });
+  };
+
   // after component has rendered, either center 'par' or player's gross score
   useEffect(
     () => {
       //console.log('gross', gross, 'first', first);
       const index = gross ? parseInt(gross) - 1 : first;
-      flatlistRef.current.scrollToIndex({
-        index: index,
-        viewPosition: 0.5,
-      });
+      _scrollTo(index);
     }
   );
 
@@ -112,6 +117,7 @@ const HoleScore = props => {
       ref={flatlistRef}
       onScrollToIndexFailed={(e) => {
         console.log('onScrollToIndexFailed e', e);
+        setTimeout(() =>_scrollTo(e.index), 250);
       }}
     />
   );
