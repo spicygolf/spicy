@@ -4,6 +4,9 @@ import {
   Text,
   View,
 } from 'react-native';
+import {
+  Card
+} from 'react-native-elements';
 
 import { getTeams } from 'common/utils/teams';
 import HoleScore from 'common/components/holeScore';
@@ -65,7 +68,7 @@ const FivePointsScore = props => {
       <View style={styles.player_container}>
         <View style={styles.player_score_container}>
           <View style={styles.player_name}>
-            <Text>{item.name || ''}</Text>
+            <Text style={styles.player_name_txt}>{item.name || ''}</Text>
             <Text>{handicap}</Text>
           </View>
           <View style={styles.hole_score}>
@@ -94,11 +97,13 @@ const FivePointsScore = props => {
     );
   } else {
     content = (
-      <FlatList
-        data={game.players}
-        renderItem={_renderPlayer}
-        keyExtractor={item => item._key}
-      />
+      <Card>
+        <FlatList
+          data={game.players}
+          renderItem={_renderPlayer}
+          keyExtractor={item => item._key}
+        />
+      </Card>
     );
   }
 
@@ -128,7 +133,7 @@ var styles = StyleSheet.create({
     padding: 5,
   },
   content_container: {
-    paddingTop: 15,
+
   },
   player_container: {
     padding: 15,
@@ -144,6 +149,9 @@ var styles = StyleSheet.create({
   },
   player_name: {
     flex: 1,
+  },
+  player_name_txt: {
+    fontSize: 16,
   },
   hole_score: {
     flex: 1,

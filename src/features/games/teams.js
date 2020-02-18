@@ -5,19 +5,17 @@ import React from 'react';
 import {
   FlatList,
   StyleSheet,
-  Text,
-  View
 } from 'react-native';
 
 import {
-  Icon,
+  Card,
 } from 'react-native-elements';
 
 import { filter } from 'lodash';
 
 
 
-const Teams = ({teams, players, gamespec, renderPlayer}) => {
+const Teams = ({teams, players, renderPlayer}) => {
 
   //console.log('Teams teams', teams);
   //console.log('Teams players', players);
@@ -31,16 +29,17 @@ const Teams = ({teams, players, gamespec, renderPlayer}) => {
     //console.log('playersOnTeam', item.team, playersOnTeam);
 
     return (
-      <View>
-        <View>
-          <Text style={styles.team}>Team {item.team}</Text>
-        </View>
+      <Card
+        title={`Team ${item.team}`}
+        containerStyle={styles.container}
+        titleStyle={styles.wrapper}
+      >
         <FlatList
           data={playersOnTeam}
           renderItem={renderPlayer}
           keyExtractor={item => item._key}
         />
-      </View>
+      </Card>
     );
   }
 
@@ -60,7 +59,12 @@ export default Teams;
 
 
 const styles = StyleSheet.create({
-  team: {
-    fontWeight: 'bold'
+  container: {
+    paddingLeft: 5,
+    paddingRight: 5,
+    margin: 10,
+  },
+  wrapper: {
+    fontSize: 16,
   }
 });

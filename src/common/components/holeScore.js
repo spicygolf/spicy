@@ -123,8 +123,8 @@ export default HoleScore;
 
 const styles = StyleSheet.create({
   score_option: {
-    paddingTop: 7,
-    paddingBottom: 7,
+    paddingTop: 5,
+    paddingBottom: 5,
     paddingLeft: 15,
     paddingRight: 15,
   },
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
   },
   hole_score_text: {
-    fontSize: 30,
+    fontSize: 26,
   },
   hole_score_text_selected: {
     color: 'white',
