@@ -52,11 +52,11 @@ const Rounds = props => {
     try {
       const index = round.player[0].handicap.value;
       const ch = course_handicap(index, tee, game.holes);
-      console.log('LinkRound ch', ch);
+      //console.log('LinkRound ch', ch);
       if( ch ) other.push({key: 'course_handicap', value: ch});
-      console.log('LinkRound other', other);
+      //console.log('LinkRound other', other);
     } catch(e) {
-      console.log('Could not calc a course handicap for ', round);
+      //console.log('Could not calc a course handicap for ', round);
     }
 
     // link round to game
@@ -112,7 +112,7 @@ const Rounds = props => {
             }
           },
         });
-        console.log('arData', arData);
+        //console.log('arData', arData);
 
         linkRoundToGameAndPlayer(arData.addRound, true);
       }}
