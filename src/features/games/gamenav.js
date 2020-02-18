@@ -19,7 +19,7 @@ const GameNav = props => {
   const navigation = useNavigation();
 
   const back = backTo ?
-    () => navigation.navigate(this.props.backTo) :
+    () => navigation.navigate(backTo) :
     () => navigation.goBack();
 
   const left = showBack ? (
