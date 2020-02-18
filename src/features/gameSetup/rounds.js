@@ -21,6 +21,7 @@ import { GameContext } from 'features/game/gameContext';
 import { ADD_LINK_MUTATION } from 'common/graphql/link'
 import { ADD_ROUND_MUTATION } from 'features/rounds/graphql';
 import { GET_GAME_QUERY } from 'features/games/graphql';
+import { course_handicap } from '../../common/utils/handicap';
 
 
 
@@ -41,13 +42,29 @@ const Rounds = props => {
 
   const navigation = useNavigation();
 
-  const linkRoundToGameAndPlayer = (rkey, isNew) => {
+  const linkRoundToGameAndPlayer = (round, isNew) => {
+
     console.log('linking round to game and player');
+    const { _key: rkey, tee } = round;
+
+    // first see if we can calc a course_handicap
+    let other = [];
+    try {
+      const index = round.player[0].handicap.value;
+      const ch = course_handicap(index, tee, game.holes);
+      console.log('LinkRound ch', ch);
+      if( ch ) other.push({key: 'course_handicap', value: ch});
+      console.log('LinkRound other', other);
+    } catch(e) {
+      console.log('Could not calc a course handicap for ', round);
+    }
+
     // link round to game
     let { loading: r2gLoading, error: r2gError, data: r2gData } = linkRoundToGame({
       variables: {
-        from: {type: 'round', value: rkey},
-        to:   {type: 'game', value: gkey},
+        from  : {type: 'round', value: rkey},
+        to    : {type: 'game', value: gkey},
+        other: other,
       },
       refetchQueries: () => [{
         query: GET_GAME_QUERY,
@@ -84,9 +101,9 @@ const Rounds = props => {
   const addButton = (
     <Button
       title="Add New Round"
-      onPress={() => {
+      onPress={async () => {
         // add round
-        let { loading: arLoading, error: arError, data: arData } = addRound({
+        let { loading: arLoading, error: arError, data: arData } = await addRound({
           variables: {
             round: {
               date: game_start,
@@ -94,17 +111,10 @@ const Rounds = props => {
               scores: []
             }
           },
-          refetchQueries: () => [{
-            query: GET_GAME_QUERY,
-            variables: {
-              gkey: gkey
-            }
-          }],
-          awaitRefetchQueries: true,
         });
-        //console.log('arData', arData);
+        console.log('arData', arData);
 
-        linkRoundToGameAndPlayer(arData.addRound._key, true);
+        linkRoundToGameAndPlayer(arData.addRound, true);
       }}
     />
   );
@@ -133,7 +143,7 @@ const Rounds = props => {
                 title={moment(item.date).format('llll')}
                 onPress={() => {
                   //console.log('round clicked', item);
-                  linkRoundToGameAndPlayer(item._key, false);
+                  linkRoundToGameAndPlayer(item, false);
                 }}
               />
             );
