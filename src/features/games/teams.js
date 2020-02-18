@@ -32,7 +32,7 @@ const Teams = ({teams, players, renderPlayer}) => {
       <Card
         title={`Team ${item.team}`}
         containerStyle={styles.container}
-        titleStyle={styles.wrapper}
+        titleStyle={styles.title}
       >
         <FlatList
           data={playersOnTeam}
@@ -62,9 +62,10 @@ const styles = StyleSheet.create({
   container: {
     paddingLeft: 5,
     paddingRight: 5,
+    paddingBottom: 0,
     margin: 10,
   },
-  wrapper: {
+  title: {
     fontSize: 16,
-  }
+  },
 });
