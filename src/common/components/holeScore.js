@@ -117,7 +117,8 @@ const HoleScore = props => {
       ref={flatlistRef}
       onScrollToIndexFailed={(e) => {
         console.log('onScrollToIndexFailed e', e);
-        setTimeout(() =>_scrollTo(e.index), 250);
+        // this horrible hack seems to fix #15
+        setTimeout(() => _scrollTo(e.index), 250);
       }}
     />
   );

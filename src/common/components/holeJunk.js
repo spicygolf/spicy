@@ -165,6 +165,7 @@ const HoleJunk = props => {
     <View>
       <FlatList
         horizontal={true}
+        inverted={true}
         data={sorted_junk}
         renderItem={({item}) => renderJunk(item)}
         keyExtractor={item => item.name}
@@ -182,7 +183,7 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 2,
-    marginRight: 5,
+    marginLeft: 5,
     borderColor: blue,
   },
   buttonTitle: {
