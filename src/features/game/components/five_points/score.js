@@ -33,13 +33,13 @@ const FivePointsScore = props => {
 
     const hole = get_hole(currentHole, round);
 
-    let handicap = 'NH';
-    const index = (item && item.handicap && item.handicap.display) ?
-      item.handicap.display : null;
+    let handicap = '';
+    //const index = (item && item.handicap && item.handicap.display) ?
+    //  item.handicap.display : null;
     if( round ) {
       handicap = round.game_handicap ?
         round.game_handicap : round.course_handicap;
-      handicap = handicap ? handicap.toString() : 'NH';
+      handicap = handicap ? handicap.toString() : '';
     }
 
     //console.log('FivePointsScore round', round);
