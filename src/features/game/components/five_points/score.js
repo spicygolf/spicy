@@ -107,8 +107,9 @@ const FivePointsScore = props => {
     );
   }
 
-  // TODO: get 9 or 18 from game / gameSetup somehow
-  const holes = Array.from(Array(18).keys()).map(x => ++x);
+  let holes = Array.from(Array(18).keys()).map(x => ++x);
+  if( game.holes == 'front9' ) holes.length = 9;
+  if( game.holes == 'back9' ) holes.splice(0, 9);
 
   return (
     <View style={styles.score_container}>
