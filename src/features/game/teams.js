@@ -1,17 +1,14 @@
-'use strict';
-
 import React from 'react';
-
 import {
   FlatList,
   StyleSheet,
 } from 'react-native';
-
 import {
   Card,
 } from 'react-native-elements';
-
 import { filter } from 'lodash';
+
+import TeamJunk from 'common/components/teamJunk';
 
 
 
@@ -39,10 +36,11 @@ const Teams = ({teams, players, renderPlayer}) => {
           renderItem={renderPlayer}
           keyExtractor={item => item._key}
         />
+        <TeamJunk />
       </Card>
     );
-  }
 
+  }
 
   const flatlist = (
     <FlatList

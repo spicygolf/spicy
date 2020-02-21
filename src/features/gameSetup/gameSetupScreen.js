@@ -1,8 +1,7 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import {
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import {
@@ -10,30 +9,18 @@ import {
 } from 'react-native-elements';
 
 import Players from 'features/gameSetup/players';
-import { GameContext } from 'features/game/gameContext';
+import Teams from 'features/gameSetup/teams';
 
 
 
 const GameSetupScreen = props => {
 
-  const { game, gamespec:gs } = useContext(GameContext);
-
-  const playerSection = (
-    <Players
-      addCurrentPlayer={true}
-    />
-  );
-
-  const optionsSection = (
-    <Card title="Options">
-    </Card>
-  );
-
   return (
     <View style={styles.container}>
       <ScrollView>
-        { playerSection }
-        { optionsSection }
+        <Players addCurrentPlayer={true} />
+        <Teams />
+        <Card title="Options"></Card>
       </ScrollView>
     </View>
   );
@@ -46,10 +33,6 @@ export default GameSetupScreen;
 const styles = StyleSheet.create({
   container: {
     height: '100%',
-    marginBottom: 100
+    paddingBottom: 10,
   },
-  listContainer: {
-    marginTop: 0,
-    marginBottom: 10
-  }
 });

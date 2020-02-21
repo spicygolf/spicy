@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import {
+  FlatList,
   StyleSheet,
   Text,
   View,
@@ -12,7 +13,7 @@ import { getTeams } from 'common/utils/teams';
 import HoleScore from 'common/components/holeScore';
 import HoleJunk from 'common/components/holeJunk';
 import HoleNav from 'features/game/holenav';
-import Teams from 'features/games/teams';
+import Teams from 'features/game/teams';
 import { GameContext } from 'features/game/gameContext';
 import {
   get_hole,
@@ -34,19 +35,14 @@ const FivePointsScore = props => {
     const hole = get_hole(currentHole, round);
 
     let handicap = '';
-    //const index = (item && item.handicap && item.handicap.display) ?
-    //  item.handicap.display : null;
     if( round ) {
       handicap = round.game_handicap ?
         round.game_handicap : round.course_handicap;
       handicap = handicap ? handicap.toString() : '';
     }
 
-    //console.log('FivePointsScore round', round);
-    // TODO: if Round is null here, we need to Link / Create a round
     const score = get_score(currentHole, round);
     const rkey = (round && round._key) ? round._key : null;
-    //console.log('score', score);
 
     const holeScore = hole ? (
       <HoleScore
@@ -83,10 +79,25 @@ const FivePointsScore = props => {
 
   };
 
+  const _renderTeamChooser = ({item}) => {
+
+    return (
+      <View style={styles.teamChooserView}>
+        <Text>1</Text>
+        <Text>{item.name || ''}</Text>
+        <Text>2</Text>
+      </View>
+    );
+
+  };
+
+
   let content = null;
-  if( gamespec.team_size && gamespec.team_size > 1 ) {
-    const teams = getTeams(game.players, gamespec);
-    //console.log('teams', teams);
+
+  const teams = getTeams(game, currentHole);
+  console.log('teams', teams);
+
+  if( teams ) {
     content = (
       <Teams
         teams={teams}
@@ -97,10 +108,10 @@ const FivePointsScore = props => {
     );
   } else {
     content = (
-      <Card>
+      <Card title='Choose Teams'>
         <FlatList
           data={game.players}
-          renderItem={_renderPlayer}
+          renderItem={_renderTeamChooser}
           keyExtractor={item => item._key}
         />
       </Card>
@@ -157,5 +168,8 @@ var styles = StyleSheet.create({
   },
   hole_score: {
     flex: 1,
+  },
+  teamChooserView: {
+    flexDirection: 'row',
   },
 });

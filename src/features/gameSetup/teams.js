@@ -1,7 +1,4 @@
-'use strict';
-
-import React from 'react';
-
+import React, { useContext } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -10,73 +7,62 @@ import {
 } from 'react-native';
 
 import {
-  Icon,
+  ButtonGroup,
+  Card,
 } from 'react-native-elements';
 
-import { useNavigation } from '@react-navigation/native';
-import { filter } from 'lodash';
-
+import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';
 
 
 
-const Teams = ({teams, players, gamespec, renderPlayer }) => {
+const Teams = props => {
 
-  const navigation = useNavigation()
+  const { game } = useContext(GameContext);
 
-  const addButton = team => (
-    <Icon
-      name='add-circle'
-      color={blue}
-      size={40}
-      title='Add Player'
-      onPress={() => navigation.navigate('AddPlayer', {team: team})}
-      testID='add_player_button'
-    />
+  const never = () => (<Text>Never</Text>);
+  const every1 = () => (
+    <View style={styles.buttonView}>
+      <Text>Every</Text>
+      <Text>Hole</Text>
+    </View>
   );
-  const noAddButton = _ => (<Icon name='add-circle' size={40} color='#fff'/>);
+  const every3 = () => (
+    <View style={styles.buttonView}>
+      <Text>Every</Text>
+      <Text>3 Holes</Text>
+    </View>
+  );
+  const every6 = () => (
+    <View style={styles.buttonView}>
+      <Text>Every</Text>
+      <Text>6 Holes</Text>
+    </View>
+  );
+  const buttons = [
+    {element: never},
+    {element: every1},
+    {element: every3},
+  ];
+  if( game.holes == 'all18' ) buttons.push({element: every6});
 
-  const _renderTeam = ({item}) => {
-
-    const playersOnTeam = filter(players, p => {
-      return (p.team == item.team);
-    });
-    //console.log('playersOnTeam', item.team, playersOnTeam);
-    const button = ( playersOnTeam.length < gamespec.team_size )
-      ? addButton : noAddButton;
-
-    return (
-      <View>
-        <View>
-          <Text style={styles.team}>Team {item.team}</Text>
-        </View>
-        <FlatList
-          data={playersOnTeam}
-          renderItem={renderPlayer}
-          keyExtractor={i => i._key}
-        />
-        {button(item.team)}
-      </View>
-    );
-  }
-
-
-  const flatlist = (
-    <FlatList
-      data={teams}
-      renderItem={_renderTeam}
-      keyExtractor={item => String(item.team)}
-    />
+  return (
+    <Card title='Teams'>
+      <Text>Teams Rotate:</Text>
+      <ButtonGroup
+        buttons={buttons}
+        textStyle={styles.buttonText}
+      />
+    </Card>
   );
 
-  return flatlist;
 };
 
 export default Teams;
 
 
 const styles = StyleSheet.create({
-  team: {
-    fontWeight: 'bold'
-  }
+  buttonView: {
+    alignItems: 'center',
+  },
 });

@@ -16,12 +16,9 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import RemovePlayer from 'features/gameSetup/removePlayer';
-import Teams from 'features/gameSetup/teams';
 import TeeSelector from 'features/gameSetup/teeSelector';
 import HandicapBadge from 'common/components/handicapBadge';
 import { GameContext } from 'features/game/gameContext';
-import { course_handicap } from 'common/utils/handicap';
-import { getTeams } from 'common/utils/teams';
 import { get_round_for_player } from 'common/utils/rounds';
 import { blue } from 'common/colors';
 
@@ -125,27 +122,6 @@ const Players = props => {
   const noAddButton = () => (<Icon name='add-circle' size={40} color='#fff'/>);
   const button = _shouldShowAddButton(players) ? addButton : noAddButton;
 
-  let content = null;
-  if( gamespec.team_size && gamespec.team_size > 1 ) {
-    const teams = getTeams(players, gamespec);
-    content = (
-      <Teams
-        teams={teams}
-        players={players}
-        gamespec={gamespec}
-        renderPlayer={_renderPlayer}
-      />
-    );
-  } else {
-    content = (
-      <FlatList
-        data={players}
-        renderItem={this._renderPlayer}
-        keyExtractor={item => item._key}
-      />
-    );
-  }
-
   return (
     <Card>
       <View style={styles.cardTitle}>
@@ -154,7 +130,11 @@ const Players = props => {
         { button(1) }
       </View>
       <View style={styles.listContainer}>
-        {content}
+        <FlatList
+          data={players}
+          renderItem={_renderPlayer}
+          keyExtractor={item => item._key}
+        />
       </View>
     </Card>
   );

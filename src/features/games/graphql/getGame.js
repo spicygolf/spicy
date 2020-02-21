@@ -13,6 +13,16 @@ export const GET_GAME_QUERY = gql`
       end
       gametype
       holes
+      teams {
+        rotate
+        holes {
+          hole
+          teams {
+            team
+            players
+          }
+        }
+      }
       rounds {
         _key
         date
