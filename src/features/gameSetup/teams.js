@@ -10,6 +10,7 @@ import {
   ButtonGroup,
   Card,
 } from 'react-native-elements';
+import { findIndex } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';
@@ -20,38 +21,41 @@ const Teams = props => {
 
   const { game } = useContext(GameContext);
 
-  const never = () => (<Text>Never</Text>);
-  const every1 = () => (
-    <View style={styles.buttonView}>
-      <Text>Every</Text>
-      <Text>Hole</Text>
-    </View>
-  );
-  const every3 = () => (
-    <View style={styles.buttonView}>
-      <Text>Every</Text>
-      <Text>3 Holes</Text>
-    </View>
-  );
-  const every6 = () => (
-    <View style={styles.buttonView}>
-      <Text>Every</Text>
-      <Text>6 Holes</Text>
-    </View>
-  );
-  const buttons = [
-    {element: never},
-    {element: every1},
-    {element: every3},
+  const options = [
+    {slug: 'never' , caption: 'Never'  },
+    {slug: 'every1', caption: 'Every 1'},
+    {slug: 'every3', caption: 'Every 3'},
+    {slug: 'every6', caption: 'Every 6'},
   ];
-  if( game.holes == 'all18' ) buttons.push({element: every6});
+
+  const updateRotation = selectedIndex => {
+    console.log('selectedIndex', options[selectedIndex].slug);
+
+    // TODO: write the slug to the game object with an update mutation
+
+  };
+
+  const getSelected = () => {
+    if( !game || !game.teams || !game.teams.rotate ) return null;
+
+    const option = findIndex(options, {slug: game.teams.rotate});
+    //console.log('option', option);
+    return option;
+  };
+
+  const buttons = options.map(o => o.caption);
 
   return (
     <Card title='Teams'>
       <Text>Teams Rotate:</Text>
       <ButtonGroup
         buttons={buttons}
-        textStyle={styles.buttonText}
+        disabled={[1,2,3]}
+        selectedIndex={getSelected()}
+        onPress={updateRotation}
+        textStyle={styles.textStyle}
+        selectedButtonStyle={styles.selectedButton}
+        selectedTextStyle={styles.selectedText}
       />
     </Card>
   );
@@ -64,5 +68,15 @@ export default Teams;
 const styles = StyleSheet.create({
   buttonView: {
     alignItems: 'center',
+  },
+  textStyle: {
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  selectedButton: {
+    backgroundColor: blue,
+  },
+  selectedText: {
+    color: 'white',
   },
 });

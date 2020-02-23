@@ -10,6 +10,7 @@ import {
 } from 'react-native-elements';
 
 import { getTeams } from 'common/utils/teams';
+import TeamChooser from 'common/components/teamChooser';
 import HoleScore from 'common/components/holeScore';
 import HoleJunk from 'common/components/holeJunk';
 import HoleNav from 'features/game/holenav';
@@ -79,42 +80,23 @@ const FivePointsScore = props => {
 
   };
 
-  const _renderTeamChooser = ({item}) => {
-
-    return (
-      <View style={styles.teamChooserView}>
-        <Text>1</Text>
-        <Text>{item.name || ''}</Text>
-        <Text>2</Text>
-      </View>
-    );
-
-  };
-
-
   let content = null;
 
   const teams = getTeams(game, currentHole);
-  console.log('teams', teams);
+  //console.log('teams', teams);
 
   if( teams ) {
     content = (
       <Teams
         teams={teams}
-        players={game.players}
-        gamespec={gamespec}
         renderPlayer={_renderPlayer}
       />
     );
   } else {
     content = (
-      <Card title='Choose Teams'>
-        <FlatList
-          data={game.players}
-          renderItem={_renderTeamChooser}
-          keyExtractor={item => item._key}
-        />
-      </Card>
+      <TeamChooser
+        currentHole={currentHole}
+      />
     );
   }
 
@@ -168,8 +150,5 @@ var styles = StyleSheet.create({
   },
   hole_score: {
     flex: 1,
-  },
-  teamChooserView: {
-    flexDirection: 'row',
   },
 });

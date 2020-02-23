@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -6,22 +6,25 @@ import {
 import {
   Card,
 } from 'react-native-elements';
-import { filter } from 'lodash';
+import { find } from 'lodash';
 
 import TeamJunk from 'common/components/teamJunk';
+import { GameContext } from 'features/game/gameContext';
 
 
 
-const Teams = ({teams, players, renderPlayer}) => {
+const Teams = ({teams, renderPlayer}) => {
 
   //console.log('Teams teams', teams);
-  //console.log('Teams players', players);
-  //console.log('Teams gamespec', gamespec);
+  const { game } = useContext(GameContext);
+  const { players } = game;
 
   const _renderTeam = ({item}) => {
-
-    const playersOnTeam = filter(players, p => {
-      return (p.team == item.team);
+    //console.log('_renderTeam item', item);
+    const playersOnTeam = [];
+    item.players.map(pkey => {
+      const p = find(players, {_key: pkey});
+      playersOnTeam.push(p);
     });
     //console.log('playersOnTeam', item.team, playersOnTeam);
 

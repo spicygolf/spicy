@@ -52,6 +52,9 @@ const NewGame = props => {
           start: moment.utc().format(),
           gametype: gamespec._key,
           holes: 'all18',
+          teams: {
+            rotate: 'never',
+          },
           options: gamespec.defaultOptions || []
         },
       },

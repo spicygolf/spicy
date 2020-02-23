@@ -30,7 +30,7 @@ const HoleNav = ({holes:holesOrig, currentHole, changeHole}) => {
           onPress={() => {
             let newHoleIndex = currentHoleIndex - 1;
             if( newHoleIndex < 0 ) newHoleIndex = holes.length - 1;
-            changeHole(holes[newHoleIndex]);
+            changeHole(holes[newHoleIndex].toString());
           }}
         />
       </View>
@@ -44,7 +44,7 @@ const HoleNav = ({holes:holesOrig, currentHole, changeHole}) => {
         onPress={() => {
           let newHoleIndex = currentHoleIndex + 1;
           if( newHoleIndex >= holes.length ) newHoleIndex = 0;
-          changeHole(holes[newHoleIndex]);
+          changeHole(holes[newHoleIndex].toString());
         }}
       />
       </View>
