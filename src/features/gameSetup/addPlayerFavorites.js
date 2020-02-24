@@ -14,14 +14,12 @@ import {
 
 import Player from 'features/gameSetup/Player';
 import { GameContext } from 'features/game/gameContext';
-import { AddPlayerContext } from 'features/gameSetup/addPlayerContext';
 
 
 
 const AddPlayerFavorites = props => {
 
   const { currentPlayerKey } = useContext(GameContext);
-  const { team } = useContext(AddPlayerContext);
 
   const _renderFavoritesPlayer = ({item}) => {
 
@@ -32,7 +30,6 @@ const AddPlayerFavorites = props => {
 
     return (
       <Player
-        team={team}
         item={item}
         title={item.name}
         subtitle={`${handicap}${club}`}

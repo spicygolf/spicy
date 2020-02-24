@@ -28,7 +28,7 @@ const Players = props => {
 
   const navigation = useNavigation();
   const { game, gamespec } = useContext(GameContext);
-  const { _key: gkey, rounds, players, start } = game;
+  const { _key: gkey, rounds, players } = game;
 
 
   const _itemPressed = player => {
@@ -43,7 +43,6 @@ const Players = props => {
 
   const _shouldShowAddButton = players => {
     let ret = true;
-    if( gamespec.team_size > 1 ) return false;
     if( gamespec.max_players < 1 ) return true;
     try {
       const player_count = players.length;
@@ -109,25 +108,21 @@ const Players = props => {
     }
   };
 
-  const addButton = team => (
+  const button = _shouldShowAddButton(players) ? (
     <Icon
       name='add-circle'
       color={blue}
       size={40}
       title='Add Player'
-      onPress={() => navigation.navigate('AddPlayer', {team: team})}
+      onPress={() => navigation.navigate('AddPlayer')}
       testID='add_player_button'
     />
-  );
-  const noAddButton = () => (<Icon name='add-circle' size={40} color='#fff'/>);
-  const button = _shouldShowAddButton(players) ? addButton : noAddButton;
+  ) : null;
 
   return (
     <Card>
       <View style={styles.cardTitle}>
-        { noAddButton() }
         <Text style={styles.title}>Players</Text>
-        { button(1) }
       </View>
       <View style={styles.listContainer}>
         <FlatList
@@ -136,6 +131,7 @@ const Players = props => {
           keyExtractor={item => item._key}
         />
       </View>
+      { button }
     </Card>
   );
 
@@ -146,10 +142,8 @@ export default Players;
 
 const styles = StyleSheet.create({
   cardTitle: {
-    flexDirection: 'row',
-    flex: 3,
     alignItems: 'center',
-    justifyContent: 'space-between'
+    justifyContent: 'center'
   },
   title: {
     fontSize: 18,

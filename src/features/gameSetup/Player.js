@@ -22,11 +22,10 @@ const Player = props => {
   const { game } = useContext(GameContext);
   const { _key:gkey } = game;
 
-  const { team, item, title, subtitle } = props;
+  const { item, title, subtitle } = props;
   const pkey = item._key;
 
   let others = [];
-  if( team ) others.push({key: 'team', value: team});
 
   return (
     <ListItem

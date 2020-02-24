@@ -3,7 +3,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  Keyboard,
   StyleSheet,
   Text,
   TextInput,
@@ -22,7 +21,6 @@ import {
 
 import Player from 'features/gameSetup/Player';
 import { GameContext } from 'features/game/gameContext';
-import { AddPlayerContext } from 'features/gameSetup/addPlayerContext';
 
 
 
@@ -32,7 +30,6 @@ const AddPlayerSearch = (props) => {
   let searchInput;
 
   const { currentPlayerKey } = useContext(GameContext);
-  const { team } = useContext(AddPlayerContext);
 
   const ListHeader = ({title}) => (
     <View>
@@ -48,7 +45,6 @@ const AddPlayerSearch = (props) => {
 
     return (
       <Player
-        team={team}
         item={item}
         title={item.name}
         subtitle={`${handicap}${club}`}
