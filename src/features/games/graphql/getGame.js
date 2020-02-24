@@ -1,9 +1,5 @@
 import gql from 'graphql-tag';
 
-import { useQuery } from '@apollo/react-hooks';
-
-
-
 export const GET_GAME_QUERY = gql`
   query GetGame($gkey: String!) {
     getGame(_key: $gkey) {

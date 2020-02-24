@@ -9,25 +9,58 @@ import {
   Card,
   Icon,
 } from 'react-native-elements';
-import { find } from 'lodash';
+import { cloneDeep, filter, find, findIndex } from 'lodash';
+import { useMutation } from '@apollo/react-hooks';
 
+import { GET_GAME_QUERY } from 'features/games/graphql';
+import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';
 
 
 const TeamChooser = props => {
 
+  const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
+
   const { currentHole } = props;
   const { game } = useContext(GameContext);
+  const { _key: gkey } = game;
   const h = ( game && game.teams && game.teams.holes ) ?
     find(game.teams.holes, {hole: currentHole}) : {hole: currentHole, teams: []};
   //console.log('h', h);
 
 
   const removeFromTeam = (teamNum, pkey) => {
-    console.log('removeFromTeam', teamNum, pkey);
+    //console.log('removeFromTeam', teamNum, pkey);
 
     // remove player from this team (across appropriate holes)
+    let newGame = cloneDeep(game);
+    delete newGame._key;
+    delete newGame.rounds;
+    delete newGame.players;
+    const holeIndex = findIndex(newGame.teams.holes, {hole: currentHole});
+    const teamIndex = findIndex(newGame.teams.holes[holeIndex].teams, {team: teamNum});
+    //console.log('holeIndex', holeIndex, 'teamIndex', teamIndex, 'teamNum', teamNum);
+    const players = newGame.teams.holes[holeIndex].teams[teamIndex].players;
+    const newPlayers = filter(players, p => p != pkey);
+    //console.log('newPlayers', newPlayers);
+    newGame.teams.holes[holeIndex].teams[teamIndex].players = newPlayers;
+    console.log('removeFromTeam newGame', newGame);
+
+    console.log('mutation', UPDATE_GAME_MUTATION);
+
+    const { loading, error, data } = updateGame({
+      variables: {
+        gkey: gkey,
+        game: newGame,
+      },
+      refetchQueries: [{
+        query: GET_GAME_QUERY,
+        variables: {
+          gkey: gkey
+        }
+      }],
+    });
 
   }
 
@@ -77,8 +110,8 @@ const TeamChooser = props => {
       }
     };
 
-    const team1 = teamIcon(1);
-    const team2 = teamIcon(2);
+    const team1 = teamIcon('1');
+    const team2 = teamIcon('2');
 
     return (
       <View style={styles.teamChooserView}>
