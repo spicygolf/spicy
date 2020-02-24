@@ -44,6 +44,9 @@ const TeamChooser = props => {
     delete newGame.players;
 
     const holesToUpdate = getHolesToUpdate(newGame.teams.rotate, game.holes);
+    if( !newGame.teams.holes ) {
+      newGame.teams.holes = [];
+    }
     holesToUpdate.map(h => {
       // if hole data doesn't exist, create blanks
       if( findIndex(newGame.teams.holes, {hole: h}) < 0 ) {

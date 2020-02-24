@@ -106,6 +106,7 @@ const Tee = props => {
         // add the same tee to the other players' rounds in this
         // game, unless they have round2tee already.
         game.rounds.map(round => {
+          if( !round ) return;  // odd edge case during development /shrug
           if( !round.tee ) {
             add(round._key, item._key, [{key: "assigned", value: "auto"}]);
           }

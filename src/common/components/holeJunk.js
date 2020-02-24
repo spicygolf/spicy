@@ -60,7 +60,7 @@ const HoleJunk = props => {
       // We just set this junk to 'true', and it's a limit of one per group, so
       // we have to set the other players in group to false.
 
-      const otherRounds = filter(game.rounds, r => (r._key != rkey));
+      const otherRounds = filter(game.rounds, r => (r && r._key != rkey));
       otherRounds.map(r => {
         const s = get_score(hole.hole, r);
         newScore = upsertScore([s], hole.hole, junk.name, false);
