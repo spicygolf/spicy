@@ -43,7 +43,7 @@ export const getTeams = (game, hole) => {
 
 export const getHolesToUpdate = (rotate, gameHoles) => {
 
-  console.log('getHolesToUpdate', rotate, gameHoles);
+  //console.log('getHolesToUpdate', rotate, gameHoles);
 
   let holes = Array.from(Array(18).keys()).map(x => (++x).toString());
   if( gameHoles == 'front9' ) holes.length = 9;

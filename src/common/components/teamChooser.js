@@ -6,7 +6,6 @@ import {
   View,
 } from 'react-native';
 import {
-  Card,
   Icon,
 } from 'react-native-elements';
 import { cloneDeep, filter, find, findIndex } from 'lodash';
@@ -31,12 +30,14 @@ const TeamChooser = props => {
   //console.log('h', h);
 
 
-  const removeFromTeam = (teamNum, pkey) => {
-    //console.log('removeFromTeam', teamNum, pkey);
+  const changeTeamsForPlayer = (pkey, addToTeam, removeFromTeam) => {
+    //console.log('pkey', pkey);
+    //console.log('addToTeam', addToTeam);
+    //console.log('removeFromTeam', removeFromTeam);
 
     // remove player from this team (across appropriate holes)
     let newGame = cloneDeep(game);
-    // TODO: this is hacky for the future...
+    // TODO: these deletes are hacky for the future...
     // maybe just grab the properties we know are in GameInput type
     delete newGame._key;
     delete newGame.rounds;
@@ -44,19 +45,61 @@ const TeamChooser = props => {
 
     const holesToUpdate = getHolesToUpdate(newGame.teams.rotate, game.holes);
     holesToUpdate.map(h => {
+      // if hole data doesn't exist, create blanks
+      if( findIndex(newGame.teams.holes, {hole: h}) < 0 ) {
+        newGame.teams.holes.push(
+          {
+            hole: h,
+            teams: [
+              {team: '1', players: []},
+              {team: '2', players: []},
+            ],
+          }
+        );
+      }
       const holeIndex = findIndex(newGame.teams.holes, {hole: h});
-      console.log('holeIndex', holeIndex);
-      if( holeIndex < 0 ) return;
-      const teamIndex = findIndex(newGame.teams.holes[holeIndex].teams, {team: teamNum});
-      //console.log('holeIndex', holeIndex, 'teamIndex', teamIndex, 'teamNum', teamNum);
-      const players = newGame.teams.holes[holeIndex].teams[teamIndex].players;
-      const newPlayers = filter(players, p => p != pkey);
-      //console.log('newPlayers', newPlayers);
-      newGame.teams.holes[holeIndex].teams[teamIndex].players = newPlayers;
-      //console.log('removeFromTeam newGame inside map', newGame);
+      //console.log('holeIndex', holeIndex);
+
+      // ****** remove player from team ******
+      if( findIndex(newGame.teams.holes[holeIndex].teams, {team: removeFromTeam}) < 0 ) {
+        newGame.teams.holes[holeIndex].teams.push(
+          {
+            team: removeFromTeam,
+            players: [],
+          }
+        );
+      }
+      const rmTeamIndex = findIndex(newGame.teams.holes[holeIndex].teams, {team: removeFromTeam});
+      //console.log('rmTeamIndex', rmTeamIndex);
+      if( rmTeamIndex < 0 ) return;
+      const rmPlayers = newGame.teams.holes[holeIndex].teams[rmTeamIndex].players;
+      const rmNewPlayers = filter(rmPlayers, p => p != pkey);
+      //console.log('rmNewPlayers', rmNewPlayers);
+      newGame.teams.holes[holeIndex].teams[rmTeamIndex].players = rmNewPlayers;
+      //console.log('removeFromTeam newGame', newGame);
+
+      // ****** add player to team ******
+      if( !addToTeam ) return;
+      if( findIndex(newGame.teams.holes[holeIndex].teams, {team: addToTeam}) < 0 ) {
+        newGame.teams.holes[holeIndex].teams.push(
+          {
+            team: addToTeam,
+            players: [],
+          }
+        );
+      }
+      const addTeamIndex = findIndex(newGame.teams.holes[holeIndex].teams, {team: addToTeam});
+      //console.log('holeIndex', holeIndex, 'addTeamIndex', addTeamIndex);
+      if( addTeamIndex < 0 ) return;
+      const addPlayers = newGame.teams.holes[holeIndex].teams[addTeamIndex].players;
+      addPlayers.push(pkey);
+      //console.log('addPlayers', addPlayers);
+      newGame.teams.holes[holeIndex].teams[addTeamIndex].players = addPlayers;
+      //console.log('addToTeam newGame', newGame);
+
     });
 
-    //console.log('removeFromTeam newGame outside map', newGame);
+    //console.log('removeFromTeam newGame final', newGame);
 
     const { loading, error, data } = updateGame({
       variables: {
@@ -73,15 +116,6 @@ const TeamChooser = props => {
 
   };
 
-  const addToTeam = (teamNum, pkey) => {
-    console.log('addToTeam', teamNum, pkey);
-
-    // remove player from other team (across appropriate holes)
-
-
-    // add player to this team (across appropriate holes)
-
-  }
 
   const _renderPlayer = ({item}) => {
 
@@ -102,7 +136,7 @@ const TeamChooser = props => {
             color={blue}
             size={30}
             iconStyle={styles.icon}
-            onPress={() => removeFromTeam(teamNum, item._key)}
+            onPress={() => changeTeamsForPlayer(item._key, null, teamNum)}
           />
         );
       } else {
@@ -113,7 +147,7 @@ const TeamChooser = props => {
             color='#aaa'
             size={30}
             iconStyle={styles.icon}
-            onPress={() => addToTeam(teamNum, item._key)}
+            onPress={() => changeTeamsForPlayer(item._key, teamNum, teamNum == '1' ? '2' : '1')}
           />
         );
       }
@@ -134,19 +168,17 @@ const TeamChooser = props => {
 
 
   return (
-    <Card title='Choose Teams'>
-      <View style={styles.container}>
-        <View style={styles.teamTitleView}>
-          <Text style={styles.title}>Team 1</Text>
-          <Text style={styles.title}>Team 2</Text>
-        </View>
-        <FlatList
-          data={game.players}
-          renderItem={_renderPlayer}
-          keyExtractor={item => item._key}
-        />
+    <View style={styles.container}>
+      <View style={styles.teamTitleView}>
+        <Text style={styles.title}>Team 1</Text>
+        <Text style={styles.title}>Team 2</Text>
       </View>
-    </Card>
+      <FlatList
+        data={game.players}
+        renderItem={_renderPlayer}
+        keyExtractor={item => item._key}
+      />
+    </View>
   );
 
 };

@@ -94,9 +94,11 @@ const FivePointsScore = props => {
     );
   } else {
     content = (
-      <TeamChooser
-        currentHole={currentHole}
-      />
+      <Card title='Choose Teams'>
+        <TeamChooser
+          currentHole={currentHole}
+        />
+      </Card>
     );
   }
 

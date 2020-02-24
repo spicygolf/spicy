@@ -14,6 +14,7 @@ import { findIndex } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';
+import TeamChooser from '../../common/components/teamChooser';
 
 
 
@@ -45,6 +46,17 @@ const Teams = props => {
 
   const buttons = options.map(o => o.caption);
 
+  let chooser = null;
+
+  if( game && game.teams && game.teams.rotate && game.teams.rotate == 'never' ) {
+    chooser = (
+      <View style={styles.chooserView}>
+        <Text>Choose Teams:</Text>
+        <TeamChooser currentHole="1" />
+      </View>
+    );
+  }
+
   return (
     <Card title='Teams'>
       <Text>Teams Rotate:</Text>
@@ -57,6 +69,7 @@ const Teams = props => {
         selectedButtonStyle={styles.selectedButton}
         selectedTextStyle={styles.selectedText}
       />
+      { chooser }
     </Card>
   );
 
@@ -79,4 +92,7 @@ const styles = StyleSheet.create({
   selectedText: {
     color: 'white',
   },
+  chooserView: {
+    paddingTop: 20,
+  }
 });
