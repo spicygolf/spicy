@@ -41,3 +41,21 @@ export const getTeams = (game, hole) => {
   }
 };
 
+export const getHolesToUpdate = (rotate, gameHoles) => {
+
+  console.log('getHolesToUpdate', rotate, gameHoles);
+
+  let holes = Array.from(Array(18).keys()).map(x => (++x).toString());
+  if( gameHoles == 'front9' ) holes.length = 9;
+  if( gameHoles == 'back9' ) holes.splice(0, 9);
+
+  switch ( rotate ) {
+    case 'never':
+      return holes;
+      break;
+    default:
+      console.log('Unhandled team / hole rotation case');
+      break;
+  };
+
+};

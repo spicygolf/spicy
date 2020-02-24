@@ -100,6 +100,7 @@ const FivePointsScore = props => {
     );
   }
 
+  // TODO: DRY, this is copied in common/utils/teams
   let holes = Array.from(Array(18).keys()).map(x => ++x);
   if( game.holes == 'front9' ) holes.length = 9;
   if( game.holes == 'back9' ) holes.splice(0, 9);

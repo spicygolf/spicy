@@ -16,6 +16,7 @@ import { GET_GAME_QUERY } from 'features/games/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';
+import { getHolesToUpdate } from 'common/utils/teams';
 
 
 const TeamChooser = props => {
@@ -35,19 +36,27 @@ const TeamChooser = props => {
 
     // remove player from this team (across appropriate holes)
     let newGame = cloneDeep(game);
+    // TODO: this is hacky for the future...
+    // maybe just grab the properties we know are in GameInput type
     delete newGame._key;
     delete newGame.rounds;
     delete newGame.players;
-    const holeIndex = findIndex(newGame.teams.holes, {hole: currentHole});
-    const teamIndex = findIndex(newGame.teams.holes[holeIndex].teams, {team: teamNum});
-    //console.log('holeIndex', holeIndex, 'teamIndex', teamIndex, 'teamNum', teamNum);
-    const players = newGame.teams.holes[holeIndex].teams[teamIndex].players;
-    const newPlayers = filter(players, p => p != pkey);
-    //console.log('newPlayers', newPlayers);
-    newGame.teams.holes[holeIndex].teams[teamIndex].players = newPlayers;
-    console.log('removeFromTeam newGame', newGame);
 
-    console.log('mutation', UPDATE_GAME_MUTATION);
+    const holesToUpdate = getHolesToUpdate(newGame.teams.rotate, game.holes);
+    holesToUpdate.map(h => {
+      const holeIndex = findIndex(newGame.teams.holes, {hole: h});
+      console.log('holeIndex', holeIndex);
+      if( holeIndex < 0 ) return;
+      const teamIndex = findIndex(newGame.teams.holes[holeIndex].teams, {team: teamNum});
+      //console.log('holeIndex', holeIndex, 'teamIndex', teamIndex, 'teamNum', teamNum);
+      const players = newGame.teams.holes[holeIndex].teams[teamIndex].players;
+      const newPlayers = filter(players, p => p != pkey);
+      //console.log('newPlayers', newPlayers);
+      newGame.teams.holes[holeIndex].teams[teamIndex].players = newPlayers;
+      //console.log('removeFromTeam newGame inside map', newGame);
+    });
+
+    //console.log('removeFromTeam newGame outside map', newGame);
 
     const { loading, error, data } = updateGame({
       variables: {
@@ -62,7 +71,7 @@ const TeamChooser = props => {
       }],
     });
 
-  }
+  };
 
   const addToTeam = (teamNum, pkey) => {
     console.log('addToTeam', teamNum, pkey);
