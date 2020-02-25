@@ -21,6 +21,7 @@ import {
   get_round_for_player,
   get_score,
 } from 'common/utils/rounds';
+import { scoring } from 'common/utils/score';
 
 
 
@@ -90,6 +91,8 @@ const FivePointsScore = props => {
       <Teams
         teams={teams}
         renderPlayer={_renderPlayer}
+        scoring={scoring()}
+        currentHole={currentHole}
       />
     );
   } else {
@@ -130,10 +133,14 @@ var styles = StyleSheet.create({
     padding: 5,
   },
   content_container: {
-
+    // TODO: any way to create this buffer for the bottom nav buttons?
+    paddingBottom: 80,
   },
   player_container: {
     padding: 15,
+    paddingRight: 15,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   player_score_container: {
     flexDirection: 'row',

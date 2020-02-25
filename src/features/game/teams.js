@@ -13,7 +13,7 @@ import { GameContext } from 'features/game/gameContext';
 
 
 
-const Teams = ({teams, renderPlayer}) => {
+const Teams = ({teams, renderPlayer, scoring, currentHole }) => {
 
   //console.log('Teams teams', teams);
   const { game } = useContext(GameContext);
@@ -30,7 +30,6 @@ const Teams = ({teams, renderPlayer}) => {
 
     return (
       <Card
-        title={`Team ${item.team}`}
         containerStyle={styles.container}
         titleStyle={styles.title}
       >
@@ -39,7 +38,11 @@ const Teams = ({teams, renderPlayer}) => {
           renderItem={renderPlayer}
           keyExtractor={item => item._key}
         />
-        <TeamJunk />
+        <TeamJunk
+          team={item.team}
+          scoring={scoring}
+          currentHole={currentHole}
+        />
       </Card>
     );
 
