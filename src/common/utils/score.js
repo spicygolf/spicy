@@ -2,6 +2,21 @@
 
 export const scoring = () => {
 
+
+  return staticScore();
+
+};
+
+
+
+
+
+
+
+
+
+const staticScore = () => {
+
   return {
     holes: [
       {

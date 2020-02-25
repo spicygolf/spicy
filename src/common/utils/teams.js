@@ -1,9 +1,11 @@
 
-import { find, findIndex, values } from 'lodash';
+import { find, values } from 'lodash';
+
+import { getHoles } from 'common/utils/game';
+
 
 
 // return teams only if they are complete
-
 export const getTeams = (game, hole) => {
 
   //console.log('getTeams - game', game, 'hole', hole);
@@ -41,13 +43,9 @@ export const getTeams = (game, hole) => {
   }
 };
 
-export const getHolesToUpdate = (rotate, gameHoles) => {
+export const getHolesToUpdate = (rotate, game) => {
 
-  //console.log('getHolesToUpdate', rotate, gameHoles);
-
-  let holes = Array.from(Array(18).keys()).map(x => (++x).toString());
-  if( gameHoles == 'front9' ) holes.length = 9;
-  if( gameHoles == 'back9' ) holes.splice(0, 9);
+  const holes = getHoles(game);
 
   switch ( rotate ) {
     case 'never':

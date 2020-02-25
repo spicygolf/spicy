@@ -21,6 +21,7 @@ import {
   get_round_for_player,
   get_score,
 } from 'common/utils/rounds';
+import { getHoles } from 'common/utils/game';
 import { scoring } from 'common/utils/score';
 
 
@@ -105,10 +106,7 @@ const FivePointsScore = props => {
     );
   }
 
-  // TODO: DRY, this is copied in common/utils/teams
-  let holes = Array.from(Array(18).keys()).map(x => ++x);
-  if( game.holes == 'front9' ) holes.length = 9;
-  if( game.holes == 'back9' ) holes.splice(0, 9);
+  const holes = getHoles(game);
 
   return (
     <View style={styles.score_container}>
