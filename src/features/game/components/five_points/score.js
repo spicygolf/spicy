@@ -92,7 +92,7 @@ const FivePointsScore = props => {
       <Teams
         teams={teams}
         renderPlayer={_renderPlayer}
-        scoring={scoring()}
+        scoring={scoring(game, gamespec)}
         currentHole={currentHole}
       />
     );

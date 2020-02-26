@@ -1,14 +1,171 @@
+import { getHoles } from 'common/utils/game';
+
+import { find } from 'lodash';
+import {
+  get_hole,
+  get_net_score,
+  get_round_for_player,
+  get_score,
+  get_score_value,
+} from './rounds';
 
 
-export const scoring = () => {
 
+export const scoring = (game, gamespec) => {
 
-  return staticScore();
+  const { _key: gkey } = game;
+
+  let ret = {
+    holes: [],
+    totals: [],
+  };
+
+  const holes = getHoles(game);
+  holes.map(hole => {
+    //console.log('scoring hole', hole);
+    const gHole = find(game.teams.holes, {hole: hole});
+
+    const teams = gHole.teams.map(gTeam => {
+      let teamTotal = 0;
+      let team = {
+        team: gTeam.team,
+        players: gTeam.players.map(gPlayer => {
+
+          // player score
+          const round = get_round_for_player(game.rounds, gPlayer);
+          const score = get_score(hole, round);
+          const gross = get_score_value('gross', score);
+          const net = get_net_score(gross, score, gkey);
+          const teeHole = get_hole(hole, round);
+          const par = (teeHole && teeHole.par) ? parseFloat(teeHole.par) : 0.0;
+
+          // player junk
+          const playerJunk = [];
+          gamespec.junk.map(gsJunk => {
+            if( gsJunk.scope != 'player' ) return;
+            let j = false;
+            switch ( gsJunk.based_on ) {
+              case 'user':
+                //console.log('gsv', gsJunk.name, score, get_score_value(gsJunk.name, score));
+                j = get_score_value(gsJunk.name, score) == 'true';
+                break;
+              case 'gross':
+              case 'net':
+                const s = gsJunk.based_on == 'gross' ? gross : net;
+                j = isScoreToParJunk(gsJunk, s, par) ? true : false;
+                break;
+              default:
+                console.log(`scoring - invalid junk based_on
+                  '${gsJunk.based_on}'`);
+                break;
+            }
+            //console.log('player j', gPlayer, gsJunk, j);
+            if( j == true ) {
+              teamTotal = teamTotal + gsJunk.value;
+              playerJunk.push(gsJunk);
+            }
+          });
+
+          return ({
+            pkey: gPlayer,
+            score: {gross: gross, net: net},
+            junk: playerJunk,
+          });
+        }),
+        score: [],
+        junk: [],
+        multipliers: [],
+        total: 0,
+      };
+
+      // team score
+      gamespec.junk.map(gsJunk => {
+        if( gsJunk.scope == 'team' && gsJunk.type == 'dot') {
+          //if( hole == '1' ) console.log('team score gsJunk', gsJunk);
+          switch( gsJunk.calculation ) {
+            case 'best_ball':
+              let bb = null;
+              team.players.map(player => {
+                const newScore = parseFloat(player.score[gsJunk.based_on]);
+                if( !bb ) {
+                  bb = newScore;
+                } else {
+                  bb = (newScore < bb) ? newScore: bb;
+                }
+              });
+              team.score[gsJunk.name] = bb;
+              break;
+            case 'sum':
+              let sum = 0.0;
+              team.players.map(player => {
+                const newScore = parseFloat(player.score[gsJunk.based_on]);
+                sum = sum + newScore;
+              });
+              team.score[gsJunk.name] = sum;
+              break;
+            default:
+              console.log(`unknown team junk calculation:
+                '${gsJunk.calculation}'`);
+              break;
+          }
+        }
+
+      });
+
+      // team junk
+
+      // multipliers
+
+      // team junk that depends on team score or something after the above calcs
+
+      // total
+      team.total = teamTotal;
+
+      return team;
+    });
+
+    if( hole == '1' ) console.log('teams', hole, teams);
+
+    ret.holes.push({
+      hole: hole,
+      teams: teams,
+    });
+
+  });
+
+  //console.log('scoring final', ret);
+
+  // TODO: remove me once calcs are done
+  ret = staticScore();
+
+  return ret;
 
 };
 
 
+export const isScoreToParJunk = (junk, s, par) => {
 
+  // assumes junk.score_to_par is in form '{fit} {amount}' like 'exactly -2'
+  const [fit, amount] = junk.score_to_par.split(' ');
+  //console.log(junk.name, junk.based_on, s, hole.par, fit, amount);
+
+  switch( fit ) {
+    case 'exactly':
+      if( (s - par) != parseFloat(amount) ) return null;
+      return junk;
+      break;
+    case 'less_than':
+      console.log('less_than');
+      break;
+    case 'greater_than':
+      console.log('greater_than');
+      break;
+    default:
+      // if condition not achieved, return null
+      return null;
+  }
+
+};
 
 
 
@@ -32,8 +189,16 @@ const staticScore = () => {
                   {net: 3},
                 ],
                 junk: [
-                  {prox: 1},
-                  {birdie: 1},
+                  {
+                    name: 'prox',
+                    seq: 3,
+                    value: 1,
+                  },
+                  {
+                    name: 'birdie',
+                    seq: 4,
+                    value: 1,
+                  },
                 ],
               },
               {

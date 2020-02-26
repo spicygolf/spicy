@@ -20,6 +20,7 @@ import {
   get_score,
   get_score_value
 } from 'common/utils/rounds';
+import { isScoreToParJunk } from 'common/utils/score';
 import { upsertScore } from 'common/utils/upsertScore';
 
 
@@ -109,27 +110,18 @@ const HoleJunk = props => {
       }
 
       if( !junk.score_to_par ) {
-        console.log(`Invalid game setup.  Junk '${junk.name}' doesn't have 'score_to_par' set properly.`);
+        console.log(`Invalid game setup.  Junk '${junk.name}' doesn't have
+        'score_to_par' set properly.`);
       }
 
-      // assumes junk.score_to_par is in form '{fit} {amount}' like 'exactly -2'
-      const [fit, amount] = junk.score_to_par.split(' ');
-      //console.log(junk.name, junk.based_on, s, hole.par, fit, amount);
-      switch( fit ) {
-        case 'exactly':
-          if( (s - par) != parseFloat(amount) ) return null;
-          selected = true;
-          break;
-        case 'less_than':
-          console.log('less_than');
-          break;
-        case 'greater_than':
-          console.log('greater_than');
-          break;
-        default:
-          // if condition not achieved, return null
-          return null;
+      const j = isScoreToParJunk(junk, s, par);
+      if( j ) {
+        selected = true;
+      } else {
+        // condition not achieved, so return null;
+        return null;
       }
+
 
     }
 
@@ -185,7 +177,7 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 2,
-    marginLeft: 5,
+    marginRight: 5,
     borderColor: blue,
   },
   buttonTitle: {
