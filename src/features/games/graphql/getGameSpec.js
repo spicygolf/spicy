@@ -37,6 +37,7 @@ query GetGameSpec($gamespec: String!) {
           score_to_par
           based_on
           calculation
+          better
       }
       options {
           name

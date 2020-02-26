@@ -1,6 +1,6 @@
 import { getHoles } from 'common/utils/game';
 
-import { find } from 'lodash';
+import { find, orderBy } from 'lodash';
 import {
   get_hole,
   get_net_score,
@@ -17,7 +17,6 @@ export const scoring = (game, gamespec) => {
 
   let ret = {
     holes: [],
-    totals: [],
   };
 
   const holes = getHoles(game);
@@ -74,7 +73,6 @@ export const scoring = (game, gamespec) => {
         }),
         score: [],
         junk: [],
-        multipliers: [],
         total: 0,
       };
 
@@ -112,17 +110,54 @@ export const scoring = (game, gamespec) => {
 
       });
 
-      // team junk
-
-      // multipliers
-
-      // team junk that depends on team score or something after the above calcs
-
-      // total
       team.total = teamTotal;
 
       return team;
     });
+
+    // team junk
+    gamespec.junk.map(gsJunk => {
+      if( gsJunk.scope == 'team' && gsJunk.type == 'dot' ) {
+
+        const teamScores = teams.map((t, i) => ({
+          team: t.team,
+          name: gsJunk.name,
+          value: t.score[gsJunk.name],
+          index: i,
+        }));
+        const direction = (gsJunk.better == 'lower') ? 'asc' : 'desc';
+        const sorted = orderBy(teamScores, ['value'], [direction]);
+
+        let best = sorted[0];
+        for( let i=1; i<sorted.length; i++ ) {
+          if( gsJunk.better == 'lower' ) {
+            if( sorted[i].value > best.value ) {
+              // best is good, break out of this loop
+              teams[best.index].junk.push(gsJunk);
+              teams[best.index].total = teams[best.index].total + gsJunk.value;
+              break;
+            }
+          } else if( gsJunk.better == 'higher' ) {
+            if( sorted[i].value < best.value ) {
+              // best is good, break out of this loop
+              teams[best.index].junk.push(gsJunk);
+              teams[best.index].total = teams[best.index].total + gsJunk.value;
+              break;
+            }
+          }
+        }
+
+//        if( hole == '1' ) console.log('teams', sorted[i].index, teams, teams[sorted[i].index]);
+
+
+      }
+    });
+
+    // multipliers
+
+    // team junk that depends on team score or something after the above calcs
+
+    // total
 
     if( hole == '1' ) console.log('teams', hole, teams);
 
@@ -136,7 +171,7 @@ export const scoring = (game, gamespec) => {
   //console.log('scoring final', ret);
 
   // TODO: remove me once calcs are done
-  ret = staticScore();
+  //ret = staticScore();
 
   return ret;
 
@@ -228,14 +263,6 @@ const staticScore = () => {
                 seq: 2,
               },
             ],
-            multipliers: [
-              {
-                name: 'bbq',
-                value: 2,
-                icon: 'album',
-                seq: 4,
-              },
-            ],
             total: 12,
           },
           {
@@ -263,15 +290,18 @@ const staticScore = () => {
               {low_team: 8},
             ],
             junk: [],
-            multipliers: [],
             total: 0,
           },
         ],
+        multipliers: [
+          {
+            name: 'bbq',
+            value: 2,
+            icon: 'album',
+            seq: 4,
+          },
+        ],
       },
-    ],
-    totals : [
-      {team: '1', total: 12},
-      {team: '2', total: 0},
     ],
   };
 

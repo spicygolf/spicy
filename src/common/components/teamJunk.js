@@ -43,7 +43,15 @@ const TeamJunk = props => {
 
   };
 
-  const teamTotals = find(scoring.totals, {team: teamNum});
+  let runningTotal = 0, totalTotal = 0;
+  scoring.holes.map(h => {
+    const team = find(h.teams, {team: teamNum});
+    totalTotal = totalTotal + team.total;
+    runningTotal = runningTotal +
+      (( parseInt(h.hole) <= parseInt(currentHole) ) ? team.total : 0);
+  });
+  //console.log('runningTotal', runningTotal);
+  //console.log('totalTotal', totalTotal);
 
   const hole = find(scoring.holes, { hole: currentHole });
   if( !hole ) return null;
@@ -51,8 +59,8 @@ const TeamJunk = props => {
   const team = find(hole.teams, {team: teamNum});
   if( !team ) return null;
 
-  const junk = team.junk.concat(team.multipliers);
-  const sorted_junk = orderBy(junk, ['seq'], ['asc']);
+  const sorted_junk = orderBy(team.junk, ['seq'], ['asc']);
+  //console.log('sorted_junk', sorted_junk);
 
   return (
     <View style={styles.container}>
@@ -67,7 +75,7 @@ const TeamJunk = props => {
           <Text style={styles.totalsText}>Hole: {team.total}</Text>
         </View>
         <View>
-          <Text style={styles.totalsText}>Total: {teamTotals.total}</Text>
+          <Text style={styles.totalsText}>Total: {totalTotal}</Text>
         </View>
       </View>
     </View>
