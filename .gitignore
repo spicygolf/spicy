@@ -29,6 +29,11 @@ build/
 local.properties
 *.iml
 
+# java
+.project
+.classpath
+**/.settings/*
+
 # node.js
 #
 node_modules/
