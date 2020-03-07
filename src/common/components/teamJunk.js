@@ -43,16 +43,15 @@ const TeamJunk = props => {
 
   };
 
-  const teamTotals = find(scoring.totals, {team: teamNum});
-
   const hole = find(scoring.holes, { hole: currentHole });
   if( !hole ) return null;
 
   const team = find(hole.teams, {team: teamNum});
   if( !team ) return null;
 
-  const junk = team.junk.concat(team.multipliers);
-  const sorted_junk = orderBy(junk, ['seq'], ['asc']);
+  const sorted_junk = orderBy(team.junk, ['seq'], ['asc']);
+  //console.log('sorted_junk', sorted_junk);
+  if( sorted_junk.length == 0 ) return null;
 
   return (
     <View style={styles.container}>
@@ -62,14 +61,6 @@ const TeamJunk = props => {
         renderItem={({item}) => renderJunk(item)}
         keyExtractor={item => item.seq.toString()}
       />
-      <View style={styles.totalsView}>
-        <View>
-          <Text style={styles.totalsText}>Hole: {team.total}</Text>
-        </View>
-        <View>
-          <Text style={styles.totalsText}>Total: {teamTotals.total}</Text>
-        </View>
-      </View>
     </View>
   );
 };
@@ -80,7 +71,10 @@ export default TeamJunk;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    paddingTop: 0,
+    paddingBottom: 5,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   icon: {
     padding: 5,
@@ -96,15 +90,5 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     fontSize: 13,
-  },
-  totalsView: {
-    flexDirection: 'row',
-    flex: 2,
-    justifyContent: 'space-around',
-    padding: 10,
-  },
-  totalsText: {
-    fontWeight: 'bold',
-    fontSize: 19,
   },
 });

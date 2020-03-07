@@ -29,12 +29,25 @@ query GetGameSpec($gamespec: String!) {
           name
           seq
           type
+          value
           limit
           scope
           icon
           show_in
           score_to_par
           based_on
+          calculation
+          better
+      }
+      multipliers {
+          name
+          seq
+          value
+          icon
+          based_on
+          scope
+          availability
+          after
       }
       options {
           name

@@ -36,14 +36,14 @@ const FivePointsScore = props => {
     const round = get_round_for_player(game.rounds, item._key);
 
     const hole = get_hole(currentHole, round);
-
+/*
     let handicap = '';
     if( round ) {
       handicap = round.game_handicap ?
         round.game_handicap : round.course_handicap;
       handicap = handicap ? handicap.toString() : '';
     }
-
+*/
     const score = get_score(currentHole, round);
     const rkey = (round && round._key) ? round._key : null;
 
@@ -68,7 +68,6 @@ const FivePointsScore = props => {
         <View style={styles.player_score_container}>
           <View style={styles.player_name}>
             <Text style={styles.player_name_txt}>{item.name || ''}</Text>
-            <Text>{handicap}</Text>
           </View>
           <View style={styles.hole_score}>
             {holeScore}
@@ -92,7 +91,7 @@ const FivePointsScore = props => {
       <Teams
         teams={teams}
         renderPlayer={_renderPlayer}
-        scoring={scoring()}
+        scoring={scoring(game, gamespec)}
         currentHole={currentHole}
       />
     );
@@ -152,9 +151,11 @@ var styles = StyleSheet.create({
   },
   player_name: {
     flex: 1,
+    justifyContent: 'center',
   },
   player_name_txt: {
     fontSize: 16,
+    fontWeight: 'bold',
   },
   hole_score: {
     flex: 1,

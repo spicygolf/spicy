@@ -17,6 +17,7 @@ export const GET_GAME_QUERY = gql`
             team
             players
           }
+          multipliers
         }
       }
       rounds {
