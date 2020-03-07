@@ -21,10 +21,10 @@ const TeamTotals = props => {
   return (
   <View style={styles.totalsView}>
     <View>
-      <Text style={styles.totalsText}>Hole: {team.holeTotal}</Text>
+      <Text style={styles.totalsText}>Hole: {`${team.points} x ${hole.holeMultiplier} = ${team.holeTotal}`}</Text>
     </View>
     <View>
-      <Text style={styles.totalsText}>Total: {team.runningTotal}</Text>
+      <Text style={styles.totalsText}>Running Total: {team.runningTotal}</Text>
     </View>
   </View>
 );
@@ -45,6 +45,6 @@ const styles = StyleSheet.create({
   },
   totalsText: {
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 16,
   },
 });

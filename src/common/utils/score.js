@@ -162,7 +162,7 @@ export const scoring = (game, gamespec) => {
     const multipliers = [];
     gamespec.multipliers.map(gsMult => {
       if( gsMult.based_on == 'user' ) {
-        if( hole == '2' ) console.log('scoring mult', gsMult, gHole);
+        //if( hole == '2' ) console.log('scoring mult', gsMult, gHole);
         if( gHole && gHole.multipliers && gHole.multipliers.includes(gsMult.name) ) {
           multipliers.push(gsMult);
         }
