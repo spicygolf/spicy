@@ -14,8 +14,8 @@ import { useMutation } from '@apollo/react-hooks';
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
-import { blue } from 'common/colors';
 import { getHolesToUpdate } from 'common/utils/teams';
+import { blue } from 'common/colors';
 
 
 const TeamChooser = props => {
@@ -57,6 +57,7 @@ const TeamChooser = props => {
               {team: '1', players: []},
               {team: '2', players: []},
             ],
+            multipliers: [],
           }
         );
       }

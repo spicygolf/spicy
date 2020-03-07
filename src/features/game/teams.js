@@ -9,6 +9,8 @@ import {
 import { find } from 'lodash';
 
 import TeamJunk from 'common/components/teamJunk';
+import TeamMultipliers from 'common/components/teamMultipliers';
+import TeamTotals from 'common/components/teamTotals';
 import { GameContext } from 'features/game/gameContext';
 
 
@@ -16,7 +18,7 @@ import { GameContext } from 'features/game/gameContext';
 const Teams = ({teams, renderPlayer, scoring, currentHole }) => {
 
   //console.log('Teams teams', teams);
-  const { game } = useContext(GameContext);
+  const { game, gamespec } = useContext(GameContext);
   const { players } = game;
 
   const _renderTeam = ({item}) => {
@@ -39,6 +41,16 @@ const Teams = ({teams, renderPlayer, scoring, currentHole }) => {
           keyExtractor={item => item._key}
         />
         <TeamJunk
+          team={item.team}
+          scoring={scoring}
+          currentHole={currentHole}
+        />
+        <TeamMultipliers
+          team={item.team}
+          scoring={scoring}
+          currentHole={currentHole}
+        />
+        <TeamTotals
           team={item.team}
           scoring={scoring}
           currentHole={currentHole}
@@ -66,7 +78,8 @@ const styles = StyleSheet.create({
   container: {
     paddingLeft: 5,
     paddingRight: 5,
-    paddingBottom: 0,
+    paddingTop: 0,
+    paddingBottom: 5,
     margin: 10,
   },
   title: {

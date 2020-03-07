@@ -39,6 +39,16 @@ query GetGameSpec($gamespec: String!) {
           calculation
           better
       }
+      multipliers {
+          name
+          seq
+          value
+          icon
+          based_on
+          scope
+          availability
+          after
+      }
       options {
           name
           disp

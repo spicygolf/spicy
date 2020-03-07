@@ -37,7 +37,7 @@ const HoleJunk = props => {
   const { junk } = gamespec;
   if( !junk ) return null;
   const sorted_junk = sortBy(junk, ['seq']);
-
+  if( sorted_junk.length == 0 ) return null;
 
   const setJunk = (junk, newValue) => {
 

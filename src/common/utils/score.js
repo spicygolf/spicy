@@ -1,6 +1,6 @@
 import { getHoles } from 'common/utils/game';
 
-import { find, orderBy } from 'lodash';
+import { find, orderBy, reduce, sortBy } from 'lodash';
 import {
   get_hole,
   get_net_score,
@@ -25,7 +25,7 @@ export const scoring = (game, gamespec) => {
     const gHole = find(game.teams.holes, {hole: hole});
 
     const teams = gHole.teams.map(gTeam => {
-      let teamTotal = 0;
+      let teamPoints = 0;
       let team = {
         team: gTeam.team,
         players: gTeam.players.map(gPlayer => {
@@ -60,7 +60,7 @@ export const scoring = (game, gamespec) => {
             }
             //console.log('player j', gPlayer, gsJunk, j);
             if( j == true ) {
-              teamTotal = teamTotal + gsJunk.value;
+              teamPoints = teamPoints + gsJunk.value;
               playerJunk.push(gsJunk);
             }
           });
@@ -73,7 +73,10 @@ export const scoring = (game, gamespec) => {
         }),
         score: [],
         junk: [],
-        total: 0,
+        points: 0,
+        holeTotal: 0,
+        runningTotal: 0,
+        gameTotal: 0,
       };
 
       // team score
@@ -110,7 +113,7 @@ export const scoring = (game, gamespec) => {
 
       });
 
-      team.total = teamTotal;
+      team.points = teamPoints;
 
       return team;
     });
@@ -134,14 +137,14 @@ export const scoring = (game, gamespec) => {
             if( sorted[i].value > best.value ) {
               // best is good, break out of this loop
               teams[best.index].junk.push(gsJunk);
-              teams[best.index].total = teams[best.index].total + gsJunk.value;
+              teams[best.index].points = teams[best.index].points + gsJunk.value;
               break;
             }
           } else if( gsJunk.better == 'higher' ) {
             if( sorted[i].value < best.value ) {
               // best is good, break out of this loop
               teams[best.index].junk.push(gsJunk);
-              teams[best.index].total = teams[best.index].total + gsJunk.value;
+              teams[best.index].points = teams[best.index].points + gsJunk.value;
               break;
             }
           }
@@ -149,29 +152,99 @@ export const scoring = (game, gamespec) => {
 
 //        if( hole == '1' ) console.log('teams', sorted[i].index, teams, teams[sorted[i].index]);
 
-
       }
     });
 
-    // multipliers
-
     // team junk that depends on team score or something after the above calcs
+    //   something like 'ky' or 'oj' in wolfhammer
 
-    // total
+    // multipliers
+    const multipliers = [];
+    gamespec.multipliers.map(gsMult => {
+      if( gsMult.based_on == 'user' ) {
+        if( hole == '2' ) console.log('scoring mult', gsMult, gHole);
+        if( gHole && gHole.multipliers && gHole.multipliers.includes(gsMult.name) ) {
+          multipliers.push(gsMult);
+        }
+      } else {
+        //if( hole == '1' ) console.log('non-user multiplier', gsMult);
+        // loop thru teams and players to see if this multiplier is achieved
+        teams.map(t => {
+          t.players.map(p => {
+            const j = find(p.junk, {name: gsMult.based_on});
+            if( j ) {
+              switch( gsMult.availability ) {
+                case 'got_all_points':
+                  // did this team get all the points?  if not, exit out
+                  let other_teams_points = 0;
+                  teams.map(getall_team => {
+                    if( getall_team.team != t.team ) {
+                      other_teams_points += getall_team.points;
+                    }
+                  });
+                  if( other_teams_points == 0 ) {
+                    multipliers.push(gsMult);
+                  }
+                  break;
+                default:
+                  break;
+              }
+            }
+          });
+        });
+      }
+    });
 
-    if( hole == '1' ) console.log('teams', hole, teams);
+    // hole totals
+    const holeMultiplier = reduce(multipliers, (tot, m) => (tot * m.value), 1);
+    //console.log('holeMultiplier', hole, holeMultiplier);
+    teams.map(t => {
+      t.holeTotal = t.points * holeMultiplier;
+    });
+
+    //  if( hole == '1' ) console.log(hole, teams, multipliers);
 
     ret.holes.push({
       hole: hole,
       teams: teams,
+      multipliers: multipliers,
+      holeMultiplier: holeMultiplier,
     });
 
   });
 
-  //console.log('scoring final', ret);
+  // runningTotal calcs
 
-  // TODO: remove me once calcs are done
-  //ret = staticScore();
+  const teamTotals = [];
+
+  // loop thru holes, calculating runningTotal for each team
+  // TODO: do we need to go by seq or other order?
+  ret.holes.map((h, i) => {
+
+    h.teams.map(t => {
+/*
+      let teamTotalsIndex = findIndex(teamTotals, {team: t.team});
+      if( teamTotalsIndex < 0 ) {
+        // we didn't find a teamTotals object for this team, so make one
+        // with defaults of zero
+        teamTotalsIndex = 0;
+        teamTotals.push({
+          team: t.team,
+          runningTotal: 0,
+        });
+      }
+*/
+      let lastHoleRunningTotal = ( i == 0 ) ? 0
+        : find(ret.holes[i-1].teams, {team: t.team}).runningTotal;
+      //console.log('lastHoleRunningTotal', lastHoleRunningTotal, 't', t);
+
+      t.runningTotal = lastHoleRunningTotal + t.holeTotal;
+      //console.log('teamTotals', h.hole, t.runningTotal);
+    });
+  });
+
+
+  console.log('scoring final', ret);
 
   return ret;
 
@@ -202,107 +275,24 @@ export const isScoreToParJunk = (junk, s, par) => {
 
 };
 
+export const isTeamDownTheMost = (hole, team) => {
+  if( !hole ) return true;
 
-
-
-
-
-const staticScore = () => {
-
-  return {
-    holes: [
-      {
-        hole: '1',
-        teams: [
-          {
-            team: '1',
-            players: [
-              {
-                pkey: '34483698',
-                score: [
-                  {gross: 3},
-                  {net: 3},
-                ],
-                junk: [
-                  {
-                    name: 'prox',
-                    seq: 3,
-                    value: 1,
-                  },
-                  {
-                    name: 'birdie',
-                    seq: 4,
-                    value: 1,
-                  },
-                ],
-              },
-              {
-                pkey: '35217104',
-                score: [
-                  {gross: 4},
-                  {net: 4},
-                ],
-                junk: [],
-              },
-            ],
-            score: [
-              {low_ball: 3},
-              {low_team: 7},
-            ],
-            junk: [
-              {
-                name: 'low_ball',
-                value: 2,
-                icon: 'album',
-                seq: 1,
-              },
-              {
-                name: 'low_team',
-                value: 2,
-                icon: 'album',
-                seq: 2,
-              },
-            ],
-            total: 12,
-          },
-          {
-            team: '2',
-            players: [
-              {
-                pkey: '35216720',
-                score: [
-                  {gross: 4},
-                  {net: 4},
-                ],
-                junk: [],
-              },
-              {
-                pkey: '35217480',
-                score: [
-                  {gross: 4},
-                  {net: 4},
-                ],
-                junk: [],
-              },
-            ],
-            score: [
-              {low_ball: 4},
-              {low_team: 8},
-            ],
-            junk: [],
-            total: 0,
-          },
-        ],
-        multipliers: [
-          {
-            name: 'bbq',
-            value: 2,
-            icon: 'album',
-            seq: 4,
-          },
-        ],
-      },
-    ],
-  };
+  const teamScores = hole.teams.map(t => ({
+    team: t.team,
+    score: t.runningTotal
+  }));
+  const sortedTeamScores = sortBy(teamScores, ['score'], ['asc']);
+  const teamsDownTheMost = [sortedTeamScores[0].team];
+  const lowestScore = sortedTeamScores[0].score;
+  for( let i=1; i < sortedTeamScores.length; i++ ) {
+    if( sortedTeamScores[i].score == lowestScore ) {
+      teamsDownTheMost.push(sortedTeamScores[i].team);
+    } else {
+      break;
+    }
+  }
+  //console.log('isTeamDownTheMost', sortedTeamScores, teamsDownTheMost);
+  return teamsDownTheMost.includes(team.team);
 
 };

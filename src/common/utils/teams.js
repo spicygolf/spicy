@@ -43,16 +43,29 @@ export const getTeams = (game, hole) => {
   }
 };
 
-export const getHolesToUpdate = (rotate, game) => {
+// term can be:
+//    never, every1, every3, every6 (for team choosing / rotation)
+//    rest_of_nine, hole (for multiplier scope, uses currentHole)
+export const getHolesToUpdate = (term, game, currentHole) => {
 
   const holes = getHoles(game);
 
-  switch ( rotate ) {
+  switch ( term ) {
     case 'never':
       return holes;
       break;
+    case 'rest_of_nine':
+      const begHole = parseInt(currentHole);
+      const endHole = (Math.floor(begHole/9) * 9) + 9;
+      const ret = holes.splice(begHole-1, endHole-begHole+1);
+      console.log('rest_of_nine', begHole, endHole, ret);
+      return ret;
+      break;
+    case 'hole':
+      return [currentHole];
+      break;
     default:
-      console.log('Unhandled team / hole rotation case');
+      console.log(`Unhandled term case: '${term}'`);
       break;
   };
 
