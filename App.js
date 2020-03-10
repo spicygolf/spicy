@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { NavigationNativeContainer } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { ApolloProvider } from 'react-apollo';
 import { ApolloProvider as ApolloHooksProvider } from '@apollo/react-hooks';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -19,7 +19,7 @@ const App = props => {
   return (
     <ApolloProvider client={client}>
       <ApolloHooksProvider client={client}>
-        <NavigationNativeContainer>
+        <NavigationContainer>
           <Stack.Navigator
             initialRouteName='Splash'
             screenOptions={{
@@ -30,7 +30,7 @@ const App = props => {
             <Stack.Screen name='App' component={AppStack} />
             <Stack.Screen name='Account' component={AccountStack} />
           </Stack.Navigator>
-        </NavigationNativeContainer>
+        </NavigationContainer>
       </ApolloHooksProvider>
     </ApolloProvider>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -29,16 +29,14 @@ const AppStack = props => {
   const { route } = props;
   const { currentPlayerKey, token } = route.params;
 
-  const Tab = createBottomTabNavigator();
+  const Tab = createMaterialBottomTabNavigator();
 
   const tabs = (
     <Tab.Navigator
       initialRouteName='GamesStack'
-      screenOptions={{}}
-      tabBarOptions={{
-        inactiveBackgroundColor: 'white',
-        inactiveTintColor: '#333',
-  }}
+      shifting={true}
+      activeColor='#fff'
+      inactiveColor='#ccc'
     >
       <Tab.Screen
         name='FeedStack'
@@ -48,15 +46,12 @@ const AppStack = props => {
           tabBarIcon: ({ focused }) => {
             return (
               <TabIcon
-                color={focused ? 'white' : blue }
+                color={focused ? '#fff' : '#ccc' }
                 name='message'
               />
             );
           },
-          tabBarOptions: {
-              activeBackgroundColor: blue,
-              activeTintColor: 'white'
-          },
+          tabBarColor: blue,
           tabBarTestID: 'feed_tab'
         }}
       />
@@ -68,15 +63,12 @@ const AppStack = props => {
           tabBarIcon: ({ focused }) => {
             return (
               <TabIcon
-                color={focused ? 'white' : green }
-                name='playlist-add-check'
+              color={focused ? '#fff' : '#ccc' }
+              name='playlist-add-check'
               />
             );
           },
-          tabBarOptions: {
-            activeBackgroundColor: green,
-            activeTintColor: 'white'
-          },
+          tabBarColor: green,
           tabBarTestID: 'games_tab'
         }}
       />
@@ -88,15 +80,12 @@ const AppStack = props => {
           tabBarIcon: ({ focused }) => {
             return (
               <TabIcon
-                color={focused ? 'white' : red }
-                name='account-box'
+              color={focused ? '#fff' : '#ccc' }
+              name='account-box'
               />
             );
           },
-          tabBarOptions: {
-              activeBackgroundColor: red,
-              activeTintColor: 'white'
-          },
+          tabBarColor: red,
           tabBarTestID: 'profile_tab'
         }}
       />
