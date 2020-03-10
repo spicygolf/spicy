@@ -1,7 +1,8 @@
 import React from 'react';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import {
+  Icon
+} from 'react-native-elements';
 
 import FeedStack from 'features/feed/feedstack';
 import GamesStack from 'features/games/gamesstack';
@@ -17,9 +18,15 @@ import {
 
 
 
-const TabIcon = ({name, color, testID}) => {
+const TabIcon = ({type, name, color, testID}) => {
   return (
-    <Icon size={24} color={color} name={name} testID={testID}/>
+    <Icon
+      size={24}
+      color={color}
+      type={type}
+      name={name}
+      testID={testID}
+    />
   );
 };
 
@@ -47,8 +54,9 @@ const AppStack = props => {
             return (
               <TabIcon
                 color={focused ? '#fff' : '#ccc' }
-                name='message'
-              />
+                name='comment'
+                type='font-awesome'
+                />
             );
           },
           tabBarColor: blue,
@@ -64,7 +72,8 @@ const AppStack = props => {
             return (
               <TabIcon
               color={focused ? '#fff' : '#ccc' }
-              name='playlist-add-check'
+              name='edit'
+              type='font-awesome'
               />
             );
           },
@@ -81,7 +90,8 @@ const AppStack = props => {
             return (
               <TabIcon
               color={focused ? '#fff' : '#ccc' }
-              name='account-box'
+              name='user'
+              type='font-awesome'
               />
             );
           },
