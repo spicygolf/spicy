@@ -1,15 +1,21 @@
 import React, { useRef, useState } from 'react';
 import {
-  Button,
+  Dimensions,
   StyleSheet,
   Text,
   TextInput,
   View
 } from 'react-native';
+import {
+  Button,
+} from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 import { baseUrl } from 'common/config';
+import { blue } from 'common/colors';
+
+const { width } = Dimensions.get('window')
 
 
 
@@ -82,14 +88,33 @@ const Login = props => {
             value={password}
           />
         </View>
+        <Button
+          style={styles.login_button}
+          onPress={_onLogin}
+          title='Login'
+          accessibilityLabel='Login'
+          testID='login_button'
+        />
+        <Button
+          onPress={() => { navigation.navigate('Forgot'); }}
+          title='Forgot Password'
+          type='clear'
+          accessibilityLabel='Forgot Password'
+          testID='forgot_button'
+        />
       </View>
-      <Button
-        style={styles.button}
-        onPress={_onLogin}
-        title='Login'
-        accessibilityLabel='Login'
-        testID='login_button'
-      />
+      <View style={styles.divider}>
+        <View style={styles.hrLine} />
+        <Text style={styles.dividerText}>OR</Text>
+        <View style={styles.hrLine} />
+      </View>
+      <View style={styles.new_account_view}>
+        <Button
+          onPress={() => { navigation.navigate('Register'); }}
+          title='Register A New Account'
+          type='clear'
+        />
+      </View>
     </View>
   );
 
@@ -117,9 +142,31 @@ var styles = StyleSheet.create({
     paddingRight: 10,
     marginBottom: 10,
   },
-  button: {
+  login_button: {
     backgroundColor: '#FF3366',
-    borderColor: '#FF3366'
-  }
-
+    borderColor: '#FF3366',
+    marginTop: 15,
+    marginBottom: 15,
+  },
+  divider: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 40,
+  },
+  hrLine: {
+    width: width / 3.5,
+    backgroundColor: blue,
+    height: 1,
+  },
+  dividerText: {
+    color: blue,
+    textAlign: 'center',
+    width: width / 8,
+  },
+  new_account_view: {
+    marginTop: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
