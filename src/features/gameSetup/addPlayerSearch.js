@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -27,7 +27,7 @@ import { GameContext } from 'features/game/gameContext';
 const AddPlayerSearch = (props) => {
 
   const [ search, setSearch ] = useState('');
-  let searchInput;
+  const searchInputRef = useRef(null);
 
   const { currentPlayerKey } = useContext(GameContext);
 
@@ -54,14 +54,14 @@ const AddPlayerSearch = (props) => {
 
   useEffect(
     () => {
-      searchInput.focus();
-    }
+      searchInputRef.current.focus();
+    }, [searchInputRef]
   );
 
   return (
     <View style={styles.container}>
       <TextInput
-        ref={input => { searchInput = input; }}
+        ref={searchInputRef}
         style={styles.searchTextInput}
         placeholder='search players...'
         autoCapitalize='none'

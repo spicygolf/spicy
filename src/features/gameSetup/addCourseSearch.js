@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -41,7 +41,7 @@ const AddCourseSearch = props => {
   const [ q, setQ ] = useState('');
   const [ course, setCourse ] = useState(null);
 
-  let searchInput = null;
+  const searchInputRef = useRef(null);
 
   const _coursePressed = course => {
     Keyboard.dismiss();
@@ -76,8 +76,8 @@ const AddCourseSearch = props => {
 
   useEffect(
     () => {
-      if( searchInput ) searchInput.focus();
-    }
+      searchInputRef.current.focus();
+    }, [searchInputRef]
   );
 
   if( !course ) {
@@ -102,10 +102,11 @@ const AddCourseSearch = props => {
     return (
       <View style={styles.container}>
         <TextInput
-          ref={(input) => { searchInput = input; }}
+          ref={searchInputRef}
           style={styles.searchTextInput}
           placeholder='search courses...'
           autoCapitalize='none'
+          autoFocus={true}
           onChangeText={text => setQ(text)}
           value={q}
         />
