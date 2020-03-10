@@ -28,7 +28,7 @@ const Splash = props => {
           props.navigation.navigate('App', currentPlayerData);
         } else {
           // if no token, render Login component
-          props.navigation.navigate('Auth');
+          props.navigation.navigate('Account');
         }
 
 

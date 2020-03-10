@@ -20,6 +20,6 @@ export const logout = async ({navigation, client}) => {
   // call API logout endpoint
   // TODO: ^
 
-  // navigate to login page
-  navigation.navigate('Auth');
+  // navigate to account stack
+  navigation.navigate('Account');
 };

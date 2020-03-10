@@ -6,7 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import Splash from 'features/splash/splash';
 import AppStack from 'app/components/appstack';
-import AuthStack from 'app/components/authstack';
+import AccountStack from 'app/components/accountstack';
 
 import configureClient from 'app/client/configureClient';
 
@@ -28,7 +28,7 @@ const App = props => {
           >
             <Stack.Screen name='Splash' component={Splash} />
             <Stack.Screen name='App' component={AppStack} />
-            <Stack.Screen name='Auth' component={AuthStack} />
+            <Stack.Screen name='Account' component={AccountStack} />
           </Stack.Navigator>
         </NavigationNativeContainer>
       </ApolloHooksProvider>

@@ -1,11 +1,11 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import Login from 'features/login/login';
+import Login from 'features/account/login';
 
 
 
-const AuthStack = props => {
+const AccountStack = props => {
 
   const Stack = createStackNavigator();
 
@@ -20,4 +20,4 @@ const AuthStack = props => {
 
 };
 
-export default AuthStack;
+export default AccountStack;
