@@ -13,7 +13,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 import { baseUrl } from 'common/config';
-import { blue } from 'common/colors';
+import { blue, green } from 'common/colors';
 
 const { width } = Dimensions.get('window')
 
@@ -23,10 +23,13 @@ const Login = props => {
 
   const [ email, setEmail ] = useState('');
   const [ password, setPassword ] = useState('');
+  const [ emailValid, setEmailValid ] = useState(false);
+  const [ passValid, setPassValid ] = useState(false);
+
   const navigation = useNavigation();
   const emailRef = useRef(null);
 
-  const _onLogin = async () => {
+  const login = async () => {
     // REST call to API to get token and store it in AsyncStorage
     const uri = `${baseUrl}/account/login`;
     try {
@@ -49,7 +52,9 @@ const Login = props => {
 
       // clear fields after successful login
       setEmail('');
+      setEmailValid(false);
       setPassword('');
+      setPassValid(false);
       emailRef.current.focus();
 
       navigation.navigate('App', {
@@ -63,14 +68,41 @@ const Login = props => {
     }
   };
 
+  const validate = (type, text) => {
+
+    const eTest = type == 'email' ? text : email;
+    const pTest = type == 'password' ? text : password;
+    //console.log('email', eTest);
+    //console.log('pass ', pTest);
+
+    setEmailValid(validateEmail(eTest));
+    setPassValid(validatePassword(pTest));
+
+  };
+
+  const validateEmail = email => {
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const validatePassword = pass => {
+    if( pass.length > 3 ) return true;
+  }
+
+  const eValid = { borderColor: emailValid ? green : '#ddd' };
+  const pValid = { borderColor: passValid ? green : '#ddd' };
+
   return (
     <View style={styles.loginView} testID='login_form_view'>
       <View>
         <View style={styles.field_container}>
           <Text style={styles.field_label}>Email</Text>
           <TextInput
-            style={styles.field_input}
-            onChangeText={text => setEmail(text)}
+            style={[styles.field_input, eValid]}
+            onChangeText={text => {
+              setEmail(text);
+              validate('email', text);
+            }}
             keyboardType='email-address'
             autoCapitalize='none'
             value={email}
@@ -80,8 +112,11 @@ const Login = props => {
         <View style={styles.field_container}>
         <Text style={styles.field_label}>Password</Text>
           <TextInput
-            style={styles.field_input}
-            onChangeText={text => setPassword(text)}
+            style={[styles.field_input, pValid]}
+            onChangeText={text => {
+              setPassword(text);
+              validate('password', text);
+            }}
             autoCompleteType='password'
             secureTextEntry={true}
             autoCapitalize='none'
@@ -90,8 +125,10 @@ const Login = props => {
         </View>
         <Button
           style={styles.login_button}
-          onPress={_onLogin}
+          onPress={login}
           title='Login'
+          type={(emailValid && passValid) ? 'solid' : 'outline'}
+          disabled={!(emailValid && passValid)}
           accessibilityLabel='Login'
           testID='login_button'
         />
@@ -143,8 +180,6 @@ var styles = StyleSheet.create({
     marginBottom: 10,
   },
   login_button: {
-    backgroundColor: '#FF3366',
-    borderColor: '#FF3366',
     marginTop: 15,
     marginBottom: 15,
   },
@@ -153,6 +188,7 @@ var styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 40,
+    marginBottom: 40,
   },
   hrLine: {
     width: width / 3.5,
@@ -165,7 +201,6 @@ var styles = StyleSheet.create({
     width: width / 8,
   },
   new_account_view: {
-    marginTop: 15,
     justifyContent: 'center',
     alignItems: 'center',
   },
