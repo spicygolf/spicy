@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -8,9 +8,8 @@ import {
   TextInput,
   View
 } from 'react-native';
-
+import { useFocusEffect } from '@react-navigation/native';
 import { Query } from 'react-apollo';
-
 import { find } from 'lodash';
 
 import {
@@ -52,10 +51,12 @@ const AddPlayerSearch = (props) => {
     );
   }
 
-  useEffect(
-    () => {
-      searchInputRef.current.focus();
-    }, [searchInputRef]
+  useFocusEffect(
+    React.useCallback(() => {
+      if( searchInputRef && searchInputRef.current ) {
+        searchInputRef.current.focus();
+      }
+    })
   );
 
   return (

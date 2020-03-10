@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -16,6 +16,7 @@ import {
   Icon
 } from 'react-native-elements';
 import { useQuery } from '@apollo/react-hooks';
+import { useFocusEffect } from '@react-navigation/native';
 import { find, orderBy } from 'lodash';
 
 import { SEARCH_COURSE_QUERY } from 'features/courses/graphql';
@@ -74,10 +75,12 @@ const AddCourseSearch = props => {
     );
   }
 
-  useEffect(
-    () => {
-      searchInputRef.current.focus();
-    }, [searchInputRef]
+  useFocusEffect(
+    React.useCallback(() => {
+      if( searchInputRef && searchInputRef.current ) {
+        searchInputRef.current.focus();
+      }
+    })
   );
 
   if( !course ) {
