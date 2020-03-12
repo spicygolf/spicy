@@ -11,9 +11,11 @@ import {
 } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { baseUrl } from 'common/config';
 import { blue, green } from 'common/colors';
+import { validateEmail, validatePassword } from 'common/utils/account';
 
 const { width } = Dimensions.get('window')
 
@@ -80,17 +82,17 @@ const Login = props => {
 
   };
 
-  const validateEmail = email => {
-    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
-  };
-
-  const validatePassword = pass => {
-    if( pass.length > 3 ) return true;
-  }
-
   const eValid = { borderColor: emailValid ? green : '#ddd' };
   const pValid = { borderColor: passValid ? green : '#ddd' };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if( emailRef && emailRef.current ) {
+        emailRef.current.focus();
+      }
+    })
+  );
+
 
   return (
     <View style={styles.loginView} testID='login_form_view'>
@@ -110,7 +112,7 @@ const Login = props => {
           />
         </View>
         <View style={styles.field_container}>
-        <Text style={styles.field_label}>Password</Text>
+          <Text style={styles.field_label}>Password</Text>
           <TextInput
             style={[styles.field_input, pValid]}
             onChangeText={text => {

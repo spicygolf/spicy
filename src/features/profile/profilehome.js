@@ -11,7 +11,7 @@ import {
 } from 'react-native-elements';
 
 import { red } from 'common/colors';
-import { logout } from 'common/utils/auth';
+import { logout } from 'common/utils/account';
 
 
 const ProfileHome = props => {

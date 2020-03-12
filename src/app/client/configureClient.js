@@ -8,7 +8,7 @@ import { onError } from 'apollo-link-error';
 import { HttpLink } from 'apollo-link-http';
 
 import { baseUrl } from 'common/config';
-import { logout } from 'common/utils/auth';
+import { logout } from 'common/utils/account';
 
 
 export default function configureClient() {

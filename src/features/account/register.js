@@ -1,17 +1,79 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
   Text,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+
+import RegisterBasics from 'features/account/registerBasics';
+import RegisterHandicap from 'features/account/registerHandicap';
+import RegisterHandicapSearch from 'features/account/registerHandicapSearch';
+import { blue } from 'common/colors';
 
 
 
 const Register = props => {
 
+  const [ registration, setRegistration ] = useState({
+    email: '',
+    password: '',
+    password2: '',
+    lastName: '',
+    ghinNumber: '',
+    country: 'USA',
+    state: '',
+    prev: 1,
+  });
+  const navigation = useNavigation();
+
+  const { route } = props;
+  const c = (route && route.params && route.params.c) ? route.params.c : 1;
+
+  const get_card = c => {
+    switch( c ) {
+      case 1:
+        return (
+          <RegisterBasics
+            registration={registration}
+            setRegistration={setRegistration}
+          />
+        );
+        break;
+      case 2:
+        return (
+          <RegisterHandicap
+            registration={registration}
+            setRegistration={setRegistration}
+          />
+        );
+        break;
+      case 3:
+        return (
+          <RegisterHandicapSearch
+            registration={registration}
+            setRegistration={setRegistration}
+          />
+        );
+        break;
+      default:
+        console.log('registration', registration);
+        break;
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text>Register</Text>
+      { get_card(c) }
+      <View style={styles.login_view}>
+        <Text>
+          Already have an account?
+          <Text
+            onPress={() => { navigation.navigate('Login'); }}
+            style={styles.login_text}
+          >  Log In</Text>
+        </Text>
+      </View>
     </View>
   );
 };
@@ -21,5 +83,16 @@ export default Register;
 const styles = StyleSheet.create({
   container: {
     margin: 10,
+    height: '100%',
+    justifyContent: 'space-between',
+  },
+  login_view: {
+    padding: 15,
+    paddingBottom: 40,
+  },
+  login_text: {
+    fontWeight: 'bold',
+    marginLeft: 6,
+    color: blue,
   },
 });
