@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -11,7 +11,6 @@ import {
 } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { useFocusEffect } from '@react-navigation/native';
 
 import { baseUrl } from 'common/config';
 import { blue, green } from 'common/colors';
@@ -85,14 +84,13 @@ const Login = props => {
   const eValid = { borderColor: emailValid ? green : '#ddd' };
   const pValid = { borderColor: passValid ? green : '#ddd' };
 
-  useFocusEffect(
-    React.useCallback(() => {
+  useEffect(
+    () => {
       if( emailRef && emailRef.current ) {
         emailRef.current.focus();
       }
-    })
+    }, [emailRef]
   );
-
 
   return (
     <View style={styles.loginView} testID='login_form_view'>

@@ -16,11 +16,11 @@ import { blue } from 'common/colors';
 const Register = props => {
 
   const [ registration, setRegistration ] = useState({
-    email: '',
-    password: '',
-    password2: '',
-    lastName: '',
-    ghinNumber: '',
+    email: 'ba@ba.com',
+    password: 'asdf',
+    password2: 'asdf',
+    lastName: 'Barrett',
+    ghinNumber: '753836',
     country: 'USA',
     state: '',
     prev: 1,
