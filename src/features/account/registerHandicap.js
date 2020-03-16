@@ -108,12 +108,12 @@ const RegisterHandicap = props => {
                 value={registration.ghinNumber}
               />
             </View>
-            <View style={styles.divider}>
+          </View>
+          <View style={styles.divider}>
               <View style={styles.hrLine} />
               <Text style={styles.dividerText}>OR</Text>
               <View style={styles.hrLine} />
             </View>
-          </View>
           <View>
             <Text style={styles.lookup}>
               Look up my GHIN number by Last Name & State
@@ -143,6 +143,26 @@ const RegisterHandicap = props => {
               </View>
             </View>
           </View>
+          <View style={[styles.divider, {paddingTop: 40,}]}>
+              <View style={styles.hrLine} />
+              <Text style={styles.dividerText}>OR</Text>
+              <View style={styles.hrLine} />
+            </View>
+        </View>
+        <View style={styles.skip_view}>
+          <Text>
+            I don't keep a GHIN handicap.
+            <Text
+              onPress={() => {
+                setRegistration({
+                  ...registration,
+                  prev: 2,
+                });
+                navigation.navigate('Register', { c: 4 });
+              }}
+              style={styles.skip_text}
+            >  Skip this step</Text>
+          </Text>
         </View>
       </Card>
       <View style={styles.button_row}>
@@ -151,6 +171,10 @@ const RegisterHandicap = props => {
           title='Prev'
           type='solid'
           onPress={() => {
+            setRegistration({
+              ...registration,
+              prev: 1,
+            });
             navigation.navigate('Register', {c: registration.prev});
           }}
           accessibilityLabel='Register Prev 2'
@@ -230,6 +254,16 @@ const styles = StyleSheet.create({
   },
   picker_state: {
     flex: 1,
+  },
+  skip_view: {
+    paddingTop: 15,
+    paddingBottom: 15,
+    justifyContent: 'flex-start'
+  },
+  skip_text: {
+    fontWeight: 'bold',
+    marginLeft: 6,
+    color: blue,
   },
   prev: {
     width: 150,

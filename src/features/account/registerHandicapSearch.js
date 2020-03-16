@@ -9,12 +9,14 @@ import {
 } from 'react-native';
 import {
   Button,
-  Card,
+  Icon,
   ListItem,
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 
 import { login, search } from 'common/utils/ghin';
+import { green } from 'common/colors';
+import { fn } from 'moment';
 
 
 
@@ -36,19 +38,54 @@ const RegisterHandicapSearch = props => {
 
   const renderGolfer = ({item}) => {
     //console.log('golfer', item);
+    const fn = item.FirstName ? item.FirstName : item.first_name;
+    const ln = item.LastName ? item.LastName : item.last_name;
+    const gn = item.GHINNumber ? item.GHINNumber : item.ghin;
     const key = item.GHINNumber ? item.SearchValue :
-      `${item.ghin}_${item.club_id}`
+      `${item.ghin}_${item.club_id}`;
     const title = item.PlayerName ? item.PlayerName :
       `${item.first_name} ${item.last_name}`;
     const subtitle = item.ClubName ? item.ClubName : item.club_name;
     const hdcp = item.Display ? item.Display : item.handicap_index;
+
+    const leftAvatarColor = (gn == selected) ? green : '#fff';
 
     return (
       <ListItem
         key={key}
         title={title}
         subtitle={subtitle}
+        leftAvatar={(
+          <Icon
+            name='check-circle'
+            type='material-community'
+            color={leftAvatarColor}
+            size={30}
+          />
+        )}
         rightElement={handicap(hdcp)}
+        onPress={() => {
+          if( selected ) {
+            setSelected(null);
+            setRegistration({
+              ...registration,
+              ghin_creds: null,
+              name: '',
+              short: '',
+            })
+          } else {
+            setSelected(gn);
+            setRegistration({
+              ...registration,
+              ghin_creds: {
+                lastName: ln,
+                ghinNumber: gn,
+              },
+              name: title,
+              short: fn,
+            });
+          }
+        }}
       />
     );
   };
@@ -90,11 +127,11 @@ const RegisterHandicapSearch = props => {
         data={golfers}
         renderItem={renderGolfer}
         keyExtractor={g => (
-          g.GHINNumber ? g.SearchValue : Math.random()
+          g.GHINNumber ? g.SearchValue : `${g.ghin}_${g.club_id}`
         )}
         onEndReachedThreshold={0.8}
         onEndReached={async () => {
-          console.log('onEndReached');
+          //console.log('onEndReached');
           // should only be in 'search' part where we want to peform
           // infinite scroll pagination
           const search_results = await search(
@@ -105,6 +142,7 @@ const RegisterHandicapSearch = props => {
           );
           setGolfers(golfers.concat(search_results));
           setPage(page+1);
+          console.log('page fetched', page);
         }}
       />
     );
@@ -114,6 +152,7 @@ const RegisterHandicapSearch = props => {
       <View style={styles.card}>
         <View style={styles.title_view}>
           <Text style={styles.title}>GHIN Results</Text>
+          <Text>(please click one to proceed)</Text>
         </View>
         { cardContent }
       </View>
@@ -135,8 +174,8 @@ const RegisterHandicapSearch = props => {
         <Button
           style={styles.next}
           title='Next'
-          type={(fetched && golfers && golfers.length) ? 'solid' : 'outline'}
-          disabled={!(fetched && golfers && golfers.length)}
+          type={selected ? 'solid' : 'outline'}
+          disabled={!selected}
           onPress={() => {
             setRegistration({
               ...registration,
