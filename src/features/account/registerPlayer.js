@@ -12,6 +12,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import { validateName } from 'common/utils/account';
+import { login } from 'common/utils/ghin';
 import { green } from 'common/colors';
 
 
@@ -50,13 +51,34 @@ const RegisterPlayer = props => {
     }, [nameRef]
   );
 
+  useEffect(
+    () => {
+      const fetchData = async () => {
+
+        if( registration.ghin_creds ) {
+          const search_results = await login(
+            registration.ghin_creds.ghinNumber,
+            registration.ghin_creds.lastName
+          );
+          if( search_results ) {
+            setRegistration({
+              ...registration,
+              ghin_data: search_results
+            });
+          }
+        }
+      };
+      fetchData();
+    }, []
+  );
+
   return (
     <View style={styles.container}>
       <View>
-        <Card title='Player Information'>
+        <Card title='Register - Player Information'>
           <View testID='register_4_view'>
+            <Text style={styles.changes}>{ changes }</Text>
             <View style={styles.field_container}>
-              <Text style={styles.changes}>{ changes }</Text>
               <Text style={styles.field_label}>Full Name *</Text>
               <TextInput
                 style={[styles.field_input, nValid]}
@@ -106,14 +128,10 @@ const RegisterPlayer = props => {
           />
           <Button
             style={styles.next}
-            title='Next'
+            title='Register'
             type={(nameValid && shortValid) ? 'solid' : 'outline'}
             disabled={!(nameValid && shortValid)}
             onPress={() => {
-              setRegistration({
-                ...registration,
-                prev: 4,
-              });
               navigation.navigate('Register', {c: 5})
             }}
             accessibilityLabel='Register Next 4'

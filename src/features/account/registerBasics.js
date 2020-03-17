@@ -55,7 +55,7 @@ const RegisterBasics = props => {
   return (
     <View style={styles.container}>
       <View>
-        <Card title='Basics'>
+        <Card title='Register - Basics'>
           <View style={styles.loginView} testID='register_1_view'>
             <View>
               <View style={styles.field_container}>

@@ -74,7 +74,7 @@ const RegisterHandicap = props => {
 
   return (
     <View style={styles.container}>
-      <Card title='Handicap'>
+      <Card title='Register - Handicap'>
         <View style={styles.loginView} testID='register_2_view'>
           <View>
             <View style={styles.field_container}>
@@ -143,7 +143,7 @@ const RegisterHandicap = props => {
               </View>
             </View>
           </View>
-          <View style={[styles.divider, {paddingTop: 40,}]}>
+          <View style={styles.divider}>
               <View style={styles.hrLine} />
               <Text style={styles.dividerText}>OR</Text>
               <View style={styles.hrLine} />
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 50,
     marginBottom: 20,
   },
   hrLine: {
@@ -256,7 +256,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   skip_view: {
-    paddingTop: 15,
     paddingBottom: 15,
     justifyContent: 'flex-start'
   },

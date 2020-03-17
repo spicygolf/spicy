@@ -132,8 +132,11 @@ const RegisterHandicapSearch = props => {
         onEndReachedThreshold={0.8}
         onEndReached={async () => {
           //console.log('onEndReached');
+
           // should only be in 'search' part where we want to peform
           // infinite scroll pagination
+          if( registration.lastName && registration.ghinNumber ) return;
+
           const search_results = await search(
             registration.state,
             registration.lastName,
@@ -147,11 +150,12 @@ const RegisterHandicapSearch = props => {
       />
     );
   }
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
         <View style={styles.title_view}>
-          <Text style={styles.title}>GHIN Results</Text>
+          <Text style={styles.title}>Register - GHIN Results</Text>
           <Text>(please click one to proceed)</Text>
         </View>
         { cardContent }

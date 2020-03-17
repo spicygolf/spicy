@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import {
   Button,
+  Card,
 } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -93,7 +94,10 @@ const Login = props => {
   );
 
   return (
-    <View style={styles.loginView} testID='login_form_view'>
+    <Card
+      title='Login'
+      testID='login_form_view'
+    >
       <View>
         <View style={styles.field_container}>
           <Text style={styles.field_label}>Email</Text>
@@ -152,7 +156,7 @@ const Login = props => {
           type='clear'
         />
       </View>
-    </View>
+    </Card>
   );
 
 };
@@ -162,7 +166,8 @@ export default Login;
 
 var styles = StyleSheet.create({
   loginView: {
-    margin: 10
+    margin: 10,
+    height: '100%',
   },
   field_container: {
 
