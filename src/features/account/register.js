@@ -121,7 +121,9 @@ const Register = props => {
         await AsyncStorage.setItem('token', payload.token);
 
         // clear fields after successful login
-        setRegistration(defaultRegistration);
+        //setRegistration(defaultRegistration);
+        // TODO: this doesn't work, because it causes a re-render.
+        //       need to figure out how to reset registration
 
         navigation.navigate('App', {
           currentPlayerKey: payload.pkey,
@@ -154,7 +156,7 @@ const Register = props => {
           <Text
             onPress={() => { navigation.navigate('Login'); }}
             style={styles.login_text}
-          >  Log In</Text>
+          >  Login</Text>
         </Text>
       </View>
     </View>
