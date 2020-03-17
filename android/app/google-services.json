@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1063399479208",
+    "firebase_url": "https://spicy-golf-prod.firebaseio.com",
+    "project_id": "spicy-golf-prod",
+    "storage_bucket": "spicy-golf-prod.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1063399479208:android:108f565f125b84aa7f2f9d",
+        "android_client_info": {
+          "package_name": "golf.spicy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1063399479208-bsu299v5p0lpibh4j320ugprr939k94a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA07FhxGY1LI6Oa4-WOPE1pyutffdzVemY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1063399479208-bsu299v5p0lpibh4j320ugprr939k94a.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1063399479208-59v1p9o7utdf8441ai32gsav659ekn8o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "golf.spicy"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
