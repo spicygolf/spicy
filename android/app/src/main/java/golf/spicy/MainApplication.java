@@ -1,4 +1,4 @@
-package golf.druid.spicygolf;
+package golf.spicy;
 
 import android.app.Application;
 import android.content.Context;

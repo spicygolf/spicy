@@ -488,7 +488,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "golf.druid.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = "golf.spicy";
 				PRODUCT_NAME = spicygolf;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -508,7 +508,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "golf.druid.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = "golf.spicy";
 				PRODUCT_NAME = spicygolf;
 				VERSIONING_SYSTEM = "apple-generic";
 			};

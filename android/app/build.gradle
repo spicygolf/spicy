@@ -130,7 +130,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "golf.druid.spicygolf"
+        applicationId "golf.spicy"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
