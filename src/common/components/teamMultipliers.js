@@ -34,7 +34,7 @@ const TeamMultipliers = props => {
 
   const setMultiplier = (mult, newValue) => {
 
-    //console.log('setMultiplier', teamNum, mult, newValue);
+    //console.log('setMultiplier', currentHole, teamNum, mult, newValue);
 
     let newGame = cloneDeep(game);
     // TODO: these deletes are hacky for the future...
@@ -54,17 +54,27 @@ const TeamMultipliers = props => {
         newGame.teams.holes[holeIndex].multipliers = [];
       }
       const mults = newGame.teams.holes[holeIndex].multipliers;
-      if( newValue && !mults.includes(mult.name) ) {
-        mults.push(mult.name);
+      if( newValue && !find(mults, {
+        name: mult.name,
+        team: teamNum,
+        first_hole: currentHole,
+      }) ) {
+        mults.push({
+          name: mult.name,
+          team: teamNum,
+          first_hole: currentHole,
+        });
       }
-      if( !newValue && mults.includes(mult.name) ) {
-        const newMults = filter(mults, m => m != mult.name);
+      if( !newValue && find(mults, {name: mult.name}) ) {
+        const newMults = filter(mults, m => (
+          !(m.name == mult.name && m.team == teamNum && m.first_hole == currentHole)
+        ));
         newGame.teams.holes[holeIndex].multipliers = newMults;
       }
 
     });
 
-    console.log('setMultiplier newGame', newGame);
+    //console.log('setMultiplier newGame', newGame);
 
     const { loading, error, data } = updateGame({
       variables: {
@@ -84,17 +94,31 @@ const TeamMultipliers = props => {
 
   const renderMultiplier = mult => {
 
+    //console.log('renderMultiplier', mult);
+
     // TODO: mult.name needs l10n, i18n - use mult.name as slug
     let type = 'outline';
     let color = red;
     let bgColor = null;
 
     let selected = false;
-    if( h && h.multipliers && h.multipliers.includes(mult.name) ) {
+    let disabled = false;
+    if(
+      h &&
+      h.multipliers &&
+      find(h.multipliers, {
+        name: mult.name,
+        team: teamNum,
+        first_hole: currentHole
+      })
+      ||
+      mult.existing
+    ) {
       selected = true;
       type = 'solid';
       color = 'white';
       bgColor = red;
+      if(mult.existing) disabled=true;
     }
 
     return (
@@ -110,7 +134,12 @@ const TeamMultipliers = props => {
         type={type}
         buttonStyle={[styles.button, {backgroundColor: bgColor}]}
         titleStyle={[styles.buttonTitle, {color: color}]}
-        onPress={() => setMultiplier(mult, !selected)}
+        disabled={disabled}
+        onPress={() => {
+          if( !mult.existing ) {
+            setMultiplier(mult, !selected);
+          }
+        }}
       />
     );
 
@@ -124,6 +153,18 @@ const TeamMultipliers = props => {
   if( !team ) return null;
 
   const team_mults = [];
+  // see if we have any mults already working
+  h.multipliers.map(hMult => {
+    if( hMult.first_hole != currentHole && hMult.team == teamNum ) {
+      const existingMult = find(gamespec.multipliers, {name: hMult.name});
+      team_mults.push({
+        ...existingMult,
+        existing: true,
+      });
+    }
+  });
+
+  // add in the mults for this particular hole
   gamespec.multipliers.map(gsMult => {
     // only give options for multipliers based_on == 'user'
     if( gsMult.based_on != 'user' ) return;
@@ -149,7 +190,7 @@ const TeamMultipliers = props => {
         horizontal={true}
         data={sorted_mults}
         renderItem={({item}) => renderMultiplier(item)}
-        keyExtractor={item => item.seq.toString()}
+        keyExtractor={_ => Math.random().toString()}
       />
     </View>
   );
