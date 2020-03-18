@@ -1,6 +1,6 @@
 import { getHoles } from 'common/utils/game';
 
-import { find, orderBy, reduce, sortBy } from 'lodash';
+import { filter, find, orderBy, reduce, sortBy } from 'lodash';
 import {
   get_hole,
   get_net_score,
@@ -150,7 +150,7 @@ export const scoring = (game, gamespec) => {
           }
         }
 
-//        if( hole == '1' ) console.log('teams', sorted[i].index, teams, teams[sorted[i].index]);
+        //if( hole == '1' ) console.log('teams', sorted[i].index, teams, teams[sorted[i].index]);
 
       }
     });
@@ -158,16 +158,18 @@ export const scoring = (game, gamespec) => {
     // team junk that depends on team score or something after the above calcs
     //   something like 'ky' or 'oj' in wolfhammer
 
+    //if( hole == '15' ) console.log('gHole', gHole);
+
     // multipliers
     const multipliers = [];
     gamespec.multipliers.map(gsMult => {
       if( gsMult.based_on == 'user' ) {
-        //if( hole == '2' ) console.log('scoring mult', gsMult, gHole);
-        if( gHole && gHole.multipliers && gHole.multipliers.includes(gsMult.name) ) {
-          multipliers.push(gsMult);
+        if( gHole && gHole.multipliers ) {
+          filter(gHole.multipliers, {name: gsMult.name}).map(mult => {
+            multipliers.push(gsMult);
+          });
         }
       } else {
-        //if( hole == '1' ) console.log('non-user multiplier', gsMult);
         // loop thru teams and players to see if this multiplier is achieved
         teams.map(t => {
           t.players.map(p => {

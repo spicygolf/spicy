@@ -17,7 +17,11 @@ export const GET_GAME_QUERY = gql`
             team
             players
           }
-          multipliers
+          multipliers {
+            name
+            team
+            first_hole
+          }
         }
       }
       rounds {
