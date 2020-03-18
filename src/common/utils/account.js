@@ -1,13 +1,76 @@
 import AsyncStorage from '@react-native-community/async-storage';
+import auth from '@react-native-firebase/auth';
 
-export const logout = async ({navigation, client}) => {
+import { baseUrl } from 'common/config';
+
+
+
+export const register = async (registration, fbUser) => {
+
+  // REST call to register player
+  const uri = `${baseUrl}/account/register`;
+  try {
+    const res = await fetch(uri, {
+      method: 'POST',
+      body: JSON.stringify({
+        ...registration,
+        fbUser: fbUser,
+      }),
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'application/json'
+      }
+    });
+    const payload = await res.json();
+    console.log('register payload', payload);
+  } catch( e ) {
+    console.log('register error', e);
+
+  }
+};
+
+export const login = async fbUser => {
+
+  const token = await fbUser.getIdToken();
+
+  // REST call to API to get pkey, token
+  const uri = `${baseUrl}/account/login`;
+
+  const res = await fetch(uri, {
+    method: 'POST',
+    body: JSON.stringify({
+      email: fbUser.email,
+      fbToken: token,
+    }),
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'application/json'
+    }
+  });
+  const payload = await res.json();
+
+  let ret = null;
+  switch( res.status ) {
+    case 200:
+      ret = {
+        currentPlayerKey: payload.pkey,
+        token: payload.token,
+      };
+      break;
+    default:
+      // TODO: handle errors
+      console.log('login payload', payload);
+  }
+  return ret;
+};
+
+export const logout = async client => {
 
   // zap local storage
   await AsyncStorage.removeItem('token');
   await AsyncStorage.removeItem('currentPlayer');
 
   // zap cache
-  console.log('logout client', client);
   try {
     // clear apollo client cache/store
     if (client && typeof client.clearStore === 'function') {
@@ -18,10 +81,22 @@ export const logout = async ({navigation, client}) => {
   }
 
   // call API logout endpoint
-  // TODO: ^
+  await auth().signOut();
 
-  // navigate to account stack
-  navigation.navigate('Account');
+};
+
+export const getCurrentUser = () => {
+  const fbUser = auth().currentUser;
+  return login(fbUser)
+    .then(login_res => {
+      return {
+        ...login_res,
+        fbUser: fbUser,
+      };
+    })
+    .catch(e => {
+      console.log('getCurrentUser error', e);
+    });
 };
 
 export const validateEmail = email => {

@@ -19,13 +19,21 @@ const ProfileHome = props => {
   const client = useApolloClient();
 
   const _logoutPressed = () => {
-    logout(props);
+    logout(client);
   }
 
   const _clearCache = props => {
     client.resetStore();
   }
 
+/*
+      <Button
+        style={styles.logout_button}
+        title='Clear Cache'
+        testID='clear_cache_button'
+        onPress={() => _clearCache()}
+      />
+*/
   return (
     <View>
       <Button
@@ -33,12 +41,6 @@ const ProfileHome = props => {
         title='Logout'
         testID='logout_button'
         onPress={() => _logoutPressed()}
-      />
-      <Button
-        style={styles.logout_button}
-        title='Clear Cache'
-        testID='clear_cache_button'
-        onPress={() => _clearCache()}
       />
     </View>
   );
@@ -50,6 +52,6 @@ export default ProfileHome;
 
 const styles = StyleSheet.create({
   logout_button: {
-    marginTop: 10
+    margin: 20
   }
 });

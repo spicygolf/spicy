@@ -10,10 +10,9 @@ import {
   Button,
   Card,
 } from 'react-native-elements';
-import AsyncStorage from '@react-native-community/async-storage';
+import auth from '@react-native-firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 
-import { baseUrl } from 'common/config';
 import { blue, green } from 'common/colors';
 import { validateEmail, validatePassword } from 'common/utils/account';
 
@@ -27,55 +26,30 @@ const Login = props => {
   const [ password, setPassword ] = useState('');
   const [ emailValid, setEmailValid ] = useState(false);
   const [ passValid, setPassValid ] = useState(false);
+  const [ loginError, setLoginError ] = useState();
 
   const navigation = useNavigation();
   const emailRef = useRef(null);
 
   const login = async () => {
-    // REST call to API to get token and store it in AsyncStorage
-    const uri = `${baseUrl}/account/login`;
+
     try {
-      const res = await fetch(uri, {
-        method: 'POST',
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Content-Type': 'application/json'
-        }
-      });
-      const payload = await res.json();
-      console.log('payload', payload);
-      // TODO: handle anything other than 200 here.
-      await AsyncStorage.setItem('currentPlayer', payload.pkey);
-      await AsyncStorage.setItem('token', payload.token);
-
-      // clear fields after successful login
-      setEmail('');
-      setEmailValid(false);
-      setPassword('');
-      setPassValid(false);
-      emailRef.current.focus();
-
-      navigation.navigate('App', {
-        currentPlayerKey: payload.pkey,
-        token: payload.token,
-      });
-
-    } catch(err) {
-      console.error(err);
-      // TODO: handle me
+      const res = await auth().signInWithEmailAndPassword(email, password);
+    } catch( e ) {
+      console.log('login error', e.message, e.code);
+      const split = e.message.split(']');
+      console.log('message', split);
+      let message = e.message;
+      if( split && split[1] ) message = split[1].trim();
+      setLoginError(message);
     }
+
   };
 
   const validate = (type, text) => {
 
     const eTest = type == 'email' ? text : email;
     const pTest = type == 'password' ? text : password;
-    //console.log('email', eTest);
-    //console.log('pass ', pTest);
 
     setEmailValid(validateEmail(eTest));
     setPassValid(validatePassword(pTest));
@@ -126,6 +100,9 @@ const Login = props => {
             autoCapitalize='none'
             value={password}
           />
+        </View>
+        <View style={styles.field_container}>
+          <Text style={styles.error_text}>{loginError}</Text>
         </View>
         <Button
           style={styles.login_button}

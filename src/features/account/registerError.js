@@ -36,7 +36,7 @@ const RegisterError = props => {
                 ...registration,
                 prev: 4,
               });
-              navigation.navigate('Register', {c: registration.prev});
+              navigation.navigate('Register', {c: 4});
             }}
             accessibilityLabel='Register Prev 10000'
             testID='register_prev_10000_button'

@@ -12,10 +12,10 @@ import {
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import { useQuery } from '@apollo/react-hooks';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import moment from 'moment';
 import { reverse, sortBy } from 'lodash';
 
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
 import { blue } from 'common/colors';
 

@@ -5,14 +5,14 @@ import {
   Text,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-community/async-storage';
+import auth from '@react-native-firebase/auth';
 
-import { baseUrl } from 'common/config';
 import RegisterBasics from 'features/account/registerBasics';
 import RegisterHandicap from 'features/account/registerHandicap';
 import RegisterHandicapSearch from 'features/account/registerHandicapSearch';
 import RegisterPlayer from 'features/account/registerPlayer';
 import RegisterError from 'features/account/registerError';
+import { register } from 'common/utils/account';
 import { blue } from 'common/colors';
 
 
@@ -101,51 +101,28 @@ const Register = props => {
 
   const register = async () => {
     //console.log('registration', registration);
-
-    // REST call to register player
-    const uri = `${baseUrl}/account/register`;
     try {
-      const res = await fetch(uri, {
-        method: 'POST',
-        body: JSON.stringify(registration),
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Content-Type': 'application/json'
-        }
-      });
-      const payload = await res.json();
-
-      if( payload.statusCode == 201 ) {
-        // successful registration and login
-        await AsyncStorage.setItem('currentPlayer', payload.pkey);
-        await AsyncStorage.setItem('token', payload.token);
-
-        // clear fields after successful login
-        //setRegistration(defaultRegistration);
-        // TODO: this doesn't work, because it causes a re-render.
-        //       need to figure out how to reset registration
-
-        navigation.navigate('App', {
-          currentPlayerKey: payload.pkey,
-          token: payload.token,
-        });
-        return;
+      const res = await auth().createUserWithEmailAndPassword(
+        registration.email,
+        registration.password
+      );
+      if( res && res.user ) {
+        res.user.sendEmailVerification();
+        await register(registration, res.user);
       }
-
-      // handle anything other than 201 here.
-      console.log('error payload', payload);
-      navigation.navigate('Register', {c: 10000, e: payload});
-
-    } catch(err) {
-      console.log('err', err);
+    } catch( e ) {
+      //console.log('register error', e);
+      let message = e.message;
+      const split = e.message.split(']');
+      if( split && split[1] ) message = split[1].trim();
       navigation.navigate('Register', {c: 10000, e: {
         error: 500,
-        message: err
+        message: message
       }});
+
     }
+
   };
-
-
 
   return (
     <View style={styles.container}>
@@ -164,6 +141,7 @@ const Register = props => {
 };
 
 export default Register;
+
 
 const styles = StyleSheet.create({
   container: {
