@@ -11,10 +11,12 @@ import {
 } from 'react-native-elements';
 import { cloneDeep, filter, find, findIndex, orderBy } from 'lodash';
 import { useMutation } from '@apollo/react-hooks';
+import jsonLogic from 'json-logic-js';
 
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
+import ScoringWrapper from 'common/utils/ScoringWrapper';
 import { isTeamDownTheMost } from 'common/utils/score';
 import { getHolesToUpdate } from 'common/utils/teams';
 import { red } from 'common/colors';
@@ -22,6 +24,9 @@ import { red } from 'common/colors';
 
 
 const TeamMultipliers = props => {
+
+  // add custom operators for logic
+  jsonLogic.add_operation('team_down_the_most', isTeamDownTheMost);
 
   const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
 
@@ -164,22 +169,27 @@ const TeamMultipliers = props => {
     }
   });
 
-  // add in the mults for this particular hole
+  // add in the user mults for this particular hole
   gamespec.multipliers.map(gsMult => {
     // only give options for multipliers based_on == 'user'
     if( gsMult.based_on != 'user' ) return;
-    switch( gsMult.availability ) {
-      case 'team_down_the_most':
-        const prevHole = find(scoring.holes, { hole: (currentHole-1).toString() });
-        if( isTeamDownTheMost(prevHole, team) ) {
-          team_mults.push(gsMult);
-        }
-        break;
-      default:
-        break;
+
+    try {
+      const replaced = gsMult.availability.replace(/'/g, '"');
+      const availability = JSON.parse(replaced);
+
+      if( jsonLogic.apply(availability, {
+        scoring: new ScoringWrapper(scoring, currentHole),
+        team: team,
+      }) ) {
+        team_mults.push(gsMult);
+      }
+    } catch( e ) {
+      console.log('logic error', e);
     }
+
   });
-  //console.log('team mults', teamNum, team_mults);
+  console.log('team mults', teamNum, team_mults);
   const sorted_mults = orderBy(team_mults, ['seq'], ['asc']);
   //console.log('sorted_mults', sorted_mults);
   if( sorted_mults.length == 0 ) return null;
