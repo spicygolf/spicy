@@ -1,6 +1,6 @@
 import { getHoles } from 'common/utils/game';
 
-import { filter, find, orderBy, reduce, sortBy } from 'lodash';
+import { filter, find, orderBy, reduce } from 'lodash';
 import {
   get_hole,
   get_net_score,
@@ -274,27 +274,5 @@ export const isScoreToParJunk = (junk, s, par) => {
       // if condition not achieved, return null
       return null;
   }
-
-};
-
-export const isTeamDownTheMost = (hole, team) => {
-  if( !hole ) return true;
-
-  const teamScores = hole.teams.map(t => ({
-    team: t.team,
-    score: t.runningTotal
-  }));
-  const sortedTeamScores = sortBy(teamScores, ['score'], ['asc']);
-  const teamsDownTheMost = [sortedTeamScores[0].team];
-  const lowestScore = sortedTeamScores[0].score;
-  for( let i=1; i < sortedTeamScores.length; i++ ) {
-    if( sortedTeamScores[i].score == lowestScore ) {
-      teamsDownTheMost.push(sortedTeamScores[i].team);
-    } else {
-      break;
-    }
-  }
-  //console.log('isTeamDownTheMost', sortedTeamScores, teamsDownTheMost);
-  return teamsDownTheMost.includes(team.team);
 
 };
