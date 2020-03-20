@@ -191,7 +191,7 @@ const TeamMultipliers = props => {
     }
 
   });
-  console.log('team mults', teamNum, team_mults);
+  //console.log('team mults', teamNum, team_mults);
   const sorted_mults = orderBy(team_mults, ['seq'], ['asc']);
   //console.log('sorted_mults', sorted_mults);
   if( sorted_mults.length == 0 ) return null;
