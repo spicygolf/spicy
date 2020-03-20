@@ -17,7 +17,6 @@ import { GET_GAME_QUERY } from 'features/games/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import ScoringWrapper from 'common/utils/ScoringWrapper';
-import { isTeamDownTheMost } from 'common/utils/score';
 import { getHolesToUpdate } from 'common/utils/teams';
 import { red } from 'common/colors';
 
@@ -25,13 +24,17 @@ import { red } from 'common/colors';
 
 const TeamMultipliers = props => {
 
-  // add custom operators for logic
-  jsonLogic.add_operation('team_down_the_most', isTeamDownTheMost);
-
   const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
 
   const { team: teamNum, scoring, currentHole } = props;
   const { game, gamespec } = useContext(GameContext);
+
+  // add custom operators for logic
+  const scoringWrapper = new ScoringWrapper(game, scoring, currentHole)
+  jsonLogic.add_operation('team_down_the_most', scoringWrapper.isTeamDownTheMost);
+  jsonLogic.add_operation('team_second_to_last', scoringWrapper.isTeamSecondToLast);
+  jsonLogic.add_operation('other_team_multiplied_with', scoringWrapper.didOtherTeamMultiplyWith);
+
   const { _key: gkey } = game;
   const h = ( game && game.teams && game.teams.holes ) ?
     find(game.teams.holes, {hole: currentHole}) : {hole: currentHole, teams: []};
@@ -177,9 +180,8 @@ const TeamMultipliers = props => {
     try {
       const replaced = gsMult.availability.replace(/'/g, '"');
       const availability = JSON.parse(replaced);
-
       if( jsonLogic.apply(availability, {
-        scoring: new ScoringWrapper(scoring, currentHole),
+        scoring: scoringWrapper,
         team: team,
       }) ) {
         team_mults.push(gsMult);
