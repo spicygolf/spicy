@@ -37,10 +37,7 @@ export const GET_GAME_QUERY = gql`
             v
             ts
           }
-          pops {
-            gkey
-            pops
-          }
+          pops
         }
         player {
           _key
@@ -77,7 +74,6 @@ export const GET_GAME_QUERY = gql`
         _key
         name
         short
-        team
         handicap {
           value
           revDate

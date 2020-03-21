@@ -10,6 +10,7 @@ export const get_round_for_player = (rounds, pkey) => {
 };
 
 
+// given a hole (string, "1") and round, return the course's 'hole' object
 export const get_hole = (hole, round) => {
   if( round && round.tee && round.tee.holes ) {
     const ret = find(round.tee.holes, h => h.hole == hole);
