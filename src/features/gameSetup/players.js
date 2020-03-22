@@ -32,13 +32,7 @@ const Players = props => {
 
 
   const _itemPressed = player => {
-    console.log('pressed player', player);
-
-    // TODO: maybe implement me?
-    // I could see this being used for choosing a round or multiple that the
-    // player may have going that current day.
-    //
-    //navigate('player_item', {player: player});
+    navigation.navigate('EditPlayer', {player: player});
   };
 
   const _shouldShowAddButton = players => {

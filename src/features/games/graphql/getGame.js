@@ -28,6 +28,7 @@ export const GET_GAME_QUERY = gql`
         _key
         date
         seq
+        handicap_index
         game_handicap
         course_handicap
         scores {

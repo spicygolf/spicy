@@ -21,7 +21,7 @@ import { GameContext } from 'features/game/gameContext';
 import { ADD_LINK_MUTATION } from 'common/graphql/link'
 import { ADD_ROUND_MUTATION } from 'features/rounds/graphql';
 import { GET_GAME_QUERY } from 'features/games/graphql';
-import { course_handicap } from '../../common/utils/handicap';
+import { course_handicap } from 'common/utils/handicap';
 
 
 
