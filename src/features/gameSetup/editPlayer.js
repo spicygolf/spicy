@@ -37,7 +37,7 @@ const EditPlayer = props => {
   const initHI = (player && player.handicap && player.handicap.display) ?
     player.handicap.display : '';
   const initGH = (round && round.game_handicap) ?
-    round.course_handicap.toString() : '';
+    round.game_handicap.toString() : '';
   const [ HI, setHI ] = useState(initHI);
   const initCH = round.course_handicap ? round.course_handicap.toString() : '-';
   const [ CH, setCH ] = useState(initCH);
@@ -57,13 +57,13 @@ const EditPlayer = props => {
       // fuck if I know...  gl;hf
     }
 
-    if( CH && CH != initCH ) {
-      other.push({key: 'course_handicap', value: CH});
+    if( CH != initCH ) {
+      other.push({key: 'course_handicap', value: CH || null});
       doUpdate = true;
     }
 
-    if( GH && GH != initGH ) {
-      other.push({key: 'game_handicap', value: GH});
+    if( GH != initGH ) {
+      other.push({key: 'game_handicap', value: GH || null});
       doUpdate = true;
     }
 
@@ -145,7 +145,7 @@ const EditPlayer = props => {
               <TextInput
                 style={styles.field_input}
                 onChangeText={text => {
-                  setGH(text);
+                  setGH(parseFloat(text) || '');
                 }}
                 onEndEditing={() => update()}
                 keyboardType='decimal-pad'
