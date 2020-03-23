@@ -106,7 +106,7 @@ const HoleJunk = props => {
       const based_on = junk.based_on || 'gross';
       let s = get_score_value('gross', score);
       if( based_on == 'net' ) {
-        s = get_net_score(s, score, gkey);
+        s = get_net_score(s, score);
       }
 
       if( !junk.score_to_par ) {

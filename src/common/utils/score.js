@@ -34,7 +34,7 @@ export const scoring = (game, gamespec) => {
           const round = get_round_for_player(game.rounds, gPlayer);
           const score = get_score(hole, round);
           const gross = get_score_value('gross', score);
-          const net = get_net_score(gross, score, gkey);
+          const net = get_net_score(gross, score);
           const teeHole = get_hole(hole, round);
           const par = (teeHole && teeHole.par) ? parseFloat(teeHole.par) : 0.0;
 
