@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useMutation } from '@apollo/react-hooks';
 
-import { get_score_value } from 'common/utils/rounds';
+import { get_score_value, get_net_score } from 'common/utils/rounds';
 import { upsertScore } from 'common/utils/upsertScore';
 import { blue } from 'common/colors';
 import { GET_GAME_QUERY } from 'features/games/graphql';
@@ -36,6 +36,8 @@ const HoleScore = props => {
   }
 
   const gross = get_score_value('gross', score);
+  //console.log('holeScore score', score);
+  //const net = get_net_score(gross, score);
 
   const par = parseInt(hole.par);
   const first = (par - 2 >= 0 ? par - 1 : 0);
@@ -63,10 +65,23 @@ const HoleScore = props => {
       hole_score_styles.push(styles.hole_score_text_not_selected);
     }
 
+    let content = (
+      <Text style={hole_score_styles}>{item.key}</Text>
+    );
+
+    if( score.pops && score.pops != '0' ) {
+      const net = get_net_score(item.key, score);
+      content = (
+        <Text style={[hole_score_styles, styles.pop_text]}>
+          {item.key}/{net}
+        </Text>
+      );
+    }
+
     return (
       <TouchableHighlight onPress={() => setScore(item)}>
         <View style={score_styles}>
-          <Text style={hole_score_styles}>{item.key}</Text>
+          { content }
         </View>
       </TouchableHighlight>
     )
@@ -130,10 +145,10 @@ export default HoleScore;
 
 const styles = StyleSheet.create({
   score_option: {
-    paddingTop: 5,
-    paddingBottom: 5,
-    paddingLeft: 15,
-    paddingRight: 15,
+    height: 40,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   score_option_selected: {
     backgroundColor: blue,
@@ -142,7 +157,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
   },
   hole_score_text: {
-    fontSize: 26,
+    fontSize: 24,
+
   },
   hole_score_text_selected: {
     color: 'white',
@@ -150,5 +166,7 @@ const styles = StyleSheet.create({
   hole_score_text_not_selected: {
     color: '#111',
   },
-
+  pop_text: {
+    fontSize: 14,
+  },
 });
