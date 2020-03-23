@@ -1,11 +1,13 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import {
   FlatList,
+  ImageBackground,
   StyleSheet,
   Text,
   TouchableHighlight,
   View,
 } from 'react-native';
+import { Icon } from 'react-native-elements';
 import { useMutation } from '@apollo/react-hooks';
 
 import { get_score_value, get_net_score } from 'common/utils/rounds';
@@ -14,6 +16,12 @@ import { blue } from 'common/colors';
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import { POST_SCORE_MUTATION } from 'features/rounds/graphql';
 import { GameContext } from 'features/game/gameContext';
+
+const circle_blk = require('../../../assets/img/circle_blk.png');
+const circle_wht = require('../../../assets/img/circle_wht.png');
+const square_blk = require('../../../assets/img/square_blk.png');
+const square_wht = require('../../../assets/img/square_wht.png');
+
 
 
 
@@ -57,12 +65,18 @@ const HoleScore = props => {
     //console.log('item', item);
     let score_styles = [styles.score_option];
     let hole_score_styles = [styles.hole_score_text];
+    let src = null;
+
     if( item.selected ) {
       score_styles.push(styles.score_option_selected);
       hole_score_styles.push(styles.hole_score_text_selected);
+      if( item.toPar == -1 ) src = circle_wht;
+      if( item.toPar == 1 ) src = square_wht;
     } else {
       score_styles.push(styles.score_option_not_selected);
       hole_score_styles.push(styles.hole_score_text_not_selected);
+      if( item.toPar == -1 ) src = circle_blk;
+      if( item.toPar == 1 ) src = square_blk;
     }
 
     let content = (
@@ -79,11 +93,16 @@ const HoleScore = props => {
     }
 
     return (
-      <TouchableHighlight onPress={() => setScore(item)}>
-        <View style={score_styles}>
-          { content }
-        </View>
-      </TouchableHighlight>
+      <View style={score_styles}>
+        <ImageBackground
+          source={src}
+          style={styles.imgBg}
+        >
+          <TouchableHighlight onPress={() => setScore(item)}>
+            { content }
+          </TouchableHighlight>
+        </ImageBackground>
+      </View>
     )
   };
 
@@ -145,10 +164,9 @@ export default HoleScore;
 
 const styles = StyleSheet.create({
   score_option: {
-    height: 40,
     width: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 40,
+    padding: 1,
   },
   score_option_selected: {
     backgroundColor: blue,
@@ -158,7 +176,6 @@ const styles = StyleSheet.create({
   },
   hole_score_text: {
     fontSize: 24,
-
   },
   hole_score_text_selected: {
     color: 'white',
@@ -169,4 +186,10 @@ const styles = StyleSheet.create({
   pop_text: {
     fontSize: 14,
   },
+  imgBg: {
+    width: 38,
+    height: 38,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
