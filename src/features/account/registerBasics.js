@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,8 +10,9 @@ import {
   Card,
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-import { useFocusEffect } from '@react-navigation/native';
 
+import { RegisterContext } from 'features/account/registerContext';
+import BackToLogin from 'features/account/backToLogin';
 import { validateEmail, validatePassword } from 'common/utils/account';
 import { green } from 'common/colors';
 
@@ -20,7 +21,7 @@ import { green } from 'common/colors';
 
 const RegisterBasics = props => {
 
-  const { registration, setRegistration } = props;
+  const { registration, setRegistration } = useContext(RegisterContext);
   const navigation = useNavigation();
   const emailRef = useRef(null);
 
@@ -123,13 +124,14 @@ const RegisterBasics = props => {
                 ...registration,
                 prev: 1,
               });
-              navigation.navigate('Register', {c: 2})
+              navigation.navigate('RegisterHandicap')
             }}
             accessibilityLabel='Register Next 1'
             testID='register_next_1_button'
           />
         </View>
       </View>
+      <BackToLogin />
     </View>
   );
 };

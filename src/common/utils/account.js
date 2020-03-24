@@ -5,7 +5,7 @@ import { baseUrl } from 'common/config';
 
 
 
-export const register = async (registration, fbUser) => {
+export const register_player = async (registration, fbUser) => {
 
   // REST call to register player
   const uri = `${baseUrl}/account/register`;

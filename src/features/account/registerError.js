@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext } from 'react';
 import {
   StyleSheet,
   Text,
@@ -11,11 +11,20 @@ import {
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 
+import BackToLogin from 'features/account/backToLogin';
+import { RegisterContext } from 'features/account/registerContext';
+
 
 
 const RegisterError = props => {
 
-  const { registration, setRegistration, error } = props;
+  let error = {
+    error: 500,
+    message: 'Unknown error',
+  };
+  const { route } = props;
+  //console.log('route', route);
+  if( route && route.params && route.params.e ) error = route.params.e;
   const navigation = useNavigation();
 
   return (
@@ -32,17 +41,14 @@ const RegisterError = props => {
             title='Prev'
             type='solid'
             onPress={() => {
-              setRegistration({
-                ...registration,
-                prev: 4,
-              });
-              navigation.navigate('Register', {c: 4});
+              navigation.navigate('RegisterPlayer');
             }}
             accessibilityLabel='Register Prev 10000'
             testID='register_prev_10000_button'
           />
         </View>
       </View>
+      <BackToLogin />
     </View>
   );
 };

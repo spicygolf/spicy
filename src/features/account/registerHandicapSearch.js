@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -14,15 +14,16 @@ import {
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 
+import BackToLogin from 'features/account/backToLogin';
+import { RegisterContext } from 'features/account/registerContext';
 import { login, search } from 'common/utils/ghin';
 import { green } from 'common/colors';
-import { fn } from 'moment';
 
 
 
 const RegisterHandicapSearch = props => {
 
-  const { registration, setRegistration } = props;
+  const { registration, setRegistration } = useContext(RegisterContext);
   const navigation = useNavigation();
   const [ golfers, setGolfers ] = useState([]);
   const [ fetched, setFetched ] = useState(false);
@@ -166,11 +167,7 @@ const RegisterHandicapSearch = props => {
           title='Prev'
           type='solid'
           onPress={() => {
-            setRegistration({
-              ...registration,
-              prev: 1,
-            });
-            navigation.navigate('Register', {c: registration.prev});
+            navigation.goBack();
           }}
           accessibilityLabel='Register Prev 3'
           testID='register_prev_3_button'
@@ -181,16 +178,13 @@ const RegisterHandicapSearch = props => {
           type={selected ? 'solid' : 'outline'}
           disabled={!selected}
           onPress={() => {
-            setRegistration({
-              ...registration,
-              prev: 3,
-            });
-            navigation.navigate('Register', {c: 4})
+            navigation.navigate('RegisterPlayer');
           }}
           accessibilityLabel='Register Next 3'
           testID='register_next_3_button'
         />
       </View>
+      <BackToLogin />
     </View>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -11,6 +11,8 @@ import {
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 
+import BackToLogin from 'features/account/backToLogin';
+import { RegisterContext } from 'features/account/registerContext';
 import { validateName } from 'common/utils/account';
 import { login } from 'common/utils/ghin';
 import { green } from 'common/colors';
@@ -20,7 +22,7 @@ import { green } from 'common/colors';
 
 const RegisterPlayer = props => {
 
-  const { registration, setRegistration } = props;
+  const { registration, setRegistration } = useContext(RegisterContext);
   const navigation = useNavigation();
   const nameRef = useRef(null);
 
@@ -117,11 +119,7 @@ const RegisterPlayer = props => {
             title='Prev'
             type='solid'
             onPress={() => {
-              setRegistration({
-                ...registration,
-                prev: 2,
-              });
-              navigation.navigate('Register', {c: registration.prev});
+              navigation.goBack();
             }}
             accessibilityLabel='Register Prev 4'
             testID='register_prev_4_button'
@@ -132,13 +130,14 @@ const RegisterPlayer = props => {
             type={(nameValid && shortValid) ? 'solid' : 'outline'}
             disabled={!(nameValid && shortValid)}
             onPress={() => {
-              navigation.navigate('Register', {c: 5})
+              navigation.navigate('RegisterComplete')
             }}
             accessibilityLabel='Register Next 4'
             testID='register_next_4_button'
           />
         </View>
       </View>
+      <BackToLogin />
     </View>
   );
 };

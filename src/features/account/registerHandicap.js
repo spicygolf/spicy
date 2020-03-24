@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -13,6 +13,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { find } from 'lodash';
 
+import BackToLogin from 'features/account/backToLogin';
+import { RegisterContext } from 'features/account/registerContext';
 import CountryPicker from 'features/account/countryPicker';
 import StatePicker from 'features/account/statePicker';
 import { validateName, validateInteger } from 'common/utils/account';
@@ -25,7 +27,7 @@ const { width } = Dimensions.get('window')
 
 const RegisterHandicap = props => {
 
-  const { registration, setRegistration } = props;
+  const { registration, setRegistration } = useContext(RegisterContext);
   const navigation = useNavigation();
   const lastNameRef = useRef(null);
 
@@ -154,11 +156,7 @@ const RegisterHandicap = props => {
             I don't keep a GHIN handicap.
             <Text
               onPress={() => {
-                setRegistration({
-                  ...registration,
-                  prev: 2,
-                });
-                navigation.navigate('Register', { c: 4 });
+                navigation.navigate('RegisterPlayer');
               }}
               style={styles.skip_text}
             >  Skip this step</Text>
@@ -171,11 +169,7 @@ const RegisterHandicap = props => {
           title='Prev'
           type='solid'
           onPress={() => {
-            setRegistration({
-              ...registration,
-              prev: 1,
-            });
-            navigation.navigate('Register', {c: registration.prev});
+            navigation.goBack();
           }}
           accessibilityLabel='Register Prev 2'
           testID='register_prev_2_button'
@@ -186,16 +180,13 @@ const RegisterHandicap = props => {
           type={(lastNameValid && (ghinNumberValid || (registration.country && registration.state))) ? 'solid' : 'outline'}
           disabled={!(lastNameValid && (ghinNumberValid || (registration.country && registration.state)))}
           onPress={() => {
-            setRegistration({
-              ...registration,
-              prev: 2,
-            });
-            navigation.navigate('Register', {c: 3})
+            navigation.navigate('RegisterHandicapSearch')
           }}
           accessibilityLabel='Register Next 2'
           testID='register_next_2_button'
         />
       </View>
+      <BackToLogin />
     </View>
   );
 };
