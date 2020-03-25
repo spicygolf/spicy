@@ -64,6 +64,7 @@ const RegisterHandicap = props => {
           method: 'GET',
         });
         const json = await res.json();
+        console.log('countries json', json);
         setCountries(json.countries);
       };
       fetchData();
@@ -122,7 +123,6 @@ const RegisterHandicap = props => {
             </Text>
             <View style={styles.states_row}>
               <View style={[styles.field_container, styles.picker_country]}>
-                <Text style={styles.field_label}>Country</Text>
                 <CountryPicker
                   countries={countries}
                   selectedValue={registration.country}
@@ -133,7 +133,6 @@ const RegisterHandicap = props => {
                 />
               </View>
               <View style={[styles.field_container, styles.picker_state]}>
-                <Text style={styles.field_label}>State/Province</Text>
                 <StatePicker
                   states={statelist}
                   selectedValue={registration.state}
