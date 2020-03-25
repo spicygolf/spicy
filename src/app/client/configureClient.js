@@ -1,8 +1,7 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import { ApolloLink } from 'apollo-link';
 import ApolloClient from 'apollo-client';
-import { Hermes } from 'apollo-cache-hermes';
-import { CachePersistor } from 'apollo-cache-persist';
+import { InMemoryCache } from 'apollo-cache-inmemory';
 import { setContext } from 'apollo-link-context';
 import { onError } from 'apollo-link-error';
 import { HttpLink } from 'apollo-link-http';
@@ -13,18 +12,8 @@ import { logout } from 'common/utils/account';
 
 export default function configureClient() {
 
-  const cache = new Hermes({
-    entityIdForNode: object => object._key || undefined
-  });
-
-  // NOTE: This must go after the call to withClientState. Otherwise that will
-  //       overwrite the cache with defaults.
-  const persistor = new CachePersistor({
-    cache,
-    storage: AsyncStorage,
-    maxSize: false, // set to unlimited (default is 1MB
-    // https://github.com/apollographql/apollo-cache-persist)
-    debug: true // enables console logging // TODO: remove me
+  const cache = new InMemoryCache({
+    dataIdFromObject: object => object._key || null
   });
 
   const authLink = setContext((_, { headers }) => {
@@ -100,7 +89,6 @@ export default function configureClient() {
 
   return {
     client: client,
-    persistor: persistor
   };
 
 };

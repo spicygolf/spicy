@@ -162,15 +162,17 @@ const TeamMultipliers = props => {
 
   const team_mults = [];
   // see if we have any mults already working
-  h.multipliers.map(hMult => {
-    if( hMult.first_hole != currentHole && hMult.team == teamNum ) {
-      const existingMult = find(gamespec.multipliers, {name: hMult.name});
-      team_mults.push({
-        ...existingMult,
-        existing: true,
-      });
-    }
-  });
+  if( h && h.multipliers ) {
+    h.multipliers.map(hMult => {
+      if( hMult.first_hole != currentHole && hMult.team == teamNum ) {
+        const existingMult = find(gamespec.multipliers, {name: hMult.name});
+        team_mults.push({
+          ...existingMult,
+          existing: true,
+        });
+      }
+    });
+  }
 
   // add in the user mults for this particular hole
   gamespec.multipliers.map(gsMult => {
