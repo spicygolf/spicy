@@ -13,8 +13,9 @@ import GameSpec from 'features/game/gamespec';
 const Game = props => {
 
   const { route } = props;
-  const { currentGameKey } = route.params;
+  const { currentGameKey, setup } = route.params;
   //console.log('currentGameKey', currentGameKey);
+  //console.log('setup', setup);
 
   // get game
   const { loading, error, data } = useQuery(GET_GAME_QUERY, {
@@ -34,12 +35,13 @@ const Game = props => {
     const game = data.getGame;
     console.log('game', game);
 
-    // le sigh, we have to pass game and currentPlayerKey onto <GameSpec>
+    // le sigh, we have to pass these params onto <GameSpec>
     // because RN doesn't like an increasing or decreasing number of hooks run
     // for different renders.
     return (
       <GameSpec
         game={game}
+        setup={setup}
       />
     );
 

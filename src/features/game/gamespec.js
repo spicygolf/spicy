@@ -19,7 +19,7 @@ const GameSpec = props => {
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
   //console.log('currentPlayerKey', currentPlayerKey);
 
-  const { game } = props;
+  const { game, setup } = props;
 
   // get gamespec
   const { loading, error, data } = useQuery(GET_GAMESPEC_QUERY, {
@@ -45,7 +45,9 @@ const GameSpec = props => {
         gamespec: gamespec,
         currentPlayerKey: currentPlayerKey,
       }}>
-        <GameStack />
+        <GameStack
+          setup={setup}
+        />
       </GameContext.Provider>
     );
 

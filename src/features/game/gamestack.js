@@ -20,6 +20,9 @@ import { green } from 'common/colors';
 
 const GameStack = props => {
 
+  const { setup } = props;
+  const initRoute = setup ? 'GameSetup' : 'Score';
+
   const { game, gamespec } = useContext(GameContext);
   const start = moment(game.start).format('llll');
 
@@ -31,7 +34,7 @@ const GameStack = props => {
         <Text style={styles.name_txt}>{gamespec.name} - {start}</Text>
       </View>
       <Tab.Navigator
-        initialRouteName='Score'
+        initialRouteName={initRoute}
         screenOptions={{
           inactiveTintColor: '#ccc',
           inactiveBackgroundColor: '#666',
