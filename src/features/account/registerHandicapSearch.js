@@ -47,7 +47,7 @@ const RegisterHandicapSearch = props => {
     const title = item.PlayerName ? item.PlayerName :
       `${item.first_name} ${item.last_name}`;
     const subtitle = item.ClubName ? item.ClubName : item.club_name;
-    const hdcp = item.Display ? item.Display : item.handicap_index;
+    const hdcp = item.handicapIndex ? item.handicapIndex : item.handicap_index;
 
     const leftAvatarColor = (gn == selected) ? green : '#fff';
 

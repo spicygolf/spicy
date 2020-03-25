@@ -6,8 +6,8 @@ export default gql`
       _key
       playerName
       handicap {
+        handicapIndex
         revDate
-        display
       }
       clubs {
         _key

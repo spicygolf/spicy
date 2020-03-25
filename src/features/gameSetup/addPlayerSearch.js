@@ -37,8 +37,8 @@ const AddPlayerSearch = (props) => {
   );
 
   const _renderPlayer = ({item}) => {
-    const handicap = (item && item.handicap && item.handicap.display) ?
-    item.handicap.display : 'no handicap';
+    const handicap = (item && item.handicap && item.handicap.handicapIndex) ?
+    item.handicap.handicapIndex : 'no handicap';
     const club = (item && item.clubs && item.clubs[0]) ?
     ` - ${item.clubs[0].name}` : '';
 

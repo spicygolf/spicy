@@ -13,10 +13,8 @@ export const GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY = gql`
       name
       short
       handicap {
-        value
+        handicapIndex
         revDate
-        display
-        tournamentScoreCount
       }
       clubs {
         _key

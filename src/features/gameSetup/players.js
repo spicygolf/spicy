@@ -59,8 +59,8 @@ const Players = props => {
         round.course_handicap : null;
       const gh = (round && round.game_handicap) ?
         round.game_handicap : null;
-      const hi = (item && item.handicap && item.handicap.display) ?
-        item.handicap.display : null;
+      const hi = (round && round.handicap_index) ?
+        round.handicap_index : null;
 
       const subtitle = (
         <TeeSelector

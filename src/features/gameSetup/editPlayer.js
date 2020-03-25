@@ -34,27 +34,26 @@ const EditPlayer = props => {
   const { game } = useContext(GameContext);
   const round = get_round_for_player(game.rounds, pkey);
 
-  const initHI = (player && player.handicap && player.handicap.display) ?
-    player.handicap.display : '';
-  const initGH = (round && round.game_handicap) ?
-    round.game_handicap.toString() : '';
+  const initHI = (round && round.handicap_index) ?
+    round.handicap_index.toString() : '';
   const [ HI, setHI ] = useState(initHI);
   const initCH = round.course_handicap ? round.course_handicap.toString() : '-';
   const [ CH, setCH ] = useState(initCH);
+  const initGH = (round && round.game_handicap) ?
+    round.game_handicap.toString() : '';
   const [ GH, setGH ] = useState(initGH);
 
   const [ updateLink ] = useMutation(UPDATE_LINK_MUTATION);
 
 
   const update = () => {
+    console.log('update', HI, initHI, CH, initCH, GH, initGH);
     let doUpdate = false;
     const other = [];
 
     if( HI != initHI ) {
-      // TODO: update handicap index
-      // maybe add another handicap doc to the collection?
-      // but this has to handle the non-GHIN players
-      // fuck if I know...  gl;hf
+      other.push({key: 'handicap_index', value: HI || null});
+      doUpdate = true;
     }
 
     if( CH != initCH ) {
@@ -68,6 +67,7 @@ const EditPlayer = props => {
     }
 
     if( doUpdate ) {
+      console.log('doUpdate');
       // update 'round2game' edge with these two handicaps on them
 
       const { loading, error, data } = updateLink({
@@ -118,7 +118,9 @@ const EditPlayer = props => {
                 style={styles.field_input}
                 onChangeText={text => {
                   setHI(text);
-                  setCH(course_handicap(parseFloat(text), round.tee, game.holes));
+                  const newCH = course_handicap(parseFloat(text), round.tee, game.holes);
+                  console.log('newCH', newCH, round, game.holes);
+                  setCH(newCH);
                 }}
                 onEndEditing={() => update()}
                 keyboardType='decimal-pad'

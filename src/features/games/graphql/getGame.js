@@ -73,10 +73,8 @@ export const GET_GAME_QUERY = gql`
         name
         short
         handicap {
-          value
+          handicapIndex
           revDate
-          display
-          tournamentScoreCount
         }
       }
     }
