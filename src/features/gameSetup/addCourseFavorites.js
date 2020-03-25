@@ -43,11 +43,11 @@ const AddCourseFavorites = props => {
   if (error) return (<Text>Error! ${error.message}</Text>);
 
   //console.log('client', client);
-  console.log('faveTees data', data);
+  //console.log('faveTees data', data);
 
   const tees = (data && data.getFavoriteTeesForPlayer) ?
     data.getFavoriteTeesForPlayer : [];
-  console.log('tees', tees, currentPlayerKey);
+  //console.log('tees', tees, currentPlayerKey);
 
   const newTees = tees.map(tee => ({
     ...tee,
@@ -63,7 +63,7 @@ const AddCourseFavorites = props => {
       }]
     }
   }));
-  console.log('newTees', newTees);
+  //console.log('newTees', newTees);
 
   return (
     <View style={styles.container}>

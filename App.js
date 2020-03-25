@@ -14,7 +14,7 @@ import configureClient from 'app/client/configureClient';
 
 const App = props => {
 
-  const { client, persistor } = configureClient();
+  const { client } = configureClient();
 
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();

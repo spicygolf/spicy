@@ -56,6 +56,7 @@ export const GET_GAME_QUERY = gql`
           }
           assigned
           course {
+            _key
             name
           }
           holes {
