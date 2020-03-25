@@ -1,4 +1,5 @@
 
+import { getRatings } from 'common/utils/game';
 
 
 
@@ -9,25 +10,19 @@ export const course_handicap = (index, tee, holes) => {
     return null;
   }
 
-  let par, rating, slope;
+  let par;
   switch (holes) {
     case 'front9':
       par = get_par(tee, 1, 9);
       par = 36;
-      rating = tee.rating.front9;
-      slope = tee.slope.front9;
       break;
     case 'back9':
       par = get_par(tee, 10, 18);
       par = 36;
-      rating = tee.rating.back9;
-      slope = tee.slope.back9;
       break;
     case 'all18':
       par = get_par(tee, 1, 18);
       par = 72;
-      rating = tee.rating.all18;
-      slope = tee.slope.all18;
       break;
     default:
       console.log(`course_handicap - invalid value for holes: '${holes}'`);
@@ -35,6 +30,7 @@ export const course_handicap = (index, tee, holes) => {
       break;
   }
 
+  const { rating, slope } = getRatings(holes, tee);
   //console.log(index, slope, rating, par);
   return Math.round((index * (slope / 113)) + (rating - par));
 

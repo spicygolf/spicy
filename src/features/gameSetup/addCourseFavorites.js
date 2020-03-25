@@ -13,6 +13,7 @@ import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
 
 import Tee from 'features/gameSetup/Tee';
 import { GameContext } from 'features/game/gameContext';
+import { getRatings } from 'common/utils/game';
 
 
 
@@ -21,8 +22,7 @@ const AddCourseFavorites = props => {
   const { game, currentPlayerKey } = useContext(GameContext);
 
   const _renderFavoritesTee = ({item}) => {
-    const rating = item.rating.all18 ? item.rating.all18 : item.rating.front9;
-    const slope = item.slope.all18 ? item.slope.all18 : item.slope.front9;
+    const { rating, slope } = getRatings(game.holes, item);
     return (
       <Tee
         item={item}

@@ -17,15 +17,11 @@ export const GET_COURSE_QUERY = gql`
         _key
         name
         gender
-        rating {
-          all18
-          front9
-          back9
-        }
-        slope {
-          all18
-          front9
-          back9
+        Ratings {
+          RatingType
+          CourseRating
+          SlopeRating
+          BogeyRating
         }
       }
     }

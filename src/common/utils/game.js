@@ -1,3 +1,4 @@
+import { find } from 'lodash';
 
 
 export const getHoles = game => {
@@ -10,4 +11,37 @@ export const getHoles = game => {
 
   return holes.map(h => h.toString());
 
+};
+
+export const getRatings = (holes, tee) => {
+  let ratings;
+
+  switch (holes) {
+    case 'front9':
+      ratings = find(tee.Ratings, {RatingType: 'Front'});
+      break;
+    case 'back9':
+      ratings = find(tee.Ratings, {RatingType: 'Back'});
+      break;
+    case 'all18':
+      ratings = find(tee.Ratings, {RatingType: 'Total'});
+      break;
+    default:
+      console.log(`course_handicap - invalid value for holes: '${holes}'`);
+      break;
+  }
+
+  if( !ratings ) {
+    ratings = {
+      CourseRating: 0,
+      SlopeRating: 0,
+      BogeyRating: 0,
+    };
+  }
+
+  return {
+    rating: ratings.CourseRating,
+    slope: ratings.SlopeRating,
+    bogey: ratings.BogeyRating,
+  };
 };

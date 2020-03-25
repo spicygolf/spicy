@@ -23,6 +23,7 @@ import { SEARCH_COURSE_QUERY } from 'features/courses/graphql';
 import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
 import Tee from 'features/gameSetup/Tee';
 import { GameContext } from 'features/game/gameContext';
+import { getRatings } from 'common/utils/game';
 
 
 
@@ -36,7 +37,7 @@ const ListHeader = ({title}) => (
 
 const AddCourseSearch = props => {
 
-  const { currentPlayerKey } = useContext(GameContext);
+  const { game, currentPlayerKey } = useContext(GameContext);
   //console.log('currentPlayerKey', currentPlayerKey);
 
   const [ q, setQ ] = useState('');
@@ -64,8 +65,7 @@ const AddCourseSearch = props => {
   }
 
   const _renderCourseTee = ({item}) => {
-    const rating = item.rating.all18 ? item.rating.all18 : item.rating.front9;
-    const slope = item.slope.all18 ? item.slope.all18 : item.slope.front9;
+    const { rating, slope } = getRatings(game.holes, item);
     return (
       <Tee
         item={item}
@@ -141,25 +141,28 @@ const AddCourseSearch = props => {
     const faveTees = (data && data.getFavoriteTeesForPlayer ?
       data.getFavoriteTeesForPlayer : []);
 
-    let tees = course.tees.map(tee => ({
-      ...tee,
-      order: tee.rating.all18 ? tee.rating.all18 : tee.rating.front9,
-      fave: {
-        faved: (find(faveTees, {_key: tee._key}) ? true : false),
-        from: {type: 'player', value: currentPlayerKey},
-        to:   {type: 'tee', value: tee._key},
-        refetchQueries: [{
-          query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
-          variables: {
-            pkey: currentPlayerKey
-          }
-        }]
-      }
-    }));
+    let tees = course.tees.map(tee => {
+      const { rating } = getRatings(game.holes, tee);
+      return ({
+        ...tee,
+        order: rating,
+        fave: {
+          faved: (find(faveTees, {_key: tee._key}) ? true : false),
+          from: {type: 'player', value: currentPlayerKey},
+          to:   {type: 'tee', value: tee._key},
+          refetchQueries: [{
+            query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
+            variables: {
+              pkey: currentPlayerKey
+            }
+          }]
+        }
+      });
+    });
     tees = orderBy(
       tees,
-      ['gender', 'rating', 'order'],
-      ['desc',   'desc',   'desc' ]
+      ['gender', 'order'],
+      ['desc',   'desc' ]
     );
 
     const cardHeader = (

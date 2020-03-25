@@ -12,15 +12,13 @@ export const GET_FAVORITE_TEES_FOR_PLAYER_QUERY = gql`
       _key
       name
       gender
-      rating {
-        all18
-        front9
-        back9
-      }
-      slope {
-        all18
-        front9
-        back9
+      TotalYardage
+      TotalMeters
+      Ratings {
+        RatingType
+        CourseRating
+        SlopeRating
+        BogeyRating
       }
       course {
         _key

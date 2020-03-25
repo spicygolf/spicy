@@ -48,15 +48,11 @@ export const GET_GAME_QUERY = gql`
           _key
           name
           gender
-          rating {
-            front9
-            back9
-            all18
-          }
-          slope {
-            front9
-            back9
-            all18
+          Ratings {
+            RatingType
+            CourseRating
+            SlopeRating
+            BogeyRating
           }
           assigned
           course {
