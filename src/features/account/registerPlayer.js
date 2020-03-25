@@ -10,10 +10,11 @@ import {
   Card,
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
+import auth from '@react-native-firebase/auth';
 
 import BackToLogin from 'features/account/backToLogin';
 import { RegisterContext } from 'features/account/registerContext';
-import { validateName } from 'common/utils/account';
+import { validateName, registerPlayer } from 'common/utils/account';
 import { login } from 'common/utils/ghin';
 import { green } from 'common/colors';
 
@@ -41,8 +42,44 @@ const RegisterPlayer = props => {
   const nValid = { borderColor: nameValid ? green : '#ddd' };
   const sValid = { borderColor: shortValid ? green : '#ddd' };
 
-  const changes = registration.ghin_creds ?
+  const changes = registration.ghinCreds ?
     'Make changes to GHIN information (if any)' : '';
+
+  const register = async () => {
+    console.log('registration', JSON.stringify(registration, null, ' '));
+
+    try {
+      const res = await auth().createUserWithEmailAndPassword(
+        registration.email,
+        registration.password
+      );
+
+      if( res && res.user ) {
+        //console.log('res.user', res.user);
+        res.user.sendEmailVerification();
+        await registerPlayer(registration, {
+          email: res.user.email,
+          metadata: res.user.metadata,
+          providerData: res.user.providerData,
+          providerId: res.user.providerId,
+          uid: res.user.uid,
+        });
+      }
+
+    } catch( e ) {
+
+      //console.log('register error', e);
+      let message = e.message;
+      const split = e.message.split(']');
+      if( split && split[1] ) message = split[1].trim();
+      navigation.navigate('RegisterError', {e: {
+        error: 500,
+        message: message
+      }});
+
+    }
+
+  };
 
   useEffect(
     () => {
@@ -57,15 +94,15 @@ const RegisterPlayer = props => {
     () => {
       const fetchData = async () => {
 
-        if( registration.ghin_creds ) {
+        if( registration.ghinCreds ) {
           const search_results = await login(
-            registration.ghin_creds.ghinNumber,
-            registration.ghin_creds.lastName
+            registration.ghinCreds.ghinNumber,
+            registration.ghinCreds.lastName
           );
           if( search_results ) {
             setRegistration({
               ...registration,
-              ghin_data: search_results
+              ghinData: search_results
             });
           }
         }
@@ -130,7 +167,7 @@ const RegisterPlayer = props => {
             type={(nameValid && shortValid) ? 'solid' : 'outline'}
             disabled={!(nameValid && shortValid)}
             onPress={() => {
-              navigation.navigate('RegisterComplete')
+              register();
             }}
             accessibilityLabel='Register Next 4'
             testID='register_next_4_button'

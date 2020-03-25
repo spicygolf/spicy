@@ -70,7 +70,7 @@ const RegisterHandicapSearch = props => {
             setSelected(null);
             setRegistration({
               ...registration,
-              ghin_creds: null,
+              ghinCreds: null,
               name: '',
               short: '',
             })
@@ -78,7 +78,7 @@ const RegisterHandicapSearch = props => {
             setSelected(gn);
             setRegistration({
               ...registration,
-              ghin_creds: {
+              ghinCreds: {
                 lastName: ln,
                 ghinNumber: gn,
               },

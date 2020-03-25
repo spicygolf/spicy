@@ -5,28 +5,25 @@ import { baseUrl } from 'common/config';
 
 
 
-export const register_player = async (registration, fbUser) => {
+export const registerPlayer = async (registration, fbUser) => {
 
   // REST call to register player
   const uri = `${baseUrl}/account/register`;
-  try {
-    const res = await fetch(uri, {
-      method: 'POST',
-      body: JSON.stringify({
-        ...registration,
-        fbUser: fbUser,
-      }),
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Content-Type': 'application/json'
-      }
-    });
-    const payload = await res.json();
-    console.log('register payload', payload);
-  } catch( e ) {
-    console.log('register error', e);
 
-  }
+  const res = await fetch(uri, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...registration,
+      fbUser: fbUser,
+    }),
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'application/json'
+    }
+  });
+  const payload = await res.json();
+  //console.log('register payload', payload);
+
 };
 
 export const login = async fbUser => {

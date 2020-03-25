@@ -11,25 +11,23 @@ import RegisterHandicap from 'features/account/registerHandicap';
 import RegisterHandicapSearch from 'features/account/registerHandicapSearch';
 import RegisterPlayer from 'features/account/registerPlayer';
 import RegisterError from 'features/account/registerError';
-import RegisterComplete from 'features/account/registerComplete';
 
 
 
 const Register = props => {
 
   const defaultRegistration = {
-    email: 'brad@sankatygroup.com',
-    password: '2fingers',
-    password2: '2fingers',
-    lastName: 'Anderson',
-    ghinNumber: '1152839',
+    email: '',
+    password: '',
+    password2: '',
+    lastName: '',
+    ghinNumber: '',
     country: 'USA',
     state: '',
-    ghin_creds: null,
-    ghin_data: null,
-    name: 'Brad Anderson',
-    short: 'boorad',
-    prev: 1,
+    ghinCreds: null,
+    ghinData: null,
+    name: '',
+    short: '',
   };
 
   const [ registration, setRegistration ] = useState(defaultRegistration);
@@ -52,7 +50,6 @@ const Register = props => {
           <Stack.Screen name='RegisterHandicapSearch' component={RegisterHandicapSearch} />
           <Stack.Screen name='RegisterPlayer' component={RegisterPlayer} />
           <Stack.Screen name='RegisterError' component={RegisterError} />
-          <Stack.Screen name='RegisterComplete' component={RegisterComplete} />
         </Stack.Navigator>
       </RegisterContext.Provider>
     </SafeAreaView>
