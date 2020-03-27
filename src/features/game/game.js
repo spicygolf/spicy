@@ -32,6 +32,7 @@ const Game = props => {
   if( loading ) return (<ActivityIndicator />);
   if( error ) {
     console.log(error);
+    // TODO: error component
     return (<Text>Error</Text>);
   }
 

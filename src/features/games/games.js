@@ -58,7 +58,7 @@ const Games = props => {
     );
   }
 
-  console.log('currentPlayerKey', currentPlayerKey);
+  //console.log('currentPlayerKey', currentPlayerKey);
   const { loading, error, data } = useQuery(ACTIVE_GAMES_FOR_PLAYER_QUERY,  {
     variables: {
       pkey: currentPlayerKey,
