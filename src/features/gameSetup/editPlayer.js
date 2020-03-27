@@ -119,7 +119,7 @@ const EditPlayer = props => {
                 onChangeText={text => {
                   setHI(text);
                   const newCH = course_handicap(parseFloat(text), round.tee, game.holes);
-                  console.log('newCH', newCH, round, game.holes);
+                  //console.log('newCH', newCH, round, game.holes);
                   setCH(newCH);
                 }}
                 onEndEditing={() => update()}

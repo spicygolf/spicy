@@ -32,7 +32,9 @@ const Players = props => {
 
 
   const _itemPressed = player => {
-    navigation.navigate('EditPlayer', {player: player});
+    // check to see if round exists... if not, don't go here
+    const round = get_round_for_player(rounds, player._key);
+    if( round ) navigation.navigate('EditPlayer', {player: player});
   };
 
   const _shouldShowAddButton = players => {

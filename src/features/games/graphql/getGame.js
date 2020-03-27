@@ -43,6 +43,10 @@ export const GET_GAME_QUERY = gql`
         player {
           _key
           name
+          handicap {
+            handicapIndex
+            revDate
+          }
         }
         tee {
           _key

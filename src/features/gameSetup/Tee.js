@@ -120,9 +120,10 @@ const Tee = props => {
               round.player &&
               round.player[0] &&
               round.player[0].handicap &&
-              round.player[0].handicap.value ) {
+              round.player[0].handicap.handicapIndex
+            ) {
 
-            const index = round.player[0].handicap.value;
+            const index = round.player[0].handicap.handicapIndex;
             //console.log('index', index)
 
             // tee is 'item' if it's the one being changed
@@ -132,7 +133,10 @@ const Tee = props => {
             const ch = course_handicap(index, tee, game.holes);
             if( ch && ch != round.course_handicap ) {
               //console.log('updating course_handicap to ', ch);
-              update(round._key, [{key: 'course_handicap', value: ch}]);
+              update(round._key, [
+                {key: 'handicap_index', value: index},
+                {key: 'course_handicap', value: ch},
+              ]);
             }
           }
         });
