@@ -11,6 +11,7 @@ export const GET_PLAYER_QUERY = gql`
     getPlayer(_key: $player) {
       _key
       name
+      statusAuthz
       short
       handicap {
         handicapIndex

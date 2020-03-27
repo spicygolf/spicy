@@ -5,6 +5,7 @@ export default gql`
     gameSpecsForPlayer(pkey: $pkey) {
       _key
       name
+      status
       type
       max_players
       min_players
