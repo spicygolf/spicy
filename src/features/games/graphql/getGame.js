@@ -7,7 +7,6 @@ export const GET_GAME_QUERY = gql`
       name
       start
       end
-      gametype
       holes
       teams {
         rotate
@@ -79,6 +78,57 @@ export const GET_GAME_QUERY = gql`
         handicap {
           handicapIndex
           revDate
+        }
+      }
+      gamespecs {
+        _key
+        name
+        type
+        min_players
+        max_players
+        location_type
+        team_size
+        team_determination
+        team_change_every
+        scoring {
+            hole {
+                name
+                points
+                source
+                type
+                scope
+                based_on
+            }
+        }
+        junk {
+            name
+            seq
+            type
+            value
+            limit
+            scope
+            icon
+            show_in
+            score_to_par
+            based_on
+            calculation
+            better
+        }
+        multipliers {
+            name
+            seq
+            value
+            icon
+            based_on
+            scope
+            availability
+            after
+        }
+        options {
+            name
+            disp
+            type
+            default
         }
       }
     }

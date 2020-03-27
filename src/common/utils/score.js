@@ -11,9 +11,42 @@ import {
 
 
 
-export const scoring = (game, gamespec) => {
+export const getJunkFromGamespecs = gamespecs => {
+  let ret = [];
+  gamespecs.map(gs => {
+    const { junk } = gs;
+    if( !junk ) return;
+    junk.map(j => {
+      ret.push({
+        ...j,
+        key: `${gs._key}_${j.name}`,
+      });
+    });
+  });
+  return ret;
+};
 
-  const { _key: gkey } = game;
+export const getMultipliersFromGamespecs = gamespecs => {
+  let ret = [];
+  gamespecs.map(gs => {
+    const { multipliers } = gs;
+    if( !multipliers ) return;
+    multipliers.map(m => {
+      ret.push({
+        ...m,
+        key: `${gs._key}_${m.name}`,
+      });
+    });
+  });
+  return ret;
+};
+
+
+export const scoring = (game) => {
+
+  const { gamespecs } = game;
+  const alljunk = getJunkFromGamespecs(gamespecs);
+  const allmultipliers = getMultipliersFromGamespecs(gamespecs);
 
   let ret = {
     holes: [],
@@ -40,7 +73,7 @@ export const scoring = (game, gamespec) => {
 
           // player junk
           const playerJunk = [];
-          gamespec.junk.map(gsJunk => {
+          alljunk.map(gsJunk => {
             if( gsJunk.scope != 'player' ) return;
             let j = false;
             switch ( gsJunk.based_on ) {
@@ -80,7 +113,7 @@ export const scoring = (game, gamespec) => {
       };
 
       // team score
-      gamespec.junk.map(gsJunk => {
+      alljunk.map(gsJunk => {
         if( gsJunk.scope == 'team' && gsJunk.type == 'dot') {
           //if( hole == '1' ) console.log('team score gsJunk', gsJunk);
           switch( gsJunk.calculation ) {
@@ -119,7 +152,7 @@ export const scoring = (game, gamespec) => {
     });
 
     // team junk
-    gamespec.junk.map(gsJunk => {
+    alljunk.map(gsJunk => {
       if( gsJunk.scope == 'team' && gsJunk.type == 'dot' ) {
 
         const teamScores = teams.map((t, i) => ({
@@ -162,7 +195,7 @@ export const scoring = (game, gamespec) => {
 
     // multipliers
     const multipliers = [];
-    gamespec.multipliers.map(gsMult => {
+    allmultipliers.map(gsMult => {
       if( gsMult.based_on == 'user' ) {
         if( gHole && gHole.multipliers ) {
           filter(gHole.multipliers, {name: gsMult.name}).map(mult => {

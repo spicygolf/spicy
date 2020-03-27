@@ -14,6 +14,7 @@ import { useMutation } from '@apollo/react-hooks';
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
+import { getNewGameForUpdate } from 'common/utils/game';
 import { getHolesToUpdate } from 'common/utils/teams';
 import { blue } from 'common/colors';
 
@@ -36,12 +37,7 @@ const TeamChooser = props => {
     //console.log('removeFromTeam', removeFromTeam);
 
     // remove player from this team (across appropriate holes)
-    let newGame = cloneDeep(game);
-    // TODO: these deletes are hacky for the future...
-    // maybe just grab the properties we know are in GameInput type
-    delete newGame._key;
-    delete newGame.rounds;
-    delete newGame.players;
+    let newGame = getNewGameForUpdate(game);
 
     const holesToUpdate = getHolesToUpdate(newGame.teams.rotate, game.holes);
     if( !newGame.teams.holes ) {

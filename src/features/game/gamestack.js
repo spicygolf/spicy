@@ -23,7 +23,9 @@ const GameStack = props => {
   const { setup } = props;
   const initRoute = setup ? 'GameSetup' : 'Score';
 
-  const { game, gamespec } = useContext(GameContext);
+  const { game } = useContext(GameContext);
+  const { gamespecs } = game;
+  const gamespec_name = gamespecs.map(gs => gs.name).join('-');
   const start = moment(game.start).format('llll');
 
   const Tab = createMaterialTopTabNavigator();
@@ -31,7 +33,7 @@ const GameStack = props => {
   return (
     <View style={styles.container}>
       <View style={styles.gname}>
-        <Text style={styles.name_txt}>{gamespec.name} - {start}</Text>
+        <Text style={styles.name_txt}>{gamespec_name} - {start}</Text>
       </View>
       <Tab.Navigator
         initialRouteName={initRoute}

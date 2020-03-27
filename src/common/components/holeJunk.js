@@ -20,7 +20,10 @@ import {
   get_score,
   get_score_value
 } from 'common/utils/rounds';
-import { isScoreToParJunk } from 'common/utils/score';
+import {
+  getJunkFromGamespecs,
+  isScoreToParJunk
+} from 'common/utils/score';
 import { upsertScore } from 'common/utils/upsertScore';
 
 
@@ -32,11 +35,12 @@ const HoleJunk = props => {
   const { hole, score, rkey } = props;
   const par = (hole && hole.par) ? parseFloat(hole.par) : 0.0;
 
-  const { game, gamespec } = useContext(GameContext);
+  const { game } = useContext(GameContext);
   const { _key: gkey } = game;
-  const { junk } = gamespec;
-  if( !junk ) return null;
-  const sorted_junk = sortBy(junk, ['seq']);
+
+  const { gamespecs } = game;
+  const alljunk = getJunkFromGamespecs(gamespecs);
+  const sorted_junk = sortBy(alljunk, ['seq']);
   if( sorted_junk.length == 0 ) return null;
 
   const setJunk = (junk, newValue) => {
@@ -159,7 +163,6 @@ const HoleJunk = props => {
         horizontal={true}
         data={sorted_junk}
         renderItem={({item}) => renderJunk(item)}
-        keyExtractor={item => item.name}
       />
     </View>
   );

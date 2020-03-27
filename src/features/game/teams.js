@@ -18,7 +18,7 @@ import { GameContext } from 'features/game/gameContext';
 const Teams = ({teams, renderPlayer, scoring, currentHole }) => {
 
   //console.log('Teams teams', teams);
-  const { game, gamespec } = useContext(GameContext);
+  const { game } = useContext(GameContext);
   const { players } = game;
 
   const _renderTeam = ({item}) => {
