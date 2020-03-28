@@ -9,6 +9,12 @@ import { GameContext } from 'features/game/gameContext';
 
 const Score = (props) => {
 
+  return (<FivePointsScore {...props} />);
+  // TODO: deal with multiple gamespecs attached to same game
+  // maybe a general 'category' of games that have to be similar to be
+  // attached to the same game?
+
+
   let Component = null;
 
   const { game } = useContext(GameContext);

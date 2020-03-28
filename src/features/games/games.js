@@ -40,7 +40,7 @@ const Games = props => {
   };
 
   const renderItem = ({item}) => {
-    if( !item || !item.gametype ) return null;
+    if( !item ) return null;
     const startTime = moment(item.start).format('llll');
     return (
       <ListItem
@@ -58,6 +58,7 @@ const Games = props => {
     );
   }
 
+  //console.log('currentPlayerKey', currentPlayerKey);
   const { loading, error, data } = useQuery(ACTIVE_GAMES_FOR_PLAYER_QUERY,  {
     variables: {
       pkey: currentPlayerKey,

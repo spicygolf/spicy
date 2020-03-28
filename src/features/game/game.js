@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import {
   ActivityIndicator,
@@ -7,7 +7,10 @@ import {
 
 import { useQuery } from '@apollo/react-hooks';
 import { GET_GAME_QUERY } from 'features/games/graphql';
-import GameSpec from 'features/game/gamespec';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import { GameContext } from 'features/game/gameContext';
+import GameStack from 'features/game/gamestack';
+
 
 
 const Game = props => {
@@ -16,6 +19,9 @@ const Game = props => {
   const { currentGameKey, setup } = route.params;
   //console.log('currentGameKey', currentGameKey);
   //console.log('setup', setup);
+
+  const { currentPlayerKey } = useContext(CurrentPlayerContext);
+  //console.log('currentPlayerKey', currentPlayerKey);
 
   // get game
   const { loading, error, data } = useQuery(GET_GAME_QUERY, {
@@ -26,6 +32,7 @@ const Game = props => {
   if( loading ) return (<ActivityIndicator />);
   if( error ) {
     console.log(error);
+    // TODO: error component
     return (<Text>Error</Text>);
   }
 
@@ -35,14 +42,15 @@ const Game = props => {
     const game = data.getGame;
     console.log('game', game);
 
-    // le sigh, we have to pass these params onto <GameSpec>
-    // because RN doesn't like an increasing or decreasing number of hooks run
-    // for different renders.
     return (
-      <GameSpec
-        game={game}
-        setup={setup}
-      />
+      <GameContext.Provider value={{
+        game: game,
+        currentPlayerKey: currentPlayerKey,
+      }}>
+        <GameStack
+          setup={setup}
+        />
+      </GameContext.Provider>
     );
 
   } else {

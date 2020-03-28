@@ -10,6 +10,7 @@ import {
 
 import Players from 'features/gameSetup/players';
 import Teams from 'features/gameSetup/teams';
+import Options from 'features/gameSetup/options';
 
 
 
@@ -20,7 +21,7 @@ const GameSetupScreen = props => {
       <ScrollView>
         <Players addCurrentPlayer={true} />
         <Teams />
-        <Card title="Options"></Card>
+        <Options />
       </ScrollView>
     </View>
   );

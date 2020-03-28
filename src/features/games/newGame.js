@@ -35,7 +35,8 @@ const NewGame = props => {
 
   const gamespecPressed = async gamespec => {
     const game = await addGame(gamespec);
-    const link = await linkCurrentPlayerToGame(gamespec, game);
+    const linkg2gs = await linkGameToGamespec(game, gamespec)
+    const linkp2g = await linkCurrentPlayerToGame(game);
     const { _key: gkey } = game;
     navigation.navigate('Game', {
       currentGameKey: gkey,
@@ -50,7 +51,6 @@ const NewGame = props => {
         game: {
           name: gamespec.name,
           start: moment.utc().format(),
-          gametype: gamespec._key,
           holes: 'all18',
           teams: {
             rotate: 'never',
@@ -64,15 +64,32 @@ const NewGame = props => {
     return data.addGame;
   };
 
-  const linkCurrentPlayerToGame = async (gamespec, game) => {
+  const linkGameToGamespec = async (game, gamespec) => {
+    const { loading, error, data } = await addLinkMutation({
+      variables: {
+        from: {type: 'game', value: game._key},
+        to: {type: 'gamespec', value: gamespec._key},
+      },
+      refetchQueries: () => [{
+        query: ACTIVE_GAMES_FOR_PLAYER_QUERY,
+        variables: {
+          pkey: currentPlayerKey,
+        },
+        fetchPolicy: 'cache-and-network',
+      }],
+    });
+    // TODO: handle loading, error?
+    //console.log('newGame linkg2gs', data);
+    return data.link;
+
+  };
+
+  const linkCurrentPlayerToGame = async (game) => {
     // now add current logged in player to game via edge
     const { _key: gkey } = game;
     let others = [
       {key: 'created_by', value: 'true'},
     ];
-    if( gamespec.team_size > 1 ) {
-      others.push({key: 'team', value: 1});
-    }
     const { loading, error, data } = await addLinkMutation({
       variables: {
         from: {type: 'player', value: currentPlayerKey},
@@ -88,7 +105,7 @@ const NewGame = props => {
       }],
     });
     // TODO: handle loading, error?
-    //console.log('newGame link', data);
+    //console.log('newGame linkp2g', data);
     return data.link;
   };
 

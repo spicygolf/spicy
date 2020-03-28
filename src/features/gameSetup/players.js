@@ -27,7 +27,8 @@ import { blue } from 'common/colors';
 const Players = props => {
 
   const navigation = useNavigation();
-  const { game, gamespec } = useContext(GameContext);
+  const { game } = useContext(GameContext);
+
   const { _key: gkey, rounds, players } = game;
 
 
@@ -38,6 +39,7 @@ const Players = props => {
   };
 
   const _shouldShowAddButton = players => {
+    return true; //TODO: fixme now that multiple gamespecs could be on each game
     let ret = true;
     if( gamespec.max_players < 1 ) return true;
     try {

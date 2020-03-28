@@ -28,7 +28,7 @@ import { scoring } from 'common/utils/score';
 
 const FivePointsScore = props => {
 
-  const { game, gamespec } = useContext(GameContext);
+  const { game } = useContext(GameContext);
   const [ currentHole, setCurrentHole ] = useState('1');
 
 
@@ -91,7 +91,7 @@ const FivePointsScore = props => {
       <Teams
         teams={teams}
         renderPlayer={_renderPlayer}
-        scoring={scoring(game, gamespec)}
+        scoring={scoring(game)}
         currentHole={currentHole}
       />
     );

@@ -45,3 +45,51 @@ export const getRatings = (holes, tee) => {
     bogey: ratings.BogeyRating,
   };
 };
+
+export const getNewGameForUpdate = game => {
+
+  // do this to get the exact right doc structure of a game to send
+  // to updateGame mutation (i.e. no __typename keys that come from cache)
+  let ret = {
+    name: game.name,
+    start: game.start,
+    end: game.end,
+    holes: game.holes,
+    teams: {
+      rotate: game.teams.rotate,
+      holes: game.teams.holes ? game.teams.holes.map(h => {
+        return {
+          hole: h.hole,
+          teams: h.teams ? h.teams.map(t => {
+            return {
+              team: t.team,
+              players: t.players,
+            };
+          }) : [],
+          multipliers: h.multipliers ? h.multipliers.map(m => {
+            return {
+              name: m.name,
+              team: m.team,
+              first_hole: m.first_hole,
+            }
+          }) : [],
+        };
+      }) : [],
+    },
+  };
+  return ret;
+
+};
+
+export const getAllGamespecOptions = game => {
+  let options = [];
+  game.gamespecs.map(gs => {
+    gs.options.map(o => {
+      options.push({
+        ...o,
+        gamespec_key: gs._key,
+      });
+    });
+  });
+  return options;
+};

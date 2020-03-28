@@ -17,7 +17,9 @@ import { GET_GAME_QUERY } from 'features/games/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import ScoringWrapper from 'common/utils/ScoringWrapper';
+import { getNewGameForUpdate } from 'common/utils/game';
 import { getHolesToUpdate } from 'common/utils/teams';
+import { getMultipliersFromGamespecs } from 'common/utils/score';
 import { red } from 'common/colors';
 
 
@@ -27,7 +29,9 @@ const TeamMultipliers = props => {
   const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
 
   const { team: teamNum, scoring, currentHole } = props;
-  const { game, gamespec } = useContext(GameContext);
+  const { game } = useContext(GameContext);
+  const { gamespecs } = game;
+  const allmultipliers = getMultipliersFromGamespecs(gamespecs);
 
   // add custom operators for logic
   const scoringWrapper = new ScoringWrapper(game, scoring, currentHole)
@@ -44,12 +48,7 @@ const TeamMultipliers = props => {
 
     //console.log('setMultiplier', currentHole, teamNum, mult, newValue);
 
-    let newGame = cloneDeep(game);
-    // TODO: these deletes are hacky for the future...
-    // maybe just grab the properties we know are in GameInput type
-    delete newGame._key;
-    delete newGame.rounds;
-    delete newGame.players;
+    let newGame = getNewGameForUpdate(game);
 
     const holesToUpdate = getHolesToUpdate(mult.scope, game.holes, currentHole);
     holesToUpdate.map(h => {
@@ -77,6 +76,7 @@ const TeamMultipliers = props => {
         const newMults = filter(mults, m => (
           !(m.name == mult.name && m.team == teamNum && m.first_hole == currentHole)
         ));
+        console.log('newMults', newMults);
         newGame.teams.holes[holeIndex].multipliers = newMults;
       }
 
@@ -165,7 +165,7 @@ const TeamMultipliers = props => {
   if( h && h.multipliers ) {
     h.multipliers.map(hMult => {
       if( hMult.first_hole != currentHole && hMult.team == teamNum ) {
-        const existingMult = find(gamespec.multipliers, {name: hMult.name});
+        const existingMult = find(allmultipliers, {name: hMult.name});
         team_mults.push({
           ...existingMult,
           existing: true,
@@ -175,7 +175,7 @@ const TeamMultipliers = props => {
   }
 
   // add in the user mults for this particular hole
-  gamespec.multipliers.map(gsMult => {
+  allmultipliers.map(gsMult => {
     // only give options for multipliers based_on == 'user'
     if( gsMult.based_on != 'user' ) return;
 
