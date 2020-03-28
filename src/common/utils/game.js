@@ -80,3 +80,16 @@ export const getNewGameForUpdate = game => {
   return ret;
 
 };
+
+export const getAllGamespecOptions = game => {
+  let options = [];
+  game.gamespecs.map(gs => {
+    gs.options.map(o => {
+      options.push({
+        ...o,
+        gamespec_key: gs._key,
+      });
+    });
+  });
+  return options;
+};
