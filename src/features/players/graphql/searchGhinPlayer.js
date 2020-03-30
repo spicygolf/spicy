@@ -9,6 +9,7 @@ export default gql`
         handicapIndex
         revDate
       }
+      pkey
       clubs {
         _key
         name

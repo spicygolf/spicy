@@ -17,7 +17,7 @@ export const login = async (ghinNumber, lastName) => {
   const ret = await res.json();
   if( ret && ret.golfers ) return ret.golfers;
 
-  //console.log('No golfers returned');
+  //console.log('No golfers returned', ret);
   return [];
 
 };

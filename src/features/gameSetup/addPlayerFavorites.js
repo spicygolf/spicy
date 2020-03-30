@@ -24,15 +24,16 @@ const AddPlayerFavorites = props => {
   const _renderFavoritesPlayer = ({item}) => {
 
     const handicap = (item && item.handicap && item.handicap.handicapIndex) ?
-    item.handicap.handicapIndex : 'no handicap';
+    item.handicap.handicapIndex : 'NH';
     const club = (item && item.clubs && item.clubs[0]) ?
-    ` - ${item.clubs[0].name}` : '';
+    item.clubs[0].name : '';
 
     return (
       <Player
         item={item}
         title={item.name}
-        subtitle={`${handicap}${club}`}
+        subtitle={club}
+        hdcp={handicap}
       />
     );
   }

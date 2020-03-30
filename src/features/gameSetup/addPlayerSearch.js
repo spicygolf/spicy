@@ -11,13 +11,15 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { Query } from 'react-apollo';
 import { find } from 'lodash';
+import { useMutation } from '@apollo/react-hooks';
 
 import {
-  SEARCH_PLAYER_QUERY,
+  ADD_PLAYER_MUTATION,
+  SEARCH_GHIN_PLAYER_QUERY,
   GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
   GetFavoritePlayersForPlayer
 } from 'features/players/graphql';
-
+import { ADD_LINK_MUTATION } from 'common/graphql/link';
 import Player from 'features/gameSetup/Player';
 import { GameContext } from 'features/game/gameContext';
 
@@ -30,23 +32,42 @@ const AddPlayerSearch = (props) => {
 
   const { currentPlayerKey } = useContext(GameContext);
 
-  const ListHeader = ({title}) => (
-    <View>
-      <Text style={styles.header}>{title}</Text>
-    </View>
-  );
+  const [ addPlayer ] = useMutation(ADD_PLAYER_MUTATION);
+  const [ link ] = useMutation(ADD_LINK_MUTATION);
+
+  const addPlayerFromGhinPlayer = gp => {
+    if( gp.playerName != 'Eric Froseth' ) return;
+    const p = {
+      name: gp.playerName,
+    };
+    const { loading, error, data } = addPlayer({
+      variables: {
+        player: p,
+      },
+    });
+    if( data && data.addPlayer ) {
+      console.log('addPlayer data', data.addPlayer);
+      const { gp2pLoading, gp2pError, gp2pData } = link({
+        variables: {
+          from: {type: 'ghin_player', value: gp._key},
+          to: {type: 'player', value: data.addPlayer._key},
+        },
+      });
+    }
+  };
 
   const _renderPlayer = ({item}) => {
     const handicap = (item && item.handicap && item.handicap.handicapIndex) ?
-    item.handicap.handicapIndex : 'no handicap';
+    item.handicap.handicapIndex : 'NH';
     const club = (item && item.clubs && item.clubs[0]) ?
-    ` - ${item.clubs[0].name}` : '';
+      item.clubs[0].name : '';
 
     return (
       <Player
         item={item}
         title={item.name}
-        subtitle={`${handicap}${club}`}
+        subtitle={club}
+        hdcp={handicap}
       />
     );
   }
@@ -71,7 +92,7 @@ const AddPlayerSearch = (props) => {
       />
       <View>
         <Query
-          query={SEARCH_PLAYER_QUERY}
+          query={SEARCH_GHIN_PLAYER_QUERY}
           variables={{q: search}}
         >
           {({ loading, error, data }) => {
@@ -83,39 +104,44 @@ const AddPlayerSearch = (props) => {
 
             if(
               data &&
-              data.searchPlayer &&
-              data.searchPlayer.length) {
+              data.searchGhinPlayer &&
+              data.searchGhinPlayer.length) {
+
+              //console.log('search players', data.searchGhinPlayer);
 
               // TODO: useQuery
               return (
                 <GetFavoritePlayersForPlayer pkey={currentPlayerKey}>
                   {({loading, players:favePlayers}) => {
                     if( loading ) return (<ActivityIndicator />);
-                    let players = data.searchPlayer.map(player => ({
-                      ...player,
-                      fave: {
-                        faved: (find(favePlayers, {_key: player._key}) ? true : false),
-                        from: {type: 'player', value: currentPlayerKey},
-                        to:   {type: 'player', value: player._key},
-                        refetchQueries: [{
-                          query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
-                          variables: {
-                            pkey: currentPlayerKey
-                          }
-                        }]
-                      }
-                    }));
+                    let players = data.searchGhinPlayer.map(async gp => {
+                      if( !gp.pkey ) await addPlayerFromGhinPlayer(gp);
+                      return ({
+                        ...gp,
+                        name: gp.playerName,
+                        fave: {
+                          faved: (find(favePlayers, {_key: gp.pkey}) ? true : false),
+                          from: {type: 'player', value: currentPlayerKey},
+                          to:   {type: 'player', value: gp.pkey},
+                          refetchQueries: [{
+                            query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
+                            variables: {
+                              pkey: currentPlayerKey
+                            }
+                          }]
+                        }
+                      });
+                    });
                     //players = orderBy(players,
                     //              ['gender', 'rating', 'slope'],
                     //              ['desc',   'desc',   'desc' ]);
 
-                    const header = (<ListHeader title='Registered Players' />);
+                    //const header = (<ListHeader title='Registered Players' />);
 
                     return (
                       <FlatList
                         data={players}
                         renderItem={_renderPlayer}
-                        ListHeaderComponent={header}
                         keyExtractor={item => item._key}
                         keyboardShouldPersistTaps={'handled'}
                       />
