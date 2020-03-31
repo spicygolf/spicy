@@ -62,7 +62,7 @@ const Player = props => {
           console.log('error adding player to game', error);
         }
         // setup round for player
-        //console.log('Issue #21 - Player on its way to LinkRound', item);
+        console.log('Issue #21 - Player on its way to LinkRound', item);
         navigation.navigate('LinkRound', {
           player: item,
         });

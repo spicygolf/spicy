@@ -14,7 +14,7 @@ export const GET_PLAYER_QUERY = gql`
       statusAuthz
       short
       handicap {
-        handicapIndex
+        index
         revDate
       }
       clubs {

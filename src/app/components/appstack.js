@@ -32,12 +32,13 @@ const TabIcon = ({type, name, color, testID}) => {
 
 const AppStack = props => {
 
+  const { user } = props;
   const [ creds, setCreds ] = useState();
 
   useEffect(
     () => {
       const getCreds = async () => {
-        const c = await getCurrentUser();
+        const c = await getCurrentUser(user);
         if( c && c.currentPlayerKey && c.token ) {
           await AsyncStorage.setItem('currentPlayer', c.currentPlayerKey);
           await AsyncStorage.setItem('token', c.token);
@@ -45,7 +46,7 @@ const AppStack = props => {
         }
       };
       getCreds();
-    }, []
+    }, [user]
   );
 
   if( !creds ) return (

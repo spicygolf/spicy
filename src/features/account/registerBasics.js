@@ -120,10 +120,6 @@ const RegisterBasics = props => {
             type={(emailValid && passValid && pass2Valid) ? 'solid' : 'outline'}
             disabled={!(emailValid && passValid && pass2Valid)}
             onPress={() => {
-              setRegistration({
-                ...registration,
-                prev: 1,
-              });
               navigation.navigate('RegisterHandicap')
             }}
             accessibilityLabel='Register Next 1'

@@ -64,7 +64,7 @@ const RegisterHandicap = props => {
           method: 'GET',
         });
         const json = await res.json();
-        console.log('countries json', json);
+        //console.log('countries json', json);
         setCountries(json.countries);
       };
       fetchData();

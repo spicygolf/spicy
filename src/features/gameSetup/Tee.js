@@ -120,10 +120,10 @@ const Tee = props => {
               round.player &&
               round.player[0] &&
               round.player[0].handicap &&
-              round.player[0].handicap.handicapIndex
+              round.player[0].handicap.index
             ) {
 
-            const index = round.player[0].handicap.handicapIndex;
+            const index = round.player[0].handicap.index;
             //console.log('index', index)
 
             // tee is 'item' if it's the one being changed

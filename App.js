@@ -3,7 +3,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { ApolloProvider } from 'react-apollo';
 import { ApolloProvider as ApolloHooksProvider } from '@apollo/react-hooks';
 import auth from '@react-native-firebase/auth';
-import { createStackNavigator } from '@react-navigation/stack';
 
 import Splash from 'features/splash/splash';
 import AppStack from 'app/components/appstack';
@@ -37,7 +36,7 @@ const App = props => {
     content = (<Splash />);
   } else {
     if( user ) {
-      content = (<AppStack />);
+      content = (<AppStack user={user} />);
     } else {
       content = (<AccountStack />);
     }

@@ -42,11 +42,11 @@ const RegisterPlayer = props => {
   const nValid = { borderColor: nameValid ? green : '#ddd' };
   const sValid = { borderColor: shortValid ? green : '#ddd' };
 
-  const changes = registration.ghinCreds ?
+  const changes = registration.handicap ?
     'Make changes to GHIN information (if any)' : '';
 
   const register = async () => {
-    console.log('registration', JSON.stringify(registration, null, ' '));
+    //console.log('registration', JSON.stringify(registration, null, ' '));
 
     try {
       const res = await auth().createUserWithEmailAndPassword(
@@ -100,8 +100,13 @@ const RegisterPlayer = props => {
             registration.ghinCreds.lastName
           );
           if( search_results ) {
+            console.log('search_results', search_results);
             setRegistration({
               ...registration,
+              handicap: {
+                source: 'ghin',
+                id: search_results.GHINNumber,
+              },
               ghinData: search_results
             });
           }
