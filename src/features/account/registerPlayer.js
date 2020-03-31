@@ -99,13 +99,20 @@ const RegisterPlayer = props => {
             registration.ghinCreds.ghinNumber,
             registration.ghinCreds.lastName
           );
-          if( search_results ) {
-            console.log('search_results', search_results);
+          if( search_results && search_results.length ) {
+            const g = search_results[0];
             setRegistration({
               ...registration,
               handicap: {
                 source: 'ghin',
-                id: search_results.GHINNumber,
+                id: g.GHINNumber,
+                firstName: g.FirstName,
+                lastName: g.LastName,
+                playerName: `${g.FirstName} ${g.LastName}`,
+                gender: g.Gender,
+                active: g.Active == 'true',
+                index: g.Display,
+                revDate: g.RevDate,
               },
               ghinData: search_results
             });
