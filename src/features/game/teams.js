@@ -26,9 +26,9 @@ const Teams = ({teams, renderPlayer, scoring, currentHole }) => {
     const playersOnTeam = [];
     item.players.map(pkey => {
       const p = find(players, {_key: pkey});
-      playersOnTeam.push(p);
+      if( p ) playersOnTeam.push(p);
     });
-    //console.log('playersOnTeam', item.team, playersOnTeam);
+    console.log('playersOnTeam', item.team, playersOnTeam);
 
     return (
       <Card
