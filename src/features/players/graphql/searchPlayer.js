@@ -1,12 +1,12 @@
 import gql from 'graphql-tag';
 
-export default gql`
+export const SEARCH_PLAYER_QUERY = gql`
   query SearchPlayer($q: String!) {
     searchPlayer(q: $q) {
       _key
       name
       handicap {
-        handicapIndex
+        index
         revDate
       }
       clubs {

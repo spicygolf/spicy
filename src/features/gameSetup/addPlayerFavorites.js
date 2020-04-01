@@ -23,16 +23,17 @@ const AddPlayerFavorites = props => {
 
   const _renderFavoritesPlayer = ({item}) => {
 
-    const handicap = (item && item.handicap && item.handicap.handicapIndex) ?
-    item.handicap.handicapIndex : 'no handicap';
+    const handicap = (item && item.handicap && item.handicap.index) ?
+    item.handicap.index : 'NH';
     const club = (item && item.clubs && item.clubs[0]) ?
-    ` - ${item.clubs[0].name}` : '';
+    item.clubs[0].name : '';
 
     return (
       <Player
         item={item}
         title={item.name}
-        subtitle={`${handicap}${club}`}
+        subtitle={club}
+        hdcp={handicap}
       />
     );
   }
@@ -43,12 +44,12 @@ const AddPlayerFavorites = props => {
       <GetFavoritePlayersForPlayer pkey={currentPlayerKey}>
         {({loading, players}) => {
           if( loading ) return (<ActivityIndicator />);
-          const newPlayers = players.map(player => ({
-            ...player,
+          const newPlayers = players.map(p => ({
+            ...p,
             fave: {
               faved: true,
               from: {type: 'player', value: currentPlayerKey},
-              to:   {type: 'player', value: player._key},
+              to:   {type: 'player', value: p._key},
               refetchQueries: [{
                 query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
                 variables: {

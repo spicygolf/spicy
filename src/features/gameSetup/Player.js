@@ -1,5 +1,9 @@
 import React, { useContext } from 'react';
-
+import {
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {
   ListItem
 } from 'react-native-elements';
@@ -13,6 +17,11 @@ import { GET_GAME_QUERY } from 'features/games/graphql';
 import FavoriteIcon from 'common/components/favoriteIcon';
 
 
+const handicap = h => (
+  <View>
+    <Text style={styles.handicap}>{h}</Text>
+  </View>
+);
 
 const Player = props => {
 
@@ -22,7 +31,8 @@ const Player = props => {
   const { game } = useContext(GameContext);
   const { _key:gkey } = game;
 
-  const { item, title, subtitle } = props;
+  const { item, title, subtitle, hdcp } = props;
+  //console.log('player', item);
   const pkey = item._key;
 
   let others = [];
@@ -31,6 +41,7 @@ const Player = props => {
     <ListItem
       title={title}
       subtitle={subtitle}
+      rightElement={handicap(hdcp)}
       onPress={() => {
         // link player to game
         const { loading, error, data } = link({
@@ -51,7 +62,7 @@ const Player = props => {
           console.log('error adding player to game', error);
         }
         // setup round for player
-        //console.log('Issue #21 - Player on its way to LinkRound', item);
+        console.log('Issue #21 - Player on its way to LinkRound', item);
         navigation.navigate('LinkRound', {
           player: item,
         });
@@ -67,3 +78,11 @@ const Player = props => {
 };
 
 export default Player;
+
+
+const styles = StyleSheet.create({
+  handicap: {
+    fontSize: 24,
+    paddingRight: 10,
+  },
+});

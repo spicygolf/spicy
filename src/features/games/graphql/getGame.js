@@ -43,7 +43,7 @@ export const GET_GAME_QUERY = gql`
           _key
           name
           handicap {
-            handicapIndex
+            index
             revDate
           }
         }
@@ -76,7 +76,7 @@ export const GET_GAME_QUERY = gql`
         name
         short
         handicap {
-          handicapIndex
+          index
           revDate
         }
       }

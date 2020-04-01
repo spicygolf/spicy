@@ -17,9 +17,9 @@ import RegisterError from 'features/account/registerError';
 const Register = props => {
 
   const defaultRegistration = {
-    email: 'ba@ba.com',
-    password: 'asdf',
-    password2: 'asdf',
+    email: '',
+    password: '',
+    password2: '',
     lastName: '',
     ghinNumber: '',
     country: 'USA',

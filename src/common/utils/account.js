@@ -22,7 +22,7 @@ export const registerPlayer = async (registration, fbUser) => {
     }
   });
   const payload = await res.json();
-  //console.log('register payload', payload);
+  console.log('register payload', payload);
 
 };
 
@@ -56,7 +56,7 @@ export const login = async fbUser => {
       break;
     default:
       // TODO: handle errors
-      console.log('login payload', payload);
+      console.log('login error - payload', payload);
   }
   return ret;
 };
@@ -82,8 +82,7 @@ export const logout = async client => {
 
 };
 
-export const getCurrentUser = () => {
-  const fbUser = auth().currentUser;
+export const getCurrentUser = fbUser => {
   return login(fbUser)
     .then(login_res => {
       return {

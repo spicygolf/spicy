@@ -47,7 +47,7 @@ const RegisterHandicapSearch = props => {
     const title = item.PlayerName ? item.PlayerName :
       `${item.first_name} ${item.last_name}`;
     const subtitle = item.ClubName ? item.ClubName : item.club_name;
-    const hdcp = item.handicapIndex ? item.handicapIndex : item.handicap_index;
+    const hdcp = item.Display ? item.Display : item.handicap_index;
 
     const leftAvatarColor = (gn == selected) ? green : '#fff';
 
@@ -102,6 +102,7 @@ const RegisterHandicapSearch = props => {
             registration.ghinNumber,
             registration.lastName
           );
+          //console.log('search_results', search_results);
           setGolfers(search_results);
           setFetched(true);
           return;
@@ -113,6 +114,7 @@ const RegisterHandicapSearch = props => {
             1,  // don't use page here, cuz infinite scroll pagination below
             perPage,
           );
+          //console.log('search_results', search_results);
           setGolfers(search_results);
           setFetched(true);
           return;
@@ -123,6 +125,7 @@ const RegisterHandicapSearch = props => {
   );
 
   if( fetched ) {
+    //console.log('golfers', golfers);
     cardContent = (
       <FlatList
         data={golfers}

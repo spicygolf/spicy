@@ -11,13 +11,13 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { Query } from 'react-apollo';
 import { find } from 'lodash';
+import { useMutation } from '@apollo/react-hooks';
 
 import {
   SEARCH_PLAYER_QUERY,
   GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
   GetFavoritePlayersForPlayer
 } from 'features/players/graphql';
-
 import Player from 'features/gameSetup/Player';
 import { GameContext } from 'features/game/gameContext';
 
@@ -30,23 +30,18 @@ const AddPlayerSearch = (props) => {
 
   const { currentPlayerKey } = useContext(GameContext);
 
-  const ListHeader = ({title}) => (
-    <View>
-      <Text style={styles.header}>{title}</Text>
-    </View>
-  );
-
   const _renderPlayer = ({item}) => {
-    const handicap = (item && item.handicap && item.handicap.handicapIndex) ?
-    item.handicap.handicapIndex : 'no handicap';
+    const handicap = (item && item.handicap && item.handicap.index) ?
+    item.handicap.index : 'NH';
     const club = (item && item.clubs && item.clubs[0]) ?
-    ` - ${item.clubs[0].name}` : '';
+      item.clubs[0].name : '';
 
     return (
       <Player
         item={item}
         title={item.name}
-        subtitle={`${handicap}${club}`}
+        subtitle={club}
+        hdcp={handicap}
       />
     );
   }
@@ -86,17 +81,19 @@ const AddPlayerSearch = (props) => {
               data.searchPlayer &&
               data.searchPlayer.length) {
 
+              //console.log('search players', data.searchPlayer);
+
               // TODO: useQuery
               return (
                 <GetFavoritePlayersForPlayer pkey={currentPlayerKey}>
                   {({loading, players:favePlayers}) => {
                     if( loading ) return (<ActivityIndicator />);
-                    let players = data.searchPlayer.map(player => ({
-                      ...player,
+                    let players = data.searchPlayer.map(p => ({
+                      ...p,
                       fave: {
-                        faved: (find(favePlayers, {_key: player._key}) ? true : false),
+                        faved: (find(favePlayers, {_key: p._key}) ? true : false),
                         from: {type: 'player', value: currentPlayerKey},
-                        to:   {type: 'player', value: player._key},
+                        to:   {type: 'player', value: p._key},
                         refetchQueries: [{
                           query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
                           variables: {
@@ -109,13 +106,12 @@ const AddPlayerSearch = (props) => {
                     //              ['gender', 'rating', 'slope'],
                     //              ['desc',   'desc',   'desc' ]);
 
-                    const header = (<ListHeader title='Registered Players' />);
+                    //const header = (<ListHeader title='Registered Players' />);
 
                     return (
                       <FlatList
                         data={players}
                         renderItem={_renderPlayer}
-                        ListHeaderComponent={header}
                         keyExtractor={item => item._key}
                         keyboardShouldPersistTaps={'handled'}
                       />
