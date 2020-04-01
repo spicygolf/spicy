@@ -118,6 +118,7 @@ const TeamChooser = props => {
 
 
   const _renderPlayer = ({item}) => {
+    if( !item ) return;
 
     let team;
     if( h && h.teams ) {
@@ -176,7 +177,10 @@ const TeamChooser = props => {
       <FlatList
         data={game.players}
         renderItem={_renderPlayer}
-        keyExtractor={item => item._key}
+        keyExtractor={item => {
+          if( item && item._key ) return item._key;
+          return Math.random();
+        }}
       />
     </View>
   );

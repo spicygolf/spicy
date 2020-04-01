@@ -33,17 +33,9 @@ const FivePointsScore = props => {
 
 
   const _renderPlayer = ({item}) => {
+    if( !item || !item._key ) return null;
     const round = get_round_for_player(game.rounds, item._key);
-
     const hole = get_hole(currentHole, round);
-/*
-    let handicap = '';
-    if( round ) {
-      handicap = round.game_handicap ?
-        round.game_handicap : round.course_handicap;
-      handicap = handicap ? handicap.toString() : '';
-    }
-*/
     const score = get_score(currentHole, round);
     const rkey = (round && round._key) ? round._key : null;
 
@@ -106,6 +98,7 @@ const FivePointsScore = props => {
   }
 
   const holes = getHoles(game);
+  //console.log('holes', holes);
 
   return (
     <View style={styles.score_container}>

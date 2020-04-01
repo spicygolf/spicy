@@ -28,7 +28,7 @@ const Teams = ({teams, renderPlayer, scoring, currentHole }) => {
       const p = find(players, {_key: pkey});
       if( p ) playersOnTeam.push(p);
     });
-    console.log('playersOnTeam', item.team, playersOnTeam);
+    //console.log('playersOnTeam', item.team, playersOnTeam);
 
     return (
       <Card

@@ -14,6 +14,7 @@ export const getTeams = (game, hole) => {
 
     let onTeam = {};
     game.players.map(p => {
+      if( !p ) return;
       onTeam[p._key] = false;
     });
 

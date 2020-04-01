@@ -31,8 +31,8 @@ const Players = props => {
 
   const { _key: gkey, rounds, players } = game;
 
-
   const _itemPressed = player => {
+    if( !player ) return;
     // check to see if round exists... if not, don't go here
     const round = get_round_for_player(rounds, player._key);
     if( round ) navigation.navigate('EditPlayer', {player: player});
@@ -52,7 +52,8 @@ const Players = props => {
   }
 
   const _renderPlayer = ({item}) => {
-    if( item && item.name ) {
+    //console.log('renderPlayer item', item);
+    if( item && item.name && item._key ) {
       const pkey = item._key;
 
       const round = get_round_for_player(rounds, pkey);
@@ -126,7 +127,10 @@ const Players = props => {
         <FlatList
           data={players}
           renderItem={_renderPlayer}
-          keyExtractor={item => item._key}
+          keyExtractor={item => {
+            if( item && item._key ) return item._key;
+            return Math.random();
+          }}
         />
       </View>
       { button }
