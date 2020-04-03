@@ -13,46 +13,51 @@ const RemovePlayer = props => {
   const [ unlink ] = useMutation(REMOVE_LINK_MUTATION);
 
   const _removePlayer = () => {
-    _removePlayer2Game();
-    _removeRound2Game();
+    //console.log('removePlayer', pkey, gkey, rkey);
+    if( pkey && gkey ) _removePlayer2Game();
+    if( rkey && gkey ) _removeRound2Game();
   };
 
   const _removePlayer2Game = () => {
     // remove player2game link
-    const { loading, data, error } = unlink({
-      variables: {
-        from: {type: 'player', value: pkey},
-        to: {type: 'game', value: gkey}
-      },
-      refetchQueries: [{
-        query: GET_GAME_QUERY,
+    try {
+      const { loading, data, error } = unlink({
         variables: {
-          gkey: gkey
-        }
-      }],
-      awaitRefetchQueries: true,
-    });
-    if( error ) {
-      console.log('error removing player from game', error);
+          from: {type: 'player', value: pkey},
+          to: {type: 'game', value: gkey}
+        },
+        refetchQueries: [{
+          query: GET_GAME_QUERY,
+          variables: {
+            gkey: gkey
+          }
+        }],
+        awaitRefetchQueries: true,
+      });
+      if( error ) throw(error);
+    } catch(e) {
+      console.log('error removing player from game', e);
     }
   };
 
   const _removeRound2Game = () => {
-    const { loading, data, error } = unlink({
-      variables: {
-        from: {type: 'round', value: rkey},
-        to: {type: 'game', value: gkey}
-      },
-      refetchQueries: [{
-        query: GET_GAME_QUERY,
+    try {
+      const { loading, data, error } = unlink({
         variables: {
-          gkey: gkey
-        }
-      }],
-      awaitRefetchQueries: true,
-    });
-    if( error ) {
-      console.log('error unlinking round from game', error);
+          from: {type: 'round', value: rkey},
+          to: {type: 'game', value: gkey}
+        },
+        refetchQueries: [{
+          query: GET_GAME_QUERY,
+          variables: {
+            gkey: gkey
+          }
+        }],
+        awaitRefetchQueries: true,
+      });
+      if( error ) throw(error);
+    } catch(e) {
+      console.log('error removing round from game', e);
     }
   };
 

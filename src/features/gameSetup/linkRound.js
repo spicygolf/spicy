@@ -1,50 +1,191 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  FlatList,
+  StyleSheet,
   Text,
-  View
+  View,
 } from 'react-native';
+import {
+  Button,
+  ListItem,
+} from 'react-native-elements';
+import moment from 'moment';
+import { useMutation } from '@apollo/react-hooks';
+import { useNavigation } from '@react-navigation/native';
+import { useLazyQuery } from '@apollo/react-hooks';
 
-import { useQuery } from '@apollo/react-hooks';
-
+import GameNav from 'features/games/gamenav';
 import { GameContext } from 'features/game/gameContext';
+import { ADD_LINK_MUTATION } from 'common/graphql/link'
+import { ADD_ROUND_MUTATION } from 'features/rounds/graphql';
+import { GET_GAME_QUERY } from 'features/games/graphql';
 import { GET_ROUNDS_FOR_PLAYER_DAY_QUERY } from 'features/rounds/graphql';
-import Rounds from 'features/gameSetup/rounds';
+import {
+  linkPlayerToGame,
+  linkRoundToGameAndPlayer,
+} from 'common/utils/links';
 
 
 
-const LinkRound = (props) => {
 
+const LinkRound = props => {
+
+  //console.log('LinkRound');
   const { route } = props;
   const { player } = route.params;
-  const { _key:pkey } = player;
+
+  const [ rounds, setRounds ] = useState(null);
+  const [ madeNewRound, setMadeNewRound ] = useState(false);
+  const newRound = ( rounds && rounds.length === 0 );
+  console.log('LinkRound', rounds, newRound);
 
   const { game } = useContext(GameContext);
-  const { start: game_start } = game;
+  const { _key: gkey, start: game_start } = game;
+  const { _key: pkey } = player;
 
-  const { loading, error, data } = useQuery(GET_ROUNDS_FOR_PLAYER_DAY_QUERY,  {
-    variables: {
-      pkey: pkey,
-      day: game_start,
-    }
-  });
+  const navigation = useNavigation();
+  const [ addRound ] = useMutation(ADD_ROUND_MUTATION);
+  const [ link ] = useMutation(ADD_LINK_MUTATION);
+  const [ linkRoundToGame ] = useMutation(ADD_LINK_MUTATION);
+  const [ linkRoundToPlayer ] = useMutation(ADD_LINK_MUTATION);
 
-  if( loading ) return (<ActivityIndicator />);
-  if (error) return (<Text>Error! ${error.message}</Text>);
+  const [ getRoundsForPlayerDay, { error, data } ] = useLazyQuery(
+    GET_ROUNDS_FOR_PLAYER_DAY_QUERY
+  );
+  if (error) console.log('Error fetching rounds for player day', error);
 
-  const rounds = (data && data.getRoundsForPlayerDay ) ?
-    data.getRoundsForPlayerDay : [];
+  if( data && data.getRoundsForPlayerDay && !rounds ) {
+    setRounds(data.getRoundsForPlayerDay);
+  }
+
+  const createNewRound = async () => {
+    console.log('creating new round');
+
+    // add round
+    let { loading: arLoading, error: arError, data: arData } = await addRound({
+      variables: {
+        round: {
+          date: game_start,
+          seq: 1,
+          scores: []
+        }
+      },
+    });
+    //console.log('arData', arData);
+
+    linkRoundToGameAndPlayer({
+      round: arData.addRound,
+      game: game,
+      player: player,
+      isNew: true,
+      linkRoundToGame: linkRoundToGame,
+      linkRoundToPlayer: linkRoundToPlayer,
+    });
+    navigation.navigate('GameSetup');
+
+  };
+
+  if( newRound && !madeNewRound ) {
+    createNewRound();
+    setMadeNewRound(true);
+  }
+
+  const addButton = (
+    <Button
+      title="Add New Round"
+      onPress={async () => {
+        await createNewRound();
+      }}
+    />
+  );
+
+  let content = null;
 
   if( rounds && Array.isArray(rounds) ) {
-    return (
-      <Rounds
-        rounds={rounds}
-        player={player}
-      />
-    );
-  }
-  return null;
+    if( rounds.length === 0 ) {
+      content = addButton;
+    } else {
+      content = (
+        <View>
+          <Text style={styles.explanation}>
+            {player.name} is already playing round(s) today.
+            Please choose one from the list or create a new round for this game.
+          </Text>
 
+          <FlatList
+            data={rounds}
+            renderItem={({item, index}) => {
+              return (
+                <ListItem
+                  key={index}
+                  title={moment(item.date).format('llll')}
+                  onPress={() => {
+                    //console.log('round clicked', item);
+                    linkRoundToGameAndPlayer({
+                      round: item,
+                      game: game,
+                      player: player,
+                      isNew: false,
+                      linkRoundToGame: linkRoundToGame,
+                      linkRoundToPlayer: linkRoundToPlayer,
+                    });
+                    navigation.navigate('GameSetup');
+                  }}
+                />
+              );
+            }}
+            keyExtractor={(_item, index) => index.toString()}
+          />
+
+          {addButton}
+        </View>
+      );
+    }
+  } else {
+    content = (<ActivityIndicator />);
+  }
+
+  useEffect(
+    () => {
+      const init = async () => {
+        console.log('linkRound useEffect init');
+        await linkPlayerToGame({
+          pkey: pkey,
+          gkey: gkey,
+          link: link,
+        });
+        getRoundsForPlayerDay({
+          variables: {
+            pkey: pkey,
+            day: game_start,
+          },
+        });
+      }
+      init();
+    }, []
+  );
+
+  return (
+    <View style={styles.container}>
+      <GameNav
+        title='Choose Round'
+        showBack={true}
+        backTo={'GameSetup'}
+      />
+      {content}
+    </View>
+  );
 };
 
 export default LinkRound;
+
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 5,
+  },
+  explanation: {
+    padding: 10,
+  },
+});
