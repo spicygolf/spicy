@@ -4,7 +4,9 @@ import {
   Text,
   View,
 } from 'react-native';
-import { find } from 'lodash';
+import { filter, find } from 'lodash';
+
+import { formatDiff } from 'common/utils/score';
 
 
 
@@ -18,13 +20,21 @@ const TeamTotals = props => {
   const team = find(hole.teams, {team: teamNum});
   if( !team ) return null;
 
+  let otherTeam = null;
+  const otherTeams = filter(hole.teams,
+    t => (t.team.toString() != teamNum.toString())
+  );
+  if( otherTeams && otherTeams.length == 1 ) otherTeam = otherTeams[0];
+  //console.log('teamTotals', teamNum, otherTeams, otherTeam);
+  const diff = otherTeam ? team.runningTotal - otherTeam.runningTotal : null;
+
   return (
   <View style={styles.totalsView}>
     <View>
       <Text style={styles.totalsText}>Hole: {`${team.points} x ${hole.holeMultiplier} = ${team.holeTotal}`}</Text>
     </View>
     <View>
-      <Text style={styles.totalsText}>Running Total: {team.runningTotal}</Text>
+      <Text style={styles.totalsText}>Running Total: {team.runningTotal} ({formatDiff(diff)})</Text>
     </View>
   </View>
 );
@@ -44,7 +54,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   totalsText: {
-    fontWeight: 'bold',
+    //fontWeight: 'bold',
     fontSize: 16,
   },
 });

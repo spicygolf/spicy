@@ -309,3 +309,10 @@ export const isScoreToParJunk = (junk, s, par) => {
   }
 
 };
+
+export   const formatDiff = diff => {
+  if( !diff ) return '';
+  let sign = '';
+  if( diff > 0 ) sign = '+';
+  return `${sign}${diff}`;
+};
