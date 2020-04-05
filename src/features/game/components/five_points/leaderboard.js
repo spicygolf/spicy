@@ -7,7 +7,7 @@ import
   View
 } from 'react-native';
 import { DataTable } from 'react-native-paper';
-import { find } from 'lodash';
+import { filter, find } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
 import { scoring } from 'common/utils/score';
@@ -21,11 +21,14 @@ const FivePointsLeaderboard = props => {
   const { game } = useContext(GameContext);
   const scores = scoring(game);
 
-  const playerList = game.players.map((p, i) => ({
-    key: i,
-    pkey: p._key,
-    name: p.name,
-  }));
+  const playerList = filter(game.players.map((p, i) => {
+    if( !p ) return null;
+    return ({
+      key: i,
+      pkey: p._key,
+      name: p.name,
+    });
+  }), (p => p != null));
 
   const findScore = (hole, pkey) => {
     let ret = null;
@@ -62,7 +65,7 @@ const FivePointsLeaderboard = props => {
       const scoreCells = playerList.map(p => {
         const score = findScore(h, p.pkey);
         if( !totals[p.pkey] ) totals[p.pkey] = 0;
-        totals[p.pkey] += parseFloat(score);
+        totals[p.pkey] += (parseFloat(score) || 0);
         return (
           <DataTable.Cell style={styles.scoreCell}>{score}</DataTable.Cell>
         );
