@@ -80,8 +80,10 @@ coverage
 */fastlane/Preview.html
 */fastlane/screenshots
 
-# Bundle artifact
+# ios builds
+ios/assets/*
 *.jsbundle
-
-# CocoaPods
 /ios/Pods/
+
+# android builds
+android/app/src/main/assets/*
