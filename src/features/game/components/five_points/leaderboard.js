@@ -43,6 +43,7 @@ const FivePointsLeaderboard = props => {
     const players = playerList.map(p => {
       return (
         <DataTable.Title
+          key={`${p.pkey}_name`}
           style={[styles.playerName, styles.rotate]}
           numberOfLines={2}
         >
@@ -67,21 +68,31 @@ const FivePointsLeaderboard = props => {
         if( !totals[p.pkey] ) totals[p.pkey] = 0;
         totals[p.pkey] += (parseFloat(score) || 0);
         return (
-          <DataTable.Cell style={styles.scoreCell}>{score}</DataTable.Cell>
+          <DataTable.Cell
+            key={`${p.pkey}_${h.hole}`}
+            style={styles.scoreCell}
+          >
+            {score}
+          </DataTable.Cell>
         );
       });
       return (
-        <DataTable.Row style={styles.row}>
+        <DataTable.Row key={`row_hole_${h.hole}`} style={styles.row}>
           <DataTable.Cell style={styles.holeCell}>{h.hole}</DataTable.Cell>
           { scoreCells }
         </DataTable.Row>
       );
     });
     const totalCells = playerList.map(p => (
-      <DataTable.Cell style={styles.scoreCell}>{totals[p.pkey]}</DataTable.Cell>
+      <DataTable.Cell
+        key={`${p.pkey}_${sideName}`}
+        style={styles.scoreCell}
+      >
+        {totals[p.pkey]}
+      </DataTable.Cell>
     ));
     ret.push((
-      <DataTable.Row style={styles.row}>
+      <DataTable.Row key={`row_${sideName}`} style={styles.row}>
         <DataTable.Cell style={styles.holeCell}>{sideName}</DataTable.Cell>
         { totalCells }
       </DataTable.Row>
@@ -94,7 +105,12 @@ const FivePointsLeaderboard = props => {
 
   const totalRows = totals => {
     const totalCells = playerList.map(p => (
-      <DataTable.Cell style={styles.scoreCell}>{totals[p.pkey]}</DataTable.Cell>
+      <DataTable.Cell
+        key={`${p.pkey}_total`}
+        style={styles.scoreCell}
+      >
+        {totals[p.pkey]}
+      </DataTable.Cell>
     ));
     return (
       <DataTable.Row style={styles.row}>
