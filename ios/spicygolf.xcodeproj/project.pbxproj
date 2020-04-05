@@ -299,7 +299,7 @@
 			baseConfigurationReference = FFF78D79653DD86D05E4A780 /* Pods-spicygolf.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = NO;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = spicygolf/Info.plist;
@@ -320,7 +320,7 @@
 			baseConfigurationReference = 914896C0CEFDAA592DADF952 /* Pods-spicygolf.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = spicygolf/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
