@@ -21,7 +21,7 @@ import { green } from 'common/colors';
 const GameStack = props => {
 
   const { setup } = props;
-  const initRoute = setup ? 'GameSetup' : 'Leaderboard';
+  const initRoute = setup ? 'GameSetup' : 'Score';
 
   const { game } = useContext(GameContext);
   const { gamespecs } = game;
