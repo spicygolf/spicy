@@ -54,9 +54,11 @@ export const scoring = (game) => {
 
   const holes = getHoles(game);
   holes.map(hole => {
-    //console.log('scoring hole', hole);
-    const gHole = find(game.teams.holes, {hole: hole});
+    //console.log('scoring hole', hole, game.teams);
 
+    const gHole = find(game.teams.holes, {hole: hole});
+    //console.log('gHole', gHole);
+    if( !gHole || !gHole.teams ) return;
     const teams = gHole.teams.map(gTeam => {
       let teamPoints = 0;
       let team = {

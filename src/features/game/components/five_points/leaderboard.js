@@ -32,6 +32,7 @@ const FivePointsLeaderboard = props => {
 
   const findScore = (hole, pkey) => {
     let ret = null;
+    if( !hole || !hole.teams ) return ret;
     hole.teams.map(t => {
       const p = find(t.players, {pkey: pkey});
       if( p ) ret = p.score[scoreType];
@@ -135,7 +136,7 @@ const FivePointsLeaderboard = props => {
   let totals = {};
   playerList.map(p => {
     if( !totals[p.pkey] ) totals[p.pkey] = 0;
-    totals[p.pkey] += parseFloat(frontTotals[p.pkey] + parseFloat(backTotals[p.pkey]));
+    totals[p.pkey] += ((parseFloat(frontTotals[p.pkey]) || 0) + (parseFloat(backTotals[p.pkey]) || 0));
   });
 
   return (
