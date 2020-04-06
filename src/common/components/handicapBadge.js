@@ -18,7 +18,10 @@ const HandicapBadge = props => {
     course_game_handicap = game_handicap;
   }
 
-  const format = (v, places) => (v.toFixed(places));
+  const format = (v, places) => {
+    if( !v ) return '-';
+    return v.toFixed(places)
+  };
 
   return (
     <View style={styles.row}>
