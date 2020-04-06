@@ -72,11 +72,11 @@ const AddPlayerManual = props => {
   };
 
   const [ player, setPlayer ] = useState({
-    name: 'Matt Rackey',
-    short: 'Matt',
+    name: '',
+    short: '',
     handicap: {
       source: 'manual',
-      index: '8.8',
+      index: '',
     },
     statusAuthz: ['prod'],
     createdBy: currentPlayerKey,
