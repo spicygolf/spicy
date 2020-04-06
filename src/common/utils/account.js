@@ -117,6 +117,11 @@ export const validateInteger = number => {
   return Number.isInteger(parseInt(number));
 };
 
+export const validateFloat = number => {
+  if( !number ) return false;
+  return !Number.isNaN(parseFloat(number));
+};
+
 export const build_qs = args => {
   const a = [];
   for( let key in args ) {

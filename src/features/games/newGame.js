@@ -126,7 +126,6 @@ const NewGame = props => {
         screen: 'LinkRound',
         params: {
           player: player,
-          currentPlayerKey: currentPlayerKey,
         },
       },
     });

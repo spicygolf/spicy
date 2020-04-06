@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import AddPlayerFavorites from 'features/gameSetup/addPlayerFavorites';
 import AddPlayerSearch from 'features/gameSetup/addPlayerSearch';
+import AddPlayerManual from 'features/gameSetup/addPlayerManual';
 
 import { green } from 'common/colors';
 
@@ -38,6 +39,11 @@ const AddPlayerTabs = props => {
           showIcon: true
         }
       }}
+      tabBarOptions={{
+        labelStyle: {
+          textTransform: 'capitalize',
+        }
+      }}
     >
       <Tab.Screen
         name='AddPlayerFavorites'
@@ -59,6 +65,21 @@ const AddPlayerTabs = props => {
         component={AddPlayerSearch}
         options={{
           title: 'Search',
+          tabBarIcon: ({ focused }) => {
+            return (
+              <TabIcon
+                color={focused ? green : '#555' }
+                name='search'
+              />
+            );
+          },
+        }}
+      />
+      <Tab.Screen
+        name='AddPlayerManual'
+        component={AddPlayerManual}
+        options={{
+          title: 'Manual',
           tabBarIcon: ({ focused }) => {
             return (
               <TabIcon

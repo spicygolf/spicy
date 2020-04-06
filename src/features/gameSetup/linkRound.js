@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useLazyQuery } from '@apollo/react-hooks';
 
 import GameNav from 'features/games/gamenav';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { GameContext } from 'features/game/gameContext';
 import { ADD_LINK_MUTATION } from 'common/graphql/link'
 import { ADD_ROUND_MUTATION } from 'features/rounds/graphql';
@@ -32,7 +33,8 @@ const LinkRound = props => {
 
   //console.log('LinkRound');
   const { route } = props;
-  const { player, currentPlayerKey } = route.params;
+  const { player } = route.params;
+  const { currentPlayerKey } = useContext(CurrentPlayerContext);
 
   const [ rounds, setRounds ] = useState(null);
   const [ madeNewRound, setMadeNewRound ] = useState(false);
