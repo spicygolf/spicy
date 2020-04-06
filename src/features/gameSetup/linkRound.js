@@ -28,17 +28,16 @@ import {
 
 
 
-
 const LinkRound = props => {
 
   //console.log('LinkRound');
   const { route } = props;
-  const { player } = route.params;
+  const { player, currentPlayerKey } = route.params;
 
   const [ rounds, setRounds ] = useState(null);
   const [ madeNewRound, setMadeNewRound ] = useState(false);
   const newRound = ( rounds && rounds.length === 0 );
-  console.log('LinkRound', rounds, newRound);
+  //console.log('LinkRound', rounds, newRound);
 
   const { game } = useContext(GameContext);
   const { _key: gkey, start: game_start } = game;
@@ -60,7 +59,7 @@ const LinkRound = props => {
   }
 
   const createNewRound = async () => {
-    console.log('creating new round');
+    //console.log('creating new round');
 
     // add round
     let { loading: arLoading, error: arError, data: arData } = await addRound({
@@ -149,11 +148,12 @@ const LinkRound = props => {
   useEffect(
     () => {
       const init = async () => {
-        console.log('linkRound useEffect init');
+        //console.log('linkRound useEffect init');
         await linkPlayerToGame({
           pkey: pkey,
           gkey: gkey,
           link: link,
+          currentPlayerKey: currentPlayerKey,
         });
         getRoundsForPlayerDay({
           variables: {

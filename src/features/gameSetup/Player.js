@@ -37,7 +37,6 @@ const Player = props => {
           handicap: item.handicap,
         };
         navigation.navigate('LinkRound', {
-          rounds: [],
           player: player,
         });
       }}

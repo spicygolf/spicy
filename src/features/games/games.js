@@ -77,7 +77,7 @@ const Games = props => {
   return (
     <View style={styles.container}>
       <View style={styles.gamesSubMenu}>
-        <View style={styles.newGameButton}>
+        <View>
           <Icon
             name='add-circle'
             color={blue}
@@ -109,12 +109,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   gamesSubMenu: {
-    alignItems: 'flex-end',
-    paddingRight: 10,
+    alignItems: 'center',
     paddingTop: 10,
   },
-  gamesSubMenuSpacer: {
-  },
-  newGameButton: {
-  }
 });

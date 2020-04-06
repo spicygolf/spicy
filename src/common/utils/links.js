@@ -4,8 +4,8 @@ import { course_handicap } from 'common/utils/handicap';
 
 
 
-export const linkPlayerToGame = async ({pkey, gkey, link}) => {
-  console.log('linkPlayerToGame');
+export const linkPlayerToGame = async ({pkey, gkey, link, currentPlayerKey}) => {
+  //console.log('linkPlayerToGame');
   //return;
   // link player to game
   try {
@@ -19,6 +19,12 @@ export const linkPlayerToGame = async ({pkey, gkey, link}) => {
         variables: {
           gkey: gkey
         }
+      }, {
+        query: ACTIVE_GAMES_FOR_PLAYER_QUERY,
+        variables: {
+          pkey: currentPlayerKey,
+        },
+        fetchPolicy: 'cache-and-network',
       }],
       awaitRefetchQueries: true
     });
@@ -33,7 +39,7 @@ export const linkRoundToGameAndPlayer = props => {
 
   const {round, game, player, isNew, linkRoundToGame, linkRoundToPlayer} = props;
 
-  console.log('linking round to game and player');
+  //console.log('linking round to game and player');
   const { _key: rkey, tee } = round;
   const { _key: gkey, holes } = game;
   const { _key: pkey, handicap } = player;
@@ -46,7 +52,7 @@ export const linkRoundToGameAndPlayer = props => {
     const ch = course_handicap(hi, tee, holes);
     //console.log('LinkRound ch', ch);
     if( ch ) other.push({key: 'course_handicap', value: ch});
-    console.log('LinkRound other', other);
+    //console.log('LinkRound other', other);
   } catch(e) {
     console.log('Could not calc a course handicap for ', round);
     console.log('error', e);

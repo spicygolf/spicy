@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 import { ListItem } from 'react-native-elements';
-import { useQuery, useMutation } from '@apollo/react-hooks';
+import { useLazyQuery, useQuery, useMutation } from '@apollo/react-hooks';
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 
@@ -21,6 +21,7 @@ import {
   ADD_GAME_MUTATION,
 } from 'features/games/graphql';
 import { ADD_LINK_MUTATION } from 'common/graphql/link';
+import { GET_PLAYER_QUERY } from 'features/players/graphql';
 
 
 
@@ -28,20 +29,32 @@ const NewGame = props => {
 
   const { route } = props;
   const { currentPlayerKey } = route.params;
+  const [ gkey, setGkey ] = useState(null);
 
   const navigation = useNavigation();
   const [ addGameMutation ] = useMutation(ADD_GAME_MUTATION);
   const [ addLinkMutation ] = useMutation(ADD_LINK_MUTATION);
 
+  // grab current player object from db
+  const [ currentPlayer, setCurrentPlayer ] = useState(null);
+  const [ getPlayer, {error: cpError, data: cpData} ] = useLazyQuery(GET_PLAYER_QUERY);
+  if (cpError) console.log('Error fetching rounds for player day', cpError);
+  //console.log('cpData', cpData);
+  if( cpData && cpData.getPlayer && !currentPlayer ) {
+    //console.log('setting currentPlayer', cpData);
+    setCurrentPlayer(cpData.getPlayer);
+  }
+
   const gamespecPressed = async gamespec => {
     const game = await addGame(gamespec);
-    const linkg2gs = await linkGameToGamespec(game, gamespec)
-    const linkp2g = await linkCurrentPlayerToGame(game);
-    const { _key: gkey } = game;
-    navigation.navigate('Game', {
-      currentGameKey: gkey,
-      setup: true,
+    setGkey(game._key);
+    await linkGameToGamespec(game, gamespec)
+    getPlayer({
+      variables: {
+        player: currentPlayerKey,
+      }
     });
+    //console.log('gamespecPressed')
   };
 
   const addGame = async gamespec => {
@@ -84,31 +97,6 @@ const NewGame = props => {
 
   };
 
-  const linkCurrentPlayerToGame = async (game) => {
-    // now add current logged in player to game via edge
-    const { _key: gkey } = game;
-    let others = [
-      {key: 'created_by', value: 'true'},
-    ];
-    const { loading, error, data } = await addLinkMutation({
-      variables: {
-        from: {type: 'player', value: currentPlayerKey},
-        to: {type: 'game', value: gkey},
-        other: others,
-      },
-      refetchQueries: () => [{
-        query: ACTIVE_GAMES_FOR_PLAYER_QUERY,
-        variables: {
-          pkey: currentPlayerKey,
-        },
-        fetchPolicy: 'cache-and-network',
-      }],
-    });
-    // TODO: handle loading, error?
-    //console.log('newGame linkp2g', data);
-    return data.link;
-  };
-
   // `item` is a gamespec
   const _renderItem = ({item}) => {
     return (
@@ -121,6 +109,28 @@ const NewGame = props => {
       />
     );
   };
+
+  //console.log('currentPlayer', currentPlayer, gkey);
+  if( currentPlayer && gkey ) {
+    console.log('currentPlayer', currentPlayer);
+    const player = {
+      _key: currentPlayerKey,
+      name: currentPlayer.name,
+      handicap: currentPlayer.handicap,
+    }
+    navigation.navigate('Game', {
+      currentGameKey: gkey,
+      setup: true,
+      screen: 'GameSetup',
+      params: {
+        screen: 'LinkRound',
+        params: {
+          player: player,
+          currentPlayerKey: currentPlayerKey,
+        },
+      },
+    });
+  }
 
   const { data, loading, error} = useQuery(GAMESPECS_FOR_PLAYER_QUERY, {
     variables: {
