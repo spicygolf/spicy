@@ -128,6 +128,10 @@ export const GET_GAME_QUERY = gql`
             name
             disp
             type
+            choices {
+              name
+              disp
+            }
             default
         }
       }

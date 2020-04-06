@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { ApolloProvider } from 'react-apollo';
 import { ApolloProvider as ApolloHooksProvider } from '@apollo/react-hooks';
+import { Provider as PaperProvider } from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
 
 import Splash from 'features/splash/splash';
@@ -46,7 +47,9 @@ const App = props => {
     <ApolloProvider client={client}>
       <ApolloHooksProvider client={client}>
         <NavigationContainer>
-          { content }
+          <PaperProvider>
+            { content }
+          </PaperProvider>
         </NavigationContainer>
       </ApolloHooksProvider>
     </ApolloProvider>
