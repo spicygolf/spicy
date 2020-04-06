@@ -18,15 +18,17 @@ const HandicapBadge = props => {
     course_game_handicap = game_handicap;
   }
 
+  const format = (v, places) => (v.toFixed(places));
+
   return (
     <View style={styles.row}>
       <View style={styles.hdcp}>
-        <Text>HI</Text>
-        <Text>{handicap_index || '-'}</Text>
+        <Text style={styles.txt}>HI</Text>
+        <Text style={styles.txt}>{format(handicap_index, 1) || '-'}</Text>
       </View>
       <View style={styles.hdcp}>
-        <Text>{course_game}</Text>
-        <Text>{course_game_handicap || '-'}</Text>
+        <Text style={styles.txt}>{course_game}</Text>
+        <Text style={styles.txt}>{format(course_game_handicap, 0) || '-'}</Text>
       </View>
     </View>
   );
@@ -44,5 +46,8 @@ const styles = StyleSheet.create({
   hdcp: {
     flex: 2,
     alignItems: 'center',
+  },
+  txt: {
+    fontSize: 11,
   },
 });
