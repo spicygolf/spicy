@@ -32,8 +32,8 @@ const Tee = props => {
 
   const assigned = oldTee ? "manual" : "first";
 
-  const add = (rkey, tkey, other) => {
-    const { loading, error, data } = linkRoundToTee({
+  const add = async (rkey, tkey, other) => {
+    const { loading, error, data } = await linkRoundToTee({
       variables: {
         from: {type: 'round', value: rkey},
         to: {type: 'tee', value: tkey},
@@ -52,8 +52,8 @@ const Tee = props => {
     }
   };
 
-  const rm = (rkey, tkey) => {
-    const { loading, error, data } = unlinkRoundToTee({
+  const rm = async (rkey, tkey) => {
+    const { loading, error, data } = await unlinkRoundToTee({
       variables: {
         from: {type: 'round', value: rkey},
         to: {type: 'tee', value: tkey},
@@ -71,8 +71,8 @@ const Tee = props => {
     }
   };
 
-  const update = (rkey, other) => {
-    const { loading, error, data } = updateLink({
+  const update = async (rkey, other) => {
+    const { loading, error, data } = await updateLink({
       variables: {
         from: {type: 'round', value: rkey},
         to: {type: 'game', value: gkey},
@@ -95,26 +95,26 @@ const Tee = props => {
     <ListItem
       title={title}
       subtitle={subtitle}
-      onPress={() => {
+      onPress={async () => {
         if( oldTee ) {
           // we need to remove this edge and replace with new one
-          rm(rkey, oldTee._key);
+          await rm(rkey, oldTee._key);
         }
 
-        add(rkey, item._key, [{key: "assigned", value: assigned}]);
+        await add(rkey, item._key, [{key: "assigned", value: assigned}]);
 
         // add the same tee to the other players' rounds in this
         // game, unless they have round2tee already.
-        game.rounds.map(round => {
+        game.rounds.map(async round => {
           if( !round ) return;  // odd edge case during development /shrug
           if( !round.tee ) {
-            add(round._key, item._key, [{key: "assigned", value: "auto"}]);
+            await add(round._key, item._key, [{key: "assigned", value: "auto"}]);
           }
         });
 
         // here is one place we can calculate the course_handicap
         // on the round2game edges
-        game.rounds.map(round => {
+        game.rounds.map(async round => {
           if(
               round &&
               round.player &&
@@ -131,9 +131,10 @@ const Tee = props => {
             const tee = (round._key == rkey) ? item : round.tee;
 
             const ch = course_handicap(index, tee, game.holes);
+            console.log('ch', ch);
             if( ch && ch != round.course_handicap ) {
-              //console.log('updating course_handicap to ', ch);
-              update(round._key, [
+              console.log('updating course_handicap to ', ch);
+              await update(round._key, [
                 {key: 'handicap_index', value: index},
                 {key: 'course_handicap', value: ch},
               ]);

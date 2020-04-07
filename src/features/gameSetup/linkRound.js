@@ -20,7 +20,6 @@ import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { GameContext } from 'features/game/gameContext';
 import { ADD_LINK_MUTATION } from 'common/graphql/link'
 import { ADD_ROUND_MUTATION } from 'features/rounds/graphql';
-import { GET_GAME_QUERY } from 'features/games/graphql';
 import { GET_ROUNDS_FOR_PLAYER_DAY_QUERY } from 'features/rounds/graphql';
 import {
   linkPlayerToGame,
@@ -57,6 +56,7 @@ const LinkRound = props => {
   if (error) console.log('Error fetching rounds for player day', error);
 
   if( data && data.getRoundsForPlayerDay && !rounds ) {
+    //console.log('setting rounds for ', pkey)
     setRounds(data.getRoundsForPlayerDay);
   }
 
@@ -121,9 +121,9 @@ const LinkRound = props => {
                 <ListItem
                   key={index}
                   title={moment(item.date).format('llll')}
-                  onPress={() => {
+                  onPress={async () => {
                     //console.log('round clicked', item);
-                    linkRoundToGameAndPlayer({
+                    await linkRoundToGameAndPlayer({
                       round: item,
                       game: game,
                       player: player,
@@ -150,21 +150,27 @@ const LinkRound = props => {
   useEffect(
     () => {
       const init = async () => {
-        //console.log('linkRound useEffect init');
+        //console.log('linkRound useEffect init', pkey, currentPlayerKey);
         await linkPlayerToGame({
           pkey: pkey,
           gkey: gkey,
           link: link,
           currentPlayerKey: currentPlayerKey,
         });
-        getRoundsForPlayerDay({
-          variables: {
-            pkey: pkey,
-            day: game_start,
-          },
-        });
-      }
+      };
       init();
+    }, []
+  );
+
+  useEffect(
+    () => {
+      //console.log('getRoundsForPlayerDay', pkey);
+      getRoundsForPlayerDay({
+        variables: {
+          pkey: pkey,
+          day: game_start,
+        },
+      });
     }, []
   );
 

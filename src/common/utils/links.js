@@ -6,7 +6,7 @@ import { course_handicap } from 'common/utils/handicap';
 
 
 export const linkPlayerToGame = async ({pkey, gkey, link, currentPlayerKey}) => {
-  //console.log('linkPlayerToGame');
+  //console.log('linkPlayerToGame', pkey, gkey, currentPlayerKey);
   //return;
   // link player to game
   try {
@@ -36,7 +36,7 @@ export const linkPlayerToGame = async ({pkey, gkey, link, currentPlayerKey}) => 
   }
 };
 
-export const linkRoundToGameAndPlayer = props => {
+export const linkRoundToGameAndPlayer = async props => {
 
   const {round, game, player, isNew, linkRoundToGame, linkRoundToPlayer} = props;
 
@@ -51,7 +51,7 @@ export const linkRoundToGameAndPlayer = props => {
     const hi = handicap.index;
     if( hi ) other.push({key: 'handicap_index', value: hi});
     const ch = course_handicap(hi, tee, holes);
-    //console.log('LinkRound ch', ch);
+    //console.log('LinkRound ch', ch, hi, tee, holes);
     if( ch ) other.push({key: 'course_handicap', value: ch});
     //console.log('LinkRound other', other);
   } catch(e) {
@@ -60,7 +60,7 @@ export const linkRoundToGameAndPlayer = props => {
   }
 
   // link round to game
-  let { loading: r2gLoading, error: r2gError, data: r2gData } = linkRoundToGame({
+  let { loading: r2gLoading, error: r2gError, data: r2gData } = await linkRoundToGame({
     variables: {
       from  : {type: 'round', value: rkey},
       to    : {type: 'game', value: gkey},
@@ -78,7 +78,7 @@ export const linkRoundToGameAndPlayer = props => {
 
   if( isNew ) {
     // link round to player
-    let { loading: r2pLoading, error: r2pError, data: r2pData } = linkRoundToPlayer({
+    let { loading: r2pLoading, error: r2pError, data: r2pData } = await linkRoundToPlayer({
       variables: {
         from: {type: 'round', value: rkey},
         to:   {type: 'player', value: pkey},

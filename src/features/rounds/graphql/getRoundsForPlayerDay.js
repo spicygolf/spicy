@@ -12,6 +12,29 @@ export const GET_ROUNDS_FOR_PLAYER_DAY_QUERY = gql`
       _key
       date
       seq
+      tee {
+        _key
+        name
+        gender
+        Ratings {
+          RatingType
+          CourseRating
+          SlopeRating
+          BogeyRating
+        }
+        assigned
+        course {
+          _key
+          name
+        }
+        holes {
+          hole
+          length
+          par
+          handicap
+          seq
+        }
+      }
     }
   }
 `;

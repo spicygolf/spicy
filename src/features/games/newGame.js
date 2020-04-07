@@ -47,14 +47,13 @@ const NewGame = props => {
 
   const gamespecPressed = async gamespec => {
     const game = await addGame(gamespec);
-    setGkey(game._key);
     await linkGameToGamespec(game, gamespec)
     getPlayer({
       variables: {
         player: currentPlayerKey,
       }
     });
-    //console.log('gamespecPressed')
+    setGkey(game._key);
   };
 
   const addGame = async gamespec => {
@@ -114,7 +113,7 @@ const NewGame = props => {
   if( currentPlayer && gkey ) {
     console.log('currentPlayer', currentPlayer);
     const player = {
-      _key: currentPlayerKey,
+      _key: currentPlayer._key,
       name: currentPlayer.name,
       handicap: currentPlayer.handicap,
     }
