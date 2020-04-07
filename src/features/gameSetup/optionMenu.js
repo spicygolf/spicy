@@ -5,9 +5,7 @@ import {
   View,
 } from 'react-native';
 import {
-  Button,
   Menu,
-  Provider,
 } from 'react-native-paper';
 import { find } from 'lodash';
 
@@ -17,7 +15,7 @@ import { green } from 'common/colors';
 
 const OptionMenu = props => {
 
-  const { option } = props;
+  const { option, setOption } = props;
   const [ value, setValue ] = useState(option.default);
   const [ visible, setVisible ] = useState(false);
 
@@ -29,6 +27,10 @@ const OptionMenu = props => {
         key={choice.name}
         onPress={() => {
           setValue(choice.name);
+          setOption({
+            ...option,
+            value: choice.name,
+          });
           setVisible(false);
         }}
         title={choice.disp}
@@ -75,7 +77,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   field_label: {
-    fontWeight: 'bold',
     marginTop: 5,
     marginBottom: 5,
     flex: 3,

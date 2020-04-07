@@ -6,13 +6,13 @@ import {
 } from 'react-native';
 import { Switch } from 'react-native-paper';
 
-import { green } from 'common/colors';
+import { blue } from 'common/colors';
 
 
 
 const OptionBool = props => {
 
-  const { option } = props;
+  const { option, setOption } = props;
   const [ value, setValue ] = useState(option.default == 'true');
 
   return (
@@ -21,8 +21,14 @@ const OptionBool = props => {
       <View style={styles.field_input_view}>
         <Switch
           value={value}
-          onValueChange={() => setValue(!value)}
-          color={green}
+          onValueChange={() => {
+            setOption({
+              ...option,
+              value: !value,
+            })
+            setValue(!value);
+          }}
+          color={blue}
           style={styles.switch}
         />
       </View>
@@ -43,7 +49,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   field_label: {
-    fontWeight: 'bold',
     marginTop: 5,
     marginBottom: 5,
     flex: 3,

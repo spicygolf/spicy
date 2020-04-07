@@ -5,9 +5,14 @@ import {
   View,
 } from 'react-native';
 import { Card } from 'react-native-elements';
+import { useMutation } from '@apollo/react-hooks';
+import { findIndex } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
 import { getAllGamespecOptions } from 'common/utils/game';
+import { getNewGameForUpdate } from 'common/utils/game';
+import { GET_GAME_QUERY } from 'features/games/graphql';
+import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import OptionDisplay from 'features/gameSetup/optionDisplay';
 import OptionNum from 'features/gameSetup/optionNum';
 import OptionPct from 'features/gameSetup/optionPct';
@@ -19,23 +24,57 @@ import OptionMenu from 'features/gameSetup/optionMenu';
 const Options = props => {
 
   const { game } = useContext(GameContext);
+  const { _key: gkey } = game;
   const allGSoptions = getAllGamespecOptions(game);
 
+  const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
+
+  const setOption = option => {
+    const newOption = {
+      name: option.name,
+      disp: option.disp,
+      type: option.type,
+      value: option.value.toString(),
+    };
+
+    let newGame = getNewGameForUpdate(game);
+    if( !newGame.options ) newGame.options = [];
+    const i = findIndex(newGame.options, {name: newOption.name});
+    if( i < 0 ) newGame.options.push(newOption);
+    if( i >= 0 ) newGame.options[i] = newOption;
+    console.log('setOption newGame', newGame);
+
+    const { loading, error, data } = updateGame({
+      variables: {
+        gkey: gkey,
+        game: newGame,
+      },
+      refetchQueries: [{
+        query: GET_GAME_QUERY,
+        variables: {
+          gkey: gkey
+        }
+      }],
+    });
+    if( error ) console.log('Error setting option in game', error);
+
+  };
+
   const renderOption = ({item}) => {
-    console.log('option', item);
+    //console.log('option', item);
     let ret = (<OptionDisplay option={item}/>);
     switch( item.type ) {
       case 'num':
-        ret = (<OptionNum option={item}/>)
+        ret = (<OptionNum option={item} setOption={setOption}/>)
         break;
       case 'pct':
-        ret = (<OptionPct option={item}/>)
+        ret = (<OptionPct option={item} setOption={setOption}/>)
         break;
       case 'bool':
-        ret = (<OptionBool option={item}/>)
+        ret = (<OptionBool option={item} setOption={setOption}/>)
         break;
       case 'menu':
-        ret = (<OptionMenu option={item}/>)
+        ret = (<OptionMenu option={item} setOption={setOption}/>)
         break;
       default:
         break;

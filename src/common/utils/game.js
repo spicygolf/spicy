@@ -76,6 +76,7 @@ export const getNewGameForUpdate = game => {
         };
       }) : [],
     },
+    options: game.options || [],
   };
   return ret;
 

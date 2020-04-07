@@ -135,6 +135,12 @@ export const GET_GAME_QUERY = gql`
             default
         }
       }
+      options {
+        name
+        disp
+        type
+        value
+      }
     }
   }
 `;

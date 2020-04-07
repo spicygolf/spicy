@@ -15,13 +15,16 @@ import { green } from 'common/colors';
 
 const OptionPct = props => {
 
-  const { option } = props;
+  const { option, setOption } = props;
   const [ value, setValue ] = useState(option.default || null);
 
   const validate = (type, text) => {
     const oTest = type == 'num' ? text : value;
-    // TODO: is between 0 and 100?
-    setOptionValid(validateFloat(oTest));
+    let valid = false;
+    valid = validateFloat(oTest);
+    const v = parseFloat(oTest);
+    valid = valid && (v && v >= 0 && v <= 100);
+    setOptionValid(valid);
   };
 
   const [ optionValid, setOptionValid ] = useState(false);
@@ -40,6 +43,12 @@ const OptionPct = props => {
           onChangeText={text => {
             setValue(text);
             validate('num', text);
+          }}
+          onEndEditing={() => {
+            if( optionValid ) setOption({
+              ...option,
+              value: value,
+            });
           }}
           keyboardType='decimal-pad'
           value={value.toString()}
@@ -65,7 +74,6 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
   },
   field_label: {
-    fontWeight: 'bold',
     marginTop: 5,
     marginBottom: 5,
     flex: 3,

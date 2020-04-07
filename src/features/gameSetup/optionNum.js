@@ -15,7 +15,7 @@ import { green } from 'common/colors';
 
 const OptionNum = props => {
 
-  const { option } = props;
+  const { option, setOption } = props;
   const [ value, setValue ] = useState(option.default || null);
 
   const validate = (type, text) => {
@@ -40,6 +40,12 @@ const OptionNum = props => {
             setValue(text);
             validate('num', text);
           }}
+          onEndEditing={() => {
+            if( optionValid ) setOption({
+              ...option,
+              value: value,
+            });
+          }}
           keyboardType='decimal-pad'
           value={value.toString()}
         />
@@ -61,7 +67,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   field_label: {
-    fontWeight: 'bold',
     marginTop: 5,
     marginBottom: 5,
     flex: 3,

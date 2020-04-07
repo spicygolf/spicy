@@ -8,7 +8,7 @@ import {
 import {
   Icon,
 } from 'react-native-elements';
-import { cloneDeep, filter, find, findIndex } from 'lodash';
+import { filter, find, findIndex } from 'lodash';
 import { useMutation } from '@apollo/react-hooks';
 
 import { GET_GAME_QUERY } from 'features/games/graphql';
