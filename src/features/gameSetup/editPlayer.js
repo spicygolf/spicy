@@ -47,27 +47,27 @@ const EditPlayer = props => {
 
 
   const update = () => {
-    console.log('update', HI, initHI, CH, initCH, GH, initGH);
+    //console.log('update', HI, initHI, CH, initCH, GH, initGH);
     let doUpdate = false;
     const other = [];
 
     if( HI != initHI ) {
-      other.push({key: 'handicap_index', value: HI || null});
+      other.push({key: 'handicap_index', value: HI});
       doUpdate = true;
     }
 
     if( CH != initCH ) {
-      other.push({key: 'course_handicap', value: CH || null});
+      other.push({key: 'course_handicap', value: CH});
       doUpdate = true;
     }
 
     if( GH != initGH ) {
-      other.push({key: 'game_handicap', value: GH || null});
+      other.push({key: 'game_handicap', value: GH});
       doUpdate = true;
     }
 
     if( doUpdate ) {
-      console.log('doUpdate');
+      //console.log('doUpdate');
       // update 'round2game' edge with these two handicaps on them
 
       const { loading, error, data } = updateLink({
@@ -94,7 +94,7 @@ const EditPlayer = props => {
   useEffect(
     () => {
       if( initCH == '-' ) {
-        setCH(course_handicap(parseFloat(HI), round.tee, game.holes));
+        setCH(course_handicap(HI, round.tee, game.holes));
         update();
       }
     }, [CH]
@@ -118,7 +118,7 @@ const EditPlayer = props => {
                 style={styles.field_input}
                 onChangeText={text => {
                   setHI(text);
-                  const newCH = course_handicap(parseFloat(text), round.tee, game.holes);
+                  const newCH = course_handicap(text, round.tee, game.holes);
                   //console.log('newCH', newCH, round, game.holes);
                   setCH(newCH);
                 }}
@@ -132,7 +132,7 @@ const EditPlayer = props => {
             <Text style={styles.field_label}>Course Handicap</Text>
             <View style={styles.field_display_view}>
               <Text style={styles.field_display}>
-                {( CH ) ? CH.toString() : '-'}
+                {( CH != null ) ? CH.toString() : '-'}
               </Text>
             </View>
           </View>

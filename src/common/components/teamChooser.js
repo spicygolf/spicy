@@ -179,7 +179,7 @@ const TeamChooser = props => {
         renderItem={_renderPlayer}
         keyExtractor={item => {
           if( item && item._key ) return item._key;
-          return Math.random();
+          return Math.random().toString();
         }}
       />
     </View>

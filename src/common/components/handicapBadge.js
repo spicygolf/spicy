@@ -17,21 +17,22 @@ const HandicapBadge = props => {
     course_game = 'GH';
     course_game_handicap = game_handicap;
   }
-
-  const format = (v, places) => {
-    if( !v ) return '-';
-    return v.toFixed(places)
-  };
+  //console.log('course_handicap', course_handicap);
+  //console.log('course_game_handicap', course_game_handicap);
 
   return (
     <View style={styles.row}>
       <View style={styles.hdcp}>
         <Text style={styles.txt}>HI</Text>
-        <Text style={styles.txt}>{format(handicap_index, 1) || '-'}</Text>
+        <Text style={styles.txt}>
+          {handicap_index != null ? handicap_index : '-'}
+        </Text>
       </View>
       <View style={styles.hdcp}>
         <Text style={styles.txt}>{course_game}</Text>
-        <Text style={styles.txt}>{format(course_game_handicap, 0) || '-'}</Text>
+        <Text style={styles.txt}>
+          {course_game_handicap != null ? course_game_handicap : '-'}
+        </Text>
       </View>
     </View>
   );

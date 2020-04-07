@@ -12,8 +12,8 @@ import {
   Icon,
   ListItem
 } from 'react-native-elements';
-
 import { useNavigation } from '@react-navigation/native';
+import { filter } from 'lodash';
 
 import RemovePlayer from 'features/gameSetup/removePlayer';
 import TeeSelector from 'features/gameSetup/teeSelector';
@@ -56,16 +56,16 @@ const Players = props => {
     if( item && item.name && item._key ) {
       const pkey = item._key;
 
-      const round = get_round_for_player(rounds, pkey);
-      const rkey = (round && round._key) ? round._key : null;
-      const tee =  (round && round.tee ) ? round.tee : null;
+      let rkey, tee, ch, gh, hi;
 
-      const ch = (round && round.course_handicap) ?
-        round.course_handicap : null;
-      const gh = (round && round.game_handicap) ?
-        round.game_handicap : null;
-      const hi = (round && round.handicap_index) ?
-        round.handicap_index : null;
+      const round = get_round_for_player(rounds, pkey);
+      if( round ) {
+        rkey = round._key;
+        tee =  round.tee;
+        ch = round.course_handicap;
+        gh = round.game_handicap;
+        hi = round.handicap_index;
+      }
 
       const subtitle = (
         <TeeSelector
@@ -129,7 +129,7 @@ const Players = props => {
           renderItem={_renderPlayer}
           keyExtractor={item => {
             if( item && item._key ) return item._key;
-            return Math.random();
+            return Math.random().toString();
           }}
         />
       </View>
