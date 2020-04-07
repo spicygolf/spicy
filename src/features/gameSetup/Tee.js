@@ -131,9 +131,9 @@ const Tee = props => {
             const tee = (round._key == rkey) ? item : round.tee;
 
             const ch = course_handicap(index, tee, game.holes);
-            console.log('ch', ch);
+            //console.log('ch', ch);
             if( ch && ch != round.course_handicap ) {
-              console.log('updating course_handicap to ', ch);
+              //console.log('updating course_handicap to ', ch);
               await update(round._key, [
                 {key: 'handicap_index', value: index},
                 {key: 'course_handicap', value: ch},
