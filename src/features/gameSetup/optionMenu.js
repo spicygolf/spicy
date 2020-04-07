@@ -16,7 +16,7 @@ import { green } from 'common/colors';
 const OptionMenu = props => {
 
   const { option, setOption } = props;
-  const [ value, setValue ] = useState(option.default);
+  const [ value, setValue ] = useState(option.value);
   const [ visible, setVisible ] = useState(false);
 
   const getDisplay = () => find(option.choices, {name: value}).disp;

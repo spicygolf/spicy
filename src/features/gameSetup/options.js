@@ -9,7 +9,7 @@ import { useMutation } from '@apollo/react-hooks';
 import { findIndex } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
-import { getAllGamespecOptions } from 'common/utils/game';
+import { getAllOptions } from 'common/utils/game';
 import { getNewGameForUpdate } from 'common/utils/game';
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
@@ -25,7 +25,7 @@ const Options = props => {
 
   const { game } = useContext(GameContext);
   const { _key: gkey } = game;
-  const allGSoptions = getAllGamespecOptions(game);
+  const allOptions = getAllOptions(game);
 
   const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
 
@@ -85,7 +85,7 @@ const Options = props => {
   return (
     <Card title="Options">
       <FlatList
-        data={allGSoptions}
+        data={allOptions}
         renderItem={renderOption}
         keyExtractor={o => `${o.gamespec_key}_${o.name}`}
       />

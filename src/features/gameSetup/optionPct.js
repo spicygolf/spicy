@@ -16,7 +16,7 @@ import { green } from 'common/colors';
 const OptionPct = props => {
 
   const { option, setOption } = props;
-  const [ value, setValue ] = useState(option.default || null);
+  const [ value, setValue ] = useState(option.value || null);
 
   const validate = (type, text) => {
     const oTest = type == 'num' ? text : value;

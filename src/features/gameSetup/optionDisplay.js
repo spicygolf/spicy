@@ -12,7 +12,7 @@ const OptionDisplay = props => {
 
   return (
     <View>
-      <Text>{option.name} - {option.default}</Text>
+      <Text>{option.name} - {option.value}</Text>
     </View>
   );
 };

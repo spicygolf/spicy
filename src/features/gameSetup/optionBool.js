@@ -13,7 +13,7 @@ import { blue } from 'common/colors';
 const OptionBool = props => {
 
   const { option, setOption } = props;
-  const [ value, setValue ] = useState(option.default == 'true');
+  const [ value, setValue ] = useState(option.value == 'true');
 
   return (
     <View style={styles.field_container}>

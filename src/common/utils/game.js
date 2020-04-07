@@ -71,12 +71,19 @@ export const getNewGameForUpdate = game => {
               name: m.name,
               team: m.team,
               first_hole: m.first_hole,
-            }
+            };
           }) : [],
         };
       }) : [],
     },
-    options: game.options || [],
+    options: game.options ? game.options.map(o => {
+      return {
+        name: o.name,
+        type: o.type,
+        disp: o.disp,
+        value: o.value,
+      };
+    }) : [],
   };
   return ret;
 
@@ -91,6 +98,26 @@ export const getAllGamespecOptions = game => {
         gamespec_key: gs._key,
       });
     });
+  });
+  return options;
+};
+
+export const getAllOptions = game => {
+  let options = [];
+  const gsOptions = getAllGamespecOptions(game);
+  if( gsOptions && gsOptions.length ) gsOptions.map(gso => {
+    let o = {
+      name: gso.name,
+      type: gso.type,
+      disp: gso.disp,
+      choices: gso.choices,
+      value: gso.default,
+      gamespec_key: gso.gamespec_key,
+    };
+    // if found, a game option overrides a gamespec option
+    const go = find(game.options, {name: gso.name});
+    if( go ) o.value = go.value;
+    options.push(o);
   });
   return options;
 };
