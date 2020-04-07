@@ -27,9 +27,7 @@ const Games = props => {
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
 
   const newGamePressed = () => {
-    navigation.navigate('NewGame', {
-      currentPlayerKey: currentPlayerKey,
-    });
+    navigation.navigate('NewGame');
   };
 
   const itemPressed = (item, setup) => {

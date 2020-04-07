@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 import { ListItem } from 'react-native-elements';
-import { useLazyQuery, useQuery, useMutation } from '@apollo/react-hooks';
+import { useQuery, useMutation } from '@apollo/react-hooks';
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 
@@ -21,38 +21,22 @@ import {
   ADD_GAME_MUTATION,
 } from 'features/games/graphql';
 import { ADD_LINK_MUTATION } from 'common/graphql/link';
-import { GET_PLAYER_QUERY } from 'features/players/graphql';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 
 
 
 const NewGame = props => {
 
-  const { route } = props;
-  const { currentPlayerKey } = route.params;
+  const { currentPlayer, currentPlayerKey } = useContext(CurrentPlayerContext);
   const [ gkey, setGkey ] = useState(null);
 
   const navigation = useNavigation();
   const [ addGameMutation ] = useMutation(ADD_GAME_MUTATION);
   const [ addLinkMutation ] = useMutation(ADD_LINK_MUTATION);
 
-  // grab current player object from db
-  const [ currentPlayer, setCurrentPlayer ] = useState(null);
-  const [ getPlayer, {error: cpError, data: cpData} ] = useLazyQuery(GET_PLAYER_QUERY);
-  if (cpError) console.log('Error fetching rounds for player day', cpError);
-  //console.log('cpData', cpData);
-  if( cpData && cpData.getPlayer && !currentPlayer ) {
-    //console.log('setting currentPlayer', cpData);
-    setCurrentPlayer(cpData.getPlayer);
-  }
-
   const gamespecPressed = async gamespec => {
     const game = await addGame(gamespec);
     await linkGameToGamespec(game, gamespec)
-    getPlayer({
-      variables: {
-        player: currentPlayerKey,
-      }
-    });
     setGkey(game._key);
   };
 
@@ -111,7 +95,7 @@ const NewGame = props => {
 
   //console.log('currentPlayer', currentPlayer, gkey);
   if( currentPlayer && gkey ) {
-    console.log('currentPlayer', currentPlayer);
+    //console.log('currentPlayer', currentPlayer);
     const player = {
       _key: currentPlayer._key,
       name: currentPlayer.name,

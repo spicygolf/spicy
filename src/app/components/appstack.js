@@ -7,12 +7,14 @@ import {
   Icon
 } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
+import { useLazyQuery } from '@apollo/react-hooks';
 
 import FeedStack from 'features/feed/feedstack';
 import GamesStack from 'features/games/gamesstack';
 import ProfileStack from 'features/profile/profilestack';
 import { getCurrentUser } from 'common/utils/account';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import { GET_PLAYER_QUERY } from 'features/players/graphql';
 import { green, red, blue } from 'common/colors';
 
 
@@ -35,6 +37,16 @@ const AppStack = props => {
   const { user } = props;
   const [ creds, setCreds ] = useState();
 
+  // grab current player object from db
+  const [ currentPlayer, setCurrentPlayer ] = useState(null);
+  const [ getPlayer, {error: cpError, data: cpData} ] = useLazyQuery(GET_PLAYER_QUERY);
+  if (cpError) console.log('Error fetching current player', cpError);
+  //console.log('cpData', cpData);
+  if( cpData && cpData.getPlayer && !currentPlayer ) {
+    //console.log('setting currentPlayer', cpData);
+    setCurrentPlayer(cpData.getPlayer);
+  }
+
   useEffect(
     () => {
       const getCreds = async () => {
@@ -43,6 +55,11 @@ const AppStack = props => {
           await AsyncStorage.setItem('currentPlayer', c.currentPlayerKey);
           await AsyncStorage.setItem('token', c.token);
           setCreds(c);
+          getPlayer({
+            variables: {
+              player: c.currentPlayerKey,
+            }
+          });
         }
       };
       getCreds();
@@ -123,6 +140,7 @@ const AppStack = props => {
   return (
     <CurrentPlayerContext.Provider value={{
       currentPlayerKey: creds.currentPlayerKey,
+      currentPlayer: currentPlayer,
       token: creds.token,
     }}>
       {tabs}
