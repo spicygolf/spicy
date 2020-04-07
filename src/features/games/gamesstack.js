@@ -21,6 +21,7 @@ const GamesStack = props => {
         screenOptions={{
           title: 'Games',
           headerMode: 'none',
+          headerShown: false,
           headerStyle: {
             height: 0,
           },
