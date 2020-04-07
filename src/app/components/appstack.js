@@ -60,6 +60,11 @@ const AppStack = props => {
               player: c.currentPlayerKey,
             }
           });
+        } else {
+          if( c && c.message ) {
+            // TODO: navigate to an Error component
+            console.log('something is wrong', c.message);
+          }
         }
       };
       getCreds();

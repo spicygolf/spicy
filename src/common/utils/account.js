@@ -91,7 +91,8 @@ export const getCurrentUser = fbUser => {
       };
     })
     .catch(e => {
-      console.log('getCurrentUser error', e);
+      //console.log('getCurrentUser error', e);
+      return e;
     });
 };
 
