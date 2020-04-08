@@ -27,7 +27,7 @@ Druid Golf mobile app written in React Native
  * Start up the App
 
         yarn run ios
-or
+    or
 
         yarn run android
 
@@ -44,7 +44,6 @@ If ready for deploy, perform a version bump commit:
 
 After version bump, follow instructions here: [https://facebook.github.io/react-native/docs/signed-apk-android.html](https://facebook.github.io/react-native/docs/signed-apk-android.html).  Basically, when everything is set up, do:
 
-    yarn run build:android
     cd android && ./gradlew assembleRelease
 
 Then go to [App Releases](https://play.google.com/apps/publish/?dev_acc=00137341438711124394#ManageReleasesPlace:p=golf.spicy) in the Play Store.  Upload the APK file found at ```./android/app/build/outputs/apk/release/app-release.apk```
