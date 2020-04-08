@@ -1,4 +1,7 @@
-import { getHoles } from 'common/utils/game';
+import {
+  getHoles,
+  getJunk
+} from 'common/utils/game';
 
 import { filter, find, orderBy, reduce } from 'lodash';
 import {
@@ -81,7 +84,7 @@ export const scoring = (game) => {
             switch ( gsJunk.based_on ) {
               case 'user':
                 //console.log('gsv', gsJunk.name, score, get_score_value(gsJunk.name, score));
-                j = get_score_value(gsJunk.name, score) == 'true';
+                j = getJunk(gsJunk.name, gPlayer, game, hole) == 'true';
                 break;
               case 'gross':
               case 'net':

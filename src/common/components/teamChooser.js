@@ -31,7 +31,7 @@ const TeamChooser = props => {
   //console.log('h', h);
 
 
-  const changeTeamsForPlayer = (pkey, addToTeam, removeFromTeam) => {
+  const changeTeamsForPlayer = async (pkey, addToTeam, removeFromTeam) => {
     //console.log('pkey', pkey);
     //console.log('addToTeam', addToTeam);
     //console.log('removeFromTeam', removeFromTeam);
@@ -101,7 +101,7 @@ const TeamChooser = props => {
 
     //console.log('removeFromTeam newGame final', newGame);
 
-    const { loading, error, data } = updateGame({
+    const { loading, error, data } = await updateGame({
       variables: {
         gkey: gkey,
         game: newGame,
@@ -113,6 +113,8 @@ const TeamChooser = props => {
         }
       }],
     });
+
+    if( error ) console.log('Error updating game - teamChooser', error);
 
   };
 

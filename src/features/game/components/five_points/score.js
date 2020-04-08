@@ -51,7 +51,7 @@ const FivePointsScore = props => {
       <HoleJunk
         hole={hole}
         score={score}
-        rkey={rkey}
+        pkey={item._key}
       />
     ) : null;
 

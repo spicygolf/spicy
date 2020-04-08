@@ -15,6 +15,11 @@ export const GET_GAME_QUERY = gql`
           teams {
             team
             players
+            junk {
+              name
+              player
+              value
+            }
           }
           multipliers {
             name
