@@ -64,6 +64,13 @@ export const getNewGameForUpdate = game => {
             return {
               team: t.team,
               players: t.players,
+              junk: t.junk ? t.junk.map(j => {
+                return {
+                  name: j.name,
+                  player: j.player,
+                  value: j.value,
+                };
+              }) : [],
             };
           }) : [],
           multipliers: h.multipliers ? h.multipliers.map(m => {
@@ -120,4 +127,15 @@ export const getAllOptions = game => {
     options.push(o);
   });
   return options;
+};
+
+export const getJunk = (junkName, pkey, game, holeNum) => {
+  if( !game || !game.teams || !game.teams.holes ) return null;
+  const gHole = find(game.teams.holes, {hole: holeNum});
+  if( !gHole || !gHole.teams ) return null;
+  const gTeam = find(gHole.teams, t => ( t && t.players && t.players.includes(pkey) ));
+  if( !gTeam || !gTeam.junk ) return null;
+  const j = find(gTeam.junk, {name: junkName, player: pkey});
+  if( !j || !j.value ) return null;
+  return j.value;
 };
