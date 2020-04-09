@@ -48,7 +48,7 @@ const AddPlayerManual = props => {
       }],
     });
     if( error ) console.log('Error adding player', error);
-    console.log('data', data);
+    //console.log('data', data);
     if( data && data.addPlayer ) {
       const p = {
         _key: data.addPlayer._key,
@@ -56,7 +56,12 @@ const AddPlayerManual = props => {
         handicap: player.handicap,
       };
       navigation.navigate('LinkRound', {
-        player: p
+        game: {
+          _key: game._key,
+          start: game.start,
+        },
+        player: p,
+        round: null,
       });
     }
   };

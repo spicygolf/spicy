@@ -68,8 +68,8 @@ const NewGame = props => {
   };
 
   // New game has been created, so navigate to it.
-  // Send directly to LinkRound so the creator can be added to the game
-  // and a round created for them.
+  // Send directly to LinkRoundList so the creator can be added to the game
+  // and a round created for them (or existing round chosen).
   if( currentPlayer && gkey ) {
     const player = {
       _key: currentPlayer._key,
@@ -78,11 +78,14 @@ const NewGame = props => {
     }
     navigation.navigate('Game', {
       currentGameKey: gkey,
-      setup: true,
       screen: 'GameSetup',
       params: {
-        screen: 'LinkRound',
+        screen: 'LinkRoundList',
         params: {
+          game: {
+            _key: gkey,
+            start: game_start,
+          },
           player: player,
         },
       },
@@ -91,6 +94,7 @@ const NewGame = props => {
 
   useEffect(
     () => {
+      //console.log('createNewGame');
       const createNewGame = async () => {
         const game = await addGame();
         await linkGameToGamespec(game)

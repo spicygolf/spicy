@@ -22,7 +22,7 @@ const Player = props => {
 
   const navigation = useNavigation();
 
-  const { item, title, subtitle, hdcp } = props;
+  const { game, item, title, subtitle, hdcp } = props;
   //console.log('player', item);
 
   return (
@@ -31,12 +31,17 @@ const Player = props => {
       subtitle={subtitle}
       rightElement={handicap(hdcp)}
       onPress={() => {
+        //console.log('player pressed', item);
         const player =  {
           _key: item._key,
           name: item.name,
           handicap: item.handicap,
         };
-        navigation.navigate('LinkRound', {
+        navigation.navigate('LinkRoundList', {
+          game: {
+            _key: game._key,
+            start: game.start,
+          },
           player: player,
         });
       }}

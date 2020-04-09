@@ -106,29 +106,27 @@ const Tee = props => {
         // add the same tee to the other players' rounds in this
         // game, unless they have round2tee already.
         game.rounds.map(async round => {
+          //console.log('looping through rounds after tee selection', round);
           if( !round ) return;  // odd edge case during development /shrug
           if( !round.tee ) {
             await add(round._key, item._key, [{key: "assigned", value: "auto"}]);
           }
-        });
 
-        // here is one place we can calculate the course_handicap
-        // on the round2game edges
-        game.rounds.map(async round => {
+          // here is one place we can calculate the course_handicap
+          // on the round2game edges
           if(
-              round &&
-              round.player &&
-              round.player[0] &&
-              round.player[0].handicap &&
-              round.player[0].handicap.index
-            ) {
-
+            round &&
+            round.player &&
+            round.player[0] &&
+            round.player[0].handicap &&
+            round.player[0].handicap.index
+          ) {
             const index = round.player[0].handicap.index;
             //console.log('index', index)
 
             // tee is 'item' if it's the one being changed
             // otherwise, it's round.tee
-            const tee = (round._key == rkey) ? item : round.tee;
+            const tee = round.tee ? round.tee : item;
 
             const ch = course_handicap(index, tee, game.holes);
             //console.log('ch', ch);

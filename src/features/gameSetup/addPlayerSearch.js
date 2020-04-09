@@ -28,7 +28,7 @@ const AddPlayerSearch = (props) => {
   const [ search, setSearch ] = useState('');
   const searchInputRef = useRef(null);
 
-  const { currentPlayerKey } = useContext(GameContext);
+  const { currentPlayerKey, game } = useContext(GameContext);
 
   const _renderPlayer = ({item}) => {
     const handicap = (item && item.handicap && item.handicap.index) ?
@@ -38,6 +38,7 @@ const AddPlayerSearch = (props) => {
 
     return (
       <Player
+        game={game}
         item={item}
         title={item.name}
         subtitle={club}
