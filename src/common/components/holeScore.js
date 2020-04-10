@@ -93,21 +93,21 @@ const HoleScore = props => {
     }
 
     return (
-      <View style={score_styles}>
-        <ImageBackground
-          source={src}
-          style={styles.imgBg}
-        >
-          <TouchableHighlight onPress={() => setScore(item)}>
-            { content }
-          </TouchableHighlight>
-        </ImageBackground>
-      </View>
+      <TouchableHighlight onPress={() => setScore(item)}>
+        <View style={score_styles}>
+          <ImageBackground
+            source={src}
+            style={styles.imgBg}
+          >
+              { content }
+          </ImageBackground>
+        </View>
+      </TouchableHighlight>
     )
   };
 
   const setScore = (item) => {
-
+    if( item.key == gross ) return; // no change in score, so do nothing
     const { key:newGross } = item;
     const newScore = upsertScore([score], hole.hole, 'gross', newGross);
 
@@ -173,6 +173,10 @@ const styles = StyleSheet.create({
   },
   score_option_not_selected: {
     backgroundColor: '#ddd',
+  },
+  touchable: {
+    height: '100%',
+    width: '100%',
   },
   hole_score_text: {
     fontSize: 24,
