@@ -88,6 +88,7 @@ export const GET_GAME_QUERY = gql`
       gamespecs {
         _key
         name
+        disp
         type
         min_players
         max_players
@@ -121,6 +122,7 @@ export const GET_GAME_QUERY = gql`
         }
         multipliers {
             name
+            disp
             seq
             value
             icon

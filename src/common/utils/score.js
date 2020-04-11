@@ -1,9 +1,11 @@
+import { filter, find, orderBy, reduce } from 'lodash';
+import jsonLogic from 'json-logic-js';
+
+import ScoringWrapper from 'common/utils/ScoringWrapper';
 import {
   getHoles,
   getJunk
 } from 'common/utils/game';
-
-import { filter, find, orderBy, reduce } from 'lodash';
 import {
   get_hole,
   get_net_score,
@@ -198,6 +200,14 @@ export const scoring = (game) => {
 
     //if( hole == '15' ) console.log('gHole', gHole);
 
+    const oneHoleScoring = {
+      holes: [{
+        hole: hole,
+        teams: teams,
+      }],
+    };
+    const scoringWrapper = new ScoringWrapper(game, oneHoleScoring, hole)
+
     // multipliers
     const multipliers = [];
     allmultipliers.map(gsMult => {
@@ -213,12 +223,28 @@ export const scoring = (game) => {
           t.players.map(p => {
             const j = find(p.junk, {name: gsMult.based_on});
             if( j ) {
+              try {
+                const replaced = gsMult.availability.replace(/'/g, '"');
+                const availability = JSON.parse(replaced);
+                const logic = scoringWrapper.logic(availability, {team: t});
+                //console.log(hole, j.name, logic, t);
+                if( logic ) {
+                  multipliers.push(gsMult);
+                }
+              } catch( e ) {
+                console.log('logic error', e);
+              }
+
+/*
               switch( gsMult.availability ) {
                 case 'got_all_points':
                   // did this team get all the points?  if not, exit out
+                  let this_team_points = 0;
                   let other_teams_points = 0;
                   teams.map(getall_team => {
-                    if( getall_team.team != t.team ) {
+                    if( getall_team.team == t.team ) {
+                      this_teams_points += getall_team.points;
+                    } else {
                       other_teams_points += getall_team.points;
                     }
                   });
@@ -229,6 +255,7 @@ export const scoring = (game) => {
                 default:
                   break;
               }
+*/
             }
           });
         });

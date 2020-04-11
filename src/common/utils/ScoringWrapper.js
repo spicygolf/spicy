@@ -1,3 +1,4 @@
+import jsonLogic from 'json-logic-js';
 import { find, orderBy } from 'lodash';
 
 
@@ -9,6 +10,21 @@ class ScoringWrapper {
     this._game = game;
     this._scoring = scoring;
     this._currentHole = parseInt(currentHole);
+
+    for( let key in this.customs ) {
+      if( this.customs.hasOwnProperty(key) ) {
+        jsonLogic.add_operation(key, this.customs[key]);
+      }
+    }
+  }
+
+  logic = ( expression, extra_vars ) => {
+    const data = {
+      ...extra_vars,
+      scoring: this,
+    };
+    //console.log('data', data);
+    return jsonLogic.apply(expression, data)
   }
 
   getPrevHole = () => {
@@ -82,6 +98,14 @@ class ScoringWrapper {
     //console.log('ranked', ranked);
     return ranked;
   };
+
+  // custom logic mapping
+  customs = {
+    'team_down_the_most': this.isTeamDownTheMost,
+    'team_second_to_last': this.isTeamSecondToLast,
+    'other_team_multiplied_with': this.didOtherTeamMultiplyWith,
+  };
+
 
 }
 

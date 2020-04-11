@@ -9,9 +9,8 @@ import {
   Button,
   Icon,
 } from 'react-native-elements';
-import { cloneDeep, filter, find, findIndex, orderBy } from 'lodash';
+import { filter, find, findIndex, orderBy } from 'lodash';
 import { useMutation } from '@apollo/react-hooks';
-import jsonLogic from 'json-logic-js';
 
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
@@ -33,11 +32,7 @@ const TeamMultipliers = props => {
   const { gamespecs } = game;
   const allmultipliers = getMultipliersFromGamespecs(gamespecs);
 
-  // add custom operators for logic
-  const scoringWrapper = new ScoringWrapper(game, scoring, currentHole)
-  jsonLogic.add_operation('team_down_the_most', scoringWrapper.isTeamDownTheMost);
-  jsonLogic.add_operation('team_second_to_last', scoringWrapper.isTeamSecondToLast);
-  jsonLogic.add_operation('other_team_multiplied_with', scoringWrapper.didOtherTeamMultiplyWith);
+  const scoringWrapper = new ScoringWrapper(game, scoring, currentHole);
 
   const { _key: gkey } = game;
   const h = ( game && game.teams && game.teams.holes ) ?
@@ -131,7 +126,7 @@ const TeamMultipliers = props => {
 
     return (
       <Button
-        title={mult.name}
+        title={mult.disp}
         icon={
           <Icon
             style={styles.icon}
@@ -182,10 +177,7 @@ const TeamMultipliers = props => {
     try {
       const replaced = gsMult.availability.replace(/'/g, '"');
       const availability = JSON.parse(replaced);
-      if( jsonLogic.apply(availability, {
-        scoring: scoringWrapper,
-        team: team,
-      }) ) {
+      if( scoringWrapper.logic(availability, {team: team}) ) {
         team_mults.push(gsMult);
       }
     } catch( e ) {
