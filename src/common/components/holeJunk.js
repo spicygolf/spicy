@@ -13,19 +13,19 @@ import { findIndex, sortBy } from 'lodash';
 import gql from 'graphql-tag';
 
 import { GameContext } from 'features/game/gameContext';
-import { GET_GAME_QUERY } from 'features/games/graphql';
 import { blue } from 'common/colors';
 import {
   get_net_score,
-  get_score_value
+  get_score_value,
 } from 'common/utils/rounds';
 import {
   getJunkFromGamespecs,
-  isScoreToParJunk
+  isScoreToParJunk,
 } from 'common/utils/score';
 import {
   getJunk,
-  getNewGameForUpdate
+  getNewGameForUpdate,
+  setTeamJunk,
 } from 'common/utils/game';
 
 
@@ -78,56 +78,7 @@ const HoleJunk = props => {
     let newHole = Object.assign({}, newGame.teams.holes[gHoleIndex]);
 
     const newTeams = newHole.teams.map(t => {
-      if( findIndex(t.players, p => (p == pkey)) >= 0 ) {
-        // this is the player's team for junk being set
-        let newJunk = [];
-        if( t.junk && t.junk.length ) {
-          t.junk.map(j => {
-            if( j.name == junk.name ) {
-              if( j.player == pkey ) {
-                newJunk.push({
-                  ...j,
-                  value: newValue,
-                });
-              } else {
-                if( junk.limit != 'one_per_group' ) {
-                  newJunk.push(j);
-                }
-              }
-            } else {
-              newJunk.push(j);
-            }
-          });
-        } else {
-          newJunk.push({
-            name: junk.name,
-            player: pkey,
-            value: newValue,
-          });
-        }
-        return {
-          ...t,
-          junk: newJunk,
-        };
-      } else {
-        // this is not the player's team for junk being set
-        let newJunk = [];
-        if( t.junk && t.junk.length ) {
-          t.junk.map(j => {
-            if( j.name == junk.name ) {
-              if( junk.limit != 'one_per_group' ) {
-                newJunk.push(j);
-              }
-            } else {
-              newJunk.push(j);
-            }
-          });
-        }
-        return {
-          ...t,
-          junk: newJunk,
-        };
-      }
+      return setTeamJunk(t, junk, newValue, pkey);
     });
     newHole = {
       ...newHole,
@@ -135,6 +86,7 @@ const HoleJunk = props => {
     };
 
     newGame.teams.holes[gHoleIndex] = newHole;
+
 
     const { loading, error, data } = await updateGame({
       variables: {

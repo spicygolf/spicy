@@ -1,4 +1,4 @@
-import { find } from 'lodash';
+import { find, findIndex } from 'lodash';
 
 
 export const getHoles = game => {
@@ -138,4 +138,56 @@ export const getJunk = (junkName, pkey, game, holeNum) => {
   const j = find(gTeam.junk, {name: junkName, player: pkey});
   if( !j || !j.value ) return null;
   return j.value;
+};
+
+
+export const setTeamJunk = (t, junk, newValue, pkey) => {
+
+  if( findIndex(t.players, p => (p == pkey)) >= 0 ) {
+    // this is the player's team for junk being set
+    let newJunk = [];
+    //console.log('team junk', t.junk);
+    if( newValue ) {
+      newJunk.push({
+        name: junk.name,
+        player: pkey,
+        value: newValue,
+      });
+    }
+    if( t.junk && t.junk.length ) {
+      t.junk.map(j => {
+        if( j.name == junk.name ) {
+          if( (!junk.limit || junk.limit != 'one_per_group') && j.player != pkey ) {
+            newJunk.push(j);
+          }
+        } else {
+          newJunk.push(j);
+        }
+      });
+    }
+    return {
+      ...t,
+      junk: newJunk,
+    };
+  } else {
+    // this is not the player's team for junk being set
+    let newJunk = [];
+    if( t.junk && t.junk.length ) {
+      t.junk.map(j => {
+        if( j.name == junk.name ) {
+          if( junk.limit != 'one_per_group' ) {
+            newJunk.push(j);
+          }
+        } else {
+          newJunk.push(j);
+        }
+      });
+    }
+    return {
+      ...t,
+      junk: newJunk,
+    };
+  }
+
+
 };
