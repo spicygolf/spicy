@@ -4,6 +4,14 @@ export default gql`
   mutation PostScore($round: String!, $score: ScoreInput!) {
     postScore(round: $round, score: $score) {
       _key
+      scores {
+        hole
+        values {
+          k
+          v
+          ts
+        }
+      }
     }
   }
 `;

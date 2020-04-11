@@ -7,13 +7,11 @@ import {
   TouchableHighlight,
   View,
 } from 'react-native';
-import { Icon } from 'react-native-elements';
 import { useMutation } from '@apollo/react-hooks';
 
 import { get_score_value, get_net_score } from 'common/utils/rounds';
 import { upsertScore } from 'common/utils/upsertScore';
 import { blue } from 'common/colors';
-import { GET_GAME_QUERY } from 'features/games/graphql';
 import { POST_SCORE_MUTATION } from 'features/rounds/graphql';
 import { GameContext } from 'features/game/gameContext';
 
@@ -27,11 +25,11 @@ const square_wht = require('../../../assets/img/square_wht.png');
 
 const HoleScore = props => {
 
-  const [ postScore ] = useMutation(POST_SCORE_MUTATION);
-
   const { game } = useContext(GameContext);
   const { _key: gkey } = game;
   const { hole, score, rkey } = props;
+
+  const [ postScore ] = useMutation(POST_SCORE_MUTATION);
 
   // TODO: this is possibly from not having a round linked
   //       maybe the warnings icon in Game Setup tab?
@@ -116,12 +114,6 @@ const HoleScore = props => {
         round: rkey,
         score: newScore[0] || [],
       },
-      refetchQueries: [{
-        query: GET_GAME_QUERY,
-        variables: {
-          gkey: gkey
-        }
-      }],
     });
 
   };

@@ -10,10 +10,10 @@ import {
 } from 'react-native-elements';
 import { useMutation } from '@apollo/react-hooks';
 import { findIndex, sortBy } from 'lodash';
+import gql from 'graphql-tag';
 
 import { GameContext } from 'features/game/gameContext';
 import { GET_GAME_QUERY } from 'features/games/graphql';
-import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import { blue } from 'common/colors';
 import {
   get_net_score,
@@ -31,6 +31,28 @@ import {
 
 
 const HoleJunk = props => {
+
+  const UPDATE_GAME_MUTATION = gql`
+  mutation UpdateGame($gkey: String!, $game: GameInput!) {
+    updateGame(gkey: $gkey, game: $game) {
+      _key
+      teams {
+        holes {
+          hole
+          teams {
+            team
+            players
+            junk {
+              name
+              player
+              value
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
   const { hole, score, pkey } = props;
   const par = (hole && hole.par) ? parseFloat(hole.par) : 0.0;
@@ -119,12 +141,6 @@ const HoleJunk = props => {
         gkey: gkey,
         game: newGame,
       },
-      refetchQueries: [{
-        query: GET_GAME_QUERY,
-        variables: {
-          gkey: gkey
-        }
-      }],
     });
 
     if( error ) console.log('Error updating game - holeJunk', error);
