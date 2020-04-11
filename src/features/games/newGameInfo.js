@@ -60,7 +60,7 @@ const NewGameInfo = props => {
               Game:
             </Text>
             <Text>
-              {gamespec.name}
+              {gamespec.disp}
             </Text>
           </View>
         </View>

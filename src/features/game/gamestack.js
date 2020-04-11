@@ -25,7 +25,7 @@ const GameStack = props => {
 
   const { game } = useContext(GameContext);
   const { gamespecs } = game;
-  const gamespec_name = gamespecs.map(gs => gs.name).join('-');
+  const gamespec_name = gamespecs.map(gs => gs.disp).join('-');
   const start = moment(game.start).format('llll');
 
   const Tab = createMaterialTopTabNavigator();

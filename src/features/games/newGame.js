@@ -32,7 +32,7 @@ const NewGame = props => {
     const { loading, error, data } = await addGameMutation({
       variables: {
         game: {
-          name: gamespec.name,
+          name: gamespec.disp,
           start: game_start,
           holes: 'all18',
           teams: {
@@ -60,6 +60,7 @@ const NewGame = props => {
         },
         fetchPolicy: 'cache-and-network',
       }],
+      awaitRefetchQueries: true,  // TODO: shouldn't need this
     });
     // TODO: handle loading, error?
     //console.log('newGame linkg2gs', data);

@@ -8,6 +8,7 @@ query GetGameSpec($gamespec: String!) {
   getGameSpec(_key: $gamespec) {
       _key
       name
+      disp
       type
       min_players
       max_players
@@ -41,6 +42,7 @@ query GetGameSpec($gamespec: String!) {
       }
       multipliers {
           name
+          disp
           seq
           value
           icon

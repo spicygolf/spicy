@@ -38,7 +38,7 @@ const NewGameList = props => {
     return (
       <ListItem
         roundAvatar
-        title={item.name || ''}
+        title={item.disp || ''}
         subtitle={item.type || ''}
         onPress={() => gamespecPressed(item)}
         testID={`new_${item._key}`}
