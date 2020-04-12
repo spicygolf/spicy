@@ -12,6 +12,7 @@ export const GET_PLAYER_QUERY = gql`
       _key
       name
       statusAuthz
+      level
       short
       handicap {
         index

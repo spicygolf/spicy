@@ -1,5 +1,5 @@
 import { find, findIndex } from 'lodash';
-
+import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
 
 export const getHoles = game => {
 
@@ -189,5 +189,28 @@ export const setTeamJunk = (t, junk, newValue, pkey) => {
     };
   }
 
+
+};
+
+export const rmgame = async (gkey, currentPlayerKey, mutation) => {
+  const { loading, error, data } = await mutation({
+    variables: {
+      gkey: gkey
+    },
+    refetchQueries: [{
+      query: ACTIVE_GAMES_FOR_PLAYER_QUERY,
+      variables: {
+        pkey: currentPlayerKey,
+      },
+      fetchPolicy: 'cache-and-network',
+    }],
+    awaitFetchQueries: true,
+  });
+  if( error ) {
+    console.log('error removing game', error);
+    console.log('rmgame', gkey);
+    return null;
+  }
+  return data;
 
 };

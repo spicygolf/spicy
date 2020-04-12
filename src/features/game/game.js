@@ -36,7 +36,7 @@ const Game = props => {
     return (<Text>Error</Text>);
   }
 
-  if( data ) {
+  if( data && data.getGame ) {
     // got game
     //console.log('g_data', g_data);
     const game = data.getGame;
@@ -44,6 +44,7 @@ const Game = props => {
 
     return (
       <GameContext.Provider value={{
+        gkey: game._key,
         game: game,
         currentPlayerKey: currentPlayerKey,
       }}>

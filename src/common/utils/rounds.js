@@ -57,3 +57,19 @@ export const get_net_score = (gross, score) => {
   //console.log('g', g, 'p', p);
   return (g-p).toString();
 }
+
+
+export const rmround = async (rkey, mutation) => {
+  const { loading, error, data } = await mutation({
+    variables: {
+      rkey: rkey
+    },
+  });
+  if( error ) {
+    console.log('error removing round', error);
+    console.log('rmround', rkey);
+    return null;
+  }
+  return data;
+
+};
