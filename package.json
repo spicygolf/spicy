@@ -59,6 +59,7 @@
     "react-native-reanimated": "^1.7.0",
     "react-native-safe-area-context": "^0.7.2",
     "react-native-screens": "^2.0.0-alpha.34",
+    "react-native-splash-screen": "^3.2.0",
     "react-native-tab-view": "^2.13.0",
     "react-native-vector-icons": "^6.5.0"
   },

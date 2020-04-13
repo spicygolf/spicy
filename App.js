@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import SplashScreen from 'react-native-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
 import { ApolloProvider } from 'react-apollo';
 import { ApolloProvider as ApolloHooksProvider } from '@apollo/react-hooks';
@@ -33,6 +34,7 @@ const App = props => {
 
   useEffect(
     () => {
+      SplashScreen.hide();
       const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
       return subscriber; // unsubscribe on unmount
     }, []
