@@ -3,7 +3,7 @@
 echo "Cleaning up node modules";
 rm -rf node_modules;
 yarn install;
-echo "Clearning all temp directories";
+echo "Cleaning all temp directories";
 rm -rf $TMPDIR/react-native-packager-cache-*;
 rm -rf $TMPDIR/metro-*;
 rm -rf $TMPDIR/react-*;
