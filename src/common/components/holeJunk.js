@@ -8,9 +8,9 @@ import {
   Button,
   Icon,
 } from 'react-native-elements';
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation } from '@apollo/client';
 import { findIndex, sortBy } from 'lodash';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 
 import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';

@@ -2,6 +2,9 @@ import moment from 'moment';
 import { cloneDeep, find, indexOf, unionBy } from 'lodash';
 
 
+// TODO: deprecated - see upsertScore in common/utils/score
+
+
 export const upsertScore = (arr, hole, key, newval) => {
   if( !arr || !arr[0] ) arr = [{hole: hole, values: []}];
 

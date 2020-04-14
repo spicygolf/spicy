@@ -7,13 +7,16 @@ import {
   TouchableHighlight,
   View,
 } from 'react-native';
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation } from '@apollo/client';
+import { findIndex } from 'lodash';
+import { gql } from '@apollo/client';
 
 import { get_score_value, get_net_score } from 'common/utils/rounds';
-import { upsertScore } from 'common/utils/upsertScore';
+import { upsertScore } from 'common/utils/score';
 import { blue } from 'common/colors';
 import { POST_SCORE_MUTATION } from 'features/rounds/graphql';
 import { GameContext } from 'features/game/gameContext';
+import { GET_GAME_QUERY } from 'features/games/graphql';
 
 const circle_blk = require('../../../assets/img/circle_blk.png');
 const circle_wht = require('../../../assets/img/circle_wht.png');
@@ -51,7 +54,7 @@ const HoleScore = props => {
 
   // populate array of score options
   let score_options = [];
-  for( let i = 1; i < 20; i++) {
+  for( let i = 1; i < 13; i++) {
     score_options.push({
       key: i.toString(),
       toPar: i - par,
@@ -107,12 +110,46 @@ const HoleScore = props => {
   const setScore = (item) => {
     if( item.key == gross ) return; // no change in score, so do nothing
     const { key:newGross } = item;
-    const newScore = upsertScore([score], hole.hole, 'gross', newGross);
+    const newScore = upsertScore(score, newGross);
 
     const { loading, error, data } = postScore({
       variables: {
         round: rkey,
-        score: newScore[0] || [],
+        score: newScore,
+      },
+      update: (cache, { data: { postScore } }) => {
+        //console.log('update fn postScore', postScore);
+        const h = parseInt(score.hole) - 1;
+        const id = `${rkey}.scores.${h}`;
+        const fragment = gql`
+          fragment scores on Round {
+            scores
+          }
+        `;
+        const r = cache.readFragment({ fragment, id });
+        console.log('r', r);
+/*
+        const { getGame } = cache.readQuery({
+          query: GET_GAME_QUERY,
+          variables: {
+            gkey: gkey,
+          },
+        });
+        const r = findIndex(getGame.rounds, {_key: rkey});
+        const h = findIndex(getGame.rounds[r].scores, {hole: hole.hole});
+        getGame.rounds[r].scores[h].values = postScore.values;
+        console.log('writing new game to cache', getGame);
+        cache.writeQuery({
+          query: GET_GAME_QUERY,
+          variables: {
+            gkey: gkey,
+          },
+          data: {
+            getGame: getGame
+          },
+        });
+*/
+        console.log('cache', cache);
       },
     });
 

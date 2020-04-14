@@ -9,7 +9,7 @@ import {
   Button,
   Card,
 } from 'react-native-elements';
-import { useMutation, useQuery } from '@apollo/react-hooks';
+import { useMutation, useQuery } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 import { find } from 'lodash';
 
@@ -42,17 +42,18 @@ const Admin = props => {
 
   const { loading, error, data } = useQuery(GET_DELETE_GAME_INFO_QUERY, {
     variables: {
-      game: gkey,
+      gkey: gkey,
     },
   });
   if( loading ) return (<ActivityIndicator />);
   if( error ) console.log('Error getting deleteGameInfo', error);
 
+  //console.log('deleteGameInfo', data.getDeleteGameInfo);
 
   const doDeleteGame = async () => {
-    const gkey = data.getGame._key;
-    const dgi = data.getGame.deleteGameInfo;
-    //console.log('deleteGame', gid, dgi);
+    const gkey = data.getDeleteGameInfo._key;
+    const dgi = data.getDeleteGameInfo.deleteGameInfo;
+    //console.log('deleteGame', gkey, dgi);
 
     // remove round2game links and rounds with no links to other games
     dgi.rounds.map(async r => {

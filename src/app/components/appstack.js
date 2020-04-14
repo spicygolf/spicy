@@ -7,7 +7,7 @@ import {
   Icon
 } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
-import { useLazyQuery } from '@apollo/react-hooks';
+import { useLazyQuery } from '@apollo/client';
 
 import FeedStack from 'features/feed/feedstack';
 import GamesStack from 'features/games/gamesstack';

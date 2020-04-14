@@ -1,8 +1,8 @@
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 
 export const GET_DELETE_GAME_INFO_QUERY = gql`
-  query GetGame($game: String!) {
-    getGame(_key: $game) {
+  query GetDeleteGameInfo($gkey: String!) {
+    getDeleteGameInfo(_key: $gkey) {
         _key
         deleteGameInfo {
             rounds {

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
 } from 'react-native';
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 
 import {

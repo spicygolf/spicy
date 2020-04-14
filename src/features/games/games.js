@@ -11,7 +11,7 @@ import {
   ListItem
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-import { useQuery } from '@apollo/react-hooks';
+import { useQuery } from '@apollo/client';
 import moment from 'moment';
 import { reverse, sortBy } from 'lodash';
 

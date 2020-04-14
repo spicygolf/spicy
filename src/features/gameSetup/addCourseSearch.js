@@ -15,7 +15,7 @@ import {
   ListItem,
   Icon
 } from 'react-native-elements';
-import { useQuery } from '@apollo/react-hooks';
+import { useQuery } from '@apollo/client';
 import { useFocusEffect } from '@react-navigation/native';
 import { find, orderBy } from 'lodash';
 

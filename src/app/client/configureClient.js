@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-community/async-storage';
-import { ApolloLink } from 'apollo-link';
-import ApolloClient from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { setContext } from 'apollo-link-context';
-import { onError } from 'apollo-link-error';
-import { HttpLink } from 'apollo-link-http';
+import {
+  ApolloClient,
+  ApolloLink,
+  HttpLink,
+  InMemoryCache,
+} from '@apollo/client';
+import { setContext } from '@apollo/link-context';
+import { onError } from '@apollo/link-error';
 
 import { baseUrl } from 'common/config';
 import { logout } from 'common/utils/account';
@@ -13,7 +15,15 @@ import { logout } from 'common/utils/account';
 export default function configureClient() {
 
   const cache = new InMemoryCache({
-    dataIdFromObject: object => object._key || null
+    dataIdFromObject: object => {
+      switch( object.__typename ) {
+        //case 'Score':
+        //  return object.hole;
+        //  break;
+        default:
+          return object._key || null;
+      }
+    }
   });
 
   const authLink = setContext((_, { headers }) => {

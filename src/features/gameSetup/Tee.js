@@ -5,7 +5,7 @@ import {
 } from 'react-native-elements';
 
 import { useNavigation } from '@react-navigation/native';
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation } from '@apollo/client';
 
 import { GameContext } from 'features/game/gameContext';
 import { AddCourseContext } from 'features/gameSetup/addCourseContext';

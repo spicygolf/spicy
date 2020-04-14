@@ -1,16 +1,13 @@
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 
 export default gql`
   mutation PostScore($round: String!, $score: ScoreInput!) {
     postScore(round: $round, score: $score) {
-      _key
-      scores {
-        hole
-        values {
-          k
-          v
-          ts
-        }
+      hole
+      values {
+        k
+        v
+        ts
       }
     }
   }

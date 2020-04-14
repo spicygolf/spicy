@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 
 export const ADD_GAME_MUTATION = gql`
   mutation AddGame($game: GameInput!) {

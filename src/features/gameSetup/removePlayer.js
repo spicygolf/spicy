@@ -1,6 +1,6 @@
 import React from 'react';
 import { Icon } from 'react-native-elements';
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation } from '@apollo/client';
 
 import { REMOVE_LINK_MUTATION } from 'common/graphql/unlink';
 import { GET_GAME_QUERY } from 'features/games/graphql';

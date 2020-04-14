@@ -8,7 +8,7 @@ import {
   View
 } from 'react-native';
 import { Mutation } from 'react-apollo';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 import moment from 'moment';
 import { find } from 'lodash';
 

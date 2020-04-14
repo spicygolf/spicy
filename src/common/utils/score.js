@@ -1,5 +1,5 @@
 import { filter, find, orderBy, reduce } from 'lodash';
-import jsonLogic from 'json-logic-js';
+import moment from 'moment';
 
 import ScoringWrapper from 'common/utils/ScoringWrapper';
 import {
@@ -342,9 +342,41 @@ export const isScoreToParJunk = (junk, s, par) => {
 
 };
 
-export   const formatDiff = diff => {
+export const formatDiff = diff => {
   if( !diff ) return '';
   let sign = '';
   if( diff > 0 ) sign = '+';
   return `(${sign}${diff})`;
+};
+
+export const upsertScore = (score, newGross) => {
+  const ts = moment.utc().format();
+
+  const newScore = {
+    hole: score.hole,
+    values: [],
+  };
+  if( score && score.values && score.values.length ) {
+    score.values.map(s => {
+      let newVal = s.v;
+      let newTS = s.ts;
+      if( s.k == 'gross' ) {
+        newVal = newGross;
+        newTS = ts;
+      }
+      newScore.values.push({
+        k: s.k,
+        v: newVal,
+        ts: newTS,
+      });
+    });
+  } else {
+    newScore.values = [{
+      k: 'gross',
+      v: newGross,
+      ts: ts,
+    }]
+  }
+  //console.log('newScore', newScore);
+  return newScore;
 };
