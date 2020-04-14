@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 
 export const GET_GAME_QUERY = gql`
   query GetGame($gkey: String!) {

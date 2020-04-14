@@ -1,5 +1,5 @@
 import { filter, find, orderBy, reduce } from 'lodash';
-import jsonLogic from 'json-logic-js';
+import moment from 'moment';
 
 import ScoringWrapper from 'common/utils/ScoringWrapper';
 import {
@@ -85,8 +85,8 @@ export const scoring = (game) => {
             let j = false;
             switch ( gsJunk.based_on ) {
               case 'user':
-                //console.log('gsv', gsJunk.name, score, get_score_value(gsJunk.name, score));
-                j = getJunk(gsJunk.name, gPlayer, game, hole) == 'true';
+                const jv = getJunk(gsJunk.name, gPlayer, game, hole);
+                if( jv == 'true' || jv == true ) j = true;
                 break;
               case 'gross':
               case 'net':
@@ -234,28 +234,6 @@ export const scoring = (game) => {
               } catch( e ) {
                 console.log('logic error', e);
               }
-
-/*
-              switch( gsMult.availability ) {
-                case 'got_all_points':
-                  // did this team get all the points?  if not, exit out
-                  let this_team_points = 0;
-                  let other_teams_points = 0;
-                  teams.map(getall_team => {
-                    if( getall_team.team == t.team ) {
-                      this_teams_points += getall_team.points;
-                    } else {
-                      other_teams_points += getall_team.points;
-                    }
-                  });
-                  if( other_teams_points == 0 ) {
-                    multipliers.push(gsMult);
-                  }
-                  break;
-                default:
-                  break;
-              }
-*/
             }
           });
         });
@@ -342,9 +320,41 @@ export const isScoreToParJunk = (junk, s, par) => {
 
 };
 
-export   const formatDiff = diff => {
+export const formatDiff = diff => {
   if( !diff ) return '';
   let sign = '';
   if( diff > 0 ) sign = '+';
   return `(${sign}${diff})`;
+};
+
+export const upsertScore = (score, newGross) => {
+  const ts = moment.utc().format();
+
+  const newScore = {
+    hole: score.hole,
+    values: [],
+  };
+  if( score && score.values && score.values.length ) {
+    score.values.map(s => {
+      let newVal = s.v;
+      let newTS = s.ts;
+      if( s.k == 'gross' ) {
+        newVal = newGross;
+        newTS = ts;
+      }
+      newScore.values.push({
+        k: s.k,
+        v: newVal,
+        ts: newTS,
+      });
+    });
+  } else {
+    newScore.values = [{
+      k: 'gross',
+      v: newGross,
+      ts: ts,
+    }]
+  }
+  //console.log('newScore', newScore);
+  return newScore;
 };

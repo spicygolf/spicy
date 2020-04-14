@@ -1,4 +1,8 @@
-import { setTeamJunk } from 'common/utils/game';
+import {
+  setTeamJunk,
+  stripKey,
+} from 'common/utils/game';
+
 
 
 describe('common/utils/game tests', () => {
@@ -199,6 +203,27 @@ describe('common/utils/game tests', () => {
 
   });
 
+  test('stripKey', () => {
 
+    const data = {
+      __typename: 'Thing',
+      _key: 'key',
+      obj_key: {k: 1, v: '2', __typename: 'ObjThing'},
+      arr_key: [
+        {k: '1', v: '2', __typename: 'ArrayThing'}
+      ],
+    };
+
+    const newData = {
+      _key: 'key',
+      obj_key: {k: 1, v: '2'},
+      arr_key: [
+        {k: '1', v: '2'}
+      ],
+    };
+
+    expect(stripKey(data, '__typename')).toMatchObject(newData);
+
+  });
 
 });

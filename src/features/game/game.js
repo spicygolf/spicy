@@ -5,7 +5,7 @@ import {
   Text
 } from 'react-native';
 
-import { useQuery } from '@apollo/react-hooks';
+import { useQuery } from '@apollo/client';
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { GameContext } from 'features/game/gameContext';

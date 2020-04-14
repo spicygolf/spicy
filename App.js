@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import SplashScreen from 'react-native-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
 import { ApolloProvider } from 'react-apollo';
-import { ApolloProvider as ApolloHooksProvider } from '@apollo/react-hooks';
+import { ApolloProvider as ApolloHooksProvider } from '@apollo/client';
 import { Provider as PaperProvider } from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
 

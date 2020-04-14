@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-community/async-storage';
-import { ApolloLink } from 'apollo-link';
-import ApolloClient from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { setContext } from 'apollo-link-context';
-import { onError } from 'apollo-link-error';
-import { HttpLink } from 'apollo-link-http';
+import {
+  ApolloClient,
+  ApolloLink,
+  HttpLink,
+  InMemoryCache,
+} from '@apollo/client';
+import { setContext } from '@apollo/link-context';
+import { onError } from '@apollo/link-error';
 
 import { baseUrl } from 'common/config';
 import { logout } from 'common/utils/account';
@@ -13,8 +15,23 @@ import { logout } from 'common/utils/account';
 export default function configureClient() {
 
   const cache = new InMemoryCache({
-    dataIdFromObject: object => object._key || null
-  });
+/*
+    possibleTypes: {
+      Game: ['Teams', 'Round', 'Player', 'GameSpec'],
+      Teams: ['TeamHole'],
+      TeamHole: ['Team'],
+      Team: ['GameJunk'],
+      Round: ['Score', 'Player', 'Tee'],
+      Score: ['Value'],
+      Player: ['Club', 'Handicap'],
+      Tee: ['Rating', 'Course', 'Hole'],
+      GameSpec: ['ScoringSpec', 'JunkSpec', 'MultiplierSpec', 'OptionSpec'],
+      ScoringSpec: ['HoleScoringSpec'],
+      OptionSpec: ['Choice'],
+    },
+*/
+    dataIdFromObject: object => object._key || null,
+   });
 
   const authLink = setContext((_, { headers }) => {
     // get the authentication token from local storage if it exists

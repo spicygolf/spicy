@@ -6,7 +6,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useApolloClient } from '@apollo/react-hooks';
+import { useApolloClient } from '@apollo/client';
 import {
   Card,
   Button

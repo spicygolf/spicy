@@ -126,7 +126,7 @@ class BirdieEmAllLeaderboard extends React.Component {
     return (
       <Query
         query={GET_GAME_QUERY}
-        variables={{game: this.props.currentGame._key}}
+        variables={{gkey: this.props.currentGame._key}}
       >
         {({ loading, error, data, client }) => {
           if( loading ) {

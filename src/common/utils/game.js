@@ -1,4 +1,4 @@
-import { find, findIndex } from 'lodash';
+import { cloneDeep, find, findIndex } from 'lodash';
 import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
 
 export const getHoles = game => {
@@ -92,8 +92,28 @@ export const getNewGameForUpdate = game => {
       };
     }) : [],
   };
-  return ret;
+  return cloneDeep(ret);
 
+};
+
+export const stripKey = (data, toStrip) => {
+  let result = {};
+  for( const key in data ) {
+    if( data.hasOwnProperty(key) ) {
+      let value = data[key];
+      if( Array.isArray(value) ) {
+        result[key] = value.map(v => stripKey(v, toStrip));
+      } else if( typeof value === 'object' ) {
+        value = stripKey(value, toStrip);
+        if( key !== toStrip ) {
+          result[key] = value;
+        }
+      } else {
+        result[key] = value;
+      }
+    }
+  }
+  return cloneDeep(result);
 };
 
 export const getAllGamespecOptions = game => {

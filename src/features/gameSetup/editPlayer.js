@@ -10,7 +10,7 @@ import {
 import {
   Card
 } from 'react-native-elements';
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation } from '@apollo/client';
 
 import GameNav from 'features/games/gamenav';
 import { GameContext } from 'features/game/gameContext';

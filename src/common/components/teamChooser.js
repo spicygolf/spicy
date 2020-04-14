@@ -9,7 +9,7 @@ import {
   Icon,
 } from 'react-native-elements';
 import { filter, find, findIndex } from 'lodash';
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation } from '@apollo/client';
 
 import { GET_GAME_QUERY } from 'features/games/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';

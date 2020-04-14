@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 import { ListItem } from 'react-native-elements';
-import { useQuery } from '@apollo/react-hooks';
+import { useQuery } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 
 import GameNav from 'features/games/gamenav';

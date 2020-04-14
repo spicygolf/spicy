@@ -5,7 +5,7 @@ import {
   View,
 } from 'react-native';
 import { Card } from 'react-native-elements';
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation } from '@apollo/client';
 import { findIndex } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
