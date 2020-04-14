@@ -85,8 +85,8 @@ export const scoring = (game) => {
             let j = false;
             switch ( gsJunk.based_on ) {
               case 'user':
-                //console.log('gsv', gsJunk.name, score, get_score_value(gsJunk.name, score));
-                j = getJunk(gsJunk.name, gPlayer, game, hole) == 'true';
+                const jv = getJunk(gsJunk.name, gPlayer, game, hole);
+                if( jv == 'true' || jv == true ) j = true;
                 break;
               case 'gross':
               case 'net':
@@ -234,28 +234,6 @@ export const scoring = (game) => {
               } catch( e ) {
                 console.log('logic error', e);
               }
-
-/*
-              switch( gsMult.availability ) {
-                case 'got_all_points':
-                  // did this team get all the points?  if not, exit out
-                  let this_team_points = 0;
-                  let other_teams_points = 0;
-                  teams.map(getall_team => {
-                    if( getall_team.team == t.team ) {
-                      this_teams_points += getall_team.points;
-                    } else {
-                      other_teams_points += getall_team.points;
-                    }
-                  });
-                  if( other_teams_points == 0 ) {
-                    multipliers.push(gsMult);
-                  }
-                  break;
-                default:
-                  break;
-              }
-*/
             }
           });
         });

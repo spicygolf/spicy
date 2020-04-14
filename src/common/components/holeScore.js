@@ -7,9 +7,8 @@ import {
   TouchableHighlight,
   View,
 } from 'react-native';
-import { useMutation } from '@apollo/client';
-import { findIndex } from 'lodash';
-import { gql } from '@apollo/client';
+import { useMutation, gql } from '@apollo/client';
+import { cloneDeep, findIndex } from 'lodash';
 
 import { get_score_value, get_net_score } from 'common/utils/rounds';
 import { upsertScore } from 'common/utils/score';
@@ -118,38 +117,28 @@ const HoleScore = props => {
         score: newScore,
       },
       update: (cache, { data: { postScore } }) => {
-        //console.log('update fn postScore', postScore);
-        const h = parseInt(score.hole) - 1;
-        const id = `${rkey}.scores.${h}`;
-        const fragment = gql`
-          fragment scores on Round {
-            scores
-          }
-        `;
-        const r = cache.readFragment({ fragment, id });
-        console.log('r', r);
-/*
+        // read game from cache
         const { getGame } = cache.readQuery({
           query: GET_GAME_QUERY,
           variables: {
             gkey: gkey,
           },
         });
-        const r = findIndex(getGame.rounds, {_key: rkey});
-        const h = findIndex(getGame.rounds[r].scores, {hole: hole.hole});
-        getGame.rounds[r].scores[h].values = postScore.values;
-        console.log('writing new game to cache', getGame);
+        // create new game to write back
+        const newGame = cloneDeep(getGame);
+        const r = findIndex(newGame.rounds, {_key: rkey});
+        const h = findIndex(newGame.rounds[r].scores, {hole: hole.hole});
+        newGame.rounds[r].scores[h].values = postScore.values;
+        //write back to cache
         cache.writeQuery({
           query: GET_GAME_QUERY,
           variables: {
             gkey: gkey,
           },
           data: {
-            getGame: getGame
+            getGame: newGame
           },
         });
-*/
-        console.log('cache', cache);
       },
     });
 

@@ -9,10 +9,11 @@ import {
   Icon,
 } from 'react-native-elements';
 import { useMutation } from '@apollo/client';
-import { findIndex, sortBy } from 'lodash';
+import { cloneDeep, findIndex, sortBy } from 'lodash';
 import { gql } from '@apollo/client';
 
 import { GameContext } from 'features/game/gameContext';
+import { GET_GAME_QUERY } from 'features/games/graphql';
 import { blue } from 'common/colors';
 import {
   get_net_score,
@@ -35,7 +36,6 @@ const HoleJunk = props => {
   const UPDATE_GAME_MUTATION = gql`
   mutation UpdateGame($gkey: String!, $game: GameInput!) {
     updateGame(gkey: $gkey, game: $game) {
-      _key
       teams {
         holes {
           hole
@@ -78,7 +78,7 @@ const HoleJunk = props => {
     let newHole = Object.assign({}, newGame.teams.holes[gHoleIndex]);
 
     const newTeams = newHole.teams.map(t => {
-      return setTeamJunk(t, junk, newValue, pkey);
+      return setTeamJunk(t, junk, newValue.toString(), pkey);
     });
     newHole = {
       ...newHole,
@@ -87,11 +87,33 @@ const HoleJunk = props => {
 
     newGame.teams.holes[gHoleIndex] = newHole;
 
-
     const { loading, error, data } = await updateGame({
       variables: {
         gkey: gkey,
         game: newGame,
+      },
+      update: (cache, { data: { updateGame } }) => {
+        // read game from cache
+        const { getGame } = cache.readQuery({
+          query: GET_GAME_QUERY,
+          variables: {
+            gkey: gkey,
+          },
+        });
+        // create new game to write back
+        const newG = cloneDeep(getGame);
+        const h = findIndex(newGame.teams.holes, {hole: hole.hole});
+        newG.teams.holes[h] = newHole;
+        //write back to cache
+        cache.writeQuery({
+          query: GET_GAME_QUERY,
+          variables: {
+            gkey: gkey,
+          },
+          data: {
+            getGame: newG
+          },
+        });
       },
     });
 

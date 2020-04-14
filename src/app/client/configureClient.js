@@ -15,16 +15,23 @@ import { logout } from 'common/utils/account';
 export default function configureClient() {
 
   const cache = new InMemoryCache({
-    dataIdFromObject: object => {
-      switch( object.__typename ) {
-        //case 'Score':
-        //  return object.hole;
-        //  break;
-        default:
-          return object._key || null;
-      }
-    }
-  });
+/*
+    possibleTypes: {
+      Game: ['Teams', 'Round', 'Player', 'GameSpec'],
+      Teams: ['TeamHole'],
+      TeamHole: ['Team'],
+      Team: ['GameJunk'],
+      Round: ['Score', 'Player', 'Tee'],
+      Score: ['Value'],
+      Player: ['Club', 'Handicap'],
+      Tee: ['Rating', 'Course', 'Hole'],
+      GameSpec: ['ScoringSpec', 'JunkSpec', 'MultiplierSpec', 'OptionSpec'],
+      ScoringSpec: ['HoleScoringSpec'],
+      OptionSpec: ['Choice'],
+    },
+*/
+    dataIdFromObject: object => object._key || null,
+   });
 
   const authLink = setContext((_, { headers }) => {
     // get the authentication token from local storage if it exists
