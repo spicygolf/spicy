@@ -148,8 +148,9 @@
 				LastUpgradeCheck = 1140;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						DevelopmentTeam = N99BE7M6KP;
+						DevelopmentTeam = CRRL9RDZ9F;
 						LastSwiftMigration = 1140;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -333,7 +334,10 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = CRRL9RDZ9F;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -349,6 +353,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = golf.spicy;
 				PRODUCT_NAME = spicygolf;
+				PROVISIONING_PROFILE_SPECIFIER = "Druid Golf Prod Provisioning";
 				SWIFT_OBJC_BRIDGING_HEADER = "spicygolf-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -363,7 +368,10 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = CRRL9RDZ9F;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = spicygolf/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -374,6 +382,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = golf.spicy;
 				PRODUCT_NAME = spicygolf;
+				PROVISIONING_PROFILE_SPECIFIER = "Druid Golf Prod Provisioning";
 				SWIFT_OBJC_BRIDGING_HEADER = "spicygolf-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
