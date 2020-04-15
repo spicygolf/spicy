@@ -40,7 +40,7 @@ const Forgot = props => {
         }
       });
       const payload = await res.json();
-      console.log('payload', payload);
+      console.log('forgot payload', payload);
       // TODO: handle anything other than 200 here.
 
       // clear fields after successful login
@@ -74,7 +74,7 @@ const Forgot = props => {
   );
 
   return (
-    <View>
+    <View style={styles.container}>
       <Card
         title='Forgot Password'
         testID='forgot_form_view'
@@ -106,7 +106,7 @@ const Forgot = props => {
         </View>
       </Card>
       <View style={styles.back_to_login_view}>
-        <Text>
+        <Text style={styles.back_to_text}>
           Back to
           <Text
             onPress={() => navigation.navigate('Login')}
@@ -123,6 +123,10 @@ export default Forgot;
 
 
 var styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#b30000',
+    flex: 1,
+  },
   loginView: {
     margin: 10,
     height: '100%',
@@ -145,6 +149,9 @@ var styles = StyleSheet.create({
   login_button: {
     marginTop: 15,
     marginBottom: 15,
+  },
+  back_to_text: {
+    color: 'white',
   },
   back_to_login_view: {
     margin: 15,

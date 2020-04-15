@@ -195,6 +195,10 @@ export default RegisterPlayer;
 
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#b30000',
+    flex: 1,
+  },
   changes: {
     paddingBottom: 20,
   },

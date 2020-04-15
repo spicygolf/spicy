@@ -16,11 +16,11 @@ const BackToLogin = props => {
 
   return (
     <View style={styles.login_view}>
-      <Text>
+      <Text style={styles.login_text}>
         Already have an account?
         <Text
           onPress={() => { navigation.navigate('Login'); }}
-          style={styles.login_text}
+          style={styles.login_button}
         >  Login</Text>
       </Text>
     </View>
@@ -35,8 +35,13 @@ const styles = StyleSheet.create({
   login_view: {
     padding: 15,
     paddingBottom: 40,
+    bottom: 0,
+    position: 'absolute',
   },
   login_text: {
+    color: 'white',
+  },
+  login_button: {
     fontWeight: 'bold',
     marginLeft: 6,
     color: blue,

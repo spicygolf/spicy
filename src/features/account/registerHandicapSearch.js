@@ -197,10 +197,11 @@ export default RegisterHandicapSearch;
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#b30000',
     flex: 1,
   },
   card: {
-    flex: 0.9,
+    flex: 0.85,
     margin: 15,
     backgroundColor: '#fff',
     borderWidth: 1,
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 15,
-    flex: 0.1,
+    flex: 0.15,
   },
   prev: {
     width: 150,

@@ -34,7 +34,7 @@ const Register = props => {
   const Stack = createStackNavigator();
 
   return (
-    <SafeAreaView style={{flex: 1,}}>
+    <SafeAreaView style={styles.container}>
       <RegisterContext.Provider
         value={{
           registration: registration,
@@ -61,8 +61,7 @@ export default Register;
 
 const styles = StyleSheet.create({
   container: {
-    margin: 10,
-    height: '100%',
-    justifyContent: 'space-between',
+    backgroundColor: '#b30000',
+    flex: 1,
   },
 });

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -30,6 +31,8 @@ const Login = props => {
 
   const navigation = useNavigation();
   const emailRef = useRef(null);
+
+  const logo = require('../../../assets/img/logo200.png');
 
   const login = async () => {
 
@@ -68,72 +71,84 @@ const Login = props => {
   );
 
   return (
-    <Card
-      title='Login'
-      testID='login_form_view'
-    >
-      <View>
-        <View style={styles.field_container}>
-          <Text style={styles.field_label}>Email</Text>
-          <TextInput
-            style={[styles.field_input, eValid]}
-            onChangeText={text => {
-              setEmail(text);
-              validate('email', text);
-            }}
-            keyboardType='email-address'
-            autoCapitalize='none'
-            value={email}
-            ref={emailRef}
+    <View style={styles.container}>
+      <View style={styles.logo_view}>
+        <Image
+          source={logo}
+          style={styles.logo}
+          resizeMode='contain'
+        />
+      </View>
+      <View style={styles.logo_view}>
+        <Text style={styles.welcome}>Welcome to Spicy Golf</Text>
+      </View>
+      <Card
+        title='Login'
+        testID='login_form_view'
+      >
+        <View>
+          <View style={styles.field_container}>
+            <Text style={styles.field_label}>Email</Text>
+            <TextInput
+              style={[styles.field_input, eValid]}
+              onChangeText={text => {
+                setEmail(text);
+                validate('email', text);
+              }}
+              keyboardType='email-address'
+              autoCapitalize='none'
+              value={email}
+              ref={emailRef}
+            />
+          </View>
+          <View style={styles.field_container}>
+            <Text style={styles.field_label}>Password</Text>
+            <TextInput
+              style={[styles.field_input, pValid]}
+              onChangeText={text => {
+                setPassword(text);
+                validate('password', text);
+              }}
+              autoCompleteType='password'
+              secureTextEntry={true}
+              autoCapitalize='none'
+              value={password}
+            />
+          </View>
+          <View style={styles.field_container}>
+            <Text style={styles.error_text}>{loginError}</Text>
+          </View>
+          <Button
+            style={styles.login_button}
+            onPress={login}
+            title='Login'
+            type={(emailValid && passValid) ? 'solid' : 'outline'}
+            disabled={!(emailValid && passValid)}
+            accessibilityLabel='Login'
+            testID='login_button'
+          />
+          <Button
+            onPress={() => { navigation.navigate('Forgot'); }}
+            title='Forgot Password'
+            type='clear'
+            accessibilityLabel='Forgot Password'
+            testID='forgot_button'
           />
         </View>
-        <View style={styles.field_container}>
-          <Text style={styles.field_label}>Password</Text>
-          <TextInput
-            style={[styles.field_input, pValid]}
-            onChangeText={text => {
-              setPassword(text);
-              validate('password', text);
-            }}
-            autoCompleteType='password'
-            secureTextEntry={true}
-            autoCapitalize='none'
-            value={password}
+        <View style={styles.divider}>
+          <View style={styles.hrLine} />
+          <Text style={styles.dividerText}>OR</Text>
+          <View style={styles.hrLine} />
+        </View>
+        <View style={styles.new_account_view}>
+          <Button
+            onPress={() => { navigation.navigate('Register'); }}
+            title='Register A New Account'
+            type='clear'
           />
         </View>
-        <View style={styles.field_container}>
-          <Text style={styles.error_text}>{loginError}</Text>
-        </View>
-        <Button
-          style={styles.login_button}
-          onPress={login}
-          title='Login'
-          type={(emailValid && passValid) ? 'solid' : 'outline'}
-          disabled={!(emailValid && passValid)}
-          accessibilityLabel='Login'
-          testID='login_button'
-        />
-        <Button
-          onPress={() => { navigation.navigate('Forgot'); }}
-          title='Forgot Password'
-          type='clear'
-          accessibilityLabel='Forgot Password'
-          testID='forgot_button'
-        />
-      </View>
-      <View style={styles.divider}>
-        <View style={styles.hrLine} />
-        <Text style={styles.dividerText}>OR</Text>
-        <View style={styles.hrLine} />
-      </View>
-      <View style={styles.new_account_view}>
-        <Button
-          onPress={() => { navigation.navigate('Register'); }}
-          title='Register A New Account'
-          type='clear'
-        />
-      </View>
-    </Card>
+      </Card>
+    </View>
   );
 
 };
@@ -142,6 +157,23 @@ export default Login;
 
 
 var styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#b30000',
+    flex: 1,
+  },
+  logo_view: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  logo: {
+    height: 100,
+  },
+  welcome: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   loginView: {
     margin: 10,
     height: '100%',

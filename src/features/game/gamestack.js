@@ -33,7 +33,7 @@ const GameStack = props => {
   return (
     <View style={styles.container}>
       <View style={styles.gname}>
-        <Text style={styles.name_txt}>{gamespec_name} - {start}</Text>
+        <Text style={styles.gname_txt}>{gamespec_name} - {start}</Text>
       </View>
       <Tab.Navigator
         initialRouteName={initRoute}
@@ -87,5 +87,9 @@ const styles = StyleSheet.create({
   gname: {
     alignItems: 'center',
     backgroundColor: 'white',
+    paddingVertical: 10,
   },
-})
+  gname_txt: {
+    fontSize: 12,
+  },
+});

@@ -1,6 +1,7 @@
 import React from 'react';
 import {
-  SafeAreaView
+  SafeAreaView,
+  StyleSheet,
 } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -9,6 +10,7 @@ import Games from 'features/games/games';
 import NewGameList from 'features/games/newGameList';
 import NewGameInfo from 'features/games/newGameInfo';
 import NewGame from 'features/games/newGame';
+import { green } from 'common/colors';
 
 
 
@@ -17,7 +19,7 @@ const GamesStack = props => {
   const Stack = createStackNavigator();
 
   return (
-    <SafeAreaView style={{flex: 1,}}>
+    <SafeAreaView style={styles.container}>
       <Stack.Navigator
         initialRouteName='Games'
         screenOptions={{
@@ -41,3 +43,11 @@ const GamesStack = props => {
 };
 
 export default GamesStack;
+
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: green,
+    flex: 1,
+  },
+});

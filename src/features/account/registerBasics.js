@@ -136,6 +136,10 @@ export default RegisterBasics;
 
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#b30000',
+    flex: 1,
+  },
   field_label: {
     fontWeight: 'bold',
     marginTop: 5,

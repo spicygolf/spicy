@@ -1,6 +1,7 @@
 import React from 'react';
 import {
-  SafeAreaView
+  SafeAreaView,
+  StyleSheet,
 } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -15,7 +16,7 @@ const AccountStack = props => {
   const Stack = createStackNavigator();
 
   return (
-    <SafeAreaView style={{flex: 1,}}>
+    <SafeAreaView style={styles.container}>
       <Stack.Navigator
         initialRouteName='Login'
         headerMode='none'
@@ -30,3 +31,11 @@ const AccountStack = props => {
 };
 
 export default AccountStack;
+
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#b30000',
+    flex: 1,
+  },
+});
