@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Image,
   StyleSheet,
-  Text,
   View
 } from 'react-native';
 
@@ -9,10 +9,13 @@ import {
 
 const Splash = props => {
 
+  const logo = require('../../../assets/img/logo200.png');
+
   return (
     <View style={styles.container}>
-      <Text>Spicy Golf</Text>
-      <Text>Splash Page</Text>
+      <Image
+        source={logo}
+      />
     </View>
   );
 
@@ -26,5 +29,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#b30000',
   },
 });
