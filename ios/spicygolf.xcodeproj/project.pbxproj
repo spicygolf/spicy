@@ -388,7 +388,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = golf.spicy;
 				PRODUCT_NAME = spicygolf;
-				PROVISIONING_PROFILE_SPECIFIER = "Spicy Golf App Store";
+				PROVISIONING_PROFILE_SPECIFIER = "Spicy Golf App";
 				SWIFT_OBJC_BRIDGING_HEADER = "spicygolf-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
