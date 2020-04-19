@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import SplashScreen from 'react-native-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
 import { ApolloProvider } from 'react-apollo';
 import { ApolloProvider as ApolloHooksProvider } from '@apollo/client';
@@ -21,6 +20,7 @@ import configureClient from 'app/client/configureClient';
 
 const App = props => {
 
+  console.log('hai');
   const { client } = configureClient();
 
   const [initializing, setInitializing] = useState(true);
@@ -34,7 +34,6 @@ const App = props => {
 
   useEffect(
     () => {
-      SplashScreen.hide();
       const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
       return subscriber; // unsubscribe on unmount
     }, []
