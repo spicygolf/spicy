@@ -15,7 +15,7 @@ import { upsertScore } from 'common/utils/score';
 import { blue } from 'common/colors';
 import { POST_SCORE_MUTATION } from 'features/rounds/graphql';
 import { GameContext } from 'features/game/gameContext';
-import { GET_GAME_QUERY } from 'features/games/graphql';
+import { GET_GAME_QUERY } from 'features/game/graphql';
 
 const circle_blk = require('../../../assets/img/circle_blk.png');
 const circle_wht = require('../../../assets/img/circle_wht.png');

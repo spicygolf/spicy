@@ -1,16 +1,15 @@
 import React, { useContext } from 'react';
-
 import {
   ActivityIndicator,
   Text
 } from 'react-native';
-
 import { useQuery } from '@apollo/client';
-import { GET_GAME_QUERY } from 'features/games/graphql';
+
+import { GET_GAME_QUERY } from 'features/game/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { GameContext } from 'features/game/gameContext';
 import GameStack from 'features/game/gamestack';
-
+import { scoring } from 'common/utils/score';
 
 
 const Game = props => {
@@ -40,12 +39,15 @@ const Game = props => {
     // got game
     //console.log('g_data', g_data);
     const game = data.getGame;
-    console.log('game', game);
+    console.log('game  ', game);
+    const scores = scoring(game);
+    console.log('scores', scores);
 
     return (
       <GameContext.Provider value={{
         gkey: game._key,
         game: game,
+        scores: scores,
         currentPlayerKey: currentPlayerKey,
       }}>
         <GameStack

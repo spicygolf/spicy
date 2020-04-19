@@ -13,7 +13,7 @@ import { cloneDeep, findIndex, sortBy } from 'lodash';
 import { gql } from '@apollo/client';
 
 import { GameContext } from 'features/game/gameContext';
-import { GET_GAME_QUERY } from 'features/games/graphql';
+import { GET_GAME_QUERY } from 'features/game/graphql';
 import { blue } from 'common/colors';
 import {
   get_net_score,

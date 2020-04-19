@@ -12,7 +12,7 @@ import
 } from 'react-native';
 
 import { Query, withApollo } from 'react-apollo';
-import { GET_GAME_QUERY } from 'features/games/graphql';
+import { GET_GAME_QUERY } from 'features/game/graphql';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 

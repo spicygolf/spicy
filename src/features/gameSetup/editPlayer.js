@@ -15,7 +15,7 @@ import { useMutation } from '@apollo/client';
 import GameNav from 'features/games/gamenav';
 import { GameContext } from 'features/game/gameContext';
 import { UPDATE_LINK_MUTATION } from 'common/graphql/link';
-import { GET_GAME_QUERY } from 'features/games/graphql';
+import { GET_GAME_QUERY } from 'features/game/graphql';
 import { course_handicap } from 'common/utils/handicap';
 import { get_round_for_player } from 'common/utils/rounds';
 import { blue } from 'common/colors';

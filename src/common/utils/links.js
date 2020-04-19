@@ -1,4 +1,4 @@
-import { GET_GAME_QUERY } from 'features/games/graphql';
+import { GET_GAME_QUERY } from 'features/game/graphql';
 import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
 import { course_handicap } from 'common/utils/handicap';
 

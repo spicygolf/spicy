@@ -288,9 +288,6 @@ export const scoring = (game) => {
     });
   });
 
-
-  console.log('scoring final', ret);
-
   return ret;
 
 };
