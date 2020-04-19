@@ -3,13 +3,13 @@
  * @flow strict-local
  *
  */
-
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { ApolloProvider } from 'react-apollo';
 import { ApolloProvider as ApolloHooksProvider } from '@apollo/client';
 import { Provider as PaperProvider } from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
+import RNBootSplash from "react-native-bootsplash";
 
 import Splash from 'features/splash/splash';
 import AppStack from 'app/components/appstack';
@@ -33,6 +33,7 @@ const App = props => {
 
   useEffect(
     () => {
+      RNBootSplash.hide({ duration: 250 });
       const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
       return subscriber; // unsubscribe on unmount
     }, []
