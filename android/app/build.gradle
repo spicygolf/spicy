@@ -152,6 +152,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 8
         versionName "0.1.7"
+        ndk {
+            abiFilter "x86"
+        }
     }
     splits {
         abi {

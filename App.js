@@ -20,7 +20,6 @@ import configureClient from 'app/client/configureClient';
 
 const App = props => {
 
-  console.log('hai');
   const { client } = configureClient();
 
   const [initializing, setInitializing] = useState(true);

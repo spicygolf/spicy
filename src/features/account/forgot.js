@@ -12,7 +12,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import { baseUrl } from 'common/config';
-import { blue, green } from 'common/colors';
+import { green } from 'common/colors';
 import { validateEmail } from 'common/utils/account';
 
 
@@ -151,7 +151,7 @@ var styles = StyleSheet.create({
     marginBottom: 15,
   },
   back_to_text: {
-    color: 'white',
+    color: '#ccc',
   },
   back_to_login_view: {
     margin: 15,
@@ -160,6 +160,6 @@ var styles = StyleSheet.create({
   login_text: {
     fontWeight: 'bold',
     marginLeft: 6,
-    color: blue,
+    color: '#fff',
   },
 });
