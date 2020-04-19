@@ -11,6 +11,7 @@ import {
   Card,
   Button
 } from 'react-native-elements';
+import DeviceInfo from 'react-native-device-info';
 
 import { red } from 'common/colors';
 import { logout } from 'common/utils/account';
@@ -44,25 +45,33 @@ const ProfileHome = props => {
         onPress={() => _clearCache()}
       />
 */
+
+  const version = DeviceInfo.getVersion();
+
   return (
-    <Card>
-      <View style={styles.field_view}>
-        <Text>Name:</Text>
-        <Text>{currentPlayer.name}</Text>
+    <View>
+      <Card>
+        <View style={styles.field_view}>
+          <Text>Name:</Text>
+          <Text>{currentPlayer.name}</Text>
+        </View>
+        <View style={styles.field_view}>
+          <Text>Current Index:</Text>
+          <Text>{index}</Text>
+        </View>
+        <View style={styles.button_view}>
+          <Button
+            style={styles.logout_button}
+            title='Logout'
+            testID='logout_button'
+            onPress={() => _logoutPressed()}
+          />
+        </View>
+      </Card>
+      <View style={styles.app_info}>
+        <Text>v{version}</Text>
       </View>
-      <View style={styles.field_view}>
-        <Text>Current Index:</Text>
-        <Text>{index}</Text>
-      </View>
-      <View style={styles.button_view}>
-        <Button
-          style={styles.logout_button}
-          title='Logout'
-          testID='logout_button'
-          onPress={() => _logoutPressed()}
-        />
-      </View>
-    </Card>
+    </View>
   );
 
 };
@@ -79,5 +88,11 @@ const styles = StyleSheet.create({
   },
   logout_button: {
     margin: 20
+  },
+  app_info: {
+    marginHorizontal: 15,
+    marginVertical: 20,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
 });

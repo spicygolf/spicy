@@ -48,6 +48,7 @@
     "react-logger": "^1.1.0",
     "react-native": "0.62.2",
     "react-native-bootsplash": "^2.2.3",
+    "react-native-device-info": "^5.5.5",
     "react-native-dropdownalert": "^4.0.1",
     "react-native-elements": "^1.2.7",
     "react-native-gesture-handler": "^1.5.6",
