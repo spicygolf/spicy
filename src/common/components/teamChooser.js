@@ -11,7 +11,7 @@ import {
 import { filter, find, findIndex } from 'lodash';
 import { useMutation } from '@apollo/client';
 
-import { GET_GAME_QUERY } from 'features/games/graphql';
+import { GET_GAME_QUERY } from 'features/game/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import { getNewGameForUpdate } from 'common/utils/game';

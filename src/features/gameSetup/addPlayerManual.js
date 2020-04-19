@@ -17,7 +17,7 @@ import {
   validateFloat,
   validateName
 } from 'common/utils/account';
-import { GET_GAME_QUERY } from 'features/games/graphql';
+import { GET_GAME_QUERY } from 'features/game/graphql';
 import { ADD_PLAYER_MUTATION } from 'features/players/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { GameContext } from 'features/game/gameContext';

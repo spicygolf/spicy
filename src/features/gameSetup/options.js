@@ -11,7 +11,7 @@ import { findIndex } from 'lodash';
 import { GameContext } from 'features/game/gameContext';
 import { getAllOptions } from 'common/utils/game';
 import { getNewGameForUpdate } from 'common/utils/game';
-import { GET_GAME_QUERY } from 'features/games/graphql';
+import { GET_GAME_QUERY } from 'features/game/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import OptionDisplay from 'features/gameSetup/optionDisplay';
 import OptionNum from 'features/gameSetup/optionNum';

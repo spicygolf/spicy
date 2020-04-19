@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-import { blue } from 'common/colors';
 
 
 const BackToLogin = props => {
@@ -39,11 +38,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   login_text: {
-    color: 'white',
+    color: '#ccc',
   },
   login_button: {
     fontWeight: 'bold',
     marginLeft: 6,
-    color: blue,
+    color: "#fff",
   },
 });

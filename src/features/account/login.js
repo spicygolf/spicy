@@ -127,27 +127,24 @@ const Login = props => {
             accessibilityLabel='Login'
             testID='login_button'
           />
-          <Button
-            onPress={() => { navigation.navigate('Forgot'); }}
-            title='Forgot Password'
-            type='clear'
-            accessibilityLabel='Forgot Password'
-            testID='forgot_button'
-          />
-        </View>
-        <View style={styles.divider}>
-          <View style={styles.hrLine} />
-          <Text style={styles.dividerText}>OR</Text>
-          <View style={styles.hrLine} />
-        </View>
-        <View style={styles.new_account_view}>
-          <Button
-            onPress={() => { navigation.navigate('Register'); }}
-            title='Register A New Account'
-            type='clear'
-          />
         </View>
       </Card>
+      <View style={styles.non_login_buttons_view}>
+        <Button
+          onPress={() => { navigation.navigate('Forgot'); }}
+          title='Forgot Password'
+          type='clear'
+          titleStyle={styles.non_login_buttons}
+          accessibilityLabel='Forgot Password'
+          testID='forgot_button'
+        />
+        <Button
+          onPress={() => { navigation.navigate('Register'); }}
+          title='Register A New Account'
+          type='clear'
+          titleStyle={styles.non_login_buttons}
+        />
+      </View>
     </View>
   );
 
@@ -170,7 +167,7 @@ var styles = StyleSheet.create({
     height: 100,
   },
   welcome: {
-    color: 'white',
+    color: '#ddd',
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -214,8 +211,14 @@ var styles = StyleSheet.create({
     textAlign: 'center',
     width: width / 8,
   },
-  new_account_view: {
-    justifyContent: 'center',
+  non_login_buttons_view: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginHorizontal: 10,
+    marginVertical: 20,
   },
+  non_login_buttons: {
+    color: '#ddd',
+  }
 });

@@ -10,7 +10,6 @@ import { DataTable } from 'react-native-paper';
 import { filter, find } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
-import { scoring } from 'common/utils/score';
 
 
 
@@ -18,8 +17,7 @@ const FivePointsLeaderboard = props => {
 
   const scoreType = 'gross'; // gross, net, points, ?
 
-  const { game } = useContext(GameContext);
-  const scores = scoring(game);
+  const { game, scores } = useContext(GameContext);
 
   const playerList = filter(game.players.map((p, i) => {
     if( !p ) return null;

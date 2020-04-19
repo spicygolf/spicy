@@ -11,7 +11,7 @@ import { GameContext } from 'features/game/gameContext';
 import { AddCourseContext } from 'features/gameSetup/addCourseContext';
 import { ADD_LINK_MUTATION, UPDATE_LINK_MUTATION } from 'common/graphql/link';
 import { REMOVE_LINK_MUTATION } from 'common/graphql/unlink';
-import { GET_GAME_QUERY } from 'features/games/graphql';
+import { GET_GAME_QUERY } from 'features/game/graphql';
 import FavoriteIcon from 'common/components/favoriteIcon';
 import { course_handicap } from '../../common/utils/handicap';
 

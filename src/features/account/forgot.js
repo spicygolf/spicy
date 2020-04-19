@@ -10,15 +10,17 @@ import {
   Card,
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
+import auth from '@react-native-firebase/auth';
 
 import { baseUrl } from 'common/config';
-import { blue, green } from 'common/colors';
+import { green } from 'common/colors';
 import { validateEmail } from 'common/utils/account';
 
 
 
 const Forgot = props => {
 
+  const [ sent, setSent ] = useState(false);
   const [ email, setEmail ] = useState('');
   const [ emailValid, setEmailValid ] = useState(false);
 
@@ -26,33 +28,17 @@ const Forgot = props => {
   const emailRef = useRef(null);
 
   const forgot = async () => {
-    // REST call to API to get email sent for password reset
-    const uri = `${baseUrl}/account/forgot`;
     try {
-      const res = await fetch(uri, {
-        method: 'POST',
-        body: JSON.stringify({
-          email: email,
-        }),
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Content-Type': 'application/json'
-        }
-      });
-      const payload = await res.json();
-      console.log('forgot payload', payload);
-      // TODO: handle anything other than 200 here.
+      const res = await auth().sendPasswordResetEmail(email);
 
+      setSent(true);
       // clear fields after successful login
       setEmail('');
       setEmailValid(false);
       emailRef.current.focus();
 
-      navigation.navigate('Login');
-
-    } catch(err) {
-      console.error(err);
-      // TODO: handle me
+    } catch( e ) {
+      console.log('forgot error', e.message, e.code);
     }
   };
 
@@ -71,6 +57,22 @@ const Forgot = props => {
         emailRef.current.focus();
       }
     }, [emailRef]
+  );
+
+  const button = (
+    <Button
+    style={styles.login_button}
+    onPress={forgot}
+    title='Send Password Reset Email'
+    type={(emailValid) ? 'solid' : 'outline'}
+    disabled={!(emailValid)}
+    accessibilityLabel='Send Password Reset Email'
+    testID='forgot_button'
+  />
+  );
+
+  const sentMessage = (
+    <Text>Password Reset Email Sent</Text>
   );
 
   return (
@@ -94,15 +96,7 @@ const Forgot = props => {
               ref={emailRef}
             />
           </View>
-          <Button
-            style={styles.login_button}
-            onPress={forgot}
-            title='Submit'
-            type={(emailValid) ? 'solid' : 'outline'}
-            disabled={!(emailValid)}
-            accessibilityLabel='Submit'
-            testID='forgot_button'
-          />
+          { sent ? sentMessage : button }
         </View>
       </Card>
       <View style={styles.back_to_login_view}>
@@ -151,7 +145,7 @@ var styles = StyleSheet.create({
     marginBottom: 15,
   },
   back_to_text: {
-    color: 'white',
+    color: '#ccc',
   },
   back_to_login_view: {
     margin: 15,
@@ -160,6 +154,6 @@ var styles = StyleSheet.create({
   login_text: {
     fontWeight: 'bold',
     marginLeft: 6,
-    color: blue,
+    color: '#fff',
   },
 });

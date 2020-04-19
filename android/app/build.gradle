@@ -152,6 +152,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 8
         versionName "0.1.7"
+        ndk {
+            abiFilter "x86"
+        }
     }
     splits {
         abi {
@@ -215,7 +218,7 @@ android {
 dependencies {
     api fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
-    api "com.android.support:appcompat-v7:23.0.1"
+    //api "com.android.support:appcompat-v7:23.0.1"
     api "com.facebook.react:react-native:+"  // From node_modules
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"

@@ -27,6 +27,11 @@ const ProfileHome = props => {
     logout(client);
   }
 
+  const index = (
+    currentPlayer &&
+    currentPlayer.handicap &&
+    currentPlayer.handicap.index
+  ) ? currentPlayer.handicap.index : '-';
 /*
   const _clearCache = props => {
     client.resetStore();
@@ -47,7 +52,7 @@ const ProfileHome = props => {
       </View>
       <View style={styles.field_view}>
         <Text>Current Index:</Text>
-        <Text>{currentPlayer.handicap.index || null}</Text>
+        <Text>{index}</Text>
       </View>
       <View style={styles.button_view}>
         <Button
