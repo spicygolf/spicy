@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
+  KeyboardAvoidingView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -76,117 +78,123 @@ const RegisterHandicap = props => {
   if( c && c.states ) statelist = c.states;
 
   return (
-    <View style={styles.container}>
-      <Card title='Register - Handicap'>
-        <View style={styles.loginView} testID='register_2_view'>
-          <View>
-            <View style={styles.field_container}>
-              <Text style={styles.field_label}>Last Name *</Text>
-              <TextInput
-                style={[styles.field_input, lnValid]}
-                onChangeText={text => {
-                  setRegistration({
-                    ...registration,
-                    lastName: text,
-                  });
-                  validate('name', text);
-                }}
-                autoCapitalize='words'
-                value={registration.lastName}
-                ref={lastNameRef}
-              />
-            </View>
-            <View style={styles.field_container}>
-              <Text style={styles.field_label}>GHIN Number</Text>
-              <TextInput
-                style={[styles.field_input, gnValid]}
-                onChangeText={text => {
-                  setRegistration({
-                    ...registration,
-                    ghinNumber: text,
-                  });
-                  validate('number', text);
-                }}
-                autoCapitalize='none'
-                value={registration.ghinNumber}
-              />
-            </View>
-          </View>
-          <View style={styles.divider}>
-              <View style={styles.hrLine} />
-              <Text style={styles.dividerText}>OR</Text>
-              <View style={styles.hrLine} />
-            </View>
-          <View>
-            <Text style={styles.lookup}>
-              Look up my GHIN number by Last Name & State
-            </Text>
-            <View style={styles.states_row}>
-              <View style={[styles.field_container, styles.picker_country]}>
-                <CountryPicker
-                  countries={countries}
-                  selectedValue={registration.country}
-                  onValueChange={(v) => setRegistration({
-                    ...registration,
-                    country: v,
-                  })}
-                />
-              </View>
-              <View style={[styles.field_container, styles.picker_state]}>
-                <StatePicker
-                  states={statelist}
-                  selectedValue={registration.state}
-                  onValueChange={(v) => setRegistration({
-                    ...registration,
-                    state: v,
-                  })}
-                />
-              </View>
-            </View>
-          </View>
-          <View style={styles.divider}>
-              <View style={styles.hrLine} />
-              <Text style={styles.dividerText}>OR</Text>
-              <View style={styles.hrLine} />
-            </View>
-        </View>
-        <View style={styles.skip_view}>
-          <Text>
-            I don't keep a GHIN handicap.
-            <Text
-              onPress={() => {
-                navigation.navigate('RegisterPlayer');
-              }}
-              style={styles.skip_text}
-            >  Skip this step</Text>
-          </Text>
-        </View>
-      </Card>
-      <View style={styles.button_row}>
-        <Button
-          style={styles.prev}
-          title='Prev'
-          type='solid'
-          onPress={() => {
-            navigation.goBack();
-          }}
-          accessibilityLabel='Register Prev 2'
-          testID='register_prev_2_button'
-        />
-        <Button
-          style={styles.next}
-          title='Next'
-          type={(lastNameValid && (ghinNumberValid || (registration.country && registration.state))) ? 'solid' : 'outline'}
-          disabled={!(lastNameValid && (ghinNumberValid || (registration.country && registration.state)))}
-          onPress={() => {
-            navigation.navigate('RegisterHandicapSearch')
-          }}
-          accessibilityLabel='Register Next 2'
-          testID='register_next_2_button'
-        />
-      </View>
+    <KeyboardAvoidingView
+      behavior={"padding"}
+      style={styles.container}
+      contentContainerStyle={{flex: 1,}}
+    >
       <BackToLogin />
-    </View>
+      <ScrollView>
+        <Card title='Register - Handicap'>
+          <View style={styles.loginView} testID='register_2_view'>
+            <View>
+              <View style={styles.field_container}>
+                <Text style={styles.field_label}>Last Name *</Text>
+                <TextInput
+                  style={[styles.field_input, lnValid]}
+                  onChangeText={text => {
+                    setRegistration({
+                      ...registration,
+                      lastName: text,
+                    });
+                    validate('name', text);
+                  }}
+                  autoCapitalize='words'
+                  value={registration.lastName}
+                  ref={lastNameRef}
+                />
+              </View>
+              <View style={styles.field_container}>
+                <Text style={styles.field_label}>GHIN Number</Text>
+                <TextInput
+                  style={[styles.field_input, gnValid]}
+                  onChangeText={text => {
+                    setRegistration({
+                      ...registration,
+                      ghinNumber: text,
+                    });
+                    validate('number', text);
+                  }}
+                  autoCapitalize='none'
+                  value={registration.ghinNumber}
+                />
+              </View>
+            </View>
+            <View style={styles.divider}>
+                <View style={styles.hrLine} />
+                <Text style={styles.dividerText}>OR</Text>
+                <View style={styles.hrLine} />
+              </View>
+            <View>
+              <Text style={styles.lookup}>
+                Look up my GHIN number by Last Name & State
+              </Text>
+              <View style={styles.states_row}>
+                <View style={[styles.field_container, styles.picker_country]}>
+                  <CountryPicker
+                    countries={countries}
+                    selectedValue={registration.country}
+                    onValueChange={(v) => setRegistration({
+                      ...registration,
+                      country: v,
+                    })}
+                  />
+                </View>
+                <View style={[styles.field_container, styles.picker_state]}>
+                  <StatePicker
+                    states={statelist}
+                    selectedValue={registration.state}
+                    onValueChange={(v) => setRegistration({
+                      ...registration,
+                      state: v,
+                    })}
+                  />
+                </View>
+              </View>
+            </View>
+            <View style={styles.divider}>
+                <View style={styles.hrLine} />
+                <Text style={styles.dividerText}>OR</Text>
+                <View style={styles.hrLine} />
+              </View>
+          </View>
+          <View style={styles.skip_view}>
+            <Text>
+              I don't keep a GHIN handicap.
+              <Text
+                onPress={() => {
+                  navigation.navigate('RegisterPlayer');
+                }}
+                style={styles.skip_text}
+              >  Skip this step</Text>
+            </Text>
+          </View>
+        </Card>
+        <View style={styles.button_row}>
+          <Button
+            style={styles.prev}
+            title='Prev'
+            type='solid'
+            onPress={() => {
+              navigation.goBack();
+            }}
+            accessibilityLabel='Register Prev 2'
+            testID='register_prev_2_button'
+          />
+          <Button
+            style={styles.next}
+            title='Next'
+            type={(lastNameValid && (ghinNumberValid || (registration.country && registration.state))) ? 'solid' : 'outline'}
+            disabled={!(lastNameValid && (ghinNumberValid || (registration.country && registration.state)))}
+            onPress={() => {
+              navigation.navigate('RegisterHandicapSearch')
+            }}
+            accessibilityLabel='Register Next 2'
+            testID='register_next_2_button'
+          />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -220,7 +228,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 50,
+    marginTop: 25,
     marginBottom: 20,
   },
   hrLine: {

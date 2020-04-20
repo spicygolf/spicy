@@ -32,10 +32,8 @@ export default BackToLogin;
 
 const styles = StyleSheet.create({
   login_view: {
-    padding: 15,
-    paddingBottom: 40,
-    bottom: 0,
-    position: 'absolute',
+    paddingTop: 15,
+    paddingLeft: 15,
   },
   login_text: {
     color: '#ccc',

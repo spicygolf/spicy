@@ -125,6 +125,7 @@ const RegisterPlayer = props => {
 
   return (
     <View style={styles.container}>
+      <BackToLogin />
       <View>
         <Card title='Register - Player Information'>
           <View testID='register_4_view'>
@@ -186,7 +187,6 @@ const RegisterPlayer = props => {
           />
         </View>
       </View>
-      <BackToLogin />
     </View>
   );
 };

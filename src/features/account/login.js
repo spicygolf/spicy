@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -61,7 +64,7 @@ const Login = props => {
 
   const eValid = { borderColor: emailValid ? green : '#ddd' };
   const pValid = { borderColor: passValid ? green : '#ddd' };
-
+/*
   useEffect(
     () => {
       if( emailRef && emailRef.current ) {
@@ -69,83 +72,89 @@ const Login = props => {
       }
     }, [emailRef]
   );
-
+*/
   return (
-    <View style={styles.container}>
-      <View style={styles.logo_view}>
-        <Image
-          source={logo}
-          style={styles.logo}
-          resizeMode='contain'
-        />
-      </View>
-      <View style={styles.logo_view}>
-        <Text style={styles.welcome}>Welcome to Spicy Golf</Text>
-      </View>
-      <Card
-        title='Login'
-        testID='login_form_view'
-      >
-        <View>
-          <View style={styles.field_container}>
-            <Text style={styles.field_label}>Email</Text>
-            <TextInput
-              style={[styles.field_input, eValid]}
-              onChangeText={text => {
-                setEmail(text);
-                validate('email', text);
-              }}
-              keyboardType='email-address'
-              autoCapitalize='none'
-              value={email}
-              ref={emailRef}
-            />
-          </View>
-          <View style={styles.field_container}>
-            <Text style={styles.field_label}>Password</Text>
-            <TextInput
-              style={[styles.field_input, pValid]}
-              onChangeText={text => {
-                setPassword(text);
-                validate('password', text);
-              }}
-              autoCompleteType='password'
-              secureTextEntry={true}
-              autoCapitalize='none'
-              value={password}
-            />
-          </View>
-          <View style={styles.field_container}>
-            <Text style={styles.error_text}>{loginError}</Text>
-          </View>
-          <Button
-            style={styles.login_button}
-            onPress={login}
-            title='Login'
-            type={(emailValid && passValid) ? 'solid' : 'outline'}
-            disabled={!(emailValid && passValid)}
-            accessibilityLabel='Login'
-            testID='login_button'
+    <KeyboardAvoidingView
+      behavior={"position"}
+      style={styles.container}
+      contentContainerStyle={{flex: 1,}}
+    >
+      <ScrollView>
+        <View style={styles.logo_view}>
+          <Image
+            source={logo}
+            style={styles.logo}
+            resizeMode='contain'
           />
         </View>
-      </Card>
-      <View style={styles.non_login_buttons_view}>
-        <Button
-          onPress={() => { navigation.navigate('Forgot'); }}
-          title='Forgot Password'
-          type='clear'
-          titleStyle={styles.non_login_buttons}
-          accessibilityLabel='Forgot Password'
-          testID='forgot_button'
-        />
-        <Button
-          onPress={() => { navigation.navigate('Register'); }}
-          title='Register A New Account'
-          type='clear'
-          titleStyle={styles.non_login_buttons}
-        />
-      </View>
-    </View>
+        <View style={styles.logo_view}>
+          <Text style={styles.welcome}>Welcome to Spicy Golf</Text>
+        </View>
+        <Card
+          title='Login'
+          testID='login_form_view'
+        >
+          <View>
+            <View style={styles.field_container}>
+              <Text style={styles.field_label}>Email</Text>
+              <TextInput
+                style={[styles.field_input, eValid]}
+                onChangeText={text => {
+                  setEmail(text);
+                  validate('email', text);
+                }}
+                keyboardType='email-address'
+                autoCapitalize='none'
+                value={email}
+                ref={emailRef}
+              />
+            </View>
+            <View style={styles.field_container}>
+              <Text style={styles.field_label}>Password</Text>
+              <TextInput
+                style={[styles.field_input, pValid]}
+                onChangeText={text => {
+                  setPassword(text);
+                  validate('password', text);
+                }}
+                autoCompleteType='password'
+                secureTextEntry={true}
+                autoCapitalize='none'
+                value={password}
+              />
+            </View>
+            <View style={styles.field_container}>
+              <Text style={styles.error_text}>{loginError}</Text>
+            </View>
+            <Button
+              style={styles.login_button}
+              onPress={login}
+              title='Login'
+              type={(emailValid && passValid) ? 'solid' : 'outline'}
+              disabled={!(emailValid && passValid)}
+              accessibilityLabel='Login'
+              testID='login_button'
+            />
+          </View>
+        </Card>
+        <View style={styles.non_login_buttons_view}>
+          <Button
+            onPress={() => { navigation.navigate('Forgot'); }}
+            title='Forgot Password'
+            type='clear'
+            titleStyle={styles.non_login_buttons}
+            accessibilityLabel='Forgot Password'
+            testID='forgot_button'
+          />
+          <Button
+            onPress={() => { navigation.navigate('Register'); }}
+            title='Register'
+            type='clear'
+            titleStyle={styles.non_login_buttons}
+          />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 
 };
@@ -191,32 +200,14 @@ var styles = StyleSheet.create({
     marginBottom: 10,
   },
   login_button: {
-    marginTop: 15,
     marginBottom: 15,
-  },
-  divider: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 40,
-  },
-  hrLine: {
-    width: width / 3.5,
-    backgroundColor: blue,
-    height: 1,
-  },
-  dividerText: {
-    color: blue,
-    textAlign: 'center',
-    width: width / 8,
   },
   non_login_buttons_view: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginHorizontal: 10,
-    marginVertical: 20,
+    marginVertical: 10,
   },
   non_login_buttons: {
     color: '#ddd',

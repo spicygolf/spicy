@@ -157,6 +157,7 @@ const RegisterHandicapSearch = props => {
 
   return (
     <View style={styles.container}>
+      <BackToLogin />
       <View style={styles.card}>
         <View style={styles.title_view}>
           <Text style={styles.title}>Register - GHIN Results</Text>
@@ -187,7 +188,6 @@ const RegisterHandicapSearch = props => {
           testID='register_next_3_button'
         />
       </View>
-      <BackToLogin />
     </View>
   );
 };

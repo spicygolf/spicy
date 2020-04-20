@@ -55,6 +55,7 @@ const RegisterBasics = props => {
 
   return (
     <View style={styles.container}>
+      <BackToLogin />
       <View>
         <Card title='Register - Basics'>
           <View style={styles.loginView} testID='register_1_view'>
@@ -127,7 +128,6 @@ const RegisterBasics = props => {
           />
         </View>
       </View>
-      <BackToLogin />
     </View>
   );
 };
