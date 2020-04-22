@@ -214,7 +214,10 @@ export const scoring = (game) => {
       if( gsMult.based_on == 'user' ) {
         if( gHole && gHole.multipliers ) {
           filter(gHole.multipliers, {name: gsMult.name}).map(mult => {
-            multipliers.push(gsMult);
+            multipliers.push({
+              ...gsMult,
+              team: t.team,
+            });
           });
         }
       } else {
@@ -229,7 +232,10 @@ export const scoring = (game) => {
                 const logic = scoringWrapper.logic(availability, {team: t});
                 //console.log(hole, j.name, logic, t);
                 if( logic ) {
-                  multipliers.push(gsMult);
+                  multipliers.push({
+                    ...gsMult,
+                    team: t.team,
+                  });
                 }
               } catch( e ) {
                 console.log('logic error', e);
