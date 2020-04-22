@@ -43,7 +43,9 @@ const Games = props => {
     return (
       <ListItem
         title={item.name || ''}
+        tit={styles.title}
         subtitle={startTime || ''}
+        subtitleStyle={styles.subtitle}
         onPress={() => itemPressed(item, false)}
         rightIcon={
           <Icon
@@ -109,5 +111,12 @@ const styles = StyleSheet.create({
   gamesSubMenu: {
     alignItems: 'center',
     paddingTop: 10,
+  },
+  title: {
+    color: '#111',
+  },
+  subtitle: {
+    color: '#666',
+    fontSize: 12,
   },
 });
