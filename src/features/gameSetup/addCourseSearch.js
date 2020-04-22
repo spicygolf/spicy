@@ -220,6 +220,7 @@ const styles = StyleSheet.create({
   },
   searchTextInput: {
     fontSize: 20,
+    color: '#000',
     width: '100%',
     paddingLeft: 20,
     paddingRight: 20

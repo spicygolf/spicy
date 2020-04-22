@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
   },
   field_input: {
     height: 40,
+    color: '#000',
     borderColor: '#ccc',
     borderWidth: 1,
     paddingLeft: 10,
