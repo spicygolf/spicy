@@ -116,6 +116,7 @@ const TeamMultipliers = props => {
       })
       ||
       mult.existing
+      || mult.based_on != 'user' // show selected, because this one was achieved
     ) {
       selected = true;
       type = 'solid';
@@ -139,6 +140,7 @@ const TeamMultipliers = props => {
         titleStyle={[styles.buttonTitle, {color: color}]}
         disabled={disabled}
         onPress={() => {
+          if( mult.based_on != 'user' ) return; // achieved so no press action
           if( !mult.existing ) {
             setMultiplier(mult, !selected);
           }
@@ -171,8 +173,16 @@ const TeamMultipliers = props => {
 
   // add in the user mults for this particular hole
   allmultipliers.map(gsMult => {
-    // only give options for multipliers based_on == 'user'
-    if( gsMult.based_on != 'user' ) return;
+    // only give options for multipliers based_on == 'user' or if they were
+    // achieved via scoring or logic
+    if( gsMult.based_on != 'user' ) {
+      hole.multipliers.map(hMult => {
+        if( hMult.name == gsMult.name && hMult.team == teamNum ) {
+          team_mults.push(gsMult);
+        }
+      });
+      return;
+    }
 
     try {
       const replaced = gsMult.availability.replace(/'/g, '"');

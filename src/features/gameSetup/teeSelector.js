@@ -49,6 +49,7 @@ const TeeSelector = (props) => {
         title={buttonName}
         type="clear"
         buttonStyle={styles.button}
+        titleStyle={styles.title}
         onPress={pressFn}
       />
     </View>
@@ -64,6 +65,8 @@ const styles = StyleSheet.create({
     paddingBottom: 3,
     paddingLeft: 0,
     paddingRight: 0,
-
-  }
+  },
+  title: {
+    fontSize: 14,
+  },
 });
