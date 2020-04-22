@@ -64,6 +64,16 @@ export const scoring = (game) => {
     const gHole = find(game.teams.holes, {hole: hole});
     //console.log('gHole', gHole);
     if( !gHole || !gHole.teams ) return;
+
+    // begin possiblePoints calcs
+    let possiblePoints = 0;
+    alljunk.map(gsJunk => {
+      if( gsJunk.limit == 'one_team_per_group' ||
+          gsJunk.limit == 'one_per_group' ) {
+        possiblePoints += gsJunk.value;
+      }
+    });
+
     const teams = gHole.teams.map(gTeam => {
       let teamPoints = 0;
       let team = {
@@ -100,7 +110,8 @@ export const scoring = (game) => {
             }
             //console.log('player j', gPlayer, gsJunk, j);
             if( j == true ) {
-              teamPoints = teamPoints + gsJunk.value;
+              if( gsJunk.limit.length == 0 ) possiblePoints += gsJunk.value;
+              teamPoints += gsJunk.value;
               playerJunk.push(gsJunk);
             }
           });
@@ -229,7 +240,10 @@ export const scoring = (game) => {
               try {
                 const replaced = gsMult.availability.replace(/'/g, '"');
                 const availability = JSON.parse(replaced);
-                const logic = scoringWrapper.logic(availability, {team: t});
+                const logic = scoringWrapper.logic(availability, {
+                  team: t,
+                  possiblePoints: possiblePoints,
+                });
                 //console.log(hole, j.name, logic, t);
                 if( logic ) {
                   multipliers.push({
@@ -253,13 +267,14 @@ export const scoring = (game) => {
       t.holeTotal = t.points * holeMultiplier;
     });
 
-    //  if( hole == '1' ) console.log(hole, teams, multipliers);
+    //if( hole == '1' ) console.log(hole, possiblePoints, teams, multipliers);
 
     ret.holes.push({
       hole: hole,
       teams: teams,
       multipliers: multipliers,
       holeMultiplier: holeMultiplier,
+      possiblePoints: possiblePoints,
     });
 
   });

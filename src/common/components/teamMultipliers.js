@@ -116,7 +116,7 @@ const TeamMultipliers = props => {
       })
       ||
       mult.existing
-      || mult.based_on != 'user'
+      || mult.based_on != 'user' // show selected, because this one was achieved
     ) {
       selected = true;
       type = 'solid';
@@ -176,9 +176,11 @@ const TeamMultipliers = props => {
     // only give options for multipliers based_on == 'user' or if they were
     // achieved via scoring or logic
     if( gsMult.based_on != 'user' ) {
-      if( find(hole.multipliers, {name: gsMult.name, team: teamNum}) ) {
-        team_mults.push(gsMult);
-      }
+      hole.multipliers.map(hMult => {
+        if( hMult.name == gsMult.name && hMult.team == teamNum ) {
+          team_mults.push(gsMult);
+        }
+      });
       return;
     }
 
