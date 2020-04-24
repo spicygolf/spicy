@@ -39,7 +39,9 @@ const NewGameList = props => {
       <ListItem
         roundAvatar
         title={item.disp || ''}
+        titleStyle={styles.title}
         subtitle={item.type || ''}
+        subtitleStyle={styles.subtitle}
         onPress={() => gamespecPressed(item)}
         testID={`new_${item._key}`}
       />
@@ -78,3 +80,14 @@ const NewGameList = props => {
 };
 
 export default NewGameList;
+
+
+const styles = StyleSheet.create({
+  title: {
+    color: '#111',
+  },
+  subtitle: {
+    color: '#666',
+    fontSize: 12,
+  },
+});
