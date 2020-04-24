@@ -224,10 +224,11 @@ export const scoring = (game) => {
     allmultipliers.map(gsMult => {
       if( gsMult.based_on == 'user' ) {
         if( gHole && gHole.multipliers ) {
+          //console.log('scoring gHole', gHole);
           filter(gHole.multipliers, {name: gsMult.name}).map(mult => {
             multipliers.push({
               ...gsMult,
-              team: t.team,
+              team: mult.team,
             });
           });
         }
