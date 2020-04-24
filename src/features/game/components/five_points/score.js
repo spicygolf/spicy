@@ -10,6 +10,7 @@ import {
 } from 'react-native-elements';
 
 import { getTeams } from 'common/utils/teams';
+import TeeSelector from 'features/gameSetup/teeSelector';
 import TeamChooser from 'common/components/teamChooser';
 import HoleScore from 'common/components/holeScore';
 import HoleJunk from 'common/components/holeJunk';
@@ -44,7 +45,14 @@ const FivePointsScore = props => {
         score={score}
         rkey={rkey}
       />
-    ) : null;
+    ) : (
+      <TeeSelector
+        game={game}
+        tee={round.tee}
+        rkey={rkey}
+        player={item}
+      />
+    );
 
     const holeJunk = hole ? (
       <HoleJunk
