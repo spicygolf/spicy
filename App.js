@@ -16,6 +16,8 @@ import AppStack from 'app/components/appstack';
 import AccountStack from 'app/components/accountstack';
 
 import configureClient from 'app/client/configureClient';
+import { CurrentPlayerProvider } from 'features/players/currentPlayerContext';
+
 
 
 const App = props => {
@@ -55,7 +57,9 @@ const App = props => {
       <ApolloHooksProvider client={client}>
         <NavigationContainer>
           <PaperProvider>
-            { content }
+            <CurrentPlayerProvider>
+              { content }
+            </CurrentPlayerProvider>
           </PaperProvider>
         </NavigationContainer>
       </ApolloHooksProvider>

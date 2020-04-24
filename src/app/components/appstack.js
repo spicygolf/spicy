@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
 } from 'react-native';
@@ -13,7 +13,10 @@ import FeedStack from 'features/feed/feedstack';
 import GamesStack from 'features/games/gamesstack';
 import ProfileStack from 'features/profile/profilestack';
 import { getCurrentUser } from 'common/utils/account';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import {
+  CurrentPlayerContext,
+  CurrentPlayerProvider
+} from 'features/players/currentPlayerContext';
 import { GET_PLAYER_QUERY } from 'features/players/graphql';
 import { green, red, blue } from 'common/colors';
 
@@ -37,8 +40,16 @@ const AppStack = props => {
   const { user } = props;
   const [ creds, setCreds ] = useState();
 
+  const {
+    currentPlayer,
+    setCurrentPlayer,
+    currentPlayerKey,
+    setCurrentPlayerKey,
+    token,
+    setToken,
+  } = useContext(CurrentPlayerContext);
+
   // grab current player object from db
-  const [ currentPlayer, setCurrentPlayer ] = useState(null);
   const [ getPlayer, {error: cpError, data: cpData} ] = useLazyQuery(GET_PLAYER_QUERY);
   if (cpError) console.log('Error fetching current player', cpError);
   //console.log('cpData', cpData);
@@ -52,6 +63,8 @@ const AppStack = props => {
       const getCreds = async () => {
         const c = await getCurrentUser(user);
         if( c && c.currentPlayerKey && c.token ) {
+          setCurrentPlayerKey(c.currentPlayerKey);
+          setToken(c.token);
           await AsyncStorage.setItem('currentPlayer', c.currentPlayerKey);
           await AsyncStorage.setItem('token', c.token);
           setCreds(c);
@@ -77,7 +90,7 @@ const AppStack = props => {
 
   const Tab = createMaterialBottomTabNavigator();
 
-  const tabs = (
+  return (
     <Tab.Navigator
       initialRouteName='GamesStack'
       shifting={true}
@@ -139,17 +152,6 @@ const AppStack = props => {
         }}
       />
     </Tab.Navigator>
-  );
-
-
-  return (
-    <CurrentPlayerContext.Provider value={{
-      currentPlayerKey: creds.currentPlayerKey,
-      currentPlayer: currentPlayer,
-      token: creds.token,
-    }}>
-      {tabs}
-    </CurrentPlayerContext.Provider>
   );
 
 };

@@ -16,6 +16,7 @@ import DeviceInfo from 'react-native-device-info';
 import { red } from 'common/colors';
 import { logout } from 'common/utils/account';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import Impersonate from 'features/profile/impersonate';
 
 
 
@@ -48,6 +49,8 @@ const ProfileHome = props => {
 
   const version = DeviceInfo.getVersion();
 
+  const impersonate = (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin' ) ? (<Impersonate />) : null;
+
   return (
     <View>
       <Card>
@@ -68,6 +71,7 @@ const ProfileHome = props => {
           />
         </View>
       </Card>
+      { impersonate }
       <View style={styles.app_info}>
         <Text>v{version}</Text>
       </View>
