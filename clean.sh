@@ -14,7 +14,7 @@ cd ios;
 rm -rf Pods;
 rm -rf Podfile.lock;
 rm -rf build;
-rm -rf ~/Library/Developer/Xcode/DerrivedData;
+rm -rf ~/Library/Developer/Xcode/DerivedData;
 pod update;
 pod install;
 cd ..;
