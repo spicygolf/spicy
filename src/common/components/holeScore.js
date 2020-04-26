@@ -113,7 +113,7 @@ const HoleScore = props => {
 
     const { loading, error, data } = postScore({
       variables: {
-        round: rkey,
+        rkey: rkey,
         score: newScore,
       },
       update: (cache, { data: { postScore } }) => {

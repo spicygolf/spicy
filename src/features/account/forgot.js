@@ -12,7 +12,6 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 
-import { baseUrl } from 'common/config';
 import { green } from 'common/colors';
 import { validateEmail } from 'common/utils/account';
 

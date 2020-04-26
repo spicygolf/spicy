@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 
-export default gql`
+export const ROUND_FRAGMENT = gql`
     fragment my_round on Round {
       _key
       scores

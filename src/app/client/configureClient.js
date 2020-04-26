@@ -4,11 +4,14 @@ import {
   ApolloLink,
   HttpLink,
   InMemoryCache,
+  split,
 } from '@apollo/client';
+import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/link-context';
 import { onError } from '@apollo/link-error';
+import { WebSocketLink } from '@apollo/link-ws';
 
-import { baseUrl } from 'common/config';
+import { baseUri, scheme } from 'common/config';
 import { logout } from 'common/utils/account';
 
 
@@ -77,8 +80,32 @@ export default function configureClient() {
   });
 
   const httpLink = new HttpLink({
-    uri: `${baseUrl}/graphql`
+    uri: `${scheme}://${baseUri}/graphql`
   });
+
+  const wsLink = new WebSocketLink({
+    uri: `ws://${baseUri}/graphql`,
+    options: {
+      reconnect: true
+    }
+  });
+
+  // The split function takes three parameters:
+  //
+  // * A function that's called for each operation to execute
+  // * The Link to use for an operation if the function returns a "truthy" value
+  // * The Link to use for an operation if the function returns a "falsy" value
+  const splitLink = split(
+    ({ query }) => {
+      const definition = getMainDefinition(query);
+      return (
+        definition.kind === 'OperationDefinition' &&
+        definition.operation === 'subscription'
+      );
+    },
+    wsLink,
+    httpLink,
+  );
 
   const defaultOptions = {
     watchQuery: {
@@ -99,7 +126,7 @@ export default function configureClient() {
     link: ApolloLink.from([
         errorLink,
         authLink,
-        httpLink
+        splitLink
     ]),
     defaultOptions: defaultOptions
   });

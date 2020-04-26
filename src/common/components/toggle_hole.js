@@ -68,7 +68,7 @@ export const ToggleHole = ({round_id, hole, type, gotit, updateCache}) => {
             <TouchableOpacity
               onPress={() => postScore({
                 variables: {
-                  round: round_id,
+                  rkey: round_id,
                   score: {
                     hole: hole,
                     values: [{

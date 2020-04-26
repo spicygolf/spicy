@@ -1,6 +1,10 @@
 
 'use strict';
 
-export const baseUrl = 'https://api.spicy.golf/v1';     //prod
-//export const baseUrl = 'http://10.0.2.2:3010/v1';   // android
-//export const baseUrl = 'http://localhost:3010/v1';  // ios
+//export const scheme = 'https';
+//export const baseUri = 'api.spicy.golf/v1';     //prod
+
+
+export const scheme = 'http';
+export const baseUri = 'localhost:3010/v1';  // ios
+//export const baseUri = '10.0.2.2:3010/v1';   // android

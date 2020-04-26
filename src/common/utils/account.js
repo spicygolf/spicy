@@ -1,14 +1,14 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import auth from '@react-native-firebase/auth';
 
-import { baseUrl } from 'common/config';
+import { baseUri, scheme } from 'common/config';
 
 
 
 export const registerPlayer = async (registration, fbUser) => {
 
   // REST call to register player
-  const uri = `${baseUrl}/account/register`;
+  const uri = `${scheme}://${baseUri}/account/register`;
 
   const res = await fetch(uri, {
     method: 'POST',
@@ -31,7 +31,7 @@ export const login = async fbUser => {
   const token = await fbUser.getIdToken();
 
   // REST call to API to get pkey, token
-  const uri = `${baseUrl}/account/login`;
+  const uri = `${scheme}://${baseUri}/account/login`;
 
   const res = await fetch(uri, {
     method: 'POST',
