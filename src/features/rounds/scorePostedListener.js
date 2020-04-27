@@ -1,11 +1,8 @@
 import React from 'react';
 import { useApolloClient, useSubscription } from '@apollo/client';
-import { cloneDeep, findIndex } from 'lodash';
 
-import {
-  ROUND_SCORES_FRAGMENT,
-  SCORE_POSTED_SUBSCRIPTION
-} from 'features/rounds/graphql';
+import { SCORE_POSTED_SUBSCRIPTION } from 'features/rounds/graphql';
+import { updateRoundScoreCache } from 'common/utils/rounds';
 
 
 
@@ -25,30 +22,12 @@ const ScorePostedListener = props => {
 
   if( data && data.scorePosted ) {
     const { cache } = client;
-    //console.log('cache', cache);
-    //console.log('scorePosted', data.scorePosted);
+    //console.log('cache data', cache.data);
     const score = data.scorePosted.scores[0];
-
-    // read scores from cache
-    const optimistic = true;
-    const cRound = cache.readFragment({
-      id: rkey,
-      fragment: ROUND_SCORES_FRAGMENT,
-    }, optimistic);
-    //console.log('getRound from cache', cRound);
-
-    // make new scores to write back
-    const newScores = cloneDeep(cRound.scores);
-    const h = findIndex(newScores, {hole: score.hole});
-    newScores[h].values = score.values;
-
-    // write back to cache
-    cache.writeFragment({
-      id: rkey,
-      fragment: ROUND_SCORES_FRAGMENT,
-      data: {
-        scores: newScores,
-      },
+    updateRoundScoreCache({
+      cache,
+      rkey,
+      score,
     });
   }
 

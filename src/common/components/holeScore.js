@@ -8,14 +8,16 @@ import {
   View,
 } from 'react-native';
 import { useMutation, gql } from '@apollo/client';
-import { cloneDeep, findIndex } from 'lodash';
 
-import { get_score_value, get_net_score } from 'common/utils/rounds';
+import {
+  get_score_value,
+  get_net_score,
+  updateRoundScoreCache
+} from 'common/utils/rounds';
 import { upsertScore } from 'common/utils/score';
 import { blue } from 'common/colors';
 import { POST_SCORE_MUTATION } from 'features/rounds/graphql';
 import { GameContext } from 'features/game/gameContext';
-import { GET_GAME_QUERY } from 'features/game/graphql';
 
 const circle_blk = require('../../../assets/img/circle_blk.png');
 const circle_wht = require('../../../assets/img/circle_wht.png');
@@ -117,6 +119,12 @@ const HoleScore = props => {
         score: newScore,
       },
       update: (cache, { data: { postScore } }) => {
+        updateRoundScoreCache({
+          cache,
+          rkey,
+          score: postScore,
+        });
+/*
         // read game from cache
         const { getGame } = cache.readQuery({
           query: GET_GAME_QUERY,
@@ -139,6 +147,7 @@ const HoleScore = props => {
             getGame: newGame
           },
         });
+*/
       },
     });
 

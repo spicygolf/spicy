@@ -33,7 +33,47 @@ export default function configureClient() {
       OptionSpec: ['Choice'],
     },
 */
-    dataIdFromObject: object => object._key || null,
+    //dataIdFromObject: object => object._key || null,
+
+    typePolicies: {
+      Game: {
+        keyFields: object => object._key,
+      },
+      Teams: {
+        keyFields: (object, context) => {
+          console.log('object', object, 'context', context);
+          return;
+        },
+        fields: {
+
+        },
+      },
+      TeamHole: {
+        fields: {
+          hole: {
+            keyArgs: ['hole'],
+          }
+        },
+      },
+      Round: {
+        keyFields: object => object._key,
+      },
+      Player: {
+        keyFields: object => object._key,
+      },
+      Club: {
+        keyFields: object => object._key,
+      },
+      Tee: {
+        keyFields: object => object._key,
+      },
+      Course: {
+        keyFields: object => object._key,
+      },
+      GameSpec: {
+        keyFields: object => object._key,
+      },
+    },
    });
 
   const authLink = setContext((_, { headers }) => {

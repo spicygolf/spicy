@@ -1,4 +1,6 @@
-import { find } from 'lodash';
+import { cloneDeep, find, findIndex } from 'lodash';
+
+import { ROUND_SCORES_FRAGMENT } from 'features/rounds/graphql';
 
 
 
@@ -71,5 +73,32 @@ export const rmround = async (rkey, mutation) => {
     return null;
   }
   return data;
+
+};
+
+
+export const updateRoundScoreCache = ({cache, rkey, score}) => {
+
+  // read scores from cache
+  const optimistic = true;
+  const cRound = cache.readFragment({
+    id: rkey,
+    fragment: ROUND_SCORES_FRAGMENT,
+  }, optimistic);
+  //console.log('getRound from cache', cRound);
+
+  // make new scores to write back
+  const newScores = cloneDeep(cRound.scores);
+  const h = findIndex(newScores, {hole: score.hole});
+  newScores[h].values = score.values;
+
+  // write back to cache
+  cache.writeFragment({
+    id: rkey,
+    fragment: ROUND_SCORES_FRAGMENT,
+    data: {
+      scores: newScores,
+    },
+  });
 
 };

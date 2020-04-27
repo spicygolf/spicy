@@ -93,6 +93,14 @@ const HoleJunk = props => {
         game: newGame,
       },
       update: (cache, { data: { updateGame } }) => {
+        console.log('cache data', cache.data);
+/*
+        updateGameTeamsCache({
+          cache,
+          gkey,
+          teams: newGame.teams,
+        });
+*/
         // read game from cache
         const { getGame } = cache.readQuery({
           query: GET_GAME_QUERY,
