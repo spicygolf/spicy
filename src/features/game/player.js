@@ -22,9 +22,8 @@ const Player = props => {
 
   if( !player || !player._key ) return null;
 
-  // TODO: get these from graphql queries / subscriptions
   const round = get_round_for_player(game.rounds, player._key);
-  const { rkey } = round;
+  const { _key: rkey } = round;
   const hole = get_hole(currentHole, round);
   const score = get_score(currentHole, round);
 
