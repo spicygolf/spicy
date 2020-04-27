@@ -4,24 +4,21 @@ import { gql } from '@apollo/client';
 export const GAME_TEAMS_FRAGMENT = gql`
   fragment gameTeams on Game {
     _key
-    teams {
-      rotate
-      holes {
-        hole
-        teams {
-          team
-          players
-          junk {
-            name
-            player
-            value
-          }
-        }
-        multipliers {
+    holes {
+      hole
+      teams {
+        team
+        players
+        junk {
           name
-          team
-          first_hole
+          player
+          value
         }
+      }
+      multipliers {
+        name
+        team
+        first_hole
       }
     }
   }

@@ -35,8 +35,8 @@ const TeamMultipliers = props => {
   const scoringWrapper = new ScoringWrapper(game, scoring, currentHole);
 
   const { _key: gkey } = game;
-  const h = ( game && game.teams && game.teams.holes ) ?
-    find(game.teams.holes, {hole: currentHole}) : {hole: currentHole, teams: []};
+  const h = ( game && game.holes ) ?
+    find(game.holes, {hole: currentHole}) : {hole: currentHole, teams: []};
   //console.log('h', h);
 
   const setMultiplier = (mult, newValue) => {
@@ -45,17 +45,17 @@ const TeamMultipliers = props => {
 
     let newGame = getNewGameForUpdate(game);
 
-    const holesToUpdate = getHolesToUpdate(mult.scope, game.holes, currentHole);
+    const holesToUpdate = getHolesToUpdate(mult.scope, game, currentHole);
     holesToUpdate.map(h => {
-      const holeIndex = findIndex(newGame.teams.holes, {hole: h});
+      const holeIndex = findIndex(newGame.holes, {hole: h});
       if( holeIndex < 0 ) console.log('setMultiplier hole does not exist');
       //console.log('holeIndex', holeIndex);
 
       // if multipliers doesn't exist, create blank
-      if( !newGame.teams.holes[holeIndex].multipliers ) {
-        newGame.teams.holes[holeIndex].multipliers = [];
+      if( !newGame.holes[holeIndex].multipliers ) {
+        newGame.holes[holeIndex].multipliers = [];
       }
-      const mults = newGame.teams.holes[holeIndex].multipliers;
+      const mults = newGame.holes[holeIndex].multipliers;
       if( newValue && !find(mults, {
         name: mult.name,
         team: teamNum,
@@ -72,7 +72,7 @@ const TeamMultipliers = props => {
           !(m.name == mult.name && m.team == teamNum && m.first_hole == currentHole)
         ));
         console.log('newMults', newMults);
-        newGame.teams.holes[holeIndex].multipliers = newMults;
+        newGame.holes[holeIndex].multipliers = newMults;
       }
 
     });

@@ -71,11 +71,11 @@ const HoleJunk = props => {
   const setJunk = async (junk, newValue) => {
 
     let newGame = getNewGameForUpdate(game);
-    if( !newGame || !newGame.teams || !newGame.teams.holes ) return;
+    if( !newGame || !newGame.holes ) return;
 
-    const gHoleIndex = findIndex(newGame.teams.holes, {hole: hole.hole});
+    const gHoleIndex = findIndex(newGame.holes, {hole: hole.hole});
     if( gHoleIndex < 0 ) return;
-    let newHole = Object.assign({}, newGame.teams.holes[gHoleIndex]);
+    let newHole = Object.assign({}, newGame.holes[gHoleIndex]);
 
     const newTeams = newHole.teams.map(t => {
       return setTeamJunk(t, junk, newValue.toString(), pkey);
@@ -85,7 +85,7 @@ const HoleJunk = props => {
       teams: newTeams,
     };
 
-    newGame.teams.holes[gHoleIndex] = newHole;
+    newGame.holes[gHoleIndex] = newHole;
 
     const { loading, error, data } = await updateGame({
       variables: {
@@ -98,7 +98,7 @@ const HoleJunk = props => {
         updateGameTeamsCache({
           cache,
           gkey,
-          teams: newGame.teams,
+          holes: newGame.holes,
         });
 */
         // read game from cache
@@ -110,7 +110,7 @@ const HoleJunk = props => {
         });
         // create new game to write back
         const newG = cloneDeep(getGame);
-        const h = findIndex(newGame.teams.holes, {hole: hole.hole});
+        const h = findIndex(newGame.holes, {hole: hole.hole});
         newG.teams.holes[h] = newHole;
         //write back to cache
         cache.writeQuery({

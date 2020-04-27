@@ -37,9 +37,9 @@ const Teams = props => {
   };
 
   const getSelected = () => {
-    if( !game || !game.teams || !game.teams.rotate ) return null;
+    if( !game || !game.scope || !game.scope.teams_rotate ) return null;
 
-    const option = findIndex(options, {slug: game.teams.rotate});
+    const option = findIndex(options, {slug: game.scope.teams_rotate});
     //console.log('option', option);
     return option;
   };
@@ -48,7 +48,7 @@ const Teams = props => {
 
   let chooser = null;
 
-  if( game && game.teams && game.teams.rotate && game.teams.rotate == 'never' ) {
+  if( game && game.scope && game.scope.teams_rotate && game.scope.teams_rotate == 'never' ) {
     chooser = (
       <View style={styles.chooserView}>
         <Text>Choose Teams:</Text>

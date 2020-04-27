@@ -65,7 +65,7 @@ const AddCourseSearch = props => {
   }
 
   const _renderCourseTee = ({item}) => {
-    const { rating, slope } = getRatings(game.holes, item);
+    const { rating, slope } = getRatings(game.scope.holes, item);
     return (
       <Tee
         item={item}
@@ -142,7 +142,7 @@ const AddCourseSearch = props => {
       data.getFavoriteTeesForPlayer : []);
 
     let tees = course.tees.map(tee => {
-      const { rating } = getRatings(game.holes, tee);
+      const { rating } = getRatings(game.scope.holes, tee);
       return ({
         ...tee,
         order: rating,

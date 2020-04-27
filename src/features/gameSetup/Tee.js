@@ -128,7 +128,7 @@ const Tee = props => {
             // otherwise, it's round.tee
             const tee = round.tee ? round.tee : item;
 
-            const ch = course_handicap(index, tee, game.holes);
+            const ch = course_handicap(index, tee, game.scope.holes);
             //console.log('ch', ch);
             if( ch && ch != round.course_handicap ) {
               //console.log('updating course_handicap to ', ch);

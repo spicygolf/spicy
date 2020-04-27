@@ -59,9 +59,9 @@ export const scoring = (game) => {
 
   const holes = getHoles(game);
   holes.map(hole => {
-    //console.log('scoring hole', hole, game.teams);
+    //console.log('scoring hole', hole, game);
 
-    const gHole = find(game.teams.holes, {hole: hole});
+    const gHole = find(game.holes, {hole: hole});
     //console.log('gHole', gHole);
     if( !gHole || !gHole.teams ) return;
 

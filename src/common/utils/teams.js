@@ -10,7 +10,7 @@ export const getTeams = (game, hole) => {
 
   //console.log('getTeams - game', game, 'hole', hole);
 
-  if( game && game.teams && game.teams.holes ) {
+  if( game && game.holes ) {
 
     let onTeam = {};
     game.players.map(p => {
@@ -18,7 +18,7 @@ export const getTeams = (game, hole) => {
       onTeam[p._key] = false;
     });
 
-    const h = find(game.teams.holes, {hole: hole});
+    const h = find(game.holes, {hole: hole});
     //console.log('getTeams hole', h);
     if( !h || !h.teams ) return null;
 
@@ -44,9 +44,13 @@ export const getTeams = (game, hole) => {
   }
 };
 
-// term can be:
-//    never, every1, every3, every6 (for team choosing / rotation)
-//    rest_of_nine, hole (for multiplier scope, uses currentHole)
+/*
+  term can be:
+    never, every1, every3, every6 (for team choosing / rotation)
+    rest_of_nine, hole (for multiplier scope, uses currentHole)
+*/
+
+// TODO: test me for maybe being the cause of #83
 export const getHolesToUpdate = (term, game, currentHole) => {
 
   const holes = getHoles(game);
