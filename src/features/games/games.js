@@ -13,7 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useQuery } from '@apollo/client';
 import moment from 'moment';
-import { reverse, sortBy } from 'lodash';
+import { filter, reverse, sortBy } from 'lodash';
 
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
@@ -71,8 +71,10 @@ const Games = props => {
 
   const games = (data && data.activeGamesForPlayer ) ?
     data.activeGamesForPlayer : [];
+  const filtered_games = filter(games, g => g);
   // sort games descending by start time
-    const sorted_games = reverse(sortBy(games, ['start']));
+  const sorted_games = reverse(sortBy(filtered_games, ['start']));
+  //console.log('sorted_games', sorted_games);
 
   return (
     <View style={styles.container}>
