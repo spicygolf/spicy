@@ -12,6 +12,13 @@ import LinkRound from 'features/gameSetup/linkRound';
 
 const GameSetupStack = props => {
 
+  const nada = {
+    animation: 'timing',
+    config: {
+      duration: 0,
+    },
+  };
+
   const Stack = createStackNavigator();
 
   return (
@@ -19,12 +26,42 @@ const GameSetupStack = props => {
       initialRouteName='GameSetup'
       headerMode='none'
     >
-      <Stack.Screen name='GameSetup' component={GameSetupScreen} />
-      <Stack.Screen name='AddCourse' component={AddCourse} />
-      <Stack.Screen name='AddPlayer' component={AddPlayer} />
-      <Stack.Screen name='EditPlayer' component={EditPlayer} />
-      <Stack.Screen name='LinkRoundList' component={LinkRoundList} />
-      <Stack.Screen name='LinkRound' component={LinkRound} />
+      <Stack.Screen
+        name='GameSetup'
+        component={GameSetupScreen}
+      />
+      <Stack.Screen
+        name='AddCourse'
+        component={AddCourse}
+      />
+      <Stack.Screen
+        name='AddPlayer'
+        component={AddPlayer}
+      />
+      <Stack.Screen
+        name='EditPlayer'
+        component={EditPlayer}
+      />
+      <Stack.Screen
+        name='LinkRoundList'
+        component={LinkRoundList}
+        options={{
+          transitionSpec: {
+            open: nada,
+            close: nada,
+          },
+        }}
+      />
+      <Stack.Screen
+        name='LinkRound'
+        component={LinkRound}
+        options={{
+          transitionSpec: {
+            open: nada,
+            close: nada,
+          },
+        }}
+      />
     </Stack.Navigator>
   );
 
