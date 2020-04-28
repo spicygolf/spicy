@@ -36,17 +36,15 @@ const HoleJunk = props => {
   const UPDATE_GAME_MUTATION = gql`
   mutation UpdateGame($gkey: String!, $game: GameInput!) {
     updateGame(gkey: $gkey, game: $game) {
-      teams {
-        holes {
-          hole
-          teams {
-            team
-            players
-            junk {
-              name
-              player
-              value
-            }
+      holes {
+        hole
+        teams {
+          team
+          players
+          junk {
+            name
+            player
+            value
           }
         }
       }
@@ -111,7 +109,7 @@ const HoleJunk = props => {
         // create new game to write back
         const newG = cloneDeep(getGame);
         const h = findIndex(newGame.holes, {hole: hole.hole});
-        newG.teams.holes[h] = newHole;
+        newG.holes[h] = newHole;
         //write back to cache
         cache.writeQuery({
           query: GET_GAME_QUERY,
