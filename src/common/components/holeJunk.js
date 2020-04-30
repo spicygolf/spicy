@@ -85,7 +85,7 @@ const HoleJunk = props => {
 
     newGame.holes[gHoleIndex] = newHole;
 
-    const { loading, error, data } = await updateGame({
+    const { loading, error, data } = updateGame({
       variables: {
         gkey: gkey,
         game: newGame,
