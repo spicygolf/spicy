@@ -94,7 +94,7 @@ const EditPlayer = props => {
   useEffect(
     () => {
       if( initCH == '-' ) {
-        setCH(course_handicap(HI, round.tee, game.holes));
+        setCH(course_handicap(HI, round.tee, game.scope.holes));
         update();
       }
     }, [CH]
@@ -118,8 +118,8 @@ const EditPlayer = props => {
                 style={styles.field_input}
                 onChangeText={text => {
                   setHI(text);
-                  const newCH = course_handicap(text, round.tee, game.holes);
-                  //console.log('newCH', newCH, round, game.holes);
+                  const newCH = course_handicap(text, round.tee, game.scope.holes);
+                  //console.log('newCH', newCH, round, game.scope.holes);
                   setCH(newCH);
                 }}
                 onEndEditing={() => update()}

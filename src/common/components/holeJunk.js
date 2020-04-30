@@ -9,11 +9,11 @@ import {
   Icon,
 } from 'react-native-elements';
 import { useMutation } from '@apollo/client';
-import { cloneDeep, findIndex, sortBy } from 'lodash';
+import { findIndex, sortBy } from 'lodash';
 import { gql } from '@apollo/client';
 
 import { GameContext } from 'features/game/gameContext';
-import { GET_GAME_QUERY } from 'features/game/graphql';
+import { updateGameHolesCache } from 'common/utils/game';
 import { blue } from 'common/colors';
 import {
   get_net_score,
@@ -36,17 +36,15 @@ const HoleJunk = props => {
   const UPDATE_GAME_MUTATION = gql`
   mutation UpdateGame($gkey: String!, $game: GameInput!) {
     updateGame(gkey: $gkey, game: $game) {
-      teams {
-        holes {
-          hole
-          teams {
-            team
-            players
-            junk {
-              name
-              player
-              value
-            }
+      holes {
+        hole
+        teams {
+          team
+          players
+          junk {
+            name
+            player
+            value
           }
         }
       }
@@ -71,11 +69,11 @@ const HoleJunk = props => {
   const setJunk = async (junk, newValue) => {
 
     let newGame = getNewGameForUpdate(game);
-    if( !newGame || !newGame.teams || !newGame.teams.holes ) return;
+    if( !newGame || !newGame.holes ) return;
 
-    const gHoleIndex = findIndex(newGame.teams.holes, {hole: hole.hole});
+    const gHoleIndex = findIndex(newGame.holes, {hole: hole.hole});
     if( gHoleIndex < 0 ) return;
-    let newHole = Object.assign({}, newGame.teams.holes[gHoleIndex]);
+    let newHole = Object.assign({}, newGame.holes[gHoleIndex]);
 
     const newTeams = newHole.teams.map(t => {
       return setTeamJunk(t, junk, newValue.toString(), pkey);
@@ -85,34 +83,19 @@ const HoleJunk = props => {
       teams: newTeams,
     };
 
-    newGame.teams.holes[gHoleIndex] = newHole;
+    newGame.holes[gHoleIndex] = newHole;
 
-    const { loading, error, data } = await updateGame({
+    const { loading, error, data } = updateGame({
       variables: {
         gkey: gkey,
         game: newGame,
       },
       update: (cache, { data: { updateGame } }) => {
-        // read game from cache
-        const { getGame } = cache.readQuery({
-          query: GET_GAME_QUERY,
-          variables: {
-            gkey: gkey,
-          },
-        });
-        // create new game to write back
-        const newG = cloneDeep(getGame);
-        const h = findIndex(newGame.teams.holes, {hole: hole.hole});
-        newG.teams.holes[h] = newHole;
-        //write back to cache
-        cache.writeQuery({
-          query: GET_GAME_QUERY,
-          variables: {
-            gkey: gkey,
-          },
-          data: {
-            getGame: newG
-          },
+        //console.log('cache data', cache.data);
+        updateGameHolesCache({
+          cache,
+          gkey,
+          holes: newGame.holes,
         });
       },
     });

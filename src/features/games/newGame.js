@@ -34,10 +34,11 @@ const NewGame = props => {
         game: {
           name: gamespec.disp,
           start: game_start,
-          holes: 'all18',
-          teams: {
-            rotate: 'never',
+          scope: {
+            holes: 'all18',
+            teams_rotate: 'never',
           },
+          holes: [],
           options: gamespec.defaultOptions || []
         },
       },

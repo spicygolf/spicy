@@ -4,11 +4,14 @@ import {
   ApolloLink,
   HttpLink,
   InMemoryCache,
+  split,
 } from '@apollo/client';
+import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/link-context';
 import { onError } from '@apollo/link-error';
+import { WebSocketLink } from '@apollo/link-ws';
 
-import { baseUrl } from 'common/config';
+import { baseUri, scheme } from 'common/config';
 import { logout } from 'common/utils/account';
 
 
@@ -30,7 +33,47 @@ export default function configureClient() {
       OptionSpec: ['Choice'],
     },
 */
-    dataIdFromObject: object => object._key || null,
+    //dataIdFromObject: object => object._key || null,
+
+    typePolicies: {
+      Game: {
+        keyFields: object => object._key,
+      },
+      Teams: {
+        keyFields: (object, context) => {
+          console.log('object', object, 'context', context);
+          return;
+        },
+        fields: {
+
+        },
+      },
+      TeamHole: {
+        fields: {
+          hole: {
+            keyArgs: ['hole'],
+          }
+        },
+      },
+      Round: {
+        keyFields: object => object._key,
+      },
+      Player: {
+        keyFields: object => object._key,
+      },
+      Club: {
+        keyFields: object => object._key,
+      },
+      Tee: {
+        keyFields: object => object._key,
+      },
+      Course: {
+        keyFields: object => object._key,
+      },
+      GameSpec: {
+        keyFields: object => object._key,
+      },
+    },
    });
 
   const authLink = setContext((_, { headers }) => {
@@ -77,8 +120,32 @@ export default function configureClient() {
   });
 
   const httpLink = new HttpLink({
-    uri: `${baseUrl}/graphql`
+    uri: `${scheme}://${baseUri}/graphql`
   });
+
+  const wsLink = new WebSocketLink({
+    uri: `ws://${baseUri}/graphql`,
+    options: {
+      reconnect: true
+    }
+  });
+
+  // The split function takes three parameters:
+  //
+  // * A function that's called for each operation to execute
+  // * The Link to use for an operation if the function returns a "truthy" value
+  // * The Link to use for an operation if the function returns a "falsy" value
+  const splitLink = split(
+    ({ query }) => {
+      const definition = getMainDefinition(query);
+      return (
+        definition.kind === 'OperationDefinition' &&
+        definition.operation === 'subscription'
+      );
+    },
+    wsLink,
+    httpLink,
+  );
 
   const defaultOptions = {
     watchQuery: {
@@ -99,7 +166,7 @@ export default function configureClient() {
     link: ApolloLink.from([
         errorLink,
         authLink,
-        httpLink
+        splitLink
     ]),
     defaultOptions: defaultOptions
   });

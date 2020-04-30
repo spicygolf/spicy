@@ -2,6 +2,7 @@
 
 import React, { useContext } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -52,7 +53,7 @@ const ProfileHome = props => {
   const impersonate = (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin' ) ? (<Impersonate />) : null;
 
   return (
-    <View>
+    <ScrollView>
       <Card>
         <View style={styles.field_view}>
           <Text>Name:</Text>
@@ -75,7 +76,7 @@ const ProfileHome = props => {
       <View style={styles.app_info}>
         <Text>v{version}</Text>
       </View>
-    </View>
+    </ScrollView>
   );
 
 };

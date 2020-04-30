@@ -21,7 +21,7 @@ import CountryPicker from 'features/account/countryPicker';
 import StatePicker from 'features/account/statePicker';
 import { validateName, validateInteger } from 'common/utils/account';
 import { blue, green } from 'common/colors';
-import { baseUrl } from 'common/config';
+import { baseUri, scheme } from 'common/config';
 
 const { width } = Dimensions.get('window')
 
@@ -61,7 +61,7 @@ const RegisterHandicap = props => {
   useEffect(
     () => {
       const fetchData = async () => {
-        const url = `${baseUrl}/ghin/countries_and_states`;
+        const url = `${scheme}://${baseUri}/ghin/countries_and_states`;
         const res = await fetch(url, {
           method: 'GET',
         });

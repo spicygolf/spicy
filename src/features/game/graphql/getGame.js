@@ -7,25 +7,25 @@ export const GET_GAME_QUERY = gql`
       name
       start
       end
-      holes
-      teams {
-        rotate
-        holes {
-          hole
-          teams {
-            team
-            players
-            junk {
-              name
-              player
-              value
-            }
-          }
-          multipliers {
+      scope {
+        holes
+        teams_rotate
+      }
+      holes {
+        hole
+        teams {
+          team
+          players
+          junk {
             name
-            team
-            first_hole
+            player
+            value
           }
+        }
+        multipliers {
+          name
+          team
+          first_hole
         }
       }
       rounds {

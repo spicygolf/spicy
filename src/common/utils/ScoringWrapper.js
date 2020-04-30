@@ -62,7 +62,7 @@ class ScoringWrapper {
   };
 
   didOtherTeamMultiplyWith = (hole, thisTeam, multName) => {
-    const gHole = find(this._game.teams.holes, {hole: hole.hole});
+    const gHole = find(this._game.holes, {hole: hole.hole});
 
     if( !gHole || !gHole.multipliers || !gHole.multipliers.length ) return false;
     const targetMult = find(gHole.multipliers, {name: multName});

@@ -22,7 +22,7 @@ const AddCourseFavorites = props => {
   const { game, currentPlayerKey } = useContext(GameContext);
 
   const _renderFavoritesTee = ({item}) => {
-    const { rating, slope } = getRatings(game.holes, item);
+    const { rating, slope } = getRatings(game.scope.holes, item);
     return (
       <Tee
         item={item}

@@ -1,16 +1,19 @@
 import { cloneDeep, find, findIndex } from 'lodash';
-import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
+import {
+  ACTIVE_GAMES_FOR_PLAYER_QUERY,
+} from 'features/games/graphql';
+import {
+  GAME_HOLES_FRAGMENT
+} from 'features/game/graphql';
+
+
 
 export const getHoles = game => {
-
   //console.log('game utils game', game);
-
   let holes = Array.from(Array(18).keys()).map(x => ++x);
-  if( game.holes == 'front9' ) holes.length = 9;
-  if( game.holes == 'back9' ) holes.splice(0, 9);
-
+  if( game.scope.holes === 'front9' ) holes.length = 9;
+  if( game.scope.holes === 'back9' ) holes.splice(0, 9);
   return holes.map(h => h.toString());
-
 };
 
 export const getRatings = (holes, tee) => {
@@ -54,35 +57,35 @@ export const getNewGameForUpdate = game => {
     name: game.name,
     start: game.start,
     end: game.end,
-    holes: game.holes,
-    teams: {
-      rotate: game.teams.rotate,
-      holes: game.teams.holes ? game.teams.holes.map(h => {
-        return {
-          hole: h.hole,
-          teams: h.teams ? h.teams.map(t => {
-            return {
-              team: t.team,
-              players: t.players,
-              junk: t.junk ? t.junk.map(j => {
-                return {
-                  name: j.name,
-                  player: j.player,
-                  value: j.value,
-                };
-              }) : [],
-            };
-          }) : [],
-          multipliers: h.multipliers ? h.multipliers.map(m => {
-            return {
-              name: m.name,
-              team: m.team,
-              first_hole: m.first_hole,
-            };
-          }) : [],
-        };
-      }) : [],
+    scope: {
+      holes: game.scope.holes,
+      teams_rotate: game.scope.teams_rotate,
     },
+    holes: game.holes ? game.holes.map(h => {
+      return {
+        hole: h.hole,
+        teams: h.teams ? h.teams.map(t => {
+          return {
+            team: t.team,
+            players: t.players,
+            junk: t.junk ? t.junk.map(j => {
+              return {
+                name: j.name,
+                player: j.player,
+                value: j.value,
+              };
+            }) : [],
+          };
+        }) : [],
+        multipliers: h.multipliers ? h.multipliers.map(m => {
+          return {
+            name: m.name,
+            team: m.team,
+            first_hole: m.first_hole,
+          };
+        }) : [],
+      };
+    }) : [],
     options: game.options ? game.options.map(o => {
       return {
         name: o.name,
@@ -150,8 +153,8 @@ export const getAllOptions = game => {
 };
 
 export const getJunk = (junkName, pkey, game, holeNum) => {
-  if( !game || !game.teams || !game.teams.holes ) return null;
-  const gHole = find(game.teams.holes, {hole: holeNum});
+  if( !game || !game.holes ) return null;
+  const gHole = find(game.holes, {hole: holeNum});
   if( !gHole || !gHole.teams ) return null;
   const gTeam = find(gHole.teams, t => ( t && t.players && t.players.includes(pkey) ));
   if( !gTeam || !gTeam.junk ) return null;
@@ -232,5 +235,26 @@ export const rmgame = async (gkey, currentPlayerKey, mutation) => {
     return null;
   }
   return data;
+
+};
+
+export const updateGameHolesCache = ({cache, gkey, holes}) => {
+
+  // read holes from cache
+  const optimistic = true;
+  const cGame = cache.readFragment({
+    id: gkey,
+    fragment: GAME_HOLES_FRAGMENT,
+  }, optimistic);
+  //console.log('getGame from cache', cGame);
+
+  // write back to cache with new values
+  cache.writeFragment({
+    id: gkey,
+    fragment: GAME_HOLES_FRAGMENT,
+    data: {
+      holes,
+    },
+  });
 
 };

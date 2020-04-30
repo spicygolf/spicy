@@ -8,6 +8,7 @@ import {
 } from 'react-native-elements';
 import { find } from 'lodash';
 
+import Player from 'features/game/player';
 import TeamJunk from 'common/components/teamJunk';
 import TeamMultipliers from 'common/components/teamMultipliers';
 import TeamTotals from 'common/components/teamTotals';
@@ -15,11 +16,20 @@ import { GameContext } from 'features/game/gameContext';
 
 
 
-const Teams = ({teams, renderPlayer, scoring, currentHole }) => {
+const Teams = ({teams, scoring, currentHole }) => {
 
   //console.log('Teams teams', teams);
   const { game } = useContext(GameContext);
   const { players } = game;
+
+  const _renderPlayer = ({item}) => {
+    return (
+      <Player
+        player={item}
+        game={game}
+        currentHole={currentHole}
+      />);
+  };
 
   const _renderTeam = ({item}) => {
     //console.log('_renderTeam item', item);
@@ -37,7 +47,7 @@ const Teams = ({teams, renderPlayer, scoring, currentHole }) => {
       >
         <FlatList
           data={playersOnTeam}
-          renderItem={renderPlayer}
+          renderItem={_renderPlayer}
           keyExtractor={item => item._key}
         />
         <TeamJunk
@@ -58,7 +68,7 @@ const Teams = ({teams, renderPlayer, scoring, currentHole }) => {
       </Card>
     );
 
-  }
+  };
 
   const flatlist = (
     <FlatList

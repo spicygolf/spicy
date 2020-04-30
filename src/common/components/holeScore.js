@@ -8,14 +8,16 @@ import {
   View,
 } from 'react-native';
 import { useMutation, gql } from '@apollo/client';
-import { cloneDeep, findIndex } from 'lodash';
 
-import { get_score_value, get_net_score } from 'common/utils/rounds';
+import {
+  get_score_value,
+  get_net_score,
+  updateRoundScoreCache
+} from 'common/utils/rounds';
 import { upsertScore } from 'common/utils/score';
 import { blue } from 'common/colors';
 import { POST_SCORE_MUTATION } from 'features/rounds/graphql';
 import { GameContext } from 'features/game/gameContext';
-import { GET_GAME_QUERY } from 'features/game/graphql';
 
 const circle_blk = require('../../../assets/img/circle_blk.png');
 const circle_wht = require('../../../assets/img/circle_wht.png');
@@ -113,31 +115,14 @@ const HoleScore = props => {
 
     const { loading, error, data } = postScore({
       variables: {
-        round: rkey,
+        rkey: rkey,
         score: newScore,
       },
       update: (cache, { data: { postScore } }) => {
-        // read game from cache
-        const { getGame } = cache.readQuery({
-          query: GET_GAME_QUERY,
-          variables: {
-            gkey: gkey,
-          },
-        });
-        // create new game to write back
-        const newGame = cloneDeep(getGame);
-        const r = findIndex(newGame.rounds, {_key: rkey});
-        const h = findIndex(newGame.rounds[r].scores, {hole: hole.hole});
-        newGame.rounds[r].scores[h].values = postScore.values;
-        //write back to cache
-        cache.writeQuery({
-          query: GET_GAME_QUERY,
-          variables: {
-            gkey: gkey,
-          },
-          data: {
-            getGame: newGame
-          },
+        updateRoundScoreCache({
+          cache,
+          rkey,
+          score: postScore,
         });
       },
     });

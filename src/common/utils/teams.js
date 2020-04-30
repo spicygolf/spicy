@@ -10,7 +10,7 @@ export const getTeams = (game, hole) => {
 
   //console.log('getTeams - game', game, 'hole', hole);
 
-  if( game && game.teams && game.teams.holes ) {
+  if( game && game.holes ) {
 
     let onTeam = {};
     game.players.map(p => {
@@ -18,7 +18,7 @@ export const getTeams = (game, hole) => {
       onTeam[p._key] = false;
     });
 
-    const h = find(game.teams.holes, {hole: hole});
+    const h = find(game.holes, {hole: hole});
     //console.log('getTeams hole', h);
     if( !h || !h.teams ) return null;
 
@@ -44,9 +44,12 @@ export const getTeams = (game, hole) => {
   }
 };
 
-// term can be:
-//    never, every1, every3, every6 (for team choosing / rotation)
-//    rest_of_nine, hole (for multiplier scope, uses currentHole)
+/*
+  term can be:
+    never, every1, every3, every6 (for team choosing / rotation)
+    rest_of_nine, hole (for multiplier scope, uses currentHole)
+*/
+
 export const getHolesToUpdate = (term, game, currentHole) => {
 
   const holes = getHoles(game);
@@ -57,9 +60,9 @@ export const getHolesToUpdate = (term, game, currentHole) => {
       break;
     case 'rest_of_nine':
       const begHole = parseInt(currentHole);
-      const endHole = (Math.floor(begHole/9) * 9) + 9;
+      const endHole = (Math.floor((begHole-1)/9) * 9) + 9;
       const ret = holes.splice(begHole-1, endHole-begHole+1);
-      console.log('rest_of_nine', begHole, endHole, ret);
+      //console.log('rest_of_nine', begHole, endHole, ret);
       return ret;
       break;
     case 'hole':

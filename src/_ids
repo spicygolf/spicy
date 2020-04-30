@@ -27,3 +27,37 @@ tees     63235211 Blue ELGC
 - Druid 3/26/2020
 games/65173183
 gamespecs/65384954
+
+
+
+
+Rackey
+------
+players/68884875
+{
+  "email": "ratmacky@yahoo.com",
+  "name": "Matt Rackey ",
+  "short": "RackAttack",
+  "fbUser": {
+    "email": "ratmacky@yahoo.com",
+    "metadata": {
+      "lastSignInTime": "2020-04-25T01:10:51.200Z",
+      "creationTime": "2020-04-25T01:10:51.200Z"
+    },
+    "providerData": [
+      {
+        "email": "ratmacky@yahoo.com",
+        "phoneNumber": null,
+        "photoURL": null,
+        "displayName": null,
+        "uid": "ratmacky@yahoo.com",
+        "providerId": "password"
+      }
+    ],
+    "providerId": "firebase",
+    "uid": "Ly8HXNKLmYN6WTxv8HU0nNw1cHI2"
+  },
+  "statusAuthz": [
+    "prod"
+  ]
+}

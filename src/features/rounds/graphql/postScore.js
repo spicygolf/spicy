@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
-export default gql`
-  mutation PostScore($round: String!, $score: ScoreInput!) {
-    postScore(round: $round, score: $score) {
+export const POST_SCORE_MUTATION = gql`
+  mutation PostScore($rkey: String!, $score: ScoreInput!) {
+    postScore(rkey: $rkey, score: $score) {
       hole
       values {
         k

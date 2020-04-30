@@ -1,4 +1,4 @@
-import { baseUrl } from 'common/config';
+import { baseUri, scheme } from 'common/config';
 import { build_qs } from 'common/utils/account';
 
 
@@ -10,7 +10,7 @@ export const login = async (ghinNumber, lastName) => {
     lastName: lastName,
   });
 
-  const url = `${baseUrl}/ghin/player/login?${qs}`;
+  const url = `${scheme}://${baseUri}/ghin/player/login?${qs}`;
   const res = await fetch(url, {
     method: 'GET',
   });
@@ -38,7 +38,7 @@ export const search = async (state, lastName, page, perPage) => {
     token: login_golfers[0].NewUserToken,
   });
 
-  const url = `${baseUrl}/ghin/player/search?${qs}`;
+  const url = `${scheme}://${baseUri}/ghin/player/search?${qs}`;
   const res = await fetch(url, {
     method: 'GET',
   });

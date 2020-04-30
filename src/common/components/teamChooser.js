@@ -26,8 +26,8 @@ const TeamChooser = props => {
   const { currentHole } = props;
   const { game } = useContext(GameContext);
   const { _key: gkey } = game;
-  const h = ( game && game.teams && game.teams.holes ) ?
-    find(game.teams.holes, {hole: currentHole}) : {hole: currentHole, teams: []};
+  const h = ( game && game.holes ) ?
+    find(game.holes, {hole: currentHole}) : {hole: currentHole, teams: []};
   //console.log('h', h);
 
 
@@ -38,15 +38,16 @@ const TeamChooser = props => {
 
     // remove player from this team (across appropriate holes)
     let newGame = getNewGameForUpdate(game);
+    //console.log('changeTeamsForPlayer newGame', newGame);
 
-    const holesToUpdate = getHolesToUpdate(newGame.teams.rotate, game.holes);
-    if( !newGame.teams.holes ) {
-      newGame.teams.holes = [];
+    const holesToUpdate = getHolesToUpdate(newGame.scope.teams_rotate, game);
+    if( !newGame.holes ) {
+      newGame.holes = [];
     }
     holesToUpdate.map(h => {
       // if hole data doesn't exist, create blanks
-      if( findIndex(newGame.teams.holes, {hole: h}) < 0 ) {
-        newGame.teams.holes.push(
+      if( findIndex(newGame.holes, {hole: h}) < 0 ) {
+        newGame.holes.push(
           {
             hole: h,
             teams: [
@@ -57,44 +58,44 @@ const TeamChooser = props => {
           }
         );
       }
-      const holeIndex = findIndex(newGame.teams.holes, {hole: h});
+      const holeIndex = findIndex(newGame.holes, {hole: h});
       //console.log('holeIndex', holeIndex);
 
       // ****** remove player from team ******
-      if( findIndex(newGame.teams.holes[holeIndex].teams, {team: removeFromTeam}) < 0 ) {
-        newGame.teams.holes[holeIndex].teams.push(
+      if( findIndex(newGame.holes[holeIndex].teams, {team: removeFromTeam}) < 0 ) {
+        newGame.holes[holeIndex].teams.push(
           {
             team: removeFromTeam,
             players: [],
           }
         );
       }
-      const rmTeamIndex = findIndex(newGame.teams.holes[holeIndex].teams, {team: removeFromTeam});
+      const rmTeamIndex = findIndex(newGame.holes[holeIndex].teams, {team: removeFromTeam});
       //console.log('rmTeamIndex', rmTeamIndex);
       if( rmTeamIndex < 0 ) return;
-      const rmPlayers = newGame.teams.holes[holeIndex].teams[rmTeamIndex].players;
+      const rmPlayers = newGame.holes[holeIndex].teams[rmTeamIndex].players;
       const rmNewPlayers = filter(rmPlayers, p => p != pkey);
       //console.log('rmNewPlayers', rmNewPlayers);
-      newGame.teams.holes[holeIndex].teams[rmTeamIndex].players = rmNewPlayers;
+      newGame.holes[holeIndex].teams[rmTeamIndex].players = rmNewPlayers;
       //console.log('removeFromTeam newGame', newGame);
 
       // ****** add player to team ******
       if( !addToTeam ) return;
-      if( findIndex(newGame.teams.holes[holeIndex].teams, {team: addToTeam}) < 0 ) {
-        newGame.teams.holes[holeIndex].teams.push(
+      if( findIndex(newGame.holes[holeIndex].teams, {team: addToTeam}) < 0 ) {
+        newGame.holes[holeIndex].teams.push(
           {
             team: addToTeam,
             players: [],
           }
         );
       }
-      const addTeamIndex = findIndex(newGame.teams.holes[holeIndex].teams, {team: addToTeam});
+      const addTeamIndex = findIndex(newGame.holes[holeIndex].teams, {team: addToTeam});
       //console.log('holeIndex', holeIndex, 'addTeamIndex', addTeamIndex);
       if( addTeamIndex < 0 ) return;
-      const addPlayers = newGame.teams.holes[holeIndex].teams[addTeamIndex].players;
+      const addPlayers = newGame.holes[holeIndex].teams[addTeamIndex].players;
       addPlayers.push(pkey);
       //console.log('addPlayers', addPlayers);
-      newGame.teams.holes[holeIndex].teams[addTeamIndex].players = addPlayers;
+      newGame.holes[holeIndex].teams[addTeamIndex].players = addPlayers;
       //console.log('addToTeam newGame', newGame);
 
     });
