@@ -9,11 +9,11 @@ import {
   Icon,
 } from 'react-native-elements';
 import { useMutation } from '@apollo/client';
-import { cloneDeep, findIndex, sortBy } from 'lodash';
+import { findIndex, sortBy } from 'lodash';
 import { gql } from '@apollo/client';
 
 import { GameContext } from 'features/game/gameContext';
-import { GET_GAME_QUERY } from 'features/game/graphql';
+import { updateGameHolesCache } from 'common/utils/game';
 import { blue } from 'common/colors';
 import {
   get_net_score,
@@ -91,34 +91,11 @@ const HoleJunk = props => {
         game: newGame,
       },
       update: (cache, { data: { updateGame } }) => {
-        console.log('cache data', cache.data);
-/*
-        updateGameTeamsCache({
+        //console.log('cache data', cache.data);
+        updateGameHolesCache({
           cache,
           gkey,
           holes: newGame.holes,
-        });
-*/
-        // read game from cache
-        const { getGame } = cache.readQuery({
-          query: GET_GAME_QUERY,
-          variables: {
-            gkey: gkey,
-          },
-        });
-        // create new game to write back
-        const newG = cloneDeep(getGame);
-        const h = findIndex(newGame.holes, {hole: hole.hole});
-        newG.holes[h] = newHole;
-        //write back to cache
-        cache.writeQuery({
-          query: GET_GAME_QUERY,
-          variables: {
-            gkey: gkey,
-          },
-          data: {
-            getGame: newG
-          },
         });
       },
     });

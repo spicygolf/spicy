@@ -124,30 +124,6 @@ const HoleScore = props => {
           rkey,
           score: postScore,
         });
-/*
-        // read game from cache
-        const { getGame } = cache.readQuery({
-          query: GET_GAME_QUERY,
-          variables: {
-            gkey: gkey,
-          },
-        });
-        // create new game to write back
-        const newGame = cloneDeep(getGame);
-        const r = findIndex(newGame.rounds, {_key: rkey});
-        const h = findIndex(newGame.rounds[r].scores, {hole: hole.hole});
-        newGame.rounds[r].scores[h].values = postScore.values;
-        //write back to cache
-        cache.writeQuery({
-          query: GET_GAME_QUERY,
-          variables: {
-            gkey: gkey,
-          },
-          data: {
-            getGame: newGame
-          },
-        });
-*/
       },
     });
 

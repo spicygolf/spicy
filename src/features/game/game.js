@@ -9,6 +9,7 @@ import { GET_GAME_QUERY } from 'features/game/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { GameContext } from 'features/game/gameContext';
 import GameStack from 'features/game/gamestack';
+import GameUpdatedListener from 'features/game/gameUpdatedListener';
 import ScorePostedListener from 'features/rounds/scorePostedListener';
 import { scoring } from 'common/utils/score';
 
@@ -42,6 +43,10 @@ const Game = props => {
     const game = data.getGame;
     console.log('game  ', game);
 
+     const game_listener = (
+       <GameUpdatedListener gkey={game._key} />
+     );
+
     /* This is the place where we have all players' rounds as data. It can be
        updated by other players, so here is a good place to kick off a
        subscription to listen for those other changes, update the cache and
@@ -63,6 +68,7 @@ const Game = props => {
         scores: scores,
         currentPlayerKey: currentPlayerKey,
       }}>
+        { game_listener }
         { round_listeners }
         <GameStack
           setup={setup}

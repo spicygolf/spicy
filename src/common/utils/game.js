@@ -1,5 +1,12 @@
 import { cloneDeep, find, findIndex } from 'lodash';
-import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
+import {
+  ACTIVE_GAMES_FOR_PLAYER_QUERY,
+} from 'features/games/graphql';
+import {
+  GAME_HOLES_FRAGMENT
+} from 'features/game/graphql';
+
+
 
 export const getHoles = game => {
   //console.log('game utils game', game);
@@ -228,5 +235,26 @@ export const rmgame = async (gkey, currentPlayerKey, mutation) => {
     return null;
   }
   return data;
+
+};
+
+export const updateGameHolesCache = ({cache, gkey, holes}) => {
+
+  // read holes from cache
+  const optimistic = true;
+  const cGame = cache.readFragment({
+    id: gkey,
+    fragment: GAME_HOLES_FRAGMENT,
+  }, optimistic);
+  //console.log('getGame from cache', cGame);
+
+  // write back to cache with new values
+  cache.writeFragment({
+    id: gkey,
+    fragment: GAME_HOLES_FRAGMENT,
+    data: {
+      holes,
+    },
+  });
 
 };
