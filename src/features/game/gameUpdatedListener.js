@@ -21,7 +21,7 @@ const GameUpdatedListener = props => {
   if( error ) console.log('Error in GameUpdatedListener', error);
 
   if( data && data.gameUpdated ) {
-    console.log('gameUpdated', data);
+    //console.log('gameUpdated', data);
     const { cache } = client;
     //console.log('cache data', cache.data);
     const { holes } = data.gameUpdated;
