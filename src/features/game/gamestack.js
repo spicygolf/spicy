@@ -48,8 +48,9 @@ const GameStack = props => {
         tabBarOptions={{
           labelStyle: {
             textTransform: 'capitalize',
-          }
+          },
         }}
+        swipeEnabled={false}
       >
         <Tab.Screen
           name='Leaderboard'
