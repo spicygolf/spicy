@@ -20,21 +20,26 @@ const TeamTotals = props => {
   const team = find(hole.teams, {team: teamNum});
   if( !team ) return null;
 
+  let netPoints = team.points;
   let otherTeam = null;
   const otherTeams = filter(hole.teams,
     t => (t.team.toString() != teamNum.toString())
   );
-  if( otherTeams && otherTeams.length == 1 ) otherTeam = otherTeams[0];
-  //console.log('teamTotals', teamNum, otherTeams, otherTeam);
+  if( otherTeams && otherTeams.length == 1 ) {
+    otherTeam = otherTeams[0];
+    netPoints = team.points - otherTeam.points;
+    if( netPoints < 0 ) netPoints = 0;
+  }
+  const netTotal = netPoints * hole.holeMultiplier;
   const diff = otherTeam ? team.runningTotal - otherTeam.runningTotal : null;
 
   return (
   <View style={styles.totalsView}>
     <View>
-      <Text style={styles.totalsText}>Hole: {`${team.points} x ${hole.holeMultiplier} = ${team.holeTotal}`}</Text>
+      <Text style={styles.totalsText}>Hole: {`${netPoints} x ${hole.holeMultiplier} = ${netTotal}`}</Text>
     </View>
     <View>
-      <Text style={styles.totalsText}>Total: {team.runningTotal} {formatDiff(diff)}</Text>
+      <Text style={styles.totalsText}>Total: {formatDiff(diff)}</Text>
     </View>
   </View>
 );
