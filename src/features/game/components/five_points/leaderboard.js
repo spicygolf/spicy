@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import
 {
   ScrollView,
@@ -8,6 +8,7 @@ import
   View
 } from 'react-native';
 import { Icon } from 'react-native-elements';
+import { Dropdown } from 'react-native-material-dropdown';
 import { filter, find } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
@@ -16,7 +17,7 @@ import { GameContext } from 'features/game/gameContext';
 
 const FivePointsLeaderboard = props => {
 
-  const scoreType = 'gross'; // gross, net, points, ?
+  const [ scoreType, setScoreType ] = useState('gross');
 
   const { game, scores } = useContext(GameContext);
 
@@ -104,7 +105,7 @@ const FivePointsLeaderboard = props => {
       </View>
     ));
     return (
-      <View style={styles.row}>
+      <View style={[styles.row, styles.totalRow]}>
         <View style={styles.holeCellView}>
           <Text style={styles.holeCell}>{section.side}</Text>
         </View>
@@ -113,17 +114,44 @@ const FivePointsLeaderboard = props => {
     );
   };
 
+  const ViewChooser = props => {
+
+    const choices = [
+      {value: 'gross'},
+      {value: 'net'},
+      {value: 'points'},
+    ];
+
+    return (
+      <Dropdown
+        value={scoreType}
+        data={choices}
+        label='View'
+        fontSize={12}
+        onChangeText={text => {
+          setScoreType(text);
+        }}
+      />
+    );
+
+  };
+
   const Header = () => {
+
     const players = playerList.map(p => {
       return (
         <View style={[styles.playerNameView, styles.rotate]}>
-          <Text style={styles.playerName}>{ p.name }</Text>
+          <Text
+            style={styles.playerName}
+            numberOfLines={2}
+          >{ p.name }</Text>
         </View>
       );
     });
     return (
       <View style={styles.header}>
         <View style={styles.holeTitleView}>
+          <ViewChooser />
           <Text style={styles.holeTitle}>Hole</Text>
         </View>
         { players }
@@ -142,7 +170,6 @@ const FivePointsLeaderboard = props => {
 
   const data = [];
   const f = front();
-  console.log('f', f);
   data.push(f);
   const b = back();
   data.push(b);
@@ -170,8 +197,8 @@ const FivePointsLeaderboard = props => {
 
 export default FivePointsLeaderboard;
 
-const headerHeight = 100;
-const rowHeight = 28;
+const headerHeight = 90;
+const rowHeight = 26;
 
 var styles = StyleSheet.create({
   container: {
@@ -186,12 +213,16 @@ var styles = StyleSheet.create({
   holeTitleView: {
     height: headerHeight,
     flex: 1,
-    flexDirection: 'column-reverse',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
     //borderWidth: 1,
   },
   holeTitle: {
     paddingBottom: 10,
     alignSelf: 'center',
+  },
+  chooserText: {
+    fontSize: 12,
   },
   rotate: {
     transform: [{ rotate: '270deg'}],
@@ -203,12 +234,14 @@ var styles = StyleSheet.create({
     //borderWidth: 1,
   },
   playerName: {
-
+    paddingLeft: 10,
+    maxWidth: headerHeight,
   },
   row: {
     minHeight: rowHeight,
     height: rowHeight,
     flexDirection: 'row',
+    paddingVertical: 5,
   },
   holeCellView: {
     flex: 1,
@@ -231,5 +264,9 @@ var styles = StyleSheet.create({
     alignSelf: 'stretch',
     justifyContent: 'center',
     //borderWidth: 1,
+  },
+  totalRow: {
+    paddingVertical: 5,
+    backgroundColor: '#ddd',
   },
 });
