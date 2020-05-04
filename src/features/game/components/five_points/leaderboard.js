@@ -40,6 +40,12 @@ const FivePointsLeaderboard = props => {
     return ret;
   };
 
+  const format = v => {
+    console.log('format', scoreType, v);
+    if( scoreType === 'points' && parseFloat(v) > 0 ) return `+${v}`;
+    return v;
+  };
+
   const side = (holes, side) => {
     const totals = {};
     const rows = holes.map(h => {
@@ -78,12 +84,16 @@ const FivePointsLeaderboard = props => {
       //console.log(scoreType, score.score[scoreType]);
       return (
         <View style={styles.scorePopContainer}>
-          <Text style={styles.scoreCell}>{s.score[scoreType] || '  '}</Text>
-          <Icon
-            name='lens'
-            color={ s.score.pops > 0 ? 'black' : '#eee' }
-            size={5}
-          />
+          <View style={styles.scoreView}>
+            <Text style={styles.scoreCell}>{format(s.score[scoreType]) || '  '}</Text>
+          </View>
+          <View style={styles.popView}>
+            <Icon
+              name='lens'
+              color={ s.score.pops > 0 ? 'black' : '#eee' }
+              size={5}
+            />
+          </View>
         </View>
       );
     });
@@ -101,7 +111,9 @@ const FivePointsLeaderboard = props => {
   const TotalRow = ({section}) => {
     const totalCells = playerList.map(p => (
       <View style={styles.scorePopContainer}>
-        <Text style={styles.scoreCell}>{section.totals[p.pkey]}</Text>
+        <View style={styles.scoreView}>
+          <Text style={styles.scoreCell}>{format(section.totals[p.pkey])}</Text>
+        </View>
       </View>
     ));
     return (
@@ -256,14 +268,19 @@ var styles = StyleSheet.create({
     margin: 0,
     padding: 0,
     height: rowHeight,
-    paddingRight: 2,
+    paddingRight: 5,
   },
   scorePopContainer: {
     flexDirection: 'row',
     flex: 1,
-    alignSelf: 'stretch',
-    justifyContent: 'center',
-    //borderWidth: 1,
+  },
+  scoreView: {
+    alignItems: 'flex-end',
+    flex: 0.65,
+  },
+  popView: {
+    alignItems: 'flex-start',
+    flex: 0.35,
   },
   totalRow: {
     paddingVertical: 5,
