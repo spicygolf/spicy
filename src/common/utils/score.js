@@ -118,7 +118,11 @@ export const scoring = (game) => {
 
           return ({
             pkey: gPlayer,
-            score: {gross: gross, net: net},
+            score: {
+              gross,
+              net,
+              pops: gross - net,
+            },
             junk: playerJunk,
           });
         }),

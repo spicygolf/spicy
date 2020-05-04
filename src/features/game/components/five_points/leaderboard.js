@@ -6,6 +6,7 @@ import
   Text,
   View
 } from 'react-native';
+import { Icon } from 'react-native-elements';
 import { DataTable } from 'react-native-paper';
 import { filter, find } from 'lodash';
 
@@ -38,6 +39,16 @@ const FivePointsLeaderboard = props => {
     return ret;
   };
 
+  const findPops = (hole, pkey) => {
+    let ret = null;
+    if( !hole || !hole.teams ) return ret;
+    hole.teams.map(t => {
+      const p = find(t.players, {pkey: pkey});
+      if( p ) ret = p.score['pops'];
+    });
+    return ret;
+  };
+
   const header = () => {
     const players = playerList.map(p => {
       return (
@@ -64,6 +75,7 @@ const FivePointsLeaderboard = props => {
     const ret = holes.map(h => {
       const scoreCells = playerList.map(p => {
         const score = findScore(h, p.pkey);
+        const pops = findPops(h, p.pkey);
         if( !totals[p.pkey] ) totals[p.pkey] = 0;
         totals[p.pkey] += (parseFloat(score) || 0);
         return (
@@ -72,8 +84,13 @@ const FivePointsLeaderboard = props => {
             style={styles.scoreCell}
           >
             {score}
+            <Icon
+              name='lens'
+              color={ pops > 0 ? 'black' : 'white' }
+              size={4}
+            />
           </DataTable.Cell>
-        );
+      );
       });
       return (
         <DataTable.Row key={`row_hole_${h.hole}`} style={styles.row}>
