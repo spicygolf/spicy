@@ -2,12 +2,12 @@ import React, { useContext } from 'react';
 import
 {
   ScrollView,
+  SectionList,
   StyleSheet,
   Text,
   View
 } from 'react-native';
 import { Icon } from 'react-native-elements';
-import { DataTable } from 'react-native-paper';
 import { filter, find } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
@@ -34,136 +34,135 @@ const FivePointsLeaderboard = props => {
     if( !hole || !hole.teams ) return ret;
     hole.teams.map(t => {
       const p = find(t.players, {pkey: pkey});
-      if( p ) ret = p.score[scoreType];
+      if( p ) ret = p.score;
     });
     return ret;
   };
 
-  const findPops = (hole, pkey) => {
-    let ret = null;
-    if( !hole || !hole.teams ) return ret;
-    hole.teams.map(t => {
-      const p = find(t.players, {pkey: pkey});
-      if( p ) ret = p.score['pops'];
+  const side = (holes, side) => {
+    const totals = {};
+    const rows = holes.map(h => {
+      const scores = playerList.map((p, i) => {
+        const score = findScore(h, p.pkey);
+        if( !totals[p.pkey] ) totals[p.pkey] = 0;
+        totals[p.pkey] += (parseFloat(score[scoreType]) || 0);
+        return { pkey: p.pkey, score };
+      });
+      return {
+        hole: h.hole,
+        scores: scores,
+      };
     });
-    return ret;
+
+    return {
+      side,
+      data: rows,
+      totals,
+    };
+
   };
 
-  const header = () => {
+  const front = d => {
+    const holes = scores.holes.filter(h => (parseInt(h.hole) <= 9));
+    return side(holes, 'Out');
+  };
+
+  const back = () => {
+    const holes = scores.holes.filter(h => (parseInt(h.hole) >= 10));
+    return side(holes, 'In');
+  };
+
+  const Row = ({row}) => {
+    const scoreCells = row.scores.map(s => {
+      //console.log(scoreType, score.score[scoreType]);
+      return (
+        <View style={styles.scorePopContainer}>
+          <Text style={styles.scoreCell}>{s.score[scoreType] || '  '}</Text>
+          <Icon
+            name='lens'
+            color={ s.score.pops > 0 ? 'black' : '#eee' }
+            size={5}
+          />
+        </View>
+      );
+    });
+
+    return (
+      <View style={styles.row}>
+        <View style={styles.holeCellView}>
+          <Text style={styles.holeCell}>{row.hole}</Text>
+        </View>
+        { scoreCells }
+      </View>
+    );
+  };
+
+  const TotalRow = ({section}) => {
+    const totalCells = playerList.map(p => (
+      <View style={styles.scorePopContainer}>
+        <Text style={styles.scoreCell}>{section.totals[p.pkey]}</Text>
+      </View>
+    ));
+    return (
+      <View style={styles.row}>
+        <View style={styles.holeCellView}>
+          <Text style={styles.holeCell}>{section.side}</Text>
+        </View>
+        { totalCells }
+      </View>
+    );
+  };
+
+  const Header = () => {
     const players = playerList.map(p => {
       return (
-        <DataTable.Title
-          key={`${p.pkey}_name`}
-          style={[styles.playerName, styles.rotate]}
-          numberOfLines={2}
-        >
-          <Text>{ p.name }</Text>
-        </DataTable.Title>
+        <View style={[styles.playerNameView, styles.rotate]}>
+          <Text style={styles.playerName}>{ p.name }</Text>
+        </View>
       );
     });
     return (
-      <DataTable.Header style={styles.header}>
-        <DataTable.Title style={styles.holeTitle}>Hole</DataTable.Title>
+      <View style={styles.header}>
+        <View style={styles.holeTitleView}>
+          <Text style={styles.holeTitle}>Hole</Text>
+        </View>
         { players }
-      </DataTable.Header>
+      </View>
     );
 
   };
 
-  const side = (holes, sideName) => {
-    let totals = {};
-    const ret = holes.map(h => {
-      const scoreCells = playerList.map(p => {
-        const score = findScore(h, p.pkey);
-        const pops = findPops(h, p.pkey);
-        if( !totals[p.pkey] ) totals[p.pkey] = 0;
-        totals[p.pkey] += (parseFloat(score) || 0);
-        return (
-          <DataTable.Cell
-            key={`${p.pkey}_${h.hole}`}
-            style={styles.scoreCell}
-          >
-            {score}
-            <Icon
-              name='lens'
-              color={ pops > 0 ? 'black' : 'white' }
-              size={4}
-            />
-          </DataTable.Cell>
-      );
-      });
-      return (
-        <DataTable.Row key={`row_hole_${h.hole}`} style={styles.row}>
-          <DataTable.Cell style={styles.holeCell}>{h.hole}</DataTable.Cell>
-          { scoreCells }
-        </DataTable.Row>
-      );
-    });
-    const totalCells = playerList.map(p => (
-      <DataTable.Cell
-        key={`${p.pkey}_${sideName}`}
-        style={styles.scoreCell}
-      >
-        {totals[p.pkey]}
-      </DataTable.Cell>
-    ));
-    ret.push((
-      <DataTable.Row key={`row_${sideName}`} style={styles.row}>
-        <DataTable.Cell style={styles.holeCell}>{sideName}</DataTable.Cell>
-        { totalCells }
-      </DataTable.Row>
-    ));
-    return {
-      rows: ret,
+  const Footer = () => {
+    const section = {
+      side: 'Total',
       totals: totals,
     };
+    return (<TotalRow section={section} />);
   };
 
-  const totalRows = totals => {
-    const totalCells = playerList.map(p => (
-      <DataTable.Cell
-        key={`${p.pkey}_total`}
-        style={styles.scoreCell}
-      >
-        {totals[p.pkey]}
-      </DataTable.Cell>
-    ));
-    return (
-      <DataTable.Row style={styles.row}>
-        <DataTable.Cell style={styles.holeCell}>Total</DataTable.Cell>
-        { totalCells }
-      </DataTable.Row>
-    )
-  };
-
-  const front = () => {
-    const holes = scores.holes.filter(h => (parseInt(h.hole) <= 9));
-    return side(holes, 'Front');
-  };
-  const { rows: frontRows, totals: frontTotals } = front();
-
-  const back = () => {
-    const holes = scores.holes.filter(h => (parseInt(h.hole) >= 10));
-    return side(holes, 'Back');
-  };
-  const { rows: backRows, totals: backTotals } = back();
-
-  let totals = {};
+  const data = [];
+  const f = front();
+  console.log('f', f);
+  data.push(f);
+  const b = back();
+  data.push(b);
+  const totals = {};
   playerList.map(p => {
     if( !totals[p.pkey] ) totals[p.pkey] = 0;
-    totals[p.pkey] += ((parseFloat(frontTotals[p.pkey]) || 0) + (parseFloat(backTotals[p.pkey]) || 0));
+    totals[p.pkey] += ((parseFloat(f.totals[p.pkey]) || 0) + (parseFloat(b.totals[p.pkey]) || 0));
   });
+  console.log('data', data);
 
   return (
     <View style={styles.container}>
-      <DataTable>
-        { header() }
-        <ScrollView style={styles.rows}>
-          { frontRows }
-          { backRows }
-          { totalRows(totals) }
-        </ScrollView>
-      </DataTable>
+      <SectionList
+        sections={data}
+        keyExtractor={(item, index) => item+index}
+        renderItem={({item}) => (<Row row={item} />)}
+        renderSectionFooter={({ section }) => (<TotalRow section={section} />)}
+        ListHeaderComponent={Header}
+        ListFooterComponent={Footer}
+      />
     </View>
   );
 
@@ -178,46 +177,59 @@ var styles = StyleSheet.create({
   container: {
     margin: 10,
     height: '100%',
-    paddingBottom: 60, // for the bottom-tabs... grrr
   },
   header: {
+    flexDirection: 'row',
     height: headerHeight,
     alignItems: 'center',
-    flexShrink: 1,
   },
-  holeTitle: {
-    justifyContent: 'flex-start',
-    alignItems: 'flex-end',
+  holeTitleView: {
     height: headerHeight,
     flex: 1,
+    flexDirection: 'column-reverse',
     //borderWidth: 1,
+  },
+  holeTitle: {
+    paddingBottom: 10,
+    alignSelf: 'center',
   },
   rotate: {
     transform: [{ rotate: '270deg'}],
   },
-  playerName: {
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+  playerNameView: {
     width: headerHeight,
     flex: 1,
+    alignSelf: 'center',
     //borderWidth: 1,
   },
-  rows: {
-    marginBottom: 50,
+  playerName: {
+
   },
   row: {
     minHeight: rowHeight,
     height: rowHeight,
+    flexDirection: 'row',
   },
-  holeCell: {
+  holeCellView: {
     flex: 1,
     height: rowHeight,
+    alignItems: 'center',
+    //borderWidth: 1,
+  },
+  holeCell: {
+
   },
   scoreCell: {
     margin: 0,
     padding: 0,
-    justifyContent: 'center',
-    flex: 1,
     height: rowHeight,
+    paddingRight: 2,
+  },
+  scorePopContainer: {
+    flexDirection: 'row',
+    flex: 1,
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+    //borderWidth: 1,
   },
 });

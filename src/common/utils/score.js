@@ -85,6 +85,7 @@ export const scoring = (game) => {
           const score = get_score(hole, round);
           const gross = get_score_value('gross', score);
           const net = get_net_score(gross, score);
+          const pops = parseFloat(score.pops);
           const teeHole = get_hole(hole, round);
           const par = (teeHole && teeHole.par) ? parseFloat(teeHole.par) : 0.0;
 
@@ -121,7 +122,7 @@ export const scoring = (game) => {
             score: {
               gross,
               net,
-              pops: gross - net,
+              pops,
             },
             junk: playerJunk,
           });
