@@ -41,7 +41,6 @@ const FivePointsLeaderboard = props => {
   };
 
   const format = v => {
-    console.log('format', scoreType, v);
     if( scoreType === 'points' && parseFloat(v) > 0 ) return `+${v}`;
     return v;
   };
@@ -81,7 +80,6 @@ const FivePointsLeaderboard = props => {
 
   const Row = ({row}) => {
     const scoreCells = row.scores.map(s => {
-      //console.log(scoreType, score.score[scoreType]);
       return (
         <View style={styles.scorePopContainer}>
           <View style={styles.scoreView}>
@@ -190,7 +188,7 @@ const FivePointsLeaderboard = props => {
     if( !totals[p.pkey] ) totals[p.pkey] = 0;
     totals[p.pkey] += ((parseFloat(f.totals[p.pkey]) || 0) + (parseFloat(b.totals[p.pkey]) || 0));
   });
-  console.log('data', data);
+  //console.log('data', data);
 
   return (
     <View style={styles.container}>
