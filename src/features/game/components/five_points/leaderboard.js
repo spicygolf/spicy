@@ -81,7 +81,7 @@ const FivePointsLeaderboard = props => {
   const Row = ({row}) => {
     const scoreCells = row.scores.map(s => {
       return (
-        <View style={styles.scorePopContainer}>
+        <View key={`cell_${row.hole}_${s.pkey}`} style={styles.scorePopContainer}>
           <View style={styles.scoreView}>
             <Text style={styles.scoreCell}>{format(s.score[scoreType]) || '  '}</Text>
           </View>
@@ -97,7 +97,7 @@ const FivePointsLeaderboard = props => {
     });
 
     return (
-      <View style={styles.row}>
+      <View key={`row_${row.hole}`} style={styles.row}>
         <View style={styles.holeCellView}>
           <Text style={styles.holeCell}>{row.hole}</Text>
         </View>
@@ -108,14 +108,14 @@ const FivePointsLeaderboard = props => {
 
   const TotalRow = ({section}) => {
     const totalCells = playerList.map(p => (
-      <View style={styles.scorePopContainer}>
+      <View key={`totalcell_${section.side}_${p.pkey}`} style={styles.scorePopContainer}>
         <View style={styles.scoreView}>
           <Text style={styles.scoreCell}>{format(section.totals[p.pkey])}</Text>
         </View>
       </View>
     ));
     return (
-      <View style={[styles.row, styles.totalRow]}>
+      <View key={`totalrow_${section.side}`} style={[styles.row, styles.totalRow]}>
         <View style={styles.holeCellView}>
           <Text style={styles.holeCell}>{section.side}</Text>
         </View>
@@ -150,7 +150,7 @@ const FivePointsLeaderboard = props => {
 
     const players = playerList.map(p => {
       return (
-        <View style={[styles.playerNameView, styles.rotate]}>
+        <View key={`header_${p.pkey}`} style={[styles.playerNameView, styles.rotate]}>
           <Text
             style={styles.playerName}
             numberOfLines={2}
