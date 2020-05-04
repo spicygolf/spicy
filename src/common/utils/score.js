@@ -85,6 +85,7 @@ export const scoring = (game) => {
           const score = get_score(hole, round);
           const gross = get_score_value('gross', score);
           const net = get_net_score(gross, score);
+          const pops = parseFloat(score.pops);
           const teeHole = get_hole(hole, round);
           const par = (teeHole && teeHole.par) ? parseFloat(teeHole.par) : 0.0;
 
@@ -118,7 +119,11 @@ export const scoring = (game) => {
 
           return ({
             pkey: gPlayer,
-            score: {gross: gross, net: net},
+            score: {
+              gross,
+              net,
+              pops,
+            },
             junk: playerJunk,
           });
         }),
@@ -265,8 +270,25 @@ export const scoring = (game) => {
     const holeMultiplier = reduce(multipliers, (tot, m) => (tot * m.value), 1);
     //console.log('holeMultiplier', hole, holeMultiplier);
     teams.map(t => {
-      t.holeTotal = t.points * holeMultiplier;
+      const holeTotal = t.points * holeMultiplier;
+      t.holeTotal = holeTotal;
+      // give points to players on this team
+      t.players.map(p => {
+        p.score.points = holeTotal;
+      });
     });
+    if( teams.length == 2 ) {
+      // calculate net total points
+      teams.map(t => {
+        const otherTeamIndex = (t.team === '1' ) ? 1 : 0;
+        let holeNetTotal = t.holeTotal - teams[otherTeamIndex].holeTotal;
+        t.holeNetTotal = holeNetTotal;
+        // give points to players on this team
+        t.players.map(p => {
+          p.score.points = t.holeNetTotal; // overwrite holeTotal points in 2-team
+        });
+      });
+    }
 
     //if( hole == '1' ) console.log(hole, possiblePoints, teams, multipliers);
 

@@ -57,7 +57,9 @@ export const get_net_score = (gross, score) => {
   const g = parseFloat(gross);
   const p = parseFloat(score.pops);
   //console.log('g', g, 'p', p);
-  return (g-p).toString();
+  let net = (g-p).toString();
+  if( isNaN(net) ) net = null;
+  return net;
 }
 
 
