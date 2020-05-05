@@ -124,7 +124,7 @@ export default function configureClient() {
   });
 
   const wsLink = new WebSocketLink({
-    uri: `ws://${baseUri}/graphql`,
+    uri: `${scheme}://${baseUri}/graphql`,
     options: {
       reconnect: true
     }

@@ -17,8 +17,14 @@ const GameUpdatedListener = props => {
     { variables: { gkey } },
   );
 
-  if( loading ) return null;
-  if( error ) console.log('Error in GameUpdatedListener', error);
+  if( loading ) {
+    //console.log('loading');
+    return null;
+  }
+  if( error ) {
+    console.log('Error in GameUpdatedListener', error);
+    return null;
+  }
 
   if( data && data.gameUpdated ) {
     //console.log('gameUpdated', data);
@@ -32,9 +38,10 @@ const GameUpdatedListener = props => {
         holes,
       });
     }
-
+    return null;
   }
 
+  console.log('gameUpdatedListener should not get here', data);
   // non-display component
   return null;
 
