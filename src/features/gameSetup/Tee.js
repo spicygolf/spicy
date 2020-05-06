@@ -133,8 +133,8 @@ const Tee = props => {
             if( ch && ch != round.course_handicap ) {
               //console.log('updating course_handicap to ', ch);
               await update(round._key, [
-                {key: 'handicap_index', value: index},
-                {key: 'course_handicap', value: ch},
+                {key: 'handicap_index', value: index.toString()},
+                {key: 'course_handicap', value: ch.toString()},
               ]);
             }
           }

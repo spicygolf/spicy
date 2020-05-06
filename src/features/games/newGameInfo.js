@@ -105,7 +105,7 @@ const NewGameInfo = props => {
         </View>
       </Card>
       <Button
-        style={styles.button}
+        buttonStyle={styles.button}
         title='Create Game'
         type='solid'
         onPress={() => {

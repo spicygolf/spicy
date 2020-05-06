@@ -49,10 +49,10 @@ export const linkRoundToGameAndPlayer = async props => {
   let other = [];
   try {
     const hi = handicap.index;
-    if( hi ) other.push({key: 'handicap_index', value: hi});
+    if( hi ) other.push({key: 'handicap_index', value: hi.toString()});
     const ch = course_handicap(hi, tee, holes);
     //console.log('LinkRound ch', ch, hi, tee, holes);
-    if( ch ) other.push({key: 'course_handicap', value: ch});
+    if( ch ) other.push({key: 'course_handicap', value: ch.toString()});
     //console.log('LinkRound other', other);
   } catch(e) {
     console.log('Could not calc a course handicap for ', round);

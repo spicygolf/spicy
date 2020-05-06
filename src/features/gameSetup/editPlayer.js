@@ -52,17 +52,17 @@ const EditPlayer = props => {
     const other = [];
 
     if( HI != initHI ) {
-      other.push({key: 'handicap_index', value: HI});
+      other.push({key: 'handicap_index', value: HI.toString()});
       doUpdate = true;
     }
 
     if( CH != initCH ) {
-      other.push({key: 'course_handicap', value: CH});
+      other.push({key: 'course_handicap', value: CH.toString()});
       doUpdate = true;
     }
 
     if( GH != initGH ) {
-      other.push({key: 'game_handicap', value: GH});
+      other.push({key: 'game_handicap', value: GH.toString()});
       doUpdate = true;
     }
 
