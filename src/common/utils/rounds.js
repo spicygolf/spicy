@@ -62,6 +62,9 @@ export const get_net_score = (gross, score) => {
   return net;
 }
 
+export const get_pops = score => {
+  return (score && score.pops) ? parseFloat(score.pops) : 0;
+};
 
 export const rmround = async (rkey, mutation) => {
   const { loading, error, data } = await mutation({

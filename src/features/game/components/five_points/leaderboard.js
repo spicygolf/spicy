@@ -51,7 +51,7 @@ const FivePointsLeaderboard = props => {
       const scores = playerList.map((p, i) => {
         const score = findScore(h, p.pkey);
         if( !totals[p.pkey] ) totals[p.pkey] = 0;
-        totals[p.pkey] += (parseFloat(score[scoreType]) || 0);
+        if( score ) totals[p.pkey] += (parseFloat(score[scoreType]) || 0);
         return { pkey: p.pkey, score };
       });
       return {
@@ -80,6 +80,7 @@ const FivePointsLeaderboard = props => {
 
   const Row = ({row}) => {
     const scoreCells = row.scores.map(s => {
+      if( !s.score ) return null;
       return (
         <View key={`cell_${row.hole}_${s.pkey}`} style={styles.scorePopContainer}>
           <View style={styles.scoreView}>
@@ -154,6 +155,7 @@ const FivePointsLeaderboard = props => {
           <Text
             style={styles.playerName}
             numberOfLines={2}
+            textBreakStrategy='simple'
           >{ p.name }</Text>
         </View>
       );

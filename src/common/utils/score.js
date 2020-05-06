@@ -12,6 +12,7 @@ import {
   get_round_for_player,
   get_score,
   get_score_value,
+  get_pops,
 } from './rounds';
 
 
@@ -85,7 +86,7 @@ export const scoring = (game) => {
           const score = get_score(hole, round);
           const gross = get_score_value('gross', score);
           const net = get_net_score(gross, score);
-          const pops = parseFloat(score.pops);
+          const pops = get_pops(score);
           const teeHole = get_hole(hole, round);
           const par = (teeHole && teeHole.par) ? parseFloat(teeHole.par) : 0.0;
 
