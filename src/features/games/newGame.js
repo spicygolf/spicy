@@ -27,8 +27,8 @@ const NewGame = props => {
   const [ addGameMutation ] = useMutation(ADD_GAME_MUTATION);
   const [ addLinkMutation ] = useMutation(ADD_LINK_MUTATION);
 
+  // add new game
   const addGame = async () => {
-    // add new game
     const { loading, error, data } = await addGameMutation({
       variables: {
         game: {
@@ -84,10 +84,6 @@ const NewGame = props => {
       params: {
         screen: 'LinkRoundList',
         params: {
-          game: {
-            _key: gkey,
-            start: game_start,
-          },
           player: player,
         },
       },

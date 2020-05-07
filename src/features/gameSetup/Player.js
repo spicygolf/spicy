@@ -37,13 +37,7 @@ const Player = props => {
           name: item.name,
           handicap: item.handicap,
         };
-        navigation.navigate('LinkRoundList', {
-          game: {
-            _key: game._key,
-            start: game.start,
-          },
-          player: player,
-        });
+        navigation.navigate('LinkRoundList', {player});
       }}
       leftIcon={(
         <FavoriteIcon

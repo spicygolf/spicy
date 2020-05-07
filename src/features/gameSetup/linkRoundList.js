@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useQuery } from '@apollo/client';
 import moment from 'moment';
 
+import { GameContext } from 'features/game/gameContext';
 import GameNav from 'features/games/gamenav';
 import { GET_ROUNDS_FOR_PLAYER_DAY_QUERY } from 'features/rounds/graphql';
 
@@ -21,10 +22,9 @@ import { GET_ROUNDS_FOR_PLAYER_DAY_QUERY } from 'features/rounds/graphql';
 
 const LinkRoundList = props => {
 
-  //console.log('LinkRoundList');
-
   const { route } = props;
-  const { game, player } = route.params;
+  const { player } = route.params;
+  const { game } = useContext(GameContext);
 
   const { start: game_start } = game;
   const { _key: pkey } = player;

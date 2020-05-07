@@ -93,17 +93,20 @@ export const GET_GAME_QUERY = gql`
         min_players
         max_players
         location_type
+        teams
         team_size
         team_determination
         team_change_every
         scoring {
             hole {
-                name
-                points
-                source
-                type
-                scope
-                based_on
+              name
+              disp
+              seq
+              points
+              source
+              scope
+              calculation
+              better
             }
         }
         junk {

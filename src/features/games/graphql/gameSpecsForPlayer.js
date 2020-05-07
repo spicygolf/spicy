@@ -11,6 +11,7 @@ export default gql`
       max_players
       min_players
       location_type
+      teams
       team_size
     }
   }

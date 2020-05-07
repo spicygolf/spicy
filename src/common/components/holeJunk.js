@@ -34,23 +34,23 @@ import {
 const HoleJunk = props => {
 
   const UPDATE_GAME_MUTATION = gql`
-  mutation UpdateGame($gkey: String!, $game: GameInput!) {
-    updateGame(gkey: $gkey, game: $game) {
-      holes {
-        hole
-        teams {
-          team
-          players
-          junk {
-            name
-            player
-            value
+    mutation UpdateGame($gkey: String!, $game: GameInput!) {
+      updateGame(gkey: $gkey, game: $game) {
+        holes {
+          hole
+          teams {
+            team
+            players
+            junk {
+              name
+              player
+              value
+            }
           }
         }
       }
     }
-  }
-`;
+  `;
 
   const { hole, score, pkey } = props;
   const par = (hole && hole.par) ? parseFloat(hole.par) : 0.0;

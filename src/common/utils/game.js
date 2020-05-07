@@ -152,6 +152,13 @@ export const getAllOptions = game => {
   return options;
 };
 
+export const getGamespecKVs = (game, key) => {
+  const ret = game.gamespecs.map(gs => {
+    return gs[key];
+  });
+  return ret;
+};
+
 export const getJunk = (junkName, pkey, game, holeNum) => {
   if( !game || !game.holes ) return null;
   const gHole = find(game.holes, {hole: holeNum});
