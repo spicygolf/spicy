@@ -16,6 +16,13 @@ import { green } from 'common/colors';
 
 const GamesStack = props => {
 
+  const nada = {
+    animation: 'timing',
+    config: {
+      duration: 0,
+    },
+  };
+
   const Stack = createStackNavigator();
 
   return (
@@ -31,11 +38,38 @@ const GamesStack = props => {
           },
         }}
       >
-        <Stack.Screen name='Games' component={Games} />
-        <Stack.Screen name='Game' component={Game} />
-        <Stack.Screen name='NewGameList' component={NewGameList} />
-        <Stack.Screen name='NewGameInfo' component={NewGameInfo} />
-        <Stack.Screen name='NewGame' component={NewGame} />
+        <Stack.Screen
+          name='Games'
+          component={Games}
+        />
+        <Stack.Screen
+          name='Game'
+          component={Game}
+          options={{
+            transitionSpec: {
+              open: nada,
+              close: nada,
+            },
+          }}
+        />
+        <Stack.Screen
+          name='NewGameList'
+          component={NewGameList}
+        />
+        <Stack.Screen
+          name='NewGameInfo'
+          component={NewGameInfo}
+        />
+        <Stack.Screen
+          name='NewGame'
+          component={NewGame}
+          options={{
+            transitionSpec: {
+              open: nada,
+              close: nada,
+            },
+          }}
+        />
       </Stack.Navigator>
     </SafeAreaView>
   );

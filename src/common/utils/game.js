@@ -1,10 +1,12 @@
-import { cloneDeep, find, findIndex } from 'lodash';
+import { cloneDeep, find, findIndex, reduce } from 'lodash';
+
 import {
   ACTIVE_GAMES_FOR_PLAYER_QUERY,
 } from 'features/games/graphql';
 import {
   GAME_HOLES_FRAGMENT
 } from 'features/game/graphql';
+import { getHolesToUpdate } from 'common/utils/teams';
 
 
 
@@ -153,6 +155,7 @@ export const getAllOptions = game => {
 };
 
 export const getGamespecKVs = (game, key) => {
+  //console.log('getGamespecKVs game', game);
   const ret = game.gamespecs.map(gs => {
     return gs[key];
   });
@@ -232,7 +235,7 @@ export const rmgame = async (gkey, currentPlayerKey, mutation) => {
       variables: {
         pkey: currentPlayerKey,
       },
-      fetchPolicy: 'cache-and-network',
+      fetchPolicy: 'network-only',
     }],
     awaitFetchQueries: true,
   });
@@ -263,5 +266,65 @@ export const updateGameHolesCache = ({cache, gkey, holes}) => {
       holes,
     },
   });
+
+};
+
+export const addPlayerToOwnTeam = async ({pkey, game, updateGame}) => {
+
+  const { _key: gkey } = game;
+  let newGame = getNewGameForUpdate(game);
+
+  const holesToUpdate = getHolesToUpdate(newGame.scope.teams_rotate, game);
+  if( !newGame.holes ) {
+    newGame.holes = [];
+  }
+  console.log('holesToUpdate', holesToUpdate);
+  holesToUpdate.map(h => {
+    const holeIndex = findIndex(newGame.holes, {hole: h});
+    if( holeIndex < 0 ) {
+      // if hole data doesn't exist, create it with the single player team
+      newGame.holes.push({
+        hole: h,
+        teams: [{
+          team: '1', players: [pkey], junk: [],
+        }],
+        multipliers: [],
+      });
+    } else {
+      // hole exists, so just add a new team with this player only
+      if( newGame.holes[holeIndex].teams ) {
+        const maxTeam = reduce(newGame.holes[holeIndex].teams, (max, t) => {
+          const teamNum = parseInt(t.team);
+          if( !teamNum ) return max;
+          return (teamNum > max) ? teamNum : max;
+        }, 0);
+        console.log('maxTeam', maxTeam);
+        newGame.holes[holeIndex].teams.push({
+          team: (++maxTeam).toString(), players: [pkey], junk: [],
+        });
+      } else {
+        newGame.holes[holeIndex].teams = [{
+          team: '1', players: [pkey], junk: [],
+        }];
+      }
+    }
+  });
+  console.log('addPlayerToOwnTeam newGame', newGame);
+  const { loading, error, data } = await updateGame({
+    variables: {
+      gkey: gkey,
+      game: newGame,
+    },
+    update: (cache, { data }) => {
+      //console.log('cache data', cache.data);
+      updateGameHolesCache({
+        cache,
+        gkey,
+        holes: newGame.holes,
+      });
+    },
+  });
+
+  if( error ) console.log('Error updating game - addPlayerToOwnTeam', error);
 
 };

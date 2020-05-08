@@ -31,10 +31,19 @@ const Games = props => {
   };
 
   const itemPressed = (item, setup) => {
-    navigation.navigate('Game', {
-      currentGameKey: item._key,
-      setup: setup
-    });
+    if( setup ) {
+      navigation.navigate('Game', {
+        currentGameKey: item._key,
+        screen: 'Setup',
+        params: {
+          screen: 'GameSetup',
+        },
+      });
+    } else {
+      navigation.navigate('Game', {
+        currentGameKey: item._key,
+      });
+    }
   };
 
   const renderItem = ({item}) => {

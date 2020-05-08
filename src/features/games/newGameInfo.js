@@ -114,8 +114,8 @@ const NewGameInfo = props => {
             game_start: moment.utc(start).format(),
           })
         }}
-        accessibilityLabel='Register Next 1'
-        testID='register_next_1_button'
+        accessibilityLabel='Create Game'
+        testID='create_game_button'
       />
     </View>
   );

@@ -21,8 +21,9 @@ const Player = props => {
   const { player, game, currentHole } = props;
 
   if( !player || !player._key ) return null;
-
   const round = get_round_for_player(game.rounds, player._key);
+  if( !round ) return null;
+
   const { _key: rkey } = round;
   const hole = get_hole(currentHole, round);
   const score = get_score(currentHole, round);

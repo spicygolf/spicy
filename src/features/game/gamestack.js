@@ -20,8 +20,12 @@ import { green } from 'common/colors';
 
 const GameStack = props => {
 
-  const { setup } = props;
-  const initRoute = setup ? 'GameSetup' : 'Score';
+  const nada = {
+    animation: 'timing',
+    config: {
+      duration: 0,
+    },
+  };
 
   const { game } = useContext(GameContext);
   const { gamespecs } = game;
@@ -36,7 +40,7 @@ const GameStack = props => {
         <Text style={styles.gname_txt}>{gamespec_name} - {start}</Text>
       </View>
       <Tab.Navigator
-        initialRouteName={initRoute}
+        initialRouteName='Score'
         screenOptions={{
           inactiveTintColor: '#ccc',
           inactiveBackgroundColor: '#666',
@@ -67,7 +71,7 @@ const GameStack = props => {
           }}
         />
         <Tab.Screen
-          name='GameSetup'
+          name='Setup'
           component={GameSetupStack}
           options={{
             title: 'Setup'

@@ -33,7 +33,7 @@ const TeeSelector = (props) => {
       oldTee: tee,
     })
   } else {
-    pressFn = () => navigation.navigate('LinkRoundList', {player});
+    pressFn = () => navigation.navigate('LinkRoundList', {game, player});
     buttonName = 'Select Round';
   }
 
