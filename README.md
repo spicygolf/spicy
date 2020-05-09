@@ -1,16 +1,14 @@
-# Druid Golf App
+# Spicy Golf App
 
-Druid Golf mobile app written in React Native
+Spicy Golf mobile app written in React Native
 
 ## Development Setup
 
  * Install node npm yarn watchman cocoapods, probably via `brew`
  * Install XCode
- * Install command-line developer tools
+ * Configure Command Line Tools like [here](https://stackoverflow.com/questions/29108172/xcrun-unable-to-find-simctl).
 
-         xcode-select --install
-
-    You might have to set XCode | Preferences | Locations | Command Line Tools dropdown to something if it's blank.
+    TL;DR - set XCode | Preferences | Locations | Command Line Tools dropdown to something if it's blank.
 
  * Install React Native CLI and Detox
 

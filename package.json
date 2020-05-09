@@ -1,6 +1,7 @@
 {
   "name": "spicygolf",
   "version": "0.2.2",
+  "description": "Spicy Golf App",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -19,7 +20,7 @@
         "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/spicygolf.app",
         "build": "xcodebuild -project ios/spicygolf.xcodeproj -scheme spicygolf -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build -UseModernBuildSystem=NO",
         "type": "ios.simulator",
-        "name": "iPhone X"
+        "name": "iPhone 11"
       }
     }
   },
