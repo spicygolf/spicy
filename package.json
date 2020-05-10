@@ -85,5 +85,7 @@
     "transform": {
       "^.+\\.js$": "<rootDir>/node_modules/react-native/jest/preprocessor.js"
     }
-  }
+  },
+  "author": "Brad Anderson <brad@druid.golf>",
+  "license": "ISC"
 }
