@@ -36,7 +36,7 @@ const LinkRound = props => {
 `;
 
   const { route } = props;
-  const { game, player, round } = route.params;
+  const { game, player, round, isNew } = route.params;
   //console.log('LinkRound route params', game, player, round);
 
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
@@ -79,7 +79,7 @@ const LinkRound = props => {
       round: r,
       game: game,
       player: player,
-      isNew: true,
+      isNew: isNew,
       linkRoundToGame: linkRoundToGame,
       linkRoundToPlayer: linkRoundToPlayer,
     });
@@ -103,7 +103,9 @@ const LinkRound = props => {
         }
 
         // link round
-        let r = round ? round : await createNewRound();
+        let r = (round && !isNew)
+          ? round
+          : await createNewRound();
         await linkRound(r);
 
         // TODO: do we even need this anymore after refactor?
