@@ -77,7 +77,7 @@ const Leaderboard = props => {
     });
     if( scoreType === 'match' ) {
       const lastRow = last(rows);
-      lastRow.scores.map(s => {
+      if( lastRow ) lastRow.scores.map(s => {
         totals[s.pkey] = s.score.match;
       });
     }

@@ -350,6 +350,7 @@ export const playerListIndividual = ({game}) => {
 
 export const playerListWithTeams = ({game, scores}) => {
   const ret = [];
+  if( !scores || !scores.holes || !scores.holes[0] ) return ret;
   scores.holes[0].teams.map(t => {
     t.players.map(p => {
       const gP = find(game.players, {_key: p.pkey});
