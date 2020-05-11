@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 
 import BirdieEmAllLeaderboard from './components/birdie_em_all/leaderboard';
-import FivePointsLeaderboard from './components/five_points/leaderboard';
+import PointsLeaderboard from './components/points/leaderboard';
+import MatchPlayLeaderboard from './components/matchplay/leaderboard';
 import GameNotFound from './components/general/notfound';
 import { GameContext } from 'features/game/gameContext';
 
@@ -9,7 +10,7 @@ import { GameContext } from 'features/game/gameContext';
 
 const Leaderboard = (props) => {
 
-  return (<FivePointsLeaderboard {...props} />);
+  //return (<FivePointsLeaderboard {...props} />);
   // TODO: deal with multiple gamespecs attached to same game
   // maybe a general 'category' of games that have to be similar to be
   // attached to the same game?
@@ -17,14 +18,21 @@ const Leaderboard = (props) => {
 
   let Component = null;
 
-  const { game } = useContext(GameContext);
+  const { activeGameSpec } = useContext(GameContext);
+  if( !activeGameSpec ) {
+    console.log('no active gamespec');
+    return null;
+  }
 
-  switch(game.gametype) {
+  switch(activeGameSpec.type) {
     case "birdie_em_all":
       Component = BirdieEmAllLeaderboard;
       break;
-    case "five_points":
-      Component = FivePointsLeaderboard;
+    case "points":
+      Component = PointsLeaderboard;
+      break;
+    case 'match':
+      Component = MatchPlayLeaderboard;
       break;
     default:
       Component = GameNotFound;

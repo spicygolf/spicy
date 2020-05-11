@@ -47,6 +47,11 @@ const Game = props => {
     // got game
     //console.log('g_data', g_data);
     const game = data.getGame;
+    const { _key: gkey } = game;
+    const activeGameSpec = (game && game.gamespecs && game.gamespecs[0])
+      ? game.gamespecs[0]
+      : null;
+
     console.log('game  ', game);
 
      const game_listener = (
@@ -69,10 +74,11 @@ const Game = props => {
 
     return (
       <GameContext.Provider value={{
-        gkey: game._key,
-        game: game,
-        scores: scores,
-        currentPlayerKey: currentPlayerKey,
+        gkey,
+        game,
+        scores,
+        currentPlayerKey,
+        activeGameSpec,
       }}>
         { game_listener }
         { round_listeners }

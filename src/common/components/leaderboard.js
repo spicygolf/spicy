@@ -8,26 +8,24 @@ import
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Dropdown } from 'react-native-material-dropdown';
-import { filter, find } from 'lodash';
+import { find, last, orderBy } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
+import { playerListIndividual, playerListWithTeams } from 'common/utils/game';
 
 
 
-const FivePointsLeaderboard = props => {
+const Leaderboard = props => {
 
-  const [ scoreType, setScoreType ] = useState('gross');
+  const { activeChoices, initialScoreType, teams } = props;
+  const [ scoreType, setScoreType ] = useState(initialScoreType || 'gross');
 
   const { game, scores } = useContext(GameContext);
 
-  const playerList = filter(game.players.map((p, i) => {
-    if( !p ) return null;
-    return ({
-      key: i,
-      pkey: p._key,
-      name: p.name,
-    });
-  }), (p => p != null));
+  const playerList = teams
+    ? playerListWithTeams({game, scores})
+    : playerListIndividual({game});
+  const orderedPlayerList = orderBy(playerList, ['team']);
 
   const findScore = (hole, pkey) => {
     let ret = null;
@@ -39,26 +37,47 @@ const FivePointsLeaderboard = props => {
     return ret;
   };
 
+  // TODO: Inject format fn in with higher-level Leaderboard components?
   const format = v => {
     if( scoreType === 'points' && parseFloat(v) > 0 ) return `+${v}`;
+    if( scoreType === 'match' ) {
+      if( v && v.toString().includes('&') ) return v;
+      if( parseFloat(v) < 0 ) return '';
+      if( parseFloat(v) > 0 ) return `${v} up`;
+      if( parseFloat(v) == 0 ) return 'AS';
+    }
     return v;
   };
 
   const side = (holes, side) => {
-    const totals = {};
+    let totals = {};
     const rows = holes.map(h => {
-      const scores = playerList.map((p, i) => {
+      const scores = orderedPlayerList.map((p) => {
         const score = findScore(h, p.pkey);
         if( !totals[p.pkey] ) totals[p.pkey] = 0;
         if( score ) totals[p.pkey] += (parseFloat(score[scoreType]) || 0);
-        return { pkey: p.pkey, score };
+        const team = find(h.teams, {team: p.team})
+        return {
+          pkey: p.pkey,
+          score: {
+            ...score,
+            match: team.matchOver ? null : team.matchDiff
+          },
+          team: team.team
+        };
       });
       return {
         hole: h.hole,
-        scores: scores,
+        scores,
       };
     });
-
+    if( scoreType === 'match' ) {
+      const lastRow = last(rows);
+      lastRow.scores.map(s => {
+        totals[s.pkey] = s.score.match;
+      });
+    }
+    console.log('totals', side, totals, rows);
     return {
       side,
       data: rows,
@@ -107,7 +126,7 @@ const FivePointsLeaderboard = props => {
   };
 
   const TotalRow = ({section}) => {
-    const totalCells = playerList.map(p => (
+    const totalCells = orderedPlayerList.map(p => (
       <View key={`totalcell_${section.side}_${p.pkey}`} style={styles.scorePopContainer}>
         <View style={styles.scoreView}>
           <Text style={styles.scoreCell}>{format(section.totals[p.pkey])}</Text>
@@ -126,11 +145,9 @@ const FivePointsLeaderboard = props => {
 
   const ViewChooser = props => {
 
-    const choices = [
-      {value: 'gross'},
-      {value: 'net'},
-      {value: 'points'},
-    ];
+    const { activeChoices } = props;
+
+    const choices = activeChoices.map(c => ({value: c}));
 
     return (
       <Dropdown
@@ -148,7 +165,7 @@ const FivePointsLeaderboard = props => {
 
   const Header = () => {
 
-    const players = playerList.map(p => {
+    const players = orderedPlayerList.map(p => {
       return (
         <View key={`header_${p.pkey}`} style={[styles.playerNameView, styles.rotate]}>
           <Text
@@ -161,7 +178,7 @@ const FivePointsLeaderboard = props => {
     return (
       <View style={styles.header}>
         <View style={styles.holeTitleView}>
-          <ViewChooser />
+          <ViewChooser activeChoices={activeChoices} />
           <Text style={styles.holeTitle}>Hole</Text>
         </View>
         { players }
@@ -171,6 +188,7 @@ const FivePointsLeaderboard = props => {
   };
 
   const Footer = () => {
+    if( scoreType === 'match' ) return null;
     const section = {
       side: 'Total',
       totals: totals,
@@ -184,7 +202,7 @@ const FivePointsLeaderboard = props => {
   const b = back();
   data.push(b);
   const totals = {};
-  playerList.map(p => {
+  orderedPlayerList.map(p => {
     if( !totals[p.pkey] ) totals[p.pkey] = 0;
     totals[p.pkey] += ((parseFloat(f.totals[p.pkey]) || 0) + (parseFloat(b.totals[p.pkey]) || 0));
   });
@@ -205,7 +223,7 @@ const FivePointsLeaderboard = props => {
 
 }
 
-export default FivePointsLeaderboard;
+export default Leaderboard;
 
 const headerHeight = 90;
 const rowHeight = 26;
@@ -231,6 +249,7 @@ var styles = StyleSheet.create({
   holeTitle: {
     paddingBottom: 10,
     alignSelf: 'center',
+    color: '#666',
   },
   chooserText: {
     fontSize: 12,
@@ -248,6 +267,7 @@ var styles = StyleSheet.create({
     paddingLeft: 10,
     maxWidth: headerHeight,
     width: headerHeight,
+    color: '#666',
     //borderWidth: 1,
   },
   row: {
@@ -263,7 +283,7 @@ var styles = StyleSheet.create({
     //borderWidth: 1,
   },
   holeCell: {
-
+    color: '#666',
   },
   scoreCell: {
     margin: 0,

@@ -18,6 +18,21 @@ import {
 
 
 
+export const getScoringFromGamespecs = ({gamespecs, scoringType}) => {
+  let ret = [];
+  gamespecs.map(gs => {
+    const { scoring } = gs;
+    if( !scoring || !scoring[scoringType] ) return;
+    scoring[scoringType].map(s => {
+      ret.push({
+        ...s,
+        key: `${gs._key}_${s.name}`,
+      });
+    });
+  });
+  return ret;
+};
+
 export const getJunkFromGamespecs = gamespecs => {
   let ret = [];
   gamespecs.map(gs => {
@@ -52,7 +67,7 @@ export const getMultipliersFromGamespecs = gamespecs => {
 export const scoring = game => {
 
   const { gamespecs } = game;
-  const alljunk = getJunkFromGamespecs(gamespecs);
+  const allJunk = getJunkFromGamespecs(gamespecs);
   const allmultipliers = getMultipliersFromGamespecs(gamespecs);
   const teamGame = getGamespecKVs(game, 'teams').includes(true);
 
@@ -73,7 +88,7 @@ export const scoring = game => {
 
     // begin possiblePoints calcs
     let possiblePoints = 0;
-    alljunk.map(gsJunk => {
+    allJunk.map(gsJunk => {
       if( gsJunk.limit == 'one_team_per_group' ||
           gsJunk.limit == 'one_per_group' ) {
         possiblePoints += gsJunk.value;
@@ -86,7 +101,7 @@ export const scoring = game => {
         team: gTeam.team,
         players: gTeam.players.map(gPlayer => {
           const pkey = gPlayer;
-          const {p, tp, pp} = calcPlayerScore({pkey, game, hole, alljunk});
+          const {p, tp, pp} = calcPlayerScore({pkey, game, hole, allJunk});
           teamPoints += tp;
           possiblePoints += pp;
           return p;
@@ -96,13 +111,14 @@ export const scoring = game => {
         points: teamPoints,
         holeTotal: 0,
         runningTotal: 0,
-        gameTotal: 0,
+        matchDiff: 0,
+        matchOver: false,
       };
-      team = calcTeamScore({team, alljunk});
+      team = calcTeamScore({team, allJunk});
       return team;
     });
 
-    teams = calcTeamJunk({teams, alljunk});
+    teams = calcTeamJunk({teams, allJunk});
     //if( hole == '1' ) console.log('teams', sorted[i].index, teams, teams[sorted[i].index]);
 
     //  junk that depends on team score or something after the above calcs
@@ -196,29 +212,45 @@ export const scoring = game => {
 
   });
 
-  // runningTotal calcs
-
-  const teamTotals = [];
-
-  // loop thru holes, calculating runningTotal for each team
-  // TODO: do we need to go by seq or other order?
+  // loop thru holes, calculating runningTotal, match for each team
+  let isMatchOver = false;
   ret.holes.map((h, i) => {
-
+    // runningTotal
     h.teams.map(t => {
       let lastHoleRunningTotal = ( i == 0 ) ? 0
         : find(ret.holes[i-1].teams, {team: t.team}).runningTotal;
       //console.log('lastHoleRunningTotal', lastHoleRunningTotal, 't', t);
-
       t.runningTotal = lastHoleRunningTotal + t.holeTotal;
       //console.log('teamTotals', h.hole, t.runningTotal);
     });
+
+    // match
+    if( h.teams.length == 2 ) {
+      h.teams.map(t => {
+        if( isMatchOver ) {
+          t.matchDiff = null;
+          t.matchOver = true;
+          return;
+        }
+        const otherTeamIndex = (t.team === '1' ) ? 1 : 0;
+        const diff = t.runningTotal - h.teams[otherTeamIndex].runningTotal;
+        const holesRemaining = ret.holes.length - i - 1;
+        console.log('holesRemaining', h.hole, holesRemaining);
+        if( diff > holesRemaining ) {
+          isMatchOver = true;
+          t.matchDiff = `${diff} & ${holesRemaining}`;
+        } else {
+          t.matchDiff = diff;
+        }
+      });
+    }
   });
 
   return ret;
 };
 
 
-const calcPlayerScore = ({pkey, game, hole, alljunk}) => {
+const calcPlayerScore = ({pkey, game, hole, allScoringHole, allJunk}) => {
 
   let tp = 0;
   let pp = 0;
@@ -234,7 +266,7 @@ const calcPlayerScore = ({pkey, game, hole, alljunk}) => {
 
   // player junk
   const playerJunk = [];
-  alljunk.map(gsJunk => {
+  allJunk.map(gsJunk => {
     if( gsJunk.scope != 'player' ) return;
     let j = false;
     switch ( gsJunk.based_on ) {
@@ -273,9 +305,9 @@ const calcPlayerScore = ({pkey, game, hole, alljunk}) => {
 
 };
 
-const calcTeamScore = ({team, alljunk}) => {
+const calcTeamScore = ({team, allJunk}) => {
   let ret = cloneDeep(team);
-  alljunk.map(gsJunk => {
+  allJunk.map(gsJunk => {
     if( gsJunk.scope == 'team' && gsJunk.type == 'dot') {
       //if( hole == '1' ) console.log('team score gsJunk', gsJunk);
       switch( gsJunk.calculation ) {
@@ -309,9 +341,9 @@ const calcTeamScore = ({team, alljunk}) => {
   return ret;
 };
 
-const calcTeamJunk = ({teams, alljunk}) => {
+const calcTeamJunk = ({teams, allJunk}) => {
   const ret = cloneDeep(teams);
-  alljunk.map(gsJunk => {
+  allJunk.map(gsJunk => {
     if( gsJunk.scope == 'team' && gsJunk.type == 'dot' ) {
       const teamScores = teams.map((t, i) => ({
         team: t.team,
@@ -370,7 +402,7 @@ export const isScoreToParJunk = (junk, s, par) => {
 };
 
 export const formatDiff = diff => {
-  if( !diff ) return '';
+  if( !diff ) return '-';
   let sign = '';
   if( diff > 0 ) sign = '+';
   return `${sign}${diff}`;

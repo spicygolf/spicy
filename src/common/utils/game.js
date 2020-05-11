@@ -1,4 +1,4 @@
-import { cloneDeep, find, findIndex, reduce } from 'lodash';
+import { cloneDeep, filter, find, findIndex, reduce } from 'lodash';
 
 import {
   ACTIVE_GAMES_FOR_PLAYER_QUERY,
@@ -327,4 +327,39 @@ export const addPlayerToOwnTeam = async ({pkey, game, updateGame}) => {
 
   if( error ) console.log('Error updating game - addPlayerToOwnTeam', error);
 
+};
+
+
+export const playerListIndividual = ({game}) => {
+  return (
+    filter(
+      game.players.map(p => {
+        if( !p ) return null;
+        return ({
+          key: p._key,
+          pkey: p._key,
+          name: p.name,
+          team: '0',
+        });
+      }),
+      (p => p != null)
+    )
+  )
+};
+
+
+export const playerListWithTeams = ({game, scores}) => {
+  const ret = [];
+  scores.holes[0].teams.map(t => {
+    t.players.map(p => {
+      const gP = find(game.players, {_key: p.pkey});
+      ret.push({
+        key: p.pkey,
+        pkey: p.pkey,
+        name: gP.name || '',
+        team: t.team,
+      });
+    });
+  });
+  return filter(ret, (p => p != null));
 };

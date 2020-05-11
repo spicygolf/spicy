@@ -40,7 +40,7 @@ const GameStack = props => {
         <Text style={styles.gname_txt}>{gamespec_name} - {start}</Text>
       </View>
       <Tab.Navigator
-        initialRouteName='Score'
+        initialRouteName='Leaderboard'
         screenOptions={{
           inactiveTintColor: '#ccc',
           inactiveBackgroundColor: '#666',
