@@ -17,6 +17,7 @@ import { filter, reverse, sortBy } from 'lodash';
 
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
+import { acronym, last } from 'common/utils/text';
 import { blue } from 'common/colors';
 
 
@@ -46,15 +47,46 @@ const Games = props => {
     }
   };
 
+  const buildSubtitle = game => {
+
+    //console.log('game', game);
+    let courses = [], players = [];
+    game.rounds.map(r => {
+      if( r && r.player && r.player[0] ) {
+        players.push(last(r.player[0].name));
+      }
+      if( r && r.tee && r.tee.course && r.tee.course.name ) {
+        const c = acronym(r.tee.course.name)
+        if( courses.indexOf(c) < 0 ) courses.push(c);
+      }
+    });
+    const coursesTxt = (courses.length > 2)
+      ? 'various courses'
+      : courses.join(', ');
+    const playersTxt = (players.length > 5)
+      ? `${players.length} players`
+      : players.join(', ');
+
+    const startTime = moment(game.start).format('llll');
+
+    return (
+      <View>
+        <Text style={styles.subtitle}>{`${coursesTxt} - ${playersTxt}`}</Text>
+        <Text style={styles.subtitle}>{startTime || ''}</Text>
+      </View>
+    );
+
+  };
+
   const renderItem = ({item}) => {
     if( !item ) return null;
-    const startTime = moment(item.start).format('llll');
+    const subtitle = buildSubtitle(item);
+
     return (
       <ListItem
         title={item.name || ''}
-        tit={styles.title}
-        subtitle={startTime || ''}
-        subtitleStyle={styles.subtitle}
+        titleStyle={styles.title}
+        subtitle={subtitle}
         onPress={() => itemPressed(item, false)}
         rightIcon={
           <Icon

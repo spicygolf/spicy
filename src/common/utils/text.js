@@ -5,3 +5,14 @@ export const acronym = orig => {
   let acronym = matches.join('');
   return acronym;
 };
+
+export const first = name => {
+  const names = name.split(' ');
+  return names[0] || '';
+};
+
+// TODO: handle name suffixes such as III, Jr. Sr. whatever...
+export const last = name => {
+  const names = name.split(' ');
+  return names[names.length-1] || '';
+};
