@@ -111,6 +111,7 @@ export const GET_GAME_QUERY = gql`
         }
         junk {
             name
+            disp
             seq
             type
             value

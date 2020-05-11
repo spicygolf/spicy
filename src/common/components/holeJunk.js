@@ -154,7 +154,7 @@ const HoleJunk = props => {
 
     return (
       <Button
-        title={junk.name}
+        title={junk.disp}
         icon={
           <Icon
             style={styles.icon}
