@@ -32,11 +32,17 @@ const TeamTotals = props => {
   }
   const netTotal = netPoints * hole.holeMultiplier;
   const diff = otherTeam ? team.runningTotal - otherTeam.runningTotal : null;
+  const points = (netPoints == 0)
+    ? '-'
+    : netPoints;
+  const multiplier = (hole.holeMultiplier == 1 || netPoints == 0 )
+    ? ''
+    : `x ${hole.holeMultiplier} = ${netTotal}`;
 
   return (
   <View style={styles.totalsView}>
     <View>
-      <Text style={styles.totalsText}>Hole: {`${netPoints} x ${hole.holeMultiplier} = ${netTotal}`}</Text>
+      <Text style={styles.totalsText}>Hole: {`${points} ${multiplier}`}</Text>
     </View>
     <View>
       <Text style={styles.totalsText}>Total: {formatDiff(diff)}</Text>

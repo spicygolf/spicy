@@ -21,6 +21,8 @@ const TeamJunk = props => {
 
   const renderJunk = junk => {
 
+    if( junk.show_in == 'none' ) return null;
+
     // TODO: junk.name needs l10n, i18n - use junk.name as slug
     const type = 'solid';
     const color = 'white';
