@@ -293,12 +293,12 @@ export const addPlayerToOwnTeam = async ({pkey, game, updateGame}) => {
     } else {
       // hole exists, so just add a new team with this player only
       if( newGame.holes[holeIndex].teams ) {
-        const maxTeam = reduce(newGame.holes[holeIndex].teams, (max, t) => {
+        let maxTeam = reduce(newGame.holes[holeIndex].teams, (max, t) => {
           const teamNum = parseInt(t.team);
           if( !teamNum ) return max;
           return (teamNum > max) ? teamNum : max;
         }, 0);
-        console.log('maxTeam', maxTeam);
+        //console.log('maxTeam', maxTeam);
         newGame.holes[holeIndex].teams.push({
           team: (++maxTeam).toString(), players: [pkey], junk: [],
         });
