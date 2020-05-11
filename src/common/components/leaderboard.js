@@ -52,18 +52,22 @@ const Leaderboard = props => {
   const side = (holes, side) => {
     let totals = {};
     const rows = holes.map(h => {
-      const scores = orderedPlayerList.map((p) => {
+      const scores = orderedPlayerList.map(p => {
         const score = findScore(h, p.pkey);
         if( !totals[p.pkey] ) totals[p.pkey] = 0;
         if( score ) totals[p.pkey] += (parseFloat(score[scoreType]) || 0);
-        const team = find(h.teams, {team: p.team})
+        let t = find(h.teams, {team: p.team});
+        let team = '';
+        if( t && t.team ) team = t.team; // dafuq?
+        let match = null;
+        if( t && !t.matchOver ) match = t.matchDiff;
         return {
           pkey: p.pkey,
           score: {
             ...score,
-            match: team.matchOver ? null : team.matchDiff
+            match,
           },
-          team: team.team
+          team,
         };
       });
       return {
@@ -77,7 +81,6 @@ const Leaderboard = props => {
         totals[s.pkey] = s.score.match;
       });
     }
-    console.log('totals', side, totals, rows);
     return {
       side,
       data: rows,

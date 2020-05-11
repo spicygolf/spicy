@@ -235,7 +235,6 @@ export const scoring = game => {
         const otherTeamIndex = (t.team === '1' ) ? 1 : 0;
         const diff = t.runningTotal - h.teams[otherTeamIndex].runningTotal;
         const holesRemaining = ret.holes.length - i - 1;
-        console.log('holesRemaining', h.hole, holesRemaining);
         if( diff > holesRemaining ) {
           isMatchOver = true;
           t.matchDiff = `${diff} & ${holesRemaining}`;
