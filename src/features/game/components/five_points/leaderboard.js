@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import
 {
-  ScrollView,
   SectionList,
   StyleSheet,
   Text,
@@ -154,7 +153,6 @@ const FivePointsLeaderboard = props => {
         <View key={`header_${p.pkey}`} style={[styles.playerNameView, styles.rotate]}>
           <Text
             style={styles.playerName}
-            numberOfLines={2}
             textBreakStrategy='simple'
           >{ p.name }</Text>
         </View>
@@ -221,6 +219,7 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     height: headerHeight,
     alignItems: 'center',
+    //borderWidth: 1,
   },
   holeTitleView: {
     height: headerHeight,
@@ -240,14 +239,16 @@ var styles = StyleSheet.create({
     transform: [{ rotate: '270deg'}],
   },
   playerNameView: {
-    width: headerHeight,
     flex: 1,
-    alignSelf: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
     //borderWidth: 1,
   },
   playerName: {
     paddingLeft: 10,
     maxWidth: headerHeight,
+    width: headerHeight,
+    //borderWidth: 1,
   },
   row: {
     minHeight: rowHeight,
