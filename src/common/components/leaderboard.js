@@ -60,7 +60,11 @@ const Leaderboard = props => {
         let team = '';
         if( t && t.team ) team = t.team; // dafuq?
         let match = null;
-        if( t && !t.matchOver ) match = t.matchDiff;
+        if( t && !t.matchOver &&  h.scoresEntered == orderedPlayerList.length) {
+          // we have a team object, the match isn't over, and all scores are
+          // entered for this hole, so we can set the match property
+          match = t.matchDiff;
+        }
         return {
           pkey: p.pkey,
           score: {
@@ -81,6 +85,7 @@ const Leaderboard = props => {
         totals[s.pkey] = s.score.match;
       });
     }
+    //console.log('rows', side, rows);
     return {
       side,
       data: rows,

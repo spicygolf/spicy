@@ -85,6 +85,7 @@ export const scoring = game => {
 
     let teams = [];
     let players = [];
+    let scoresEntered = 0;
 
     // begin possiblePoints calcs
     let possiblePoints = 0;
@@ -104,6 +105,7 @@ export const scoring = game => {
           const {p, tp, pp} = calcPlayerScore({pkey, game, hole, allJunk});
           teamPoints += tp;
           possiblePoints += pp;
+          if( p && p.score && p.score.gross ) ++scoresEntered;
           return p;
         }),
         score: [],
@@ -208,6 +210,7 @@ export const scoring = game => {
       multipliers,
       holeMultiplier,
       possiblePoints,
+      scoresEntered,
     });
 
   });
@@ -237,7 +240,11 @@ export const scoring = game => {
         const holesRemaining = ret.holes.length - i - 1;
         if( diff > holesRemaining ) {
           isMatchOver = true;
-          t.matchDiff = `${diff} & ${holesRemaining}`;
+          if( holesRemaining > 0 ) {
+            t.matchDiff = `${diff} & ${holesRemaining}`;
+          } else {
+            t.matchDiff = diff;
+          }
         } else {
           t.matchDiff = diff;
         }
