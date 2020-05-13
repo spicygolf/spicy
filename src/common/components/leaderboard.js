@@ -54,7 +54,7 @@ const Leaderboard = props => {
           // entered for this hole, so we can set the match property
           match = t.matchDiff;
         }
-        if( t.matchOver && t.win && !isMatchOver ) {
+        if( t && t.matchOver && t.win && !isMatchOver ) {
           match = t.matchDiff;
           isMatchOver = true; // to not show the result for any more holes
         }
