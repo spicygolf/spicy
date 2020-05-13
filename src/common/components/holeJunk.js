@@ -34,23 +34,23 @@ import {
 const HoleJunk = props => {
 
   const UPDATE_GAME_MUTATION = gql`
-  mutation UpdateGame($gkey: String!, $game: GameInput!) {
-    updateGame(gkey: $gkey, game: $game) {
-      holes {
-        hole
-        teams {
-          team
-          players
-          junk {
-            name
-            player
-            value
+    mutation UpdateGame($gkey: String!, $game: GameInput!) {
+      updateGame(gkey: $gkey, game: $game) {
+        holes {
+          hole
+          teams {
+            team
+            players
+            junk {
+              name
+              player
+              value
+            }
           }
         }
       }
     }
-  }
-`;
+  `;
 
   const { hole, score, pkey } = props;
   const par = (hole && hole.par) ? parseFloat(hole.par) : 0.0;
@@ -107,6 +107,8 @@ const HoleJunk = props => {
 
   const renderJunk = junk => {
 
+    if( junk.show_in == 'none' ) return null;
+
     // TODO: junk.name needs l10n, i18n - use junk.name as slug
     let type = 'outline';
     let color = blue;
@@ -152,7 +154,7 @@ const HoleJunk = props => {
 
     return (
       <Button
-        title={junk.name}
+        title={junk.disp}
         icon={
           <Icon
             style={styles.icon}

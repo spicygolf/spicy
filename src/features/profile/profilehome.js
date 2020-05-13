@@ -30,6 +30,11 @@ const ProfileHome = props => {
     logout(client);
   }
 
+  const name = (
+    currentPlayer &&
+    currentPlayer.name
+  ) ? currentPlayer.name : '';
+
   const index = (
     currentPlayer &&
     currentPlayer.handicap &&
@@ -57,7 +62,7 @@ const ProfileHome = props => {
       <Card>
         <View style={styles.field_view}>
           <Text>Name:</Text>
-          <Text>{currentPlayer.name}</Text>
+          <Text>{name}</Text>
         </View>
         <View style={styles.field_view}>
           <Text>Current Index:</Text>

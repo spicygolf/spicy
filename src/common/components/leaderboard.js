@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import
 {
-  ScrollView,
   SectionList,
   StyleSheet,
   Text,
@@ -9,26 +8,24 @@ import
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { Dropdown } from 'react-native-material-dropdown';
-import { filter, find } from 'lodash';
+import { find, last, orderBy } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
+import { playerListIndividual, playerListWithTeams } from 'common/utils/game';
+import { format } from 'common/utils/score';
 
 
+const Leaderboard = props => {
 
-const FivePointsLeaderboard = props => {
-
-  const [ scoreType, setScoreType ] = useState('gross');
+  const { activeChoices, initialScoreType, teams } = props;
+  const [ scoreType, setScoreType ] = useState(initialScoreType || 'gross');
 
   const { game, scores } = useContext(GameContext);
 
-  const playerList = filter(game.players.map((p, i) => {
-    if( !p ) return null;
-    return ({
-      key: i,
-      pkey: p._key,
-      name: p.name,
-    });
-  }), (p => p != null));
+  const playerList = teams
+    ? playerListWithTeams({game, scores})
+    : playerListIndividual({game});
+  const orderedPlayerList = orderBy(playerList, ['team']);
 
   const findScore = (hole, pkey) => {
     let ret = null;
@@ -40,26 +37,49 @@ const FivePointsLeaderboard = props => {
     return ret;
   };
 
-  const format = v => {
-    if( scoreType === 'points' && parseFloat(v) > 0 ) return `+${v}`;
-    return v;
-  };
-
   const side = (holes, side) => {
-    const totals = {};
+    let totals = {};
+    let isMatchOver = false;
     const rows = holes.map(h => {
-      const scores = playerList.map((p, i) => {
+      const scores = orderedPlayerList.map(p => {
         const score = findScore(h, p.pkey);
         if( !totals[p.pkey] ) totals[p.pkey] = 0;
         if( score ) totals[p.pkey] += (parseFloat(score[scoreType]) || 0);
-        return { pkey: p.pkey, score };
+        let t = find(h.teams, {team: p.team});
+        let team = '';
+        if( t && t.team ) team = t.team; // dafuq?
+        let match = null;
+        if( t && !t.matchOver && !isMatchOver &&  h.scoresEntered == orderedPlayerList.length) {
+          // we have a team object, the match isn't over, and all scores are
+          // entered for this hole, so we can set the match property
+          match = t.matchDiff;
+        }
+        if( t.matchOver && t.win && !isMatchOver ) {
+          match = t.matchDiff;
+          isMatchOver = true; // to not show the result for any more holes
+        }
+
+        return {
+          pkey: p.pkey,
+          score: {
+            ...score,
+            match,
+          },
+          team,
+        };
       });
       return {
         hole: h.hole,
-        scores: scores,
+        scores,
       };
     });
-
+    if( scoreType === 'match' ) {
+      const lastRow = last(rows);
+      if( lastRow ) lastRow.scores.map(s => {
+        totals[s.pkey] = s.score.match;
+      });
+    }
+    //console.log('rows', side, rows);
     return {
       side,
       data: rows,
@@ -84,7 +104,11 @@ const FivePointsLeaderboard = props => {
       return (
         <View key={`cell_${row.hole}_${s.pkey}`} style={styles.scorePopContainer}>
           <View style={styles.scoreView}>
-            <Text style={styles.scoreCell}>{format(s.score[scoreType]) || '  '}</Text>
+            <Text style={styles.scoreCell}>{format({
+              v: s.score[scoreType],
+              type: scoreType,
+              showDown: false,
+            })}</Text>
           </View>
           <View style={styles.popView}>
             <Icon
@@ -108,10 +132,13 @@ const FivePointsLeaderboard = props => {
   };
 
   const TotalRow = ({section}) => {
-    const totalCells = playerList.map(p => (
+    const totalCells = orderedPlayerList.map(p => (
       <View key={`totalcell_${section.side}_${p.pkey}`} style={styles.scorePopContainer}>
         <View style={styles.scoreView}>
-          <Text style={styles.scoreCell}>{format(section.totals[p.pkey])}</Text>
+          <Text style={styles.scoreCell}>{format({
+            v: section.totals[p.pkey],
+            type: scoreType,
+          })}</Text>
         </View>
       </View>
     ));
@@ -127,11 +154,9 @@ const FivePointsLeaderboard = props => {
 
   const ViewChooser = props => {
 
-    const choices = [
-      {value: 'gross'},
-      {value: 'net'},
-      {value: 'points'},
-    ];
+    const { activeChoices } = props;
+
+    const choices = activeChoices.map(c => ({value: c}));
 
     return (
       <Dropdown
@@ -149,12 +174,11 @@ const FivePointsLeaderboard = props => {
 
   const Header = () => {
 
-    const players = playerList.map(p => {
+    const players = orderedPlayerList.map(p => {
       return (
         <View key={`header_${p.pkey}`} style={[styles.playerNameView, styles.rotate]}>
           <Text
             style={styles.playerName}
-            numberOfLines={2}
             textBreakStrategy='simple'
           >{ p.name }</Text>
         </View>
@@ -163,7 +187,7 @@ const FivePointsLeaderboard = props => {
     return (
       <View style={styles.header}>
         <View style={styles.holeTitleView}>
-          <ViewChooser />
+          <ViewChooser activeChoices={activeChoices} />
           <Text style={styles.holeTitle}>Hole</Text>
         </View>
         { players }
@@ -173,6 +197,7 @@ const FivePointsLeaderboard = props => {
   };
 
   const Footer = () => {
+    if( scoreType === 'match' ) return null;
     const section = {
       side: 'Total',
       totals: totals,
@@ -186,7 +211,7 @@ const FivePointsLeaderboard = props => {
   const b = back();
   data.push(b);
   const totals = {};
-  playerList.map(p => {
+  orderedPlayerList.map(p => {
     if( !totals[p.pkey] ) totals[p.pkey] = 0;
     totals[p.pkey] += ((parseFloat(f.totals[p.pkey]) || 0) + (parseFloat(b.totals[p.pkey]) || 0));
   });
@@ -207,7 +232,7 @@ const FivePointsLeaderboard = props => {
 
 }
 
-export default FivePointsLeaderboard;
+export default Leaderboard;
 
 const headerHeight = 90;
 const rowHeight = 26;
@@ -221,6 +246,7 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     height: headerHeight,
     alignItems: 'center',
+    //borderWidth: 1,
   },
   holeTitleView: {
     height: headerHeight,
@@ -232,6 +258,7 @@ var styles = StyleSheet.create({
   holeTitle: {
     paddingBottom: 10,
     alignSelf: 'center',
+    color: '#666',
   },
   chooserText: {
     fontSize: 12,
@@ -240,14 +267,17 @@ var styles = StyleSheet.create({
     transform: [{ rotate: '270deg'}],
   },
   playerNameView: {
-    width: headerHeight,
     flex: 1,
-    alignSelf: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
     //borderWidth: 1,
   },
   playerName: {
     paddingLeft: 10,
     maxWidth: headerHeight,
+    width: headerHeight,
+    color: '#666',
+    //borderWidth: 1,
   },
   row: {
     minHeight: rowHeight,
@@ -262,7 +292,7 @@ var styles = StyleSheet.create({
     //borderWidth: 1,
   },
   holeCell: {
-
+    color: '#666',
   },
   scoreCell: {
     margin: 0,

@@ -19,7 +19,7 @@ import { GameContext } from 'features/game/gameContext';
 const Teams = ({teams, scoring, currentHole }) => {
 
   //console.log('Teams teams', teams);
-  const { game } = useContext(GameContext);
+  const { game, activeGameSpec } = useContext(GameContext);
   const { players } = game;
 
   const _renderPlayer = ({item}) => {
@@ -64,6 +64,7 @@ const Teams = ({teams, scoring, currentHole }) => {
           team={item.team}
           scoring={scoring}
           currentHole={currentHole}
+          type={activeGameSpec.type}
         />
       </Card>
     );

@@ -1,37 +1,78 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
+import {
+  StyleSheet,
+  View,
+} from 'react-native';
+import {
+  Card
+} from 'react-native-elements';
 
-import BirdieEmAllScore from './components/birdie_em_all/score';
-import FivePointsScore from './components/five_points/score';
-import GameNotFound from './components/general/notfound';
+import { getTeams } from 'common/utils/teams';
+import TeamChooser from 'common/components/teamChooser';
+import HoleNav from 'features/game/holenav';
+import Teams from 'features/game/teams';
 import { GameContext } from 'features/game/gameContext';
+import { getHoles } from 'common/utils/game';
 
 
 
-const Score = (props) => {
+const Score = props => {
 
-  return (<FivePointsScore {...props} />);
-  // TODO: deal with multiple gamespecs attached to same game
-  // maybe a general 'category' of games that have to be similar to be
-  // attached to the same game?
+  const { game, scores } = useContext(GameContext);
+  const [ currentHole, setCurrentHole ] = useState('1');
 
 
-  let Component = null;
+  let content = null;
 
-  const { game } = useContext(GameContext);
+  const teams = getTeams(game, currentHole);
+  //console.log('teams', teams);
 
-  switch( game.gametype) {
-    case 'birdie_em_all':
-      Component = BirdieEmAllScore;
-      break;
-    case "five_points":
-      Component = FivePointsScore;
-      break;
-    default:
-      Component = GameNotFound;
+  if( teams ) {
+    content = (
+      <Teams
+        teams={teams}
+        scoring={scores}
+        currentHole={currentHole}
+      />
+    );
+  } else {
+    content = (
+      <Card title='Choose Teams'>
+        <TeamChooser
+          currentHole={currentHole}
+        />
+      </Card>
+    );
   }
 
-  return <Component {...props}/>;
+  const holes = getHoles(game);
+  //console.log('holes', holes);
+
+  return (
+    <View style={styles.score_container}>
+      <HoleNav
+        holes={holes}
+        currentHole={currentHole}
+        changeHole={hole => setCurrentHole(hole)}
+      />
+      <View style={styles.content_container}>
+        {content}
+      </View>
+    </View>
+  );
 
 };
 
 export default Score;
+
+
+var styles = StyleSheet.create({
+  score_container: {
+    padding: 5,
+    flex: 1,
+  },
+  content_container: {
+    // TODO: any way to create this buffer for the bottom nav buttons?
+    paddingBottom: 80,
+  },
+});

@@ -13,17 +13,20 @@ query GetGameSpec($gamespec: String!) {
       min_players
       max_players
       location_type
+      teams
       team_size
       team_determination
       team_change_every
       scoring {
           hole {
               name
+              disp
+              seq
               points
               source
-              type
               scope
-              based_on
+              calculation
+              better
           }
       }
       junk {

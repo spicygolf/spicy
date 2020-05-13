@@ -45,6 +45,7 @@ export const login = async fbUser => {
     }
   });
   const payload = await res.json();
+  //console.log('login payload', payload);
 
   let ret = null;
   switch( res.status ) {

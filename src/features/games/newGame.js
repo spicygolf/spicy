@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Text,
+  View,
 } from 'react-native';
 import { useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
@@ -27,20 +29,22 @@ const NewGame = props => {
   const [ addGameMutation ] = useMutation(ADD_GAME_MUTATION);
   const [ addLinkMutation ] = useMutation(ADD_LINK_MUTATION);
 
+  const newGame = {
+    name: gamespec.disp,
+    start: game_start,
+    scope: {
+      holes: 'all18',
+      teams_rotate: 'never',
+    },
+    holes: [],
+    options: gamespec.defaultOptions || []
+  };
+
+  // add new game
   const addGame = async () => {
-    // add new game
     const { loading, error, data } = await addGameMutation({
       variables: {
-        game: {
-          name: gamespec.disp,
-          start: game_start,
-          scope: {
-            holes: 'all18',
-            teams_rotate: 'never',
-          },
-          holes: [],
-          options: gamespec.defaultOptions || []
-        },
+        game: newGame,
       },
     });
     // TODO: handle loading, error?
@@ -70,25 +74,29 @@ const NewGame = props => {
   };
 
   // New game has been created, so navigate to it.
-  // Send directly to LinkRoundList so the creator can be added to the game
-  // and a round created for them (or existing round chosen).
   if( currentPlayer && gkey ) {
+
+    // we don't have a game object in GameContext yet, so we have to make one up
+    // to send to LinkRoundList and friends
+    const game = {
+      _key: gkey,
+      ...newGame,
+      gamespecs: [gamespec],
+    };
     const player = {
       _key: currentPlayer._key,
       name: currentPlayer.name,
       handicap: currentPlayer.handicap,
-    }
+    };
     navigation.navigate('Game', {
       currentGameKey: gkey,
-      screen: 'GameSetup',
+      screen: 'Setup',
       params: {
-        screen: 'LinkRoundList',
+        screen: 'GameSetup',
         params: {
-          game: {
-            _key: gkey,
-            start: game_start,
-          },
-          player: player,
+          addCurrentPlayerToGame: true,
+          game,
+          player,
         },
       },
     });
@@ -107,7 +115,9 @@ const NewGame = props => {
   );
 
   return (
-    <ActivityIndicator />
+    <View>
+      <ActivityIndicator />
+    </View>
   );
 
 };

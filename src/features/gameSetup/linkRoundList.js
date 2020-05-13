@@ -21,8 +21,6 @@ import { GET_ROUNDS_FOR_PLAYER_DAY_QUERY } from 'features/rounds/graphql';
 
 const LinkRoundList = props => {
 
-  //console.log('LinkRoundList');
-
   const { route } = props;
   const { game, player } = route.params;
 
@@ -31,12 +29,13 @@ const LinkRoundList = props => {
 
   const navigation = useNavigation();
 
-  const setRound = round => {
+  const setRound = (round, isNew) => {
     //console.log('setRound', round);
     navigation.navigate('LinkRound', {
-      game, game,
-      player: player,
-      round: round,
+      game,
+      player,
+      round,
+      isNew,
     });
 
   };
@@ -56,7 +55,7 @@ const LinkRoundList = props => {
       // didn't find any rounds, so LinkRound will create one and link
       // everything.  It'll take over from here.
       //console.log('no rounds for player day');
-      setRound(null);
+      setRound(null, true);
       return null;
     } else {
 
@@ -81,7 +80,7 @@ const LinkRoundList = props => {
                     <ListItem
                       key={index}
                       title={moment(item.date).format('llll')}
-                      onPress={() => setRound(item)}
+                      onPress={() => setRound(item, false)}
                     />
                   );
                 }}

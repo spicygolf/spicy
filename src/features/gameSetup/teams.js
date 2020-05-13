@@ -14,13 +14,15 @@ import { findIndex } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';
-import TeamChooser from '../../common/components/teamChooser';
-
+import TeamChooser from 'common/components/teamChooser';
+import { getGamespecKVs } from 'common/utils/game';
 
 
 const Teams = props => {
 
   const { game } = useContext(GameContext);
+  const teamsFromGamespecs = getGamespecKVs(game, 'teams');
+  if( !teamsFromGamespecs.includes(true) ) return null;
 
   const options = [
     {slug: 'never' , caption: 'Never'  },

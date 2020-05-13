@@ -6,13 +6,13 @@ import {
 } from 'react-native';
 import { filter, find } from 'lodash';
 
-import { formatDiff } from 'common/utils/score';
+import { format } from 'common/utils/score';
 
 
 
 const TeamTotals = props => {
 
-  const { team: teamNum, scoring, currentHole } = props;
+  const { team: teamNum, scoring, currentHole, type } = props;
 
   const hole = find(scoring.holes, { hole: currentHole });
   if( !hole ) return null;
@@ -32,14 +32,29 @@ const TeamTotals = props => {
   }
   const netTotal = netPoints * hole.holeMultiplier;
   const diff = otherTeam ? team.runningTotal - otherTeam.runningTotal : null;
+  const points = (netPoints == 0)
+    ? '-'
+    : netPoints;
+  const multiplier = (hole.holeMultiplier == 1 || netPoints == 0 )
+    ? ''
+    : `x ${hole.holeMultiplier} = ${netTotal}`;
+
+  let total = `Total: ${format({v: diff, type})}`;
+  if( type === 'match' && team.matchOver ) {
+    if( team.win ) {
+      total = `Win: ${format({v: team.matchDiff, type})}`;
+    } else {
+      total = ``;
+    }
+  }
 
   return (
   <View style={styles.totalsView}>
     <View>
-      <Text style={styles.totalsText}>Hole: {`${netPoints} x ${hole.holeMultiplier} = ${netTotal}`}</Text>
+      <Text style={styles.totalsText}>Hole: {`${points} ${multiplier}`}</Text>
     </View>
     <View>
-      <Text style={styles.totalsText}>Total: {formatDiff(diff)}</Text>
+      <Text style={styles.totalsText}>{total}</Text>
     </View>
   </View>
 );

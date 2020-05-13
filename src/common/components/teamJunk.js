@@ -21,13 +21,15 @@ const TeamJunk = props => {
 
   const renderJunk = junk => {
 
+    if( junk.show_in == 'none' ) return null;
+
     // TODO: junk.name needs l10n, i18n - use junk.name as slug
     const type = 'solid';
     const color = 'white';
 
     return (
       <Button
-        title={junk.name}
+        title={junk.disp}
         icon={
           <Icon
             style={styles.icon}

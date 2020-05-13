@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 import {
   ActivityIndicator,
-  Text
+  Text,
+  View,
 } from 'react-native';
 import { useQuery } from '@apollo/client';
 
@@ -14,12 +15,13 @@ import ScorePostedListener from 'features/rounds/scorePostedListener';
 import { scoring } from 'common/utils/score';
 
 
+
 const Game = props => {
 
   const { route } = props;
-  const { currentGameKey, setup } = route.params;
+  const { currentGameKey } = route.params;
   //console.log('currentGameKey', currentGameKey);
-  //console.log('setup', setup);
+  //console.log('Game route params', route.params);
 
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
   //console.log('currentPlayerKey', currentPlayerKey);
@@ -30,17 +32,26 @@ const Game = props => {
       gkey: currentGameKey
     },
   });
-  if( loading ) return (<ActivityIndicator />);
+  if( loading ) return (
+    <View>
+      <ActivityIndicator />
+    </View>
+  );
   if( error ) {
     console.log(error);
     // TODO: error component
-    return (<Text>Error</Text>);
+    return (<Text>Error Loading Game: `${error}`</Text>);
   }
 
   if( data && data.getGame ) {
     // got game
     //console.log('g_data', g_data);
     const game = data.getGame;
+    const { _key: gkey } = game;
+    const activeGameSpec = (game && game.gamespecs && game.gamespecs[0])
+      ? game.gamespecs[0]
+      : null;
+
     console.log('game  ', game);
 
      const game_listener = (
@@ -63,21 +74,24 @@ const Game = props => {
 
     return (
       <GameContext.Provider value={{
-        gkey: game._key,
-        game: game,
-        scores: scores,
-        currentPlayerKey: currentPlayerKey,
+        gkey,
+        game,
+        scores,
+        currentPlayerKey,
+        activeGameSpec,
       }}>
         { game_listener }
         { round_listeners }
-        <GameStack
-          setup={setup}
-        />
+        <GameStack />
       </GameContext.Provider>
     );
 
   } else {
-    return (<ActivityIndicator />);
+    return (
+      <View>
+        <ActivityIndicator />
+      </View>
+    );
   }
 
 };

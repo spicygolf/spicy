@@ -42,7 +42,7 @@ export const linkRoundToGameAndPlayer = async props => {
 
   //console.log('linking round to game and player');
   const { _key: rkey, tee } = round;
-  const { _key: gkey, holes } = game;
+  const { _key: gkey, scope: { holes } } = game;
   const { _key: pkey, handicap } = player;
 
   // first see if we can calc a course_handicap
@@ -51,7 +51,7 @@ export const linkRoundToGameAndPlayer = async props => {
     const hi = handicap.index;
     if( hi ) other.push({key: 'handicap_index', value: hi.toString()});
     const ch = course_handicap(hi, tee, holes);
-    //console.log('LinkRound ch', ch, hi, tee, holes);
+    //console.log('links ch', ch, hi, tee, holes);
     if( ch ) other.push({key: 'course_handicap', value: ch.toString()});
     //console.log('LinkRound other', other);
   } catch(e) {

@@ -1,10 +1,12 @@
-import { cloneDeep, find, findIndex } from 'lodash';
+import { cloneDeep, filter, find, findIndex, reduce } from 'lodash';
+
 import {
   ACTIVE_GAMES_FOR_PLAYER_QUERY,
 } from 'features/games/graphql';
 import {
   GAME_HOLES_FRAGMENT
 } from 'features/game/graphql';
+import { getHolesToUpdate } from 'common/utils/teams';
 
 
 
@@ -119,6 +121,7 @@ export const stripKey = (data, toStrip) => {
   return cloneDeep(result);
 };
 
+
 export const getAllGamespecOptions = game => {
   let options = [];
   game.gamespecs.map(gs => {
@@ -131,6 +134,7 @@ export const getAllGamespecOptions = game => {
   });
   return options;
 };
+
 
 export const getAllOptions = game => {
   let options = [];
@@ -150,6 +154,37 @@ export const getAllOptions = game => {
     options.push(o);
   });
   return options;
+};
+
+
+export const getOption = (game, option) => {
+
+  let v = null;
+  const options = getAllOptions(game);
+
+  const go = find(options, {name: option});
+  if( go && go.value ) v = go.value;
+  //console.log('2', gso, go, v);
+
+  // convert bool
+  if( (go && go.type == 'bool') ) {
+    v = (v === true || v === 'true');
+  }
+  //console.log('3', gso, go, v);
+
+  return {
+    name: option,
+    value: v,
+  };
+}
+
+
+export const getGamespecKVs = (game, key) => {
+  //console.log('getGamespecKVs game', game);
+  const ret = game.gamespecs.map(gs => {
+    return gs[key];
+  });
+  return ret;
 };
 
 export const getJunk = (junkName, pkey, game, holeNum) => {
@@ -225,7 +260,7 @@ export const rmgame = async (gkey, currentPlayerKey, mutation) => {
       variables: {
         pkey: currentPlayerKey,
       },
-      fetchPolicy: 'cache-and-network',
+      fetchPolicy: 'network-only',
     }],
     awaitFetchQueries: true,
   });
@@ -257,4 +292,100 @@ export const updateGameHolesCache = ({cache, gkey, holes}) => {
     },
   });
 
+};
+
+export const addPlayerToOwnTeam = async ({pkey, game, updateGame}) => {
+
+  const { _key: gkey } = game;
+  let newGame = getNewGameForUpdate(game);
+
+  const holesToUpdate = getHolesToUpdate(newGame.scope.teams_rotate, game);
+  if( !newGame.holes ) {
+    newGame.holes = [];
+  }
+  console.log('holesToUpdate', holesToUpdate);
+  holesToUpdate.map(h => {
+    const holeIndex = findIndex(newGame.holes, {hole: h});
+    if( holeIndex < 0 ) {
+      // if hole data doesn't exist, create it with the single player team
+      newGame.holes.push({
+        hole: h,
+        teams: [{
+          team: '1', players: [pkey], junk: [],
+        }],
+        multipliers: [],
+      });
+    } else {
+      // hole exists, so just add a new team with this player only
+      if( newGame.holes[holeIndex].teams ) {
+        let maxTeam = reduce(newGame.holes[holeIndex].teams, (max, t) => {
+          const teamNum = parseInt(t.team);
+          if( !teamNum ) return max;
+          return (teamNum > max) ? teamNum : max;
+        }, 0);
+        //console.log('maxTeam', maxTeam);
+        newGame.holes[holeIndex].teams.push({
+          team: (++maxTeam).toString(), players: [pkey], junk: [],
+        });
+      } else {
+        newGame.holes[holeIndex].teams = [{
+          team: '1', players: [pkey], junk: [],
+        }];
+      }
+    }
+  });
+  console.log('addPlayerToOwnTeam newGame', newGame);
+  const { loading, error, data } = await updateGame({
+    variables: {
+      gkey: gkey,
+      game: newGame,
+    },
+    update: (cache, { data }) => {
+      //console.log('cache data', cache.data);
+      updateGameHolesCache({
+        cache,
+        gkey,
+        holes: newGame.holes,
+      });
+    },
+  });
+
+  if( error ) console.log('Error updating game - addPlayerToOwnTeam', error);
+
+};
+
+
+export const playerListIndividual = ({game}) => {
+  return (
+    filter(
+      game.players.map(p => {
+        if( !p ) return null;
+        return ({
+          key: p._key,
+          pkey: p._key,
+          name: p.name,
+          team: '0',
+        });
+      }),
+      (p => p != null)
+    )
+  )
+};
+
+
+export const playerListWithTeams = ({game, scores}) => {
+  const ret = [];
+  if( !scores || !scores.holes || !scores.holes[0] ) return ret;
+  scores.holes[0].teams.map(t => {
+    t.players.map(p => {
+      const gP = find(game.players, {_key: p.pkey});
+      ret.push({
+        key: p.pkey,
+        pkey: p.pkey,
+        name: gP.name || '',
+        team: t.team,
+      });
+    });
+  });
+  return filter(ret, (p => p != null));
 };
