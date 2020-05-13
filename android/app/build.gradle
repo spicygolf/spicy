@@ -150,8 +150,8 @@ android {
         applicationId "golf.spicy"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 16
-        versionName "0.2.2"
+        versionCode 17
+        versionName "0.2.3"
         //ndk { abiFilter "x86" }
     }
     splits {
