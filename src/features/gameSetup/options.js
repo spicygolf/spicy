@@ -29,7 +29,7 @@ const Options = props => {
 
   const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
 
-  const setOption = option => {
+  const setOption = async option => {
     const newOption = {
       name: option.name,
       disp: option.disp,
@@ -42,9 +42,9 @@ const Options = props => {
     const i = findIndex(newGame.options, {name: newOption.name});
     if( i < 0 ) newGame.options.push(newOption);
     if( i >= 0 ) newGame.options[i] = newOption;
-    console.log('setOption newGame', newGame);
+    //console.log('setOption newGame', newGame);
 
-    const { loading, error, data } = updateGame({
+    const { loading, error, data } = await updateGame({
       variables: {
         gkey: gkey,
         game: newGame,

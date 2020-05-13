@@ -12,7 +12,7 @@ import { find, last, orderBy } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
 import { playerListIndividual, playerListWithTeams } from 'common/utils/game';
-
+import { format } from 'common/utils/score';
 
 
 const Leaderboard = props => {
@@ -37,20 +37,9 @@ const Leaderboard = props => {
     return ret;
   };
 
-  // TODO: Inject format fn in with higher-level Leaderboard components?
-  const format = v => {
-    if( scoreType === 'points' && parseFloat(v) > 0 ) return `+${v}`;
-    if( scoreType === 'match' ) {
-      if( v && v.toString().includes('&') ) return v;
-      if( parseFloat(v) < 0 ) return '';
-      if( parseFloat(v) > 0 ) return `${v} up`;
-      if( parseFloat(v) == 0 ) return 'AS';
-    }
-    return v;
-  };
-
   const side = (holes, side) => {
     let totals = {};
+    let isMatchOver = false;
     const rows = holes.map(h => {
       const scores = orderedPlayerList.map(p => {
         const score = findScore(h, p.pkey);
@@ -60,11 +49,16 @@ const Leaderboard = props => {
         let team = '';
         if( t && t.team ) team = t.team; // dafuq?
         let match = null;
-        if( t && !t.matchOver &&  h.scoresEntered == orderedPlayerList.length) {
+        if( t && !t.matchOver && !isMatchOver &&  h.scoresEntered == orderedPlayerList.length) {
           // we have a team object, the match isn't over, and all scores are
           // entered for this hole, so we can set the match property
           match = t.matchDiff;
         }
+        if( t.matchOver && t.win && !isMatchOver ) {
+          match = t.matchDiff;
+          isMatchOver = true; // to not show the result for any more holes
+        }
+
         return {
           pkey: p.pkey,
           score: {
@@ -110,7 +104,11 @@ const Leaderboard = props => {
       return (
         <View key={`cell_${row.hole}_${s.pkey}`} style={styles.scorePopContainer}>
           <View style={styles.scoreView}>
-            <Text style={styles.scoreCell}>{format(s.score[scoreType]) || '  '}</Text>
+            <Text style={styles.scoreCell}>{format({
+              v: s.score[scoreType],
+              type: scoreType,
+              showDown: false,
+            })}</Text>
           </View>
           <View style={styles.popView}>
             <Icon
@@ -137,7 +135,10 @@ const Leaderboard = props => {
     const totalCells = orderedPlayerList.map(p => (
       <View key={`totalcell_${section.side}_${p.pkey}`} style={styles.scorePopContainer}>
         <View style={styles.scoreView}>
-          <Text style={styles.scoreCell}>{format(section.totals[p.pkey])}</Text>
+          <Text style={styles.scoreCell}>{format({
+            v: section.totals[p.pkey],
+            type: scoreType,
+          })}</Text>
         </View>
       </View>
     ));

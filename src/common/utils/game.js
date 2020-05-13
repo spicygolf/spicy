@@ -121,6 +121,7 @@ export const stripKey = (data, toStrip) => {
   return cloneDeep(result);
 };
 
+
 export const getAllGamespecOptions = game => {
   let options = [];
   game.gamespecs.map(gs => {
@@ -133,6 +134,7 @@ export const getAllGamespecOptions = game => {
   });
   return options;
 };
+
 
 export const getAllOptions = game => {
   let options = [];
@@ -153,6 +155,29 @@ export const getAllOptions = game => {
   });
   return options;
 };
+
+
+export const getOption = (game, option) => {
+
+  let v = null;
+  const options = getAllOptions(game);
+
+  const go = find(options, {name: option});
+  if( go && go.value ) v = go.value;
+  //console.log('2', gso, go, v);
+
+  // convert bool
+  if( (go && go.type == 'bool') ) {
+    v = (v === true || v === 'true');
+  }
+  //console.log('3', gso, go, v);
+
+  return {
+    name: option,
+    value: v,
+  };
+}
+
 
 export const getGamespecKVs = (game, key) => {
   //console.log('getGamespecKVs game', game);
