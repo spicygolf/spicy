@@ -1,11 +1,12 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
   ActivityIndicator,
   Text,
   View,
 } from 'react-native';
-import { useQuery } from '@apollo/client';
+import { useLazyQuery } from '@apollo/client';
 
+import useAppState from 'hooks/useAppState';
 import { GET_GAME_QUERY } from 'features/game/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { GameContext } from 'features/game/gameContext';
@@ -24,23 +25,20 @@ const Game = props => {
   //console.log('Game route params', route.params);
 
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
-  //console.log('currentPlayerKey', currentPlayerKey);
+  const { justBecameActive } = useAppState();
+  const [ getGame, { error, data } ] = useLazyQuery(GET_GAME_QUERY);
 
-  // get game
-  const { loading, error, data } = useQuery(GET_GAME_QUERY, {
-    variables: {
-      gkey: currentGameKey
-    },
-  });
-  if( loading ) return (
+
+  let content = (
     <View>
       <ActivityIndicator />
     </View>
   );
+
   if( error ) {
     console.log(error);
     // TODO: error component
-    return (<Text>Error Loading Game: `${error}`</Text>);
+    content = (<Text>Error Loading Game: `${error}`</Text>);
   }
 
   if( data && data.getGame ) {
@@ -72,7 +70,7 @@ const Game = props => {
     const scores = scoring(game);
     console.log('scores', scores);
 
-    return (
+    content = (
       <GameContext.Provider value={{
         gkey,
         game,
@@ -86,13 +84,29 @@ const Game = props => {
       </GameContext.Provider>
     );
 
-  } else {
-    return (
-      <View>
-        <ActivityIndicator />
-      </View>
-    );
   }
+
+  useEffect(() => {
+    if( justBecameActive ) {
+      console.log('justBecameActive getGame');
+      getGame({
+        variables: {
+          gkey: currentGameKey,
+        },
+      });
+    }
+  }, [justBecameActive]);
+
+  useEffect(() => {
+    console.log('initial getGame');
+    getGame({
+      variables: {
+        gkey: currentGameKey,
+      },
+    });
+  }, []);
+
+  return (content);
 
 };
 
