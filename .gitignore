@@ -90,3 +90,5 @@ ios/assets/*
 
 # android builds
 android/app/src/main/assets/*
+android/app/debug/*
+android/app/release/*

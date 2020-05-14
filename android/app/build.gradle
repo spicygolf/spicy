@@ -5,18 +5,18 @@ apply plugin: "com.google.gms.google-services"
 import com.android.build.OutputFile
 
 def getPassword(String currentUser, String keyChain) {
-   def stdout = new ByteArrayOutputStream()
-   def stderr = new ByteArrayOutputStream()
-   exec {
-       commandLine 'security', '-q', 'find-generic-password', '-a', currentUser, '-s', keyChain, '-w'
-       standardOutput = stdout
-       errorOutput = stderr
-       ignoreExitValue true
-   }
-   //noinspection GroovyAssignabilityCheck
-      stdout.toString().trim()
+    def stdout = new ByteArrayOutputStream()
+    def stderr = new ByteArrayOutputStream()
+    exec {
+        commandLine 'security', '-q', 'find-generic-password', '-a', currentUser, '-s', keyChain, '-w'
+        standardOutput = stdout
+        errorOutput = stderr
+        ignoreExitValue true
+    }
+    //noinspection GroovyAssignabilityCheck
+    stdout.toString().trim()
 }
-def pass = getPassword("brad","spicygolf_android_keystore")
+def pass = getPassword("boorad", "spicygolf_android_keystore")
 
 /**
  * The react.gradle file registers a task for each build variant (e.g. bundleDebugJsAndAssets
@@ -152,6 +152,8 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 17
         versionName "0.2.3"
+
+        // uncomment for emulator, comment for Play Store
         //ndk { abiFilter "x86" }
     }
     splits {
