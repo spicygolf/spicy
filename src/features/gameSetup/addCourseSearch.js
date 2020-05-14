@@ -109,7 +109,6 @@ const AddCourseSearch = props => {
           style={styles.searchTextInput}
           placeholder='search courses...'
           autoCapitalize='none'
-          autoFocus={true}
           onChangeText={text => setQ(text)}
           value={q}
         />

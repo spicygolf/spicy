@@ -26,23 +26,20 @@ const AddPlayerTabs = props => {
   return (
     <Tab.Navigator
       initialRouteName='AddPlayerFavorites'
-      screenOptions={{
-        tabBarOptions: {
-          activeTintColor: green,
-          inactiveTintColor: '#555',
-          style: {
-            backgroundColor: 'none',
-          },
-          indicatorStyle: {
-            backgroundColor: green
-          },
-          showIcon: true
-        }
-      }}
+      screenOptions={{}}
       tabBarOptions={{
+        activeTintColor: green,
+        inactiveTintColor: '#555',
+        style: {
+          backgroundColor: 'none',
+        },
         labelStyle: {
           textTransform: 'capitalize',
-        }
+        },
+        indicatorStyle: {
+          backgroundColor: green
+        },
+        showIcon: true
       }}
     >
       <Tab.Screen
