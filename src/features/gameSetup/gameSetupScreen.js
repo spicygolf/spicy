@@ -1,10 +1,10 @@
 import React, { useContext, useEffect } from 'react';
 import {
-  ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { GameContext } from 'features/game/gameContext';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
@@ -40,12 +40,12 @@ const GameSetupScreen = props => {
 
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <KeyboardAwareScrollView>
         <Players />
         <Teams />
         <Options />
         { admin }
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 

@@ -1,8 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
-  KeyboardAvoidingView,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -14,6 +12,7 @@ import {
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import { find } from 'lodash';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import BackToLogin from 'features/account/backToLogin';
 import { RegisterContext } from 'features/account/registerContext';
@@ -78,13 +77,9 @@ const RegisterHandicap = props => {
   if( c && c.states ) statelist = c.states;
 
   return (
-    <KeyboardAvoidingView
-      behavior={"padding"}
-      style={styles.container}
-      contentContainerStyle={{flex: 1,}}
-    >
+    <View style={styles.container}>
       <BackToLogin />
-      <ScrollView>
+      <KeyboardAwareScrollView>
         <Card title='Register - Handicap'>
           <View style={styles.loginView} testID='register_2_view'>
             <View>
@@ -193,8 +188,8 @@ const RegisterHandicap = props => {
             testID='register_next_2_button'
           />
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
+    </View>
   );
 };
 

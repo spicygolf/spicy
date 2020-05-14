@@ -11,6 +11,7 @@ import {
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import BackToLogin from 'features/account/backToLogin';
 import { RegisterContext } from 'features/account/registerContext';
@@ -126,7 +127,7 @@ const RegisterPlayer = props => {
   return (
     <View style={styles.container}>
       <BackToLogin />
-      <View>
+      <KeyboardAwareScrollView>
         <Card title='Register - Player Information'>
           <View testID='register_4_view'>
             <Text style={styles.changes}>{ changes }</Text>
@@ -186,7 +187,7 @@ const RegisterPlayer = props => {
             testID='register_next_4_button'
           />
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     </View>
   );
 };

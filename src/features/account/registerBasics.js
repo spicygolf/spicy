@@ -10,6 +10,7 @@ import {
   Card,
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { RegisterContext } from 'features/account/registerContext';
 import BackToLogin from 'features/account/backToLogin';
@@ -56,78 +57,80 @@ const RegisterBasics = props => {
   return (
     <View style={styles.container}>
       <BackToLogin />
-      <View>
-        <Card title='Register - Basics'>
-          <View style={styles.loginView} testID='register_1_view'>
-            <View>
-              <View style={styles.field_container}>
-                <Text style={styles.field_label}>Email *</Text>
-                <TextInput
-                  style={[styles.field_input, eValid]}
-                  onChangeText={text => {
-                    setRegistration({
-                      ...registration,
-                      email: text,
-                    });
-                    validate('email', text);
-                  }}
-                  keyboardType='email-address'
-                  autoCapitalize='none'
-                  value={registration.email}
-                  ref={emailRef}
-                />
-              </View>
-              <View style={styles.field_container}>
-                <Text style={styles.field_label}>Password *</Text>
-                <TextInput
-                  style={[styles.field_input, pValid]}
-                  onChangeText={text => {
-                    setRegistration({
-                      ...registration,
-                      password: text,
-                    });
-                    validate('password', text);
-                  }}
-                  autoCompleteType='password'
-                  secureTextEntry={true}
-                  autoCapitalize='none'
-                  value={registration.password}
-                />
-              </View>
-              <View style={styles.field_container}>
-                <Text style={styles.field_label}>Password Again *</Text>
-                <TextInput
-                  style={[styles.field_input, p2Valid]}
-                  onChangeText={text => {
-                    setRegistration({
-                      ...registration,
-                      password2: text,
-                    });
-                    validate('password2', text);
-                  }}
-                  autoCompleteType='password'
-                  secureTextEntry={true}
-                  autoCapitalize='none'
-                  value={registration.password2}
-                />
+      <KeyboardAwareScrollView>
+        <View>
+          <Card title='Register - Basics'>
+            <View style={styles.loginView} testID='register_1_view'>
+              <View>
+                <View style={styles.field_container}>
+                  <Text style={styles.field_label}>Email *</Text>
+                  <TextInput
+                    style={[styles.field_input, eValid]}
+                    onChangeText={text => {
+                      setRegistration({
+                        ...registration,
+                        email: text,
+                      });
+                      validate('email', text);
+                    }}
+                    keyboardType='email-address'
+                    autoCapitalize='none'
+                    value={registration.email}
+                    ref={emailRef}
+                  />
+                </View>
+                <View style={styles.field_container}>
+                  <Text style={styles.field_label}>Password *</Text>
+                  <TextInput
+                    style={[styles.field_input, pValid]}
+                    onChangeText={text => {
+                      setRegistration({
+                        ...registration,
+                        password: text,
+                      });
+                      validate('password', text);
+                    }}
+                    autoCompleteType='password'
+                    secureTextEntry={true}
+                    autoCapitalize='none'
+                    value={registration.password}
+                  />
+                </View>
+                <View style={styles.field_container}>
+                  <Text style={styles.field_label}>Password Again *</Text>
+                  <TextInput
+                    style={[styles.field_input, p2Valid]}
+                    onChangeText={text => {
+                      setRegistration({
+                        ...registration,
+                        password2: text,
+                      });
+                      validate('password2', text);
+                    }}
+                    autoCompleteType='password'
+                    secureTextEntry={true}
+                    autoCapitalize='none'
+                    value={registration.password2}
+                  />
+                </View>
               </View>
             </View>
+          </Card>
+          <View style={styles.button_row}>
+            <Button
+              style={styles.next}
+              title='Next'
+              type={(emailValid && passValid && pass2Valid) ? 'solid' : 'outline'}
+              disabled={!(emailValid && passValid && pass2Valid)}
+              onPress={() => {
+                navigation.navigate('RegisterHandicap')
+              }}
+              accessibilityLabel='Register Next 1'
+              testID='register_next_1_button'
+            />
           </View>
-        </Card>
-        <View style={styles.button_row}>
-          <Button
-            style={styles.next}
-            title='Next'
-            type={(emailValid && passValid && pass2Valid) ? 'solid' : 'outline'}
-            disabled={!(emailValid && passValid && pass2Valid)}
-            onPress={() => {
-              navigation.navigate('RegisterHandicap')
-            }}
-            accessibilityLabel='Register Next 1'
-            testID='register_next_1_button'
-          />
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     </View>
   );
 };

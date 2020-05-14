@@ -2,7 +2,6 @@
 
 import React, { useContext } from 'react';
 import {
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -13,6 +12,7 @@ import {
   Button
 } from 'react-native-elements';
 import DeviceInfo from 'react-native-device-info';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { red } from 'common/colors';
 import { logout } from 'common/utils/account';
@@ -58,7 +58,7 @@ const ProfileHome = props => {
   const impersonate = (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin' ) ? (<Impersonate />) : null;
 
   return (
-    <ScrollView>
+    <KeyboardAwareScrollView>
       <Card>
         <View style={styles.field_view}>
           <Text>Name:</Text>
@@ -81,7 +81,7 @@ const ProfileHome = props => {
       <View style={styles.app_info}>
         <Text>v{version}</Text>
       </View>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 
 };

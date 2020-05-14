@@ -11,6 +11,7 @@ import {
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { green } from 'common/colors';
 import { validateEmail } from 'common/utils/account';
@@ -60,14 +61,14 @@ const Forgot = props => {
 
   const button = (
     <Button
-    style={styles.login_button}
-    onPress={forgot}
-    title='Send Password Reset Email'
-    type={(emailValid) ? 'solid' : 'outline'}
-    disabled={!(emailValid)}
-    accessibilityLabel='Send Password Reset Email'
-    testID='forgot_button'
-  />
+      style={styles.login_button}
+      onPress={forgot}
+      title='Send Password Reset Email'
+      type={(emailValid) ? 'solid' : 'outline'}
+      disabled={!(emailValid)}
+      accessibilityLabel='Send Password Reset Email'
+      testID='forgot_button'
+    />
   );
 
   const sentMessage = (
@@ -76,37 +77,39 @@ const Forgot = props => {
 
   return (
     <View style={styles.container}>
-      <Card
-        title='Forgot Password'
-        testID='forgot_form_view'
-      >
-        <View>
-          <View style={styles.field_container}>
-            <Text style={styles.field_label}>Email *</Text>
-            <TextInput
-              style={[styles.field_input, eValid]}
-              onChangeText={text => {
-                setEmail(text);
-                validate('email', text);
-              }}
-              keyboardType='email-address'
-              autoCapitalize='none'
-              value={email}
-              ref={emailRef}
-            />
-          </View>
-          { sent ? sentMessage : button }
-        </View>
-      </Card>
+      <KeyboardAwareScrollView>
       <View style={styles.back_to_login_view}>
-        <Text style={styles.back_to_text}>
-          Back to
-          <Text
-            onPress={() => navigation.navigate('Login')}
-            style={styles.login_text}
-          > Login</Text>
-        </Text>
-      </View>
+          <Text style={styles.back_to_text}>
+            Back to
+            <Text
+              onPress={() => navigation.navigate('Login')}
+              style={styles.login_text}
+            > Login</Text>
+          </Text>
+        </View>
+        <Card
+          title='Forgot Password'
+          testID='forgot_form_view'
+        >
+          <View>
+            <View style={styles.field_container}>
+              <Text style={styles.field_label}>Email *</Text>
+              <TextInput
+                style={[styles.field_input, eValid]}
+                onChangeText={text => {
+                  setEmail(text);
+                  validate('email', text);
+                }}
+                keyboardType='email-address'
+                autoCapitalize='none'
+                value={email}
+                ref={emailRef}
+              />
+            </View>
+            { sent ? sentMessage : button }
+          </View>
+        </Card>
+      </KeyboardAwareScrollView>
     </View>
   );
 

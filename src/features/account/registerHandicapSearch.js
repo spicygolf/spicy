@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  ScrollView,
   StyleSheet,
   Text,
   View,

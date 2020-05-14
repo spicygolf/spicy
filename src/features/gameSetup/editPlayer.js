@@ -11,6 +11,7 @@ import {
   Card
 } from 'react-native-elements';
 import { useMutation } from '@apollo/client';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import GameNav from 'features/games/gamenav';
 import { GameContext } from 'features/game/gameContext';
@@ -107,7 +108,7 @@ const EditPlayer = props => {
         showBack={true}
         backTo={'GameSetup'}
       />
-      <ScrollView style={styles.scrollview_container}>
+      <KeyboardAwareScrollView style={styles.scrollview_container}>
         <Card
           title='Handicap'
         >
@@ -162,7 +163,7 @@ const EditPlayer = props => {
         <Card title='Round'>
 
         </Card>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 };
