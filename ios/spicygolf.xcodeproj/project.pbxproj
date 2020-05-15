@@ -329,7 +329,7 @@
 				CODE_SIGN_ENTITLEMENTS = spicygolf/spicygolf.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = CRRL9RDZ9F;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -365,7 +365,7 @@
 				CODE_SIGN_ENTITLEMENTS = spicygolf/spicygolfRelease.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = CRRL9RDZ9F;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = spicygolf/Info.plist;
