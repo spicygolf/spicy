@@ -101,7 +101,6 @@ const LinkRound = props => {
           console.log('firing add player to own team');
           await addPlayerToOwnTeam({pkey, game, updateGame});
         }
-
         // link round
         let r = (round && !isNew)
           ? round

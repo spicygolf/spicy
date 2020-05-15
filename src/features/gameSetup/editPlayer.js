@@ -34,6 +34,7 @@ const EditPlayer = props => {
 
   const { game } = useContext(GameContext);
   const round = get_round_for_player(game.rounds, pkey);
+  //console.log('EditPlayer round', round);
 
   const initHI = (round && round.handicap_index) ?
     round.handicap_index.toString() : '';
@@ -52,17 +53,17 @@ const EditPlayer = props => {
     let doUpdate = false;
     const other = [];
 
-    if( HI != initHI ) {
+    if( HI && HI != initHI ) {
       other.push({key: 'handicap_index', value: HI.toString()});
       doUpdate = true;
     }
 
-    if( CH != initCH ) {
+    if( CH && CH != initCH ) {
       other.push({key: 'course_handicap', value: CH.toString()});
       doUpdate = true;
     }
 
-    if( GH != initGH ) {
+    if( GH && GH != initGH ) {
       other.push({key: 'game_handicap', value: GH.toString()});
       doUpdate = true;
     }
