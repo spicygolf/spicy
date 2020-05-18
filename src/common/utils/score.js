@@ -78,7 +78,7 @@ export const scoring = game => {
 
   const holes = getHoles(game);
   holes.map(hole => {
-    //console.log('scoring hole', hole, game);
+    //console.log('scoring hole', hole);
 
     const gHole = find(game.holes, {hole: hole});
     //console.log('gHole', gHole);
@@ -369,6 +369,7 @@ const calcTeamJunk = ({teams, allJunk, game}) => {
         value: t.score[gsJunk.name],
         index: i,
       }));
+      //console.log('teamScores', teamScores);
 
       // figure out how many scores to iterate through to break tie
       // i.e. first ball only, or progress thru the balls for ties
@@ -383,23 +384,29 @@ const calcTeamJunk = ({teams, allJunk, game}) => {
       let countOfBest = 1;
       for( let i=1; i<teamScores.length; i++ ) {
         for( let j=0; j<lenOfScores; j++ ) {
-        if( teamScores[i].value[j] == best.value[j] ) {
-          ++countOfBest;
-        }
-        if( gsJunk.better == 'lower' ) {
+          //console.log('i', i, 'j', j, teamScores[i].value[j], best.value[j]);
+          if( teamScores[i].value[j] == best.value[j] ) {
+            //console.log('adding to countOfBest cuz tied');
+            ++countOfBest;
+          }
+          if( gsJunk.better == 'lower' ) {
             if( teamScores[i].value[j] < best.value[j] ) {
               best = teamScores[i];
+              //console.log('this team beat best team', best);
               countOfBest = 1;
+              //break; // don't go further with these orderedScores
             }
           } else if( gsJunk.better == 'higher' ) {
             if( teamScores[i].value > best.value[j] ) {
               best = teamScores[i];
+              //console.log('this team beat best team', best);
               countOfBest = 1;
+              //break; // don't go further with these orderedScores
             }
           }
         }
       }
-      if( countOfBest == 1 ) {
+      if( countOfBest <= lenOfScores ) {
         ret[best.index].junk.push(gsJunk);
         ret[best.index].points = ret[best.index].points + gsJunk.value;
       }
