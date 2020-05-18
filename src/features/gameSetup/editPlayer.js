@@ -39,7 +39,7 @@ const EditPlayer = props => {
   const initHI = (round && round.handicap_index) ?
     round.handicap_index.toString() : '';
   const [ HI, setHI ] = useState(initHI);
-  const initCH = round.course_handicap ? round.course_handicap.toString() : '-';
+  const initCH = round.course_handicap ? round.course_handicap.toString() : '';
   const [ CH, setCH ] = useState(initCH);
   const initGH = (round && round.game_handicap) ?
     round.game_handicap.toString() : '';
@@ -53,23 +53,25 @@ const EditPlayer = props => {
     let doUpdate = false;
     const other = [];
 
-    if( HI && HI != initHI ) {
+    // all the checks for '' is so if you clear the text box out, it'll remove
+    // the data from the edge
+    if( (HI || HI == '') && HI != initHI && (!isNaN(HI) || HI == '') ) {
       other.push({key: 'handicap_index', value: HI.toString()});
       doUpdate = true;
     }
 
-    if( CH && CH != initCH ) {
+    if( (CH || CH == '') && CH != initCH && (!isNaN(CH) || CH == '') ) {
       other.push({key: 'course_handicap', value: CH.toString()});
       doUpdate = true;
     }
 
-    if( GH && GH != initGH ) {
+    if( (GH || GH == '') && GH != initGH && (!isNaN(GH) || GH == '') ) {
       other.push({key: 'game_handicap', value: GH.toString()});
       doUpdate = true;
     }
 
     if( doUpdate ) {
-      //console.log('doUpdate');
+      //console.log('doUpdate other', other);
       // update 'round2game' edge with these two handicaps on them
 
       const { loading, error, data } = updateLink({
@@ -119,8 +121,9 @@ const EditPlayer = props => {
               <TextInput
                 style={styles.field_input}
                 onChangeText={text => {
-                  setHI(text);
-                  const newCH = course_handicap(text, round.tee, game.scope.holes);
+                  const newText = text.replace(/[^0-9+.-]/g, '');
+                  setHI(newText);
+                  const newCH = course_handicap(newText, round.tee, game.scope.holes) || '';
                   //console.log('newCH', newCH, round, game.scope.holes);
                   setCH(newCH);
                 }}
@@ -149,7 +152,8 @@ const EditPlayer = props => {
               <TextInput
                 style={styles.field_input}
                 onChangeText={text => {
-                  setGH(parseFloat(text) || '');
+                  const newText = text.replace(/[^0-9+.-]/g, '');
+                  setGH(newText);
                 }}
                 onEndEditing={() => update()}
                 keyboardType='decimal-pad'
