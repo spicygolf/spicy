@@ -394,14 +394,14 @@ const calcTeamJunk = ({teams, allJunk, game}) => {
               best = teamScores[i];
               //console.log('this team beat best team', best);
               countOfBest = 1;
-              //break; // don't go further with these orderedScores
+              break; // don't go further with these orderedScores
             }
           } else if( gsJunk.better == 'higher' ) {
             if( teamScores[i].value > best.value[j] ) {
               best = teamScores[i];
               //console.log('this team beat best team', best);
               countOfBest = 1;
-              //break; // don't go further with these orderedScores
+              break; // don't go further with these orderedScores
             }
           }
         }
