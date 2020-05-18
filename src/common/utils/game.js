@@ -7,6 +7,7 @@ import {
   GAME_HOLES_FRAGMENT
 } from 'features/game/graphql';
 import { getHolesToUpdate } from 'common/utils/teams';
+import { acronym, last } from 'common/utils/text';
 
 
 
@@ -388,4 +389,39 @@ export const playerListWithTeams = ({game, scores}) => {
     });
   });
   return filter(ret, (p => p != null));
+};
+
+
+export const getCoursesPlayersTxt = game => {
+  let courses = [], acronyms = [], players = [];
+  game.rounds.map(r => {
+    if( r && r.player && r.player[0] ) {
+      players.push(last(r.player[0].name));
+    }
+    if( r && r.tee && r.tee.course && r.tee.course.name ) {
+      const c = r.tee.course.name;
+      if( courses.indexOf(c) < 0 ) courses.push(c);
+      const a = acronym(c);
+      if( acronyms.indexOf(a) < 0 ) acronyms.push(a);
+    }
+  });
+
+  const courseFull = (courses.length == 1)
+    ? courses[0]
+    : acronyms.join(', ');
+
+  const coursesTxt = (acronyms.length > 2)
+    ? 'various courses'
+    : acronyms.join(', ');
+
+  const playersTxt = (players.length > 5)
+    ? `${players.length} players`
+    : players.join(', ');
+
+  return {
+    courseFull,
+    coursesTxt,
+    playersTxt,
+  };
+
 };

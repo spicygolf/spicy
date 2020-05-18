@@ -17,7 +17,7 @@ import { filter, reverse, sortBy } from 'lodash';
 
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
-import { acronym, last } from 'common/utils/text';
+import { getCoursesPlayersTxt } from 'common/utils/game';
 import { blue } from 'common/colors';
 
 
@@ -50,22 +50,7 @@ const Games = props => {
   const buildSubtitle = game => {
 
     //console.log('game', game);
-    let courses = [], players = [];
-    game.rounds.map(r => {
-      if( r && r.player && r.player[0] ) {
-        players.push(last(r.player[0].name));
-      }
-      if( r && r.tee && r.tee.course && r.tee.course.name ) {
-        const c = acronym(r.tee.course.name)
-        if( courses.indexOf(c) < 0 ) courses.push(c);
-      }
-    });
-    const coursesTxt = (courses.length > 2)
-      ? 'various courses'
-      : courses.join(', ');
-    const playersTxt = (players.length > 5)
-      ? `${players.length} players`
-      : players.join(', ');
+    const { coursesTxt, playersTxt } = getCoursesPlayersTxt(game);
 
     const startTime = moment(game.start).format('llll');
 

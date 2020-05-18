@@ -13,7 +13,7 @@ import { GameContext } from 'features/game/gameContext';
 import Leaderboard from 'features/game/leaderboard';
 import Score from 'features/game/score';
 import GameSetupStack from 'features/gameSetup/gameSetupStack';
-
+import { getCoursesPlayersTxt } from 'common/utils/game';
 import { green } from 'common/colors';
 
 
@@ -31,6 +31,7 @@ const GameStack = props => {
   const { gamespecs } = game;
   const gamespec_name = gamespecs.map(gs => gs.disp).join('-');
   const start = moment(game.start).format('llll');
+  const { courseFull } = getCoursesPlayersTxt(game);
 
   const Tab = createMaterialTopTabNavigator();
 
@@ -38,6 +39,7 @@ const GameStack = props => {
     <View style={styles.container}>
       <View style={styles.gname}>
         <Text style={styles.gname_txt}>{gamespec_name} - {start}</Text>
+        <Text style={styles.subtitle}>{`${courseFull}`}</Text>
       </View>
       <Tab.Navigator
         initialRouteName='Leaderboard'
@@ -95,6 +97,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   gname_txt: {
+    fontSize: 12,
+  },
+  subtitle: {
     fontSize: 12,
   },
 });
