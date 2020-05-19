@@ -85,7 +85,6 @@ export const scoring = game => {
     if( !gHole ) return;
 
     let teams = [];
-    let players = [];
     let scoresEntered = 0;
 
     // begin possiblePoints calcs
@@ -122,7 +121,7 @@ export const scoring = game => {
       return team;
     });
 
-    teams = calcTeamJunk({teams, allJunk, game});
+    teams = calcTeamJunk({teams, allJunk, game, scoresEntered});
     //if( hole == '1' ) console.log('teams', sorted[i].index, teams, teams[sorted[i].index]);
 
     //  junk that depends on team score or something after the above calcs
@@ -227,7 +226,9 @@ export const scoring = game => {
       let lastHoleRunningTotal = ( i == 0 ) ? 0
         : find(ret.holes[i-1].teams, {team: t.team}).runningTotal;
       //console.log('lastHoleRunningTotal', lastHoleRunningTotal, 't', t);
-      t.runningTotal = lastHoleRunningTotal + t.holeTotal;
+      t.runningTotal = ( game.players.length == h.scoresEntered )
+        ? lastHoleRunningTotal + t.holeTotal
+        : lastHoleRunningTotal;
       //console.log('teamTotals', h.hole, t.runningTotal);
     });
 
@@ -358,7 +359,7 @@ const calcTeamScore = ({team, allJunk}) => {
   return ret;
 };
 
-const calcTeamJunk = ({teams, allJunk, game}) => {
+const calcTeamJunk = ({teams, allJunk, game, scoresEntered}) => {
   const ret = cloneDeep(teams);
   allJunk.map(gsJunk => {
     if( gsJunk.scope == 'team' && gsJunk.type == 'dot' ) {
@@ -408,7 +409,9 @@ const calcTeamJunk = ({teams, allJunk, game}) => {
       }
       if( countOfBest <= lenOfScores ) {
         ret[best.index].junk.push(gsJunk);
-        ret[best.index].points = ret[best.index].points + gsJunk.value;
+        ret[best.index].points = (game.players.length == scoresEntered)
+          ? ret[best.index].points + gsJunk.value
+          : 0;
       }
     }
   });
