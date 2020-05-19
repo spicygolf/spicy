@@ -10,7 +10,6 @@ import {
   Button,
   ListItem,
 } from 'react-native-elements';
-import { useNavigation } from '@react-navigation/native';
 import { useQuery } from '@apollo/client';
 import moment from 'moment';
 
@@ -27,8 +26,6 @@ const LinkRoundList = props => {
 
   const { start: game_start } = game;
   const { _key: pkey } = player;
-
-  const navigation = useNavigation();
 
   const [ round, setRound ] = useState(null);
   const [ isNew, setIsNew ] = useState(null);

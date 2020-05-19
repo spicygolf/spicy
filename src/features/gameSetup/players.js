@@ -13,7 +13,6 @@ import {
   ListItem
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-import { filter } from 'lodash';
 
 import RemovePlayer from 'features/gameSetup/removePlayer';
 import TeeSelector from 'features/gameSetup/teeSelector';

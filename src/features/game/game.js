@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Text,
@@ -24,6 +24,9 @@ const Game = props => {
   //console.log('currentGameKey', currentGameKey);
   //console.log('Game route params', route.params);
 
+  const [ game, setGame ] = useState(null);
+  const [ scores, setScores ] = useState(null);
+
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
   const { justBecameActive } = useAppState();
   const [ getGame, { error, data } ] = useLazyQuery(GET_GAME_QUERY);
@@ -41,20 +44,27 @@ const Game = props => {
     content = (<Text>Error Loading Game: `${error}`</Text>);
   }
 
-  if( data && data.getGame ) {
-    // got game
-    //console.log('g_data', g_data);
-    const game = data.getGame;
+  if( data && data.getGame && !game ) {
+    setGame(data.getGame);
+    console.log('game  ', data.getGame);
+  }
+
+  if( game && !scores ) {
+    let s = scoring(game);
+    setScores(s);
+    console.log('scores', s);
+  }
+
+  if( game && scores ) {
+
     const { _key: gkey } = game;
     const activeGameSpec = (game && game.gamespecs && game.gamespecs[0])
       ? game.gamespecs[0]
       : null;
 
-    console.log('game  ', game);
-
-     const game_listener = (
-       <GameUpdatedListener gkey={game._key} />
-     );
+    const game_listener = (
+      <GameUpdatedListener gkey={game._key} />
+    );
 
     /* This is the place where we have all players' rounds as data. It can be
        updated by other players, so here is a good place to kick off a
@@ -66,9 +76,6 @@ const Game = props => {
     const round_listeners = game.rounds.map(r => (
       <ScorePostedListener key={r._key} rkey={r._key} />
     ));
-
-    const scores = scoring(game);
-    console.log('scores', scores);
 
     content = (
       <GameContext.Provider value={{

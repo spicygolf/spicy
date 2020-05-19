@@ -10,12 +10,6 @@ import { GameContext } from 'features/game/gameContext';
 
 const Leaderboard = (props) => {
 
-  //return (<FivePointsLeaderboard {...props} />);
-  // TODO: deal with multiple gamespecs attached to same game
-  // maybe a general 'category' of games that have to be similar to be
-  // attached to the same game?
-
-
   let Component = null;
 
   const { activeGameSpec } = useContext(GameContext);

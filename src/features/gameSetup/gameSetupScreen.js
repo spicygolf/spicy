@@ -22,7 +22,9 @@ const GameSetupScreen = props => {
 
   const { game } = useContext(GameContext);
   const { currentPlayer: cp } = useContext(CurrentPlayerContext);
-  const admin = (cp && cp.level && cp.level == 'admin' ) ? (<Admin />) : null;
+  const admin = (cp && cp.level && cp.level == 'admin' )
+    ? (<Admin />)
+    : null;
 
   useEffect(
     () => {

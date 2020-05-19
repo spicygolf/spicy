@@ -15,10 +15,8 @@ import auth from '@react-native-firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
-import { blue, green } from 'common/colors';
+import { green } from 'common/colors';
 import { validateEmail, validatePassword } from 'common/utils/account';
-
-const { width } = Dimensions.get('window')
 
 
 
@@ -62,17 +60,6 @@ const Login = props => {
 
   const eValid = { borderColor: emailValid ? green : '#ddd' };
   const pValid = { borderColor: passValid ? green : '#ddd' };
-/*
-  useEffect(
-    () => {
-      if( emailRef && emailRef.current ) {
-        emailRef.current.focus();
-      }
-    }, [emailRef]
-  );
-*/
-
-  console.log('login button disabled: ', !(emailValid && passValid));
 
   return (
     <KeyboardAwareScrollView

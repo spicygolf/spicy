@@ -18,28 +18,29 @@ const GameNav = props => {
   const { backTo, showBack, showScore, game, scores, title } = props;
   const navigation = useNavigation();
 
-  const back = backTo ?
-    () => navigation.navigate(backTo) :
-    () => navigation.goBack();
+  const back = backTo
+    ? () => navigation.navigate(backTo)
+    : () => navigation.goBack();
 
-  const left = showBack ? (
-    <TouchableOpacity
-      onPress={() => back()}
-    >
-      <Icon name='chevron-left' size={30} color='#bbb' />
-    </TouchableOpacity>
-  ) : <Text></Text>;
+  const left = showBack
+    ? (
+        <TouchableOpacity
+          onPress={() => back()}
+        >
+          <Icon name='chevron-left' size={30} color='#bbb' />
+        </TouchableOpacity>
+    )
+    : (<Text></Text>);
 
-  const right = showScore ? (
-    <TouchableOpacity
-      onPress={() => navigation.navigate('Score', {
-          game   : game,
-          scores : scores
-        })}
-    >
-      <Icon name='lead-pencil' size={30} color='#666' />
-    </TouchableOpacity>
-  ) : <Text></Text>;
+  const right = showScore
+    ? (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Score', { game, scores })}
+        >
+          <Icon name='lead-pencil' size={30} color='#666' />
+        </TouchableOpacity>
+    )
+    : (<Text></Text>);
 
   return (
     <View style={styles.container}>

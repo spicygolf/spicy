@@ -20,13 +20,6 @@ import { green } from 'common/colors';
 
 const GameStack = props => {
 
-  const nada = {
-    animation: 'timing',
-    config: {
-      duration: 0,
-    },
-  };
-
   const { game } = useContext(GameContext);
   const { gamespecs } = game;
   const gamespec_name = gamespecs.map(gs => gs.disp).join('-');
@@ -86,6 +79,7 @@ const GameStack = props => {
 };
 
 export default GameStack;
+
 
 const styles = StyleSheet.create({
   container: {
