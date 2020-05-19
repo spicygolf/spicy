@@ -5,21 +5,19 @@ import { course_handicap } from 'common/utils/handicap';
 
 
 
-export const linkPlayerToGame = async ({pkey, gkey, link, currentPlayerKey}) => {
+export const linkPlayerToGame = async ({pkey, gkey, playerToGame, currentPlayerKey}) => {
   //console.log('linkPlayerToGame', pkey, gkey, currentPlayerKey);
   //return;
   // link player to game
   try {
-    const { loading, error, data } = await link({
+    const { loading, error, data } = await playerToGame({
       variables: {
         from: {type: 'player', value: pkey},
         to: {type: 'game', value: gkey},
       },
       refetchQueries: () => [{
         query: GET_GAME_QUERY,
-        variables: {
-          gkey: gkey
-        }
+        variables: { gkey }
       }, {
         query: ACTIVE_GAMES_FOR_PLAYER_QUERY,
         variables: {
@@ -38,7 +36,7 @@ export const linkPlayerToGame = async ({pkey, gkey, link, currentPlayerKey}) => 
 
 export const linkRoundToGameAndPlayer = async props => {
 
-  const {round, game, player, isNew, linkRoundToGame, linkRoundToPlayer} = props;
+  const {round, game, player, isNew, roundToGame, roundToPlayer} = props;
 
   //console.log('linking round to game and player');
   const { _key: rkey, tee } = round;
@@ -60,7 +58,7 @@ export const linkRoundToGameAndPlayer = async props => {
   }
 
   // link round to game
-  let { loading: r2gLoading, error: r2gError, data: r2gData } = await linkRoundToGame({
+  let { loading: r2gLoading, error: r2gError, data: r2gData } = await roundToGame({
     variables: {
       from  : {type: 'round', value: rkey},
       to    : {type: 'game', value: gkey},
@@ -68,9 +66,7 @@ export const linkRoundToGameAndPlayer = async props => {
     },
     refetchQueries: () => [{
       query: GET_GAME_QUERY,
-      variables: {
-        gkey: gkey
-      }
+      variables: { gkey }
     }],
     awaitRefetchQueries: true,
   });
@@ -78,16 +74,14 @@ export const linkRoundToGameAndPlayer = async props => {
 
   if( isNew ) {
     // link round to player
-    let { loading: r2pLoading, error: r2pError, data: r2pData } = await linkRoundToPlayer({
+    let { loading: r2pLoading, error: r2pError, data: r2pData } = await roundToPlayer({
       variables: {
         from: {type: 'round', value: rkey},
         to:   {type: 'player', value: pkey},
       },
       refetchQueries: () => [{
         query: GET_GAME_QUERY,
-        variables: {
-          gkey: gkey
-        }
+        variables: { gkey }
       }],
       awaitRefetchQueries: true,
     });

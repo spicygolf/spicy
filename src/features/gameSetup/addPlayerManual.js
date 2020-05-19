@@ -55,7 +55,7 @@ const AddPlayerManual = props => {
         name: player.name,
         handicap: player.handicap,
       };
-      navigation.navigate('LinkRound', {
+      navigation.navigate('LinkRoundList', {
         game,
         player: p,
         round: null,

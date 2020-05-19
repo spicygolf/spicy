@@ -6,7 +6,6 @@ import AddCourse from 'features/gameSetup/addCourse';
 import AddPlayer from 'features/gameSetup/addPlayer';
 import EditPlayer from 'features/gameSetup/editPlayer';
 import LinkRoundList from 'features/gameSetup/linkRoundList';
-import LinkRound from 'features/gameSetup/linkRound';
 
 
 
@@ -45,16 +44,6 @@ const GameSetupStack = props => {
       <Stack.Screen
         name='LinkRoundList'
         component={LinkRoundList}
-        options={{
-          transitionSpec: {
-            open: nada,
-            close: nada,
-          },
-        }}
-      />
-      <Stack.Screen
-        name='LinkRound'
-        component={LinkRound}
         options={{
           transitionSpec: {
             open: nada,

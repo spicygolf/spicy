@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
   ActivityIndicator,
 } from 'react-native';
@@ -6,7 +6,7 @@ import { gql, useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { ADD_LINK_MUTATION } from 'common/graphql/link'
+import { UPSERT_LINK_MUTATION } from 'common/graphql/link'
 import { ADD_ROUND_MUTATION } from 'features/rounds/graphql';
 import {
   linkPlayerToGame,
@@ -22,22 +22,21 @@ import {
 const LinkRound = props => {
 
   const UPDATE_GAME_MUTATION = gql`
-  mutation UpdateGame($gkey: String!, $game: GameInput!) {
-    updateGame(gkey: $gkey, game: $game) {
-      holes {
-        hole
-        teams {
-          team
-          players
+    mutation UpdateGame($gkey: String!, $game: GameInput!) {
+      updateGame(gkey: $gkey, game: $game) {
+        holes {
+          hole
+          teams {
+            team
+            players
+          }
         }
       }
     }
-  }
-`;
+  `;
 
-  const { route } = props;
-  const { game, player, round, isNew } = route.params;
-  //console.log('LinkRound route params', game, player, round);
+  const { game, player, round, isNew } = props;
+  //console.log('LinkRound props', game, player, round, isNew);
 
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
 
@@ -48,14 +47,14 @@ const LinkRound = props => {
   const navigation = useNavigation();
 
   const [ addRound ] = useMutation(ADD_ROUND_MUTATION);
-  const [ link ] = useMutation(ADD_LINK_MUTATION);
   const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
-  const [ linkRoundToGame ] = useMutation(ADD_LINK_MUTATION);
-  const [ linkRoundToPlayer ] = useMutation(ADD_LINK_MUTATION);
+  const [ playerToGame ] = useMutation(UPSERT_LINK_MUTATION);
+  const [ roundToGame ] = useMutation(UPSERT_LINK_MUTATION);
+  const [ roundToPlayer ] = useMutation(UPSERT_LINK_MUTATION);
 
 
   const createNewRound = async () => {
-    console.log('createNewRound');
+    //console.log('createNewRound');
     // add round
     const { loading, error, data } = await addRound({
       variables: {
@@ -77,11 +76,11 @@ const LinkRound = props => {
     //console.log('linkRound');
     await linkRoundToGameAndPlayer({
       round: r,
-      game: game,
-      player: player,
-      isNew: isNew,
-      linkRoundToGame: linkRoundToGame,
-      linkRoundToPlayer: linkRoundToPlayer,
+      game,
+      player,
+      isNew,
+      roundToGame,
+      roundToPlayer,
     });
   };
 
@@ -90,15 +89,15 @@ const LinkRound = props => {
       const init = async () => {
         // link player to game
         await linkPlayerToGame({
-          pkey: pkey,
-          gkey: gkey,
-          link: link,
-          currentPlayerKey: currentPlayerKey,
+          pkey,
+          gkey,
+          playerToGame,
+          currentPlayerKey,
         });
 
         // if not a team game, add player to her own team and update game
         if( !teamGame ) {
-          console.log('firing add player to own team');
+          //console.log('firing add player to own team');
           await addPlayerToOwnTeam({pkey, game, updateGame});
         }
         // link round
@@ -107,8 +106,7 @@ const LinkRound = props => {
           : await createNewRound();
         await linkRound(r);
 
-        // TODO: do we even need this anymore after refactor?
-        console.log('LinkRound navigating to GameSetup');
+        //console.log('LinkRound navigating to GameSetup');
         navigation.navigate('Game', {
           currentGameKey: gkey,
           screen: 'Setup',
