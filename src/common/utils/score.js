@@ -78,7 +78,7 @@ export const scoring = game => {
 
   const holes = getHoles(game);
   holes.map(hole => {
-    //console.log('scoring hole', hole);
+    //console.log(`scoring hole '${hole}'   ***********************************`);
 
     const gHole = find(game.holes, {hole: hole});
     //console.log('gHole', gHole);
@@ -105,7 +105,7 @@ export const scoring = game => {
           const {p, tp, pp} = calcPlayerJunk({pkey, game, hole, allJunk});
           teamPoints += tp;
           possiblePoints += pp;
-          if( p && p.score && p.score.gross ) ++scoresEntered;
+          if( p && p.score && p.score.gross && p.score.gross.value ) ++scoresEntered;
           return p;
         }),
         score: [],
@@ -122,7 +122,6 @@ export const scoring = game => {
     });
 
     teams = calcTeamJunk({teams, allJunk, game, scoresEntered});
-    //if( hole == '1' ) console.log('teams', sorted[i].index, teams, teams[sorted[i].index]);
 
     //  junk that depends on team score or something after the above calcs
     //  something like 'ky' or 'oj' in wolfhammer
@@ -189,7 +188,7 @@ export const scoring = game => {
       totalPointsMarked += t.points;
       // give points to players on this team
       t.players.map(p => {
-        p.score.points = holeTotal;
+        p.score.points.value = holeTotal;
       });
     });
     if( teams.length == 2 ) {
@@ -200,13 +199,14 @@ export const scoring = game => {
         t.holeNetTotal = holeNetTotal;
         // give points to players on this team
         t.players.map(p => {
-          p.score.points = t.holeNetTotal; // overwrite holeTotal points in 2-team
+          p.score.points.value = t.holeNetTotal; // overwrite holeTotal points in 2-team
         });
       });
     }
 
     // warnings
     let warnings = [];
+    //console.log('warnings', game.players.length, scoresEntered);
     if( totalPointsMarked < possiblePoints && game.players.length == scoresEntered ) {
       warnings.push('Mark all possible points');
     }
@@ -293,6 +293,8 @@ const calcPlayerJunk = ({pkey, game, hole, allScoringHole, allJunk}) => {
   const pops = get_pops(score);
   const teeHole = get_hole(hole, round);
   const par = (teeHole && teeHole.par) ? parseFloat(teeHole.par) : 0.0;
+  const grossToPar = gross - par;
+  const netToPar = net - par;
 
   // player junk
   const playerJunk = [];
@@ -326,7 +328,12 @@ const calcPlayerJunk = ({pkey, game, hole, allScoringHole, allJunk}) => {
   return ({
     p: {
       pkey: pkey,
-      score: {gross, net, pops},
+      score: {
+        gross: { value: gross, toPar: grossToPar},
+        net: { value: net, toPar: netToPar},
+        pops: { value: pops, toPar: null},
+        points: { value: 0, toPar: null},
+      },
       junk: playerJunk,
     },
     tp,
@@ -342,16 +349,16 @@ const calcTeamScore = ({team, allJunk}) => {
       switch( gsJunk.calculation ) {
         case 'best_ball':
           const orderedBalls = orderBy(team.players, p => (
-            parseFloat(p.score[gsJunk.based_on])
+            parseFloat(p.score[gsJunk.based_on].value)
           ));
           //console.log('orderedBalls', orderedBalls);
-          let val = orderedBalls.map(p => p.score[gsJunk.based_on]);
+          let val = orderedBalls.map(p => p.score[gsJunk.based_on].value);
           ret.score[gsJunk.name] = val;
           break;
         case 'sum':
           let sum = 0.0;
           team.players.map(player => {
-            const newScore = parseFloat(player.score[gsJunk.based_on]);
+            const newScore = parseFloat(player.score[gsJunk.based_on].value);
             sum = sum + newScore;
           });
           // make value an array because of best_ball calc above needing to be
@@ -372,14 +379,16 @@ const calcTeamJunk = ({teams, allJunk, game, scoresEntered}) => {
   const ret = cloneDeep(teams);
   allJunk.map(gsJunk => {
     if( gsJunk.scope == 'team' && gsJunk.type == 'dot' ) {
-      if( game.players.length > scoresEntered ) return;
       // get all team scores array
-      const teamScores = teams.map((t, i) => ({
-        team: t.team,
-        name: gsJunk.name,
-        value: t.score[gsJunk.name],
-        index: i,
-      }));
+      const teamScores = teams.map((t, i) => {
+        //console.log(`${gsJunk.name} score`, t.score[gsJunk.name]);
+        return ({
+          team: t.team,
+          name: gsJunk.name,
+          value: t.score[gsJunk.name],
+          index: i,
+        });
+      });
       //console.log('teamScores', teamScores);
 
       // figure out how many scores to iterate through to break tie
@@ -393,9 +402,15 @@ const calcTeamJunk = ({teams, allJunk, game, scoresEntered}) => {
 
       let best = teamScores[0];
       let countOfBest = 1;
+      let validScores = true;
       for( let i=1; i<teamScores.length; i++ ) {
         for( let j=0; j<lenOfScores; j++ ) {
           //console.log('i', i, 'j', j, teamScores[i].value[j], best.value[j]);
+          if( !teamScores[i].value[j] ) {
+            //console.log(`we don't have valid scores`);
+            validScores = false;
+            break;
+          }
           if( teamScores[i].value[j] == best.value[j] ) {
             //console.log('adding to countOfBest cuz tied');
             ++countOfBest;
@@ -408,7 +423,7 @@ const calcTeamJunk = ({teams, allJunk, game, scoresEntered}) => {
               break; // don't go further with these orderedScores
             }
           } else if( gsJunk.better == 'higher' ) {
-            if( teamScores[i].value > best.value[j] ) {
+            if( teamScores[i].value[j] > best.value[j] ) {
               best = teamScores[i];
               //console.log('this team beat best team', best);
               countOfBest = 1;
@@ -417,7 +432,7 @@ const calcTeamJunk = ({teams, allJunk, game, scoresEntered}) => {
           }
         }
       }
-      if( countOfBest <= lenOfScores ) {
+      if( validScores && (countOfBest <= lenOfScores) ) {
         ret[best.index].junk.push(gsJunk);
         ret[best.index].points = (game.players.length == scoresEntered)
           ? ret[best.index].points + gsJunk.value
@@ -454,6 +469,7 @@ export const isScoreToParJunk = (junk, s, par) => {
 };
 
 export const format = ({v, type, showDown = true}) => {
+  if( type === 'points' && parseFloat(v) == 0 ) return ``;
   if( type === 'points' && parseFloat(v) > 0 ) return `+${v}`;
   if( type === 'match' ) {
     if( v && v.toString().includes('&') ) return v;

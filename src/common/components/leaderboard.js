@@ -44,7 +44,7 @@ const Leaderboard = props => {
       const scores = orderedPlayerList.map(p => {
         const score = findScore(h, p.pkey);
         if( !totals[p.pkey] ) totals[p.pkey] = 0;
-        if( score ) totals[p.pkey] += (parseFloat(score[scoreType]) || 0);
+        if( score ) totals[p.pkey] += (parseFloat(score[scoreType].value) || 0);
         let t = find(h.teams, {team: p.team});
         let team = '';
         if( t && t.team ) team = t.team; // dafuq?
@@ -117,7 +117,7 @@ const Leaderboard = props => {
         <View key={`cell_${row.hole}_${s.pkey}`} style={styles.scorePopContainer}>
           <View style={styles.scoreView}>
             <Text style={styles.scoreCell}>{format({
-              v: s.score[scoreType],
+              v: s.score[scoreType].value,
               type: scoreType,
               showDown: false,
             })}</Text>
