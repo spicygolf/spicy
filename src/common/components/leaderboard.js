@@ -44,7 +44,7 @@ const Leaderboard = props => {
       const scores = orderedPlayerList.map(p => {
         const score = findScore(h, p.pkey);
         if( !totals[p.pkey] ) totals[p.pkey] = 0;
-        if( score ) totals[p.pkey] += (parseFloat(score[scoreType].value) || 0);
+        if( score && score[scoreType] ) totals[p.pkey] += (parseFloat(score[scoreType].value) || 0);
         let t = find(h.teams, {team: p.team});
         let team = '';
         if( t && t.team ) team = t.team; // dafuq?
@@ -63,7 +63,7 @@ const Leaderboard = props => {
           pkey: p.pkey,
           score: {
             ...score,
-            match,
+            match: { value: match, toPar: null},
           },
           team,
         };
@@ -76,7 +76,7 @@ const Leaderboard = props => {
     if( scoreType === 'match' ) {
       const lastRow = last(rows);
       if( lastRow ) lastRow.scores.map(s => {
-        totals[s.pkey] = s.score.match;
+        totals[s.pkey] = s.score.match.value;
       });
     }
     //console.log('rows', side, rows);
@@ -101,26 +101,46 @@ const Leaderboard = props => {
   const Row = ({row}) => {
     const scoreCells = row.scores.map(s => {
       if( !s.score ) return null;
+      const sv = s.score[scoreType].value;
       let pops = [];
-      for( let i=0; i<parseFloat(s.score.pops); i++ ) {
+      for( let i=0; i<parseFloat(s.score.pops.value); i++ ) {
         pops.push((
           <Icon
             key={i}
             name='lens'
-            color={ s.score.pops > 0 ? 'black' : '#eee' }
+            color={ s.score.pops.value > 0 ? 'black' : '#eee' }
             size={5}
             iconStyle={styles.pop}
           />
         ));
       }
+
+      const birdieShape = ( sv && s.score[scoreType].toPar < 0 )
+        ? [ shapeStyles(rowHeight).circle ]
+        : (scoreType == 'match') ? [ shapeStyles(rowHeight).match ] : [ shapeStyles(rowHeight).nocircle ];
+
+      const eagleShape = ( sv && s.score[scoreType].toPar < -1 )
+        ? [ shapeStyles(rowHeight-5).circle ]
+        : (scoreType == 'match') ? [ shapeStyles(rowHeight-5).match ] : [ shapeStyles(rowHeight-5).nocircle ];
+
+      const txt = (
+        <Text style={styles.scoreCell}>
+          {format({
+            v: sv,
+            type: scoreType,
+            showDown: false,
+          })}
+        </Text>
+      );
+
       return (
         <View key={`cell_${row.hole}_${s.pkey}`} style={styles.scorePopContainer}>
           <View style={styles.scoreView}>
-            <Text style={styles.scoreCell}>{format({
-              v: s.score[scoreType].value,
-              type: scoreType,
-              showDown: false,
-            })}</Text>
+            <View style={birdieShape}>
+              <View style={eagleShape}>
+                {txt}
+              </View>
+            </View>
           </View>
           <View style={styles.popView}>
             { pops }
@@ -140,13 +160,19 @@ const Leaderboard = props => {
   };
 
   const TotalRow = ({section}) => {
+    const scoreShape = (scoreType == 'match')
+      ? [ shapeStyles(rowHeight).match ]
+      : [ shapeStyles(rowHeight).nocircle ];
+
     const totalCells = orderedPlayerList.map(p => (
       <View key={`totalcell_${section.side}_${p.pkey}`} style={styles.scorePopContainer}>
         <View style={styles.scoreView}>
-          <Text style={styles.scoreCell}>{format({
-            v: section.totals[p.pkey],
-            type: scoreType,
-          })}</Text>
+          <View style={scoreShape}>
+            <Text style={styles.scoreCell}>{format({
+              v: section.totals[p.pkey],
+              type: scoreType,
+            })}</Text>
+          </View>
         </View>
       </View>
     ));
@@ -245,6 +271,37 @@ export default Leaderboard;
 const headerHeight = 90;
 const rowHeight = 26;
 
+const shapeStyles = r => {
+  return StyleSheet.create({
+    circle: {
+      width: r,
+      height: r,
+      borderRadius: r / 2,
+      backgroundColor: 'transparent',
+      borderColor: 'black',
+      borderWidth: 1,
+      paddingRight: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    nocircle: {
+      width: r,
+      height: r,
+      backgroundColor: 'transparent',
+      paddingRight: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    match: {
+      height: r,
+      backgroundColor: 'transparent',
+      paddingRight: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  });
+};
+
 var styles = StyleSheet.create({
   container: {
     margin: 10,
@@ -291,22 +348,18 @@ var styles = StyleSheet.create({
     minHeight: rowHeight,
     height: rowHeight,
     flexDirection: 'row',
-    paddingVertical: 5,
+    //paddingVertical: 5,
   },
   holeCellView: {
     flex: 1,
     height: rowHeight,
     alignItems: 'center',
+    justifyContent: 'center',
     //borderWidth: 1,
   },
   holeCell: {
     color: '#666',
-  },
-  scoreCell: {
-    margin: 0,
-    padding: 0,
-    height: rowHeight,
-    paddingRight: 5,
+    fontSize: 13,
   },
   scorePopContainer: {
     flexDirection: 'row',
@@ -314,17 +367,20 @@ var styles = StyleSheet.create({
   },
   scoreView: {
     alignItems: 'flex-end',
-    flex: 0.65,
+    flex: 0.75,
+  },
+  scoreCell: {
+    fontSize: 13,
   },
   popView: {
     alignItems: 'flex-start',
-    flex: 0.35,
+    paddingTop: 3,
+    flex: 0.25,
   },
   pop: {
     paddingVertical: 0.5,
   },
   totalRow: {
-    paddingVertical: 5,
     backgroundColor: '#ddd',
   },
 });
