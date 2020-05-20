@@ -101,6 +101,18 @@ const Leaderboard = props => {
   const Row = ({row}) => {
     const scoreCells = row.scores.map(s => {
       if( !s.score ) return null;
+      let pops = [];
+      for( let i=0; i<parseFloat(s.score.pops); i++ ) {
+        pops.push((
+          <Icon
+            key={i}
+            name='lens'
+            color={ s.score.pops > 0 ? 'black' : '#eee' }
+            size={5}
+            iconStyle={styles.pop}
+          />
+        ));
+      }
       return (
         <View key={`cell_${row.hole}_${s.pkey}`} style={styles.scorePopContainer}>
           <View style={styles.scoreView}>
@@ -111,11 +123,7 @@ const Leaderboard = props => {
             })}</Text>
           </View>
           <View style={styles.popView}>
-            <Icon
-              name='lens'
-              color={ s.score.pops > 0 ? 'black' : '#eee' }
-              size={5}
-            />
+            { pops }
           </View>
         </View>
       );
@@ -311,6 +319,9 @@ var styles = StyleSheet.create({
   popView: {
     alignItems: 'flex-start',
     flex: 0.35,
+  },
+  pop: {
+    paddingVertical: 0.5,
   },
   totalRow: {
     paddingVertical: 5,
