@@ -117,11 +117,15 @@ const Leaderboard = props => {
 
       const birdieShape = ( sv && s.score[scoreType].toPar < 0 )
         ? [ shapeStyles(rowHeight).circle ]
-        : (scoreType == 'match') ? [ shapeStyles(rowHeight).match ] : [ shapeStyles(rowHeight).nocircle ];
+        : (scoreType == 'match' || scoreType == 'points' )
+          ? [ shapeStyles(rowHeight).match ]
+          : [ shapeStyles(rowHeight).nocircle ];
 
       const eagleShape = ( sv && s.score[scoreType].toPar < -1 )
         ? [ shapeStyles(rowHeight-5).circle ]
-        : (scoreType == 'match') ? [ shapeStyles(rowHeight-5).match ] : [ shapeStyles(rowHeight-5).nocircle ];
+        : (scoreType == 'match' || scoreType == 'points' )
+          ? [ shapeStyles(rowHeight-5).match ]
+          : [ shapeStyles(rowHeight-5).nocircle ];
 
       const txt = (
         <Text style={styles.scoreCell}>
@@ -160,7 +164,7 @@ const Leaderboard = props => {
   };
 
   const TotalRow = ({section}) => {
-    const scoreShape = (scoreType == 'match')
+    const scoreShape = (scoreType == 'match' || scoreType == 'points' )
       ? [ shapeStyles(rowHeight).match ]
       : [ shapeStyles(rowHeight).nocircle ];
 
@@ -214,6 +218,7 @@ const Leaderboard = props => {
           <Text
             style={styles.playerName}
             textBreakStrategy='simple'
+            numberOfLines={2}
           >{ p.name }</Text>
         </View>
       );
@@ -295,9 +300,9 @@ const shapeStyles = r => {
     match: {
       height: r,
       backgroundColor: 'transparent',
-      paddingRight: 0,
+      paddingRight: 2,
       justifyContent: 'center',
-      alignItems: 'center',
+      //alignItems: 'center',
     },
   });
 };
