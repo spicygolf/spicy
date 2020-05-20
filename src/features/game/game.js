@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
   ActivityIndicator,
   Text,
   View,
 } from 'react-native';
-import { useLazyQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 
 import useAppState from 'hooks/useAppState';
 import { GET_GAME_QUERY } from 'features/game/graphql';
@@ -22,21 +22,26 @@ const Game = props => {
   const { route } = props;
   const { currentGameKey } = route.params;
   //console.log('currentGameKey', currentGameKey);
-  //console.log('Game route params', route.params);
-
-  const [ game, setGame ] = useState(null);
-  const [ scores, setScores ] = useState(null);
 
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
   const { justBecameActive } = useAppState();
-  const [ getGame, { error, data } ] = useLazyQuery(GET_GAME_QUERY);
 
+  let content = null;
 
-  let content = (
-    <View>
-      <ActivityIndicator />
-    </View>
-  );
+  // execute the getGame query
+  const { loading, error, refetch, data } = useQuery(GET_GAME_QUERY, {
+    variables: {
+      gkey: currentGameKey,
+    },
+  });
+
+  if( loading ) {
+    content = (
+      <View>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   if( error ) {
     console.log(error);
@@ -44,18 +49,13 @@ const Game = props => {
     content = (<Text>Error Loading Game: `${error}`</Text>);
   }
 
-  if( data && data.getGame && !game ) {
-    setGame(data.getGame);
-    console.log('game  ', data.getGame);
-  }
+  if( data && data.getGame ) {
 
-  if( game && !scores ) {
-    let s = scoring(game);
-    setScores(s);
-    console.log('scores', s);
-  }
+    const game = data.getGame;
+    console.log('game  ', game);
 
-  if( game && scores ) {
+    const scores = scoring(game);
+    console.log('scores', scores);
 
     const { _key: gkey } = game;
     const activeGameSpec = (game && game.gamespecs && game.gamespecs[0])
@@ -96,24 +96,11 @@ const Game = props => {
   useEffect(() => {
     if( justBecameActive ) {
       console.log('justBecameActive getGame');
-      getGame({
-        variables: {
-          gkey: currentGameKey,
-        },
-      });
+      refetch();
     }
   }, [justBecameActive]);
 
-  useEffect(() => {
-    console.log('initial getGame');
-    getGame({
-      variables: {
-        gkey: currentGameKey,
-      },
-    });
-  }, []);
-
-  return (content);
+  return content;
 
 };
 
