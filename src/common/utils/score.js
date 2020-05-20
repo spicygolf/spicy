@@ -102,7 +102,7 @@ export const scoring = game => {
         team: gTeam.team,
         players: gTeam.players.map(gPlayer => {
           const pkey = gPlayer;
-          const {p, tp, pp} = calcPlayerScore({pkey, game, hole, allJunk});
+          const {p, tp, pp} = calcPlayerJunk({pkey, game, hole, allJunk});
           teamPoints += tp;
           possiblePoints += pp;
           if( p && p.score && p.score.gross ) ++scoresEntered;
@@ -182,9 +182,11 @@ export const scoring = game => {
     // hole totals
     const holeMultiplier = reduce(multipliers, (tot, m) => (tot * m.value), 1);
     //console.log('holeMultiplier', hole, holeMultiplier);
+    let totalPointsMarked = 0;
     teams.map(t => {
       const holeTotal = t.points * holeMultiplier;
       t.holeTotal = holeTotal;
+      totalPointsMarked += t.points;
       // give points to players on this team
       t.players.map(p => {
         p.score.points = holeTotal;
@@ -203,6 +205,12 @@ export const scoring = game => {
       });
     }
 
+    // warnings
+    let warnings = [];
+    if( totalPointsMarked < possiblePoints && game.players.length == scoresEntered ) {
+      warnings.push('Mark all possible points');
+    }
+
     //if( hole == '1' ) console.log(hole, possiblePoints, teams, multipliers);
 
     ret.holes.push({
@@ -212,6 +220,7 @@ export const scoring = game => {
       holeMultiplier,
       possiblePoints,
       scoresEntered,
+      warnings,
     });
 
   });
@@ -271,7 +280,7 @@ export const scoring = game => {
 };
 
 
-const calcPlayerScore = ({pkey, game, hole, allScoringHole, allJunk}) => {
+const calcPlayerJunk = ({pkey, game, hole, allScoringHole, allJunk}) => {
 
   let tp = 0;
   let pp = 0;

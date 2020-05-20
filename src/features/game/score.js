@@ -1,11 +1,14 @@
 import React, { useContext, useState } from 'react';
 import {
   StyleSheet,
+  Text,
   View,
 } from 'react-native';
 import {
-  Card
+  Card,
+  Icon,
 } from 'react-native-elements';
+import { find } from 'lodash';
 
 import { getTeams } from 'common/utils/teams';
 import TeamChooser from 'common/components/teamChooser';
@@ -23,6 +26,26 @@ const Score = props => {
 
 
   let content = null;
+
+  const hole = find(scores.holes, {hole: currentHole});
+  const warnings = ( hole && hole.warnings )
+    ? hole.warnings.map((w, i) => (
+        <View style={styles.warning}>
+          <Icon
+            key={`icon_${i}`}
+            name='alert-outline'
+            type='material-community'
+            color='#666'
+            size={24}
+            iconStyle={styles.warningIcon}
+          />
+          <Text key={`text_${i}`} style={styles.warningTxt}>{w}</Text>
+        </View>
+      ))
+    : [];
+  const warningsContent = ( warnings && warnings.length )
+    ? (<View style={styles.warnings}>{warnings}</View>)
+    : null;
 
   const teams = getTeams(game, currentHole);
   //console.log('teams', teams);
@@ -55,6 +78,7 @@ const Score = props => {
         currentHole={currentHole}
         changeHole={hole => setCurrentHole(hole)}
       />
+      {warningsContent}
       <View style={styles.content_container}>
         {content}
       </View>
@@ -73,5 +97,24 @@ var styles = StyleSheet.create({
   },
   content_container: {
     flex: 1,
+  },
+  warnings: {
+    marginHorizontal: 9,
+    paddingVertical: 2,
+    paddingHorizontal: 5,
+    backgroundColor: 'yellow',
+    borderWidth: 2,
+    borderColor: '#ddd',
+  },
+  warning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  warningIcon: {
+
+  },
+  warningTxt: {
+    paddingLeft: 5,
+    color: '#666',
   },
 });
