@@ -181,11 +181,9 @@ export const scoring = game => {
     // hole totals
     const holeMultiplier = reduce(multipliers, (tot, m) => (tot * m.value), 1);
     //console.log('holeMultiplier', hole, holeMultiplier);
-    let totalPointsMarked = 0;
     teams.map(t => {
       const holeTotal = t.points * holeMultiplier;
       t.holeTotal = holeTotal;
-      totalPointsMarked += t.points;
       // give points to players on this team
       t.players.map(p => {
         p.score.points.value = holeTotal;
@@ -206,8 +204,18 @@ export const scoring = game => {
 
     // warnings
     let warnings = [];
-    //console.log('warnings', game.players.length, scoresEntered);
-    if( totalPointsMarked < possiblePoints && game.players.length == scoresEntered ) {
+    let markedJunk = 0, requiredJunk = 0;
+    allJunk.map(junk => {
+      if( junk.scope == 'player' && junk.limit == 'one_per_group' ) {
+        ++requiredJunk;
+        teams.map(t => {
+          t.players.map(p => {
+            if( find(p.junk, {name: junk.name}) ) ++markedJunk;
+          });
+        });
+      }
+    });
+    if( markedJunk < requiredJunk && game.players.length == scoresEntered ) {
       warnings.push('Mark all possible points');
     }
 
@@ -220,6 +228,8 @@ export const scoring = game => {
       holeMultiplier,
       possiblePoints,
       scoresEntered,
+      markedJunk,
+      requiredJunk,
       warnings,
     });
 

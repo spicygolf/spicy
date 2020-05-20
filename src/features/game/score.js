@@ -30,7 +30,7 @@ const Score = props => {
   const hole = find(scores.holes, {hole: currentHole});
   const warnings = ( hole && hole.warnings )
     ? hole.warnings.map((w, i) => (
-        <View style={styles.warning}>
+        <View key={`warning_${i}`}style={styles.warning}>
           <Icon
             key={`icon_${i}`}
             name='alert-outline'
