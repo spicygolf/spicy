@@ -72,7 +72,6 @@ var styles = StyleSheet.create({
     flex: 1,
   },
   content_container: {
-    // TODO: any way to create this buffer for the bottom nav buttons?
-    paddingBottom: 80,
+    flex: 1,
   },
 });

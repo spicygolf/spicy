@@ -363,6 +363,7 @@ const calcTeamJunk = ({teams, allJunk, game, scoresEntered}) => {
   const ret = cloneDeep(teams);
   allJunk.map(gsJunk => {
     if( gsJunk.scope == 'team' && gsJunk.type == 'dot' ) {
+      if( game.players.length > scoresEntered ) return;
       // get all team scores array
       const teamScores = teams.map((t, i) => ({
         team: t.team,
