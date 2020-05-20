@@ -164,19 +164,28 @@ const Leaderboard = props => {
   };
 
   const TotalRow = ({section}) => {
-    const scoreShape = (scoreType == 'match' || scoreType == 'points' )
+    const birdieShape = (scoreType == 'match' || scoreType == 'points' )
       ? [ shapeStyles(rowHeight).match ]
       : [ shapeStyles(rowHeight).nocircle ];
+
+    const eagleShape = (scoreType == 'match' || scoreType == 'points' )
+      ? [ shapeStyles(rowHeight-5).match ]
+      : [ shapeStyles(rowHeight-5).nocircle ];
 
     const totalCells = orderedPlayerList.map(p => (
       <View key={`totalcell_${section.side}_${p.pkey}`} style={styles.scorePopContainer}>
         <View style={styles.scoreView}>
-          <View style={scoreShape}>
-            <Text style={styles.scoreCell}>{format({
-              v: section.totals[p.pkey],
-              type: scoreType,
-            })}</Text>
+          <View style={birdieShape}>
+            <View style={eagleShape}>
+              <Text style={styles.scoreCell}>
+                {format({
+                  v: section.totals[p.pkey],
+                  type: scoreType,
+                })}
+              </Text>
+            </View>
           </View>
+          <View style={styles.popView}></View>
         </View>
       </View>
     ));
@@ -302,7 +311,6 @@ const shapeStyles = r => {
       backgroundColor: 'transparent',
       paddingRight: 2,
       justifyContent: 'center',
-      //alignItems: 'center',
     },
   });
 };
