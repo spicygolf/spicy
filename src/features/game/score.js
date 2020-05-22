@@ -1,5 +1,6 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   StyleSheet,
   Text,
   View,
@@ -16,14 +17,14 @@ import HoleNav from 'features/game/holenav';
 import Teams from 'features/game/teams';
 import { GameContext } from 'features/game/gameContext';
 import { getHoles } from 'common/utils/game';
+import { getGameMeta, setGameMeta } from 'common/utils/metadata';
 
 
 
 const Score = props => {
 
-  const { game, scores } = useContext(GameContext);
-  const [ currentHole, setCurrentHole ] = useState('1');
-
+  const { game, gkey, scores } = useContext(GameContext);
+  const [ currentHole, setCurrentHole ] = useState();
 
   let content = null;
 
@@ -50,33 +51,58 @@ const Score = props => {
   const teams = getTeams(game, currentHole);
   //console.log('teams', teams);
 
-  if( teams ) {
-    content = (
-      <Teams
-        teams={teams}
-        scoring={scores}
-        currentHole={currentHole}
-      />
-    );
-  } else {
-    content = (
-      <Card title='Choose Teams'>
-        <TeamChooser
+  if( currentHole ) {
+    if( teams ) {
+      content = (
+        <Teams
+          teams={teams}
+          scoring={scores}
           currentHole={currentHole}
         />
-      </Card>
+      );
+    } else {
+      content = (
+        <Card title='Choose Teams'>
+          <TeamChooser
+            currentHole={currentHole}
+          />
+        </Card>
+      );
+    }
+  } else {
+    content = (
+      <View>
+        <ActivityIndicator />
+      </View>
     );
   }
-
   const holes = getHoles(game);
   //console.log('holes', holes);
+
+  useEffect(
+    () => {
+      const init = async () => {
+        const gameMeta = await getGameMeta(gkey);
+        //console.log('meta', gameMeta);
+        if( !gameMeta || !gameMeta.currentHole ) {
+          setCurrentHole('1');
+        } else {
+          setCurrentHole(gameMeta.currentHole);
+        }
+      };
+      init();
+    }, []
+  );
 
   return (
     <View style={styles.score_container}>
       <HoleNav
         holes={holes}
         currentHole={currentHole}
-        changeHole={hole => setCurrentHole(hole)}
+        changeHole={async hole => {
+          await setGameMeta(gkey, 'currentHole', hole);
+          setCurrentHole(hole);
+        }}
       />
       {warningsContent}
       <View style={styles.content_container}>

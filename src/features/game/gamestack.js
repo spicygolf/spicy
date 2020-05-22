@@ -35,7 +35,7 @@ const GameStack = props => {
         <Text style={styles.subtitle}>{`${courseFull}`}</Text>
       </View>
       <Tab.Navigator
-        initialRouteName='Leaderboard'
+        initialRouteName='Score'
         screenOptions={{
           inactiveTintColor: '#ccc',
           inactiveBackgroundColor: '#666',
