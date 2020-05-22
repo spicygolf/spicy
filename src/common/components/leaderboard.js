@@ -100,7 +100,7 @@ const Leaderboard = props => {
 
   const Row = ({row}) => {
     const scoreCells = row.scores.map(s => {
-      if( !s.score ) return null;
+      if( !s.score || !s.score[scoreType] ) return null;
       const sv = s.score[scoreType].value;
       let pops = [];
       for( let i=0; i<parseFloat(s.score.pops.value); i++ ) {
@@ -318,7 +318,7 @@ const shapeStyles = r => {
 var styles = StyleSheet.create({
   container: {
     margin: 10,
-    height: '100%',
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
