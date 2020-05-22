@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import moment from 'moment';
-import { find, findIndex } from 'lodash';
+import { filter, find, findIndex } from 'lodash';
 
 
 
@@ -40,22 +40,28 @@ export const getGameMeta = async gkey => {
 export const setGameMeta = async (gkey, key, value) => {
   const ts = moment.utc().format();
   let gamesMeta = await getGamesMeta(gkey);
-  if( !gamesMeta ) gamesMeta = [];
+  if( !gamesMeta || !Array.isArray(gamesMeta) ) gamesMeta = [];
+
   let game = find(gamesMeta, {gkey: gkey});
   if( !game ) game = { gkey, ts, };
   game[key] = value;
+
   const i = findIndex(gamesMeta, {gkey: gkey});
   if( i >= 0 ) {
     gamesMeta[i] = game;
   } else {
     gamesMeta.push(game);
   }
+  gamesMeta = filterGamesMeta(gamesMeta);
   //console.log('setGameMeta gamesMeta: ', gamesMeta);
   await setGamesMeta(gamesMeta);
 };
 
 
-// TODO: implement me
-export const clearGamesMeta = async () => {
-
+// Don't let storage get out of control, only keep last week of games meta
+export const filterGamesMeta = gamesMeta => {
+  return filter(gamesMeta, g => {
+    console.log('g', g);
+    return moment.utc(g.ts) > moment.utc().subtract(1, 'week');
+  });
 };
