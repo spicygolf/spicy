@@ -442,11 +442,11 @@ const calcTeamJunk = ({teams, allJunk, game, scoresEntered}) => {
           }
         }
       }
-      if( validScores && (countOfBest <= lenOfScores) ) {
+      if( validScores &&
+          (countOfBest <= lenOfScores) &&
+          (game.players.length == scoresEntered)) {
         ret[best.index].junk.push(gsJunk);
-        ret[best.index].points = (game.players.length == scoresEntered)
-          ? ret[best.index].points + gsJunk.value
-          : 0;
+        ret[best.index].points = ret[best.index].points + gsJunk.value;
       }
     }
   });
