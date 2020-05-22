@@ -65,6 +65,14 @@ export const getMultipliersFromGamespecs = gamespecs => {
 };
 
 
+// This is the main scoring function for the app
+//
+// It's basically a shit-show of maps/loops through different data structures,
+// coupled with a metric fuck-tonne of conditionals.
+// My guess is that this version is horribly inefficient and is eating phone
+// battery.  Also, I really do pity the poor fuck who will eventually have to
+// refactor this function and its offshoots.
+//
 export const scoring = game => {
 
   const { gamespecs } = game;
@@ -236,10 +244,14 @@ export const scoring = game => {
   });
 
   // loop thru holes, calculating runningTotal, match for each team
+  let allHolesScoredSoFar = true;
   let isMatchOver = false;
   let matchResult = '';
   let winningTeam = null;
   ret.holes.map((h, i) => {
+    // see if this hole is fully-scored
+    if(  h.scoresEntered < game.players.length ) allHolesScoredSoFar = false;
+
     // runningTotal
     h.teams.map(t => {
       let lastHoleRunningTotal = ( i == 0 ) ? 0
@@ -263,7 +275,7 @@ export const scoring = game => {
         const otherTeamIndex = (t.team === '1' ) ? 1 : 0;
         const diff = t.runningTotal - h.teams[otherTeamIndex].runningTotal;
         const holesRemaining = ret.holes.length - i - 1;
-        if( diff > holesRemaining ) {
+        if( diff > holesRemaining && allHolesScoredSoFar ) {
           matchResult = `${diff} & ${holesRemaining}`;
           isMatchOver = true;
           t.matchOver = true;
