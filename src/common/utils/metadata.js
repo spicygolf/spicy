@@ -61,7 +61,6 @@ export const setGameMeta = async (gkey, key, value) => {
 // Don't let storage get out of control, only keep last week of games meta
 export const filterGamesMeta = gamesMeta => {
   return filter(gamesMeta, g => {
-    console.log('g', g);
     return moment.utc(g.ts) > moment.utc().subtract(1, 'week');
   });
 };
