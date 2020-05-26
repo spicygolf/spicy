@@ -1,4 +1,4 @@
-import { cloneDeep, filter, find, max, orderBy, reduce } from 'lodash';
+import { cloneDeep, filter, find, findIndex, max, orderBy, reduce } from 'lodash';
 import moment from 'moment';
 
 import ScoringWrapper from 'common/utils/ScoringWrapper';
@@ -80,8 +80,21 @@ export const scoring = game => {
   const allmultipliers = getMultipliersFromGamespecs(gamespecs);
   const teamGame = getGamespecKVs(game, 'teams').includes(true);
 
+  // player scoring
+  let players = game.players.map(p => ({
+    pkey: p._key,
+    name: p.name,
+    gross: 0.0,
+    grossToPar: 0.0,
+    net: 0.0,
+    netToPar: 0.0,
+    points: 0.0,
+    netPoints: 0.0,
+  }));
+
   let ret = {
     holes: [],
+    players,
   };
 
   const holes = getHoles(game);
@@ -110,7 +123,7 @@ export const scoring = game => {
         team: gTeam.team,
         players: gTeam.players.map(gPlayer => {
           const pkey = gPlayer;
-          const {p, tp, pp} = calcPlayerJunk({pkey, game, hole, allJunk});
+          const {p, tp, pp} = calcPlayerJunk({players, pkey, game, hole, allJunk});
           teamPoints += tp;
           possiblePoints += pp;
           if( p && p.score && p.score.gross && p.score.gross.value ) ++scoresEntered;
@@ -195,6 +208,7 @@ export const scoring = game => {
       // give points to players on this team
       t.players.map(p => {
         p.score.points.value = holeTotal;
+        incrementPlayer(players, p.pkey, 'points', holeTotal);
       });
     });
     if( teams.length == 2 ) {
@@ -206,6 +220,7 @@ export const scoring = game => {
         // give points to players on this team
         t.players.map(p => {
           p.score.points.value = t.holeNetTotal; // overwrite holeTotal points in 2-team
+          incrementPlayer(players, p.pkey, 'netPoints', t.holeNetTotal);
         });
       });
     }
@@ -227,8 +242,7 @@ export const scoring = game => {
       warnings.push('Mark all possible points');
     }
 
-    //if( hole == '1' ) console.log(hole, possiblePoints, teams, multipliers);
-
+    // hole scoring
     ret.holes.push({
       hole,
       teams,
@@ -301,8 +315,14 @@ export const scoring = game => {
   return ret;
 };
 
+const incrementPlayer = (players, pkey, type, value) => {
+  const i = findIndex(players, {pkey: pkey});
+  if( i < 0 ) return;
+  //console.log('incrementPlayer', pkey, type, value);
+  players[i][type] += (parseFloat(value) || 0);
+};
 
-const calcPlayerJunk = ({pkey, game, hole, allScoringHole, allJunk}) => {
+const calcPlayerJunk = ({players, pkey, game, hole, allScoringHole, allJunk}) => {
 
   let tp = 0;
   let pp = 0;
@@ -317,6 +337,12 @@ const calcPlayerJunk = ({pkey, game, hole, allScoringHole, allJunk}) => {
   const par = (teeHole && teeHole.par) ? parseFloat(teeHole.par) : 0.0;
   const grossToPar = gross - par;
   const netToPar = net - par;
+
+  // add to players section of scores
+  incrementPlayer(players, pkey, 'gross', gross);
+  incrementPlayer(players, pkey, 'net', net);
+  incrementPlayer(players, pkey, 'grossToPar', grossToPar);
+  incrementPlayer(players, pkey, 'netToPar', netToPar);
 
   // player junk
   const playerJunk = [];

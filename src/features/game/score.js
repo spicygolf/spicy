@@ -15,8 +15,9 @@ import { getTeams } from 'common/utils/teams';
 import TeamChooser from 'common/components/teamChooser';
 import HoleNav from 'features/game/holenav';
 import Teams from 'features/game/teams';
+import Summary from 'features/game/summary';
 import { GameContext } from 'features/game/gameContext';
-import { getHoles } from 'common/utils/game';
+import { getHoles, getIsScoringComplete } from 'common/utils/game';
 import { getGameMeta, setGameMeta } from 'common/utils/metadata';
 
 
@@ -60,6 +61,13 @@ const Score = props => {
           currentHole={currentHole}
         />
       );
+    } else if( currentHole === 'Summary' ) {
+      content = (
+        <Summary
+          game={game}
+          scores={scores}
+        />
+      );
     } else {
       content = (
         <Card title='Choose Teams'>
@@ -77,6 +85,7 @@ const Score = props => {
     );
   }
   const holes = getHoles(game);
+  const isScoringComplete = getIsScoringComplete({game, scores});
   //console.log('holes', holes);
 
   useEffect(
@@ -103,6 +112,7 @@ const Score = props => {
           await setGameMeta(gkey, 'currentHole', hole);
           setCurrentHole(hole);
         }}
+        isScoringComplete={isScoringComplete}
       />
       {warningsContent}
       <View style={styles.content_container}>

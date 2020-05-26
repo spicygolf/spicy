@@ -12,12 +12,20 @@ import { acronym, last } from 'common/utils/text';
 
 
 export const getHoles = game => {
-  //console.log('game utils game', game);
-  let holes = Array.from(Array(18).keys()).map(x => ++x);
-  if( game.scope.holes === 'front9' ) holes.length = 9;
-  if( game.scope.holes === 'back9' ) holes.splice(0, 9);
-  return holes.map(h => h.toString());
+  return game.holes.map(h => h.hole.toString());
 };
+
+
+export const getIsScoringComplete = ({game, scores}) => {
+  let ret = true;
+  const playerCount = game.players.length;
+  scores.holes.map(h => {
+    if( h.scoresEntered < playerCount ) ret = false;
+    if( h.markedJunk < h.requiredJunk ) ret = false;
+  });
+  return ret;
+};
+
 
 export const getRatings = (holes, tee) => {
   let ratings;
