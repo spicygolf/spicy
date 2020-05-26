@@ -39,7 +39,9 @@ const TeamTotals = props => {
     ? ''
     : `x ${hole.holeMultiplier} = ${netTotal}`;
 
-  let total = `Total: ${format({v: diff, type})}`;
+  let totalTxt = format({v: diff, type});
+  if( totalTxt == '' && type == 'points' ) totalTxt = '0';
+  let total = `Total: ${totalTxt}`;
   if( type === 'match' && team.matchOver ) {
     if( team.win ) {
       total = `Win: ${format({v: team.matchDiff, type})}`;
