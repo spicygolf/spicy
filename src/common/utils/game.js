@@ -196,6 +196,7 @@ export const getGamespecKVs = (game, key) => {
   return ret;
 };
 
+
 export const getJunk = (junkName, pkey, game, holeNum) => {
   if( !game || !game.holes ) return null;
   const gHole = find(game.holes, {hole: holeNum});

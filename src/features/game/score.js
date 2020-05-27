@@ -15,7 +15,7 @@ import { getTeams } from 'common/utils/teams';
 import TeamChooser from 'common/components/teamChooser';
 import HoleNav from 'features/game/holenav';
 import Teams from 'features/game/teams';
-import Summary from 'features/game/summary';
+import GameSummaryStack from 'features/gameSummary/gameSummaryStack';
 import { GameContext } from 'features/game/gameContext';
 import { getHoles, getIsScoringComplete } from 'common/utils/game';
 import { getGameMeta, setGameMeta } from 'common/utils/metadata';
@@ -63,10 +63,7 @@ const Score = props => {
       );
     } else if( currentHole === 'Summary' ) {
       content = (
-        <Summary
-          game={game}
-          scores={scores}
-        />
+        <GameSummaryStack />
       );
     } else {
       content = (

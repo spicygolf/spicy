@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -9,15 +9,18 @@ import {
   Button,
   Card,
 } from 'react-native-elements';
+import { useNavigation } from '@react-navigation/native';
 import { orderBy } from 'lodash';
 
 import { getGamespecKVs } from 'common/utils/game';
+import { GameContext } from 'features/game/gameContext';
 
 
 
-const Summary = props => {
+const GameSummary = props => {
 
-  const { game, scores } = props;
+  const { game, scores } = useContext(GameContext);
+  const navigation = useNavigation();
 
   const teamGame = getGamespecKVs(game, 'teams').includes(true);
 
@@ -78,6 +81,9 @@ const Summary = props => {
           buttonStyle={styles.post_button}
           titleStyle={styles.post_button_title}
           type='solid'
+          onPress={() => {
+            navigation.navigate('PostScores');
+          }}
         />
       </View>
     </Card>
@@ -85,7 +91,7 @@ const Summary = props => {
 };
 
 
-export default Summary;
+export default GameSummary;
 
 
 const styles = StyleSheet.create({
