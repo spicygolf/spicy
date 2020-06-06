@@ -2,7 +2,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
 } from 'react-native';
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import {
+  createMaterialBottomTabNavigator
+} from '@react-navigation/material-bottom-tabs';
 import {
   Icon
 } from 'react-native-elements';
@@ -12,10 +14,10 @@ import { useLazyQuery } from '@apollo/client';
 import FeedStack from 'features/feed/feedstack';
 import GamesStack from 'features/games/gamesstack';
 import ProfileStack from 'features/profile/profilestack';
+import RegisterAgain from 'features/account/registerAgain';
 import { getCurrentUser } from 'common/utils/account';
 import {
   CurrentPlayerContext,
-  CurrentPlayerProvider
 } from 'features/players/currentPlayerContext';
 import { GET_PLAYER_QUERY } from 'features/players/graphql';
 import { green, red, blue } from 'common/colors';
@@ -37,15 +39,14 @@ const TabIcon = ({type, name, color, testID}) => {
 
 const AppStack = props => {
 
+  const [ content, setContent ] = useState(<ActivityIndicator />);
+
   const { user } = props;
-  const [ creds, setCreds ] = useState();
 
   const {
     currentPlayer,
     setCurrentPlayer,
-    currentPlayerKey,
     setCurrentPlayerKey,
-    token,
     setToken,
   } = useContext(CurrentPlayerContext);
 
@@ -58,101 +59,122 @@ const AppStack = props => {
     setCurrentPlayer(cpData.getPlayer);
   }
 
+  const getCreds = async () => {
+    const c = await getCurrentUser(user);
+    console.log('getCreds', c);
+    if( c && c.currentPlayerKey && c.token ) {
+      setCurrentPlayerKey(c.currentPlayerKey);
+      setToken(c.token);
+      await AsyncStorage.setItem('currentPlayer', c.currentPlayerKey);
+      await AsyncStorage.setItem('token', c.token);
+      setContent(tabs());
+      getPlayer({
+        variables: {
+          player: c.currentPlayerKey,
+        }
+      });
+    } else {
+      if( c && c.message ) {
+        console.log('something is wrong:', c.message);
+        if( c.navTo ) {
+          switch( c.navTo ) {
+            case 'RegisterAgain':
+              setContent(<RegisterAgain
+                fbUser={c.fbUser}
+                retryCreds={retryCreds}
+              />);
+              break;
+            default:
+              //setContent(<Alert message={c.message} />);
+              break;
+          }
+        } else {
+          // TODO: navigate to an Error component
+          //setContent(<Alert message={c.message} />);
+        }
+      }
+    }
+  };
+
+  const retryCreds = async () => {
+    await getCreds();
+  };
+
   useEffect(
     () => {
-      const getCreds = async () => {
-        const c = await getCurrentUser(user);
-        if( c && c.currentPlayerKey && c.token ) {
-          setCurrentPlayerKey(c.currentPlayerKey);
-          setToken(c.token);
-          await AsyncStorage.setItem('currentPlayer', c.currentPlayerKey);
-          await AsyncStorage.setItem('token', c.token);
-          setCreds(c);
-          getPlayer({
-            variables: {
-              player: c.currentPlayerKey,
-            }
-          });
-        } else {
-          if( c && c.message ) {
-            // TODO: navigate to an Error component
-            console.log('something is wrong', c.message);
-          }
-        }
-      };
       getCreds();
     }, [user]
   );
 
-  if( !creds ) return (
-    <ActivityIndicator />
-  );
+  const tabs = () => {
+    const Tab = createMaterialBottomTabNavigator();
 
-  const Tab = createMaterialBottomTabNavigator();
-
-  return (
-    <Tab.Navigator
-      initialRouteName='GamesStack'
-      shifting={true}
-      activeColor='#fff'
-      inactiveColor='#ccc'
-    >
-      <Tab.Screen
-        name='FeedStack'
-        component={FeedStack}
-        options={{
-          title: 'Feed',
-          tabBarIcon: ({ focused }) => {
-            return (
-              <TabIcon
+    return (
+      <Tab.Navigator
+        initialRouteName='GamesStack'
+        shifting={true}
+        activeColor='#fff'
+        inactiveColor='#ccc'
+      >
+        <Tab.Screen
+          name='FeedStack'
+          component={FeedStack}
+          options={{
+            title: 'Feed',
+            tabBarIcon: ({ focused }) => {
+              return (
+                <TabIcon
+                  color={focused ? '#fff' : '#ccc' }
+                  name='comment'
+                  type='font-awesome'
+                  />
+              );
+            },
+            tabBarColor: blue,
+            tabBarTestID: 'feed_tab'
+          }}
+        />
+        <Tab.Screen
+          name='GamesStack'
+          component={GamesStack}
+          options={{
+            title: 'Games',
+            tabBarIcon: ({ focused }) => {
+              return (
+                <TabIcon
                 color={focused ? '#fff' : '#ccc' }
-                name='comment'
+                name='edit'
                 type='font-awesome'
                 />
-            );
-          },
-          tabBarColor: blue,
-          tabBarTestID: 'feed_tab'
-        }}
-      />
-      <Tab.Screen
-        name='GamesStack'
-        component={GamesStack}
-        options={{
-          title: 'Games',
-          tabBarIcon: ({ focused }) => {
-            return (
-              <TabIcon
-              color={focused ? '#fff' : '#ccc' }
-              name='edit'
-              type='font-awesome'
-              />
-            );
-          },
-          tabBarColor: green,
-          tabBarTestID: 'games_tab'
-        }}
-      />
-      <Tab.Screen
-        name='ProfileStack'
-        component={ProfileStack}
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ focused }) => {
-            return (
-              <TabIcon
-              color={focused ? '#fff' : '#ccc' }
-              name='user'
-              type='font-awesome'
-              />
-            );
-          },
-          tabBarColor: red,
-          tabBarTestID: 'profile_tab'
-        }}
-      />
-    </Tab.Navigator>
-  );
+              );
+            },
+            tabBarColor: green,
+            tabBarTestID: 'games_tab'
+          }}
+        />
+        <Tab.Screen
+          name='ProfileStack'
+          component={ProfileStack}
+          options={{
+            title: 'Profile',
+            tabBarIcon: ({ focused }) => {
+              return (
+                <TabIcon
+                color={focused ? '#fff' : '#ccc' }
+                name='user'
+                type='font-awesome'
+                />
+              );
+            },
+            tabBarColor: red,
+            tabBarTestID: 'profile_tab'
+          }}
+        />
+      </Tab.Navigator>
+    );
+  }
+
+  return content;
 
 };
 

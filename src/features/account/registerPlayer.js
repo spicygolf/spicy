@@ -50,6 +50,7 @@ const RegisterPlayer = props => {
     //console.log('registration', JSON.stringify(registration, null, ' '));
 
     try {
+      // firebase registration
       const res = await auth().createUserWithEmailAndPassword(
         registration.email,
         registration.password
@@ -58,13 +59,19 @@ const RegisterPlayer = props => {
       if( res && res.user ) {
         //console.log('res.user', res.user);
         res.user.sendEmailVerification();
-        await registerPlayer(registration, {
+        // spicy golf registration
+        const payload = await registerPlayer(registration, {
           email: res.user.email,
           metadata: res.user.metadata,
           providerData: res.user.providerData,
           providerId: res.user.providerId,
           uid: res.user.uid,
         });
+
+        // TODO: trap errors here, add retry or something, not sure...
+
+      } else {
+        console.log('register error', res);
       }
 
     } catch( e ) {
@@ -127,7 +134,9 @@ const RegisterPlayer = props => {
   return (
     <View style={styles.container}>
       <BackToLogin />
-      <KeyboardAwareScrollView>
+      <KeyboardAwareScrollView
+        keyboardShouldPersistTaps='handled'
+      >
         <Card title='Register - Player Information'>
           <View testID='register_4_view'>
             <Text style={styles.changes}>{ changes }</Text>

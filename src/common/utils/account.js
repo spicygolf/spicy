@@ -23,6 +23,7 @@ export const registerPlayer = async (registration, fbUser) => {
   });
   const payload = await res.json();
   console.log('register payload', payload);
+  return payload
 
 };
 
@@ -55,9 +56,18 @@ export const login = async fbUser => {
         token: payload.token,
       };
       break;
+    case 401:
+      // we got thru Firebase, but not SpicyGolf login.  Did we have a failed
+      // registration?
+      ret = {
+        message: 'Got thru Firebase login, but not SpicyGolf.',
+        navTo: 'RegisterAgain',
+      };
+      break;
     default:
       // TODO: handle errors
       console.log('login error - payload', payload);
+      ret = payload;
   }
   return ret;
 };
