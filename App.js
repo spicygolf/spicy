@@ -28,8 +28,9 @@ const App = props => {
   const [user, setUser] = useState();
 
   // Handle user state changes
-  const onAuthStateChanged = (user) => {
-    setUser(user);
+  const onAuthStateChanged = (u) => {
+    console.log('user', u);
+    setUser(u);
     if (initializing) setInitializing(false);
   }
 

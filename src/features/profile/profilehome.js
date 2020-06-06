@@ -24,9 +24,17 @@ import Impersonate from 'features/profile/impersonate';
 const ProfileHome = props => {
 
   const client = useApolloClient();
-  const { currentPlayer } = useContext(CurrentPlayerContext);
+  const {
+    currentPlayer,
+    setCurrentPlayer,
+    setCurrentPlayerKey,
+    setToken,
+  } = useContext(CurrentPlayerContext);
 
   const _logoutPressed = () => {
+    setCurrentPlayer(null);
+    setCurrentPlayerKey(null);
+    setToken(null);
     logout(client);
   }
 

@@ -111,10 +111,6 @@ export default function configureClient() {
       );
 
     if (networkError) {
-      if( networkError.statusCode == 401 ) {
-        console.log('logged out');
-        logout(cache.client);
-      }
       console.log(`[Network error]: ${networkError}`);
     }
   });

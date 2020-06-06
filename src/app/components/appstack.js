@@ -54,14 +54,17 @@ const AppStack = props => {
   const [ getPlayer, {error: cpError, data: cpData} ] = useLazyQuery(GET_PLAYER_QUERY);
   if (cpError) console.log('Error fetching current player', cpError);
   //console.log('cpData', cpData);
-  if( cpData && cpData.getPlayer && !currentPlayer ) {
+  if( cpData &&
+      cpData.getPlayer &&
+      (!currentPlayer || cpData.getPlayer._key != currentPlayer._key)
+    ) {
     //console.log('setting currentPlayer', cpData);
     setCurrentPlayer(cpData.getPlayer);
   }
 
   const getCreds = async () => {
     const c = await getCurrentUser(user);
-    console.log('getCreds', c);
+    //console.log('getCreds', c);
     if( c && c.currentPlayerKey && c.token ) {
       setCurrentPlayerKey(c.currentPlayerKey);
       setToken(c.token);
