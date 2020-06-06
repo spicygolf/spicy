@@ -77,7 +77,9 @@ const Forgot = props => {
 
   return (
     <View style={styles.container}>
-      <KeyboardAwareScrollView>
+      <KeyboardAwareScrollView
+        keyboardShouldPersistTaps='handled'
+      >
       <View style={styles.back_to_login_view}>
           <Text style={styles.back_to_text}>
             Back to

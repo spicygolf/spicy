@@ -52,7 +52,7 @@ const RegisterAgain = props => {
       uid: fbUser.uid,
     });
 
-    console.log('register again', payload);
+    //console.log('register again', payload);
     retryCreds();
   };
 
