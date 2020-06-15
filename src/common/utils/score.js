@@ -81,16 +81,21 @@ export const scoring = game => {
   const teamGame = getGamespecKVs(game, 'teams').includes(true);
 
   // player scoring
-  let players = game.players.map(p => ({
-    pkey: p._key,
-    name: p.name,
-    gross: 0.0,
-    grossToPar: 0.0,
-    net: 0.0,
-    netToPar: 0.0,
-    points: 0.0,
-    netPoints: 0.0,
-  }));
+  let players = game.players.map(p => {
+    const round = get_round_for_player(game.rounds, p._key);
+    const ch = parseFloat(round.course_handicap);
+    return ({
+      pkey: p._key,
+      name: p.name,
+      gross: 0.0,
+      grossToPar: 0.0,
+      net: 0.0,
+      netToPar: 0.0,
+      points: 0.0,
+      netPoints: 0.0,
+      courseHandicap: ch,
+    });
+  });
 
   let ret = {
     holes: [],

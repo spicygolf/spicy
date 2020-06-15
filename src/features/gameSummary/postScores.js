@@ -53,16 +53,20 @@ const PostScores = props => {
   );
 
   return (
-    <View>
-      <GameNav
-          title='Post Scores'
-          showBack={true}
-          showScore={false}
-      />
-      <PostScore
-        player={currentPlayer}
-      />
-      <View style={styles.button_row}>
+    <View style={styles.container}>
+      <View style={styles.gameNav}>
+        <GameNav
+            title='Post Scores'
+            showBack={true}
+            showScore={false}
+        />
+      </View>
+      <View style={styles.postScore}>
+        <PostScore
+          player={currentPlayer}
+        />
+      </View>
+      <View style={styles.buttonRow}>
         {prev}
         {next}
       </View>
@@ -74,7 +78,15 @@ export default PostScores;
 
 
 const styles = StyleSheet.create({
-  button_row: {
+  container: {
+    height: '100%',
+  },
+  gameNav: {
+  },
+  postScore: {
+    flex: 1,
+  },
+  buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 15,

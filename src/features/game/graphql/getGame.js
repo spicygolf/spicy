@@ -43,6 +43,7 @@ export const GET_GAME_QUERY = gql`
             ts
           }
           pops
+          coursePops
         }
         player {
           _key

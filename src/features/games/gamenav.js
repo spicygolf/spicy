@@ -65,14 +65,10 @@ export default GameNav;
 
 const styles = StyleSheet.create({
   container: {
-    flex: -1,
-    minHeight: 50
   },
   GameNav: {
-    flex: 3,
     flexDirection: 'row',
-    minHeight: 50,
-    padding: 5
+    paddingHorizontal: 5
   },
   left: {
     flex: 1,
