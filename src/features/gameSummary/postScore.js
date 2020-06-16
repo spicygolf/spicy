@@ -24,8 +24,8 @@ const PostScore = props => {
 
   const { player } = props;
   const { game } = useContext(GameContext);
-  const [ posting, setPosting ] = useState();
   const round = get_round_for_player(game.rounds, player.pkey);
+  const [ posting, setPosting ] = useState();
 
   const calcPosting = round => {
     return round.scores.map(s => {
@@ -58,7 +58,7 @@ const PostScore = props => {
 
   const calcAdjustedTotal = () => (
     reduce(posting, (sum, h) => (
-      sum + parseFloat(h.adjusted)
+      sum + (parseFloat(h.adjusted) || 0)
     ), 0)
   );
 
@@ -106,10 +106,13 @@ const PostScore = props => {
               item.isAdjusted ? styles.isAdjusted : null,
             ]}
             onChangeText={text => {
-              console.log('index', index);
-              let newPosting = posting;
-              posting[index].adjusted = text;
-              //setPosting(newPosting);
+              let newPosting = [...posting];
+              const newHole = {
+                ...newPosting[index],
+                adjusted: text
+              };
+              newPosting.splice(index, 1, newHole);
+              setPosting(newPosting);
             }}
             keyboardType='decimal-pad'
             value={item.adjusted.toString()}
@@ -119,12 +122,11 @@ const PostScore = props => {
     );
   };
 
-  console.log('player', player);
   useEffect(
     () => {
       const newPosting = calcPosting(round);
       setPosting(newPosting);
-    }, [player]
+    }, [round]
   );
 
   return (
