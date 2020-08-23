@@ -45,10 +45,22 @@ export const GET_GAME_QUERY = gql`
           pops
           coursePops
         }
+        posting {
+          id
+          adjusted_gross_score
+          differential
+          date_validated
+          exceptional
+          posted_by_pkey
+        }
         player {
           _key
           name
           handicap {
+            source
+            id
+            gender
+            active
             index
             revDate
           }

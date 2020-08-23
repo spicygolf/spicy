@@ -19,6 +19,14 @@ export const GET_ROUND_QUERY = gql`
         }
         pops
       }
+      posting {
+        id
+        adjusted_gross_score
+        differential
+        date_validated
+        exceptional
+        posted_by_pkey
+      }
       player {
         _key
         name

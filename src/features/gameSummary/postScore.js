@@ -1,31 +1,42 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
+  FlatList,
   StyleSheet,
   View,
   Text,
   TextInput,
 } from 'react-native';
 import {
+  Button,
   Card,
 } from 'react-native-elements';
 import { reduce } from 'lodash';
+import { useMutation } from '@apollo/client';
+import moment from 'moment';
 
 import {
   get_hole,
   get_round_for_player,
   get_score_value,
+  updateRoundPostedCache,
 } from 'common/utils/rounds';
 import { GameContext } from 'features/game/gameContext';
-import { FlatList } from 'react-native-gesture-handler';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import { POST_ROUND_MUTATION } from 'features/rounds/graphql';
 
 
 
 const PostScore = props => {
 
   const { player } = props;
+  //console.log('player', player);
+
   const { game } = useContext(GameContext);
+  const { currentPlayerKey } = useContext(CurrentPlayerContext);
+
   const round = get_round_for_player(game.rounds, player.pkey);
   const [ posting, setPosting ] = useState();
+  const [ postRoundToHandicapService ] = useMutation(POST_ROUND_MUTATION);
 
   const calcPosting = round => {
     return round.scores.map(s => {
@@ -54,6 +65,52 @@ const PostScore = props => {
         isAdjusted,
       };
     });
+  };
+
+  const postRound = async rkey => {
+
+    const { loading, error, data } = await postRoundToHandicapService({
+      variables: {
+        rkey,
+        posted_by_pkey: currentPlayerKey,
+      },
+      update: (cache, { data: { postRoundToHandicapService } }) => {
+        //console.log('update cache.data', cache.data);
+        updateRoundPostedCache({
+          cache,
+          rkey,
+          posting: postRoundToHandicapService.posting,
+        });
+      },
+    });
+
+    if( error ) console.log('Error posting round to handicap service', error);
+
+  };
+
+  const postRoundButton = () => {
+    let ret = null;
+    if( round.posting == null ) {
+      ret = (
+        <Button
+          title='Post Round'
+          buttonStyle={styles.buttonStyle}
+          titleStyle={styles.buttonTitle}
+          onPress={() => postRound(round._key)}
+        />
+      );
+    } else {
+      const { date_validated, adjusted_gross_score, posted_by_pkey } = round.posting;
+      const dt = moment(date_validated).format('lll');
+      ret = (
+        <View>
+          <Text style={styles.postingTxt}>posted: {adjusted_gross_score}</Text>
+          <Text style={styles.postingTxt}>at: {dt}</Text>
+          <Text style={styles.postingTxt}>by: {posted_by_pkey}</Text>
+        </View>
+      );
+    }
+    return ret;
   };
 
   const calcAdjustedTotal = () => (
@@ -100,23 +157,13 @@ const PostScore = props => {
           <Text style={styles.grossTxt}>{item.gross}</Text>
         </View>
         <View style={styles.adjusted}>
-          <TextInput
-            style={[
+          <Text style={[
               styles.adjustedTxt,
               item.isAdjusted ? styles.isAdjusted : null,
             ]}
-            onChangeText={text => {
-              let newPosting = [...posting];
-              const newHole = {
-                ...newPosting[index],
-                adjusted: text
-              };
-              newPosting.splice(index, 1, newHole);
-              setPosting(newPosting);
-            }}
-            keyboardType='decimal-pad'
-            value={item.adjusted.toString()}
-          />
+          >
+            {item.adjusted}
+          </Text>
         </View>
       </View>
     );
@@ -131,10 +178,17 @@ const PostScore = props => {
 
   return (
     <Card containerStyle={styles.container}>
-      <Text style={styles.playerName}>{player.name}</Text>
-      <Text style={styles.courseHandicap}>
-        Course Handicap: {player.courseHandicap}
-      </Text>
+      <View style={styles.playerView}>
+        <View>
+          <Text style={styles.playerName}>{player.name}</Text>
+          <Text style={styles.courseHandicap}>
+            Course Handicap: {player.courseHandicap}
+          </Text>
+        </View>
+        <View>
+          { postRoundButton() }
+        </View>
+      </View>
       <View style={styles.flatListView}>
       { header() }
       <FlatList
@@ -156,8 +210,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  playerView: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 5,
+  },
+  buttonStyle: {
+    width: 150,
+  },
+  buttonTitle: {
+    fontSize: 14,
+  },
   flatListView: {
-    height: '95%'
+    height: '92%'
   },
   flatList: {
     paddingBottom: 10,
@@ -168,6 +233,9 @@ const styles = StyleSheet.create({
   courseHandicap: {
     fontSize: 11,
   },
+  postingTxt: {
+    fontSize: 10,
+  },
   holeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -176,7 +244,8 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     paddingVertical: 5,
-    color: '#666',
+    color: '#333',
+    backgroundColor: '#eee',
   },
   hole: {
     flex: 1,
@@ -202,6 +271,7 @@ const styles = StyleSheet.create({
   },
   hdcpTxt: {
     alignSelf: 'center',
+    color: '#666',
   },
   adjusted: {
     flex: 1,
@@ -210,14 +280,15 @@ const styles = StyleSheet.create({
   adjustedTxt: {
     height: 22,
     color: '#000',
-    borderColor: '#ddd',
+    borderColor: '#fff',
     borderWidth: 1,
     paddingHorizontal: 15,
-    marginVertical: 2,
+    paddingVertical: 2,
     textAlign: 'right',
     alignSelf: 'center',
   },
   isAdjusted: {
-    borderColor: '#111'
+    borderColor: '#111',
+    borderWidth: 1,
   },
 });

@@ -64,7 +64,7 @@ const AppStack = props => {
 
   const getCreds = async () => {
     const c = await getCurrentUser(user);
-    console.log('getCreds', c);
+    //console.log('getCreds', c);
     if( c && c.currentPlayerKey && c.token ) {
       setCurrentPlayerKey(c.currentPlayerKey);
       setToken(c.token);

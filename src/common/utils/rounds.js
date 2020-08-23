@@ -107,3 +107,29 @@ export const updateRoundScoreCache = ({cache, rkey, score}) => {
   });
 
 };
+
+
+export const updateRoundPostedCache = ({cache, rkey, posting}) => {
+  console.log('rounds.js updateRoundPostedCache implement me');
+  /*
+  TODO: 'updateRound' somewhere in here?  fragment function name, see holeJunk for example
+
+  // read holes from cache
+  const optimistic = true;
+  const cGame = cache.readFragment({
+    id: gkey,
+    fragment: GAME_HOLES_FRAGMENT,
+  }, optimistic);
+  //console.log('getGame from cache', cGame);
+
+  // write back to cache with new values
+  cache.writeFragment({
+    id: gkey,
+    fragment: GAME_HOLES_FRAGMENT,
+    data: {
+      holes,
+    },
+  });
+*/
+};
+

@@ -33,6 +33,7 @@ const Game = props => {
     variables: {
       gkey: currentGameKey,
     },
+    fetchPolicy: 'no-cache',
   });
 
   if( loading ) {

@@ -149,7 +149,7 @@ export default function configureClient() {
       errorPolicy: 'all',
     },
     query: {
-      fetchPolicy: 'cache-only',
+      fetchPolicy: 'cache-and-network',
       errorPolicy: 'all',
     },
     mutate: {

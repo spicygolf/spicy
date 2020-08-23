@@ -56,7 +56,7 @@ const PostScores = props => {
     <View style={styles.container}>
       <View style={styles.gameNav}>
         <GameNav
-            title='Post Scores'
+            title='Post Rounds'
             showBack={true}
             showScore={false}
         />
