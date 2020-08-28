@@ -18,10 +18,10 @@ const sortNumber = (a, b) => (a - b);
 
 const HoleNav = props => {
 
-  const {holes:holesOrig, currentHole, changeHole, isScoringComplete} = props;
+  const {holes:holesOrig, currentHole, changeHole} = props;
 
   const holes = holesOrig.sort(sortNumber);
-  if( isScoringComplete ) holes.push("Summary");
+  holes.push("Summary");
   const currentHoleIndex = findIndex(holes, h => { return h == currentHole })
 
   return (

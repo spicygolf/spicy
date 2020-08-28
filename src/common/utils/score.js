@@ -94,6 +94,7 @@ export const scoring = game => {
       points: 0.0,
       netPoints: 0.0,
       courseHandicap: ch,
+      holesScored: 0,
     });
   });
 
@@ -348,6 +349,7 @@ const calcPlayerJunk = ({players, pkey, game, hole, allScoringHole, allJunk}) =>
   incrementPlayer(players, pkey, 'net', net);
   incrementPlayer(players, pkey, 'grossToPar', grossToPar);
   incrementPlayer(players, pkey, 'netToPar', netToPar);
+  if( gross > 0 ) incrementPlayer(players, pkey, 'holesScored', 1);
 
   // player junk
   const playerJunk = [];

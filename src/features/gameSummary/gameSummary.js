@@ -12,7 +12,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { orderBy } from 'lodash';
 
-import { getGamespecKVs } from 'common/utils/game';
+import { getHoles } from 'common/utils/game';
 import { GameContext } from 'features/game/gameContext';
 
 
@@ -22,8 +22,8 @@ const GameSummary = props => {
   const { game, scores } = useContext(GameContext);
   const navigation = useNavigation();
 
-  const teamGame = getGamespecKVs(game, 'teams').includes(true);
-
+  //const teamGame = getGamespecKVs(game, 'teams').includes(true);
+  const totalHoles = getHoles(game).length;
   const sorted_players = orderBy(scores.players, ['gross'], ['asc']);
 
   const format = v => {
@@ -32,10 +32,17 @@ const GameSummary = props => {
   };
 
   const renderPlayer = ({item}) => {
+    let thru = '';
+    if( item.holesScored < totalHoles ) {
+      thru = `thru ${item.holesScored}`;
+    }
     return (
       <View style={styles.row}>
         <View style={styles.player}>
           <Text>{item.name}</Text>
+        </View>
+        <View style={[styles.thru, styles.number]}>
+          <Text style={styles.thruTxt}>{thru}</Text>
         </View>
         <View style={[styles.gross, styles.number]}>
           <Text>{item.gross}</Text>
@@ -54,6 +61,9 @@ const GameSummary = props => {
     <View style={styles.row}>
       <View style={styles.player}>
         <Text style={styles.headerTxt}>Player</Text>
+      </View>
+      <View style={styles.thru}>
+        <Text style={styles.headerTxt}></Text>
       </View>
       <View style={styles.gross}>
         <Text style={styles.headerTxt}>Gross</Text>
@@ -102,6 +112,14 @@ const styles = StyleSheet.create({
   player: {
     flex: 4,
     justifyContent: 'flex-start',
+  },
+  thru: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  thruTxt: {
+    fontSize: 11,
   },
   gross: {
     flex: 1,

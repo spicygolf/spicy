@@ -4,21 +4,24 @@ import {
   StyleSheet,
   View,
   Text,
-  TextInput,
 } from 'react-native';
 import {
   Button,
   Card,
 } from 'react-native-elements';
-import { reduce } from 'lodash';
+import { findIndex, reduce } from 'lodash';
 import { useMutation } from '@apollo/client';
 import moment from 'moment';
 
 import {
+  getHoles,
+  getNewGameForUpdate,
+} from 'common/utils/game';
+import {
   get_hole,
   get_round_for_player,
   get_score_value,
-  updateRoundPostedCache,
+  updateGameRoundPostedCache,
 } from 'common/utils/rounds';
 import { GameContext } from 'features/game/gameContext';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
@@ -35,6 +38,7 @@ const PostScore = props => {
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
 
   const round = get_round_for_player(game.rounds, player.pkey);
+  const totalHoles = getHoles(game).length;
   const [ posting, setPosting ] = useState();
   const [ postRoundToHandicapService ] = useMutation(POST_ROUND_MUTATION);
 
@@ -75,11 +79,20 @@ const PostScore = props => {
         posted_by_pkey: currentPlayerKey,
       },
       update: (cache, { data: { postRoundToHandicapService } }) => {
-        //console.log('update cache.data', cache.data);
-        updateRoundPostedCache({
+
+        // build new game and add posting to specific round
+        let newGame = getNewGameForUpdate(game);
+        const gRoundIndex = findIndex(newGame.rounds, {_key: rkey});
+        if( gRoundIndex < 0 ) return;
+        let newRound = Object.assign({}, newGame.rounds[gRoundIndex]);
+        newRound.posting = postRoundToHandicapService.posting;
+        newGame.rounds[gRoundIndex] = newRound;
+
+        // update cache with new rounds
+        updateGameRoundPostedCache({
           cache,
-          rkey,
-          posting: postRoundToHandicapService.posting,
+          gkey,
+          rounds: newGame.rounds,
         });
       },
     });
@@ -91,14 +104,22 @@ const PostScore = props => {
   const postRoundButton = () => {
     let ret = null;
     if( round.posting == null ) {
-      ret = (
-        <Button
-          title='Post Round'
-          buttonStyle={styles.buttonStyle}
-          titleStyle={styles.buttonTitle}
-          onPress={() => postRound(round._key)}
-        />
-      );
+      if( player.holesScored < totalHoles ) {
+        ret = (
+          <View>
+            <Text>thru {player.holesScored}</Text>
+          </View>
+        );
+      } else {
+        ret = (
+          <Button
+            title='Post Round'
+            buttonStyle={styles.buttonStyle}
+            titleStyle={styles.buttonTitle}
+            onPress={() => postRound(round._key)}
+          />
+        );
+      }
     } else {
       const { date_validated, adjusted_gross_score, posted_by_pkey } = round.posting;
       const dt = moment(date_validated).format('lll');

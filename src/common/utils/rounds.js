@@ -1,5 +1,6 @@
 import { cloneDeep, find, findIndex } from 'lodash';
 
+import { GAME_ROUND_POSTING_FRAGMENT } from 'features/games/graphql';
 import { ROUND_SCORES_FRAGMENT } from 'features/rounds/graphql';
 
 
@@ -90,7 +91,10 @@ export const updateRoundScoreCache = ({cache, rkey, score}) => {
     id: rkey,
     fragment: ROUND_SCORES_FRAGMENT,
   }, optimistic);
-  //console.log('getRound from cache', cRound);
+
+  // TODO: does this function even work?  For updateGameRoundPostedCache below,
+  //       I had to update game.rounds in cache
+  console.log('getRound from cache', cRound);
 
   // make new scores to write back
   const newScores = cloneDeep(cRound.scores);
@@ -109,27 +113,22 @@ export const updateRoundScoreCache = ({cache, rkey, score}) => {
 };
 
 
-export const updateRoundPostedCache = ({cache, rkey, posting}) => {
-  console.log('rounds.js updateRoundPostedCache implement me');
-  /*
-  TODO: 'updateRound' somewhere in here?  fragment function name, see holeJunk for example
-
-  // read holes from cache
+export const updateGameRoundPostedCache = ({cache, gkey, rounds}) => {
+  // read from cache
   const optimistic = true;
   const cGame = cache.readFragment({
     id: gkey,
-    fragment: GAME_HOLES_FRAGMENT,
+    fragment: GAME_ROUND_POSTING_FRAGMENT,
   }, optimistic);
-  //console.log('getGame from cache', cGame);
+  console.log('game from cache', cGame);
 
   // write back to cache with new values
   cache.writeFragment({
     id: gkey,
-    fragment: GAME_HOLES_FRAGMENT,
+    fragment: GAME_ROUND_POSTING_FRAGMENT,
     data: {
-      holes,
+      rounds,
     },
   });
-*/
 };
 

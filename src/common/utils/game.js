@@ -15,18 +15,6 @@ export const getHoles = game => {
   return game.holes.map(h => h.hole.toString());
 };
 
-
-export const getIsScoringComplete = ({game, scores}) => {
-  let ret = true;
-  const playerCount = game.players.length;
-  scores.holes.map(h => {
-    if( h.scoresEntered < playerCount ) ret = false;
-    if( h.markedJunk < h.requiredJunk ) ret = false;
-  });
-  return ret;
-};
-
-
 export const getRatings = (holes, tee) => {
   let ratings;
 

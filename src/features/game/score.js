@@ -17,7 +17,7 @@ import HoleNav from 'features/game/holenav';
 import Teams from 'features/game/teams';
 import GameSummaryStack from 'features/gameSummary/gameSummaryStack';
 import { GameContext } from 'features/game/gameContext';
-import { getHoles, getIsScoringComplete } from 'common/utils/game';
+import { getHoles } from 'common/utils/game';
 import { getGameMeta, setGameMeta } from 'common/utils/metadata';
 
 
@@ -82,7 +82,6 @@ const Score = props => {
     );
   }
   const holes = getHoles(game);
-  const isScoringComplete = getIsScoringComplete({game, scores});
   //console.log('holes', holes);
 
   useEffect(
@@ -109,7 +108,6 @@ const Score = props => {
           await setGameMeta(gkey, 'currentHole', hole);
           setCurrentHole(hole);
         }}
-        isScoringComplete={isScoringComplete}
       />
       {warningsContent}
       <View style={styles.content_container}>
