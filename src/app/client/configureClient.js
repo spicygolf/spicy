@@ -18,9 +18,11 @@ import { logout } from 'common/utils/account';
 export default function configureClient() {
 
   const cache = new InMemoryCache({
+    dataIdFromObject: object => object._key || null,
 /*
     possibleTypes: {
-      Game: ['Teams', 'Round', 'Player', 'GameSpec'],
+      Game: ['Teams', 'Round', 'Player', 'GameSpec', 'TeamHole'],
+    },
       Teams: ['TeamHole'],
       TeamHole: ['Team'],
       Team: ['GameJunk'],
@@ -32,8 +34,7 @@ export default function configureClient() {
       ScoringSpec: ['HoleScoringSpec'],
       OptionSpec: ['Choice'],
     },
-*/
-    //dataIdFromObject: object => object._key || null,
+    //
 
     typePolicies: {
       Game: {
@@ -74,6 +75,8 @@ export default function configureClient() {
         keyFields: object => object._key,
       },
     },
+    */
+
    });
 
   const authLink = setContext((_, { headers }) => {

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -17,7 +17,7 @@ import PostScore from 'features/gameSummary/postScore';
 
 const PostScores = props => {
 
-  const { scores } = useContext(GameContext);
+  const { game, scores } = useContext(GameContext);
   const sorted_players = orderBy(scores.players, ['gross'], ['asc']);
 
   const [ currentPlayerIndex, setCurrentPlayerIndex ] = useState(0);
@@ -64,6 +64,7 @@ const PostScores = props => {
       <View style={styles.postScore}>
         <PostScore
           player={currentPlayer}
+          game={game}
         />
       </View>
       <View style={styles.buttonRow}>

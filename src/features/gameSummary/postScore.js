@@ -23,7 +23,6 @@ import {
   get_score_value,
   updateGameRoundPostedCache,
 } from 'common/utils/rounds';
-import { GameContext } from 'features/game/gameContext';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { POST_ROUND_MUTATION } from 'features/rounds/graphql';
 
@@ -31,11 +30,11 @@ import { POST_ROUND_MUTATION } from 'features/rounds/graphql';
 
 const PostScore = props => {
 
-  const { player } = props;
+  const { player, game } = props;
   //console.log('player', player);
 
-  const { game } = useContext(GameContext);
-  const { currentPlayerKey } = useContext(CurrentPlayerContext);
+  const { currentPlayer } = useContext(CurrentPlayerContext);
+  //console.log('currentPlayer', currentPlayer);
 
   const round = get_round_for_player(game.rounds, player.pkey);
   const totalHoles = getHoles(game).length;
@@ -76,10 +75,18 @@ const PostScore = props => {
     const { loading, error, data } = await postRoundToHandicapService({
       variables: {
         rkey,
-        posted_by_pkey: currentPlayerKey,
+        posted_by_pkey: currentPlayer.name,
       },
       update: (cache, { data: { postRoundToHandicapService } }) => {
+        console.log('update cache:', cache);
 
+        // raw dogg this
+        let cGame = cache.data.data[game._key];
+        console.log('cGame', cGame);
+        const gRoundIndex = findIndex(cGame.rounds, {_key: rkey});
+        console.log('round index', gRoundIndex);
+
+        /*
         // build new game and add posting to specific round
         let newGame = getNewGameForUpdate(game);
         const gRoundIndex = findIndex(newGame.rounds, {_key: rkey});
@@ -87,6 +94,7 @@ const PostScore = props => {
         let newRound = Object.assign({}, newGame.rounds[gRoundIndex]);
         newRound.posting = postRoundToHandicapService.posting;
         newGame.rounds[gRoundIndex] = newRound;
+        console.log('newRound', newRound);
 
         // update cache with new rounds
         updateGameRoundPostedCache({
@@ -94,6 +102,7 @@ const PostScore = props => {
           gkey,
           rounds: newGame.rounds,
         });
+        */
       },
     });
 

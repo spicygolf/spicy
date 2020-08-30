@@ -114,7 +114,7 @@ export const updateRoundScoreCache = ({cache, rkey, score}) => {
 
 
 export const updateGameRoundPostedCache = ({cache, gkey, rounds}) => {
-  // read from cache
+    // read from cache
   const optimistic = true;
   const cGame = cache.readFragment({
     id: gkey,
