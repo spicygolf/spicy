@@ -77,8 +77,6 @@ const PostScore = props => {
         posted_by_pkey: currentPlayer.name,
       },
       update: (cache, { data: { postRoundToHandicapService } }) => {
-        //console.log('cache before round posting update', cache.data.data[rkey]);
-
         // update cache with new posting
         updateRoundPostedCache({
           cache,

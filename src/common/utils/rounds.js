@@ -112,6 +112,7 @@ export const updateRoundScoreCache = ({cache, rkey, score}) => {
 
 
 export const updateRoundPostedCache = ({cache, rkey, posting}) => {
+  //console.log('cache before round posting update', cache.data.data[rkey]);
   // read from cache
   const optimistic = true;
   const cRound = cache.readFragment({
