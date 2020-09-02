@@ -118,7 +118,15 @@ const HoleScore = props => {
         rkey: rkey,
         score: newScore,
       },
+      optimisticResponse: {
+        __typename: 'Mutation',
+        postScore: {
+          ...newScore,
+          __typename: 'Score',
+        }
+      },
       update: (cache, { data: { postScore } }) => {
+        //console.log('postScore response', newScore, postScore);
         updateRoundScoreCache({
           cache,
           rkey,
