@@ -1,7 +1,9 @@
 import { cloneDeep, find, findIndex } from 'lodash';
 
-import { GAME_ROUND_POSTING_FRAGMENT } from 'features/games/graphql';
-import { ROUND_SCORES_FRAGMENT } from 'features/rounds/graphql';
+import {
+  ROUND_POSTING_FRAGMENT,
+  ROUND_SCORES_FRAGMENT
+} from 'features/rounds/graphql';
 
 
 
@@ -92,10 +94,6 @@ export const updateRoundScoreCache = ({cache, rkey, score}) => {
     fragment: ROUND_SCORES_FRAGMENT,
   }, optimistic);
 
-  // TODO: does this function even work?  For updateGameRoundPostedCache below,
-  //       I had to update game.rounds in cache
-  console.log('getRound from cache', cRound);
-
   // make new scores to write back
   const newScores = cloneDeep(cRound.scores);
   const h = findIndex(newScores, {hole: score.hole});
@@ -113,22 +111,24 @@ export const updateRoundScoreCache = ({cache, rkey, score}) => {
 };
 
 
-export const updateGameRoundPostedCache = ({cache, gkey, rounds}) => {
-    // read from cache
+export const updateRoundPostedCache = ({cache, rkey, posting}) => {
+  // read from cache
   const optimistic = true;
-  const cGame = cache.readFragment({
-    id: gkey,
-    fragment: GAME_ROUND_POSTING_FRAGMENT,
+  const cRound = cache.readFragment({
+    id: rkey,
+    fragment: ROUND_POSTING_FRAGMENT,
   }, optimistic);
-  console.log('game from cache', cGame);
+  //console.log('round from cache', cRound);
+  //console.log('posting to update cache', posting);
 
   // write back to cache with new values
   cache.writeFragment({
-    id: gkey,
-    fragment: GAME_ROUND_POSTING_FRAGMENT,
+    id: rkey,
+    fragment: ROUND_POSTING_FRAGMENT,
     data: {
-      rounds,
+      posting,
     },
   });
+  //console.log('cache after round posting update', cache.data.data[rkey]);
 };
 

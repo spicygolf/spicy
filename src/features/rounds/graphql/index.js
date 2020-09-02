@@ -5,4 +5,5 @@ export { POST_ROUND_MUTATION } from './postRoundMutation';
 export { GET_ROUNDS_FOR_PLAYER_DAY_QUERY } from './getRoundsForPlayerDay';
 export { GET_ROUND_QUERY } from './getRound';
 export { ROUND_SCORES_FRAGMENT } from './roundScoresFragment';
+export { ROUND_POSTING_FRAGMENT } from './roundPostingFragment';
 export { SCORE_POSTED_SUBSCRIPTION } from './scorePostedSubscription';

@@ -19,7 +19,36 @@ export default function configureClient() {
 
   const cache = new InMemoryCache({
     dataIdFromObject: object => object._key || null,
+    typePolicies: {
 /*
+      Game: {
+        fields: {
+          rounds: {
+            merge: (existing = {}, incoming) => {
+              return {...existing, ...incoming};
+            },
+          },
+        },
+      },
+*/
+      Player: {
+        fields: {
+          handicap: {
+            merge: (existing = {}, incoming) => {
+              return {...existing, ...incoming};
+            },
+          },
+        }
+      },
+      Handicap: {
+        keyFields: false,
+      },
+      Posting: {
+        keyFields: false,
+      },
+    },
+
+    /*
     possibleTypes: {
       Game: ['Teams', 'Round', 'Player', 'GameSpec', 'TeamHole'],
     },
@@ -152,7 +181,7 @@ export default function configureClient() {
       errorPolicy: 'all',
     },
     query: {
-      fetchPolicy: 'cache-and-network',
+      //fetchPolicy: 'cache-only',
       errorPolicy: 'all',
     },
     mutate: {

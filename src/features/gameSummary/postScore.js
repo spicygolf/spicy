@@ -14,14 +14,13 @@ import { useMutation } from '@apollo/client';
 import moment from 'moment';
 
 import {
-  getHoles,
-  getNewGameForUpdate,
+  getHoles
 } from 'common/utils/game';
 import {
   get_hole,
   get_round_for_player,
   get_score_value,
-  updateGameRoundPostedCache,
+  updateRoundPostedCache,
 } from 'common/utils/rounds';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { POST_ROUND_MUTATION } from 'features/rounds/graphql';
@@ -78,31 +77,14 @@ const PostScore = props => {
         posted_by_pkey: currentPlayer.name,
       },
       update: (cache, { data: { postRoundToHandicapService } }) => {
-        console.log('update cache:', cache);
+        //console.log('cache before round posting update', cache.data.data[rkey]);
 
-        // raw dogg this
-        let cGame = cache.data.data[game._key];
-        console.log('cGame', cGame);
-        const gRoundIndex = findIndex(cGame.rounds, {_key: rkey});
-        console.log('round index', gRoundIndex);
-
-        /*
-        // build new game and add posting to specific round
-        let newGame = getNewGameForUpdate(game);
-        const gRoundIndex = findIndex(newGame.rounds, {_key: rkey});
-        if( gRoundIndex < 0 ) return;
-        let newRound = Object.assign({}, newGame.rounds[gRoundIndex]);
-        newRound.posting = postRoundToHandicapService.posting;
-        newGame.rounds[gRoundIndex] = newRound;
-        console.log('newRound', newRound);
-
-        // update cache with new rounds
-        updateGameRoundPostedCache({
+        // update cache with new posting
+        updateRoundPostedCache({
           cache,
-          gkey,
-          rounds: newGame.rounds,
+          rkey,
+          posting: postRoundToHandicapService.posting,
         });
-        */
       },
     });
 
