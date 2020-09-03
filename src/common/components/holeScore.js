@@ -29,8 +29,6 @@ const square_wht = require('../../../assets/img/square_wht.png');
 
 const HoleScore = props => {
 
-  const { game } = useContext(GameContext);
-  const { _key: gkey } = game;
   const { hole, score, rkey } = props;
 
   const [ postScore ] = useMutation(POST_SCORE_MUTATION);
@@ -95,7 +93,10 @@ const HoleScore = props => {
     }
 
     return (
-      <TouchableHighlight onPress={() => setScore(item)}>
+      <TouchableHighlight
+        onPress={() => setScore(item)}
+        onLongPress={() => setScore(item)}
+      >
         <View style={score_styles}>
           <ImageBackground
             source={src}
@@ -160,6 +161,7 @@ const HoleScore = props => {
       data={score_options}
       renderItem={({item}) => renderScore(item)}
       ref={flatlistRef}
+      onStartShouldSetPanResponderCapture={(evt, gestureState) => false}
       onScrollToIndexFailed={(e) => {
         console.log('onScrollToIndexFailed e', e);
         // this horrible hack seems to fix #15
