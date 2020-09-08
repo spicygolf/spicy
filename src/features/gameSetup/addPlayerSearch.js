@@ -11,7 +11,6 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { Query } from 'react-apollo';
 import { find } from 'lodash';
-import { useMutation } from '@apollo/client';
 
 import {
   SEARCH_PLAYER_QUERY,

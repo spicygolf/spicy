@@ -40,7 +40,7 @@ const AddCourseSearch = props => {
   const { game, currentPlayerKey } = useContext(GameContext);
   //console.log('currentPlayerKey', currentPlayerKey);
 
-  const [ q, setQ ] = useState('');
+  const [ search, setSearch ] = useState('');
   const [ course, setCourse ] = useState(null);
 
   const searchInputRef = useRef(null);
@@ -87,7 +87,7 @@ const AddCourseSearch = props => {
 
     const { loading, error, data } = useQuery(SEARCH_COURSE_QUERY, {
       variables: {
-        q: q,
+        q: search,
       }
     });
     if( loading ) return (<ActivityIndicator />);
@@ -109,8 +109,8 @@ const AddCourseSearch = props => {
           style={styles.searchTextInput}
           placeholder='search courses...'
           autoCapitalize='none'
-          onChangeText={text => setQ(text)}
-          value={q}
+          onChangeText={text => setSearch(text)}
+          value={search}
         />
         <FlatList
           data={data.searchCourse}
