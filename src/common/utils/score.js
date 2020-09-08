@@ -83,7 +83,7 @@ export const scoring = game => {
   // player scoring
   let players = game.players.map(p => {
     const round = get_round_for_player(game.rounds, p._key);
-    const ch = parseFloat(round.course_handicap);
+    const ch = (round && round.course_handicap) ? parseFloat(round.course_handicap) : 0;
     return ({
       pkey: p._key,
       name: p.name,
