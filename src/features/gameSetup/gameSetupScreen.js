@@ -42,7 +42,7 @@ const GameSetupScreen = props => {
 
   return (
     <View style={styles.container}>
-      <KeyboardAwareScrollView>
+      <KeyboardAwareScrollView testID="game_setup_scrollview">
         <Players />
         <Teams />
         <Options />

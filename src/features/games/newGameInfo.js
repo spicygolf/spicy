@@ -115,7 +115,7 @@ const NewGameInfo = props => {
           })
         }}
         accessibilityLabel='Create Game'
-        testID='create_game_button'
+        testID='create_game'
       />
     </View>
   );

@@ -85,6 +85,7 @@ const LinkRoundList = props => {
             <Button
               title="Add New Round"
               onPress={() => chooseRound(null, true)}
+              testID='add_new_round'
             />
           </View>
         </View>

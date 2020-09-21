@@ -93,6 +93,7 @@ const Login = props => {
               autoCapitalize='none'
               value={email}
               ref={emailRef}
+              testID='email_field'
             />
           </View>
           <View style={styles.field_container}>
@@ -107,6 +108,7 @@ const Login = props => {
               secureTextEntry={true}
               autoCapitalize='none'
               value={password}
+              testID='password_field'
             />
           </View>
           <View style={styles.field_container}>

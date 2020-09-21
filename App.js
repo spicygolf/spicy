@@ -78,4 +78,5 @@ YellowBox.ignoreWarnings([
   'Module RCTImageLoader',
   'VirtualizedLists should never be nested',
   'Missing cache result fields',
+  'RCTBridge',
 ]);

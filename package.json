@@ -20,7 +20,7 @@
     "configurations": {
       "ios.sim.debug": {
         "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/spicygolf.app",
-        "build": "xcodebuild -project ios/spicygolf.xcodeproj -scheme spicygolf -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build -UseModernBuildSystem=NO",
+        "build": "xcodebuild -workspace ios/spicygolf.xcworkspace -scheme spicygolf -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build -UseModernBuildSystem=NO",
         "type": "ios.simulator",
         "name": "iPhone 11"
       }
@@ -72,7 +72,7 @@
     "@react-native-community/cli": "^4.6.3",
     "@react-native-community/eslint-config": "^0.0.5",
     "babel-jest": "24.9.0",
-    "detox": "^12.11.0",
+    "detox": "^17.4.5",
     "eslint": "^6.8.0",
     "jest": "^24.9.0",
     "metro-react-native-babel-preset": "^0.58.0",

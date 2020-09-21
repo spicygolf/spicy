@@ -103,6 +103,7 @@ const Admin = props => {
           buttonStyle={styles.button}
           containerStyle={styles.yes_button}
           onPress={() => doDeleteGame()}
+          testID="admin_delete_game_yes"
         />
       </View>
     </View>
@@ -120,6 +121,7 @@ const Admin = props => {
         buttonStyle={styles.button}
         disabled={showSure}
         onPress={() => setShowSure(true)}
+        testID="admin_delete_game"
       />
       { areYouSure }
     </Card>

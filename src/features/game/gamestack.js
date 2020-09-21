@@ -69,7 +69,8 @@ const GameStack = props => {
           name='Setup'
           component={GameSetupStack}
           options={{
-            title: 'Setup'
+            title: 'Setup',
+            tabBarTestID: 'game_setup_tab'
           }}
         />
       </Tab.Navigator>
