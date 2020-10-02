@@ -47,6 +47,7 @@ const AppStack = props => {
     currentPlayer,
     setCurrentPlayer,
     setCurrentPlayerKey,
+    token,
     setToken,
   } = useContext(CurrentPlayerContext);
 
@@ -78,22 +79,37 @@ const AppStack = props => {
       });
     } else {
       if( c && c.message ) {
-        console.log('something is wrong:', c.message);
-        if( c.navTo ) {
-          switch( c.navTo ) {
-            case 'RegisterAgain':
-              setContent(<RegisterAgain
-                fbUser={c.fbUser}
-                retryCreds={retryCreds}
-              />);
-              break;
-            default:
-              //setContent(<Alert message={c.message} />);
-              break;
-          }
+        // try to get creds from local storage
+        const newCurrentPlayerKey = await AsyncStorage.getItem('currentPlayer');
+        const newToken = await AsyncStorage.getItem('token');
+        if( newToken && newCurrentPlayerKey ) {
+          // TODO: DRY (above)
+          setCurrentPlayerKey(newCurrentPlayerKey);
+          setToken(newToken);
+          setContent(tabs());
+          getPlayer({
+            variables: {
+              player: newCurrentPlayerKey,
+            }
+          });
         } else {
-          // TODO: navigate to an Error component
-          //setContent(<Alert message={c.message} />);
+          console.log('something is wrong:', c);
+          if( c.navTo ) {
+            switch( c.navTo ) {
+              case 'RegisterAgain':
+                setContent(<RegisterAgain
+                  fbUser={c.fbUser}
+                  retryCreds={retryCreds}
+                />);
+                break;
+              default:
+                //setContent(<Alert message={c.message} />);
+                break;
+            }
+          } else {
+            // TODO: navigate to an Error component
+            //setContent(<Alert message={c.message} />);
+          }
         }
       }
     }
