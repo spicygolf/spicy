@@ -10,113 +10,22 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/link-context';
 import { onError } from '@apollo/link-error';
 import { WebSocketLink } from '@apollo/link-ws';
+import OfflineLink from "apollo-link-offline";
+import { persistCache } from "apollo3-cache-persist";
 
 import { baseUri, scheme } from 'common/config';
 import { logout } from 'common/utils/account';
+import typePolicies from 'app/client/typePolicies';
+import possibleTypes from 'app/client/possibleTypes';
 
 
-export default function configureClient() {
+
+export default configureClient = async () => {
 
   const cache = new InMemoryCache({
     dataIdFromObject: object => object._key || null,
-    typePolicies: {
-/*
-
-    To address this problem (which is not a bug in Apollo Client), define a custom merge function for the Game.rounds field, so InMemoryCache can safely merge these objects:
-
-      existing: [{"__ref":"95347021"}]
-      incoming: []
-
-    For more information about these options, please refer to the documentation:
-
-      * Ensuring entity objects have IDs: https://go.apollo.dev/c/generating-unique-identifiers
-      * Defining custom merge functions: https://go.apollo.dev/c/merging-non-normalized-objects
-
-      Game: {
-        fields: {
-          rounds: {
-            merge: (existing = {}, incoming) => {
-              return {...existing, ...incoming};
-            },
-          },
-        },
-      },
-*/
-      Player: {
-        fields: {
-          handicap: {
-            merge: (existing = {}, incoming) => {
-              return {...existing, ...incoming};
-            },
-          },
-        }
-      },
-      Handicap: {
-        keyFields: false,
-      },
-      Posting: {
-        keyFields: false,
-      },
-    },
-
-    /*
-    possibleTypes: {
-      Game: ['Teams', 'Round', 'Player', 'GameSpec', 'TeamHole'],
-    },
-      Teams: ['TeamHole'],
-      TeamHole: ['Team'],
-      Team: ['GameJunk'],
-      Round: ['Score', 'Player', 'Tee'],
-      Score: ['Value'],
-      Player: ['Club', 'Handicap'],
-      Tee: ['Rating', 'Course', 'Hole'],
-      GameSpec: ['ScoringSpec', 'JunkSpec', 'MultiplierSpec', 'OptionSpec'],
-      ScoringSpec: ['HoleScoringSpec'],
-      OptionSpec: ['Choice'],
-    },
-    //
-
-    typePolicies: {
-      Game: {
-        keyFields: object => object._key,
-      },
-      Teams: {
-        keyFields: (object, context) => {
-          console.log('object', object, 'context', context);
-          return;
-        },
-        fields: {
-
-        },
-      },
-      TeamHole: {
-        fields: {
-          hole: {
-            keyArgs: ['hole'],
-          }
-        },
-      },
-      Round: {
-        keyFields: object => object._key,
-      },
-      Player: {
-        keyFields: object => object._key,
-      },
-      Club: {
-        keyFields: object => object._key,
-      },
-      Tee: {
-        keyFields: object => object._key,
-      },
-      Course: {
-        keyFields: object => object._key,
-      },
-      GameSpec: {
-        keyFields: object => object._key,
-      },
-    },
-    */
-
+    typePolicies: typePolicies,
+    possibleTypes: possibleTypes,
    });
 
   const authLink = setContext((_, { headers }) => {
@@ -154,7 +63,8 @@ export default function configureClient() {
       );
 
     if (networkError) {
-      console.log(`[Network error]: ${networkError}`);
+      // ignore these, because we're building this thing 'offline-first'
+      //console.log(`[Network error]: ${networkError}`);
     }
   });
 
@@ -167,6 +77,11 @@ export default function configureClient() {
     options: {
       reconnect: true
     }
+  });
+
+  const offlineLink = new OfflineLink({
+    storage: AsyncStorage,
+    sequential: true,
   });
 
   // The split function takes three parameters:
@@ -183,7 +98,7 @@ export default function configureClient() {
       );
     },
     wsLink,
-    httpLink,
+    ApolloLink.from([offlineLink, httpLink]),
   );
 
   const defaultOptions = {
@@ -192,7 +107,7 @@ export default function configureClient() {
       errorPolicy: 'all',
     },
     query: {
-      //fetchPolicy: 'cache-only',
+      fetchPolicy: 'cache-and-network',
       errorPolicy: 'all',
     },
     mutate: {
@@ -210,8 +125,15 @@ export default function configureClient() {
     defaultOptions: defaultOptions
   });
 
-  return {
-    client: client,
-  };
+  await persistCache({
+    cache,
+    storage: AsyncStorage,
+    maxSize: false,
+    debug: false
+  });
+
+  offlineLink.setup(client);
+
+  return client;
 
 };

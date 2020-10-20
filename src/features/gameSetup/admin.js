@@ -46,7 +46,9 @@ const Admin = props => {
     },
   });
   if( loading ) return (<ActivityIndicator />);
-  if( error ) console.log('Error getting deleteGameInfo', error);
+  if( error && error.message != 'Network request failed' ) {
+    console.log('Error getting deleteGameInfo', error);
+  }
 
   //console.log('deleteGameInfo', data.getDeleteGameInfo);
 

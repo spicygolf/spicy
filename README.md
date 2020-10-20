@@ -10,9 +10,9 @@ Spicy Golf mobile app written in React Native
 
     TL;DR - set XCode | Preferences | Locations | Command Line Tools dropdown to something if it's blank.
 
- * Install React Native CLI and Detox
+ * Install React Native CLI and Detox CLI
 
-        sudo npm install -g react-native-cli detox
+        yarn global add react-native-cli detox-cli
 
  * Install Yarn dependencies
 

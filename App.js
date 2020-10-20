@@ -22,7 +22,7 @@ import { CurrentPlayerProvider } from 'features/players/currentPlayerContext';
 
 const App = props => {
 
-  const { client } = configureClient();
+  const [ client, setClient ] = useState(undefined);
 
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
@@ -42,9 +42,19 @@ const App = props => {
     }, []
   );
 
+  useEffect(
+    () => {
+      const configClient = async () => {
+        const c = await configureClient();
+        setClient(c);
+      };
+      configClient();
+    }, []
+  );
+
   let content = null;
-  if( initializing ) {
-    content = (<Splash />);
+  if( initializing || !client ) {
+    return (<Splash />);
   } else {
     if( user ) {
       content = (<AppStack user={user} />);

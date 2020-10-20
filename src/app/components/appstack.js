@@ -53,7 +53,9 @@ const AppStack = props => {
 
   // grab current player object from db
   const [ getPlayer, {error: cpError, data: cpData} ] = useLazyQuery(GET_PLAYER_QUERY);
-  if (cpError) console.log('Error fetching current player', cpError);
+  if (cpError && cpError.message != 'Network request failed' ) {
+    console.log('Error fetching current player', cpError);
+  }
   //console.log('cpData', cpData);
   if( cpData &&
       cpData.getPlayer &&

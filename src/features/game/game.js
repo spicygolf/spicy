@@ -43,7 +43,7 @@ const Game = props => {
     );
   }
 
-  if( error ) {
+  if( error && error.message != 'Network request failed') {
     console.log(error);
     // TODO: error component
     content = (<Text>Error Loading Game: `${error}`</Text>);

@@ -89,14 +89,15 @@ const Games = props => {
     variables: {
       pkey: currentPlayerKey,
     },
-    fetchPolicy: 'cache-and-network',
   });
-
   if( loading ) return (<ActivityIndicator />);
-  if (error) return (<Text>Error! ${error.message}</Text>);
+  if (error && error.message != 'Network request failed') {
+    return (<Text>Error! ${error.message}</Text>);
+  }
 
-  const games = (data && data.activeGamesForPlayer ) ?
-    data.activeGamesForPlayer : [];
+  const games = ( data && data.activeGamesForPlayer )
+    ? data.activeGamesForPlayer
+    : [];
   const filtered_games = filter(games, g => g);
   // sort games descending by start time
   const sorted_games = reverse(sortBy(filtered_games, ['start']));
