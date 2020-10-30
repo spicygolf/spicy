@@ -53,6 +53,7 @@ export const getTeams = (game, hole) => {
 export const getHolesToUpdate = (term, game, currentHole) => {
 
   const holes = getHoles(game);
+  //console.log('getHolesToUpdate', holes, term, currentHole);
 
   switch ( term ) {
     case 'never':

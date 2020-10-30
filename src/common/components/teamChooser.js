@@ -24,10 +24,12 @@ const TeamChooser = props => {
   const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
 
   const { currentHole } = props;
+  //console.log('currentHole', currentHole);
   const { game } = useContext(GameContext);
   const { _key: gkey } = game;
-  const h = ( game && game.holes ) ?
-    find(game.holes, {hole: currentHole}) : {hole: currentHole, teams: []};
+  const h = ( game && game.holes && game.holes.length )
+    ? find(game.holes, {hole: currentHole})
+    : {hole: currentHole, teams: []};
   //console.log('h', h);
 
 
@@ -44,6 +46,7 @@ const TeamChooser = props => {
     if( !newGame.holes ) {
       newGame.holes = [];
     }
+    //console.log('holesToUpdate', holesToUpdate);
     holesToUpdate.map(h => {
       // if hole data doesn't exist, create blanks
       if( findIndex(newGame.holes, {hole: h}) < 0 ) {

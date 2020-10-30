@@ -12,6 +12,23 @@ import { acronym, last } from 'common/utils/text';
 
 
 export const getHoles = game => {
+  if( !game.holes || !game.holes.length ) {
+    let ret = [];
+    switch( game.scope.holes ) {
+      case 'all18':
+        return Array.from(Array(18).keys()).map(x => (++x).toString());
+        break;
+      case 'front9':
+        return ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        break;
+      case 'back9':
+        return ['10', '11', '12', '13', '14', '15', '16', '17', '18'];
+        break;
+      default:
+        console.log(`getHoles - invalid value for holes: '${game.scope.holes}'`);
+        break;
+    }
+  }
   return game.holes.map(h => h.hole.toString());
 };
 
@@ -279,13 +296,14 @@ export const updateGameHolesCache = ({cache, gkey, holes}) => {
     id: gkey,
     fragment: GAME_HOLES_FRAGMENT,
   }, optimistic);
-  //console.log('getGame from cache', cGame);
+  console.log('getGame from cache', cGame);
 
   // write back to cache with new values
   cache.writeFragment({
     id: gkey,
     fragment: GAME_HOLES_FRAGMENT,
     data: {
+      _key: gkey,
       holes,
     },
   });
