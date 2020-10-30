@@ -48,18 +48,23 @@ const ProfileHome = props => {
     currentPlayer.handicap &&
     currentPlayer.handicap.index
   ) ? currentPlayer.handicap.index : '-';
-/*
+
   const _clearCache = props => {
-    client.resetStore();
+    for( const key of Object.keys(client.cache.data.data) ) {
+      client.cache.evict(key);
+    }
+    client.cache.gc();
+    console.log('cache', client.cache.data.data);
   }
 
-      <Button
-        style={styles.logout_button}
-        title='Clear Cache'
-        testID='clear_cache_button'
-        onPress={() => _clearCache()}
-      />
-*/
+  const clear_cache_button = (
+    <Button
+      style={styles.logout_button}
+      title='Clear Cache'
+      testID='clear_cache_button'
+      onPress={() => _clearCache()}
+    />
+  );
 
   const version = DeviceInfo.getVersion();
 
@@ -76,14 +81,13 @@ const ProfileHome = props => {
           <Text>Current Index:</Text>
           <Text>{index}</Text>
         </View>
-        <View style={styles.button_view}>
-          <Button
-            style={styles.logout_button}
-            title='Logout'
-            testID='logout_button'
-            onPress={() => _logoutPressed()}
-          />
-        </View>
+        { clear_cache_button }
+        <Button
+          style={styles.logout_button}
+          title='Logout'
+          testID='logout_button'
+          onPress={() => _logoutPressed()}
+        />
       </Card>
       { impersonate }
       <View style={styles.app_info}>
