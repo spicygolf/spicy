@@ -29,26 +29,25 @@ const Game = props => {
   let content = null;
 
   // execute the getGame query
-  const { loading, error, refetch, data } = useQuery(GET_GAME_QUERY, {
+  const { loading, error, refetch, data, client } = useQuery(GET_GAME_QUERY, {
     variables: {
       gkey: currentGameKey,
     },
   });
 
+  //console.log('cache', client.cache.data.data);
+
   if( loading ) {
-    content = (
-      <View>
-        <ActivityIndicator />
-      </View>
-    );
+    content = (<View><ActivityIndicator /></View>);
   }
 
   if( error && error.message != 'Network request failed') {
     console.log(error);
     // TODO: error component
-    content = (<Text>Error Loading Game: `${error}`</Text>);
+    content = (<Text>Error Loading Game: `{error.message}`</Text>);
   }
 
+  //console.log('data', currentGameKey, data);
   if( data && data.getGame ) {
 
     const game = data.getGame;

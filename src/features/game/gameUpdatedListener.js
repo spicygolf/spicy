@@ -10,7 +10,7 @@ const GameUpdatedListener = props => {
 
   const { gkey } = props;
   if( !gkey ) return null;
-  const client = useApolloClient();
+  const { cache } = useApolloClient();
 
   const { loading, error, data } = useSubscription(
     GAME_UPDATED_SUBSCRIPTION,
@@ -28,7 +28,6 @@ const GameUpdatedListener = props => {
 
   if( data && data.gameUpdated ) {
     //console.log('gameUpdated', data);
-    const { cache } = client;
     //console.log('cache data', cache.data);
     const { holes } = data.gameUpdated;
     if( holes ) {
