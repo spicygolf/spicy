@@ -8,13 +8,17 @@ export default gql`
       start
       end
       rounds {
+        _key
         player {
+          _key
           name
           short
         }
         tee {
+          _key
           name
           course {
+            _key
             name
           }
         }

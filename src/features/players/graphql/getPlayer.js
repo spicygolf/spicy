@@ -1,7 +1,3 @@
-import React from 'react';
-
-import { Query } from 'react-apollo';
-
 import { gql } from '@apollo/client';
 
 
@@ -19,6 +15,7 @@ export const GET_PLAYER_QUERY = gql`
         revDate
       }
       clubs {
+        _key
         name
         state
       }

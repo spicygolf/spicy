@@ -6,6 +6,7 @@ import {
   StyleSheet,
   View
 } from 'react-native';
+import { useQuery } from '@apollo/client';
 
 import {
   GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
@@ -39,39 +40,57 @@ const AddPlayerFavorites = props => {
     );
   }
 
-  // TODO: useQuery
+  const { loading, error, data } = useQuery(GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY, {
+    variables: {
+      pkey: currentPlayerKey,
+    },
+  });
+
+  if( loading ) {
+    return (
+      <View>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if( error && error.message != 'Network request failed') {
+    console.log(error);
+    // TODO: error component
+    return (<Text>Error Loading Favorite Players: `{error.message}`</Text>);
+  }
+
+  //console.log('getFavoritePlayersForPlayer data', currentPlayerKey, data);
+
+  const players = (data && data.getFavoritePlayersForPlayer)
+    ? data.getFavoritePlayersForPlayer
+    : [];
+  const newPlayers = players.map(p => ({
+    ...p,
+    fave: {
+      faved: true,
+      from: {type: 'player', value: currentPlayerKey},
+      to:   {type: 'player', value: p._key},
+      refetchQueries: [{
+        query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
+        variables: {
+          pkey: currentPlayerKey
+        }
+      }],
+      awaitRefetchQueries: true
+    }
+  }));
+
   return (
     <View style={styles.container}>
-      <GetFavoritePlayersForPlayer pkey={currentPlayerKey}>
-        {({loading, players}) => {
-          if( loading ) return (<ActivityIndicator />);
-          const newPlayers = players.map(p => ({
-            ...p,
-            fave: {
-              faved: true,
-              from: {type: 'player', value: currentPlayerKey},
-              to:   {type: 'player', value: p._key},
-              refetchQueries: [{
-                query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
-                variables: {
-                  pkey: currentPlayerKey
-                }
-              }],
-              awaitRefetchQueries: true
-            }
-          }));
-          return (
-            <View style={styles.listContainer}>
-              <FlatList
-                data={newPlayers}
-                renderItem={_renderFavoritesPlayer}
-                keyExtractor={item => item._key}
-                keyboardShouldPersistTaps={'handled'}
-              />
-            </View>
-          );
-        }}
-      </GetFavoritePlayersForPlayer>
+      <View style={styles.listContainer}>
+        <FlatList
+          data={newPlayers}
+          renderItem={_renderFavoritesPlayer}
+          keyExtractor={item => item._key}
+          keyboardShouldPersistTaps={'handled'}
+        />
+      </View>
     </View>
   );
 
