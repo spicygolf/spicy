@@ -23,7 +23,10 @@ import possibleTypes from 'app/client/possibleTypes';
 export default configureClient = async () => {
 
   const cache = new InMemoryCache({
-    dataIdFromObject: object => object._key || null,
+    dataIdFromObject: object => {
+      //console.log('object', object);
+      return object._key || null
+    },
     typePolicies: typePolicies,
     possibleTypes: possibleTypes,
    });

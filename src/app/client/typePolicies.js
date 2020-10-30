@@ -1,4 +1,6 @@
 
+
+
 const typePolicies = {
   /*
 
@@ -12,25 +14,49 @@ const typePolicies = {
         * Ensuring entity objects have IDs: https://go.apollo.dev/c/generating-unique-identifiers
         * Defining custom merge functions: https://go.apollo.dev/c/merging-non-normalized-objects
   */
-
-  Game: {
+  Query: {
     fields: {
-      rounds: {
-        merge: (existing, incoming) => {
-          //console.log("Game.fields.rounds", existing, incoming);
+      getFavoritePlayersForPlayer: {
+        merge: (existing = [], incoming) => {
           return incoming;
+          //return {...existing, ...incoming};
         },
-      },
+      }
     },
   },
   Player: {
     fields: {
       handicap: {
-        merge: (existing = {}, incoming) => {
-          return {...existing, ...incoming};
-        },
+        merge: true
       },
     },
+  },
+  GameHole: {
+    keyFields: false,
+  },
+  GameScope: {
+    keyFields: false,
+  },
+  Hole: {
+    keyFields: false,
+  },
+  HoleScoringSpec: {
+    keyFields: false,
+  },
+  JunkSpec: {
+    keyFields: false,
+  },
+  OptionSpec: {
+    keyFields: false,
+  },
+  Rating: {
+    keyFields: false,
+  },
+  Score: {
+    keyFields: false,
+  },
+  ScoringSpec: {
+    keyFields: false,
   },
   Handicap: {
     keyFields: false,
@@ -38,17 +64,6 @@ const typePolicies = {
   Posting: {
     keyFields: false,
   },
-  /*
-    Query: {
-      fields: {
-        activeGamesForPlayer: {
-          merge: (existing = {}, incoming) => {
-            return {...existing, ...incoming};
-          },
-        },
-      },
-    },
-  */
 };
 
 export default typePolicies;
