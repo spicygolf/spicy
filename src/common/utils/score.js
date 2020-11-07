@@ -341,7 +341,9 @@ const calcPlayerJunk = ({players, pkey, game, hole, allScoringHole, allJunk}) =>
   const pops = get_pops(score);
   const teeHole = get_hole(hole, round);
   const par = (teeHole && teeHole.par) ? parseFloat(teeHole.par) : 0.0;
-  const grossToPar = gross - par;
+  const grossToPar = ( gross && gross > 0 )
+    ? gross - par
+    : 0;
   const netToPar = net - par;
 
   // add to players section of scores
