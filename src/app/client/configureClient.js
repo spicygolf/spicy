@@ -106,11 +106,9 @@ export default configureClient = async () => {
 
   const defaultOptions = {
     watchQuery: {
-      fetchPolicy: 'cache-and-network',
       errorPolicy: 'all',
     },
     query: {
-      fetchPolicy: 'cache-and-network',
       errorPolicy: 'all',
     },
     mutate: {
