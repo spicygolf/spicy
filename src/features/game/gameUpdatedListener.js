@@ -2,7 +2,6 @@ import React from 'react';
 import { useApolloClient, useSubscription } from '@apollo/client';
 
 import { GAME_UPDATED_SUBSCRIPTION } from 'features/game/graphql';
-import { updateGameHolesCache } from 'common/utils/game';
 
 
 
@@ -28,19 +27,8 @@ const GameUpdatedListener = props => {
 
   if( data && data.gameUpdated ) {
     //console.log('gameUpdated', data);
-    //console.log('cache data', cache.data);
-    const { holes } = data.gameUpdated;
-    if( holes ) {
-      updateGameHolesCache({
-        cache,
-        gkey,
-        holes,
-      });
-    }
-    return null;
   }
 
-  console.log('gameUpdatedListener should not get here', data);
   // non-display component
   return null;
 

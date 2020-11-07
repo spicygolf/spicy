@@ -3,9 +3,6 @@ import { cloneDeep, filter, find, findIndex, reduce } from 'lodash';
 import {
   ACTIVE_GAMES_FOR_PLAYER_QUERY,
 } from 'features/games/graphql';
-import {
-  GAME_HOLES_FRAGMENT
-} from 'features/game/graphql';
 import { getHolesToUpdate } from 'common/utils/teams';
 import { acronym, last } from 'common/utils/text';
 
@@ -288,6 +285,7 @@ export const rmgame = async (gkey, currentPlayerKey, mutation) => {
 
 };
 
+/*
 export const updateGameHolesCache = ({cache, gkey, holes}) => {
 
   // read holes from cache
@@ -309,6 +307,7 @@ export const updateGameHolesCache = ({cache, gkey, holes}) => {
   });
 
 };
+*/
 
 export const addPlayerToOwnTeam = async ({pkey, game, updateGame}) => {
 
@@ -319,7 +318,7 @@ export const addPlayerToOwnTeam = async ({pkey, game, updateGame}) => {
   if( !newGame.holes ) {
     newGame.holes = [];
   }
-  console.log('holesToUpdate', holesToUpdate);
+  //console.log('holesToUpdate', holesToUpdate);
   holesToUpdate.map(h => {
     const holeIndex = findIndex(newGame.holes, {hole: h});
     if( holeIndex < 0 ) {
@@ -350,19 +349,11 @@ export const addPlayerToOwnTeam = async ({pkey, game, updateGame}) => {
       }
     }
   });
-  console.log('addPlayerToOwnTeam newGame', newGame);
+  //console.log('addPlayerToOwnTeam newGame', newGame);
   const { loading, error, data } = await updateGame({
     variables: {
       gkey: gkey,
       game: newGame,
-    },
-    update: (cache, { data }) => {
-      //console.log('cache data', cache.data);
-      updateGameHolesCache({
-        cache,
-        gkey,
-        holes: newGame.holes,
-      });
     },
   });
 

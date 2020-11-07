@@ -13,7 +13,6 @@ import { findIndex, sortBy } from 'lodash';
 import { gql } from '@apollo/client';
 
 import { GameContext } from 'features/game/gameContext';
-import { updateGameHolesCache } from 'common/utils/game';
 import { blue } from 'common/colors';
 import {
   get_net_score,
@@ -89,14 +88,6 @@ const HoleJunk = props => {
       variables: {
         gkey: gkey,
         game: newGame,
-      },
-      update: (cache, { data: { updateGame } }) => {
-        //console.log('cache data', cache.data);
-        updateGameHolesCache({
-          cache,
-          gkey,
-          holes: newGame.holes,
-        });
       },
     });
 
