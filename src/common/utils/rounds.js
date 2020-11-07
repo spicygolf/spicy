@@ -84,7 +84,8 @@ export const rmround = async (rkey, mutation) => {
 
 };
 
-
+/* TODO: remove me if it turns out I'm not needed b/c Apollo Client 3 updates
+         cache more sanely than before
 export const updateRoundScoreCache = ({cache, rkey, score}) => {
 
   // read scores from cache
@@ -109,7 +110,7 @@ export const updateRoundScoreCache = ({cache, rkey, score}) => {
   });
 
 };
-
+*/
 
 export const updateRoundPostedCache = ({cache, rkey, posting}) => {
   //console.log('cache before round posting update', cache.data.data[rkey]);

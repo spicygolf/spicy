@@ -12,7 +12,6 @@ import { useMutation, gql } from '@apollo/client';
 import {
   get_score_value,
   get_net_score,
-  updateRoundScoreCache
 } from 'common/utils/rounds';
 import { upsertScore } from 'common/utils/score';
 import { blue } from 'common/colors';
@@ -112,28 +111,23 @@ const HoleScore = props => {
   const setScore = (item) => {
     if( item.key == gross ) return; // no change in score, so do nothing
     const { key:newGross } = item;
-    const newScore = upsertScore(score, newGross);
+    let newScore = upsertScore(score, newGross);
+    //console.log('newScore', newScore);
 
     const { loading, error, data } = postScore({
       variables: {
         rkey: rkey,
         score: newScore,
       },
+/*
       optimisticResponse: {
         __typename: 'Mutation',
         postScore: {
-          ...newScore,
           __typename: 'Score',
+          ...newScore,
         }
       },
-      update: (cache, { data: { postScore } }) => {
-        //console.log('postScore response', newScore, postScore);
-        updateRoundScoreCache({
-          cache,
-          rkey,
-          score: postScore,
-        });
-      },
+*/
     });
 
   };

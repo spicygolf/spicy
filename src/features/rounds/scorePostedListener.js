@@ -2,7 +2,6 @@ import React from 'react';
 import { useApolloClient, useSubscription } from '@apollo/client';
 
 import { SCORE_POSTED_SUBSCRIPTION } from 'features/rounds/graphql';
-import { updateRoundScoreCache } from 'common/utils/rounds';
 
 
 
@@ -21,14 +20,7 @@ const ScorePostedListener = props => {
   if( error ) console.log('Error in ScorePostedListener', error);
 
   if( data && data.scorePosted ) {
-    const { cache } = client;
-    //console.log('cache data', cache.data);
-    const score = data.scorePosted.scores[0];
-    updateRoundScoreCache({
-      cache,
-      rkey,
-      score,
-    });
+      //console.log('data', data);
   }
 
   // non-display component

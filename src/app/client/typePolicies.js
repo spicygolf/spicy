@@ -1,19 +1,8 @@
+import { cloneDeep, findIndex } from 'lodash';
 
 
 
 const typePolicies = {
-  /*
-
-      To address this problem (which is not a bug in Apollo Client), define a custom merge function for the Game.rounds field, so InMemoryCache can safely merge these objects:
-
-        existing: [{"__ref":"95347021"}]
-        incoming: []
-
-      For more information about these options, please refer to the documentation:
-
-        * Ensuring entity objects have IDs: https://go.apollo.dev/c/generating-unique-identifiers
-        * Defining custom merge functions: https://go.apollo.dev/c/merging-non-normalized-objects
-  */
   Query: {
     fields: {
       getFavoritePlayersForPlayer: {
@@ -31,10 +20,32 @@ const typePolicies = {
       },
     },
   },
+  Round: {
+    fields: {
+      scores: {
+        merge: (existing = [], incoming) => {
+          if( existing.length == 0 ) return incoming;
+          let newScores = [];
+          existing.map(h => {
+            newScores.push(cloneDeep(h))
+          });
+          incoming.map(h => {
+            const i = findIndex(newScores, {hole: h.hole});
+            newScores[i].values = h.values;
+          });
+          //console.log('Round.scores merge', existing, incoming, newScores);
+          return newScores;
+        },
+      },
+    },
+  },
   GameHole: {
     keyFields: false,
   },
   GameScope: {
+    keyFields: false,
+  },
+  Handicap: {
     keyFields: false,
   },
   Hole: {
@@ -49,6 +60,9 @@ const typePolicies = {
   OptionSpec: {
     keyFields: false,
   },
+  Posting: {
+    keyFields: false,
+  },
   Rating: {
     keyFields: false,
   },
@@ -58,54 +72,9 @@ const typePolicies = {
   ScoringSpec: {
     keyFields: false,
   },
-  Handicap: {
-    keyFields: false,
-  },
-  Posting: {
+  Value: {
     keyFields: false,
   },
 };
 
 export default typePolicies;
-
-/*
-    typePolicies: {
-      Game: {
-        keyFields: object => object._key,
-      },
-      Teams: {
-        keyFields: (object, context) => {
-          console.log('object', object, 'context', context);
-          return;
-        },
-        fields: {
-
-        },
-      },
-      TeamHole: {
-        fields: {
-          hole: {
-            keyArgs: ['hole'],
-          }
-        },
-      },
-      Round: {
-        keyFields: object => object._key,
-      },
-      Player: {
-        keyFields: object => object._key,
-      },
-      Club: {
-        keyFields: object => object._key,
-      },
-      Tee: {
-        keyFields: object => object._key,
-      },
-      Course: {
-        keyFields: object => object._key,
-      },
-      GameSpec: {
-        keyFields: object => object._key,
-      },
-    },
-  */
