@@ -12,7 +12,7 @@ import { format } from 'common/utils/score';
 
 const TeamTotals = props => {
 
-  const { team: teamNum, scoring, currentHole, type } = props;
+  const { team: teamNum, scoring, currentHole, type, betterPoints } = props;
 
   const hole = find(scoring.holes, { hole: currentHole });
   if( !hole ) return null;
@@ -28,10 +28,12 @@ const TeamTotals = props => {
   if( otherTeams && otherTeams.length == 1 ) {
     otherTeam = otherTeams[0];
     netPoints = team.points - otherTeam.points;
+    if( betterPoints === 'lower' ) netPoints *= -1;
     if( netPoints < 0 ) netPoints = 0;
   }
   const netTotal = netPoints * hole.holeMultiplier;
-  const diff = otherTeam ? team.runningTotal - otherTeam.runningTotal : null;
+  let diff = otherTeam ? team.runningTotal - otherTeam.runningTotal : null;
+  if( betterPoints === 'lower' ) diff *= -1;
   const points = (netPoints == 0)
     ? '-'
     : netPoints;

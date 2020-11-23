@@ -66,6 +66,7 @@ export const get_net_score = (gross, score) => {
 }
 
 export const get_pops = score => {
+  //console.log('score', score);
   return (score && score.pops) ? parseFloat(score.pops) : 0;
 };
 

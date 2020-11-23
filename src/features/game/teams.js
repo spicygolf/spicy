@@ -65,6 +65,7 @@ const Teams = ({teams, scoring, currentHole }) => {
           scoring={scoring}
           currentHole={currentHole}
           type={activeGameSpec.type}
+          betterPoints={activeGameSpec.better}
         />
       </Card>
     );

@@ -52,7 +52,6 @@ const TeamJunk = props => {
   if( !team ) return null;
 
   const sorted_junk = orderBy(team.junk, ['seq'], ['asc']);
-  //console.log('sorted_junk', sorted_junk);
   if( sorted_junk.length == 0 ) return null;
 
   return (

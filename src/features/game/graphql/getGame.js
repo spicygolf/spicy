@@ -103,6 +103,7 @@ export const GET_GAME_QUERY = gql`
         name
         disp
         type
+        better
         min_players
         max_players
         location_type
@@ -120,6 +121,8 @@ export const GET_GAME_QUERY = gql`
               scope
               calculation
               better
+              type
+              based_on
             }
         }
         junk {

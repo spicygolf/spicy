@@ -14,17 +14,13 @@ import {
   get_net_score,
 } from 'common/utils/rounds';
 import { upsertScore } from 'common/utils/score';
+import { shapeStyles } from 'common/utils/styles';
 import { blue } from 'common/colors';
 import { POST_SCORE_MUTATION } from 'features/rounds/graphql';
-import { GameContext } from 'features/game/gameContext';
-
-const circle_blk = require('../../../assets/img/circle_blk.png');
-const circle_wht = require('../../../assets/img/circle_wht.png');
-const square_blk = require('../../../assets/img/square_blk.png');
-const square_wht = require('../../../assets/img/square_wht.png');
 
 
 
+const scoreSize = 40;
 
 const HoleScore = props => {
 
@@ -64,18 +60,33 @@ const HoleScore = props => {
     //console.log('item', item);
     let score_styles = [styles.score_option];
     let hole_score_styles = [styles.hole_score_text];
-    let src = null;
+    let size = scoreSize - 2;
+    let color = 'transparent';
+    let outerShape = shapeStyles(size, color).none;
+    let innerShape = shapeStyles(size-5, color).none;
 
     if( item.selected ) {
       score_styles.push(styles.score_option_selected);
       hole_score_styles.push(styles.hole_score_text_selected);
-      if( item.toPar == -1 ) src = circle_wht;
-      if( item.toPar == 1 ) src = square_wht;
+      color = 'white';
     } else {
       score_styles.push(styles.score_option_not_selected);
       hole_score_styles.push(styles.hole_score_text_not_selected);
-      if( item.toPar == -1 ) src = circle_blk;
-      if( item.toPar == 1 ) src = square_blk;
+      color = 'black';
+    }
+    if( item.toPar == -2 ) {  // eagle
+      innerShape = shapeStyles(size-5, color).circle;
+      outerShape = shapeStyles(size,   color).circle;
+    }
+    if( item.toPar == -1 ) {  // birdie
+      outerShape = shapeStyles(size,   color).circle;
+    }
+    if( item.toPar ==  1 ) {  // bogey
+      outerShape = shapeStyles(size,   color).square;
+    }
+    if( item.toPar ==  2 ) {  // double bogey
+      innerShape = shapeStyles(size-5, color).square;
+      outerShape = shapeStyles(size,   color).square;
     }
 
     let content = (
@@ -97,12 +108,11 @@ const HoleScore = props => {
         onLongPress={() => setScore(item)}
       >
         <View style={score_styles}>
-          <ImageBackground
-            source={src}
-            style={styles.imgBg}
-          >
+          <View style={outerShape}>
+            <View style={innerShape}>
               { content }
-          </ImageBackground>
+            </View>
+          </View>
         </View>
       </TouchableHighlight>
     )
@@ -171,8 +181,8 @@ export default HoleScore;
 
 const styles = StyleSheet.create({
   score_option: {
-    width: 40,
-    height: 40,
+    width: scoreSize,
+    height: scoreSize,
     padding: 1,
   },
   score_option_selected: {
@@ -197,10 +207,4 @@ const styles = StyleSheet.create({
   pop_text: {
     fontSize: 14,
   },
-  imgBg: {
-    width: 38,
-    height: 38,
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
 });

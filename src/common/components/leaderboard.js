@@ -13,6 +13,8 @@ import { find, last, orderBy } from 'lodash';
 import { GameContext } from 'features/game/gameContext';
 import { playerListIndividual, playerListWithTeams } from 'common/utils/game';
 import { format } from 'common/utils/score';
+import { shapeStyles } from 'common/utils/styles';
+
 
 
 const Leaderboard = props => {
@@ -116,16 +118,16 @@ const Leaderboard = props => {
       }
 
       const birdieShape = ( sv && s.score[scoreType].toPar < 0 )
-        ? [ shapeStyles(rowHeight).circle ]
+        ? [ shapeStyles(rowHeight, 'black').circle ]
         : (scoreType == 'match' || scoreType == 'points' )
-          ? [ shapeStyles(rowHeight).match ]
-          : [ shapeStyles(rowHeight).nocircle ];
+          ? [ shapeStyles(rowHeight, 'black').match ]
+          : [ shapeStyles(rowHeight, 'black').none ];
 
       const eagleShape = ( sv && s.score[scoreType].toPar < -1 )
         ? [ shapeStyles(rowHeight-5).circle ]
         : (scoreType == 'match' || scoreType == 'points' )
-          ? [ shapeStyles(rowHeight-5).match ]
-          : [ shapeStyles(rowHeight-5).nocircle ];
+          ? [ shapeStyles(rowHeight-5, 'black').match ]
+          : [ shapeStyles(rowHeight-5, 'black').none ];
 
       const txt = (
         <Text style={styles.scoreCell}>
@@ -165,12 +167,12 @@ const Leaderboard = props => {
 
   const TotalRow = ({section}) => {
     const birdieShape = (scoreType == 'match' || scoreType == 'points' )
-      ? [ shapeStyles(rowHeight).match ]
-      : [ shapeStyles(rowHeight).nocircle ];
+      ? [ shapeStyles(rowHeight, 'black').match ]
+      : [ shapeStyles(rowHeight, 'black').none ];
 
     const eagleShape = (scoreType == 'match' || scoreType == 'points' )
-      ? [ shapeStyles(rowHeight-5).match ]
-      : [ shapeStyles(rowHeight-5).nocircle ];
+      ? [ shapeStyles(rowHeight-5, 'black').match ]
+      : [ shapeStyles(rowHeight-5, 'black').none ];
 
     const totalCells = orderedPlayerList.map(p => (
       <View key={`totalcell_${section.side}_${p.pkey}`} style={styles.scorePopContainer}>
@@ -285,35 +287,6 @@ export default Leaderboard;
 const headerHeight = 90;
 const rowHeight = 26;
 
-const shapeStyles = r => {
-  return StyleSheet.create({
-    circle: {
-      width: r,
-      height: r,
-      borderRadius: r / 2,
-      backgroundColor: 'transparent',
-      borderColor: 'black',
-      borderWidth: 1,
-      paddingRight: 0,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    nocircle: {
-      width: r,
-      height: r,
-      backgroundColor: 'transparent',
-      paddingRight: 0,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    match: {
-      height: r,
-      backgroundColor: 'transparent',
-      paddingRight: 2,
-      justifyContent: 'center',
-    },
-  });
-};
 
 var styles = StyleSheet.create({
   container: {
