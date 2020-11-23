@@ -24,6 +24,8 @@ describe('common/utils/score tests', () => {
     const teams = [team, otherTeam];
     const newTeam = {...team, holeTotal: 0, points: 45,};
     expect(vegasTeamScore({team, teams, game, s})).toMatchObject(newTeam);
+    const newOtherTeam = {...otherTeam, points: 45,};
+    expect(vegasTeamScore({team: otherTeam, teams, game, s})).toMatchObject(newOtherTeam);
   });
 
   test('vegasTeamScore - 1 pt', () => {
@@ -43,6 +45,17 @@ describe('common/utils/score tests', () => {
     const otherTeam = makeTeam( 2, makePlayer(3, 4, 4, 0, []), makePlayer(4, 6, 4, 1, []) );
     const teams = [team, otherTeam];
     const newTeam = {...team, points: 34,};
+    expect(vegasTeamScore({team, teams, game, s})).toMatchObject(newTeam);
+    const newOtherTeam = {...otherTeam, points: 54,};
+    expect(vegasTeamScore({team: otherTeam, teams, game, s})).toMatchObject(newOtherTeam);
+  });
+
+  test('vegasTeamScore - two birdies adds 10', () => {
+    const game = makeVegasOptionsGame(true, true, true);
+    const team = makeTeam( 1, makePlayer(1, 3, 4, 0, [{name: 'birdie'}]), makePlayer(2, 3, 4, 0, [{name: 'birdie'}]) );
+    const otherTeam = makeTeam( 2, makePlayer(3, 4, 4, 0, []), makePlayer(4, 4, 4, 0, []) );
+    const teams = [team, otherTeam];
+    const newTeam = {...team, points: 33,};
     expect(vegasTeamScore({team, teams, game, s})).toMatchObject(newTeam);
     const newOtherTeam = {...otherTeam, points: 54,};
     expect(vegasTeamScore({team: otherTeam, teams, game, s})).toMatchObject(newOtherTeam);
