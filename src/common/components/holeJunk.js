@@ -9,7 +9,7 @@ import {
   Icon,
 } from 'react-native-elements';
 import { useMutation } from '@apollo/client';
-import { findIndex, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
 import { gql } from '@apollo/client';
 
 import { GameContext } from 'features/game/gameContext';
@@ -24,7 +24,7 @@ import {
 } from 'common/utils/score';
 import {
   getJunk,
-  getNewGameForUpdate,
+  omitTypename,
   setTeamJunk,
 } from 'common/utils/game';
 
@@ -32,10 +32,11 @@ import {
 
 const HoleJunk = props => {
 
-  const UPDATE_GAME_MUTATION = gql`
-    mutation UpdateGame($gkey: String!, $game: GameInput!) {
-      updateGame(gkey: $gkey, game: $game) {
-        holes {
+  const UPDATE_GAME_HOLES_MUTATION = gql`
+    mutation UpdateGameHoles($gkey: String!, $holes: [GameHoleInput]!) {
+      updateGameHoles(gkey: $gkey, holes: $holes) {
+        _key
+        holes  {
           hole
           teams {
             team
@@ -45,6 +46,11 @@ const HoleJunk = props => {
               player
               value
             }
+          }
+          multipliers {
+            name
+            team
+            first_hole
           }
         }
       }
@@ -62,33 +68,39 @@ const HoleJunk = props => {
   const sorted_junk = sortBy(alljunk, ['seq']);
   if( sorted_junk.length == 0 ) return null;
 
-  const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
+  const [ updateGameHoles ] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
 
   const setJunk = async (junk, newValue) => {
+    // only set in DB if junk is based on user input
+    if( !junk || !junk.based_on || junk.based_on != 'user') return;
+    if( !game || !game.holes ) return;
 
-    let newGame = getNewGameForUpdate(game);
-    if( !newGame || !newGame.holes ) return;
-
-    const gHoleIndex = findIndex(newGame.holes, {hole: hole.hole});
-    if( gHoleIndex < 0 ) return;
-    let newHole = Object.assign({}, newGame.holes[gHoleIndex]);
-
-    const newTeams = newHole.teams.map(t => {
-      return setTeamJunk(t, junk, newValue.toString(), pkey);
+    let newHoles = game.holes.map(h => {
+      let newHole = {...h,};
+      if( h.hole == hole.hole ) {
+        let newTeams = newHole.teams.map(t => {
+          return setTeamJunk({...t,}, junk, newValue.toString(), pkey);
+        });
+        newHole.teams = newTeams;
+      }
+      return newHole;
     });
-    newHole = {
-      ...newHole,
-      teams: newTeams,
-    };
+    const newHolesWithoutTypes = omitTypename(newHoles);
 
-    newGame.holes[gHoleIndex] = newHole;
-
-    const { loading, error, data } = updateGame({
+    const { loading, error, data } = await updateGameHoles({
       variables: {
         gkey: gkey,
-        game: newGame,
+        holes: newHolesWithoutTypes,
       },
+      optimisticResponse: {
+        __typename: 'Mutation',
+        updateGameHoles: {
+          __typename: 'Game',
+          _key: gkey,
+          holes: newHoles,
+        },
+      }
     });
 
     if( error ) console.log('Error updating game - holeJunk', error);
@@ -156,10 +168,8 @@ const HoleJunk = props => {
         type={type}
         buttonStyle={styles.button}
         titleStyle={styles.buttonTitle}
-        onPress={() => {
-          // only set in DB if junk is based on user input
-          if( junk.based_on == 'user') setJunk(junk, !selected);
-        }}
+        onPress={() => setJunk(junk, !selected)}
+        onLongPress={() => setJunk(junk, !selected)}
       />
     );
 

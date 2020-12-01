@@ -112,25 +112,25 @@ export const getNewGameForUpdate = game => {
 
 };
 
-export const stripKey = (data, toStrip) => {
-  let result = {};
-  for( const key in data ) {
-    if( data.hasOwnProperty(key) ) {
-      let value = data[key];
-      if( Array.isArray(value) ) {
-        result[key] = value.map(v => stripKey(v, toStrip));
-      } else if( typeof value === 'object' ) {
-        value = stripKey(value, toStrip);
-        if( key !== toStrip ) {
-          result[key] = value;
-        }
-      } else {
-        result[key] = value;
-      }
-    }
+// Used to remove typename property from objects
+// https://github.com/apollographql/apollo-feature-requests/issues/6#issuecomment-659596763
+const isFile = value =>
+  (typeof File !== 'undefined' && value instanceof File) || (typeof Blob !== 'undefined' && value instanceof Blob);
+
+// From https://gist.github.com/Billy-/d94b65998501736bfe6521eadc1ab538
+export const omitDeep = (value, key) => {
+  if (Array.isArray(value)) {
+    return value.map(i => omitDeep(i, key));
+  } else if (typeof value === 'object' && value !== null && !isFile(value)) {
+    return Object.keys(value).reduce((newObject, k) => {
+      if (k === key) return newObject;
+      return Object.assign({ [k]: omitDeep(value[k], key) }, newObject);
+    }, {});
   }
-  return cloneDeep(result);
+  return value;
 };
+
+export const omitTypename = value => omitDeep(value, '__typename');
 
 
 export const getAllGamespecOptions = game => {
@@ -219,6 +219,7 @@ export const setTeamJunk = (t, junk, newValue, pkey) => {
     //console.log('team junk', t.junk);
     if( newValue ) {
       newJunk.push({
+        __typename: 'GameJunk',
         name: junk.name,
         player: pkey,
         value: newValue,
