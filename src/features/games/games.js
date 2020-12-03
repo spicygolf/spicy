@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -10,8 +10,8 @@ import {
   Icon,
   ListItem
 } from 'react-native-elements';
-import { useNavigation } from '@react-navigation/native';
-import { useQuery } from '@apollo/client';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useLazyQuery } from '@apollo/client';
 import moment from 'moment';
 import { filter, reverse, sortBy } from 'lodash';
 
@@ -26,6 +26,8 @@ const Games = props => {
 
   const navigation = useNavigation();
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
+  //console.log('currentPlayerKey', currentPlayerKey);
+  const [ isFetching, setIsFetching ] = useState(false);
 
   const newGamePressed = () => {
     navigation.navigate('NewGameList');
@@ -84,13 +86,29 @@ const Games = props => {
     );
   }
 
-  //console.log('currentPlayerKey', currentPlayerKey);
-  const { loading, error, data } = useQuery(ACTIVE_GAMES_FOR_PLAYER_QUERY,  {
-    variables: {
-      pkey: currentPlayerKey,
-    },
-  });
-  if( loading ) return (<ActivityIndicator />);
+  useFocusEffect(
+    React.useCallback(() => {
+      //console.log('Games List focused');
+      fetchGameList();
+    }, [])
+  );
+
+  const fetchGameList = () => {
+    //console.log('fetchGameList');
+    setIsFetching(true);
+    getGameList();
+    setIsFetching(false);
+  }
+
+  const [ getGameList, { error, data }] = useLazyQuery(
+    ACTIVE_GAMES_FOR_PLAYER_QUERY,
+    {
+      variables: {
+        pkey: currentPlayerKey,
+      },
+      fetchPolicy: 'cache-and-network',
+    }
+  );
   if (error && error.message != 'Network request failed') {
     return (<Text>Error! ${error.message}</Text>);
   }
@@ -120,6 +138,8 @@ const Games = props => {
       <FlatList
         data={sorted_games}
         renderItem={renderItem}
+        onRefresh={() => fetchGameList()}
+        refreshing={isFetching}
         keyExtractor={item => item._key}
       />
     </View>
