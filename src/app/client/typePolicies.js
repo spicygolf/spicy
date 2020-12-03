@@ -31,7 +31,10 @@ const typePolicies = {
           });
           incoming.map(h => {
             const i = findIndex(newScores, {hole: h.hole});
-            newScores[i].values = h.values;
+            newScores[i] = {
+              ...newScores[i],
+              ...h
+            };
           });
           //console.log('Round.scores merge', existing, incoming, newScores);
           return newScores;
