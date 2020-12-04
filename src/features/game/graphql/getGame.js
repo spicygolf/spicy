@@ -51,7 +51,9 @@ export const GET_GAME_QUERY = gql`
           differential
           date_validated
           exceptional
-          posted_by_pkey
+          posted_by
+          success
+          messages
         }
         player {
           _key

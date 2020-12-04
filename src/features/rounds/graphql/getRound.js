@@ -25,7 +25,9 @@ export const GET_ROUND_QUERY = gql`
         differential
         date_validated
         exceptional
-        posted_by_pkey
+        posted_by
+        success
+        messages
       }
       player {
         _key

@@ -20,7 +20,6 @@ import {
   get_hole,
   get_round_for_player,
   get_score_value,
-  updateRoundPostedCache,
 } from 'common/utils/rounds';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { POST_ROUND_MUTATION } from 'features/rounds/graphql';
@@ -74,15 +73,7 @@ const PostScore = props => {
     const { loading, error, data } = await postRoundToHandicapService({
       variables: {
         rkey,
-        posted_by_pkey: currentPlayer.name,
-      },
-      update: (cache, { data: { postRoundToHandicapService } }) => {
-        // update cache with new posting
-        updateRoundPostedCache({
-          cache,
-          rkey,
-          posting: postRoundToHandicapService.posting,
-        });
+        posted_by: currentPlayer.name,
       },
     });
 
@@ -109,15 +100,23 @@ const PostScore = props => {
           />
         );
       }
-    } else {
-      const { date_validated, adjusted_gross_score, posted_by_pkey } = round.posting;
+    } else if( round.posting && round.posting.success == true ) {
+      const { date_validated, adjusted_gross_score, posted_by } = round.posting;
       const dt = moment(date_validated).format('lll');
       ret = (
         <View>
           <Text style={styles.postingTxt}>posted: {adjusted_gross_score}</Text>
           <Text style={styles.postingTxt}>at: {dt}</Text>
-          <Text style={styles.postingTxt}>by: {posted_by_pkey}</Text>
+          <Text style={styles.postingTxt}>by: {posted_by}</Text>
         </View>
+      );
+    } else {
+      // posting has failed
+      const msgs = round.posting.messages.map(message => (
+          <Text style={[styles.postingTxt, styles.postingError]}>{message}</Text>
+      ));
+      ret = (
+        <View>{ msgs }</View>
       );
     }
     return ret;
@@ -145,10 +144,10 @@ const PostScore = props => {
         <Text style={styles.hdr}>Totals</Text>
         <Text style={styles.hdr}></Text>
         <View style={styles.hdr}>
-          <Text style={styles.gross}>{player.gross}</Text>
+          <Text style={styles.grossTxt}>{player.gross}</Text>
         </View>
         <View style={styles.hdr}>
-          <Text style={styles.gross}>{adjustedTotal}</Text>
+          <Text style={styles.grossTxt}>{adjustedTotal}</Text>
         </View>
       </View>
     );
@@ -189,13 +188,13 @@ const PostScore = props => {
   return (
     <Card containerStyle={styles.container}>
       <View style={styles.playerView}>
-        <View>
+        <View style={{flex: 3,}}>
           <Text style={styles.playerName}>{player.name}</Text>
           <Text style={styles.courseHandicap}>
             Course Handicap: {player.courseHandicap}
           </Text>
         </View>
-        <View>
+        <View style={{flex: 4, alignItems: 'flex-end',}}>
           { postRoundButton() }
         </View>
       </View>
@@ -246,6 +245,10 @@ const styles = StyleSheet.create({
   postingTxt: {
     fontSize: 10,
   },
+  postingError: {
+    color: 'red',
+    fontWeight: 'bold',
+  },
   holeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -256,6 +259,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     color: '#333',
     backgroundColor: '#eee',
+    fontSize: 12,
   },
   hole: {
     flex: 1,
@@ -265,6 +269,7 @@ const styles = StyleSheet.create({
   holeTxt: {
     alignSelf: 'center',
     color: '#666',
+    fontSize: 12,
   },
   gross: {
     flex: 1,
@@ -273,6 +278,7 @@ const styles = StyleSheet.create({
   },
   grossTxt: {
     alignSelf: 'center',
+    fontSize: 12,
   },
   hdcp: {
     flex: 1,
@@ -282,13 +288,14 @@ const styles = StyleSheet.create({
   hdcpTxt: {
     alignSelf: 'center',
     color: '#666',
+    fontSize: 12,
   },
   adjusted: {
     flex: 1,
     justifyContent: 'center',
   },
   adjustedTxt: {
-    height: 22,
+    height: 21,
     color: '#000',
     borderColor: '#fff',
     borderWidth: 1,
@@ -296,6 +303,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     textAlign: 'right',
     alignSelf: 'center',
+    fontSize: 12,
   },
   isAdjusted: {
     borderColor: '#111',
