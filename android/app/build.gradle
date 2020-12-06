@@ -150,8 +150,8 @@ android {
         applicationId "golf.spicy"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 22
-        versionName "0.2.8"
+        versionCode 23
+        versionName "0.2.9"
 
         // uncomment for emulator, comment for Play Store
         //ndk { abiFilter "x86" }
