@@ -80,18 +80,20 @@ export default PostScores;
 
 const styles = StyleSheet.create({
   container: {
-    height: '100%',
-  },
-  gameNav: {
-  },
-  postScore: {
     flex: 1,
   },
+  gameNav: {
+    flex: 1,
+  },
+  postScore: {
+    flex: 9,
+  },
   buttonRow: {
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 15,
-    paddingVertical: 15,
+    paddingTop: 15,
   },
   button: {
     width: 150,

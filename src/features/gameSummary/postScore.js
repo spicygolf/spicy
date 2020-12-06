@@ -186,7 +186,7 @@ const PostScore = props => {
   );
 
   return (
-    <Card containerStyle={styles.container}>
+    <Card containerStyle={styles.container} wrapperStyle={styles.wrapper}>
       <View style={styles.playerView}>
         <View style={{flex: 3,}}>
           <Text style={styles.playerName}>{player.name}</Text>
@@ -198,16 +198,16 @@ const PostScore = props => {
           { postRoundButton() }
         </View>
       </View>
+      { header( )}
       <View style={styles.flatListView}>
-      { header() }
-      <FlatList
-        contentContainerStyle={styles.flatList}
-        data={posting}
-        renderItem={renderHole}
-        keyExtractor={item => item.hole.hole}
-      />
-      { footer() }
+        <FlatList
+          contentContainerStyle={styles.flatList}
+          data={posting}
+          renderItem={renderHole}
+          keyExtractor={item => item.hole.hole}
+        />
       </View>
+      { footer() }
     </Card>
   );
 };
@@ -217,6 +217,10 @@ export default PostScore;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    marginTop: 0,
+  },
+  wrapper: {
     flex: 1,
   },
   playerView: {
@@ -231,10 +235,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   flatListView: {
-    height: '92%'
+    flex: 1,
   },
   flatList: {
-    paddingBottom: 10,
   },
   playerName: {
     fontWeight: 'bold',
@@ -297,7 +300,7 @@ const styles = StyleSheet.create({
   adjustedTxt: {
     height: 21,
     color: '#000',
-    borderColor: '#fff',
+    borderColor: 'transparent',
     borderWidth: 1,
     paddingHorizontal: 15,
     paddingVertical: 2,
