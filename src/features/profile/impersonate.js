@@ -35,7 +35,7 @@ const Impersonate = props => {
       />
       <Button
         title='Impersonate'
-        style={styles.button}
+        buttonStyle={styles.button}
         onPress={() => impersonateUser()}
       />
     </Card>
@@ -60,6 +60,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    margin: 20
+    margin: 10,
   },
 });

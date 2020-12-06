@@ -57,15 +57,6 @@ const ProfileHome = props => {
     console.log('cache', client.cache.data.data);
   }
 
-  const clear_cache_button = (
-    <Button
-      style={styles.logout_button}
-      title='Clear Cache'
-      testID='clear_cache_button'
-      onPress={() => _clearCache()}
-    />
-  );
-
   const version = DeviceInfo.getVersion();
 
   const impersonate = (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin' ) ? (<Impersonate />) : null;
@@ -81,9 +72,14 @@ const ProfileHome = props => {
           <Text>Current Index:</Text>
           <Text>{index}</Text>
         </View>
-        { clear_cache_button }
         <Button
-          style={styles.logout_button}
+          buttonStyle={styles.button}
+          title='Clear Local Data'
+          testID='clear_cache_button'
+          onPress={() => _clearCache()}
+        />
+        <Button
+          buttonStyle={styles.button}
           title='Logout'
           testID='logout_button'
           onPress={() => _logoutPressed()}
@@ -108,8 +104,8 @@ const styles = StyleSheet.create({
   button_view: {
     marginTop: 40,
   },
-  logout_button: {
-    margin: 20
+  button: {
+    margin: 10,
   },
   app_info: {
     marginHorizontal: 15,
