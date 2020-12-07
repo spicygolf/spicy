@@ -17,7 +17,7 @@ import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import ScoringWrapper from 'common/utils/ScoringWrapper';
 import { getNewGameForUpdate } from 'common/utils/game';
-import { getHolesToUpdate } from 'common/utils/teams';
+import { getHolesToUpdate } from 'common/utils/game';
 import { getMultipliersFromGamespecs } from 'common/utils/score';
 import { red } from 'common/colors';
 

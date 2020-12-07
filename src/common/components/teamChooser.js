@@ -15,7 +15,7 @@ import { GET_GAME_QUERY } from 'features/game/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import { getNewGameForUpdate } from 'common/utils/game';
-import { getHolesToUpdate } from 'common/utils/teams';
+import { getHolesToUpdate } from 'common/utils/game';
 import { blue } from 'common/colors';
 
 
