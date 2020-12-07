@@ -80,7 +80,7 @@ const App = props => {
 };
 
 export default App;
-
+/*
 // temporary for RN #3965
 import { YellowBox } from 'react-native';
 YellowBox.ignoreWarnings([
@@ -90,3 +90,4 @@ YellowBox.ignoreWarnings([
   'Missing cache result fields',
   'RCTBridge',
 ]);
+*/
