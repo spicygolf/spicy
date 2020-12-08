@@ -1,5 +1,7 @@
 import React, { useContext, useState } from 'react';
 import {
+  KeyboardAvoidingView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -27,18 +29,23 @@ const Impersonate = props => {
   };
 
   return (
-    <Card title='Admin'>
-      <Text style={styles.field_label}>Player to Impersonate:</Text>
-      <TextInput
-        style={styles.field_input}
-        onChangeText={text => setIPlayer(text)}
-      />
-      <Button
-        title='Impersonate'
-        buttonStyle={styles.button}
-        onPress={() => impersonateUser()}
-      />
-    </Card>
+    <KeyboardAvoidingView>
+      <ScrollView keyboardShouldPersistTaps='handled'>
+        <Card>
+          <Card.Title>Admin</Card.Title>
+          <Text style={styles.field_label}>Player to Impersonate:</Text>
+          <TextInput
+            style={styles.field_input}
+            onChangeText={text => setIPlayer(text)}
+          />
+          <Button
+            title='Impersonate'
+            buttonStyle={styles.button}
+            onPress={() => impersonateUser()}
+          />
+        </Card>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 

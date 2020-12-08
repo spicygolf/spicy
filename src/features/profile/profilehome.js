@@ -2,6 +2,8 @@
 
 import React, { useContext } from 'react';
 import {
+  KeyboardAvoidingView,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -12,7 +14,6 @@ import {
   Button
 } from 'react-native-elements';
 import DeviceInfo from 'react-native-device-info';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { red } from 'common/colors';
 import { logout } from 'common/utils/account';
@@ -62,34 +63,36 @@ const ProfileHome = props => {
   const impersonate = (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin' ) ? (<Impersonate />) : null;
 
   return (
-    <KeyboardAwareScrollView>
-      <Card>
-        <View style={styles.field_view}>
-          <Text>Name:</Text>
-          <Text>{name}</Text>
-        </View>
-        <View style={styles.field_view}>
-          <Text>Current Index:</Text>
-          <Text>{index}</Text>
-        </View>
-        <Button
-          buttonStyle={styles.button}
-          title='Clear Local Data'
-          testID='clear_cache_button'
-          onPress={() => _clearCache()}
-        />
-        <Button
-          buttonStyle={styles.button}
-          title='Logout'
-          testID='logout_button'
-          onPress={() => _logoutPressed()}
-        />
-      </Card>
-      { impersonate }
+    <KeyboardAvoidingView style={{flex: 1,}}>
+      <ScrollView keyboardShouldPersistTaps='handled'>
+        <Card>
+          <View style={styles.field_view}>
+            <Text>Name:</Text>
+            <Text>{name}</Text>
+          </View>
+          <View style={styles.field_view}>
+            <Text>Current Index:</Text>
+            <Text>{index}</Text>
+          </View>
+          <Button
+            buttonStyle={styles.button}
+            title='Clear Local Data'
+            testID='clear_cache_button'
+            onPress={() => _clearCache()}
+          />
+          <Button
+            buttonStyle={styles.button}
+            title='Logout'
+            testID='logout_button'
+            onPress={() => _logoutPressed()}
+          />
+        </Card>
+        { impersonate }
+      </ScrollView>
       <View style={styles.app_info}>
-        <Text>v{version}</Text>
-      </View>
-    </KeyboardAwareScrollView>
+          <Text>v{version}</Text>
+        </View>
+    </KeyboardAvoidingView>
   );
 
 };

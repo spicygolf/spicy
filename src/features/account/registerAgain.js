@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import {
+  KeyboardAvoidingView,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -10,7 +12,6 @@ import {
   Button,
   Card,
 } from 'react-native-elements';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { validateName, registerPlayer } from 'common/utils/account';
 import { green } from 'common/colors';
@@ -58,63 +59,65 @@ const RegisterAgain = props => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAwareScrollView
-        keyboardShouldPersistTaps='handled'
-      >
-        <Card title='Registration Error'>
-          <Text style={styles.sorry}>
-            We encountered an error during registration.  How embarrassing for us.
-            Can you please fill out the following fields again so we can try to fix this?
-          </Text>
-          <View style={styles.field_container}>
-            <Text style={styles.field_label}>Email</Text>
-            <Text style={styles.sorry}>{fbUser.email}</Text>
-          </View>
-          <View style={styles.field_container}>
-            <Text style={styles.field_label}>Full Name *</Text>
-            <TextInput
-              style={[styles.field_input, nValid]}
-              onChangeText={text => {
-                setRegistration({
-                  ...registration,
-                  name: text,
-                });
-                validate('name', text);
+      <KeyboardAvoidingView>
+        <ScrollView keyboardShouldPersistTaps='handled'>
+          <Card>
+            <Card.Title>Registration Error</Card.Title>
+            <Card.Divider />
+            <Text style={styles.sorry}>
+              We encountered an error during registration.  How embarrassing for us.
+              Can you please fill out the following fields again so we can try to fix this?
+            </Text>
+            <View style={styles.field_container}>
+              <Text style={styles.field_label}>Email</Text>
+              <Text style={styles.sorry}>{fbUser.email}</Text>
+            </View>
+            <View style={styles.field_container}>
+              <Text style={styles.field_label}>Full Name *</Text>
+              <TextInput
+                style={[styles.field_input, nValid]}
+                onChangeText={text => {
+                  setRegistration({
+                    ...registration,
+                    name: text,
+                  });
+                  validate('name', text);
+                }}
+                autoCapitalize='words'
+                value={registration.name}
+              />
+            </View>
+            <View style={styles.field_container}>
+              <Text style={styles.field_label}>Short/Nickname *</Text>
+              <TextInput
+                style={[styles.field_input, sValid]}
+                onChangeText={text => {
+                  setRegistration({
+                    ...registration,
+                    short: text,
+                  });
+                  validate('short', text);
+                }}
+                autoCapitalize='words'
+                value={registration.short}
+              />
+            </View>
+          </Card>
+          <View style={styles.button_row}>
+            <Button
+              buttonStyle={styles.next}
+              title='Fix Registration'
+              type={(nameValid && shortValid) ? 'solid' : 'outline'}
+              disabled={!(nameValid && shortValid)}
+              onPress={() => {
+                register();
               }}
-              autoCapitalize='words'
-              value={registration.name}
+              accessibilityLabel='Fix Registration'
+              testID='register_again_button'
             />
           </View>
-          <View style={styles.field_container}>
-            <Text style={styles.field_label}>Short/Nickname *</Text>
-            <TextInput
-              style={[styles.field_input, sValid]}
-              onChangeText={text => {
-                setRegistration({
-                  ...registration,
-                  short: text,
-                });
-                validate('short', text);
-              }}
-              autoCapitalize='words'
-              value={registration.short}
-            />
-          </View>
-        </Card>
-        <View style={styles.button_row}>
-          <Button
-            buttonStyle={styles.next}
-            title='Fix Registration'
-            type={(nameValid && shortValid) ? 'solid' : 'outline'}
-            disabled={!(nameValid && shortValid)}
-            onPress={() => {
-              register();
-            }}
-            accessibilityLabel='Fix Registration'
-            testID='register_again_button'
-          />
-        </View>
-      </KeyboardAwareScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

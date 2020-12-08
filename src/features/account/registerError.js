@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import {
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import {
@@ -12,7 +11,6 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import BackToLogin from 'features/account/backToLogin';
-import { RegisterContext } from 'features/account/registerContext';
 
 
 
@@ -30,7 +28,9 @@ const RegisterError = props => {
   return (
     <View style={styles.container}>
       <View>
-        <Card title='Register - Error'>
+        <Card>
+          <Card.Title>Register - Error</Card.Title>
+          <Card.Divider />
           <View testID='register_10000_view'>
             <Text>{error.message}</Text>
           </View>

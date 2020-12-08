@@ -57,10 +57,13 @@ const AddCourseSearch = props => {
   const _renderCourse = ({item}) => {
     return (
       <ListItem
-        title={item.name || ''}
-        subtitle={`${item.city}, ${item.state}`}
         onPress={() => _coursePressed(item)}
-      />
+      >
+        <ListItem.Content>
+          <ListItem.Title>{item.name || ''}</ListItem.Title>
+          <ListItem.Subtitle>{`${item.city}, ${item.state}`}</ListItem.Subtitle>
+        </ListItem.Content>
+      </ListItem>
     );
   }
 

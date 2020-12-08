@@ -27,9 +27,6 @@ const Player = props => {
 
   return (
     <ListItem
-      title={title}
-      subtitle={subtitle}
-      rightElement={handicap(hdcp)}
       onPress={() => {
         //console.log('player pressed', item);
         const player =  {
@@ -39,12 +36,16 @@ const Player = props => {
         };
         navigation.navigate('LinkRoundList', {game, player});
       }}
-      leftIcon={(
-        <FavoriteIcon
-          fave={item.fave}
-        />
-      )}
-    />
+    >
+      <FavoriteIcon
+        fave={item.fave}
+      />
+      <ListItem.Content>
+        <ListItem.Title>{title}</ListItem.Title>
+        <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
+      </ListItem.Content>
+      { handicap(hdcp) }
+    </ListItem>
   );
 
 };

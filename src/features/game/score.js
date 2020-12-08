@@ -67,7 +67,9 @@ const Score = props => {
       );
     } else {
       content = (
-        <Card title='Choose Teams'>
+        <Card>
+          <Card.Title>Choose Teams</Card.Title>
+          <Card.Divider />
           <TeamChooser
             currentHole={currentHole}
           />

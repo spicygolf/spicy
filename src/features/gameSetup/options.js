@@ -83,7 +83,9 @@ const Options = props => {
   };
 
   return (
-    <Card title="Options">
+    <Card>
+      <Card.Title>Options</Card.Title>
+      <Card.Divider />
       <FlatList
         data={allOptions}
         renderItem={renderOption}

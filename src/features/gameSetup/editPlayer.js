@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
   Dimensions,
+  KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,7 +12,6 @@ import {
   Card
 } from 'react-native-elements';
 import { useMutation } from '@apollo/client';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import GameNav from 'features/games/gamenav';
 import { GameContext } from 'features/game/gameContext';
@@ -111,64 +111,67 @@ const EditPlayer = props => {
         showBack={true}
         backTo={'GameSetup'}
       />
-      <KeyboardAwareScrollView style={styles.scrollview_container}>
-        <Card
-          title='Handicap'
-        >
-          <View style={styles.field_container}>
-            <Text style={styles.field_label}>Handicap Index</Text>
-            <View style={styles.field_input_view}>
-              <TextInput
-                style={styles.field_input}
-                onChangeText={text => {
-                  const newText = text.replace(/[^0-9+.-]/g, '');
-                  setHI(newText);
-                  const newCH = course_handicap(newText, round.tee, game.scope.holes) || '';
-                  //console.log('newCH', newCH, round, game.scope.holes);
-                  setCH(newCH);
-                }}
-                onEndEditing={() => update()}
-                keyboardType='decimal-pad'
-                value={HI.toString()}
-              />
+      <KeyboardAvoidingView style={styles.scrollview_container}>
+        <ScrollView>
+          <Card>
+            <Card.Title>Handicap</Card.Title>
+            <Card.Divider />
+            <View style={styles.field_container}>
+              <Text style={styles.field_label}>Handicap Index</Text>
+              <View style={styles.field_input_view}>
+                <TextInput
+                  style={styles.field_input}
+                  onChangeText={text => {
+                    const newText = text.replace(/[^0-9+.-]/g, '');
+                    setHI(newText);
+                    const newCH = course_handicap(newText, round.tee, game.scope.holes) || '';
+                    //console.log('newCH', newCH, round, game.scope.holes);
+                    setCH(newCH);
+                  }}
+                  onEndEditing={() => update()}
+                  keyboardType='decimal-pad'
+                  value={HI.toString()}
+                />
+              </View>
             </View>
-          </View>
-          <View style={styles.field_container}>
-            <Text style={styles.field_label}>Course Handicap</Text>
-            <View style={styles.field_display_view}>
-              <Text style={styles.field_display}>
-                {( CH != null ) ? CH.toString() : '-'}
-              </Text>
+            <View style={styles.field_container}>
+              <Text style={styles.field_label}>Course Handicap</Text>
+              <View style={styles.field_display_view}>
+                <Text style={styles.field_display}>
+                  {( CH != null ) ? CH.toString() : '-'}
+                </Text>
+              </View>
             </View>
-          </View>
-          <View style={styles.divider}>
-            <View style={styles.hrLine} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.hrLine} />
-          </View>
-          <View style={styles.field_container}>
-            <Text style={styles.field_label}>Game Handicap</Text>
-            <View style={styles.field_input_view}>
-              <TextInput
-                style={styles.field_input}
-                onChangeText={text => {
-                  const newText = text.replace(/[^0-9+.-]/g, '');
-                  setGH(newText);
-                }}
-                onEndEditing={() => update()}
-                keyboardType='decimal-pad'
-                value={GH.toString()}
-              />
+            <View style={styles.divider}>
+              <View style={styles.hrLine} />
+              <Text style={styles.dividerText}>OR</Text>
+              <View style={styles.hrLine} />
             </View>
-          </View>
-          <Text style={styles.explanation}>
-            Full course handicap that overrides numbers above
-          </Text>
-        </Card>
-        <Card title='Round'>
-
-        </Card>
-      </KeyboardAwareScrollView>
+            <View style={styles.field_container}>
+              <Text style={styles.field_label}>Game Handicap</Text>
+              <View style={styles.field_input_view}>
+                <TextInput
+                  style={styles.field_input}
+                  onChangeText={text => {
+                    const newText = text.replace(/[^0-9+.-]/g, '');
+                    setGH(newText);
+                  }}
+                  onEndEditing={() => update()}
+                  keyboardType='decimal-pad'
+                  value={GH.toString()}
+                />
+              </View>
+            </View>
+            <Text style={styles.explanation}>
+              Full course handicap that overrides numbers above
+            </Text>
+          </Card>
+          <Card>
+            <Card.Title>Round</Card.Title>
+            <Card.Divider />
+          </Card>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };

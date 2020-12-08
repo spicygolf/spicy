@@ -67,22 +67,24 @@ const Games = props => {
 
   const renderItem = ({item}) => {
     if( !item ) return null;
+    const name = item.name || '';
     const subtitle = buildSubtitle(item);
 
     return (
       <ListItem
-        title={item.name || ''}
-        titleStyle={styles.title}
-        subtitle={subtitle}
         onPress={() => itemPressed(item, false)}
-        rightIcon={
-          <Icon
-            name='settings'
-            color='#999'
-            onPress={() => itemPressed(item, true)}
-          />
-        }
-      />
+      >
+        <ListItem.Content>
+          <ListItem.Title style={styles.title}>{name}</ListItem.Title>
+          <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
+        </ListItem.Content>
+        <ListItem.Chevron
+          name='md-settings'
+          color='#999'
+          size={24}
+          onPress={() => itemPressed(item, true)}
+        />
+      </ListItem>
     );
   }
 
