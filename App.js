@@ -4,6 +4,7 @@
  *
  */
 import React, { useEffect, useState } from 'react';
+import { LogBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { ApolloProvider } from 'react-apollo';
 import { ApolloProvider as ApolloHooksProvider } from '@apollo/client';
@@ -49,6 +50,14 @@ const App = props => {
         setClient(c);
       };
       configClient();
+    }, []
+  );
+
+  useEffect(
+    () => {
+      LogBox.ignoreLogs([
+        'VirtualizedLists should never be nested',
+      ]);
     }, []
   );
 
