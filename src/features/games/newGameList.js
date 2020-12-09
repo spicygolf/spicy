@@ -37,14 +37,14 @@ const NewGameList = props => {
   const _renderItem = ({item}) => {
     return (
       <ListItem
-        roundAvatar
-        title={item.disp || ''}
-        titleStyle={styles.title}
-        subtitle={item.type || ''}
-        subtitleStyle={styles.subtitle}
         onPress={() => gamespecPressed(item)}
         testID={`new_${item._key}`}
-      />
+      >
+        <ListItem.Content>
+          <ListItem.Title style={styles.title}>{item.disp || ''}</ListItem.Title>
+          <ListItem.Subtitle style={styles.subtitle}>{item.type || ''}</ListItem.Subtitle>
+        </ListItem.Content>
+      </ListItem>
     );
   };
 

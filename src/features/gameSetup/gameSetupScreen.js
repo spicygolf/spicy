@@ -1,10 +1,10 @@
 import React, { useContext, useEffect } from 'react';
 import {
+  KeyboardAvoidingView,
+  ScrollView,
   StyleSheet,
-  View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { GameContext } from 'features/game/gameContext';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
@@ -41,14 +41,17 @@ const GameSetupScreen = props => {
   );
 
   return (
-    <View style={styles.container}>
-      <KeyboardAwareScrollView testID="game_setup_scrollview">
+    <KeyboardAvoidingView
+      style={styles.container}
+      testID="game_setup_scrollview"
+    >
+      <ScrollView keyboardShouldPersistTaps="handled">
         <Players />
         <Teams />
         <Options />
         { admin }
-      </KeyboardAwareScrollView>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 
 };

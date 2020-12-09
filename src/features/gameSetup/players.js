@@ -53,6 +53,7 @@ const Players = props => {
   const _renderPlayer = ({item}) => {
     //console.log('renderPlayer item', item);
     if( item && item.name && item._key ) {
+      const name = item.name || '';
       const pkey = item._key;
 
       let rkey, tee, ch, gh, hi;
@@ -78,27 +79,23 @@ const Players = props => {
       return (
         <ListItem
           key={pkey}
-          title={item.name || ''}
-          subtitle={subtitle}
           onPress={() => _itemPressed(item)}
-          rightElement={
-            <RemovePlayer
-              gkey={gkey}
-              pkey={pkey}
-              rkey={rkey}
-            />
-          }
-          rightIcon={
-            <HandicapBadge
+        >
+          <ListItem.Content style={styles.player}>
+            <ListItem.Title>{name}</ListItem.Title>
+            <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
+          </ListItem.Content>
+          <HandicapBadge
               game_handicap={gh}
               course_handicap={ch}
               handicap_index={hi}
             />
-          }
-          contentContainerStyle={{
-            flex: 6,
-          }}
-        />
+          <RemovePlayer
+              gkey={gkey}
+              pkey={pkey}
+              rkey={rkey}
+            />
+        </ListItem>
       );
 
     } else {
@@ -119,9 +116,8 @@ const Players = props => {
 
   return (
     <Card>
-      <View style={styles.cardTitle}>
-        <Text style={styles.title}>Players</Text>
-      </View>
+      <Card.Title style={styles.title}>Players</Card.Title>
+      <Card.Divider />
       <View style={styles.listContainer}>
         <FlatList
           data={players}
@@ -142,17 +138,18 @@ export default Players;
 
 
 const styles = StyleSheet.create({
-  cardTitle: {
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
   title: {
+    alignItems: 'center',
+    justifyContent: 'center',
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#555'
+    color: '#555',
+  },
+  player: {
+    flex: 6,
   },
   listContainer: {
     marginTop: 0,
-    marginBottom: 10
+    marginBottom: 10,
   },
 });

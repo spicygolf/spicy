@@ -2,22 +2,22 @@ import React, { useContext } from 'react';
 import {
   FlatList,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import {
   Button,
   Icon,
 } from 'react-native-elements';
-import { filter, find, findIndex, orderBy } from 'lodash';
+import { cloneDeep, filter, find, findIndex, orderBy } from 'lodash';
 import { useMutation } from '@apollo/client';
 
-import { GET_GAME_QUERY } from 'features/game/graphql';
-import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
+import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import ScoringWrapper from 'common/utils/ScoringWrapper';
-import { getNewGameForUpdate } from 'common/utils/game';
-import { getHolesToUpdate } from 'common/utils/teams';
+import {
+  getHolesToUpdate,
+  omitTypename,
+} from 'common/utils/game';
 import { getMultipliersFromGamespecs } from 'common/utils/score';
 import { red } from 'common/colors';
 
@@ -25,7 +25,7 @@ import { red } from 'common/colors';
 
 const TeamMultipliers = props => {
 
-  const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
+  const [ updateGameHoles ] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
   const { team: teamNum, scoring, currentHole } = props;
   const { game } = useContext(GameContext);
@@ -39,29 +39,35 @@ const TeamMultipliers = props => {
     find(game.holes, {hole: currentHole}) : {hole: currentHole, teams: []};
   //console.log('h', h);
 
-  const setMultiplier = (mult, newValue) => {
+  const setMultiplier = async (mult, newValue) => {
+    // only set in DB if junk is based on user input
+    if( mult.based_on != 'user' ) return;
+    // achieved so no press action
+    if( mult.existing ) return;
 
-    //console.log('setMultiplier', currentHole, teamNum, mult, newValue);
+    if( !game || !game.holes ) return;
 
-    let newGame = getNewGameForUpdate(game);
+    let holesToUpdate = getHolesToUpdate(mult.scope, game, currentHole);
 
-    const holesToUpdate = getHolesToUpdate(mult.scope, game, currentHole);
+    let newHoles = cloneDeep(game.holes);
     holesToUpdate.map(h => {
-      const holeIndex = findIndex(newGame.holes, {hole: h});
+      const holeIndex = findIndex(newHoles, {hole: h});
       if( holeIndex < 0 ) console.log('setMultiplier hole does not exist');
       //console.log('holeIndex', holeIndex);
 
       // if multipliers doesn't exist, create blank
-      if( !newGame.holes[holeIndex].multipliers ) {
-        newGame.holes[holeIndex].multipliers = [];
+      if( !newHoles[holeIndex].multipliers ) {
+        newHoles[holeIndex].multipliers = [];
       }
-      const mults = newGame.holes[holeIndex].multipliers;
+      const mults = newHoles[holeIndex].multipliers;
       if( newValue && !find(mults, {
+        __typename: 'Multiplier',
         name: mult.name,
         team: teamNum,
         first_hole: currentHole,
       }) ) {
         mults.push({
+          __typename: 'Multiplier',
           name: mult.name,
           team: teamNum,
           first_hole: currentHole,
@@ -71,26 +77,29 @@ const TeamMultipliers = props => {
         const newMults = filter(mults, m => (
           !(m.name == mult.name && m.team == teamNum && m.first_hole == currentHole)
         ));
-        console.log('newMults', newMults);
-        newGame.holes[holeIndex].multipliers = newMults;
+        //console.log('newMults', newMults);
+        newHoles[holeIndex].multipliers = newMults;
       }
 
     });
+    const newHolesWithoutTypes = omitTypename(newHoles);
 
-    //console.log('setMultiplier newGame', newGame);
-
-    const { loading, error, data } = updateGame({
+    const { loading, error, data } = await updateGameHoles({
       variables: {
         gkey: gkey,
-        game: newGame,
+        holes: newHolesWithoutTypes,
       },
-      refetchQueries: [{
-        query: GET_GAME_QUERY,
-        variables: {
-          gkey: gkey
-        }
-      }],
+      optimisticResponse: {
+        __typename: 'Mutation',
+        updateGameHoles: {
+          __typename: 'Game',
+          _key: gkey,
+          holes: newHoles,
+        },
+      }
     });
+
+    if( error ) console.log('Error updating game - teamMultipliers', error);
 
 
   };
@@ -139,12 +148,8 @@ const TeamMultipliers = props => {
         buttonStyle={[styles.button, {backgroundColor: bgColor}]}
         titleStyle={[styles.buttonTitle, {color: color}]}
         disabled={disabled}
-        onPress={() => {
-          if( mult.based_on != 'user' ) return; // achieved so no press action
-          if( !mult.existing ) {
-            setMultiplier(mult, !selected);
-          }
-        }}
+        onPress={() => setMultiplier(mult, !selected)}
+        onLongPress={() => setMultiplier(mult, !selected)}
       />
     );
 

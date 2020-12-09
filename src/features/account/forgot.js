@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  KeyboardAvoidingView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -11,7 +13,6 @@ import {
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { green } from 'common/colors';
 import { validateEmail } from 'common/utils/account';
@@ -76,11 +77,9 @@ const Forgot = props => {
   );
 
   return (
-    <View style={styles.container}>
-      <KeyboardAwareScrollView
-        keyboardShouldPersistTaps='handled'
-      >
-      <View style={styles.back_to_login_view}>
+    <KeyboardAvoidingView style={styles.container}>
+      <ScrollView keyboardShouldPersistTaps='handled'>
+        <View style={styles.back_to_login_view}>
           <Text style={styles.back_to_text}>
             Back to
             <Text
@@ -89,10 +88,9 @@ const Forgot = props => {
             > Login</Text>
           </Text>
         </View>
-        <Card
-          title='Forgot Password'
-          testID='forgot_form_view'
-        >
+        <Card testID='forgot_form_view'>
+          <Card.Title>Forgot Password</Card.Title>
+          <Card.Divider />
           <View>
             <View style={styles.field_container}>
               <Text style={styles.field_label}>Email *</Text>
@@ -111,8 +109,8 @@ const Forgot = props => {
             { sent ? sentMessage : button }
           </View>
         </Card>
-      </KeyboardAwareScrollView>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 
 };

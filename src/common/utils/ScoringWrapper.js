@@ -104,6 +104,8 @@ class ScoringWrapper {
     'team_down_the_most': this.isTeamDownTheMost,
     'team_second_to_last': this.isTeamSecondToLast,
     'other_team_multiplied_with': this.didOtherTeamMultiplyWith,
+    'getPrevHole': this.getPrevHole,
+    'getCurrHole': this.getCurrHole,
   };
 
 

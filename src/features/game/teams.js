@@ -43,7 +43,6 @@ const Teams = ({teams, scoring, currentHole }) => {
     return (
       <Card
         containerStyle={styles.container}
-        titleStyle={styles.title}
       >
         <FlatList
           data={playersOnTeam}
@@ -93,8 +92,5 @@ const styles = StyleSheet.create({
     paddingTop: 0,
     paddingBottom: 5,
     margin: 10,
-  },
-  title: {
-    fontSize: 16,
   },
 });

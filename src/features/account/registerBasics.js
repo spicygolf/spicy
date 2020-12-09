@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
+  KeyboardAvoidingView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -10,7 +12,6 @@ import {
   Card,
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { RegisterContext } from 'features/account/registerContext';
 import BackToLogin from 'features/account/backToLogin';
@@ -57,9 +58,11 @@ const RegisterBasics = props => {
   return (
     <View style={styles.container}>
       <BackToLogin />
-      <KeyboardAwareScrollView>
-        <View>
-          <Card title='Register - Basics'>
+      <KeyboardAvoidingView>
+        <ScrollView keyboardShouldPersistTaps='handled'>
+          <Card>
+            <Card.Title>Register - Basics</Card.Title>
+            <Card.Divider />
             <View style={styles.loginView} testID='register_1_view'>
               <View>
                 <View style={styles.field_container}>
@@ -129,8 +132,8 @@ const RegisterBasics = props => {
               testID='register_next_1_button'
             />
           </View>
-        </View>
-      </KeyboardAwareScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };

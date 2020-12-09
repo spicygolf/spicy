@@ -57,10 +57,13 @@ const AddCourseSearch = props => {
   const _renderCourse = ({item}) => {
     return (
       <ListItem
-        title={item.name || ''}
-        subtitle={`${item.city}, ${item.state}`}
         onPress={() => _coursePressed(item)}
-      />
+      >
+        <ListItem.Content>
+          <ListItem.Title>{item.name || ''}</ListItem.Title>
+          <ListItem.Subtitle>{`${item.city}, ${item.state}`}</ListItem.Subtitle>
+        </ListItem.Content>
+      </ListItem>
     );
   }
 
@@ -165,19 +168,19 @@ const AddCourseSearch = props => {
     );
 
     const cardHeader = (
-      <ListItem
-        title={course.name}
-        subtitle={`${course.city}, ${course.state}`}
-        rightIcon={
-          <Icon
-            name='remove-circle'
-            color='red'
-            onPress={() => {
-              _removeCourse();
-            }}
-          />
-        }
-      />
+      <ListItem>
+        <ListItem.Content>
+          <ListItem.Title>{course.name}</ListItem.Title>
+          <ListItem.Subtitle>{`${course.city}, ${course.state}`}</ListItem.Subtitle>
+        </ListItem.Content>
+        <Icon
+          name='remove-circle'
+          color='red'
+          onPress={() => {
+            _removeCourse();
+          }}
+        />
+      </ListItem>
     );
 
     const cardList = (

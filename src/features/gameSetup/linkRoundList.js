@@ -75,9 +75,12 @@ const LinkRoundList = props => {
                 return (
                   <ListItem
                     key={index}
-                    title={moment(item.date).format('llll')}
                     onPress={() => chooseRound(item, false)}
-                  />
+                  >
+                    <ListItem.Content>
+                      <ListItem.Title>{moment(item.date).format('llll')}</ListItem.Title>
+                    </ListItem.Content>
+                  </ListItem>
                 );
               }}
               keyExtractor={(_item, index) => index.toString()}

@@ -53,17 +53,6 @@ const RegisterHandicapSearch = props => {
     return (
       <ListItem
         key={key}
-        title={title}
-        subtitle={subtitle}
-        leftAvatar={(
-          <Icon
-            name='check-circle'
-            type='material-community'
-            color={leftAvatarColor}
-            size={30}
-          />
-        )}
-        rightElement={handicap(hdcp)}
         onPress={() => {
           if( selected ) {
             setSelected(null);
@@ -86,7 +75,19 @@ const RegisterHandicapSearch = props => {
             });
           }
         }}
-      />
+      >
+        <Icon
+          name='check-circle'
+          type='material-community'
+          color={leftAvatarColor}
+          size={30}
+        />
+        <ListItem.Content>
+          <ListItem.Title>{title}</ListItem.Title>
+          <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
+        </ListItem.Content>
+        { handicap(hdcp) }
+      </ListItem>
     );
   };
 

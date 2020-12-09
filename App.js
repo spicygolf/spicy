@@ -4,6 +4,7 @@
  *
  */
 import React, { useEffect, useState } from 'react';
+import { LogBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { ApolloProvider } from 'react-apollo';
 import { ApolloProvider as ApolloHooksProvider } from '@apollo/client';
@@ -52,6 +53,14 @@ const App = props => {
     }, []
   );
 
+  useEffect(
+    () => {
+      LogBox.ignoreLogs([
+        'VirtualizedLists should never be nested',
+      ]);
+    }, []
+  );
+
   let content = null;
   if( initializing || !client ) {
     return (<Splash />);
@@ -80,7 +89,7 @@ const App = props => {
 };
 
 export default App;
-
+/*
 // temporary for RN #3965
 import { YellowBox } from 'react-native';
 YellowBox.ignoreWarnings([
@@ -90,3 +99,4 @@ YellowBox.ignoreWarnings([
   'Missing cache result fields',
   'RCTBridge',
 ]);
+*/

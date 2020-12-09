@@ -3,7 +3,6 @@ import { cloneDeep, filter, find, findIndex, reduce } from 'lodash';
 import {
   ACTIVE_GAMES_FOR_PLAYER_QUERY,
 } from 'features/games/graphql';
-import { getHolesToUpdate } from 'common/utils/teams';
 import { acronym, last } from 'common/utils/text';
 
 
@@ -287,28 +286,37 @@ export const rmgame = async (gkey, currentPlayerKey, mutation) => {
 };
 
 /*
-export const updateGameHolesCache = ({cache, gkey, holes}) => {
-
-  // read holes from cache
-  const optimistic = true;
-  const cGame = cache.readFragment({
-    id: gkey,
-    fragment: GAME_HOLES_FRAGMENT,
-  }, optimistic);
-  console.log('getGame from cache', cGame);
-
-  // write back to cache with new values
-  cache.writeFragment({
-    id: gkey,
-    fragment: GAME_HOLES_FRAGMENT,
-    data: {
-      _key: gkey,
-      holes,
-    },
-  });
-
-};
+  term can be:
+    never, every1, every3, every6 (for team choosing / rotation)
+    rest_of_nine, hole (for multiplier scope, uses currentHole)
 */
+
+export const getHolesToUpdate = (term, game, currentHole) => {
+
+  const holes = getHoles(game);
+  //console.log('getHolesToUpdate', holes, term, currentHole);
+
+  switch ( term ) {
+    case 'never':
+      return holes;
+      break;
+    case 'rest_of_nine':
+      const begHole = parseInt(currentHole);
+      const endHole = (Math.floor((begHole-1)/9) * 9) + 9;
+      const ret = holes.splice(begHole-1, endHole-begHole+1);
+      //console.log('rest_of_nine', begHole, endHole, ret);
+      return ret;
+      break;
+    case 'hole':
+      return [currentHole];
+      break;
+    default:
+      console.log(`Unhandled term case: '${term}'`);
+      break;
+  };
+
+}
+
 
 export const addPlayerToOwnTeam = async ({pkey, game, updateGame}) => {
 

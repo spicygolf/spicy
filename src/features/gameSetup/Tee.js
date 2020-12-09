@@ -93,8 +93,6 @@ const Tee = props => {
 
   return (
     <ListItem
-      title={title}
-      subtitle={subtitle}
       onPress={async () => {
         if( oldTee ) {
           // we need to remove this edge and replace with new one
@@ -143,12 +141,15 @@ const Tee = props => {
         // after all that, go back to GameSetup
         navigation.navigate('GameSetup');
       }}
-      leftIcon={(
-        <FavoriteIcon
-          fave={item.fave}
-        />
-      )}
-    />
+    >
+      <FavoriteIcon
+        fave={item.fave}
+      />
+      <ListItem.Content>
+        <ListItem.Title>{title}</ListItem.Title>
+        <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
+      </ListItem.Content>
+    </ListItem>
   );
 
 };

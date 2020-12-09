@@ -60,7 +60,9 @@ const Teams = props => {
   }
 
   return (
-    <Card title='Teams'>
+    <Card>
+      <Card.Title>Teams</Card.Title>
+      <Card.Divider />
       <Text>Teams Rotate:</Text>
       <ButtonGroup
         buttons={buttons}

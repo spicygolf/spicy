@@ -115,9 +115,10 @@ const Admin = props => {
 
   return (
     <Card
-      title='Admin'
       containerStyle={{backgroundColor: bg}}
     >
+      <Card.Title>Admin</Card.Title>
+      <Card.Divider />
       <Button
         title='Delete Game'
         buttonStyle={styles.button}

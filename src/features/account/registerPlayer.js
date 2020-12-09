@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
+  KeyboardAvoidingView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -11,7 +13,6 @@ import {
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import BackToLogin from 'features/account/backToLogin';
 import { RegisterContext } from 'features/account/registerContext';
@@ -134,69 +135,71 @@ const RegisterPlayer = props => {
   return (
     <View style={styles.container}>
       <BackToLogin />
-      <KeyboardAwareScrollView
-        keyboardShouldPersistTaps='handled'
-      >
-        <Card title='Register - Player Information'>
-          <View testID='register_4_view'>
-            <Text style={styles.changes}>{ changes }</Text>
-            <View style={styles.field_container}>
-              <Text style={styles.field_label}>Full Name *</Text>
-              <TextInput
-                style={[styles.field_input, nValid]}
-                onChangeText={text => {
-                  setRegistration({
-                    ...registration,
-                    name: text,
-                  });
-                  validate('name', text);
-                }}
-                autoCapitalize='words'
-                value={registration.name}
-                ref={nameRef}
-              />
+      <KeyboardAvoidingView>
+        <ScrollView keyboardShouldPersistTaps='handled'>
+          <Card>
+            <Card.Title>Register - Player Information</Card.Title>
+            <Card.Divider />
+            <View testID='register_4_view'>
+              <Text style={styles.changes}>{ changes }</Text>
+              <View style={styles.field_container}>
+                <Text style={styles.field_label}>Full Name *</Text>
+                <TextInput
+                  style={[styles.field_input, nValid]}
+                  onChangeText={text => {
+                    setRegistration({
+                      ...registration,
+                      name: text,
+                    });
+                    validate('name', text);
+                  }}
+                  autoCapitalize='words'
+                  value={registration.name}
+                  ref={nameRef}
+                />
+              </View>
+              <View style={styles.field_container}>
+                <Text style={styles.field_label}>Short/Nickname *</Text>
+                <TextInput
+                  style={[styles.field_input, sValid]}
+                  onChangeText={text => {
+                    setRegistration({
+                      ...registration,
+                      short: text,
+                    });
+                    validate('short', text);
+                  }}
+                  autoCapitalize='words'
+                  value={registration.short}
+                />
+              </View>
             </View>
-            <View style={styles.field_container}>
-              <Text style={styles.field_label}>Short/Nickname *</Text>
-              <TextInput
-                style={[styles.field_input, sValid]}
-                onChangeText={text => {
-                  setRegistration({
-                    ...registration,
-                    short: text,
-                  });
-                  validate('short', text);
-                }}
-                autoCapitalize='words'
-                value={registration.short}
-              />
-            </View>
+          </Card>
+          <View style={styles.button_row}>
+            <Button
+              style={styles.prev}
+              title='Prev'
+              type='solid'
+              onPress={() => {
+                navigation.goBack();
+              }}
+              accessibilityLabel='Register Prev 4'
+              testID='register_prev_4_button'
+            />
+            <Button
+              style={styles.next}
+              title='Register'
+              type={(nameValid && shortValid) ? 'solid' : 'outline'}
+              disabled={!(nameValid && shortValid)}
+              onPress={() => {
+                register();
+              }}
+              accessibilityLabel='Register Next 4'
+              testID='register_next_4_button'
+            />
           </View>
-        </Card>
-        <View style={styles.button_row}>
-          <Button
-            style={styles.prev}
-            title='Prev'
-            type='solid'
-            onPress={() => {
-              navigation.goBack();
-            }}
-            accessibilityLabel='Register Prev 4'
-            testID='register_prev_4_button'
-          />
-          <Button
-            style={styles.next}
-            title='Register'
-            type={(nameValid && shortValid) ? 'solid' : 'outline'}
-            disabled={!(nameValid && shortValid)}
-            onPress={() => {
-              register();
-            }}
-            accessibilityLabel='Register Next 4'
-            testID='register_next_4_button'
-          />
-        </View>
-      </KeyboardAwareScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };
