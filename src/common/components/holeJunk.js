@@ -10,10 +10,10 @@ import {
 } from 'react-native-elements';
 import { useMutation } from '@apollo/client';
 import { sortBy } from 'lodash';
-import { gql } from '@apollo/client';
 
 import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';
+import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
 import {
   get_net_score,
   get_score_value,
@@ -31,32 +31,6 @@ import {
 
 
 const HoleJunk = props => {
-
-  const UPDATE_GAME_HOLES_MUTATION = gql`
-    mutation UpdateGameHoles($gkey: String!, $holes: [GameHoleInput]!) {
-      updateGameHoles(gkey: $gkey, holes: $holes) {
-        _key
-        holes  {
-          hole
-          teams {
-            team
-            players
-            junk {
-              name
-              player
-              value
-            }
-          }
-          multipliers {
-            name
-            team
-            first_hole
-          }
-        }
-      }
-    }
-  `;
-
   const { hole, score, pkey } = props;
   const par = (hole && hole.par) ? parseFloat(hole.par) : 0.0;
 
