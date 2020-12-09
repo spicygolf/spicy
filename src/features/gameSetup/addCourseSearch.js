@@ -168,19 +168,19 @@ const AddCourseSearch = props => {
     );
 
     const cardHeader = (
-      <ListItem
-        title={course.name}
-        subtitle={`${course.city}, ${course.state}`}
-        rightIcon={
-          <Icon
-            name='remove-circle'
-            color='red'
-            onPress={() => {
-              _removeCourse();
-            }}
-          />
-        }
-      />
+      <ListItem>
+        <ListItem.Content>
+          <ListItem.Title>{course.name}</ListItem.Title>
+          <ListItem.Subtitle>{`${course.city}, ${course.state}`}</ListItem.Subtitle>
+        </ListItem.Content>
+        <Icon
+          name='remove-circle'
+          color='red'
+          onPress={() => {
+            _removeCourse();
+          }}
+        />
+      </ListItem>
     );
 
     const cardList = (
