@@ -79,7 +79,8 @@ const Games = props => {
           <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
         </ListItem.Content>
         <ListItem.Chevron
-          name='md-settings'
+          type='material'
+          name='settings'
           color='#999'
           size={24}
           onPress={() => itemPressed(item, true)}

@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   player: {
-    flex: 4,
+    flex: 3,
     justifyContent: 'flex-start',
   },
   thru: {
@@ -139,6 +139,7 @@ const styles = StyleSheet.create({
   },
   headerTxt: {
     color: '#666',
+    fontSize: 12,
     paddingBottom: 5,
   },
   post_button: {
