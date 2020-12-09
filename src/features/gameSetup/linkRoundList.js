@@ -77,9 +77,9 @@ const LinkRoundList = props => {
                     key={index}
                     onPress={() => chooseRound(item, false)}
                   >
-                    <ListItemContent>
+                    <ListItem.Content>
                       <ListItem.Title>{moment(item.date).format('llll')}</ListItem.Title>
-                    </ListItemContent>
+                    </ListItem.Content>
                   </ListItem>
                 );
               }}
