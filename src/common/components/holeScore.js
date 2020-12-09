@@ -57,7 +57,7 @@ const HoleScore = props => {
   }
 
   const renderScore = item => {
-    //console.log('item', item);
+    //console.log('renderScore item', item);
     let score_styles = [styles.score_option];
     let hole_score_styles = [styles.hole_score_text];
     let size = scoreSize - 2;
@@ -93,7 +93,7 @@ const HoleScore = props => {
       <Text style={hole_score_styles}>{item.key}</Text>
     );
 
-    if( score.pops && score.pops != '0' ) {
+    if( score && score.pops && score.pops != '0' ) {
       const net = get_net_score(item.key, score);
       content = (
         <Text style={[hole_score_styles, styles.pop_text]}>
