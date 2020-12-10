@@ -610,6 +610,7 @@ export const upsertScore = (score, newGross) => {
   const ts = moment.utc().format();
 
   const newScore = {
+    __typename: 'Score',
     hole: score.hole,
     values: [],
   };
@@ -622,6 +623,7 @@ export const upsertScore = (score, newGross) => {
         newTS = ts;
       }
       newScore.values.push({
+        __typename: 'Value',
         k: s.k,
         v: newVal,
         ts: newTS,
@@ -629,6 +631,7 @@ export const upsertScore = (score, newGross) => {
     });
   } else {
     newScore.values = [{
+      __typename: 'Value',
       k: 'gross',
       v: newGross,
       ts: ts,

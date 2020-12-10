@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import {
   FlatList,
-  ImageBackground,
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -9,6 +8,7 @@ import {
 } from 'react-native';
 import { useMutation, gql } from '@apollo/client';
 
+import { omitTypename } from 'common/utils/game';
 import {
   get_score_value,
   get_net_score,
@@ -118,28 +118,27 @@ const HoleScore = props => {
     )
   };
 
-  const setScore = (item) => {
+  const setScore = async (item) => {
     if( item.key == gross ) return; // no change in score, so do nothing
     const { key:newGross } = item;
     let newScore = upsertScore(score, newGross);
-    //console.log('newScore', newScore);
+    const newScoreWithoutTypes = omitTypename(newScore);
 
-    const { loading, error, data } = postScore({
+    const { loading, error, data } = await postScore({
       variables: {
         rkey: rkey,
-        score: newScore,
+        score: newScoreWithoutTypes,
       },
-/*
       optimisticResponse: {
         __typename: 'Mutation',
         postScore: {
-          __typename: 'Score',
-          ...newScore,
-        }
+          __typename: 'Round',
+          _key: rkey,
+          scores: [newScore],
+        },
       },
-*/
     });
-
+    if( error ) console.log('Error posting score - holeScore', error);
   };
 
   const _scrollTo = index => {
