@@ -1,6 +1,11 @@
 import jsonLogic from 'json-logic-js';
 import { find, orderBy } from 'lodash';
 
+import {
+  getGamespecKVs,
+} from 'common/utils/game';
+
+
 
 // a wrapper class containing functions about scoring and players and teams
 // so we can inject them into  JsonLogic as custom operators
@@ -10,6 +15,7 @@ class ScoringWrapper {
     this._game = game;
     this._scoring = scoring;
     this._currentHole = parseInt(currentHole);
+    this.betterPoints = getGamespecKVs(game, 'better');
 
     for( let key in this.customs ) {
       if( this.customs.hasOwnProperty(key) ) {
@@ -45,8 +51,11 @@ class ScoringWrapper {
 
   isTeamDownTheMost = (hole, team) => {
     if( !hole ) return true;
-    // 'asc' order is to get rank 1 as the team 'down the most'
-    const ranks = this._teamRanks(hole, 'asc');
+    // use 'asc' if higher points is better, 'desc' if lower points is better
+    let dir = 'asc';
+    if( this.betterPoints.includes('lower') ) dir = 'desc';
+    // get rank 1 as the team 'down the most'
+    const ranks = this._teamRanks(hole, dir);
     const thisTeam = find(ranks, {team: team.team});
     if( !thisTeam ) return true;
     return thisTeam.rank == 1;
@@ -54,8 +63,11 @@ class ScoringWrapper {
 
   isTeamSecondToLast = (hole, team) => {
     if( !hole ) return false;
-    // 'asc' order is to get rank 2 as the team 'down second most'
-    const ranks = this._teamRanks(hole, 'asc');
+    // use 'asc' if higher points is better, 'desc' if lower points is better
+    let dir = 'asc';
+    if( this.betterPoints.includes('lower') ) dir = 'desc';
+    // get rank 2 as the team 'down second most'
+    const ranks = this._teamRanks(hole, dir);
     const thisTeam = find(ranks, {team: team.team});
     if( !thisTeam ) return true;
     return thisTeam.rank == 2;
