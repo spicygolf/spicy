@@ -50,11 +50,17 @@ const ProfileHome = props => {
     currentPlayer.handicap.index
   ) ? currentPlayer.handicap.index : '-';
 
-  const _clearCache = props => {
+  const _clearCache = async props => {
+    await client.clearStore();
+    client.cache.data.clear();
+/*
     for( const key of Object.keys(client.cache.data.data) ) {
-      client.cache.evict(key);
+      const e = client.cache.evict({id: key});
+      console.log('evict', key, e);
     }
-    client.cache.gc();
+    const gc = client.cache.gc();
+    console.log('gc', gc);
+*/
     console.log('cache', client.cache.data.data);
   }
 

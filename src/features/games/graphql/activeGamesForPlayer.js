@@ -7,6 +7,10 @@ export default gql`
       name
       start
       end
+      scope {
+        holes
+        teams_rotate
+      }
       rounds {
         _key
         player {

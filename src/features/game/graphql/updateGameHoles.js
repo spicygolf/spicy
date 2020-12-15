@@ -26,4 +26,3 @@ export const UPDATE_GAME_HOLES_MUTATION = gql`
     }
   }
 `;
-

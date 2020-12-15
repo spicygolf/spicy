@@ -2,9 +2,11 @@ import React, { useContext } from 'react';
 import {
   FlatList,
   StyleSheet,
+  View,
 } from 'react-native';
 import {
   Card,
+  Icon,
 } from 'react-native-elements';
 import { find } from 'lodash';
 
@@ -21,6 +23,16 @@ const Teams = ({teams, scoring, currentHole }) => {
   //console.log('Teams teams', teams);
   const { game, activeGameSpec } = useContext(GameContext);
   const { players } = game;
+
+  const changeTeamsContent = (game && game.scope && game.scope.teams_rotate && game.scope.teams_rotate != 'never')
+    ? (
+      <Icon
+        type='material'
+        name="people"
+        color="#999"
+      />
+    )
+    : null;
 
   const _renderPlayer = ({item}) => {
     return (
@@ -59,13 +71,16 @@ const Teams = ({teams, scoring, currentHole }) => {
           scoring={scoring}
           currentHole={currentHole}
         />
-        <TeamTotals
-          team={item.team}
-          scoring={scoring}
-          currentHole={currentHole}
-          type={activeGameSpec.type}
-          betterPoints={activeGameSpec.better}
-        />
+        <View style={styles.settings_totals}>
+          { changeTeamsContent }
+          <TeamTotals
+            team={item.team}
+            scoring={scoring}
+            currentHole={currentHole}
+            type={activeGameSpec.type}
+            betterPoints={activeGameSpec.better}
+          />
+        </View>
       </Card>
     );
 
@@ -91,6 +106,11 @@ const styles = StyleSheet.create({
     paddingRight: 5,
     paddingTop: 0,
     paddingBottom: 5,
-    margin: 10,
+    margin: 5,
+  },
+  settings_totals: {
+    flexDirection: 'row',
+    paddingHorizontal: 5,
+    marginHorizontal: 5,
   },
 });

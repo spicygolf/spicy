@@ -1,15 +1,15 @@
-'use strict';
-
 import React from 'react';
 import {
   StyleSheet,
   Text,
   View
 } from 'react-native';
+import {
+  Button,
+  Icon,
+} from 'react-native-elements';
 
-import { Icon } from 'react-native-elements';
-
-import { findIndex, sortBy } from 'lodash';
+import { findIndex } from 'lodash';
 
 
 
@@ -39,7 +39,7 @@ const HoleNav = props => {
       </View>
       <View style={styles.currentHole}>
         <Text style={styles.holeText}>{currentHole}</Text>
-        </View>
+      </View>
       <View style={styles.direction}>
       <Icon
         name='chevron-right'
@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
   },
   currentHole: {
     flex: 3,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center'
   },

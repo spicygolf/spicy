@@ -1,26 +1,32 @@
 import React, { useContext } from 'react';
 import {
-  FlatList,
   StyleSheet,
   Text,
   View
 } from 'react-native';
-
 import {
   ButtonGroup,
   Card,
 } from 'react-native-elements';
-import { findIndex } from 'lodash';
+import { useMutation } from '@apollo/client';
+import { cloneDeep, findIndex } from 'lodash';
 
+import { UPDATE_GAME_SCOPE_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';
 import TeamChooser from 'common/components/teamChooser';
-import { getGamespecKVs } from 'common/utils/game';
+import {
+  getGamespecKVs,
+  omitTypename,
+} from 'common/utils/game';
+
 
 
 const Teams = props => {
 
   const { game } = useContext(GameContext);
+  const [ updateGameScope ] = useMutation(UPDATE_GAME_SCOPE_MUTATION);
+
   const teamsFromGamespecs = getGamespecKVs(game, 'teams');
   if( !teamsFromGamespecs.includes(true) ) return null;
 
@@ -31,20 +37,36 @@ const Teams = props => {
     {slug: 'every6', caption: 'Every 6'},
   ];
 
-  const updateRotation = selectedIndex => {
-    console.log('selectedIndex', options[selectedIndex].slug);
+  const updateRotation = async selectedIndex => {
+    if( !game || !game.scope ) return;
 
-    // TODO: write the slug to the game object with an update mutation
+    //console.log('selectedIndex', options[selectedIndex].slug);
+    let newScope = cloneDeep(game.scope);
+    newScope.teams_rotate = options[selectedIndex].slug;
+    const newScopeWithoutTypes = omitTypename(newScope);
 
+    const { loading, error, data } = await updateGameScope({
+      variables: {
+        gkey: game._key,
+        scope: newScopeWithoutTypes,
+      },
+      optimisticResponse: {
+        __typename: 'Mutation',
+        updateGameScope: {
+          __typename: 'Game',
+          _key: game._key,
+          scope: newScope,
+        },
+      }
+    });
+
+    if( error ) console.log('Error updating game scope - gameSetup teams', error);
   };
 
-  const getSelected = () => {
-    if( !game || !game.scope || !game.scope.teams_rotate ) return null;
-
-    const option = findIndex(options, {slug: game.scope.teams_rotate});
-    //console.log('option', option);
-    return option;
-  };
+  let selected = -1;
+  if( game  && game.scope && game.scope.teams_rotate ) {
+    selected = findIndex(options, {slug: game.scope.teams_rotate});
+  }
 
   const buttons = options.map(o => o.caption);
 
@@ -66,8 +88,7 @@ const Teams = props => {
       <Text>Teams Rotate:</Text>
       <ButtonGroup
         buttons={buttons}
-        disabled={[1,2,3]}
-        selectedIndex={getSelected()}
+        selectedIndex={selected}
         onPress={updateRotation}
         textStyle={styles.textStyle}
         selectedButtonStyle={styles.selectedButton}

@@ -30,6 +30,8 @@ const Score = props => {
   let content = null;
 
   const hole = find(scores.holes, {hole: currentHole});
+
+  // TODO: ScoreWarnings as its own component?
   const warnings = ( hole && hole.warnings )
     ? hole.warnings.map((w, i) => (
         <View key={`warning_${i}`}style={styles.warning}>

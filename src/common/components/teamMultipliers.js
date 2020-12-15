@@ -225,8 +225,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 5,
     paddingBottom: 5,
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingHorizontal: 5,
   },
   icon: {
     padding: 5,

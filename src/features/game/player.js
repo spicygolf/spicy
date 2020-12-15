@@ -74,10 +74,7 @@ export default Player;
 
 var styles = StyleSheet.create({
   player_container: {
-    padding: 15,
-    paddingRight: 15,
-    paddingTop: 10,
-    paddingBottom: 10,
+    padding: 10,
   },
   player_score_container: {
     flexDirection: 'row',
