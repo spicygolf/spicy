@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,12 +7,14 @@ import {
 import { filter, find } from 'lodash';
 
 import { format } from 'common/utils/score';
+import { GameContext } from 'features/game/gameContext';
 
 
 
 const TeamTotals = props => {
 
   const { team: teamNum, scoring, currentHole, type, betterPoints } = props;
+  const { game } = useContext(GameContext);
 
   const hole = find(scoring.holes, { hole: currentHole });
   if( !hole ) return null;
@@ -44,12 +46,18 @@ const TeamTotals = props => {
   let totalTxt = format({v: diff, type});
   if( totalTxt == '' && type == 'points' ) totalTxt = '0';
   let total = `Total: ${totalTxt}`;
+
+  // handle totals differently for match play
   if( type === 'match' && team.matchOver ) {
     if( team.win ) {
       total = `Win: ${format({v: team.matchDiff, type})}`;
     } else {
       total = ``;
     }
+  }
+  // don't show team totals if the teams are rotating at all
+  if( type !== 'match' && game.scope.teams_rotate !== 'never' ) {
+    total = ``;
   }
 
   return (

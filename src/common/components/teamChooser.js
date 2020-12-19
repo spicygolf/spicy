@@ -8,20 +8,19 @@ import {
 import {
   Icon,
 } from 'react-native-elements';
-import { filter, find, findIndex } from 'lodash';
+import { cloneDeep, filter, find, findIndex, orderBy } from 'lodash';
 import { useMutation } from '@apollo/client';
 
-import { GET_GAME_QUERY } from 'features/game/graphql';
-import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
+import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
-import { getNewGameForUpdate } from 'common/utils/game';
+import { omitTypename } from 'common/utils/game';
 import { getHolesToUpdate } from 'common/utils/game';
 import { blue } from 'common/colors';
 
 
 const TeamChooser = props => {
 
-  const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
+  const [ updateGameHoles ] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
   const { currentHole } = props;
   //console.log('currentHole', currentHole);
@@ -35,91 +34,102 @@ const TeamChooser = props => {
 
   const changeTeamsForPlayer = async (pkey, addToTeam, removeFromTeam) => {
     //console.log('pkey', pkey);
-    //console.log('addToTeam', addToTeam);
-    //console.log('removeFromTeam', removeFromTeam);
+    console.log('addToTeam', addToTeam);
+    console.log('removeFromTeam', removeFromTeam);
 
-    // remove player from this team (across appropriate holes)
-    let newGame = getNewGameForUpdate(game);
-    //console.log('changeTeamsForPlayer newGame', newGame);
-
-    const holesToUpdate = getHolesToUpdate(newGame.scope.teams_rotate, game);
-    if( !newGame.holes ) {
-      newGame.holes = [];
-    }
+    // set up variables for mutation
+    const holesToUpdate = getHolesToUpdate(game.scope.teams_rotate, game, currentHole);
     //console.log('holesToUpdate', holesToUpdate);
+    let newHoles = cloneDeep(game.holes);
+    if( !newHoles ) {
+      newHoles = [];
+    }
+
     holesToUpdate.map(h => {
       // if hole data doesn't exist, create blanks
-      if( findIndex(newGame.holes, {hole: h}) < 0 ) {
-        newGame.holes.push(
-          {
-            hole: h,
-            teams: [
-              {team: '1', players: []},
-              {team: '2', players: []},
-            ],
-            multipliers: [],
-          }
-        );
+      if( findIndex(newHoles, {hole: h}) < 0 ) {
+        newHoles.push({
+          __typename: 'GameHole',
+          hole: h,
+          teams: [
+            {__typename: 'Team', team: '1', players: []},
+            {__typename: 'Team', team: '2', players: []},
+          ],
+          multipliers: [],
+        });
       }
-      const holeIndex = findIndex(newGame.holes, {hole: h});
+      const holeIndex = findIndex(newHoles, {hole: h});
       //console.log('holeIndex', holeIndex);
 
       // ****** remove player from team ******
-      if( findIndex(newGame.holes[holeIndex].teams, {team: removeFromTeam}) < 0 ) {
-        newGame.holes[holeIndex].teams.push(
-          {
-            team: removeFromTeam,
-            players: [],
-          }
-        );
-      }
-      const rmTeamIndex = findIndex(newGame.holes[holeIndex].teams, {team: removeFromTeam});
+      let rmTeamIndex = findIndex(newHoles[holeIndex].teams, {team: removeFromTeam});
       //console.log('rmTeamIndex', rmTeamIndex);
-      if( rmTeamIndex < 0 ) return;
-      const rmPlayers = newGame.holes[holeIndex].teams[rmTeamIndex].players;
+      if( rmTeamIndex < 0 ) {
+        newHoles[holeIndex].teams.push({
+          __typename: 'Team',
+          team: removeFromTeam,
+          players: [],
+          junk: [],
+        });
+        rmTeamIndex = 0;
+      }
+      const rmPlayers = newHoles[holeIndex].teams[rmTeamIndex].players;
       const rmNewPlayers = filter(rmPlayers, p => p != pkey);
       //console.log('rmNewPlayers', rmNewPlayers);
-      newGame.holes[holeIndex].teams[rmTeamIndex].players = rmNewPlayers;
-      //console.log('removeFromTeam newGame', newGame);
+      newHoles[holeIndex].teams[rmTeamIndex].players = rmNewPlayers;
+      //console.log('removeFromTeam newHoles', newHoles);
 
       // ****** add player to team ******
       if( !addToTeam ) return;
-      if( findIndex(newGame.holes[holeIndex].teams, {team: addToTeam}) < 0 ) {
-        newGame.holes[holeIndex].teams.push(
-          {
-            team: addToTeam,
-            players: [],
-          }
-        );
+
+      // first remove this player from all other teams (to be safe)
+      const newTeams = newHoles[holeIndex].teams.map(t => {
+        let players = t.players.filter(p => (p != pkey));
+        return {
+          ...t,
+          players,
+        }
+      });
+      newHoles[holeIndex].teams = orderBy(newTeams, ['team'], ['asc']);
+      //console.log('teams after removing player from all other teams', newHoles[holeIndex].teams);
+
+      let addTeamIndex = findIndex(newHoles[holeIndex].teams, {team: addToTeam});
+      if( addTeamIndex < 0 ) {
+        newHoles[holeIndex].teams.push({
+          __typename: 'Team',
+          team: addToTeam,
+          players: [],
+          junk: [],
+        });
+        addTeamIndex = 0;
       }
-      const addTeamIndex = findIndex(newGame.holes[holeIndex].teams, {team: addToTeam});
       //console.log('holeIndex', holeIndex, 'addTeamIndex', addTeamIndex);
       if( addTeamIndex < 0 ) return;
-      const addPlayers = newGame.holes[holeIndex].teams[addTeamIndex].players;
+      const addPlayers = newHoles[holeIndex].teams[addTeamIndex].players;
       addPlayers.push(pkey);
       //console.log('addPlayers', addPlayers);
-      newGame.holes[holeIndex].teams[addTeamIndex].players = addPlayers;
-      //console.log('addToTeam newGame', newGame);
-
+      newHoles[holeIndex].teams[addTeamIndex].players = addPlayers;
+      //console.log('addToTeam newHoles', newHoles);
     });
+    //console.log('removeFromTeam newHoles final', newHoles);
+    const newHolesWithoutTypes = omitTypename(newHoles);
 
-    //console.log('removeFromTeam newGame final', newGame);
-
-    const { loading, error, data } = await updateGame({
+    const { loading, error, data } = await updateGameHoles({
       variables: {
         gkey: gkey,
-        game: newGame,
+        holes: newHolesWithoutTypes,
       },
-      refetchQueries: [{
-        query: GET_GAME_QUERY,
-        variables: {
-          gkey: gkey
-        }
-      }],
+      optimisticResponse: {
+        __typename: 'Mutation',
+        updateGameHoles: {
+          __typename: 'Game',
+          _key: gkey,
+          holes: newHoles,
+        },
+      }
     });
 
     if( error ) console.log('Error updating game - teamChooser', error);
-
   };
 
 

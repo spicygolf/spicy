@@ -48,7 +48,7 @@ const Leaderboard = props => {
         if( !totals[p.pkey] ) totals[p.pkey] = 0;
         if( score && score[scoreType] ) totals[p.pkey] += (parseFloat(score[scoreType].value) || 0);
         let t = find(h.teams, {team: p.team});
-        let team = '';
+        let team = null;
         if( t && t.team ) team = t.team; // dafuq?
         let match = null;
         if( t && !t.matchOver && !isMatchOver &&  h.scoresEntered == orderedPlayerList.length) {
@@ -101,8 +101,10 @@ const Leaderboard = props => {
   };
 
   const Row = ({row}) => {
-    const scoreCells = row.scores.map(s => {
-      if( !s.score || !s.score[scoreType] ) return null;
+    const scoreCells = row.scores.map((s, i) => {
+      if( !s.score || !s.score[scoreType] ) {
+        return (<View key={`cell_${row.hole}_${i}`} style={styles.scorePopContainer} />);
+      }
       const sv = s.score[scoreType].value;
       let pops = [];
       for( let i=0; i<parseFloat(s.score.pops.value); i++ ) {

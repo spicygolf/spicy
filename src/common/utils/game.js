@@ -295,23 +295,35 @@ export const getHolesToUpdate = (term, game, currentHole) => {
 
   const holes = getHoles(game);
   //console.log('getHolesToUpdate', holes, term, currentHole);
+  let begHole, endHole, ret=[];
 
   switch ( term ) {
     case 'never':
       return holes;
       break;
     case 'rest_of_nine':
-      const begHole = parseInt(currentHole);
-      const endHole = (Math.floor((begHole-1)/9) * 9) + 9;
-      const ret = holes.splice(begHole-1, endHole-begHole+1);
+      begHole = parseInt(currentHole);
+      endHole = (Math.floor((begHole-1)/9) * 9) + 9;
+      ret = holes.splice(begHole-1, endHole-begHole+1);
       //console.log('rest_of_nine', begHole, endHole, ret);
       return ret;
       break;
     case 'hole':
+    case 'every1':
       return [currentHole];
+      break;
+    case 'every3':
+    case 'every6':
+      const cnt = parseInt(term.charAt(term.length - 1));
+      begHole = parseInt(currentHole);
+      endHole = begHole + cnt - 1;
+      ret = holes.splice(begHole-1, endHole-begHole+1);
+      //console.log('everyX', cnt, begHole, endHole, ret);
+      return ret;
       break;
     default:
       console.log(`Unhandled term case: '${term}'`);
+      return [];
       break;
   };
 

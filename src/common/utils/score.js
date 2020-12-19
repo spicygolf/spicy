@@ -294,8 +294,13 @@ export const scoring = game => {
 
     // runningTotal
     h.teams.map(t => {
-      let lastHoleRunningTotal = ( i == 0 ) ? 0
-        : find(ret.holes[i-1].teams, {team: t.team}).runningTotal;
+      let lastHoleRunningTotal = 0;
+      if( i > 0 ) {
+        let lastHole = find(ret.holes[i-1].teams, {team: t.team});
+        lastHoleRunningTotal = (lastHole && lastHole.runningTotal)
+          ? lastHole.runningTotal
+          : 0;
+      }
       //console.log('lastHoleRunningTotal', lastHoleRunningTotal, 't', t);
       t.runningTotal = ( game.players.length == h.scoresEntered )
         ? lastHoleRunningTotal + t.holeTotal

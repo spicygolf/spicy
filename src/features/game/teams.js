@@ -1,16 +1,19 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import {
   Card,
   Icon,
+  Overlay,
 } from 'react-native-elements';
-import { find } from 'lodash';
+import { find, orderBy } from 'lodash';
 
 import Player from 'features/game/player';
+import ChangeTeams from 'features/game/changeTeams';
 import TeamJunk from 'common/components/teamJunk';
 import TeamMultipliers from 'common/components/teamMultipliers';
 import TeamTotals from 'common/components/teamTotals';
@@ -23,15 +26,30 @@ const Teams = ({teams, scoring, currentHole }) => {
   //console.log('Teams teams', teams);
   const { game, activeGameSpec } = useContext(GameContext);
   const { players } = game;
+  const ordered_teams = orderBy(teams, ['team'], ['asc']);
 
-  const changeTeamsContent = (game && game.scope && game.scope.teams_rotate && game.scope.teams_rotate != 'never')
+  const [visible, setVisible] = useState(false);
+
+  const toggleOverlay = () => {
+    setVisible(!visible);
+  };
+
+  const changeTeamsContent = (
+    game &&
+    game.scope &&
+    game.scope.teams_rotate &&
+    game.scope.teams_rotate != 'never')
     ? (
-      <Icon
-        type='material'
-        name="people"
-        color="#999"
-      />
-    )
+        <TouchableOpacity
+          onPress={toggleOverlay}
+        >
+          <Icon
+            type='material'
+            name="people"
+            color="#999"
+          />
+        </TouchableOpacity>
+      )
     : null;
 
   const _renderPlayer = ({item}) => {
@@ -53,42 +71,47 @@ const Teams = ({teams, scoring, currentHole }) => {
     //console.log('playersOnTeam', item.team, playersOnTeam);
 
     return (
-      <Card
-        containerStyle={styles.container}
-      >
-        <FlatList
-          data={playersOnTeam}
-          renderItem={_renderPlayer}
-          keyExtractor={item => item._key}
-        />
-        <TeamJunk
-          team={item.team}
-          scoring={scoring}
-          currentHole={currentHole}
-        />
-        <TeamMultipliers
-          team={item.team}
-          scoring={scoring}
-          currentHole={currentHole}
-        />
-        <View style={styles.settings_totals}>
-          { changeTeamsContent }
-          <TeamTotals
+      <View>
+        <Card
+          containerStyle={styles.container}
+        >
+          <FlatList
+            data={playersOnTeam}
+            renderItem={_renderPlayer}
+            keyExtractor={item => item._key}
+          />
+          <TeamJunk
             team={item.team}
             scoring={scoring}
             currentHole={currentHole}
-            type={activeGameSpec.type}
-            betterPoints={activeGameSpec.better}
           />
-        </View>
-      </Card>
+          <TeamMultipliers
+            team={item.team}
+            scoring={scoring}
+            currentHole={currentHole}
+          />
+          <View style={styles.settings_totals}>
+            { changeTeamsContent }
+            <TeamTotals
+              team={item.team}
+              scoring={scoring}
+              currentHole={currentHole}
+              type={activeGameSpec.type}
+              betterPoints={activeGameSpec.better}
+            />
+          </View>
+        </Card>
+        <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
+          <ChangeTeams />
+        </Overlay>
+      </View>
     );
 
   };
 
   const flatlist = (
     <FlatList
-      data={teams}
+      data={ordered_teams}
       renderItem={_renderTeam}
       keyExtractor={item => String(item.team)}
     />
