@@ -102,7 +102,10 @@ const Teams = ({teams, scoring, currentHole }) => {
           </View>
         </Card>
         <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
-          <ChangeTeams />
+          <ChangeTeams
+            currentHole={currentHole}
+            close={toggleOverlay}
+          />
         </Overlay>
       </View>
     );

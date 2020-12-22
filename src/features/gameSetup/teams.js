@@ -18,6 +18,7 @@ import TeamChooser from 'common/components/teamChooser';
 import {
   getGamespecKVs,
   omitTypename,
+  teamsRotateOptions,
 } from 'common/utils/game';
 
 
@@ -30,19 +31,12 @@ const Teams = props => {
   const teamsFromGamespecs = getGamespecKVs(game, 'teams');
   if( !teamsFromGamespecs.includes(true) ) return null;
 
-  const options = [
-    {slug: 'never' , caption: 'Never'  },
-    {slug: 'every1', caption: 'Every 1'},
-    {slug: 'every3', caption: 'Every 3'},
-    {slug: 'every6', caption: 'Every 6'},
-  ];
-
   const updateRotation = async selectedIndex => {
     if( !game || !game.scope ) return;
 
-    //console.log('selectedIndex', options[selectedIndex].slug);
+    //console.log('selectedIndex', teamsRotateOptions[selectedIndex].slug);
     let newScope = cloneDeep(game.scope);
-    newScope.teams_rotate = options[selectedIndex].slug;
+    newScope.teams_rotate = teamsRotateOptions[selectedIndex].slug;
     const newScopeWithoutTypes = omitTypename(newScope);
 
     const { loading, error, data } = await updateGameScope({
@@ -65,10 +59,10 @@ const Teams = props => {
 
   let selected = -1;
   if( game  && game.scope && game.scope.teams_rotate ) {
-    selected = findIndex(options, {slug: game.scope.teams_rotate});
+    selected = findIndex(teamsRotateOptions, {slug: game.scope.teams_rotate});
   }
 
-  const buttons = options.map(o => o.caption);
+  const buttons = teamsRotateOptions.map(o => o.caption);
 
   let chooser = null;
 

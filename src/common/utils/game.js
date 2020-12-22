@@ -452,3 +452,10 @@ export const getCoursesPlayersTxt = game => {
   };
 
 };
+
+export const teamsRotateOptions = [
+  {slug: 'never' , caption: 'Never'  },
+  {slug: 'every1', caption: 'Every 1'},
+  {slug: 'every3', caption: 'Every 3'},
+  {slug: 'every6', caption: 'Every 6'},
+];
