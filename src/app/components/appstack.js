@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
 } from 'react-native';
@@ -16,9 +16,7 @@ import GamesStack from 'features/games/gamesstack';
 import ProfileStack from 'features/profile/profilestack';
 import RegisterAgain from 'features/account/registerAgain';
 import { getCurrentUser } from 'common/utils/account';
-import {
-  CurrentPlayerContext,
-} from 'features/players/currentPlayerContext';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { GET_PLAYER_QUERY } from 'features/players/graphql';
 import { green, red, blue } from 'common/colors';
 
@@ -43,13 +41,9 @@ const AppStack = props => {
 
   const { user } = props;
 
-  const {
-    currentPlayer,
-    setCurrentPlayer,
-    setCurrentPlayerKey,
-    token,
-    setToken,
-  } = useContext(CurrentPlayerContext);
+  const [currentPlayer, setCurrentPlayer] = useState(null);
+  const [currentPlayerKey, setCurrentPlayerKey] = useState(null);
+  const [token, setToken] = useState(null);
 
   // grab current player object from db
   const [ getPlayer, {error: cpError, data: cpData} ] = useLazyQuery(GET_PLAYER_QUERY);
@@ -195,8 +189,21 @@ const AppStack = props => {
     );
   }
 
-  return content;
-
+  if( currentPlayer && currentPlayerKey && token ) {
+    return (
+      <CurrentPlayerContext.Provider
+        value={{
+          currentPlayer,
+          currentPlayerKey,
+          token,
+        }}
+      >
+        { content }
+      </CurrentPlayerContext.Provider>
+    );
+  } else {
+    return (<ActivityIndicator />);
+  }
 };
 
 export default AppStack;
