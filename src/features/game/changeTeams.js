@@ -10,23 +10,30 @@ import {
   Icon,
   ListItem,
 } from 'react-native-elements';
+import { useMutation } from '@apollo/client';
 import { find } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
 import {
   getHolesToUpdate,
+  omitTypename,
   teamsRotateOptions
 } from 'common/utils/game';
 import { green } from 'common/colors';
 import HoleChooser from 'common/components/holeChooser';
+import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
+import { setGameMeta } from 'common/utils/metadata';
 
 
 
 const ChangeTeams = ({currentHole, close}) => {
 
   const { game } = useContext(GameContext);
+  const { _key: gkey } = game;
   const [ selected, setSelected ] = useState("0");
   const [ holes, setHoles ] = useState([]);
+
+  const [ updateGameHoles ] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
   const choices = [
     {key: "0", name: "gameSetup", disp: "Game Setup"},
@@ -75,6 +82,42 @@ const ChangeTeams = ({currentHole, close}) => {
     return (<View style={styles.separator}></View>);
   }
 
+  const changeTeamsOnHoles = async () => {
+    let newHoles = game.holes.map(h => {
+      if( holes.includes(h.hole) ) {
+        return {
+          ...h,
+          teams: [],
+          multipliers: [],
+        };
+      } else {
+        return h;
+      }
+    });
+    const newHolesWithoutTypes = omitTypename(newHoles);
+
+    const { loading, error, data } = await updateGameHoles({
+      variables: {
+        gkey: gkey,
+        holes: newHolesWithoutTypes,
+      },
+      optimisticResponse: {
+        __typename: 'Mutation',
+        updateGameHoles: {
+          __typename: 'Game',
+          _key: gkey,
+          holes: newHoles,
+        },
+      }
+    });
+
+    if( error ) {
+      console.log('Error updating game - changeTeams', error);
+    } else {
+      setGameMeta(gkey, 'holesToUpdate', holes);
+    }
+  };
+
   useEffect(
     () => {
       switch( selected ) {
@@ -122,8 +165,8 @@ const ChangeTeams = ({currentHole, close}) => {
           buttonStyle={styles.next}
           title='Change'
           type='solid'
-          onPress={() => {
-            console.log('Change Teams clicked', holes);
+          onPress={async () => {
+            await changeTeamsOnHoles();
             close();
           }}
           accessibilityLabel='Change Teams'
@@ -164,7 +207,7 @@ const styles = StyleSheet.create({
   button_row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 20,
+    paddingTop: 40,
   },
   prev: {
     width: 120,

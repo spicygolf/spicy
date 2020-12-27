@@ -15,10 +15,16 @@ import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import { omitTypename } from 'common/utils/game';
 import { getHolesToUpdate } from 'common/utils/game';
+import { getTeams } from 'common/utils/teams';
+import { getGameMeta, setGameMeta } from 'common/utils/metadata';
 import { blue } from 'common/colors';
 
 
+
 const TeamChooser = props => {
+
+  // TODO: modify this to support more than just two teams
+  const teamCount = 2;
 
   const [ updateGameHoles ] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
@@ -26,7 +32,8 @@ const TeamChooser = props => {
   //console.log('currentHole', currentHole);
   const { game } = useContext(GameContext);
   const { _key: gkey } = game;
-  const h = ( game && game.holes && game.holes.length )
+  const teams = getTeams(game, currentHole);
+  const gameHole = ( game && game.holes && game.holes.length )
     ? find(game.holes, {hole: currentHole})
     : {hole: currentHole, teams: []};
   //console.log('h', h);
@@ -34,12 +41,17 @@ const TeamChooser = props => {
 
   const changeTeamsForPlayer = async (pkey, addToTeam, removeFromTeam) => {
     //console.log('pkey', pkey);
-    console.log('addToTeam', addToTeam);
-    console.log('removeFromTeam', removeFromTeam);
+    //console.log('addToTeam', addToTeam);
+    //console.log('removeFromTeam', removeFromTeam);
 
-    // set up variables for mutation
-    const holesToUpdate = getHolesToUpdate(game.scope.teams_rotate, game, currentHole);
+    // get holes for updating, either from game metadata or game setup
+    const gameMeta = await getGameMeta(gkey);
+    const holesToUpdate = (gameMeta && gameMeta.holesToUpdate && gameMeta.holesToUpdate.length)
+      ? gameMeta.holesToUpdate
+      : getHolesToUpdate(game.scope.teams_rotate, game, currentHole);
     //console.log('holesToUpdate', holesToUpdate);
+
+    // set up variable for mutation
     let newHoles = cloneDeep(game.holes);
     if( !newHoles ) {
       newHoles = [];
@@ -51,68 +63,46 @@ const TeamChooser = props => {
         newHoles.push({
           __typename: 'GameHole',
           hole: h,
-          teams: [
-            {__typename: 'Team', team: '1', players: []},
-            {__typename: 'Team', team: '2', players: []},
-          ],
+          teams: [],
           multipliers: [],
         });
       }
       const holeIndex = findIndex(newHoles, {hole: h});
-      //console.log('holeIndex', holeIndex);
+      //console.log('hole', h);
 
-      // ****** remove player from team ******
-      let rmTeamIndex = findIndex(newHoles[holeIndex].teams, {team: removeFromTeam});
-      //console.log('rmTeamIndex', rmTeamIndex);
-      if( rmTeamIndex < 0 ) {
-        newHoles[holeIndex].teams.push({
-          __typename: 'Team',
-          team: removeFromTeam,
-          players: [],
-          junk: [],
-        });
-        rmTeamIndex = 0;
-      }
-      const rmPlayers = newHoles[holeIndex].teams[rmTeamIndex].players;
-      const rmNewPlayers = filter(rmPlayers, p => p != pkey);
-      //console.log('rmNewPlayers', rmNewPlayers);
-      newHoles[holeIndex].teams[rmTeamIndex].players = rmNewPlayers;
-      //console.log('removeFromTeam newHoles', newHoles);
-
-      // ****** add player to team ******
-      if( !addToTeam ) return;
-
-      // first remove this player from all other teams (to be safe)
-      const newTeams = newHoles[holeIndex].teams.map(t => {
-        let players = t.players.filter(p => (p != pkey));
-        return {
-          ...t,
-          players,
+      // if team data doesn't exist, create blanks
+      if( !newHoles[holeIndex].teams ) newHoles[holeIndex].teams = [];
+      //console.log('teams', newHoles[holeIndex].teams);
+      for( let i=0; i < teamCount; i++ ) {
+        const teamNum = (i+1).toString();
+        const teamIndex = find(newHoles[holeIndex].teams, {team: teamNum});
+        //console.log('blanks', teamNum, teamIndex);
+        if( !teamIndex || teamIndex < 0 ) {
+          newHoles[holeIndex].teams.push({
+            __typename: 'Team',
+            team: teamNum,
+            players: [],
+            junk: []
+          });
         }
-      });
-      newHoles[holeIndex].teams = orderBy(newTeams, ['team'], ['asc']);
-      //console.log('teams after removing player from all other teams', newHoles[holeIndex].teams);
-
-      let addTeamIndex = findIndex(newHoles[holeIndex].teams, {team: addToTeam});
-      if( addTeamIndex < 0 ) {
-        newHoles[holeIndex].teams.push({
-          __typename: 'Team',
-          team: addToTeam,
-          players: [],
-          junk: [],
-        });
-        addTeamIndex = 0;
       }
-      //console.log('holeIndex', holeIndex, 'addTeamIndex', addTeamIndex);
-      if( addTeamIndex < 0 ) return;
-      const addPlayers = newHoles[holeIndex].teams[addTeamIndex].players;
-      addPlayers.push(pkey);
-      //console.log('addPlayers', addPlayers);
-      newHoles[holeIndex].teams[addTeamIndex].players = addPlayers;
-      //console.log('addToTeam newHoles', newHoles);
+
+      newHoles[holeIndex].teams = newHoles[holeIndex].teams.map(t => {
+        let newTeam = cloneDeep(t);
+        // remove player from team, if match removeFromTeam
+        if( removeFromTeam == t.team ) {
+          newTeam.players = filter(t.players, p => p != pkey);
+        }
+        // add player to team, if match addToTeam
+        if( addToTeam == t.team ) {
+          newTeam.players.push(pkey);
+        }
+        //console.log('newTeam', newTeam);
+        return newTeam;
+      });
     });
-    //console.log('removeFromTeam newHoles final', newHoles);
     const newHolesWithoutTypes = omitTypename(newHoles);
+    //console.log('newHoles final', newHolesWithoutTypes);
 
     const { loading, error, data } = await updateGameHoles({
       variables: {
@@ -129,7 +119,14 @@ const TeamChooser = props => {
       }
     });
 
-    if( error ) console.log('Error updating game - teamChooser', error);
+    if( error ) {
+      console.log('Error updating game - teamChooser', error);
+    } else {
+      // if we've chosen teams, clear out game metadata on holesToUpdate
+      if( teams ) {
+        setGameMeta(gkey, 'holesToUpdate', []);
+      }
+    }
   };
 
 
@@ -137,8 +134,8 @@ const TeamChooser = props => {
     if( !item ) return;
 
     let team;
-    if( h && h.teams ) {
-      team = find(h.teams, t => (
+    if( gameHole && gameHole.teams ) {
+      team = find(gameHole.teams, t => (
         t && t.players && t.players.includes(item._key)
       ));
     }
@@ -146,6 +143,7 @@ const TeamChooser = props => {
 
     const teamIcon = (teamNum) => {
       if( team && team.team && team.team == teamNum ) {
+        // removing from a team
         return (
           <Icon
             name='check-circle'
@@ -157,6 +155,7 @@ const TeamChooser = props => {
           />
         );
       } else {
+        // adding to a team
         return (
           <Icon
             name='plus-circle'
