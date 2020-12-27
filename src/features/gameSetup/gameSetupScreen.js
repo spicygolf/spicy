@@ -43,9 +43,12 @@ const GameSetupScreen = props => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      testID="game_setup_scrollview"
-    >
-      <ScrollView keyboardShouldPersistTaps="handled">
+      testID='game_setup_kaview'
+      >
+      <ScrollView
+        keyboardShouldPersistTaps='handled'
+        testID='game_setup_scrollview'
+      >
         <Players />
         <Teams />
         <Options />

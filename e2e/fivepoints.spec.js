@@ -91,12 +91,14 @@ describe('SpicyGolf', () => {
     await element(by.id('game_setup_tab'))
       .tap();
 
-    await element(by.id('game_setup_scrollview')).scrollTo('bottom');
+    await element(by.id('game_setup_scrollview'))
+      .tapAtPoint({x: 10, y: 10});
+    await element(by.id('game_setup_scrollview'))
+      .scrollTo('bottom');
     await element(by.id('admin_delete_game'))
       .tap();
 
-      await element(by.id('game_setup_scrollview')).scrollTo('bottom');
-      await element(by.id('admin_delete_game_yes'))
+    await element(by.id('admin_delete_game_yes'))
       .tap();
 
 

@@ -76,6 +76,7 @@ const LinkRoundList = props => {
                   <ListItem
                     key={index}
                     onPress={() => chooseRound(item, false)}
+                    testID={`choose_existing_round_${index}`}
                   >
                     <ListItem.Content>
                       <ListItem.Title>{moment(item.date).format('llll')}</ListItem.Title>
