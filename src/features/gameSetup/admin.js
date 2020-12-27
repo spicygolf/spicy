@@ -8,6 +8,7 @@ import {
 import {
   Button,
   Card,
+  Overlay,
 } from 'react-native-elements';
 import { useMutation, useQuery } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
@@ -91,29 +92,14 @@ const Admin = props => {
   // TODO: we could show the rounds here, and give the user a choice as to
   // which ones they want to delete before deleting game.
   // They won't get the option to delete rounds linked to other games.
-  const areYouSure = showSure ?  (
-    <View>
-      <Text style={styles.sure_txt}>Delete Game: Are you sure?</Text>
-      <View style={styles.button_row}>
-        <Button
-          title='No'
-          onPress={() => setShowSure(false)}
-          containerStyle={styles.no_button}
-        />
-        <Button
-          title='Yes'
-          buttonStyle={styles.button}
-          containerStyle={styles.yes_button}
-          onPress={() => doDeleteGame()}
-          testID="admin_delete_game_yes"
-        />
-      </View>
-    </View>
-  ) : null;
+  const toggleOverlay = () => {
+    setShowSure(!showSure);
+  };
 
   const bg = showSure ? '#fbb' : '#fff';
 
   return (
+    <View>
     <Card
       containerStyle={{backgroundColor: bg}}
     >
@@ -126,8 +112,31 @@ const Admin = props => {
         onPress={() => setShowSure(true)}
         testID="admin_delete_game"
       />
-      { areYouSure }
     </Card>
+    <Overlay isVisible={showSure} onBackdropPress={toggleOverlay}>
+      <View>
+        <Text style={styles.sure_txt}>Delete Game: Are you sure?</Text>
+        <View style={styles.button_row}>
+          <Button
+            title='No'
+            type='outline'
+            onPress={toggleOverlay}
+            containerStyle={styles.no_button}
+          />
+          <Button
+            title='Yes'
+            buttonStyle={styles.button}
+            containerStyle={styles.yes_button}
+            onPress={() => {
+              doDeleteGame();
+              toggleOverlay();
+            }}
+            testID="admin_delete_game_yes"
+          />
+        </View>
+      </View>
+    </Overlay>
+    </View>
   );
 
 };
