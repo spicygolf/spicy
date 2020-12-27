@@ -55,14 +55,16 @@ const GameStack = props => {
           name='Leaderboard'
           component={Leaderboard}
           options={{
-            title: 'Leaderboard'
+            title: 'Leaderboard',
+            tabBarTestID: 'game_leaderboard_tab',
           }}
         />
         <Tab.Screen
           name='Score'
           component={Score}
           options={{
-            title: 'Score'
+            title: 'Score',
+            tabBarTestID: 'game_score_tab',
           }}
         />
         <Tab.Screen
@@ -70,7 +72,7 @@ const GameStack = props => {
           component={GameSetupStack}
           options={{
             title: 'Setup',
-            tabBarTestID: 'game_setup_tab'
+            tabBarTestID: 'game_setup_tab',
           }}
         />
       </Tab.Navigator>

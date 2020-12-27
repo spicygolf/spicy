@@ -141,6 +141,7 @@ const Tee = props => {
         // after all that, go back to GameSetup
         navigation.navigate('GameSetup');
       }}
+      testID={`favorite_tee_${item._key}`}
     >
       <FavoriteIcon
         fave={item.fave}

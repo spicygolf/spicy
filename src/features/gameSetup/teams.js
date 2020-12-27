@@ -70,12 +70,13 @@ const Teams = props => {
     chooser = (
       <View style={styles.chooserView}>
         <Text>Choose Teams:</Text>
-        <TeamChooser currentHole="1" />
+        <TeamChooser currentHole='1' from='game_setup' />
       </View>
     );
   }
 
   return (
+    <View testID='game_setup_teams_card'>
     <Card>
       <Card.Title>Teams</Card.Title>
       <Card.Divider />
@@ -90,6 +91,7 @@ const Teams = props => {
       />
       { chooser }
     </Card>
+    </View>
   );
 
 };

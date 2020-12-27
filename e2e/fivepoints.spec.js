@@ -7,7 +7,7 @@ describe('SpicyGolf', () => {
       .toBeVisible()
       .withTimeout(3000);
 
-      return;
+    return;
 
 
 
@@ -81,18 +81,79 @@ describe('SpicyGolf', () => {
 
 
     // **************************************
-    // add player to game
+    // add players to game
+    // TODO: means we have 3 favorites already, kinda brittle, fix later
     await element(by.id('add_player_button'))
       .tap();
 
+    await element(by.id('add_player_favorites_0'))
+      .tap();
+
+    await element(by.id('add_player_button'))
+      .tap();
+
+    await element(by.id('add_player_favorites_1'))
+      .tap();
+
+    await element(by.id('add_player_button'))
+      .tap();
+
+    await element(by.id('add_player_favorites_2'))
+      .tap();
+
+
+    // **************************************
+    // select course, tee
+
+    await element(by.id('tee_selector_0'))
+      .tap();
+
+    // TODO: means DHGC Presidents tee is a favorite - kinda brittle, fix later
+    await element(by.id('favorite_tee_34421535'))
+      .tap();
+
+
+    // **************************************
+    // choose teams
+
+    await waitFor(element(by.id('game_setup_teams_card')))
+      .toBeVisible()
+      .whileElement(by.id('game_setup_scrollview')).scroll(350, 'down')
+
+    await element(by.id('game_setup_add_player_to_team_1_0'))
+      .tap();
+
+    await element(by.id('game_setup_add_player_to_team_2_1'))
+      .tap();
+
+    await element(by.id('game_setup_add_player_to_team_2_2'))
+      .tap();
+
+    await element(by.id('game_setup_add_player_to_team_1_3'))
+      .tap();
+
+    // **************************************
+    // score game
+
+    await element(by.id('game_score_tab'))
+      .tap();
+
+
+
+
+
+
+    return;
 
     // **************************************
     // clean up after our test
     await element(by.id('game_setup_tab'))
       .tap();
 
+    // until LogBox errors are cleared, need to tap the scrollview
     await element(by.id('game_setup_scrollview'))
-      .tapAtPoint({x: 10, y: 10});
+      .tap({x: 10, y: 10});
+
     await element(by.id('game_setup_scrollview'))
       .scrollTo('bottom');
     await element(by.id('admin_delete_game'))

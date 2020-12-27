@@ -22,7 +22,7 @@ const AddPlayerFavorites = props => {
 
   const { currentPlayerKey, game } = useContext(GameContext);
 
-  const _renderFavoritesPlayer = ({item}) => {
+  const _renderFavoritesPlayer = ({item, index}) => {
 
     const handicap = (item && item.handicap && item.handicap.index) ?
     item.handicap.index : 'NH';
@@ -36,6 +36,7 @@ const AddPlayerFavorites = props => {
         title={item.name}
         subtitle={club}
         hdcp={handicap}
+        testID={index}
       />
     );
   }

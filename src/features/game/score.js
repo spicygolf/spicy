@@ -74,6 +74,7 @@ const Score = props => {
           <Card.Divider />
           <TeamChooser
             currentHole={currentHole}
+            from='score'
           />
         </Card>
       );

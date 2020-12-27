@@ -28,7 +28,7 @@ const TeamChooser = props => {
 
   const [ updateGameHoles ] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
-  const { currentHole } = props;
+  const { currentHole, from } = props;
   //console.log('currentHole', currentHole);
   const { game } = useContext(GameContext);
   const { _key: gkey } = game;
@@ -130,7 +130,7 @@ const TeamChooser = props => {
   };
 
 
-  const _renderPlayer = ({item}) => {
+  const _renderPlayer = ({item, index}) => {
     if( !item ) return;
 
     let team;
@@ -143,6 +143,7 @@ const TeamChooser = props => {
 
     const teamIcon = (teamNum) => {
       if( team && team.team && team.team == teamNum ) {
+        //console.log('remove', from, teamNum, index);
         // removing from a team
         return (
           <Icon
@@ -152,9 +153,11 @@ const TeamChooser = props => {
             size={30}
             iconStyle={styles.icon}
             onPress={() => changeTeamsForPlayer(item._key, null, teamNum)}
+            testID={`${from}_remove_player_from_team_${teamNum}_${index}`}
           />
         );
       } else {
+        //console.log('add', from, teamNum, index);
         // adding to a team
         return (
           <Icon
@@ -164,6 +167,7 @@ const TeamChooser = props => {
             size={30}
             iconStyle={styles.icon}
             onPress={() => changeTeamsForPlayer(item._key, teamNum, teamNum == '1' ? '2' : '1')}
+            testID={`${from}_add_player_to_team_${teamNum}_${index}`}
           />
         );
       }

@@ -50,7 +50,7 @@ const Players = props => {
     return ret;
   }
 
-  const _renderPlayer = ({item}) => {
+  const _renderPlayer = ({item, index}) => {
     //console.log('renderPlayer item', item);
     if( item && item.name && item._key ) {
       const name = item.name || '';
@@ -73,6 +73,7 @@ const Players = props => {
           tee={tee}
           rkey={rkey}
           player={item}
+          testID={index}
         />
       );
 

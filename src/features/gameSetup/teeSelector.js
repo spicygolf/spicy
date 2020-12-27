@@ -17,7 +17,7 @@ const TeeSelector = (props) => {
 
   const navigation = useNavigation();
 
-  const { game, tee, rkey, player } = props;
+  const { game, tee, rkey, player, testID } = props;
 
   const course = (tee && tee.course && tee.name) ?
     ' - ' + acronym(tee.course.name) : '';
@@ -45,6 +45,7 @@ const TeeSelector = (props) => {
         buttonStyle={styles.button}
         titleStyle={styles.title}
         onPress={pressFn}
+        testID={`tee_selector_${testID}`}
       />
     </View>
   );

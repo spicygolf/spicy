@@ -22,7 +22,7 @@ const Player = props => {
 
   const navigation = useNavigation();
 
-  const { game, item, title, subtitle, hdcp } = props;
+  const { game, item, testID, title, subtitle, hdcp } = props;
   //console.log('player', item);
 
   return (
@@ -36,6 +36,7 @@ const Player = props => {
         };
         navigation.navigate('LinkRoundList', {game, player});
       }}
+      testID={`add_player_favorites_${testID}`}
     >
       <FavoriteIcon
         fave={item.fave}
