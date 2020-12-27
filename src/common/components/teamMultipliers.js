@@ -17,6 +17,7 @@ import ScoringWrapper from 'common/utils/ScoringWrapper';
 import {
   getHolesToUpdate,
   omitTypename,
+  teamsRotate,
 } from 'common/utils/game';
 import { getMultipliersFromGamespecs } from 'common/utils/score';
 import { red } from 'common/colors';
@@ -155,6 +156,8 @@ const TeamMultipliers = props => {
 
   };
 
+  // no pressing if teams rotate - rethink this? There are degenerates out there
+  if( teamsRotate(game) ) return null;
 
   const hole = find(scoring.holes, { hole: currentHole });
   if( !hole ) return null;
@@ -163,7 +166,7 @@ const TeamMultipliers = props => {
   if( !team ) return null;
 
   const team_mults = [];
-  // see if we have any mults already working
+  // see if we have any mults already working from previous holes
   if( h && h.multipliers ) {
     h.multipliers.map(hMult => {
       if( hMult.first_hole != currentHole && hMult.team == teamNum ) {

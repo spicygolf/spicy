@@ -459,3 +459,10 @@ export const teamsRotateOptions = [
   {slug: 'every3', caption: 'Every 3'},
   {slug: 'every6', caption: 'Every 6'},
 ];
+
+export const teamsRotate = (game) => (
+  game &&
+  game.scope &&
+  game.scope.teams_rotate &&
+  game.scope.teams_rotate !== 'never'
+);
