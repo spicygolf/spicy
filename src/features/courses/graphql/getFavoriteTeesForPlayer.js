@@ -1,14 +1,10 @@
-import React from 'react';
-
-import { Query } from 'react-apollo';
-
 import { gql } from '@apollo/client';
 
 
 
 export const GET_FAVORITE_TEES_FOR_PLAYER_QUERY = gql`
-  query GetFavoriteTeesForPlayer($pkey: String!) {
-    getFavoriteTeesForPlayer(pkey: $pkey) {
+  query GetFavoriteTeesForPlayer($pkey: String!, $gametime: String) {
+    getFavoriteTeesForPlayer(pkey: $pkey, gametime: $gametime) {
       _key
       name
       gender

@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 
-export default gql`
+export const SEARCH_COURSE_QUERY = gql`
   query SearchCourse($q: String!) {
     searchCourse(q: $q) {
       _key
@@ -11,6 +11,8 @@ export default gql`
         _key
         name
         gender
+        TotalYardage
+        TotalMeters
         Ratings {
           RatingType
           CourseRating

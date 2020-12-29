@@ -130,6 +130,7 @@ const AddCourseSearch = props => {
     const { loading, error, data } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
       variables: {
         pkey: currentPlayerKey,
+        gametime: game.start,
       }
     });
 
@@ -155,7 +156,8 @@ const AddCourseSearch = props => {
           refetchQueries: [{
             query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
             variables: {
-              pkey: currentPlayerKey
+              pkey: currentPlayerKey,
+              gametime: game.start,
             }
           }]
         }
