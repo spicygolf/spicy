@@ -88,7 +88,7 @@ export const scoring = game => {
   const { gamespecs } = game;
   const allScoring = getScoringFromGamespecs(gamespecs);
   const allJunk = getJunkFromGamespecs(gamespecs);
-  const allmultipliers = getMultipliersFromGamespecs(gamespecs);
+  const allMultipliers = getMultipliersFromGamespecs(gamespecs);
   const teamGame = getGamespecKVs(game, 'teams').includes(true);
   const pointsGame = getGamespecKVs(game, 'type').includes('points');
   const matchplayGame = getGamespecKVs(game, 'type').includes('match');
@@ -162,9 +162,9 @@ export const scoring = game => {
       return team;
     });
 
-    teams = calcTeamScore({teams, allScoring, allJunk, game, scoresEntered});
+    teams = calcTeamScore({teams, allScoring, allJunk, game, scoresEntered, hole});
 
-    teams = calcTeamJunk({teams, allScoring, allJunk, game, scoresEntered});
+    teams = calcTeamJunk({teams, allScoring, allJunk, game, scoresEntered, betterPoints});
 
     //  junk that depends on team score or something after the above calcs
     //  something like 'ky' or 'oj' in wolfhammer
@@ -181,7 +181,7 @@ export const scoring = game => {
 
     // multipliers
     const multipliers = [];
-    allmultipliers.map(gsMult => {
+    allMultipliers.map(gsMult => {
       if( gsMult.based_on == 'user' ) {
         if( gHole && gHole.multipliers ) {
           //console.log('scoring gHole', gHole);
@@ -199,9 +199,7 @@ export const scoring = game => {
             const j = find(p.junk, {name: gsMult.based_on});
             if( j ) {
               try {
-                const replaced = gsMult.availability.replace(/'/g, '"');
-                const availability = JSON.parse(replaced);
-                const logic = scoringWrapper.logic(availability, {
+                const logic = scoringWrapper.logic(gsMult.availability, {
                   team: t,
                   possiblePoints: possiblePoints,
                 });
@@ -430,7 +428,7 @@ const calcPlayerJunk = ({players, pkey, game, hole, allScoring, allJunk}) => {
 
 };
 
-const calcTeamScore = ({teams, allScoring, allJunk, game, scoresEntered}) => {
+const calcTeamScore = ({teams, allScoring, allJunk, game, scoresEntered, hole}) => {
 
   // ready to calc yet?  check if all scores are in
   //console.log('calcTeamScore', game.players, scoresEntered, teams);
@@ -457,6 +455,33 @@ const calcTeamScore = ({teams, allScoring, allJunk, game, scoresEntered}) => {
       if( gsJunk.scope == 'team' ) {
         if( gsJunk.type == 'dot') {
           switch( gsJunk.calculation ) {
+            // TODO: convert low_ball and low_team over to logic, and get rid of
+            //       gsJunk.calculation and best_ball and sum cases below.
+            //       i.e. only use gsJunk.logic field going forward
+            case 'logic':
+              const oneHoleScoring = {
+                holes: [{
+                  hole: hole,
+                  teams: teams,
+                }],
+              };
+              const scoringWrapper = new ScoringWrapper(game, oneHoleScoring, hole);
+              let junk_pts = 0;
+              try {
+                const logic = scoringWrapper.logic(gsJunk.logic, {
+                  team,
+                  teams,
+                });
+                //console.log('team junk logic', hole, logic);
+                if( logic ) {
+                  junk_pts = parseFloat(gsJunk.value);
+                }
+              } catch( e ) {
+                console.log('logic error', e);
+              }
+              ret.score[gsJunk.name] = junk_pts;
+              break;
+            // TODO: see above, only use 'logic' in future
             case 'best_ball':
               const orderedBalls = orderBy(team.players, p => (
                 parseFloat(p.score[gsJunk.based_on].value)
@@ -465,6 +490,7 @@ const calcTeamScore = ({teams, allScoring, allJunk, game, scoresEntered}) => {
               let val = orderedBalls.map(p => p.score[gsJunk.based_on].value);
               ret.score[gsJunk.name] = val;
               break;
+            // TODO: see above, only use 'logic' in future
             case 'sum':
               let sum = 0.0;
               team.players.map(player => {
@@ -485,15 +511,14 @@ const calcTeamScore = ({teams, allScoring, allJunk, game, scoresEntered}) => {
         }
       }
     });
-
     return ret;
   });
 
 };
 
-const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered}) => {
+const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered, betterPoints}) => {
 
-  // ready to calc yet?  check if all scores are in
+  // ready to calc yet?  check if all scores are in for this hole
   //console.log('calcTeamJunk', game.players, scoresEntered, teams);
   if( game.players.length != scoresEntered ) return teams;
 
@@ -513,55 +538,73 @@ const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered}) => {
         });
         //console.log('teamScores', teamScores);
 
-        // figure out how many scores to iterate through to break tie
-        // i.e. first ball only, or progress thru the balls for ties
-        const maxLenScores = max(teamScores.map(t => t.value.length));
-        const ties_option = getOption(game, 'next_ball_breaks_ties');
-        const lenOfScores = ( ties_option && ties_option.value === true )
-          ? maxLenScores
-          : 1;
-        //console.log('lenOfScores', lenOfScores);
+        switch( gsJunk.calculation ) {
+          case 'logic':
+            // logic already has points calculated, so just use them
+            const betterMult = (betterPoints == 'lower')
+              ? -1
+              : 1;
+            for( let i=0; i<teamScores.length; i++ ) {
+              if( teamScores[i].value != 0 &&
+                  game.players.length == scoresEntered ) {
+                ret[i].junk.push(gsJunk);
+                ret[i].points = ret[i].points + teamScores[i].value * betterMult;
+              }
+            }
+            break;
+          default:
+            // TODO: replace low_ball and low_total with logic (like above)
+            //       and move these bits into ScoringWrapper under custom fns
 
-        let best = teamScores[0];
-        let countOfBest = 1;
-        let validScores = true;
-        for( let i=1; i<teamScores.length; i++ ) {
-          for( let j=0; j<lenOfScores; j++ ) {
-            //console.log('i', i, 'j', j, teamScores[i].value[j], best.value[j]);
-            if( !teamScores[i].value[j] ) {
-              //console.log(`we don't have valid scores`);
-              validScores = false;
-              break;
-            }
-            if( teamScores[i].value[j] == best.value[j] ) {
-              //console.log('adding to countOfBest cuz tied');
-              ++countOfBest;
-            }
-            if( gsJunk.better == 'lower' ) {
-              if( teamScores[i].value[j] < best.value[j] ) {
-                best = teamScores[i];
-                //console.log('this team beat best team', best);
-                countOfBest = 1;
-                break; // don't go further with these orderedScores
+            // figure out how many scores to iterate through to break tie
+            // i.e. first ball only, or progress thru the balls for ties
+            const maxLenScores = max(teamScores.map(t => t.value.length));
+            const ties_option = getOption(game, 'next_ball_breaks_ties');
+            const lenOfScores = ( ties_option && ties_option.value === true )
+              ? maxLenScores
+              : 1;
+            //console.log('lenOfScores', lenOfScores);
+
+            let best = teamScores[0];
+            let countOfBest = 1;
+            let validScores = true;
+            for( let i=1; i<teamScores.length; i++ ) {
+              for( let j=0; j<lenOfScores; j++ ) {
+                //console.log('i', i, 'j', j, teamScores[i].value[j], best.value[j]);
+                if( !teamScores[i].value[j] ) {
+                  //console.log(`we don't have valid scores`);
+                  validScores = false;
+                  break;
+                }
+                if( teamScores[i].value[j] == best.value[j] ) {
+                  //console.log('adding to countOfBest cuz tied');
+                  ++countOfBest;
+                }
+                if( gsJunk.better == 'lower' ) {
+                  if( teamScores[i].value[j] < best.value[j] ) {
+                    best = teamScores[i];
+                    //console.log('this team beat best team', best);
+                    countOfBest = 1;
+                    break; // don't go further with these orderedScores
+                  }
+                } else if( gsJunk.better == 'higher' ) {
+                  if( teamScores[i].value[j] > best.value[j] ) {
+                    best = teamScores[i];
+                    //console.log('this team beat best team', best);
+                    countOfBest = 1;
+                    break; // don't go further with these orderedScores
+                  }
+                }
               }
-            } else if( gsJunk.better == 'higher' ) {
-              if( teamScores[i].value[j] > best.value[j] ) {
-                best = teamScores[i];
-                //console.log('this team beat best team', best);
-                countOfBest = 1;
-                break; // don't go further with these orderedScores
-              }
             }
+            if( validScores &&
+                (countOfBest <= lenOfScores) &&
+                (game.players.length == scoresEntered)) {
+              ret[best.index].junk.push(gsJunk);
+              ret[best.index].points = ret[best.index].points + gsJunk.value;
+            }
+            break;
           }
-        }
-        if( validScores &&
-            (countOfBest <= lenOfScores) &&
-            (game.players.length == scoresEntered)) {
-          ret[best.index].junk.push(gsJunk);
-          ret[best.index].points = ret[best.index].points + gsJunk.value;
-        }
-      } else if( gsJunk.type == 'vegas' ) {
-        console.log('scoring vegas', );
       } else {
         console.log('unknown junk type: ', gsJunk.type);
       }
@@ -574,6 +617,7 @@ const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered}) => {
 export const isScoreToParJunk = (junk, s, par) => {
 
   // assumes junk.score_to_par is in form '{fit} {amount}' like 'exactly -2'
+  if( !junk.score_to_par ) return null;
   const [fit, amount] = junk.score_to_par.split(' ');
   //console.log(junk.name, junk.based_on, s, hole.par, fit, amount);
 
@@ -659,7 +703,7 @@ export const vegasTeamScore = ({team, teams, game, s}) => {
 
   // flips digits?  add10?
   let flip = false;
-  let addPoints = 0;
+  //let addPoints = 0;
 
   let thisTeamJunk = [];
   team.players.map(p => {
@@ -674,31 +718,21 @@ export const vegasTeamScore = ({team, teams, game, s}) => {
   const otherTeamBirdies = countJunk(otherTeamJunk, {name: 'birdie'});
   const otherTeamEagles = countJunk(otherTeamJunk, {name: 'eagle'});
   const birdies_cancel_option = getOption(game, 'birdies_cancel_flip');
-  const two_birdies_option = getOption(game, 'two_birdies_same_team');
-  const eagle_option = getOption(game, 'eagle_adds_10');
 
   if( otherTeamBirdies ) {
     if( !birdies_cancel_option || !(thisTeamBirdies || thisTeamEagles) ) {
       flip = true;
-      if( two_birdies_option && otherTeamBirdies > 1 ) {
-        addPoints += 10;
-      }
     }
   }
   if( otherTeamEagles ) {
     if( !birdies_cancel_option || !thisTeamEagles ) {
       flip = true;
-      if( eagle_option ) addPoints += 10;
-      if( eagle_option && otherTeamEagles > 1 ) {
-        addPoints += 10;
-      }
     }
   }
 
   // now perform math on digits and team object
   if( flip ) teamDigits.sort((a, b) => (b - a));
   let points = teamDigits[0] * 10 + teamDigits[1];
-  points += addPoints;
   team.points += points;
 
   //console.log('scoring vegas  this team', team);

@@ -108,8 +108,9 @@ const HoleJunk = props => {
       }
 
       if( !junk.score_to_par ) {
-        console.log(`Invalid game setup.  Junk '${junk.name}' doesn't have
-        'score_to_par' set properly.`);
+        //console.log(`Invalid game setup.  Junk '${junk.name}' doesn't have
+        //'score_to_par' set properly.`);
+        return null;
       }
 
       const j = isScoreToParJunk(junk, s, par);

@@ -1,5 +1,10 @@
 import jsonLogic from 'json-logic-js';
-import { find, orderBy } from 'lodash';
+import {
+  concat,
+  filter,
+  find,
+  orderBy
+} from 'lodash';
 
 import {
   getGamespecKVs,
@@ -8,7 +13,7 @@ import {
 
 
 // a wrapper class containing functions about scoring and players and teams
-// so we can inject them into  JsonLogic as custom operators
+// so we can inject them into JsonLogic as custom operators
 class ScoringWrapper {
 
   constructor(game, scoring, currentHole) {
@@ -25,12 +30,20 @@ class ScoringWrapper {
   }
 
   logic = ( expression, extra_vars ) => {
+    if( !(expression && expression.replace) ) {
+      console.log('expression error: ', expression);
+      return false;
+    }
+    const replaced = expression.replace(/'/g, '"');
+    const parsed = JSON.parse(replaced);
+    this._extra_vars = extra_vars;
     const data = {
       ...extra_vars,
       scoring: this,
     };
-    //console.log('data', data);
-    return jsonLogic.apply(expression, data)
+    //console.log('logic expression', expression);
+    //console.log('logic data', data);
+    return jsonLogic.apply(parsed, data)
   }
 
   getPrevHole = () => {
@@ -84,6 +97,29 @@ class ScoringWrapper {
     return true;
   };
 
+  countJunk = (team, junkName) => {
+    let teamJunk = [];
+    team.players.map(p => {
+      teamJunk = concat(teamJunk, p.junk)
+    })
+    const f = filter(teamJunk, {name: junkName});
+    //console.log('countJunk', this._currentHole, teamJunk, f);
+    if( !f ) return 0;
+    return f.length;
+  };
+
+  // team arg is 'this' or 'other'
+  getTeam = (team) => {
+    let ret = null;
+    if( team == 'this' ) ret = this._extra_vars.team;
+    if( team == 'other' ) {
+      const otherTeamIndex = (this._extra_vars.team.team === '1' ) ? 1 : 0;
+      ret = this._extra_vars.teams[otherTeamIndex];
+    }
+    //console.log('getTeam', team, ret);
+    return ret;
+  };
+
   _teamRanks = (hole, dir) => {
     const teamScores = hole.teams.map(t => ({
       team: t.team,
@@ -118,6 +154,8 @@ class ScoringWrapper {
     'other_team_multiplied_with': this.didOtherTeamMultiplyWith,
     'getPrevHole': this.getPrevHole,
     'getCurrHole': this.getCurrHole,
+    'team': this.getTeam,
+    'countJunk': this.countJunk,
   };
 
 

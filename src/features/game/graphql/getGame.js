@@ -140,6 +140,7 @@ export const GET_GAME_QUERY = gql`
             score_to_par
             based_on
             calculation
+            logic
             better
         }
         multipliers {
