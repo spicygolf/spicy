@@ -102,12 +102,6 @@ const Teams = ({teams, scoring, currentHole }) => {
             />
           </View>
         </Card>
-        <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
-          <ChangeTeams
-            currentHole={currentHole}
-            close={toggleOverlay}
-          />
-        </Overlay>
       </View>
     );
 
@@ -121,7 +115,17 @@ const Teams = ({teams, scoring, currentHole }) => {
     />
   );
 
-  return flatlist;
+  return (
+    <View>
+      { flatlist }
+      <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
+          <ChangeTeams
+            currentHole={currentHole}
+            close={toggleOverlay}
+          />
+        </Overlay>
+    </View>
+  );
 };
 
 export default Teams;
