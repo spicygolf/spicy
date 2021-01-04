@@ -8,12 +8,11 @@ import { useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 
 import {
-  ACTIVE_GAMES_FOR_PLAYER_QUERY,
   ADD_GAME_MUTATION,
 } from 'features/games/graphql';
 import { ADD_LINK_MUTATION } from 'common/graphql/link';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-
+import { omitTypename } from 'common/utils/game';
 
 
 const NewGame = props => {
@@ -22,32 +21,69 @@ const NewGame = props => {
   const { gamespec, game_start } = route.params;
   //console.log('newGame', gamespec, game_start);
 
-  const { currentPlayer, currentPlayerKey } = useContext(CurrentPlayerContext);
+  const { currentPlayer } = useContext(CurrentPlayerContext);
   const [ gkey, setGkey ] = useState(null);
 
   const navigation = useNavigation();
   const [ addGameMutation ] = useMutation(ADD_GAME_MUTATION);
   const [ addLinkMutation ] = useMutation(ADD_LINK_MUTATION);
 
+/*
+    // TODO: maybe something like:
+              (with the commented out optimisticResponse below)
+    const temp_key = Date.now() + '_' + currentPlayerKey;
+    if( data.addGame._key == temp_key ) {
+      set flag of "temp keys" to true;
+      add nested object of { game , links: [ link, link ] } into a local store;
+    }
+    * send temp_keys flag thru to other mutations depending on this _key that
+      we made up because lack of connectivity
+    * periodically read local store and update _keys of actual data in database
+      when connectivity is restored
+    * how would other phones / clients w subscriptions act?
+*/
+
   const newGame = {
+    __typename: 'Game',
     name: gamespec.disp,
     start: game_start,
     scope: {
+      __typename: 'GameScope',
       holes: 'all18',
       teams_rotate: 'never',
     },
     holes: [],
     options: gamespec.defaultOptions || []
   };
+  // TODO: we may have to add `__typename: 'Option'` if there's anything in gamespec.defaultOptions
+  const newGameWithoutTypes = omitTypename(newGame);
 
   // add new game
   const addGame = async () => {
+    console.log('Begin adding game');
     const { loading, error, data } = await addGameMutation({
       variables: {
-        game: newGame,
+        game: newGameWithoutTypes,
       },
+/*
+      optimisticResponse: {
+        __typename: 'Mutation',
+        addGame: {
+          _key: Date.now(),
+          ...newGame,
+        }
+      },
+      update: (cache, { data: { addGame } }) => {
+        console.log('NewGame addGame mutation update function');
+        console.log('cache', cache.data.data);
+        console.log('data.addGame', addGame);
+      },
+*/
     });
-    // TODO: handle loading, error?
+
+    if( error && error.message != 'Network request failed' ) {
+      console.log('Error adding game: ', error.message);
+    }
     //console.log('newGame data', data);
     return data.addGame;
   };
@@ -58,16 +94,10 @@ const NewGame = props => {
         from: {type: 'game', value: game._key},
         to: {type: 'gamespec', value: gamespec._key},
       },
-      refetchQueries: () => [{
-        query: ACTIVE_GAMES_FOR_PLAYER_QUERY,
-        variables: {
-          pkey: currentPlayerKey,
-        },
-        fetchPolicy: 'cache-and-network',
-      }],
-      awaitRefetchQueries: true,  // TODO: shouldn't need this
     });
-    // TODO: handle loading, error?
+    if( error && error.message != 'Network request failed' ) {
+      console.log('Error linking game to gamespec: ', error.message);
+    }
     //console.log('newGame linkg2gs', data);
     return data.link;
 
@@ -80,7 +110,7 @@ const NewGame = props => {
     // to send to LinkRoundList and friends
     const game = {
       _key: gkey,
-      ...newGame,
+      ...newGameWithoutTypes,
       gamespecs: [gamespec],
     };
     const player = {
@@ -94,7 +124,7 @@ const NewGame = props => {
       params: {
         screen: 'GameSetup',
         params: {
-          addCurrentPlayerToGame: true,
+          addCurrentPlayerToGame: true,  // TODO: false for caddies / scorers
           game,
           player,
         },
@@ -110,7 +140,7 @@ const NewGame = props => {
         await linkGameToGamespec(game)
         setGkey(game._key);
       };
-      createNewGame();
+      if( !gkey ) createNewGame();
     }, []
   );
 

@@ -48,20 +48,23 @@ const NewGameList = props => {
     );
   };
 
-  const { data, loading, error} = useQuery(GAMESPECS_FOR_PLAYER_QUERY, {
+  const { data, loading, error } = useQuery(GAMESPECS_FOR_PLAYER_QUERY, {
     variables: {
       pkey: currentPlayerKey,
     },
-    fetchPolicy: 'cache-and-network',
   });
 
   if( loading ) return (<ActivityIndicator />);
 
   // TODO: error component instead of below...
-  if( error || !data.gameSpecsForPlayer ) {
+  if( (error && error.message != "Network request failed") ) {
     console.log(error);
-    return (<Text>Error</Text>);
+    return (<Text>Error: {error.message}</Text>);
   }
+
+  const gameSpecsForPlayer = (data && data.gameSpecsForPlayer)
+    ? data.gameSpecsForPlayer
+    : [];
 
   return (
     <View>
@@ -70,7 +73,7 @@ const NewGameList = props => {
         showBack={true}
       />
       <FlatList
-        data={data.gameSpecsForPlayer}
+        data={gameSpecsForPlayer}
         renderItem={_renderItem}
         keyExtractor={item => item._key}
       />

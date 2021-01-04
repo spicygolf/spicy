@@ -113,7 +113,7 @@ const Games = props => {
     }
   );
   if (error && error.message != 'Network request failed') {
-    return (<Text>Error! ${error.message}</Text>);
+    return (<Text>Error! {error.message}</Text>);
   }
 
   const games = ( data && data.activeGamesForPlayer )
