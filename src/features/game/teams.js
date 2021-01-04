@@ -69,6 +69,7 @@ const Teams = ({teams, scoring, currentHole }) => {
       if( p ) playersOnTeam.push(p);
     });
     //console.log('playersOnTeam', item.team, playersOnTeam);
+    if( !playersOnTeam.length ) return null; // bandaid (item 1) for #143
 
     return (
       <View>
