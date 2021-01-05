@@ -47,7 +47,7 @@ export const get_score_value = (name, score) => {
     const ret = find(score.values, val => val.k == name);
     if( !ret || !ret.v ) return null;
     //console.log('get_score_value', ret);
-    return ret.v;
+    return parseFloat(ret.v);
   } else {
     return null;
   }

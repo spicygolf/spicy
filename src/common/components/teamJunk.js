@@ -51,6 +51,9 @@ const TeamJunk = props => {
   const team = find(hole.teams, {team: teamNum});
   if( !team ) return null;
 
+  // team junk for single-player teams will be under holeJunk
+  if( team.players && team.players.length == 1 ) return null;
+
   const sorted_junk = orderBy(team.junk, ['seq'], ['asc']);
   if( sorted_junk.length == 0 ) return null;
 
@@ -88,7 +91,6 @@ const styles = StyleSheet.create({
   buttonTitle: {
     paddingTop: 5,
     paddingBottom: 5,
-    paddingLeft: 10,
     paddingRight: 10,
     fontSize: 13,
   },

@@ -1,4 +1,4 @@
-import { find, values } from 'lodash';
+import { find, includes, values } from 'lodash';
 
 
 
@@ -40,3 +40,29 @@ export const getTeams = (game, hole) => {
     return null;
   }
 };
+
+export const getScoreTeams = ({scores, hole}) => {
+  if( scores && scores.holes ) {
+    const h = find(scores.holes, {hole: hole});
+    return ( h && h.teams )
+      ? h.teams
+      : [];
+  } else {
+    return [];
+  }
+};
+
+export const getScoreTeamForPlayer = ({scores, hole, pkey}) => {
+  const teams = getScoreTeams({scores, hole});
+  const playerTeam = find(teams, t => {
+    return find(t.players, {pkey});
+  });
+  return playerTeam;
+};
+
+export const getScorePlayersOnTeam = ({scores, hole, pkey}) => {
+  const team = getScoreTeamForPlayer({scores, hole, pkey});
+  return (team && team.players)
+    ? team.players
+    : [];
+}

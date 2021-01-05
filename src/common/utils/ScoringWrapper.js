@@ -9,6 +9,10 @@ import {
 import {
   getGamespecKVs,
 } from 'common/utils/game';
+import {
+  get_score_value,
+} from 'common/utils/rounds';
+import { get_net_score } from './rounds';
 
 
 
@@ -120,6 +124,35 @@ class ScoringWrapper {
     return ret;
   };
 
+  // TODO: HoleJunk is sending TeeHole and Score in as _extra_vars, so in future
+  //       we will need to read holeNum arg and maybe find the hole (for par)
+  isParOrBetter = (holeNum, scoreType = 'gross') => {
+    const score = this._extra_vars.score;
+    let s = null;
+    switch(scoreType) {
+      case 'gross':
+        s = get_score_value(scoreType, score);
+        break;
+      case 'net':
+        s = get_net_score(gross, score);
+        break;
+      default:
+        break;
+    }
+    if( !s ) return false;
+    const p = parseInt(this._extra_vars.hole.par);
+    //console.log('isParOrBetter', s, p, (s <= p));
+    return (s <= p);
+  };
+
+  // TODO: HoleJunk is sending TeeHole and Score in as _extra_vars, so in future
+  //       we will need to read holeNum arg and maybe find the hole (for par)
+  holePar = (holeNum) => {
+    const p = parseInt(this._extra_vars.hole.par);
+    //console.log('holePar', p);
+    return p;
+  };
+
   _teamRanks = (hole, dir) => {
     const teamScores = hole.teams.map(t => ({
       team: t.team,
@@ -156,6 +189,8 @@ class ScoringWrapper {
     'getCurrHole': this.getCurrHole,
     'team': this.getTeam,
     'countJunk': this.countJunk,
+    'parOrBetter': this.isParOrBetter,
+    'holePar': this.holePar,
   };
 
 

@@ -142,6 +142,7 @@ export const GET_GAME_QUERY = gql`
             calculation
             logic
             better
+            availability
         }
         multipliers {
             name

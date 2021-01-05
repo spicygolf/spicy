@@ -24,7 +24,7 @@ import {
   get_score,
   get_score_value,
   get_pops,
-} from './rounds';
+} from 'common/utils/rounds';
 
 
 
@@ -177,7 +177,7 @@ export const scoring = game => {
         teams: teams,
       }],
     };
-    const scoringWrapper = new ScoringWrapper(game, oneHoleScoring, hole)
+    const scoringWrapper = new ScoringWrapper(game, oneHoleScoring, hole);
 
     // multipliers
     const multipliers = [];

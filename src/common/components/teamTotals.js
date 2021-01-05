@@ -34,7 +34,7 @@ const TeamTotals = props => {
     if( netPoints < 0 ) netPoints = 0;
   }
   const netTotal = netPoints * hole.holeMultiplier;
-  let diff = otherTeam ? team.runningTotal - otherTeam.runningTotal : null;
+  let diff = otherTeam ? team.runningTotal - otherTeam.runningTotal : team.runningTotal;
   if( betterPoints === 'lower' ) diff *= -1;
   const points = (netPoints == 0)
     ? '-'

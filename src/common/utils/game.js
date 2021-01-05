@@ -6,7 +6,10 @@ import {
 import { acronym, last } from 'common/utils/text';
 
 
-
+/**
+ *  return array of strings - hole numbers in the game
+ *
+ */
 export const getHoles = game => {
   if( !game.holes || !game.holes.length ) {
     let ret = [];

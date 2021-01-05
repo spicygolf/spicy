@@ -43,6 +43,7 @@ query GetGameSpec($gamespec: String!) {
           calculation
           logic
           better
+          availability
       }
       multipliers {
           name

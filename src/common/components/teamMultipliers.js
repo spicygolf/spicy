@@ -241,7 +241,6 @@ const styles = StyleSheet.create({
   buttonTitle: {
     paddingTop: 5,
     paddingBottom: 5,
-    paddingLeft: 10,
     paddingRight: 10,
     fontSize: 13,
   },
