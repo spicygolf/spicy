@@ -194,8 +194,11 @@ const AppStack = props => {
       <CurrentPlayerContext.Provider
         value={{
           currentPlayer,
+          setCurrentPlayer,
           currentPlayerKey,
+          setCurrentPlayerKey,
           token,
+          setToken,
         }}
       >
         { content }
