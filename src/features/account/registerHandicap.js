@@ -5,12 +5,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import {
   Button,
   Card,
+  Input,
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import { find } from 'lodash';
@@ -80,16 +80,16 @@ const RegisterHandicap = props => {
   return (
     <View style={styles.container}>
       <BackToLogin />
-      <KeyboardAvoidingView>
-        <ScrollView keyboardShouldPersistTaps='handled'>
+      <KeyboardAvoidingView behavior='position'>
+        <ScrollView>
         <Card>
           <Card.Title>Register - Handicap</Card.Title>
           <Card.Divider />
           <View style={styles.loginView} testID='register_2_view'>
             <View>
               <View style={styles.field_container}>
-                <Text style={styles.field_label}>Last Name *</Text>
-                <TextInput
+                <Input
+                  placeholder='Last Name *'
                   style={[styles.field_input, lnValid]}
                   onChangeText={text => {
                     setRegistration({
@@ -104,8 +104,8 @@ const RegisterHandicap = props => {
                 />
               </View>
               <View style={styles.field_container}>
-                <Text style={styles.field_label}>GHIN Number</Text>
-                <TextInput
+                <Input
+                  placeholder='GHIN Number'
                   style={[styles.field_input, gnValid]}
                   onChangeText={text => {
                     setRegistration({
@@ -115,6 +115,7 @@ const RegisterHandicap = props => {
                     validate('number', text);
                   }}
                   autoCapitalize='none'
+                  keyboardType='decimal-pad'
                   value={registration.ghinNumber}
                 />
               </View>
@@ -206,19 +207,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#b30000',
     flex: 1,
   },
-  field_label: {
-    fontWeight: 'bold',
-    marginTop: 5,
-    marginBottom: 5,
-  },
   field_input: {
-    height: 40,
     color: '#000',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginBottom: 10,
+    fontSize: 16,
   },
   button_row: {
     flexDirection: 'row',
@@ -229,8 +220,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 25,
-    marginBottom: 20,
+    marginVertical: 15,
   },
   hrLine: {
     width: width / 3.5,

@@ -60,7 +60,7 @@ const RegisterAgain = props => {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView>
-        <ScrollView keyboardShouldPersistTaps='handled'>
+        <ScrollView>
           <Card>
             <Card.Title>Registration Error</Card.Title>
             <Card.Divider />

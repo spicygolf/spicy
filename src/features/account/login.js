@@ -108,13 +108,24 @@ const Login = props => {
                 testID='password_field'
               />
             </View>
+            <View style={styles.forgot_pwd_view}>
+              <Button
+                onPress={() => { navigation.navigate('Forgot'); }}
+                title='FORGOT PASSWORD?'
+                type='clear'
+                titleStyle={styles.forgot_button_title}
+                accessibilityLabel='Forgot Password?'
+                testID='forgot_button'
+              />
+            </View>
             <View style={styles.field_container}>
               <Text style={styles.error_text}>{loginError}</Text>
             </View>
             <Button
-              style={styles.login_button}
+              buttonStyle={styles.login_button}
               onPress={login}
-              title='Login'
+              title='LOGIN'
+              titleStyle={styles.login_button_title}
               type={(emailValid && passValid) ? 'solid' : 'outline'}
               disabled={!(emailValid && passValid)}
               accessibilityLabel='Login'
@@ -122,20 +133,13 @@ const Login = props => {
             />
           </View>
         </Card>
-        <View style={styles.non_login_buttons_view}>
-          <Button
-            onPress={() => { navigation.navigate('Forgot'); }}
-            title='Forgot Password'
-            type='clear'
-            titleStyle={styles.non_login_buttons}
-            accessibilityLabel='Forgot Password'
-            testID='forgot_button'
-          />
+        <View style={styles.register_view}>
+          <Text style={styles.register_label}>Don't have an account?</Text>
           <Button
             onPress={() => { navigation.navigate('Register'); }}
-            title='Register'
+            title='REGISTER'
             type='clear'
-            titleStyle={styles.non_login_buttons}
+            titleStyle={styles.register_button_title}
           />
         </View>
       </ScrollView>
@@ -170,7 +174,6 @@ var styles = StyleSheet.create({
     height: '100%',
   },
   field_container: {
-
   },
   field_label: {
     fontWeight: 'bold',
@@ -185,17 +188,34 @@ var styles = StyleSheet.create({
     paddingRight: 10,
     marginBottom: 10,
   },
+  error_text: {
+    color: 'red',
+  },
   login_button: {
-    marginBottom: 15,
+    marginVertical: 15,
   },
-  non_login_buttons_view: {
+  login_button_title: {
+    fontWeight: 'bold',
+  },
+  forgot_pwd_view: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginHorizontal: 10,
-    marginVertical: 10,
+    justifyContent: 'flex-end',
   },
-  non_login_buttons: {
+  forgot_button_title: {
+    //color: '#000',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  register_view: {
+    alignItems: 'center',
+    marginTop: 25,
+  },
+  register_label: {
+    color: '#ccc',
+  },
+  register_button_title: {
     color: '#ddd',
-  }
+    fontWeight: 'bold',
+    textDecorationLine: 'underline',
+  },
 });

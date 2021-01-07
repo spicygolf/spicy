@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Keyboard,
   StyleSheet,
   Text,
   View,
@@ -121,6 +122,7 @@ const RegisterHandicapSearch = props => {
         }
       };
       fetchData();
+      Keyboard.dismiss();
     }, []
   );
 
