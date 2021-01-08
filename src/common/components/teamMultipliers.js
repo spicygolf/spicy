@@ -193,9 +193,7 @@ const TeamMultipliers = props => {
     }
 
     try {
-      const replaced = gsMult.availability.replace(/'/g, '"');
-      const availability = JSON.parse(replaced);
-      if( scoringWrapper.logic(availability, {team: team}) ) {
+      if( scoringWrapper.logic(gsMult.availability, {team: team}) ) {
         team_mults.push(gsMult);
       }
     } catch( e ) {
