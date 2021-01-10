@@ -18,11 +18,22 @@ const sortNumber = (a, b) => (a - b);
 
 const HoleNav = props => {
 
-  const {holes:holesOrig, currentHole, changeHole} = props;
+  const {holes:holesOrig, holeInfo, changeHole} = props;
 
   const holes = holesOrig.sort(sortNumber);
   holes.push("Summary");
-  const currentHoleIndex = findIndex(holes, h => { return h == currentHole })
+  const currentHoleIndex = findIndex(holes, h => { return h == holeInfo.hole })
+
+  let holeInfoContent = null;
+  if( holeInfo.par && holeInfo.length && holeInfo.handicap ) {
+    holeInfoContent = (
+      <Text style={styles.holeInfo}>
+        Par: <Text style={styles.holeInfoValue}>{holeInfo.par} </Text>
+        Yds: <Text style={styles.holeInfoValue}>{holeInfo.length} </Text>
+        Hdcp: <Text style={styles.holeInfoValue}>{holeInfo.handicap}</Text>
+      </Text>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -39,7 +50,8 @@ const HoleNav = props => {
           />
       </View>
       <View style={styles.currentHole}>
-        <Text style={styles.holeText}>{currentHole}</Text>
+        <Text style={styles.holeText}>{holeInfo.hole}</Text>
+        { holeInfoContent }
       </View>
       <View style={styles.direction}>
       <Icon
@@ -68,15 +80,22 @@ const styles = StyleSheet.create({
   direction: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   currentHole: {
     flex: 3,
-    flexDirection: 'row',
+    //flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   holeText: {
-    fontSize: 20
-  }
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  holeInfo: {
+    fontSize: 9,
+  },
+  holeInfoValue: {
+    fontWeight: 'bold',
+  },
 })

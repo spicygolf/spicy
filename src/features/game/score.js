@@ -17,17 +17,18 @@ import HoleNav from 'features/game/holenav';
 import Teams from 'features/game/teams';
 import GameSummaryStack from 'features/gameSummary/gameSummaryStack';
 import { GameContext } from 'features/game/gameContext';
-import { getHoles } from 'common/utils/game';
+import { getHoles, getLocalHoleInfo } from 'common/utils/game';
 import { getGameMeta, setGameMeta } from 'common/utils/metadata';
 
 
 
 const Score = props => {
 
-  const { game, gkey, scores } = useContext(GameContext);
+  const { game, gkey, scores, activeGameSpec } = useContext(GameContext);
   const [ currentHole, setCurrentHole ] = useState();
 
   let content = null;
+  let holeInfo = {hole: currentHole};
 
   const hole = find(scores.holes, {hole: currentHole});
 
@@ -56,6 +57,10 @@ const Score = props => {
 
   if( currentHole ) {
     if( teams ) {
+      holeInfo = ( activeGameSpec && activeGameSpec.location_type && activeGameSpec.location_type == 'local' )
+        ? getLocalHoleInfo({game, currentHole})
+        : {hole: currentHole};
+
       content = (
         <Teams
           teams={teams}
@@ -108,7 +113,7 @@ const Score = props => {
     <View style={styles.score_container}>
       <HoleNav
         holes={holes}
-        currentHole={currentHole}
+        holeInfo={holeInfo}
         changeHole={async hole => {
           await setGameMeta(gkey, 'currentHole', hole);
           setCurrentHole(hole);

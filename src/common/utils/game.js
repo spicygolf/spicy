@@ -469,3 +469,32 @@ export const teamsRotate = (game) => (
   game.scope.teams_rotate &&
   game.scope.teams_rotate !== 'never'
 );
+
+export const getLocalHoleInfo = ({game, currentHole}) => {
+  // we should have already checked gamespec.location_type == 'local' but...
+  let par, length, handicap;
+  let sameCourse = true;
+  game.rounds.map(r => {
+    const teeHole = find(r.tee.holes, {hole: currentHole});
+    if( !teeHole ) sameCourse = false;
+    if( par && par != teeHole.par ) {
+      sameCourse = false;
+    } else {
+      par = teeHole.par;
+    }
+    if( length && length != teeHole.length ) {
+      sameCourse = false;
+    } else {
+      length = teeHole.length;
+    }
+    if( handicap && handicap != teeHole.handicap ) {
+      sameCourse = false;
+    } else {
+      handicap = teeHole.handicap;
+    }
+  });
+  if( sameCourse ) {
+    return {hole: currentHole, par, length, handicap};
+  }
+  return {hole: currentHole};
+};
