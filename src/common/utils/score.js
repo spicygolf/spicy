@@ -162,14 +162,30 @@ export const scoring = game => {
       return team;
     });
 
-    teams = calcTeamScore({teams, allScoring, allJunk, game, scoresEntered, hole});
+    teams = calcTeamScore({
+      teams,
+      allScoring,
+      allJunk,
+      game,
+      scoresEntered,
+      hole
+    });
 
-    teams = calcTeamJunk({teams, allScoring, allJunk, game, scoresEntered, betterPoints});
+    const {newTeams, pp} = calcTeamJunk({
+      teams,
+      allScoring,
+      allJunk,
+      game,
+      scoresEntered,
+      betterPoints
+    });
+    teams = newTeams;
+    possiblePoints += pp;
 
     //  junk that depends on team score or something after the above calcs
     //  something like 'ky' or 'oj' in wolfhammer
 
-    //if( hole == '1' ) console.log('teams', teams);
+    //if( hole == '5' ) console.log('teams', teams, possiblePoints);
 
     const oneHoleScoring = {
       holes: [{
@@ -402,14 +418,14 @@ const calcPlayerJunk = ({players, pkey, game, hole, allScoring, allJunk}) => {
           '${gsJunk.based_on}'`);
         break;
     }
-    //console.log('player j', gPlayer, gsJunk, j);
+    //console.log('player j', hole, pkey, gsJunk, j);
     if( j == true ) {
       if( gsJunk.limit.length == 0 ) pp += gsJunk.value;
       tp += gsJunk.value;
       playerJunk.push(gsJunk);
     }
   });
-  //console.log('calcPlayerScore end', gPlayer, hole, tp, pp);
+  //console.log('calcPlayerScore end', hole, pkey, tp, pp);
 
   return ({
     p: {
@@ -471,6 +487,7 @@ const calcTeamScore = ({teams, allScoring, allJunk, game, scoresEntered, hole}) 
                 const logic = scoringWrapper.logic(gsJunk.logic, {
                   team,
                   teams,
+                  junk: gsJunk,
                 });
                 //console.log('team junk logic', hole, logic);
                 if( logic ) {
@@ -520,9 +537,14 @@ const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered, betterPo
 
   // ready to calc yet?  check if all scores are in for this hole
   //console.log('calcTeamJunk', game.players, scoresEntered, teams);
-  if( game.players.length != scoresEntered ) return teams;
+  if( game.players.length != scoresEntered ) return {
+    newTeams: teams,
+    pp: 0,
+  };
 
-  const ret = cloneDeep(teams);
+  let ret = cloneDeep(teams);
+  let maxJunkPoints = 0;
+
   allJunk.map(gsJunk => {
     if( gsJunk.scope == 'team' ) {
       if( gsJunk.type == 'dot' ) {
@@ -549,6 +571,10 @@ const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered, betterPo
                   game.players.length == scoresEntered ) {
                 ret[i].junk.push(gsJunk);
                 ret[i].points = ret[i].points + teamScores[i].value * betterMult;
+                // of the junk that has points, add the max # of these junk to possiblePoints
+                // TODO: this works for 9/10 Points game (3,3,3 or 5,3,1, etc),
+                //       but does it work universally?  Other junk?
+                maxJunkPoints = Math.max(teamScores[i].value, maxJunkPoints);
               }
             }
             break;
@@ -604,14 +630,17 @@ const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered, betterPo
               ret[best.index].points = ret[best.index].points + gsJunk.value;
             }
             break;
-          }
+        }
       } else {
         console.log('unknown junk type: ', gsJunk.type);
       }
     }
   });
-  //console.log('calcTeamJunk ret', ret);
-  return ret;
+  //console.log('calcTeamJunk', ret, maxJunkPoints);
+  return {
+    newTeams: ret,
+    pp: maxJunkPoints,
+  };
 };
 
 export const isScoreToParJunk = (junk, s, par) => {

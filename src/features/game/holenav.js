@@ -35,7 +35,8 @@ const HoleNav = props => {
             if( newHoleIndex < 0 ) newHoleIndex = holes.length - 1;
             changeHole(holes[newHoleIndex].toString());
           }}
-        />
+          testID={'holeNav_prev'}
+          />
       </View>
       <View style={styles.currentHole}>
         <Text style={styles.holeText}>{currentHole}</Text>
@@ -49,6 +50,7 @@ const HoleNav = props => {
           if( newHoleIndex >= holes.length ) newHoleIndex = 0;
           changeHole(holes[newHoleIndex].toString());
         }}
+        testID={'holeNav_next'}
       />
       </View>
     </View>

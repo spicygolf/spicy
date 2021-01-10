@@ -18,7 +18,7 @@ import {
 
 const Player = props => {
 
-  const { player, game, currentHole } = props;
+  const { player, game, currentHole, test } = props;
 
   if( !player || !player._key ) return null;
   const round = get_round_for_player(game.rounds, player._key);
@@ -33,6 +33,7 @@ const Player = props => {
       hole={hole}
       score={score}
       rkey={rkey}
+      test={test}
     />
   ) : (
     <TeeSelector
@@ -48,6 +49,7 @@ const Player = props => {
       hole={hole}
       score={score}
       pkey={player._key}
+      test={test}
     />
   ) : null;
 

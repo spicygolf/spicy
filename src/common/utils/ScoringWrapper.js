@@ -66,6 +66,7 @@ class ScoringWrapper {
     return curr;
   };
 
+  // TODO: team arg can be taken out of logic expression, as it's in _extra_vars (usually)
   isTeamDownTheMost = (hole, team) => {
     if( !hole ) return true;
     // use 'asc' if higher points is better, 'desc' if lower points is better
@@ -73,11 +74,13 @@ class ScoringWrapper {
     if( this.betterPoints.includes('lower') ) dir = 'desc';
     // get rank 1 as the team 'down the most'
     const ranks = this._teamRanks(hole, dir);
+    //console.log('isTeamDownTheMost ranks', ranks);
     const thisTeam = find(ranks, {team: team.team});
     if( !thisTeam ) return true;
     return thisTeam.rank == 1;
   };
 
+  // TODO: team arg can be taken out of logic expression, as it's in _extra_vars (usually)
   isTeamSecondToLast = (hole, team) => {
     if( !hole ) return false;
     // use 'asc' if higher points is better, 'desc' if lower points is better
@@ -88,6 +91,30 @@ class ScoringWrapper {
     const thisTeam = find(ranks, {team: team.team});
     if( !thisTeam ) return true;
     return thisTeam.rank == 2;
+  };
+
+  rankWithTies = (rank, teamsAtRank) => {
+    let ret = true;
+    const junk = this._extra_vars.junk;
+    let dir = 'asc';
+    // TODO: do this from junk, not game 'better'
+    if( junk.better != 'lower' ) dir = 'desc';
+    const teamScores = this._extra_vars.teams.map(t => {
+      try {
+        return {
+          team: t.team,
+          score: parseFloat(t.players[0].score[junk.based_on].value),
+        };
+      } catch(e) {console.log(e)}
+    });
+    const ranks = this._getRanks(teamScores, dir);
+    const team = this._extra_vars.team;
+    const thisTeam = find(ranks, {team: team.team});
+    if( thisTeam.rank != rank ) ret = false;
+    const atRank = filter(ranks, {rank: rank}).length;
+    if( !atRank || atRank != teamsAtRank ) ret = false;
+    //console.log('rankWithTies', hole.hole, junk.name, ranks, thisTeam, atRank, rank, teamsAtRank, ret);
+    return ret;
   };
 
   didOtherTeamMultiplyWith = (hole, thisTeam, multName) => {
@@ -158,6 +185,10 @@ class ScoringWrapper {
       team: t.team,
       score: t.runningTotal
     }));
+    return this._getRanks(teamScores, dir);
+  };
+
+  _getRanks = (teamScores, dir) => {
     const sorted = orderBy(teamScores, ['score'], [dir]);
     //console.log('sorted', sorted);
     const ranked = sorted.map( (item, i) => {
@@ -184,6 +215,7 @@ class ScoringWrapper {
   customs = {
     'team_down_the_most': this.isTeamDownTheMost,
     'team_second_to_last': this.isTeamSecondToLast,
+    'rankWithTies': this.rankWithTies,
     'other_team_multiplied_with': this.didOtherTeamMultiplyWith,
     'getPrevHole': this.getPrevHole,
     'getCurrHole': this.getCurrHole,

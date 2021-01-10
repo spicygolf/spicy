@@ -24,7 +24,10 @@ const scoreSize = 40;
 
 const HoleScore = props => {
 
-  const { hole, score, rkey } = props;
+  const { hole, score, rkey, test } = props;
+  // some testing things
+  const { team, player_index } = test;
+  const h = hole.hole;
 
   const [ postScore ] = useMutation(POST_SCORE_MUTATION);
 
@@ -39,7 +42,7 @@ const HoleScore = props => {
   }
 
   const gross = get_score_value('gross', score);
-  //console.log('holeScore score', score);
+  //console.log('holeScore score', hole, score);
   //const net = get_net_score(gross, score);
 
   const par = parseInt(hole.par);
@@ -101,11 +104,13 @@ const HoleScore = props => {
         </Text>
       );
     }
-
+    const testID=`h_${h}_t_${team}_p_${player_index+1}_s_${item.key}`;
+    //console.log('testID', testID);
     return (
       <TouchableHighlight
         onPress={() => setScore(item)}
         onLongPress={() => setScore(item)}
+        testID={testID}
       >
         <View style={score_styles}>
           <View style={outerShape}>

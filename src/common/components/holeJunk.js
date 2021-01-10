@@ -35,7 +35,11 @@ import {
 
 
 const HoleJunk = props => {
-  const { hole, score, pkey } = props;
+  const { hole, score, pkey, test } = props;
+  // some testing things
+  const { team, player_index } = test;
+  const h = hole.hole;
+
   const par = (hole && hole.par) ? parseFloat(hole.par) : 0.0;
 
   const { game, scores } = useContext(GameContext);
@@ -165,7 +169,8 @@ const HoleJunk = props => {
       type = 'solid';
       color = 'white';
     }
-
+    const testID=`h_${h}_t_${team}_p_${player_index+1}_j_${junk.seq}`;
+    //console.log('testID', testID);
     return (
       <Button
         title={junk.disp}
@@ -181,6 +186,7 @@ const HoleJunk = props => {
         titleStyle={styles.buttonTitle}
         onPress={() => setJunk(junk, !selected)}
         onLongPress={() => setJunk(junk, !selected)}
+        testID={testID}
       />
     );
 

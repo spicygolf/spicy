@@ -52,12 +52,13 @@ const Teams = ({teams, scoring, currentHole }) => {
       )
     : null;
 
-  const _renderPlayer = ({item}) => {
+  const _renderPlayer = ({team, player, player_index}) => {
     return (
       <Player
-        player={item}
+        player={player}
         game={game}
         currentHole={currentHole}
+        test={{team, player_index}}
       />);
   };
 
@@ -70,6 +71,7 @@ const Teams = ({teams, scoring, currentHole }) => {
     });
     //console.log('playersOnTeam', item.team, playersOnTeam);
     if( !playersOnTeam.length ) return null; // bandaid (item 1) for #143
+    const team = item.team;
 
     return (
       <View>
@@ -78,7 +80,13 @@ const Teams = ({teams, scoring, currentHole }) => {
         >
           <FlatList
             data={playersOnTeam}
-            renderItem={_renderPlayer}
+            renderItem={({item, index}) => (
+              _renderPlayer({
+                team,
+                player: item,
+                player_index: index,
+              })
+            )}
             keyExtractor={item => item._key}
           />
           <TeamJunk

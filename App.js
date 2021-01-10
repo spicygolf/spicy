@@ -56,6 +56,9 @@ const App = props => {
     () => {
       LogBox.ignoreLogs([
         'VirtualizedLists should never be nested',
+//        'Cannot update a component from inside',
+//        'Cache data may be lost',
+//        'Remote debugger is in',
       ]);
     }, []
   );
