@@ -109,7 +109,7 @@ describe('SpicyGolf', () => {
       .tap();
 
     // TODO: means DHGC Presidents tee is a favorite - kinda brittle, fix later
-    await element(by.id('favorite_tee_34421535'))
+    await element(by.id('favorite_tee_77958051'))
       .tap();
 
 
