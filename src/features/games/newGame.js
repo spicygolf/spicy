@@ -28,8 +28,12 @@ const NewGame = props => {
   const [ addGameMutation ] = useMutation(ADD_GAME_MUTATION);
   const [ addLinkMutation ] = useMutation(ADD_LINK_MUTATION);
 
+  const teams_rotate = ( gamespec.team_change_every && gamespec.team_change_every > 0 )
+    ? `every${gamespec.team_change_every}`
+    : 'never';
+
 /*
-    // TODO: maybe something like:
+    // TODO: for #140, maybe something like:
               (with the commented out optimisticResponse below)
     const temp_key = Date.now() + '_' + currentPlayerKey;
     if( data.addGame._key == temp_key ) {
@@ -50,7 +54,7 @@ const NewGame = props => {
     scope: {
       __typename: 'GameScope',
       holes: 'all18',
-      teams_rotate: 'never',
+      teams_rotate,
     },
     holes: [],
     options: gamespec.defaultOptions || []

@@ -15,6 +15,7 @@ import { UPDATE_GAME_SCOPE_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';
 import TeamChooser from 'common/components/teamChooser';
+import WolfOrderChooser from 'common/components/wolfOrderChooser';
 import {
   getGamespecKVs,
   omitTypename,
@@ -25,7 +26,9 @@ import {
 
 const Teams = props => {
 
-  const { game } = useContext(GameContext);
+  const { game, activeGameSpec } = useContext(GameContext);
+  //console.log('gameSetup activeGameSpec', activeGameSpec);
+
   const [ updateGameScope ] = useMutation(UPDATE_GAME_SCOPE_MUTATION);
 
   const teamsFromGamespecs = getGamespecKVs(game, 'teams');
@@ -64,13 +67,42 @@ const Teams = props => {
 
   const buttons = teamsRotateOptions.map(o => o.caption);
 
-  let chooser = null;
+  let title = "Teams";
+  let chooserContent = null;
+  let buttonsContent = null;
 
-  if( game && game.scope && game.scope.teams_rotate && game.scope.teams_rotate == 'never' ) {
-    chooser = (
-      <View style={styles.chooserView}>
-        <Text>Choose Teams:</Text>
-        <TeamChooser currentHole='1' from='game_setup' />
+  if( game && game.scope && game.scope.teams_rotate ) {
+    if( game.scope.teams_rotate == 'never' ) {
+      chooserContent = (
+        <View style={styles.chooserView}>
+          <Text>Choose Teams:</Text>
+          <TeamChooser currentHole='1' from='game_setup' />
+        </View>
+      );
+    }
+    if( game.scope.teams_rotate == 'every1' && activeGameSpec.team_determination == 'wolf' ) {
+      const wolf_name = (activeGameSpec.wolf_disp)
+        ? activeGameSpec.wolf_disp
+        : 'Wolf';
+      title = `${wolf_name} Order`;
+      chooserContent = (
+        <WolfOrderChooser />
+      );
+    }
+  }
+
+  if( activeGameSpec.team_determination != 'wolf' ) {
+    buttonsContent = (
+      <View>
+        <Text>Teams Rotate:</Text>
+        <ButtonGroup
+          buttons={buttons}
+          selectedIndex={selected}
+          onPress={updateRotation}
+          textStyle={styles.textStyle}
+          selectedButtonStyle={styles.selectedButton}
+          selectedTextStyle={styles.selectedText}
+        />
       </View>
     );
   }
@@ -78,18 +110,10 @@ const Teams = props => {
   return (
     <View testID='game_setup_teams_card'>
     <Card>
-      <Card.Title>Teams</Card.Title>
+      <Card.Title>{ title }</Card.Title>
       <Card.Divider />
-      <Text>Teams Rotate:</Text>
-      <ButtonGroup
-        buttons={buttons}
-        selectedIndex={selected}
-        onPress={updateRotation}
-        textStyle={styles.textStyle}
-        selectedButtonStyle={styles.selectedButton}
-        selectedTextStyle={styles.selectedText}
-      />
-      { chooser }
+      { buttonsContent }
+      { chooserContent }
     </Card>
     </View>
   );

@@ -13,6 +13,8 @@ export default gql`
       location_type
       teams
       team_size
+      team_determination
+      team_change_every
     }
   }
 `;

@@ -10,6 +10,7 @@ export const GET_GAME_QUERY = gql`
       scope {
         holes
         teams_rotate
+        wolf_order
       }
       holes {
         hole
@@ -112,6 +113,7 @@ export const GET_GAME_QUERY = gql`
         teams
         team_size
         team_determination
+        wolf_disp
         team_change_every
         scoring {
             hole {
