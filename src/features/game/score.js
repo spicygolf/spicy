@@ -56,11 +56,11 @@ const Score = props => {
   //console.log('teams', teams);
 
   if( currentHole ) {
-    if( teams ) {
-      holeInfo = ( activeGameSpec && activeGameSpec.location_type && activeGameSpec.location_type == 'local' )
-        ? getLocalHoleInfo({game, currentHole})
-        : {hole: currentHole};
+    holeInfo = ( activeGameSpec && activeGameSpec.location_type && activeGameSpec.location_type == 'local' )
+      ? getLocalHoleInfo({game, currentHole})
+      : {hole: currentHole};
 
+    if( teams ) {
       content = (
         <Teams
           teams={teams}
