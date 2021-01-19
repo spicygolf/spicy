@@ -9,6 +9,7 @@ export const UPDATE_GAME_SCOPE_MUTATION = gql`
       scope  {
         holes
         teams_rotate
+        wolf_order
       }
     }
   }

@@ -10,6 +10,7 @@ export default gql`
       scope {
         holes
         teams_rotate
+        wolf_order
       }
       rounds {
         _key

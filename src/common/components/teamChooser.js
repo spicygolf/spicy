@@ -24,6 +24,7 @@ import { blue } from 'common/colors';
 const TeamChooser = props => {
 
   // TODO: modify this to support more than just two teams
+  //       or, just make a ManyTeamChooser component
   const teamCount = 2;
 
   const [ updateGameHoles ] = useMutation(UPDATE_GAME_HOLES_MUTATION);
@@ -36,7 +37,6 @@ const TeamChooser = props => {
   const gameHole = ( game && game.holes && game.holes.length )
     ? find(game.holes, {hole: currentHole})
     : {hole: currentHole, teams: []};
-  //console.log('h', h);
 
 
   const changeTeamsForPlayer = async (pkey, addToTeam, removeFromTeam) => {
@@ -187,6 +187,15 @@ const TeamChooser = props => {
   };
 
 
+  let sorted_players = game.players;
+  if( game && game.scope && game.scope.wolf_order ) {
+    sorted_players = game.scope.wolf_order.map(pkey => {
+      const p = find(game.players, {_key: pkey});
+      if( !p ) console.log('a player in wolf_order that is not in players?');
+      return p;
+    });
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.teamTitleView}>
@@ -194,7 +203,7 @@ const TeamChooser = props => {
         <Text style={styles.title}>Team 2</Text>
       </View>
       <FlatList
-        data={game.players}
+        data={sorted_players}
         renderItem={_renderPlayer}
         keyExtractor={item => {
           if( item && item._key ) return item._key;
