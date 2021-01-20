@@ -623,7 +623,7 @@ const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered, betterPo
                 }
               }
             }
-            if( validScores &&
+            if( validScores && best &&
                 (countOfBest <= lenOfScores) &&
                 (game.players.length == scoresEntered)) {
               ret[best.index].junk.push(gsJunk);

@@ -1,5 +1,6 @@
 import {
   getHolesToUpdate,
+  getWolfPlayerIndex,
   omitTypename,
   setTeamJunk,
 } from 'common/utils/game';
@@ -319,6 +320,69 @@ describe('common/utils/game tests', () => {
     const holes = ['15', '16', '17', '18'];
 
     expect(getHolesToUpdate('rest_of_nine', game, '15')).toEqual(holes);
+
+  });
+
+  // wolf
+  test('getWolfPlayerIndex - 4 players', () => {
+
+    const game = {
+      scope: {
+        holes: 'all18',
+        wolf_order: ['1', '2', '3', '4'],
+      },
+      players: ['1p', '2p', '3p', '4p'],
+    };
+
+    expect(getWolfPlayerIndex({game, currentHole: '1'})).toEqual(0);
+    expect(getWolfPlayerIndex({game, currentHole: '2'})).toEqual(1);
+    expect(getWolfPlayerIndex({game, currentHole: '3'})).toEqual(2);
+    expect(getWolfPlayerIndex({game, currentHole: '4'})).toEqual(3);
+    expect(getWolfPlayerIndex({game, currentHole: '5'})).toEqual(0);
+    expect(getWolfPlayerIndex({game, currentHole: '6'})).toEqual(1);
+    expect(getWolfPlayerIndex({game, currentHole: '7'})).toEqual(2);
+    expect(getWolfPlayerIndex({game, currentHole: '8'})).toEqual(3);
+    expect(getWolfPlayerIndex({game, currentHole: '9'})).toEqual(0);
+    expect(getWolfPlayerIndex({game, currentHole: '10'})).toEqual(1);
+    expect(getWolfPlayerIndex({game, currentHole: '11'})).toEqual(2);
+    expect(getWolfPlayerIndex({game, currentHole: '12'})).toEqual(3);
+    expect(getWolfPlayerIndex({game, currentHole: '13'})).toEqual(0);
+    expect(getWolfPlayerIndex({game, currentHole: '14'})).toEqual(1);
+    expect(getWolfPlayerIndex({game, currentHole: '15'})).toEqual(2);
+    expect(getWolfPlayerIndex({game, currentHole: '16'})).toEqual(3);
+    expect(getWolfPlayerIndex({game, currentHole: '17'})).toEqual(-1);
+    expect(getWolfPlayerIndex({game, currentHole: '18'})).toEqual(-1);
+
+  });
+
+  test('getWolfPlayerIndex - 5 players', () => {
+
+    const game = {
+      scope: {
+        holes: 'all18',
+        wolf_order: ['1', '2', '3', '4', '5',],
+      },
+      players: ['1p', '2p', '3p', '4p', '5p',],
+    };
+
+    expect(getWolfPlayerIndex({game, currentHole: '1'})).toEqual(0);
+    expect(getWolfPlayerIndex({game, currentHole: '2'})).toEqual(1);
+    expect(getWolfPlayerIndex({game, currentHole: '3'})).toEqual(2);
+    expect(getWolfPlayerIndex({game, currentHole: '4'})).toEqual(3);
+    expect(getWolfPlayerIndex({game, currentHole: '5'})).toEqual(4);
+    expect(getWolfPlayerIndex({game, currentHole: '6'})).toEqual(0);
+    expect(getWolfPlayerIndex({game, currentHole: '7'})).toEqual(1);
+    expect(getWolfPlayerIndex({game, currentHole: '8'})).toEqual(2);
+    expect(getWolfPlayerIndex({game, currentHole: '9'})).toEqual(3);
+    expect(getWolfPlayerIndex({game, currentHole: '10'})).toEqual(4);
+    expect(getWolfPlayerIndex({game, currentHole: '11'})).toEqual(0);
+    expect(getWolfPlayerIndex({game, currentHole: '12'})).toEqual(1);
+    expect(getWolfPlayerIndex({game, currentHole: '13'})).toEqual(2);
+    expect(getWolfPlayerIndex({game, currentHole: '14'})).toEqual(3);
+    expect(getWolfPlayerIndex({game, currentHole: '15'})).toEqual(4);
+    expect(getWolfPlayerIndex({game, currentHole: '16'})).toEqual(-1);
+    expect(getWolfPlayerIndex({game, currentHole: '17'})).toEqual(-1);
+    expect(getWolfPlayerIndex({game, currentHole: '18'})).toEqual(-1);
 
   });
 

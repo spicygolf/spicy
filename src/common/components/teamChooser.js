@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -13,7 +13,10 @@ import { useMutation } from '@apollo/client';
 
 import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
-import { omitTypename } from 'common/utils/game';
+import {
+  getWolfPlayerIndex,
+  omitTypename,
+} from 'common/utils/game';
 import { getHolesToUpdate } from 'common/utils/game';
 import { getTeams } from 'common/utils/teams';
 import { getGameMeta, setGameMeta } from 'common/utils/metadata';
@@ -31,12 +34,19 @@ const TeamChooser = props => {
 
   const { currentHole, from } = props;
   //console.log('currentHole', currentHole);
-  const { game } = useContext(GameContext);
+  const { game, activeGameSpec } = useContext(GameContext);
   const { _key: gkey } = game;
   const teams = getTeams(game, currentHole);
   const gameHole = ( game && game.holes && game.holes.length )
     ? find(game.holes, {hole: currentHole})
     : {hole: currentHole, teams: []};
+
+  // wolf vars
+  const isWolf = (activeGameSpec.team_determination == 'wolf');
+  const wolfPlayerIndex = isWolf ? getWolfPlayerIndex({game, currentHole}) : -1;
+  const wolfPKey = isWolf ? game.scope.wolf_order[wolfPlayerIndex] : '';
+  const team1Text = isWolf ? '   Wolf' : 'Team 1';
+  const team2Text = isWolf ? 'Opponents' : 'Team 2';
 
 
   const changeTeamsForPlayer = async (pkey, addToTeam, removeFromTeam) => {
@@ -129,9 +139,11 @@ const TeamChooser = props => {
     }
   };
 
-
   const _renderPlayer = ({item, index}) => {
     if( !item ) return;
+
+    const isWolfPlayer = (item._key == wolfPKey);
+    console.log('isWolfPlayer', item.name, isWolfPlayer);
 
     let team;
     if( gameHole && gameHole.teams ) {
@@ -145,31 +157,55 @@ const TeamChooser = props => {
       if( team && team.team && team.team == teamNum ) {
         //console.log('remove', from, teamNum, index);
         // removing from a team
-        return (
-          <Icon
-            name='check-circle'
-            type='material-community'
-            color={blue}
-            size={30}
-            iconStyle={styles.icon}
-            onPress={() => changeTeamsForPlayer(item._key, null, teamNum)}
-            testID={`${from}_remove_player_from_team_${teamNum}_${index}`}
-          />
-        );
+        if( !isWolfPlayer ) {
+          return (
+            <Icon
+              name='check-circle'
+              type='material-community'
+              color={blue}
+              size={30}
+              iconStyle={styles.icon}
+              onPress={() => changeTeamsForPlayer(item._key, null, teamNum)}
+              testID={`${from}_remove_player_from_team_${teamNum}_${index}`}
+            />
+          );
+        } else {
+          return (
+            <Icon
+              name='wolf-pack-battalion'
+              type='font-awesome-5'
+              color={blue}
+              size={30}
+              iconStyle={styles.icon}
+            />
+          );
+        }
       } else {
         //console.log('add', from, teamNum, index);
         // adding to a team
-        return (
-          <Icon
-            name='plus-circle'
-            type='material-community'
-            color='#aaa'
-            size={30}
-            iconStyle={styles.icon}
-            onPress={() => changeTeamsForPlayer(item._key, teamNum, teamNum == '1' ? '2' : '1')}
-            testID={`${from}_add_player_to_team_${teamNum}_${index}`}
-          />
-        );
+        if( !isWolfPlayer ) {
+          return (
+            <Icon
+              name='plus-circle'
+              type='material-community'
+              color='#aaa'
+              size={30}
+              iconStyle={styles.icon}
+              onPress={() => changeTeamsForPlayer(item._key, teamNum, teamNum == '1' ? '2' : '1')}
+              testID={`${from}_add_player_to_team_${teamNum}_${index}`}
+            />
+          );
+        } else {
+          return (
+            <Icon
+              name='plus-circle'
+              type='material-community'
+              color='transparent'
+              size={30}
+              iconStyle={styles.icon}
+            />
+          );
+        }
       }
     };
 
@@ -186,6 +222,29 @@ const TeamChooser = props => {
 
   };
 
+  useEffect(
+    () => {
+      const checkWolf = async () => {
+        if( wolfPlayerIndex < 0 ) return;
+        const wolfOnTeamOne = typeof find(gameHole.teams, team => {
+          if( team.team != '1' ) return false;
+          if( team && team.players && team.players.length ) {
+            return team.players.includes(wolfPKey);
+          }
+          return false;
+        }) !== 'undefined';
+        if( wolfOnTeamOne ) return;
+
+        // we got to here, so need to doctor up gameHole teams w/ Wolf
+        await changeTeamsForPlayer(wolfPKey, '1', '2');
+        //console.log('teamChooser useEffect', gameHole, wolfPlayerIndex, wolfOnTeamOne);
+      };
+
+      if( isWolf ) {
+        checkWolf();
+      }
+    }, [game.scope.wolf_order, currentHole]
+  );
 
   let sorted_players = game.players;
   if( game && game.scope && game.scope.wolf_order ) {
@@ -199,8 +258,8 @@ const TeamChooser = props => {
   return (
     <View style={styles.container}>
       <View style={styles.teamTitleView}>
-        <Text style={styles.title}>Team 1</Text>
-        <Text style={styles.title}>Team 2</Text>
+        <Text style={styles.title}>{team1Text}</Text>
+        <Text style={styles.title}>{team2Text}</Text>
       </View>
       <FlatList
         data={sorted_players}

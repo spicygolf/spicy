@@ -58,7 +58,10 @@ const WolfOrderChooser = props => {
   // TODO: use game.scope.wolf_order to sort here
   //        also handle if it's null or maybe even if mismatched w/ game.players
   let sorted_players = [];
-  if( game && game.scope && game.scope.wolf_order ) {
+  if( game && game.scope && game.scope.wolf_order &&
+    game.scope.wolf_order.length &&
+    game.scope.wolf_order.length == game.players.length
+  ) {
     sorted_players = game.scope.wolf_order.map(pkey => {
       const p = find(players, {_key: pkey});
       if( !p ) console.log('a player in wolf_order that is not in players?');

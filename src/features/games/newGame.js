@@ -12,7 +12,10 @@ import {
 } from 'features/games/graphql';
 import { ADD_LINK_MUTATION } from 'common/graphql/link';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { omitTypename } from 'common/utils/game';
+import {
+  getHoles,
+  omitTypename,
+} from 'common/utils/game';
 
 
 const NewGame = props => {
@@ -47,7 +50,14 @@ const NewGame = props => {
     * how would other phones / clients w subscriptions act?
 */
 
-  const newGame = {
+  const initialHoles = getHoles({
+    scope: {
+      holes: 'all18'
+    },
+    holes: [],
+  });
+
+  let newGame = {
     __typename: 'Game',
     name: gamespec.disp,
     start: game_start,
@@ -56,9 +66,16 @@ const NewGame = props => {
       holes: 'all18',
       teams_rotate,
     },
-    holes: [],
+    holes: initialHoles.map(h => ({
+      __typename: 'GameHole',
+      hole: h,
+      teams: [],
+      multipliers: [],
+    })),
     options: gamespec.defaultOptions || []
   };
+
+
   // TODO: we may have to add `__typename: 'Option'` if there's anything in gamespec.defaultOptions
   const newGameWithoutTypes = omitTypename(newGame);
 

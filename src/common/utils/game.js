@@ -12,7 +12,6 @@ import { acronym, last } from 'common/utils/text';
  */
 export const getHoles = game => {
   if( !game.holes || !game.holes.length ) {
-    let ret = [];
     switch( game.scope.holes ) {
       case 'all18':
         return Array.from(Array(18).keys()).map(x => (++x).toString());
@@ -475,8 +474,14 @@ export const getLocalHoleInfo = ({game, currentHole}) => {
   let par, length, handicap;
   let sameCourse = true;
   game.rounds.map(r => {
+    // check to see if tee is set yet
+    if( !r.tee ) return {hole: currentHole};
+
     const teeHole = find(r.tee.holes, {hole: currentHole});
-    if( !teeHole ) sameCourse = false;
+    if( !teeHole ) {
+      sameCourse = false;
+      return;
+    }
     if( par && par != teeHole.par ) {
       sameCourse = false;
     } else {
@@ -497,4 +502,26 @@ export const getLocalHoleInfo = ({game, currentHole}) => {
     return {hole: currentHole, par, length, handicap};
   }
   return {hole: currentHole};
+};
+
+/*
+ *  return the index in the game.scope.wolf_index array for who is wolf
+ *  return -1 if data is whack, or we're done with full rounds of wolf rotation
+ */
+export const getWolfPlayerIndex = ({game, currentHole}) => {
+  if( !(game && game.players && game.players.length) ) return -1;
+  if( !(game && game.scope && game.scope.wolf_order && game.scope.wolf_order.length) ) return -1;
+  if( game.players.length != game.scope.wolf_order.length ) return -1;
+
+  const currHole = parseInt(currentHole);
+  const hole_count = getHoles(game).length;
+  const player_count = game.scope.wolf_order.length;
+  const wolf_round = Math.floor((currHole-1) / player_count);
+
+  // are we past full rounds?
+  if( (wolf_round+1) * player_count > hole_count ) return -1;
+
+  const remainder = (currHole-1) % player_count;
+  // console.log('getWolfPlayerIndex', currentHole, wolf_round, remainder);
+  return remainder;
 };
