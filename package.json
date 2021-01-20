@@ -65,7 +65,7 @@
     "react-native-safe-area-context": "^0.7.2",
     "react-native-screens": "^2.0.0-alpha.34",
     "react-native-tab-view": "^2.13.0",
-    "react-native-vector-icons": "^6.5.0",
+    "react-native-vector-icons": "^8.0.0",
     "subscriptions-transport-ws": "^0.9.16"
   },
   "devDependencies": {
