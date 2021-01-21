@@ -56,7 +56,6 @@ const Teams = ({teams, scoring, currentHole }) => {
     return (
       <Player
         player={player}
-        game={game}
         currentHole={currentHole}
         test={{team, player_index}}
       />);

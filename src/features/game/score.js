@@ -9,7 +9,7 @@ import {
   Card,
   Icon,
 } from 'react-native-elements';
-import { find } from 'lodash';
+import { filter, find } from 'lodash';
 
 import { getTeams } from 'common/utils/teams';
 import TeamChooser from 'common/components/teamChooser';
@@ -55,12 +55,19 @@ const Score = props => {
   const teams = getTeams(game, currentHole);
   //console.log('teams', teams);
 
+  const clearHoleFromHolesToUpdate = async () => {
+    const gameMeta = await getGameMeta(gkey);
+    const newHoles = filter(gameMeta.holesToUpdate, h => (h != currentHole));
+    await setGameMeta(gkey, 'holesToUpdate', newHoles);
+  };
+
   if( currentHole ) {
     holeInfo = ( activeGameSpec && activeGameSpec.location_type && activeGameSpec.location_type == 'local' )
       ? getLocalHoleInfo({game, currentHole})
       : {hole: currentHole};
 
     if( teams ) {
+      clearHoleFromHolesToUpdate();
       content = (
         <Teams
           teams={teams}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,6 +8,10 @@ import {
 import TeeSelector from 'features/gameSetup/teeSelector';
 import HoleScore from 'common/components/holeScore';
 import HoleJunk from 'common/components/holeJunk';
+import { GameContext } from 'features/game/gameContext';
+import {
+  getWolfPlayerIndex,
+} from 'common/utils/game';
 import {
   get_hole,
   get_round_for_player,
@@ -18,7 +22,8 @@ import {
 
 const Player = props => {
 
-  const { player, game, currentHole, test } = props;
+  const { player, currentHole, test } = props;
+  const { game, activeGameSpec } = useContext(GameContext);
 
   if( !player || !player._key ) return null;
   const round = get_round_for_player(game.rounds, player._key);
@@ -27,6 +32,15 @@ const Player = props => {
   const { _key: rkey } = round;
   const hole = get_hole(currentHole, round);
   const score = get_score(currentHole, round);
+
+  const wolfPlayerIndex = getWolfPlayerIndex({game, currentHole});
+  let wolfPKey = '';
+  if( wolfPlayerIndex > -1 ) {
+    wolfPKey = game.scope.wolf_order[wolfPlayerIndex];
+  }
+  const wolf = (wolfPKey === player._key)
+    ? (<Text style={styles.wolf}>{activeGameSpec.wolf_disp}</Text>)
+    : null;
 
   const holeScore = hole ? (
     <HoleScore
@@ -58,6 +72,7 @@ const Player = props => {
       <View style={styles.player_score_container}>
         <View style={styles.player_name}>
           <Text style={styles.player_name_txt}>{player.name || ''}</Text>
+          { wolf }
         </View>
         <View style={styles.hole_score}>
           {holeScore}

@@ -33,7 +33,7 @@ const TeamChooser = props => {
   const [ updateGameHoles ] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
   const { currentHole, from } = props;
-  //console.log('currentHole', currentHole);
+  //console.log('teamChooser currentHole', currentHole);
   const { game, activeGameSpec } = useContext(GameContext);
   const { _key: gkey } = game;
   const teams = getTeams(game, currentHole);
@@ -59,7 +59,7 @@ const TeamChooser = props => {
     const holesToUpdate = (gameMeta && gameMeta.holesToUpdate && gameMeta.holesToUpdate.length)
       ? gameMeta.holesToUpdate
       : getHolesToUpdate(game.scope.teams_rotate, game, currentHole);
-    //console.log('holesToUpdate', holesToUpdate);
+    //console.log('teamChooser holesToUpdate', holesToUpdate, gameMeta);
 
     // set up variable for mutation
     let newHoles = cloneDeep(game.holes);
@@ -143,7 +143,7 @@ const TeamChooser = props => {
     if( !item ) return;
 
     const isWolfPlayer = (item._key == wolfPKey);
-    console.log('isWolfPlayer', item.name, isWolfPlayer);
+    //console.log('isWolfPlayer', item.name, isWolfPlayer);
 
     let team;
     if( gameHole && gameHole.teams ) {
