@@ -17,6 +17,7 @@ import {
   get_round_for_player,
   get_score,
 } from 'common/utils/rounds';
+import { blue } from 'common/colors';
 
 
 
@@ -110,6 +111,10 @@ var styles = StyleSheet.create({
   player_name_txt: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  wolf: {
+    fontSize: 12,
+    color: blue,
   },
   hole_score: {
     flex: 1,
