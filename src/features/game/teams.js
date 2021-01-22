@@ -123,7 +123,7 @@ const Teams = ({teams, scoring, currentHole }) => {
   );
 
   return (
-    <View>
+    <View style={styles.component_container}>
       { flatlist }
       <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
           <ChangeTeams
@@ -139,6 +139,9 @@ export default Teams;
 
 
 const styles = StyleSheet.create({
+  component_container: {
+    flex: 1,
+  },
   container: {
     paddingLeft: 5,
     paddingRight: 5,
