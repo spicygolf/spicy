@@ -57,6 +57,7 @@ const Score = props => {
 
   const clearHoleFromHolesToUpdate = async () => {
     const gameMeta = await getGameMeta(gkey);
+    if( !(gameMeta && gameMeta.holesToUpdate) ) return;
     const newHoles = filter(gameMeta.holesToUpdate, h => (h != currentHole));
     await setGameMeta(gkey, 'holesToUpdate', newHoles);
   };

@@ -45,10 +45,14 @@ class ScoringWrapper {
       ...extra_vars,
       scoring: this,
     };
-    //console.log('logic expression', expression);
-    //console.log('logic data', data);
+    console.log('logic expression', parsed);
+    console.log('logic data', data);
     return jsonLogic.apply(parsed, data)
   }
+
+  /*
+   *     custom functions
+   */
 
   getPrevHole = () => {
     const prev = find(this._scoring.holes, {
@@ -180,6 +184,18 @@ class ScoringWrapper {
     return p;
   };
 
+  playersOnTeam = (team) => {
+    const t = this.getTeam(team);
+    return (t && t.players)
+      ? t.players.length
+      : 0;
+  };
+
+  isWolfPlayer = (pkey) => {
+    console.log('isWolfPlayer', pkey, this);
+    return true;
+  }
+
   _teamRanks = (hole, dir) => {
     const teamScores = hole.teams.map(t => ({
       team: t.team,
@@ -223,6 +239,8 @@ class ScoringWrapper {
     'countJunk': this.countJunk,
     'parOrBetter': this.isParOrBetter,
     'holePar': this.holePar,
+    'playersOnTeam': this.playersOnTeam,
+    'isWolfPlayer': this.isWolfPlayer,
   };
 
 

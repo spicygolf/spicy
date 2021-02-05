@@ -156,9 +156,6 @@ const TeamMultipliers = props => {
 
   };
 
-  // no pressing if teams rotate - rethink this? There are degenerates out there
-  if( teamsRotate(game) ) return null;
-
   const hole = find(scoring.holes, { hole: currentHole });
   if( !hole ) return null;
 
@@ -181,6 +178,15 @@ const TeamMultipliers = props => {
 
   // add in the user mults for this particular hole
   allmultipliers.map(gsMult => {
+
+    // if teams are rotating, and junk depends on team position, return
+    // we don't want to offer junk in this situation
+    if( teamsRotate(game) ) {
+      if( gsMult.availability.includes('team_down_the_most') ) return;
+      if( gsMult.availability.includes('team_second_to_last') ) return;
+      if( gsMult.availability.includes('rankWithTies') ) return;
+    }
+
     // only give options for multipliers based_on == 'user' or if they were
     // achieved via scoring or logic
     if( gsMult.based_on != 'user' ) {
