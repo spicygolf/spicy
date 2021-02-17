@@ -53,6 +53,7 @@ const NewGameList = props => {
     variables: {
       pkey: currentPlayerKey,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   if( loading ) return (<ActivityIndicator />);
