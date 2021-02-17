@@ -1,5 +1,4 @@
-import React, { useContext, useState } from 'react';
-
+import React, { useContext } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -11,6 +10,7 @@ import {
 import { ListItem } from 'react-native-elements';
 import { useQuery } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
+import { orderBy } from 'lodash';
 
 import GameNav from 'features/games/gamenav';
 
@@ -35,14 +35,15 @@ const NewGameList = props => {
 
   // `item` is a gamespec
   const _renderItem = ({item}) => {
+    const { gamespec } = item;
     return (
       <ListItem
-        onPress={() => gamespecPressed(item)}
-        testID={`new_${item._key}`}
+        onPress={() => gamespecPressed(gamespec)}
+        testID={`new_${gamespec._key}`}
       >
         <ListItem.Content>
-          <ListItem.Title style={styles.title}>{item.disp || ''}</ListItem.Title>
-          <ListItem.Subtitle style={styles.subtitle}>{item.type || ''}</ListItem.Subtitle>
+          <ListItem.Title style={styles.title}>{gamespec.disp || ''}</ListItem.Title>
+          <ListItem.Subtitle style={styles.subtitle}>{gamespec.type || ''}</ListItem.Subtitle>
         </ListItem.Content>
       </ListItem>
     );
@@ -62,8 +63,9 @@ const NewGameList = props => {
     return (<Text>Error: {error.message}</Text>);
   }
 
+  console.log('data', data);
   const gameSpecsForPlayer = (data && data.gameSpecsForPlayer)
-    ? data.gameSpecsForPlayer
+    ? orderBy(data.gameSpecsForPlayer, ['player_count'], ['desc'])
     : [];
 
   return (
@@ -75,7 +77,7 @@ const NewGameList = props => {
       <FlatList
         data={gameSpecsForPlayer}
         renderItem={_renderItem}
-        keyExtractor={item => item._key}
+        keyExtractor={item => item.gamespec._key}
       />
     </View>
   );
