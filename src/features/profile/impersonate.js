@@ -15,7 +15,7 @@ import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 
 
 
-const Impersonate = props => {
+const Impersonate = ({ clearCache }) => {
 
   const {
     setCurrentPlayerKey,
@@ -25,6 +25,7 @@ const Impersonate = props => {
 
   const impersonateUser = () => {
     console.log('impersonate', iPlayer);
+    clearCache();
     setCurrentPlayerKey(iPlayer);
   };
 

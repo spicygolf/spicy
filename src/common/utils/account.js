@@ -59,6 +59,7 @@ export const login = async fbUser => {
     case 401:
       // we got thru Firebase, but not SpicyGolf login.  Did we have a failed
       // registration?
+      console.log('login forbidden');
       ret = {
         message: 'Got thru Firebase login, but not SpicyGolf.',
         navTo: 'RegisterAgain',

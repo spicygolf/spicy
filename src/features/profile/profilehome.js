@@ -50,7 +50,7 @@ const ProfileHome = props => {
     currentPlayer.handicap.index
   ) ? currentPlayer.handicap.index : '-';
 
-  const _clearCache = async props => {
+  const _clearCache = async () => {
     await client.clearStore();
     client.cache.data.clear();
 /*
@@ -66,7 +66,9 @@ const ProfileHome = props => {
 
   const version = DeviceInfo.getVersion();
 
-  const impersonate = (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin' ) ? (<Impersonate />) : null;
+  const impersonate = (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin' )
+    ? (<Impersonate clearCache={_clearCache} />)
+    : null;
 
   return (
     <KeyboardAvoidingView style={{flex: 1,}}>
