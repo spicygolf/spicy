@@ -45,9 +45,11 @@ class ScoringWrapper {
       ...extra_vars,
       scoring: this,
     };
-    console.log('logic expression', parsed);
-    console.log('logic data', data);
-    return jsonLogic.apply(parsed, data)
+    const ret = jsonLogic.apply(parsed, data);
+    //console.log('logic expression', parsed);
+    //console.log('logic data', data);
+    //console.log('logic value', ret);
+    return ret;
   }
 
   /*
@@ -144,7 +146,7 @@ class ScoringWrapper {
   };
 
   // team arg is 'this' or 'other'
-  getTeam = (team) => {
+  getTeam = (team = 'this') => {
     let ret = null;
     if( team == 'this' ) ret = this._extra_vars.team;
     if( team == 'other' ) {
@@ -186,9 +188,11 @@ class ScoringWrapper {
 
   playersOnTeam = (team) => {
     const t = this.getTeam(team);
-    return (t && t.players)
+    const ret = (t && t.players)
       ? t.players.length
       : 0;
+    //console.log('playersOnTeam', t, team, ret);
+    return ret;
   };
 
   isWolfPlayer = (pkey) => {
