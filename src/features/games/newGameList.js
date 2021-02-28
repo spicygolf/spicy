@@ -23,6 +23,8 @@ import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 
 const NewGameList = props => {
 
+  let player_total = 0;
+
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
 
   const navigation = useNavigation();
@@ -35,7 +37,13 @@ const NewGameList = props => {
 
   // `item` is a gamespec
   const _renderItem = ({item}) => {
-    const { gamespec } = item;
+    const { gamespec, player_count } = item;
+    let pct = (player_total == 0)
+      ? ''
+      : Math.round( 100 * player_count / player_total ) + '%';
+    let cnt = (player_total == 0)
+      ? ''
+      : ' - ' + player_count;
     return (
       <ListItem
         onPress={() => gamespecPressed(gamespec)}
@@ -45,6 +53,7 @@ const NewGameList = props => {
           <ListItem.Title style={styles.title}>{gamespec.disp || ''}</ListItem.Title>
           <ListItem.Subtitle style={styles.subtitle}>{gamespec.type || ''}</ListItem.Subtitle>
         </ListItem.Content>
+        <Text style={styles.subtitle}>{pct}{cnt}</Text>
       </ListItem>
     );
   };
@@ -64,7 +73,13 @@ const NewGameList = props => {
     return (<Text>Error: {error.message}</Text>);
   }
 
-  console.log('data', data);
+  //console.log('data', data);
+  if( data && data.gameSpecsForPlayer ) {
+    data.gameSpecsForPlayer.map( ({player_count}) => {
+      player_total += player_count;
+    });
+    console.log('player total games', player_total);
+  }
   const gameSpecsForPlayer = (data && data.gameSpecsForPlayer)
     ? orderBy(data.gameSpecsForPlayer, ['player_count'], ['desc'])
     : [];
