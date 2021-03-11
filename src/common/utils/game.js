@@ -1,4 +1,11 @@
-import { cloneDeep, filter, find, findIndex, reduce } from 'lodash';
+import {
+  cloneDeep,
+  filter,
+  find,
+  findIndex,
+  groupBy,
+  reduce
+} from 'lodash';
 
 import {
   ACTIVE_GAMES_FOR_PLAYER_QUERY,
@@ -502,6 +509,14 @@ export const getLocalHoleInfo = ({game, currentHole}) => {
     return {hole: currentHole, par, length, handicap};
   }
   return {hole: currentHole};
+};
+
+export const isTeeSameForAllPlayers = ({game}) => {
+  const distinct_tees = groupBy(game.rounds, r => {
+    return r.tee._key;
+  });
+  //console.log('distinct_tees',distinct_tees);
+  return Object.keys(distinct_tees).length == 1;
 };
 
 /*

@@ -17,7 +17,11 @@ import HoleNav from 'features/game/holenav';
 import Teams from 'features/game/teams';
 import GameSummaryStack from 'features/gameSummary/gameSummaryStack';
 import { GameContext } from 'features/game/gameContext';
-import { getHoles, getLocalHoleInfo } from 'common/utils/game';
+import {
+  getHoles,
+  getLocalHoleInfo,
+  isTeeSameForAllPlayers,
+} from 'common/utils/game';
 import { getGameMeta, setGameMeta } from 'common/utils/metadata';
 
 
@@ -63,7 +67,7 @@ const Score = props => {
   };
 
   if( currentHole ) {
-    holeInfo = ( activeGameSpec && activeGameSpec.location_type && activeGameSpec.location_type == 'local' )
+    holeInfo = isTeeSameForAllPlayers({game})
       ? getLocalHoleInfo({game, currentHole})
       : {hole: currentHole};
 
