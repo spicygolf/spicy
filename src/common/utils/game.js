@@ -513,7 +513,9 @@ export const getLocalHoleInfo = ({game, currentHole}) => {
 
 export const isTeeSameForAllPlayers = ({game}) => {
   const distinct_tees = groupBy(game.rounds, r => {
-    return r.tee._key;
+    if( r && r.tee && r.tee._key )
+      return r.tee._key;
+    return null;
   });
   //console.log('distinct_tees',distinct_tees);
   return Object.keys(distinct_tees).length == 1;
