@@ -181,7 +181,7 @@ const Leaderboard = props => {
         <View style={styles.scoreView}>
           <View style={birdieShape}>
             <View style={eagleShape}>
-              <Text style={styles.scoreCell}>
+              <Text style={styles.scoreCell} numberOfLines={1}>
                 {format({
                   v: section.totals[p.pkey],
                   type: scoreType,
@@ -355,15 +355,19 @@ var styles = StyleSheet.create({
   },
   scoreView: {
     alignItems: 'flex-end',
-    flex: 0.75,
+    flex: 0.8,
   },
   scoreCell: {
     fontSize: 13,
+    textAlign: 'right',
+    marginRight: 8,
+    paddingRight: 10,
+    minWidth: 40,
   },
   popView: {
     alignItems: 'flex-start',
     paddingTop: 3,
-    flex: 0.25,
+    flex: 0.2,
   },
   pop: {
     paddingVertical: 0.5,
