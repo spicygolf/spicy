@@ -1,4 +1,8 @@
 import React from 'react';
+import {
+  SafeAreaView,
+  StyleSheet,
+} from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import ProfileHome from 'features/profile/profilehome';
@@ -11,25 +15,31 @@ const ProfileStack = props => {
   const Stack = createStackNavigator();
 
   return (
-    <Stack.Navigator
-      initialRouteName='ProfileHome'
-      screenOptions={{
-        title: 'Profile',
-        headerLeft: null,
-        headerStyle: {
-          backgroundColor: red,
-        },
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: 'bold'
-        },
-        headerTintColor: 'white'
+    <SafeAreaView style={styles.container}>
+      <Stack.Navigator
+        initialRouteName='ProfileHome'
+        screenOptions={{
+          title: 'Profile',
+          headerMode: 'none',
+          headerShown: false,
+          headerStyle: {
+            height: 0,
+          },
       }}
-    >
-      <Stack.Screen name='ProfileHome' component={ProfileHome} />
-    </Stack.Navigator>
+      >
+        <Stack.Screen name='ProfileHome' component={ProfileHome} />
+      </Stack.Navigator>
+    </SafeAreaView>
   );
 
 };
 
 export default ProfileStack;
+
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: red,
+    flex: 1,
+  },
+});
