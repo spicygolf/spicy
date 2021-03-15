@@ -360,7 +360,7 @@ var styles = StyleSheet.create({
   scoreCell: {
     fontSize: 13,
     textAlign: 'right',
-    marginRight: 8,
+    marginRight: 10,
     paddingRight: 10,
     minWidth: 40,
   },
