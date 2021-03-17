@@ -1,11 +1,10 @@
-'use strict';
-
 import React, { useContext } from 'react';
 import {
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { useApolloClient } from '@apollo/client';
@@ -13,14 +12,13 @@ import {
   Card,
   Button,
   Icon,
+  ListItem,
 } from 'react-native-elements';
 import DeviceInfo from 'react-native-device-info';
 import { useNavigation } from '@react-navigation/native';
 
-import { blue } from 'common/colors';
-import { logout } from 'common/utils/account';
+import { blue, light } from 'common/colors';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import Impersonate from 'features/profile/impersonate';
 
 
 
@@ -31,18 +29,8 @@ const ProfileHome = props => {
 
   const {
     currentPlayer,
-    setCurrentPlayer,
-    setCurrentPlayerKey,
-    setToken,
   } = useContext(CurrentPlayerContext);
 
-
-  const _logoutPressed = () => {
-    setCurrentPlayer(null);
-    setCurrentPlayerKey(null);
-    setToken(null);
-    logout(client);
-  }
 
   const getField = field => {
     if( currentPlayer && currentPlayer[field] ) {
@@ -91,7 +79,7 @@ const ProfileHome = props => {
     }
   };
 
-  console.log('currentPlayer', currentPlayer);
+  //console.log('currentPlayer', currentPlayer);
 
   const name = getField('name');
   const short = getField('short');
@@ -100,36 +88,37 @@ const ProfileHome = props => {
   const index = getHandicapField('index');
   const revDate = getHandicapField('revDate');
 
-  const _clearCache = async () => {
-    await client.clearStore();
-    client.cache.data.clear();
-/*
-    for( const key of Object.keys(client.cache.data.data) ) {
-      const e = client.cache.evict({id: key});
-      console.log('evict', key, e);
-    }
-    const gc = client.cache.gc();
-    console.log('gc', gc);
-*/
-    console.log('cache', client.cache.data.data);
-  }
-
   const handicap_content = handicapContent({source, index, revDate});
 
   const version = DeviceInfo.getVersion();
 
-  const impersonate = (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin' )
-    ? (<Impersonate clearCache={_clearCache} />)
-    : null;
 
   return (
     <KeyboardAvoidingView style={{flex: 1,}}>
       <ScrollView keyboardShouldPersistTaps='handled'>
-        <Card>
-          <View style={styles.name_view}>
-            <Text style={styles.name}>{name}</Text>
-            <Text style={styles.short}>{short}</Text>
-          </View>
+        <Card wrapperStyle={styles.card_wrapper}>
+          <ListItem>
+          <Icon
+              name='settings'
+              type='material'
+              color='transparent'
+              size={24}
+            />
+            <ListItem.Content style={styles.name_view}>
+              <ListItem.Title style={styles.name}>{name}</ListItem.Title>
+              <ListItem.Subtitle style={styles.short}>{short}</ListItem.Subtitle>
+            </ListItem.Content>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Settings')}
+            >
+              <Icon
+                name='settings'
+                type='material'
+                color={light}
+                size={24}
+              />
+            </TouchableOpacity>
+          </ListItem>
           <View style={styles.subname_view}>
             { handicap_content }
             <View style={styles.stats_view}>
@@ -148,36 +137,6 @@ const ProfileHome = props => {
             </View>
           </View>
         </Card>
-        <Card>
-          <Button
-            buttonStyle={styles.button}
-            title='Settings'
-            titleStyle={styles.settings_button_title}
-            icon={
-              <Icon
-                name='settings'
-                type='material'
-                color='#fff'
-                size={24}
-              />
-            }
-            testID='settings_button'
-            onPress={() => console.log('settings')}
-          />
-          <Button
-            buttonStyle={styles.button}
-            title='Clear Local Data'
-            testID='clear_cache_button'
-            onPress={() => _clearCache()}
-          />
-          <Button
-            buttonStyle={styles.button}
-            title='Logout'
-            testID='logout_button'
-            onPress={() => _logoutPressed()}
-          />
-        </Card>
-        { impersonate }
       </ScrollView>
       <View style={styles.app_info}>
           <Text>v{version}</Text>
@@ -191,9 +150,12 @@ export default ProfileHome;
 
 
 const styles = StyleSheet.create({
+  card_wrapper: {
+    marginBottom: 20,
+  },
   name_view: {
     marginVertical: 10,
-    alignSelf: 'center',
+    alignItems: 'center',
   },
   name: {
     textAlign: 'center',
@@ -251,12 +213,6 @@ const styles = StyleSheet.create({
   },
   button_view: {
     marginTop: 40,
-  },
-  button: {
-    margin: 10,
-  },
-  settings_button_title: {
-    paddingHorizontal: 10,
   },
   app_info: {
     marginHorizontal: 15,

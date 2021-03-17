@@ -7,6 +7,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import ProfileHome from 'features/profile/profilehome';
 import LinkHandicap from 'features/profile/linkHandicap';
+import SettingsHome from 'features/profile/settings/settings.js';
+import Account from 'features/profile/settings/account.js';
+import ClearCache from 'features/profile/settings/clearCache.js';
+import Logout from 'features/profile/settings/logout.js';
+import Impersonate from 'features/profile/settings/impersonate.js';
 import { red } from 'common/colors';
 
 
@@ -41,7 +46,41 @@ const ProfileStack = props => {
             title: 'Link Handicap Service',
             headerShown: 'false',
           }}
-
+        />
+        <Stack.Screen
+          name='Settings'
+          component={SettingsHome}
+          options={{
+            title: 'Settings',
+          }}
+        />
+        <Stack.Screen
+          name='Account'
+          component={Account}
+          options={{
+            title: 'Account',
+          }}
+        />
+        <Stack.Screen
+          name='ClearCache'
+          component={ClearCache}
+          options={{
+            title: 'Clear Local Data',
+          }}
+        />
+        <Stack.Screen
+          name='Logout'
+          component={Logout}
+          options={{
+            title: 'Logout',
+          }}
+        />
+        <Stack.Screen
+          name='Impersonate'
+          component={Impersonate}
+          options={{
+            title: 'Impersonate',
+          }}
         />
       </Stack.Navigator>
     </SafeAreaView>

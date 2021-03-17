@@ -10,12 +10,16 @@ import {
   Button,
   Card,
 } from 'react-native-elements';
+import { useApolloClient } from '@apollo/client';
 
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import { clearCache } from 'common/utils/account';
 
 
 
-const Impersonate = ({ clearCache }) => {
+const Impersonate = props => {
+
+  const client = useApolloClient();
 
   const {
     setCurrentPlayerKey,
@@ -25,7 +29,7 @@ const Impersonate = ({ clearCache }) => {
 
   const impersonateUser = () => {
     console.log('impersonate', iPlayer);
-    clearCache();
+    clearCache(client);
     setCurrentPlayerKey(iPlayer);
   };
 
@@ -33,7 +37,6 @@ const Impersonate = ({ clearCache }) => {
     <KeyboardAvoidingView>
       <ScrollView keyboardShouldPersistTaps='handled'>
         <Card>
-          <Card.Title>Admin</Card.Title>
           <Text style={styles.field_label}>Player to Impersonate:</Text>
           <TextInput
             style={styles.field_input}

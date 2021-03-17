@@ -52,9 +52,9 @@ export const login = async fbUser => {
   switch( res.status ) {
     case 200:
       ret = {
-        //currentPlayerKey: payload.pkey,
+        currentPlayerKey: payload.pkey,
         //currentPlayerKey: '117972196', // Chris H Carter - old - for dev
-        currentPlayerKey: '65882229',  // Chris H Carter - new - for dev
+        //currentPlayerKey: '65882229',  // Chris H Carter - new - for dev
         token: payload.token,
       };
       break;
@@ -93,8 +93,25 @@ export const logout = async client => {
 
   // call API logout endpoint
   await auth().signOut();
+  return true;
 
 };
+
+export const clearCache = async client => {
+  await client.clearStore();
+  client.cache.data.clear();
+/*
+  for( const key of Object.keys(client.cache.data.data) ) {
+    const e = client.cache.evict({id: key});
+    console.log('evict', key, e);
+  }
+  const gc = client.cache.gc();
+  console.log('gc', gc);
+*/
+  console.log('cache', client.cache.data.data);
+  return true;
+};
+
 
 export const getCurrentUser = fbUser => {
   return login(fbUser)

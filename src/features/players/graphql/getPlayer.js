@@ -7,6 +7,7 @@ export const GET_PLAYER_QUERY = gql`
     getPlayer(_key: $player) {
       _key
       name
+      email
       statusAuthz
       level
       short
