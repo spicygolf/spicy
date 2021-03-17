@@ -2,9 +2,9 @@ import { gql } from '@apollo/client';
 
 
 
-export const GET_PLAYER_QUERY = gql`
-  query GetPlayer($player: String!) {
-    getPlayer(_key: $player) {
+export const MERGE_PLAYERS_MUTATION = gql`
+  mutation MergePlayers($source: PlayerKeyInput!, $target: HandicapInput!) {
+    mergePlayers(source: $source, target: $target) {
       _key
       name
       statusAuthz

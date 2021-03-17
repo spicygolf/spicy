@@ -6,6 +6,7 @@ import {
 import { createStackNavigator } from '@react-navigation/stack';
 
 import ProfileHome from 'features/profile/profilehome';
+import LinkHandicap from 'features/profile/linkHandicap';
 import { red } from 'common/colors';
 
 
@@ -19,15 +20,29 @@ const ProfileStack = props => {
       <Stack.Navigator
         initialRouteName='ProfileHome'
         screenOptions={{
-          title: 'Profile',
-          headerMode: 'none',
-          headerShown: false,
-          headerStyle: {
-            height: 0,
-          },
-      }}
+        }}
       >
-        <Stack.Screen name='ProfileHome' component={ProfileHome} />
+        <Stack.Screen
+          name='ProfileHome'
+          component={ProfileHome}
+          options={{
+            title: 'Profile',
+            headerMode: 'none',
+            headerShown: 'false',
+            headerStyle: {
+              height: 0,
+            },
+          }}
+        />
+        <Stack.Screen
+          name='LinkHandicap'
+          component={LinkHandicap}
+          options={{
+            title: 'Link Handicap Service',
+            headerShown: 'false',
+          }}
+
+        />
       </Stack.Navigator>
     </SafeAreaView>
   );

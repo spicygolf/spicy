@@ -104,10 +104,7 @@ const RegisterPlayer = props => {
       const fetchData = async () => {
 
         if( registration.ghinCreds ) {
-          const search_results = await login(
-            registration.ghinCreds.ghinNumber,
-            registration.ghinCreds.lastName
-          );
+          const search_results = await login(registration.ghinCreds);
           if( search_results && search_results.length ) {
             const g = search_results[0];
             setRegistration({

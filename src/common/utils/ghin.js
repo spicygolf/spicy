@@ -3,7 +3,7 @@ import { build_qs } from 'common/utils/account';
 
 
 
-export const login = async (ghinNumber, lastName) => {
+export const login = async ({ghinNumber, lastName}) => {
 
   const qs = build_qs({
     ghinNumber: ghinNumber,
@@ -22,19 +22,23 @@ export const login = async (ghinNumber, lastName) => {
 
 };
 
-export const search = async (state, lastName, page, perPage) => {
+export const search = async ({state, lastName, firstName, page, perPage}) => {
 
-  const login_golfers = await login('1152839', 'Anderson');
+  const login_golfers = await login({
+    ghinNumber: '1152839',
+    lastName: 'Anderson'
+  });
   if( !login_golfers || !login_golfers.length ) {
     console.log('Cannot log into GHIN');
     return [];
   }
 
   const qs = build_qs({
-    state: state,
-    lastName: lastName,
-    page: page,
-    perPage: perPage,
+    state,
+    lastName,
+    firstName,
+    page,
+    perPage,
     token: login_golfers[0].NewUserToken,
   });
 

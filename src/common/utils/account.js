@@ -53,6 +53,8 @@ export const login = async fbUser => {
     case 200:
       ret = {
         currentPlayerKey: payload.pkey,
+        //currentPlayerKey: '117972196', // Chris H Carter - old - for dev
+        //currentPlayerKey: '65882229',  // Chris H Carter - new - for dev
         token: payload.token,
       };
       break;

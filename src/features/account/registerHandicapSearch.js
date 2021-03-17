@@ -109,12 +109,12 @@ const RegisterHandicapSearch = props => {
           return;
         }
         if( registration.lastName && registration.state ) {
-          search_results = await search(
-            registration.state,
-            registration.lastName,
-            1,  // don't use page here, cuz infinite scroll pagination below
+          search_results = await search({
+            state: registration.state,
+            lastName: registration.lastName,
+            page: 1,  // don't use page here, cuz infinite scroll pagination below
             perPage,
-          );
+          });
           //console.log('search_results', search_results);
           setGolfers(search_results);
           setFetched(true);
@@ -143,12 +143,12 @@ const RegisterHandicapSearch = props => {
           // infinite scroll pagination
           if( registration.lastName && registration.ghinNumber ) return;
 
-          const search_results = await search(
-            registration.state,
-            registration.lastName,
-            page+1,
+          const search_results = await search({
+            state: registration.state,
+            lastName: registration.lastName,
+            page: page+1,
             perPage,
-          );
+          });
           setGolfers(golfers.concat(search_results));
           setPage(page+1);
           console.log('page fetched', page);
