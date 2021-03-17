@@ -21,6 +21,13 @@ import { logout } from 'common/utils/account';
 
 const LinkHandicap = props => {
 
+  const defaultNewLink = {
+    country: 'USA',
+    state: '',
+    lastName: '',
+    firstName: '',
+  };
+
   const {
     currentPlayer,
     setCurrentPlayer,
@@ -32,7 +39,7 @@ const LinkHandicap = props => {
   const navigation = useNavigation();
 
   const [ service, setService ] = useState('ghin');
-  const [ newLink, setNewLink ] = useState();
+  const [ newLink, setNewLink ] = useState(defaultNewLink);
 
   const [ mergePlayers ] = useMutation(MERGE_PLAYERS_MUTATION);
 
@@ -82,7 +89,10 @@ const LinkHandicap = props => {
         <Card wrapperStyle={styles.card_wrapper}>
           <Card.Title>GHIN Player Search</Card.Title>
           <Card.Divider />
-          <GhinSearchPlayer setFn={setNewLink} />
+          <GhinSearchPlayer
+            state={newLink}
+            setState={setNewLink}
+          />
         </Card>
         );
       break;
@@ -90,7 +100,7 @@ const LinkHandicap = props => {
         break;
   }
 
-  if( newLink ) {
+  if( newLink && newLink.handicap ) {
     //console.log('newLink', newLink);
     return (
       <View style={styles.container}>
@@ -114,8 +124,9 @@ const LinkHandicap = props => {
             <View style={styles.row}>
               <Text style={styles.label}>revision</Text><Text style={styles.value}>{newLink.handicap.revDate}</Text>
             </View>
-            <View>
+            <View style={styles.note_view}>
               <Text style={styles.note}>If you click 'Confirm' you will be logged out.</Text>
+              <Text style={styles.note}>Login again and handicap service will be linked.</Text>
             </View>
         </Card>
         <View style={styles.button_row}>
@@ -179,9 +190,12 @@ const styles = StyleSheet.create({
     //fontWeight: 'bold',
     flex: 4,
   },
-  note: {
+  note_view: {
     marginTop: 25,
+  },
+  note: {
     textAlign: 'center',
+    fontSize: 11,
   },
   button_row: {
     flexDirection: 'row',

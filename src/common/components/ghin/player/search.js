@@ -6,26 +6,17 @@ import GhinPlayerSearchResults from 'common/components/ghin/player/searchResults
 
 
 
-const GhinSearchPlayer = ({setFn}) => {
-
-  const defaultGhinPlayerSearch = {
-    country: 'USA',
-    state: 'GA',
-    lastName: 'Carter',
-    firstName: 'Chris',
-  };
-
-  const [ ghinPlayerSearch, setGhinPlayerSearch ] = useState(defaultGhinPlayerSearch);
+const GhinSearchPlayer = ({state, setState}) => {
 
   return (
     <GhinPlayerSearchContext.Provider
       value={{
-        ghinPlayerSearch,
-        setGhinPlayerSearch,
+        state,
+        setState,
       }}
     >
       <GhinPlayerSearchInput />
-      <GhinPlayerSearchResults setFn={setFn} />
+      <GhinPlayerSearchResults />
     </GhinPlayerSearchContext.Provider>
   )
 };

@@ -8,7 +8,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { RegisterContext } from 'features/account/registerContext';
 import RegisterBasics from 'features/account/registerBasics';
 import RegisterHandicap from 'features/account/registerHandicap';
-import RegisterHandicapSearch from 'features/account/registerHandicapSearch';
 import RegisterPlayer from 'features/account/registerPlayer';
 import RegisterError from 'features/account/registerError';
 
@@ -21,6 +20,7 @@ const Register = props => {
     password: '',
     password2: '',
     lastName: '',
+    firstName: '',
     ghinNumber: '',
     country: 'USA',
     state: '',
@@ -47,7 +47,6 @@ const Register = props => {
         >
           <Stack.Screen name='RegisterBasics' component={RegisterBasics} />
           <Stack.Screen name='RegisterHandicap' component={RegisterHandicap} />
-          <Stack.Screen name='RegisterHandicapSearch' component={RegisterHandicapSearch} />
           <Stack.Screen name='RegisterPlayer' component={RegisterPlayer} />
           <Stack.Screen name='RegisterError' component={RegisterError} />
         </Stack.Navigator>

@@ -4,17 +4,16 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View
 } from 'react-native';
 import {
   Button,
   Card,
+  Input,
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 
-import { green } from 'common/colors';
 import { validateEmail } from 'common/utils/account';
 
 
@@ -23,7 +22,7 @@ const Forgot = props => {
 
   const [ sent, setSent ] = useState(false);
   const [ email, setEmail ] = useState('');
-  const [ emailValid, setEmailValid ] = useState(false);
+  const [ emailValid, setEmailValid ] = useState(true);
 
   const navigation = useNavigation();
   const emailRef = useRef(null);
@@ -49,8 +48,6 @@ const Forgot = props => {
     setEmailValid(validateEmail(eTest));
 
   };
-
-  const eValid = { borderColor: emailValid ? green : '#ddd' };
 
   useEffect(
     () => {
@@ -92,10 +89,13 @@ const Forgot = props => {
           <Card.Title>Forgot Password</Card.Title>
           <Card.Divider />
           <View>
-            <View style={styles.field_container}>
-              <Text style={styles.field_label}>Email *</Text>
-              <TextInput
-                style={[styles.field_input, eValid]}
+            <View style={styles.field}>
+              <Input
+                label='Email'
+                labelStyle={styles.label}
+                containerStyle={styles.field_input}
+                inputStyle={styles.field_input_txt}
+                errorMessage={emailValid ? '' : 'Please enter a valid email address'}
                 onChangeText={text => {
                   setEmail(text);
                   validate('email', text);
@@ -127,21 +127,19 @@ var styles = StyleSheet.create({
     margin: 10,
     height: '100%',
   },
-  field_container: {
-
+  field: {
+    flex: 1,
+    marginBottom: 15,
   },
-  field_label: {
-    fontWeight: 'bold',
-    margin: 5,
+  label: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: 'normal',
   },
   field_input: {
-    height: 40,
     color: '#000',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginBottom: 10,
+    marginHorizontal: 0,
+    paddingHorizontal: 0,
   },
   login_button: {
     marginTop: 15,

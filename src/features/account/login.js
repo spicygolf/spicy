@@ -11,6 +11,7 @@ import {
 import {
   Button,
   Card,
+  Input,
 } from 'react-native-elements';
 import auth from '@react-native-firebase/auth';
 import { useNavigation } from '@react-navigation/native';
@@ -24,8 +25,8 @@ const Login = props => {
 
   const [ email, setEmail ] = useState('');
   const [ password, setPassword ] = useState('');
-  const [ emailValid, setEmailValid ] = useState(false);
-  const [ passValid, setPassValid ] = useState(false);
+  const [ emailValid, setEmailValid ] = useState(true);
+  const [ passValid, setPassValid ] = useState(true);
   const [ loginError, setLoginError ] = useState();
 
   const navigation = useNavigation();
@@ -58,9 +59,6 @@ const Login = props => {
 
   };
 
-  const eValid = { borderColor: emailValid ? green : '#ddd' };
-  const pValid = { borderColor: passValid ? green : '#ddd' };
-
   return (
     <KeyboardAvoidingView style={styles.container}>
       <ScrollView keyboardShouldPersistTaps='handled'>
@@ -78,10 +76,13 @@ const Login = props => {
           <Card.Title>Login</Card.Title>
           <Card.Divider />
           <View>
-            <View style={styles.field_container}>
-              <Text style={styles.field_label}>Email</Text>
-              <TextInput
-                style={[styles.field_input, eValid]}
+            <View style={styles.field}>
+              <Input
+                label='Email'
+                labelStyle={styles.label}
+                containerStyle={styles.field_input}
+                inputStyle={styles.field_input_txt}
+                errorMessage={emailValid ? '' : 'Please enter a valid email address'}
                 onChangeText={text => {
                   setEmail(text);
                   validate('email', text);
@@ -93,10 +94,13 @@ const Login = props => {
                 testID='email_field'
               />
             </View>
-            <View style={styles.field_container}>
-              <Text style={styles.field_label}>Password</Text>
-              <TextInput
-                style={[styles.field_input, pValid]}
+            <View style={styles.field}>
+              <Input
+                label='Password'
+                labelStyle={styles.label}
+                containerStyle={styles.field_input}
+                inputStyle={styles.field_input_txt}
+                errorMessage={passValid ? '' : 'Please enter a valid password'}
                 onChangeText={text => {
                   setPassword(text);
                   validate('password', text);
@@ -173,20 +177,19 @@ var styles = StyleSheet.create({
     margin: 10,
     height: '100%',
   },
-  field_container: {
+  field: {
+    flex: 1,
+    marginBottom: 5,
   },
-  field_label: {
-    fontWeight: 'bold',
-    margin: 5,
+  label: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: 'normal',
   },
   field_input: {
-    height: 40,
     color: '#000',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginBottom: 10,
+    marginHorizontal: 0,
+    paddingHorizontal: 0,
   },
   error_text: {
     color: 'red',

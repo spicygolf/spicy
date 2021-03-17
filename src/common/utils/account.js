@@ -52,9 +52,9 @@ export const login = async fbUser => {
   switch( res.status ) {
     case 200:
       ret = {
-        currentPlayerKey: payload.pkey,
+        //currentPlayerKey: payload.pkey,
         //currentPlayerKey: '117972196', // Chris H Carter - old - for dev
-        //currentPlayerKey: '65882229',  // Chris H Carter - new - for dev
+        currentPlayerKey: '65882229',  // Chris H Carter - new - for dev
         token: payload.token,
       };
       break;
@@ -111,12 +111,14 @@ export const getCurrentUser = fbUser => {
 };
 
 export const validateEmail = email => {
+  if( email == '' ) return true;
   if( !email ) return false;
   var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
 };
 
 export const validatePassword = pass => {
+  if( pass == '' ) return true;
   if( !pass ) return false;
   if( pass.length > 3 ) return true;
 }

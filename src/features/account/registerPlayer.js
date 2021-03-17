@@ -4,12 +4,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import {
   Button,
   Card,
+  Input,
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
@@ -18,7 +18,6 @@ import BackToLogin from 'features/account/backToLogin';
 import { RegisterContext } from 'features/account/registerContext';
 import { validateName, registerPlayer } from 'common/utils/account';
 import { login } from 'common/utils/ghin';
-import { green } from 'common/colors';
 
 
 
@@ -40,9 +39,6 @@ const RegisterPlayer = props => {
     setNameValid(validateName(nTest));
     setShortValid(validateName(sTest));
   };
-
-  const nValid = { borderColor: nameValid ? green : '#ddd' };
-  const sValid = { borderColor: shortValid ? green : '#ddd' };
 
   const changes = registration.handicap ?
     'Make changes to GHIN information (if any)' : '';
@@ -139,10 +135,13 @@ const RegisterPlayer = props => {
             <Card.Divider />
             <View testID='register_4_view'>
               <Text style={styles.changes}>{ changes }</Text>
-              <View style={styles.field_container}>
-                <Text style={styles.field_label}>Full Name *</Text>
-                <TextInput
-                  style={[styles.field_input, nValid]}
+              <View style={styles.field}>
+                <Input
+                  label='Full Name'
+                  labelStyle={styles.label}
+                  containerStyle={styles.field_input}
+                  inputStyle={styles.field_input_txt}
+                  errorMessage={nameValid ? '' : 'Please enter your full name'}
                   onChangeText={text => {
                     setRegistration({
                       ...registration,
@@ -155,10 +154,13 @@ const RegisterPlayer = props => {
                   ref={nameRef}
                 />
               </View>
-              <View style={styles.field_container}>
-                <Text style={styles.field_label}>Short/Nickname *</Text>
-                <TextInput
-                  style={[styles.field_input, sValid]}
+              <View style={styles.field}>
+                <Input
+                  label='Short/Nickname'
+                  labelStyle={styles.label}
+                  containerStyle={styles.field_input}
+                  inputStyle={styles.field_input_txt}
+                  errorMessage={shortValid ? '' : 'Please enter your short/nickname'}
                   onChangeText={text => {
                     setRegistration({
                       ...registration,
@@ -212,19 +214,19 @@ const styles = StyleSheet.create({
   changes: {
     paddingBottom: 20,
   },
-  field_label: {
-    fontWeight: 'bold',
-    marginTop: 5,
-    marginBottom: 5,
+  field: {
+    flex: 1,
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: 'normal',
   },
   field_input: {
-    height: 40,
     color: '#000',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginBottom: 10,
+    marginHorizontal: 0,
+    paddingHorizontal: 0,
   },
   button_row: {
     flexDirection: 'row',

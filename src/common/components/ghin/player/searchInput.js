@@ -20,7 +20,7 @@ import { baseUri, scheme } from 'common/config';
 
 const GhinPlayerSearchInput = props => {
 
-  const { ghinPlayerSearch, setGhinPlayerSearch } = useContext(GhinPlayerSearchContext);
+  const { state, setState } = useContext(GhinPlayerSearchContext);
 
   const [ countries, setCountries ] = useState([]);
 
@@ -39,21 +39,21 @@ const GhinPlayerSearchInput = props => {
     }, []
   );
 
-  const c = find(countries, {code: ghinPlayerSearch.country});
+  const c = find(countries, {code: state.country});
   let statelist = [];
   if( c && c.states ) statelist = c.states;
 
   //console.log('ghinPlayerSearch', ghinPlayerSearch);
 
   return (
-    <View>
+    <View style={styles.container}>
       <View style={styles.row}>
         <View style={styles.picker_country}>
           <CountryPicker
             countries={countries}
-            selectedValue={ghinPlayerSearch.country}
-            onValueChange={(v) => setGhinPlayerSearch({
-              ...ghinPlayerSearch,
+            selectedValue={state.country}
+            onValueChange={(v) => setState({
+              ...state,
               country: v,
             })}
           />
@@ -61,9 +61,9 @@ const GhinPlayerSearchInput = props => {
         <View style={styles.picker_state}>
           <StatePicker
             states={statelist}
-            selectedValue={ghinPlayerSearch.state}
-            onValueChange={(v) => setGhinPlayerSearch({
-              ...ghinPlayerSearch,
+            selectedValue={state.state}
+            onValueChange={(v) => setState({
+              ...state,
               state: v,
             })}
           />
@@ -77,14 +77,13 @@ const GhinPlayerSearchInput = props => {
             containerStyle={[styles.field_input, styles.last_name]}
             inputStyle={styles.field_input_txt}
             onChangeText={text => {
-              setGhinPlayerSearch({
-                ...ghinPlayerSearch,
+              setState({
+                ...state,
                 lastName: text,
               });
-              //validate('name', text);
             }}
             autoCapitalize='words'
-            value={ghinPlayerSearch.lastName}
+            value={state.lastName}
           />
         </View>
         <View style={styles.field}>
@@ -94,13 +93,13 @@ const GhinPlayerSearchInput = props => {
             containerStyle={styles.field_input}
             inputStyle={styles.field_input_txt}
             onChangeText={text => {
-              setGhinPlayerSearch({
-                ...ghinPlayerSearch,
+              setState({
+                ...state,
                 firstName: text,
               });
             }}
             autoCapitalize='words'
-            value={ghinPlayerSearch.firstName}
+            value={state.firstName}
           />
         </View>
       </View>
@@ -112,6 +111,8 @@ export default GhinPlayerSearchInput;
 
 
 const styles = StyleSheet.create({
+  container: {
+  },
   row: {
     flexDirection: 'row',
     marginBottom: 10,

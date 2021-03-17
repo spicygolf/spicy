@@ -11,14 +11,14 @@ import {
 } from 'react-native-elements';
 
 import { GhinPlayerSearchContext } from 'common/components/ghin/player/searchContext';
-import { login, search } from 'common/utils/ghin';
+import { search } from 'common/utils/ghin';
 
 
 
-const GhinPlayerSearchResults = ({setFn}) => {
+const GhinPlayerSearchResults = props => {
 
-  const { ghinPlayerSearch } = useContext(GhinPlayerSearchContext);
-  //console.log('results context', ghinPlayerSearch);
+  const { state, setState } = useContext(GhinPlayerSearchContext);
+  //console.log('ghin player search results context', state);
 
   const [ golfers, setGolfers ] = useState([]);
   const [ fetched, setFetched ] = useState(0);  // 0 - no search, 1 - fetching, 2 - fetched
@@ -52,38 +52,28 @@ const GhinPlayerSearchResults = ({setFn}) => {
         containerStyle={styles.container}
         key={key}
         onPress={() => {
-          if( selected ) {
-            setSelected(null);
-            setFn({
-              ...ghinPlayerSearch,
-              ghinCreds: null,
-              name: '',
-              short: '',
-            })
-          } else {
-            setSelected(gn);
-            setFn({
-              ...ghinPlayerSearch,
-              ghinCreds: {
-                lastName: ln,
-                ghinNumber: gn,
-              },
-              handicap: {
-                source: 'ghin',
-                id: gn,
-                firstName: fn,
-                lastName: ln,
-                gender,
-                playerName: player_name,
-                active,
-                index: hdcp,
-                revDate: revDate,
-              },
-              name: player_name,
-              short: fn,
-              club: player_club,
-            });
-          }
+          setSelected(gn);
+          setState({
+            ...state,
+            ghinCreds: {
+              lastName: ln,
+              ghinNumber: gn,
+            },
+            handicap: {
+              source: 'ghin',
+              id: gn,
+              firstName: fn,
+              lastName: ln,
+              gender,
+              playerName: player_name,
+              active,
+              index: hdcp,
+              revDate: revDate,
+            },
+            name: player_name,
+            short: fn,
+            club: player_club,
+          });
         }}
       >
         <ListItem.Content style={styles.container}>
@@ -99,74 +89,71 @@ const GhinPlayerSearchResults = ({setFn}) => {
     () => {
       const fetchData = async () => {
         let search_results = [];
-        if( ghinPlayerSearch.ghinNumber ) {
-          setFetched(1); // fetching
-          search_results = await login(ghinPlayerSearch);
-          //console.log('search_results', search_results);
-          setGolfers(search_results);
-          setFetched(2); // fetched
-          return;
-        }
-        if( ghinPlayerSearch.state ) {
-          setFetched(1); // fetching
-          search_results = await search({
-            ...ghinPlayerSearch,
-            page: 1,  // don't use page here, cuz infinite scroll pagination below
-            perPage,
-          });
-          //console.log('search_results', search_results);
-          setGolfers(search_results);
-          setFetched(2); // fetched
-          return;
-        }
+        setFetched(1); // fetching
+        search_results = await search({
+          ...state,
+          page: 1,  // don't use page here, cuz infinite scroll pagination below
+          perPage,
+        });
+        //console.log('search_results', search_results);
+        setGolfers(search_results);
+        setFetched(2); // fetched
+        return;
       };
       fetchData();
-    }, [ghinPlayerSearch]
+    }, [state]
   );
 
-  let content = null;
+  let content = (
+    <View style={styles.results_list}>
+
+    </View>
+  );
 
   switch( fetched ) {
     case 1:
-      content = (<ActivityIndicator />);
+      content = (
+        <View style={styles.results_list}>
+          <ActivityIndicator />
+        </View>
+      );
       break;
     case 2:
       //console.log('golfers', golfers);
-      if( golfers.length ) {
-        content = (
-          <FlatList
-            data={golfers}
-            renderItem={renderGolfer}
-            keyExtractor={g => (
-              g.GHINNumber ? g.SearchValue : `${g.ghin}_${g.club_id}`
-            )}
-            onEndReachedThreshold={0.8}
-            onEndReached={async () => {
-              //console.log('onEndReached');
+      content = (
+        <FlatList
+          data={golfers}
+          renderItem={renderGolfer}
+          style={styles.results_list}
+          keyExtractor={g => (
+            g.GHINNumber ? g.SearchValue : `${g.ghin}_${g.club_id}`
+          )}
+          onEndReachedThreshold={0.8}
+          onEndReached={async () => {
+            //console.log('onEndReached');
 
-              // should only be in 'search' part where we want to peform
-              // infinite scroll pagination
-              if( ghinPlayerSearch.lastName && ghinPlayerSearch.ghinNumber ) return;
+            // should only be in 'search' part where we want to peform
+            // infinite scroll pagination
+            if( state.lastName && state.ghinNumber ) return;
 
-              const search_results = await search({
-                ...ghinPlayerSearch,
-                page: page+1,
-                perPage,
-              });
-              setGolfers(golfers.concat(search_results));
-              setPage(page+1);
-              console.log('page fetched', page);
-            }}
-            keyboardShouldPersistTaps='handled'
-          />
-        );
-      } else {
-        content = (
-          <View>
-            <Text style={styles.no_results}>No Results</Text>
-          </View>
-        );
-      }
+            const search_results = await search({
+              ...state,
+              page: page+1,
+              perPage,
+            });
+            console.log('infinite scroll search_results', search_results);
+            setGolfers(golfers.concat(search_results));
+            setPage(page+1);
+            console.log('page fetched', page);
+          }}
+          keyboardShouldPersistTaps='handled'
+          ListEmptyComponent={(
+            <View style={{flex: 1}}>
+              <Text style={styles.no_results}>No Results</Text>
+            </View>
+          )}
+        />
+      );
       break;
     case 0:
     default:
@@ -186,13 +173,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     marginHorizontal: 0,
   },
-  player_name: {},
   player_club: {
     color: '#999',
     fontSize: 12,
   },
   handicap: {
     fontSize: 24,
+  },
+  results_list: {
+    height: '54%',
   },
   no_results: {
     color: "#999",

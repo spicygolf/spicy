@@ -3,20 +3,18 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
 import {
   Button,
   Card,
+  Input
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 
 import { RegisterContext } from 'features/account/registerContext';
 import BackToLogin from 'features/account/backToLogin';
 import { validateEmail, validatePassword } from 'common/utils/account';
-import { green } from 'common/colors';
 
 
 
@@ -33,18 +31,14 @@ const RegisterBasics = props => {
 
   const validate = (type, text) => {
 
-    const eTest = type == 'email' ? text : registration.email;
-    const pTest = type == 'password' ? text : registration.password;
-    const p2Test = type == 'password2' ? text : registration.password2;
+    const eTest = (type == 'email') ? text : registration.email;
+    const pTest = (type == 'password') ? text : registration.password;
+    const p2Test = (type == 'password2') ? text : registration.password2;
 
     setEmailValid(validateEmail(eTest));
     setPassValid(validatePassword(pTest) && (pTest == p2Test));
     setPass2Valid(validatePassword(p2Test) && (p2Test == pTest));
   };
-
-  const eValid = { borderColor: emailValid ? green : '#ddd' };
-  const pValid = { borderColor: passValid ? green : '#ddd' };
-  const p2Valid = { borderColor: pass2Valid ? green : '#ddd' };
 
   useEffect(
     () => {
@@ -63,59 +57,66 @@ const RegisterBasics = props => {
           <Card>
             <Card.Title>Register - Basics</Card.Title>
             <Card.Divider />
-            <View style={styles.loginView} testID='register_1_view'>
-              <View>
-                <View style={styles.field_container}>
-                  <Text style={styles.field_label}>Email *</Text>
-                  <TextInput
-                    style={[styles.field_input, eValid]}
-                    onChangeText={text => {
-                      setRegistration({
-                        ...registration,
-                        email: text,
-                      });
-                      validate('email', text);
-                    }}
-                    keyboardType='email-address'
-                    autoCapitalize='none'
-                    value={registration.email}
-                    ref={emailRef}
-                  />
-                </View>
-                <View style={styles.field_container}>
-                  <Text style={styles.field_label}>Password *</Text>
-                  <TextInput
-                    style={[styles.field_input, pValid]}
-                    onChangeText={text => {
-                      setRegistration({
-                        ...registration,
-                        password: text,
-                      });
-                      validate('password', text);
-                    }}
-                    autoCompleteType='password'
-                    secureTextEntry={true}
-                    autoCapitalize='none'
-                    value={registration.password}
-                  />
-                </View>
-                <View style={styles.field_container}>
-                  <Text style={styles.field_label}>Password Again *</Text>
-                  <TextInput
-                    style={[styles.field_input, p2Valid]}
-                    onChangeText={text => {
-                      setRegistration({
-                        ...registration,
-                        password2: text,
-                      });
-                      validate('password2', text);
-                    }}
-                    autoCompleteType='password'
-                    secureTextEntry={true}
-                    autoCapitalize='none'
-                    value={registration.password2}
-                  />
-                </View>
+            <View>
+              <View style={styles.field}>
+                <Input
+                  label='Email'
+                  labelStyle={styles.label}
+                  containerStyle={styles.field_input}
+                  inputStyle={styles.field_input_txt}
+                  errorMessage={emailValid ? '' : 'Please enter a valid email address'}
+                  onChangeText={text => {
+                    setRegistration({
+                      ...registration,
+                      email: text,
+                    });
+                    validate('email', text);
+                  }}
+                  keyboardType='email-address'
+                  autoCapitalize='none'
+                  value={registration.email}
+                  ref={emailRef}
+                />
+              </View>
+              <View style={styles.field}>
+                <Input
+                  label='Password'
+                  labelStyle={styles.label}
+                  containerStyle={styles.field_input}
+                  inputStyle={styles.field_input_txt}
+                  errorMessage={passValid ? '' : 'Please enter a valid and matching password (4+ characters)'}
+                  onChangeText={text => {
+                    setRegistration({
+                      ...registration,
+                      password: text,
+                    });
+                    validate('password', text);
+                  }}
+                  autoCompleteType='password'
+                  secureTextEntry={true}
+                  autoCapitalize='none'
+                  value={registration.password}
+                />
+              </View>
+              <View style={styles.field}>
+                <Input
+                  label='Password Again'
+                  labelStyle={styles.label}
+                  containerStyle={styles.field_input}
+                  inputStyle={styles.field_input_txt}
+                  errorMessage={pass2Valid ? '' : 'Please enter a matching password'}
+                  onChangeText={text => {
+                    setRegistration({
+                      ...registration,
+                      password2: text,
+                    });
+                    validate('password2', text);
+                  }}
+                  autoCompleteType='password'
+                  secureTextEntry={true}
+                  autoCapitalize='none'
+                  value={registration.password2}
+                />
               </View>
             </View>
           </Card>
@@ -146,19 +147,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#b30000',
     flex: 1,
   },
-  field_label: {
-    fontWeight: 'bold',
-    marginTop: 5,
-    marginBottom: 5,
+  field: {
+    flex: 1,
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: 'normal',
   },
   field_input: {
-    height: 40,
     color: '#000',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginBottom: 10,
+    marginHorizontal: 0,
+    paddingHorizontal: 0,
   },
   login_button: {
     marginTop: 15,
