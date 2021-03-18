@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useApolloClient } from '@apollo/client';
 import {
   Card,
   Button,
@@ -19,18 +18,20 @@ import { useNavigation } from '@react-navigation/native';
 
 import { blue, light } from 'common/colors';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import GamesStat from 'features/profile/stats/games';
+import FollowingStat from 'features/profile/stats/following';
+import FollowersStat from 'features/profile/stats/followers';
 
 
 
 const ProfileHome = props => {
 
-  const client = useApolloClient();
   const navigation = useNavigation();
 
   const {
     currentPlayer,
   } = useContext(CurrentPlayerContext);
-
+  const pkey = currentPlayer._key;
 
   const getField = field => {
     if( currentPlayer && currentPlayer[field] ) {
@@ -122,18 +123,9 @@ const ProfileHome = props => {
           <View style={styles.subname_view}>
             { handicap_content }
             <View style={styles.stats_view}>
-              <View style={styles.stat_view}>
-                <View><Text style={styles.stat_value}>98</Text></View>
-                <View><Text style={styles.stat_label}>games</Text></View>
-              </View>
-              <View style={styles.stat_view}>
-                <View><Text style={styles.stat_value}>23</Text></View>
-                <View><Text style={styles.stat_label}>following</Text></View>
-              </View>
-              <View style={styles.stat_view}>
-                <View><Text style={styles.stat_value}>1</Text></View>
-                <View><Text style={styles.stat_label}>followers</Text></View>
-              </View>
+              <GamesStat pkey={pkey} />
+              <FollowingStat pkey={pkey} />
+              <FollowersStat pkey={pkey} />
             </View>
           </View>
         </Card>
@@ -199,17 +191,6 @@ const styles = StyleSheet.create({
     flex: 2,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  stat_view: {
-    paddingHorizontal: 5,
-  },
-  stat_value: {
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  stat_label: {
-    textAlign: 'center',
-    fontSize: 11,
   },
   button_view: {
     marginTop: 40,

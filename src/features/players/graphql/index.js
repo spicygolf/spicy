@@ -6,3 +6,4 @@ export {
   GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
   GetFavoritePlayersForPlayer
 } from './getFavoritePlayersForPlayer';
+export { GET_PLAYERS_FOLLOWERS_QUERY } from './getPlayersFollowers';

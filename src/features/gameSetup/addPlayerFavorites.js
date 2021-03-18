@@ -8,10 +8,7 @@ import {
 } from 'react-native';
 import { useQuery } from '@apollo/client';
 
-import {
-  GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
-  GetFavoritePlayersForPlayer
-} from 'features/players/graphql';
+import { GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY } from 'features/players/graphql';
 
 import Player from 'features/gameSetup/Player';
 import { GameContext } from 'features/game/gameContext';
