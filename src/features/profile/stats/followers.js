@@ -13,6 +13,8 @@ import { styles } from './styles';
 
 const FollowersStat = ({pkey}) => {
 
+  let stat = ' ';
+
   const { error, data } = useQuery(GET_PLAYERS_FOLLOWERS_QUERY, {
     variables: {
       pkey,
@@ -20,12 +22,12 @@ const FollowersStat = ({pkey}) => {
     fetchPolicy: 'cache-and-network',
   });
   if (error && error.message != 'Network request failed') {
-    return (<Text>Error! {error.message}</Text>);
+    stat = '?';
   }
 
-  const stat = ( data && data.getPlayersFollowers )
-  ? data.getPlayersFollowers.length
-  : ' ';
+  if( data && data.getPlayersFollowers ) {
+    stat = data.getPlayersFollowers.length;
+  }
 
   return (
     <View style={styles.stat_view}>

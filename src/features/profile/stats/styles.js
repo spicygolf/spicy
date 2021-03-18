@@ -9,6 +9,7 @@ export const styles = StyleSheet.create({
   stat_value: {
     textAlign: 'center',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   stat_label: {
     textAlign: 'center',

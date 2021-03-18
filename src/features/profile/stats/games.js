@@ -12,6 +12,8 @@ import { styles } from './styles';
 
 const GamesStat = ({pkey}) => {
 
+  let stat = ' ';
+
   const { error, data } = useQuery(ACTIVE_GAMES_FOR_PLAYER_QUERY, {
     variables: {
       pkey,
@@ -19,12 +21,12 @@ const GamesStat = ({pkey}) => {
     fetchPolicy: 'cache-and-network',
   });
   if (error && error.message != 'Network request failed') {
-    return (<Text>Error! {error.message}</Text>);
+    stat = '?';
   }
 
-  const stat = ( data && data.activeGamesForPlayer )
-  ? data.activeGamesForPlayer.length
-  : ' ';
+  if( data && data.activeGamesForPlayer ) {
+    stat = data.activeGamesForPlayer.length;
+  }
 
   return (
     <View style={styles.stat_view}>

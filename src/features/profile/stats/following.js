@@ -12,6 +12,8 @@ import { styles } from './styles';
 
 const FollowingStat = ({pkey}) => {
 
+  let stat = ' ';
+
   const { error, data } = useQuery(GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY, {
     variables: {
       pkey,
@@ -19,12 +21,12 @@ const FollowingStat = ({pkey}) => {
     fetchPolicy: 'cache-and-network',
   });
   if (error && error.message != 'Network request failed') {
-    return (<Text>Error! {error.message}</Text>);
+    stat = '?';
   }
 
-  const stat = ( data && data.getFavoritePlayersForPlayer )
-  ? data.getFavoritePlayersForPlayer.length
-  : ' ';
+  if( data && data.getFavoritePlayersForPlayer ) {
+    stat = data.getFavoritePlayersForPlayer.length;
+  }
 
   return (
     <View style={styles.stat_view}>
