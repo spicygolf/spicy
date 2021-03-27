@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useMutation, gql } from '@apollo/client';
 
+import useAppState from 'hooks/useAppState';
 import { omitTypename } from 'common/utils/game';
 import {
   get_score_value,
@@ -28,6 +29,8 @@ const HoleScore = props => {
   // some testing things
   const { team, player_index } = test;
   const h = hole.hole;
+
+  const { justBecameActive } = useAppState();
 
   const [ postScore ] = useMutation(POST_SCORE_MUTATION);
 
@@ -60,6 +63,7 @@ const HoleScore = props => {
   }
 
   const renderScore = item => {
+
     //console.log('renderScore item', item);
     let score_styles = [styles.score_option];
     let hole_score_styles = [styles.hole_score_text];
@@ -146,7 +150,8 @@ const HoleScore = props => {
     if( error ) console.log('Error posting score - holeScore', error);
   };
 
-  const _scrollTo = index => {
+  const scroll = () => {
+    const index = gross ? parseInt(gross) - 1 : first;
     if( !index || !flatlistRef || !flatlistRef.current ) return;
     flatlistRef.current.scrollToIndex({
       index: index,
@@ -155,13 +160,9 @@ const HoleScore = props => {
   };
 
   // after component has rendered, either center 'par' or player's gross score
-  useEffect(
-    () => {
-      //console.log('gross', gross, 'first', first);
-      const index = gross ? parseInt(gross) - 1 : first;
-      _scrollTo(index);
-    }
-  );
+  useEffect( () => scroll() );
+    // also scroll/center after device becomes active again
+  useEffect( () => scroll(), [ justBecameActive ] );
 
   return (
     <FlatList
@@ -173,7 +174,7 @@ const HoleScore = props => {
       onScrollToIndexFailed={(e) => {
         console.log('onScrollToIndexFailed e', e);
         // this horrible hack seems to fix #15
-        setTimeout(() => _scrollTo(e.index), 250);
+        setTimeout(() => scroll(), 250);
       }}
     />
   );

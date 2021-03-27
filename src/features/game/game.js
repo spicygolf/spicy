@@ -94,7 +94,7 @@ const Game = props => {
 
   useEffect(() => {
     if( justBecameActive ) {
-      console.log('justBecameActive getGame');
+      //console.log('justBecameActive getGame');
       refetch();
     }
   }, [justBecameActive]);
