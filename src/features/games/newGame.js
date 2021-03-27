@@ -7,9 +7,7 @@ import {
 import { useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 
-import {
-  ADD_GAME_MUTATION,
-} from 'features/games/graphql';
+import { ADD_GAME_MUTATION } from 'features/games/graphql';
 import { ADD_LINK_MUTATION } from 'common/graphql/link';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import {
@@ -81,25 +79,11 @@ const NewGame = props => {
 
   // add new game
   const addGame = async () => {
-    console.log('Begin adding game');
+    //console.log('Begin adding game');
     const { loading, error, data } = await addGameMutation({
       variables: {
         game: newGameWithoutTypes,
       },
-/*
-      optimisticResponse: {
-        __typename: 'Mutation',
-        addGame: {
-          _key: Date.now(),
-          ...newGame,
-        }
-      },
-      update: (cache, { data: { addGame } }) => {
-        console.log('NewGame addGame mutation update function');
-        console.log('cache', cache.data.data);
-        console.log('data.addGame', addGame);
-      },
-*/
     });
 
     if( error && error.message != 'Network request failed' ) {
@@ -110,6 +94,7 @@ const NewGame = props => {
   };
 
   const linkGameToGamespec = async (game) => {
+    //console.log('Begin linking game to gamespec');
     const { loading, error, data } = await addLinkMutation({
       variables: {
         from: {type: 'game', value: game._key},
@@ -125,33 +110,37 @@ const NewGame = props => {
   };
 
   // New game has been created, so navigate to it.
-  if( currentPlayer && gkey ) {
+  useEffect(
+    () => {
+      if( currentPlayer && gkey ) {
 
-    // we don't have a game object in GameContext yet, so we have to make one up
-    // to send to LinkRoundList and friends
-    const game = {
-      _key: gkey,
-      ...newGameWithoutTypes,
-      gamespecs: [gamespec],
-    };
-    const player = {
-      _key: currentPlayer._key,
-      name: currentPlayer.name,
-      handicap: currentPlayer.handicap,
-    };
-    navigation.navigate('Game', {
-      currentGameKey: gkey,
-      screen: 'Setup',
-      params: {
-        screen: 'GameSetup',
-        params: {
-          addCurrentPlayerToGame: true,  // TODO: false for caddies / scorers
-          game,
-          player,
-        },
-      },
-    });
-  }
+        // we don't have a game object in GameContext yet, so we have to make one up
+        // to send to LinkRoundList and friends
+        const game = {
+          _key: gkey,
+          ...newGameWithoutTypes,
+          gamespecs: [gamespec],
+        };
+        const player = {
+          _key: currentPlayer._key,
+          name: currentPlayer.name,
+          handicap: currentPlayer.handicap,
+        };
+        navigation.navigate('Game', {
+          currentGameKey: gkey,
+          screen: 'Setup',
+          params: {
+            screen: 'GameSetup',
+            params: {
+              addCurrentPlayerToGame: true,  // TODO: false for caddies / scorers
+              game,
+              player,
+            },
+          },
+        });
+      }
+    }, [gkey]
+  );
 
   useEffect(
     () => {
