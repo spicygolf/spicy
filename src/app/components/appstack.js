@@ -9,7 +9,6 @@ import {
   Icon
 } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
-import { useLazyQuery } from '@apollo/client';
 
 import FeedStack from 'features/feed/feedstack';
 import GamesStack from 'features/games/gamesstack';
@@ -17,7 +16,7 @@ import ProfileStack from 'features/profile/profilestack';
 import RegisterAgain from 'features/account/registerAgain';
 import { getCurrentUser } from 'common/utils/account';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { GET_PLAYER_QUERY } from 'features/players/graphql';
+import CurrentPlayer from 'features/players/currentPlayer';
 import { green, red, blue } from 'common/colors';
 
 
@@ -45,20 +44,6 @@ const AppStack = props => {
   const [currentPlayerKey, setCurrentPlayerKey] = useState(null);
   const [token, setToken] = useState(null);
 
-  // grab current player object from db
-  const [ getPlayer, {error: cpError, data: cpData} ] = useLazyQuery(GET_PLAYER_QUERY);
-  if (cpError && cpError.message != 'Network request failed' ) {
-    console.log('Error fetching current player', cpError);
-  }
-  //console.log('cpData', cpData);
-  if( cpData &&
-      cpData.getPlayer &&
-      (!currentPlayer || cpData.getPlayer._key != currentPlayer._key)
-    ) {
-    //console.log('setting currentPlayer', cpData);
-    setCurrentPlayer(cpData.getPlayer);
-  }
-
   const getCreds = async () => {
     const c = await getCurrentUser(user);
     //console.log('getCreds', c);
@@ -68,11 +53,6 @@ const AppStack = props => {
       await AsyncStorage.setItem('currentPlayer', c.currentPlayerKey);
       await AsyncStorage.setItem('token', c.token);
       setContent(tabs());
-      getPlayer({
-        variables: {
-          player: c.currentPlayerKey,
-        }
-      });
     } else {
       if( c && c.message ) {
         // try to get creds from local storage
@@ -83,11 +63,6 @@ const AppStack = props => {
           setCurrentPlayerKey(newCurrentPlayerKey);
           setToken(newToken);
           setContent(tabs());
-          getPlayer({
-            variables: {
-              player: newCurrentPlayerKey,
-            }
-          });
         } else {
           console.log('something is wrong:', c);
           if( c.navTo ) {
@@ -189,7 +164,7 @@ const AppStack = props => {
     );
   }
 
-  if( currentPlayer && currentPlayerKey && token ) {
+  if( currentPlayerKey && token ) {
     return (
       <CurrentPlayerContext.Provider
         value={{
@@ -199,8 +174,10 @@ const AppStack = props => {
           setCurrentPlayerKey,
           token,
           setToken,
+          user,
         }}
       >
+        <CurrentPlayer pkey={currentPlayerKey} />
         { content }
       </CurrentPlayerContext.Provider>
     );

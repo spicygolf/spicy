@@ -13,7 +13,6 @@ import {
   Icon,
   ListItem,
 } from 'react-native-elements';
-import DeviceInfo from 'react-native-device-info';
 import { useNavigation } from '@react-navigation/native';
 
 import { blue, light } from 'common/colors';
@@ -31,7 +30,9 @@ const ProfileHome = props => {
   const {
     currentPlayer,
   } = useContext(CurrentPlayerContext);
-  const pkey = currentPlayer._key;
+  const pkey = (currentPlayer && currentPlayer._key)
+    ? currentPlayer._key
+    : null;
 
   const getField = field => {
     if( currentPlayer && currentPlayer[field] ) {
@@ -91,8 +92,6 @@ const ProfileHome = props => {
 
   const handicap_content = handicapContent({source, index, revDate});
 
-  const version = DeviceInfo.getVersion();
-
 
   return (
     <KeyboardAvoidingView style={{flex: 1,}}>
@@ -130,9 +129,6 @@ const ProfileHome = props => {
           </View>
         </Card>
       </ScrollView>
-      <View style={styles.app_info}>
-          <Text>v{version}</Text>
-        </View>
     </KeyboardAvoidingView>
   );
 
@@ -194,11 +190,5 @@ const styles = StyleSheet.create({
   },
   button_view: {
     marginTop: 40,
-  },
-  app_info: {
-    marginHorizontal: 15,
-    marginVertical: 10,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
 });

@@ -2,12 +2,15 @@ import React, { useContext, } from 'react';
 import {
   FlatList,
   StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import {
   Icon,
   ListItem,
 } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
+import DeviceInfo from 'react-native-device-info';
 
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { dark, light } from 'common/colors';
@@ -54,6 +57,8 @@ const SettingsHome = props => {
     },
   ];
 
+  const version = DeviceInfo.getVersion();
+
   const renderSetting = ({item}) => {
     if( item.level == 'admin' &&
         !(currentPlayer && currentPlayer.level && currentPlayer.level == 'admin') ) {
@@ -81,10 +86,15 @@ const SettingsHome = props => {
   };
 
   return (
-    <FlatList
-      data={settings_data}
-      renderItem={renderSetting}
-    />
+    <View style={styles.container}>
+      <FlatList
+        data={settings_data}
+        renderItem={renderSetting}
+      />
+      <View style={styles.app_info}>
+        <Text>v{version}</Text>
+      </View>
+    </View>
   );
 };
 
@@ -92,7 +102,16 @@ export default SettingsHome;
 
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   title: {
     color: dark,
+  },
+  app_info: {
+    marginHorizontal: 15,
+    marginVertical: 10,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
 });

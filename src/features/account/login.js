@@ -17,7 +17,7 @@ import auth from '@react-native-firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 
 import { green } from 'common/colors';
-import { validateEmail, validatePassword } from 'common/utils/account';
+import { validateEmail, validatePassword, parseFirebaseError } from 'common/utils/account';
 
 
 
@@ -40,10 +40,7 @@ const Login = props => {
       const res = await auth().signInWithEmailAndPassword(email, password);
     } catch( e ) {
       console.log('login error', e.message, e.code);
-      const split = e.message.split(']');
-      console.log('message', split);
-      let message = e.message;
-      if( split && split[1] ) message = split[1].trim();
+      const { slug, message } = parseFirebaseError(e);
       setLoginError(message);
     }
 

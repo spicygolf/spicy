@@ -127,6 +127,35 @@ export const getCurrentUser = fbUser => {
     });
 };
 
+export const validate = (type, text) => {
+
+  let ret = false;
+
+  switch( type ) {
+    case 'email':
+      ret = validateEmail(text);
+      break;
+    case 'password':
+      ret = validatePassword(text);
+      break;
+    case 'name':
+      ret = validateName(text);
+      break;
+    case 'int':
+      ret = validateInteger(text);
+      break;
+    case 'float':
+      ret = validateFloat(text);
+      break;
+    default:
+      break;
+  }
+
+  return ret;
+
+};
+
+
 export const validateEmail = email => {
   if( email == '' ) return true;
   if( !email ) return false;
@@ -164,4 +193,20 @@ export const build_qs = args => {
     }
   }
   return a.join('&');
+};
+
+export const parseFirebaseError = e => {
+  const split = e.message.split(']');
+  let slug = '';
+  if( split && split[0] ) {
+    slugSplit = split[0].split('[');
+    if( slugSplit && slugSplit[1] ) slug = slugSplit[1].trim();
+  }
+  let message = e.message;
+  if( split && split[1] ) message = split[1].trim();
+
+  return {
+    slug,
+    message,
+  };
 };

@@ -9,6 +9,7 @@ import ProfileHome from 'features/profile/profilehome';
 import LinkHandicap from 'features/profile/linkHandicap';
 import SettingsHome from 'features/profile/settings/settings.js';
 import Account from 'features/profile/settings/account.js';
+import AccountChange from 'features/profile/settings/accountChange.js';
 import ClearCache from 'features/profile/settings/clearCache.js';
 import Logout from 'features/profile/settings/logout.js';
 import Impersonate from 'features/profile/settings/impersonate.js';
@@ -59,6 +60,13 @@ const ProfileStack = props => {
           component={Account}
           options={{
             title: 'Account',
+          }}
+        />
+        <Stack.Screen
+          name='AccountChange'
+          component={AccountChange}
+          options={{
+            title: 'Change',
           }}
         />
         <Stack.Screen
