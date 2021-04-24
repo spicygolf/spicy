@@ -31,6 +31,7 @@ const StatePicker = props => {
       value={getValue(selectedValue)}
       data={items}
       label='State/Territory'
+      pickerStyle={styles.picker}
       onChangeText={text => {
         onChange(text);
       }}
@@ -43,4 +44,7 @@ export default StatePicker;
 
 
 const styles = StyleSheet.create({
+  picker: {
+    height: '50%',
+  },
 });

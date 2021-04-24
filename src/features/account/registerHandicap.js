@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
   },
   skip_view: {
     paddingBottom: 15,
+    paddingHorizontal: 10,
     justifyContent: 'flex-start'
   },
   skip_text: {

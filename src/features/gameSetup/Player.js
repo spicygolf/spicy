@@ -7,7 +7,6 @@ import {
 import {
   ListItem
 } from 'react-native-elements';
-import { useNavigation } from '@react-navigation/native';
 import FavoriteIcon from 'common/components/favoriteIcon';
 
 
@@ -20,22 +19,12 @@ const handicap = h => (
 
 const Player = props => {
 
-  const navigation = useNavigation();
-
-  const { game, item, testID, title, subtitle, hdcp } = props;
+  const { game, item, testID, title, subtitle, hdcp, onPress } = props;
   //console.log('player', item);
 
   return (
     <ListItem
-      onPress={() => {
-        //console.log('player pressed', item);
-        const player =  {
-          _key: item._key,
-          name: item.name,
-          handicap: item.handicap,
-        };
-        navigation.navigate('LinkRoundList', {game, player});
-      }}
+      onPress={() => onPress(item)}
       testID={`add_player_favorites_${testID}`}
     >
       <FavoriteIcon

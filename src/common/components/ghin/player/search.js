@@ -1,4 +1,4 @@
-import React, { useState, } from 'react';
+import React from 'react';
 
 import { GhinPlayerSearchContext } from 'common/components/ghin/player/searchContext';
 import GhinPlayerSearchInput from 'common/components/ghin/player/searchInput';

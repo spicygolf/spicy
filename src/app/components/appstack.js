@@ -165,6 +165,7 @@ const AppStack = props => {
   }
 
   if( currentPlayerKey && token ) {
+    //console.log('currentPlayerKey', currentPlayerKey);
     return (
       <CurrentPlayerContext.Provider
         value={{

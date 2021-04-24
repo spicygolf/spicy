@@ -170,7 +170,6 @@ export default GhinPlayerSearchResults;
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 5,
-    paddingHorizontal: 0,
     marginHorizontal: 0,
   },
   player_club: {
@@ -181,7 +180,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   results_list: {
-    height: '54%',
   },
   no_results: {
     color: "#999",

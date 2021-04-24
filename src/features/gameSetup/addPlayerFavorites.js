@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, } from 'react';
 
 import {
   ActivityIndicator,
@@ -7,9 +7,9 @@ import {
   View
 } from 'react-native';
 import { useQuery } from '@apollo/client';
+import { useNavigation } from '@react-navigation/native';
 
 import { GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY } from 'features/players/graphql';
-
 import Player from 'features/gameSetup/Player';
 import { GameContext } from 'features/game/gameContext';
 
@@ -17,6 +17,7 @@ import { GameContext } from 'features/game/gameContext';
 
 const AddPlayerFavorites = props => {
 
+  const navigation = useNavigation();
   const { currentPlayerKey, game } = useContext(GameContext);
 
   const _renderFavoritesPlayer = ({item, index}) => {
@@ -33,6 +34,15 @@ const AddPlayerFavorites = props => {
         title={item.name}
         subtitle={club}
         hdcp={handicap}
+        onPress={item => {
+          //console.log('player pressed', item);
+          const player =  {
+            _key: item._key,
+            name: item.name,
+            handicap: item.handicap,
+          };
+          navigation.navigate('LinkRoundList', {game, player});
+        }}
         testID={index}
       />
     );
@@ -102,7 +112,6 @@ const styles = StyleSheet.create({
     flex: 1
   },
   listContainer: {
-    marginTop: 0,
-    marginBottom: 50
+    margin: 0,
   }
 });

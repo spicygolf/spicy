@@ -5,7 +5,7 @@ import {
 
 import { AddLinkMutation } from 'common/graphql/link';
 import { RemoveLinkMutation } from 'common/graphql/unlink';
-
+import { green } from 'common/colors';
 
 
 class FavoriteIcon extends React.Component {
@@ -29,7 +29,7 @@ class FavoriteIcon extends React.Component {
             return (
               <Icon
                 name='star'
-                color='yellow'
+                color={green}
                 size={36}
                 onPress={async () => {
                   const {data, errors} = await removeLinkMutation({
@@ -60,7 +60,7 @@ class FavoriteIcon extends React.Component {
             return (
               <Icon
                 name='star-border'
-                color='#ddd'
+                color={green}
                 size={36}
                 onPress={async () => {
                   const {data, errors} = await addLinkMutation({

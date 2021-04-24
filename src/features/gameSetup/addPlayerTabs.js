@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import AddPlayerFavorites from 'features/gameSetup/addPlayerFavorites';
 import AddPlayerSearch from 'features/gameSetup/addPlayerSearch';
+import AddPlayerGHINSearch from 'features/gameSetup/addPlayerGHINSearch';
 import AddPlayerManual from 'features/gameSetup/addPlayerManual';
 
 import { green } from 'common/colors';
@@ -34,10 +35,14 @@ const AddPlayerTabs = props => {
           backgroundColor: 'none',
         },
         labelStyle: {
-          textTransform: 'capitalize',
+          textTransform: 'none',
+          fontSize: 12,
         },
         indicatorStyle: {
           backgroundColor: green
+        },
+        tabStyle: {
+          justifyContent: 'flex-start',
         },
         showIcon: true
       }}
@@ -61,7 +66,22 @@ const AddPlayerTabs = props => {
         name='AddPlayerSearch'
         component={AddPlayerSearch}
         options={{
-          title: 'Search',
+          title: 'Spicy Golf Search',
+          tabBarIcon: ({ focused }) => {
+            return (
+              <TabIcon
+                color={focused ? green : '#555' }
+                name='search'
+              />
+            );
+          },
+        }}
+      />
+      <Tab.Screen
+        name='AddPlayerGHINSearch'
+        component={AddPlayerGHINSearch}
+        options={{
+          title: 'GHIN\nSearch',
           tabBarIcon: ({ focused }) => {
             return (
               <TabIcon
@@ -81,7 +101,7 @@ const AddPlayerTabs = props => {
             return (
               <TabIcon
                 color={focused ? green : '#555' }
-                name='search'
+                name='add'
               />
             );
           },
