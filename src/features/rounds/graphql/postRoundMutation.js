@@ -11,6 +11,7 @@ export const POST_ROUND_MUTATION = gql`
         date_validated
         exceptional
         posted_by
+        estimated_handicap
         success
         messages
       }

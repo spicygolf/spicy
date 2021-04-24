@@ -101,11 +101,11 @@ const PostScore = props => {
         );
       }
     } else if( round.posting && round.posting.success == true ) {
-      const { date_validated, adjusted_gross_score, posted_by } = round.posting;
+      const { date_validated, adjusted_gross_score, posted_by, estimated_handicap } = round.posting;
       const dt = moment(date_validated).format('lll');
       ret = (
         <View>
-          <Text style={styles.postingTxt}>posted: {adjusted_gross_score}</Text>
+          <Text style={styles.postingTxt}>posted: {adjusted_gross_score}  trend: {estimated_handicap}</Text>
           <Text style={styles.postingTxt}>at: {dt}</Text>
           <Text style={styles.postingTxt}>by: {posted_by}</Text>
         </View>
