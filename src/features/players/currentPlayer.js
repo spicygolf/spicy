@@ -26,7 +26,7 @@ const CurrentPlayer = props => {
   useEffect(
     () => {
       if( data && data.getPlayer ) {
-        //console.log('data.getPlayer', data.getPlayer);
+        //console.log('setCurrentPlayer', data.getPlayer);
         setCurrentPlayer(data.getPlayer);
       }
     }, [data]
