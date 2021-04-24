@@ -318,6 +318,7 @@ var styles = StyleSheet.create({
   },
   buttonContainer: {
     maxHeight: 20,
+    zIndex: 5,
   },
   selectedButton: {
     backgroundColor: blue,
