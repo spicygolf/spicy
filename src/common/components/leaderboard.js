@@ -6,14 +6,14 @@ import
   Text,
   View
 } from 'react-native';
-import { Icon } from 'react-native-elements';
-import { Dropdown } from 'react-native-material-dropdown';
-import { find, last, orderBy } from 'lodash';
+import { ButtonGroup, Icon } from 'react-native-elements';
+import { find, findIndex, last, orderBy } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
 import { playerListIndividual, playerListWithTeams } from 'common/utils/game';
 import { format } from 'common/utils/score';
 import { shapeStyles } from 'common/utils/styles';
+import { blue } from 'common/colors';
 
 
 
@@ -207,17 +207,20 @@ const Leaderboard = props => {
 
     const { activeChoices } = props;
 
-    const choices = activeChoices.map(c => ({value: c}));
+    const selected = activeChoices.indexOf(scoreType);
+    console.log('selected', selected, activeChoices, scoreType);
 
     return (
-      <Dropdown
-        value={scoreType}
-        data={choices}
-        label='View'
-        fontSize={12}
-        onChangeText={text => {
-          setScoreType(text);
+      <ButtonGroup
+        buttons={activeChoices}
+        selectedIndex={selected}
+        onPress={index => {
+          setScoreType(activeChoices[index]);
         }}
+        containerStyle={styles.buttonContainer}
+        selectedButtonStyle={styles.selectedButton}
+        textStyle={styles.buttonText}
+        selectedTextStyle={styles.selectedButtonText}
       />
     );
 
@@ -237,12 +240,14 @@ const Leaderboard = props => {
       );
     });
     return (
-      <View style={styles.header}>
-        <View style={styles.holeTitleView}>
-          <ViewChooser activeChoices={activeChoices} />
-          <Text style={styles.holeTitle}>Hole</Text>
+      <View>
+        <ViewChooser activeChoices={activeChoices} />
+        <View style={styles.header}>
+          <View style={styles.holeTitleView}>
+            <Text style={styles.holeTitle}>Hole</Text>
+          </View>
+          { players }
         </View>
-        { players }
       </View>
     );
 
@@ -286,18 +291,18 @@ const Leaderboard = props => {
 
 export default Leaderboard;
 
-const headerHeight = 90;
+const headerHeight = 75;
 const rowHeight = 26;
 
 
 var styles = StyleSheet.create({
   container: {
-    margin: 10,
+    marginHorizontal: 10,
     flex: 1,
   },
   header: {
     flexDirection: 'row',
-    height: headerHeight,
+    height: headerHeight - 10,
     alignItems: 'center',
     //borderWidth: 1,
   },
@@ -309,12 +314,20 @@ var styles = StyleSheet.create({
     //borderWidth: 1,
   },
   holeTitle: {
-    paddingBottom: 10,
     alignSelf: 'center',
     color: '#666',
   },
-  chooserText: {
+  buttonContainer: {
+    maxHeight: 20,
+  },
+  selectedButton: {
+    backgroundColor: blue,
+  },
+  buttonText: {
     fontSize: 12,
+  },
+  selectedButtonText: {
+    color: 'white',
   },
   rotate: {
     transform: [{ rotate: '270deg'}],
@@ -326,7 +339,6 @@ var styles = StyleSheet.create({
     //borderWidth: 1,
   },
   playerName: {
-    paddingLeft: 10,
     maxWidth: headerHeight,
     width: headerHeight,
     color: '#666',

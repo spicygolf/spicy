@@ -45,9 +45,8 @@ const GameStack = props => {
           },
         }}
         tabBarOptions={{
-          labelStyle: {
-            textTransform: 'capitalize',
-          },
+          labelStyle: styles.tabBarLabel,
+          style: styles.tabBar,
         }}
         swipeEnabled={false}
       >
@@ -88,10 +87,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 12
   },
+  tabBar: {
+    maxHeight: 35,
+    height: 35,
+  },
+  tabBarLabel: {
+    textTransform: 'capitalize',
+  },
   gname: {
     alignItems: 'center',
     backgroundColor: 'white',
-    paddingVertical: 10,
+    paddingVertical: 5,
   },
   gname_txt: {
     fontSize: 12,
