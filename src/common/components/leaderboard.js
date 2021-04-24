@@ -208,7 +208,6 @@ const Leaderboard = props => {
     const { activeChoices } = props;
 
     const selected = activeChoices.indexOf(scoreType);
-    console.log('selected', selected, activeChoices, scoreType);
 
     return (
       <ButtonGroup
