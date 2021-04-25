@@ -419,7 +419,7 @@ export const playerListWithTeams = ({game, scores}) => {
       ret.push({
         key: p.pkey,
         pkey: p.pkey,
-        name: gP.name || '',
+        name: (gP && gP.name) ? gP.name : '',
         team: t.team,
       });
     });
