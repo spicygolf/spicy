@@ -43,6 +43,7 @@ export const search = async ({state, lastName, firstName, page, perPage}) => {
   });
 
   const url = `${scheme}://${baseUri}/ghin/player/search?${qs}`;
+  //console.log('url', url);
   const res = await fetch(url, {
     method: 'GET',
   });
