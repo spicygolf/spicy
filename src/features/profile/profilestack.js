@@ -26,18 +26,16 @@ const ProfileStack = props => {
       <Stack.Navigator
         initialRouteName='ProfileHome'
         screenOptions={{
+          title: 'Profile',
+          headerShown: false,
         }}
       >
         <Stack.Screen
           name='ProfileHome'
           component={ProfileHome}
-          options={{
+          screenOptions={{
             title: 'Profile',
-            headerMode: 'none',
-            headerShown: 'false',
-            headerStyle: {
-              height: 0,
-            },
+            headerShown: false,
           }}
         />
         <Stack.Screen
@@ -45,7 +43,7 @@ const ProfileStack = props => {
           component={LinkHandicap}
           options={{
             title: 'Link Handicap Service',
-            headerShown: 'false',
+            headerShown: true,
           }}
         />
         <Stack.Screen
@@ -53,6 +51,8 @@ const ProfileStack = props => {
           component={SettingsHome}
           options={{
             title: 'Settings',
+            headerShown: true,
+            headerBackTitleVisible: false,
           }}
         />
         <Stack.Screen
@@ -60,6 +60,8 @@ const ProfileStack = props => {
           component={Account}
           options={{
             title: 'Account',
+            headerShown: true,
+            headerBackTitleVisible: false,
           }}
         />
         <Stack.Screen
@@ -67,6 +69,8 @@ const ProfileStack = props => {
           component={AccountChange}
           options={{
             title: 'Change',
+            headerShown: true,
+            headerBackTitleVisible: false,
           }}
         />
         <Stack.Screen
@@ -74,6 +78,8 @@ const ProfileStack = props => {
           component={ClearCache}
           options={{
             title: 'Clear Local Data',
+            headerShown: true,
+            headerBackTitleVisible: false,
           }}
         />
         <Stack.Screen
@@ -81,6 +87,8 @@ const ProfileStack = props => {
           component={Logout}
           options={{
             title: 'Logout',
+            headerShown: true,
+            headerBackTitleVisible: false,
           }}
         />
         <Stack.Screen
@@ -88,6 +96,8 @@ const ProfileStack = props => {
           component={Impersonate}
           options={{
             title: 'Impersonate',
+            headerShown: true,
+            headerBackTitleVisible: false,
           }}
         />
       </Stack.Navigator>
