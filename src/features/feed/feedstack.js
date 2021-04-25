@@ -20,14 +20,17 @@ const FeedStack = props => {
         initialRouteName='FeedHome'
         screenOptions={{
           title: 'Feed',
-          headerMode: 'none',
           headerShown: false,
-          headerStyle: {
-            height: 0,
-          },
         }}
       >
-        <Stack.Screen name='FeedHome' component={FeedHome} />
+        <Stack.Screen
+          name='FeedHome'
+          component={FeedHome}
+          options={{
+            title: 'Feed',
+            headerShown: false,
+          }}
+        />
       </Stack.Navigator>
     </SafeAreaView>
   );
