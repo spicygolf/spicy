@@ -13,9 +13,9 @@ const AddPlayerGHINSearch = props => {
 
   const defaultNewPlayer = {
     country: 'USA',
-    state: 'MD',
-    lastName: 'Jacobs',
-    firstName: 'K',
+    state: '',
+    lastName: '',
+    firstName: '',
   };
   const [ newPlayer, setNewPlayer ] = useState(defaultNewPlayer);
   const [ lookupPkey, { data: lPkey} ] = useLazyQuery(LOOKUP_PLAYER_BY_GHIN);
@@ -27,7 +27,7 @@ const AddPlayerGHINSearch = props => {
   // see if player already in spicy w/ lookup on ghin #
   useEffect(
     () => {
-      console.log('newPlayer', newPlayer);
+      //console.log('newPlayer', newPlayer);
       if( newPlayer && newPlayer.ghinCreds && newPlayer.ghinCreds.ghinNumber ) {
         lookupPkey({
           variables: { ghin: newPlayer.ghinCreds.ghinNumber },
