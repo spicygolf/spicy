@@ -9,14 +9,15 @@ import {
   Icon
 } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
+import { useLazyQuery } from '@apollo/client';
 
 import FeedStack from 'features/feed/feedstack';
 import GamesStack from 'features/games/gamesstack';
 import ProfileStack from 'features/profile/profilestack';
 import RegisterAgain from 'features/account/registerAgain';
 import { getCurrentUser } from 'common/utils/account';
+import { GET_PLAYER_QUERY } from 'features/players/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import CurrentPlayer from 'features/players/currentPlayer';
 import { green, red, blue } from 'common/colors';
 
 
@@ -43,6 +44,8 @@ const AppStack = props => {
   const [currentPlayer, setCurrentPlayer] = useState(null);
   const [currentPlayerKey, setCurrentPlayerKey] = useState(null);
   const [token, setToken] = useState(null);
+
+  const [ getCurrentPlayer, { error, data } ] = useLazyQuery(GET_PLAYER_QUERY);
 
   const getCreds = async () => {
     const c = await getCurrentUser(user);
@@ -96,12 +99,41 @@ const AppStack = props => {
     }, [user]
   );
 
+  useEffect(
+    () => {
+      if( currentPlayerKey && token ) {
+        getCurrentPlayer({
+          variables: {
+            player: currentPlayerKey,
+          },
+          fetchPolicy: 'cache-and-network',
+        });
+      }
+    }, [currentPlayerKey, token]
+  );
+
+  useEffect(
+    () => {
+      if( data && data.getPlayer ) {
+        setCurrentPlayer(data.getPlayer);
+      }
+    }, [data]
+  );
+
+  useEffect(
+    () => {
+      if (error && error.message != 'Network request failed' ) {
+        console.log('Error fetching current player', error);
+      }
+    }, [error]
+  );
+
   const tabs = () => {
     const Tab = createMaterialBottomTabNavigator();
 
     return (
       <Tab.Navigator
-        initialRouteName='GamesStack'
+        initialRouteName='FeedStack'
         shifting={true}
         activeColor='#fff'
         inactiveColor='#ccc'
@@ -117,7 +149,7 @@ const AppStack = props => {
                   color={focused ? '#fff' : '#ccc' }
                   name='comment'
                   type='font-awesome'
-                  />
+                />
               );
             },
             tabBarColor: blue,
@@ -132,9 +164,9 @@ const AppStack = props => {
             tabBarIcon: ({ focused }) => {
               return (
                 <TabIcon
-                color={focused ? '#fff' : '#ccc' }
-                name='edit'
-                type='font-awesome'
+                  color={focused ? '#fff' : '#ccc' }
+                  name='edit'
+                  type='font-awesome'
                 />
               );
             },
@@ -150,9 +182,9 @@ const AppStack = props => {
             tabBarIcon: ({ focused }) => {
               return (
                 <TabIcon
-                color={focused ? '#fff' : '#ccc' }
-                name='user'
-                type='font-awesome'
+                  color={focused ? '#fff' : '#ccc' }
+                  name='user'
+                  type='font-awesome'
                 />
               );
             },
@@ -164,7 +196,7 @@ const AppStack = props => {
     );
   }
 
-  if( currentPlayerKey && token ) {
+  if( currentPlayer && currentPlayerKey && token ) {
     //console.log('currentPlayerKey', currentPlayerKey);
     return (
       <CurrentPlayerContext.Provider
@@ -178,7 +210,6 @@ const AppStack = props => {
           user,
         }}
       >
-        <CurrentPlayer pkey={currentPlayerKey} />
         { content }
       </CurrentPlayerContext.Provider>
     );

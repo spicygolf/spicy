@@ -10,12 +10,13 @@ import { useQuery } from '@apollo/client';
 
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { GAMES_FOR_PLAYER_FEED } from 'features/feed/graphql';
-console.log('query', GAMES_FOR_PLAYER_FEED);
+
 
 
 const Games = props => {
 
   const { currentPlayer: cp } = useContext(CurrentPlayerContext);
+  if( !cp ) return null;
 
   const begDate = '2021-01-01';
   const currentPlayer = `players/${cp._key}`
@@ -37,4 +38,3 @@ const Games = props => {
 };
 
 export default Games;
-
