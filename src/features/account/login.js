@@ -70,8 +70,6 @@ const Login = props => {
           <Text style={styles.welcome}>Welcome to Spicy Golf</Text>
         </View>
         <Card testID='login_form_view'>
-          <Card.Title>Login</Card.Title>
-          <Card.Divider />
           <View>
             <View style={styles.field}>
               <Input
