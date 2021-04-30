@@ -158,7 +158,7 @@ var styles = StyleSheet.create({
   logo_view: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingVertical: 10,
+    paddingVertical: 7,
   },
   logo: {
     height: 100,
