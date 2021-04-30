@@ -52,59 +52,6 @@ const SpicyPlayerSearchResults = props => {
       />
     );
   }
-/*
-  const _renderGolfer = ({item}) => {
-    console.log('golfer', item);
-    const fn = item.FirstName ? item.FirstName : item.first_name;
-    const ln = item.LastName ? item.LastName : item.last_name;
-    const gn = item.GHINNumber ? item.GHINNumber : item.ghin;
-    const key = item.GHINNumber ? item.SearchValue :
-      `${item.ghin}_${item.club_id}`;
-    const player_name = item.PlayerName ? item.PlayerName :
-      `${item.first_name} ${item.last_name}`;
-    const player_club = item.ClubName ? item.ClubName : item.club_name;
-    const hdcp = item.Display ? item.Display : item.handicap_index;
-    const revDate = item.RevDate ? item.RevDate : item.rev_date;
-    const gender = item.Gender ? item.Gender : item.gender;
-    const active = item.Status ? (item.Status == 'Active') : (item.status == 'Active');
-
-    return (
-      <ListItem
-        containerStyle={styles.container}
-        key={key}
-        onPress={() => {
-          setState({
-            ...state,
-            ghinCreds: {
-              lastName: ln,
-              ghinNumber: gn,
-            },
-            handicap: {
-              source: 'ghin',
-              id: gn,
-              firstName: fn,
-              lastName: ln,
-              gender,
-              playerName: player_name,
-              active,
-              index: hdcp,
-              revDate: revDate,
-            },
-            name: player_name,
-            short: fn,
-            club: player_club,
-          });
-        }}
-      >
-        <ListItem.Content style={styles.container}>
-          <ListItem.Title style={styles.player_name}>{player_name}</ListItem.Title>
-          <ListItem.Subtitle style={styles.player_club}>{player_club}</ListItem.Subtitle>
-        </ListItem.Content>
-        { handicap(hdcp) }
-      </ListItem>
-    );
-  };
-*/
 
   const { currentPlayerKey, game } = useContext(GameContext);
 
