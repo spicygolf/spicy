@@ -43,6 +43,8 @@
     "apollo-client": "^2.6.8",
     "apollo-link-offline": "^1.0.0",
     "apollo3-cache-persist": "^0.8.0",
+    "date-fns": "^2.21.1",
+    "date-fns-tz": "^1.1.4",
     "graphql": "^14.3.1",
     "handlebars": "^4.6.0",
     "json-logic-js": "^2.0.0",

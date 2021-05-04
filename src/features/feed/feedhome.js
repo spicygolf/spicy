@@ -4,7 +4,7 @@ import {
   View,
 } from 'react-native';
 
-import Games from 'features/feed/games';
+import Stats from 'features/feed/stats';
 
 
 
@@ -12,7 +12,7 @@ const FeedHome = props => {
 
   return (
     <View>
-      <Games />
+      <Stats />
     </View>
   );
 
