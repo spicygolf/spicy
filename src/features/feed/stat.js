@@ -1,12 +1,15 @@
 import React, { useContext, } from 'react';
 import {
   StyleSheet,
+  TouchableOpacity,
   Text,
+  View,
 } from 'react-native';
 import {
   Card,
 } from 'react-native-elements';
 import { useQuery } from '@apollo/client';
+import { useNavigation } from '@react-navigation/native';
 
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { STAT_FOR_PLAYER_FEED } from 'features/feed//graphql';
@@ -16,6 +19,7 @@ import { STAT_FOR_PLAYER_FEED } from 'features/feed//graphql';
 const Stat = props => {
 
   const { stat, side } = props;
+  const navigation = useNavigation();
   let title = '';
 
   const { currentPlayer: cp } = useContext(CurrentPlayerContext);
@@ -57,12 +61,18 @@ const Stat = props => {
   //console.log('data', data, myClubs);
 
   return (
-    <Card
-      containerStyle={[styles.container, styles[side]]}
-    >
-      <Card.Title>{title}</Card.Title>
-      <Text style={styles.stat}>{statValue}</Text>
-    </Card>
+    <View style={[styles.tov, styles[side]]}>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate('FeedGames', props);
+        }}
+      >
+        <Card>
+          <Card.Title>{title}</Card.Title>
+          <Text style={styles.stat}>{statValue}</Text>
+        </Card>
+      </TouchableOpacity>
+    </View>
   );
 
 };
@@ -71,7 +81,7 @@ export default Stat;
 
 
 const styles = StyleSheet.create({
-  container: {
+  tov: {
     flex: 1,
     marginVertical: 15,
   },

@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import FeedHome from 'features/feed/feedhome';
+import Stats from 'features/feed/stats';
+import Games from 'features/feed/games';
 import { blue } from 'common/colors';
 
 
@@ -24,11 +25,19 @@ const FeedStack = props => {
         }}
       >
         <Stack.Screen
-          name='FeedHome'
-          component={FeedHome}
+          name='FeedStats'
+          component={Stats}
           options={{
             title: 'Feed',
             headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name='FeedGames'
+          component={Games}
+          options={{
+            title: 'Games',
+            headerShown: true,
           }}
         />
       </Stack.Navigator>
