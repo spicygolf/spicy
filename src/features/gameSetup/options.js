@@ -23,13 +23,14 @@ import OptionMenu from 'features/gameSetup/optionMenu';
 
 const Options = props => {
 
-  const { game } = useContext(GameContext);
+  const { game, readonly } = useContext(GameContext);
   const { _key: gkey } = game;
   const allOptions = getAllOptions(game);
 
   const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
 
   const setOption = async option => {
+    if( readonly ) return; // view mode only, so don't allow changes
     const newOption = {
       name: option.name,
       disp: option.disp,
@@ -65,16 +66,16 @@ const Options = props => {
     let ret = (<OptionDisplay option={item}/>);
     switch( item.type ) {
       case 'num':
-        ret = (<OptionNum option={item} setOption={setOption}/>)
+        ret = (<OptionNum option={item} setOption={setOption} readonly={readonly} />)
         break;
       case 'pct':
-        ret = (<OptionPct option={item} setOption={setOption}/>)
+        ret = (<OptionPct option={item} setOption={setOption} readonly={readonly} />)
         break;
       case 'bool':
-        ret = (<OptionBool option={item} setOption={setOption}/>)
+        ret = (<OptionBool option={item} setOption={setOption} readonly={readonly} />)
         break;
       case 'menu':
-        ret = (<OptionMenu option={item} setOption={setOption}/>)
+        ret = (<OptionMenu option={item} setOption={setOption} readonly={readonly} />)
         break;
       default:
         break;

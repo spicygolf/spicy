@@ -34,7 +34,7 @@ const TeamChooser = props => {
 
   const { currentHole, from } = props;
   //console.log('teamChooser currentHole', currentHole);
-  const { game, activeGameSpec } = useContext(GameContext);
+  const { game, activeGameSpec, readonly } = useContext(GameContext);
   const { _key: gkey } = game;
   const teams = getTeams(game, currentHole);
   const gameHole = ( game && game.holes && game.holes.length )
@@ -53,6 +53,7 @@ const TeamChooser = props => {
     //console.log('pkey', pkey);
     //console.log('addToTeam', addToTeam);
     //console.log('removeFromTeam', removeFromTeam);
+    if( readonly ) return; // view mode only, so don't allow changes
 
     // get holes for updating, either from game metadata or game setup
     const gameMeta = await getGameMeta(gkey);

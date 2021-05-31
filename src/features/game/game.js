@@ -20,7 +20,7 @@ import { scoring } from 'common/utils/score';
 const Game = props => {
 
   const { route } = props;
-  const { currentGameKey } = route.params;
+  const { currentGameKey, readonly } = route.params;
   //console.log('currentGameKey', currentGameKey);
 
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
@@ -83,6 +83,7 @@ const Game = props => {
         scores,
         currentPlayerKey,
         activeGameSpec,
+        readonly,
       }}>
         { game_listener }
         { round_listeners }

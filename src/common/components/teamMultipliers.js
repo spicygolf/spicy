@@ -29,7 +29,7 @@ const TeamMultipliers = props => {
   const [ updateGameHoles ] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
   const { team: teamNum, scoring, currentHole } = props;
-  const { game } = useContext(GameContext);
+  const { game, readonly } = useContext(GameContext);
   const { gamespecs } = game;
   const allmultipliers = getMultipliersFromGamespecs(gamespecs);
 
@@ -41,6 +41,7 @@ const TeamMultipliers = props => {
   //console.log('h', h);
 
   const setMultiplier = async (mult, newValue) => {
+    if( readonly ) return; // viewing game only, so do nothing
     // only set in DB if junk is based on user input
     if( mult.based_on != 'user' ) return;
     // achieved so no press action

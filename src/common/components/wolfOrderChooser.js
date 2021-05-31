@@ -22,14 +22,14 @@ import {
 
 const WolfOrderChooser = props => {
 
-  const { game } = useContext(GameContext);
+  const { game, readonly } = useContext(GameContext);
   const { players } = game;
 
   const [ updateGameScope ] = useMutation(UPDATE_GAME_SCOPE_MUTATION);
 
 
   const setOrder = async newOrderPlayers => {
-    if( !game || !game.scope ) return;
+    if( !game || !game.scope || readonly ) return;
     console.log('setOrder data', newOrderPlayers);
 
     let newScope = cloneDeep(game.scope);

@@ -12,7 +12,7 @@ import { blue } from 'common/colors';
 
 const OptionBool = props => {
 
-  const { option, setOption } = props;
+  const { option, setOption, readonly } = props;
   const [ value, setValue ] = useState(option.value == 'true');
 
   return (
@@ -21,6 +21,7 @@ const OptionBool = props => {
       <View style={styles.field_input_view}>
         <Switch
           value={value}
+          disabled={readonly}
           onValueChange={() => {
             setOption({
               ...option,

@@ -15,7 +15,7 @@ import { green } from 'common/colors';
 
 const OptionPct = props => {
 
-  const { option, setOption } = props;
+  const { option, setOption, readonly } = props;
   const [ value, setValue ] = useState(option.value || null);
 
   const validate = (type, text) => {
@@ -39,6 +39,7 @@ const OptionPct = props => {
       <Text style={styles.field_label}>{option.disp}</Text>
       <View style={styles.field_input_view}>
         <TextInput
+          editable={!readonly}
           style={[styles.field_input, oValid]}
           onChangeText={text => {
             setValue(text);

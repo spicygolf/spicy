@@ -26,7 +26,7 @@ import {
 
 const Teams = props => {
 
-  const { game, activeGameSpec } = useContext(GameContext);
+  const { game, activeGameSpec, readonly } = useContext(GameContext);
   //console.log('gameSetup activeGameSpec', activeGameSpec);
 
   const [ updateGameScope ] = useMutation(UPDATE_GAME_SCOPE_MUTATION);
@@ -35,7 +35,7 @@ const Teams = props => {
   if( !teamsFromGamespecs.includes(true) ) return null;
 
   const updateRotation = async selectedIndex => {
-    if( !game || !game.scope ) return;
+    if( !game || !game.scope || readonly ) return;
 
     //console.log('selectedIndex', teamsRotateOptions[selectedIndex].slug);
     let newScope = cloneDeep(game.scope);

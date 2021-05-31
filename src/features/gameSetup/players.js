@@ -26,11 +26,12 @@ import { blue } from 'common/colors';
 const Players = props => {
 
   const navigation = useNavigation();
-  const { game } = useContext(GameContext);
+  const { game, readonly } = useContext(GameContext);
 
   const { _key: gkey, rounds, players } = game;
 
   const _itemPressed = player => {
+    if( readonly ) return;
     if( !player ) return;
     // check to see if round exists... if not, don't go here
     const round = get_round_for_player(rounds, player._key);
@@ -38,6 +39,7 @@ const Players = props => {
   };
 
   const _shouldShowAddButton = players => {
+    if( readonly ) return false;
     return true; //TODO: fixme now that multiple gamespecs could be on each game
     let ret = true;
     if( gamespec.max_players < 1 ) return true;
@@ -73,9 +75,20 @@ const Players = props => {
           tee={tee}
           rkey={rkey}
           player={item}
+          readonly={readonly}
           testID={index}
         />
       );
+
+      const removePlayerContent = readonly
+        ? null
+        : (
+            <RemovePlayer
+              gkey={gkey}
+              pkey={pkey}
+              rkey={rkey}
+            />
+          );
 
       return (
         <ListItem
@@ -91,11 +104,7 @@ const Players = props => {
               course_handicap={ch}
               handicap_index={hi}
             />
-          <RemovePlayer
-              gkey={gkey}
-              pkey={pkey}
-              rkey={rkey}
-            />
+            {removePlayerContent}
         </ListItem>
       );
 

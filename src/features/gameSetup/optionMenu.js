@@ -15,7 +15,7 @@ import { green } from 'common/colors';
 
 const OptionMenu = props => {
 
-  const { option, setOption } = props;
+  const { option, setOption, readonly } = props;
   const [ value, setValue ] = useState(option.value);
   const [ visible, setVisible ] = useState(false);
 
@@ -38,26 +38,32 @@ const OptionMenu = props => {
     );
   });
 
+  const menuContent = readonly
+    ? (<Text>{getDisplay()}</Text>)
+    : (
+        <Menu
+          style={styles.menu}
+          visible={visible}
+          anchor={
+            <View style={styles.anchor_view}>
+              <Text
+                style={styles.anchor}
+                onPress={() => setVisible(true)}
+              >{getDisplay()}</Text>
+            </View>
+          }
+          onDismiss={() => setVisible(false)}
+        >
+          { choices }
+        </Menu>
+      );
+
   return (
     <View style={styles.field_container}>
       <Text style={styles.field_label}>{option.disp}</Text>
       <View style={styles.field_input_view}>
         <View style={styles.menu_view}>
-          <Menu
-            style={styles.menu}
-            visible={visible}
-            anchor={
-              <View style={styles.anchor_view}>
-                <Text
-                  style={styles.anchor}
-                  onPress={() => setVisible(true)}
-                >{getDisplay()}</Text>
-              </View>
-            }
-            onDismiss={() => setVisible(false)}
-          >
-            { choices }
-          </Menu>
+          {menuContent}
         </View>
       </View>
     </View>

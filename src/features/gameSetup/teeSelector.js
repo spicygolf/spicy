@@ -17,13 +17,19 @@ const TeeSelector = (props) => {
 
   const navigation = useNavigation();
 
-  const { game, tee, rkey, player, testID } = props;
+  const { game, tee, rkey, player, readonly, testID } = props;
 
   const course = (tee && tee.course && tee.name) ?
     ' - ' + acronym(tee.course.name) : '';
   let buttonName = (tee && tee.name) ? `${tee.name}${course}`
     : 'Select Course/Tee';
   let pressFn;
+
+  if( readonly ) return (
+    <View>
+      <Text style={styles.title}>{buttonName}</Text>
+    </View>
+  );
 
   // if we have round key, go to AddCourse.
   // If for some reason we don't go to LinkRound

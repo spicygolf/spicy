@@ -10,6 +10,7 @@ import {
   ListItem,
 } from 'react-native-elements';
 import { useQuery } from '@apollo/client';
+import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
 
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
@@ -22,6 +23,8 @@ const Games = props => {
 
   const { currentPlayer: cp } = useContext(CurrentPlayerContext);
   if( !cp ) return null;
+
+  const navigation = useNavigation();
 
   const { route } = props;
   const { stat, begDate, endDate } = route.params;
@@ -50,6 +53,17 @@ const Games = props => {
 
   };
 
+  const gamePressed = (item) => {
+    console.log(item);
+    navigation.navigate('GamesStack', {
+      screen: 'Game',
+      params: {
+        currentGameKey: item._key,
+        readonly: true,
+      },
+    });
+  };
+
   const renderGame = ({item}) => {
     if( !item ) return null;
     const name = item.name || '';
@@ -57,7 +71,7 @@ const Games = props => {
 
     return (
       <ListItem
-        onPress={() => itemPressed(item)}
+        onPress={() => gamePressed(item)}
       >
         <ListItem.Content>
           <ListItem.Title style={styles.title}>{name}</ListItem.Title>

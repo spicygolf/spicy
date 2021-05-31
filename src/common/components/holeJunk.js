@@ -42,7 +42,8 @@ const HoleJunk = props => {
 
   const par = (hole && hole.par) ? parseFloat(hole.par) : 0.0;
 
-  const { game, scores } = useContext(GameContext);
+  const { game, scores, readonly } = useContext(GameContext);
+  console.log('readonly', readonly);
   const { _key: gkey } = game;
 
   const { gamespecs } = game;
@@ -63,6 +64,7 @@ const HoleJunk = props => {
 
 
   const setJunk = async (junk, newValue) => {
+    if( readonly ) return; // viewing game only, so do nothing
     // only set in DB if junk is based on user input
     if( !junk || !junk.based_on || junk.based_on != 'user') return;
     if( !game || !game.holes ) return;

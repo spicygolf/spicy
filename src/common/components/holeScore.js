@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
 import { useMutation, gql } from '@apollo/client';
 
 import useAppState from 'hooks/useAppState';
+import { GameContext } from 'features/game/gameContext';
 import { omitTypename } from 'common/utils/game';
 import {
   get_score_value,
@@ -29,6 +30,8 @@ const HoleScore = props => {
   // some testing things
   const { team, player_index } = test;
   const h = hole.hole;
+
+  const { readonly } = useContext(GameContext);
 
   const { justBecameActive } = useAppState();
 
@@ -128,6 +131,7 @@ const HoleScore = props => {
   };
 
   const setScore = async (item) => {
+    if( readonly ) return; // viewing game only, so do nothing
     if( item.key == gross ) return; // no change in score, so do nothing
     const { key:newGross } = item;
     let newScore = upsertScore(score, newGross);

@@ -37,6 +37,7 @@ const Games = props => {
     if( setup ) {
       navigation.navigate('Game', {
         currentGameKey: item._key,
+        readonly: false,
         screen: 'Setup',
         params: {
           screen: 'GameSetup',
@@ -45,6 +46,7 @@ const Games = props => {
     } else {
       navigation.navigate('Game', {
         currentGameKey: item._key,
+        readonly: false,
       });
     }
   };
