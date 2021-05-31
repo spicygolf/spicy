@@ -52,6 +52,7 @@ export const GET_GAME_QUERY = gql`
           differential
           date_validated
           exceptional
+          estimated_handicap
           posted_by
           success
           messages
