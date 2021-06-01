@@ -240,7 +240,6 @@ const Leaderboard = props => {
     });
     return (
       <View>
-        <ViewChooser activeChoices={activeChoices} />
         <View style={styles.header}>
           <View style={styles.holeTitleView}>
             <Text style={styles.holeTitle}>Hole</Text>
@@ -275,6 +274,7 @@ const Leaderboard = props => {
 
   return (
     <View style={styles.container}>
+      <ViewChooser activeChoices={activeChoices} />
       <SectionList
         sections={data}
         keyExtractor={(item, index) => item+index}
@@ -301,7 +301,7 @@ var styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    height: headerHeight - 10,
+    height: headerHeight,
     alignItems: 'center',
     //borderWidth: 1,
   },
@@ -317,7 +317,7 @@ var styles = StyleSheet.create({
     color: '#666',
   },
   buttonContainer: {
-    maxHeight: 20,
+    maxHeight: 24,
     zIndex: 5,
   },
   selectedButton: {
