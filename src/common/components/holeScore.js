@@ -176,7 +176,7 @@ const HoleScore = props => {
       ref={flatlistRef}
       onStartShouldSetPanResponderCapture={(evt, gestureState) => false}
       onScrollToIndexFailed={(e) => {
-        console.log('onScrollToIndexFailed e', e);
+        //console.log('onScrollToIndexFailed e', e);
         // this horrible hack seems to fix #15
         setTimeout(() => scroll(), 250);
       }}

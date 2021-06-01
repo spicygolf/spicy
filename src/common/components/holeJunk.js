@@ -43,7 +43,6 @@ const HoleJunk = props => {
   const par = (hole && hole.par) ? parseFloat(hole.par) : 0.0;
 
   const { game, scores, readonly } = useContext(GameContext);
-  console.log('readonly', readonly);
   const { _key: gkey } = game;
 
   const { gamespecs } = game;

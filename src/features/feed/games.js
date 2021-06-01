@@ -32,7 +32,7 @@ const Games = props => {
   const currentPlayer = `players/${cp._key}`
   const myClubs = cp.clubs.map(c => `clubs/${c._key}`);
 
-  console.log('variables', {stat, begDate, endDate, currentPlayer, myClubs});
+  // console.log('variables', {stat, begDate, endDate, currentPlayer, myClubs});
 
   const { loading, error, data } = useQuery(GAMES_FOR_PLAYER_FEED, {
     variables: { stat, begDate, endDate, currentPlayer, myClubs, }
