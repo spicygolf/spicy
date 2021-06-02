@@ -25,7 +25,7 @@ import Player from 'features/gameSetup/Player';
 const SpicyPlayerSearchResults = props => {
 
   const { state, setState, onPress } = useContext(SpicyPlayerSearchContext);
-  //console.log('spicy player search results context', state);
+  // console.log('spicy player search results context', state);
 
 
   const handicap = h => (
@@ -81,7 +81,7 @@ const SpicyPlayerSearchResults = props => {
 
   // build players array for render
   let players = [];
-  if( searchPlayers.length && favorites.length ) {
+  if( searchPlayers.length && favorites ) {
     players = searchPlayers.map(p => ({
       ...p,
       fave: {

@@ -15,7 +15,7 @@ const SpicyPlayerSearchInput = props => {
 
   const { state, setState } = useContext(SpicyPlayerSearchContext);
 
-  //console.log('spicyPlayerSearch', spicyPlayerSearch);
+  // console.log('SpicyPlayerSearchInput', state);
 
   return (
     <View style={styles.container}>
