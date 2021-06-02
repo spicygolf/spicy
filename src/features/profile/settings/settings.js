@@ -21,6 +21,7 @@ const SettingsHome = props => {
 
   const {
     currentPlayer,
+    impersonate,
   } = useContext(CurrentPlayerContext);
 
   const navigation = useNavigation();
@@ -60,9 +61,16 @@ const SettingsHome = props => {
   const version = DeviceInfo.getVersion();
 
   const renderSetting = ({item}) => {
-    if( item.level == 'admin' &&
-        !(currentPlayer && currentPlayer.level && currentPlayer.level == 'admin') ) {
-      return null;
+    // console.log('impersonate', impersonate);
+    if( item.level == 'admin' ) {
+      if (
+          (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin') ||
+          (impersonate && impersonate.original && impersonate.original.level && impersonate.original.level == 'admin')
+         ) {
+        // do nothing
+      } else {
+        return null;
+      }
     }
 
     return (

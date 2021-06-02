@@ -16,6 +16,7 @@ import {
   SEARCH_PLAYER_QUERY,
   GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
 } from 'features/players/graphql';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { GameContext } from 'features/game/gameContext';
 import { SpicyPlayerSearchContext } from 'common/components/spicy/player/searchContext';
 import Player from 'features/gameSetup/Player';
@@ -53,7 +54,11 @@ const SpicyPlayerSearchResults = props => {
     );
   }
 
-  const { currentPlayerKey, game } = useContext(GameContext);
+  const { currentPlayerKey } = useContext(CurrentPlayerContext);
+  const gameCtx = useContext(GameContext);
+  const game = gameCtx && gameCtx.game
+    ? gameCtx.game
+    : null;
 
   // get this player's favorite players
   const { data: fData } = useQuery(

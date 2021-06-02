@@ -44,6 +44,7 @@ const AppStack = props => {
   const [currentPlayer, setCurrentPlayer] = useState(null);
   const [currentPlayerKey, setCurrentPlayerKey] = useState(null);
   const [token, setToken] = useState(null);
+  const [ impersonate, setImpersonate ] = useState(null);
 
   const [ getCurrentPlayer, { error, data } ] = useLazyQuery(GET_PLAYER_QUERY);
 
@@ -207,6 +208,8 @@ const AppStack = props => {
           setCurrentPlayerKey,
           token,
           setToken,
+          impersonate,
+          setImpersonate,
           user,
         }}
       >
