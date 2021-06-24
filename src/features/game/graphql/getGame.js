@@ -130,43 +130,30 @@ export const GET_GAME_QUERY = gql`
               based_on
             }
         }
-        junk {
-            name
-            disp
-            seq
-            type
-            value
-            limit
-            scope
-            icon
-            show_in
-            score_to_par
-            based_on
-            calculation
-            logic
-            better
-            availability
-        }
-        multipliers {
-            name
-            disp
-            seq
-            value
-            icon
-            based_on
-            scope
-            availability
-            after
-        }
         options {
-            name
-            disp
-            type
-            choices {
+          name
+          disp
+          seq
+          type
+          sub_type
+          value
+          choices {
               name
               disp
-            }
-            default
+          }
+          default
+          limit
+          scope
+          icon
+          show_in
+          score_to_par
+          based_on
+          calculation
+          availability
+          logic
+          better
+          after
+          holes
         }
       }
       options {

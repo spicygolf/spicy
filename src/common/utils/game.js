@@ -159,29 +159,38 @@ export const getAllOptions = game => {
   let options = [];
   const gsOptions = getAllGamespecOptions(game);
   if( gsOptions && gsOptions.length ) gsOptions.map(gso => {
-    let o = {
-      name: gso.name,
-      type: gso.type,
-      disp: gso.disp,
-      choices: gso.choices,
-      value: gso.default,
-      gamespec_key: gso.gamespec_key,
-    };
-    // if found, a game option overrides a gamespec option
-    const go = find(game.options, {name: gso.name});
-    if( go ) o.value = go.value;
-    options.push(o);
+    if( gso.type == 'game' ) {
+      let holes = gso.holes
+      if( !holes ) holes = game.holes.map(h => h.hole);
+      let value = gso.value;
+      if( typeof value === 'undefined' || value === null ) value = gso.default;
+      let o = {
+        name: gso.name,
+        type: gso.sub_type,
+        disp: gso.disp,
+        choices: gso.choices,
+        value,
+        holes,
+        gamespec_key: gso.gamespec_key,
+      };
+      // if found, a game option overrides a gamespec option
+      const go = find(game.options, {name: gso.name});
+      if( go ) o.value = go.value;
+      // TODO: if( go.holes ) o.holes = go.holes ??
+      options.push(o);
+    }
   });
   return options;
 };
 
 
-export const getOption = (game, option) => {
+export const getOption = ({game, hole, option}) => {
 
   let v = null;
-  const options = getAllOptions(game);
+  const allOptions = getAllOptions(game);
+  // console.log('allOptions', allOptions, hole);
 
-  const go = find(options, {name: option});
+  const go = find(allOptions, o => (o.name == option && o.holes.indexOf(`${hole}`) > -1));
   if( go && go.value ) v = go.value;
   //console.log('2', gso, go, v);
 

@@ -45,8 +45,7 @@ const HoleJunk = props => {
   const { game, scores, readonly } = useContext(GameContext);
   const { _key: gkey } = game;
 
-  const { gamespecs } = game;
-  const alljunk = getJunkFromGamespecs(gamespecs);
+  const alljunk = getJunkFromGamespecs(game);
   const sorted_junk = sortBy(alljunk, ['seq']);
   if( sorted_junk.length == 0 ) return null;
 

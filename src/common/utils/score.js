@@ -28,9 +28,9 @@ import {
 
 
 
-export const getScoringFromGamespecs = gamespecs => {
+export const getScoringFromGamespecs = game => {
   let ret = {};
-  gamespecs.map(gs => {
+  game.gamespecs.map(gs => {
     const { scoring } = gs;
     if( !scoring ) return;
 
@@ -44,31 +44,43 @@ export const getScoringFromGamespecs = gamespecs => {
   return ret;
 };
 
-export const getJunkFromGamespecs = gamespecs => {
+export const getJunkFromGamespecs = game => {
   let ret = [];
-  gamespecs.map(gs => {
-    const { junk } = gs;
-    if( !junk ) return;
-    junk.map(j => {
-      ret.push({
-        ...j,
-        key: `${gs._key}_${j.name}`,
-      });
+  game.gamespecs.map(gs => {
+    const { options } = gs;
+    if( !options ) return;
+    options.map(o => {
+      if( o.type == 'junk' ) {
+        let holes = o.holes
+          ? o.holes
+          : holes = getHoles(game);
+        ret.push({
+          ...o,
+          holes,
+          key: `${gs._key}_${o.name}`,
+        });
+      }
     });
   });
   return ret;
 };
 
-export const getMultipliersFromGamespecs = gamespecs => {
+export const getMultipliersFromGamespecs = game => {
   let ret = [];
-  gamespecs.map(gs => {
-    const { multipliers } = gs;
-    if( !multipliers ) return;
-    multipliers.map(m => {
-      ret.push({
-        ...m,
-        key: `${gs._key}_${m.name}`,
-      });
+  game.gamespecs.map(gs => {
+    const { options } = gs;
+    if( !options ) return;
+    options.map(o => {
+      if( o.type == 'multiplier' ) {
+        let holes = o.holes
+          ? o.holes
+          : holes = getHoles(game);
+        ret.push({
+          ...o,
+          holes,
+          key: `${gs._key}_${o.name}`,
+        });
+      }
     });
   });
   return ret;
@@ -85,11 +97,9 @@ export const getMultipliersFromGamespecs = gamespecs => {
 //
 export const scoring = game => {
 
-  const { gamespecs } = game;
-  const allScoring = getScoringFromGamespecs(gamespecs);
-  const allJunk = getJunkFromGamespecs(gamespecs);
-  const allMultipliers = getMultipliersFromGamespecs(gamespecs);
-  const teamGame = getGamespecKVs(game, 'teams').includes(true);
+  const allScoring = getScoringFromGamespecs(game);
+  const allJunk = getJunkFromGamespecs(game);
+  const allMultipliers = getMultipliersFromGamespecs(game);
   const pointsGame = getGamespecKVs(game, 'type').includes('points');
   const matchplayGame = getGamespecKVs(game, 'type').includes('match');
   const betterPoints = getGamespecKVs(game, 'better');
@@ -112,6 +122,7 @@ export const scoring = game => {
     });
   });
 
+  // return value of main scoring function
   let ret = {
     holes: [],
     players,
@@ -121,7 +132,7 @@ export const scoring = game => {
   holes.map(hole => {
     //console.log(`scoring hole '${hole}'   ***********************************`);
 
-    const gHole = find(game.holes, {hole: hole});
+    const gHole = find(game.holes, {hole});
     //console.log('gHole', gHole);
     if( !gHole ) return;
 
@@ -131,9 +142,11 @@ export const scoring = game => {
     // begin possiblePoints calcs
     let possiblePoints = 0;
     allJunk.map(gsJunk => {
+      if( !isOptionOnThisHole(gsJunk, hole) ) return;
       if( gsJunk.limit == 'one_team_per_group' ||
           gsJunk.limit == 'one_per_group' ) {
         possiblePoints += gsJunk.value;
+        // console.log('adding to possible points', hole, gsJunk.name, gsJunk.value, possiblePoints);
       }
     });
 
@@ -168,7 +181,7 @@ export const scoring = game => {
       allJunk,
       game,
       scoresEntered,
-      hole
+      hole,
     });
 
     const {newTeams, pp} = calcTeamJunk({
@@ -177,7 +190,8 @@ export const scoring = game => {
       allJunk,
       game,
       scoresEntered,
-      betterPoints
+      betterPoints,
+      hole,
     });
     teams = newTeams;
     possiblePoints += pp;
@@ -185,7 +199,7 @@ export const scoring = game => {
     //  junk that depends on team score or something after the above calcs
     //  something like 'ky' or 'oj' in wolfhammer
 
-    //if( hole == '5' ) console.log('teams', teams, possiblePoints);
+    // if( hole == '1' ) console.log('teams', teams, possiblePoints);
 
     const oneHoleScoring = {
       holes: [{
@@ -197,7 +211,9 @@ export const scoring = game => {
 
     // multipliers
     const multipliers = [];
+    // console.log('allMultipliers', allMultipliers);
     allMultipliers.map(gsMult => {
+      if( !isOptionOnThisHole(gsMult, hole) ) return;
       if( gsMult.based_on == 'user' ) {
         if( gHole && gHole.multipliers ) {
           //console.log('scoring gHole', gHole);
@@ -375,9 +391,9 @@ const incrementPlayer = (players, pkey, type, value) => {
 
 const calcPlayerJunk = ({players, pkey, game, hole, allScoring, allJunk}) => {
 
-  let tp = 0;
-  let pp = 0;
-  //console.log('calcPlayerScore beg', gPlayer, hole, tp, pp);
+  let tp = 0; // team points
+  let pp = 0; // possible points
+  // if( hole == '1' ) console.log('calcPlayerScore beg', hole, tp, pp);
 
   const round = get_round_for_player(game.rounds, pkey);
   const score = get_score(hole, round);
@@ -401,6 +417,7 @@ const calcPlayerJunk = ({players, pkey, game, hole, allScoring, allJunk}) => {
   // player junk
   const playerJunk = [];
   allJunk.map(gsJunk => {
+    if( !isOptionOnThisHole(gsJunk, hole) ) return;
     if( gsJunk.scope != 'player' ) return;
     let j = false;
     switch ( gsJunk.based_on ) {
@@ -425,7 +442,7 @@ const calcPlayerJunk = ({players, pkey, game, hole, allScoring, allJunk}) => {
       playerJunk.push(gsJunk);
     }
   });
-  //console.log('calcPlayerScore end', hole, pkey, tp, pp);
+  // if( hole == '1' ) console.log('calcPlayerScore end', hole, pkey, tp, pp);
 
   return ({
     p: {
@@ -460,7 +477,7 @@ const calcTeamScore = ({teams, allScoring, allJunk, game, scoresEntered, hole}) 
       scoring.map(s => {
         if( s.scope == 'team' ) {
           if( scoringType == 'hole' && s.type == 'vegas' ) {
-            ret = vegasTeamScore({team: ret, teams, game, s});
+            ret = vegasTeamScore({team: ret, teams, game, hole, s});
           }
         }
       });
@@ -468,8 +485,9 @@ const calcTeamScore = ({teams, allScoring, allJunk, game, scoresEntered, hole}) 
 
     // go thru junk for team score
     allJunk.map(gsJunk => {
+      if( !isOptionOnThisHole(gsJunk, hole) ) return;
       if( gsJunk.scope == 'team' ) {
-        if( gsJunk.type == 'dot') {
+        if( gsJunk.sub_type == 'dot') {
           switch( gsJunk.calculation ) {
             // TODO: convert low_ball and low_team over to logic, and get rid of
             //       gsJunk.calculation and best_ball and sum cases below.
@@ -524,16 +542,17 @@ const calcTeamScore = ({teams, allScoring, allJunk, game, scoresEntered, hole}) 
               break;
           }
         } else {
-          console.log('unknown junk type: ', gsJunk.type);
+          console.log('unknown junk type: ', gsJunk.sub_type);
         }
       }
     });
+    // console.log('calcTeamScore', ret);
     return ret;
   });
 
 };
 
-const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered, betterPoints}) => {
+const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered, betterPoints, hole}) => {
 
   // ready to calc yet?  check if all scores are in for this hole
   //console.log('calcTeamJunk', game.players, scoresEntered, teams);
@@ -546,8 +565,9 @@ const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered, betterPo
   let maxJunkPoints = 0;
 
   allJunk.map(gsJunk => {
+    if( !isOptionOnThisHole(gsJunk, hole) ) return;
     if( gsJunk.scope == 'team' ) {
-      if( gsJunk.type == 'dot' ) {
+      if( gsJunk.sub_type == 'dot' ) {
         // get all team scores array
         const teamScores = teams.map((t, i) => {
           //console.log(`${gsJunk.name} score`, t.score[gsJunk.name]);
@@ -585,7 +605,7 @@ const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered, betterPo
             // figure out how many scores to iterate through to break tie
             // i.e. first ball only, or progress thru the balls for ties
             const maxLenScores = max(teamScores.map(t => t.value.length));
-            const ties_option = getOption(game, 'next_ball_breaks_ties');
+            const ties_option = getOption({game, hole, option: 'next_ball_breaks_ties'});
             const lenOfScores = ( ties_option && ties_option.value === true )
               ? maxLenScores
               : 1;
@@ -632,7 +652,7 @@ const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered, betterPo
             break;
         }
       } else {
-        console.log('unknown junk type: ', gsJunk.type);
+        console.log('unknown junk type: ', gsJunk.sub_type);
       }
     }
   });
@@ -641,6 +661,11 @@ const calcTeamJunk = ({teams, allScoring, allJunk, game, scoresEntered, betterPo
     newTeams: ret,
     pp: maxJunkPoints,
   };
+};
+
+export const isOptionOnThisHole = (option, hole) => {
+  if ( !option || !option.holes ) return false;
+  return ( option.holes.indexOf(hole) >= 0 );
 };
 
 export const isScoreToParJunk = (junk, s, par) => {
@@ -719,7 +744,7 @@ export const upsertScore = (score, newGross) => {
   return newScore;
 };
 
-export const vegasTeamScore = ({team, teams, game, s}) => {
+export const vegasTeamScore = ({team, teams, game, hole, s}) => {
 
   //console.log('s', s);
   //console.log('team', team);
@@ -746,7 +771,7 @@ export const vegasTeamScore = ({team, teams, game, s}) => {
   const thisTeamEagles = countJunk(thisTeamJunk, {name: 'eagle'});
   const otherTeamBirdies = countJunk(otherTeamJunk, {name: 'birdie'});
   const otherTeamEagles = countJunk(otherTeamJunk, {name: 'eagle'});
-  const birdies_cancel_option = getOption(game, 'birdies_cancel_flip');
+  const birdies_cancel_option = getOption({game, hole, option: 'birdies_cancel_flip'});
 
   if( otherTeamBirdies ) {
     if( !birdies_cancel_option || !(thisTeamBirdies || thisTeamEagles) ) {

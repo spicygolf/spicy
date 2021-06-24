@@ -30,8 +30,7 @@ const TeamMultipliers = props => {
 
   const { team: teamNum, scoring, currentHole } = props;
   const { game, readonly } = useContext(GameContext);
-  const { gamespecs } = game;
-  const allmultipliers = getMultipliersFromGamespecs(gamespecs);
+  const allmultipliers = getMultipliersFromGamespecs(game);
 
   const scoringWrapper = new ScoringWrapper(game, scoring, currentHole);
 

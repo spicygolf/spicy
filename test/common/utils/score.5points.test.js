@@ -17,13 +17,13 @@ const hole1 = {
 describe('common/utils/score - 5points tests', () => {
 
   test('5Points - Scoring - prox only', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 4, pops: 0, junk: [{name: 'prox'}]},
       {player: 2, team: 1, score: 5, pops: 0, junk: []},
       {player: 3, team: 2, score: 5, pops: 0, junk: []},
       {player: 4, team: 2, score: 4, pops: 0, junk: []},
     ];
-    const game = make5PointsGame({hole: hole1, players_teams});
+    const game = make5PointsGame({holes: [hole1], data});
     const scores = scoring(game);
     const received = scores.holes[0].teams.map(t => ({
       team: parseInt(t.team),
@@ -35,13 +35,13 @@ describe('common/utils/score - 5points tests', () => {
   });
 
   test('5Points - Scoring - 1 pt prox vs total', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 4, pops: 0, junk: [{name: 'prox'}]},
       {player: 2, team: 1, score: 5, pops: 0, junk: []},
       {player: 3, team: 2, score: 4, pops: 0, junk: []},
       {player: 4, team: 2, score: 4, pops: 0, junk: []},
     ];
-    const game = make5PointsGame({hole: hole1, players_teams});
+    const game = make5PointsGame({holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -54,13 +54,13 @@ describe('common/utils/score - 5points tests', () => {
   });
 
   test('5Points - Scoring - 3 to 2', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 4, pops: 0, junk: [{name: 'prox'}]},
       {player: 2, team: 1, score: 7, pops: 0, junk: []},
       {player: 3, team: 2, score: 5, pops: 0, junk: []},
       {player: 4, team: 2, score: 5, pops: 0, junk: []},
     ];
-    const game = make5PointsGame({hole: hole1, players_teams});
+    const game = make5PointsGame({holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -73,13 +73,13 @@ describe('common/utils/score - 5points tests', () => {
   });
 
   test('5Points - Scoring - clean sweep all 5', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 4, pops: 0, junk: [{name: 'prox'}]},
       {player: 2, team: 1, score: 5, pops: 0, junk: []},
       {player: 3, team: 2, score: 5, pops: 0, junk: []},
       {player: 4, team: 2, score: 5, pops: 0, junk: []},
     ];
-    const game = make5PointsGame({hole: hole1, players_teams});
+    const game = make5PointsGame({holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -92,13 +92,13 @@ describe('common/utils/score - 5points tests', () => {
   });
 
   test('5Points - Scoring - birdie, no bbq cuz prox', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 3, pops: 0, junk: []},
       {player: 2, team: 1, score: 4, pops: 0, junk: []},
       {player: 3, team: 2, score: 4, pops: 0, junk: []},
       {player: 4, team: 2, score: 4, pops: 0, junk: [{name: 'prox'}]},
     ];
-    const game = make5PointsGame({hole: hole1, players_teams});
+    const game = make5PointsGame({holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -111,13 +111,13 @@ describe('common/utils/score - 5points tests', () => {
   });
 
   test('5Points - Scoring - birdie, no bbq cuz tied total', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 3, pops: 0, junk: [{name: 'prox'}]},
       {player: 2, team: 1, score: 5, pops: 0, junk: []},
       {player: 3, team: 2, score: 4, pops: 0, junk: []},
       {player: 4, team: 2, score: 4, pops: 0, junk: []},
     ];
-    const game = make5PointsGame({hole: hole1, players_teams});
+    const game = make5PointsGame({holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -130,13 +130,13 @@ describe('common/utils/score - 5points tests', () => {
   });
 
   test('5Points - Scoring - birdie, no bbq cuz lost total', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 3, pops: 0, junk: [{name: 'prox'}]},
       {player: 2, team: 1, score: 6, pops: 0, junk: []},
       {player: 3, team: 2, score: 4, pops: 0, junk: []},
       {player: 4, team: 2, score: 4, pops: 0, junk: []},
     ];
-    const game = make5PointsGame({hole: hole1, players_teams});
+    const game = make5PointsGame({holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -149,13 +149,13 @@ describe('common/utils/score - 5points tests', () => {
   });
 
   test('5Points - Scoring - birdie, no bbq cuz birdie chop', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 3, pops: 0, junk: [{name: 'prox'}]},
       {player: 2, team: 1, score: 6, pops: 0, junk: []},
       {player: 3, team: 2, score: 3, pops: 0, junk: []},
       {player: 4, team: 2, score: 4, pops: 0, junk: []},
     ];
-    const game = make5PointsGame({hole: hole1, players_teams});
+    const game = make5PointsGame({holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -168,13 +168,13 @@ describe('common/utils/score - 5points tests', () => {
   });
 
   test('5Points - Scoring - birdie, no bbq cuz net tied low', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 3, pops: 0, junk: [{name: 'prox'}]},
       {player: 2, team: 1, score: 6, pops: 0, junk: []},
       {player: 3, team: 2, score: 4, pops: 1, junk: []},
       {player: 4, team: 2, score: 4, pops: 0, junk: []},
     ];
-    const game = make5PointsGame({hole: hole1, players_teams});
+    const game = make5PointsGame({holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -187,13 +187,13 @@ describe('common/utils/score - 5points tests', () => {
   });
 
   test('5Points - Scoring - birdie with bbq', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 3, pops: 0, junk: [{name: 'prox'}]},
       {player: 2, team: 1, score: 4, pops: 0, junk: []},
       {player: 3, team: 2, score: 4, pops: 0, junk: []},
       {player: 4, team: 2, score: 4, pops: 0, junk: []},
     ];
-    const game = make5PointsGame({hole: hole1, players_teams});
+    const game = make5PointsGame({holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     let received = scores.holes[0].teams.map(t => ({
@@ -230,17 +230,18 @@ describe('common/utils/score - 5points tests', () => {
 //     helper functions
 /* ======================================================================= */
 
-const make5PointsGame = ({hole, players_teams}) => {
+const make5PointsGame = ({holes, data}) => {
   return makeGame(
     {
       gamespecs: [
         {
-          junk: [
+          options: [
             {
+              "type": "junk",
               "name": "low_ball",
               "disp": "Low Ball",
               "seq": 1,
-              "type": "dot",
+              "sub_type": "dot",
               "value": 2,
               "limit": "one_team_per_group",
               "scope": "team",
@@ -251,10 +252,11 @@ const make5PointsGame = ({hole, players_teams}) => {
               "better": "lower"
             },
             {
+              "type": "junk",
               "name": "low_total",
               "disp": "Low Total",
               "seq": 2,
-              "type": "dot",
+              "sub_type": "dot",
               "value": 2,
               "limit": "one_team_per_group",
               "scope": "team",
@@ -265,10 +267,11 @@ const make5PointsGame = ({hole, players_teams}) => {
               "better": "lower"
             },
             {
+              "type": "junk",
               "name": "prox",
               "disp": "Prox",
               "seq": 3,
-              "type": "dot",
+              "sub_type": "dot",
               "value": 1,
               "limit": "one_per_group",
               "scope": "player",
@@ -277,10 +280,11 @@ const make5PointsGame = ({hole, players_teams}) => {
               "based_on": "user"
             },
             {
+              "type": "junk",
               "name": "birdie",
               "disp": "Birdie",
               "seq": 4,
-              "type": "dot",
+              "sub_type": "dot",
               "value": 1,
               "limit": "",
               "scope": "player",
@@ -290,10 +294,11 @@ const make5PointsGame = ({hole, players_teams}) => {
               "based_on": "gross"
             },
             {
+              "type": "junk",
               "name": "eagle",
               "disp": "Eagle",
               "seq": 5,
-              "type": "dot",
+              "sub_type": "dot",
               "value": 2,
               "limit": "",
               "scope": "player",
@@ -301,10 +306,9 @@ const make5PointsGame = ({hole, players_teams}) => {
               "show_in": "score",
               "score_to_par": "exactly -2",
               "based_on": "gross"
-            }
-          ],
-          multipliers: [
+            },
             {
+              "type": "multiplier",
               "name": "pre_double",
               "disp": "Pre 2x",
               "seq": 1,
@@ -320,6 +324,7 @@ const make5PointsGame = ({hole, players_teams}) => {
               }`
             },
             {
+              "type": "multiplier",
               "name": "double",
               "disp": "2x",
               "seq": 2,
@@ -335,6 +340,7 @@ const make5PointsGame = ({hole, players_teams}) => {
               }`
             },
             {
+              "type": "multiplier",
               "name": "double_back",
               "disp": "2x back",
               "seq": 3,
@@ -357,6 +363,7 @@ const make5PointsGame = ({hole, players_teams}) => {
               }`
             },
             {
+              "type": "multiplier",
               "name": "birdie_bbq",
               "disp": "Birdie BBQ",
               "seq": 4,
@@ -367,6 +374,7 @@ const make5PointsGame = ({hole, players_teams}) => {
               "availability": `{ '===': [ {'var': 'team.points'}, {'var': 'possiblePoints'} ] }`
             },
             {
+              "type": "multiplier",
               "name": "eagle_bbq",
               "disp": "Eagle BBQ",
               "seq": 5,
@@ -380,12 +388,11 @@ const make5PointsGame = ({hole, players_teams}) => {
           scoring: {
             hole: [],
           },
-          options: [],
         },
       ],
       options: [],
-      hole,
-      players_teams,
+      holes,
+      data,
     }
   );
 }

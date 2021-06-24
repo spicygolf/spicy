@@ -4,54 +4,62 @@ import { findIndex } from 'lodash';
 export const makeGame = ({
   gamespecs = [],
   options = [],
-  hole = {},
-  players_teams = [],
+  holes = [],
+  data = [],
 }) => {
 
   let players = [];
   let rounds = [];
-  let teams = [];
-  players_teams.map(pt => {
-    const newPlayer = {_key: `p_${pt.player}`};
-    players.push(newPlayer);
-    rounds.push({
-      _key: `r_${pt.player}`,
-      player: [newPlayer],
-      scores: [
-        {hole: `${hole.hole}`, values: [{k: 'gross', v: `${pt.score}`}], pops: `${pt.pops}`},
-      ],
-      tee: {
-        holes: [
-          {hole: `${hole.hole}`, par: `${hole.par}`},
-        ],
-      },
-    });
-    let teamIndex = findIndex(teams, {team: `${pt.team}`});
-    if( teamIndex < 0 ) {
-      const newLen = teams.push({team: `${pt.team}`, players: [], junk: []});
-      teamIndex = newLen - 1;
+  let holeteams = {};
+  data.map(d => {
+    const newPlayer = {_key: `p_${d.player}`};
+    const dhole = d && d.hole
+      ? `${d.hole}`
+      : '1';
+    const playerIndex = findIndex(players, newPlayer);
+    if( playerIndex < 0 ) {
+      players.push(newPlayer);
     }
-    teams[teamIndex].players.push(`p_${pt.player}`);
-    pt.junk.map(j => {
-      teams[teamIndex].junk.push({...j, player: `p_${pt.player}`, value: "true"});
+    const roundIndex = findIndex(rounds, {_key: `r_${d.player}`});
+    if( roundIndex < 0 ) {
+      const newRound = {
+        _key: `r_${d.player}`,
+        player: [newPlayer],
+        scores: [
+          {hole: dhole, values: [{k: 'gross', v: `${d.score}`}], pops: `${d.pops}`},
+        ],
+        tee: {
+          holes: holes.map(hole => (
+            {hole: `${hole.hole}`, par: `${hole.par}`}
+          )),
+        },
+      };
+      rounds.push(newRound);
+    } else {
+      rounds[roundIndex].scores.push(
+        {hole: dhole, values: [{k: 'gross', v: `${d.score}`}], pops: `${d.pops}`},
+      );
+    }
+    if( !holeteams[dhole] ) holeteams[dhole] = [];
+    let teamIndex = findIndex(holeteams[dhole], {team: `${d.team}`});
+    if( teamIndex < 0 ) {
+      holeteams[dhole].push({team: `${d.team}`, players: [], junk: []});
+      teamIndex = holeteams[dhole].length - 1;
+    }
+    holeteams[dhole][teamIndex].players.push(`p_${d.player}`);
+    d.junk.map(j => {
+      holeteams[dhole][teamIndex].junk.push({...j, player: `p_${d.player}`, value: "true"});
     });
   });
-  //console.log('teams', JSON.stringify(teams, null, 2));
-  let holes = [
-    {
-      hole: `${hole.hole}`,
-      teams,
-      multipliers: hole.multipliers,
-    },
-  ];
+  // console.log('holeteams', JSON.stringify(holeteams, null, 2));
 
   return {
     gamespecs,
     options,
     holes: holes.map(h => ({
-      hole: h.hole,
+      hole: `${h.hole}`,
       multipliers: h.multipliers,
-      teams: h.teams.map(t => ({
+      teams: holeteams[`${h.hole}`].map(t => ({
         team: t.team,
         players: t.players,
         junk: t.junk,

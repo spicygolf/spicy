@@ -91,6 +91,8 @@ const Game = props => {
       </GameContext.Provider>
     );
 
+  } else {
+    console.log('no game data');
   }
 
   useEffect(() => {

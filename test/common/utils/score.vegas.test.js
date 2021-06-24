@@ -18,13 +18,13 @@ const hole1 = {
 describe('common/utils/score - Vegas tests', () => {
 
   test('Vegas - Scoring - no blood', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 4, pops: 0, junk: []},
       {player: 2, team: 1, score: 5, pops: 0, junk: []},
       {player: 3, team: 2, score: 5, pops: 0, junk: []},
       {player: 4, team: 2, score: 4, pops: 0, junk: []},
     ];
-    const game = makeVegasGame({birdies_cancel_flip, hole: hole1, players_teams});
+    const game = makeVegasGame({birdies_cancel_flip, holes: [hole1], data});
     const scores = scoring(game);
     const received = scores.holes[0].teams.map(t => ({
       team: parseInt(t.team),
@@ -35,13 +35,13 @@ describe('common/utils/score - Vegas tests', () => {
   });
 
   test('Vegas - Scoring - 1 pt', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 4, pops: 0, junk: []},
       {player: 2, team: 1, score: 5, pops: 0, junk: []},
       {player: 3, team: 2, score: 4, pops: 0, junk: []},
       {player: 4, team: 2, score: 4, pops: 0, junk: []},
     ];
-    const game = makeVegasGame({birdies_cancel_flip, hole: hole1, players_teams});
+    const game = makeVegasGame({birdies_cancel_flip, holes: [hole1], data});
     const scores = scoring(game);
     const received = scores.holes[0].teams.map(t => ({
       team: parseInt(t.team),
@@ -52,13 +52,13 @@ describe('common/utils/score - Vegas tests', () => {
   });
 
   test('Vegas - Scoring - birdie flip w pop', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 3, pops: 0, junk: []},
       {player: 2, team: 1, score: 4, pops: 0, junk: []},
       {player: 3, team: 2, score: 4, pops: 0, junk: []},
       {player: 4, team: 2, score: 6, pops: 1, junk: []},
     ];
-    const game = makeVegasGame({birdies_cancel_flip, hole: hole1, players_teams});
+    const game = makeVegasGame({birdies_cancel_flip, holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -70,13 +70,13 @@ describe('common/utils/score - Vegas tests', () => {
   });
 
   test('Vegas - Scoring - two birdies adds 10', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 3, pops: 0, junk: []},
       {player: 2, team: 1, score: 3, pops: 0, junk: []},
       {player: 3, team: 2, score: 4, pops: 0, junk: []},
       {player: 4, team: 2, score: 4, pops: 0, junk: []},
     ];
-    const game = makeVegasGame({birdies_cancel_flip, hole: hole1, players_teams});
+    const game = makeVegasGame({birdies_cancel_flip, holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -89,13 +89,13 @@ describe('common/utils/score - Vegas tests', () => {
   });
 
   test('Vegas - Scoring - birdies cancel flip', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 3, pops: 0, junk: []},
       {player: 2, team: 1, score: 4, pops: 0, junk: []},
       {player: 3, team: 2, score: 3, pops: 0, junk: []},
       {player: 4, team: 2, score: 7, pops: 0, junk: []},
     ];
-    const game = makeVegasGame({birdies_cancel_flip, hole: hole1, players_teams});
+    const game = makeVegasGame({birdies_cancel_flip, holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -107,13 +107,13 @@ describe('common/utils/score - Vegas tests', () => {
   });
 
   test('Vegas - Scoring - eagle adds 10', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 2, pops: 0, junk: []},
       {player: 2, team: 1, score: 4, pops: 0, junk: []},
       {player: 3, team: 2, score: 4, pops: 0, junk: []},
       {player: 4, team: 2, score: 6, pops: 0, junk: []},
     ];
-    const game = makeVegasGame({birdies_cancel_flip, hole: hole1, players_teams});
+    const game = makeVegasGame({birdies_cancel_flip, holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -127,13 +127,13 @@ describe('common/utils/score - Vegas tests', () => {
 
 
   test('Vegas - Scoring - eagle over birdie', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 2, pops: 0, junk: []},
       {player: 2, team: 1, score: 4, pops: 0, junk: []},
       {player: 3, team: 2, score: 3, pops: 0, junk: []},
       {player: 4, team: 2, score: 6, pops: 0, junk: []},
     ];
-    const game = makeVegasGame({birdies_cancel_flip, hole: hole1, players_teams});
+    const game = makeVegasGame({birdies_cancel_flip, holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -145,13 +145,13 @@ describe('common/utils/score - Vegas tests', () => {
     expect(received).toContainEqual({team: 2, holeNetTotal: -49});  });
 
   test('Vegas - Scoring - eagles cancel', () => {
-    const players_teams = [
+    const data = [
       {player: 1, team: 1, score: 2, pops: 0, junk: []},
       {player: 2, team: 1, score: 4, pops: 0, junk: []},
       {player: 3, team: 2, score: 2, pops: 0, junk: []},
       {player: 4, team: 2, score: 6, pops: 0, junk: []},
     ];
-    const game = makeVegasGame({birdies_cancel_flip, hole: hole1, players_teams});
+    const game = makeVegasGame({birdies_cancel_flip, holes: [hole1], data});
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map(t => ({
@@ -169,18 +169,19 @@ describe('common/utils/score - Vegas tests', () => {
 //     helper functions
 /* ======================================================================= */
 
-const makeVegasGame = ({birdies_cancel_flip, hole, players_teams}) => {
+const makeVegasGame = ({birdies_cancel_flip, holes, data}) => {
   return makeGame(
     {
       gamespecs: [
         {
           better: 'lower',
-          junk: [
+          options: [
             {
+              "type": "junk",
               "name": "birdie",
               "disp": "Birdie",
               "seq": 0,
-              "type": "vegas",
+              "sub_type": "vegas",
               "value": 0,
               "limit": "",
               "scope": "player",
@@ -190,10 +191,11 @@ const makeVegasGame = ({birdies_cancel_flip, hole, players_teams}) => {
               "based_on": "gross"
             },
             {
+              "type": "junk",
               "name": "eagle",
               "disp": "Eagle",
               "seq": 1,
-              "type": "vegas",
+              "sub_type": "vegas",
               "value": 0,
               "limit": "",
               "scope": "player",
@@ -203,10 +205,11 @@ const makeVegasGame = ({birdies_cancel_flip, hole, players_teams}) => {
               "based_on": "gross"
             },
             {
+              "type": "junk",
               "name": "two_birdies_add",
               "disp": "2 Birdies +10",
               "seq": 2,
-              "type": "dot",
+              "sub_type": "dot",
               "value": 10,
               "limit": "",
               "scope": "team",
@@ -239,10 +242,11 @@ const makeVegasGame = ({birdies_cancel_flip, hole, players_teams}) => {
               "better": "lower"
             },
             {
+              "type": "junk",
               "name": "eagle_add",
               "disp": "Eagle +10",
               "seq": 3,
-              "type": "dot",
+              "sub_type": "dot",
               "value": 10,
               "limit": "",
               "scope": "team",
@@ -269,10 +273,11 @@ const makeVegasGame = ({birdies_cancel_flip, hole, players_teams}) => {
               "better": "lower"
             },
             {
+              "type": "junk",
               "name": "two_eagles_add",
               "disp": "2 Eagles +20",
               "seq": 4,
-              "type": "dot",
+              "sub_type": "dot",
               "value": 20,
               "limit": "",
               "scope": "team",
@@ -297,7 +302,13 @@ const makeVegasGame = ({birdies_cancel_flip, hole, players_teams}) => {
               }`,
               "based_on": "gross",
               "better": "lower"
-            }
+            },
+            {
+              "type": "game",
+              "name": "birdies_cancel_flip",
+              "sub_type": "bool",
+              "value": birdies_cancel_flip
+            },
           ],
           scoring: {
             hole: [
@@ -313,18 +324,10 @@ const makeVegasGame = ({birdies_cancel_flip, hole, players_teams}) => {
               },
             ],
           },
-          options: [],
         },
       ],
-      options: [
-        {
-          "name": "birdies_cancel_flip",
-          "type": "bool",
-          "value": birdies_cancel_flip
-        },
-      ],
-      hole,
-      players_teams,
+      holes,
+      data,
     }
   );
 }
