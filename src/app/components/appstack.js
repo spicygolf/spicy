@@ -134,7 +134,7 @@ const AppStack = props => {
 
     return (
       <Tab.Navigator
-        initialRouteName='FeedStack'
+        initialRouteName='GamesStack'
         shifting={true}
         activeColor='#fff'
         inactiveColor='#ccc'

@@ -22,9 +22,6 @@ const GameSetupScreen = props => {
 
   const { game } = useContext(GameContext);
   const { currentPlayer: cp } = useContext(CurrentPlayerContext);
-  const admin = (cp && cp.level && cp.level == 'admin' )
-    ? (<Admin />)
-    : null;
 
   useEffect(
     () => {
@@ -52,7 +49,7 @@ const GameSetupScreen = props => {
         <Players />
         <Teams />
         <Options />
-        { admin }
+        <Admin />
       </ScrollView>
     </KeyboardAvoidingView>
   );

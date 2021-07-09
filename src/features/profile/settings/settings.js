@@ -67,9 +67,9 @@ const SettingsHome = props => {
           (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin') ||
           (impersonate && impersonate.original && impersonate.original.level && impersonate.original.level == 'admin')
          ) {
-        // do nothing
+        // do nothing... i.e. continue on rendering the setting
       } else {
-        return null;
+        return null;  // don't render the setting
       }
     }
 
