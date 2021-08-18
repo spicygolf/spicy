@@ -6,6 +6,7 @@ import AddCourse from 'features/gameSetup/addCourse';
 import AddPlayer from 'features/gameSetup/addPlayer';
 import EditPlayer from 'features/gameSetup/editPlayer';
 import LinkRoundList from 'features/gameSetup/linkRoundList';
+import OptionsCustom from 'features/gameSetup/optionsCustom';
 
 
 
@@ -51,6 +52,12 @@ const GameSetupStack = props => {
           },
         }}
       />
+      <Stack.Screen
+        name='OptionsCustom'
+        component={OptionsCustom}
+      >
+
+      </Stack.Screen>
     </Stack.Navigator>
   );
 

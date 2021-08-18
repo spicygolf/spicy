@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -15,8 +15,8 @@ import { green } from 'common/colors';
 
 const OptionMenu = props => {
 
-  const { option, setOption, readonly } = props;
-  const [ value, setValue ] = useState(option.value);
+  const { option, setOption, readonly, index = 0 } = props;
+  const [ value, setValue ] = useState(option.values[0].value);
   const [ visible, setVisible ] = useState(false);
 
   const getDisplay = () => find(option.choices, {name: value}).disp;
@@ -27,10 +27,16 @@ const OptionMenu = props => {
         key={choice.name}
         onPress={() => {
           setValue(choice.name);
-          setOption({
-            ...option,
-            value: choice.name,
-          });
+          let newOption = {
+            name: option.name,
+            values: option.values.map((v, i) => ({
+              value: (i === index)
+                ? choice.name
+                : v.value,
+              holes: v.holes,
+            })),
+          };
+          setOption(newOption);
           setVisible(false);
         }}
         title={choice.disp}
@@ -59,34 +65,17 @@ const OptionMenu = props => {
       );
 
   return (
-    <View style={styles.field_container}>
-      <Text style={styles.field_label}>{option.disp}</Text>
-      <View style={styles.field_input_view}>
-        <View style={styles.menu_view}>
-          {menuContent}
-        </View>
-      </View>
+    <View style={styles.menu_view}>
+      { menuContent }
     </View>
   );
+
 };
 
 export default OptionMenu;
 
 
 const styles = StyleSheet.create({
-  field_container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  field_input_view: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  field_label: {
-    marginTop: 5,
-    marginBottom: 5,
-    flex: 3,
-  },
   menu_view: {
     width: '100%',
   },

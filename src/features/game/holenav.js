@@ -5,7 +5,6 @@ import {
   View
 } from 'react-native';
 import {
-  Button,
   Icon,
 } from 'react-native-elements';
 

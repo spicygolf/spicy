@@ -4,6 +4,7 @@ import {
   find,
   findIndex,
   groupBy,
+  isEqual,
   reduce
 } from 'lodash';
 
@@ -110,15 +111,25 @@ export const getNewGameForUpdate = game => {
     options: game.options ? game.options.map(o => {
       return {
         name: o.name,
-        type: o.type,
-        disp: o.disp,
-        value: o.value,
+        values: o.values ? o.values.map(v => {
+          return {
+            value: v.value,
+            holes: v.holes,
+          }
+        }) : [],
       };
     }) : [],
   };
   return cloneDeep(ret);
 
 };
+
+// https://stackoverflow.com/a/175787/598628
+function isNumeric(str) {
+  if (typeof str != "string") return false // we only process strings!
+  return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+         !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+}
 
 // Used to remove typename property from objects
 // https://github.com/apollographql/apollo-feature-requests/issues/6#issuecomment-659596763
@@ -155,28 +166,34 @@ export const getAllGamespecOptions = game => {
 };
 
 
-export const getAllOptions = game => {
+export const getAllOptions = ({game, type}) => {
   let options = [];
   const gsOptions = getAllGamespecOptions(game);
   if( gsOptions && gsOptions.length ) gsOptions.map(gso => {
-    if( gso.type == 'game' ) {
-      let holes = gso.holes
-      if( !holes ) holes = game.holes.map(h => h.hole);
-      let value = gso.value;
-      if( typeof value === 'undefined' || value === null ) value = gso.default;
+    if( gso.type === type ) {
+      let values = gso.values;
+      if( typeof values === 'undefined' || values === null || values.length === 0 ) {
+        values = [
+          {value: gso.default, holes: game.holes.map(h => h.hole)}
+        ];
+      }
+      values = values.map(v => ({
+        ...v,
+        holes: (v.holes !== null) ? v.holes : game.holes.map(h => h.hole)
+      }));
+      // console.log('values', values);
       let o = {
-        name: gso.name,
-        type: gso.sub_type,
-        disp: gso.disp,
-        choices: gso.choices,
-        value,
-        holes,
-        gamespec_key: gso.gamespec_key,
+        ...gso,
+        values,
+        key: `${gso.gamespec_key}_${gso.name}`,
       };
       // if found, a game option overrides a gamespec option
       const go = find(game.options, {name: gso.name});
-      if( go ) o.value = go.value;
-      // TODO: if( go.holes ) o.holes = go.holes ??
+      // console.log('game options', go, gso.name, game.options);
+      if( go ) o = {
+        ...o,
+        values: go.values,
+      }
       options.push(o);
     }
   });
@@ -184,28 +201,49 @@ export const getAllOptions = game => {
 };
 
 
-export const getOption = ({game, hole, option}) => {
+export const getOption = ({game, hole, option, type}) => {
 
   let v = null;
-  const allOptions = getAllOptions(game);
-  // console.log('allOptions', allOptions, hole);
+  const allOptions = getAllOptions({game, type});
+  console.log('allOptions', allOptions, hole);
 
-  const go = find(allOptions, o => (o.name == option && o.holes.indexOf(`${hole}`) > -1));
+  const go = find(allOptions, o => (
+    o.name == option.name && isOptionOnThisHole({option, hole})
+  ));
   if( go && go.value ) v = go.value;
-  //console.log('2', gso, go, v);
+  console.log('2', go, v);
 
   // convert bool
   if( (go && go.type == 'bool') ) {
     v = (v === true || v === 'true');
   }
-  //console.log('3', gso, go, v);
 
+  // convert number
+  if( isNumeric(v) ) v = parseFloat(v);
+  console.log('3', go, v);
+
+  //console.log('FIXME, there is no `value` field anymore');
+  //console.log('option', option, v);
   return {
     name: option,
     value: v,
   };
 }
 
+export const isOptionOnThisHole = ({option, hole}) => {
+  if ( !option ) return false;
+  let ret = false;
+  option.values.map(v => {
+    if( v.holes?.indexOf(hole) >= 0 ) ret = true;
+  });
+  // console.log('isOptionOnThisHole', option, hole, ret);
+  return ret;
+};
+
+
+export const isSameHolesList = (holes1, holes2) => {
+  return isEqual(holes1, holes2);
+};
 
 export const getGamespecKVs = (game, key) => {
   //console.log('getGamespecKVs game', game);
@@ -223,8 +261,11 @@ export const getJunk = (junkName, pkey, game, holeNum) => {
   const gTeam = find(gHole.teams, t => ( t && t.players && t.players.includes(pkey) ));
   if( !gTeam || !gTeam.junk ) return null;
   const j = find(gTeam.junk, {name: junkName, player: pkey});
-  if( !j || !j.value ) return null;
-  return j.value;
+  console.log('j', j, gTeam);
+  if( !j || !j.values ) return null;
+  const jo = getOption({game, hole: holeNum, option: j, type: 'junk'});
+  console.log('jo', jo);
+  return jo.value;
 };
 
 

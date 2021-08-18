@@ -150,6 +150,7 @@ const ChangeTeams = ({currentHole, close}) => {
       <HoleChooser
         holes={holes}
         setHoles={setHoles}
+        title="Preview:"
         active={(selected == '2')}
       />
       <View style={styles.button_row}>

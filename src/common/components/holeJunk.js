@@ -20,10 +20,10 @@ import {
   get_score_value,
 } from 'common/utils/rounds';
 import {
-  getJunkFromGamespecs,
   isScoreToParJunk,
 } from 'common/utils/score';
 import {
+  getAllOptions,
   getJunk,
   omitTypename,
   setTeamJunk,
@@ -45,7 +45,8 @@ const HoleJunk = props => {
   const { game, scores, readonly } = useContext(GameContext);
   const { _key: gkey } = game;
 
-  const alljunk = getJunkFromGamespecs(game);
+  const alljunk = getAllOptions({game, type: 'junk'});
+  // console.log('allJunk in holeJunk', alljunk);
   const sorted_junk = sortBy(alljunk, ['seq']);
   if( sorted_junk.length == 0 ) return null;
 

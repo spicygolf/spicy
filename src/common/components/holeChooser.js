@@ -10,7 +10,7 @@ import { GameContext } from 'features/game/gameContext';
 
 
 
-const HoleChooser = ({holes, setHoles, active}) => {
+const HoleChooser = ({holes, setHoles, title, active}) => {
 
   const { game } = useContext(GameContext);
 
@@ -51,7 +51,7 @@ const HoleChooser = ({holes, setHoles, active}) => {
 
   return (
     <View style={styles.previewView}>
-      <Text>Preview:</Text>
+      <Text>{title}</Text>
       { rowsContent }
     </View>
   );

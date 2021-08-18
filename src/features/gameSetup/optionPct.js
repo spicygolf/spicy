@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  View,
 } from 'react-native';
 
 import {
@@ -15,8 +14,8 @@ import { green } from 'common/colors';
 
 const OptionPct = props => {
 
-  const { option, setOption, readonly } = props;
-  const [ value, setValue ] = useState(option.value || null);
+  const { option, setOption, readonly, index = 0 } = props;
+  const [ value, setValue ] = useState(option.values[0].value || null);
 
   const validate = (type, text) => {
     const oTest = type == 'num' ? text : value;
@@ -35,50 +34,41 @@ const OptionPct = props => {
   );
 
   return (
-    <View style={styles.field_container}>
-      <Text style={styles.field_label}>{option.disp}</Text>
-      <View style={styles.field_input_view}>
-        <TextInput
-          editable={!readonly}
-          style={[styles.field_input, oValid]}
-          onChangeText={text => {
-            setValue(text);
-            validate('num', text);
-          }}
-          onEndEditing={() => {
-            if( optionValid ) setOption({
-              ...option,
-              value: value,
-            });
-          }}
-          keyboardType='decimal-pad'
-          value={value.toString()}
-        />
-        <Text style={styles.sign}>%</Text>
-      </View>
-    </View>
+    <>
+      <TextInput
+        editable={!readonly}
+        style={[styles.field_input, oValid]}
+        onChangeText={text => {
+          setValue(text);
+          validate('num', text);
+        }}
+        onEndEditing={() => {
+          if( optionValid ) {
+            let newOption = {
+              name: option.name,
+              values: option.values.map((v, i) => ({
+                value: (i === index)
+                  ? value.toString()
+                  : v.value,
+                holes: v.holes,
+              })),
+            };
+            setOption(newOption);
+          }
+        }}
+        keyboardType='decimal-pad'
+        value={value.toString()}
+      />
+      <Text style={styles.sign}>%</Text>
+    </>
   );
+
 };
 
 export default OptionPct;
 
 
 const styles = StyleSheet.create({
-  field_container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  field_input_view: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  field_label: {
-    marginTop: 5,
-    marginBottom: 5,
-    flex: 3,
-  },
   field_input: {
     height: 40,
     color: '#000',

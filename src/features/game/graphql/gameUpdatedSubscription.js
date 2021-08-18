@@ -30,9 +30,10 @@ export const GAME_UPDATED_SUBSCRIPTION = gql`
       }
       options {
         name
-        disp
-        type
-        value
+        values {
+          value
+          holes
+        }
       }
     }
   }

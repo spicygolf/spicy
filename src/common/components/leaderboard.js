@@ -7,7 +7,7 @@ import
   View
 } from 'react-native';
 import { ButtonGroup, Icon } from 'react-native-elements';
-import { find, findIndex, last, orderBy } from 'lodash';
+import { find, last, orderBy } from 'lodash';
 
 import { GameContext } from 'features/game/gameContext';
 import { playerListIndividual, playerListWithTeams } from 'common/utils/game';
@@ -17,6 +17,7 @@ import { blue } from 'common/colors';
 
 
 
+// TODO: please make distinct components for this massive shitstorm/rats nest
 const Leaderboard = props => {
 
   const { activeChoices, initialScoreType, teams } = props;

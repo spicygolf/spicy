@@ -136,7 +136,6 @@ export const GET_GAME_QUERY = gql`
           seq
           type
           sub_type
-          value
           choices {
               name
               disp
@@ -153,14 +152,18 @@ export const GET_GAME_QUERY = gql`
           logic
           better
           after
-          holes
+          values {
+            value
+            holes
+          }
         }
       }
       options {
         name
-        disp
-        type
-        value
+        values {
+          value
+          holes
+        }
       }
     }
   }

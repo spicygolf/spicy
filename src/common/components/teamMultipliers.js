@@ -15,11 +15,11 @@ import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
 import { GameContext } from 'features/game/gameContext';
 import ScoringWrapper from 'common/utils/ScoringWrapper';
 import {
+  getAllOptions,
   getHolesToUpdate,
   omitTypename,
   teamsRotate,
 } from 'common/utils/game';
-import { getMultipliersFromGamespecs } from 'common/utils/score';
 import { red } from 'common/colors';
 
 
@@ -30,7 +30,7 @@ const TeamMultipliers = props => {
 
   const { team: teamNum, scoring, currentHole } = props;
   const { game, readonly } = useContext(GameContext);
-  const allmultipliers = getMultipliersFromGamespecs(game);
+  const allmultipliers = getAllOptions({game, type: 'multiplier'});
 
   const scoringWrapper = new ScoringWrapper(game, scoring, currentHole);
 
