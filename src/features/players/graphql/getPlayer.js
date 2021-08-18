@@ -1,7 +1,5 @@
 import { gql } from '@apollo/client';
 
-
-
 export const GET_PLAYER_QUERY = gql`
   query GetPlayer($player: String!) {
     getPlayer(_key: $player) {

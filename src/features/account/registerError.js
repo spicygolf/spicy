@@ -1,28 +1,17 @@
-import React, { useContext } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Button,
-  Card,
-} from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-
 import BackToLogin from 'features/account/backToLogin';
+import React, { useContext } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Button, Card } from 'react-native-elements';
 
-
-
-const RegisterError = props => {
-
+const RegisterError = (props) => {
   let error = {
     error: 500,
     message: 'Unknown error',
   };
   const { route } = props;
   //console.log('route', route);
-  if( route && route.params && route.params.e ) error = route.params.e;
+  if (route && route.params && route.params.e) error = route.params.e;
   const navigation = useNavigation();
 
   return (
@@ -31,20 +20,20 @@ const RegisterError = props => {
         <Card>
           <Card.Title>Register - Error</Card.Title>
           <Card.Divider />
-          <View testID='register_10000_view'>
+          <View testID="register_10000_view">
             <Text>{error.message}</Text>
           </View>
         </Card>
         <View style={styles.button_row}>
           <Button
             style={styles.prev}
-            title='Prev'
-            type='solid'
+            title="Prev"
+            type="solid"
             onPress={() => {
               navigation.navigate('RegisterPlayer');
             }}
-            accessibilityLabel='Register Prev 10000'
-            testID='register_prev_10000_button'
+            accessibilityLabel="Register Prev 10000"
+            testID="register_prev_10000_button"
           />
         </View>
       </View>
@@ -54,7 +43,6 @@ const RegisterError = props => {
 };
 
 export default RegisterError;
-
 
 const styles = StyleSheet.create({
   container: {

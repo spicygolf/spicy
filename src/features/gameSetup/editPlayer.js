@@ -1,3 +1,11 @@
+import { useMutation } from '@apollo/client';
+import { blue } from 'common/colors';
+import { UPDATE_LINK_MUTATION } from 'common/graphql/link';
+import { course_handicap } from 'common/utils/handicap';
+import { get_round_for_player } from 'common/utils/rounds';
+import { GameContext } from 'features/game/gameContext';
+import { GET_GAME_QUERY } from 'features/game/graphql';
+import GameNav from 'features/games/gamenav';
 import React, { useContext, useEffect, useState } from 'react';
 import {
   Dimensions,
@@ -8,45 +16,28 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import {
-  Card
-} from 'react-native-elements';
-import { useMutation } from '@apollo/client';
+import { Card } from 'react-native-elements';
 
-import GameNav from 'features/games/gamenav';
-import { GameContext } from 'features/game/gameContext';
-import { UPDATE_LINK_MUTATION } from 'common/graphql/link';
-import { GET_GAME_QUERY } from 'features/game/graphql';
-import { course_handicap } from 'common/utils/handicap';
-import { get_round_for_player } from 'common/utils/rounds';
-import { blue } from 'common/colors';
+const { width } = Dimensions.get('window');
 
-const { width } = Dimensions.get('window')
-
-
-
-const EditPlayer = props => {
-
+const EditPlayer = (props) => {
   const { route } = props;
-  const player = (route && route.params && route.params.player) ?
-    route.params.player : null;
+  const player =
+    route && route.params && route.params.player ? route.params.player : null;
   const { _key: pkey } = player;
 
   const { game } = useContext(GameContext);
   const round = get_round_for_player(game.rounds, pkey);
   //console.log('EditPlayer round', round);
 
-  const initHI = (round && round.handicap_index) ?
-    round.handicap_index.toString() : '';
-  const [ HI, setHI ] = useState(initHI);
+  const initHI = round && round.handicap_index ? round.handicap_index.toString() : '';
+  const [HI, setHI] = useState(initHI);
   const initCH = round.course_handicap ? round.course_handicap.toString() : '';
-  const [ CH, setCH ] = useState(initCH);
-  const initGH = (round && round.game_handicap) ?
-    round.game_handicap.toString() : '';
-  const [ GH, setGH ] = useState(initGH);
+  const [CH, setCH] = useState(initCH);
+  const initGH = round && round.game_handicap ? round.game_handicap.toString() : '';
+  const [GH, setGH] = useState(initGH);
 
-  const [ updateLink ] = useMutation(UPDATE_LINK_MUTATION);
-
+  const [updateLink] = useMutation(UPDATE_LINK_MUTATION);
 
   const update = () => {
     //console.log('update', HI, initHI, CH, initCH, GH, initGH);
@@ -55,62 +46,57 @@ const EditPlayer = props => {
 
     // all the checks for '' is so if you clear the text box out, it'll remove
     // the data from the edge
-    if( (HI || HI == '') && HI != initHI && (!isNaN(HI) || HI == '') ) {
-      other.push({key: 'handicap_index', value: HI.toString()});
+    if ((HI || HI == '') && HI != initHI && (!isNaN(HI) || HI == '')) {
+      other.push({ key: 'handicap_index', value: HI.toString() });
       doUpdate = true;
     }
 
-    if( (CH || CH == '') && CH != initCH && (!isNaN(CH) || CH == '') ) {
-      other.push({key: 'course_handicap', value: CH.toString()});
+    if ((CH || CH == '') && CH != initCH && (!isNaN(CH) || CH == '')) {
+      other.push({ key: 'course_handicap', value: CH.toString() });
       doUpdate = true;
     }
 
-    if( (GH || GH == '') && GH != initGH && (!isNaN(GH) || GH == '') ) {
-      other.push({key: 'game_handicap', value: GH.toString()});
+    if ((GH || GH == '') && GH != initGH && (!isNaN(GH) || GH == '')) {
+      other.push({ key: 'game_handicap', value: GH.toString() });
       doUpdate = true;
     }
 
-    if( doUpdate ) {
+    if (doUpdate) {
       //console.log('doUpdate other', other);
       // update 'round2game' edge with these two handicaps on them
 
       const { loading, error, data } = updateLink({
         variables: {
-          from: {type: 'round', value: round._key},
-          to: {type: 'game', value: game._key},
+          from: { type: 'round', value: round._key },
+          to: { type: 'game', value: game._key },
           other: other,
         },
-        refetchQueries: () => [{
-          query: GET_GAME_QUERY,
-          variables: {
-            gkey: game._key
-          }
-        }],
+        refetchQueries: () => [
+          {
+            query: GET_GAME_QUERY,
+            variables: {
+              gkey: game._key,
+            },
+          },
+        ],
         awaitRefetchQueries: true,
       });
-      if( error ) {
+      if (error) {
         console.log('error updating round2game', error);
       }
     }
-
   };
 
-  useEffect(
-    () => {
-      if( initCH == '-' ) {
-        setCH(course_handicap(HI, round.tee, game.scope.holes));
-        update();
-      }
-    }, [CH]
-  );
+  useEffect(() => {
+    if (initCH == '-') {
+      setCH(course_handicap(HI, round.tee, game.scope.holes));
+      update();
+    }
+  }, [CH]);
 
   return (
     <View>
-      <GameNav
-        title={player.name}
-        showBack={true}
-        backTo={'GameSetup'}
-      />
+      <GameNav title={player.name} showBack={true} backTo={'GameSetup'} />
       <KeyboardAvoidingView style={styles.scrollview_container}>
         <ScrollView>
           <Card>
@@ -121,15 +107,16 @@ const EditPlayer = props => {
               <View style={styles.field_input_view}>
                 <TextInput
                   style={styles.field_input}
-                  onChangeText={text => {
+                  onChangeText={(text) => {
                     const newText = text.replace(/[^0-9+.-]/g, '');
                     setHI(newText);
-                    const newCH = course_handicap(newText, round.tee, game.scope.holes) || '';
+                    const newCH =
+                      course_handicap(newText, round.tee, game.scope.holes) || '';
                     //console.log('newCH', newCH, round, game.scope.holes);
                     setCH(newCH);
                   }}
                   onEndEditing={() => update()}
-                  keyboardType='decimal-pad'
+                  keyboardType="decimal-pad"
                   value={HI.toString()}
                 />
               </View>
@@ -138,7 +125,7 @@ const EditPlayer = props => {
               <Text style={styles.field_label}>Course Handicap</Text>
               <View style={styles.field_display_view}>
                 <Text style={styles.field_display}>
-                  {( CH != null ) ? CH.toString() : '-'}
+                  {CH != null ? CH.toString() : '-'}
                 </Text>
               </View>
             </View>
@@ -152,12 +139,12 @@ const EditPlayer = props => {
               <View style={styles.field_input_view}>
                 <TextInput
                   style={styles.field_input}
-                  onChangeText={text => {
+                  onChangeText={(text) => {
                     const newText = text.replace(/[^0-9+.-]/g, '');
                     setGH(newText);
                   }}
                   onEndEditing={() => update()}
-                  keyboardType='decimal-pad'
+                  keyboardType="decimal-pad"
                   value={GH.toString()}
                 />
               </View>
@@ -177,7 +164,6 @@ const EditPlayer = props => {
 };
 
 export default EditPlayer;
-
 
 const styles = StyleSheet.create({
   scrollview_container: {

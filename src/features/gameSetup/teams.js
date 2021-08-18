@@ -1,41 +1,26 @@
-import React, { useContext } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
-import {
-  ButtonGroup,
-  Card,
-} from 'react-native-elements';
 import { useMutation } from '@apollo/client';
-import { cloneDeep, findIndex } from 'lodash';
-
-import { UPDATE_GAME_SCOPE_MUTATION } from 'features/game/graphql';
-import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';
 import TeamChooser from 'common/components/teamChooser';
 import WolfOrderChooser from 'common/components/wolfOrderChooser';
-import {
-  getGamespecKVs,
-  omitTypename,
-  teamsRotateOptions,
-} from 'common/utils/game';
+import { getGamespecKVs, omitTypename, teamsRotateOptions } from 'common/utils/game';
+import { GameContext } from 'features/game/gameContext';
+import { UPDATE_GAME_SCOPE_MUTATION } from 'features/game/graphql';
+import { cloneDeep, findIndex } from 'lodash';
+import React, { useContext } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { ButtonGroup, Card } from 'react-native-elements';
 
-
-
-const Teams = props => {
-
+const Teams = (props) => {
   const { game, activeGameSpec, readonly } = useContext(GameContext);
   //console.log('gameSetup activeGameSpec', activeGameSpec);
 
-  const [ updateGameScope ] = useMutation(UPDATE_GAME_SCOPE_MUTATION);
+  const [updateGameScope] = useMutation(UPDATE_GAME_SCOPE_MUTATION);
 
   const teamsFromGamespecs = getGamespecKVs(game, 'teams');
-  if( !teamsFromGamespecs.includes(true) ) return null;
+  if (!teamsFromGamespecs.includes(true)) return null;
 
-  const updateRotation = async selectedIndex => {
-    if( !game || !game.scope || readonly ) return;
+  const updateRotation = async (selectedIndex) => {
+    if (!game || !game.scope || readonly) return;
 
     //console.log('selectedIndex', teamsRotateOptions[selectedIndex].slug);
     let newScope = cloneDeep(game.scope);
@@ -54,44 +39,43 @@ const Teams = props => {
           _key: game._key,
           scope: newScope,
         },
-      }
+      },
     });
 
-    if( error ) console.log('Error updating game scope - gameSetup teams', error);
+    if (error) console.log('Error updating game scope - gameSetup teams', error);
   };
 
   let selected = -1;
-  if( game  && game.scope && game.scope.teams_rotate ) {
-    selected = findIndex(teamsRotateOptions, {slug: game.scope.teams_rotate});
+  if (game && game.scope && game.scope.teams_rotate) {
+    selected = findIndex(teamsRotateOptions, { slug: game.scope.teams_rotate });
   }
 
-  const buttons = teamsRotateOptions.map(o => o.caption);
+  const buttons = teamsRotateOptions.map((o) => o.caption);
 
-  let title = "Teams";
+  let title = 'Teams';
   let chooserContent = null;
   let buttonsContent = null;
 
-  if( game && game.scope && game.scope.teams_rotate ) {
-    if( game.scope.teams_rotate == 'never' ) {
+  if (game && game.scope && game.scope.teams_rotate) {
+    if (game.scope.teams_rotate == 'never') {
       chooserContent = (
         <View style={styles.chooserView}>
           <Text>Choose Teams:</Text>
-          <TeamChooser currentHole='1' from='game_setup' />
+          <TeamChooser currentHole="1" from="game_setup" />
         </View>
       );
     }
-    if( game.scope.teams_rotate == 'every1' && activeGameSpec.team_determination == 'wolf' ) {
-      const wolf_name = (activeGameSpec.wolf_disp)
-        ? activeGameSpec.wolf_disp
-        : 'Wolf';
+    if (
+      game.scope.teams_rotate == 'every1' &&
+      activeGameSpec.team_determination == 'wolf'
+    ) {
+      const wolf_name = activeGameSpec.wolf_disp ? activeGameSpec.wolf_disp : 'Wolf';
       title = `${wolf_name} Order`;
-      chooserContent = (
-        <WolfOrderChooser />
-      );
+      chooserContent = <WolfOrderChooser />;
     }
   }
 
-  if( activeGameSpec.team_determination != 'wolf' ) {
+  if (activeGameSpec.team_determination != 'wolf') {
     buttonsContent = (
       <View>
         <Text>Teams Rotate:</Text>
@@ -108,20 +92,18 @@ const Teams = props => {
   }
 
   return (
-    <View testID='game_setup_teams_card'>
-    <Card>
-      <Card.Title>{ title }</Card.Title>
-      <Card.Divider />
-      { buttonsContent }
-      { chooserContent }
-    </Card>
+    <View testID="game_setup_teams_card">
+      <Card>
+        <Card.Title>{title}</Card.Title>
+        <Card.Divider />
+        {buttonsContent}
+        {chooserContent}
+      </Card>
     </View>
   );
-
 };
 
 export default Teams;
-
 
 const styles = StyleSheet.create({
   buttonView: {
@@ -139,5 +121,5 @@ const styles = StyleSheet.create({
   },
   chooserView: {
     paddingTop: 20,
-  }
+  },
 });

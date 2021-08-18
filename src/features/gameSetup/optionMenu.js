@@ -1,27 +1,17 @@
-import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Menu,
-} from 'react-native-paper';
-import { find } from 'lodash';
-
 import { green } from 'common/colors';
+import { find } from 'lodash';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Menu } from 'react-native-paper';
 
-
-
-const OptionMenu = props => {
-
+const OptionMenu = (props) => {
   const { option, setOption, readonly, index = 0 } = props;
-  const [ value, setValue ] = useState(option.values[0].value);
-  const [ visible, setVisible ] = useState(false);
+  const [value, setValue] = useState(option.values[0].value);
+  const [visible, setVisible] = useState(false);
 
-  const getDisplay = () => find(option.choices, {name: value}).disp;
+  const getDisplay = () => find(option.choices, { name: value }).disp;
 
-  const choices = option.choices.map(choice => {
+  const choices = option.choices.map((choice) => {
     return (
       <Menu.Item
         key={choice.name}
@@ -30,9 +20,7 @@ const OptionMenu = props => {
           let newOption = {
             name: option.name,
             values: option.values.map((v, i) => ({
-              value: (i === index)
-                ? choice.name
-                : v.value,
+              value: i === index ? choice.name : v.value,
               holes: v.holes,
             })),
           };
@@ -44,36 +32,29 @@ const OptionMenu = props => {
     );
   });
 
-  const menuContent = readonly
-    ? (<Text>{getDisplay()}</Text>)
-    : (
-        <Menu
-          style={styles.menu}
-          visible={visible}
-          anchor={
-            <View style={styles.anchor_view}>
-              <Text
-                style={styles.anchor}
-                onPress={() => setVisible(true)}
-              >{getDisplay()}</Text>
-            </View>
-          }
-          onDismiss={() => setVisible(false)}
-        >
-          { choices }
-        </Menu>
-      );
-
-  return (
-    <View style={styles.menu_view}>
-      { menuContent }
-    </View>
+  const menuContent = readonly ? (
+    <Text>{getDisplay()}</Text>
+  ) : (
+    <Menu
+      style={styles.menu}
+      visible={visible}
+      anchor={
+        <View style={styles.anchor_view}>
+          <Text style={styles.anchor} onPress={() => setVisible(true)}>
+            {getDisplay()}
+          </Text>
+        </View>
+      }
+      onDismiss={() => setVisible(false)}
+    >
+      {choices}
+    </Menu>
   );
 
+  return <View style={styles.menu_view}>{menuContent}</View>;
 };
 
 export default OptionMenu;
-
 
 const styles = StyleSheet.create({
   menu_view: {

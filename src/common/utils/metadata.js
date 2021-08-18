@@ -1,53 +1,46 @@
 import AsyncStorage from '@react-native-community/async-storage';
-import moment from 'moment';
 import { filter, find, findIndex } from 'lodash';
+import moment from 'moment';
 
-
-
-export const getMeta = async key => {
+export const getMeta = async (key) => {
   let ret = null;
   try {
     const value = await AsyncStorage.getItem(key);
     ret = JSON.parse(value);
-  } catch(e) {
+  } catch (e) {
     console.log('Error getting metadata from AsyncStorage', e);
   }
   return ret;
 };
 
-
 export const setMeta = async (key, value) => {
   await AsyncStorage.setItem(key, JSON.stringify(value));
 };
-
 
 export const getGamesMeta = async () => {
   return await getMeta('games');
 };
 
-
-export const setGamesMeta = async gamesMeta => {
+export const setGamesMeta = async (gamesMeta) => {
   return await setMeta('games', gamesMeta);
 };
 
-
-export const getGameMeta = async gkey => {
+export const getGameMeta = async (gkey) => {
   const games = await getMeta('games');
-  return find(games, {gkey: gkey});
+  return find(games, { gkey: gkey });
 };
-
 
 export const setGameMeta = async (gkey, key, value) => {
   const ts = moment.utc().format();
   let gamesMeta = await getGamesMeta(gkey);
-  if( !gamesMeta || !Array.isArray(gamesMeta) ) gamesMeta = [];
+  if (!gamesMeta || !Array.isArray(gamesMeta)) gamesMeta = [];
 
-  let game = find(gamesMeta, {gkey: gkey});
-  if( !game ) game = { gkey, ts, };
+  let game = find(gamesMeta, { gkey: gkey });
+  if (!game) game = { gkey, ts };
   game[key] = value;
 
-  const i = findIndex(gamesMeta, {gkey: gkey});
-  if( i >= 0 ) {
+  const i = findIndex(gamesMeta, { gkey: gkey });
+  if (i >= 0) {
     gamesMeta[i] = game;
   } else {
     gamesMeta.push(game);
@@ -57,10 +50,9 @@ export const setGameMeta = async (gkey, key, value) => {
   await setGamesMeta(gamesMeta);
 };
 
-
 // Don't let storage get out of control, only keep last week of games meta
-export const filterGamesMeta = gamesMeta => {
-  return filter(gamesMeta, g => {
+export const filterGamesMeta = (gamesMeta) => {
+  return filter(gamesMeta, (g) => {
     return moment.utc(g.ts) > moment.utc().subtract(1, 'week');
   });
 };

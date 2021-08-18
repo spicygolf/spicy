@@ -1,36 +1,21 @@
-import React, { useContext, useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import {
-  Button,
-  Card
-} from 'react-native-elements';
 import { useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
-import moment from 'moment';
-
-import {
-  validateFloat,
-  validateName
-} from 'common/utils/account';
-import { GET_GAME_QUERY } from 'features/game/graphql';
-import { ADD_PLAYER_MUTATION } from 'features/players/graphql';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { GameContext } from 'features/game/gameContext';
 import { green } from 'common/colors';
+import { validateFloat, validateName } from 'common/utils/account';
+import { GameContext } from 'features/game/gameContext';
+import { GET_GAME_QUERY } from 'features/game/graphql';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import { ADD_PLAYER_MUTATION } from 'features/players/graphql';
+import moment from 'moment';
+import React, { useContext, useEffect, useState } from 'react';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, Card } from 'react-native-elements';
 
-
-
-const AddPlayerManual = props => {
-
+const AddPlayerManual = (props) => {
   const { game } = useContext(GameContext);
   const { _key: gkey } = game;
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
-  const [ addPlayer ] = useMutation(ADD_PLAYER_MUTATION);
+  const [addPlayer] = useMutation(ADD_PLAYER_MUTATION);
   const navigation = useNavigation();
 
   const add = async () => {
@@ -40,16 +25,18 @@ const AddPlayerManual = props => {
       variables: {
         player: player,
       },
-      refetchQueries: [{
-        query: GET_GAME_QUERY,
-        variables: {
-          gkey: gkey
-        }
-      }],
+      refetchQueries: [
+        {
+          query: GET_GAME_QUERY,
+          variables: {
+            gkey: gkey,
+          },
+        },
+      ],
     });
-    if( error ) console.log('Error adding player', error);
+    if (error) console.log('Error adding player', error);
     //console.log('data', data);
-    if( data && data.addPlayer ) {
+    if (data && data.addPlayer) {
       const p = {
         _key: data.addPlayer._key,
         name: player.name,
@@ -63,7 +50,6 @@ const AddPlayerManual = props => {
     }
   };
 
-
   const validate = (type, text) => {
     const nTest = type == 'name' ? text : player.name;
     const sTest = type == 'short' ? text : player.short;
@@ -73,7 +59,7 @@ const AddPlayerManual = props => {
     setHIValid(validateFloat(hTest));
   };
 
-  const [ player, setPlayer ] = useState({
+  const [player, setPlayer] = useState({
     name: '',
     short: '',
     handicap: {
@@ -85,18 +71,16 @@ const AddPlayerManual = props => {
     createdDate: '',
   });
 
-  const [ nameValid, setNameValid ] = useState(false);
+  const [nameValid, setNameValid] = useState(false);
   const nValid = { borderColor: nameValid ? green : '#ddd' };
 
-  const [ shortValid, setShortValid ] = useState(false);
+  const [shortValid, setShortValid] = useState(false);
   const sValid = { borderColor: shortValid ? green : '#ddd' };
 
-  const [ hiValid, setHIValid ] = useState(false);
+  const [hiValid, setHIValid] = useState(false);
   const hValid = { borderColor: hiValid ? green : '#ddd' };
 
-  useEffect(
-    () => validate(), []
-  );
+  useEffect(() => validate(), []);
 
   return (
     <Card>
@@ -105,14 +89,14 @@ const AddPlayerManual = props => {
           <Text style={styles.field_label}>Full Name *</Text>
           <TextInput
             style={[styles.field_input, nValid]}
-            onChangeText={text => {
+            onChangeText={(text) => {
               setPlayer({
                 ...player,
                 name: text,
               });
               validate('name', text);
             }}
-            autoCapitalize='words'
+            autoCapitalize="words"
             value={player.name}
           />
         </View>
@@ -120,14 +104,14 @@ const AddPlayerManual = props => {
           <Text style={styles.field_label}>Short/Nickname *</Text>
           <TextInput
             style={[styles.field_input, sValid]}
-            onChangeText={text => {
+            onChangeText={(text) => {
               setPlayer({
                 ...player,
                 short: text,
               });
               validate('short', text);
             }}
-            autoCapitalize='words'
+            autoCapitalize="words"
             value={player.short}
           />
         </View>
@@ -136,7 +120,7 @@ const AddPlayerManual = props => {
           <View style={styles.handicap_field_input_view}>
             <TextInput
               style={[styles.field_input, styles.handicap_field_input, hValid]}
-              onChangeText={text => {
+              onChangeText={(text) => {
                 setPlayer({
                   ...player,
                   handicap: {
@@ -146,28 +130,26 @@ const AddPlayerManual = props => {
                 });
                 validate('index', text);
               }}
-              keyboardType='decimal-pad'
+              keyboardType="decimal-pad"
               value={player.handicap.index.toString()}
             />
           </View>
         </View>
         <Button
-            style={styles.add}
-            title='Add'
-            type={(nameValid && shortValid && hiValid) ? 'solid' : 'outline'}
-            disabled={!(nameValid && shortValid && hiValid)}
-            onPress={add}
-            accessibilityLabel='AddPlayerManual'
-            testID='add_player_manual_button'
-          />
+          style={styles.add}
+          title="Add"
+          type={nameValid && shortValid && hiValid ? 'solid' : 'outline'}
+          disabled={!(nameValid && shortValid && hiValid)}
+          onPress={add}
+          accessibilityLabel="AddPlayerManual"
+          testID="add_player_manual_button"
+        />
       </View>
     </Card>
   );
-
 };
 
 export default AddPlayerManual;
-
 
 const styles = StyleSheet.create({
   handicap_field_container: {

@@ -1,26 +1,14 @@
-import React, { useContext, useEffect } from 'react';
-import {
-  ActivityIndicator,
-} from 'react-native';
 import { gql, useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
-
+import { UPSERT_LINK_MUTATION } from 'common/graphql/link';
+import { addPlayerToOwnTeam, getGamespecKVs } from 'common/utils/game';
+import { linkPlayerToGame, linkRoundToGameAndPlayer } from 'common/utils/links';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { UPSERT_LINK_MUTATION } from 'common/graphql/link'
 import { ADD_ROUND_MUTATION } from 'features/rounds/graphql';
-import {
-  linkPlayerToGame,
-  linkRoundToGameAndPlayer,
-} from 'common/utils/links';
-import {
-  addPlayerToOwnTeam,
-  getGamespecKVs,
-} from 'common/utils/game';
+import React, { useContext, useEffect } from 'react';
+import { ActivityIndicator } from 'react-native';
 
-
-
-const LinkRound = props => {
-
+const LinkRound = (props) => {
   const UPDATE_GAME_MUTATION = gql`
     mutation UpdateGame($gkey: String!, $game: GameInput!) {
       updateGame(gkey: $gkey, game: $game) {
@@ -46,12 +34,11 @@ const LinkRound = props => {
 
   const navigation = useNavigation();
 
-  const [ addRound ] = useMutation(ADD_ROUND_MUTATION);
-  const [ updateGame ] = useMutation(UPDATE_GAME_MUTATION);
-  const [ playerToGame ] = useMutation(UPSERT_LINK_MUTATION);
-  const [ roundToGame ] = useMutation(UPSERT_LINK_MUTATION);
-  const [ roundToPlayer ] = useMutation(UPSERT_LINK_MUTATION);
-
+  const [addRound] = useMutation(ADD_ROUND_MUTATION);
+  const [updateGame] = useMutation(UPDATE_GAME_MUTATION);
+  const [playerToGame] = useMutation(UPSERT_LINK_MUTATION);
+  const [roundToGame] = useMutation(UPSERT_LINK_MUTATION);
+  const [roundToPlayer] = useMutation(UPSERT_LINK_MUTATION);
 
   const createNewRound = async () => {
     //console.log('createNewRound');
@@ -61,18 +48,18 @@ const LinkRound = props => {
         round: {
           date: game_start,
           seq: 1,
-          scores: []
-        }
+          scores: [],
+        },
       },
     });
-    if( error ) {
+    if (error) {
       console.log('Error creating new round', error);
       return null;
     }
     return data.addRound;
   };
 
-  const linkRound = async r => {
+  const linkRound = async (r) => {
     //console.log('linkRound');
     await linkRoundToGameAndPlayer({
       round: r,
@@ -84,45 +71,38 @@ const LinkRound = props => {
     });
   };
 
-  useEffect(
-    () => {
-      const init = async () => {
-        // link player to game
-        await linkPlayerToGame({
-          pkey,
-          gkey,
-          playerToGame,
-          currentPlayerKey,
-        });
+  useEffect(() => {
+    const init = async () => {
+      // link player to game
+      await linkPlayerToGame({
+        pkey,
+        gkey,
+        playerToGame,
+        currentPlayerKey,
+      });
 
-        // if not a team game, add player to her own team and update game
-        if( !teamGame ) {
-          //console.log('firing add player to own team');
-          await addPlayerToOwnTeam({pkey, game, updateGame});
-        }
-        // link round
-        let r = (round && !isNew)
-          ? round
-          : await createNewRound();
-        await linkRound(r);
+      // if not a team game, add player to her own team and update game
+      if (!teamGame) {
+        //console.log('firing add player to own team');
+        await addPlayerToOwnTeam({ pkey, game, updateGame });
+      }
+      // link round
+      let r = round && !isNew ? round : await createNewRound();
+      await linkRound(r);
 
-        //console.log('LinkRound navigating to GameSetup');
-        navigation.navigate('Game', {
-          currentGameKey: gkey,
-          screen: 'Setup',
-          params: {
-            screen: 'GameSetup',
-          },
-        });
+      //console.log('LinkRound navigating to GameSetup');
+      navigation.navigate('Game', {
+        currentGameKey: gkey,
+        screen: 'Setup',
+        params: {
+          screen: 'GameSetup',
+        },
+      });
+    };
+    init();
+  }, []);
 
-      };
-      init();
-    }, []
-  );
-
-  return (<ActivityIndicator />);
-
+  return <ActivityIndicator />;
 };
 
 export default LinkRound;
-

@@ -1,26 +1,15 @@
-import React, { useContext, useState, } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Button,
-  Card,
-} from 'react-native-elements';
 import { useApolloClient } from '@apollo/client';
-import { useNavigation } from '@react-navigation/native';
 import { useMutation } from '@apollo/client';
-
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import { useNavigation } from '@react-navigation/native';
 import GhinSearchPlayer from 'common/components/ghin/player/search';
-import { MERGE_PLAYERS_MUTATION } from 'features/players/graphql';
 import { logout } from 'common/utils/account';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import { MERGE_PLAYERS_MUTATION } from 'features/players/graphql';
+import React, { useContext, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Button, Card } from 'react-native-elements';
 
-
-
-const LinkHandicap = props => {
-
+const LinkHandicap = (props) => {
   const defaultNewLink = {
     country: 'USA',
     state: '',
@@ -28,20 +17,16 @@ const LinkHandicap = props => {
     firstName: '',
   };
 
-  const {
-    currentPlayer,
-    setCurrentPlayer,
-    setCurrentPlayerKey,
-    setToken,
-  } = useContext(CurrentPlayerContext);
+  const { currentPlayer, setCurrentPlayer, setCurrentPlayerKey, setToken } =
+    useContext(CurrentPlayerContext);
 
   const client = useApolloClient();
   const navigation = useNavigation();
 
-  const [ service, setService ] = useState('ghin');
-  const [ newLink, setNewLink ] = useState(defaultNewLink);
+  const [service, setService] = useState('ghin');
+  const [newLink, setNewLink] = useState(defaultNewLink);
 
-  const [ mergePlayers ] = useMutation(MERGE_PLAYERS_MUTATION);
+  const [mergePlayers] = useMutation(MERGE_PLAYERS_MUTATION);
 
   const linkHandicap = async () => {
     const { data } = await mergePlayers({
@@ -55,7 +40,7 @@ const LinkHandicap = props => {
         },
       },
     });
-    if( data && data.mergePlayers ) {
+    if (data && data.mergePlayers) {
       // now logout
       setCurrentPlayer(null);
       setCurrentPlayerKey(null);
@@ -65,9 +50,11 @@ const LinkHandicap = props => {
   };
 
   const serviceChooser = (
-    <Text style={styles.ghin_only}>GHIN is the only handicap service currently supported.</Text>
+    <Text style={styles.ghin_only}>
+      GHIN is the only handicap service currently supported.
+    </Text>
   );
-/*  TODO: activate when we have more than one service
+  /*  TODO: activate when we have more than one service
   const serviceChooser = (
     <Card>
       <Card.Title>Choose Service</Card.Title>
@@ -83,70 +70,77 @@ const LinkHandicap = props => {
 
   let search = null;
 
-  switch( service ) {
+  switch (service) {
     case 'ghin':
       search = (
         <Card wrapperStyle={styles.card_wrapper}>
           <Card.Title>GHIN Player Search</Card.Title>
           <Card.Divider />
-          <GhinSearchPlayer
-            state={newLink}
-            setState={setNewLink}
-          />
+          <GhinSearchPlayer state={newLink} setState={setNewLink} />
         </Card>
-        );
+      );
       break;
     default:
-        break;
+      break;
   }
 
-  if( newLink && newLink.handicap ) {
+  if (newLink && newLink.handicap) {
     //console.log('newLink', newLink);
     return (
       <View style={styles.container}>
         <Card>
           <Card.Title>Confirm Link</Card.Title>
           <View style={styles.row}>
-              <Text style={styles.label}>source</Text><Text style={styles.value}>{newLink.handicap.source.toUpperCase()}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>name</Text><Text style={styles.value}>{newLink.name}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>number</Text><Text style={styles.value}>{newLink.handicap.id}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>club</Text><Text style={styles.value}>{newLink.club}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>handicap</Text><Text style={styles.value}>{newLink.handicap.index}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>revision</Text><Text style={styles.value}>{newLink.handicap.revDate}</Text>
-            </View>
-            <View style={styles.note_view}>
-              <Text style={styles.note}>If you click 'Confirm' you will be logged out.</Text>
-              <Text style={styles.note}>Login again and handicap service will be linked.</Text>
-            </View>
+            <Text style={styles.label}>source</Text>
+            <Text style={styles.value}>{newLink.handicap.source.toUpperCase()}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>name</Text>
+            <Text style={styles.value}>{newLink.name}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>number</Text>
+            <Text style={styles.value}>{newLink.handicap.id}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>club</Text>
+            <Text style={styles.value}>{newLink.club}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>handicap</Text>
+            <Text style={styles.value}>{newLink.handicap.index}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>revision</Text>
+            <Text style={styles.value}>{newLink.handicap.revDate}</Text>
+          </View>
+          <View style={styles.note_view}>
+            <Text style={styles.note}>
+              If you click 'Confirm' you will be logged out.
+            </Text>
+            <Text style={styles.note}>
+              Login again and handicap service will be linked.
+            </Text>
+          </View>
         </Card>
         <View style={styles.button_row}>
           <Button
             style={styles.prev}
-            title='Cancel'
-            type='solid'
+            title="Cancel"
+            type="solid"
             onPress={() => {
               navigation.goBack();
             }}
-            accessibilityLabel='Link Handicap Cancel'
+            accessibilityLabel="Link Handicap Cancel"
           />
           <Button
             style={styles.next}
-            title='Confirm'
-            type='solid'
+            title="Confirm"
+            type="solid"
             onPress={() => {
               linkHandicap();
             }}
-            accessibilityLabel='Link Handicap Confirm'
+            accessibilityLabel="Link Handicap Confirm"
           />
         </View>
       </View>
@@ -154,15 +148,14 @@ const LinkHandicap = props => {
   } else {
     return (
       <View style={styles.container}>
-        { serviceChooser }
-        { search }
+        {serviceChooser}
+        {search}
       </View>
     );
   }
 };
 
 export default LinkHandicap;
-
 
 const styles = StyleSheet.create({
   container: {

@@ -1,13 +1,9 @@
-import React from 'react';
-
 import { GhinPlayerSearchContext } from 'common/components/ghin/player/searchContext';
 import GhinPlayerSearchInput from 'common/components/ghin/player/searchInput';
 import GhinPlayerSearchResults from 'common/components/ghin/player/searchResults';
+import React from 'react';
 
-
-
-const GhinSearchPlayer = ({state, setState}) => {
-
+const GhinSearchPlayer = ({ state, setState }) => {
   return (
     <GhinPlayerSearchContext.Provider
       value={{
@@ -18,7 +14,7 @@ const GhinSearchPlayer = ({state, setState}) => {
       <GhinPlayerSearchInput />
       <GhinPlayerSearchResults />
     </GhinPlayerSearchContext.Provider>
-  )
+  );
 };
 
 export default GhinSearchPlayer;

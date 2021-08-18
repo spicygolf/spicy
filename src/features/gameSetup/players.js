@@ -1,69 +1,54 @@
-import React, { useContext } from 'react';
-
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
-
-import {
-  Card,
-  Icon,
-  ListItem
-} from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-
+import { blue } from 'common/colors';
+import HandicapBadge from 'common/components/handicapBadge';
+import { get_round_for_player } from 'common/utils/rounds';
+import { GameContext } from 'features/game/gameContext';
 import RemovePlayer from 'features/gameSetup/removePlayer';
 import TeeSelector from 'features/gameSetup/teeSelector';
-import HandicapBadge from 'common/components/handicapBadge';
-import { GameContext } from 'features/game/gameContext';
-import { get_round_for_player } from 'common/utils/rounds';
-import { blue } from 'common/colors';
+import React, { useContext } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Card, Icon, ListItem } from 'react-native-elements';
 
-
-
-const Players = props => {
-
+const Players = (props) => {
   const navigation = useNavigation();
   const { game, readonly } = useContext(GameContext);
 
   const { _key: gkey, rounds, players } = game;
 
-  const _itemPressed = player => {
-    if( readonly ) return;
-    if( !player ) return;
+  const _itemPressed = (player) => {
+    if (readonly) return;
+    if (!player) return;
     // check to see if round exists... if not, don't go here
     const round = get_round_for_player(rounds, player._key);
-    if( round ) navigation.navigate('EditPlayer', {player: player});
+    if (round) navigation.navigate('EditPlayer', { player: player });
   };
 
-  const _shouldShowAddButton = players => {
-    if( readonly ) return false;
+  const _shouldShowAddButton = (players) => {
+    if (readonly) return false;
     return true; //TODO: fixme now that multiple gamespecs could be on each game
     let ret = true;
-    if( gamespec.max_players < 1 ) return true;
+    if (gamespec.max_players < 1) return true;
     try {
       const player_count = players.length;
-      ret = (player_count < gamespec.max_players);
-    } catch(e) {
+      ret = player_count < gamespec.max_players;
+    } catch (e) {
       console.log('error in shouldShowButton', e);
     }
     return ret;
-  }
+  };
 
-  const _renderPlayer = ({item, index}) => {
+  const _renderPlayer = ({ item, index }) => {
     //console.log('renderPlayer item', item);
-    if( item && item.name && item._key ) {
+    if (item && item.name && item._key) {
       const name = item.name || '';
       const pkey = item._key;
 
       let rkey, tee, ch, gh, hi;
 
       const round = get_round_for_player(rounds, pkey);
-      if( round ) {
+      if (round) {
         rkey = round._key;
-        tee =  round.tee;
+        tee = round.tee;
         ch = round.course_handicap;
         gh = round.game_handicap;
         hi = round.handicap_index;
@@ -80,34 +65,20 @@ const Players = props => {
         />
       );
 
-      const removePlayerContent = readonly
-        ? null
-        : (
-            <RemovePlayer
-              gkey={gkey}
-              pkey={pkey}
-              rkey={rkey}
-            />
-          );
+      const removePlayerContent = readonly ? null : (
+        <RemovePlayer gkey={gkey} pkey={pkey} rkey={rkey} />
+      );
 
       return (
-        <ListItem
-          key={pkey}
-          onPress={() => _itemPressed(item)}
-        >
+        <ListItem key={pkey} onPress={() => _itemPressed(item)}>
           <ListItem.Content style={styles.player}>
             <ListItem.Title>{name}</ListItem.Title>
             <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
           </ListItem.Content>
-          <HandicapBadge
-              game_handicap={gh}
-              course_handicap={ch}
-              handicap_index={hi}
-            />
-            {removePlayerContent}
+          <HandicapBadge game_handicap={gh} course_handicap={ch} handicap_index={hi} />
+          {removePlayerContent}
         </ListItem>
       );
-
     } else {
       return null;
     }
@@ -115,12 +86,12 @@ const Players = props => {
 
   const button = _shouldShowAddButton(players) ? (
     <Icon
-      name='add-circle'
+      name="add-circle"
       color={blue}
       size={40}
-      title='Add Player'
+      title="Add Player"
       onPress={() => navigation.navigate('AddPlayer')}
-      testID='add_player_button'
+      testID="add_player_button"
     />
   ) : null;
 
@@ -132,20 +103,18 @@ const Players = props => {
         <FlatList
           data={players}
           renderItem={_renderPlayer}
-          keyExtractor={item => {
-            if( item && item._key ) return item._key;
+          keyExtractor={(item) => {
+            if (item && item._key) return item._key;
             return Math.random().toString();
           }}
         />
       </View>
-      { button }
+      {button}
     </Card>
   );
-
 };
 
 export default Players;
-
 
 const styles = StyleSheet.create({
   title: {

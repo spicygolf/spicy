@@ -1,19 +1,10 @@
-import React, { useContext } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
+import HoleChooser from 'common/components/holeChooser';
 import { GameContext } from 'features/game/gameContext';
 import GameNav from 'features/games/gamenav';
-import HoleChooser from 'common/components/holeChooser';
+import React, { useContext } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 
-
-
-const OptionsCustom = props => {
-
+const OptionsCustom = (props) => {
   const { route } = props;
   const { params } = route;
   const { option, setOption } = params;
@@ -22,7 +13,7 @@ const OptionsCustom = props => {
 
   const setLimit = () => {
     let limit = -1;
-    switch( option.type ) {
+    switch (option.type) {
       case 'bool':
         limit = 2;
         break;
@@ -30,10 +21,9 @@ const OptionsCustom = props => {
         limit = option.choices.length;
         break;
     }
-
   };
 
-  const renderCustomOption = ({item}) => {
+  const renderCustomOption = ({ item }) => {
     console.log('value', item);
     return (
       <View style={styles.optionContainer}>
@@ -42,7 +32,7 @@ const OptionsCustom = props => {
           <Text style={styles.value}>{item.value}</Text>
         </View>
         <HoleChooser
-          holes={item.holes || game.holes.map(h => h.hole)}
+          holes={item.holes || game.holes.map((h) => h.hole)}
           setHoles={() => null}
           title=""
           active={true}
@@ -55,11 +45,7 @@ const OptionsCustom = props => {
 
   return (
     <View style={styles.container}>
-      <GameNav
-        title='Customize Options'
-        showBack={true}
-        backTo={'GameSetup'}
-      />
+      <GameNav title="Customize Options" showBack={true} backTo={'GameSetup'} />
       <View style={styles.title}>
         <Text>Option:</Text>
         <Text style={styles.name}>{option.disp}</Text>
@@ -67,14 +53,13 @@ const OptionsCustom = props => {
       <FlatList
         data={option.values}
         renderItem={renderCustomOption}
-        keyExtractor={o => o.value}
+        keyExtractor={(o) => o.value}
       />
     </View>
   );
 };
 
 export default OptionsCustom;
-
 
 const styles = StyleSheet.create({
   container: {

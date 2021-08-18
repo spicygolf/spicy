@@ -1,17 +1,11 @@
-import React from 'react';
-import {
-  Text,
-  View,
-} from 'react-native';
 import { useQuery } from '@apollo/client';
-
 import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
+import React from 'react';
+import { Text, View } from 'react-native';
+
 import { styles } from './styles';
 
-
-
-const GamesStat = ({pkey}) => {
-
+const GamesStat = ({ pkey }) => {
   let stat = ' ';
 
   const { error, data } = useQuery(ACTIVE_GAMES_FOR_PLAYER_QUERY, {
@@ -24,14 +18,18 @@ const GamesStat = ({pkey}) => {
     stat = '?';
   }
 
-  if( data && data.activeGamesForPlayer ) {
+  if (data && data.activeGamesForPlayer) {
     stat = data.activeGamesForPlayer.length;
   }
 
   return (
     <View style={styles.stat_view}>
-      <View><Text style={styles.stat_value}>{stat}</Text></View>
-      <View><Text style={styles.stat_label}>games</Text></View>
+      <View>
+        <Text style={styles.stat_value}>{stat}</Text>
+      </View>
+      <View>
+        <Text style={styles.stat_label}>games</Text>
+      </View>
     </View>
   );
 };

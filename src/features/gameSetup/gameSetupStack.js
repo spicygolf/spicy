@@ -1,17 +1,13 @@
-import React from 'react';
-import { createStackNavigator }  from '@react-navigation/stack';
-
-import GameSetupScreen from 'features/gameSetup/gameSetupScreen';
+import { createStackNavigator } from '@react-navigation/stack';
 import AddCourse from 'features/gameSetup/addCourse';
 import AddPlayer from 'features/gameSetup/addPlayer';
 import EditPlayer from 'features/gameSetup/editPlayer';
+import GameSetupScreen from 'features/gameSetup/gameSetupScreen';
 import LinkRoundList from 'features/gameSetup/linkRoundList';
 import OptionsCustom from 'features/gameSetup/optionsCustom';
+import React from 'react';
 
-
-
-const GameSetupStack = props => {
-
+const GameSetupStack = (props) => {
   const nada = {
     animation: 'timing',
     config: {
@@ -22,28 +18,13 @@ const GameSetupStack = props => {
   const Stack = createStackNavigator();
 
   return (
-    <Stack.Navigator
-      initialRouteName='GameSetup'
-      headerMode='none'
-    >
+    <Stack.Navigator initialRouteName="GameSetup" headerMode="none">
+      <Stack.Screen name="GameSetup" component={GameSetupScreen} />
+      <Stack.Screen name="AddCourse" component={AddCourse} />
+      <Stack.Screen name="AddPlayer" component={AddPlayer} />
+      <Stack.Screen name="EditPlayer" component={EditPlayer} />
       <Stack.Screen
-        name='GameSetup'
-        component={GameSetupScreen}
-      />
-      <Stack.Screen
-        name='AddCourse'
-        component={AddCourse}
-      />
-      <Stack.Screen
-        name='AddPlayer'
-        component={AddPlayer}
-      />
-      <Stack.Screen
-        name='EditPlayer'
-        component={EditPlayer}
-      />
-      <Stack.Screen
-        name='LinkRoundList'
+        name="LinkRoundList"
         component={LinkRoundList}
         options={{
           transitionSpec: {
@@ -52,15 +33,9 @@ const GameSetupStack = props => {
           },
         }}
       />
-      <Stack.Screen
-        name='OptionsCustom'
-        component={OptionsCustom}
-      >
-
-      </Stack.Screen>
+      <Stack.Screen name="OptionsCustom" component={OptionsCustom}></Stack.Screen>
     </Stack.Navigator>
   );
-
 };
 
 export default GameSetupStack;

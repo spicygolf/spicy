@@ -1,81 +1,59 @@
-import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-} from 'react-native';
-import {
-  createMaterialBottomTabNavigator
-} from '@react-navigation/material-bottom-tabs';
-import {
-  Icon
-} from 'react-native-elements';
-import AsyncStorage from '@react-native-community/async-storage';
 import { useLazyQuery } from '@apollo/client';
-
+import AsyncStorage from '@react-native-community/async-storage';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { blue, green, red } from 'common/colors';
+import { getCurrentUser } from 'common/utils/account';
+import RegisterAgain from 'features/account/registerAgain';
 import FeedStack from 'features/feed/feedstack';
 import GamesStack from 'features/games/gamesstack';
-import ProfileStack from 'features/profile/profilestack';
-import RegisterAgain from 'features/account/registerAgain';
-import { getCurrentUser } from 'common/utils/account';
-import { GET_PLAYER_QUERY } from 'features/players/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { green, red, blue } from 'common/colors';
+import { GET_PLAYER_QUERY } from 'features/players/graphql';
+import ProfileStack from 'features/profile/profilestack';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator } from 'react-native';
+import { Icon } from 'react-native-elements';
 
-
-
-const TabIcon = ({type, name, color, testID}) => {
-  return (
-    <Icon
-      size={24}
-      color={color}
-      type={type}
-      name={name}
-      testID={testID}
-    />
-  );
+const TabIcon = ({ type, name, color, testID }) => {
+  return <Icon size={24} color={color} type={type} name={name} testID={testID} />;
 };
 
-
-const AppStack = props => {
-
-  const [ content, setContent ] = useState(<ActivityIndicator />);
+const AppStack = (props) => {
+  const [content, setContent] = useState(<ActivityIndicator />);
 
   const { user } = props;
 
   const [currentPlayer, setCurrentPlayer] = useState(null);
   const [currentPlayerKey, setCurrentPlayerKey] = useState(null);
   const [token, setToken] = useState(null);
-  const [ impersonate, setImpersonate ] = useState(null);
+  const [impersonate, setImpersonate] = useState(null);
 
-  const [ getCurrentPlayer, { error, data } ] = useLazyQuery(GET_PLAYER_QUERY);
+  const [getCurrentPlayer, { error, data }] = useLazyQuery(GET_PLAYER_QUERY);
 
   const getCreds = async () => {
     const c = await getCurrentUser(user);
     //console.log('getCreds', c);
-    if( c && c.currentPlayerKey && c.token ) {
+    if (c && c.currentPlayerKey && c.token) {
       setCurrentPlayerKey(c.currentPlayerKey);
       setToken(c.token);
       await AsyncStorage.setItem('currentPlayer', c.currentPlayerKey);
       await AsyncStorage.setItem('token', c.token);
       setContent(tabs());
     } else {
-      if( c && c.message ) {
+      if (c && c.message) {
         // try to get creds from local storage
         const newCurrentPlayerKey = await AsyncStorage.getItem('currentPlayer');
         const newToken = await AsyncStorage.getItem('token');
-        if( newToken && newCurrentPlayerKey ) {
+        if (newToken && newCurrentPlayerKey) {
           // TODO: DRY (above)
           setCurrentPlayerKey(newCurrentPlayerKey);
           setToken(newToken);
           setContent(tabs());
         } else {
           console.log('something is wrong:', c);
-          if( c.navTo ) {
-            switch( c.navTo ) {
+          if (c.navTo) {
+            switch (c.navTo) {
               case 'RegisterAgain':
-                setContent(<RegisterAgain
-                  fbUser={c.fbUser}
-                  retryCreds={retryCreds}
-                />);
+                setContent(<RegisterAgain fbUser={c.fbUser} retryCreds={retryCreds} />);
                 break;
               default:
                 //setContent(<Alert message={c.message} />);
@@ -94,110 +72,102 @@ const AppStack = props => {
     await getCreds();
   };
 
-  useEffect(
-    () => {
-      getCreds();
-    }, [user]
-  );
+  useEffect(() => {
+    getCreds();
+  }, [user]);
 
-  useEffect(
-    () => {
-      if( currentPlayerKey && token ) {
-        getCurrentPlayer({
-          variables: {
-            player: currentPlayerKey,
-          },
-          fetchPolicy: 'cache-and-network',
-        });
-      }
-    }, [currentPlayerKey, token]
-  );
+  useEffect(() => {
+    if (currentPlayerKey && token) {
+      getCurrentPlayer({
+        variables: {
+          player: currentPlayerKey,
+        },
+        fetchPolicy: 'cache-and-network',
+      });
+    }
+  }, [currentPlayerKey, token]);
 
-  useEffect(
-    () => {
-      if( data && data.getPlayer ) {
-        setCurrentPlayer(data.getPlayer);
-      }
-    }, [data]
-  );
+  useEffect(() => {
+    if (data && data.getPlayer) {
+      setCurrentPlayer(data.getPlayer);
+    }
+  }, [data]);
 
-  useEffect(
-    () => {
-      if (error && error.message != 'Network request failed' ) {
-        console.log('Error fetching current player', error);
-      }
-    }, [error]
-  );
+  useEffect(() => {
+    if (error && error.message != 'Network request failed') {
+      console.log('Error fetching current player', error);
+    }
+  }, [error]);
 
   const tabs = () => {
     const Tab = createMaterialBottomTabNavigator();
 
     return (
       <Tab.Navigator
-        initialRouteName='GamesStack'
+        initialRouteName="GamesStack"
         shifting={true}
-        activeColor='#fff'
-        inactiveColor='#ccc'
+        activeColor="#fff"
+        inactiveColor="#ccc"
       >
         <Tab.Screen
-          name='FeedStack'
+          name="FeedStack"
           component={FeedStack}
           options={{
             title: 'Feed',
             tabBarIcon: ({ focused }) => {
               return (
                 <TabIcon
-                  color={focused ? '#fff' : '#ccc' }
-                  name='comment'
-                  type='font-awesome'
+                  color={focused ? '#fff' : '#ccc'}
+                  name="comment"
+                  type="font-awesome"
                 />
               );
             },
             tabBarColor: blue,
-            tabBarTestID: 'feed_tab'
+            tabBarTestID: 'feed_tab',
           }}
         />
         <Tab.Screen
-          name='GamesStack'
+          name="GamesStack"
           component={GamesStack}
           options={{
             title: 'Games',
             tabBarIcon: ({ focused }) => {
               return (
                 <TabIcon
-                  color={focused ? '#fff' : '#ccc' }
-                  name='edit'
-                  type='font-awesome'
+                  color={focused ? '#fff' : '#ccc'}
+                  name="edit"
+                  type="font-awesome"
                 />
               );
             },
             tabBarColor: green,
-            tabBarTestID: 'games_tab'
+            tabBarTestID: 'games_tab',
           }}
         />
         <Tab.Screen
-          name='ProfileStack'
+          name="ProfileStack"
           component={ProfileStack}
           options={{
             title: 'Profile',
             tabBarIcon: ({ focused }) => {
               return (
                 <TabIcon
-                  color={focused ? '#fff' : '#ccc' }
-                  name='user'
-                  type='font-awesome'
+                  color={focused ? '#fff' : '#ccc'}
+                  name="user"
+                  type="font-awesome"
                 />
               );
             },
             tabBarColor: red,
-            tabBarTestID: 'profile_tab'
+            tabBarTestID: 'profile_tab',
           }}
         />
       </Tab.Navigator>
     );
-  }
+  };
 
-  if( currentPlayer && currentPlayerKey && token ) {
+  if (currentPlayer && currentPlayerKey && token) {
     //console.log('currentPlayerKey', currentPlayerKey);
     return (
       <CurrentPlayerContext.Provider
@@ -213,11 +183,11 @@ const AppStack = props => {
           user,
         }}
       >
-        { content }
+        {content}
       </CurrentPlayerContext.Provider>
     );
   } else {
-    return (<ActivityIndicator />);
+    return <ActivityIndicator />;
   }
 };
 

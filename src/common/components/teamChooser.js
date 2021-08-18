@@ -1,76 +1,63 @@
-import React, { useContext, useEffect } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Icon,
-} from 'react-native-elements';
-import { cloneDeep, filter, find, findIndex, orderBy } from 'lodash';
 import { useMutation } from '@apollo/client';
-
-import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
-import { GameContext } from 'features/game/gameContext';
-import {
-  getWolfPlayerIndex,
-  omitTypename,
-} from 'common/utils/game';
-import { getHolesToUpdate } from 'common/utils/game';
-import { getTeams } from 'common/utils/teams';
-import { getGameMeta, setGameMeta } from 'common/utils/metadata';
 import { blue } from 'common/colors';
+import { getWolfPlayerIndex, omitTypename } from 'common/utils/game';
+import { getHolesToUpdate } from 'common/utils/game';
+import { getGameMeta, setGameMeta } from 'common/utils/metadata';
+import { getTeams } from 'common/utils/teams';
+import { GameContext } from 'features/game/gameContext';
+import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
+import { cloneDeep, filter, find, findIndex, orderBy } from 'lodash';
+import React, { useContext, useEffect } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Icon } from 'react-native-elements';
 
-
-
-const TeamChooser = props => {
-
+const TeamChooser = (props) => {
   // TODO: modify this to support more than just two teams
   //       or, just make a ManyTeamChooser component
   const teamCount = 2;
 
-  const [ updateGameHoles ] = useMutation(UPDATE_GAME_HOLES_MUTATION);
+  const [updateGameHoles] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
   const { currentHole, from } = props;
   //console.log('teamChooser currentHole', currentHole);
   const { game, activeGameSpec, readonly } = useContext(GameContext);
   const { _key: gkey } = game;
   const teams = getTeams(game, currentHole);
-  const gameHole = ( game && game.holes && game.holes.length )
-    ? find(game.holes, {hole: currentHole})
-    : {hole: currentHole, teams: []};
+  const gameHole =
+    game && game.holes && game.holes.length
+      ? find(game.holes, { hole: currentHole })
+      : { hole: currentHole, teams: [] };
 
   // wolf vars
-  const isWolf = (activeGameSpec.team_determination == 'wolf');
-  const wolfPlayerIndex = isWolf ? getWolfPlayerIndex({game, currentHole}) : -1;
+  const isWolf = activeGameSpec.team_determination == 'wolf';
+  const wolfPlayerIndex = isWolf ? getWolfPlayerIndex({ game, currentHole }) : -1;
   const wolfPKey = isWolf ? game.scope.wolf_order[wolfPlayerIndex] : '';
   const team1Text = isWolf ? '   Wolf' : 'Team 1';
   const team2Text = isWolf ? 'Opponents' : 'Team 2';
-
 
   const changeTeamsForPlayer = async (pkey, addToTeam, removeFromTeam) => {
     //console.log('pkey', pkey);
     //console.log('addToTeam', addToTeam);
     //console.log('removeFromTeam', removeFromTeam);
-    if( readonly ) return; // view mode only, so don't allow changes
+    if (readonly) return; // view mode only, so don't allow changes
 
     // get holes for updating, either from game metadata or game setup
     const gameMeta = await getGameMeta(gkey);
-    const holesToUpdate = (gameMeta && gameMeta.holesToUpdate && gameMeta.holesToUpdate.length)
-      ? gameMeta.holesToUpdate
-      : getHolesToUpdate(game.scope.teams_rotate, game, currentHole);
+    const holesToUpdate =
+      gameMeta && gameMeta.holesToUpdate && gameMeta.holesToUpdate.length
+        ? gameMeta.holesToUpdate
+        : getHolesToUpdate(game.scope.teams_rotate, game, currentHole);
     //console.log('teamChooser holesToUpdate', holesToUpdate, gameMeta);
 
     // set up variable for mutation
     let newHoles = cloneDeep(game.holes);
-    if( !newHoles ) {
+    if (!newHoles) {
       newHoles = [];
     }
 
-    holesToUpdate.map(h => {
+    holesToUpdate.map((h) => {
       // if hole data doesn't exist, create blanks
-      if( findIndex(newHoles, {hole: h}) < 0 ) {
+      if (findIndex(newHoles, { hole: h }) < 0) {
         newHoles.push({
           __typename: 'GameHole',
           hole: h,
@@ -78,34 +65,34 @@ const TeamChooser = props => {
           multipliers: [],
         });
       }
-      const holeIndex = findIndex(newHoles, {hole: h});
+      const holeIndex = findIndex(newHoles, { hole: h });
       //console.log('hole', h);
 
       // if team data doesn't exist, create blanks
-      if( !newHoles[holeIndex].teams ) newHoles[holeIndex].teams = [];
+      if (!newHoles[holeIndex].teams) newHoles[holeIndex].teams = [];
       //console.log('teams', newHoles[holeIndex].teams);
-      for( let i=0; i < teamCount; i++ ) {
-        const teamNum = (i+1).toString();
-        const teamIndex = find(newHoles[holeIndex].teams, {team: teamNum});
+      for (let i = 0; i < teamCount; i++) {
+        const teamNum = (i + 1).toString();
+        const teamIndex = find(newHoles[holeIndex].teams, { team: teamNum });
         //console.log('blanks', teamNum, teamIndex);
-        if( !teamIndex || teamIndex < 0 ) {
+        if (!teamIndex || teamIndex < 0) {
           newHoles[holeIndex].teams.push({
             __typename: 'Team',
             team: teamNum,
             players: [],
-            junk: []
+            junk: [],
           });
         }
       }
 
-      newHoles[holeIndex].teams = newHoles[holeIndex].teams.map(t => {
+      newHoles[holeIndex].teams = newHoles[holeIndex].teams.map((t) => {
         let newTeam = cloneDeep(t);
         // remove player from team, if match removeFromTeam
-        if( removeFromTeam == t.team ) {
-          newTeam.players = filter(t.players, p => p != pkey);
+        if (removeFromTeam == t.team) {
+          newTeam.players = filter(t.players, (p) => p != pkey);
         }
         // add player to team, if match addToTeam
-        if( addToTeam == t.team ) {
+        if (addToTeam == t.team) {
           newTeam.players.push(pkey);
         }
         //console.log('newTeam', newTeam);
@@ -127,42 +114,40 @@ const TeamChooser = props => {
           _key: gkey,
           holes: newHoles,
         },
-      }
+      },
     });
 
-    if( error ) {
+    if (error) {
       console.log('Error updating game - teamChooser', error);
     } else {
       // if we've chosen teams, clear out game metadata on holesToUpdate
-      if( teams ) {
+      if (teams) {
         setGameMeta(gkey, 'holesToUpdate', []);
       }
     }
   };
 
-  const _renderPlayer = ({item, index}) => {
-    if( !item ) return;
+  const _renderPlayer = ({ item, index }) => {
+    if (!item) return;
 
-    const isWolfPlayer = (item._key == wolfPKey);
+    const isWolfPlayer = item._key == wolfPKey;
     //console.log('isWolfPlayer', item.name, isWolfPlayer);
 
     let team;
-    if( gameHole && gameHole.teams ) {
-      team = find(gameHole.teams, t => (
-        t && t.players && t.players.includes(item._key)
-      ));
+    if (gameHole && gameHole.teams) {
+      team = find(gameHole.teams, (t) => t && t.players && t.players.includes(item._key));
     }
     //console.log('team', item.name, team);
 
     const teamIcon = (teamNum) => {
-      if( team && team.team && team.team == teamNum ) {
+      if (team && team.team && team.team == teamNum) {
         //console.log('remove', from, teamNum, index);
         // removing from a team
-        if( !isWolfPlayer ) {
+        if (!isWolfPlayer) {
           return (
             <Icon
-              name='check-circle'
-              type='material-community'
+              name="check-circle"
+              type="material-community"
               color={blue}
               size={30}
               iconStyle={styles.icon}
@@ -173,8 +158,8 @@ const TeamChooser = props => {
         } else {
           return (
             <Icon
-              name='wolf-pack-battalion'
-              type='font-awesome-5'
+              name="wolf-pack-battalion"
+              type="font-awesome-5"
               color={blue}
               size={30}
               iconStyle={styles.icon}
@@ -184,24 +169,26 @@ const TeamChooser = props => {
       } else {
         //console.log('add', from, teamNum, index);
         // adding to a team
-        if( !isWolfPlayer ) {
+        if (!isWolfPlayer) {
           return (
             <Icon
-              name='plus-circle'
-              type='material-community'
-              color='#aaa'
+              name="plus-circle"
+              type="material-community"
+              color="#aaa"
               size={30}
               iconStyle={styles.icon}
-              onPress={() => changeTeamsForPlayer(item._key, teamNum, teamNum == '1' ? '2' : '1')}
+              onPress={() =>
+                changeTeamsForPlayer(item._key, teamNum, teamNum == '1' ? '2' : '1')
+              }
               testID={`${from}_add_player_to_team_${teamNum}_${index}`}
             />
           );
         } else {
           return (
             <Icon
-              name='plus-circle'
-              type='material-community'
-              color='transparent'
+              name="plus-circle"
+              type="material-community"
+              color="transparent"
               size={30}
               iconStyle={styles.icon}
             />
@@ -215,43 +202,41 @@ const TeamChooser = props => {
 
     return (
       <View style={styles.teamChooserView}>
-        { team1 }
+        {team1}
         <Text style={styles.player_name}>{item.name || ''}</Text>
-        { team2 }
+        {team2}
       </View>
     );
-
   };
 
-  useEffect(
-    () => {
-      const checkWolf = async () => {
-        if( wolfPlayerIndex < 0 ) return;
-        const wolfOnTeamOne = typeof find(gameHole.teams, team => {
-          if( team.team != '1' ) return false;
-          if( team && team.players && team.players.length ) {
+  useEffect(() => {
+    const checkWolf = async () => {
+      if (wolfPlayerIndex < 0) return;
+      const wolfOnTeamOne =
+        typeof find(gameHole.teams, (team) => {
+          if (team.team != '1') return false;
+          if (team && team.players && team.players.length) {
             return team.players.includes(wolfPKey);
           }
           return false;
         }) !== 'undefined';
-        if( wolfOnTeamOne ) return;
+      if (wolfOnTeamOne) return;
 
-        // we got to here, so need to doctor up gameHole teams w/ Wolf
-        await changeTeamsForPlayer(wolfPKey, '1', '2');
-        //console.log('teamChooser useEffect', gameHole, wolfPlayerIndex, wolfOnTeamOne);
-      };
+      // we got to here, so need to doctor up gameHole teams w/ Wolf
+      await changeTeamsForPlayer(wolfPKey, '1', '2');
+      //console.log('teamChooser useEffect', gameHole, wolfPlayerIndex, wolfOnTeamOne);
+    };
 
-      if( isWolf ) {
-        checkWolf();
-      }
-    }, [game.scope.wolf_order, currentHole]
-  );
+    if (isWolf) {
+      checkWolf();
+    }
+  }, [game.scope.wolf_order, currentHole]);
 
   let sorted_players = game.players;
-  if( game && game.scope && game.scope.wolf_order ) {
-    sorted_players = game.scope.wolf_order.map(pkey => {
-      const p = find(game.players, {_key: pkey});
-      if( !p ) console.log('a player in wolf_order that is not in players?');
+  if (game && game.scope && game.scope.wolf_order) {
+    sorted_players = game.scope.wolf_order.map((pkey) => {
+      const p = find(game.players, { _key: pkey });
+      if (!p) console.log('a player in wolf_order that is not in players?');
       return p;
     });
   }
@@ -265,23 +250,19 @@ const TeamChooser = props => {
       <FlatList
         data={sorted_players}
         renderItem={_renderPlayer}
-        keyExtractor={item => {
-          if( item && item._key ) return item._key;
+        keyExtractor={(item) => {
+          if (item && item._key) return item._key;
           return Math.random().toString();
         }}
       />
     </View>
   );
-
 };
 
 export default TeamChooser;
 
-
 const styles = StyleSheet.create({
-  container: {
-
-  },
+  container: {},
   teamTitleView: {
     justifyContent: 'space-between',
     flexDirection: 'row',

@@ -1,31 +1,19 @@
-import React, { useContext, } from 'react';
-
-import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  View
-} from 'react-native';
 import { useQuery } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
-
-import { GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY } from 'features/players/graphql';
-import Player from 'features/gameSetup/Player';
 import { GameContext } from 'features/game/gameContext';
+import Player from 'features/gameSetup/Player';
+import { GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY } from 'features/players/graphql';
+import React, { useContext } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 
-
-
-const AddPlayerFavorites = props => {
-
+const AddPlayerFavorites = (props) => {
   const navigation = useNavigation();
   const { currentPlayerKey, game } = useContext(GameContext);
 
-  const _renderFavoritesPlayer = ({item, index}) => {
-
-    const handicap = (item && item.handicap && item.handicap.index) ?
-    item.handicap.index : 'NH';
-    const club = (item && item.clubs && item.clubs[0]) ?
-    item.clubs[0].name : '';
+  const _renderFavoritesPlayer = ({ item, index }) => {
+    const handicap =
+      item && item.handicap && item.handicap.index ? item.handicap.index : 'NH';
+    const club = item && item.clubs && item.clubs[0] ? item.clubs[0].name : '';
 
     return (
       <Player
@@ -34,19 +22,19 @@ const AddPlayerFavorites = props => {
         title={item.name}
         subtitle={club}
         hdcp={handicap}
-        onPress={item => {
+        onPress={(item) => {
           //console.log('player pressed', item);
-          const player =  {
+          const player = {
             _key: item._key,
             name: item.name,
             handicap: item.handicap,
           };
-          navigation.navigate('LinkRoundList', {game, player});
+          navigation.navigate('LinkRoundList', { game, player });
         }}
         testID={index}
       />
     );
-  }
+  };
 
   const { loading, error, data } = useQuery(GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY, {
     variables: {
@@ -54,7 +42,7 @@ const AddPlayerFavorites = props => {
     },
   });
 
-  if( loading ) {
+  if (loading) {
     return (
       <View>
         <ActivityIndicator />
@@ -62,31 +50,32 @@ const AddPlayerFavorites = props => {
     );
   }
 
-  if( error && error.message != 'Network request failed') {
+  if (error && error.message != 'Network request failed') {
     console.log(error);
     // TODO: error component
-    return (<Text>Error Loading Favorite Players: `{error.message}`</Text>);
+    return <Text>Error Loading Favorite Players: `{error.message}`</Text>;
   }
 
   //console.log('getFavoritePlayersForPlayer data', currentPlayerKey, data);
 
-  const players = (data && data.getFavoritePlayersForPlayer)
-    ? data.getFavoritePlayersForPlayer
-    : [];
-  const newPlayers = players.map(p => ({
+  const players =
+    data && data.getFavoritePlayersForPlayer ? data.getFavoritePlayersForPlayer : [];
+  const newPlayers = players.map((p) => ({
     ...p,
     fave: {
       faved: true,
-      from: {type: 'player', value: currentPlayerKey},
-      to:   {type: 'player', value: p._key},
-      refetchQueries: [{
-        query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
-        variables: {
-          pkey: currentPlayerKey
-        }
-      }],
-      awaitRefetchQueries: true
-    }
+      from: { type: 'player', value: currentPlayerKey },
+      to: { type: 'player', value: p._key },
+      refetchQueries: [
+        {
+          query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
+          variables: {
+            pkey: currentPlayerKey,
+          },
+        },
+      ],
+      awaitRefetchQueries: true,
+    },
   }));
 
   return (
@@ -95,23 +84,21 @@ const AddPlayerFavorites = props => {
         <FlatList
           data={newPlayers}
           renderItem={_renderFavoritesPlayer}
-          keyExtractor={item => item._key}
+          keyExtractor={(item) => item._key}
           keyboardShouldPersistTaps={'handled'}
         />
       </View>
     </View>
   );
-
 };
 
 export default AddPlayerFavorites;
 
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
   },
   listContainer: {
     margin: 0,
-  }
+  },
 });

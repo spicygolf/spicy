@@ -1,17 +1,10 @@
+import { ROUND_POSTING_FRAGMENT, ROUND_SCORES_FRAGMENT } from 'features/rounds/graphql';
 import { cloneDeep, find, findIndex } from 'lodash';
 
-import {
-  ROUND_POSTING_FRAGMENT,
-  ROUND_SCORES_FRAGMENT
-} from 'features/rounds/graphql';
-
-
-
 export const get_round_for_player = (rounds, pkey) => {
-
-  const ret = find(rounds, r => {
-    if( r && r.player[0] && r.player[0]._key ) {
-      return (r.player[0]._key == pkey);
+  const ret = find(rounds, (r) => {
+    if (r && r.player[0] && r.player[0]._key) {
+      return r.player[0]._key == pkey;
     } else {
       return null;
     }
@@ -20,11 +13,10 @@ export const get_round_for_player = (rounds, pkey) => {
   return ret;
 };
 
-
 // given a hole (string, "1") and round, return the course's 'hole' object
 export const get_hole = (hole, round) => {
-  if( round && round.tee && round.tee.holes ) {
-    const ret = find(round.tee.holes, h => h.hole == hole);
+  if (round && round.tee && round.tee.holes) {
+    const ret = find(round.tee.holes, (h) => h.hole == hole);
     //console.log('hole', hole);
     return ret;
   } else {
@@ -34,18 +26,17 @@ export const get_hole = (hole, round) => {
 
 // hole int, round {}
 export const get_score = (hole, round) => {
-  if( !round ) return null;
-  const ret = find(round.scores, s => s.hole == hole);
-  if( !ret ) return null;
+  if (!round) return null;
+  const ret = find(round.scores, (s) => s.hole == hole);
+  if (!ret) return null;
   //console.log('get_score', ret);
   return ret;
 };
 
-
 export const get_score_value = (name, score) => {
-  if( score && score.values ) {
-    const ret = find(score.values, val => val.k == name);
-    if( !ret || !ret.v ) return null;
+  if (score && score.values) {
+    const ret = find(score.values, (val) => val.k == name);
+    if (!ret || !ret.v) return null;
     //console.log('get_score_value', ret);
     return parseFloat(ret.v);
   } else {
@@ -53,34 +44,32 @@ export const get_score_value = (name, score) => {
   }
 };
 
-
 export const get_net_score = (gross, score) => {
-  if( !score || !score.pops ) return gross;
+  if (!score || !score.pops) return gross;
 
   const g = parseFloat(gross);
   const p = parseFloat(score.pops);
   //console.log('g', g, 'p', p);
-  let net = (g-p).toString();
-  if( isNaN(net) ) net = null;
+  let net = (g - p).toString();
+  if (isNaN(net)) net = null;
   return net;
-}
+};
 
-export const get_pops = score => {
+export const get_pops = (score) => {
   //console.log('score', score);
-  return (score && score.pops) ? parseFloat(score.pops) : 0;
+  return score && score.pops ? parseFloat(score.pops) : 0;
 };
 
 export const rmround = async (rkey, mutation) => {
   const { loading, error, data } = await mutation({
     variables: {
-      rkey: rkey
+      rkey: rkey,
     },
   });
-  if( error ) {
+  if (error) {
     console.log('error removing round', error);
     console.log('rmround', rkey);
     return null;
   }
   return data;
-
 };

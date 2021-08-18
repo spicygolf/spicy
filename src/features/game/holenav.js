@@ -1,30 +1,21 @@
-import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
-import {
-  Icon,
-} from 'react-native-elements';
-
 import { findIndex } from 'lodash';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Icon } from 'react-native-elements';
 
+const sortNumber = (a, b) => a - b;
 
-
-const sortNumber = (a, b) => (a - b);
-
-
-const HoleNav = props => {
-
-  const {holes:holesOrig, holeInfo, changeHole} = props;
+const HoleNav = (props) => {
+  const { holes: holesOrig, holeInfo, changeHole } = props;
 
   const holes = holesOrig.sort(sortNumber);
-  holes.push("Summary");
-  const currentHoleIndex = findIndex(holes, h => { return h == holeInfo.hole })
+  holes.push('Summary');
+  const currentHoleIndex = findIndex(holes, (h) => {
+    return h == holeInfo.hole;
+  });
 
   let holeInfoContent = null;
-  if( holeInfo.par && holeInfo.length && holeInfo.handicap ) {
+  if (holeInfo.par && holeInfo.length && holeInfo.handicap) {
     holeInfoContent = (
       <Text style={styles.holeInfo}>
         Par: <Text style={styles.holeInfoValue}>{holeInfo.par} </Text>
@@ -38,39 +29,37 @@ const HoleNav = props => {
     <View style={styles.container}>
       <View style={styles.direction}>
         <Icon
-          name='chevron-left'
+          name="chevron-left"
           size={40}
           onPress={() => {
             let newHoleIndex = currentHoleIndex - 1;
-            if( newHoleIndex < 0 ) newHoleIndex = holes.length - 1;
+            if (newHoleIndex < 0) newHoleIndex = holes.length - 1;
             changeHole(holes[newHoleIndex].toString());
           }}
           testID={'holeNav_prev'}
-          />
+        />
       </View>
       <View style={styles.currentHole}>
         <Text style={styles.holeText}>{holeInfo.hole}</Text>
-        { holeInfoContent }
+        {holeInfoContent}
       </View>
       <View style={styles.direction}>
-      <Icon
-        name='chevron-right'
-        size={40}
-        onPress={() => {
-          let newHoleIndex = currentHoleIndex + 1;
-          if( newHoleIndex >= holes.length ) newHoleIndex = 0;
-          changeHole(holes[newHoleIndex].toString());
-        }}
-        testID={'holeNav_next'}
-      />
+        <Icon
+          name="chevron-right"
+          size={40}
+          onPress={() => {
+            let newHoleIndex = currentHoleIndex + 1;
+            if (newHoleIndex >= holes.length) newHoleIndex = 0;
+            changeHole(holes[newHoleIndex].toString());
+          }}
+          testID={'holeNav_next'}
+        />
       </View>
     </View>
   );
-
-}
+};
 
 export default HoleNav;
-
 
 const styles = StyleSheet.create({
   container: {
@@ -97,4 +86,4 @@ const styles = StyleSheet.create({
   holeInfoValue: {
     fontWeight: 'bold',
   },
-})
+});

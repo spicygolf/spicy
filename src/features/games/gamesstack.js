@@ -1,21 +1,14 @@
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-} from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-
+import { green } from 'common/colors';
 import Game from 'features/game/game';
 import Games from 'features/games/games';
-import NewGameList from 'features/games/newGameList';
-import NewGameInfo from 'features/games/newGameInfo';
 import NewGame from 'features/games/newGame';
-import { green } from 'common/colors';
+import NewGameInfo from 'features/games/newGameInfo';
+import NewGameList from 'features/games/newGameList';
+import React from 'react';
+import { SafeAreaView, StyleSheet } from 'react-native';
 
-
-
-const GamesStack = props => {
-
+const GamesStack = (props) => {
   const nada = {
     animation: 'timing',
     config: {
@@ -28,7 +21,7 @@ const GamesStack = props => {
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Navigator
-        initialRouteName='Games'
+        initialRouteName="Games"
         screenOptions={{
           title: 'Games',
           headerMode: 'none',
@@ -38,12 +31,9 @@ const GamesStack = props => {
           },
         }}
       >
+        <Stack.Screen name="Games" component={Games} />
         <Stack.Screen
-          name='Games'
-          component={Games}
-        />
-        <Stack.Screen
-          name='Game'
+          name="Game"
           component={Game}
           options={{
             transitionSpec: {
@@ -52,16 +42,10 @@ const GamesStack = props => {
             },
           }}
         />
+        <Stack.Screen name="NewGameList" component={NewGameList} />
+        <Stack.Screen name="NewGameInfo" component={NewGameInfo} />
         <Stack.Screen
-          name='NewGameList'
-          component={NewGameList}
-        />
-        <Stack.Screen
-          name='NewGameInfo'
-          component={NewGameInfo}
-        />
-        <Stack.Screen
-          name='NewGame'
+          name="NewGame"
           component={NewGame}
           options={{
             transitionSpec: {
@@ -73,11 +57,9 @@ const GamesStack = props => {
       </Stack.Navigator>
     </SafeAreaView>
   );
-
 };
 
 export default GamesStack;
-
 
 const styles = StyleSheet.create({
   container: {

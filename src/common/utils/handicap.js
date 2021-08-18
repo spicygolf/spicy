@@ -1,19 +1,15 @@
-
 import { getRatings } from 'common/utils/game';
 
-
-
 export const course_handicap = (strIndex, tee, holes) => {
-
-  if( !tee || !holes ) {
+  if (!tee || !holes) {
     //console.log('course_handicap, no tee or no holes', tee, holes);
     return null;
   }
 
   // process strIndex => index
   let index = parseFloat(strIndex);
-  if( Number.isNaN(index) ) return null;
-  if( strIndex.charAt(0) == '+' ) index *= -1;
+  if (Number.isNaN(index)) return null;
+  if (strIndex.charAt(0) == '+') index *= -1;
 
   let par;
   switch (holes) {
@@ -37,11 +33,10 @@ export const course_handicap = (strIndex, tee, holes) => {
 
   const { rating, slope } = getRatings(holes, tee);
   //console.log(index, slope, rating, par);
-  return Math.round((index * (slope / 113)) + (rating - par));
-
+  return Math.round(index * (slope / 113) + (rating - par));
 };
 
 const get_par = (min, max) => {
   // TODO: implement me
   return;
-}
+};

@@ -1,7 +1,5 @@
 import { gql } from '@apollo/client';
 
-
-
 export const GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY = gql`
   query GetFavoritePlayersForPlayer($pkey: String!) {
     getFavoritePlayersForPlayer(pkey: $pkey) {

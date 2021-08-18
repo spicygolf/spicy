@@ -1,37 +1,28 @@
-import React, { useContext, useState } from 'react';
-import {
-  StyleSheet,
-  View
-} from 'react-native';
-import {
-  Button,
-} from 'react-native-elements';
-import { orderBy } from 'lodash';
-
-import GameNav from 'features/games/gamenav';
 import { GameContext } from 'features/game/gameContext';
+import GameNav from 'features/games/gamenav';
 import PostScore from 'features/gameSummary/postScore';
+import { orderBy } from 'lodash';
+import React, { useContext, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Button } from 'react-native-elements';
 
-
-
-const PostScores = props => {
-
+const PostScores = (props) => {
   const { game, scores } = useContext(GameContext);
   const sorted_players = orderBy(scores.players, ['gross'], ['asc']);
 
-  const [ currentPlayerIndex, setCurrentPlayerIndex ] = useState(0);
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
 
   const currentPlayer = sorted_players[currentPlayerIndex];
 
   const prev = (
     <Button
-      title='Previous'
+      title="Previous"
       buttonStyle={styles.button}
       titleStyle={styles.button_title}
-      disabled={( currentPlayerIndex == 0 )}
+      disabled={currentPlayerIndex == 0}
       onPress={() => {
         let cpi = currentPlayerIndex - 1;
-        if( cpi < 0 ) cpi = 0;
+        if (cpi < 0) cpi = 0;
         setCurrentPlayerIndex(cpi);
       }}
     />
@@ -39,13 +30,13 @@ const PostScores = props => {
 
   const next = (
     <Button
-      title='Next'
+      title="Next"
       buttonStyle={styles.button}
       titleStyle={styles.button_title}
-      disabled={( currentPlayerIndex == (sorted_players.length - 1) )}
+      disabled={currentPlayerIndex == sorted_players.length - 1}
       onPress={() => {
         let cpi = currentPlayerIndex + 1;
-        if( cpi > sorted_players.length - 1 ) cpi = sorted_players.length - 1;
+        if (cpi > sorted_players.length - 1) cpi = sorted_players.length - 1;
         setCurrentPlayerIndex(cpi);
       }}
     />
@@ -54,17 +45,10 @@ const PostScores = props => {
   return (
     <View style={styles.container}>
       <View style={styles.gameNav}>
-        <GameNav
-            title='Post Rounds'
-            showBack={true}
-            showScore={false}
-        />
+        <GameNav title="Post Rounds" showBack={true} showScore={false} />
       </View>
       <View style={styles.postScore}>
-        <PostScore
-          player={currentPlayer}
-          game={game}
-        />
+        <PostScore player={currentPlayer} game={game} />
       </View>
       <View style={styles.buttonRow}>
         {prev}
@@ -75,7 +59,6 @@ const PostScores = props => {
 };
 
 export default PostScores;
-
 
 const styles = StyleSheet.create({
   container: {

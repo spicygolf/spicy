@@ -1,30 +1,23 @@
-
+import { GET_GAME_QUERY } from 'features/game/graphql';
 import React from 'react';
-
-import
-{
+import { Query, withApollo } from 'react-apollo';
+import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
-
-import { Query, withApollo } from 'react-apollo';
-import { GET_GAME_QUERY } from 'features/game/graphql';
-
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
 
 // TODO: supply course details
 const courseHoles = [
-  [ '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9'],
-  ['10', '11', '12', '13', '14', '15', '16', '17', '18']
+  ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+  ['10', '11', '12', '13', '14', '15', '16', '17', '18'],
 ];
 
 class BirdieEmAllLeaderboard extends React.Component {
-
   constructor(props) {
     super(props);
     this._renderScoreItem = this._renderScoreItem.bind(this);
@@ -33,32 +26,32 @@ class BirdieEmAllLeaderboard extends React.Component {
   _scoreTeam(data) {
     var total = 0;
     var holes = [];
-    data.map(({hole, values}) => {
-      values.map(value => {
-        if( value.k === 'birdie' && value.v === 'true' ) {
+    data.map(({ hole, values }) => {
+      values.map((value) => {
+        if (value.k === 'birdie' && value.v === 'true') {
           total += 1;
           holes.push(hole);
         }
       });
     });
-    return {total: total, holes: holes};
+    return { total: total, holes: holes };
   }
 
   _score(data) {
-    if( !data ) return [];
+    if (!data) return [];
     // get team/player scores from scoring function
     var scores = data.map((score) => {
       return {
         player: score.player,
         round: score._key,
-        score: this._scoreTeam(score.scores)
+        score: this._scoreTeam(score.scores),
       };
     });
 
     // sort on score object total value
     scores.sort((a, b) => {
-      if( a.score.total < b.score.total ) return  1;
-      if( a.score.total > b.score.total ) return -1;
+      if (a.score.total < b.score.total) return 1;
+      if (a.score.total > b.score.total) return -1;
       return 0;
     });
 
@@ -72,18 +65,17 @@ class BirdieEmAllLeaderboard extends React.Component {
       player: player[0],
       round_id: round,
       score: score,
-      courseHoles: courseHoles
+      courseHoles: courseHoles,
     });
   }
 
-  _renderScoreItem({item}) {
+  _renderScoreItem({ item }) {
     var holes = (
       <View style={styles.holeContainer}>
         {courseHoles.map((nine, i) => (
           <View key={i} style={styles.nine}>
             {nine.map((hole) => {
-              var gotit = item.score.holes.includes(hole) ?
-                styles.yes : styles.no;
+              var gotit = item.score.holes.includes(hole) ? styles.yes : styles.no;
               return (
                 <View key={hole} style={styles.hole}>
                   <Text style={[styles.holeText, gotit]}>{hole}</Text>
@@ -107,10 +99,8 @@ class BirdieEmAllLeaderboard extends React.Component {
           {holes}
         </View>
         <View style={[styles.ScoreItemCell, styles.RightCell]}>
-          <TouchableOpacity
-            onPress={() => this._itemPressed(item, courseHoles)}
-          >
-            <Icon name='lead-pencil' size={25} color='#666' />
+          <TouchableOpacity onPress={() => this._itemPressed(item, courseHoles)}>
+            <Icon name="lead-pencil" size={25} color="#666" />
           </TouchableOpacity>
         </View>
       </View>
@@ -118,26 +108,23 @@ class BirdieEmAllLeaderboard extends React.Component {
   }
 
   componentDidUpdate(prev_props) {
-      console.log('cDU prev_props', prev_props);
-      console.log('cDU props', this.props);
+    console.log('cDU prev_props', prev_props);
+    console.log('cDU props', this.props);
   }
 
   render() {
     return (
-      <Query
-        query={GET_GAME_QUERY}
-        variables={{gkey: this.props.currentGame._key}}
-      >
+      <Query query={GET_GAME_QUERY} variables={{ gkey: this.props.currentGame._key }}>
         {({ loading, error, data, client }) => {
-          if( loading ) {
+          if (loading) {
             //console.log('get game query, loading - data:', data, loading);
-            return (<ActivityIndicator />);
+            return <ActivityIndicator />;
           }
-          if( error ) {
+          if (error) {
             console.log(error);
-            return (<Text>Error</Text>);
+            return <Text>Error</Text>;
           }
-          if( data && data.getGame && data.getGame.rounds ) {
+          if (data && data.getGame && data.getGame.rounds) {
             let scores = this._score(data.getGame.rounds);
 
             return (
@@ -145,13 +132,13 @@ class BirdieEmAllLeaderboard extends React.Component {
                 <FlatList
                   data={scores}
                   renderItem={this._renderScoreItem}
-                  keyExtractor={item => item.player[0].short}
+                  keyExtractor={(item) => item.player[0].short}
                   ListFooterComponent={<View style={styles.ListFooter}></View>}
-              />
+                />
               </View>
             );
           } else {
-            return (<Text>Error, no scores</Text>);
+            return <Text>Error, no scores</Text>;
           }
           return;
         }}
@@ -162,66 +149,64 @@ class BirdieEmAllLeaderboard extends React.Component {
 
 export default withApollo(BirdieEmAllLeaderboard);
 
-
 /**
  * ## Styles
  */
 var styles = StyleSheet.create({
   LeaderboardContainer: {
-    marginTop: 0
+    marginTop: 0,
   },
   ListFooter: {
     height: 0,
-    marginBottom: 90
+    marginBottom: 90,
   },
   ScoreItemContainer: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderColor: '#aaa'
+    borderColor: '#aaa',
   },
   ScoreItemCell: {
-    padding: 5
+    padding: 5,
   },
   LeftCell: {
     flex: 1,
     justifyContent: 'center',
-    marginRight: 10
+    marginRight: 10,
   },
   MiddleCell: {
-    flex: 9
+    flex: 9,
   },
   RightCell: {
     flex: 1,
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   Total: {
     fontSize: 25,
     fontWeight: 'bold',
-    textAlign: 'right'
+    textAlign: 'right',
   },
   Player: {
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   nine: {
     flexDirection: 'row',
-    flex: 9
+    flex: 9,
   },
   holeContainer: {
-    flex: 9
+    flex: 9,
   },
   hole: {
     paddingRight: 2,
-    minWidth: 28
+    minWidth: 28,
   },
   holeText: {
-    textAlign: 'right'
+    textAlign: 'right',
   },
   yes: {
     color: '#000',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   no: {
-    color: '#bbb'
-  }
-
+    color: '#bbb',
+  },
 });

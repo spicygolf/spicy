@@ -1,47 +1,33 @@
-import React, { useContext, useEffect, useState, } from 'react';
-import {
-  KeyboardAvoidingView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Card,
-  Input,
-} from 'react-native-elements';
-import { find } from 'lodash';
-
 import { GhinPlayerSearchContext } from 'common/components/ghin/player/searchContext';
+import { baseUri, scheme } from 'common/config';
 import CountryPicker from 'features/account/countryPicker';
 import StatePicker from 'features/account/statePicker';
-import { baseUri, scheme } from 'common/config';
+import { find } from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
+import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
+import { Card, Input } from 'react-native-elements';
 
-
-
-const GhinPlayerSearchInput = props => {
-
+const GhinPlayerSearchInput = (props) => {
   const { state, setState } = useContext(GhinPlayerSearchContext);
 
-  const [ countries, setCountries ] = useState([]);
+  const [countries, setCountries] = useState([]);
 
-  useEffect(
-    () => {
-      const fetchData = async () => {
-        const url = `${scheme}://${baseUri}/ghin/countries_and_states`;
-        const res = await fetch(url, {
-          method: 'GET',
-        });
-        const json = await res.json();
-        //console.log('countries json', json);
-        setCountries(json.countries);
-      };
-      fetchData();
-    }, []
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      const url = `${scheme}://${baseUri}/ghin/countries_and_states`;
+      const res = await fetch(url, {
+        method: 'GET',
+      });
+      const json = await res.json();
+      //console.log('countries json', json);
+      setCountries(json.countries);
+    };
+    fetchData();
+  }, []);
 
-  const c = find(countries, {code: state.country});
+  const c = find(countries, { code: state.country });
   let statelist = [];
-  if( c && c.states ) statelist = c.states;
+  if (c && c.states) statelist = c.states;
 
   //console.log('ghinPlayerSearch', ghinPlayerSearch);
 
@@ -52,53 +38,57 @@ const GhinPlayerSearchInput = props => {
           <CountryPicker
             countries={countries}
             selectedValue={state.country}
-            onValueChange={(v) => setState({
-              ...state,
-              country: v,
-            })}
+            onValueChange={(v) =>
+              setState({
+                ...state,
+                country: v,
+              })
+            }
           />
         </View>
         <View style={styles.picker_state}>
           <StatePicker
             states={statelist}
             selectedValue={state.state}
-            onValueChange={(v) => setState({
-              ...state,
-              state: v,
-            })}
+            onValueChange={(v) =>
+              setState({
+                ...state,
+                state: v,
+              })
+            }
           />
         </View>
       </View>
       <View style={styles.row}>
         <View style={styles.field}>
           <Input
-            label='Last Name'
+            label="Last Name"
             labelStyle={styles.label}
             containerStyle={[styles.field_input, styles.last_name]}
             inputStyle={styles.field_input_txt}
-            onChangeText={text => {
+            onChangeText={(text) => {
               setState({
                 ...state,
                 lastName: text,
               });
             }}
-            autoCapitalize='words'
+            autoCapitalize="words"
             value={state.lastName}
           />
         </View>
         <View style={styles.field}>
           <Input
-            label='First Name (optional)'
+            label="First Name (optional)"
             labelStyle={styles.label}
             containerStyle={styles.field_input}
             inputStyle={styles.field_input_txt}
-            onChangeText={text => {
+            onChangeText={(text) => {
               setState({
                 ...state,
                 firstName: text,
               });
             }}
-            autoCapitalize='words'
+            autoCapitalize="words"
             value={state.firstName}
           />
         </View>
@@ -108,7 +98,6 @@ const GhinPlayerSearchInput = props => {
 };
 
 export default GhinPlayerSearchInput;
-
 
 const styles = StyleSheet.create({
   container: {

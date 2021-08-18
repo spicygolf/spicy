@@ -1,28 +1,20 @@
 import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-import {
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
-
-
-
-const Header = props => {
-
+const Header = (props) => {
   const { title, color } = props;
   const bg = { backgroundColor: color };
 
   return (
     <View style={[styles.header, bg]}>
-      <Text style={styles.title} testID='title'>{title}</Text>
+      <Text style={styles.title} testID="title">
+        {title}
+      </Text>
     </View>
   );
-
-}
+};
 
 export default Header;
-
 
 const styles = StyleSheet.create({
   header: {
@@ -31,11 +23,11 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   title: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold'
-  }
+    fontWeight: 'bold',
+  },
 });

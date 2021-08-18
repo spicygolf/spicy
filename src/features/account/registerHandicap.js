@@ -1,39 +1,24 @@
-import React, { useContext, useEffect, } from 'react';
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Button,
-  Card,
-} from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-
+import { blue } from 'common/colors';
+import GhinSearchPlayer from 'common/components/ghin/player/search';
 import BackToLogin from 'features/account/backToLogin';
 import { RegisterContext } from 'features/account/registerContext';
-import GhinSearchPlayer from 'common/components/ghin/player/search';
-import { blue } from 'common/colors';
+import React, { useContext, useEffect } from 'react';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Button, Card } from 'react-native-elements';
 
-const { width } = Dimensions.get('window')
+const { width } = Dimensions.get('window');
 
-
-
-const RegisterHandicap = props => {
-
+const RegisterHandicap = (props) => {
   const { registration, setRegistration } = useContext(RegisterContext);
   const navigation = useNavigation();
 
-  useEffect(
-    () => {
-      //console.log('registration', registration);
-      if( registration.ghinCreds ) {
-        navigation.navigate('RegisterPlayer');
-      }
-    }, [registration]
-  );
-
+  useEffect(() => {
+    //console.log('registration', registration);
+    if (registration.ghinCreds) {
+      navigation.navigate('RegisterPlayer');
+    }
+  }, [registration]);
 
   return (
     <View style={styles.container}>
@@ -41,16 +26,13 @@ const RegisterHandicap = props => {
       <Card containerStyle={styles.card_container}>
         <Card.Title>Register - Handicap</Card.Title>
         <Card.Divider />
-        <View style={styles.loginView} testID='register_2_view'>
-          <GhinSearchPlayer
-            state={registration}
-            setState={setRegistration}
-          />
+        <View style={styles.loginView} testID="register_2_view">
+          <GhinSearchPlayer state={registration} setState={setRegistration} />
           <View style={styles.divider}>
-              <View style={styles.hrLine} />
-              <Text style={styles.dividerText}>OR</Text>
-              <View style={styles.hrLine} />
-            </View>
+            <View style={styles.hrLine} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.hrLine} />
+          </View>
         </View>
         <View style={styles.skip_view}>
           <Text>
@@ -60,15 +42,18 @@ const RegisterHandicap = props => {
                 navigation.navigate('RegisterPlayer');
               }}
               style={styles.skip_text}
-            >  Skip this step</Text>
+            >
+              {' '}
+              Skip this step
+            </Text>
           </Text>
         </View>
       </Card>
       <View style={styles.button_row}>
         <Button
           style={styles.prev}
-          title='Prev'
-          type='solid'
+          title="Prev"
+          type="solid"
           onPress={async () => {
             // if going back, clear out ghinCreds
             await setRegistration({
@@ -77,19 +62,19 @@ const RegisterHandicap = props => {
             });
             navigation.goBack();
           }}
-          accessibilityLabel='Register Prev 2'
-          testID='register_prev_2_button'
+          accessibilityLabel="Register Prev 2"
+          testID="register_prev_2_button"
         />
         <Button
           style={styles.next}
-          title='Next'
-          type={(registration.ghinCreds) ? 'solid' : 'outline'}
-          disabled={!(registration.ghinCreds)}
+          title="Next"
+          type={registration.ghinCreds ? 'solid' : 'outline'}
+          disabled={!registration.ghinCreds}
           onPress={() => {
-            navigation.navigate('RegisterPlayer')
+            navigation.navigate('RegisterPlayer');
           }}
-          accessibilityLabel='Register Next 2'
-          testID='register_next_2_button'
+          accessibilityLabel="Register Next 2"
+          testID="register_next_2_button"
         />
       </View>
     </View>
@@ -97,7 +82,6 @@ const RegisterHandicap = props => {
 };
 
 export default RegisterHandicap;
-
 
 const styles = StyleSheet.create({
   container: {
@@ -150,7 +134,7 @@ const styles = StyleSheet.create({
   skip_view: {
     paddingBottom: 15,
     paddingHorizontal: 10,
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
   },
   skip_text: {
     fontWeight: 'bold',

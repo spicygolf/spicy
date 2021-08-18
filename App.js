@@ -1,28 +1,18 @@
-/*
- * @format
- * @flow strict-local
- *
- */
-import React, { useEffect, useState } from 'react';
-import { LogBox } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { ApolloProvider } from 'react-apollo';
 import { ApolloProvider as ApolloHooksProvider } from '@apollo/client';
-import { Provider as PaperProvider } from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
-import RNBootSplash from "react-native-bootsplash";
-
-import Splash from 'features/splash/splash';
-import AppStack from 'app/components/appstack';
-import AccountStack from 'app/components/accountstack';
-
+import { NavigationContainer } from '@react-navigation/native';
 import configureClient from 'app/client/configureClient';
+import AccountStack from 'app/components/accountstack';
+import AppStack from 'app/components/appstack';
+import Splash from 'features/splash/splash';
+import React, { useEffect, useState } from 'react';
+import { ApolloProvider } from 'react-apollo';
+import { LogBox } from 'react-native';
+import RNBootSplash from 'react-native-bootsplash';
+import { Provider as PaperProvider } from 'react-native-paper';
 
-
-
-const App = props => {
-
-  const [ client, setClient ] = useState(undefined);
+const App = (props) => {
+  const [client, setClient] = useState(undefined);
 
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
@@ -31,47 +21,43 @@ const App = props => {
   const onAuthStateChanged = (u) => {
     //console.log('user', u);
     setUser(u);
-    if (initializing) setInitializing(false);
-  }
+    if (initializing) {
+      setInitializing(false);
+    }
+  };
 
-  useEffect(
-    () => {
-      RNBootSplash.hide({ duration: 250 });
-      const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-      return subscriber; // unsubscribe on unmount
-    }, []
-  );
+  useEffect(() => {
+    RNBootSplash.hide({ duration: 250 });
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  });
 
-  useEffect(
-    () => {
-      const configClient = async () => {
-        const c = await configureClient();
-        setClient(c);
-      };
-      configClient();
-    }, []
-  );
+  useEffect(() => {
+    const configClient = async () => {
+      const c = await configureClient();
+      setClient(c);
+    };
+    configClient();
+  }, []);
 
-  useEffect(
-    () => {
-      LogBox.ignoreLogs([
-        'VirtualizedLists should never be nested',
-        'Non-serializable values were found in the navigation state',
-//        'Cannot update a component from inside',
-//        'Cache data may be lost',
-//        'Remote debugger is in',
-      ]);
-    }, []
-  );
+  useEffect(() => {
+    LogBox.ignoreLogs([
+      'VirtualizedLists should never be nested',
+      'Non-serializable values were found in the navigation state',
+      //        'Cannot update a component from inside',
+      //        'Cache data may be lost',
+      //        'Remote debugger is in',
+    ]);
+  }, []);
 
   let content = null;
-  if( initializing || !client ) {
-    return (<Splash />);
+  if (initializing || !client) {
+    return <Splash />;
   } else {
-    if( user ) {
-      content = (<AppStack user={user} />);
+    if (user) {
+      content = <AppStack user={user} />;
     } else {
-      content = (<AccountStack />);
+      content = <AccountStack />;
     }
   }
 
@@ -79,14 +65,11 @@ const App = props => {
     <ApolloProvider client={client}>
       <ApolloHooksProvider client={client}>
         <NavigationContainer>
-          <PaperProvider>
-            { content }
-          </PaperProvider>
+          <PaperProvider>{content}</PaperProvider>
         </NavigationContainer>
       </ApolloHooksProvider>
     </ApolloProvider>
   );
-
 };
 
 export default App;

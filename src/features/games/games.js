@@ -1,40 +1,27 @@
-import React, { useContext, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
-import {
-  Icon,
-  ListItem
-} from 'react-native-elements';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useLazyQuery } from '@apollo/client';
-import moment from 'moment';
-import { filter, reverse, sortBy } from 'lodash';
-
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
-import { getCoursesPlayersTxt } from 'common/utils/game';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { blue } from 'common/colors';
+import { getCoursesPlayersTxt } from 'common/utils/game';
+import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import { filter, reverse, sortBy } from 'lodash';
+import moment from 'moment';
+import React, { useContext, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Icon, ListItem } from 'react-native-elements';
 
-
-
-const Games = props => {
-
+const Games = (props) => {
   const navigation = useNavigation();
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
   //console.log('currentPlayerKey', currentPlayerKey);
-  const [ isFetching, setIsFetching ] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const newGamePressed = () => {
     navigation.navigate('NewGameList');
   };
 
   const itemPressed = (item, setup) => {
-    if( setup ) {
+    if (setup) {
       navigation.navigate('Game', {
         currentGameKey: item._key,
         readonly: false,
@@ -51,8 +38,7 @@ const Games = props => {
     }
   };
 
-  const buildSubtitle = game => {
-
+  const buildSubtitle = (game) => {
     //console.log('game', game);
     const { coursesTxt, playersTxt } = getCoursesPlayersTxt(game);
 
@@ -64,38 +50,35 @@ const Games = props => {
         <Text style={styles.subtitle}>{startTime || ''}</Text>
       </View>
     );
-
   };
 
-  const renderItem = ({item}) => {
-    if( !item ) return null;
+  const renderItem = ({ item }) => {
+    if (!item) return null;
     const name = item.name || '';
     const subtitle = buildSubtitle(item);
 
     return (
-      <ListItem
-        onPress={() => itemPressed(item, false)}
-      >
+      <ListItem onPress={() => itemPressed(item, false)}>
         <ListItem.Content>
           <ListItem.Title style={styles.title}>{name}</ListItem.Title>
           <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
         </ListItem.Content>
         <ListItem.Chevron
-          type='material'
-          name='settings'
-          color='#999'
+          type="material"
+          name="settings"
+          color="#999"
           size={24}
           onPress={() => itemPressed(item, true)}
         />
       </ListItem>
     );
-  }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
       //console.log('Games List focused');
       fetchGameList();
-    }, [])
+    }, []),
   );
 
   const fetchGameList = () => {
@@ -103,25 +86,20 @@ const Games = props => {
     setIsFetching(true);
     getGameList();
     setIsFetching(false);
-  }
+  };
 
-  const [ getGameList, { error, data }] = useLazyQuery(
-    ACTIVE_GAMES_FOR_PLAYER_QUERY,
-    {
-      variables: {
-        pkey: currentPlayerKey,
-      },
-      fetchPolicy: 'cache-and-network',
-    }
-  );
+  const [getGameList, { error, data }] = useLazyQuery(ACTIVE_GAMES_FOR_PLAYER_QUERY, {
+    variables: {
+      pkey: currentPlayerKey,
+    },
+    fetchPolicy: 'cache-and-network',
+  });
   if (error && error.message != 'Network request failed') {
-    return (<Text>Error! {error.message}</Text>);
+    return <Text>Error! {error.message}</Text>;
   }
 
-  const games = ( data && data.activeGamesForPlayer )
-    ? data.activeGamesForPlayer
-    : [];
-  const filtered_games = filter(games, g => g);
+  const games = data && data.activeGamesForPlayer ? data.activeGamesForPlayer : [];
+  const filtered_games = filter(games, (g) => g);
   // sort games descending by start time
   const sorted_games = reverse(sortBy(filtered_games, ['start']));
   //console.log('sorted_games', sorted_games);
@@ -131,12 +109,12 @@ const Games = props => {
       <View style={styles.gamesSubMenu}>
         <View>
           <Icon
-            name='add-circle'
+            name="add-circle"
             color={blue}
             size={40}
             onPress={newGamePressed}
             accessibilityLabel="New Game"
-            testID='new_game'
+            testID="new_game"
           />
         </View>
       </View>
@@ -145,17 +123,13 @@ const Games = props => {
         renderItem={renderItem}
         onRefresh={() => fetchGameList()}
         refreshing={isFetching}
-        keyExtractor={item => item._key}
+        keyExtractor={(item) => item._key}
       />
     </View>
   );
-
-}
+};
 
 export default Games;
-
-
-
 
 const styles = StyleSheet.create({
   container: {

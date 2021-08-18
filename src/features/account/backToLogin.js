@@ -1,16 +1,8 @@
-import React from 'react';
-
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-
-
-const BackToLogin = props => {
-
+const BackToLogin = (props) => {
   const navigation = useNavigation();
 
   return (
@@ -18,17 +10,20 @@ const BackToLogin = props => {
       <Text style={styles.login_text}>
         Already have an account?
         <Text
-          onPress={() => { navigation.navigate('Login'); }}
+          onPress={() => {
+            navigation.navigate('Login');
+          }}
           style={styles.login_button}
-        >  Login</Text>
+        >
+          {' '}
+          Login
+        </Text>
       </Text>
     </View>
   );
-
 };
 
 export default BackToLogin;
-
 
 const styles = StyleSheet.create({
   login_view: {
@@ -41,6 +36,6 @@ const styles = StyleSheet.create({
   login_button: {
     fontWeight: 'bold',
     marginLeft: 6,
-    color: "#fff",
+    color: '#fff',
   },
 });

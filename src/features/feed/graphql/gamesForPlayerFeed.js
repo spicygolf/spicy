@@ -1,8 +1,20 @@
 import { gql } from '@apollo/client';
 
 export const GAMES_FOR_PLAYER_FEED = gql`
-  query GamesForPlayerFeed($begDate: String!, $endDate: String!, $stat: String!, $currentPlayer: String!, $myClubs: [String]!) {
-    gamesForPlayerFeed(begDate: $begDate, endDate: $endDate, stat: $stat, currentPlayer: $currentPlayer, myClubs: $myClubs) {
+  query GamesForPlayerFeed(
+    $begDate: String!
+    $endDate: String!
+    $stat: String!
+    $currentPlayer: String!
+    $myClubs: [String]!
+  ) {
+    gamesForPlayerFeed(
+      begDate: $begDate
+      endDate: $endDate
+      stat: $stat
+      currentPlayer: $currentPlayer
+      myClubs: $myClubs
+    ) {
       _key
       name
       start

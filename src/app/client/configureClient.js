@@ -1,60 +1,47 @@
-import AsyncStorage from '@react-native-community/async-storage';
-import {
-  ApolloClient,
-  ApolloLink,
-  HttpLink,
-  InMemoryCache,
-  split,
-} from '@apollo/client';
+import { ApolloClient, ApolloLink, HttpLink, InMemoryCache, split } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/link-context';
 import { onError } from '@apollo/link-error';
 import { WebSocketLink } from '@apollo/link-ws';
-import OfflineLink from "apollo-link-offline";
-import { persistCache } from "apollo3-cache-persist";
-
+import AsyncStorage from '@react-native-community/async-storage';
+import OfflineLink from 'apollo-link-offline';
+import { persistCache } from 'apollo3-cache-persist';
+import possibleTypes from 'app/client/possibleTypes';
+import typePolicies from 'app/client/typePolicies';
 import { baseUri, scheme } from 'common/config';
 import { logout } from 'common/utils/account';
-import typePolicies from 'app/client/typePolicies';
-import possibleTypes from 'app/client/possibleTypes';
-
-
 
 export default configureClient = async () => {
-
   const cache = new InMemoryCache({
-    dataIdFromObject: object => {
+    dataIdFromObject: (object) => {
       //console.log('object', object);
-      return object._key || null
+      return object._key || null;
     },
     typePolicies: typePolicies,
     possibleTypes: possibleTypes,
-   });
+  });
 
   const authLink = setContext((_, { headers }) => {
     // get the authentication token from local storage if it exists
-    return AsyncStorage.getItem('token')
-      // return the headers to the context so httpLink can read them
-      .then(token => {
-        //console.log('token', token);
-        return ({
-          headers: {
-            ...headers,
-            authorization: `Bearer ${token}`,
-          }
-        });
-      })
-      .catch(err => {
-        return headers
-      });
+    return (
+      AsyncStorage.getItem('token')
+        // return the headers to the context so httpLink can read them
+        .then((token) => {
+          //console.log('token', token);
+          return {
+            headers: {
+              ...headers,
+              authorization: `Bearer ${token}`,
+            },
+          };
+        })
+        .catch((err) => {
+          return headers;
+        })
+    );
   });
 
-  const errorLink = onError(({
-      graphQLErrors,
-      networkError,
-      operation,
-      forward
-    }) => {
+  const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
     if (graphQLErrors)
       graphQLErrors.map(({ message, locations, path }) =>
         console.log(
@@ -72,14 +59,14 @@ export default configureClient = async () => {
   });
 
   const httpLink = new HttpLink({
-    uri: `${scheme}://${baseUri}/graphql`
+    uri: `${scheme}://${baseUri}/graphql`,
   });
 
   const wsLink = new WebSocketLink({
     uri: `${scheme}://${baseUri}/subscription`,
     options: {
-      reconnect: true
-    }
+      reconnect: true,
+    },
   });
 
   const offlineLink = new OfflineLink({
@@ -112,29 +99,24 @@ export default configureClient = async () => {
       errorPolicy: 'all',
     },
     mutate: {
-      errorPolicy: 'all'
-    }
+      errorPolicy: 'all',
+    },
   };
 
   const client = new ApolloClient({
     cache,
-    link: ApolloLink.from([
-        errorLink,
-        authLink,
-        splitLink
-    ]),
-    defaultOptions: defaultOptions
+    link: ApolloLink.from([errorLink, authLink, splitLink]),
+    defaultOptions: defaultOptions,
   });
 
   await persistCache({
     cache,
     storage: AsyncStorage,
     maxSize: false,
-    debug: false
+    debug: false,
   });
 
   offlineLink.setup(client);
 
   return client;
-
 };

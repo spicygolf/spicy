@@ -1,8 +1,4 @@
-import {
-  StyleSheet,
-} from 'react-native';
-
-
+import { StyleSheet } from 'react-native';
 
 export const shapeStyles = (size, color) => {
   return StyleSheet.create({

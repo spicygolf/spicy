@@ -1,37 +1,30 @@
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-} from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-
-import ProfileHome from 'features/profile/profilehome';
+import { red } from 'common/colors';
 import LinkHandicap from 'features/profile/linkHandicap';
-import SettingsHome from 'features/profile/settings/settings.js';
+import ProfileHome from 'features/profile/profilehome';
 import Account from 'features/profile/settings/account.js';
 import AccountChange from 'features/profile/settings/accountChange.js';
 import ClearCache from 'features/profile/settings/clearCache.js';
-import Logout from 'features/profile/settings/logout.js';
 import Impersonate from 'features/profile/settings/impersonate.js';
-import { red } from 'common/colors';
+import Logout from 'features/profile/settings/logout.js';
+import SettingsHome from 'features/profile/settings/settings.js';
+import React from 'react';
+import { SafeAreaView, StyleSheet } from 'react-native';
 
-
-
-const ProfileStack = props => {
-
+const ProfileStack = (props) => {
   const Stack = createStackNavigator();
 
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Navigator
-        initialRouteName='ProfileHome'
+        initialRouteName="ProfileHome"
         screenOptions={{
           title: 'Profile',
           headerShown: false,
         }}
       >
         <Stack.Screen
-          name='ProfileHome'
+          name="ProfileHome"
           component={ProfileHome}
           screenOptions={{
             title: 'Profile',
@@ -39,7 +32,7 @@ const ProfileStack = props => {
           }}
         />
         <Stack.Screen
-          name='LinkHandicap'
+          name="LinkHandicap"
           component={LinkHandicap}
           options={{
             title: 'Link Handicap Service',
@@ -47,7 +40,7 @@ const ProfileStack = props => {
           }}
         />
         <Stack.Screen
-          name='Settings'
+          name="Settings"
           component={SettingsHome}
           options={{
             title: 'Settings',
@@ -56,7 +49,7 @@ const ProfileStack = props => {
           }}
         />
         <Stack.Screen
-          name='Account'
+          name="Account"
           component={Account}
           options={{
             title: 'Account',
@@ -65,7 +58,7 @@ const ProfileStack = props => {
           }}
         />
         <Stack.Screen
-          name='AccountChange'
+          name="AccountChange"
           component={AccountChange}
           options={{
             title: 'Change',
@@ -74,7 +67,7 @@ const ProfileStack = props => {
           }}
         />
         <Stack.Screen
-          name='ClearCache'
+          name="ClearCache"
           component={ClearCache}
           options={{
             title: 'Clear Local Data',
@@ -83,7 +76,7 @@ const ProfileStack = props => {
           }}
         />
         <Stack.Screen
-          name='Logout'
+          name="Logout"
           component={Logout}
           options={{
             title: 'Logout',
@@ -92,7 +85,7 @@ const ProfileStack = props => {
           }}
         />
         <Stack.Screen
-          name='Impersonate'
+          name="Impersonate"
           component={Impersonate}
           options={{
             title: 'Impersonate',
@@ -103,11 +96,9 @@ const ProfileStack = props => {
       </Stack.Navigator>
     </SafeAreaView>
   );
-
 };
 
 export default ProfileStack;
-
 
 const styles = StyleSheet.create({
   container: {

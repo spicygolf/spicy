@@ -1,12 +1,8 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import auth from '@react-native-firebase/auth';
-
 import { baseUri, scheme } from 'common/config';
 
-
-
 export const registerPlayer = async (registration, fbUser) => {
-
   // REST call to register player
   const uri = `${scheme}://${baseUri}/account/register`;
 
@@ -18,17 +14,15 @@ export const registerPlayer = async (registration, fbUser) => {
     }),
     headers: {
       'Cache-Control': 'no-cache',
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   });
   const payload = await res.json();
   console.log('register payload', payload);
-  return payload
-
+  return payload;
 };
 
-export const login = async fbUser => {
-
+export const login = async (fbUser) => {
   const token = await fbUser.getIdToken();
 
   // REST call to API to get pkey, token
@@ -42,14 +36,14 @@ export const login = async fbUser => {
     }),
     headers: {
       'Cache-Control': 'no-cache',
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   });
   const payload = await res.json();
   //console.log('login payload', payload);
 
   let ret = null;
-  switch( res.status ) {
+  switch (res.status) {
     case 200:
       ret = {
         currentPlayerKey: payload.pkey,
@@ -75,8 +69,7 @@ export const login = async fbUser => {
   return ret;
 };
 
-export const logout = async client => {
-
+export const logout = async (client) => {
   // zap local storage
   await AsyncStorage.removeItem('token');
   await AsyncStorage.removeItem('currentPlayer');
@@ -85,22 +78,21 @@ export const logout = async client => {
   try {
     // clear apollo client cache/store
     if (client && typeof client.clearStore === 'function') {
-      client.clearStore()
+      client.clearStore();
     }
   } catch (e) {
-    console.error('err client', e)
+    console.error('err client', e);
   }
 
   // call API logout endpoint
   await auth().signOut();
   return true;
-
 };
 
-export const clearCache = async client => {
+export const clearCache = async (client) => {
   await client.clearStore();
   client.cache.data.clear();
-/*
+  /*
   for( const key of Object.keys(client.cache.data.data) ) {
     const e = client.cache.evict({id: key});
     console.log('evict', key, e);
@@ -112,26 +104,24 @@ export const clearCache = async client => {
   return true;
 };
 
-
-export const getCurrentUser = fbUser => {
+export const getCurrentUser = (fbUser) => {
   return login(fbUser)
-    .then(login_res => {
+    .then((login_res) => {
       return {
         ...login_res,
         fbUser: fbUser,
       };
     })
-    .catch(e => {
+    .catch((e) => {
       //console.log('getCurrentUser error', e);
       return e;
     });
 };
 
 export const validate = (type, text) => {
-
   let ret = false;
 
-  switch( type ) {
+  switch (type) {
     case 'email':
       ret = validateEmail(text);
       break;
@@ -152,58 +142,57 @@ export const validate = (type, text) => {
   }
 
   return ret;
-
 };
 
-
-export const validateEmail = email => {
-  if( email == '' ) return true;
-  if( !email ) return false;
-  var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+export const validateEmail = (email) => {
+  if (email == '') return true;
+  if (!email) return false;
+  var re =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
 };
 
-export const validatePassword = pass => {
-  if( pass == '' ) return true;
-  if( !pass ) return false;
-  if( pass.length > 3 ) return true;
-}
+export const validatePassword = (pass) => {
+  if (pass == '') return true;
+  if (!pass) return false;
+  if (pass.length > 3) return true;
+};
 
-export const validateName = name => {
-  if( !name ) return false;
+export const validateName = (name) => {
+  if (!name) return false;
   var re = /^[a-zA-Z ]+$/;
   return re.test(String(name).toLowerCase());
 };
 
-export const validateInteger = number => {
-  if( !number ) return false;
+export const validateInteger = (number) => {
+  if (!number) return false;
   return Number.isInteger(parseInt(number));
 };
 
-export const validateFloat = number => {
-  if( !number ) return false;
+export const validateFloat = (number) => {
+  if (!number) return false;
   return !Number.isNaN(parseFloat(number));
 };
 
-export const build_qs = args => {
+export const build_qs = (args) => {
   const a = [];
-  for( let key in args ) {
-    if( args.hasOwnProperty(key) ) {
+  for (let key in args) {
+    if (args.hasOwnProperty(key)) {
       a.push(`${key}=${args[key]}`);
     }
   }
   return a.join('&');
 };
 
-export const parseFirebaseError = e => {
+export const parseFirebaseError = (e) => {
   const split = e.message.split(']');
   let slug = '';
-  if( split && split[0] ) {
+  if (split && split[0]) {
     slugSplit = split[0].split('[');
-    if( slugSplit && slugSplit[1] ) slug = slugSplit[1].trim();
+    if (slugSplit && slugSplit[1]) slug = slugSplit[1].trim();
   }
   let message = e.message;
-  if( split && split[1] ) message = split[1].trim();
+  if (split && split[1]) message = split[1].trim();
 
   return {
     slug,

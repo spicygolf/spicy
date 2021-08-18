@@ -1,30 +1,18 @@
-import React, { useState } from 'react';
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Button,
-  Card,
-} from 'react-native-elements';
-import { useNavigation } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import moment from 'moment';
-
+import { useNavigation } from '@react-navigation/native';
 import GameNav from 'features/games/gamenav';
+import moment from 'moment';
+import React, { useState } from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Button, Card } from 'react-native-elements';
 
-
-
-const NewGameInfo = props => {
-
+const NewGameInfo = (props) => {
   const { route } = props;
   const { gamespec } = route.params;
 
   const navigation = useNavigation();
 
-  const [start, setStart ] = useState(new Date());
+  const [start, setStart] = useState(new Date());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
 
@@ -34,7 +22,7 @@ const NewGameInfo = props => {
     setStart(newStart);
   };
 
-  const showMode = currentMode => {
+  const showMode = (currentMode) => {
     setShow(true);
     setMode(currentMode);
   };
@@ -49,41 +37,24 @@ const NewGameInfo = props => {
 
   return (
     <View>
-      <GameNav
-        title='Game Information'
-        showBack={true}
-      />
+      <GameNav title="Game Information" showBack={true} />
       <Card>
         <View>
           <View style={styles.name}>
-            <Text style={styles.label_txt}>
-              Game:
-            </Text>
-            <Text>
-              {gamespec.disp}
-            </Text>
+            <Text style={styles.label_txt}>Game:</Text>
+            <Text>{gamespec.disp}</Text>
           </View>
         </View>
         <View style={styles.date_time_view}>
           <View style={styles.date_view}>
-            <Text style={styles.label_txt}>
-              Date:
-            </Text>
-            <Text
-              style={styles.value_txt}
-              onPress={showDatepicker}
-            >
+            <Text style={styles.label_txt}>Date:</Text>
+            <Text style={styles.value_txt} onPress={showDatepicker}>
               {moment(start).format('ll')}
             </Text>
           </View>
           <View style={styles.time_view}>
-            <Text style={styles.label_txt}>
-              Time:
-            </Text>
-            <Text
-              style={styles.value_txt}
-              onPress={showTimepicker}
-            >
+            <Text style={styles.label_txt}>Time:</Text>
+            <Text style={styles.value_txt} onPress={showTimepicker}>
               {moment(start).format('LT')}
             </Text>
           </View>
@@ -92,13 +63,13 @@ const NewGameInfo = props => {
           <Text style={styles.note}>
             Recommended: match game date/time with your tee time.
           </Text>
-          { show && (
+          {show && (
             <DateTimePicker
-              testID='game_start_datetimepicker'
+              testID="game_start_datetimepicker"
               value={start}
               mode={mode}
               is24Hour={false}
-              display='default'
+              display="default"
               onChange={onChange}
             />
           )}
@@ -106,23 +77,22 @@ const NewGameInfo = props => {
       </Card>
       <Button
         buttonStyle={styles.button}
-        title='Create Game'
-        type='solid'
+        title="Create Game"
+        type="solid"
         onPress={() => {
           navigation.navigate('NewGame', {
             gamespec: gamespec,
             game_start: moment.utc(start).format(),
-          })
+          });
         }}
-        accessibilityLabel='Create Game'
-        testID='create_game'
+        accessibilityLabel="Create Game"
+        testID="create_game"
       />
     </View>
   );
 };
 
 export default NewGameInfo;
-
 
 const styles = StyleSheet.create({
   name: {

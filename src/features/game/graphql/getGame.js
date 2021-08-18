@@ -117,18 +117,18 @@ export const GET_GAME_QUERY = gql`
         wolf_disp
         team_change_every
         scoring {
-            hole {
-              name
-              disp
-              seq
-              points
-              source
-              scope
-              calculation
-              better
-              type
-              based_on
-            }
+          hole {
+            name
+            disp
+            seq
+            points
+            source
+            scope
+            calculation
+            better
+            type
+            based_on
+          }
         }
         options {
           name
@@ -137,8 +137,8 @@ export const GET_GAME_QUERY = gql`
           type
           sub_type
           choices {
-              name
-              disp
+            name
+            disp
           }
           default
           limit

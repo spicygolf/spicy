@@ -1,78 +1,57 @@
-import React, { useContext } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  View,
-} from 'react-native';
-import {
-  Button,
-  Icon,
-} from 'react-native-elements';
 import { useMutation } from '@apollo/client';
-import { find, sortBy } from 'lodash';
-
-import { GameContext } from 'features/game/gameContext';
 import { blue } from 'common/colors';
-import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
+import { getAllOptions, getJunk, omitTypename, setTeamJunk } from 'common/utils/game';
+import { get_net_score, get_score_value } from 'common/utils/rounds';
+import { isScoreToParJunk } from 'common/utils/score';
 import ScoringWrapper from 'common/utils/ScoringWrapper';
-import {
-  get_net_score,
-  get_score_value,
-} from 'common/utils/rounds';
-import {
-  isScoreToParJunk,
-} from 'common/utils/score';
-import {
-  getAllOptions,
-  getJunk,
-  omitTypename,
-  setTeamJunk,
-} from 'common/utils/game';
-import {
-  getScoreTeamForPlayer,
-} from 'common/utils/teams';
+import { getScoreTeamForPlayer } from 'common/utils/teams';
+import { GameContext } from 'features/game/gameContext';
+import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
+import { find, sortBy } from 'lodash';
+import React, { useContext } from 'react';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { Button, Icon } from 'react-native-elements';
 
-
-
-const HoleJunk = props => {
+const HoleJunk = (props) => {
   const { hole, score, pkey, test } = props;
   // some testing things
   const { team, player_index } = test;
   const h = hole.hole;
 
-  const par = (hole && hole.par) ? parseFloat(hole.par) : 0.0;
+  const par = hole && hole.par ? parseFloat(hole.par) : 0.0;
 
   const { game, scores, readonly } = useContext(GameContext);
   const { _key: gkey } = game;
 
-  const alljunk = getAllOptions({game, type: 'junk'});
+  const alljunk = getAllOptions({ game, type: 'junk' });
   // console.log('allJunk in holeJunk', alljunk);
   const sorted_junk = sortBy(alljunk, ['seq']);
-  if( sorted_junk.length == 0 ) return null;
+  if (sorted_junk.length == 0) return null;
 
-  const scoreTeamForPlayer = getScoreTeamForPlayer({scores, hole: hole.hole, pkey});
+  const scoreTeamForPlayer = getScoreTeamForPlayer({ scores, hole: hole.hole, pkey });
 
-  const [ updateGameHoles ] = useMutation(UPDATE_GAME_HOLES_MUTATION);
+  const [updateGameHoles] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
   const oneHoleScoring = {
-    holes: [{
-      hole: hole.hole,
-    }],
+    holes: [
+      {
+        hole: hole.hole,
+      },
+    ],
   };
   const scoringWrapper = new ScoringWrapper(game, oneHoleScoring, hole.hole);
 
-
   const setJunk = async (junk, newValue) => {
-    if( readonly ) return; // viewing game only, so do nothing
+    if (readonly) return; // viewing game only, so do nothing
     // only set in DB if junk is based on user input
-    if( !junk || !junk.based_on || junk.based_on != 'user') return;
-    if( !game || !game.holes ) return;
+    if (!junk || !junk.based_on || junk.based_on != 'user') return;
+    if (!game || !game.holes) return;
 
-    let newHoles = game.holes.map(h => {
-      let newHole = {...h,};
-      if( h.hole == hole.hole ) {
-        let newTeams = newHole.teams.map(t => {
-          return setTeamJunk({...t,}, junk, newValue.toString(), pkey);
+    let newHoles = game.holes.map((h) => {
+      let newHole = { ...h };
+      if (h.hole == hole.hole) {
+        let newTeams = newHole.teams.map((t) => {
+          return setTeamJunk({ ...t }, junk, newValue.toString(), pkey);
         });
         newHole.teams = newTeams;
       }
@@ -92,17 +71,15 @@ const HoleJunk = props => {
           _key: gkey,
           holes: newHoles,
         },
-      }
+      },
     });
 
-    if( error ) console.log('Error updating game - holeJunk', error);
-
+    if (error) console.log('Error updating game - holeJunk', error);
   };
 
-
-  const checkJunkAvailability = ({hole, score, junk}) => {
-    if( !junk ) return false;
-    if( !junk.availability ) return true;
+  const checkJunkAvailability = ({ hole, score, junk }) => {
+    if (!junk) return false;
+    if (!junk.availability) return true;
 
     const logic = scoringWrapper.logic(junk.availability, {
       hole,
@@ -112,33 +89,30 @@ const HoleJunk = props => {
     return logic;
   };
 
-
-  const renderJunk = junk => {
-
+  const renderJunk = (junk) => {
     // go through all reasons to not show junk and return null
-    if( junk.show_in == 'none' ) return null;
-    if( !checkJunkAvailability({hole, score, junk}) ) return null;
+    if (junk.show_in == 'none') return null;
+    if (!checkJunkAvailability({ hole, score, junk })) return null;
 
     // TODO: junk.name needs l10n, i18n - use junk.name as slug
     let type = 'outline';
     let color = blue;
 
     // don't show team junk here
-    if( junk.show_in == 'team' ) return null;
+    if (junk.show_in == 'team') return null;
 
     // TODO: are all junk true/false?
     const val = getJunk(junk.name, pkey, game, hole.hole);
-    let selected = (val && (val == true || val == 'true')) ? true : false;
+    let selected = val && (val == true || val == 'true') ? true : false;
 
     // if junk shouldn't be rendered except if a condition is achieved, then
     // return null
-    if( junk.show_in == 'score' ) {
-
-      if( junk.scope == 'team' && scoreTeamForPlayer.players.length == 1 ) {
+    if (junk.show_in == 'score') {
+      if (junk.scope == 'team' && scoreTeamForPlayer.players.length == 1) {
         // show team junk for one-person teams here, if achieved
         //console.log('one-person team junk', scoreTeamForPlayer);
-        const junkFind = find(scoreTeamForPlayer.junk, {name: junk.name});
-        if( junkFind ) {
+        const junkFind = find(scoreTeamForPlayer.junk, { name: junk.name });
+        if (junkFind) {
           selected = true;
         } else {
           return null;
@@ -146,18 +120,18 @@ const HoleJunk = props => {
       } else {
         const based_on = junk.based_on || 'gross';
         let s = get_score_value('gross', score);
-        if( based_on == 'net' ) {
+        if (based_on == 'net') {
           s = get_net_score(s, score);
         }
 
-        if( !junk.score_to_par ) {
+        if (!junk.score_to_par) {
           //console.log(`Invalid game setup.  Junk '${junk.name}' doesn't have
           //'score_to_par' set properly.`);
           return null;
         }
 
         const j = isScoreToParJunk(junk, s, par);
-        if( j ) {
+        if (j) {
           selected = true;
         } else {
           // condition not achieved, so return null;
@@ -166,22 +140,16 @@ const HoleJunk = props => {
       }
     }
 
-    if( selected ) {
+    if (selected) {
       type = 'solid';
       color = 'white';
     }
-    const testID=`h_${h}_t_${team}_p_${player_index+1}_j_${junk.seq}`;
+    const testID = `h_${h}_t_${team}_p_${player_index + 1}_j_${junk.seq}`;
     //console.log('testID', testID);
     return (
       <Button
         title={junk.disp}
-        icon={
-          <Icon
-            style={styles.icon}
-            name={junk.icon}
-            size={20}
-            color={color}
-          />}
+        icon={<Icon style={styles.icon} name={junk.icon} size={20} color={color} />}
         type={type}
         buttonStyle={styles.button}
         titleStyle={styles.buttonTitle}
@@ -190,7 +158,6 @@ const HoleJunk = props => {
         testID={testID}
       />
     );
-
   };
 
   return (
@@ -198,14 +165,13 @@ const HoleJunk = props => {
       <FlatList
         horizontal={true}
         data={sorted_junk}
-        renderItem={({item}) => renderJunk(item)}
+        renderItem={({ item }) => renderJunk(item)}
       />
     </View>
   );
 };
 
 export default HoleJunk;
-
 
 const styles = StyleSheet.create({
   container: {

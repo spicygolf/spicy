@@ -1,28 +1,13 @@
-import React, { useContext, } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Icon,
-  ListItem,
-} from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-import DeviceInfo from 'react-native-device-info';
-
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { dark, light } from 'common/colors';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import React, { useContext } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
+import { Icon, ListItem } from 'react-native-elements';
 
-
-
-const SettingsHome = props => {
-
-  const {
-    currentPlayer,
-    impersonate,
-  } = useContext(CurrentPlayerContext);
+const SettingsHome = (props) => {
+  const { currentPlayer, impersonate } = useContext(CurrentPlayerContext);
 
   const navigation = useNavigation();
 
@@ -60,45 +45,36 @@ const SettingsHome = props => {
 
   const version = DeviceInfo.getVersion();
 
-  const renderSetting = ({item}) => {
+  const renderSetting = ({ item }) => {
     // console.log('impersonate', impersonate);
-    if( item.level == 'admin' ) {
+    if (item.level == 'admin') {
       if (
-          (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin') ||
-          (impersonate && impersonate.original && impersonate.original.level && impersonate.original.level == 'admin')
-         ) {
+        (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin') ||
+        (impersonate &&
+          impersonate.original &&
+          impersonate.original.level &&
+          impersonate.original.level == 'admin')
+      ) {
         // do nothing... i.e. continue on rendering the setting
       } else {
-        return null;  // don't render the setting
+        return null; // don't render the setting
       }
     }
 
     return (
-      <ListItem
-        onPress={() => navigation.navigate(item.nav)}
-      >
-        <Icon
-          name={item.icon}
-          type={item.icon_type}
-          color={dark}
-        />
+      <ListItem onPress={() => navigation.navigate(item.nav)}>
+        <Icon name={item.icon} type={item.icon_type} color={dark} />
         <ListItem.Content>
           <ListItem.Title style={styles.title}>{item.name}</ListItem.Title>
         </ListItem.Content>
-        <Icon
-          name='chevron-right'
-          color={light}
-        />
+        <Icon name="chevron-right" color={light} />
       </ListItem>
     );
   };
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={settings_data}
-        renderItem={renderSetting}
-      />
+      <FlatList data={settings_data} renderItem={renderSetting} />
       <View style={styles.app_info}>
         <Text>v{version}</Text>
       </View>
@@ -107,7 +83,6 @@ const SettingsHome = props => {
 };
 
 export default SettingsHome;
-
 
 const styles = StyleSheet.create({
   container: {

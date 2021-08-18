@@ -1,39 +1,30 @@
-import React, { useContext, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Text,
-  View,
-} from 'react-native';
 import { useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
-
-import { ADD_GAME_MUTATION } from 'features/games/graphql';
 import { ADD_LINK_MUTATION } from 'common/graphql/link';
+import { getHoles, omitTypename } from 'common/utils/game';
+import { ADD_GAME_MUTATION } from 'features/games/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import {
-  getHoles,
-  omitTypename,
-} from 'common/utils/game';
+import React, { useContext, useEffect, useState } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
 
-
-const NewGame = props => {
-
+const NewGame = (props) => {
   const { route } = props;
   const { gamespec, game_start } = route.params;
   //console.log('newGame', gamespec, game_start);
 
   const { currentPlayer } = useContext(CurrentPlayerContext);
-  const [ gkey, setGkey ] = useState(null);
+  const [gkey, setGkey] = useState(null);
 
   const navigation = useNavigation();
-  const [ addGameMutation ] = useMutation(ADD_GAME_MUTATION);
-  const [ addLinkMutation ] = useMutation(ADD_LINK_MUTATION);
+  const [addGameMutation] = useMutation(ADD_GAME_MUTATION);
+  const [addLinkMutation] = useMutation(ADD_LINK_MUTATION);
 
-  const teams_rotate = ( gamespec.team_change_every && gamespec.team_change_every > 0 )
-    ? `every${gamespec.team_change_every}`
-    : 'never';
+  const teams_rotate =
+    gamespec.team_change_every && gamespec.team_change_every > 0
+      ? `every${gamespec.team_change_every}`
+      : 'never';
 
-/*
+  /*
     // TODO: for #140, maybe something like:
               (with the commented out optimisticResponse below)
     const temp_key = Date.now() + '_' + currentPlayerKey;
@@ -50,7 +41,7 @@ const NewGame = props => {
 
   const initialHoles = getHoles({
     scope: {
-      holes: 'all18'
+      holes: 'all18',
     },
     holes: [],
   });
@@ -64,15 +55,14 @@ const NewGame = props => {
       holes: 'all18',
       teams_rotate,
     },
-    holes: initialHoles.map(h => ({
+    holes: initialHoles.map((h) => ({
       __typename: 'GameHole',
       hole: h,
       teams: [],
       multipliers: [],
     })),
-    options: gamespec.defaultOptions || []
+    options: gamespec.defaultOptions || [],
   };
-
 
   // TODO: we may have to add `__typename: 'Option'` if there's anything in gamespec.defaultOptions
   const newGameWithoutTypes = omitTypename(newGame);
@@ -86,7 +76,7 @@ const NewGame = props => {
       },
     });
 
-    if( error && error.message != 'Network request failed' ) {
+    if (error && error.message != 'Network request failed') {
       console.log('Error adding game: ', error.message);
     }
     //console.log('newGame data', data);
@@ -97,69 +87,62 @@ const NewGame = props => {
     //console.log('Begin linking game to gamespec');
     const { loading, error, data } = await addLinkMutation({
       variables: {
-        from: {type: 'game', value: game._key},
-        to: {type: 'gamespec', value: gamespec._key},
+        from: { type: 'game', value: game._key },
+        to: { type: 'gamespec', value: gamespec._key },
       },
     });
-    if( error && error.message != 'Network request failed' ) {
+    if (error && error.message != 'Network request failed') {
       console.log('Error linking game to gamespec: ', error.message);
     }
     //console.log('newGame linkg2gs', data);
     return data.link;
-
   };
 
   // New game has been created, so navigate to it.
-  useEffect(
-    () => {
-      if( currentPlayer && gkey ) {
-
-        // we don't have a game object in GameContext yet, so we have to make one up
-        // to send to LinkRoundList and friends
-        const game = {
-          _key: gkey,
-          ...newGameWithoutTypes,
-          gamespecs: [gamespec],
-        };
-        const player = {
-          _key: currentPlayer._key,
-          name: currentPlayer.name,
-          handicap: currentPlayer.handicap,
-        };
-        navigation.navigate('Game', {
-          currentGameKey: gkey,
-          screen: 'Setup',
-          params: {
-            screen: 'GameSetup',
-            params: {
-              addCurrentPlayerToGame: true,  // TODO: false for caddies / scorers
-              game,
-              player,
-            },
-          },
-        });
-      }
-    }, [gkey]
-  );
-
-  useEffect(
-    () => {
-      //console.log('createNewGame');
-      const createNewGame = async () => {
-        const game = await addGame();
-        await linkGameToGamespec(game)
-        setGkey(game._key);
+  useEffect(() => {
+    if (currentPlayer && gkey) {
+      // we don't have a game object in GameContext yet, so we have to make one up
+      // to send to LinkRoundList and friends
+      const game = {
+        _key: gkey,
+        ...newGameWithoutTypes,
+        gamespecs: [gamespec],
       };
-      if( !gkey ) createNewGame();
-    }, []
-  );
+      const player = {
+        _key: currentPlayer._key,
+        name: currentPlayer.name,
+        handicap: currentPlayer.handicap,
+      };
+      navigation.navigate('Game', {
+        currentGameKey: gkey,
+        screen: 'Setup',
+        params: {
+          screen: 'GameSetup',
+          params: {
+            addCurrentPlayerToGame: true, // TODO: false for caddies / scorers
+            game,
+            player,
+          },
+        },
+      });
+    }
+  }, [gkey]);
+
+  useEffect(() => {
+    //console.log('createNewGame');
+    const createNewGame = async () => {
+      const game = await addGame();
+      await linkGameToGamespec(game);
+      setGkey(game._key);
+    };
+    if (!gkey) createNewGame();
+  }, []);
 
   return (
     <View>
       <ActivityIndicator />
     </View>
   );
-
 };
 
 export default NewGame;

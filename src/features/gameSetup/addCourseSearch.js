@@ -1,5 +1,12 @@
+import { useQuery } from '@apollo/client';
+import { useFocusEffect } from '@react-navigation/native';
+import { getRatings } from 'common/utils/game';
+import { SEARCH_COURSE_QUERY } from 'features/courses/graphql';
+import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
+import { GameContext } from 'features/game/gameContext';
+import Tee from 'features/gameSetup/Tee';
+import { find, orderBy } from 'lodash';
 import React, { useContext, useRef, useState } from 'react';
-
 import {
   ActivityIndicator,
   FlatList,
@@ -7,67 +14,46 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  View
+  View,
 } from 'react-native';
+import { Card, Icon, ListItem } from 'react-native-elements';
 
-import {
-  Card,
-  ListItem,
-  Icon
-} from 'react-native-elements';
-import { useQuery } from '@apollo/client';
-import { useFocusEffect } from '@react-navigation/native';
-import { find, orderBy } from 'lodash';
-
-import { SEARCH_COURSE_QUERY } from 'features/courses/graphql';
-import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
-import Tee from 'features/gameSetup/Tee';
-import { GameContext } from 'features/game/gameContext';
-import { getRatings } from 'common/utils/game';
-
-
-
-const ListHeader = ({title}) => (
+const ListHeader = ({ title }) => (
   <View>
     <Text style={styles.header}>{title}</Text>
   </View>
 );
 
-
-
-const AddCourseSearch = props => {
-
+const AddCourseSearch = (props) => {
   const { game, currentPlayerKey } = useContext(GameContext);
   //console.log('currentPlayerKey', currentPlayerKey);
 
-  const [ search, setSearch ] = useState('');
-  const [ course, setCourse ] = useState(null);
+  const [search, setSearch] = useState('');
+  const [course, setCourse] = useState(null);
 
   const searchInputRef = useRef(null);
 
-  const _coursePressed = course => {
+  const _coursePressed = (course) => {
     Keyboard.dismiss();
     setCourse(course);
-  }
+  };
 
   const _removeCourse = () => {
     setCourse(null);
-  }
+  };
 
-  const _renderCourse = ({item}) => {
+  const _renderCourse = ({ item }) => {
     return (
-      <ListItem
-        onPress={() => _coursePressed(item)}
-      >
+      <ListItem onPress={() => _coursePressed(item)}>
         <ListItem.Content>
           <ListItem.Title>{item.name || ''}</ListItem.Title>
           <ListItem.Subtitle>{`${item.city}, ${item.state}`}</ListItem.Subtitle>
         </ListItem.Content>
       </ListItem>
     );
-  }
+  };
 
-  const _renderCourseTee = ({item}) => {
+  const _renderCourseTee = ({ item }) => {
     const { rating, slope } = getRatings(game.scope.holes, item);
     return (
       <Tee
@@ -76,98 +62,92 @@ const AddCourseSearch = props => {
         subtitle={`${item.gender} - ${rating}/${slope}`}
       />
     );
-  }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
-      if( searchInputRef && searchInputRef.current ) {
+      if (searchInputRef && searchInputRef.current) {
         searchInputRef.current.focus();
       }
-    })
+    }),
   );
 
-  if( !course ) {
-
+  if (!course) {
     const { loading, error, data } = useQuery(SEARCH_COURSE_QUERY, {
       variables: {
         q: search,
-      }
+      },
     });
-    if( loading ) return (<ActivityIndicator />);
-    if( error ) {
+    if (loading) return <ActivityIndicator />;
+    if (error) {
       console.log(error);
-      return (<Text>Error</Text>);
+      return <Text>Error</Text>;
     }
 
-    const header = (
-      data &&
-      data.searchCourse &&
-      data.searchCourse.length) ?
-    (<ListHeader title='Courses' />) : null;
+    const header =
+      data && data.searchCourse && data.searchCourse.length ? (
+        <ListHeader title="Courses" />
+      ) : null;
 
     return (
       <View style={styles.container}>
         <TextInput
           ref={searchInputRef}
           style={styles.searchTextInput}
-          placeholder='search courses...'
-          autoCapitalize='none'
-          onChangeText={text => setSearch(text)}
+          placeholder="search courses..."
+          autoCapitalize="none"
+          onChangeText={(text) => setSearch(text)}
           value={search}
         />
         <FlatList
           data={data.searchCourse}
           renderItem={_renderCourse}
           ListHeaderComponent={header}
-          keyExtractor={item => item._key}
+          keyExtractor={(item) => item._key}
           keyboardShouldPersistTaps={'handled'}
         />
       </View>
     );
-
   } else {
-
     const { loading, error, data } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
       variables: {
         pkey: currentPlayerKey,
         gametime: game.start,
-      }
+      },
     });
 
-    if( loading ) return (<ActivityIndicator />);
-    if( error ) {
+    if (loading) return <ActivityIndicator />;
+    if (error) {
       console.log(error);
-      return (<Text>Error</Text>);
+      return <Text>Error</Text>;
     }
 
     console.log('faves data', data);
-    const faveTees = (data && data.getFavoriteTeesForPlayer ?
-      data.getFavoriteTeesForPlayer : []);
+    const faveTees =
+      data && data.getFavoriteTeesForPlayer ? data.getFavoriteTeesForPlayer : [];
 
-    let tees = course.tees.map(tee => {
+    let tees = course.tees.map((tee) => {
       const { rating } = getRatings(game.scope.holes, tee);
-      return ({
+      return {
         ...tee,
         order: rating,
         fave: {
-          faved: (find(faveTees, {_key: tee._key}) ? true : false),
-          from: {type: 'player', value: currentPlayerKey},
-          to:   {type: 'tee', value: tee._key},
-          refetchQueries: [{
-            query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
-            variables: {
-              pkey: currentPlayerKey,
-              gametime: game.start,
-            }
-          }]
-        }
-      });
+          faved: find(faveTees, { _key: tee._key }) ? true : false,
+          from: { type: 'player', value: currentPlayerKey },
+          to: { type: 'tee', value: tee._key },
+          refetchQueries: [
+            {
+              query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
+              variables: {
+                pkey: currentPlayerKey,
+                gametime: game.start,
+              },
+            },
+          ],
+        },
+      };
     });
-    tees = orderBy(
-      tees,
-      ['gender', 'order'],
-      ['desc',   'desc' ]
-    );
+    tees = orderBy(tees, ['gender', 'order'], ['desc', 'desc']);
 
     const cardHeader = (
       <ListItem>
@@ -176,8 +156,8 @@ const AddCourseSearch = props => {
           <ListItem.Subtitle>{`${course.city}, ${course.state}`}</ListItem.Subtitle>
         </ListItem.Content>
         <Icon
-          name='remove-circle'
-          color='red'
+          name="remove-circle"
+          color="red"
           onPress={() => {
             _removeCourse();
           }}
@@ -190,7 +170,7 @@ const AddCourseSearch = props => {
         <FlatList
           data={tees}
           renderItem={_renderCourseTee}
-          keyExtractor={item => item._key}
+          keyExtractor={(item) => item._key}
           keyboardShouldPersistTaps={'handled'}
         />
       </View>
@@ -198,54 +178,51 @@ const AddCourseSearch = props => {
 
     return (
       <Card>
-        { cardHeader }
-        { cardList }
+        {cardHeader}
+        {cardList}
       </Card>
     );
-
   }
-
 };
 
 export default AddCourseSearch;
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 15
+    marginTop: 15,
   },
   header: {
     paddingTop: 10,
     paddingLeft: 20,
     paddingRight: 20,
     fontSize: 20,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   searchTextInput: {
     fontSize: 20,
     color: '#000',
     width: '100%',
     paddingLeft: 20,
-    paddingRight: 20
+    paddingRight: 20,
   },
   cardTitle: {
     flexDirection: 'row',
     flex: 3,
     alignItems: 'center',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#555'
+    color: '#555',
   },
   citystate: {
     fontSize: 12,
-    color: '#555'
+    color: '#555',
   },
   listContainer: {
     marginTop: 0,
-    marginBottom: 50
-  }
+    marginBottom: 50,
+  },
 });

@@ -1,0 +1,5 @@
+node_modules/*
+build/*
+.eslintrc.j*
+e2e/*
+

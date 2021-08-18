@@ -1,7 +1,5 @@
 import { cloneDeep, findIndex } from 'lodash';
 
-
-
 const typePolicies = {
   Query: {
     fields: {
@@ -10,13 +8,13 @@ const typePolicies = {
           return incoming;
           //return {...existing, ...incoming};
         },
-      }
+      },
     },
   },
   Player: {
     fields: {
       handicap: {
-        merge: true
+        merge: true,
       },
     },
   },
@@ -24,16 +22,16 @@ const typePolicies = {
     fields: {
       scores: {
         merge: (existing = [], incoming) => {
-          if( existing.length == 0 ) return incoming;
+          if (existing.length == 0) return incoming;
           let newScores = [];
-          existing.map(h => {
-            newScores.push(cloneDeep(h))
+          existing.map((h) => {
+            newScores.push(cloneDeep(h));
           });
-          incoming.map(h => {
-            const i = findIndex(newScores, {hole: h.hole});
+          incoming.map((h) => {
+            const i = findIndex(newScores, { hole: h.hole });
             newScores[i] = {
               ...newScores[i],
-              ...h
+              ...h,
             };
           });
           //console.log('Round.scores merge', existing, incoming, newScores);

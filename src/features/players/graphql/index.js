@@ -6,6 +6,6 @@ export { SEARCH_PLAYER_QUERY } from './searchPlayer';
 export { UPDATE_PLAYER_MUTATION } from './updatePlayer';
 export {
   GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
-  GetFavoritePlayersForPlayer
+  GetFavoritePlayersForPlayer,
 } from './getFavoritePlayersForPlayer';
 export { GET_PLAYERS_FOLLOWERS_QUERY } from './getPlayersFollowers';

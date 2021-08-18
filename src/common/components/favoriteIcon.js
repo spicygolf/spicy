@@ -1,50 +1,45 @@
-import React from 'react';
-import {
-  Icon
-} from 'react-native-elements';
-
+import { green } from 'common/colors';
 import { AddLinkMutation } from 'common/graphql/link';
 import { RemoveLinkMutation } from 'common/graphql/unlink';
-import { green } from 'common/colors';
-
+import React from 'react';
+import { Icon } from 'react-native-elements';
 
 class FavoriteIcon extends React.Component {
-
   constructor(props) {
     super(props);
-//    if( this.props && this.props.fave && this.props.fave.faved ) {
-//      this.state = {
-//        faved: this.props.fave.faved
-//      }
-//    }
+    //    if( this.props && this.props.fave && this.props.fave.faved ) {
+    //      this.state = {
+    //        faved: this.props.fave.faved
+    //      }
+    //    }
   }
 
   render() {
     let content;
 
-    if( this.props.fave && this.props.fave.faved ) {
+    if (this.props.fave && this.props.fave.faved) {
       content = (
         <RemoveLinkMutation>
-          {({removeLinkMutation}) => {
+          {({ removeLinkMutation }) => {
             return (
               <Icon
-                name='star'
+                name="star"
                 color={green}
                 size={36}
                 onPress={async () => {
-                  const {data, errors} = await removeLinkMutation({
+                  const { data, errors } = await removeLinkMutation({
                     variables: {
                       from: this.props.fave.from,
-                      to: this.props.fave.to
+                      to: this.props.fave.to,
                     },
                     refetchQueries: this.props.fave.refetchQueries,
                     update: (cache, result) => {
-                      if( this.props.fave.update ) {
+                      if (this.props.fave.update) {
                         cache.writeQuery(this.props.fave.update);
                       }
-                    }
+                    },
                   });
-                  if( errors ) {
+                  if (errors) {
                     console.log('error removing favorite', errors);
                   }
                 }}
@@ -56,22 +51,22 @@ class FavoriteIcon extends React.Component {
     } else {
       content = (
         <AddLinkMutation>
-          {({addLinkMutation}) => {
+          {({ addLinkMutation }) => {
             return (
               <Icon
-                name='star-border'
+                name="star-border"
                 color={green}
                 size={36}
                 onPress={async () => {
-                  const {data, errors} = await addLinkMutation({
+                  const { data, errors } = await addLinkMutation({
                     variables: {
                       from: this.props.fave.from,
                       to: this.props.fave.to,
-                      other: [{key: 'favorite', value: 'true'}]
+                      other: [{ key: 'favorite', value: 'true' }],
                     },
-                    refetchQueries: this.props.fave.refetchQueries
+                    refetchQueries: this.props.fave.refetchQueries,
                   });
-                  if( errors ) {
+                  if (errors) {
                     console.log('error adding favorite', errors);
                   }
                 }}
@@ -84,7 +79,6 @@ class FavoriteIcon extends React.Component {
 
     return content;
   }
-
 }
 
 export default FavoriteIcon;

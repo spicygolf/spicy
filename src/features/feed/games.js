@@ -1,44 +1,32 @@
-import React, { useContext, } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  ListItem,
-} from 'react-native-elements';
 import { useQuery } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
-import { format } from 'date-fns';
-
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { GAMES_FOR_PLAYER_FEED } from 'features/feed/graphql';
 import { getCoursesPlayersTxt } from 'common/utils/game';
+import { format } from 'date-fns';
+import { GAMES_FOR_PLAYER_FEED } from 'features/feed/graphql';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import React, { useContext } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ListItem } from 'react-native-elements';
 
-
-
-const Games = props => {
-
+const Games = (props) => {
   const { currentPlayer: cp } = useContext(CurrentPlayerContext);
-  if( !cp ) return null;
+  if (!cp) return null;
 
   const navigation = useNavigation();
 
   const { route } = props;
   const { stat, begDate, endDate } = route.params;
 
-  const currentPlayer = `players/${cp._key}`
-  const myClubs = cp.clubs.map(c => `clubs/${c._key}`);
+  const currentPlayer = `players/${cp._key}`;
+  const myClubs = cp.clubs.map((c) => `clubs/${c._key}`);
 
   // console.log('variables', {stat, begDate, endDate, currentPlayer, myClubs});
 
   const { loading, error, data } = useQuery(GAMES_FOR_PLAYER_FEED, {
-    variables: { stat, begDate, endDate, currentPlayer, myClubs, }
+    variables: { stat, begDate, endDate, currentPlayer, myClubs },
   });
 
-  const buildSubtitle = game => {
+  const buildSubtitle = (game) => {
     //console.log('game', game);
     const { coursesTxt, playersTxt } = getCoursesPlayersTxt(game);
 
@@ -50,7 +38,6 @@ const Games = props => {
         <Text style={styles.subtitle}>{startTime || ''}</Text>
       </View>
     );
-
   };
 
   const gamePressed = (item) => {
@@ -64,23 +51,21 @@ const Games = props => {
     });
   };
 
-  const renderGame = ({item}) => {
-    if( !item ) return null;
+  const renderGame = ({ item }) => {
+    if (!item) return null;
     const name = item.name || '';
     const subtitle = buildSubtitle(item);
 
     return (
-      <ListItem
-        onPress={() => gamePressed(item)}
-      >
+      <ListItem onPress={() => gamePressed(item)}>
         <ListItem.Content>
           <ListItem.Title style={styles.title}>{name}</ListItem.Title>
           <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
         </ListItem.Content>
         <ListItem.Chevron
-          type='material'
-          name='chevron-right'
-          color='#999'
+          type="material"
+          name="chevron-right"
+          color="#999"
           size={24}
           onPress={() => itemPressed(item)}
         />
@@ -88,21 +73,20 @@ const Games = props => {
     );
   };
 
-  if( data && data.gamesForPlayerFeed ) {
+  if (data && data.gamesForPlayerFeed) {
     return (
       <FlatList
         data={data.gamesForPlayerFeed}
         renderItem={renderGame}
-        keyExtractor={g => g._key}
+        keyExtractor={(g) => g._key}
       />
     );
   } else {
-    return (<ActivityIndicator />)
+    return <ActivityIndicator />;
   }
 };
 
 export default Games;
-
 
 const styles = StyleSheet.create({
   title: {

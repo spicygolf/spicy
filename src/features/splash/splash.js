@@ -1,28 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Image,
-  StyleSheet,
-  View
-} from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
-
-
-const Splash = props => {
-
+const Splash = (props) => {
   const logo = require('../../../assets/img/logo200.png');
 
   return (
     <View style={styles.container}>
-      <Image
-        source={logo}
-      />
+      <Image source={logo} />
     </View>
   );
-
 };
 
 export default Splash;
-
 
 const styles = StyleSheet.create({
   container: {

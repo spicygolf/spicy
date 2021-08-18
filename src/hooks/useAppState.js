@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
+
 import usePrevious from './usePrevious';
 
 const AppStateTypes = {

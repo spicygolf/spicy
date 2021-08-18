@@ -1,31 +1,25 @@
-import React from 'react';
 import { useApolloClient, useSubscription } from '@apollo/client';
-
 import { SCORE_POSTED_SUBSCRIPTION } from 'features/rounds/graphql';
+import React from 'react';
 
-
-
-const ScorePostedListener = props => {
-
+const ScorePostedListener = (props) => {
   const { rkey } = props;
-  if( !rkey ) return null;
+  if (!rkey) return null;
   const client = useApolloClient();
 
-  const { loading, error, data } = useSubscription(
-    SCORE_POSTED_SUBSCRIPTION,
-    { variables: { rkey } },
-  );
+  const { loading, error, data } = useSubscription(SCORE_POSTED_SUBSCRIPTION, {
+    variables: { rkey },
+  });
 
-  if( loading ) return null;
-  if( error ) console.log('Error in ScorePostedListener', error);
+  if (loading) return null;
+  if (error) console.log('Error in ScorePostedListener', error);
 
-  if( data && data.scorePosted ) {
-      //console.log('data', data);
+  if (data && data.scorePosted) {
+    //console.log('data', data);
   }
 
   // non-display component
   return null;
-
 };
 
 export default ScorePostedListener;

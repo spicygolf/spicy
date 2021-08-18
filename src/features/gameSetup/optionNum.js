@@ -1,64 +1,49 @@
-import React, { useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  TextInput,
-} from 'react-native';
-
-import {
-  validateFloat,
-} from 'common/utils/account';
 import { green } from 'common/colors';
+import { validateFloat } from 'common/utils/account';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, TextInput } from 'react-native';
 
-
-
-const OptionNum = props => {
-
+const OptionNum = (props) => {
   const { option, setOption, readonly, index = 0 } = props;
-  const [ value, setValue ] = useState(option.values[0].value || null);
+  const [value, setValue] = useState(option.values[0].value || null);
 
   const validate = (type, text) => {
     const oTest = type == 'num' ? text : value;
     setOptionValid(validateFloat(oTest));
   };
 
-  const [ optionValid, setOptionValid ] = useState(false);
+  const [optionValid, setOptionValid] = useState(false);
   const oValid = { borderColor: optionValid ? green : '#ddd' };
 
-  useEffect(
-    () => validate(), []
-  );
+  useEffect(() => validate(), []);
 
   return (
-   <TextInput
+    <TextInput
       editable={!readonly}
       style={[styles.field_input, oValid]}
-      onChangeText={text => {
+      onChangeText={(text) => {
         setValue(text);
         validate('num', text);
       }}
       onEndEditing={() => {
-        if( optionValid ) {
+        if (optionValid) {
           let newOption = {
             name: option.name,
             values: option.values.map((v, i) => ({
-              value: (i === index)
-                ? value.toString()
-                : v.value,
+              value: i === index ? value.toString() : v.value,
               holes: v.holes,
             })),
           };
           setOption(newOption);
         }
       }}
-      keyboardType='decimal-pad'
+      keyboardType="decimal-pad"
       value={value.toString()}
     />
   );
-
 };
 
 export default OptionNum;
-
 
 const styles = StyleSheet.create({
   field_input: {

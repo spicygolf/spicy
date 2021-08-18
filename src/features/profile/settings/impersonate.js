@@ -1,39 +1,22 @@
-import React, { useContext, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Button,
-  Card,
-} from 'react-native-elements';
 import { useApolloClient } from '@apollo/client';
-
 import SpicySearchPlayer from 'common/components/spicy/player/search';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { clearCache } from 'common/utils/account';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import React, { useContext, useState } from 'react';
+import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Button, Card } from 'react-native-elements';
 
-
-
-const Impersonate = props => {
-
+const Impersonate = (props) => {
   const client = useApolloClient();
 
   const defaultNewPlayer = {
     search: '',
   };
 
-  const [ newPlayer, setNewPlayer ] = useState(defaultNewPlayer);
+  const [newPlayer, setNewPlayer] = useState(defaultNewPlayer);
 
-  const {
-    currentPlayer,
-    setCurrentPlayerKey,
-    impersonate,
-    setImpersonate,
-  } = useContext(CurrentPlayerContext);
+  const { currentPlayer, setCurrentPlayerKey, impersonate, setImpersonate } =
+    useContext(CurrentPlayerContext);
   // console.log('CurrentPlayerContext', useContext(CurrentPlayerContext));
 
   const impersonatePlayer = (iPlayer) => {
@@ -43,13 +26,13 @@ const Impersonate = props => {
   };
 
   let content;
-  if( impersonate && impersonate.original ) {
+  if (impersonate && impersonate.original) {
     content = (
       <View>
         <Card>
           <Text style={styles.field_label}>Impersonating {currentPlayer.name}</Text>
           <Button
-            title='Stop'
+            title="Stop"
             buttonStyle={styles.button}
             onPress={() => {
               // console.log('stop impersonating');
@@ -63,13 +46,13 @@ const Impersonate = props => {
   } else {
     content = (
       <KeyboardAvoidingView>
-        <ScrollView keyboardShouldPersistTaps='handled'>
+        <ScrollView keyboardShouldPersistTaps="handled">
           <Card>
             <Text style={styles.field_label}>Player to Impersonate:</Text>
             <SpicySearchPlayer
               state={newPlayer}
               setState={setNewPlayer}
-              onPress={item => {
+              onPress={(item) => {
                 // console.log('player pressed', item);
                 setImpersonate({
                   original: currentPlayer,
@@ -87,7 +70,6 @@ const Impersonate = props => {
 };
 
 export default Impersonate;
-
 
 const styles = StyleSheet.create({
   field_label: {

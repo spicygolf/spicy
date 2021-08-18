@@ -1,29 +1,19 @@
-import React, { useState, } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  ButtonGroup
-} from 'react-native-elements';
-import { zonedTimeToUtc } from 'date-fns-tz';
-import { subDays, subWeeks, subMonths, subYears } from 'date-fns'
-
-import Stat from 'features/feed/stat';
 import { blue } from 'common/colors';
+import { subDays, subMonths, subWeeks, subYears } from 'date-fns';
+import { zonedTimeToUtc } from 'date-fns-tz';
+import Stat from 'features/feed/stat';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { ButtonGroup } from 'react-native-elements';
 
-
-
-const Stats = props => {
-
-  const [ timeFrame, setTimeFrame ] = useState(1);
+const Stats = (props) => {
+  const [timeFrame, setTimeFrame] = useState(1);
 
   const buttons = ['1d', '1w', '1m', 'ytd', '1y'];
   const now = new Date();
   const endDate = zonedTimeToUtc(now).toISOString();
   let begDate = '';
-  switch( timeFrame ) {
+  switch (timeFrame) {
     case 0:
       begDate = subDays(now, 1).toISOString();
       break;
@@ -49,7 +39,7 @@ const Stats = props => {
       <ButtonGroup
         buttons={buttons}
         selectedIndex={timeFrame}
-        onPress={index => {
+        onPress={(index) => {
           setTimeFrame(index);
         }}
         containerStyle={styles.buttonGroupContainer}
@@ -59,40 +49,18 @@ const Stats = props => {
       />
       <Text style={styles.title}>Games</Text>
       <View style={styles.row}>
-        <Stat
-          stat='public'
-          begDate={begDate}
-          endDate={endDate}
-          side='left'
-        />
-        <Stat
-          stat='myclubs'
-          begDate={begDate}
-          endDate={endDate}
-          side='right'
-        />
+        <Stat stat="public" begDate={begDate} endDate={endDate} side="left" />
+        <Stat stat="myclubs" begDate={begDate} endDate={endDate} side="right" />
       </View>
       <View style={styles.row}>
-        <Stat
-          stat='faves'
-          begDate={begDate}
-          endDate={endDate}
-          side='left'
-        />
-        <Stat
-          stat='me'
-          begDate={begDate}
-          endDate={endDate}
-          side='right'
-        />
+        <Stat stat="faves" begDate={begDate} endDate={endDate} side="left" />
+        <Stat stat="me" begDate={begDate} endDate={endDate} side="right" />
       </View>
     </View>
   );
-
 };
 
 export default Stats;
-
 
 const styles = StyleSheet.create({
   buttonGroupContainer: {

@@ -1,3 +1,5 @@
+import { green } from 'common/colors';
+import { registerPlayer, validateName } from 'common/utils/account';
 import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -8,31 +10,21 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import {
-  Button,
-  Card,
-} from 'react-native-elements';
+import { Button, Card } from 'react-native-elements';
 
-import { validateName, registerPlayer } from 'common/utils/account';
-import { green } from 'common/colors';
-
-
-
-const RegisterAgain = props => {
-
+const RegisterAgain = (props) => {
   const { fbUser, retryCreds } = props;
 
-  const [ registration, setRegistration ] = useState({
+  const [registration, setRegistration] = useState({
     email: fbUser.email,
     name: '',
     short: '',
   });
 
-  const [ nameValid, setNameValid ] = useState(false);
-  const [ shortValid, setShortValid ] = useState(false);
+  const [nameValid, setNameValid] = useState(false);
+  const [shortValid, setShortValid] = useState(false);
 
   const validate = (type, text) => {
-
     const nTest = type == 'name' ? text : registration.name;
     const sTest = type == 'short' ? text : registration.short;
 
@@ -44,7 +36,6 @@ const RegisterAgain = props => {
   const sValid = { borderColor: shortValid ? green : '#ddd' };
 
   const register = async () => {
-
     const payload = await registerPlayer(registration, {
       email: fbUser.email,
       metadata: fbUser.metadata,
@@ -65,8 +56,8 @@ const RegisterAgain = props => {
             <Card.Title>Registration Error</Card.Title>
             <Card.Divider />
             <Text style={styles.sorry}>
-              We encountered an error during registration.  How embarrassing for us.
-              Can you please fill out the following fields again so we can try to fix this?
+              We encountered an error during registration. How embarrassing for us. Can
+              you please fill out the following fields again so we can try to fix this?
             </Text>
             <View style={styles.field_container}>
               <Text style={styles.field_label}>Email</Text>
@@ -76,14 +67,14 @@ const RegisterAgain = props => {
               <Text style={styles.field_label}>Full Name *</Text>
               <TextInput
                 style={[styles.field_input, nValid]}
-                onChangeText={text => {
+                onChangeText={(text) => {
                   setRegistration({
                     ...registration,
                     name: text,
                   });
                   validate('name', text);
                 }}
-                autoCapitalize='words'
+                autoCapitalize="words"
                 value={registration.name}
               />
             </View>
@@ -91,14 +82,14 @@ const RegisterAgain = props => {
               <Text style={styles.field_label}>Short/Nickname *</Text>
               <TextInput
                 style={[styles.field_input, sValid]}
-                onChangeText={text => {
+                onChangeText={(text) => {
                   setRegistration({
                     ...registration,
                     short: text,
                   });
                   validate('short', text);
                 }}
-                autoCapitalize='words'
+                autoCapitalize="words"
                 value={registration.short}
               />
             </View>
@@ -106,14 +97,14 @@ const RegisterAgain = props => {
           <View style={styles.button_row}>
             <Button
               buttonStyle={styles.next}
-              title='Fix Registration'
-              type={(nameValid && shortValid) ? 'solid' : 'outline'}
+              title="Fix Registration"
+              type={nameValid && shortValid ? 'solid' : 'outline'}
               disabled={!(nameValid && shortValid)}
               onPress={() => {
                 register();
               }}
-              accessibilityLabel='Fix Registration'
-              testID='register_again_button'
+              accessibilityLabel="Fix Registration"
+              testID="register_again_button"
             />
           </View>
         </ScrollView>
@@ -123,7 +114,6 @@ const RegisterAgain = props => {
 };
 
 export default RegisterAgain;
-
 
 const styles = StyleSheet.create({
   container: {

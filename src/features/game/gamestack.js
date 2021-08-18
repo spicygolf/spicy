@@ -1,28 +1,18 @@
-import React, { useContext } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  createMaterialTopTabNavigator
-} from '@react-navigation/material-top-tabs';
-import moment from 'moment';
-
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { green } from 'common/colors';
+import { getCoursesPlayersTxt } from 'common/utils/game';
 import { GameContext } from 'features/game/gameContext';
 import Leaderboard from 'features/game/leaderboard';
 import Score from 'features/game/score';
 import GameSetupStack from 'features/gameSetup/gameSetupStack';
-import { getCoursesPlayersTxt } from 'common/utils/game';
-import { green } from 'common/colors';
+import moment from 'moment';
+import React, { useContext } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-
-
-const GameStack = props => {
-
+const GameStack = (props) => {
   const { game } = useContext(GameContext);
   const { gamespecs } = game;
-  const gamespec_name = gamespecs.map(gs => gs.disp).join('-');
+  const gamespec_name = gamespecs.map((gs) => gs.disp).join('-');
   const start = moment(game.start).format('llll');
   const { courseFull } = getCoursesPlayersTxt(game);
 
@@ -31,17 +21,19 @@ const GameStack = props => {
   return (
     <View style={styles.container}>
       <View style={styles.gname}>
-        <Text style={styles.gname_txt}>{gamespec_name} - {start}</Text>
+        <Text style={styles.gname_txt}>
+          {gamespec_name} - {start}
+        </Text>
         <Text style={styles.subtitle}>{`${courseFull}`}</Text>
       </View>
       <Tab.Navigator
-        initialRouteName='Score'
+        initialRouteName="Score"
         screenOptions={{
           inactiveTintColor: '#ccc',
           inactiveBackgroundColor: '#666',
           activeTintColor: '#fff',
           style: {
-            backgroundColor: green
+            backgroundColor: green,
           },
         }}
         tabBarOptions={{
@@ -51,7 +43,7 @@ const GameStack = props => {
         swipeEnabled={false}
       >
         <Tab.Screen
-          name='Leaderboard'
+          name="Leaderboard"
           component={Leaderboard}
           options={{
             title: 'Leaderboard',
@@ -59,7 +51,7 @@ const GameStack = props => {
           }}
         />
         <Tab.Screen
-          name='Score'
+          name="Score"
           component={Score}
           options={{
             title: 'Score',
@@ -67,7 +59,7 @@ const GameStack = props => {
           }}
         />
         <Tab.Screen
-          name='Setup'
+          name="Setup"
           component={GameSetupStack}
           options={{
             title: 'Setup',
@@ -77,15 +69,13 @@ const GameStack = props => {
       </Tab.Navigator>
     </View>
   );
-
 };
 
 export default GameStack;
 
-
 const styles = StyleSheet.create({
   container: {
-    flex: 12
+    flex: 12,
   },
   tabBar: {
     maxHeight: 35,

@@ -1,39 +1,25 @@
-import React, { useContext } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Icon,
-  ListItem,
-} from 'react-native-elements';
-import DraggableFlatList from 'react-native-draggable-flatlist';
 import { useMutation } from '@apollo/client';
-import { cloneDeep, find } from 'lodash';
-
-import { UPDATE_GAME_SCOPE_MUTATION } from 'features/game/graphql';
+import { omitTypename } from 'common/utils/game';
 import { GameContext } from 'features/game/gameContext';
-import {
-  omitTypename,
-} from 'common/utils/game';
+import { UPDATE_GAME_SCOPE_MUTATION } from 'features/game/graphql';
+import { cloneDeep, find } from 'lodash';
+import React, { useContext } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import DraggableFlatList from 'react-native-draggable-flatlist';
+import { Icon, ListItem } from 'react-native-elements';
 
-
-
-const WolfOrderChooser = props => {
-
+const WolfOrderChooser = (props) => {
   const { game, readonly } = useContext(GameContext);
   const { players } = game;
 
-  const [ updateGameScope ] = useMutation(UPDATE_GAME_SCOPE_MUTATION);
+  const [updateGameScope] = useMutation(UPDATE_GAME_SCOPE_MUTATION);
 
-
-  const setOrder = async newOrderPlayers => {
-    if( !game || !game.scope || readonly ) return;
+  const setOrder = async (newOrderPlayers) => {
+    if (!game || !game.scope || readonly) return;
     console.log('setOrder data', newOrderPlayers);
 
     let newScope = cloneDeep(game.scope);
-    newScope.wolf_order = newOrderPlayers.map(p => p._key);
+    newScope.wolf_order = newOrderPlayers.map((p) => p._key);
     const newScopeWithoutTypes = omitTypename(newScope);
 
     const { loading, error, data } = await updateGameScope({
@@ -48,23 +34,25 @@ const WolfOrderChooser = props => {
           _key: game._key,
           scope: newScope,
         },
-      }
+      },
     });
 
-    if( error ) console.log('Error updating game scope - wolfOrderChooser', error);
-
+    if (error) console.log('Error updating game scope - wolfOrderChooser', error);
   };
 
   // TODO: use game.scope.wolf_order to sort here
   //        also handle if it's null or maybe even if mismatched w/ game.players
   let sorted_players = [];
-  if( game && game.scope && game.scope.wolf_order &&
+  if (
+    game &&
+    game.scope &&
+    game.scope.wolf_order &&
     game.scope.wolf_order.length &&
     game.scope.wolf_order.length == game.players.length
   ) {
-    sorted_players = game.scope.wolf_order.map(pkey => {
-      const p = find(players, {_key: pkey});
-      if( !p ) console.log('a player in wolf_order that is not in players?');
+    sorted_players = game.scope.wolf_order.map((pkey) => {
+      const p = find(players, { _key: pkey });
+      if (!p) console.log('a player in wolf_order that is not in players?');
       return p;
     });
   } else {
@@ -83,11 +71,7 @@ const WolfOrderChooser = props => {
         }}
         onLongPress={drag}
       >
-        <Icon
-          name='drag'
-          type='material-community'
-          size={30}
-        />
+        <Icon name="drag" type="material-community" size={30} />
         <ListItem.Content>
           <ListItem.Title>{`${seqText}${item.name}`}</ListItem.Title>
         </ListItem.Content>
@@ -109,7 +93,4 @@ const WolfOrderChooser = props => {
 
 export default WolfOrderChooser;
 
-
-const styles = StyleSheet.create({
-
-});
+const styles = StyleSheet.create({});

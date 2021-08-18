@@ -1,51 +1,35 @@
-import React, { useContext, useEffect } from 'react';
-import {
-  KeyboardAvoidingView,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
 import { GameContext } from 'features/game/gameContext';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import Admin from 'features/gameSetup/admin';
+import Options from 'features/gameSetup/options';
 import Players from 'features/gameSetup/players';
 import Teams from 'features/gameSetup/teams';
-import Options from 'features/gameSetup/options';
-import Admin from 'features/gameSetup/admin';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import React, { useContext, useEffect } from 'react';
+import { KeyboardAvoidingView, ScrollView, StyleSheet } from 'react-native';
 
-
-
-const GameSetupScreen = props => {
-
+const GameSetupScreen = (props) => {
   const { route } = props;
   const navigation = useNavigation();
 
   const { game } = useContext(GameContext);
   const { currentPlayer: cp } = useContext(CurrentPlayerContext);
 
-  useEffect(
-    () => {
-      const init = async () => {
-        if( route && route.params && route.params.addCurrentPlayerToGame ) {
-          console.log('adding current player to game');
-          console.log('player', cp);
-          console.log('game', game);
-          navigation.navigate('LinkRoundList', {game, player: cp});
-        }
-      };
-      init();
-    }, []
-  );
+  useEffect(() => {
+    const init = async () => {
+      if (route && route.params && route.params.addCurrentPlayerToGame) {
+        console.log('adding current player to game');
+        console.log('player', cp);
+        console.log('game', game);
+        navigation.navigate('LinkRoundList', { game, player: cp });
+      }
+    };
+    init();
+  }, []);
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      testID='game_setup_kaview'
-      >
-      <ScrollView
-        keyboardShouldPersistTaps='handled'
-        testID='game_setup_scrollview'
-      >
+    <KeyboardAvoidingView style={styles.container} testID="game_setup_kaview">
+      <ScrollView keyboardShouldPersistTaps="handled" testID="game_setup_scrollview">
         <Players />
         <Teams />
         <Options />
@@ -53,11 +37,9 @@ const GameSetupScreen = props => {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-
 };
 
 export default GameSetupScreen;
-
 
 const styles = StyleSheet.create({
   container: {

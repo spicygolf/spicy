@@ -1,24 +1,12 @@
-import React, { useContext } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Button,
-  Card,
-} from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-import { orderBy } from 'lodash';
-
 import { getHoles } from 'common/utils/game';
 import { GameContext } from 'features/game/gameContext';
+import { orderBy } from 'lodash';
+import React, { useContext } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Button, Card } from 'react-native-elements';
 
-
-
-const GameSummary = props => {
-
+const GameSummary = (props) => {
   const { game, scores } = useContext(GameContext);
   const navigation = useNavigation();
 
@@ -26,14 +14,14 @@ const GameSummary = props => {
   const totalHoles = getHoles(game).length;
   const sorted_players = orderBy(scores.players, ['gross'], ['asc']);
 
-  const format = v => {
-    if( v > 0 ) return `+${v}`;
+  const format = (v) => {
+    if (v > 0) return `+${v}`;
     return v;
   };
 
-  const renderPlayer = ({item}) => {
+  const renderPlayer = ({ item }) => {
     let thru = '';
-    if( item.holesScored < totalHoles ) {
+    if (item.holesScored < totalHoles) {
       thru = `thru ${item.holesScored}`;
     }
     return (
@@ -84,13 +72,13 @@ const GameSummary = props => {
         <FlatList
           data={sorted_players}
           renderItem={renderPlayer}
-          keyExtractor={item => item.pkey}
+          keyExtractor={(item) => item.pkey}
         />
         <Button
-          title='Review and post to handicap service'
+          title="Review and post to handicap service"
           buttonStyle={styles.post_button}
           titleStyle={styles.post_button_title}
-          type='solid'
+          type="solid"
           onPress={() => {
             navigation.navigate('PostScores');
           }}
@@ -100,9 +88,7 @@ const GameSummary = props => {
   );
 };
 
-
 export default GameSummary;
-
 
 const styles = StyleSheet.create({
   row: {
@@ -116,7 +102,7 @@ const styles = StyleSheet.create({
   thru: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   thruTxt: {
     fontSize: 11,

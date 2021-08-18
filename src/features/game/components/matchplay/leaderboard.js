@@ -1,20 +1,14 @@
+import Leaderboard from 'common/components/leaderboard';
 import React from 'react';
 
-import Leaderboard from 'common/components/leaderboard';
-
-
-
-const MatchPlayLeaderboard = props => {
-
+const MatchPlayLeaderboard = (props) => {
   return (
     <Leaderboard
       activeChoices={['gross', 'net', 'match']}
-      initialScoreType='match'
+      initialScoreType="match"
       teams={true}
     />
   );
-
 };
-
 
 export default MatchPlayLeaderboard;

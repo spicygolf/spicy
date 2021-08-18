@@ -1,18 +1,9 @@
-import React, { useContext, } from 'react';
-import {
-  StyleSheet,
-  View,
-} from 'react-native';
-import {
-  Input,
-} from 'react-native-elements';
-
 import { SpicyPlayerSearchContext } from 'common/components/spicy/player/searchContext';
+import React, { useContext } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Input } from 'react-native-elements';
 
-
-
-const SpicyPlayerSearchInput = props => {
-
+const SpicyPlayerSearchInput = (props) => {
   const { state, setState } = useContext(SpicyPlayerSearchContext);
 
   // console.log('SpicyPlayerSearchInput', state);
@@ -22,16 +13,16 @@ const SpicyPlayerSearchInput = props => {
       <View style={styles.row}>
         <View style={styles.field}>
           <Input
-            placeholder='name'
+            placeholder="name"
             containerStyle={styles.field_input}
             inputStyle={styles.field_input_txt}
-            onChangeText={text => {
+            onChangeText={(text) => {
               setState({
                 ...state,
                 search: text,
               });
             }}
-            autoCapitalize='words'
+            autoCapitalize="words"
             value={state.search}
           />
         </View>
@@ -41,7 +32,6 @@ const SpicyPlayerSearchInput = props => {
 };
 
 export default SpicyPlayerSearchInput;
-
 
 const styles = StyleSheet.create({
   container: {

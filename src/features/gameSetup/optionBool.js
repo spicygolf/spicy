@@ -1,17 +1,11 @@
+import { blue } from 'common/colors';
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-} from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Switch } from 'react-native-paper';
 
-import { blue } from 'common/colors';
-
-
-
-const OptionBool = props => {
-
+const OptionBool = (props) => {
   const { option, setOption, readonly, index = 0 } = props;
-  const [ value, setValue ] = useState(option.values[index].value == 'true');
+  const [value, setValue] = useState(option.values[index].value == 'true');
   return (
     <Switch
       value={value}
@@ -21,12 +15,10 @@ const OptionBool = props => {
         let newOption = {
           name: option.name,
           values: option.values.map((v, i) => ({
-            value: (i === index)
-              ? (!value).toString()
-              : v.value,
+            value: i === index ? (!value).toString() : v.value,
             holes: v.holes,
           })),
-        }
+        };
         setOption(newOption);
         setValue(!value);
       }}
@@ -34,11 +26,9 @@ const OptionBool = props => {
       style={styles.switch}
     />
   );
-
 };
 
 export default OptionBool;
-
 
 const styles = StyleSheet.create({
   switch: {

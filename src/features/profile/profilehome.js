@@ -1,3 +1,9 @@
+import { useNavigation } from '@react-navigation/native';
+import { blue, light } from 'common/colors';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import FollowersStat from 'features/profile/stats/followers';
+import FollowingStat from 'features/profile/stats/following';
+import GamesStat from 'features/profile/stats/games';
 import React, { useContext } from 'react';
 import {
   KeyboardAvoidingView,
@@ -7,49 +13,30 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {
-  Card,
-  Button,
-  Icon,
-  ListItem,
-} from 'react-native-elements';
-import { useNavigation } from '@react-navigation/native';
+import { Button, Card, Icon, ListItem } from 'react-native-elements';
 
-import { blue, light } from 'common/colors';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import GamesStat from 'features/profile/stats/games';
-import FollowingStat from 'features/profile/stats/following';
-import FollowersStat from 'features/profile/stats/followers';
-
-
-
-const ProfileHome = props => {
-
+const ProfileHome = (props) => {
   const navigation = useNavigation();
 
-  const {
-    currentPlayer,
-  } = useContext(CurrentPlayerContext);
-  const pkey = (currentPlayer && currentPlayer._key)
-    ? currentPlayer._key
-    : null;
+  const { currentPlayer } = useContext(CurrentPlayerContext);
+  const pkey = currentPlayer && currentPlayer._key ? currentPlayer._key : null;
 
-  const getField = field => {
-    if( currentPlayer && currentPlayer[field] ) {
+  const getField = (field) => {
+    if (currentPlayer && currentPlayer[field]) {
       return currentPlayer[field];
     }
     return '';
   };
 
-  const getHandicapField = field => {
-    if( currentPlayer && currentPlayer.handicap && currentPlayer.handicap[field] ) {
+  const getHandicapField = (field) => {
+    if (currentPlayer && currentPlayer.handicap && currentPlayer.handicap[field]) {
       return currentPlayer.handicap[field];
     }
     return '';
   };
 
-  const handicapContent = ({source, index, revDate}) => {
-    if( source ) {
+  const handicapContent = ({ source, index, revDate }) => {
+    if (source) {
       return (
         <View style={styles.handicap_view}>
           <Text style={styles.source}>{source} linked</Text>
@@ -65,16 +52,11 @@ const ProfileHome = props => {
             <Text style={styles.no_hc_link_txt}>service linked</Text>
           </View>
           <Button
-            type='clear'
-            icon={
-              <Icon
-                name='add-link'
-                type='material'
-                size={36}
-                color={blue}
-              />
-            }
-            onPress={() => { navigation.navigate('LinkHandicap'); }}
+            type="clear"
+            icon={<Icon name="add-link" type="material" size={36} color={blue} />}
+            onPress={() => {
+              navigation.navigate('LinkHandicap');
+            }}
           />
         </View>
       );
@@ -90,37 +72,24 @@ const ProfileHome = props => {
   const index = getHandicapField('index');
   const revDate = getHandicapField('revDate');
 
-  const handicap_content = handicapContent({source, index, revDate});
-
+  const handicap_content = handicapContent({ source, index, revDate });
 
   return (
-    <KeyboardAvoidingView style={{flex: 1,}}>
-      <ScrollView keyboardShouldPersistTaps='handled'>
+    <KeyboardAvoidingView style={{ flex: 1 }}>
+      <ScrollView keyboardShouldPersistTaps="handled">
         <Card wrapperStyle={styles.card_wrapper}>
           <ListItem>
-          <Icon
-              name='settings'
-              type='material'
-              color='transparent'
-              size={24}
-            />
+            <Icon name="settings" type="material" color="transparent" size={24} />
             <ListItem.Content style={styles.name_view}>
               <ListItem.Title style={styles.name}>{name}</ListItem.Title>
               <ListItem.Subtitle style={styles.short}>{short}</ListItem.Subtitle>
             </ListItem.Content>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Settings')}
-            >
-              <Icon
-                name='settings'
-                type='material'
-                color={light}
-                size={24}
-              />
+            <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+              <Icon name="settings" type="material" color={light} size={24} />
             </TouchableOpacity>
           </ListItem>
           <View style={styles.subname_view}>
-            { handicap_content }
+            {handicap_content}
             <View style={styles.stats_view}>
               <GamesStat pkey={pkey} />
               <FollowingStat pkey={pkey} />
@@ -131,11 +100,9 @@ const ProfileHome = props => {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-
 };
 
 export default ProfileHome;
-
 
 const styles = StyleSheet.create({
   card_wrapper: {

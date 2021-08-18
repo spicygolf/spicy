@@ -1,23 +1,12 @@
-import React, { useContext, } from 'react';
-import {
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  View,
-} from 'react-native';
-import {
-  Card,
-} from 'react-native-elements';
 import { useQuery } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
-
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { STAT_FOR_PLAYER_FEED } from 'features/feed//graphql';
+import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import React, { useContext } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Card } from 'react-native-elements';
 
-
-
-const Stat = props => {
-
+const Stat = (props) => {
   const { stat, side } = props;
   const navigation = useNavigation();
   let title = '';
@@ -25,23 +14,23 @@ const Stat = props => {
   const { currentPlayer: cp } = useContext(CurrentPlayerContext);
   //console.log('cp', cp);
   const currentPlayer = `players/${cp._key}`;
-  const myClubs = cp.clubs.map(c => `clubs/${c._key}`);
+  const myClubs = cp.clubs.map((c) => `clubs/${c._key}`);
 
   const { loading, error, data } = useQuery(STAT_FOR_PLAYER_FEED, {
     variables: {
       ...props,
       currentPlayer,
       myClubs,
-    }
+    },
   });
 
-  switch( stat ) {
+  switch (stat) {
     case 'public':
       title = 'Spicy Golf';
       break;
     case 'myclubs':
       title = 'My Club';
-      if( myClubs.length > 1 ) title = title + 's';
+      if (myClubs.length > 1) title = title + 's';
       break;
     case 'faves':
       title = 'My Favorites';
@@ -51,13 +40,13 @@ const Stat = props => {
       break;
   }
 
-  if( error && error.message != 'Network request failed') {
+  if (error && error.message != 'Network request failed') {
     console.log(error);
     // TODO: error component
   }
 
   let statValue = ' ';
-  if( data ) statValue = data.statForPlayerFeed;
+  if (data) statValue = data.statForPlayerFeed;
   //console.log('data', data, myClubs);
 
   return (
@@ -74,11 +63,9 @@ const Stat = props => {
       </TouchableOpacity>
     </View>
   );
-
 };
 
 export default Stat;
-
 
 const styles = StyleSheet.create({
   tov: {
