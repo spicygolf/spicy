@@ -11,7 +11,7 @@ export const REMOVE_LINK_MUTATION = gql`
 export class RemoveLinkMutation extends React.PureComponent {
   render() {
     //    console.log('RemoveLinkMutation props', this.props);
-    const { children, from, to } = this.props;
+    const { children } = this.props;
     //    console.log('from/to', from, to);
     return (
       <Mutation mutation={REMOVE_LINK_MUTATION}>

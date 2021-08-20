@@ -4,7 +4,7 @@ import { GameContext } from 'features/game/gameContext';
 import { UPDATE_GAME_SCOPE_MUTATION } from 'features/game/graphql';
 import { cloneDeep, find } from 'lodash';
 import React, { useContext } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import { Icon, ListItem } from 'react-native-elements';
 
@@ -15,14 +15,16 @@ const WolfOrderChooser = (props) => {
   const [updateGameScope] = useMutation(UPDATE_GAME_SCOPE_MUTATION);
 
   const setOrder = async (newOrderPlayers) => {
-    if (!game || !game.scope || readonly) return;
+    if (!game || !game.scope || readonly) {
+      return;
+    }
     console.log('setOrder data', newOrderPlayers);
 
     let newScope = cloneDeep(game.scope);
     newScope.wolf_order = newOrderPlayers.map((p) => p._key);
     const newScopeWithoutTypes = omitTypename(newScope);
 
-    const { loading, error, data } = await updateGameScope({
+    const { error } = await updateGameScope({
       variables: {
         gkey: game._key,
         scope: newScopeWithoutTypes,
@@ -37,7 +39,9 @@ const WolfOrderChooser = (props) => {
       },
     });
 
-    if (error) console.log('Error updating game scope - wolfOrderChooser', error);
+    if (error) {
+      console.log('Error updating game scope - wolfOrderChooser', error);
+    }
   };
 
   // TODO: use game.scope.wolf_order to sort here
@@ -48,11 +52,13 @@ const WolfOrderChooser = (props) => {
     game.scope &&
     game.scope.wolf_order &&
     game.scope.wolf_order.length &&
-    game.scope.wolf_order.length == game.players.length
+    game.scope.wolf_order.length === game.players.length
   ) {
     sorted_players = game.scope.wolf_order.map((pkey) => {
       const p = find(players, { _key: pkey });
-      if (!p) console.log('a player in wolf_order that is not in players?');
+      if (!p) {
+        console.log('a player in wolf_order that is not in players?');
+      }
       return p;
     });
   } else {
@@ -66,6 +72,7 @@ const WolfOrderChooser = (props) => {
     return (
       <ListItem
         key={`item-${index}`}
+        // eslint-disable-next-line react-native/no-inline-styles
         containerStyle={{
           backgroundColor: isActive ? '#ddd' : '#fff',
         }}
@@ -92,5 +99,3 @@ const WolfOrderChooser = (props) => {
 };
 
 export default WolfOrderChooser;
-
-const styles = StyleSheet.create({});

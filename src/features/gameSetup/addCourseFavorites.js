@@ -4,7 +4,7 @@ import { GameContext } from 'features/game/gameContext';
 import Tee from 'features/gameSetup/Tee';
 import React, { useContext } from 'react';
 import { useQuery } from 'react-apollo';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 
 const AddCourseFavorites = (props) => {
   const { game, currentPlayerKey } = useContext(GameContext);
@@ -28,8 +28,12 @@ const AddCourseFavorites = (props) => {
     fetchPolicy: 'cache-and-network',
   });
 
-  if (loading) return <ActivityIndicator />;
-  if (error) return <Text>Error! ${error.message}</Text>;
+  if (loading) {
+    return <ActivityIndicator />;
+  }
+  if (error) {
+    return <Text>Error! ${error.message}</Text>;
+  }
 
   //console.log('client', client);
   //console.log('faveTees data', data);

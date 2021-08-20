@@ -4,13 +4,6 @@ import PostScores from 'features/gameSummary/postScores';
 import React from 'react';
 
 const GameSummaryStack = (props) => {
-  const nada = {
-    animation: 'timing',
-    config: {
-      duration: 0,
-    },
-  };
-
   const Stack = createStackNavigator();
 
   return (

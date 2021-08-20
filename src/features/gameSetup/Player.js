@@ -10,7 +10,7 @@ const handicap = (h) => (
 );
 
 const Player = (props) => {
-  const { game, item, testID, title, subtitle, hdcp, onPress } = props;
+  const { item, testID, title, subtitle, hdcp, onPress } = props;
   //console.log('player', item);
 
   return (

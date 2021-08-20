@@ -1,12 +1,8 @@
-import { useApolloClient, useSubscription } from '@apollo/client';
+import { useSubscription } from '@apollo/client';
 import { GAME_UPDATED_SUBSCRIPTION } from 'features/game/graphql';
-import React from 'react';
 
 const GameUpdatedListener = (props) => {
   const { gkey } = props;
-  if (!gkey) return null;
-  const { cache } = useApolloClient();
-
   const { loading, error, data } = useSubscription(GAME_UPDATED_SUBSCRIPTION, {
     variables: { gkey },
   });

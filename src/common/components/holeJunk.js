@@ -18,6 +18,8 @@ const HoleJunk = (props) => {
   const { team, player_index } = test;
   const h = hole.hole;
 
+  const [updateGameHoles] = useMutation(UPDATE_GAME_HOLES_MUTATION);
+
   const par = hole && hole.par ? parseFloat(hole.par) : 0.0;
 
   const { game, scores, readonly } = useContext(GameContext);
@@ -26,11 +28,11 @@ const HoleJunk = (props) => {
   const alljunk = getAllOptions({ game, type: 'junk' });
   // console.log('allJunk in holeJunk', alljunk);
   const sorted_junk = sortBy(alljunk, ['seq']);
-  if (sorted_junk.length == 0) return null;
+  if (sorted_junk.length === 0) {
+    return null;
+  }
 
   const scoreTeamForPlayer = getScoreTeamForPlayer({ scores, hole: hole.hole, pkey });
-
-  const [updateGameHoles] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
   const oneHoleScoring = {
     holes: [
@@ -42,14 +44,20 @@ const HoleJunk = (props) => {
   const scoringWrapper = new ScoringWrapper(game, oneHoleScoring, hole.hole);
 
   const setJunk = async (junk, newValue) => {
-    if (readonly) return; // viewing game only, so do nothing
+    if (readonly) {
+      return;
+    } // viewing game only, so do nothing
     // only set in DB if junk is based on user input
-    if (!junk || !junk.based_on || junk.based_on != 'user') return;
-    if (!game || !game.holes) return;
+    if (!junk || !junk.based_on || junk.based_on !== 'user') {
+      return;
+    }
+    if (!game || !game.holes) {
+      return;
+    }
 
-    let newHoles = game.holes.map((h) => {
-      let newHole = { ...h };
-      if (h.hole == hole.hole) {
+    let newHoles = game.holes.map((nh) => {
+      let newHole = { ...nh };
+      if (nh.hole === hole.hole) {
         let newTeams = newHole.teams.map((t) => {
           return setTeamJunk({ ...t }, junk, newValue.toString(), pkey);
         });
@@ -59,7 +67,7 @@ const HoleJunk = (props) => {
     });
     const newHolesWithoutTypes = omitTypename(newHoles);
 
-    const { loading, error, data } = await updateGameHoles({
+    const { error } = await updateGameHoles({
       variables: {
         gkey: gkey,
         holes: newHolesWithoutTypes,
@@ -74,16 +82,22 @@ const HoleJunk = (props) => {
       },
     });
 
-    if (error) console.log('Error updating game - holeJunk', error);
+    if (error) {
+      console.log('Error updating game - holeJunk', error);
+    }
   };
 
-  const checkJunkAvailability = ({ hole, score, junk }) => {
-    if (!junk) return false;
-    if (!junk.availability) return true;
+  const checkJunkAvailability = ({ hole: jHole, score: jScore, junk }) => {
+    if (!junk) {
+      return false;
+    }
+    if (!junk.availability) {
+      return true;
+    }
 
     const logic = scoringWrapper.logic(junk.availability, {
-      hole,
-      score,
+      hole: jHole,
+      score: jScore,
     });
     //console.log('checkJunkAvailability logic', logic);
     return logic;
@@ -91,24 +105,30 @@ const HoleJunk = (props) => {
 
   const renderJunk = (junk) => {
     // go through all reasons to not show junk and return null
-    if (junk.show_in == 'none') return null;
-    if (!checkJunkAvailability({ hole, score, junk })) return null;
+    if (junk.show_in === 'none') {
+      return null;
+    }
+    if (!checkJunkAvailability({ hole, score, junk })) {
+      return null;
+    }
 
     // TODO: junk.name needs l10n, i18n - use junk.name as slug
     let type = 'outline';
     let color = blue;
 
     // don't show team junk here
-    if (junk.show_in == 'team') return null;
+    if (junk.show_in === 'team') {
+      return null;
+    }
 
     // TODO: are all junk true/false?
     const val = getJunk(junk.name, pkey, game, hole.hole);
-    let selected = val && (val == true || val == 'true') ? true : false;
+    let selected = val && (val === true || val === 'true') ? true : false;
 
     // if junk shouldn't be rendered except if a condition is achieved, then
     // return null
-    if (junk.show_in == 'score') {
-      if (junk.scope == 'team' && scoreTeamForPlayer.players.length == 1) {
+    if (junk.show_in === 'score') {
+      if (junk.scope === 'team' && scoreTeamForPlayer.players.length === 1) {
         // show team junk for one-person teams here, if achieved
         //console.log('one-person team junk', scoreTeamForPlayer);
         const junkFind = find(scoreTeamForPlayer.junk, { name: junk.name });
@@ -120,7 +140,7 @@ const HoleJunk = (props) => {
       } else {
         const based_on = junk.based_on || 'gross';
         let s = get_score_value('gross', score);
-        if (based_on == 'net') {
+        if (based_on === 'net') {
           s = get_net_score(s, score);
         }
 

@@ -16,7 +16,7 @@ const Stat = (props) => {
   const currentPlayer = `players/${cp._key}`;
   const myClubs = cp.clubs.map((c) => `clubs/${c._key}`);
 
-  const { loading, error, data } = useQuery(STAT_FOR_PLAYER_FEED, {
+  const { error, data } = useQuery(STAT_FOR_PLAYER_FEED, {
     variables: {
       ...props,
       currentPlayer,
@@ -30,7 +30,9 @@ const Stat = (props) => {
       break;
     case 'myclubs':
       title = 'My Club';
-      if (myClubs.length > 1) title = title + 's';
+      if (myClubs.length > 1) {
+        title = title + 's';
+      }
       break;
     case 'faves':
       title = 'My Favorites';
@@ -40,13 +42,15 @@ const Stat = (props) => {
       break;
   }
 
-  if (error && error.message != 'Network request failed') {
+  if (error && error.message !== 'Network request failed') {
     console.log(error);
     // TODO: error component
   }
 
   let statValue = ' ';
-  if (data) statValue = data.statForPlayerFeed;
+  if (data) {
+    statValue = data.statForPlayerFeed;
+  }
   //console.log('data', data, myClubs);
 
   return (

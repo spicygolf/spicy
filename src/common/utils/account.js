@@ -145,32 +145,48 @@ export const validate = (type, text) => {
 };
 
 export const validateEmail = (email) => {
-  if (email == '') return true;
-  if (!email) return false;
+  if (email === '') {
+    return true;
+  }
+  if (!email) {
+    return false;
+  }
   var re =
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
 };
 
 export const validatePassword = (pass) => {
-  if (pass == '') return true;
-  if (!pass) return false;
-  if (pass.length > 3) return true;
+  if (pass === '') {
+    return true;
+  }
+  if (!pass) {
+    return false;
+  }
+  if (pass.length > 3) {
+    return true;
+  }
 };
 
 export const validateName = (name) => {
-  if (!name) return false;
+  if (!name) {
+    return false;
+  }
   var re = /^[a-zA-Z ]+$/;
   return re.test(String(name).toLowerCase());
 };
 
 export const validateInteger = (number) => {
-  if (!number) return false;
-  return Number.isInteger(parseInt(number));
+  if (!number) {
+    return false;
+  }
+  return Number.isInteger(parseInt(number, 10));
 };
 
 export const validateFloat = (number) => {
-  if (!number) return false;
+  if (!number) {
+    return false;
+  }
   return !Number.isNaN(parseFloat(number));
 };
 
@@ -188,11 +204,15 @@ export const parseFirebaseError = (e) => {
   const split = e.message.split(']');
   let slug = '';
   if (split && split[0]) {
-    slugSplit = split[0].split('[');
-    if (slugSplit && slugSplit[1]) slug = slugSplit[1].trim();
+    let slugSplit = split[0].split('[');
+    if (slugSplit && slugSplit[1]) {
+      slug = slugSplit[1].trim();
+    }
   }
   let message = e.message;
-  if (split && split[1]) message = split[1].trim();
+  if (split && split[1]) {
+    message = split[1].trim();
+  }
 
   return {
     slug,

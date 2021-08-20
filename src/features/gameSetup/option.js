@@ -25,7 +25,9 @@ const Option = (props) => {
   const navigation = useNavigation();
 
   const setOption = async (option) => {
-    if (readonly) return; // view mode only, so don't allow changes
+    if (readonly) {
+      return;
+    } // view mode only, so don't allow changes
     const newOption = {
       name: option.name,
       values: option.values.map((v) => ({
@@ -36,13 +38,19 @@ const Option = (props) => {
     // console.log('newOption', newOption);
 
     let newGame = getNewGameForUpdate(game);
-    if (!newGame.options) newGame.options = [];
+    if (!newGame.options) {
+      newGame.options = [];
+    }
     const i = findIndex(newGame.options, { name: newOption.name });
-    if (i < 0) newGame.options.push(newOption);
-    if (i >= 0) newGame.options[i] = newOption;
+    if (i < 0) {
+      newGame.options.push(newOption);
+    }
+    if (i >= 0) {
+      newGame.options[i] = newOption;
+    }
     // console.log('setOption newGame', newGame);
 
-    const { loading, error, data } = await updateGame({
+    const { error } = await updateGame({
       variables: {
         gkey: gkey,
         game: newGame,
@@ -56,23 +64,25 @@ const Option = (props) => {
         },
       ],
     });
-    if (error) console.log('Error setting option in game', error);
+    if (error) {
+      console.log('Error setting option in game', error);
+    }
   };
 
-  const getOptionComponent = (item) => {
-    let ret = <OptionDisplay option={item} />;
-    switch (item.sub_type) {
+  const getOptionComponent = (lItem) => {
+    let ret = <OptionDisplay option={lItem} />;
+    switch (lItem.sub_type) {
       case 'num':
-        ret = <OptionNum option={item} setOption={setOption} readonly={readonly} />;
+        ret = <OptionNum option={lItem} setOption={setOption} readonly={readonly} />;
         break;
       case 'pct':
-        ret = <OptionPct option={item} setOption={setOption} readonly={readonly} />;
+        ret = <OptionPct option={lItem} setOption={setOption} readonly={readonly} />;
         break;
       case 'bool':
-        ret = <OptionBool option={item} setOption={setOption} readonly={readonly} />;
+        ret = <OptionBool option={lItem} setOption={setOption} readonly={readonly} />;
         break;
       case 'menu':
-        ret = <OptionMenu option={item} setOption={setOption} readonly={readonly} />;
+        ret = <OptionMenu option={lItem} setOption={setOption} readonly={readonly} />;
         break;
       default:
         break;

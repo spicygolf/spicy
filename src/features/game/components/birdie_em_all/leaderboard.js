@@ -38,7 +38,9 @@ class BirdieEmAllLeaderboard extends React.Component {
   }
 
   _score(data) {
-    if (!data) return [];
+    if (!data) {
+      return [];
+    }
     // get team/player scores from scoring function
     var scores = data.map((score) => {
       return {
@@ -50,22 +52,26 @@ class BirdieEmAllLeaderboard extends React.Component {
 
     // sort on score object total value
     scores.sort((a, b) => {
-      if (a.score.total < b.score.total) return 1;
-      if (a.score.total > b.score.total) return -1;
+      if (a.score.total < b.score.total) {
+        return 1;
+      }
+      if (a.score.total > b.score.total) {
+        return -1;
+      }
       return 0;
     });
 
     return scores;
   }
 
-  _itemPressed(item, courseHoles) {
+  _itemPressed(item, lCourseHoles) {
     const { player, round, score } = item;
     this.props.navigation.navigate('Score', {
       currentGame: this.props.currentGame,
       player: player[0],
       round_id: round,
       score: score,
-      courseHoles: courseHoles,
+      courseHoles: lCourseHoles,
     });
   }
 
@@ -115,7 +121,7 @@ class BirdieEmAllLeaderboard extends React.Component {
   render() {
     return (
       <Query query={GET_GAME_QUERY} variables={{ gkey: this.props.currentGame._key }}>
-        {({ loading, error, data, client }) => {
+        {({ loading, error, data }) => {
           if (loading) {
             //console.log('get game query, loading - data:', data, loading);
             return <ActivityIndicator />;
@@ -133,14 +139,13 @@ class BirdieEmAllLeaderboard extends React.Component {
                   data={scores}
                   renderItem={this._renderScoreItem}
                   keyExtractor={(item) => item.player[0].short}
-                  ListFooterComponent={<View style={styles.ListFooter}></View>}
+                  ListFooterComponent={<View style={styles.ListFooter} />}
                 />
               </View>
             );
           } else {
             return <Text>Error, no scores</Text>;
           }
-          return;
         }}
       </Query>
     );

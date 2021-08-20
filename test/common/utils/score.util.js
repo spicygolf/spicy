@@ -31,7 +31,9 @@ export const makeGame = ({ gamespecs = [], options = [], holes = [], data = [] }
         pops: `${d.pops}`,
       });
     }
-    if (!holeteams[dhole]) holeteams[dhole] = [];
+    if (!holeteams[dhole]) {
+      holeteams[dhole] = [];
+    }
     let teamIndex = findIndex(holeteams[dhole], { team: `${d.team}` });
     if (teamIndex < 0) {
       holeteams[dhole].push({ team: `${d.team}`, players: [], junk: [] });

@@ -8,8 +8,12 @@ export const course_handicap = (strIndex, tee, holes) => {
 
   // process strIndex => index
   let index = parseFloat(strIndex);
-  if (Number.isNaN(index)) return null;
-  if (strIndex.charAt(0) == '+') index *= -1;
+  if (Number.isNaN(index)) {
+    return null;
+  }
+  if (strIndex.charAt(0) === '+') {
+    index *= -1;
+  }
 
   let par;
   switch (holes) {
@@ -27,10 +31,11 @@ export const course_handicap = (strIndex, tee, holes) => {
       break;
     default:
       console.log(`course_handicap - invalid value for holes: '${holes}'`);
-      return null;
       break;
   }
-
+  if (par === null) {
+    return null;
+  }
   const { rating, slope } = getRatings(holes, tee);
   //console.log(index, slope, rating, par);
   return Math.round(index * (slope / 113) + (rating - par));

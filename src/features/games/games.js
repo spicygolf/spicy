@@ -6,8 +6,8 @@ import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { filter, reverse, sortBy } from 'lodash';
 import moment from 'moment';
-import React, { useContext, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useContext, useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 
 const Games = (props) => {
@@ -53,7 +53,9 @@ const Games = (props) => {
   };
 
   const renderItem = ({ item }) => {
-    if (!item) return null;
+    if (!item) {
+      return null;
+    }
     const name = item.name || '';
     const subtitle = buildSubtitle(item);
 
@@ -78,15 +80,15 @@ const Games = (props) => {
     React.useCallback(() => {
       //console.log('Games List focused');
       fetchGameList();
-    }, []),
+    }, [fetchGameList]),
   );
 
-  const fetchGameList = () => {
+  const fetchGameList = useCallback(() => {
     //console.log('fetchGameList');
     setIsFetching(true);
     getGameList();
     setIsFetching(false);
-  };
+  }, [getGameList]);
 
   const [getGameList, { error, data }] = useLazyQuery(ACTIVE_GAMES_FOR_PLAYER_QUERY, {
     variables: {
@@ -94,7 +96,7 @@ const Games = (props) => {
     },
     fetchPolicy: 'cache-and-network',
   });
-  if (error && error.message != 'Network request failed') {
+  if (error && error.message !== 'Network request failed') {
     return <Text>Error! {error.message}</Text>;
   }
 

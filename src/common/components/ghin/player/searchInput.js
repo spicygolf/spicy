@@ -4,8 +4,8 @@ import CountryPicker from 'features/account/countryPicker';
 import StatePicker from 'features/account/statePicker';
 import { find } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
-import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
-import { Card, Input } from 'react-native-elements';
+import { StyleSheet, View } from 'react-native';
+import { Input } from 'react-native-elements';
 
 const GhinPlayerSearchInput = (props) => {
   const { state, setState } = useContext(GhinPlayerSearchContext);
@@ -27,7 +27,9 @@ const GhinPlayerSearchInput = (props) => {
 
   const c = find(countries, { code: state.country });
   let statelist = [];
-  if (c && c.states) statelist = c.states;
+  if (c && c.states) {
+    statelist = c.states;
+  }
 
   //console.log('ghinPlayerSearch', ghinPlayerSearch);
 

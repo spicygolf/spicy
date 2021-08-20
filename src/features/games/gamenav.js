@@ -14,7 +14,7 @@ const GameNav = (props) => {
       <Icon name="chevron-left" size={30} color="#bbb" />
     </TouchableOpacity>
   ) : (
-    <Text></Text>
+    <Text />
   );
 
   const right = showScore ? (
@@ -22,7 +22,7 @@ const GameNav = (props) => {
       <Icon name="lead-pencil" size={30} color="#666" />
     </TouchableOpacity>
   ) : (
-    <Text></Text>
+    <Text />
   );
 
   return (

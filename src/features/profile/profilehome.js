@@ -75,7 +75,7 @@ const ProfileHome = (props) => {
   const handicap_content = handicapContent({ source, index, revDate });
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }}>
+    <KeyboardAvoidingView style={styles.container}>
       <ScrollView keyboardShouldPersistTaps="handled">
         <Card wrapperStyle={styles.card_wrapper}>
           <ListItem>
@@ -105,6 +105,9 @@ const ProfileHome = (props) => {
 export default ProfileHome;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   card_wrapper: {
     marginBottom: 20,
   },

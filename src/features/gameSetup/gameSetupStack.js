@@ -33,7 +33,7 @@ const GameSetupStack = (props) => {
           },
         }}
       />
-      <Stack.Screen name="OptionsCustom" component={OptionsCustom}></Stack.Screen>
+      <Stack.Screen name="OptionsCustom" component={OptionsCustom} />
     </Stack.Navigator>
   );
 };

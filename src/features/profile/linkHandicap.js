@@ -23,7 +23,7 @@ const LinkHandicap = (props) => {
   const client = useApolloClient();
   const navigation = useNavigation();
 
-  const [service, setService] = useState('ghin');
+  const [service /*, setService */] = useState('ghin');
   const [newLink, setNewLink] = useState(defaultNewLink);
 
   const [mergePlayers] = useMutation(MERGE_PLAYERS_MUTATION);

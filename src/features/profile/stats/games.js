@@ -14,7 +14,7 @@ const GamesStat = ({ pkey }) => {
     },
     fetchPolicy: 'cache-and-network',
   });
-  if (error && error.message != 'Network request failed') {
+  if (error && error.message !== 'Network request failed') {
     stat = '?';
   }
 

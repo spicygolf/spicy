@@ -25,8 +25,8 @@ const NewGameList = (props) => {
   const _renderItem = ({ item }) => {
     const { gamespec, player_count } = item;
     let pct =
-      player_total == 0 ? '' : Math.round((100 * player_count) / player_total) + '%';
-    let cnt = player_total == 0 ? '' : ' - ' + player_count;
+      player_total === 0 ? '' : Math.round((100 * player_count) / player_total) + '%';
+    let cnt = player_total === 0 ? '' : ' - ' + player_count;
     return (
       <ListItem onPress={() => gamespecPressed(gamespec)} testID={`new_${gamespec._key}`}>
         <ListItem.Content>
@@ -50,10 +50,12 @@ const NewGameList = (props) => {
     fetchPolicy: 'cache-and-network',
   });
 
-  if (loading) return <ActivityIndicator />;
+  if (loading) {
+    return <ActivityIndicator />;
+  }
 
   // TODO: error component instead of below...
-  if (error && error.message != 'Network request failed') {
+  if (error && error.message !== 'Network request failed') {
     console.log(error);
     return <Text>Error: {error.message}</Text>;
   }

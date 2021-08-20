@@ -7,7 +7,7 @@ import { GET_GAME_QUERY } from 'features/game/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { ADD_PLAYER_MUTATION } from 'features/players/graphql';
 import moment from 'moment';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button, Card } from 'react-native-elements';
 
@@ -21,7 +21,7 @@ const AddPlayerManual = (props) => {
   const add = async () => {
     player.createdDate = moment.utc().format();
 
-    const { loading, error, data } = await addPlayer({
+    const { error, data } = await addPlayer({
       variables: {
         player: player,
       },
@@ -34,7 +34,9 @@ const AddPlayerManual = (props) => {
         },
       ],
     });
-    if (error) console.log('Error adding player', error);
+    if (error) {
+      console.log('Error adding player', error);
+    }
     //console.log('data', data);
     if (data && data.addPlayer) {
       const p = {
@@ -50,14 +52,17 @@ const AddPlayerManual = (props) => {
     }
   };
 
-  const validate = (type, text) => {
-    const nTest = type == 'name' ? text : player.name;
-    const sTest = type == 'short' ? text : player.short;
-    const hTest = type == 'index' ? text : player.handicap.index;
-    setNameValid(validateName(nTest));
-    setShortValid(validateName(sTest));
-    setHIValid(validateFloat(hTest));
-  };
+  const validate = useCallback(
+    (type, text) => {
+      const nTest = type === 'name' ? text : player.name;
+      const sTest = type === 'short' ? text : player.short;
+      const hTest = type === 'index' ? text : player.handicap.index;
+      setNameValid(validateName(nTest));
+      setShortValid(validateName(sTest));
+      setHIValid(validateFloat(hTest));
+    },
+    [player.handicap.index, player.name, player.short],
+  );
 
   const [player, setPlayer] = useState({
     name: '',
@@ -80,7 +85,7 @@ const AddPlayerManual = (props) => {
   const [hiValid, setHIValid] = useState(false);
   const hValid = { borderColor: hiValid ? green : '#ddd' };
 
-  useEffect(() => validate(), []);
+  useEffect(() => validate(), [validate]);
 
   return (
     <Card>

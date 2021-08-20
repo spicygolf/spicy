@@ -18,9 +18,9 @@ const LinkRoundList = (props) => {
   const [isNew, setIsNew] = useState(null);
   const [gotoLinkRound, setGotoLinkRound] = useState(false);
 
-  const chooseRound = (round, isNew) => {
-    setRound(round);
-    setIsNew(isNew);
+  const chooseRound = (lRound, lIsNew) => {
+    setRound(lRound);
+    setIsNew(lIsNew);
     setGotoLinkRound(true);
   };
 
@@ -30,12 +30,16 @@ const LinkRoundList = (props) => {
       day: game_start,
     },
   });
-  if (loading) return <ActivityIndicator />;
-  if (error) console.log('Error fetching rounds for player day', error);
+  if (loading) {
+    return <ActivityIndicator />;
+  }
+  if (error) {
+    console.log('Error fetching rounds for player day', error);
+  }
 
   if (data && data.getRoundsForPlayerDay && !gotoLinkRound) {
     //console.log('setting rounds for ', pkey)
-    if (data.getRoundsForPlayerDay.length == 0) {
+    if (data.getRoundsForPlayerDay.length === 0) {
       // didn't find any rounds, so LinkRound will create one and link
       // everything.  It'll take over from here.
       //console.log('no rounds for player day');

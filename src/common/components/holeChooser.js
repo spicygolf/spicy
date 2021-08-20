@@ -1,5 +1,5 @@
 import { GameContext } from 'features/game/gameContext';
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-elements';
 
@@ -13,7 +13,9 @@ const HoleChooser = ({ holes, setHoles, title, active }) => {
       newHoles.push(h);
     } else {
       const i = newHoles.indexOf(h);
-      if (i > -1) newHoles.splice(i, 1);
+      if (i > -1) {
+        newHoles.splice(i, 1);
+      }
     }
     //console.log('newHoles after', newHoles);
     setHoles(newHoles);
@@ -26,8 +28,8 @@ const HoleChooser = ({ holes, setHoles, title, active }) => {
     rows[r] = r;
     r++;
   }
-  const rowsContent = rows.map((r) => {
-    const holeButtons = game.holes.slice(r * 9, r * 9 + 9).map((h) => {
+  const rowsContent = rows.map((row) => {
+    const holeButtons = game.holes.slice(row * 9, row * 9 + 9).map((h) => {
       const on = holes.includes(h.hole);
       return (
         <Button
@@ -40,7 +42,7 @@ const HoleChooser = ({ holes, setHoles, title, active }) => {
       );
     });
     return (
-      <View key={r} style={styles.rowOfHoles}>
+      <View key={row} style={styles.rowOfHoles}>
         {holeButtons}
       </View>
     );

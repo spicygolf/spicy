@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import SpicySearchPlayer from 'common/components/spicy/player/search';
 import { GameContext } from 'features/game/gameContext';
 import React, { useContext, useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 
 const AddPlayerSearch = (props) => {
   const defaultNewPlayer = {
@@ -41,10 +41,3 @@ const AddPlayerSearch = (props) => {
 };
 
 export default AddPlayerSearch;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingBottom: 50,
-  },
-});

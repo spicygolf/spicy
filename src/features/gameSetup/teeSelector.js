@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { acronym } from 'common/utils/text';
 import React from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-elements';
 
 const TeeSelector = (props) => {
@@ -13,12 +13,13 @@ const TeeSelector = (props) => {
   let buttonName = tee && tee.name ? `${tee.name}${course}` : 'Select Course/Tee';
   let pressFn;
 
-  if (readonly)
+  if (readonly) {
     return (
       <View>
         <Text style={styles.title}>{buttonName}</Text>
       </View>
     );
+  }
 
   // if we have round key, go to AddCourse.
   // If for some reason we don't go to LinkRound

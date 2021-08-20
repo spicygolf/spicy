@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
 const Splash = (props) => {

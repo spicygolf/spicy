@@ -18,7 +18,7 @@ const RegisterHandicap = (props) => {
     if (registration.ghinCreds) {
       navigation.navigate('RegisterPlayer');
     }
-  }, [registration]);
+  }, [navigation, registration]);
 
   return (
     <View style={styles.container}>

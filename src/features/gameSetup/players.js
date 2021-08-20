@@ -6,7 +6,7 @@ import { GameContext } from 'features/game/gameContext';
 import RemovePlayer from 'features/gameSetup/removePlayer';
 import TeeSelector from 'features/gameSetup/teeSelector';
 import React, { useContext } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { Card, Icon, ListItem } from 'react-native-elements';
 
 const Players = (props) => {
@@ -16,25 +16,35 @@ const Players = (props) => {
   const { _key: gkey, rounds, players } = game;
 
   const _itemPressed = (player) => {
-    if (readonly) return;
-    if (!player) return;
+    if (readonly) {
+      return;
+    }
+    if (!player) {
+      return;
+    }
     // check to see if round exists... if not, don't go here
     const round = get_round_for_player(rounds, player._key);
-    if (round) navigation.navigate('EditPlayer', { player: player });
+    if (round) {
+      navigation.navigate('EditPlayer', { player: player });
+    }
   };
 
-  const _shouldShowAddButton = (players) => {
-    if (readonly) return false;
-    return true; //TODO: fixme now that multiple gamespecs could be on each game
-    let ret = true;
-    if (gamespec.max_players < 1) return true;
-    try {
-      const player_count = players.length;
-      ret = player_count < gamespec.max_players;
-    } catch (e) {
-      console.log('error in shouldShowButton', e);
+  const _shouldShowAddButton = (_players) => {
+    if (readonly) {
+      return false;
     }
-    return ret;
+    return true; //TODO: fixme now that multiple gamespecs could be on each game
+    // let ret = true;
+    // if (gamespec.max_players < 1) {
+    //   return true;
+    // }
+    // try {
+    //   const player_count = players.length;
+    //   ret = player_count < gamespec.max_players;
+    // } catch (e) {
+    //   console.log('error in shouldShowButton', e);
+    // }
+    // return ret;
   };
 
   const _renderPlayer = ({ item, index }) => {
@@ -104,7 +114,9 @@ const Players = (props) => {
           data={players}
           renderItem={_renderPlayer}
           keyExtractor={(item) => {
-            if (item && item._key) return item._key;
+            if (item && item._key) {
+              return item._key;
+            }
             return Math.random().toString();
           }}
         />

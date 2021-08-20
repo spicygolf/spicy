@@ -25,10 +25,10 @@ const Tee = (props) => {
 
   const assigned = oldTee ? 'manual' : 'first';
 
-  const add = async (rkey, tkey, other) => {
-    const { loading, error, data } = await linkRoundToTee({
+  const add = async (lRKey, tkey, other) => {
+    const { error } = await linkRoundToTee({
       variables: {
-        from: { type: 'round', value: rkey },
+        from: { type: 'round', value: lRKey },
         to: { type: 'tee', value: tkey },
         other: other,
       },
@@ -47,10 +47,10 @@ const Tee = (props) => {
     }
   };
 
-  const rm = async (rkey, tkey) => {
-    const { loading, error, data } = await unlinkRoundToTee({
+  const rm = async (lRKey, tkey) => {
+    const { error } = await unlinkRoundToTee({
       variables: {
-        from: { type: 'round', value: rkey },
+        from: { type: 'round', value: lRKey },
         to: { type: 'tee', value: tkey },
       },
       refetchQueries: () => [
@@ -68,10 +68,10 @@ const Tee = (props) => {
     }
   };
 
-  const update = async (rkey, other) => {
-    const { loading, error, data } = await updateLink({
+  const update = async (lRKey, other) => {
+    const { error } = await updateLink({
       variables: {
-        from: { type: 'round', value: rkey },
+        from: { type: 'round', value: lRKey },
         to: { type: 'game', value: gkey },
         other: other,
       },
@@ -104,7 +104,9 @@ const Tee = (props) => {
         // game, unless they have round2tee already.
         game.rounds.map(async (round) => {
           //console.log('looping through rounds after tee selection', round);
-          if (!round) return; // odd edge case during development /shrug
+          if (!round) {
+            return;
+          } // odd edge case during development /shrug
           if (!round.tee) {
             await add(round._key, item._key, [{ key: 'assigned', value: 'auto' }]);
           }
@@ -127,7 +129,7 @@ const Tee = (props) => {
 
             const ch = course_handicap(index, tee, game.scope.holes);
             //console.log('ch', ch);
-            if (ch && ch != round.course_handicap) {
+            if (ch && ch !== round.course_handicap) {
               //console.log('updating course_handicap to ', ch);
               await update(round._key, [
                 { key: 'handicap_index', value: index.toString() },

@@ -5,7 +5,7 @@ import { Switch } from 'react-native-paper';
 
 const OptionBool = (props) => {
   const { option, setOption, readonly, index = 0 } = props;
-  const [value, setValue] = useState(option.values[index].value == 'true');
+  const [value, setValue] = useState(option.values[index].value === 'true');
   return (
     <Switch
       value={value}

@@ -40,7 +40,7 @@ const ChangeTeams = ({ currentHole, close }) => {
       default:
         break;
     }
-    const leftAvatarColor = item.key == selected ? green : 'transparent';
+    const leftAvatarColor = item.key === selected ? green : 'transparent';
 
     return (
       <ListItem onPress={() => setSelected(item.key)}>
@@ -58,7 +58,7 @@ const ChangeTeams = ({ currentHole, close }) => {
   };
 
   const renderSeparator = () => {
-    return <View style={styles.separator}></View>;
+    return <View style={styles.separator} />;
   };
 
   const changeTeamsOnHoles = async () => {
@@ -75,7 +75,7 @@ const ChangeTeams = ({ currentHole, close }) => {
     });
     const newHolesWithoutTypes = omitTypename(newHoles);
 
-    const { loading, error, data } = await updateGameHoles({
+    const { error } = await updateGameHoles({
       variables: {
         gkey: gkey,
         holes: newHolesWithoutTypes,
@@ -111,7 +111,7 @@ const ChangeTeams = ({ currentHole, close }) => {
       default:
         break;
     }
-  }, [selected]);
+  }, [currentHole, game, selected]);
 
   return (
     <View style={styles.container}>
@@ -128,7 +128,7 @@ const ChangeTeams = ({ currentHole, close }) => {
         holes={holes}
         setHoles={setHoles}
         title="Preview:"
-        active={selected == '2'}
+        active={selected === '2'}
       />
       <View style={styles.button_row}>
         <Button

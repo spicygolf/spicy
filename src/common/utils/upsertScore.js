@@ -4,7 +4,9 @@ import moment from 'moment';
 // TODO: deprecated - see upsertScore in common/utils/score
 
 export const upsertScore = (arr, hole, key, newval) => {
-  if (!arr || !arr[0]) arr = [{ hole: hole, values: [] }];
+  if (!arr || !arr[0]) {
+    arr = [{ hole: hole, values: [] }];
+  }
 
   const ts = moment.utc().format();
   const h = find(arr, { hole: hole });

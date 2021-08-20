@@ -21,7 +21,7 @@ const Game = (props) => {
   let content = null;
 
   // execute the getGame query
-  const { loading, error, refetch, data, client } = useQuery(GET_GAME_QUERY, {
+  const { loading, error, refetch, data } = useQuery(GET_GAME_QUERY, {
     variables: {
       gkey: currentGameKey,
     },
@@ -37,7 +37,7 @@ const Game = (props) => {
     );
   }
 
-  if (error && error.message != 'Network request failed') {
+  if (error && error.message !== 'Network request failed') {
     console.log(error);
     // TODO: error component
     content = <Text>Error Loading Game: `{error.message}`</Text>;
@@ -93,7 +93,7 @@ const Game = (props) => {
       //console.log('justBecameActive getGame');
       refetch();
     }
-  }, [justBecameActive]);
+  }, [justBecameActive, refetch]);
 
   return content;
 };

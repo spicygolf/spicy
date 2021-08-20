@@ -12,7 +12,9 @@ const StatePicker = (props) => {
 
   const getValue = (code) => {
     const state = find(states, { code: code });
-    if (!state) return '';
+    if (!state) {
+      return '';
+    }
     return state.name;
   };
 

@@ -12,9 +12,13 @@ const Player = (props) => {
   const { player, currentHole, test } = props;
   const { game, activeGameSpec } = useContext(GameContext);
 
-  if (!player || !player._key) return null;
+  if (!player || !player._key) {
+    return null;
+  }
   const round = get_round_for_player(game.rounds, player._key);
-  if (!round) return null;
+  if (!round) {
+    return null;
+  }
 
   const { _key: rkey } = round;
   const hole = get_hole(currentHole, round);

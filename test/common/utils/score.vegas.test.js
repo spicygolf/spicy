@@ -2,7 +2,7 @@ import { scoring } from 'common/utils/score';
 
 import { makeGame } from './score.util';
 
-const birdies_cancel_flip = true;
+const birdiesCancelFlip = true;
 
 const hole1 = {
   hole: 1,
@@ -18,10 +18,14 @@ describe('common/utils/score - Vegas tests', () => {
       { player: 3, team: 2, score: 5, pops: 0, junk: [] },
       { player: 4, team: 2, score: 4, pops: 0, junk: [] },
     ];
-    const game = makeVegasGame({ birdies_cancel_flip, holes: [hole1], data });
+    const game = makeVegasGame({
+      birdies_cancel_flip: birdiesCancelFlip,
+      holes: [hole1],
+      data,
+    });
     const scores = scoring(game);
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
     }));
     expect(received).toContainEqual({ team: 1, points: 45 });
@@ -35,10 +39,14 @@ describe('common/utils/score - Vegas tests', () => {
       { player: 3, team: 2, score: 4, pops: 0, junk: [] },
       { player: 4, team: 2, score: 4, pops: 0, junk: [] },
     ];
-    const game = makeVegasGame({ birdies_cancel_flip, holes: [hole1], data });
+    const game = makeVegasGame({
+      birdies_cancel_flip: birdiesCancelFlip,
+      holes: [hole1],
+      data,
+    });
     const scores = scoring(game);
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
     }));
     expect(received).toContainEqual({ team: 1, points: 45 });
@@ -52,11 +60,15 @@ describe('common/utils/score - Vegas tests', () => {
       { player: 3, team: 2, score: 4, pops: 0, junk: [] },
       { player: 4, team: 2, score: 6, pops: 1, junk: [] },
     ];
-    const game = makeVegasGame({ birdies_cancel_flip, holes: [hole1], data });
+    const game = makeVegasGame({
+      birdies_cancel_flip: birdiesCancelFlip,
+      holes: [hole1],
+      data,
+    });
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
     }));
     expect(received).toContainEqual({ team: 1, points: 34 });
@@ -70,11 +82,15 @@ describe('common/utils/score - Vegas tests', () => {
       { player: 3, team: 2, score: 4, pops: 0, junk: [] },
       { player: 4, team: 2, score: 4, pops: 0, junk: [] },
     ];
-    const game = makeVegasGame({ birdies_cancel_flip, holes: [hole1], data });
+    const game = makeVegasGame({
+      birdies_cancel_flip: birdiesCancelFlip,
+      holes: [hole1],
+      data,
+    });
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       holeNetTotal: t.holeNetTotal,
     }));
     // net total is 21 due to the +10 for two birdies
@@ -89,11 +105,15 @@ describe('common/utils/score - Vegas tests', () => {
       { player: 3, team: 2, score: 3, pops: 0, junk: [] },
       { player: 4, team: 2, score: 7, pops: 0, junk: [] },
     ];
-    const game = makeVegasGame({ birdies_cancel_flip, holes: [hole1], data });
+    const game = makeVegasGame({
+      birdies_cancel_flip: birdiesCancelFlip,
+      holes: [hole1],
+      data,
+    });
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
     }));
     expect(received).toContainEqual({ team: 1, points: 34 });
@@ -107,11 +127,15 @@ describe('common/utils/score - Vegas tests', () => {
       { player: 3, team: 2, score: 4, pops: 0, junk: [] },
       { player: 4, team: 2, score: 6, pops: 0, junk: [] },
     ];
-    const game = makeVegasGame({ birdies_cancel_flip, holes: [hole1], data });
+    const game = makeVegasGame({
+      birdies_cancel_flip: birdiesCancelFlip,
+      holes: [hole1],
+      data,
+    });
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       holeNetTotal: t.holeNetTotal,
     }));
     // net total is 40+10 due to the +10 for an eagle
@@ -126,11 +150,15 @@ describe('common/utils/score - Vegas tests', () => {
       { player: 3, team: 2, score: 3, pops: 0, junk: [] },
       { player: 4, team: 2, score: 6, pops: 0, junk: [] },
     ];
-    const game = makeVegasGame({ birdies_cancel_flip, holes: [hole1], data });
+    const game = makeVegasGame({
+      birdies_cancel_flip: birdiesCancelFlip,
+      holes: [hole1],
+      data,
+    });
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       holeNetTotal: t.holeNetTotal,
     }));
     // net total is (63-24) = 39 + 10 due to the eagle - birdie doesn't matter
@@ -145,11 +173,15 @@ describe('common/utils/score - Vegas tests', () => {
       { player: 3, team: 2, score: 2, pops: 0, junk: [] },
       { player: 4, team: 2, score: 6, pops: 0, junk: [] },
     ];
-    const game = makeVegasGame({ birdies_cancel_flip, holes: [hole1], data });
+    const game = makeVegasGame({
+      birdies_cancel_flip: birdiesCancelFlip,
+      holes: [hole1],
+      data,
+    });
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       holeNetTotal: t.holeNetTotal,
     }));
     expect(received).toContainEqual({ team: 1, holeNetTotal: 2 });

@@ -12,7 +12,7 @@ export const linkPlayerToGame = async ({
   //return;
   // link player to game
   try {
-    const { loading, error, data } = await playerToGame({
+    const { error } = await playerToGame({
       variables: {
         from: { type: 'player', value: pkey },
         to: { type: 'game', value: gkey },
@@ -32,7 +32,9 @@ export const linkPlayerToGame = async ({
       ],
       awaitRefetchQueries: true,
     });
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
   } catch (e) {
     console.log('error adding player to game', e);
   }
@@ -53,10 +55,14 @@ export const linkRoundToGameAndPlayer = async (props) => {
   let other = [];
   try {
     const hi = handicap.index;
-    if (hi) other.push({ key: 'handicap_index', value: hi.toString() });
+    if (hi) {
+      other.push({ key: 'handicap_index', value: hi.toString() });
+    }
     const ch = course_handicap(hi, tee, holes);
     //console.log('links ch', ch, hi, tee, holes);
-    if (ch) other.push({ key: 'course_handicap', value: ch.toString() });
+    if (ch) {
+      other.push({ key: 'course_handicap', value: ch.toString() });
+    }
     //console.log('LinkRound other', other);
   } catch (e) {
     console.log('Could not calc a course handicap for ', round);
@@ -64,11 +70,7 @@ export const linkRoundToGameAndPlayer = async (props) => {
   }
 
   // link round to game
-  let {
-    loading: r2gLoading,
-    error: r2gError,
-    data: r2gData,
-  } = await roundToGame({
+  await roundToGame({
     variables: {
       from: { type: 'round', value: rkey },
       to: { type: 'game', value: gkey },
@@ -82,15 +84,10 @@ export const linkRoundToGameAndPlayer = async (props) => {
     ],
     awaitRefetchQueries: true,
   });
-  //console.log('r2gData', r2gData);
 
   if (isNew) {
     // link round to player
-    let {
-      loading: r2pLoading,
-      error: r2pError,
-      data: r2pData,
-    } = await roundToPlayer({
+    await roundToPlayer({
       variables: {
         from: { type: 'round', value: rkey },
         to: { type: 'player', value: pkey },
@@ -103,12 +100,11 @@ export const linkRoundToGameAndPlayer = async (props) => {
       ],
       awaitRefetchQueries: true,
     });
-    //console.log('r2pData', r2pData);
   }
 };
 
 export const rmlink = async (fromType, fromKey, toType, toKey, unlink) => {
-  const { loading, error, data } = await unlink({
+  const { error, data } = await unlink({
     variables: {
       from: { type: fromType, value: fromKey },
       to: { type: toType, value: toKey },

@@ -4,8 +4,8 @@ import { ADD_LINK_MUTATION } from 'common/graphql/link';
 import { getHoles, omitTypename } from 'common/utils/game';
 import { ADD_GAME_MUTATION } from 'features/games/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 const NewGame = (props) => {
   const { route } = props;
@@ -68,35 +68,38 @@ const NewGame = (props) => {
   const newGameWithoutTypes = omitTypename(newGame);
 
   // add new game
-  const addGame = async () => {
+  const addGame = useCallback(async () => {
     //console.log('Begin adding game');
-    const { loading, error, data } = await addGameMutation({
+    const { error, data } = await addGameMutation({
       variables: {
         game: newGameWithoutTypes,
       },
     });
 
-    if (error && error.message != 'Network request failed') {
+    if (error && error.message !== 'Network request failed') {
       console.log('Error adding game: ', error.message);
     }
     //console.log('newGame data', data);
     return data.addGame;
-  };
+  }, [addGameMutation, newGameWithoutTypes]);
 
-  const linkGameToGamespec = async (game) => {
-    //console.log('Begin linking game to gamespec');
-    const { loading, error, data } = await addLinkMutation({
-      variables: {
-        from: { type: 'game', value: game._key },
-        to: { type: 'gamespec', value: gamespec._key },
-      },
-    });
-    if (error && error.message != 'Network request failed') {
-      console.log('Error linking game to gamespec: ', error.message);
-    }
-    //console.log('newGame linkg2gs', data);
-    return data.link;
-  };
+  const linkGameToGamespec = useCallback(
+    async (game) => {
+      //console.log('Begin linking game to gamespec');
+      const { error, data } = await addLinkMutation({
+        variables: {
+          from: { type: 'game', value: game._key },
+          to: { type: 'gamespec', value: gamespec._key },
+        },
+      });
+      if (error && error.message !== 'Network request failed') {
+        console.log('Error linking game to gamespec: ', error.message);
+      }
+      //console.log('newGame linkg2gs', data);
+      return data.link;
+    },
+    [addLinkMutation, gamespec._key],
+  );
 
   // New game has been created, so navigate to it.
   useEffect(() => {
@@ -126,7 +129,7 @@ const NewGame = (props) => {
         },
       });
     }
-  }, [gkey]);
+  }, [currentPlayer, gamespec, gkey, navigation, newGameWithoutTypes]);
 
   useEffect(() => {
     //console.log('createNewGame');
@@ -135,8 +138,10 @@ const NewGame = (props) => {
       await linkGameToGamespec(game);
       setGkey(game._key);
     };
-    if (!gkey) createNewGame();
-  }, []);
+    if (!gkey) {
+      createNewGame();
+    }
+  }, [addGame, gkey, linkGameToGamespec]);
 
   return (
     <View>

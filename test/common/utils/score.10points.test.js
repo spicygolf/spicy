@@ -18,7 +18,7 @@ describe('common/utils/score - 10Points tests', () => {
     const game = make10PointsGame({ holes: [hole1], data });
     const scores = scoring(game);
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
       holeNetTotal: t.holeNetTotal,
     }));
@@ -36,7 +36,7 @@ describe('common/utils/score - 10Points tests', () => {
     const game = make10PointsGame({ holes: [hole1], data });
     const scores = scoring(game);
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
       holeNetTotal: t.holeNetTotal,
     }));
@@ -54,7 +54,7 @@ describe('common/utils/score - 10Points tests', () => {
     const game = make10PointsGame({ holes: [hole1], data });
     const scores = scoring(game);
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
       holeNetTotal: t.holeNetTotal,
     }));
@@ -72,7 +72,7 @@ describe('common/utils/score - 10Points tests', () => {
     const game = make10PointsGame({ holes: [hole1], data });
     const scores = scoring(game);
     const received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
       holeNetTotal: t.holeNetTotal,
     }));
@@ -91,7 +91,7 @@ describe('common/utils/score - 10Points tests', () => {
     const scores = scoring(game);
     //console.log('scores - teams', JSON.stringify(scores.holes[0].teams, null, 2));
     let received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       holeTotal: t.holeTotal,
     }));
     expect(received).toContainEqual({ team: 1, holeTotal: 14 });
@@ -137,7 +137,7 @@ const make10PointsGame = ({ holes, data }) => {
             show_in: 'none',
             based_on: 'net',
             calculation: 'logic',
-            logic: `{'rankWithTies': [ 1, 3 ]}`,
+            logic: "{'rankWithTies': [ 1, 3 ]}",
             better: 'lower',
           },
           {
@@ -153,7 +153,7 @@ const make10PointsGame = ({ holes, data }) => {
             show_in: 'none',
             based_on: 'net',
             calculation: 'logic',
-            logic: `{'rankWithTies': [ 1, 1 ]}`,
+            logic: "{'rankWithTies': [ 1, 1 ]}",
             better: 'lower',
           },
           {
@@ -169,7 +169,7 @@ const make10PointsGame = ({ holes, data }) => {
             show_in: 'none',
             based_on: 'net',
             calculation: 'logic',
-            logic: `{'rankWithTies': [ 1, 2 ]}`,
+            logic: "{'rankWithTies': [ 1, 2 ]}",
             better: 'lower',
           },
           {
@@ -185,7 +185,7 @@ const make10PointsGame = ({ holes, data }) => {
             show_in: 'none',
             based_on: 'net',
             calculation: 'logic',
-            logic: `{'rankWithTies': [ 2, 1 ]}`,
+            logic: "{'rankWithTies': [ 2, 1 ]}",
             better: 'lower',
           },
           {
@@ -201,7 +201,7 @@ const make10PointsGame = ({ holes, data }) => {
             show_in: 'none',
             based_on: 'net',
             calculation: 'logic',
-            logic: `{'rankWithTies': [ 2, 2 ]}`,
+            logic: "{'rankWithTies': [ 2, 2 ]}",
             better: 'lower',
           },
           {
@@ -217,7 +217,7 @@ const make10PointsGame = ({ holes, data }) => {
             show_in: 'none',
             based_on: 'net',
             calculation: 'logic',
-            logic: `{'rankWithTies': [ 3, 1 ]}`,
+            logic: "{'rankWithTies': [ 3, 1 ]}",
             better: 'lower',
           },
           {
@@ -325,7 +325,8 @@ const make10PointsGame = ({ holes, data }) => {
             icon: 'album',
             based_on: 'birdie',
             scope: 'hole',
-            availability: `{ '===': [ {'var': 'team.points'}, {'var': 'possiblePoints'} ] }`,
+            availability:
+              "{ '===': [ {'var': 'team.points'}, {'var': 'possiblePoints'} ] }",
           },
           {
             type: 'multiplier',
@@ -336,7 +337,8 @@ const make10PointsGame = ({ holes, data }) => {
             icon: 'album',
             based_on: 'eagle',
             scope: 'hole',
-            availability: `{ '===': [ {'var': 'team.points'}, {'var': 'possiblePoints'} ] }`,
+            availability:
+              "{ '===': [ {'var': 'team.points'}, {'var': 'possiblePoints'} ] }",
           },
         ],
         scoring: {

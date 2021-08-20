@@ -1,21 +1,24 @@
 import { green } from 'common/colors';
 import { validateFloat } from 'common/utils/account';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, TextInput } from 'react-native';
 
 const OptionNum = (props) => {
   const { option, setOption, readonly, index = 0 } = props;
   const [value, setValue] = useState(option.values[0].value || null);
 
-  const validate = (type, text) => {
-    const oTest = type == 'num' ? text : value;
-    setOptionValid(validateFloat(oTest));
-  };
+  const validate = useCallback(
+    (type, text) => {
+      const oTest = type === 'num' ? text : value;
+      setOptionValid(validateFloat(oTest));
+    },
+    [value],
+  );
 
   const [optionValid, setOptionValid] = useState(false);
   const oValid = { borderColor: optionValid ? green : '#ddd' };
 
-  useEffect(() => validate(), []);
+  useEffect(() => validate(), [validate]);
 
   return (
     <TextInput

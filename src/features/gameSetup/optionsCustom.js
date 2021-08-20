@@ -12,15 +12,16 @@ const OptionsCustom = (props) => {
   const { game } = useContext(GameContext);
 
   const setLimit = () => {
-    let limit = -1;
+    let lim = -1;
     switch (option.type) {
       case 'bool':
-        limit = 2;
+        lim = 2;
         break;
       case 'menu':
-        limit = option.choices.length;
+        lim = option.choices.length;
         break;
     }
+    return lim;
   };
 
   const renderCustomOption = ({ item }) => {
@@ -42,6 +43,7 @@ const OptionsCustom = (props) => {
   };
 
   let limit = setLimit();
+  console.log('lint holders', limit, setOption);
 
   return (
     <View style={styles.container}>

@@ -4,7 +4,7 @@ import { registerPlayer, validateName } from 'common/utils/account';
 import { login } from 'common/utils/ghin';
 import BackToLogin from 'features/account/backToLogin';
 import { RegisterContext } from 'features/account/registerContext';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, Card, Input } from 'react-native-elements';
 
@@ -16,13 +16,16 @@ const RegisterPlayer = (props) => {
   const [nameValid, setNameValid] = useState(false);
   const [shortValid, setShortValid] = useState(false);
 
-  const validate = (type, text) => {
-    const nTest = type == 'name' ? text : registration.name;
-    const sTest = type == 'short' ? text : registration.short;
+  const validate = useCallback(
+    (type, text) => {
+      const nTest = type === 'name' ? text : registration.name;
+      const sTest = type === 'short' ? text : registration.short;
 
-    setNameValid(validateName(nTest));
-    setShortValid(validateName(sTest));
-  };
+      setNameValid(validateName(nTest));
+      setShortValid(validateName(sTest));
+    },
+    [registration.name, registration.short],
+  );
 
   const changes = registration.handicap
     ? 'Make changes to GHIN information (if any)'
@@ -42,7 +45,7 @@ const RegisterPlayer = (props) => {
         //console.log('res.user', res.user);
         res.user.sendEmailVerification();
         // spicy golf registration
-        const payload = await registerPlayer(registration, {
+        await registerPlayer(registration, {
           email: res.user.email,
           metadata: res.user.metadata,
           providerData: res.user.providerData,
@@ -58,7 +61,9 @@ const RegisterPlayer = (props) => {
       //console.log('register error', e);
       let message = e.message;
       const split = e.message.split(']');
-      if (split && split[1]) message = split[1].trim();
+      if (split && split[1]) {
+        message = split[1].trim();
+      }
       navigation.navigate('RegisterError', {
         e: {
           error: 500,
@@ -73,7 +78,7 @@ const RegisterPlayer = (props) => {
       nameRef.current.focus();
       validate();
     }
-  }, [nameRef]);
+  }, [nameRef, validate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,7 +95,7 @@ const RegisterPlayer = (props) => {
               lastName: g.LastName,
               playerName: `${g.FirstName} ${g.LastName}`,
               gender: g.Gender,
-              active: g.Active == 'true',
+              active: g.Active === 'true',
               index: g.Display,
               revDate: g.RevDate,
             },
@@ -100,7 +105,7 @@ const RegisterPlayer = (props) => {
       }
     };
     fetchData();
-  }, []);
+  }, [registration, setRegistration]);
 
   return (
     <View style={styles.container}>

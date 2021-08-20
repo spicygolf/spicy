@@ -3,60 +3,45 @@
 import { ToggleHole } from 'common/components/toggle_hole';
 import { upsertScore } from 'common/utils/upsertScore';
 import GameNav from 'features/games/gamenav';
-import moment from 'moment';
 import React from 'react';
-import { Query, withApollo } from 'react-apollo';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-class BirdieEmAllScore extends React.Component {
-  constructor(props) {
-    super(props);
-    this.scorecard = this.scorecard.bind(this);
-  }
+const BirdieEmAllScore = (props) => {
+  const { player, round_id, score, courseHoles } = props;
 
-  scorecard() {
-    const { player, round_id, score, courseHoles } = this.props;
-
-    return (
-      <View style={styles.ninesContainer}>
-        {courseHoles.map((nine, i) => (
-          <View key={i} style={styles.nine}>
-            {nine.map((hole) => {
-              const gotit = score.holes.indexOf(hole) >= 0;
-              return (
-                <ToggleHole
-                  key={hole}
-                  round_id={round_id}
-                  hole={hole}
-                  type="birdie"
-                  gotit={gotit}
-                  updateCache={(scores) => {
-                    const ns = upsertScore(scores, hole, 'birdie', !gotit);
-                    // TODO: affect change in leaderboard props or state?
-                    return ns;
-                  }}
-                />
-              );
-            })}
-          </View>
-        ))}
+  return (
+    <View>
+      <GameNav title={player.name} showBack={true} showScore={false} />
+      <View style={styles.cardContainer}>
+        <View style={styles.ninesContainer}>
+          {courseHoles.map((nine, i) => (
+            <View key={i} style={styles.nine}>
+              {nine.map((hole) => {
+                const gotit = score.holes.indexOf(hole) >= 0;
+                return (
+                  <ToggleHole
+                    key={hole}
+                    round_id={round_id}
+                    hole={hole}
+                    type="birdie"
+                    gotit={gotit}
+                    updateCache={(scores) => {
+                      const ns = upsertScore(scores, hole, 'birdie', !gotit);
+                      // TODO: affect change in leaderboard props or state?
+                      return ns;
+                    }}
+                  />
+                );
+              })}
+            </View>
+          ))}
+        </View>
       </View>
-    );
-  }
+    </View>
+  );
+};
 
-  render() {
-    const { player } = this.props;
-
-    return (
-      <View>
-        <GameNav title={player.name} showBack={true} showScore={false} />
-        <View style={styles.cardContainer}>{this.scorecard()}</View>
-      </View>
-    );
-  }
-}
-
-export default withApollo(BirdieEmAllScore);
+export default BirdieEmAllScore;
 
 var styles = StyleSheet.create({
   cardContainer: {

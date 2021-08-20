@@ -19,10 +19,12 @@ const PostScores = (props) => {
       title="Previous"
       buttonStyle={styles.button}
       titleStyle={styles.button_title}
-      disabled={currentPlayerIndex == 0}
+      disabled={currentPlayerIndex === 0}
       onPress={() => {
         let cpi = currentPlayerIndex - 1;
-        if (cpi < 0) cpi = 0;
+        if (cpi < 0) {
+          cpi = 0;
+        }
         setCurrentPlayerIndex(cpi);
       }}
     />
@@ -33,10 +35,12 @@ const PostScores = (props) => {
       title="Next"
       buttonStyle={styles.button}
       titleStyle={styles.button_title}
-      disabled={currentPlayerIndex == sorted_players.length - 1}
+      disabled={currentPlayerIndex === sorted_players.length - 1}
       onPress={() => {
         let cpi = currentPlayerIndex + 1;
-        if (cpi > sorted_players.length - 1) cpi = sorted_players.length - 1;
+        if (cpi > sorted_players.length - 1) {
+          cpi = sorted_players.length - 1;
+        }
         setCurrentPlayerIndex(cpi);
       }}
     />

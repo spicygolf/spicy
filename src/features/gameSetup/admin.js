@@ -34,8 +34,10 @@ const Admin = (props) => {
       fetchPolicy: 'no-cache',
     },
   );
-  if (loading) return <ActivityIndicator />;
-  if (error && error.message != 'Network request failed') {
+  if (loading) {
+    return <ActivityIndicator />;
+  }
+  if (error && error.message !== 'Network request failed') {
     console.log('Error getting deleteGameInfo', error);
   }
   //console.log('dgiRes in function body', dgiRes);
@@ -48,47 +50,36 @@ const Admin = (props) => {
       return;
     }
 
-    const gkey = dgiRes._key;
+    const lGKey = dgiRes._key;
     const dgi = dgiRes.deleteGameInfo;
     //console.log('deleteGame', gkey, dgi);
 
     // remove round2game links and rounds with no links to other games
     await dgi.rounds.map(async (r) => {
-      await rmlink('round', r.vertex, 'game', gkey, unlink);
-      if (r && r.other && r.other.length == 0) {
+      await rmlink('round', r.vertex, 'game', lGKey, unlink);
+      if (r && r.other && r.other.length === 0) {
         //console.log('round to delete', r);
         // we need to delete round2player edge as well as round
         const gRound = find(game.rounds, { _key: r.vertex });
         if (gRound && gRound.player && gRound.player[0] && gRound.player[0]._key) {
-          const rmR2P = await rmlink(
-            'round',
-            r.vertex,
-            'player',
-            gRound.player[0]._key,
-            unlink,
-          );
-          //console.log('remove round2player', rmR2P);
+          await rmlink('round', r.vertex, 'player', gRound.player[0]._key, unlink);
         }
-        const rmR = await rmround(r.vertex, deleteRound);
-        //console.log('remove round', rmR);
+        await rmround(r.vertex, deleteRound);
       }
     });
 
     // remove player links
     await dgi.players.map(async (p) => {
-      const rmP = await rmlink('player', p.vertex, 'game', gkey, unlink);
-      //console.log('remove player', rmP);
+      await rmlink('player', p.vertex, 'game', lGKey, unlink);
     });
 
     // remove gamespec links
     await dgi.gamespecs.map(async (gs) => {
-      const rmG2GS = await rmlink('game', gkey, 'gamespec', gs.vertex, unlink);
-      //console.log('remove game2gamespec', rmG2GS);
+      await rmlink('game', lGKey, 'gamespec', gs.vertex, unlink);
     });
 
     // remove game
-    const rmG = await rmgame(gkey, currentPlayerKey, deleteGame);
-    //console.log('remove game', rmG);
+    await rmgame(lGKey, currentPlayerKey, deleteGame);
 
     navigation.navigate('Games');
   };

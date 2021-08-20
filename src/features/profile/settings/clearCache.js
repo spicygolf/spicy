@@ -10,7 +10,9 @@ const ClearCache = (props) => {
   const client = useApolloClient();
 
   let message = '';
-  if (cleared) message = 'Local Data Cleared';
+  if (cleared) {
+    message = 'Local Data Cleared';
+  }
 
   return (
     <Card>
@@ -23,7 +25,9 @@ const ClearCache = (props) => {
         buttonStyle={styles.button}
         onPress={async () => {
           const res = await clearCache(client);
-          if (res) setCleared(true);
+          if (res) {
+            setCleared(true);
+          }
         }}
       />
       <Text style={styles.message}>{message}</Text>

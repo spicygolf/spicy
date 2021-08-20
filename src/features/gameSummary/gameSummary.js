@@ -15,7 +15,9 @@ const GameSummary = (props) => {
   const sorted_players = orderBy(scores.players, ['gross'], ['asc']);
 
   const format = (v) => {
-    if (v > 0) return `+${v}`;
+    if (v > 0) {
+      return `+${v}`;
+    }
     return v;
   };
 
@@ -51,7 +53,7 @@ const GameSummary = (props) => {
         <Text style={styles.headerTxt}>Player</Text>
       </View>
       <View style={styles.thru}>
-        <Text style={styles.headerTxt}></Text>
+        <Text style={styles.headerTxt} />
       </View>
       <View style={styles.gross}>
         <Text style={styles.headerTxt}>Gross</Text>

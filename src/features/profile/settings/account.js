@@ -25,7 +25,7 @@ const Account = (props) => {
     delete newPlayer.handicap;
     newPlayer[field] = newValue.trim();
     newPlayer = omitTypename(newPlayer);
-    const { loading, error, data } = await mutatePlayer({
+    const { error, data } = await mutatePlayer({
       variables: {
         player: newPlayer,
       },

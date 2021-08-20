@@ -12,7 +12,9 @@ export const login = async ({ ghinNumber, lastName }) => {
     method: 'GET',
   });
   const ret = await res.json();
-  if (ret && ret.golfers) return ret.golfers;
+  if (ret && ret.golfers) {
+    return ret.golfers;
+  }
 
   //console.log('No golfers returned', ret);
   return [];
@@ -43,7 +45,9 @@ export const search = async ({ state, lastName, firstName, page, perPage }) => {
     method: 'GET',
   });
   const ret = await res.json();
-  if (ret && ret.golfers) return ret.golfers;
+  if (ret && ret.golfers) {
+    return ret.golfers;
+  }
 
   //console.log('No golfers returned');
   return [];

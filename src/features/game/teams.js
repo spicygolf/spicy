@@ -25,7 +25,7 @@ const Teams = ({ teams, scoring, currentHole }) => {
     game &&
     game.scope &&
     game.scope.teams_rotate &&
-    game.scope.teams_rotate != 'never' ? (
+    game.scope.teams_rotate !== 'never' ? (
       <TouchableOpacity onPress={toggleOverlay}>
         <Icon type="material" name="people" color="#999" />
       </TouchableOpacity>
@@ -42,10 +42,14 @@ const Teams = ({ teams, scoring, currentHole }) => {
     const playersOnTeam = [];
     item.players.map((pkey) => {
       const p = find(players, { _key: pkey });
-      if (p) playersOnTeam.push(p);
+      if (p) {
+        playersOnTeam.push(p);
+      }
     });
     //console.log('playersOnTeam', item.team, playersOnTeam);
-    if (!playersOnTeam.length) return null; // bandaid (item 1) for #143
+    if (!playersOnTeam.length) {
+      return null;
+    } // bandaid (item 1) for #143
     const team = item.team;
 
     return (
@@ -53,14 +57,14 @@ const Teams = ({ teams, scoring, currentHole }) => {
         <Card containerStyle={styles.container}>
           <FlatList
             data={playersOnTeam}
-            renderItem={({ item, index }) =>
+            renderItem={({ item: p, index }) =>
               _renderPlayer({
                 team,
-                player: item,
+                player: p,
                 player_index: index,
               })
             }
-            keyExtractor={(item) => item._key}
+            keyExtractor={(i) => i._key}
           />
           <TeamJunk team={item.team} scoring={scoring} currentHole={currentHole} />
           <TeamMultipliers team={item.team} scoring={scoring} currentHole={currentHole} />

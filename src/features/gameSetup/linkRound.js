@@ -5,7 +5,7 @@ import { addPlayerToOwnTeam, getGamespecKVs } from 'common/utils/game';
 import { linkPlayerToGame, linkRoundToGameAndPlayer } from 'common/utils/links';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { ADD_ROUND_MUTATION } from 'features/rounds/graphql';
-import React, { useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 
 const LinkRound = (props) => {
@@ -40,10 +40,10 @@ const LinkRound = (props) => {
   const [roundToGame] = useMutation(UPSERT_LINK_MUTATION);
   const [roundToPlayer] = useMutation(UPSERT_LINK_MUTATION);
 
-  const createNewRound = async () => {
+  const createNewRound = useCallback(async () => {
     //console.log('createNewRound');
     // add round
-    const { loading, error, data } = await addRound({
+    const { error, data } = await addRound({
       variables: {
         round: {
           date: game_start,
@@ -57,19 +57,22 @@ const LinkRound = (props) => {
       return null;
     }
     return data.addRound;
-  };
+  }, [addRound, game_start]);
 
-  const linkRound = async (r) => {
-    //console.log('linkRound');
-    await linkRoundToGameAndPlayer({
-      round: r,
-      game,
-      player,
-      isNew,
-      roundToGame,
-      roundToPlayer,
-    });
-  };
+  const linkRound = useCallback(
+    async (r) => {
+      //console.log('linkRound');
+      await linkRoundToGameAndPlayer({
+        round: r,
+        game,
+        player,
+        isNew,
+        roundToGame,
+        roundToPlayer,
+      });
+    },
+    [game, isNew, player, roundToGame, roundToPlayer],
+  );
 
   useEffect(() => {
     const init = async () => {
@@ -100,7 +103,20 @@ const LinkRound = (props) => {
       });
     };
     init();
-  }, []);
+  }, [
+    createNewRound,
+    currentPlayerKey,
+    game,
+    gkey,
+    isNew,
+    linkRound,
+    navigation,
+    pkey,
+    playerToGame,
+    round,
+    teamGame,
+    updateGame,
+  ]);
 
   return <ActivityIndicator />;
 };

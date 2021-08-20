@@ -8,20 +8,22 @@ import { cloneDeep, filter, find, findIndex, groupBy, isEqual, reduce } from 'lo
  */
 export const getHoles = (game) => {
   if (!game.holes || !game.holes.length) {
+    let ret = [];
     switch (game.scope.holes) {
       case 'all18':
-        return Array.from(Array(18).keys()).map((x) => (++x).toString());
+        ret = Array.from(Array(18).keys()).map((x) => (++x).toString());
         break;
       case 'front9':
-        return ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        ret = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
         break;
       case 'back9':
-        return ['10', '11', '12', '13', '14', '15', '16', '17', '18'];
+        ret = ['10', '11', '12', '13', '14', '15', '16', '17', '18'];
         break;
       default:
         console.log(`getHoles - invalid value for holes: '${game.scope.holes}'`);
         break;
     }
+    return ret;
   }
   return game.holes.map((h) => h.hole.toString());
 };
@@ -124,26 +126,24 @@ export const getNewGameForUpdate = (game) => {
 
 // https://stackoverflow.com/a/175787/598628
 function isNumeric(str) {
-  if (typeof str != 'string') return false; // we only process strings!
+  if (typeof str !== 'string') {
+    return false;
+  } // we only process strings!
   return (
     !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
     !isNaN(parseFloat(str))
   ); // ...and ensure strings of whitespace fail
 }
 
-// Used to remove typename property from objects
-// https://github.com/apollographql/apollo-feature-requests/issues/6#issuecomment-659596763
-const isFile = (value) =>
-  (typeof File !== 'undefined' && value instanceof File) ||
-  (typeof Blob !== 'undefined' && value instanceof Blob);
-
 // From https://gist.github.com/Billy-/d94b65998501736bfe6521eadc1ab538
 export const omitDeep = (value, key) => {
   if (Array.isArray(value)) {
     return value.map((i) => omitDeep(i, key));
-  } else if (typeof value === 'object' && value !== null && !isFile(value)) {
+  } else if (typeof value === 'object' && value !== null) {
     return Object.keys(value).reduce((newObject, k) => {
-      if (k === key) return newObject;
+      if (k === key) {
+        return newObject;
+      }
       return Object.assign({ [k]: omitDeep(value[k], key) }, newObject);
     }, {});
   }
@@ -168,7 +168,7 @@ export const getAllGamespecOptions = (game) => {
 export const getAllOptions = ({ game, type }) => {
   let options = [];
   const gsOptions = getAllGamespecOptions(game);
-  if (gsOptions && gsOptions.length)
+  if (gsOptions && gsOptions.length) {
     gsOptions.map((gso) => {
       if (gso.type === type) {
         let values = gso.values;
@@ -188,14 +188,16 @@ export const getAllOptions = ({ game, type }) => {
         // if found, a game option overrides a gamespec option
         const go = find(game.options, { name: gso.name });
         // console.log('game options', go, gso.name, game.options);
-        if (go)
+        if (go) {
           o = {
             ...o,
             values: go.values,
           };
+        }
         options.push(o);
       }
     });
+  }
   return options;
 };
 
@@ -206,18 +208,22 @@ export const getOption = ({ game, hole, option, type }) => {
 
   const go = find(
     allOptions,
-    (o) => o.name == option.name && isOptionOnThisHole({ option, hole }),
+    (o) => o.name === option.name && isOptionOnThisHole({ option, hole }),
   );
-  if (go && go.value) v = go.value;
+  if (go && go.value) {
+    v = go.value;
+  }
   console.log('2', go, v);
 
   // convert bool
-  if (go && go.type == 'bool') {
+  if (go && go.type === 'bool') {
     v = v === true || v === 'true';
   }
 
   // convert number
-  if (isNumeric(v)) v = parseFloat(v);
+  if (isNumeric(v)) {
+    v = parseFloat(v);
+  }
   console.log('3', go, v);
 
   //console.log('FIXME, there is no `value` field anymore');
@@ -229,10 +235,14 @@ export const getOption = ({ game, hole, option, type }) => {
 };
 
 export const isOptionOnThisHole = ({ option, hole }) => {
-  if (!option) return false;
+  if (!option) {
+    return false;
+  }
   let ret = false;
   option.values.map((v) => {
-    if (v.holes?.indexOf(hole) >= 0) ret = true;
+    if (v.holes?.indexOf(hole) >= 0) {
+      ret = true;
+    }
   });
   // console.log('isOptionOnThisHole', option, hole, ret);
   return ret;
@@ -251,21 +261,29 @@ export const getGamespecKVs = (game, key) => {
 };
 
 export const getJunk = (junkName, pkey, game, holeNum) => {
-  if (!game || !game.holes) return null;
+  if (!game || !game.holes) {
+    return null;
+  }
   const gHole = find(game.holes, { hole: holeNum });
-  if (!gHole || !gHole.teams) return null;
+  if (!gHole || !gHole.teams) {
+    return null;
+  }
   const gTeam = find(gHole.teams, (t) => t && t.players && t.players.includes(pkey));
-  if (!gTeam || !gTeam.junk) return null;
+  if (!gTeam || !gTeam.junk) {
+    return null;
+  }
   const j = find(gTeam.junk, { name: junkName, player: pkey });
   console.log('j', j, gTeam);
-  if (!j || !j.values) return null;
+  if (!j || !j.values) {
+    return null;
+  }
   const jo = getOption({ game, hole: holeNum, option: j, type: 'junk' });
   console.log('jo', jo);
   return jo.value;
 };
 
 export const setTeamJunk = (t, junk, newValue, pkey) => {
-  if (findIndex(t.players, (p) => p == pkey) >= 0) {
+  if (findIndex(t.players, (p) => p === pkey) >= 0) {
     // this is the player's team for junk being set
     let newJunk = [];
     //console.log('team junk', t.junk);
@@ -279,8 +297,8 @@ export const setTeamJunk = (t, junk, newValue, pkey) => {
     }
     if (t.junk && t.junk.length) {
       t.junk.map((j) => {
-        if (j.name == junk.name) {
-          if ((!junk.limit || junk.limit != 'one_per_group') && j.player != pkey) {
+        if (j.name === junk.name) {
+          if ((!junk.limit || junk.limit !== 'one_per_group') && j.player !== pkey) {
             newJunk.push(j);
           }
         } else {
@@ -297,8 +315,8 @@ export const setTeamJunk = (t, junk, newValue, pkey) => {
     let newJunk = [];
     if (t.junk && t.junk.length) {
       t.junk.map((j) => {
-        if (j.name == junk.name) {
-          if (junk.limit != 'one_per_group') {
+        if (j.name === junk.name) {
+          if (junk.limit !== 'one_per_group') {
             newJunk.push(j);
           }
         } else {
@@ -314,7 +332,7 @@ export const setTeamJunk = (t, junk, newValue, pkey) => {
 };
 
 export const rmgame = async (gkey, currentPlayerKey, mutation) => {
-  const { loading, error, data } = await mutation({
+  const { error, data } = await mutation({
     variables: {
       gkey: gkey,
     },
@@ -352,33 +370,31 @@ export const getHolesToUpdate = (term, game, currentHole) => {
 
   switch (term) {
     case 'never':
-      return holes;
+      ret = holes;
       break;
     case 'rest_of_nine':
-      begHole = parseInt(currentHole);
+      begHole = parseInt(currentHole, 10);
       endHole = Math.floor((begHole - 1) / 9) * 9 + 9;
       ret = holes.splice(begHole - 1, endHole - begHole + 1);
       //console.log('rest_of_nine', begHole, endHole, ret);
-      return ret;
       break;
     case 'hole':
     case 'every1':
-      return [currentHole];
+      ret = [currentHole];
       break;
     case 'every3':
     case 'every6':
-      const cnt = parseInt(term.charAt(term.length - 1));
-      begHole = parseInt(currentHole);
+      const cnt = parseInt(term.charAt(term.length - 1), 10);
+      begHole = parseInt(currentHole, 10);
       endHole = begHole + cnt - 1;
       ret = holes.splice(begHole - 1, endHole - begHole + 1);
       //console.log('everyX', cnt, begHole, endHole, ret);
-      return ret;
       break;
     default:
       console.log(`Unhandled term case: '${term}'`);
-      return [];
       break;
   }
+  return ret;
 };
 
 export const addPlayerToOwnTeam = async ({ pkey, game, updateGame }) => {
@@ -411,8 +427,10 @@ export const addPlayerToOwnTeam = async ({ pkey, game, updateGame }) => {
         let maxTeam = reduce(
           newGame.holes[holeIndex].teams,
           (max, t) => {
-            const teamNum = parseInt(t.team);
-            if (!teamNum) return max;
+            const teamNum = parseInt(t.team, 10);
+            if (!teamNum) {
+              return max;
+            }
             return teamNum > max ? teamNum : max;
           },
           0,
@@ -435,20 +453,24 @@ export const addPlayerToOwnTeam = async ({ pkey, game, updateGame }) => {
     }
   });
   //console.log('addPlayerToOwnTeam newGame', newGame);
-  const { loading, error, data } = await updateGame({
+  const { error } = await updateGame({
     variables: {
       gkey: gkey,
       game: newGame,
     },
   });
 
-  if (error) console.log('Error updating game - addPlayerToOwnTeam', error);
+  if (error) {
+    console.log('Error updating game - addPlayerToOwnTeam', error);
+  }
 };
 
 export const playerListIndividual = ({ game }) => {
   return filter(
     game.players.map((p) => {
-      if (!p) return null;
+      if (!p) {
+        return null;
+      }
       return {
         key: p._key,
         pkey: p._key,
@@ -462,7 +484,9 @@ export const playerListIndividual = ({ game }) => {
 
 export const playerListWithTeams = ({ game, scores }) => {
   const ret = [];
-  if (!scores || !scores.holes || !scores.holes[0]) return ret;
+  if (!scores || !scores.holes || !scores.holes[0]) {
+    return ret;
+  }
   scores.holes[0].teams.map((t) => {
     t.players.map((p) => {
       const gP = find(game.players, { _key: p.pkey });
@@ -487,13 +511,17 @@ export const getCoursesPlayersTxt = (game) => {
     }
     if (r && r.tee && r.tee.course && r.tee.course.name) {
       const c = r.tee.course.name;
-      if (courses.indexOf(c) < 0) courses.push(c);
+      if (courses.indexOf(c) < 0) {
+        courses.push(c);
+      }
       const a = acronym(c);
-      if (acronyms.indexOf(a) < 0) acronyms.push(a);
+      if (acronyms.indexOf(a) < 0) {
+        acronyms.push(a);
+      }
     }
   });
 
-  const courseFull = courses.length == 1 ? courses[0] : acronyms.join(', ');
+  const courseFull = courses.length === 1 ? courses[0] : acronyms.join(', ');
 
   const coursesTxt = acronyms.length > 2 ? 'various courses' : acronyms.join(', ');
 
@@ -523,24 +551,26 @@ export const getLocalHoleInfo = ({ game, currentHole }) => {
   let sameCourse = true;
   game.rounds.map((r) => {
     // check to see if tee is set yet
-    if (!r.tee) return { hole: currentHole };
+    if (!r.tee) {
+      return { hole: currentHole };
+    }
 
     const teeHole = find(r.tee.holes, { hole: currentHole });
     if (!teeHole) {
       sameCourse = false;
       return;
     }
-    if (par && par != teeHole.par) {
+    if (par && par !== teeHole.par) {
       sameCourse = false;
     } else {
       par = teeHole.par;
     }
-    if (length && length != teeHole.length) {
+    if (length && length !== teeHole.length) {
       sameCourse = false;
     } else {
       length = teeHole.length;
     }
-    if (handicap && handicap != teeHole.handicap) {
+    if (handicap && handicap !== teeHole.handicap) {
       sameCourse = false;
     } else {
       handicap = teeHole.handicap;
@@ -554,11 +584,13 @@ export const getLocalHoleInfo = ({ game, currentHole }) => {
 
 export const isTeeSameForAllPlayers = ({ game }) => {
   const distinct_tees = groupBy(game.rounds, (r) => {
-    if (r && r.tee && r.tee._key) return r.tee._key;
+    if (r && r.tee && r.tee._key) {
+      return r.tee._key;
+    }
     return null;
   });
   //console.log('distinct_tees',distinct_tees);
-  return Object.keys(distinct_tees).length == 1;
+  return Object.keys(distinct_tees).length === 1;
 };
 
 /*
@@ -566,18 +598,25 @@ export const isTeeSameForAllPlayers = ({ game }) => {
  *  return -1 if data is whack, or we're done with full rounds of wolf rotation
  */
 export const getWolfPlayerIndex = ({ game, currentHole }) => {
-  if (!(game && game.players && game.players.length)) return -1;
-  if (!(game && game.scope && game.scope.wolf_order && game.scope.wolf_order.length))
+  if (!(game && game.players && game.players.length)) {
     return -1;
-  if (game.players.length != game.scope.wolf_order.length) return -1;
+  }
+  if (!(game && game.scope && game.scope.wolf_order && game.scope.wolf_order.length)) {
+    return -1;
+  }
+  if (game.players.length !== game.scope.wolf_order.length) {
+    return -1;
+  }
 
-  const currHole = parseInt(currentHole);
+  const currHole = parseInt(currentHole, 10);
   const hole_count = getHoles(game).length;
   const player_count = game.scope.wolf_order.length;
   const wolf_round = Math.floor((currHole - 1) / player_count);
 
   // are we past full rounds?
-  if ((wolf_round + 1) * player_count > hole_count) return -1;
+  if ((wolf_round + 1) * player_count > hole_count) {
+    return -1;
+  }
 
   const remainder = (currHole - 1) % player_count;
   // console.log('getWolfPlayerIndex', currentHole, wolf_round, remainder);

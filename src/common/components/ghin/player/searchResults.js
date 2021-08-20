@@ -11,7 +11,6 @@ const GhinPlayerSearchResults = (props) => {
   const [golfers, setGolfers] = useState([]);
   const [fetched, setFetched] = useState(0); // 0 - no search, 1 - fetching, 2 - fetched
   const [page, setPage] = useState(1);
-  const [selected, setSelected] = useState(null);
   const perPage = 25;
 
   const handicap = (h) => (
@@ -33,14 +32,13 @@ const GhinPlayerSearchResults = (props) => {
     const hdcp = item.Display ? item.Display : item.handicap_index;
     const revDate = item.RevDate ? item.RevDate : item.rev_date;
     const gender = item.Gender ? item.Gender : item.gender;
-    const active = item.Status ? item.Status == 'Active' : item.status == 'Active';
+    const active = item.Status ? item.Status === 'Active' : item.status === 'Active';
 
     return (
       <ListItem
         containerStyle={styles.container}
         key={key}
         onPress={() => {
-          setSelected(gn);
           setState({
             ...state,
             ghinCreds: {
@@ -90,7 +88,7 @@ const GhinPlayerSearchResults = (props) => {
     fetchData();
   }, [state]);
 
-  let content = <View style={styles.results_list}></View>;
+  let content = <View style={styles.results_list} />;
 
   switch (fetched) {
     case 1:
@@ -114,7 +112,9 @@ const GhinPlayerSearchResults = (props) => {
 
             // should only be in 'search' part where we want to peform
             // infinite scroll pagination
-            if (state.lastName && state.ghinNumber) return;
+            if (state.lastName && state.ghinNumber) {
+              return;
+            }
 
             const search_results = await search({
               ...state,
@@ -128,7 +128,7 @@ const GhinPlayerSearchResults = (props) => {
           }}
           keyboardShouldPersistTaps="handled"
           ListEmptyComponent={
-            <View style={{ flex: 1 }}>
+            <View style={styles.emptyContainer}>
               <Text style={styles.no_results}>No Results</Text>
             </View>
           }
@@ -149,6 +149,9 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 5,
     marginHorizontal: 0,
+  },
+  emptyContainer: {
+    flex: 1,
   },
   player_club: {
     color: '#999',

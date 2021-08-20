@@ -29,50 +29,46 @@ const AppStack = (props) => {
 
   const [getCurrentPlayer, { error, data }] = useLazyQuery(GET_PLAYER_QUERY);
 
-  const getCreds = async () => {
-    const c = await getCurrentUser(user);
-    //console.log('getCreds', c);
-    if (c && c.currentPlayerKey && c.token) {
-      setCurrentPlayerKey(c.currentPlayerKey);
-      setToken(c.token);
-      await AsyncStorage.setItem('currentPlayer', c.currentPlayerKey);
-      await AsyncStorage.setItem('token', c.token);
-      setContent(tabs());
-    } else {
-      if (c && c.message) {
-        // try to get creds from local storage
-        const newCurrentPlayerKey = await AsyncStorage.getItem('currentPlayer');
-        const newToken = await AsyncStorage.getItem('token');
-        if (newToken && newCurrentPlayerKey) {
-          // TODO: DRY (above)
-          setCurrentPlayerKey(newCurrentPlayerKey);
-          setToken(newToken);
-          setContent(tabs());
-        } else {
-          console.log('something is wrong:', c);
-          if (c.navTo) {
-            switch (c.navTo) {
-              case 'RegisterAgain':
-                setContent(<RegisterAgain fbUser={c.fbUser} retryCreds={retryCreds} />);
-                break;
-              default:
-                //setContent(<Alert message={c.message} />);
-                break;
-            }
+  useEffect(() => {
+    const getCreds = async () => {
+      const c = await getCurrentUser(user);
+      //console.log('getCreds', c);
+      if (c && c.currentPlayerKey && c.token) {
+        setCurrentPlayerKey(c.currentPlayerKey);
+        setToken(c.token);
+        await AsyncStorage.setItem('currentPlayer', c.currentPlayerKey);
+        await AsyncStorage.setItem('token', c.token);
+        setContent(tabs());
+      } else {
+        if (c && c.message) {
+          // try to get creds from local storage
+          const newCurrentPlayerKey = await AsyncStorage.getItem('currentPlayer');
+          const newToken = await AsyncStorage.getItem('token');
+          if (newToken && newCurrentPlayerKey) {
+            // TODO: DRY (above)
+            setCurrentPlayerKey(newCurrentPlayerKey);
+            setToken(newToken);
+            setContent(tabs());
           } else {
-            // TODO: navigate to an Error component
-            //setContent(<Alert message={c.message} />);
+            console.log('something is wrong:', c);
+            if (c.navTo) {
+              switch (c.navTo) {
+                case 'RegisterAgain':
+                  setContent(<RegisterAgain fbUser={c.fbUser} retryCreds={getCreds} />);
+                  break;
+                default:
+                  //setContent(<Alert message={c.message} />);
+                  break;
+              }
+            } else {
+              // TODO: navigate to an Error component
+              //setContent(<Alert message={c.message} />);
+            }
           }
         }
       }
-    }
-  };
+    };
 
-  const retryCreds = async () => {
-    await getCreds();
-  };
-
-  useEffect(() => {
     getCreds();
   }, [user]);
 
@@ -85,7 +81,7 @@ const AppStack = (props) => {
         fetchPolicy: 'cache-and-network',
       });
     }
-  }, [currentPlayerKey, token]);
+  }, [currentPlayerKey, getCurrentPlayer, token]);
 
   useEffect(() => {
     if (data && data.getPlayer) {
@@ -94,7 +90,7 @@ const AppStack = (props) => {
   }, [data]);
 
   useEffect(() => {
-    if (error && error.message != 'Network request failed') {
+    if (error && error.message !== 'Network request failed') {
       console.log('Error fetching current player', error);
     }
   }, [error]);

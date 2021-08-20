@@ -9,11 +9,8 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-nativ
 import { ListItem } from 'react-native-elements';
 
 const Games = (props) => {
-  const { currentPlayer: cp } = useContext(CurrentPlayerContext);
-  if (!cp) return null;
-
   const navigation = useNavigation();
-
+  const { currentPlayer: cp } = useContext(CurrentPlayerContext);
   const { route } = props;
   const { stat, begDate, endDate } = route.params;
 
@@ -22,7 +19,7 @@ const Games = (props) => {
 
   // console.log('variables', {stat, begDate, endDate, currentPlayer, myClubs});
 
-  const { loading, error, data } = useQuery(GAMES_FOR_PLAYER_FEED, {
+  const { data } = useQuery(GAMES_FOR_PLAYER_FEED, {
     variables: { stat, begDate, endDate, currentPlayer, myClubs },
   });
 
@@ -52,7 +49,9 @@ const Games = (props) => {
   };
 
   const renderGame = ({ item }) => {
-    if (!item) return null;
+    if (!item) {
+      return null;
+    }
     const name = item.name || '';
     const subtitle = buildSubtitle(item);
 
@@ -67,11 +66,15 @@ const Games = (props) => {
           name="chevron-right"
           color="#999"
           size={24}
-          onPress={() => itemPressed(item)}
+          onPress={() => gamePressed(item)}
         />
       </ListItem>
     );
   };
+
+  if (!cp) {
+    return null;
+  }
 
   if (data && data.gamesForPlayerFeed) {
     return (

@@ -9,31 +9,43 @@ const TeamTotals = (props) => {
   const { game } = useContext(GameContext);
 
   const hole = find(scoring.holes, { hole: currentHole });
-  if (!hole) return null;
+  if (!hole) {
+    return null;
+  }
 
   const team = find(hole.teams, { team: teamNum });
-  if (!team) return null;
+  if (!team) {
+    return null;
+  }
 
   let netPoints = team.points;
   let otherTeam = null;
-  const otherTeams = filter(hole.teams, (t) => t.team.toString() != teamNum.toString());
-  if (otherTeams && otherTeams.length == 1) {
+  const otherTeams = filter(hole.teams, (t) => t.team.toString() !== teamNum.toString());
+  if (otherTeams && otherTeams.length === 1) {
     otherTeam = otherTeams[0];
     netPoints = team.points - otherTeam.points;
-    if (betterPoints === 'lower') netPoints *= -1;
-    if (netPoints < 0) netPoints = 0;
+    if (betterPoints === 'lower') {
+      netPoints *= -1;
+    }
+    if (netPoints < 0) {
+      netPoints = 0;
+    }
   }
   const netTotal = netPoints * hole.holeMultiplier;
   let diff = otherTeam ? team.runningTotal - otherTeam.runningTotal : team.runningTotal;
-  if (betterPoints === 'lower') diff *= -1;
-  const points = netPoints == 0 ? '-' : netPoints;
+  if (betterPoints === 'lower') {
+    diff *= -1;
+  }
+  const points = netPoints === 0 ? '-' : netPoints;
   const multiplier =
-    hole.holeMultiplier == 1 || netPoints == 0
+    hole.holeMultiplier === 1 || netPoints === 0
       ? ''
       : `x ${hole.holeMultiplier} = ${netTotal}`;
 
   let totalTxt = format({ v: diff, type });
-  if (totalTxt == '' && type == 'points') totalTxt = '0';
+  if (totalTxt === '' && type === 'points') {
+    totalTxt = '0';
+  }
   let total = `Total: ${totalTxt}`;
 
   // handle totals differently for match play
@@ -41,12 +53,12 @@ const TeamTotals = (props) => {
     if (team.win) {
       total = `Win: ${format({ v: team.matchDiff, type })}`;
     } else {
-      total = ``;
+      total = '';
     }
   }
   // don't show team totals if the teams are rotating at all
   if (type !== 'match' && game.scope.teams_rotate !== 'never') {
-    total = ``;
+    total = '';
   }
 
   return (

@@ -47,13 +47,13 @@ const SettingsHome = (props) => {
 
   const renderSetting = ({ item }) => {
     // console.log('impersonate', impersonate);
-    if (item.level == 'admin') {
+    if (item.level === 'admin') {
       if (
-        (currentPlayer && currentPlayer.level && currentPlayer.level == 'admin') ||
+        (currentPlayer && currentPlayer.level && currentPlayer.level === 'admin') ||
         (impersonate &&
           impersonate.original &&
           impersonate.original.level &&
-          impersonate.original.level == 'admin')
+          impersonate.original.level === 'admin')
       ) {
         // do nothing... i.e. continue on rendering the setting
       } else {

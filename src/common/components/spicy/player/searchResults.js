@@ -8,19 +8,12 @@ import {
   SEARCH_PLAYER_QUERY,
 } from 'features/players/graphql';
 import { find } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
-import { ListItem } from 'react-native-elements';
+import React, { useContext } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 
-const SpicyPlayerSearchResults = (props) => {
-  const { state, setState, onPress } = useContext(SpicyPlayerSearchContext);
+const SpicyPlayerSearchResults = () => {
+  const { state, onPress } = useContext(SpicyPlayerSearchContext);
   // console.log('spicy player search results context', state);
-
-  const handicap = (h) => (
-    <View>
-      <Text style={styles.handicap}>{h}</Text>
-    </View>
-  );
 
   const renderGolfer = ({ item }) => {
     const handicap =
@@ -91,7 +84,7 @@ const SpicyPlayerSearchResults = (props) => {
       keyExtractor={(g) => g._key}
       keyboardShouldPersistTaps="handled"
       ListEmptyComponent={
-        <View style={{ flex: 1 }}>
+        <View style={styles.emptyContainer}>
           <Text style={styles.no_results}>No Results</Text>
         </View>
       }
@@ -106,6 +99,9 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 10,
     marginHorizontal: 0,
+  },
+  emptyContainer: {
+    flex: 1,
   },
   player_club: {
     color: '#999',

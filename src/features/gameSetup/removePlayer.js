@@ -10,14 +10,18 @@ const RemovePlayer = (props) => {
 
   const _removePlayer = () => {
     //console.log('removePlayer', pkey, gkey, rkey);
-    if (pkey && gkey) _removePlayer2Game();
-    if (rkey && gkey) _removeRound2Game();
+    if (pkey && gkey) {
+      _removePlayer2Game();
+    }
+    if (rkey && gkey) {
+      _removeRound2Game();
+    }
   };
 
   const _removePlayer2Game = () => {
     // remove player2game link
     try {
-      const { loading, data, error } = unlink({
+      const { error } = unlink({
         variables: {
           from: { type: 'player', value: pkey },
           to: { type: 'game', value: gkey },
@@ -32,15 +36,18 @@ const RemovePlayer = (props) => {
         ],
         awaitRefetchQueries: true,
       });
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
     } catch (e) {
+      // TODO: error component
       console.log('error removing player from game', e);
     }
   };
 
   const _removeRound2Game = () => {
     try {
-      const { loading, data, error } = unlink({
+      const { error } = unlink({
         variables: {
           from: { type: 'round', value: rkey },
           to: { type: 'game', value: gkey },
@@ -55,8 +62,11 @@ const RemovePlayer = (props) => {
         ],
         awaitRefetchQueries: true,
       });
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
     } catch (e) {
+      // TODO: error component
       console.log('error removing round from game', e);
     }
   };

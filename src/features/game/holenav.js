@@ -11,7 +11,7 @@ const HoleNav = (props) => {
   const holes = holesOrig.sort(sortNumber);
   holes.push('Summary');
   const currentHoleIndex = findIndex(holes, (h) => {
-    return h == holeInfo.hole;
+    return h === holeInfo.hole;
   });
 
   let holeInfoContent = null;
@@ -33,7 +33,9 @@ const HoleNav = (props) => {
           size={40}
           onPress={() => {
             let newHoleIndex = currentHoleIndex - 1;
-            if (newHoleIndex < 0) newHoleIndex = holes.length - 1;
+            if (newHoleIndex < 0) {
+              newHoleIndex = holes.length - 1;
+            }
             changeHole(holes[newHoleIndex].toString());
           }}
           testID={'holeNav_prev'}
@@ -49,7 +51,9 @@ const HoleNav = (props) => {
           size={40}
           onPress={() => {
             let newHoleIndex = currentHoleIndex + 1;
-            if (newHoleIndex >= holes.length) newHoleIndex = 0;
+            if (newHoleIndex >= holes.length) {
+              newHoleIndex = 0;
+            }
             changeHole(holes[newHoleIndex].toString());
           }}
           testID={'holeNav_next'}

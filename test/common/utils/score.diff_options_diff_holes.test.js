@@ -31,14 +31,14 @@ describe('common/utils/score - Options tests', () => {
 
     // hole 1 - tie, no second ball breaks tie
     let received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
     }));
     expect(received).toContainEqual({ team: 1, points: 0 }, { team: 2, points: 0 });
 
     // hole 2 - tie, second ball breaks tie
     received = scores.holes[1].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
     }));
     expect(received).toContainEqual({ team: 1, points: 1 }, { team: 2, points: 0 });
@@ -60,7 +60,7 @@ describe('common/utils/score - Options tests', () => {
 
     // hole 1 - birdie, with option value 1
     let received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
     }));
     expect(received).toContainEqual(
@@ -70,7 +70,7 @@ describe('common/utils/score - Options tests', () => {
 
     // hole 2 - birdie, with option value 2
     received = scores.holes[1].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       points: t.points,
     }));
     expect(received).toContainEqual(
@@ -97,7 +97,7 @@ describe('common/utils/score - Options tests', () => {
 
     // hole 1 - 2x, with option value 'on'
     let received = scores.holes[0].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       holeNetTotal: t.holeNetTotal,
     }));
     //console.log('received', JSON.stringify(received, null, 2));
@@ -108,7 +108,7 @@ describe('common/utils/score - Options tests', () => {
 
     // hole 2 - 2x, with option value 'off'
     received = scores.holes[1].teams.map((t) => ({
-      team: parseInt(t.team),
+      team: parseInt(t.team, 10),
       holeNetTotal: t.holeNetTotal,
     }));
     expect(received).toContainEqual(

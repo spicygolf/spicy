@@ -1,19 +1,17 @@
 import auth from '@react-native-firebase/auth';
 import { useNavigation } from '@react-navigation/native';
-import { green } from 'common/colors';
 import {
   parseFirebaseError,
   validateEmail,
   validatePassword,
 } from 'common/utils/account';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { Button, Card, Input } from 'react-native-elements';
@@ -32,17 +30,17 @@ const Login = (props) => {
 
   const login = async () => {
     try {
-      const res = await auth().signInWithEmailAndPassword(email, password);
+      await auth().signInWithEmailAndPassword(email, password);
     } catch (e) {
       console.log('login error', e.message, e.code);
-      const { slug, message } = parseFirebaseError(e);
+      const { message } = parseFirebaseError(e);
       setLoginError(message);
     }
   };
 
   const validate = (type, text) => {
-    const eTest = type == 'email' ? text : email;
-    const pTest = type == 'password' ? text : password;
+    const eTest = type === 'email' ? text : email;
+    const pTest = type === 'password' ? text : password;
 
     setEmailValid(validateEmail(eTest));
     setPassValid(validatePassword(pTest));

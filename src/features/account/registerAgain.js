@@ -25,8 +25,8 @@ const RegisterAgain = (props) => {
   const [shortValid, setShortValid] = useState(false);
 
   const validate = (type, text) => {
-    const nTest = type == 'name' ? text : registration.name;
-    const sTest = type == 'short' ? text : registration.short;
+    const nTest = type === 'name' ? text : registration.name;
+    const sTest = type === 'short' ? text : registration.short;
 
     setNameValid(validateName(nTest));
     setShortValid(validateName(sTest));
@@ -36,7 +36,7 @@ const RegisterAgain = (props) => {
   const sValid = { borderColor: shortValid ? green : '#ddd' };
 
   const register = async () => {
-    const payload = await registerPlayer(registration, {
+    await registerPlayer(registration, {
       email: fbUser.email,
       metadata: fbUser.metadata,
       providerData: fbUser.providerData,
@@ -44,7 +44,6 @@ const RegisterAgain = (props) => {
       uid: fbUser.uid,
     });
 
-    //console.log('register again', payload);
     retryCreds();
   };
 

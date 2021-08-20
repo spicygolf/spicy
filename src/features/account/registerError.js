@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import BackToLogin from 'features/account/backToLogin';
-import React, { useContext } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button, Card } from 'react-native-elements';
 
@@ -11,7 +11,9 @@ const RegisterError = (props) => {
   };
   const { route } = props;
   //console.log('route', route);
-  if (route && route.params && route.params.e) error = route.params.e;
+  if (route && route.params && route.params.e) {
+    error = route.params.e;
+  }
   const navigation = useNavigation();
 
   return (

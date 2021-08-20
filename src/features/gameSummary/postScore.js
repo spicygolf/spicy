@@ -3,7 +3,7 @@ import { getHoles } from 'common/utils/game';
 import { get_hole, get_round_for_player, get_score_value } from 'common/utils/rounds';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { POST_ROUND_MUTATION } from 'features/rounds/graphql';
-import { findIndex, reduce } from 'lodash';
+import { reduce } from 'lodash';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
@@ -21,14 +21,14 @@ const PostScore = (props) => {
   const [posting, setPosting] = useState();
   const [postRoundToHandicapService] = useMutation(POST_ROUND_MUTATION);
 
-  const calcPosting = (round) => {
-    return round.scores.map((s) => {
+  const calcPosting = (lRound) => {
+    return lRound.scores.map((s) => {
       const gross = get_score_value('gross', s);
-      const hole = get_hole(s.hole, round);
+      const hole = get_hole(s.hole, lRound);
       //console.log('renderHole hole', hole);
       const coursePops = parseFloat(s.coursePops) || 0;
       const net = gross - coursePops;
-      const par = parseInt(hole.par);
+      const par = parseInt(hole.par, 10);
       const netToPar = net - par;
       //console.log('calcPosting netToPar', netToPar);
       let adjusted = gross;
@@ -51,14 +51,17 @@ const PostScore = (props) => {
   };
 
   const postRound = async (rkey) => {
-    const { loading, error, data } = await postRoundToHandicapService({
+    const { error } = await postRoundToHandicapService({
       variables: {
         rkey,
         posted_by: currentPlayer.name,
       },
     });
 
-    if (error) console.log('Error posting round to handicap service', error);
+    if (error) {
+      // TODO: error component
+      console.log('Error posting round to handicap service', error);
+    }
   };
 
   const postRoundButton = () => {
@@ -80,7 +83,7 @@ const PostScore = (props) => {
           />
         );
       }
-    } else if (round.posting && round.posting.success == true) {
+    } else if (round.posting && round.posting.success === true) {
       const { date_validated, adjusted_gross_score, posted_by, estimated_handicap } =
         round.posting;
       const dt = moment(date_validated).format('lll');
@@ -120,7 +123,7 @@ const PostScore = (props) => {
     return (
       <View style={styles.holeContainer}>
         <Text style={styles.hdr}>Totals</Text>
-        <Text style={styles.hdr}></Text>
+        <Text style={styles.hdr} />
         <View style={styles.hdr}>
           <Text style={styles.grossTxt}>{player.gross}</Text>
         </View>
@@ -160,13 +163,13 @@ const PostScore = (props) => {
   return (
     <Card containerStyle={styles.container} wrapperStyle={styles.wrapper}>
       <View style={styles.playerView}>
-        <View style={{ flex: 3 }}>
+        <View style={styles.playerViewTxt}>
           <Text style={styles.playerName}>{player.name}</Text>
           <Text style={styles.courseHandicap}>
             Course Handicap: {player.courseHandicap}
           </Text>
         </View>
-        <View style={{ flex: 4, alignItems: 'flex-end' }}>{postRoundButton()}</View>
+        <View style={styles.postRoundButton}>{postRoundButton()}</View>
       </View>
       {header()}
       <View style={styles.flatListView}>
@@ -196,6 +199,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingBottom: 5,
+  },
+  playerViewTxt: {
+    flex: 3,
+  },
+  postRoundButton: {
+    flex: 4,
+    alignItems: 'flex-end',
   },
   buttonStyle: {
     width: 150,

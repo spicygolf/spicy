@@ -9,9 +9,8 @@ import { persistCache } from 'apollo3-cache-persist';
 import possibleTypes from 'app/client/possibleTypes';
 import typePolicies from 'app/client/typePolicies';
 import { baseUri, scheme } from 'common/config';
-import { logout } from 'common/utils/account';
 
-export default configureClient = async () => {
+const configureClient = async () => {
   const cache = new InMemoryCache({
     dataIdFromObject: (object) => {
       //console.log('object', object);
@@ -35,14 +34,14 @@ export default configureClient = async () => {
             },
           };
         })
-        .catch((err) => {
+        .catch((_err) => {
           return headers;
         })
     );
   });
 
   const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
-    if (graphQLErrors)
+    if (graphQLErrors) {
       graphQLErrors.map(({ message, locations, path }) =>
         console.log(
           `[GraphQL error]:
@@ -51,6 +50,7 @@ export default configureClient = async () => {
             Path: ${path}`,
         ),
       );
+    }
 
     if (networkError) {
       // ignore these, because we're building this thing 'offline-first'
@@ -120,3 +120,5 @@ export default configureClient = async () => {
 
   return client;
 };
+
+export default configureClient;

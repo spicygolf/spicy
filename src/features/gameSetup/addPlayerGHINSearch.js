@@ -28,7 +28,7 @@ const AddPlayerGHINSearch = (props) => {
         variables: { ghin: newPlayer.ghinCreds.ghinNumber },
       });
     }
-  }, [newPlayer]);
+  }, [lookupPkey, newPlayer]);
 
   // if already in spicy, set pkey
   // if not already in spicy w/ lookup on ghin #, then use addPlayer() mutation
@@ -62,7 +62,14 @@ const AddPlayerGHINSearch = (props) => {
       }
     };
     handleLookup();
-  }, [lPkey]);
+  }, [
+    addPlayer,
+    currentPlayerKey,
+    lPkey,
+    newPlayer.handicap,
+    newPlayer.name,
+    newPlayer.short,
+  ]);
 
   // then add player to game
   useEffect(() => {
@@ -75,7 +82,7 @@ const AddPlayerGHINSearch = (props) => {
       //console.log('player', player);
       navigation.navigate('LinkRoundList', { game, player });
     }
-  }, [pkey]);
+  }, [game, navigation, newPlayer.handicap, newPlayer.name, pkey]);
 
   return <GhinSearchPlayer state={newPlayer} setState={setNewPlayer} />;
 };

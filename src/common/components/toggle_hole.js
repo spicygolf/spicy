@@ -1,6 +1,5 @@
 'use strict';
 
-import { gql } from '@apollo/client';
 import { POST_SCORE_MUTATION, ROUND_FRAGMENT } from 'features/rounds/graphql';
 import { find } from 'lodash';
 import moment from 'moment';
@@ -22,7 +21,8 @@ export const ToggleHole = ({ round_id, hole, type, gotit, updateCache }) => {
         // update scores
         const newScores = updateCache(scores);
         // write updated score fragment
-        let res = cache.writeFragment({
+        // TODO: inspect result from writeFragment and handle?
+        cache.writeFragment({
           id: postScore._key,
           fragment: ROUND_FRAGMENT,
           data: {
@@ -34,7 +34,9 @@ export const ToggleHole = ({ round_id, hole, type, gotit, updateCache }) => {
     >
       {(postScore, { loading, error, data, client }) => {
         //if( loading ) console.log('loading');
-        if (error) console.log('error', error);
+        if (error) {
+          console.log('error', error);
+        }
         if (data && data.postScore) {
           // requery fragment after a mutation
           const { scores } = client.cache.readFragment({

@@ -33,10 +33,14 @@ export const getGameMeta = async (gkey) => {
 export const setGameMeta = async (gkey, key, value) => {
   const ts = moment.utc().format();
   let gamesMeta = await getGamesMeta(gkey);
-  if (!gamesMeta || !Array.isArray(gamesMeta)) gamesMeta = [];
+  if (!gamesMeta || !Array.isArray(gamesMeta)) {
+    gamesMeta = [];
+  }
 
   let game = find(gamesMeta, { gkey: gkey });
-  if (!game) game = { gkey, ts };
+  if (!game) {
+    game = { gkey, ts };
+  }
   game[key] = value;
 
   const i = findIndex(gamesMeta, { gkey: gkey });

@@ -25,7 +25,7 @@ const GameSetupScreen = (props) => {
       }
     };
     init();
-  }, []);
+  }, [cp, game, navigation, route]);
 
   return (
     <KeyboardAvoidingView style={styles.container} testID="game_setup_kaview">

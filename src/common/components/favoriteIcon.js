@@ -27,7 +27,7 @@ class FavoriteIcon extends React.Component {
                 color={green}
                 size={36}
                 onPress={async () => {
-                  const { data, errors } = await removeLinkMutation({
+                  const { errors } = await removeLinkMutation({
                     variables: {
                       from: this.props.fave.from,
                       to: this.props.fave.to,
@@ -58,7 +58,7 @@ class FavoriteIcon extends React.Component {
                 color={green}
                 size={36}
                 onPress={async () => {
-                  const { data, errors } = await addLinkMutation({
+                  const { errors } = await addLinkMutation({
                     variables: {
                       from: this.props.fave.from,
                       to: this.props.fave.to,

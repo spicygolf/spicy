@@ -22,32 +22,41 @@ const Leaderboard = (props) => {
 
   const findScore = (hole, pkey) => {
     let ret = null;
-    if (!hole || !hole.teams) return ret;
+    if (!hole || !hole.teams) {
+      return ret;
+    }
     hole.teams.map((t) => {
       const p = find(t.players, { pkey: pkey });
-      if (p) ret = p.score;
+      if (p) {
+        ret = p.score;
+      }
     });
     return ret;
   };
 
-  const side = (holes, side) => {
+  const side = (holes, sd) => {
     let totals = {};
     let isMatchOver = false;
     const rows = holes.map((h) => {
-      const scores = orderedPlayerList.map((p) => {
+      const scrs = orderedPlayerList.map((p) => {
         const score = findScore(h, p.pkey);
-        if (!totals[p.pkey]) totals[p.pkey] = 0;
-        if (score && score[scoreType])
+        if (!totals[p.pkey]) {
+          totals[p.pkey] = 0;
+        }
+        if (score && score[scoreType]) {
           totals[p.pkey] += parseFloat(score[scoreType].value) || 0;
+        }
         let t = find(h.teams, { team: p.team });
         let team = null;
-        if (t && t.team) team = t.team; // dafuq?
+        if (t && t.team) {
+          team = t.team;
+        } // dafuq?
         let match = null;
         if (
           t &&
           !t.matchOver &&
           !isMatchOver &&
-          h.scoresEntered == orderedPlayerList.length
+          h.scoresEntered === orderedPlayerList.length
         ) {
           // we have a team object, the match isn't over, and all scores are
           // entered for this hole, so we can set the match property
@@ -69,31 +78,32 @@ const Leaderboard = (props) => {
       });
       return {
         hole: h.hole,
-        scores,
+        scores: scrs,
       };
     });
     if (scoreType === 'match') {
       const lastRow = last(rows);
-      if (lastRow)
+      if (lastRow) {
         lastRow.scores.map((s) => {
           totals[s.pkey] = s.score.match.value;
         });
+      }
     }
     //console.log('rows', side, rows);
     return {
-      side,
+      side: sd,
       data: rows,
       totals,
     };
   };
 
   const front = (d) => {
-    const holes = scores.holes.filter((h) => parseInt(h.hole) <= 9);
+    const holes = scores.holes.filter((h) => parseInt(h.hole, 10) <= 9);
     return side(holes, 'Out');
   };
 
   const back = () => {
-    const holes = scores.holes.filter((h) => parseInt(h.hole) >= 10);
+    const holes = scores.holes.filter((h) => parseInt(h.hole, 10) >= 10);
     return side(holes, 'In');
   };
 
@@ -104,10 +114,10 @@ const Leaderboard = (props) => {
       }
       const sv = s.score[scoreType].value;
       let pops = [];
-      for (let i = 0; i < parseFloat(s.score.pops.value); i++) {
+      for (let ii = 0; ii < parseFloat(s.score.pops.value); ii++) {
         pops.push(
           <Icon
-            key={i}
+            key={ii}
             name="lens"
             color={s.score.pops.value > 0 ? 'black' : '#eee'}
             size={5}
@@ -119,14 +129,14 @@ const Leaderboard = (props) => {
       const birdieShape =
         sv && s.score[scoreType].toPar < 0
           ? [shapeStyles(rowHeight, 'black').circle]
-          : scoreType == 'match' || scoreType == 'points'
+          : scoreType === 'match' || scoreType === 'points'
           ? [shapeStyles(rowHeight, 'black').match]
           : [shapeStyles(rowHeight, 'black').none];
 
       const eagleShape =
         sv && s.score[scoreType].toPar < -1
           ? [shapeStyles(rowHeight - 5).circle]
-          : scoreType == 'match' || scoreType == 'points'
+          : scoreType === 'match' || scoreType === 'points'
           ? [shapeStyles(rowHeight - 5, 'black').match]
           : [shapeStyles(rowHeight - 5, 'black').none];
 
@@ -164,12 +174,12 @@ const Leaderboard = (props) => {
 
   const TotalRow = ({ section }) => {
     const birdieShape =
-      scoreType == 'match' || scoreType == 'points'
+      scoreType === 'match' || scoreType === 'points'
         ? [shapeStyles(rowHeight, 'black').match]
         : [shapeStyles(rowHeight, 'black').none];
 
     const eagleShape =
-      scoreType == 'match' || scoreType == 'points'
+      scoreType === 'match' || scoreType === 'points'
         ? [shapeStyles(rowHeight - 5, 'black').match]
         : [shapeStyles(rowHeight - 5, 'black').none];
 
@@ -186,7 +196,7 @@ const Leaderboard = (props) => {
               </Text>
             </View>
           </View>
-          <View style={styles.popView}></View>
+          <View style={styles.popView} />
         </View>
       </View>
     ));
@@ -200,17 +210,17 @@ const Leaderboard = (props) => {
     );
   };
 
-  const ViewChooser = (props) => {
-    const { activeChoices } = props;
+  const ViewChooser = (vcProps) => {
+    const { activeChoices: vcActiveChoices } = vcProps;
 
-    const selected = activeChoices.indexOf(scoreType);
+    const selected = vcActiveChoices.indexOf(scoreType);
 
     return (
       <ButtonGroup
-        buttons={activeChoices}
+        buttons={vcActiveChoices}
         selectedIndex={selected}
         onPress={(index) => {
-          setScoreType(activeChoices[index]);
+          setScoreType(vcActiveChoices[index]);
         }}
         containerStyle={styles.buttonContainer}
         selectedButtonStyle={styles.selectedButton}
@@ -243,7 +253,9 @@ const Leaderboard = (props) => {
   };
 
   const Footer = () => {
-    if (scoreType === 'match') return null;
+    if (scoreType === 'match') {
+      return null;
+    }
     const section = {
       side: 'Total',
       totals: totals,
@@ -258,7 +270,9 @@ const Leaderboard = (props) => {
   data.push(b);
   const totals = {};
   orderedPlayerList.map((p) => {
-    if (!totals[p.pkey]) totals[p.pkey] = 0;
+    if (!totals[p.pkey]) {
+      totals[p.pkey] = 0;
+    }
     totals[p.pkey] +=
       (parseFloat(f.totals[p.pkey]) || 0) + (parseFloat(b.totals[p.pkey]) || 0);
   });

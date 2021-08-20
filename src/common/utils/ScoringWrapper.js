@@ -3,15 +3,13 @@ import { get_score_value } from 'common/utils/rounds';
 import jsonLogic from 'json-logic-js';
 import { concat, filter, find, orderBy } from 'lodash';
 
-import { get_net_score } from './rounds';
-
 // a wrapper class containing functions about scoring and players and teams
 // so we can inject them into JsonLogic as custom operators
 class ScoringWrapper {
   constructor(game, scoring, currentHole) {
     this._game = game;
     this._scoring = scoring;
-    this._currentHole = parseInt(currentHole);
+    this._currentHole = parseInt(currentHole, 10);
     this.betterPoints = getGamespecKVs(game, 'better');
 
     for (let key in this.customs) {
@@ -62,29 +60,41 @@ class ScoringWrapper {
 
   // TODO: team arg can be taken out of logic expression, as it's in _extra_vars (usually)
   isTeamDownTheMost = (hole, team) => {
-    if (!hole) return true;
+    if (!hole) {
+      return true;
+    }
     // use 'asc' if higher points is better, 'desc' if lower points is better
     let dir = 'asc';
-    if (this.betterPoints.includes('lower')) dir = 'desc';
+    if (this.betterPoints.includes('lower')) {
+      dir = 'desc';
+    }
     // get rank 1 as the team 'down the most'
     const ranks = this._teamRanks(hole, dir);
     //console.log('isTeamDownTheMost ranks', ranks);
     const thisTeam = find(ranks, { team: team.team });
-    if (!thisTeam) return true;
-    return thisTeam.rank == 1;
+    if (!thisTeam) {
+      return true;
+    }
+    return thisTeam.rank === 1;
   };
 
   // TODO: team arg can be taken out of logic expression, as it's in _extra_vars (usually)
   isTeamSecondToLast = (hole, team) => {
-    if (!hole) return false;
+    if (!hole) {
+      return false;
+    }
     // use 'asc' if higher points is better, 'desc' if lower points is better
     let dir = 'asc';
-    if (this.betterPoints.includes('lower')) dir = 'desc';
+    if (this.betterPoints.includes('lower')) {
+      dir = 'desc';
+    }
     // get rank 2 as the team 'down second most'
     const ranks = this._teamRanks(hole, dir);
     const thisTeam = find(ranks, { team: team.team });
-    if (!thisTeam) return true;
-    return thisTeam.rank == 2;
+    if (!thisTeam) {
+      return true;
+    }
+    return thisTeam.rank === 2;
   };
 
   rankWithTies = (rank, teamsAtRank) => {
@@ -92,7 +102,9 @@ class ScoringWrapper {
     const junk = this._extra_vars.junk;
     let dir = 'asc';
     // TODO: do this from junk, not game 'better'
-    if (junk.better != 'lower') dir = 'desc';
+    if (junk.better !== 'lower') {
+      dir = 'desc';
+    }
     const teamScores = this._extra_vars.teams.map((t) => {
       try {
         return {
@@ -106,9 +118,13 @@ class ScoringWrapper {
     const ranks = this._getRanks(teamScores, dir);
     const team = this._extra_vars.team;
     const thisTeam = find(ranks, { team: team.team });
-    if (thisTeam.rank != rank) ret = false;
+    if (thisTeam.rank !== rank) {
+      ret = false;
+    }
     const atRank = filter(ranks, { rank: rank }).length;
-    if (!atRank || atRank != teamsAtRank) ret = false;
+    if (!atRank || atRank !== teamsAtRank) {
+      ret = false;
+    }
     //console.log('rankWithTies', hole.hole, junk.name, ranks, thisTeam, atRank, rank, teamsAtRank, ret);
     return ret;
   };
@@ -116,11 +132,17 @@ class ScoringWrapper {
   didOtherTeamMultiplyWith = (hole, thisTeam, multName) => {
     const gHole = find(this._game.holes, { hole: hole.hole });
 
-    if (!gHole || !gHole.multipliers || !gHole.multipliers.length) return false;
+    if (!gHole || !gHole.multipliers || !gHole.multipliers.length) {
+      return false;
+    }
     const targetMult = find(gHole.multipliers, { name: multName });
-    if (!targetMult) return false;
+    if (!targetMult) {
+      return false;
+    }
     //console.log('targetMult', targetMult);
-    if (targetMult.team == thisTeam.team) return false;
+    if (targetMult.team === thisTeam.team) {
+      return false;
+    }
     return true;
   };
 
@@ -131,15 +153,19 @@ class ScoringWrapper {
     });
     const f = filter(teamJunk, { name: junkName });
     //console.log('countJunk', this._currentHole, teamJunk, f);
-    if (!f) return 0;
+    if (!f) {
+      return 0;
+    }
     return f.length;
   };
 
   // team arg is 'this' or 'other'
   getTeam = (team = 'this') => {
     let ret = null;
-    if (team == 'this') ret = this._extra_vars.team;
-    if (team == 'other') {
+    if (team === 'this') {
+      ret = this._extra_vars.team;
+    }
+    if (team === 'other') {
       const otherTeamIndex = this._extra_vars.team.team === '1' ? 1 : 0;
       ret = this._extra_vars.teams[otherTeamIndex];
     }
@@ -154,16 +180,16 @@ class ScoringWrapper {
     let s = null;
     switch (scoreType) {
       case 'gross':
-        s = get_score_value(scoreType, score);
-        break;
       case 'net':
-        s = get_net_score(gross, score);
+        s = get_score_value(scoreType, score);
         break;
       default:
         break;
     }
-    if (!s) return false;
-    const p = parseInt(this._extra_vars.hole.par);
+    if (!s) {
+      return false;
+    }
+    const p = parseInt(this._extra_vars.hole.par, 10);
     //console.log('isParOrBetter', s, p, (s <= p));
     return s <= p;
   };
@@ -171,7 +197,7 @@ class ScoringWrapper {
   // TODO: HoleJunk is sending TeeHole and Score in as _extra_vars, so in future
   //       we will need to read holeNum arg and maybe find the hole (for par)
   holePar = (holeNum) => {
-    const p = parseInt(this._extra_vars.hole.par);
+    const p = parseInt(this._extra_vars.hole.par, 10);
     //console.log('holePar', p);
     return p;
   };
@@ -202,7 +228,7 @@ class ScoringWrapper {
     const ranked = sorted.map((item, i) => {
       if (i > 0) {
         let prevItem = sorted[i - 1];
-        if (prevItem.score == item.score) {
+        if (prevItem.score === item.score) {
           // same score, same rank
           item.rank = prevItem.rank;
         } else {

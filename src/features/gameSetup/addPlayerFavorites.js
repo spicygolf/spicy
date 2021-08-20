@@ -4,7 +4,7 @@ import { GameContext } from 'features/game/gameContext';
 import Player from 'features/gameSetup/Player';
 import { GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY } from 'features/players/graphql';
 import React, { useContext } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 
 const AddPlayerFavorites = (props) => {
   const navigation = useNavigation();
@@ -22,12 +22,12 @@ const AddPlayerFavorites = (props) => {
         title={item.name}
         subtitle={club}
         hdcp={handicap}
-        onPress={(item) => {
+        onPress={(lItem) => {
           //console.log('player pressed', item);
           const player = {
-            _key: item._key,
-            name: item.name,
-            handicap: item.handicap,
+            _key: lItem._key,
+            name: lItem.name,
+            handicap: lItem.handicap,
           };
           navigation.navigate('LinkRoundList', { game, player });
         }}
@@ -50,7 +50,7 @@ const AddPlayerFavorites = (props) => {
     );
   }
 
-  if (error && error.message != 'Network request failed') {
+  if (error && error.message !== 'Network request failed') {
     console.log(error);
     // TODO: error component
     return <Text>Error Loading Favorite Players: `{error.message}`</Text>;

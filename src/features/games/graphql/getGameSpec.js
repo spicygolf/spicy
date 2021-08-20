@@ -1,5 +1,4 @@
 import { gql } from '@apollo/client';
-import { useQuery } from '@apollo/client';
 
 export const GET_GAMESPEC_QUERY = gql`
   query GetGameSpec($gamespec: String!) {

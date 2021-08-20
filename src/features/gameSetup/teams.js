@@ -17,17 +17,21 @@ const Teams = (props) => {
   const [updateGameScope] = useMutation(UPDATE_GAME_SCOPE_MUTATION);
 
   const teamsFromGamespecs = getGamespecKVs(game, 'teams');
-  if (!teamsFromGamespecs.includes(true)) return null;
+  if (!teamsFromGamespecs.includes(true)) {
+    return null;
+  }
 
   const updateRotation = async (selectedIndex) => {
-    if (!game || !game.scope || readonly) return;
+    if (!game || !game.scope || readonly) {
+      return;
+    }
 
     //console.log('selectedIndex', teamsRotateOptions[selectedIndex].slug);
     let newScope = cloneDeep(game.scope);
     newScope.teams_rotate = teamsRotateOptions[selectedIndex].slug;
     const newScopeWithoutTypes = omitTypename(newScope);
 
-    const { loading, error, data } = await updateGameScope({
+    const { error } = await updateGameScope({
       variables: {
         gkey: game._key,
         scope: newScopeWithoutTypes,
@@ -42,7 +46,10 @@ const Teams = (props) => {
       },
     });
 
-    if (error) console.log('Error updating game scope - gameSetup teams', error);
+    if (error) {
+      // TODO: error component
+      console.log('Error updating game scope - gameSetup teams', error);
+    }
   };
 
   let selected = -1;
@@ -57,7 +64,7 @@ const Teams = (props) => {
   let buttonsContent = null;
 
   if (game && game.scope && game.scope.teams_rotate) {
-    if (game.scope.teams_rotate == 'never') {
+    if (game.scope.teams_rotate === 'never') {
       chooserContent = (
         <View style={styles.chooserView}>
           <Text>Choose Teams:</Text>
@@ -66,8 +73,8 @@ const Teams = (props) => {
       );
     }
     if (
-      game.scope.teams_rotate == 'every1' &&
-      activeGameSpec.team_determination == 'wolf'
+      game.scope.teams_rotate === 'every1' &&
+      activeGameSpec.team_determination === 'wolf'
     ) {
       const wolf_name = activeGameSpec.wolf_disp ? activeGameSpec.wolf_disp : 'Wolf';
       title = `${wolf_name} Order`;
@@ -75,7 +82,7 @@ const Teams = (props) => {
     }
   }
 
-  if (activeGameSpec.team_determination != 'wolf') {
+  if (activeGameSpec.team_determination !== 'wolf') {
     buttonsContent = (
       <View>
         <Text>Teams Rotate:</Text>

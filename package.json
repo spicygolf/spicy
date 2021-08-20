@@ -119,7 +119,8 @@
   },
   "lint-staged": {
     "*.{js,ts,tsx}": [
-      "yarn prettier"
+      "yarn prettier",
+      "yarn lint:fix"
     ]
   },
   "husky": {

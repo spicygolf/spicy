@@ -12,7 +12,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Card, Icon } from 'react-native-elements';
 
 const Score = (props) => {
-  const { game, gkey, scores, activeGameSpec } = useContext(GameContext);
+  const { game, gkey, scores } = useContext(GameContext);
   const [currentHole, setCurrentHole] = useState();
 
   let content = null;
@@ -47,8 +47,10 @@ const Score = (props) => {
 
   const clearHoleFromHolesToUpdate = async () => {
     const gameMeta = await getGameMeta(gkey);
-    if (!(gameMeta && gameMeta.holesToUpdate)) return;
-    const newHoles = filter(gameMeta.holesToUpdate, (h) => h != currentHole);
+    if (!(gameMeta && gameMeta.holesToUpdate)) {
+      return;
+    }
+    const newHoles = filter(gameMeta.holesToUpdate, (h) => h !== currentHole);
     await setGameMeta(gkey, 'holesToUpdate', newHoles);
   };
 
@@ -92,16 +94,16 @@ const Score = (props) => {
       }
     };
     init();
-  }, []);
+  }, [gkey]);
 
   return (
     <View style={styles.score_container}>
       <HoleNav
         holes={holes}
         holeInfo={holeInfo}
-        changeHole={async (hole) => {
-          await setGameMeta(gkey, 'currentHole', hole);
-          setCurrentHole(hole);
+        changeHole={async (h) => {
+          await setGameMeta(gkey, 'currentHole', h);
+          setCurrentHole(h);
         }}
       />
       {warningsContent}

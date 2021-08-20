@@ -1,6 +1,5 @@
 import { find } from 'lodash';
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import { Dropdown } from 'react-native-material-dropdown';
 
 const CountryPicker = (props) => {
@@ -12,7 +11,9 @@ const CountryPicker = (props) => {
 
   const getValue = (code) => {
     const country = find(countries, { code: code });
-    if (!country) return '';
+    if (!country) {
+      return '';
+    }
     return country.name;
   };
 
@@ -34,5 +35,3 @@ const CountryPicker = (props) => {
 };
 
 export default CountryPicker;
-
-const styles = StyleSheet.create({});

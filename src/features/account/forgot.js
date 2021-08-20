@@ -15,7 +15,7 @@ const Forgot = (props) => {
 
   const forgot = async () => {
     try {
-      const res = await auth().sendPasswordResetEmail(email);
+      await auth().sendPasswordResetEmail(email);
 
       setSent(true);
       // clear fields after successful login
@@ -28,7 +28,7 @@ const Forgot = (props) => {
   };
 
   const validate = (type, text) => {
-    const eTest = type == 'email' ? text : email;
+    const eTest = type === 'email' ? text : email;
     setEmailValid(validateEmail(eTest));
   };
 

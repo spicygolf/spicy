@@ -6,8 +6,8 @@ import { getGameMeta, setGameMeta } from 'common/utils/metadata';
 import { getTeams } from 'common/utils/teams';
 import { GameContext } from 'features/game/gameContext';
 import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
-import { cloneDeep, filter, find, findIndex, orderBy } from 'lodash';
-import React, { useContext, useEffect } from 'react';
+import { cloneDeep, filter, find, findIndex } from 'lodash';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 
@@ -29,108 +29,117 @@ const TeamChooser = (props) => {
       : { hole: currentHole, teams: [] };
 
   // wolf vars
-  const isWolf = activeGameSpec.team_determination == 'wolf';
+  const isWolf = activeGameSpec.team_determination === 'wolf';
   const wolfPlayerIndex = isWolf ? getWolfPlayerIndex({ game, currentHole }) : -1;
   const wolfPKey = isWolf ? game.scope.wolf_order[wolfPlayerIndex] : '';
   const team1Text = isWolf ? '   Wolf' : 'Team 1';
   const team2Text = isWolf ? 'Opponents' : 'Team 2';
 
-  const changeTeamsForPlayer = async (pkey, addToTeam, removeFromTeam) => {
-    //console.log('pkey', pkey);
-    //console.log('addToTeam', addToTeam);
-    //console.log('removeFromTeam', removeFromTeam);
-    if (readonly) return; // view mode only, so don't allow changes
+  const changeTeamsForPlayer = useCallback(
+    async (pkey, addToTeam, removeFromTeam) => {
+      //console.log('pkey', pkey);
+      //console.log('addToTeam', addToTeam);
+      //console.log('removeFromTeam', removeFromTeam);
+      if (readonly) {
+        return;
+      } // view mode only, so don't allow changes
 
-    // get holes for updating, either from game metadata or game setup
-    const gameMeta = await getGameMeta(gkey);
-    const holesToUpdate =
-      gameMeta && gameMeta.holesToUpdate && gameMeta.holesToUpdate.length
-        ? gameMeta.holesToUpdate
-        : getHolesToUpdate(game.scope.teams_rotate, game, currentHole);
-    //console.log('teamChooser holesToUpdate', holesToUpdate, gameMeta);
+      // get holes for updating, either from game metadata or game setup
+      const gameMeta = await getGameMeta(gkey);
+      const holesToUpdate =
+        gameMeta && gameMeta.holesToUpdate && gameMeta.holesToUpdate.length
+          ? gameMeta.holesToUpdate
+          : getHolesToUpdate(game.scope.teams_rotate, game, currentHole);
+      //console.log('teamChooser holesToUpdate', holesToUpdate, gameMeta);
 
-    // set up variable for mutation
-    let newHoles = cloneDeep(game.holes);
-    if (!newHoles) {
-      newHoles = [];
-    }
-
-    holesToUpdate.map((h) => {
-      // if hole data doesn't exist, create blanks
-      if (findIndex(newHoles, { hole: h }) < 0) {
-        newHoles.push({
-          __typename: 'GameHole',
-          hole: h,
-          teams: [],
-          multipliers: [],
-        });
+      // set up variable for mutation
+      let newHoles = cloneDeep(game.holes);
+      if (!newHoles) {
+        newHoles = [];
       }
-      const holeIndex = findIndex(newHoles, { hole: h });
-      //console.log('hole', h);
 
-      // if team data doesn't exist, create blanks
-      if (!newHoles[holeIndex].teams) newHoles[holeIndex].teams = [];
-      //console.log('teams', newHoles[holeIndex].teams);
-      for (let i = 0; i < teamCount; i++) {
-        const teamNum = (i + 1).toString();
-        const teamIndex = find(newHoles[holeIndex].teams, { team: teamNum });
-        //console.log('blanks', teamNum, teamIndex);
-        if (!teamIndex || teamIndex < 0) {
-          newHoles[holeIndex].teams.push({
-            __typename: 'Team',
-            team: teamNum,
-            players: [],
-            junk: [],
+      holesToUpdate.map((h) => {
+        // if hole data doesn't exist, create blanks
+        if (findIndex(newHoles, { hole: h }) < 0) {
+          newHoles.push({
+            __typename: 'GameHole',
+            hole: h,
+            teams: [],
+            multipliers: [],
           });
         }
-      }
+        const holeIndex = findIndex(newHoles, { hole: h });
+        //console.log('hole', h);
 
-      newHoles[holeIndex].teams = newHoles[holeIndex].teams.map((t) => {
-        let newTeam = cloneDeep(t);
-        // remove player from team, if match removeFromTeam
-        if (removeFromTeam == t.team) {
-          newTeam.players = filter(t.players, (p) => p != pkey);
+        // if team data doesn't exist, create blanks
+        if (!newHoles[holeIndex].teams) {
+          newHoles[holeIndex].teams = [];
         }
-        // add player to team, if match addToTeam
-        if (addToTeam == t.team) {
-          newTeam.players.push(pkey);
+        //console.log('teams', newHoles[holeIndex].teams);
+        for (let i = 0; i < teamCount; i++) {
+          const teamNum = (i + 1).toString();
+          const teamIndex = find(newHoles[holeIndex].teams, { team: teamNum });
+          //console.log('blanks', teamNum, teamIndex);
+          if (!teamIndex || teamIndex < 0) {
+            newHoles[holeIndex].teams.push({
+              __typename: 'Team',
+              team: teamNum,
+              players: [],
+              junk: [],
+            });
+          }
         }
-        //console.log('newTeam', newTeam);
-        return newTeam;
+
+        newHoles[holeIndex].teams = newHoles[holeIndex].teams.map((t) => {
+          let newTeam = cloneDeep(t);
+          // remove player from team, if match removeFromTeam
+          if (removeFromTeam === t.team) {
+            newTeam.players = filter(t.players, (p) => p !== pkey);
+          }
+          // add player to team, if match addToTeam
+          if (addToTeam === t.team) {
+            newTeam.players.push(pkey);
+          }
+          //console.log('newTeam', newTeam);
+          return newTeam;
+        });
       });
-    });
-    const newHolesWithoutTypes = omitTypename(newHoles);
-    //console.log('newHoles final', newHolesWithoutTypes);
+      const newHolesWithoutTypes = omitTypename(newHoles);
+      //console.log('newHoles final', newHolesWithoutTypes);
 
-    const { loading, error, data } = await updateGameHoles({
-      variables: {
-        gkey: gkey,
-        holes: newHolesWithoutTypes,
-      },
-      optimisticResponse: {
-        __typename: 'Mutation',
-        updateGameHoles: {
-          __typename: 'Game',
-          _key: gkey,
-          holes: newHoles,
+      const { error } = await updateGameHoles({
+        variables: {
+          gkey: gkey,
+          holes: newHolesWithoutTypes,
         },
-      },
-    });
+        optimisticResponse: {
+          __typename: 'Mutation',
+          updateGameHoles: {
+            __typename: 'Game',
+            _key: gkey,
+            holes: newHoles,
+          },
+        },
+      });
 
-    if (error) {
-      console.log('Error updating game - teamChooser', error);
-    } else {
-      // if we've chosen teams, clear out game metadata on holesToUpdate
-      if (teams) {
-        setGameMeta(gkey, 'holesToUpdate', []);
+      if (error) {
+        console.log('Error updating game - teamChooser', error);
+      } else {
+        // if we've chosen teams, clear out game metadata on holesToUpdate
+        if (teams) {
+          setGameMeta(gkey, 'holesToUpdate', []);
+        }
       }
-    }
-  };
+    },
+    [currentHole, game, gkey, readonly, teams, updateGameHoles],
+  );
 
   const _renderPlayer = ({ item, index }) => {
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
-    const isWolfPlayer = item._key == wolfPKey;
+    const isWolfPlayer = item._key === wolfPKey;
     //console.log('isWolfPlayer', item.name, isWolfPlayer);
 
     let team;
@@ -140,7 +149,7 @@ const TeamChooser = (props) => {
     //console.log('team', item.name, team);
 
     const teamIcon = (teamNum) => {
-      if (team && team.team && team.team == teamNum) {
+      if (team && team.team && team.team === teamNum) {
         //console.log('remove', from, teamNum, index);
         // removing from a team
         if (!isWolfPlayer) {
@@ -178,7 +187,7 @@ const TeamChooser = (props) => {
               size={30}
               iconStyle={styles.icon}
               onPress={() =>
-                changeTeamsForPlayer(item._key, teamNum, teamNum == '1' ? '2' : '1')
+                changeTeamsForPlayer(item._key, teamNum, teamNum === '1' ? '2' : '1')
               }
               testID={`${from}_add_player_to_team_${teamNum}_${index}`}
             />
@@ -211,16 +220,22 @@ const TeamChooser = (props) => {
 
   useEffect(() => {
     const checkWolf = async () => {
-      if (wolfPlayerIndex < 0) return;
+      if (wolfPlayerIndex < 0) {
+        return;
+      }
       const wolfOnTeamOne =
         typeof find(gameHole.teams, (team) => {
-          if (team.team != '1') return false;
+          if (team.team !== '1') {
+            return false;
+          }
           if (team && team.players && team.players.length) {
             return team.players.includes(wolfPKey);
           }
           return false;
         }) !== 'undefined';
-      if (wolfOnTeamOne) return;
+      if (wolfOnTeamOne) {
+        return;
+      }
 
       // we got to here, so need to doctor up gameHole teams w/ Wolf
       await changeTeamsForPlayer(wolfPKey, '1', '2');
@@ -230,13 +245,23 @@ const TeamChooser = (props) => {
     if (isWolf) {
       checkWolf();
     }
-  }, [game.scope.wolf_order, currentHole]);
+  }, [
+    game.scope.wolf_order,
+    currentHole,
+    isWolf,
+    wolfPlayerIndex,
+    gameHole.teams,
+    changeTeamsForPlayer,
+    wolfPKey,
+  ]);
 
   let sorted_players = game.players;
   if (game && game.scope && game.scope.wolf_order) {
     sorted_players = game.scope.wolf_order.map((pkey) => {
       const p = find(game.players, { _key: pkey });
-      if (!p) console.log('a player in wolf_order that is not in players?');
+      if (!p) {
+        console.log('a player in wolf_order that is not in players?');
+      }
       return p;
     });
   }
@@ -251,7 +276,9 @@ const TeamChooser = (props) => {
         data={sorted_players}
         renderItem={_renderPlayer}
         keyExtractor={(item) => {
-          if (item && item._key) return item._key;
+          if (item && item._key) {
+            return item._key;
+          }
           return Math.random().toString();
         }}
       />

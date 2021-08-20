@@ -22,7 +22,9 @@ const typePolicies = {
     fields: {
       scores: {
         merge: (existing = [], incoming) => {
-          if (existing.length == 0) return incoming;
+          if (existing.length === 0) {
+            return incoming;
+          }
           let newScores = [];
           existing.map((h) => {
             newScores.push(cloneDeep(h));

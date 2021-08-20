@@ -1,6 +1,4 @@
 import { gql } from '@apollo/client';
-import React from 'react';
-import { Query } from 'react-apollo';
 
 export const GET_COURSE_QUERY = gql`
   query GetCourse($courseKey: String!) {

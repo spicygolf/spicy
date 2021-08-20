@@ -6,7 +6,7 @@ import { get_round_for_player } from 'common/utils/rounds';
 import { GameContext } from 'features/game/gameContext';
 import { GET_GAME_QUERY } from 'features/game/graphql';
 import GameNav from 'features/games/gamenav';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import {
   Dimensions,
   KeyboardAvoidingView,
@@ -39,24 +39,24 @@ const EditPlayer = (props) => {
 
   const [updateLink] = useMutation(UPDATE_LINK_MUTATION);
 
-  const update = () => {
+  const update = useCallback(() => {
     //console.log('update', HI, initHI, CH, initCH, GH, initGH);
     let doUpdate = false;
     const other = [];
 
     // all the checks for '' is so if you clear the text box out, it'll remove
     // the data from the edge
-    if ((HI || HI == '') && HI != initHI && (!isNaN(HI) || HI == '')) {
+    if ((HI || HI === '') && HI !== initHI && (!isNaN(HI) || HI === '')) {
       other.push({ key: 'handicap_index', value: HI.toString() });
       doUpdate = true;
     }
 
-    if ((CH || CH == '') && CH != initCH && (!isNaN(CH) || CH == '')) {
+    if ((CH || CH === '') && CH !== initCH && (!isNaN(CH) || CH === '')) {
       other.push({ key: 'course_handicap', value: CH.toString() });
       doUpdate = true;
     }
 
-    if ((GH || GH == '') && GH != initGH && (!isNaN(GH) || GH == '')) {
+    if ((GH || GH === '') && GH !== initGH && (!isNaN(GH) || GH === '')) {
       other.push({ key: 'game_handicap', value: GH.toString() });
       doUpdate = true;
     }
@@ -65,7 +65,7 @@ const EditPlayer = (props) => {
       //console.log('doUpdate other', other);
       // update 'round2game' edge with these two handicaps on them
 
-      const { loading, error, data } = updateLink({
+      const { error } = updateLink({
         variables: {
           from: { type: 'round', value: round._key },
           to: { type: 'game', value: game._key },
@@ -85,14 +85,14 @@ const EditPlayer = (props) => {
         console.log('error updating round2game', error);
       }
     }
-  };
+  }, [CH, GH, HI, game._key, initCH, initGH, initHI, round._key, updateLink]);
 
   useEffect(() => {
-    if (initCH == '-') {
+    if (initCH === '-') {
       setCH(course_handicap(HI, round.tee, game.scope.holes));
       update();
     }
-  }, [CH]);
+  }, [CH, HI, game.scope.holes, initCH, round.tee, update]);
 
   return (
     <View>

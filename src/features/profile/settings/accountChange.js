@@ -63,7 +63,7 @@ const AccountChange = (props) => {
         onPress={async () => {
           if (showPassword && password) {
             try {
-              const res = await auth().signInWithEmailAndPassword(value, password);
+              await auth().signInWithEmailAndPassword(value, password);
             } catch (e) {
               console.log('login error', e.message, e.code);
               const { message: loginMessage } = parseFirebaseError(e);
@@ -75,7 +75,7 @@ const AccountChange = (props) => {
             navigation.navigate('Account');
           } else {
             //console.log(slug, message);
-            if (slug == 'auth/requires-recent-login') {
+            if (slug === 'auth/requires-recent-login') {
               //console.log('need recent login to change email');
               setShowPassword(true);
             } else {

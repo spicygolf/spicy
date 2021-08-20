@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import { validateEmail, validatePassword } from 'common/utils/account';
 import BackToLogin from 'features/account/backToLogin';
 import { RegisterContext } from 'features/account/registerContext';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Card, Input } from 'react-native-elements';
 
@@ -15,22 +15,25 @@ const RegisterBasics = (props) => {
   const [passValid, setPassValid] = useState(false);
   const [pass2Valid, setPass2Valid] = useState(false);
 
-  const validate = (type, text) => {
-    const eTest = type == 'email' ? text : registration.email;
-    const pTest = type == 'password' ? text : registration.password;
-    const p2Test = type == 'password2' ? text : registration.password2;
+  const validate = useCallback(
+    (type, text) => {
+      const eTest = type === 'email' ? text : registration.email;
+      const pTest = type === 'password' ? text : registration.password;
+      const p2Test = type === 'password2' ? text : registration.password2;
 
-    setEmailValid(validateEmail(eTest));
-    setPassValid(validatePassword(pTest) && pTest == p2Test);
-    setPass2Valid(validatePassword(p2Test) && p2Test == pTest);
-  };
+      setEmailValid(validateEmail(eTest));
+      setPassValid(validatePassword(pTest) && pTest === p2Test);
+      setPass2Valid(validatePassword(p2Test) && p2Test === pTest);
+    },
+    [registration.email, registration.password, registration.password2],
+  );
 
   useEffect(() => {
     if (emailRef && emailRef.current) {
       emailRef.current.focus();
       validate();
     }
-  }, [emailRef]);
+  }, [emailRef, validate]);
 
   return (
     <View style={styles.container}>
