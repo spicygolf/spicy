@@ -1,7 +1,7 @@
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { green } from 'common/colors';
 import AddCourseFavorites from 'features/gameSetup/addCourseFavorites';
-import AddCourseSearch from 'features/gameSetup/addCourseSearch';
+import AddCourseSearchCourse from 'features/gameSetup/addCourseSearchCourse';
 import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -42,8 +42,8 @@ const AddCourseTabs = (props) => {
         }}
       />
       <Tab.Screen
-        name="AddCourseSearch"
-        component={AddCourseSearch}
+        name="AddCourseSearchCourse"
+        component={AddCourseSearchCourse}
         options={{
           title: 'Search',
           tabBarIcon: ({ focused }) => {
