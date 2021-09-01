@@ -89,8 +89,13 @@ const Option = (props) => {
     }
     return ret;
   };
-  const holes = item.values[0].holes || getHoles(game);
-  const custom = !isSameHolesList(getHoles(game), holes);
+
+  let holes = getHoles(game);
+  let custom = false;
+  if (item && item.values) {
+    holes = item.values[0].holes;
+    custom = !isSameHolesList(getHoles(game), holes);
+  }
   const content = custom ? (
     <Text
       onPress={async () => {

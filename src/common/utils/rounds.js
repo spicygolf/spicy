@@ -50,14 +50,13 @@ export const get_score_value = (name, score) => {
 };
 
 export const get_net_score = (gross, score) => {
-  if (!score || !score.pops) {
-    return gross;
-  }
-
   const g = parseFloat(gross);
+  if (!score || !score.pops) {
+    return g;
+  }
   const p = parseFloat(score.pops);
   //console.log('g', g, 'p', p);
-  let net = (g - p).toString();
+  let net = g - p;
   if (isNaN(net)) {
     net = null;
   }

@@ -201,36 +201,30 @@ export const getAllOptions = ({ game, type }) => {
   return options;
 };
 
-export const getOption = ({ game, hole, option, type }) => {
-  let v = null;
-  const allOptions = getAllOptions({ game, type });
-  console.log('allOptions', allOptions, hole);
+export const getOptionValue = ({ hole, option }) => {
+  let ret = null;
 
-  const go = find(
-    allOptions,
-    (o) => o.name === option.name && isOptionOnThisHole({ option, hole }),
-  );
-  if (go && go.value) {
-    v = go.value;
+  if (option && option.values) {
+    option.values.map((v) => {
+      if (v.holes.includes(hole)) {
+        ret = v.value;
+      }
+    });
+    // convert bool
+    if (option.type === 'bool') {
+      ret = ret === true || ret === 'true';
+    }
+
+    // convert number
+    if (isNumeric(ret)) {
+      ret = parseFloat(ret);
+    }
   }
-  console.log('2', go, v);
+  // console.log('3', option, ret);
 
-  // convert bool
-  if (go && go.type === 'bool') {
-    v = v === true || v === 'true';
-  }
-
-  // convert number
-  if (isNumeric(v)) {
-    v = parseFloat(v);
-  }
-  console.log('3', go, v);
-
-  //console.log('FIXME, there is no `value` field anymore');
-  //console.log('option', option, v);
   return {
-    name: option,
-    value: v,
+    name: option.name,
+    value: ret,
   };
 };
 
@@ -273,13 +267,13 @@ export const getJunk = (junkName, pkey, game, holeNum) => {
     return null;
   }
   const j = find(gTeam.junk, { name: junkName, player: pkey });
-  console.log('j', j, gTeam);
-  if (!j || !j.values) {
+  // console.log('j', j, gTeam);
+  if (!j || !j.value) {
     return null;
   }
-  const jo = getOption({ game, hole: holeNum, option: j, type: 'junk' });
-  console.log('jo', jo);
-  return jo.value;
+  // console.log('j', j);
+
+  return j.value;
 };
 
 export const setTeamJunk = (t, junk, newValue, pkey) => {

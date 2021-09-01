@@ -44,6 +44,7 @@ const App = (props) => {
     LogBox.ignoreLogs([
       'VirtualizedLists should never be nested',
       'Non-serializable values were found in the navigation state',
+      'Require cycle',
       //        'Cannot update a component from inside',
       //        'Cache data may be lost',
       //        'Remote debugger is in',

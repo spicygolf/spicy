@@ -3,7 +3,7 @@ import {
   getGamespecKVs,
   getHoles,
   getJunk,
-  getOption,
+  getOptionValue,
   isOptionOnThisHole,
 } from 'common/utils/game';
 import {
@@ -101,8 +101,15 @@ export const scoring = (game) => {
         return;
       }
       if (gsJunk.limit === 'one_team_per_group' || gsJunk.limit === 'one_per_group') {
-        possiblePoints += gsJunk.value;
-        // console.log('adding to possible points', hole, gsJunk.name, gsJunk.value, possiblePoints);
+        const jo = getOptionValue({ option: gsJunk, hole });
+        possiblePoints += jo.value;
+        // console.log(
+        //   'adding to possible points',
+        //   hole,
+        //   gsJunk.name,
+        //   jo.value,
+        //   possiblePoints,
+        // );
       }
     });
 
@@ -156,9 +163,6 @@ export const scoring = (game) => {
 
     //  junk that depends on team score or something after the above calcs
     //  something like 'ky' or 'oj' in wolfhammer
-
-    // if( hole == '1' ) console.log('teams', teams, possiblePoints);
-
     const oneHoleScoring = {
       holes: [
         {
@@ -214,8 +218,15 @@ export const scoring = (game) => {
     });
 
     // hole totals
-    const holeMultiplier = reduce(multipliers, (tot, m) => tot * m.value, 1);
-    //console.log('holeMultiplier', hole, holeMultiplier);
+    const holeMultiplier = reduce(
+      multipliers,
+      (tot, m) => {
+        const mv = getOptionValue({ option: m, hole });
+        return tot * mv.value;
+      },
+      1,
+    );
+    // console.log('holeMultiplier', hole, holeMultiplier);
     teams.map((t) => {
       const holeTotal = t.points * holeMultiplier;
       t.holeTotal = holeTotal;
@@ -388,15 +399,10 @@ const calcPlayerJunk = ({ players, pkey, game, hole, allScoring, allJunk }) => {
   // player junk
   const playerJunk = [];
   allJunk.map((gsJunk) => {
-    console.log(
-      'junk is option',
-      isOptionOnThisHole({ option: gsJunk, hole }),
-      gsJunk,
-      hole,
-    );
     if (!isOptionOnThisHole({ option: gsJunk, hole })) {
       return;
     }
+    // console.log('calcPlayerJunk', gsJunk);
     if (gsJunk.scope !== 'player') {
       return;
     }
@@ -404,6 +410,7 @@ const calcPlayerJunk = ({ players, pkey, game, hole, allScoring, allJunk }) => {
     switch (gsJunk.based_on) {
       case 'user':
         const jv = getJunk(gsJunk.name, pkey, game, hole);
+        // console.log('jv', jv);
         if (jv === 'true' || jv === true) {
           j = true;
         }
@@ -418,10 +425,9 @@ const calcPlayerJunk = ({ players, pkey, game, hole, allScoring, allJunk }) => {
           '${gsJunk.based_on}'`);
         break;
     }
-    //console.log('player j', hole, pkey, gsJunk, j);
     if (j === true) {
-      const jo = getOption({ game, option: gsJunk, hole, type: 'junk' });
-      console.log('junkValue', jo.value);
+      const jo = getOptionValue({ option: gsJunk, hole });
+      // console.log('calcPlayerJunk j', hole, pkey, gsJunk, jo, pp);
       if (gsJunk.limit.length === 0) {
         pp += jo.value;
       }
@@ -429,7 +435,9 @@ const calcPlayerJunk = ({ players, pkey, game, hole, allScoring, allJunk }) => {
       playerJunk.push(gsJunk);
     }
   });
-  // if( hole == '1' ) console.log('calcPlayerScore end', hole, pkey, tp, pp);
+  // if (hole === '1') {
+  //   console.log('calcPlayerScore end', hole, pkey, tp, pp);
+  // }
 
   return {
     p: {
@@ -501,7 +509,7 @@ const calcTeamScore = ({ teams, allScoring, allJunk, game, scoresEntered, hole }
                 });
                 //console.log('team junk logic', hole, logic);
                 if (logic) {
-                  const jo = getOption({ game, hole, option: gsJunk, type: 'junk' });
+                  const jo = getOptionValue({ game, hole, option: gsJunk });
                   // console.log('jo', jo);
                   junk_pts = jo.value;
                 }
@@ -516,7 +524,9 @@ const calcTeamScore = ({ teams, allScoring, allJunk, game, scoresEntered, hole }
                 parseFloat(p.score[gsJunk.based_on].value),
               );
               //console.log('orderedBalls', orderedBalls);
-              let val = orderedBalls.map((p) => p.score[gsJunk.based_on].value);
+              let val = orderedBalls.map((p) =>
+                parseFloat(p.score[gsJunk.based_on].value),
+              );
               ret.score[gsJunk.name] = val;
               break;
             // TODO: see above, only use 'logic' in future
@@ -574,7 +584,7 @@ const calcTeamJunk = ({
       if (gsJunk.sub_type === 'dot') {
         // get all team scores array
         const teamScores = teams.map((t, i) => {
-          //console.log(`${gsJunk.name} score`, t.score[gsJunk.name]);
+          // console.log(`${gsJunk.name} score`, t.score[gsJunk.name]);
           return {
             team: t.team,
             name: gsJunk.name,
@@ -606,7 +616,7 @@ const calcTeamJunk = ({
             // figure out how many scores to iterate through to break tie
             // i.e. first ball only, or progress thru the balls for ties
             const maxLenScores = max(teamScores.map((t) => t.value.length));
-            const ties_option = getOption({
+            const ties_option = getOptionValue({
               game,
               hole,
               option: 'next_ball_breaks_ties',
@@ -647,7 +657,15 @@ const calcTeamJunk = ({
                 }
               }
             }
-
+            // console.log(
+            //   'after team junk',
+            //   validScores,
+            //   best,
+            //   countOfBest,
+            //   lenOfScores,
+            //   game.players.length,
+            //   scoresEntered,
+            // );
             if (
               validScores &&
               best &&
@@ -655,7 +673,7 @@ const calcTeamJunk = ({
               game.players.length === scoresEntered
             ) {
               ret[best.index].junk.push(gsJunk);
-              const jo = getOption({ game, hole, option: gsJunk, type: 'junk' });
+              const jo = getOptionValue({ game, hole, option: gsJunk });
               ret[best.index].points = ret[best.index].points + jo.value;
             }
             break;
@@ -665,7 +683,7 @@ const calcTeamJunk = ({
       }
     }
   });
-  //console.log('calcTeamJunk', ret, maxJunkPoints);
+  // console.log('calcTeamJunk', ret, maxJunkPoints);
   return {
     newTeams: ret,
     pp: maxJunkPoints,
@@ -788,7 +806,11 @@ export const vegasTeamScore = ({ team, teams, game, hole, s }) => {
   const thisTeamEagles = countJunk(thisTeamJunk, { name: 'eagle' });
   const otherTeamBirdies = countJunk(otherTeamJunk, { name: 'birdie' });
   const otherTeamEagles = countJunk(otherTeamJunk, { name: 'eagle' });
-  const birdies_cancel_option = getOption({ game, hole, option: 'birdies_cancel_flip' });
+  const birdies_cancel_option = getOptionValue({
+    game,
+    hole,
+    option: 'birdies_cancel_flip',
+  });
 
   if (otherTeamBirdies) {
     if (!birdies_cancel_option || !(thisTeamBirdies || thisTeamEagles)) {
