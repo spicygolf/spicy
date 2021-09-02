@@ -26,11 +26,17 @@ export const GET_GAMESPEC_QUERY = gql`
           better
         }
       }
-      junk {
+      options {
         name
+        disp
         seq
         type
-        value
+        sub_type
+        choices {
+          name
+          disp
+        }
+        default
         limit
         scope
         icon
@@ -38,26 +44,14 @@ export const GET_GAMESPEC_QUERY = gql`
         score_to_par
         based_on
         calculation
+        availability
         logic
         better
-        availability
-      }
-      multipliers {
-        name
-        disp
-        seq
-        value
-        icon
-        based_on
-        scope
-        availability
         after
-      }
-      options {
-        name
-        disp
-        type
-        default
+        values {
+          value
+          holes
+        }
       }
     }
   }

@@ -97,6 +97,10 @@ const ChangeTeams = ({ currentHole, close }) => {
     }
   };
 
+  const onCustomChange = ({ newHoles }) => {
+    setHoles(newHoles);
+  };
+
   useEffect(() => {
     switch (selected) {
       case '0': // gameSetup
@@ -126,7 +130,7 @@ const ChangeTeams = ({ currentHole, close }) => {
       </View>
       <HoleChooser
         holes={holes}
-        setHoles={setHoles}
+        onChange={onCustomChange}
         title="Preview:"
         active={selected === '2'}
       />

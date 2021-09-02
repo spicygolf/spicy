@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-elements';
 
-const HoleChooser = ({ holes, setHoles, title, active }) => {
+const HoleChooser = ({ holes, onChange, title, active }) => {
   const { game } = useContext(GameContext);
 
   const holePressed = (h, on) => {
@@ -18,7 +18,7 @@ const HoleChooser = ({ holes, setHoles, title, active }) => {
       }
     }
     //console.log('newHoles after', newHoles);
-    setHoles(newHoles);
+    onChange({ hole: h, newValue: on, newHoles });
   };
 
   const rowCount = Math.ceil(game.holes.length / 9);
