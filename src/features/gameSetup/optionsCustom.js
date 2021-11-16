@@ -24,8 +24,23 @@ const OptionsCustom = (props) => {
     return lim;
   };
 
+  const setHoles = ({ item, hole, newValue, newHoles }) => {
+    console.log('setHoles', item, hole, newValue, newHoles, option);
+    // Check option.sub_type - if bool, we need to flip another hole to the other value
+
+    // Check option.sub_type - if menu, we need to flip another hole, right?
+
+    // maybe instead of the above two options, we go through the entire option
+    // and see if the hole in question has a value otherwise and adjust from there?
+
+    // goal is to build an entire game.options[ option ] thing to mutate.
+  };
+
   const renderCustomOption = ({ item }) => {
-    console.log('value', item);
+    const onChange = ({ hole, newValue, newHoles }) => {
+      setHoles({ item, hole, newValue, newHoles });
+    };
+
     return (
       <View style={styles.optionContainer}>
         <View style={styles.valueContainer}>
@@ -34,7 +49,7 @@ const OptionsCustom = (props) => {
         </View>
         <HoleChooser
           holes={item.holes || game.holes.map((h) => h.hole)}
-          setHoles={() => null}
+          onChange={onChange}
           title=""
           active={true}
         />
