@@ -22,7 +22,7 @@
         "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/spicygolf.app",
         "build": "xcodebuild -workspace ios/spicygolf.xcworkspace -scheme spicygolf -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build -UseModernBuildSystem=NO",
         "type": "ios.simulator",
-        "name": "iPhone 11"
+        "name": "iPhone 13"
       }
     }
   },
