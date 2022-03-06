@@ -22,5 +22,11 @@
       ],
       "port": 9229
     },
+    {
+      "name": "Attach to packager",
+      "cwd": "${workspaceFolder}",
+      "type": "reactnative",
+      "request": "attach"
+    },
   ]
 }
