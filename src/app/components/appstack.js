@@ -31,8 +31,9 @@ const AppStack = (props) => {
 
   useEffect(() => {
     const getCreds = async () => {
+      // console.log('user', user);
       const c = await getCurrentUser(user);
-      //console.log('getCreds', c);
+      // console.log('getCreds', c);
       if (c && c.currentPlayerKey && c.token) {
         setCurrentPlayerKey(c.currentPlayerKey);
         setToken(c.token);
@@ -73,6 +74,7 @@ const AppStack = (props) => {
   }, [user]);
 
   useEffect(() => {
+    // console.log('cp', currentPlayerKey, token);
     if (currentPlayerKey && token) {
       getCurrentPlayer({
         variables: {
@@ -84,6 +86,7 @@ const AppStack = (props) => {
   }, [currentPlayerKey, getCurrentPlayer, token]);
 
   useEffect(() => {
+    // console.log('data', data);
     if (data && data.getPlayer) {
       setCurrentPlayer(data.getPlayer);
     }
@@ -163,28 +166,25 @@ const AppStack = (props) => {
     );
   };
 
-  if (currentPlayer && currentPlayerKey && token) {
-    //console.log('currentPlayerKey', currentPlayerKey);
-    return (
-      <CurrentPlayerContext.Provider
-        value={{
-          currentPlayer,
-          setCurrentPlayer,
-          currentPlayerKey,
-          setCurrentPlayerKey,
-          token,
-          setToken,
-          impersonate,
-          setImpersonate,
-          user,
-        }}
-      >
-        {content}
-      </CurrentPlayerContext.Provider>
-    );
-  } else {
-    return <ActivityIndicator />;
-  }
+  // console.log('content', content);
+
+  return (
+    <CurrentPlayerContext.Provider
+      value={{
+        currentPlayer,
+        setCurrentPlayer,
+        currentPlayerKey,
+        setCurrentPlayerKey,
+        token,
+        setToken,
+        impersonate,
+        setImpersonate,
+        user,
+      }}
+    >
+      {content}
+    </CurrentPlayerContext.Provider>
+  );
 };
 
 export default AppStack;

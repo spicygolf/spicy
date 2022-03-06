@@ -27,7 +27,7 @@ export const login = async (fbUser) => {
 
   // REST call to API to get pkey, token
   const uri = `${scheme}://${baseUri}/account/login`;
-
+  // console.log('uri', uri);
   const res = await fetch(uri, {
     method: 'POST',
     body: JSON.stringify({
@@ -39,8 +39,9 @@ export const login = async (fbUser) => {
       'Content-Type': 'application/json',
     },
   });
+  // console.log('res', res);
   const payload = await res.json();
-  //console.log('login payload', payload);
+  // console.log('login payload', payload);
 
   let ret = null;
   switch (res.status) {
@@ -107,6 +108,7 @@ export const clearCache = async (client) => {
 export const getCurrentUser = (fbUser) => {
   return login(fbUser)
     .then((login_res) => {
+      // console.log('login_res', login_res);
       return {
         ...login_res,
         fbUser: fbUser,
