@@ -243,7 +243,9 @@ export const isOptionOnThisHole = ({ option, hole }) => {
 };
 
 export const isSameHolesList = (holes1, holes2) => {
-  return isEqual(holes1, holes2);
+  const h1 = cloneDeep(holes1);
+  const h2 = cloneDeep(holes2);
+  return isEqual(h1.sort(), h2.sort());
 };
 
 export const getGamespecKVs = (game, key) => {
