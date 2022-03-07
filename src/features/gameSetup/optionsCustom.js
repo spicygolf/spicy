@@ -1,6 +1,7 @@
 import HoleChooser from 'common/components/holeChooser';
 import { GameContext } from 'features/game/gameContext';
 import GameNav from 'features/games/gamenav';
+import { cloneDeep, find } from 'lodash';
 import React, { useContext } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 
@@ -25,15 +26,73 @@ const OptionsCustom = (props) => {
   };
 
   const setHoles = ({ item, hole, newValue, newHoles }) => {
-    console.log('setHoles', item, hole, newValue, newHoles, option);
-    // Check option.sub_type - if bool, we need to flip another hole to the other value
+    // console.log('setHoles', item, hole, newValue, newHoles, option);
 
-    // Check option.sub_type - if menu, we need to flip another hole, right?
+    let o = cloneDeep(option);
+    const selected = newValue === true;
 
-    // maybe instead of the above two options, we go through the entire option
-    // and see if the hole in question has a value otherwise and adjust from there?
+    // loop thru existing option to build new option
+    //  add hole to matching item.value, and remove from all other option values
+    o.values = o.values.map((ov) => {
+      // console.log('ov before', ov);
+      if (ov.value === item.value) {
+        // this ov is same as clicked
+        if (selected) {
+          ov.holes.push(hole);
+        } else {
+          // deselected
+          ov.holes = ov.holes.filter((h) => h !== hole);
+        }
+      } else {
+        // this ov is not same as clicked, removing from all ones not clicked
+        ov.holes = ov.holes.filter((h) => h !== hole);
+      }
+      // console.log('ov after', ov);
+      if (ov.holes.length > 0) {
+        return ov;
+      }
+    });
+    o.values = o.values.filter((v) => v);
+    // console.log('o.values 1', o.values);
 
-    // goal is to build an entire game.options[ option ] thing to mutate.
+    // If this was a deselect, meaning we're turning it off for a value
+    // check to see if value should be in other option.values - if so, add it
+    //  (bool types and menu types with only two options)
+    if (!selected) {
+      let otherOptionValue;
+      if (o.sub_type === 'bool') {
+        // bool option so make sure other option is in option.values[]
+        otherOptionValue = (item.value !== 'true').toString();
+      } else if (o.sub_type === 'menu' && o.choices.length === 2) {
+        // two-choice option, so make sure other option is in option.values[]
+        otherOptionValue = o.choices.filter((c) => c.name !== item.value)[0].name;
+      } else {
+        // ask to add another value?
+      }
+      // console.log('otherOptionValue', otherOptionValue);
+      const otherOption = find(o.values, (ov) => ov.value === otherOptionValue);
+      // console.log('otherOption', otherOption);
+      if (!otherOption) {
+        const holes = [];
+        holes.push(hole);
+        o.values.push({ __typename: 'OptionValue', value: otherOptionValue, holes });
+      } else {
+        otherOption.holes.push(hole);
+      }
+    }
+
+    // console.log('o.values 2', o.values);
+    setOption(o);
+  };
+
+  const getOptionValueDisplay = (value) => {
+    if (option.sub_type === 'bool') {
+      return value === 'true' ? 'Yes' : 'No';
+    }
+    if (option.sub_type === 'menu') {
+      return find(option.choices, (c) => c.name === value).disp;
+    }
+    return value;
   };
 
   const renderCustomOption = ({ item }) => {
@@ -41,11 +100,12 @@ const OptionsCustom = (props) => {
       setHoles({ item, hole, newValue, newHoles });
     };
 
+    const disp = getOptionValueDisplay(item.value);
     return (
       <View style={styles.optionContainer}>
         <View style={styles.valueContainer}>
           <Text style={styles.label}>Value:</Text>
-          <Text style={styles.value}>{item.value}</Text>
+          <Text style={styles.value}>{disp}</Text>
         </View>
         <HoleChooser
           holes={item.holes || game.holes.map((h) => h.hole)}
@@ -58,7 +118,7 @@ const OptionsCustom = (props) => {
   };
 
   let limit = setLimit();
-  console.log('lint holders', limit, setOption);
+  console.log('lint holders', limit);
 
   return (
     <View style={styles.container}>
