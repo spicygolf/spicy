@@ -15,9 +15,8 @@ import React, { useContext } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 
-const Option = (props) => {
-  const { item } = props;
-  // console.log('option', item);
+const Option = ({ item }) => {
+  // console.log('Option item', item);
 
   const { game, readonly } = useContext(GameContext);
   const { _key: gkey } = game;
@@ -63,6 +62,13 @@ const Option = (props) => {
           },
         },
       ],
+      optimisticResponse: {
+        __typename: 'Mutation',
+        updateGame: {
+          __typename: 'Game',
+          ...newGame,
+        },
+      },
     });
     if (error) {
       console.log('Error setting option in game', error);
@@ -99,7 +105,7 @@ const Option = (props) => {
   const content = custom ? (
     <Text
       onPress={async () => {
-        navigation.navigate('OptionsCustom', { option: item, setOption });
+        navigation.navigate('OptionsCustom', { okey: item.key, setOption });
       }}
     >
       custom
@@ -118,7 +124,7 @@ const Option = (props) => {
         color="#999"
         size={32}
         onPress={async () => {
-          navigation.navigate('OptionsCustom', { option: item, setOption });
+          navigation.navigate('OptionsCustom', { okey: item.key, setOption });
         }}
       />
     </View>

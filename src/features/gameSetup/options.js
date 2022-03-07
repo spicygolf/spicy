@@ -5,12 +5,13 @@ import React, { useContext } from 'react';
 import { FlatList } from 'react-native';
 import { Card } from 'react-native-elements';
 
-const Options = (props) => {
+const Options = () => {
   const { game } = useContext(GameContext);
   const allOptions = getAllOptions({ game, type: 'game' });
   // console.log('allOptions', allOptions);
 
   const renderOption = ({ item }) => {
+    // console.log('renderOption item', item);
     return <Option item={item} />;
   };
 

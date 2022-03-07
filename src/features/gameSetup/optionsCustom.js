@@ -1,4 +1,5 @@
 import HoleChooser from 'common/components/holeChooser';
+import { getAllOptions } from 'common/utils/game';
 import { GameContext } from 'features/game/gameContext';
 import GameNav from 'features/games/gamenav';
 import { cloneDeep, find } from 'lodash';
@@ -8,22 +9,12 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 const OptionsCustom = (props) => {
   const { route } = props;
   const { params } = route;
-  const { option, setOption } = params;
-  // console.log('option', option);
-  const { game } = useContext(GameContext);
+  const { okey, setOption } = params;
 
-  const setLimit = () => {
-    let lim = -1;
-    switch (option.type) {
-      case 'bool':
-        lim = 2;
-        break;
-      case 'menu':
-        lim = option.choices.length;
-        break;
-    }
-    return lim;
-  };
+  const { game } = useContext(GameContext);
+  const allOptions = getAllOptions({ game, type: 'game' });
+  const option = find(allOptions, (o) => o.key === okey);
+  // console.log('OptionsCustom option.values', option.values);
 
   const setHoles = ({ item, hole, newValue, newHoles }) => {
     // console.log('setHoles', item, hole, newValue, newHoles, option);
@@ -116,9 +107,6 @@ const OptionsCustom = (props) => {
       </View>
     );
   };
-
-  let limit = setLimit();
-  console.log('lint holders', limit);
 
   return (
     <View style={styles.container}>
