@@ -618,3 +618,7 @@ export const getWolfPlayerIndex = ({ game, currentHole }) => {
   // console.log('getWolfPlayerIndex', currentHole, wolf_round, remainder);
   return remainder;
 };
+
+export const isBinary = (option) =>
+  option.sub_type === 'bool' ||
+  (option.sub_type === 'menu' && option.choices.length === 2);

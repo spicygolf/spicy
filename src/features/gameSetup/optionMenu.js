@@ -2,73 +2,76 @@ import { green } from 'common/colors';
 import { find } from 'lodash';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Menu } from 'react-native-paper';
+import { Icon } from 'react-native-elements';
+import SelectDropdown from 'react-native-select-dropdown';
 
 const OptionMenu = (props) => {
   const { option, setOption, readonly, index = 0 } = props;
-  const [value, setValue] = useState(option.values[0].value);
-  const [visible, setVisible] = useState(false);
+  const [value, setValue] = useState(option.values[index].value);
+  console.log('OptionMenu index', index);
 
+  const getChoices = () => option.choices.map((c) => c.disp);
   const getDisplay = () => find(option.choices, { name: value }).disp;
-
-  const choices = option.choices.map((choice) => {
-    return (
-      <Menu.Item
-        key={choice.name}
-        onPress={() => {
-          setValue(choice.name);
-          let newOption = {
-            name: option.name,
-            values: option.values.map((v, i) => ({
-              value: i === index ? choice.name : v.value,
-              holes: v.holes,
-            })),
-          };
-          setOption(newOption);
-          setVisible(false);
-        }}
-        title={choice.disp}
-      />
-    );
-  });
 
   const menuContent = readonly ? (
     <Text>{getDisplay()}</Text>
   ) : (
-    <Menu
-      style={styles.menu}
-      visible={visible}
-      anchor={
-        <View style={styles.anchor_view}>
-          <Text style={styles.anchor} onPress={() => setVisible(true)}>
-            {getDisplay()}
-          </Text>
-        </View>
-      }
-      onDismiss={() => setVisible(false)}
-    >
-      {choices}
-    </Menu>
+    <SelectDropdown
+      data={getChoices()}
+      defaultValueByIndex={index}
+      onSelect={(_selectedDisp, i) => {
+        setValue(option.choices[i].name);
+        let newOption = {
+          name: option.name,
+          values: option.values.map((v, idx) => ({
+            value: idx === i ? option.choices[i].name : v.value,
+            holes: v.holes,
+          })),
+        };
+        console.log('newOption', newOption);
+        setOption(newOption);
+      }}
+      renderDropdownIcon={(isOpened) => {
+        return (
+          <Icon
+            type="material-community"
+            name={isOpened ? 'chevron-up' : 'chevron-down'}
+            color="#444"
+            size={18}
+          />
+        );
+      }}
+      buttonTextAfterSelection={(selectedItem) => {
+        // text represented after item is selected
+        // if data array is an array of objects then return selectedItem.property to render after item is selected
+        console.log('buttonTextAfterSelection', selectedItem);
+        return selectedItem;
+      }}
+      rowTextForSelection={(item) => {
+        // text represented for each item in dropdown
+        // if data array is an array of objects then return item.property to represent item in dropdown
+        console.log('rowTextForSelection', item);
+        return item;
+      }}
+      buttonStyle={styles.buttonStyle}
+    />
   );
 
-  return <View style={styles.menu_view}>{menuContent}</View>;
+  return <View style={styles.container}>{menuContent}</View>;
 };
 
 export default OptionMenu;
 
 const styles = StyleSheet.create({
-  menu_view: {
-    width: '100%',
+  container: {
+    // width: '100%',
   },
-  anchor_view: {
+  buttonStyle: {
     borderWidth: 1,
     borderColor: green,
+    backgroundColor: '#fff',
     height: 40,
-    width: '100%',
-    justifyContent: 'center',
-  },
-  anchor: {
-    padding: 5,
-    marginRight: 1,
+    width: '80%',
+    alignSelf: 'flex-end',
   },
 });

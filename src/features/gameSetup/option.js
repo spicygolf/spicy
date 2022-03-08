@@ -139,14 +139,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   field_input_view: {
-    flex: 1,
+    flex: 2,
     justifyContent: 'flex-end',
     flexDirection: 'row',
     alignItems: 'center',
   },
   field_label: {
+    flex: 3,
     marginTop: 5,
     marginBottom: 5,
-    flex: 3,
   },
 });

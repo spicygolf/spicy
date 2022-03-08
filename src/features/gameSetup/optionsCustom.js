@@ -1,10 +1,12 @@
 import HoleChooser from 'common/components/holeChooser';
-import { getAllOptions } from 'common/utils/game';
+import { getAllOptions, isBinary } from 'common/utils/game';
 import { GameContext } from 'features/game/gameContext';
 import GameNav from 'features/games/gamenav';
 import { cloneDeep, find } from 'lodash';
 import React, { useContext } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+
+import OptionAddValue from './optionAddValue';
 
 const OptionsCustom = (props) => {
   const { route } = props;
@@ -16,8 +18,17 @@ const OptionsCustom = (props) => {
   const option = find(allOptions, (o) => o.key === okey);
   // console.log('OptionsCustom option.values', option.values);
 
-  const setHoles = ({ item, hole, newValue, newHoles }) => {
-    // console.log('setHoles', item, hole, newValue, newHoles, option);
+  const addOptionValue = (newValue) => {
+    if (!newValue || newValue === '') {
+      return;
+    }
+    let o = cloneDeep(option);
+    o.values.push({ __typename: 'OptionValue', value: newValue, holes: [] });
+    setOption(o);
+  };
+
+  const setHoles = ({ item, hole, newValue }) => {
+    // console.log('setHoles', item, hole, newValue, option);
 
     let o = cloneDeep(option);
     const selected = newValue === true;
@@ -39,11 +50,11 @@ const OptionsCustom = (props) => {
         ov.holes = ov.holes.filter((h) => h !== hole);
       }
       // console.log('ov after', ov);
-      if (ov.holes.length > 0) {
+      if (ov.holes.length > 0 || !isBinary(o)) {
         return ov;
       }
     });
-    o.values = o.values.filter((v) => v);
+    o.values = o.values.filter((v) => v); // gets rid of undefined
     // console.log('o.values 1', o.values);
 
     // If this was a deselect, meaning we're turning it off for a value
@@ -58,7 +69,12 @@ const OptionsCustom = (props) => {
         // two-choice option, so make sure other option is in option.values[]
         otherOptionValue = o.choices.filter((c) => c.name !== item.value)[0].name;
       } else {
-        // ask to add another value?
+        if (o.values.length === 1) {
+          // only one option, so can't move this to another value
+          // pop up a notice to tell user to add more option values?
+          console.log('only one option value, so cannot add');
+          return;
+        }
       }
       // console.log('otherOptionValue', otherOptionValue);
       const otherOption = find(o.values, (ov) => ov.value === otherOptionValue);
@@ -97,6 +113,7 @@ const OptionsCustom = (props) => {
         <View style={styles.valueContainer}>
           <Text style={styles.label}>Value:</Text>
           <Text style={styles.value}>{disp}</Text>
+          <Text style={styles.label}>Holes:</Text>
         </View>
         <HoleChooser
           holes={item.holes || game.holes.map((h) => h.hole)}
@@ -119,7 +136,9 @@ const OptionsCustom = (props) => {
         data={option.values}
         renderItem={renderCustomOption}
         keyExtractor={(o) => o.value}
+        style={styles.optionList}
       />
+      <OptionAddValue option={option} addOptionValue={addOptionValue} />
     </View>
   );
 };
@@ -140,6 +159,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingHorizontal: 10,
   },
+  optionList: {
+    flexGrow: 0,
+    paddingBottom: 20,
+  },
   optionContainer: {
     paddingVertical: 10,
   },
@@ -151,5 +174,6 @@ const styles = StyleSheet.create({
   },
   value: {
     fontWeight: 'bold',
+    paddingRight: 10,
   },
 });
