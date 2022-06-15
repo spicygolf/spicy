@@ -13,7 +13,7 @@ import { ActivityIndicator, Text, View } from 'react-native';
 const Game = (props) => {
   const { route } = props;
   const { currentGameKey, readonly } = route.params;
-  //console.log('currentGameKey', currentGameKey);
+  // console.log('currentGameKey', currentGameKey);
 
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
   const { justBecameActive } = useAppState();
@@ -31,23 +31,23 @@ const Game = (props) => {
     },
   });
 
-  //console.log('cache', client.cache.data.data);
-
-  if (loading) {
-    setContent(
-      <View>
-        <ActivityIndicator />
-      </View>,
-    );
-  }
-
-  if (error && error.message !== 'Network request failed') {
-    console.log(error);
-    // TODO: error component
-    setContent(<Text>Error Loading Game: `{error.message}`</Text>);
-  }
+  // console.log('cache', client.cache.data.data);
 
   useEffect(() => {
+    if (loading) {
+      setContent(
+        <View>
+          <ActivityIndicator />
+        </View>,
+      );
+    }
+
+    if (error && error.message !== 'Network request failed') {
+      console.log('error', error);
+      // TODO: error component
+      setContent(<Text>Error Loading Game: `{error.message}`</Text>);
+    }
+
     //console.log('data', currentGameKey, data);
     if (data && data.getGame) {
       const game = data.getGame;
@@ -89,21 +89,18 @@ const Game = (props) => {
           <GameStack />
         </GameContext.Provider>,
       );
-    } else {
-      console.log('Error loading game data');
-      // TODO: error component
-      setContent(<Text>Error Loading Game Data</Text>);
     }
-  }, [currentGameKey, currentPlayerKey, data, readonly]);
+  }, [currentGameKey, currentPlayerKey, data, error, loading, readonly]);
 
   useEffect(() => {
     if (justBecameActive) {
-      //console.log('justBecameActive getGame');
+      // console.log('justBecameActive getGame');
       refetch();
     }
   }, [justBecameActive, refetch]);
 
   // console.log('game content', content); // use this to find too many re-renders
+  // console.log(currentGameKey, currentPlayerKey, data, readonly);
   return content;
 };
 
