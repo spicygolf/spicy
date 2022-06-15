@@ -18,7 +18,11 @@ const Game = (props) => {
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
   const { justBecameActive } = useAppState();
 
-  const [content, setContent] = useState(null);
+  const [content, setContent] = useState(
+    <View>
+      <ActivityIndicator />
+    </View>,
+  );
 
   // execute the getGame query
   const { loading, error, refetch, data } = useQuery(GET_GAME_QUERY, {
@@ -90,7 +94,7 @@ const Game = (props) => {
       // TODO: error component
       setContent(<Text>Error Loading Game Data</Text>);
     }
-  }, [currentPlayerKey, data, readonly]);
+  }, [currentGameKey, currentPlayerKey, data, readonly]);
 
   useEffect(() => {
     if (justBecameActive) {
@@ -99,6 +103,7 @@ const Game = (props) => {
     }
   }, [justBecameActive, refetch]);
 
+  // console.log('game content', content); // use this to find too many re-renders
   return content;
 };
 
