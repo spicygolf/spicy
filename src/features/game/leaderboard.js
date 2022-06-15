@@ -1,7 +1,6 @@
 import { GameContext } from 'features/game/gameContext';
 import React, { useContext } from 'react';
 
-import BirdieEmAllLeaderboard from './components/birdie_em_all/leaderboard';
 import GameNotFound from './components/general/notfound';
 import MatchPlayLeaderboard from './components/matchplay/leaderboard';
 import PointsLeaderboard from './components/points/leaderboard';
@@ -16,9 +15,6 @@ const Leaderboard = (props) => {
   }
 
   switch (activeGameSpec.type) {
-    case 'birdie_em_all':
-      Component = BirdieEmAllLeaderboard;
-      break;
     case 'points':
       Component = PointsLeaderboard;
       break;

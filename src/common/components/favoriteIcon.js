@@ -1,84 +1,44 @@
+import { useMutation } from '@apollo/client';
 import { green } from 'common/colors';
-import { AddLinkMutation } from 'common/graphql/link';
-import { RemoveLinkMutation } from 'common/graphql/unlink';
 import React from 'react';
 import { Icon } from 'react-native-elements';
 
-class FavoriteIcon extends React.Component {
-  constructor(props) {
-    super(props);
-    //    if( this.props && this.props.fave && this.props.fave.faved ) {
-    //      this.state = {
-    //        faved: this.props.fave.faved
-    //      }
-    //    }
-  }
+import { ADD_LINK_MUTATION } from '../graphql/link';
+import { REMOVE_LINK_MUTATION } from '../graphql/unlink';
 
-  render() {
-    let content;
+const FavoriteIcon = (props) => {
+  const { fave } = props;
+  const [addLink] = useMutation(ADD_LINK_MUTATION);
+  const [removeLink] = useMutation(REMOVE_LINK_MUTATION);
 
-    if (this.props.fave && this.props.fave.faved) {
-      content = (
-        <RemoveLinkMutation>
-          {({ removeLinkMutation }) => {
-            return (
-              <Icon
-                name="star"
-                color={green}
-                size={36}
-                onPress={async () => {
-                  const { errors } = await removeLinkMutation({
-                    variables: {
-                      from: this.props.fave.from,
-                      to: this.props.fave.to,
-                    },
-                    refetchQueries: this.props.fave.refetchQueries,
-                    update: (cache, result) => {
-                      if (this.props.fave.update) {
-                        cache.writeQuery(this.props.fave.update);
-                      }
-                    },
-                  });
-                  if (errors) {
-                    console.log('error removing favorite', errors);
-                  }
-                }}
-              />
-            );
-          }}
-        </RemoveLinkMutation>
-      );
-    } else {
-      content = (
-        <AddLinkMutation>
-          {({ addLinkMutation }) => {
-            return (
-              <Icon
-                name="star-border"
-                color={green}
-                size={36}
-                onPress={async () => {
-                  const { errors } = await addLinkMutation({
-                    variables: {
-                      from: this.props.fave.from,
-                      to: this.props.fave.to,
-                      other: [{ key: 'favorite', value: 'true' }],
-                    },
-                    refetchQueries: this.props.fave.refetchQueries,
-                  });
-                  if (errors) {
-                    console.log('error adding favorite', errors);
-                  }
-                }}
-              />
-            );
-          }}
-        </AddLinkMutation>
-      );
-    }
+  const iconData = {
+    name: fave?.faved ? 'star' : 'star-border',
+    fn: fave?.faved ? removeLink : addLink,
+    variables: fave?.faved
+      ? { from: fave.from, to: fave.to }
+      : {
+          from: fave.from,
+          to: fave.to,
+          other: [{ key: 'favorite', value: 'true' }],
+        },
+  };
 
-    return content;
-  }
-}
+  return (
+    <Icon
+      name={iconData.name}
+      color={green}
+      size={36}
+      onPress={async () => {
+        const { errors } = await iconData.fn({
+          variables: iconData.variables,
+          refetchQueries: fave.refetchQueries,
+        });
+        if (errors) {
+          console.log(`favoriteIcon error performing '${iconData.fn.name}'`, errors);
+        }
+      }}
+    />
+  );
+};
 
 export default FavoriteIcon;

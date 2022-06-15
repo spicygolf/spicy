@@ -18,6 +18,18 @@ const AddPlayerManual = (props) => {
   const [addPlayer] = useMutation(ADD_PLAYER_MUTATION);
   const navigation = useNavigation();
 
+  const [player, setPlayer] = useState({
+    name: '',
+    short: '',
+    handicap: {
+      source: 'manual',
+      index: '',
+    },
+    statusAuthz: ['prod'],
+    createdBy: currentPlayerKey,
+    createdDate: '',
+  });
+
   const add = async () => {
     player.createdDate = moment.utc().format();
 
@@ -56,25 +68,13 @@ const AddPlayerManual = (props) => {
     (type, text) => {
       const nTest = type === 'name' ? text : player.name;
       const sTest = type === 'short' ? text : player.short;
-      const hTest = type === 'index' ? text : player.handicap.index;
+      const hTest = type === 'index' ? text : player.handicap?.index;
       setNameValid(validateName(nTest));
       setShortValid(validateName(sTest));
       setHIValid(validateFloat(hTest));
     },
-    [player.handicap.index, player.name, player.short],
+    [player],
   );
-
-  const [player, setPlayer] = useState({
-    name: '',
-    short: '',
-    handicap: {
-      source: 'manual',
-      index: '',
-    },
-    statusAuthz: ['prod'],
-    createdBy: currentPlayerKey,
-    createdDate: '',
-  });
 
   const [nameValid, setNameValid] = useState(false);
   const nValid = { borderColor: nameValid ? green : '#ddd' };
@@ -136,7 +136,7 @@ const AddPlayerManual = (props) => {
                 validate('index', text);
               }}
               keyboardType="decimal-pad"
-              value={player.handicap.index.toString()}
+              value={player.handicap?.index.toString()}
             />
           </View>
         </View>
