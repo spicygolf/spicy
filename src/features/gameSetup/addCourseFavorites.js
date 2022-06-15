@@ -1,9 +1,9 @@
+import { useQuery } from '@apollo/client';
 import { getRatings } from 'common/utils/game';
 import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
 import { GameContext } from 'features/game/gameContext';
 import Tee from 'features/gameSetup/Tee';
 import React, { useContext } from 'react';
-import { useQuery } from 'react-apollo';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 
 const AddCourseFavorites = (props) => {

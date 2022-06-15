@@ -1,4 +1,4 @@
-const env = 'PROD';
+const env = 'DEV';
 
 let s, b;
 

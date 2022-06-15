@@ -11,7 +11,7 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		52D5DA0DDC6163DF4EA07DD7 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
+		52D5DA0DDC6163DF4EA07DD7 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
 		76B2ED7C25B7DCC900552F2B /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76B2ED6C25B7DCC800552F2B /* Entypo.ttf */; };
 		76B2ED7D25B7DCC900552F2B /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76B2ED6D25B7DCC900552F2B /* SimpleLineIcons.ttf */; };
 		76B2ED7E25B7DCC900552F2B /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76B2ED6E25B7DCC900552F2B /* Ionicons.ttf */; };
@@ -31,7 +31,7 @@
 		A22A949C24440A0B0054819F /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22A949B24440A0B0054819F /* File.swift */; };
 		A23CE2A524215FFD00FB8012 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A23CE2A424215FFC00FB8012 /* GoogleService-Info.plist */; };
 		A2583C41244CA1FC007C4D9A /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A2583C40244CA1FB007C4D9A /* BootSplash.storyboard */; };
-		E4D225D649DF4A69CD1D47AA /* (null) in Frameworks */ = {isa = PBXBuildFile; };
+		E4D225D649DF4A69CD1D47AA /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -75,8 +75,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E4D225D649DF4A69CD1D47AA /* (null) in Frameworks */,
-				52D5DA0DDC6163DF4EA07DD7 /* (null) in Frameworks */,
+				E4D225D649DF4A69CD1D47AA /* BuildFile in Frameworks */,
+				52D5DA0DDC6163DF4EA07DD7 /* BuildFile in Frameworks */,
 				010F4D890007D11967B63509 /* libPods-spicygolf.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -286,7 +286,7 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-spicygolf/Pods-spicygolf-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL/OpenSSL.framework/OpenSSL",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL-Universal/OpenSSL.framework/OpenSSL",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (

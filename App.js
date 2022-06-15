@@ -1,4 +1,4 @@
-import { ApolloProvider as ApolloHooksProvider } from '@apollo/client';
+import { ApolloProvider } from '@apollo/client';
 import auth from '@react-native-firebase/auth';
 import { NavigationContainer } from '@react-navigation/native';
 import configureClient from 'app/client/configureClient';
@@ -6,7 +6,6 @@ import AccountStack from 'app/components/accountstack';
 import AppStack from 'app/components/appstack';
 import Splash from 'features/splash/splash';
 import React, { useEffect, useState } from 'react';
-import { ApolloProvider } from 'react-apollo';
 import { LogBox } from 'react-native';
 import RNBootSplash from 'react-native-bootsplash';
 import { Provider as PaperProvider } from 'react-native-paper';
@@ -64,11 +63,9 @@ const App = (props) => {
 
   return (
     <ApolloProvider client={client}>
-      <ApolloHooksProvider client={client}>
-        <NavigationContainer>
-          <PaperProvider>{content}</PaperProvider>
-        </NavigationContainer>
-      </ApolloHooksProvider>
+      <NavigationContainer>
+        <PaperProvider>{content}</PaperProvider>
+      </NavigationContainer>
     </ApolloProvider>
   );
 };
