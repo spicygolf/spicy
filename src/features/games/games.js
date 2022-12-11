@@ -7,7 +7,7 @@ import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { filter, reverse, sortBy } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useContext, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 
 const Games = (props) => {
@@ -110,14 +110,16 @@ const Games = (props) => {
     <View style={styles.container}>
       <View style={styles.gamesSubMenu}>
         <View>
-          <Icon
-            name="add-circle"
-            color={blue}
-            size={40}
-            onPress={newGamePressed}
-            accessibilityLabel="New Game"
-            testID="new_game"
-          />
+          <TouchableOpacity onPress={newGamePressed} style={styles.newGameButton}>
+            <Icon
+              name="add-circle"
+              color={blue}
+              size={40}
+              accessibilityLabel="New Game"
+              testID="new_game"
+            />
+            <Text style={styles.newGameText}>New Game</Text>
+          </TouchableOpacity>
         </View>
       </View>
       <FlatList
@@ -137,6 +139,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  newGameButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  newGameText: {
+    color: blue,
+    paddingLeft: 5,
   },
   gamesSubMenu: {
     alignItems: 'center',
