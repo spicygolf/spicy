@@ -30,7 +30,7 @@ const RegisterBasics = (props) => {
 
   useEffect(() => {
     if (emailRef && emailRef.current) {
-      emailRef.current.focus();
+      // emailRef.current.focus();
       validate();
     }
   }, [emailRef, validate]);

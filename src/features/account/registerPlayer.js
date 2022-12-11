@@ -1,7 +1,6 @@
 import auth from '@react-native-firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 import { registerPlayer, validateName } from 'common/utils/account';
-import { login } from 'common/utils/ghin';
 import BackToLogin from 'features/account/backToLogin';
 import { RegisterContext } from 'features/account/registerContext';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -28,7 +27,7 @@ const RegisterPlayer = (props) => {
   );
 
   const changes = registration.handicap
-    ? 'Make changes to GHIN information (if any)'
+    ? 'Make changes to GHIN® information (if any)'
     : '';
 
   const register = async () => {
@@ -83,25 +82,26 @@ const RegisterPlayer = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       if (registration.ghinCreds) {
-        const search_results = await login(registration.ghinCreds);
-        if (search_results && search_results.length) {
-          const g = search_results[0];
-          setRegistration({
-            ...registration,
-            handicap: {
-              source: 'ghin',
-              id: g.GHINNumber,
-              firstName: g.FirstName,
-              lastName: g.LastName,
-              playerName: `${g.FirstName} ${g.LastName}`,
-              gender: g.Gender,
-              active: g.Active === 'true',
-              index: g.Display,
-              revDate: g.RevDate,
-            },
-            ghinData: search_results,
-          });
-        }
+        // TODO: no GHIN login anymore, rework this
+        // const search_results = await login(registration.ghinCreds);
+        // if (search_results && search_results.length) {
+        //   const g = search_results[0];
+        //   setRegistration({
+        //     ...registration,
+        //     handicap: {
+        //       source: 'ghin',
+        //       id: g.GHINNumber,
+        //       firstName: g.FirstName,
+        //       lastName: g.LastName,
+        //       playerName: `${g.FirstName} ${g.LastName}`,
+        //       gender: g.Gender,
+        //       active: g.Active === 'true',
+        //       index: g.Display,
+        //       revDate: g.RevDate,
+        //     },
+        //     ghinData: search_results,
+        //   });
+        // }
       }
     };
     fetchData();
@@ -162,6 +162,11 @@ const RegisterPlayer = (props) => {
               title="Prev"
               type="solid"
               onPress={() => {
+                // clear out `handicap` from registration
+                let newReg = registration;
+                delete registration.handicap;
+                setRegistration(newReg);
+                // go back
                 navigation.goBack();
               }}
               accessibilityLabel="Register Prev 4"

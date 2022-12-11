@@ -9,11 +9,10 @@ export const GET_PLAYERS_FOLLOWERS_QUERY = gql`
       handicap {
         index
         revDate
-      }
-      clubs {
-        _key
-        name
-        state
+        clubs {
+          name
+          state
+        }
       }
     }
   }

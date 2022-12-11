@@ -46,6 +46,7 @@ const Admin = (props) => {
     const dgiRes = data && data.getDeleteGameInfo ? data.getDeleteGameInfo : null;
     //console.log('dgiRes in doDeleteGame', dgiRes);
     if (dgiRes == null) {
+      // TODO: error component
       console.error('No DeleteGameInfo available, cannot delete game');
       return;
     }

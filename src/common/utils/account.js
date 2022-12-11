@@ -23,7 +23,10 @@ export const registerPlayer = async (registration, fbUser) => {
 };
 
 export const login = async (fbUser) => {
-  const token = await fbUser.getIdToken();
+  let token = '';
+  if (fbUser.getIdToken) {
+    token = await fbUser.getIdToken();
+  }
 
   // REST call to API to get pkey, token
   const uri = `${scheme}://${baseUri}/account/login`;

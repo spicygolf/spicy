@@ -51,7 +51,7 @@ const LinkHandicap = (props) => {
 
   const serviceChooser = (
     <Text style={styles.ghin_only}>
-      GHIN is the only handicap service currently supported.
+      GHIN® is the only handicap service currently supported.
     </Text>
   );
   /*  TODO: activate when we have more than one service
@@ -74,7 +74,7 @@ const LinkHandicap = (props) => {
     case 'ghin':
       search = (
         <Card wrapperStyle={styles.card_wrapper}>
-          <Card.Title>GHIN Player Search</Card.Title>
+          <Card.Title>GHIN® Player Search</Card.Title>
           <Card.Divider />
           <GhinSearchPlayer state={newLink} setState={setNewLink} />
         </Card>

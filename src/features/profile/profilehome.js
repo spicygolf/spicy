@@ -1,11 +1,14 @@
+import { useQuery } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 import { blue, light } from 'common/colors';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import { GET_PLAYER_QUERY } from 'features/players/graphql';
 import FollowersStat from 'features/profile/stats/followers';
 import FollowingStat from 'features/profile/stats/following';
 import GamesStat from 'features/profile/stats/games';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
@@ -17,9 +20,16 @@ import { Button, Card, Icon, ListItem } from 'react-native-elements';
 
 const ProfileHome = (props) => {
   const navigation = useNavigation();
-
+  const [handicapContent, setHandicapContent] = useState(null);
   const { currentPlayer } = useContext(CurrentPlayerContext);
   const pkey = currentPlayer && currentPlayer._key ? currentPlayer._key : null;
+
+  const { loading, error, data } = useQuery(GET_PLAYER_QUERY, {
+    variables: {
+      player: pkey,
+    },
+    fetchPolicy: 'cache-and-network',
+  });
 
   const getField = (field) => {
     if (currentPlayer && currentPlayer[field]) {
@@ -28,24 +38,30 @@ const ProfileHome = (props) => {
     return '';
   };
 
-  const getHandicapField = (field) => {
-    if (currentPlayer && currentPlayer.handicap && currentPlayer.handicap[field]) {
-      return currentPlayer.handicap[field];
-    }
-    return '';
-  };
+  //console.log('currentPlayer', currentPlayer);
 
-  const handicapContent = ({ source, index, revDate }) => {
-    if (source) {
-      return (
+  const name = getField('name');
+  const short = getField('short');
+
+  useEffect(() => {
+    if (loading) {
+      setHandicapContent(<ActivityIndicator />);
+    }
+    if (error) {
+      console.log('error fetching handicap: ', error.message);
+    }
+    if (data?.getPlayer?.handicap?.source) {
+      const { source, index, revDate } = data.getPlayer.handicap;
+      console.log('data', source, index, revDate);
+      setHandicapContent(
         <View style={styles.handicap_view}>
-          <Text style={styles.source}>{source} linked</Text>
+          <Text style={styles.source}>{source.toUpperCase()}® linked</Text>
           <Text style={styles.index}>{index}</Text>
           <Text style={styles.revDate}>{revDate}</Text>
-        </View>
+        </View>,
       );
     } else {
-      return (
+      setHandicapContent(
         <View style={styles.no_hc_link_view}>
           <View>
             <Text style={styles.no_hc_link_txt}>no handicap</Text>
@@ -58,21 +74,10 @@ const ProfileHome = (props) => {
               navigation.navigate('LinkHandicap');
             }}
           />
-        </View>
+        </View>,
       );
     }
-  };
-
-  //console.log('currentPlayer', currentPlayer);
-
-  const name = getField('name');
-  const short = getField('short');
-
-  let source = getHandicapField('source').toUpperCase();
-  const index = getHandicapField('index');
-  const revDate = getHandicapField('revDate');
-
-  const handicap_content = handicapContent({ source, index, revDate });
+  }, [loading, error, data, navigation]);
 
   return (
     <KeyboardAvoidingView style={styles.container}>
@@ -89,7 +94,7 @@ const ProfileHome = (props) => {
             </TouchableOpacity>
           </ListItem>
           <View style={styles.subname_view}>
-            {handicap_content}
+            {handicapContent}
             <View style={styles.stats_view}>
               <GamesStat pkey={pkey} />
               <FollowingStat pkey={pkey} />

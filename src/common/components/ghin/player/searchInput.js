@@ -102,12 +102,9 @@ const GhinPlayerSearchInput = (props) => {
 export default GhinPlayerSearchInput;
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-  },
+  container: {},
   row: {
     flexDirection: 'row',
-    marginBottom: 10,
   },
   picker_country: {
     flex: 1,

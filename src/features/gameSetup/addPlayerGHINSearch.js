@@ -5,6 +5,7 @@ import { GameContext } from 'features/game/gameContext';
 import { ADD_PLAYER_MUTATION, LOOKUP_PLAYER_BY_GHIN } from 'features/players/graphql';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 const AddPlayerGHINSearch = (props) => {
   const defaultNewPlayer = {
@@ -23,9 +24,9 @@ const AddPlayerGHINSearch = (props) => {
   // see if player already in spicy w/ lookup on ghin #
   useEffect(() => {
     //console.log('newPlayer', newPlayer);
-    if (newPlayer && newPlayer.ghinCreds && newPlayer.ghinCreds.ghinNumber) {
+    if (newPlayer?.handicap?.id) {
       lookupPkey({
-        variables: { ghin: newPlayer.ghinCreds.ghinNumber },
+        variables: { ghin: newPlayer.handicap.id },
       });
     }
   }, [lookupPkey, newPlayer]);
@@ -84,7 +85,17 @@ const AddPlayerGHINSearch = (props) => {
     }
   }, [game, navigation, newPlayer.handicap, newPlayer.name, pkey]);
 
-  return <GhinSearchPlayer state={newPlayer} setState={setNewPlayer} />;
+  return (
+    <View style={styles.container}>
+      <GhinSearchPlayer state={newPlayer} setState={setNewPlayer} />
+    </View>
+  );
 };
 
 export default AddPlayerGHINSearch;
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 15,
+  },
+});

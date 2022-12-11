@@ -14,11 +14,10 @@ export const GET_PLAYER_QUERY = gql`
         id
         index
         revDate
-      }
-      clubs {
-        _key
-        name
-        state
+        clubs {
+          name
+          state
+        }
       }
     }
   }

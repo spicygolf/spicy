@@ -18,7 +18,7 @@ const Player = (props) => {
       <FavoriteIcon fave={item.fave} />
       <ListItem.Content>
         <ListItem.Title>{title}</ListItem.Title>
-        <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
+        <ListItem.Subtitle style={styles.subtitle}>{subtitle}</ListItem.Subtitle>
       </ListItem.Content>
       {handicap(hdcp)}
     </ListItem>
@@ -31,5 +31,8 @@ const styles = StyleSheet.create({
   handicap: {
     fontSize: 24,
     paddingRight: 10,
+  },
+  subtitle: {
+    fontSize: 11,
   },
 });

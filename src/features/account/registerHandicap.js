@@ -9,13 +9,13 @@ import { Button, Card } from 'react-native-elements';
 
 const { width } = Dimensions.get('window');
 
-const RegisterHandicap = (props) => {
+const RegisterHandicap = () => {
   const { registration, setRegistration } = useContext(RegisterContext);
   const navigation = useNavigation();
 
   useEffect(() => {
     //console.log('registration', registration);
-    if (registration.ghinCreds) {
+    if (registration.handicap?.id) {
       navigation.navigate('RegisterPlayer');
     }
   }, [navigation, registration]);
@@ -23,10 +23,10 @@ const RegisterHandicap = (props) => {
   return (
     <View style={styles.container}>
       <BackToLogin />
-      <Card containerStyle={styles.card_container}>
+      <Card containerStyle={styles.card_container} wrapperStyle={styles.card_wrapper}>
         <Card.Title>Register - Handicap</Card.Title>
         <Card.Divider />
-        <View style={styles.loginView} testID="register_2_view">
+        <View style={styles.card_wrapper} testID="register_2_view">
           <GhinSearchPlayer state={registration} setState={setRegistration} />
           <View style={styles.divider}>
             <View style={styles.hrLine} />
@@ -36,7 +36,7 @@ const RegisterHandicap = (props) => {
         </View>
         <View style={styles.skip_view}>
           <Text>
-            I don't keep a GHIN handicap.
+            I don't keep a GHIN® handicap.
             <Text
               onPress={() => {
                 navigation.navigate('RegisterPlayer');
@@ -91,6 +91,11 @@ const styles = StyleSheet.create({
   card_container: {
     flex: 11,
   },
+  card_wrapper: {
+    flex: 1,
+    margin: 0,
+    padding: 0,
+  },
   field_input: {
     color: '#000',
     fontSize: 16,
@@ -105,7 +110,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 15,
+    marginVertical: 5,
   },
   hrLine: {
     width: width / 3.5,
@@ -116,20 +121,6 @@ const styles = StyleSheet.create({
     color: blue,
     textAlign: 'center',
     width: width / 8,
-  },
-  lookup: {
-    paddingBottom: 15,
-  },
-  states_row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  picker_country: {
-    flex: 1,
-    marginRight: 5,
-  },
-  picker_state: {
-    flex: 1,
   },
   skip_view: {
     paddingBottom: 15,
