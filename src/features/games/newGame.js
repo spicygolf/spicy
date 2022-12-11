@@ -68,20 +68,24 @@ const NewGame = (props) => {
   const newGameWithoutTypes = omitTypename(newGame);
 
   // add new game
-  const addGame = useCallback(async () => {
-    //console.log('Begin adding game');
-    const { error, data } = await addGameMutation({
-      variables: {
-        game: newGameWithoutTypes,
-      },
-    });
+  const addGame = useCallback(
+    async () => {
+      //console.log('Begin adding game');
+      const { error, data } = await addGameMutation({
+        variables: {
+          game: newGameWithoutTypes,
+        },
+      });
 
-    if (error && error.message !== 'Network request failed') {
-      console.log('Error adding game: ', error.message);
-    }
-    //console.log('newGame data', data);
-    return data.addGame;
-  }, [addGameMutation, newGameWithoutTypes]);
+      if (error && error.message !== 'Network request failed') {
+        console.log('Error adding game: ', error.message);
+      }
+      //console.log('newGame data', data);
+      return data.addGame;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [newGameWithoutTypes],
+  );
 
   const linkGameToGamespec = useCallback(
     async (game) => {
@@ -98,10 +102,11 @@ const NewGame = (props) => {
       //console.log('newGame linkg2gs', data);
       return data.link;
     },
-    [addLinkMutation, gamespec._key],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [gamespec._key],
   );
 
-  // New game has been created, so navigate to it.
+  // New game has been created, now link current user to it
   useEffect(() => {
     if (currentPlayer && gkey) {
       // we don't have a game object in GameContext yet, so we have to make one up
@@ -116,13 +121,15 @@ const NewGame = (props) => {
         name: currentPlayer.name,
         handicap: currentPlayer.handicap,
       };
+      // TODO: maybe read a user setting and not do this?
+      // Caddies & scorers wouldn't always want to be added.
+      // If setting is false, navigate to 'Game' only
       navigation.navigate('Game', {
         currentGameKey: gkey,
         screen: 'Setup',
         params: {
-          screen: 'GameSetup',
+          screen: 'LinkRoundList',
           params: {
-            addCurrentPlayerToGame: true, // TODO: false for caddies / scorers
             game,
             player,
           },
@@ -131,17 +138,21 @@ const NewGame = (props) => {
     }
   }, [currentPlayer, gamespec, gkey, navigation, newGameWithoutTypes]);
 
-  useEffect(() => {
-    //console.log('createNewGame');
-    const createNewGame = async () => {
-      const game = await addGame();
-      await linkGameToGamespec(game);
-      setGkey(game._key);
-    };
-    if (!gkey) {
-      createNewGame();
-    }
-  }, [addGame, gkey, linkGameToGamespec]);
+  useEffect(
+    () => {
+      //console.log('createNewGame');
+      const createNewGame = async () => {
+        const game = await addGame();
+        await linkGameToGamespec(game);
+        setGkey(game._key);
+      };
+      if (!gkey) {
+        createNewGame();
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [gkey],
+  );
 
   return (
     <View>

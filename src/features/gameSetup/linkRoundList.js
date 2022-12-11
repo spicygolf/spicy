@@ -84,6 +84,7 @@ const LinkRoundList = (props) => {
   }
 
   if (gotoLinkRound) {
+    // console.log('going to LinkRound', game, player, round, isNew);
     return <LinkRound game={game} player={player} round={round} isNew={isNew} />;
   }
 

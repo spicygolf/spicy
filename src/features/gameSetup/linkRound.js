@@ -40,24 +40,28 @@ const LinkRound = (props) => {
   const [roundToGame] = useMutation(UPSERT_LINK_MUTATION);
   const [roundToPlayer] = useMutation(UPSERT_LINK_MUTATION);
 
-  const createNewRound = useCallback(async () => {
-    //console.log('createNewRound');
-    // add round
-    const { error, data } = await addRound({
-      variables: {
-        round: {
-          date: game_start,
-          seq: 1,
-          scores: [],
+  const createNewRound = useCallback(
+    async () => {
+      //console.log('createNewRound');
+      // add round
+      const { error, data } = await addRound({
+        variables: {
+          round: {
+            date: game_start,
+            seq: 1,
+            scores: [],
+          },
         },
-      },
-    });
-    if (error) {
-      console.log('Error creating new round', error);
-      return null;
-    }
-    return data.addRound;
-  }, [addRound, game_start]);
+      });
+      if (error) {
+        console.log('Error creating new round', error);
+        return null;
+      }
+      return data.addRound;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [game_start],
+  );
 
   const linkRound = useCallback(
     async (r) => {
@@ -71,52 +75,44 @@ const LinkRound = (props) => {
         roundToPlayer,
       });
     },
-    [game, isNew, player, roundToGame, roundToPlayer],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [game, isNew, player],
   );
 
-  useEffect(() => {
-    const init = async () => {
-      // link player to game
-      await linkPlayerToGame({
-        pkey,
-        gkey,
-        playerToGame,
-        currentPlayerKey,
-      });
+  useEffect(
+    () => {
+      const init = async () => {
+        // link player to game
+        await linkPlayerToGame({
+          pkey,
+          gkey,
+          playerToGame,
+          currentPlayerKey,
+        });
 
-      // if not a team game, add player to her own team and update game
-      if (!teamGame) {
-        //console.log('firing add player to own team');
-        await addPlayerToOwnTeam({ pkey, game, updateGame });
-      }
-      // link round
-      let r = round && !isNew ? round : await createNewRound();
-      await linkRound(r);
+        // if not a team game, add player to her own team and update game
+        if (!teamGame) {
+          //console.log('firing add player to own team');
+          await addPlayerToOwnTeam({ pkey, game, updateGame });
+        }
+        // link round
+        let r = round && !isNew ? round : await createNewRound();
+        await linkRound(r);
 
-      //console.log('LinkRound navigating to GameSetup');
-      navigation.navigate('Game', {
-        currentGameKey: gkey,
-        screen: 'Setup',
-        params: {
-          screen: 'GameSetup',
-        },
-      });
-    };
-    init();
-  }, [
-    createNewRound,
-    currentPlayerKey,
-    game,
-    gkey,
-    isNew,
-    linkRound,
-    navigation,
-    pkey,
-    playerToGame,
-    round,
-    teamGame,
-    updateGame,
-  ]);
+        //console.log('LinkRound navigating to GameSetup');
+        navigation.navigate('Game', {
+          currentGameKey: gkey,
+          screen: 'Setup',
+          params: {
+            screen: 'GameSetup',
+          },
+        });
+      };
+      init();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props],
+  );
 
   return <ActivityIndicator />;
 };

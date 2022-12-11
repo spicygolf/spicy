@@ -45,6 +45,7 @@ const GhinPlayerSearchResults = (props) => {
             handicap: {
               source: 'ghin',
               id: gn,
+              index: hdcp,
             },
             name: player_name,
             short: fn,
@@ -76,16 +77,20 @@ const GhinPlayerSearchResults = (props) => {
     },
   });
 
-  const fetchData = useCallback(async () => {
-    search();
-    if (data && data.searchPlayer && data.searchPlayer) {
-      if (page === 1) {
-        setGolfers(data.searchPlayer);
-      } else {
-        setGolfers(golfers.concat(data.searchPlayer));
+  const fetchData = useCallback(
+    async () => {
+      search();
+      if (data?.searchPlayer) {
+        if (page === 1) {
+          setGolfers(data.searchPlayer);
+        } else {
+          setGolfers(golfers.concat(data.searchPlayer));
+        }
       }
-    }
-  }, [data, golfers, page, search]);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data, golfers, page],
+  );
 
   useEffect(() => {
     setGolfers([]);

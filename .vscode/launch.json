@@ -20,7 +20,6 @@
       "program": "${workspaceFolder}/test/common/utils/score.diff_options_diff_holes.test.js",
       "args": [
       ],
-      "port": 9229
     },
     {
       "name": "Attach to packager",

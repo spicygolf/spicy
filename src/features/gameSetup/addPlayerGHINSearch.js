@@ -16,74 +16,71 @@ const AddPlayerGHINSearch = (props) => {
   };
   const [newPlayer, setNewPlayer] = useState(defaultNewPlayer);
   const [lookupPkey, { data: lPkey }] = useLazyQuery(LOOKUP_PLAYER_BY_GHIN);
-  const [pkey, setPkey] = useState();
   const [addPlayer] = useMutation(ADD_PLAYER_MUTATION);
   const { currentPlayerKey, game } = useContext(GameContext);
   const navigation = useNavigation();
 
   // see if player already in spicy w/ lookup on ghin #
-  useEffect(() => {
-    //console.log('newPlayer', newPlayer);
-    if (newPlayer?.handicap?.id) {
-      lookupPkey({
-        variables: { ghin: newPlayer.handicap.id },
-      });
-    }
-  }, [lookupPkey, newPlayer]);
+  useEffect(
+    () => {
+      if (newPlayer?.handicap?.id) {
+        lookupPkey({
+          variables: { ghin: newPlayer.handicap.id },
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [newPlayer],
+  );
 
   // if already in spicy, set pkey
-  // if not already in spicy w/ lookup on ghin #, then use addPlayer() mutation
-  useEffect(() => {
-    const handleLookup = async () => {
-      if (lPkey && lPkey.lookupPlayerByGhin) {
-        const l = lPkey.lookupPlayerByGhin;
-        if (l.length > 0) {
-          // found existing spicy user for this ghin player
-          setPkey(l[0]._key);
-        } else {
-          const player = {
-            name: newPlayer.name,
-            short: newPlayer.short,
-            handicap: newPlayer.handicap,
-            statusAuthz: ['prod'],
-            createdBy: currentPlayerKey,
-            createdDate: moment.utc().format(),
-          };
-          const { error, data } = await addPlayer({
-            variables: { player },
-          });
-          if (error) {
-            // TODO: error component
-            console.log('error adding player', error);
+  // if not already in spicy w/ lookup on ghin #
+  // then use addPlayer() mutation
+  // finally add player/round to game
+  useEffect(
+    () => {
+      const handleLookup = async () => {
+        let lrlPlayer = {
+          name: newPlayer.name,
+          handicap: newPlayer.handicap,
+        };
+        if (lPkey && lPkey.lookupPlayerByGhin) {
+          const l = lPkey.lookupPlayerByGhin;
+          if (l.length > 0) {
+            // found existing spicy user for this ghin player
+            lrlPlayer._key = l[0]._key;
+          } else {
+            const player = {
+              name: newPlayer.name,
+              short: newPlayer.short,
+              handicap: newPlayer.handicap,
+              statusAuthz: ['prod'],
+              createdBy: currentPlayerKey,
+              createdDate: moment.utc().format(),
+            };
+            const { error, data } = await addPlayer({
+              variables: { player },
+            });
+            if (error) {
+              // TODO: error component
+              console.log('error adding player', error);
+              return;
+            }
+            if (data?.addPlayer?._key) {
+              lrlPlayer._key = data.addPlayer._key;
+              // setPkey(data.addPlayer._key);
+            }
           }
-          if (data && data.addPlayer && data.addPlayer._key) {
-            setPkey(data.addPlayer._key);
-          }
+          // then add player/round to game
+          //console.log('lrlPlayer', lrlPlayer);
+          navigation.navigate('LinkRoundList', { game, player: lrlPlayer });
         }
-      }
-    };
-    handleLookup();
-  }, [
-    addPlayer,
-    currentPlayerKey,
-    lPkey,
-    newPlayer.handicap,
-    newPlayer.name,
-    newPlayer.short,
-  ]);
-
-  // then add player to game
-  useEffect(() => {
-    if (pkey) {
-      const player = {
-        _key: pkey,
-        name: newPlayer.name,
-        handicap: newPlayer.handicap,
       };
-      //console.log('player', player);
-      navigation.navigate('LinkRoundList', { game, player });
-    }
-  }, [game, navigation, newPlayer.handicap, newPlayer.name, pkey]);
+      handleLookup();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentPlayerKey, lPkey, newPlayer.handicap, newPlayer.name, newPlayer.short],
+  );
 
   return (
     <View style={styles.container}>

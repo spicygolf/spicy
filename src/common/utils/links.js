@@ -54,7 +54,7 @@ export const linkRoundToGameAndPlayer = async (props) => {
   // first see if we can calc a course_handicap
   let other = [];
   try {
-    const hi = handicap.index;
+    const hi = handicap?.index;
     if (hi) {
       other.push({ key: 'handicap_index', value: hi.toString() });
     }
