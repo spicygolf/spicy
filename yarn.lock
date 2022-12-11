@@ -4542,10 +4542,10 @@ eslint-plugin-react-hooks@^3.0.0:
   resolved "https://registry.yarnpkg.com/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-3.0.0.tgz#9e80c71846eb68dd29c3b21d832728aa66e5bd35"
   integrity sha512-EjxTHxjLKIBWFgDJdhKKzLh5q+vjTFrqNZX36uIxWS4OfyXe5DawqPj3U5qeJ1ngLwatjzQnmR0Lz0J0YH3kxw==
 
-eslint-plugin-react-hooks@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-4.2.0.tgz#8c229c268d468956334c943bb45fc860280f5556"
-  integrity sha512-623WEiZJqxR7VdxFCKLI6d6LLpwJkGPYKODnkH3D7WpOG5KM8yWueBd8TLsNAetEJNF5iJmolaAKO3F8yzyVBQ==
+eslint-plugin-react-hooks@^5.0.0-next-819687279-20221208:
+  version "5.0.0-next-819687279-20221208"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-5.0.0-next-819687279-20221208.tgz#c9dcd1f8dddd06e7479c731a9adcdbeab93abd10"
+  integrity sha512-m85pG+LHKMC503WZOsJ6VmO9MEQkpGiKIrYRESZT5GQ4RRYOQdzj3ENipmSt0dwAsGD5m5bWHfThZwXNzZI47w==
 
 eslint-plugin-react-native-globals@^0.1.1:
   version "0.1.2"
@@ -9060,9 +9060,9 @@ react-native-bootsplash@^2.2.5:
     prompts "2.3.2"
 
 react-native-device-info@^5.5.5:
-  version "5.5.5"
-  resolved "https://registry.yarnpkg.com/react-native-device-info/-/react-native-device-info-5.5.5.tgz#0be4dcee93433285a83ede81202a811d78901544"
-  integrity sha512-CIoFDlfaUVNJiHzj/2DRb0KGRxBnGfw8ZkFWR0txNg7CkN0R9hF5vToB5jklEQ8EK6HrgFEC6fa9TjJQY6eKzg==
+  version "5.6.5"
+  resolved "https://registry.yarnpkg.com/react-native-device-info/-/react-native-device-info-5.6.5.tgz#3f18d7c38b21cfc475163351a9aae6e9037a43a0"
+  integrity sha512-l457wv7gYXSRnm38AH+NpCgKYa1zxxfN0EL8mTBxo+TnasXtk0FZ86zWDLhm4eqpcSH8xpT/+z2MQrATfqCaoA==
 
 react-native-draggable-flatlist@^2.5.1:
   version "2.5.1"

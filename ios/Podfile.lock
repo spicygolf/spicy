@@ -405,7 +405,7 @@ PODS:
     - React
   - RNDateTimePicker (3.0.2):
     - React
-  - RNDeviceInfo (5.5.5):
+  - RNDeviceInfo (5.6.5):
     - React
   - RNFBApp (10.1.0):
     - Firebase/CoreOnly (~> 7.1.0)
@@ -651,7 +651,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 2a692bcb9b69b76a2f1a95f33db057129700af64
   RNCMaskedView: 71fc32d971f03b7f03d6ab6b86b730c4ee64f5b6
   RNDateTimePicker: a84d2b439666c9243d42a8396c588d4d1d36e3f3
-  RNDeviceInfo: d2ca97023bb1c2a49cd7adb3f956e14c048ea028
+  RNDeviceInfo: c5f8f3a456adcbba405ace475254b08febc4c095
   RNFBApp: 2b4e07dfca4cf780b9e2d61bcc21e34d890cd654
   RNFBAuth: 349a8d96d6ecc91d690c65ec0425cbb21b5831ed
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38
@@ -661,6 +661,6 @@ SPEC CHECKSUMS:
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: f5268f64028d4df5779ec30eff8be749883abaf5
+PODFILE CHECKSUM: 41bd1d2868e0fb8dd24edef90b29de78214775b5
 
 COCOAPODS: 1.11.3

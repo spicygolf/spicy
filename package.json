@@ -26,7 +26,7 @@
         "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/spicygolf.app",
         "build": "xcodebuild -workspace ios/spicygolf.xcworkspace -scheme spicygolf -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build -UseModernBuildSystem=NO",
         "type": "ios.simulator",
-        "name": "iPhone 11"
+        "name": "iPhone SE"
       }
     }
   },
@@ -92,7 +92,7 @@
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-prettier": "^3.2.0",
     "eslint-plugin-react": "^7.24.0",
-    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-react-hooks": "^5.0.0-next-819687279-20221208",
     "eslint-plugin-react-native": "^3.11.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "husky": "^4.3.5",

@@ -5,5 +5,8 @@ module.exports = {
   parserOptions: {
     requireConfigFile: false,
   },
-  plugins: ['@babel'],
+  plugins: ['@babel', 'react-hooks'],
+  rules: {
+    'react-hooks/exhaustive-deps': 'warn',
+  },
 };

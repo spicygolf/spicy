@@ -1,4 +1,5 @@
 {
+  "NOTE": "This seeems to not be active, in favor of .eslint.js",
   "env": {
     "browser": true,
     "es2021": true,
@@ -19,6 +20,7 @@
 },
   "plugins": [
     "react",
+    "react-hooks",
     "react-native",
     "@typescript-eslint",
     "simple-import-sort"
@@ -26,6 +28,7 @@
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/prop-types": 0,
+    "react-hooks/exhaustive-deps": "warn",
     "react-native/no-unused-styles": 2,
     "react-native/split-platform-components": 2,
     "react-native/no-inline-styles": 2,
