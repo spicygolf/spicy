@@ -79,34 +79,6 @@ const RegisterPlayer = (props) => {
     }
   }, [nameRef, validate]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (registration.ghinCreds) {
-        // TODO: no GHIN login anymore, rework this
-        // const search_results = await login(registration.ghinCreds);
-        // if (search_results && search_results.length) {
-        //   const g = search_results[0];
-        //   setRegistration({
-        //     ...registration,
-        //     handicap: {
-        //       source: 'ghin',
-        //       id: g.GHINNumber,
-        //       firstName: g.FirstName,
-        //       lastName: g.LastName,
-        //       playerName: `${g.FirstName} ${g.LastName}`,
-        //       gender: g.Gender,
-        //       active: g.Active === 'true',
-        //       index: g.Display,
-        //       revDate: g.RevDate,
-        //     },
-        //     ghinData: search_results,
-        //   });
-        // }
-      }
-    };
-    fetchData();
-  }, [registration, setRegistration]);
-
   return (
     <View style={styles.container}>
       <BackToLogin />
