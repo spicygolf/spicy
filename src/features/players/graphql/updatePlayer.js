@@ -14,11 +14,12 @@ export const UPDATE_PLAYER_MUTATION = gql`
         id
         index
         revDate
-      }
-      clubs {
-        _key
-        name
-        state
+        gender
+        clubs {
+          id
+          name
+          state
+        }
       }
     }
   }

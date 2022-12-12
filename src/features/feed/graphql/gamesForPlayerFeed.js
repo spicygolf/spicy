@@ -54,14 +54,6 @@ export const GAMES_FOR_PLAYER_FEED = gql`
         player {
           _key
           name
-          handicap {
-            source
-            id
-            gender
-            active
-            index
-            revDate
-          }
         }
         tee {
           _key
@@ -91,10 +83,6 @@ export const GAMES_FOR_PLAYER_FEED = gql`
         _key
         name
         short
-        handicap {
-          index
-          revDate
-        }
       }
     }
   }

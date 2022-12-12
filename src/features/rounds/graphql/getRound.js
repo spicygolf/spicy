@@ -34,6 +34,7 @@ export const GET_ROUND_QUERY = gql`
         name
         handicap {
           index
+          gender
           revDate
         }
       }

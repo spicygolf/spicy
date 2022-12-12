@@ -13,11 +13,12 @@ export const MERGE_PLAYERS_MUTATION = gql`
         id
         index
         revDate
-      }
-      clubs {
-        _key
-        name
-        state
+        gender
+        clubs {
+          _key
+          name
+          state
+        }
       }
     }
   }

@@ -14,6 +14,7 @@ export const GET_PLAYER_QUERY = gql`
         id
         index
         revDate
+        gender
         clubs {
           id
           name

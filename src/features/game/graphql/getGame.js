@@ -100,6 +100,7 @@ export const GET_GAME_QUERY = gql`
         handicap {
           index
           revDate
+          gender
         }
       }
       gamespecs {
