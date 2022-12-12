@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client';
-import { GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY } from 'features/players/graphql';
+import { GET_FAVORITE_PLAYERS_FOR_PLAYER_STATS_QUERY } from 'features/players/graphql';
 import React from 'react';
 import { Text, View } from 'react-native';
 
@@ -8,7 +8,7 @@ import { styles } from './styles';
 const FollowingStat = ({ pkey }) => {
   let stat = ' ';
 
-  const { error, data } = useQuery(GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY, {
+  const { error, data } = useQuery(GET_FAVORITE_PLAYERS_FOR_PLAYER_STATS_QUERY, {
     variables: {
       pkey,
     },

@@ -6,14 +6,6 @@ export const GET_PLAYERS_FOLLOWERS_QUERY = gql`
       _key
       name
       short
-      handicap {
-        index
-        revDate
-        clubs {
-          name
-          state
-        }
-      }
     }
   }
 `;
