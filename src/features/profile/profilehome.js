@@ -52,7 +52,7 @@ const ProfileHome = (props) => {
     }
     if (data?.getPlayer?.handicap?.source) {
       const { source, index, revDate } = data.getPlayer.handicap;
-      console.log('data', source, index, revDate);
+      // console.log('data', source, index, revDate);
       setHandicapContent(
         <View style={styles.handicap_view}>
           <Text style={styles.source}>{source.toUpperCase()}® linked</Text>

@@ -15,7 +15,7 @@ const Games = (props) => {
   const { stat, begDate, endDate } = route.params;
 
   const currentPlayer = `players/${cp._key}`;
-  const myClubs = cp.clubs.map((c) => `clubs/${c._key}`);
+  const myClubs = cp.handicap.clubs.map((c) => `${c.id}`);
 
   // console.log('variables', {stat, begDate, endDate, currentPlayer, myClubs});
 

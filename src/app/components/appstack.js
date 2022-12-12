@@ -73,17 +73,21 @@ const AppStack = (props) => {
     getCreds();
   }, [user]);
 
-  useEffect(() => {
-    // console.log('cp', currentPlayerKey, token);
-    if (currentPlayerKey && token) {
-      getCurrentPlayer({
-        variables: {
-          player: currentPlayerKey,
-        },
-        fetchPolicy: 'cache-and-network',
-      });
-    }
-  }, [currentPlayerKey, getCurrentPlayer, token]);
+  useEffect(
+    () => {
+      // console.log('cp', currentPlayerKey, token);
+      if (currentPlayerKey && token) {
+        getCurrentPlayer({
+          variables: {
+            player: currentPlayerKey,
+          },
+          fetchPolicy: 'cache-and-network',
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentPlayerKey, token],
+  );
 
   useEffect(() => {
     // console.log('data', data);

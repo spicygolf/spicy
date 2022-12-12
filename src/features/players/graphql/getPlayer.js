@@ -15,6 +15,7 @@ export const GET_PLAYER_QUERY = gql`
         index
         revDate
         clubs {
+          id
           name
           state
         }
