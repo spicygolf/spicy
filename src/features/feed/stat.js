@@ -14,7 +14,7 @@ const Stat = (props) => {
   const { currentPlayer: cp } = useContext(CurrentPlayerContext);
   //console.log('cp', cp);
   const currentPlayer = `players/${cp._key}`;
-  const myClubs = cp.handicap.clubs.map((c) => `${c.id}`);
+  const myClubs = cp?.handicap?.clubs ? cp.handicap.clubs.map((c) => `${c.id}`) : [];
 
   const { error, data } = useQuery(STAT_FOR_PLAYER_FEED, {
     variables: {
