@@ -108,6 +108,8 @@ export const GET_GAME_QUERY = gql`
         name
         disp
         type
+        short_description
+        long_description
         better
         min_players
         max_players

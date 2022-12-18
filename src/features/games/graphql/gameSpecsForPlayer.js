@@ -9,6 +9,9 @@ export default gql`
         disp
         status
         type
+        short_description
+        long_description
+        better
         max_players
         min_players
         location_type

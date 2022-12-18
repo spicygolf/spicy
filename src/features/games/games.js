@@ -17,7 +17,7 @@ const Games = (props) => {
   const [isFetching, setIsFetching] = useState(false);
 
   const newGamePressed = () => {
-    navigation.navigate('NewGameList');
+    navigation.navigate('NewGameScreen');
   };
 
   const itemPressed = (item, setup) => {

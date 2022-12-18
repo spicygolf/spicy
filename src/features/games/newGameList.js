@@ -1,19 +1,17 @@
-import { useQuery } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
-import GameNav from 'features/games/gamenav';
-import { GAMESPECS_FOR_PLAYER_QUERY } from 'features/games/graphql';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { orderBy } from 'lodash';
+import { GameListContext } from 'features/games/gameListContext';
 import React, { useContext } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { ListItem } from 'react-native-elements';
 
 const NewGameList = (props) => {
-  let player_total = 0;
-
-  const { currentPlayerKey } = useContext(CurrentPlayerContext);
-
   const navigation = useNavigation();
+
+  const { gameList } = useContext(GameListContext);
+  if (!gameList) {
+    return null;
+  }
+  const { gamespecs, total } = gameList;
 
   const gamespecPressed = async (gamespec) => {
     navigation.navigate('NewGameInfo', {
@@ -22,11 +20,10 @@ const NewGameList = (props) => {
   };
 
   // `item` is a gamespec
-  const _renderItem = ({ item }) => {
+  const renderItem = ({ item }) => {
     const { gamespec, player_count } = item;
-    let pct =
-      player_total === 0 ? '' : Math.round((100 * player_count) / player_total) + '%';
-    let cnt = player_total === 0 ? '' : ' - ' + player_count;
+    let pct = total === 0 ? '' : Math.round((100 * player_count) / total) + '%';
+    let cnt = total === 0 ? '' : ' - ' + player_count;
     return (
       <ListItem onPress={() => gamespecPressed(gamespec)} testID={`new_${gamespec._key}`}>
         <ListItem.Content>
@@ -43,41 +40,11 @@ const NewGameList = (props) => {
     );
   };
 
-  const { data, loading, error } = useQuery(GAMESPECS_FOR_PLAYER_QUERY, {
-    variables: {
-      pkey: currentPlayerKey,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  if (loading) {
-    return <ActivityIndicator />;
-  }
-
-  // TODO: error component instead of below...
-  if (error && error.message !== 'Network request failed') {
-    console.log(error);
-    return <Text>Error: {error.message}</Text>;
-  }
-
-  //console.log('data', data);
-  if (data && data.gameSpecsForPlayer) {
-    data.gameSpecsForPlayer.map(({ player_count }) => {
-      player_total += player_count;
-    });
-    console.log('player total games', player_total);
-  }
-  const gameSpecsForPlayer =
-    data && data.gameSpecsForPlayer
-      ? orderBy(data.gameSpecsForPlayer, ['player_count'], ['desc'])
-      : [];
-
   return (
-    <View>
-      <GameNav title="New Game" showBack={true} />
+    <View style={styles.container}>
       <FlatList
-        data={gameSpecsForPlayer}
-        renderItem={_renderItem}
+        data={gamespecs}
+        renderItem={renderItem}
         keyExtractor={(item) => item.gamespec._key}
       />
     </View>
@@ -87,6 +54,10 @@ const NewGameList = (props) => {
 export default NewGameList;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
   title: {
     color: '#111',
   },

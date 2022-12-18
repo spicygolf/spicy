@@ -64,6 +64,7 @@
     "react-native-dropdownalert": "^4.0.1",
     "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "^1.5.6",
+    "react-native-markdown-display": "^7.0.0-alpha.2",
     "react-native-material-dropdown": "https://github.com/boorad/react-native-material-dropdown",
     "react-native-paper": "^3.6.0",
     "react-native-reanimated": "^1.7.0",
