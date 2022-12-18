@@ -195,6 +195,5 @@ const styles = StyleSheet.create({
   },
 });
 
-const mq = `
-
-`;
+// Use this to test markdown before adding to gamespecs collection in ArangoDB
+const mq = '';
