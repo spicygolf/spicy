@@ -8,7 +8,7 @@ import SelectDropdown from 'react-native-select-dropdown';
 const OptionMenu = (props) => {
   const { option, setOption, readonly, index = 0 } = props;
   const [value, setValue] = useState(option.values[index].value);
-  console.log('OptionMenu index', index);
+  // console.log('OptionMenu index', index);
 
   const getChoices = () => option.choices.map((c) => c.disp);
   const getDisplay = () => find(option.choices, { name: value }).disp;
@@ -44,7 +44,7 @@ const OptionMenu = (props) => {
       buttonTextAfterSelection={(selectedItem) => {
         // text represented after item is selected
         // if data array is an array of objects then return selectedItem.property to render after item is selected
-        console.log('buttonTextAfterSelection', selectedItem);
+        // console.log('buttonTextAfterSelection', selectedItem);
         return selectedItem;
       }}
       rowTextForSelection={(item) => {

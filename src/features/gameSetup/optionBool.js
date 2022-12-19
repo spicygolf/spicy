@@ -5,7 +5,7 @@ import { Switch } from 'react-native-elements';
 
 const OptionBool = (props) => {
   const { option, setOption, readonly, index = 0 } = props;
-  console.log('OptionBool index', index);
+  // console.log('OptionBool index', index);
 
   let ov = option.default;
   if (option && option.values && option.values[index]) {
