@@ -14,7 +14,11 @@ const Player = (props) => {
   //console.log('player', item);
 
   return (
-    <ListItem onPress={() => onPress(item)} testID={`add_player_favorites_${testID}`}>
+    <ListItem
+      containerStyle={styles.container}
+      onPress={() => onPress(item)}
+      testID={`add_player_favorites_${testID}`}
+    >
       <FavoriteIcon fave={item.fave} />
       <ListItem.Content>
         <ListItem.Title>{title}</ListItem.Title>
@@ -28,11 +32,17 @@ const Player = (props) => {
 export default Player;
 
 const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 4,
+    marginHorizontal: 0,
+    paddingHorizontal: 0,
+  },
   handicap: {
-    fontSize: 24,
+    fontSize: 20,
     paddingRight: 10,
   },
   subtitle: {
+    color: '#999',
     fontSize: 11,
   },
 });

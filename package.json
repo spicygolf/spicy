@@ -7,7 +7,7 @@
     "android": "react-native run-android",
     "android:bundle": "cd android && ./gradlew bundleRelease && open app/build/outputs/bundle/release/",
     "android:apk": "cd android && ./gradlew assembleRelease && mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/spicygolf-${npm_package_version}.apk ",
-    "ios": "react-native run-ios",
+    "ios": "react-native run-ios  --simulator=\"iPhone 14\"",
     "start": "react-native start",
     "test": "jest",
     "type-check": "tsc",
@@ -26,7 +26,7 @@
         "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/spicygolf.app",
         "build": "xcodebuild -workspace ios/spicygolf.xcworkspace -scheme spicygolf -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build -UseModernBuildSystem=NO",
         "type": "ios.simulator",
-        "name": "iPhone 11"
+        "name": "iPhone 14"
       }
     }
   },

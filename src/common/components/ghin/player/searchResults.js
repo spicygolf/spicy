@@ -1,19 +1,15 @@
-import { useLazyQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { GhinPlayerSearchContext } from 'common/components/ghin/player/searchContext';
 import { SEARCH_PLAYER_QUERY } from 'features/players/graphql';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import { ListItem } from 'react-native-elements';
 
 const GhinPlayerSearchResults = (props) => {
   const { state, setState } = useContext(GhinPlayerSearchContext);
-  //console.log('ghin player search results context', state);
-
   const [page, setPage] = useState(1);
   const [golfers, setGolfers] = useState([]);
   const perPage = 25;
-
-  // console.log(state, page, golfers);
 
   const handicap = (h) => (
     <View>
@@ -21,10 +17,12 @@ const GhinPlayerSearchResults = (props) => {
     </View>
   );
 
-  const keyExtractor = (g) => `${g.id}-${g.clubs[0]?.id}-${g.playerName}`;
+  const keyExtractor = (g) => `${g?.id}-${g?.clubs[0]?.id}-${g?.playerName}`;
 
   const renderGolfer = ({ item }) => {
-    // console.log('golfer', item);
+    if (!item) {
+      return null;
+    }
     const fn = item.firstName;
     const gn = item.id;
     const key = keyExtractor(item);
@@ -61,7 +59,7 @@ const GhinPlayerSearchResults = (props) => {
     );
   };
 
-  const [search, { loading, error, data }] = useLazyQuery(SEARCH_PLAYER_QUERY, {
+  const { loading, error, data } = useQuery(SEARCH_PLAYER_QUERY, {
     variables: {
       q: {
         source: 'ghin',
@@ -77,40 +75,19 @@ const GhinPlayerSearchResults = (props) => {
     },
   });
 
-  const fetchData = useCallback(
-    async () => {
-      search();
-      if (data?.searchPlayer) {
-        if (page === 1) {
-          setGolfers(data.searchPlayer);
-        } else {
-          setGolfers(golfers.concat(data.searchPlayer));
-        }
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, golfers, page],
-  );
-
+  // if state changes at all, reset everything
   useEffect(() => {
-    setGolfers([]);
     setPage(1);
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setGolfers([]);
   }, [state]);
 
+  // when new data arrives, add it to `golfers` array
   useEffect(() => {
-    if (page === 1) {
-      setGolfers([]);
-    }
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
-
-  let content = <View style={styles.results_list} />;
+    setGolfers((g) => g.concat(data?.searchPlayer));
+  }, [data]);
 
   if (loading) {
-    content = (
+    return (
       <View style={styles.results_list}>
         <ActivityIndicator />
       </View>
@@ -123,58 +100,54 @@ const GhinPlayerSearchResults = (props) => {
     return <Text>Error Searching Players: `{error.message}`</Text>;
   }
 
-  if (golfers) {
-    // console.log('golfers', data.searchPlayer);
+  // console.log(state, page, data?.searchPlayer, golfers.length);
 
-    content = (
-      <FlatList
-        data={golfers}
-        renderItem={renderGolfer}
-        keyExtractor={keyExtractor}
-        onEndReachedThreshold={0.8}
-        onEndReached={async () => {
-          // console.log('onEndReached');
-
-          // should only be in 'search' part where we want to peform
-          // infinite scroll pagination
-          if (state.lastName && state.handicap?.id) {
-            return;
-          }
-
-          setPage(page + 1);
-          fetchData();
-        }}
-        keyboardShouldPersistTaps="handled"
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.no_results}>No Results</Text>
-          </View>
+  return (
+    <FlatList
+      data={golfers}
+      renderItem={renderGolfer}
+      keyExtractor={keyExtractor}
+      onEndReachedThreshold={0.8}
+      onEndReached={async () => {
+        // should only be in 'search' part where we want to peform
+        // infinite scroll pagination
+        if (state.lastName && state.handicap?.id) {
+          return;
         }
-      />
-    );
-  }
 
-  return content;
+        // data is as long as perPage, so we're not at end yet
+        if (data.searchPlayer.length === perPage) {
+          setPage((p) => p + 1);
+        }
+      }}
+      keyboardShouldPersistTaps="handled"
+      ListEmptyComponent={
+        <View style={styles.emptyContainer}>
+          <Text style={styles.no_results}>No Results</Text>
+        </View>
+      }
+    />
+  );
 };
 
 export default GhinPlayerSearchResults;
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 5,
+    paddingVertical: 4,
     marginHorizontal: 0,
     paddingHorizontal: 0,
-    flex: 1,
   },
   emptyContainer: {
     flex: 1,
   },
   player_club: {
     color: '#999',
-    fontSize: 12,
+    fontSize: 11,
   },
   handicap: {
-    fontSize: 24,
+    fontSize: 20,
+    paddingRight: 10,
   },
   no_results: {
     color: '#999',

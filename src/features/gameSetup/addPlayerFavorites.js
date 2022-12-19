@@ -40,6 +40,7 @@ const AddPlayerFavorites = (props) => {
     variables: {
       pkey: currentPlayerKey,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   if (loading) {
@@ -56,10 +57,7 @@ const AddPlayerFavorites = (props) => {
     return <Text>Error Loading Favorite Players: `{error.message}`</Text>;
   }
 
-  //console.log('getFavoritePlayersForPlayer data', currentPlayerKey, data);
-
-  const players =
-    data && data.getFavoritePlayersForPlayer ? data.getFavoritePlayersForPlayer : [];
+  const players = data?.getFavoritePlayersForPlayer || [];
   const newPlayers = players.map((p) => ({
     ...p,
     fave: {
@@ -99,6 +97,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContainer: {
-    margin: 0,
+    paddingHorizontal: 15,
   },
 });
