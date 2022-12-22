@@ -26,6 +26,7 @@ export const GAME_UPDATED_SUBSCRIPTION = gql`
           name
           team
           first_hole
+          value
         }
       }
       options {

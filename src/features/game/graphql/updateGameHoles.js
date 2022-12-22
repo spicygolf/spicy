@@ -19,6 +19,7 @@ export const UPDATE_GAME_HOLES_MUTATION = gql`
           name
           team
           first_hole
+          value
         }
       }
     }

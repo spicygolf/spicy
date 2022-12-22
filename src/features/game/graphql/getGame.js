@@ -27,6 +27,7 @@ export const GET_GAME_QUERY = gql`
           name
           team
           first_hole
+          value
         }
       }
       rounds {
@@ -155,6 +156,8 @@ export const GET_GAME_QUERY = gql`
           logic
           better
           after
+          input_value
+          override
           values {
             value
             holes

@@ -48,6 +48,8 @@ export const GET_GAMESPEC_QUERY = gql`
         logic
         better
         after
+        input_value
+        override
         values {
           value
           holes

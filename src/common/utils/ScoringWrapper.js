@@ -1,4 +1,4 @@
-import { getGamespecKVs } from 'common/utils/game';
+import { getGamespecKVs, getPreMultiplierTotal } from 'common/utils/game';
 import { get_score_value } from 'common/utils/rounds';
 import jsonLogic from 'json-logic-js';
 import { concat, filter, find, orderBy } from 'lodash';
@@ -214,6 +214,12 @@ class ScoringWrapper {
     return true;
   };
 
+  existingPreMultiplierTotal = (hole, threshold) => {
+    const tot = getPreMultiplierTotal(hole);
+    // console.log('tot', tot);
+    return tot >= threshold;
+  };
+
   _teamRanks = (hole, dir) => {
     const teamScores = hole.teams.map((t) => ({
       team: t.team,
@@ -245,7 +251,7 @@ class ScoringWrapper {
     return ranked;
   };
 
-  // custom logic mapping
+  // custom logic mapping... love that mixed case hotness
   customs = {
     team_down_the_most: this.isTeamDownTheMost,
     team_second_to_last: this.isTeamSecondToLast,
@@ -259,6 +265,7 @@ class ScoringWrapper {
     holePar: this.holePar,
     playersOnTeam: this.playersOnTeam,
     isWolfPlayer: this.isWolfPlayer,
+    existingPreMultiplierTotal: this.existingPreMultiplierTotal,
   };
 }
 

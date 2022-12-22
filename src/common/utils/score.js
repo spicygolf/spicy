@@ -15,7 +15,7 @@ import {
   get_score_value,
 } from 'common/utils/rounds';
 import ScoringWrapper from 'common/utils/ScoringWrapper';
-import { cloneDeep, concat, filter, find, findIndex, max, orderBy, reduce } from 'lodash';
+import { cloneDeep, concat, filter, find, findIndex, max, orderBy } from 'lodash';
 import moment from 'moment';
 
 export const getScoringFromGamespecs = (game) => {
@@ -60,7 +60,7 @@ export const scoring = (game) => {
       return;
     }
     const round = get_round_for_player(game.rounds, p._key);
-    const ch = round && round.course_handicap ? parseFloat(round.course_handicap) : 0;
+    const ch = round?.course_handicap ? parseFloat(round.course_handicap) : 0;
     return {
       pkey: p._key,
       name: p.name,
@@ -217,16 +217,26 @@ export const scoring = (game) => {
       }
     });
 
-    // hole totals
-    const holeMultiplier = reduce(
-      multipliers,
-      (tot, m) => {
-        const mv = getOptionValue({ option: m, hole });
-        return tot * mv.value;
-      },
-      1,
-    );
+    // multipliers
+    let holeMultiplier = 1;
+    for (let i = 0; i < multipliers.length; i++) {
+      const m = multipliers[i];
+      const mv = getOptionValue({ option: m, hole });
+      if (m.name === 'custom' && !mv?.value) {
+        const gMult = find(gHole?.multipliers, { name: 'custom' });
+        mv.value = gMult?.value;
+        console.log('custom value', mv);
+      }
+      if (m?.override === true) {
+        // this multiplier overrides all others, so only use its value and exit loop
+        holeMultiplier = mv.value;
+        break;
+      }
+      holeMultiplier *= mv.value;
+    }
     // console.log('holeMultiplier', hole, holeMultiplier);
+
+    // hole totals
     teams.map((t) => {
       const holeTotal = t.points * holeMultiplier;
       t.holeTotal = holeTotal;
@@ -720,8 +730,14 @@ export const isScoreToParJunk = (junk, s, par) => {
 };
 
 export const format = ({ v, type, showDown = true }) => {
+  // round v to two decimals if v is not an integer
+  if (v && v !== 0.0 && !Number.isInteger(v)) {
+    v = Math.round((v + Number.EPSILON) * 100) / 100;
+  }
+
+  // logic
   if (type === 'points' && parseFloat(v) === 0) {
-    return '';
+    return v;
   }
   if (type === 'points' && parseFloat(v) > 0) {
     return `+${v}`;

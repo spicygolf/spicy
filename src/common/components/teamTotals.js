@@ -36,11 +36,7 @@ const TeamTotals = (props) => {
   if (betterPoints === 'lower') {
     diff *= -1;
   }
-  const points = netPoints === 0 ? '-' : netPoints;
-  const multiplier =
-    hole.holeMultiplier === 1 || netPoints === 0
-      ? ''
-      : `x ${hole.holeMultiplier} = ${netTotal}`;
+  const multiplier = `x ${hole.holeMultiplier} = ${format({ v: netTotal, type })}`;
 
   let totalTxt = format({ v: diff, type });
   if (totalTxt === '' && type === 'points') {
@@ -61,10 +57,13 @@ const TeamTotals = (props) => {
     total = '';
   }
 
+  const multTxt = `${hole.holeMultiplier}x`;
+  const holeTxt =
+    netPoints !== 0 || otherTeam.points !== 0 ? `${netPoints} ${multiplier}` : multTxt;
   return (
     <View style={styles.totalsView}>
       <View>
-        <Text style={styles.totalsText}>Hole: {`${points} ${multiplier}`}</Text>
+        <Text style={styles.totalsText}>Hole: {holeTxt}</Text>
       </View>
       <View>
         <Text style={styles.totalsText}>{total}</Text>

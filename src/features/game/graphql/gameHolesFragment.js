@@ -19,6 +19,7 @@ export const GAME_HOLES_FRAGMENT = gql`
         name
         team
         first_hole
+        value
       }
     }
   }

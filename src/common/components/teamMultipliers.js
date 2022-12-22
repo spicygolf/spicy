@@ -10,27 +10,46 @@ import ScoringWrapper from 'common/utils/ScoringWrapper';
 import { GameContext } from 'features/game/gameContext';
 import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
 import { cloneDeep, filter, find, findIndex, orderBy } from 'lodash';
-import React, { useContext } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
-import { Button, Icon } from 'react-native-elements';
+import React, { useContext, useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Button, Icon, Input, Overlay } from 'react-native-elements';
 
 const TeamMultipliers = (props) => {
-  const [updateGameHoles] = useMutation(UPDATE_GAME_HOLES_MUTATION);
-
   const { team: teamNum, scoring, currentHole } = props;
+  const teamName = teamNum.toString();
+  const [updateGameHoles] = useMutation(UPDATE_GAME_HOLES_MUTATION);
+  const [activeOverlay, setActiveOverlay] = useState();
   const { game, readonly } = useContext(GameContext);
   const allmultipliers = getAllOptions({ game, type: 'multiplier' });
 
   const scoringWrapper = new ScoringWrapper(game, scoring, currentHole);
 
   const { _key: gkey } = game;
-  const h =
-    game && game.holes
-      ? find(game.holes, { hole: currentHole })
-      : { hole: currentHole, teams: [] };
-  //console.log('h', h);
+  const h = game?.holes
+    ? find(game.holes, { hole: currentHole })
+    : { hole: currentHole, teams: [] };
 
-  const setMultiplier = async (mult, newValue) => {
+  const toggleOverlay = (multName) => {
+    const key = `${teamName}|${multName}`;
+    if (activeOverlay === key) {
+      setActiveOverlay();
+    } else {
+      setActiveOverlay(key);
+    }
+  };
+
+  const maybeSetMultiplier = (mult, newValue) => {
+    if (mult.input_value === true && newValue === true) {
+      // this is a multiplier that needs its input value set and it's going to "selected"
+      // so show the overlay
+      const key = `${teamName}|${mult.name}`;
+      setActiveOverlay(key);
+    } else {
+      setMultiplier(mult, newValue);
+    }
+  };
+
+  const setMultiplier = async (mult, newValue, customValue) => {
     if (readonly) {
       return;
     } // viewing game only, so do nothing
@@ -62,21 +81,18 @@ const TeamMultipliers = (props) => {
         newHoles[holeIndex].multipliers = [];
       }
       const mults = newHoles[holeIndex].multipliers;
-      if (
-        newValue &&
-        !find(mults, {
-          __typename: 'Multiplier',
-          name: mult.name,
-          team: teamNum,
-          first_hole: currentHole,
-        })
-      ) {
-        mults.push({
-          __typename: 'Multiplier',
-          name: mult.name,
-          team: teamNum,
-          first_hole: currentHole,
-        });
+      let newMult = {
+        __typename: 'Multiplier',
+        name: mult.name,
+        team: teamNum,
+        first_hole: currentHole,
+        value: null,
+      };
+      if (newValue && !find(mults, newMult)) {
+        if (mult.input_value === true && customValue) {
+          newMult.value = parseFloat(customValue);
+        }
+        mults.push(newMult);
       }
       if (!newValue && find(mults, { name: mult.name })) {
         const newMults = filter(
@@ -84,7 +100,7 @@ const TeamMultipliers = (props) => {
           (m) =>
             !(m.name === mult.name && m.team === teamNum && m.first_hole === currentHole),
         );
-        //console.log('newMults', newMults);
+        // console.log('newMults', newMults);
         newHoles[holeIndex].multipliers = newMults;
       }
     });
@@ -110,8 +126,96 @@ const TeamMultipliers = (props) => {
     }
   };
 
+  const CustomValueOverlay = ({ mult, selected }) => {
+    const [customValue, setCustomValue] = useState();
+    const [valid, setValid] = useState(true);
+    const multName = mult.name;
+    const key = `${teamName}|${multName}`;
+
+    const validate = (n) => {
+      try {
+        if (!isNaN(parseFloat(n)) && isFinite(n)) {
+          setValid(true);
+        } else {
+          setValid(false);
+        }
+      } catch (error) {
+        setValid(false);
+      }
+    };
+
+    let overrideTxt = null;
+    if (mult.override === true) {
+      overrideTxt = (
+        <Text style={styles.overrideTxt}>
+          Overrides all other multipliers. In effect this hole only.
+        </Text>
+      );
+    }
+
+    return (
+      <Overlay
+        isVisible={activeOverlay === key}
+        onBackdropPress={() => toggleOverlay(multName)}
+      >
+        <View style={styles.field}>
+          <Input
+            label="Enter Custom Multiplier"
+            labelStyle={styles.label}
+            containerStyle={[styles.field_input, styles.last_name]}
+            inputStyle={styles.field_input_txt}
+            onChangeText={(text) => {
+              setCustomValue((_) => text);
+              validate(text);
+            }}
+            keyboardType="decimal-pad"
+            value={customValue}
+            errorMessage={valid ? '' : 'Please enter a valid number'}
+          />
+        </View>
+
+        <View style={styles.button_row}>
+          <Button
+            title="Cancel"
+            type="outline"
+            onPress={() => toggleOverlay(multName)}
+            buttonStyle={styles.no_button}
+            containerStyle={styles.no_button_container}
+          />
+          <Button
+            title="Set"
+            disabled={!valid}
+            buttonStyle={styles.yes_button}
+            containerStyle={styles.yes_button_container}
+            onPress={() => {
+              setMultiplier(mult, !selected, customValue);
+              toggleOverlay(multName);
+            }}
+            testID="multiplier_custom_value_overlay_yes"
+          />
+        </View>
+        {overrideTxt}
+      </Overlay>
+    );
+  };
+
+  const selectedOverrideMults = () => {
+    const overrideMults = filter(h?.multipliers, (m) => {
+      const optionSpec = find(allmultipliers, { name: m.name });
+      return optionSpec.override === true;
+    });
+    return overrideMults;
+  };
+
   const renderMultiplier = (mult) => {
-    //console.log('renderMultiplier', mult);
+    // // if we have any override mults, don't show this multiplier unless it's an override
+    const overrideMults = selectedOverrideMults();
+    if (overrideMults.length > 0) {
+      const overrideMult = overrideMults[0];
+      if (mult.name !== overrideMult.name) {
+        return null;
+      }
+    }
 
     // TODO: mult.name needs l10n, i18n - use mult.name as slug
     let type = 'outline';
@@ -121,8 +225,7 @@ const TeamMultipliers = (props) => {
     let selected = false;
     let disabled = false;
     if (
-      (h &&
-        h.multipliers &&
+      (h?.multipliers &&
         find(h.multipliers, {
           name: mult.name,
           team: teamNum,
@@ -140,17 +243,31 @@ const TeamMultipliers = (props) => {
       }
     }
 
+    let overlay = null;
+    let title = mult.disp;
+    if (mult.input_value === true) {
+      overlay = (
+        <CustomValueOverlay teamName={teamName} mult={mult} selected={selected} />
+      );
+      if (selected === true && mult.value) {
+        title = `${mult.value}x`;
+      }
+    }
+
     return (
-      <Button
-        title={mult.disp}
-        icon={<Icon style={styles.icon} name={mult.icon} size={20} color={color} />}
-        type={type}
-        buttonStyle={[styles.button, { backgroundColor: bgColor }]}
-        titleStyle={[styles.buttonTitle, { color: color }]}
-        disabled={disabled}
-        onPress={() => setMultiplier(mult, !selected)}
-        onLongPress={() => setMultiplier(mult, !selected)}
-      />
+      <View>
+        <Button
+          title={title}
+          icon={<Icon style={styles.icon} name={mult.icon} size={20} color={color} />}
+          type={type}
+          buttonStyle={[styles.button, { backgroundColor: bgColor }]}
+          titleStyle={[styles.buttonTitle, { color: color }]}
+          disabled={disabled}
+          onPress={() => maybeSetMultiplier(mult, !selected)}
+          onLongPress={() => maybeSetMultiplier(mult, !selected)}
+        />
+        {overlay}
+      </View>
     );
   };
 
@@ -207,6 +324,10 @@ const TeamMultipliers = (props) => {
 
     try {
       if (scoringWrapper.logic(gsMult.availability, { team: team })) {
+        if (gsMult.name === 'custom') {
+          const gMult = find(h.multipliers, { name: 'custom' });
+          gsMult.value = gMult?.value;
+        }
         team_mults.push(gsMult);
       }
     } catch (e) {
@@ -254,5 +375,38 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
     paddingRight: 10,
     fontSize: 13,
+  },
+  field: {
+    minWidth: '70%',
+  },
+  label: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: 'normal',
+  },
+  field_input: {
+    color: '#000',
+    marginHorizontal: 0,
+    paddingHorizontal: 0,
+  },
+  field_input_txt: {
+    fontSize: 16,
+  },
+  button_row: {
+    flexDirection: 'row',
+  },
+  no_button_container: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  yes_button_container: {
+    flex: 1,
+    paddingLeft: 10,
+  },
+  overrideTxt: {
+    fontSize: 9,
+    color: '#999',
+    paddingTop: 10,
+    textAlign: 'center',
   },
 });

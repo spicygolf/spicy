@@ -622,3 +622,14 @@ export const getWolfPlayerIndex = ({ game, currentHole }) => {
 export const isBinary = (option) =>
   option.sub_type === 'bool' ||
   (option.sub_type === 'menu' && option.choices.length === 2);
+
+// return
+export const getPreMultiplierTotal = (hole) => {
+  let tot = 1;
+  hole.multipliers.map((m) => {
+    if (m.name.startsWith('pre_')) {
+      tot *= parseInt(m.default, 10);
+    }
+  });
+  return tot;
+};
