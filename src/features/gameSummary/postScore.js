@@ -77,6 +77,7 @@ const PostScore = (props) => {
         ret = (
           <Button
             title="Post Round"
+            disabled="true"
             buttonStyle={styles.buttonStyle}
             titleStyle={styles.buttonTitle}
             onPress={() => postRound(round._key)}
