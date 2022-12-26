@@ -6,14 +6,14 @@ import { get_round_for_player } from 'common/utils/rounds';
 import { GameContext } from 'features/game/gameContext';
 import { GET_GAME_QUERY } from 'features/game/graphql';
 import GameNav from 'features/games/gamenav';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import HandicapInput from 'features/gameSetup/handicapInput';
+import React, { useContext } from 'react';
 import {
   Dimensions,
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { Card } from 'react-native-elements';
@@ -30,69 +30,68 @@ const EditPlayer = (props) => {
   const round = get_round_for_player(game.rounds, pkey);
   //console.log('EditPlayer round', round);
 
-  const initHI = round && round.handicap_index ? round.handicap_index.toString() : '';
-  const [HI, setHI] = useState(initHI);
-  const initCH = round.course_handicap ? round.course_handicap.toString() : '';
-  const [CH, setCH] = useState(initCH);
-  const initGH = round && round.game_handicap ? round.game_handicap.toString() : '';
-  const [GH, setGH] = useState(initGH);
+  const initHI = round?.handicap_index ? round.handicap_index.toString() : '';
+  const initCH = round?.course_handicap ? round.course_handicap.toString() : '';
+  const initGH = round?.game_handicap ? round.game_handicap.toString() : '';
 
   const [updateLink] = useMutation(UPDATE_LINK_MUTATION);
 
-  const update = useCallback(() => {
-    //console.log('update', HI, initHI, CH, initCH, GH, initGH);
-    let doUpdate = false;
-    const other = [];
-
-    // all the checks for '' is so if you clear the text box out, it'll remove
-    // the data from the edge
-    if ((HI || HI === '') && HI !== initHI && (!isNaN(HI) || HI === '')) {
-      other.push({ key: 'handicap_index', value: HI.toString() });
-      doUpdate = true;
+  // we store plus handicaps as negatives
+  const storageValue = (v) => {
+    // handle case when v is null, or only '+' or '.'
+    if (!v || v === '+' || v === '.') {
+      return '';
     }
-
-    if ((CH || CH === '') && CH !== initCH && (!isNaN(CH) || CH === '')) {
-      other.push({ key: 'course_handicap', value: CH.toString() });
-      doUpdate = true;
+    try {
+      v = v.toString().replace('+', '-');
+    } catch (e) {
+      console.error(e);
     }
+    return v;
+  };
 
-    if ((GH || GH === '') && GH !== initGH && (!isNaN(GH) || GH === '')) {
-      other.push({ key: 'game_handicap', value: GH.toString() });
-      doUpdate = true;
-    }
+  const updateHI = (v) => {
+    const ch = course_handicap(v, round.tee, game.scope.holes);
+    const other = [
+      { key: 'handicap_index', value: storageValue(v) },
+      { key: 'course_handicap', value: storageValue(ch) },
+      { key: 'game_handicap', value: storageValue(initGH) },
+    ];
+    update(other);
+  };
 
-    if (doUpdate) {
-      //console.log('doUpdate other', other);
-      // update 'round2game' edge with these two handicaps on them
+  const updateGH = (v) => {
+    const other = [
+      { key: 'handicap_index', value: storageValue(initHI) },
+      { key: 'course_handicap', value: storageValue(initCH) },
+      { key: 'game_handicap', value: storageValue(v) },
+    ];
+    update(other);
+  };
 
-      const { error } = updateLink({
-        variables: {
-          from: { type: 'round', value: round._key },
-          to: { type: 'game', value: game._key },
-          other: other,
-        },
-        refetchQueries: () => [
-          {
-            query: GET_GAME_QUERY,
-            variables: {
-              gkey: game._key,
-            },
+  const update = (other) => {
+    // console.log('update other', other);
+    // update 'round2game' edge with these two handicaps on them
+    const { error } = updateLink({
+      variables: {
+        from: { type: 'round', value: round._key },
+        to: { type: 'game', value: game._key },
+        other: other,
+      },
+      refetchQueries: () => [
+        {
+          query: GET_GAME_QUERY,
+          variables: {
+            gkey: game._key,
           },
-        ],
-        awaitRefetchQueries: true,
-      });
-      if (error) {
-        console.log('error updating round2game', error);
-      }
+        },
+      ],
+      awaitRefetchQueries: true,
+    });
+    if (error) {
+      console.log('error updating round2game', error);
     }
-  }, [CH, GH, HI, game._key, initCH, initGH, initHI, round._key, updateLink]);
-
-  useEffect(() => {
-    if (initCH === '-') {
-      setCH(course_handicap(HI, round.tee, game.scope.holes));
-      update();
-    }
-  }, [CH, HI, game.scope.holes, initCH, round.tee, update]);
+  };
 
   return (
     <View>
@@ -102,54 +101,26 @@ const EditPlayer = (props) => {
           <Card>
             <Card.Title>Handicap</Card.Title>
             <Card.Divider />
-            <View style={styles.field_container}>
-              <Text style={styles.field_label}>Handicap Index</Text>
-              <View style={styles.field_input_view}>
-                <TextInput
-                  style={styles.field_input}
-                  onChangeText={(text) => {
-                    const newText = text.replace(/[^0-9+.-]/g, '');
-                    setHI(newText);
-                    const newCH =
-                      course_handicap(newText, round.tee, game.scope.holes) || '';
-                    //console.log('newCH', newCH, round, game.scope.holes);
-                    setCH(newCH);
-                  }}
-                  onEndEditing={() => update()}
-                  keyboardType="decimal-pad"
-                  value={HI.toString()}
-                />
-              </View>
-            </View>
-            <View style={styles.field_container}>
-              <Text style={styles.field_label}>Course Handicap</Text>
-              <View style={styles.field_display_view}>
-                <Text style={styles.field_display}>
-                  {CH != null ? CH.toString() : '-'}
-                </Text>
-              </View>
-            </View>
+            <HandicapInput
+              label="Handicap Index"
+              init={initHI}
+              update={updateHI}
+              showCourse="true"
+              tee={round.tee}
+              holes={game.scope.holes}
+            />
             <View style={styles.divider}>
               <View style={styles.hrLine} />
               <Text style={styles.dividerText}>OR</Text>
               <View style={styles.hrLine} />
             </View>
-            <View style={styles.field_container}>
-              <Text style={styles.field_label}>Game Handicap</Text>
-              <View style={styles.field_input_view}>
-                <TextInput
-                  style={styles.field_input}
-                  onChangeText={(text) => {
-                    const newText = text.replace(/[^0-9+.-]/g, '');
-                    setGH(newText);
-                  }}
-                  onEndEditing={() => update()}
-                  keyboardType="decimal-pad"
-                  value={GH.toString()}
-                />
-              </View>
-            </View>
-            <Text style={styles.explanation}>
+            <HandicapInput
+              label="Game Handicap"
+              init={initGH}
+              update={updateGH}
+              showCourse="false"
+            />
+            <Text style={styles.label}>
               Full course handicap that overrides numbers above
             </Text>
           </Card>
@@ -169,40 +140,10 @@ const styles = StyleSheet.create({
   scrollview_container: {
     height: '100%',
   },
-  field_container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  field_label: {
-    fontWeight: 'bold',
-    margin: 5,
-    flex: 1,
-  },
-  field_input_view: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  field_input: {
-    height: 40,
-    width: 75,
-    color: '#000',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingLeft: 10,
-    paddingRight: 10,
-  },
-  field_display_view: {
-    flex: 1,
-    justifyContent: 'center',
-    margin: 10,
-  },
-  field_display: {
-    fontSize: 18,
-    justifyContent: 'center',
-    padding: 5,
-  },
-  explanation: {
-    padding: 5,
+  label: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: 'normal',
   },
   divider: {
     flexDirection: 'row',

@@ -32,9 +32,9 @@ class ScoringWrapper {
       scoring: this,
     };
     const ret = jsonLogic.apply(parsed, data);
-    //console.log('logic expression', parsed);
-    //console.log('logic data', data);
-    //console.log('logic value', ret);
+    // console.log('logic expression', parsed);
+    // console.log('logic data', data);
+    // console.log('logic value', ret, extra_vars?.team?.team);
     return ret;
   };
 

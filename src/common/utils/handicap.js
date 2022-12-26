@@ -11,7 +11,7 @@ export const course_handicap = (strIndex, tee, holes) => {
   if (Number.isNaN(index)) {
     return null;
   }
-  if (strIndex.charAt(0) === '+') {
+  if (strIndex.toString().charAt(0) === '+') {
     index *= -1;
   }
 
@@ -39,6 +39,17 @@ export const course_handicap = (strIndex, tee, holes) => {
   const { rating, slope } = getRatings(holes, tee);
   //console.log(index, slope, rating, par);
   return Math.round(index * (slope / 113) + (rating - par));
+};
+
+export const formatCourseHandicap = (CH) => {
+  if (!CH) {
+    return '';
+  }
+  CH = CH.toString().replace('-', '+');
+  if (CH === '-') {
+    return '';
+  }
+  return CH.toString();
 };
 
 const get_par = (min, max) => {

@@ -1,3 +1,4 @@
+import { formatCourseHandicap } from 'common/utils/handicap';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -17,12 +18,16 @@ const HandicapBadge = (props) => {
     <View style={styles.row}>
       <View style={styles.hdcp}>
         <Text style={styles.txt}>HI</Text>
-        <Text style={styles.txt}>{handicap_index != null ? handicap_index : '-'}</Text>
+        <Text style={styles.txt}>
+          {handicap_index != null ? formatCourseHandicap(handicap_index) : '-'}
+        </Text>
       </View>
       <View style={styles.hdcp}>
         <Text style={styles.txt}>{course_game}</Text>
         <Text style={styles.txt}>
-          {course_game_handicap != null ? course_game_handicap : '-'}
+          {course_game_handicap != null
+            ? formatCourseHandicap(course_game_handicap)
+            : '-'}
         </Text>
       </View>
     </View>
