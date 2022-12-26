@@ -58,12 +58,18 @@ const TeamTotals = (props) => {
   }
 
   const multTxt = `${hole.holeMultiplier}x`;
-  const holeTxt =
-    netPoints !== 0 || otherTeam.points !== 0 ? `${netPoints} ${multiplier}` : multTxt;
+
+  let holeTxt =
+    netPoints !== 0 || otherTeam?.points !== 0 ? `${netPoints} ${multiplier}` : multTxt;
+  holeTxt = 'Hole: ' + holeTxt;
+  if (type === 'match') {
+    holeTxt = '';
+  }
+
   return (
     <View style={styles.totalsView}>
       <View>
-        <Text style={styles.totalsText}>Hole: {holeTxt}</Text>
+        <Text style={styles.totalsText}>{holeTxt}</Text>
       </View>
       <View>
         <Text style={styles.totalsText}>{total}</Text>

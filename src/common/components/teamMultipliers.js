@@ -208,7 +208,8 @@ const TeamMultipliers = (props) => {
   };
 
   const renderMultiplier = (mult) => {
-    // // if we have any override mults, don't show this multiplier unless it's an override
+    // if we have any selected override mults, don't show this multiplier unless
+    // it is the selected override
     const overrideMults = selectedOverrideMults();
     if (overrideMults.length > 0) {
       const overrideMult = overrideMults[0];
@@ -334,7 +335,7 @@ const TeamMultipliers = (props) => {
       console.log('logic error', e);
     }
   });
-  //console.log('team mults', teamNum, team_mults);
+  // console.log('team mults', teamNum, team_mults);
   const sorted_mults = orderBy(team_mults, ['seq'], ['asc']);
   //console.log('sorted_mults', sorted_mults);
   if (sorted_mults.length === 0) {
