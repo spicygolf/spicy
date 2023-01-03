@@ -1,0 +1,19 @@
+{
+  "_key": "birdie_em_all",
+  "name": "Birdie-em-all",
+  "type": "points",
+  "max_players": -1,
+  "min_players": 2,
+  "location_type": "local",
+  "scoring": {
+    "hole": [
+      {
+        "name": "birdie",
+        "disp": "Birdie",
+        "source": "birdie"
+      }
+    ]
+  },
+  "options": [],
+  "todos": []
+}

@@ -1,0 +1,49 @@
+{
+  "name": "sg_api",
+  "version": "0.3.0",
+  "description": "Spicy Golf API",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.6.7",
+    "@hapi/hapi": "^20.2.1",
+    "apollo-link-context": "^1.0.8",
+    "apollo-server-cloud-functions": "^2.14.2",
+    "apollo-server-hapi": "^2.13.0",
+    "arangojs": "^7.5.0",
+    "arg": "^4.1.3",
+    "async-sema": "^2.1.4",
+    "axios": "^0.26.0",
+    "cheerio": "^1.0.0-rc.9",
+    "custom-env": "^2.0.1",
+    "date-fns": "^2.16.1",
+    "date-fns-tz": "^1.0.12",
+    "esm": "^3.2.25",
+    "fetch-retry": "^5.0.1",
+    "graphql": "^15.0.0",
+    "graphql-subscriptions": "^2.0.0",
+    "graphql-tag": "^2.10.3",
+    "graphql-tools": "^5.0.0",
+    "hapi-auth-jwt2": "^10.2.0",
+    "hashmap": "^2.4.0",
+    "jsonwebtoken": "^8.3.0",
+    "lodash-es": "^4.17.21",
+    "node-fetch": "^2.6.7",
+    "readline": "^1.3.0",
+    "xml-to-json-promise": "^0.0.3"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1"
+  },
+  "scripts": {
+    "start:dev": "pm2 start ecosystem.config.yaml",
+    "start:prod": "pm2 start ecosystem.config.yaml --env production",
+    "stop:dev": "pm2 stop ecosystem.config.yaml",
+    "stop:prod": "pm2 stop ecosystem.config.yaml --env production",
+    "logs": "pm2 logs",
+    "test": "jest",
+    "cover": "jest --coverage"
+  },
+  "author": "Brad Anderson <brad@druid.golf>",
+  "license": "ISC"
+}

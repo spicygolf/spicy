@@ -1,0 +1,226 @@
+{
+  "name": "five_points",
+  "disp": "Five Points",
+  "version": 1,
+  "status": "prod",
+  "type": "points",
+  "max_players": 4,
+  "min_players": 4,
+  "location_type": "local",
+  "teams": true,
+  "team_size": 2,
+  "team_determination": "beginning",
+  "team_change_every": 0,
+  "scoring": {
+    "hole" : [],
+    "front": [],
+    "back" : [],
+    "total": []
+  },
+  "junk": [
+    {
+      "name": "low_ball",
+      "disp": "Low Ball",
+      "seq": 1,
+      "type": "dot",
+      "value": 2,
+      "limit": "one_team_per_group",
+      "scope": "team",
+      "icon": "album",
+      "show_in": "team",
+      "based_on": "net",
+      "calculation": "best_ball",
+      "better": "lower"
+    },
+    {
+      "name": "low_total",
+      "disp": "Low Total",
+      "seq": 2,
+      "type": "dot",
+      "value": 2,
+      "limit": "one_team_per_group",
+      "scope": "team",
+      "icon": "album",
+      "show_in": "team",
+      "based_on": "net",
+      "calculation": "sum",
+      "better": "lower"
+    },
+    {
+      "name": "prox",
+      "disp": "Prox",
+      "seq": 3,
+      "type": "dot",
+      "value": 1,
+      "limit": "one_per_group",
+      "scope": "player",
+      "icon": "album",
+      "show_in": "faves",
+      "based_on": "user"
+    },
+    {
+      "name": "birdie",
+      "disp": "Birdie",
+      "seq": 4,
+      "type": "dot",
+      "value": 1,
+      "limit": "",
+      "scope": "player",
+      "icon": "album",
+      "show_in": "score",
+      "score_to_par": "exactly -1",
+      "based_on": "gross"
+    },
+    {
+      "name": "eagle",
+      "disp": "Eagle",
+      "seq": 5,
+      "type": "dot",
+      "value": 2,
+      "limit": "",
+      "scope": "player",
+      "icon": "album",
+      "show_in": "score",
+      "score_to_par": "exactly -2",
+      "based_on": "gross"
+    }
+  ],
+  "multipliers": [
+    {
+      "name": "pre_double",
+      "disp": "Pre 2x",
+      "seq": 1,
+      "value": 2,
+      "icon": "album",
+      "based_on": "user",
+      "scope": "rest_of_nine",
+      "availability": "{
+        'team_down_the_most': [
+          {'getPrevHole': []},
+          {'var': 'team'}
+        ]
+      }"
+    },
+    {
+      "name": "double",
+      "disp": "2x",
+      "seq": 2,
+      "value": 2,
+      "icon": "album",
+      "based_on": "user",
+      "scope": "hole",
+      "availability": "{
+        'team_down_the_most': [
+          {'getPrevHole': []},
+          {'var': 'team'}
+        ]
+      }"
+    },
+    {
+      "name": "double_back",
+      "disp": "2x back",
+      "seq": 3,
+      "value": 2,
+      "icon": "album",
+      "based_on": "user",
+      "scope": "hole",
+      "availability": "{
+        'and': [
+          {'team_second_to_last': [
+            {'getPrevHole': []},
+            {'var': 'team'}
+          ]},
+          {'other_team_multiplied_with': [
+            {'getCurrHole': []},
+            {'var': 'team'},
+            'double'
+          ]}
+        ]
+      }"
+    },
+    {
+      "name": "birdie_bbq",
+      "disp": "Birdie BBQ",
+      "seq": 4,
+      "value": 2,
+      "icon": "album",
+      "based_on": "birdie",
+      "scope": "hole",
+      "availability": "{ '===': [ {'var': 'team.points'}, {'var': 'possiblePoints'} ] }"
+    },
+    {
+      "name": "eagle_bbq",
+      "disp": "Eagle BBQ",
+      "seq": 5,
+      "value": 4,
+      "icon": "album",
+      "based_on": "eagle",
+      "scope": "hole",
+      "availability": "{ '===': [ {'var': 'team.points'}, {'var': 'possiblePoints'} ] }"
+    }
+  ],
+  "options": [
+    {
+      "name": "stakes",
+      "disp": "Stakes per point",
+      "type": "num",
+      "default": 1
+    },
+    {
+      "name": "use_handicaps",
+      "disp": "Use handicaps",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "handicap_index_from",
+      "disp": "Index off of the low handicap or use full handicaps",
+      "type": "menu",
+      "choices": [
+        {"name":"low", "disp": "Low"},
+        {"name":"full", "disp": "Full"}
+      ],
+      "default": "low"
+    },
+    {
+      "name": "pre_double_rest_of_nine",
+      "disp": "Pre-double is for rest of nine",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "max_off_tee",
+      "disp": "Maximum multiplier off tee.",
+      "type": "num",
+      "default": 8
+    },
+    {
+      "name": "two_birdies_4x",
+      "disp": "Two birdies on one team = 4x",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "eagles_4x",
+      "disp": "Eagle = 4x",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "discount_threshold",
+      "disp": "Discount on Losses - Threshold",
+      "type": "num",
+      "default": 100
+    },
+    {
+      "name": "discount_percent",
+      "disp": "Discount on Losses - Percentage",
+      "type": "pct",
+      "default": 50
+    }
+  ],
+  "default_options": [],
+  "todos": [
+    "remove disp attributes, feed off of name slug for i18n, l10n"
+  ]
+}

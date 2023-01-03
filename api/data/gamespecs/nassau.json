@@ -1,0 +1,68 @@
+{
+  "_key": "nassau",
+  "name": "Nassau",
+  "type": "skins",
+  "location_type": "multiple",
+  "scoring": {
+    "hole": [
+      {
+        "name": "score",
+        "disp": "score",
+        "points": 1,
+        "source": "scores",
+        "type": "skin",
+        "scope": "player"
+      }
+    ],
+    "front": [
+      {
+        "name": "total",
+        "disp": "Total",
+        "type": "sum",
+        "source": "score",
+        "units_won": 1
+      }
+    ],
+    "back" : [
+      {
+        "name": "total",
+        "disp": "Total",
+        "type": "sum",
+        "source": "score",
+        "units_won": 1
+      }
+    ],
+    "total": [
+      {
+        "name": "total",
+        "disp": "Total",
+        "type": "sum",
+        "source": "score",
+        "units_won": 1
+      }
+    ]
+  },
+  "options": [
+    {
+      "name": "handicapped",
+      "disp": "Use handicaps",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "auto-press",
+      "disp": "Automatic Press",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "auto-press-trigger",
+      "disp": "Automatic Press Trigger",
+      "type": "int",
+      "default": 2
+    }
+  ],
+  "todos": [
+    "remove disp attributes, feed off of name slug for i18n, l10n"
+  ]
+}

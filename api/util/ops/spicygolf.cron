@@ -1,0 +1,6 @@
+# crawl GHIN every night, 3am Eastern
+#  disabled 2/10/2022 as GHIN hardened authn/authz
+# 0  3  *  *  *    golf   /usr/bin/nice /home/golf/ops/crawl_ghin.sh
+
+# # backups every night, 5am Eastern
+ 0  5  *  *  *    golf   /usr/bin/nice /home/golf/ops/backup.sh

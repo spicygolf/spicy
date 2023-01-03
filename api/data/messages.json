@@ -1,0 +1,90 @@
+{
+    register: {
+
+    },
+
+    verifyEmail: {
+
+    },
+
+    login: {
+
+    },
+
+
+
+    command: 'game_start',
+    payload: {
+        gameid: 1234567890,
+        game_type: '5points-1',
+        course: 98765,
+        start_time: 15098751448,
+        teams: [
+            {
+                name: 'Team 1',
+                players: [
+                    {
+                        player: 123,
+                        handicap_override: 0
+                    },
+                    {
+                        player: 321,
+                        handicap_override: 0
+                    }
+                ]
+            },
+            {
+                name: 'Team 2',
+                players: [
+                    {
+                        player: 234,
+                        handicap_override: 0
+                    },
+                    {
+                        player: 432,
+                        handicap_override: 0
+                    }
+                ]
+            },
+        ]
+    }
+
+
+    command: 'hole_score',
+    game_type: '5points-1',
+    payload: {
+        gameid: 1234567890,
+        hole: 7,
+        scores: [
+            {
+                player: 123,
+                score: 4
+            },
+            {
+                player: 321,
+                score: 4
+            },
+            {
+                player: 234,
+                score: 4
+            },
+            {
+                player: 432,
+                score: 5
+            },
+        ],
+        prox: {
+            player: 321
+        }
+    }
+
+    command: 'hole_score',
+    game_type: 'birdie-em-all',
+    payload: {
+        gameid: 1234567891,
+        time: 1508646787,
+        hole: 7,
+        birdie: true,
+        player: 123
+    }
+}

@@ -1,0 +1,113 @@
+{
+  "name": "wolf",
+  "disp": "Wolf",
+  "version": 1,
+  "status": "dev",
+  "type": "points",
+  "max_players": null,
+  "min_players": 3,
+  "location_type": "local",
+  "teams": true,
+  "individual": false,
+  "team_size": null,
+  "team_determination": "wolf",
+  "wolf_disp": "Wolf",
+  "team_change_every": 1,
+  "scoring": {
+    "hole" : [],
+    "front": [],
+    "back" : [],
+    "total": []
+  },
+  "junk": [
+    {
+      "name": "low_ball",
+      "disp": "Low Ball",
+      "seq": 1,
+      "type": "dot",
+      "value": 1,
+      "limit": "one_team_per_group",
+      "scope": "team",
+      "icon": "album",
+      "show_in": "score",
+      "based_on": "net",
+      "calculation": "best_ball",
+      "better": "lower"
+    },
+  ],
+  "multipliers": [
+    {
+      "name": "lone_wolf",
+      "disp": "Lone 2x",
+      "seq": 1,
+      "value": 2,
+      "icon": "album",
+      "based_on": "user",
+      "scope": "hole",
+      "availability": "{
+        'and': [
+          {'==': [ {'playersOnTeam': ['this']}, 1 ]},
+          {'isWolfPlayer': []}
+        ]
+      }"
+    },
+    {
+      "name": "pre_lone_wolf",
+      "disp": "Pre Lone 3x",
+      "seq": 2,
+      "value": 3,
+      "icon": "album",
+      "based_on": "user",
+      "scope": "hole",
+      "availability": "{
+        'and': [
+          {'==': [ {'playersOnTeam': ['this']}, 1 ]},
+          {'isWolfPlayer': []}
+        ]
+      }"
+    },
+    {
+      "name": "blind_pre_lone_wolf",
+      "disp": "Blind Pre Lone 4x",
+      "seq": 3,
+      "value": 4,
+      "icon": "album",
+      "based_on": "user",
+      "scope": "hole",
+      "availability": "{
+        'and': [
+          {'==': [ {'playersOnTeam': ['this']}, 1 ]},
+          {'isWolfPlayer': []}
+        ]
+      }"
+    }
+  ],
+  "options": [
+    {
+      "name": "stakes",
+      "disp": "Stakes per point",
+      "type": "num",
+      "default": 1
+    },
+    {
+      "name": "use_handicaps",
+      "disp": "Use handicaps",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "handicap_index_from",
+      "disp": "Index off of the low handicap or use full handicaps",
+      "type": "menu",
+      "choices": [
+        {"name":"low", "disp": "Low"},
+        {"name":"full", "disp": "Full"}
+      ],
+      "default": "low"
+    }
+  ],
+  "default_options": [],
+  "todos": [
+    "remove disp attributes, feed off of name slug for i18n, l10n"
+  ]
+}

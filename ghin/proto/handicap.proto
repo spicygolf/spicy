@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package handicap;
+
+service Handicap {
+  // retrieve a handicap
+  rpc GetHandicap(GetHandicapRequest) returns (GetHandicapResponse) {}
+  rpc SearchPlayer(SearchPlayerRequest) returns (SearchPlayerResponse) {}
+}
+
+message Club {
+  string id = 1;
+  string name = 2;
+  string assn = 3;
+  string state = 4;
+  string country = 5;
+}
+
+// request with id of the golfer
+message GetHandicapRequest {
+  string source = 1;
+  string id = 2;
+}
+
+// the response details of a handicap
+message GetHandicapResponse {
+  string id = 1;
+  string source = 2;
+  string prefix = 3;
+  string firstName = 4;
+  string middleName = 5;
+  string lastName = 6;
+  string suffix = 7;
+  string playerName = 8;
+  string gender = 9;
+  bool active = 10;
+  string index = 11;
+  string revDate = 12;
+  repeated Club clubs = 13;
+}
+
+message Search {
+  string source = 1;
+  string state = 2;
+  string firstName = 3;
+  string lastName = 4;
+}
+
+message Pagination {
+  int32 page = 1;
+  int32 perPage = 2;
+}
+
+message SearchPlayerRequest {
+  Search q = 1;
+  Pagination p = 2;
+}
+
+message SearchPlayerResponse {
+  repeated GetHandicapResponse players = 1;
+}

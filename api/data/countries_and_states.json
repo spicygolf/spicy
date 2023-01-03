@@ -1,0 +1,551 @@
+{
+  "countries": [
+    {
+      "name": "United States",
+      "code": "USA",
+      "crs_code": "USA",
+      "states": [
+        {
+          "name": "Alabama",
+          "code": "AL",
+          "course_code": "US-AL"
+        },
+        {
+          "name": "Alaska",
+          "code": "AK",
+          "course_code": "US-AK"
+        },
+        {
+          "name": "American Samoa",
+          "code": "AS",
+          "course_code": "US-AS"
+        },
+        {
+          "name": "Arizona",
+          "code": "AZ",
+          "course_code": "US-AZ"
+        },
+        {
+          "name": "Arkansas",
+          "code": "AR",
+          "course_code": "US-AR"
+        },
+        {
+          "name": "California",
+          "code": "CA",
+          "course_code": "US-CA"
+        },
+        {
+          "name": "Colorado",
+          "code": "CO",
+          "course_code": "US-CO"
+        },
+        {
+          "name": "Connecticut",
+          "code": "CT",
+          "course_code": "US-CT"
+        },
+        {
+          "name": "Delaware",
+          "code": "DE",
+          "course_code": "US-DE"
+        },
+        {
+          "name": "District of Columbia",
+          "code": "DC",
+          "course_code": "US-DC"
+        },
+        {
+          "name": "Florida",
+          "code": "FL",
+          "course_code": "US-FL"
+        },
+        {
+          "name": "Georgia",
+          "code": "GA",
+          "course_code": "US-GA"
+        },
+        {
+          "name": "Guam",
+          "code": "GU",
+          "course_code": "US-GU"
+        },
+        {
+          "name": "Hawaii",
+          "code": "HI",
+          "course_code": "US-HI"
+        },
+        {
+          "name": "Idaho",
+          "code": "ID",
+          "course_code": "US-ID"
+        },
+        {
+          "name": "Illinois",
+          "code": "IL",
+          "course_code": "US-IL"
+        },
+        {
+          "name": "Indiana",
+          "code": "IN",
+          "course_code": "US-IN"
+        },
+        {
+          "name": "Iowa",
+          "code": "IA",
+          "course_code": "US-IA"
+        },
+        {
+          "name": "Kansas",
+          "code": "KS",
+          "course_code": "US-KS"
+        },
+        {
+          "name": "Kentucky",
+          "code": "KY",
+          "course_code": "US-KY"
+        },
+        {
+          "name": "Louisiana",
+          "code": "LA",
+          "course_code": "US-LA"
+        },
+        {
+          "name": "Maine",
+          "code": "ME",
+          "course_code": "US-ME"
+        },
+        {
+          "name": "Maryland",
+          "code": "MD",
+          "course_code": "US-MD"
+        },
+        {
+          "name": "Massachusetts",
+          "code": "MA",
+          "course_code": "US-MA"
+        },
+        {
+          "name": "Michigan",
+          "code": "MI",
+          "course_code": "US-MI"
+        },
+        {
+          "name": "Minnesota",
+          "code": "MN",
+          "course_code": "US-MN"
+        },
+        {
+          "name": "Mississippi",
+          "code": "MS",
+          "course_code": "US-MS"
+        },
+        {
+          "name": "Missouri",
+          "code": "MO",
+          "course_code": "US-MO"
+        },
+        {
+          "name": "Montana",
+          "code": "MT",
+          "course_code": "US-MT"
+        },
+        {
+          "name": "Nebraska",
+          "code": "NE",
+          "course_code": "US-NE"
+        },
+        {
+          "name": "Nevada",
+          "code": "NV",
+          "course_code": "US-NV"
+        },
+        {
+          "name": "New Hampshire",
+          "code": "NH",
+          "course_code": "US-NH"
+        },
+        {
+          "name": "New Jersey",
+          "code": "NJ",
+          "course_code": "US-NJ"
+        },
+        {
+          "name": "New Mexico",
+          "code": "NM",
+          "course_code": "US-NM"
+        },
+        {
+          "name": "New York",
+          "code": "NY",
+          "course_code": "US-NY"
+        },
+        {
+          "name": "North Carolina",
+          "code": "NC",
+          "course_code": "US-NC"
+        },
+        {
+          "name": "North Dakota",
+          "code": "ND",
+          "course_code": "US-ND"
+        },
+        {
+          "name": "Northern Mariana Islands",
+          "code": "MP",
+          "course_code": "US-MP"
+        },
+        {
+          "name": "Ohio",
+          "code": "OH",
+          "course_code": "US-OH"
+        },
+        {
+          "name": "Oklahoma",
+          "code": "OK",
+          "course_code": "US-OK"
+        },
+        {
+          "name": "Oregon",
+          "code": "OR",
+          "course_code": "US-OR"
+        },
+        {
+          "name": "Pennsylvania",
+          "code": "PA",
+          "course_code": "US-PA"
+        },
+        {
+          "name": "Puerto Rico",
+          "code": "PR",
+          "course_code": "US-PR"
+        },
+        {
+          "name": "Rhode Island",
+          "code": "RI",
+          "course_code": "US-RI"
+        },
+        {
+          "name": "South Carolina",
+          "code": "SC",
+          "course_code": "US-SC"
+        },
+        {
+          "name": "South Dakota",
+          "code": "SD",
+          "course_code": "US-SD"
+        },
+        {
+          "name": "Tennessee",
+          "code": "TN",
+          "course_code": "US-TN"
+        },
+        {
+          "name": "Texas",
+          "code": "TX",
+          "course_code": "US-TX"
+        },
+        {
+          "name": "United States Minor Outlying Islands",
+          "code": "UM",
+          "course_code": "US-UM"
+        },
+        {
+          "name": "Utah",
+          "code": "UT",
+          "course_code": "US-UT"
+        },
+        {
+          "name": "Vermont",
+          "code": "VT",
+          "course_code": "US-VT"
+        },
+        {
+          "name": "Virgin Islands",
+          "code": "VI",
+          "course_code": "US-VI"
+        },
+        {
+          "name": "Virginia",
+          "code": "VA",
+          "course_code": "US-VA"
+        },
+        {
+          "name": "Washington",
+          "code": "WA",
+          "course_code": "US-WA"
+        },
+        {
+          "name": "West Virginia",
+          "code": "WV",
+          "course_code": "US-WV"
+        },
+        {
+          "name": "Wisconsin",
+          "code": "WI",
+          "course_code": "US-WI"
+        },
+        {
+          "name": "Wyoming",
+          "code": "WY",
+          "course_code": "US-WY"
+        },
+        {
+          "name": "Armed Forces Pacific",
+          "code": "AP",
+          "course_code": "US-AP"
+        },
+        {
+          "name": "Armed Forces Africa, Canada, Europe, Middle East",
+          "code": "AE",
+          "course_code": "US-AE"
+        },
+        {
+          "name": "Armed Forces Americas (except Canada)",
+          "code": "AA",
+          "course_code": "US-AA"
+        }
+      ]
+    },
+    {
+      "name": "Canada",
+      "code": "CAN",
+      "crs_code": "CAN",
+      "states": [
+        {
+          "name": "Alberta",
+          "code": "AB",
+          "course_code": "CA-AB"
+        },
+        {
+          "name": "British Columbia",
+          "code": "BC",
+          "course_code": "CA-BC"
+        },
+        {
+          "name": "Manitoba",
+          "code": "MB",
+          "course_code": "CA-MB"
+        },
+        {
+          "name": "New Brunswick",
+          "code": "NB",
+          "course_code": "CA-NB"
+        },
+        {
+          "name": "Newfoundland and Labrador",
+          "code": "NL",
+          "course_code": "CA-NL"
+        },
+        {
+          "name": "Northwest Territories",
+          "code": "NT",
+          "course_code": "CA-NT"
+        },
+        {
+          "name": "Nova Scotia",
+          "code": "NS",
+          "course_code": "CA-NS"
+        },
+        {
+          "name": "Nunavut",
+          "code": "NU",
+          "course_code": "CA-NU"
+        },
+        {
+          "name": "Ontario",
+          "code": "ON",
+          "course_code": "CA-ON"
+        },
+        {
+          "name": "Prince Edward Island",
+          "code": "PE",
+          "course_code": "CA-PE"
+        },
+        {
+          "name": "Quebec",
+          "code": "QC",
+          "course_code": "CA-QC"
+        },
+        {
+          "name": "Saskatchewan",
+          "code": "SK",
+          "course_code": "CA-SK"
+        },
+        {
+          "name": "Yukon Territory",
+          "code": "YT",
+          "course_code": "CA-YT"
+        }
+      ]
+    },
+    {
+      "name": "Bahamas",
+      "code": "BHS",
+      "crs_code": "BAH",
+      "states": [
+        {
+          "name": "BS-Bahamas",
+          "code": "BS",
+          "course_code": "BH-BS"
+        }
+      ]
+    },
+    {
+      "name": "Bermuda",
+      "code": "BMU",
+      "crs_code": "BER",
+      "states": [
+        {
+          "name": "BM-Bermuda",
+          "code": "BM",
+          "course_code": "BM-BM"
+        }
+      ]
+    },
+    {
+      "name": "China",
+      "code": "CHN",
+      "crs_code": "CHN",
+      "states": [
+        {
+          "name": "China",
+          "code": "*N",
+          "course_code": "CH-*N"
+        }
+      ]
+    },
+    {
+      "name": "Dominican Republic",
+      "code": "DOM",
+      "crs_code": "DOM",
+      "states": [
+        {
+          "name": "Dominican Republic",
+          "code": "*D",
+          "course_code": "DO-*D"
+        }
+      ]
+    },
+    {
+      "name": "Hong Kong",
+      "code": "HKG",
+      "crs_code": "HKG",
+      "states": [
+        {
+          "name": "Hong Kong",
+          "code": "*H",
+          "course_code": "HK-*H"
+        }
+      ]
+    },
+    {
+      "name": "India",
+      "code": "IND",
+      "crs_code": "IND",
+      "states": [
+        {
+          "name": "India",
+          "code": "*I",
+          "course_code": "IN-*I"
+        }
+      ]
+    },
+    {
+      "name": "Marshall Islands",
+      "code": "MHL",
+      "crs_code": "MHL",
+      "states": [
+        {
+          "name": "MH-Marshall Islands",
+          "code": "MH",
+          "course_code": "MH-MH"
+        }
+      ]
+    },
+    {
+      "name": "Mexico",
+      "code": "MEX",
+      "crs_code": "MEX",
+      "states": [
+        {
+          "name": "Mexico",
+          "code": "*M",
+          "course_code": "ME-*M"
+        }
+      ]
+    },
+    {
+      "name": "Micronesia",
+      "code": "Mi",
+      "crs_code": "",
+      "states": [
+        {
+          "name": "FM-Micronesia",
+          "code": "FM",
+          "course_code": "FM"
+        }
+      ]
+    },
+    {
+      "name": "Palau",
+      "code": "PLW",
+      "crs_code": "PLW",
+      "states": [
+        {
+          "name": "PW-Palau",
+          "code": "PW",
+          "course_code": "PL-PW"
+        }
+      ]
+    },
+    {
+      "name": "Panama",
+      "code": "PAN",
+      "crs_code": "PAN",
+      "states": [
+        {
+          "name": "Panama",
+          "code": "*A",
+          "course_code": "PA-*A"
+        }
+      ]
+    },
+    {
+      "name": "Republic of Korea",
+      "code": "KOR",
+      "crs_code": "KOR",
+      "states": [
+        {
+          "name": "Republic of Korea",
+          "code": "KR",
+          "course_code": "KO-KR"
+        }
+      ]
+    },
+    {
+      "name": "Sri Lanka",
+      "code": "LKA",
+      "crs_code": "SRI",
+      "states": [
+        {
+          "name": "Sri Lanka",
+          "code": "*L",
+          "course_code": "LK-*L"
+        }
+      ]
+    },
+    {
+      "name": "Foreign",
+      "code": "Fo",
+      "crs_code": "",
+      "states": [
+        {
+          "name": "Foreign",
+          "code": "*F",
+          "course_code": "*F"
+        }
+      ]
+    }
+  ]
+}

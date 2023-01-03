@@ -1,0 +1,139 @@
+{
+  "name": "nine_points",
+  "disp": "Nine Points",
+  "version": 1,
+  "status": "test",
+  "type": "points",
+  "max_players": 3,
+  "min_players": 3,
+  "location_type": "local",
+  "teams": false,
+  "individual": true,
+  "scoring": {
+    "hole" : [],
+    "front": [],
+    "back" : [],
+    "total": []
+  },
+  "junk": [
+    {
+      "name": "all_tie",
+      "disp": "",
+      "seq": 1,
+      "type": "dot",
+      "value": 3,
+      "limit": "",
+      "scope": "team",
+      "icon": "",
+      "show_in": "none",
+      "based_on": "net",
+      "calculation": "logic",
+      "logic": "{'rankWithTies': [ 1, 3 ]}",
+      "better": "lower"
+    },
+    {
+      "name": "outright_winner",
+      "disp": "",
+      "seq": 2,
+      "type": "dot",
+      "value": 5,
+      "limit": "",
+      "scope": "team",
+      "icon": "",
+      "show_in": "none",
+      "based_on": "net",
+      "calculation": "logic",
+      "logic": "{'rankWithTies': [ 1, 1 ]}",
+      "better": "lower"
+    },
+    {
+      "name": "2_tie_win",
+      "disp": "",
+      "seq": 3,
+      "type": "dot",
+      "value": 4,
+      "limit": "",
+      "scope": "team",
+      "icon": "",
+      "show_in": "none",
+      "based_on": "net",
+      "calculation": "logic",
+      "logic": "{'rankWithTies': [ 1, 2 ]}",
+      "better": "lower"
+    },
+    {
+      "name": "all_diff_2",
+      "disp": "",
+      "seq": 4,
+      "type": "dot",
+      "value": 3,
+      "limit": "",
+      "scope": "team",
+      "icon": "",
+      "show_in": "none",
+      "based_on": "net",
+      "calculation": "logic",
+      "logic": "{'rankWithTies': [ 2, 1 ]}",
+      "better": "lower"
+    },
+    {
+      "name": "2_tie_last",
+      "disp": "",
+      "seq": 5,
+      "type": "dot",
+      "value": 2,
+      "limit": "",
+      "scope": "team",
+      "icon": "",
+      "show_in": "none",
+      "based_on": "net",
+      "calculation": "logic",
+      "logic": "{'rankWithTies': [ 2, 2 ]}",
+      "better": "lower"
+    },
+    {
+      "name": "dfl",
+      "disp": "",
+      "seq": 6,
+      "type": "dot",
+      "value": 1,
+      "limit": "",
+      "scope": "team",
+      "icon": "",
+      "show_in": "none",
+      "based_on": "net",
+      "calculation": "logic",
+      "logic": "{'rankWithTies': [ 3, 1 ]}",
+      "better": "lower"
+    }
+  ],
+  "multipliers": [],
+  "options": [
+    {
+      "name": "stakes",
+      "disp": "Stakes per point",
+      "type": "num",
+      "default": 1
+    },
+    {
+      "name": "use_handicaps",
+      "disp": "Use handicaps",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "handicap_index_from",
+      "disp": "Index off of the low handicap or use full handicaps",
+      "type": "menu",
+      "choices": [
+        {"name":"low", "disp": "Low"},
+        {"name":"full", "disp": "Full"}
+      ],
+      "default": "low"
+    }
+  ],
+  "default_options": [],
+  "todos": [
+    "remove disp attributes, feed off of name slug for i18n, l10n"
+  ]
+}

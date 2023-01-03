@@ -1,0 +1,65 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Spicy Golf API",
+      "type": "node",
+      "request": "launch",
+      // "runtimeExecutable": "nodemon",
+      "program": "${workspaceFolder}/src/server.js",
+      "runtimeArgs":["--experimental-specifier-resolution=node"],
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "schema_update 20210602",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--es-module-specifier-resolution=node",
+        "./util/arango/schema_updates/20210602.js"
+      ],
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "schema_update 20221219",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--es-module-specifier-resolution=node",
+        "./util/arango/schema_updates/20221219.js"
+      ],
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "schema_update 20221220",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--es-module-specifier-resolution=node",
+        "./util/arango/schema_updates/20221220.js"
+      ],
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Dogwood Alumni",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/src/dogwood/alumni.js",
+      "args": [],
+    }
+  ]
+}

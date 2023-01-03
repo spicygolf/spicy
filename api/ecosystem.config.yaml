@@ -1,0 +1,10 @@
+apps:
+  - script: 'src/server.js'
+    name: 'spicy_api_v3'
+    node_args: "--es-module-specifier-resolution=node"
+    watch: true
+    log_date_format: 'YYYY-MM-DD HH:mm:ss.SSS'
+    env:
+      NODE_ENV: 'dev'
+    env_production:
+      NODE_ENV: 'production'

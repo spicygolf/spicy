@@ -1,0 +1,168 @@
+{
+  "year": "2021",
+  "days": [
+    {
+      "date": "6/7/2021",
+      "shortdate": "6/7",
+      "longdate": "June 7, 2021",
+      "dow": "Mon",
+      "events" : [
+        {
+          "key": 0,
+          "start": "8:00 am",
+          "descr": "Dogwood Open Qualifier",
+          "notes": "100 players maximum"
+        },
+        {
+          "key": 1,
+          "start": "1:00 pm",
+          "descr": "Limited Player practice rounds",
+          "notes": "Please contact the Pro Shop to schedule a practice round (404) 377-1768"
+        }
+      ]
+    },
+    {
+      "date": "6/8/2021",
+      "shortdate": "6/8",
+      "longdate": "June 8, 2021",
+      "dow": "Tue",
+      "events" : [
+        {
+          "key": 0,
+          "start": "10:00 am",
+          "end": "3:00 pm",
+          "descr": "Player Registration",
+          "notes": ""
+        },
+        {
+          "key": 1,
+          "start": "12:00 pm",
+          "descr": "Player practice rounds",
+          "notes": "Please contact the Pro Shop to schedule a practice round (404) 377-1768"
+        }
+      ]
+    },
+    {
+      "date":"6/9/2021",
+      "shortdate": "6/9",
+      "longdate": "June 9, 2021",
+      "dow": "Wed",
+      "events" : [
+        {
+          "key": 0,
+          "start":"7:00 am",
+          "end":"10:00 am",
+          "descr":"Breakfast"
+        },
+        {
+          "key": 1,
+          "start":"8:00 am",
+          "descr":"Dogwood Invitational Round One"
+        },
+        {
+          "key": 2,
+          "start":"11:00 am",
+          "end":"3:00 pm",
+          "descr":"Lunch"
+        },
+        {
+          "key": 3,
+          "start":"6:00 pm",
+          "descr":"Honorary Tee Shot"
+        },
+        {
+          "key": 4,
+          "start":"6:00 pm",
+          "descr":"Long Drive Contest & Taste of the Dogwood"
+        }
+      ]
+    },
+    {
+      "date": "6/10/2021",
+      "shortdate": "6/10",
+      "longdate": "June 10, 2021",
+      "dow": "Thu",
+      "events" : [
+        {
+          "key": 0,
+          "start":"7:00 am",
+          "end":"10:00 am",
+          "descr":"Breakfast"
+        },
+        {
+          "key": 1,
+          "start":"8:00 am",
+          "descr":"Dogwood Invitational Round Two"
+        },
+        {
+          "key": 2,
+          "start":"11:00 am",
+          "end":"3:00 pm",
+          "descr":"Lunch"
+        },
+        {
+          "key": 3,
+          "start":"5:30 pm",
+          "end":"7:00 pm",
+          "descr":"Junior Clinic"
+        }
+      ]
+    },
+    {
+      "date": "6/11/2021",
+      "shortdate": "6/11",
+      "longdate": "June 11, 2021",
+      "dow": "Fri",
+      "events" : [
+        {
+          "key": 0,
+          "start":"7:00 am",
+          "end":"10:00 am",
+          "descr":"Breakfast"
+        },
+        {
+          "key": 1,
+          "start":"8:00 am",
+          "descr":"Dogwood Invitational Round Three",
+          "notes": "54 hole cut"
+        },
+        {
+          "key": 2,
+          "start":"11:00 am",
+          "end":"3:00 pm",
+          "descr":"Lunch"
+        }
+      ]
+    },
+    {
+      "date":"6/12/2021",
+      "shortdate": "6/12",
+      "longdate": "June 12, 2021",
+      "dow": "Sat",
+      "events" : [
+        {
+          "key": 0,
+          "start":"7:00 am",
+          "end":"10:00 am",
+          "descr":"Breakfast"
+        },
+        {
+          "key": 1,
+          "start":"8:00 am",
+          "descr":"Dogwood Invitational Final Round"
+        },
+        {
+          "key": 2,
+          "start":"11:00 am",
+          "end":"3:00 pm",
+          "descr":"Lunch"
+        },
+        {
+          "key": 3,
+          "start":"3:00 pm",
+          "descr":"Awards Ceremony & Press Conference"
+        }
+      ]
+    }
+  ]
+}

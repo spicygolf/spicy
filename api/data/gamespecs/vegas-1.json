@@ -1,0 +1,266 @@
+{
+  "name": "vegas",
+  "disp": "Vegas",
+  "version": 1,
+  "status": "prod",
+  "type": "points",
+  "better": "lower",
+  "max_players": 4,
+  "min_players": 4,
+  "location_type": "local",
+  "teams": true,
+  "team_size": 2,
+  "scoring": {
+    "hole": [
+      {
+        "name": "team",
+        "disp": "Team Score",
+        "seq": 1,
+        "type": "vegas",
+        "points": 0,
+        "source": "scores",
+        "scope": "team",
+        "based_on": "net"
+      }
+    ],
+    "front": [],
+    "back" : [],
+    "total": []
+  },
+  "junk": [
+    {
+      "name": "birdie",
+      "disp": "Birdie",
+      "seq": 0,
+      "type": "vegas",
+      "value": 0,
+      "limit": "",
+      "scope": "player",
+      "icon": "album",
+      "show_in": "score",
+      "score_to_par": "exactly -1",
+      "based_on": "gross"
+    },
+    {
+      "name": "eagle",
+      "disp": "Eagle",
+      "seq": 1,
+      "type": "vegas",
+      "value": 0,
+      "limit": "",
+      "scope": "player",
+      "icon": "album",
+      "show_in": "score",
+      "score_to_par": "exactly -2",
+      "based_on": "gross"
+    },
+    {
+      "name": "two_birdies_add",
+      "disp": "2 Birdies +10",
+      "seq": 2,
+      "type": "dot",
+      "value": 10,
+      "limit": "",
+      "scope": "team",
+      "icon": "album",
+      "show_in": "score",
+      "calculation": "logic",
+      "logic": "{
+        'and': [
+          {
+            '==': [
+              {'countJunk': [{'team': ['this']}, 'birdie']},
+              2
+            ]
+          },
+          {
+            '==': [
+              {'countJunk': [{'team': ['other']}, 'birdie']},
+              0
+            ]
+          },
+          {
+            '==': [
+              {'countJunk': [{'team': ['other']}, 'eagle']},
+              0
+            ]
+          }
+        ]
+      }",
+      "based_on": "gross",
+      "better": "lower"
+    },
+    {
+      "name": "eagle_add",
+      "disp": "Eagle +10",
+      "seq": 3,
+      "type": "dot",
+      "value": 10,
+      "limit": "",
+      "scope": "team",
+      "icon": "album",
+      "show_in": "score",
+      "calculation": "logic",
+      "logic": "{
+        'and': [
+          {
+            '==': [
+              {'countJunk': [{'team': ['this']}, 'eagle']},
+              1
+            ]
+          },
+          {
+            '==': [
+              {'countJunk': [{'team': ['other']}, 'eagle']},
+              0
+            ]
+          }
+        ]
+      }",
+      "based_on": "gross",
+      "better": "lower"
+    },
+    {
+      "name": "two_eagles_add",
+      "disp": "2 Eagles +20",
+      "seq": 4,
+      "type": "dot",
+      "value": 20,
+      "limit": "",
+      "scope": "team",
+      "icon": "album",
+      "show_in": "score",
+      "calculation": "logic",
+      "logic": "{
+        'and': [
+          {
+            '==': [
+              {'countJunk': [{'team': ['this']}, 'eagle']},
+              2
+            ]
+          },
+          {
+            '==': [
+              {'countJunk': [{'team': ['other']}, 'eagle']},
+              0
+            ]
+          }
+        ]
+      }",
+      "based_on": "gross",
+      "better": "lower"
+    }
+  ],
+  "multipliers": [
+    {
+      "name": "pre_double",
+      "disp": "Pre 2x",
+      "seq": 1,
+      "value": 2,
+      "icon": "album",
+      "based_on": "user",
+      "scope": "rest_of_nine",
+      "availability": "{
+        'team_down_the_most': [
+          {'getPrevHole': []},
+          {'var': 'team'}
+        ]
+      }"
+    },
+    {
+      "name": "double",
+      "disp": "2x",
+      "seq": 2,
+      "value": 2,
+      "icon": "album",
+      "based_on": "user",
+      "scope": "hole",
+      "availability": "{
+        'team_down_the_most': [
+          {'getPrevHole': []},
+          {'var': 'team'}
+        ]
+      }"
+    },
+    {
+      "name": "double_back",
+      "disp": "2x back",
+      "seq": 3,
+      "value": 2,
+      "icon": "album",
+      "based_on": "user",
+      "scope": "hole",
+      "availability": "{
+        'and': [
+          {'team_second_to_last': [
+            {'getPrevHole': []},
+            {'var': 'team'}
+          ]},
+          {'other_team_multiplied_with': [
+            {'getCurrHole': []},
+            {'var': 'team'},
+            'double'
+          ]}
+        ]
+      }"
+    }
+  ],
+  "options": [
+    {
+      "name": "stakes",
+      "disp": "$ per point",
+      "type": "num",
+      "default": 1
+    },
+    {
+      "name": "use_handicaps",
+      "disp": "Use handicaps",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "handicap_index_from",
+      "disp": "Index off of the low handicap or use full handicaps",
+      "type": "menu",
+      "choices": [
+        {"name":"low", "disp": "Low"},
+        {"name":"full", "disp": "Full"}
+      ],
+      "default": "low"
+    },
+    {
+      "name": "pre_double_rest_of_nine",
+      "disp": "Pre-double is for rest of nine",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "max_off_tee",
+      "disp": "Maximum multiplier off tee.",
+      "type": "num",
+      "default": 8
+    },
+    {
+      "name": "birdies_cancel_flip",
+      "disp": "Birdies on opposite teams cancels out the score flip",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "discount_threshold",
+      "disp": "Discount on Losses - Threshold",
+      "type": "num",
+      "default": 100
+    },
+    {
+      "name": "discount_percent",
+      "disp": "Discount on Losses - Percentage",
+      "type": "pct",
+      "default": 50
+    }
+  ],
+  "default_options": [],
+  "todos": [
+    "remove disp attributes, feed off of name slug for i18n, l10n"
+  ]
+}

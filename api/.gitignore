@@ -1,0 +1,16 @@
+.DS_Store
+node_modules/*
+util/ghin_xml/heap/*
+util/arango/dump/*
+util/arango/*.zip
+util/arango/*.bz2
+util/arango/*.gz
+util/arango/*.tar
+util/arango/tmp/*
+config.js
+
+coverage/*
+
+yarn-error.log
+
+ sg_api*.zip

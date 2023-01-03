@@ -1,0 +1,58 @@
+{
+  "name": "individual_matchplay",
+  "disp": "Individual Match Play",
+  "version": 1,
+  "status": "prod",
+  "type": "match",
+  "max_players": 2,
+  "min_players": 2,
+  "location_type": "any",
+  "teams": false,
+  "scoring": {
+    "hole": [],
+    "front": [],
+    "back" : [],
+    "total": []
+  },
+  "junk": [
+    {
+      "name": "low_ball",
+      "disp": "Low Ball",
+      "seq": 1,
+      "type": "dot",
+      "value": 1,
+      "limit": "one_team_per_group",
+      "scope": "team",
+      "icon": "album",
+      "show_in": "none",
+      "based_on": "net",
+      "calculation": "best_ball",
+      "better": "lower"
+    }
+  ],
+  "multipliers": [],
+  "options": [
+    {
+      "name": "stakes",
+      "disp": "Stakes",
+      "type": "num",
+      "default": 1
+    },
+    {
+      "name": "use_handicaps",
+      "disp": "Use handicaps",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "name": "handicap_index_from",
+      "disp": "Index off of the low handicap or use full handicaps",
+      "type": "menu",
+      "choices": [
+        {"name":"low", "disp": "Low"},
+        {"name":"full", "disp": "Full"}
+      ],
+      "default": "low"
+    }
+  ]
+}

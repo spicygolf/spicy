@@ -1,0 +1,99 @@
+use crate::ghin::{Ghin, GhinHandicapService};
+use crate::token::Token;
+use anyhow::anyhow;
+use handicap::handicap_server::{Handicap, HandicapServer};
+use handicap::{
+    GetHandicapRequest, GetHandicapResponse, SearchPlayerRequest, SearchPlayerResponse,
+};
+use log::{error, info};
+use tonic::{transport::Server, Code, Request, Response, Status};
+
+mod ghin {
+    include!("ghin/ghin.rs");
+}
+mod handicap {
+    include!("generated/handicap.rs");
+    pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
+        tonic::include_file_descriptor_set!("greeter_descriptor");
+}
+mod settings;
+mod token;
+
+#[derive(Default)]
+pub struct HandicapService {
+    ghin_token: Token,
+}
+
+#[tonic::async_trait]
+impl Handicap for HandicapService {
+    async fn get_handicap(
+        &self,
+        request: Request<GetHandicapRequest>,
+    ) -> Result<Response<GetHandicapResponse>, Status> {
+        let source = request.get_ref().source.to_owned();
+        let id = request.get_ref().id.to_owned();
+
+        let response = match source.as_str() {
+            "ghin" => {
+                let g = Ghin::default();
+                g.get_handicap(0, &self.ghin_token, id.to_owned()).await
+            }
+            _ => Err(anyhow!("unknown handicap source: '{}'", source)),
+        };
+
+        match response {
+            Ok(r) => Ok(Response::new(r)),
+            Err(e) => {
+                error!("{:?} for {}: {}", e, source, id);
+                Err(Status::new(Code::Unknown, e.to_string()))
+            }
+        }
+    }
+    async fn search_player(
+        &self,
+        request: Request<SearchPlayerRequest>,
+    ) -> Result<Response<SearchPlayerResponse>, Status> {
+        let q = request.get_ref().q.as_ref().unwrap().to_owned();
+        let p = request.get_ref().p.as_ref().unwrap().to_owned();
+
+        let response = match q.source.as_str() {
+            "ghin" => {
+                let g = Ghin::default();
+                g.search_player(0, &self.ghin_token, q.to_owned(), p.to_owned())
+                    .await
+            }
+            _ => Err(anyhow!("unknown handicap source: '{}'", q.source)),
+        };
+
+        match response {
+            Ok(r) => Ok(Response::new(r)),
+            Err(e) => {
+                error!("{:?} for {:#?}: {:#?}", e, q, p);
+                Err(Status::new(Code::Unknown, e.to_string()))
+            }
+        }
+    }
+}
+
+#[tokio::main]
+async fn main() -> Result<(), anyhow::Error> {
+    env_logger::init();
+
+    let addr = "[::1]:50051".parse().unwrap();
+    let hdcp = HandicapService::default();
+
+    let reflection_service = tonic_reflection::server::Builder::configure()
+        .register_encoded_file_descriptor_set(handicap::FILE_DESCRIPTOR_SET)
+        .build()
+        .unwrap();
+
+    info!("Handicap service listening on {}", addr);
+
+    Server::builder()
+        .add_service(HandicapServer::new(hdcp))
+        .add_service(reflection_service)
+        .serve(addr)
+        .await?;
+
+    Ok(())
+}
