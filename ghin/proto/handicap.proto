@@ -42,7 +42,7 @@ message GetHandicapResponse {
   repeated Club clubs = 13;
 }
 
-message Search {
+message SearchPlayer {
   string source = 1;
   string golfer_id = 2;
   string country = 3;
@@ -52,13 +52,8 @@ message Search {
   string email = 7;
 }
 
-message Pagination {
-  int32 page = 1;
-  int32 perPage = 2;
-}
-
 message SearchPlayerRequest {
-  Search q = 1;
+  SearchPlayer q = 1;
   Pagination p = 2;
 }
 
@@ -74,4 +69,9 @@ message GpaRequest {
 
 message GpaResponse {
   string success = 1;
+}
+
+message Pagination {
+  int32 page = 1;
+  int32 perPage = 2;
 }

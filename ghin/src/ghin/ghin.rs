@@ -6,7 +6,7 @@ use reqwest::{Client,StatusCode};
 use serde::{Deserialize, Serialize};
 use crate::token::Token;
 use crate::settings::Settings;
-use crate::handicap::{Club, GetHandicapResponse, GpaResponse, Search, Pagination, SearchPlayerResponse};
+use crate::handicap::{Club, GetHandicapResponse, GpaResponse, SearchPlayer, Pagination, SearchPlayerResponse};
 
 pub struct Ghin {
   client: Client,
@@ -69,7 +69,7 @@ pub trait GhinHandicapService {
   fn new() -> Self;
   // #[async_recursion]
   async fn login(&self, user_token: &Token) -> Result<()>;
-  async fn search_player(&self, attempts: u8, token: &Token, q: Search, p: Pagination) -> Result<SearchPlayerResponse>;
+  async fn search_player(&self, attempts: u8, token: &Token, q: SearchPlayer, p: Pagination) -> Result<SearchPlayerResponse>;
   async fn request_gpa(&self, attempts: u8, token: &Token, id: String, email: String) -> Result<GpaResponse>;
 }
 
@@ -89,11 +89,37 @@ impl GhinHandicapService for Ghin {
     }
   }
 
+  async fn login(&self, user_token: &Token) -> Result<()> {
+    // body/payload
+    let user = User {
+      email: self.settings.ghin.username.to_owned(),
+      password: self.settings.ghin.password.to_owned(),
+      remember_me: true,
+    };
+    let payload = LoginPayload {
+      user,
+    };
+
+    // request
+    let uri = self.settings.ghin.url.to_owned() + "/users/login.json";
+    let response = self.client
+      .post(uri)
+      .json(&payload)
+      .send()
+      .await?;
+
+    // debug!("login response {:#?}", response);
+
+    let LoginResponse { token } = response.json::<LoginResponse>().await?;
+    info!("Refreshing GHIN token");
+    user_token.set_token(token).await
+  }
+
   async fn search_player(
     &self,
     attempts: u8,
     token: &Token,
-    q: Search,
+    q: SearchPlayer,
     p: Pagination,
   ) -> Result<SearchPlayerResponse> {
 
@@ -150,32 +176,6 @@ impl GhinHandicapService for Ghin {
       },
       _ => Err(anyhow!("Unknown search_player error")),
     }
-  }
-
-  async fn login(&self, user_token: &Token) -> Result<()> {
-    // body/payload
-    let user = User {
-      email: self.settings.ghin.username.to_owned(),
-      password: self.settings.ghin.password.to_owned(),
-      remember_me: true,
-    };
-    let payload = LoginPayload {
-      user,
-    };
-
-    // request
-    let uri = self.settings.ghin.url.to_owned() + "/users/login.json";
-    let response = self.client
-      .post(uri)
-      .json(&payload)
-      .send()
-      .await?;
-
-    // debug!("login response {:#?}", response);
-
-    let LoginResponse { token } = response.json::<LoginResponse>().await?;
-    info!("Refreshing GHIN token");
-    user_token.set_token(token).await
   }
 
   async fn request_gpa(
