@@ -3,7 +3,7 @@ use crate::token::Token;
 use anyhow::anyhow;
 use handicap::handicap_server::{Handicap, HandicapServer};
 use handicap::{
-    GetHandicapRequest, GetHandicapResponse, SearchPlayerRequest, SearchPlayerResponse, Search, Pagination,
+    GetHandicapRequest, GetHandicapResponse, SearchPlayerRequest, SearchPlayerResponse, Search, Pagination, GpaRequest, GpaResponse,
 };
 use log::{error, info};
 use tonic::{transport::Server, Code, Request, Response, Status};
@@ -43,6 +43,7 @@ impl Handicap for HandicapService {
                     state: "".to_string(),
                     last_name: "".to_string(),
                     first_name: "".to_string(),
+                    email: "".to_string(),
                 };
                 let p = Pagination {
                     page: 1,
@@ -64,7 +65,7 @@ impl Handicap for HandicapService {
             }
         }
     }
-    
+
     async fn search_player(
         &self,
         request: Request<SearchPlayerRequest>,
@@ -85,6 +86,32 @@ impl Handicap for HandicapService {
             Ok(r) => Ok(Response::new(r)),
             Err(e) => {
                 error!("{:?} for {:#?}: {:#?}", e, q, p);
+                Err(Status::new(Code::Unknown, e.to_string()))
+            }
+        }
+    }
+
+    async fn request_gpa(
+        &self,
+        request: Request<GpaRequest>,
+    ) -> Result<Response<GpaResponse>, Status> {
+        let source = request.get_ref().source.to_owned();
+        let id = request.get_ref().golfer_id.to_owned();
+        let email = request.get_ref().email.to_owned();
+
+        let response = match source.as_str() {
+            "ghin" => {
+                let g = Ghin::default();
+                g.request_gpa(0, &self.ghin_token, id.to_owned(), email.to_owned())
+                    .await
+            }
+            _ => Err(anyhow!("unknown handicap source: '{}'", source)),
+        };
+
+        match response {
+            Ok(r) => Ok(Response::new(r)),
+            Err(e) => {
+                error!("{:?} for {:#?}: {:#?}", e, id, email);
                 Err(Status::new(Code::Unknown, e.to_string()))
             }
         }

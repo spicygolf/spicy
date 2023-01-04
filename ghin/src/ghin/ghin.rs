@@ -6,7 +6,7 @@ use reqwest::{Client,StatusCode};
 use serde::{Deserialize, Serialize};
 use crate::token::Token;
 use crate::settings::Settings;
-use crate::handicap::{Club, GetHandicapResponse, Search, Pagination, SearchPlayerResponse};
+use crate::handicap::{Club, GetHandicapResponse, GpaResponse, Search, Pagination, SearchPlayerResponse};
 
 pub struct Ghin {
   client: Client,
@@ -53,12 +53,24 @@ struct Golfer {
   country: Option<String>,
 }
 
+#[derive(Serialize, Debug)]
+struct GpaPayload {
+  email: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct GpaPostResponse {
+  success: String,
+}
+
+
 #[async_trait]
 pub trait GhinHandicapService {
   fn new() -> Self;
   // #[async_recursion]
-  async fn search_player(&self, attempts: u8, token: &Token, q: Search, p: Pagination) -> Result<SearchPlayerResponse>;
   async fn login(&self, user_token: &Token) -> Result<()>;
+  async fn search_player(&self, attempts: u8, token: &Token, q: Search, p: Pagination) -> Result<SearchPlayerResponse>;
+  async fn request_gpa(&self, attempts: u8, token: &Token, id: String, email: String) -> Result<GpaResponse>;
 }
 
 impl Default for Ghin {
@@ -103,6 +115,7 @@ impl GhinHandicapService for Ghin {
       .query(&[("country", &q.country)])
       .query(&[("last_name", &q.last_name)])
       .query(&[("first_name", &q.first_name)])
+      .query(&[("email", &q.email)])
       .query(&[("status", "Active")])
       .query(&[("sorting_criteria", "full_name")])
       .query(&[("order", "asc")])
@@ -165,7 +178,62 @@ impl GhinHandicapService for Ghin {
     user_token.set_token(token).await
   }
 
+  async fn request_gpa(
+    &self,
+    attempts: u8,
+    token: &Token,
+    id: String,
+    email: String,
+  ) -> Result<GpaResponse> {
+
+    if attempts == 2 {
+      return Err(anyhow!(
+        "Too many unsuccessful attempts to request_gpa."
+      ));
+    }
+
+    let t = token.token().await;
+    let uri = format!("{}/users/golfers/{}/request_golfer_product_access.json",
+      self.settings.ghin.url.to_owned(), id);
+
+      let payload = GpaPayload {
+        email: email.to_owned(),
+      };
+
+    let response = self.client
+      .post(uri)
+      .json(&payload)
+      .bearer_auth(t)
+      .send()
+      .await?;
+
+    // debug!("request_gpa_access response {:#?}", response);
+
+    // return result
+    match response.status() {
+      StatusCode::OK => {
+        let GpaPostResponse { success } = response.json::<GpaPostResponse>().await?;
+        Ok(GpaResponse {
+          success,
+        })
+      },
+      StatusCode::UNAUTHORIZED => {
+        self.login(&token).await?;
+        let next_attempt = attempts + 1;
+        self.request_gpa(next_attempt, &token, id, email).await
+      },
+      StatusCode::BAD_REQUEST => {
+        let r = response.text().await?;
+        error!("BAD_REQUEST: {:?}", r);
+        Err(anyhow!("bad request for request_gpa"))
+      },
+      _ => Err(anyhow!("Unknown request_gpa error")),
+    }
+  }
+
 }
+
+// -----------------------------------------------------------------------------
 
 fn rollup_golfer(golfers: &Vec<Golfer>) -> Result<SearchPlayerResponse> {
   let g = golfers.iter().nth(0);
