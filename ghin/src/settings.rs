@@ -1,11 +1,12 @@
 use std::env;
 
-use config::{ConfigError, Config, Environment, File};
+use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 #[allow(unused)]
 pub struct Ghin {
+    pub url: String,
     pub username: String,
     pub password: String,
 }
@@ -18,15 +19,15 @@ pub struct Settings {
 }
 
 impl Default for Settings {
-  fn default() -> Self {
-      let s = Self::new();
-      match s {
-        Ok(s) => s,
-        Err(e) => {
-          panic!("Cannot load settings: {:?}", e);
+    fn default() -> Self {
+        let s = Self::new();
+        match s {
+            Ok(s) => s,
+            Err(e) => {
+                panic!("Cannot load settings: {:?}", e);
+            }
         }
-      }
-  }
+    }
 }
 
 impl Settings {
@@ -39,10 +40,7 @@ impl Settings {
             // Add in the current environment file
             // Default to 'development' env
             // Note that this file is _optional_
-            .add_source(
-                File::with_name(&format!("config/{}", run_mode))
-                    .required(false),
-            )
+            .add_source(File::with_name(&format!("config/{}", run_mode)).required(false))
             // Add in a local configuration file
             // This file shouldn't be checked in to git
             .add_source(File::with_name("config/local").required(false))

@@ -41,9 +41,11 @@ message GetHandicapResponse {
 
 message Search {
   string source = 1;
-  string state = 2;
-  string firstName = 3;
-  string lastName = 4;
+  string golfer_id = 2;
+  string country = 3;
+  string state = 4;
+  string firstName = 5;
+  string lastName = 6;
 }
 
 message Pagination {

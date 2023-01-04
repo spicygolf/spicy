@@ -3,7 +3,7 @@ use crate::token::Token;
 use anyhow::anyhow;
 use handicap::handicap_server::{Handicap, HandicapServer};
 use handicap::{
-    GetHandicapRequest, GetHandicapResponse, SearchPlayerRequest, SearchPlayerResponse,
+    GetHandicapRequest, GetHandicapResponse, SearchPlayerRequest, SearchPlayerResponse, Search, Pagination,
 };
 use log::{error, info};
 use tonic::{transport::Server, Code, Request, Response, Status};
@@ -36,19 +36,35 @@ impl Handicap for HandicapService {
         let response = match source.as_str() {
             "ghin" => {
                 let g = Ghin::default();
-                g.get_handicap(0, &self.ghin_token, id.to_owned()).await
+                let  q = Search {
+                    source: source.to_owned(),
+                    golfer_id: id.to_owned(),
+                    country: "".to_string(),
+                    state: "".to_string(),
+                    last_name: "".to_string(),
+                    first_name: "".to_string(),
+                };
+                let p = Pagination {
+                    page: 1,
+                    per_page: 25,
+                };
+                g.search_player(0, &self.ghin_token, q, p).await
             }
             _ => Err(anyhow!("unknown handicap source: '{}'", source)),
         };
 
         match response {
-            Ok(r) => Ok(Response::new(r)),
+            Ok(r) => {
+                let ghr = r.players[0].to_owned();
+                Ok(Response::new(ghr))
+            },
             Err(e) => {
                 error!("{:?} for {}: {}", e, source, id);
                 Err(Status::new(Code::Unknown, e.to_string()))
             }
         }
     }
+    
     async fn search_player(
         &self,
         request: Request<SearchPlayerRequest>,
