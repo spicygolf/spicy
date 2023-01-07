@@ -1,3 +1,6 @@
+import { gql } from 'apollo-server-hapi';
+import { flattenDeep, merge } from 'lodash-es';
+
 import {
   ClubMutationSigs,
   ClubQuerySigs,
@@ -55,16 +58,17 @@ import {
   RoundTypeDefs
 } from './round';
 import {
+  SharedTypeDefs
+} from './shared';
+import {
   TeeMutationSigs,
   TeeQuerySigs,
   TeeResolvers,
   TeeTypeDefs
 } from './tee';
-import { flattenDeep, merge } from 'lodash-es';
-
-import { gql } from 'apollo-server-hapi';
 
 const TypeDefs = [
+  SharedTypeDefs,
   ClubTypeDefs,
   CourseTypeDefs,
   EventTypeDefs,

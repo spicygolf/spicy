@@ -27,7 +27,7 @@ const AddCourseTabs = (props) => {
         },
         showIcon: true,
         labelStyle: {
-          textTransform: 'capitalize',
+          textTransform: 'none',
         },
       }}
     >
@@ -45,7 +45,7 @@ const AddCourseTabs = (props) => {
         name="AddCourseSearchCourse"
         component={AddCourseSearchCourse}
         options={{
-          title: 'Search',
+          title: 'GHIN®\nSearch',
           tabBarIcon: ({ focused }) => {
             return <TabIcon color={focused ? green : '#555'} name="search" />;
           },

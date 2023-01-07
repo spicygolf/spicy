@@ -1,9 +1,10 @@
-import { Doc } from './doc';
 import { aql } from 'arangojs';
 import datefnstz from 'date-fns-tz';
-import { db } from '../db/db';
 import { isEqual } from 'lodash-es';
+
+import { db } from '../db/db';
 import { refreshEdge } from '../util/ghin';
+import { Doc } from './doc';
 
 const { zonedTimeToUtc } = datefnstz;
 
@@ -74,109 +75,7 @@ class Tee extends Doc {
     return await cursor.all();
   }
 
-  async register(courseid, tee) {
-    //console.log('register tee', courseid, tee);
-    const now = this._getNowTS();
 
-    let holes = [];
-    tee.Holes.map((h) => {
-      holes.push({
-        hole: h.Number,
-        hole_id: h.HoleId,
-        length: h.Length,
-        par: h.Par,
-        handicap: h.Allocation,
-      });
-    });
-
-    let newTee = {
-      name: tee.TeeSetRatingName,
-      gender: tee.Gender,
-      holes: holes,
-      tee_id: tee.TeeSetRatingId,
-      HolesNumber: tee.HolesNumber,
-      TotalYardage: tee.TotalYardage,
-      TotalMeters: tee.TotalMeters,
-      Ratings: tee.Ratings,
-    };
-    let new_p = false,
-      changed_p = false;
-
-    const existing = await this._getExistingTee(
-      courseid,
-      tee.TeeSetRatingName,
-      tee.Gender,
-    );
-    if (existing) {
-      // check to see if existing tee has changed any data
-      if (this._existingTeeChanged(existing, newTee)) {
-        changed_p = true;
-        // set old tee to have expiration date
-        if (!existing.effective) {
-          existing.effective = {
-            start: '2017-01-01T05:00:00Z',
-            end: now,
-          };
-        } else {
-          existing.effective.end = now;
-        }
-        delete existing._rev;
-        delete existing._id;
-        this.set(existing);
-        const saveExisting = await this.save({ overwrite: true });
-        //console.log('saveExisting res', saveExisting);
-        // add effective date to newTee
-        newTee.effective = {
-          start: now,
-          end: '',
-        };
-      } else {
-        // no changes, set newTee key to existing's for overwrite
-        changed_p = false;
-        newTee._key = existing._key;
-        newTee.effective = existing.effective;
-      }
-    } else {
-      new_p = true;
-      newTee.effective = {
-        start: now,
-        end: '',
-      };
-    }
-    if (new_p || changed_p) {
-      const type = new_p ? 'new' : 'changed';
-      console.log(`register ${type} tee`, newTee);
-    }
-    //return;
-
-    this.set(newTee);
-    const ret = await this.save({ overwrite: true });
-
-    if (ret && ret._id) {
-      const teeid = ret._id;
-      // refresh edge
-      await refreshEdge('tee2course', teeid, courseid);
-    }
-  }
-
-  async unregister(courseid, tee) {
-    const now = this._getNowTS();
-    console.log('unregister tee', courseid, tee, now);
-    // set the tee.effective.end to now
-    delete tee._id;
-    delete tee._rev;
-    if (!tee.effective) {
-      tee.effective = {
-        start: '2017-01-01T05:00:00Z',
-        end: now,
-      };
-    } else {
-      tee.effective.end = now;
-    }
-    this.set(tee);
-    const saveExisting = await this.save({ overwrite: true });
-    //console.log('saveExisting res', saveExisting);
-  }
 
   async _getExistingTee(courseid, name, gender) {
     const q = aql`

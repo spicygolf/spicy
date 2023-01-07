@@ -11,7 +11,7 @@ const AddCourse = (props) => {
 
   return (
     <View style={styles.container}>
-      <GameNav title="Add Course, Tees" showBack={true} backTo={'GameSetup'} />
+      <GameNav title="Course & Tees" showBack={true} backTo={'GameSetup'} />
       <AddCourseContext.Provider
         value={{
           rkey: rkey,

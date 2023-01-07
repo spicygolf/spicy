@@ -19,14 +19,6 @@ export default gql`
           name
           short
         }
-        tee {
-          _key
-          name
-          course {
-            _key
-            name
-          }
-        }
       }
     }
   }

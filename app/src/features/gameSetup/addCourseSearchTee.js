@@ -29,95 +29,93 @@ const AddCourseSearchTee = (props) => {
     setCourse(null);
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      if (searchInputRef && searchInputRef.current) {
-        searchInputRef.current.focus();
-      }
-    }, []),
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     if (searchInputRef && searchInputRef.current) {
+  //       searchInputRef.current.focus();
+  //     }
+  //   }, []),
+  // );
 
-  const { loading, error, data } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
-    variables: {
-      pkey: currentPlayerKey,
-      gametime: game.start,
-    },
-  });
+  // const { loading, error, data } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
+  //   variables: {
+  //     pkey: currentPlayerKey,
+  //     gametime: game.start,
+  //   },
+  // });
 
-  if (loading) {
-    return <ActivityIndicator />;
-  }
-  if (error) {
-    console.log(error);
-    // TODO: error component
-    return <Text>Error</Text>;
-  }
+  // if (loading) {
+  //   return <ActivityIndicator />;
+  // }
+  // if (error) {
+  //   console.log(error);
+  //   // TODO: error component
+  //   return <Text>Error</Text>;
+  // }
 
-  console.log('faves data', data);
-  const faveTees =
-    data && data.getFavoriteTeesForPlayer ? data.getFavoriteTeesForPlayer : [];
+  // console.log('faves data', data);
+  // const faveTees = []
+  //   data?.getFavoriteTeesForPlayer ? data.getFavoriteTeesForPlayer : [];
+  const faveTees = [];
 
-  let tees = course.tees.map((tee) => {
-    const { rating } = getRatings(game.scope.holes, tee);
-    return {
-      ...tee,
-      order: rating,
-      fave: {
-        faved: find(faveTees, { _key: tee._key }) ? true : false,
-        from: { type: 'player', value: currentPlayerKey },
-        to: { type: 'tee', value: tee._key },
-        refetchQueries: [
-          {
-            query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
-            variables: {
-              pkey: currentPlayerKey,
-              gametime: game.start,
-            },
-          },
-        ],
-      },
-    };
-  });
-  tees = orderBy(tees, ['gender', 'order'], ['desc', 'desc']);
-
-  const cardHeader = (
-    <ListItem>
-      <ListItem.Content>
-        <ListItem.Title>{course.name}</ListItem.Title>
-        <ListItem.Subtitle>{`${course.city}, ${course.state}`}</ListItem.Subtitle>
-      </ListItem.Content>
-      <Icon
-        name="remove-circle"
-        color="red"
-        onPress={() => {
-          _removeCourse();
-        }}
-      />
-    </ListItem>
-  );
-
-  const cardList = (
-    <View style={styles.listContainer}>
-      <FlatList
-        data={tees}
-        renderItem={_renderCourseTee}
-        keyExtractor={(item) => item._key}
-        keyboardShouldPersistTaps={'handled'}
-      />
-    </View>
-  );
+  // let tees = course.tees.map((tee) => {
+  //   const { rating } = getRatings(game.scope.holes, tee);
+  //   return {
+  //     ...tee,
+  //     order: rating,
+  //     fave: {
+  //       faved: find(faveTees, { _key: tee._key }) ? true : false,
+  //       from: { type: 'player', value: currentPlayerKey },
+  //       to: { type: 'tee', value: tee._key },
+  //       refetchQueries: [
+  //         {
+  //           query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
+  //           variables: {
+  //             pkey: currentPlayerKey,
+  //             gametime: game.start,
+  //           },
+  //         },
+  //       ],
+  //     },
+  //   };
+  // });
+  // tees = orderBy(tees, ['gender', 'order'], ['desc', 'desc']);
+  const tees = [];
 
   return (
-    <Card>
-      {cardHeader}
-      {cardList}
-    </Card>
+    <View style={styles.container}>
+      <ListItem style={styles.course_row}>
+        <ListItem.Content>
+          <ListItem.Title>{course.display_name}</ListItem.Title>
+          <ListItem.Subtitle>{course.city_state}</ListItem.Subtitle>
+        </ListItem.Content>
+        <Icon
+          name="remove-circle"
+          color="red"
+          onPress={() => {
+            _removeCourse();
+          }}
+        />
+      </ListItem>
+      <View style={styles.listContainer}>
+        <FlatList
+          data={tees}
+          renderItem={_renderCourseTee}
+          keyExtractor={(item) => item._key}
+          keyboardShouldPersistTaps={'handled'}
+        />
+      </View>
+    </View>
   );
 };
 
 export default AddCourseSearchTee;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 10,
+  },
   cardTitle: {
     flexDirection: 'row',
     flex: 3,
@@ -129,7 +127,6 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   listContainer: {
-    marginTop: 0,
-    marginBottom: 50,
+    margin: 0,
   },
 });

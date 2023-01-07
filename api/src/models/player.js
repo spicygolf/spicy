@@ -1,16 +1,16 @@
+import { aql } from 'arangojs';
+
+import { createToken } from '../auth';
 import {
   getHandicap as getHandicapGRPC,
   searchPlayer as searchPlayerGRPC,
 } from '../clients/handicap';
-
-import { Club } from './club';
-import { Doc } from './doc';
-import { Game } from './game';
-import { aql } from 'arangojs';
-import { createToken } from '../auth';
 import { db } from '../db/db';
 import { login } from '../util/ghin';
 import { titleize } from '../util/text';
+import { Club } from './club';
+import { Doc } from './doc';
+import { Game } from './game';
 
 const collection = db.collection('players');
 
@@ -43,21 +43,10 @@ class Player extends Doc {
               ANY v._id
               GRAPH 'games'
               FILTER re.type == 'round2game'
-              LET tee = (
-                  FOR tv, te
-                  IN 1..1
-                  ANY rv._id
-                  GRAPH 'games'
-                  FILTER te.type == 'round2tee'
-                  RETURN MERGE(tv, {
-                      assigned: te.assigned
-                  })
-              )
               RETURN MERGE(rv, {
                   handicap_index: re.handicap_index,
                   game_handicap: re.game_handicap,
                   course_handicap: re.course_handicap,
-                  tee: FIRST(tee)
               })
       )
       SORT v.start DESC

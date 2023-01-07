@@ -1,8 +1,9 @@
-import { Doc } from './doc';
 import { aql } from 'arangojs';
-import { db } from '../db/db';
 import { find } from 'lodash-es';
+
+import { db } from '../db/db';
 import { pubsub } from '../server';
+import { Doc } from './doc';
 
 const collection = db.collection('games');
 const GAME_UPDATED = 'GAME_UPDATED';

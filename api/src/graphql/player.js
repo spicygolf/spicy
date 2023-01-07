@@ -68,11 +68,6 @@ input Search {
   country: String
 }
 
-input Pagination {
-  page: Int!
-  perPage: Int!
-}
-
 type SearchPlayer {
   id: String
   firstName: String
@@ -117,7 +112,7 @@ export const PlayerResolvers = {
     searchPlayer: async (_, { q, p }, context) => {
       let pl = new Player();
       const ret = await pl.searchPlayer({q, p});
-      console.log('players', ret?.players);
+      // console.log('players', ret?.players);
       return ret?.players || [];
     },
     activeGamesForPlayer: async (_, { pkey }) => {

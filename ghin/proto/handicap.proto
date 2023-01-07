@@ -2,15 +2,27 @@ syntax = "proto3";
 
 package handicap;
 
+// -----------------------------------------------------------------------------
+//  rpcs
+// -----------------------------------------------------------------------------
 service Handicap {
   // retrieve a handicap
   rpc GetHandicap(GetHandicapRequest) returns (GetHandicapResponse) {}
   // search for a player
   rpc SearchPlayer(SearchPlayerRequest) returns (SearchPlayerResponse) {}
+  // get a course
+  rpc GetCourse(GetCourseRequest) returns (Course) {}
+  // search for a course
+  rpc SearchCourse(SearchCourseRequest) returns (SearchCourseResponse) {}
+  // get tees
+  rpc GetTees(GetTeesRequest) returns (GetTeesResponse) {}
   // request access to the GPA (Golfer Product Access) API
   rpc RequestGpa(GpaRequest) returns (GpaResponse) {}
 }
 
+// -----------------------------------------------------------------------------
+//  players
+// -----------------------------------------------------------------------------
 message Club {
   string id = 1;
   string name = 2;
@@ -61,6 +73,9 @@ message SearchPlayerResponse {
   repeated GetHandicapResponse players = 1;
 }
 
+// -----------------------------------------------------------------------------
+//  GPA request
+// -----------------------------------------------------------------------------
 message GpaRequest {
   string source = 1;
   string golfer_id = 2;
@@ -71,6 +86,109 @@ message GpaResponse {
   string success = 1;
 }
 
+// -----------------------------------------------------------------------------
+//  courses
+// -----------------------------------------------------------------------------
+message GetCourse {
+  string source = 1;
+  int32 course_id = 2;
+  bool include_altered_tees = 3;
+}
+
+message GetCourseRequest {
+  GetCourse q = 1;
+}
+
+message SearchCourse {
+  string source = 1;
+  string course_name = 2;
+  string country = 3;
+  string state = 4;
+}
+
+message SearchCourseRequest {
+  SearchCourse q = 1;
+}
+
+message SearchCourseResponse {
+  repeated Course courses = 1;
+}
+
+message Course {
+  int32 course_id = 1;
+  string course_status = 2;
+  string course_name = 3;
+  int32 facility_id = 4;
+  string facility_status = 5;
+  string facility_name = 6;
+  optional string geo_location_formatted_address = 7;
+  float geo_location_latitude = 8;
+  float geo_location_longitude = 9;
+  optional string fullname = 10;
+  optional string address1 = 11;
+  optional string address2 = 12;
+  optional string city = 13;
+  optional string state = 14;
+  optional string country = 15;
+  optional string updated_on = 16;
+  optional string season_name = 17;
+  optional string season_start_date = 18;
+  optional string season_end_date = 19;
+  optional bool is_all_year = 20;
+  repeated Tee tees = 21;
+}
+
+// -----------------------------------------------------------------------------
+//  tees
+// -----------------------------------------------------------------------------
+message Hole {
+  int32 number = 1;
+  int32 hole_id = 2;
+  int32 length = 3;
+  int32 par = 4;
+  int32 allocation = 5;
+}
+
+message Rating {
+  string rating_type = 1;
+  float course_rating = 2;
+  float slope_rating = 3;
+  float bogey_rating = 4;
+}
+
+message Tee {
+  int32 tee_id = 1;
+  string tee_name = 2;
+  string gender = 3;
+  int32 holes_number = 4;
+  int32 total_yardage = 5;
+  int32 total_meters = 6;
+  int32 total_par = 7;
+  repeated Rating ratings = 8;
+  repeated Hole holes = 9;
+
+}
+
+// TODO: enums for the choice fields?
+message SearchTee {
+  string source = 1;
+  int32 course_id = 2;
+  string gender = 3;
+  string number_of_holes = 4;
+  string tee_set_status = 5;
+}
+
+message GetTeesRequest {
+  SearchTee q = 1;
+}
+
+message GetTeesResponse {
+  repeated Tee tees = 1;
+}
+
+// -----------------------------------------------------------------------------
+//  common
+// -----------------------------------------------------------------------------
 message Pagination {
   int32 page = 1;
   int32 perPage = 2;

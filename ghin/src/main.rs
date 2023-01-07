@@ -3,7 +3,9 @@ use crate::token::Token;
 use anyhow::anyhow;
 use handicap::handicap_server::{Handicap, HandicapServer};
 use handicap::{
-    GetHandicapRequest, GetHandicapResponse, SearchPlayerRequest, SearchPlayerResponse, SearchPlayer, Pagination, GpaRequest, GpaResponse,
+    GetHandicapRequest, GetHandicapResponse, GpaRequest, GpaResponse, Pagination,
+    SearchCourseRequest, SearchCourseResponse, SearchPlayer, SearchPlayerRequest,
+    SearchPlayerResponse, GetTeesRequest, GetTeesResponse, GetCourseRequest, Course
 };
 use log::{error, info};
 use tonic::{transport::Server, Code, Request, Response, Status};
@@ -36,7 +38,7 @@ impl Handicap for HandicapService {
         let response = match source.as_str() {
             "ghin" => {
                 let g = Ghin::default();
-                let  q = SearchPlayer {
+                let q = SearchPlayer {
                     source: source.to_owned(),
                     golfer_id: id.to_owned(),
                     country: "".to_string(),
@@ -58,7 +60,7 @@ impl Handicap for HandicapService {
             Ok(r) => {
                 let ghr = r.players[0].to_owned();
                 Ok(Response::new(ghr))
-            },
+            }
             Err(e) => {
                 error!("{:?} for {}: {}", e, source, id);
                 Err(Status::new(Code::Unknown, e.to_string()))
@@ -86,6 +88,78 @@ impl Handicap for HandicapService {
             Ok(r) => Ok(Response::new(r)),
             Err(e) => {
                 error!("{:?} for {:#?}: {:#?}", e, q, p);
+                Err(Status::new(Code::Unknown, e.to_string()))
+            }
+        }
+    }
+
+    async fn get_course(
+        &self,
+        request: Request<GetCourseRequest>,
+    ) -> Result<Response<Course>, Status> {
+        let q = request.get_ref().q.as_ref().unwrap().to_owned();
+
+        let response = match q.source.as_str() {
+            "ghin" => {
+                let g = Ghin::default();
+                g.get_course(0, &self.ghin_token, q.to_owned())
+                    .await
+            }
+            _ => Err(anyhow!("unknown handicap source: '{}'", q.source)),
+        };
+
+        match response {
+            Ok(r) => Ok(Response::new(r)),
+            Err(e) => {
+                error!("{:?} for {:#?}", e, q);
+                Err(Status::new(Code::Unknown, e.to_string()))
+            }
+        }
+    }
+
+    async fn search_course(
+        &self,
+        request: Request<SearchCourseRequest>,
+    ) -> Result<Response<SearchCourseResponse>, Status> {
+        let q = request.get_ref().q.as_ref().unwrap().to_owned();
+
+        let response = match q.source.as_str() {
+            "ghin" => {
+                let g = Ghin::default();
+                g.search_course(0, &self.ghin_token, q.to_owned())
+                    .await
+            }
+            _ => Err(anyhow!("unknown handicap source: '{}'", q.source)),
+        };
+
+        match response {
+            Ok(r) => Ok(Response::new(r)),
+            Err(e) => {
+                error!("{:?} for {:#?}", e, q);
+                Err(Status::new(Code::Unknown, e.to_string()))
+            }
+        }
+    }
+
+    async fn get_tees(
+        &self,
+        request: Request<GetTeesRequest>,
+    ) -> Result<Response<GetTeesResponse>, Status> {
+        let q = request.get_ref().q.as_ref().unwrap().to_owned();
+
+        let response = match q.source.as_str() {
+            "ghin" => {
+                let g = Ghin::default();
+                g.get_tees(0, &self.ghin_token, q.to_owned())
+                    .await
+            }
+            _ => Err(anyhow!("unknown handicap source: '{}'", q.source)),
+        };
+
+        match response {
+            Ok(r) => Ok(Response::new(r)),
+            Err(e) => {
+                error!("{:?} for {:#?}", e, q);
                 Err(Status::new(Code::Unknown, e.to_string()))
             }
         }

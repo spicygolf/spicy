@@ -2,23 +2,44 @@ import { Course } from '../models/course';
 
 export const CourseTypeDefs = `
 type Course {
-  _key: String!
-  course_id: Int
-  name: String
+  course_id: ID
+  course_status: String
+  course_name: String
+  facility_id: Int
+  facility_status: String
+  facility_name: String
+  fullname: String
+  geo_location_formatted_address: String
+  geo_location_latitude: Float
+  geo_location_longitude: Float
   city: String
   state: String
+  country: String
+  updated_on: String
+  season_name: String
+  season_start_date: String
+  season_end_date: String
+  is_all_year: Boolean
   tees: [Tee]
 }
 
-type CourseKey {
-  _key: String!
+input GetCourse {
+  source: String!
+  course_id: Int!
+  include_altered_tees: Boolean
 }
 
+input SearchCourse {
+  source: String!
+  country: String
+  state: String
+  course_name: String
+}
 `;
 
 export const CourseQuerySigs = `
-  getCourse(courseKey: String!): Course
-  searchCourse(q: String!): [Course]
+  getCourse(q: GetCourse!): Course
+  searchCourse(q: SearchCourse!): [Course]
 `;
 
 export const CourseMutationSigs = `
@@ -26,23 +47,22 @@ export const CourseMutationSigs = `
 
 export const CourseResolvers = {
   Query: {
-    getCourse: async (_, { courseKey }) => {
+    getCourse: async (_, { q }) => {
       const c = new Course();
-      return c.load(courseKey);
+      return c.getCourse({ q });
     },
     searchCourse: async (_, { q }) => {
-      if( q == '' ) return [];
+      if (q.course_name === '') return [];
       let c = new Course();
-      const cursor = await c.search('name', q);
-      return cursor.all();
+      const ret = await c.searchCourse({ q });
+      return ret?.courses || [];
     },
   },
-  Course: {
-    tees: async (course) => {
-      const c = new Course();
-      return c.getTees(course._id);
-    }
-  },
-  Mutation: {
-  }
+  // Course: {
+  //   tees: async (course) => {
+  //     const c = new Course();
+  //     return c.getTees(course._id);
+  //   },
+  // },
+  Mutation: {},
 };
