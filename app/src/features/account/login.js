@@ -143,39 +143,35 @@ var styles = StyleSheet.create({
     backgroundColor: '#b30000',
     flex: 1,
   },
-  logo_view: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingVertical: 7,
-  },
-  logo: {
-    height: 100,
-  },
-  welcome: {
-    color: '#ddd',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  loginView: {
-    margin: 10,
-    height: '100%',
+  error_text: {
+    color: 'red',
   },
   field: {
     flex: 1,
     marginBottom: 5,
-  },
-  label: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: 'normal',
   },
   field_input: {
     color: '#000',
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
-  error_text: {
-    color: 'red',
+  forgot_button_title: {
+    //color: '#000',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  forgot_pwd_view: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  label: {
+    color: '#999',
+    fontSize: 12,
+    fontWeight: 'normal',
+  },
+  loginView: {
+    height: '100%',
+    margin: 10,
   },
   login_button: {
     marginVertical: 15,
@@ -183,25 +179,29 @@ var styles = StyleSheet.create({
   login_button_title: {
     fontWeight: 'bold',
   },
-  forgot_pwd_view: {
+  logo: {
+    height: 100,
+  },
+  logo_view: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  forgot_button_title: {
-    //color: '#000',
-    fontWeight: 'bold',
-    fontSize: 13,
-  },
-  register_view: {
-    alignItems: 'center',
-    marginTop: 25,
-  },
-  register_label: {
-    color: '#ccc',
+    justifyContent: 'center',
+    paddingVertical: 7,
   },
   register_button_title: {
     color: '#ddd',
     fontWeight: 'bold',
     textDecorationLine: 'underline',
+  },
+  register_label: {
+    color: '#ccc',
+  },
+  register_view: {
+    alignItems: 'center',
+    marginTop: 25,
+  },
+  welcome: {
+    color: '#ddd',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 });

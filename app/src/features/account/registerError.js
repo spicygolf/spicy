@@ -47,35 +47,35 @@ const RegisterError = (props) => {
 export default RegisterError;
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#b30000',
-    flex: 1,
-  },
-  changes: {
-    paddingBottom: 20,
-  },
-  field_label: {
-    fontWeight: 'bold',
-    marginTop: 5,
-    marginBottom: 5,
-  },
-  field_input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginBottom: 10,
-  },
   button_row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 15,
   },
-  prev: {
-    width: 150,
+  changes: {
+    paddingBottom: 20,
+  },
+  container: {
+    backgroundColor: '#b30000',
+    flex: 1,
+  },
+  field_input: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    height: 40,
+    marginBottom: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
+  },
+  field_label: {
+    fontWeight: 'bold',
+    marginBottom: 5,
+    marginTop: 5,
   },
   next: {
+    width: 150,
+  },
+  prev: {
     width: 150,
   },
 });

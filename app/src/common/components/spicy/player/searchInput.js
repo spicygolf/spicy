@@ -37,24 +37,8 @@ const styles = StyleSheet.create({
   container: {
     padding: 10,
   },
-  row: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  picker_country: {
-    flex: 1,
-    marginRight: 5,
-  },
-  picker_state: {
-    flex: 1,
-  },
   field: {
     flex: 1,
-  },
-  label: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: 'normal',
   },
   field_input: {
     color: '#000',
@@ -63,5 +47,21 @@ const styles = StyleSheet.create({
   },
   field_input_txt: {
     fontSize: 16,
+  },
+  label: {
+    color: '#999',
+    fontSize: 12,
+    fontWeight: 'normal',
+  },
+  picker_country: {
+    flex: 1,
+    marginRight: 5,
+  },
+  picker_state: {
+    flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    marginBottom: 10,
   },
 });

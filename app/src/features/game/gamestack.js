@@ -77,13 +77,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 12,
   },
-  tabBar: {
-    maxHeight: 35,
-    height: 35,
-  },
-  tabBarLabel: {
-    textTransform: 'capitalize',
-  },
   gname: {
     alignItems: 'center',
     backgroundColor: 'white',
@@ -94,5 +87,12 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 12,
+  },
+  tabBar: {
+    height: 35,
+    maxHeight: 35,
+  },
+  tabBarLabel: {
+    textTransform: 'capitalize',
   },
 });

@@ -162,39 +162,39 @@ const ChangeTeams = ({ currentHole, close }) => {
 export default ChangeTeams;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 0.6,
-    padding: 20,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    alignSelf: 'center',
-    paddingBottom: 10,
-  },
-  description: {
-    paddingVertical: 10,
-  },
-  choicesList: {},
-  separator: {
-    height: 1,
-    width: '100%',
-    backgroundColor: '#ddd',
-  },
-  previewView: {
-    paddingVertical: 10,
-  },
   button_row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingTop: 40,
   },
-  prev: {
-    width: 120,
-    paddingRight: 10,
+  choicesList: {},
+  container: {
+    flex: 0.6,
+    padding: 20,
+  },
+  description: {
+    paddingVertical: 10,
   },
   next: {
-    width: 120,
     paddingLeft: 10,
+    width: 120,
+  },
+  prev: {
+    paddingRight: 10,
+    width: 120,
+  },
+  previewView: {
+    paddingVertical: 10,
+  },
+  separator: {
+    backgroundColor: '#ddd',
+    height: 1,
+    width: '100%',
+  },
+  title: {
+    alignSelf: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    paddingBottom: 10,
   },
 });

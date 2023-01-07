@@ -1,6 +1,6 @@
 {
   "env": {
-    "browser": true,
+    "browser": false,
     "es2021": true,
     "react-native/react-native": true
   },
@@ -24,10 +24,12 @@
 },
   "plugins": [
     "@babel",
+    // "@babel/eslint-plugin",
+    // "eslint-plugin-react-native",
     "react",
     "react-hooks",
     "react-native",
-    "@typescript-eslint",
+    // "@typescript-eslint",
     "simple-import-sort"
   ],
   "root": true,
@@ -39,7 +41,7 @@
     "react-native/split-platform-components": 2,
     "react-native/no-inline-styles": 2,
     "react-native/no-color-literals": 2,
-    "react-native/no-raw-text": 2,
+    "react-native/no-raw-text": "off",
     "react-native/sort-styles": [
       "error",
       "asc",

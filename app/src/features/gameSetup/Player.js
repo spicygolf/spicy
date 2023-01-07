@@ -33,9 +33,9 @@ export default Player;
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 4,
     marginHorizontal: 0,
     paddingHorizontal: 0,
+    paddingVertical: 4,
   },
   handicap: {
     fontSize: 20,

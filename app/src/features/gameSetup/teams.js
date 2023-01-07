@@ -116,9 +116,8 @@ const styles = StyleSheet.create({
   buttonView: {
     alignItems: 'center',
   },
-  textStyle: {
-    alignItems: 'center',
-    flexWrap: 'wrap',
+  chooserView: {
+    paddingTop: 20,
   },
   selectedButton: {
     backgroundColor: blue,
@@ -126,7 +125,8 @@ const styles = StyleSheet.create({
   selectedText: {
     color: 'white',
   },
-  chooserView: {
-    paddingTop: 20,
+  textStyle: {
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
 });

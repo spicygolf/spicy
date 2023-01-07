@@ -165,36 +165,36 @@ const RegisterPlayer = (props) => {
 export default RegisterPlayer;
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#b30000',
-    flex: 1,
+  button_row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 15,
   },
   changes: {
     paddingBottom: 20,
   },
+  container: {
+    backgroundColor: '#b30000',
+    flex: 1,
+  },
   field: {
     flex: 1,
     marginBottom: 15,
-  },
-  label: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: 'normal',
   },
   field_input: {
     color: '#000',
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
-  button_row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 15,
-  },
-  prev: {
-    width: 150,
+  label: {
+    color: '#999',
+    fontSize: 12,
+    fontWeight: 'normal',
   },
   next: {
+    width: 150,
+  },
+  prev: {
     width: 150,
   },
 });

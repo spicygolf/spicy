@@ -132,6 +132,11 @@ const RegisterBasics = (props) => {
 export default RegisterBasics;
 
 const styles = StyleSheet.create({
+  button_row: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    padding: 15,
+  },
   container: {
     backgroundColor: '#b30000',
     flex: 1,
@@ -140,24 +145,19 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: 15,
   },
-  label: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: 'normal',
-  },
   field_input: {
     color: '#000',
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
-  login_button: {
-    marginTop: 15,
-    marginBottom: 15,
+  label: {
+    color: '#999',
+    fontSize: 12,
+    fontWeight: 'normal',
   },
-  button_row: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    padding: 15,
+  login_button: {
+    marginBottom: 15,
+    marginTop: 15,
   },
   next: {
     width: 150,

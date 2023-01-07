@@ -145,15 +145,15 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: 'red',
   },
-  sure_txt: {
-    paddingVertical: 10,
-  },
   button_row: {
     flexDirection: 'row',
   },
   no_button: {
     flex: 1,
     paddingRight: 10,
+  },
+  sure_txt: {
+    paddingVertical: 10,
   },
   yes_button: {
     flex: 1,

@@ -38,17 +38,17 @@ const ClearCache = (props) => {
 export default ClearCache;
 
 const styles = StyleSheet.create({
-  note: {
-    fontSize: 14,
-    margin: 10,
-    color: dark,
-  },
   button: {
     margin: 10,
   },
   message: {
-    minHeight: 40,
     marginTop: 20,
+    minHeight: 40,
     textAlign: 'center',
+  },
+  note: {
+    color: dark,
+    fontSize: 14,
+    margin: 10,
   },
 });

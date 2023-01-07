@@ -12,7 +12,7 @@ const GhinSearchCourse = ({ search, setSearch, course, setCourse, tee, setTee })
         course,
         setCourse,
         tee,
-        setTee
+        setTee,
       }}
     >
       <GhinCourseSearchInput />

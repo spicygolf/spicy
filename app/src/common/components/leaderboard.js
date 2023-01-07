@@ -299,42 +299,50 @@ const headerHeight = 75;
 const rowHeight = 26;
 
 var styles = StyleSheet.create({
+  buttonContainer: {
+    maxHeight: 24,
+    zIndex: 5,
+  },
+  buttonText: {
+    fontSize: 12,
+  },
   container: {
-    marginHorizontal: 10,
     flex: 1,
+    marginHorizontal: 10,
   },
   header: {
+    alignItems: 'center',
     flexDirection: 'row',
     height: headerHeight,
-    alignItems: 'center',
     //borderWidth: 1,
   },
-  holeTitleView: {
-    height: headerHeight,
+  holeCell: {
+    color: '#666',
+    fontSize: 13,
+  },
+  holeCellView: {
+    alignItems: 'center',
     flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'flex-end',
+    height: rowHeight,
+    justifyContent: 'center',
     //borderWidth: 1,
   },
   holeTitle: {
     alignSelf: 'center',
     color: '#666',
   },
-  buttonContainer: {
-    maxHeight: 24,
-    zIndex: 5,
+  holeTitleView: {
+    flex: 1,
+    flexDirection: 'column',
+    height: headerHeight,
+    justifyContent: 'flex-end',
+    //borderWidth: 1,
   },
-  selectedButton: {
-    backgroundColor: blue,
-  },
-  buttonText: {
-    fontSize: 12,
-  },
-  selectedButtonText: {
-    color: 'white',
-  },
-  rotate: {
-    transform: [{ rotate: '270deg' }],
+  playerName: {
+    color: '#666',
+    maxWidth: headerHeight,
+    width: headerHeight,
+    //borderWidth: 1,
   },
   playerNameView: {
     flex: 1,
@@ -342,28 +350,29 @@ var styles = StyleSheet.create({
     justifyContent: 'center',
     //borderWidth: 1,
   },
-  playerName: {
-    maxWidth: headerHeight,
-    width: headerHeight,
-    color: '#666',
-    //borderWidth: 1,
+  pop: {
+    paddingVertical: 0.5,
+  },
+  popView: {
+    alignItems: 'flex-start',
+    flex: 0.2,
+    paddingTop: 3,
+  },
+  rotate: {
+    transform: [{ rotate: '270deg' }],
   },
   row: {
-    minHeight: rowHeight,
-    height: rowHeight,
     flexDirection: 'row',
+    height: rowHeight,
+    minHeight: rowHeight,
     //paddingVertical: 5,
   },
-  holeCellView: {
-    flex: 1,
-    height: rowHeight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    //borderWidth: 1,
-  },
-  holeCell: {
-    color: '#666',
+  scoreCell: {
     fontSize: 13,
+    marginRight: 10,
+    minWidth: 40,
+    paddingRight: 10,
+    textAlign: 'right',
   },
   scorePopContainer: {
     flexDirection: 'row',
@@ -373,20 +382,11 @@ var styles = StyleSheet.create({
     alignItems: 'flex-end',
     flex: 0.8,
   },
-  scoreCell: {
-    fontSize: 13,
-    textAlign: 'right',
-    marginRight: 10,
-    paddingRight: 10,
-    minWidth: 40,
+  selectedButton: {
+    backgroundColor: blue,
   },
-  popView: {
-    alignItems: 'flex-start',
-    paddingTop: 3,
-    flex: 0.2,
-  },
-  pop: {
-    paddingVertical: 0.5,
+  selectedButtonText: {
+    color: 'white',
   },
   totalRow: {
     backgroundColor: '#ddd',

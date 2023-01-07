@@ -129,18 +129,18 @@ const Players = (props) => {
 export default Players;
 
 const styles = StyleSheet.create({
-  title: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#555',
+  listContainer: {
+    marginBottom: 10,
+    marginTop: 0,
   },
   player: {
     flex: 6,
   },
-  listContainer: {
-    marginTop: 0,
-    marginBottom: 10,
+  title: {
+    alignItems: 'center',
+    color: '#555',
+    fontSize: 18,
+    fontWeight: 'bold',
+    justifyContent: 'center',
   },
 });

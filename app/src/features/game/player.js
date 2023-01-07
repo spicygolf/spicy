@@ -61,18 +61,17 @@ const Player = (props) => {
 export default Player;
 
 var styles = StyleSheet.create({
+  hole_score: {
+    flex: 1,
+  },
   player_container: {
     padding: 10,
   },
-  player_score_container: {
-    flexDirection: 'row',
-    flex: 2,
-  },
   player_junk_container: {
-    paddingTop: 5,
     flex: 4,
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    paddingTop: 5,
   },
   player_name: {
     flex: 1,
@@ -82,11 +81,12 @@ var styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  wolf: {
-    fontSize: 12,
-    color: blue,
+  player_score_container: {
+    flexDirection: 'row',
+    flex: 2,
   },
-  hole_score: {
-    flex: 1,
+  wolf: {
+    color: blue,
+    fontSize: 12,
   },
 });

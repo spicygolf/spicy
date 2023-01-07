@@ -72,21 +72,21 @@ const Impersonate = (props) => {
 export default Impersonate;
 
 const styles = StyleSheet.create({
+  button: {
+    backgroundColor: 'red',
+    margin: 10,
+  },
+  field_input: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    color: '#000',
+    height: 40,
+    marginBottom: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
+  },
   field_label: {
     fontWeight: 'bold',
     margin: 5,
-  },
-  field_input: {
-    height: 40,
-    color: '#000',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginBottom: 10,
-  },
-  button: {
-    margin: 10,
-    backgroundColor: 'red',
   },
 });

@@ -96,42 +96,42 @@ const Forgot = (props) => {
 export default Forgot;
 
 var styles = StyleSheet.create({
+  back_to_login_view: {
+    justifyContent: 'flex-start',
+    margin: 15,
+  },
+  back_to_text: {
+    color: '#ccc',
+  },
   container: {
     backgroundColor: '#b30000',
     flex: 1,
   },
-  loginView: {
-    margin: 10,
-    height: '100%',
-  },
   field: {
     flex: 1,
     marginBottom: 15,
-  },
-  label: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: 'normal',
   },
   field_input: {
     color: '#000',
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
+  label: {
+    color: '#999',
+    fontSize: 12,
+    fontWeight: 'normal',
+  },
+  loginView: {
+    height: '100%',
+    margin: 10,
+  },
   login_button: {
-    marginTop: 15,
     marginBottom: 15,
-  },
-  back_to_text: {
-    color: '#ccc',
-  },
-  back_to_login_view: {
-    margin: 15,
-    justifyContent: 'flex-start',
+    marginTop: 15,
   },
   login_text: {
+    color: '#fff',
     fontWeight: 'bold',
     marginLeft: 6,
-    color: '#fff',
   },
 });

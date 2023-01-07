@@ -115,28 +115,28 @@ const Score = (props) => {
 export default Score;
 
 var styles = StyleSheet.create({
-  score_container: {
-    padding: 5,
-    flex: 1,
-  },
   content_container: {
     flex: 1,
   },
-  warnings: {
-    marginHorizontal: 9,
-    paddingVertical: 2,
-    paddingHorizontal: 5,
-    backgroundColor: 'yellow',
-    borderWidth: 2,
-    borderColor: '#ddd',
+  score_container: {
+    flex: 1,
+    padding: 5,
   },
   warning: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   warningIcon: {},
   warningTxt: {
-    paddingLeft: 5,
     color: '#666',
+    paddingLeft: 5,
+  },
+  warnings: {
+    backgroundColor: 'yellow',
+    borderColor: '#ddd',
+    borderWidth: 2,
+    marginHorizontal: 9,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
   },
 });

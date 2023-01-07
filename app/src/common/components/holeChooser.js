@@ -59,12 +59,12 @@ const HoleChooser = ({ holes, onChange, title, active }) => {
 export default HoleChooser;
 
 const styles = StyleSheet.create({
-  rowOfHoles: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
   holeButton: {
     margin: 1,
     minWidth: '10%',
+  },
+  rowOfHoles: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });

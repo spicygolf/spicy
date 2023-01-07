@@ -112,11 +112,11 @@ const Account = (props) => {
 export default Account;
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 11,
-    color: light,
-  },
   subtitle: {
     marginTop: 3,
+  },
+  title: {
+    color: light,
+    fontSize: 11,
   },
 });

@@ -85,16 +85,16 @@ const SettingsHome = (props) => {
 export default SettingsHome;
 
 const styles = StyleSheet.create({
+  app_info: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginHorizontal: 15,
+    marginVertical: 10,
+  },
   container: {
     flex: 1,
   },
   title: {
     color: dark,
-  },
-  app_info: {
-    marginHorizontal: 15,
-    marginVertical: 10,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
 });

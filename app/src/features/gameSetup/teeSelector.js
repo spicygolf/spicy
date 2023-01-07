@@ -53,10 +53,10 @@ export default TeeSelector;
 const styles = StyleSheet.create({
   button: {
     justifyContent: 'flex-start',
-    paddingTop: 3,
     paddingBottom: 3,
     paddingLeft: 0,
     paddingRight: 0,
+    paddingTop: 3,
   },
   title: {
     fontSize: 14,

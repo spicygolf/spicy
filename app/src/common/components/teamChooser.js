@@ -290,23 +290,23 @@ export default TeamChooser;
 
 const styles = StyleSheet.create({
   container: {},
-  teamTitleView: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-  },
-  teamChooserView: {
-    flex: 10,
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-  },
-  title: {
-    textDecorationLine: 'underline',
-    paddingBottom: 20,
-  },
   icon: {
     padding: 10,
   },
   player_name: {
     paddingTop: 15,
+  },
+  teamChooserView: {
+    flex: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  teamTitleView: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  title: {
+    paddingBottom: 20,
+    textDecorationLine: 'underline',
   },
 });

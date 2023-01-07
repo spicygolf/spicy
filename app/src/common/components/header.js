@@ -18,12 +18,12 @@ export default Header;
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingBottom: 10,
     paddingLeft: 10,
     paddingRight: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingTop: 20,
   },
   title: {
     color: '#fff',

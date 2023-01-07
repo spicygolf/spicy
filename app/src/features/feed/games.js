@@ -92,11 +92,11 @@ const Games = (props) => {
 export default Games;
 
 const styles = StyleSheet.create({
-  title: {
-    color: '#111',
-  },
   subtitle: {
     color: '#666',
     fontSize: 12,
+  },
+  title: {
+    color: '#111',
   },
 });

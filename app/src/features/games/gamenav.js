@@ -41,21 +41,21 @@ const GameNav = (props) => {
 export default GameNav;
 
 const styles = StyleSheet.create({
-  container: {},
   GameNav: {
     flexDirection: 'row',
     paddingHorizontal: 5,
   },
+  container: {},
   left: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  right: {
     flex: 1,
     justifyContent: 'center',
   },
   middle: {
     flex: 5,
+    justifyContent: 'center',
+  },
+  right: {
+    flex: 1,
     justifyContent: 'center',
   },
   title: {

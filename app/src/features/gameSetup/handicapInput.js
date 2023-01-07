@@ -61,16 +61,18 @@ const HandicapInput = (props) => {
 export default HandicapInput;
 
 const styles = StyleSheet.create({
-  fields_row: {
-    flexDirection: 'row',
-  },
   field: {
     flex: 1,
   },
-  label: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: 'normal',
+  field_display: {
+    fontSize: 18,
+    justifyContent: 'center',
+    padding: 5,
+  },
+  field_display_view: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingBottom: 22,
   },
   field_input: {
     color: '#000',
@@ -80,14 +82,12 @@ const styles = StyleSheet.create({
   field_input_txt: {
     fontSize: 16,
   },
-  field_display_view: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingBottom: 22,
+  fields_row: {
+    flexDirection: 'row',
   },
-  field_display: {
-    fontSize: 18,
-    justifyContent: 'center',
-    padding: 5,
+  label: {
+    color: '#999',
+    fontSize: 12,
+    fontWeight: 'normal',
   },
 });

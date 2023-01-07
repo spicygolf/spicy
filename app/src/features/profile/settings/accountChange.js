@@ -94,22 +94,22 @@ const AccountChange = (props) => {
 export default AccountChange;
 
 const styles = StyleSheet.create({
-  label: {
-    fontSize: 11,
-    fontWeight: 'normal',
-    color: light,
+  auth_note: {
+    color: red,
   },
-  button: {
-    margin: 10,
+  auth_txt: {
+    marginBottom: 15,
+    marginHorizontal: 10,
   },
   auth_view: {
     marginVertical: 15,
   },
-  auth_txt: {
-    marginHorizontal: 10,
-    marginBottom: 15,
+  button: {
+    margin: 10,
   },
-  auth_note: {
-    color: red,
+  label: {
+    color: light,
+    fontSize: 11,
+    fontWeight: 'normal',
   },
 });

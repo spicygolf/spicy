@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContainer: {
-    marginTop: 0,
     marginBottom: 50,
+    marginTop: 0,
   },
 });

@@ -180,31 +180,31 @@ const HoleScore = (props) => {
 export default HoleScore;
 
 const styles = StyleSheet.create({
-  score_option: {
-    width: scoreSize,
-    height: scoreSize,
-    padding: 1,
-  },
-  score_option_selected: {
-    backgroundColor: blue,
-  },
-  score_option_not_selected: {
-    backgroundColor: '#ddd',
-  },
-  touchable: {
-    height: '100%',
-    width: '100%',
-  },
   hole_score_text: {
     fontSize: 24,
-  },
-  hole_score_text_selected: {
-    color: 'white',
   },
   hole_score_text_not_selected: {
     color: '#111',
   },
+  hole_score_text_selected: {
+    color: 'white',
+  },
   pop_text: {
     fontSize: 14,
+  },
+  score_option: {
+    height: scoreSize,
+    padding: 1,
+    width: scoreSize,
+  },
+  score_option_not_selected: {
+    backgroundColor: '#ddd',
+  },
+  score_option_selected: {
+    backgroundColor: blue,
+  },
+  touchable: {
+    height: '100%',
+    width: '100%',
   },
 });

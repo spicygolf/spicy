@@ -81,17 +81,17 @@ const TeamTotals = (props) => {
 export default TeamTotals;
 
 const styles = StyleSheet.create({
+  totalsText: {
+    //fontWeight: 'bold',
+    //fontSize: 16,
+  },
   totalsView: {
     flexDirection: 'row',
     flex: 2,
     justifyContent: 'space-around',
-    paddingTop: 5,
     paddingBottom: 5,
     paddingLeft: 10,
     paddingRight: 10,
-  },
-  totalsText: {
-    //fontWeight: 'bold',
-    //fontSize: 16,
+    paddingTop: 5,
   },
 });

@@ -85,26 +85,26 @@ export const ToggleHole = ({ round_id, hole, type, gotit, updateCache }) => {
 
 var styles = StyleSheet.create({
   hole: {
-    margin: 3,
     flex: 1,
+    margin: 3,
   },
-  yes: {
-    borderColor: '#000',
-    borderWidth: 2,
+  holeText: {
+    fontSize: 20,
+    textAlign: 'center',
   },
   no: {
     borderColor: '#aaa',
     borderWidth: 1,
   },
-  holeText: {
-    textAlign: 'center',
-    fontSize: 20,
+  noText: {
+    color: '#aaa',
+  },
+  yes: {
+    borderColor: '#000',
+    borderWidth: 2,
   },
   yesText: {
     color: '#000',
     fontWeight: 'bold',
-  },
-  noText: {
-    color: '#aaa',
   },
 });

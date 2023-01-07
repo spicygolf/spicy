@@ -50,13 +50,13 @@ export default OptionNum;
 
 const styles = StyleSheet.create({
   field_input: {
-    height: 40,
-    color: '#000',
     borderColor: '#ccc',
     borderWidth: 1,
+    color: '#000',
+    flex: 1,
+    height: 40,
+    marginBottom: 10,
     paddingLeft: 10,
     paddingRight: 10,
-    marginBottom: 10,
-    flex: 1,
   },
 });

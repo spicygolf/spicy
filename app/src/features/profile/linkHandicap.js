@@ -158,47 +158,47 @@ const LinkHandicap = (props) => {
 export default LinkHandicap;
 
 const styles = StyleSheet.create({
-  container: {
-    //flex: 1,
-  },
-  card_wrapper: {
-    height: '96%',
-  },
-  ghin_only: {
-    fontSize: 11,
-    marginTop: 5,
-    marginHorizontal: 18,
-  },
-  row: {
-    flexDirection: 'row',
-    marginVertical: 5,
-    alignItems: 'baseline',
-  },
-  label: {
-    fontSize: 12,
-    color: '#999',
-    flex: 1,
-  },
-  value: {
-    //fontWeight: 'bold',
-    flex: 4,
-  },
-  note_view: {
-    marginTop: 25,
-  },
-  note: {
-    textAlign: 'center',
-    fontSize: 11,
-  },
   button_row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 15,
   },
-  prev: {
-    width: 150,
+  card_wrapper: {
+    height: '96%',
+  },
+  container: {
+    //flex: 1,
+  },
+  ghin_only: {
+    fontSize: 11,
+    marginHorizontal: 18,
+    marginTop: 5,
+  },
+  label: {
+    color: '#999',
+    flex: 1,
+    fontSize: 12,
   },
   next: {
     width: 150,
+  },
+  note: {
+    fontSize: 11,
+    textAlign: 'center',
+  },
+  note_view: {
+    marginTop: 25,
+  },
+  prev: {
+    width: 150,
+  },
+  row: {
+    alignItems: 'baseline',
+    flexDirection: 'row',
+    marginVertical: 5,
+  },
+  value: {
+    //fontWeight: 'bold',
+    flex: 4,
   },
 });

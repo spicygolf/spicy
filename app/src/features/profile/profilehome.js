@@ -110,60 +110,60 @@ const ProfileHome = (props) => {
 export default ProfileHome;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  button_view: {
+    marginTop: 40,
   },
   card_wrapper: {
     marginBottom: 20,
   },
-  name_view: {
-    marginVertical: 10,
-    alignItems: 'center',
-  },
-  name: {
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 16,
-    paddingBottom: 3,
-  },
-  short: {
-    textAlign: 'center',
-    fontSize: 12,
-    paddingBottom: 10,
-  },
-  subname_view: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
   },
   handicap_view: {
     flex: 1,
-  },
-  source: {
-    alignSelf: 'center',
   },
   index: {
     alignSelf: 'center',
     fontSize: 28,
     fontWeight: 'bold',
   },
+  name: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    paddingBottom: 3,
+    textAlign: 'center',
+  },
+  name_view: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  no_hc_link_txt: {
+    alignSelf: 'center',
+    fontSize: 11,
+  },
+  no_hc_link_view: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
   revDate: {
     alignSelf: 'center',
     fontSize: 8,
   },
-  no_hc_link_view: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  short: {
+    fontSize: 12,
+    paddingBottom: 10,
+    textAlign: 'center',
   },
-  no_hc_link_txt: {
-    fontSize: 11,
+  source: {
     alignSelf: 'center',
   },
   stats_view: {
+    alignItems: 'center',
     flexDirection: 'row',
     flex: 2,
-    alignItems: 'center',
     justifyContent: 'center',
   },
-  button_view: {
-    marginTop: 40,
+  subname_view: {
+    flexDirection: 'row',
   },
 });

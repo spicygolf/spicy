@@ -357,33 +357,28 @@ const TeamMultipliers = (props) => {
 export default TeamMultipliers;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 5,
-    paddingBottom: 5,
-    paddingHorizontal: 5,
-  },
-  icon: {
-    padding: 5,
-  },
   button: {
-    padding: 2,
-    marginLeft: 5,
     borderColor: red,
+    marginLeft: 5,
+    padding: 2,
   },
   buttonTitle: {
-    paddingTop: 5,
+    fontSize: 13,
     paddingBottom: 5,
     paddingRight: 10,
-    fontSize: 13,
+    paddingTop: 5,
+  },
+  button_row: {
+    flexDirection: 'row',
+  },
+  container: {
+    flex: 1,
+    paddingBottom: 5,
+    paddingHorizontal: 5,
+    paddingTop: 5,
   },
   field: {
     minWidth: '70%',
-  },
-  label: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: 'normal',
   },
   field_input: {
     color: '#000',
@@ -393,21 +388,26 @@ const styles = StyleSheet.create({
   field_input_txt: {
     fontSize: 16,
   },
-  button_row: {
-    flexDirection: 'row',
+  icon: {
+    padding: 5,
+  },
+  label: {
+    color: '#999',
+    fontSize: 12,
+    fontWeight: 'normal',
   },
   no_button_container: {
     flex: 1,
     paddingRight: 10,
   },
+  overrideTxt: {
+    color: '#999',
+    fontSize: 9,
+    paddingTop: 10,
+    textAlign: 'center',
+  },
   yes_button_container: {
     flex: 1,
     paddingLeft: 10,
-  },
-  overrideTxt: {
-    fontSize: 9,
-    color: '#999',
-    paddingTop: 10,
-    textAlign: 'center',
   },
 });

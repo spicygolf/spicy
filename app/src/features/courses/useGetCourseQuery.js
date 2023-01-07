@@ -22,7 +22,7 @@ const query = gql`
       season_start_date
       season_end_date
       is_all_year
-          tees {
+      tees {
         tee_id
         tee_name
         gender

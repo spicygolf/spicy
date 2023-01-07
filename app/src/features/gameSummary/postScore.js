@@ -189,12 +189,85 @@ const PostScore = (props) => {
 export default PostScore;
 
 const styles = StyleSheet.create({
+  adjusted: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  adjustedTxt: {
+    alignSelf: 'center',
+    borderColor: 'transparent',
+    borderWidth: 1,
+    color: '#000',
+    fontSize: 12,
+    height: 21,
+    paddingHorizontal: 15,
+    paddingVertical: 2,
+    textAlign: 'right',
+  },
+  buttonStyle: {
+    width: 150,
+  },
+  buttonTitle: {
+    fontSize: 14,
+  },
   container: {
     flex: 1,
     marginTop: 0,
   },
-  wrapper: {
+  courseHandicap: {
+    fontSize: 11,
+  },
+  flatList: {},
+  flatListView: {
     flex: 1,
+  },
+  gross: {
+    flex: 1,
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
+  grossTxt: {
+    alignSelf: 'center',
+    fontSize: 12,
+  },
+  hdcp: {
+    flex: 1,
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
+  hdcpTxt: {
+    alignSelf: 'center',
+    color: '#666',
+    fontSize: 12,
+  },
+  hdr: {
+    backgroundColor: '#eee',
+    color: '#333',
+    flex: 1,
+    fontSize: 12,
+    paddingVertical: 5,
+    textAlign: 'center',
+  },
+  hole: {
+    flex: 1,
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
+  holeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  holeTxt: {
+    alignSelf: 'center',
+    color: '#666',
+    fontSize: 12,
+  },
+  isAdjusted: {
+    borderColor: '#111',
+    borderWidth: 1,
+  },
+  playerName: {
+    fontWeight: 'bold',
   },
   playerView: {
     flexDirection: 'row',
@@ -205,90 +278,17 @@ const styles = StyleSheet.create({
     flex: 3,
   },
   postRoundButton: {
-    flex: 4,
     alignItems: 'flex-end',
-  },
-  buttonStyle: {
-    width: 150,
-  },
-  buttonTitle: {
-    fontSize: 14,
-  },
-  flatListView: {
-    flex: 1,
-  },
-  flatList: {},
-  playerName: {
-    fontWeight: 'bold',
-  },
-  courseHandicap: {
-    fontSize: 11,
-  },
-  postingTxt: {
-    fontSize: 10,
+    flex: 4,
   },
   postingError: {
     color: 'red',
     fontWeight: 'bold',
   },
-  holeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  postingTxt: {
+    fontSize: 10,
   },
-  hdr: {
+  wrapper: {
     flex: 1,
-    textAlign: 'center',
-    paddingVertical: 5,
-    color: '#333',
-    backgroundColor: '#eee',
-    fontSize: 12,
-  },
-  hole: {
-    flex: 1,
-    textAlign: 'center',
-    justifyContent: 'center',
-  },
-  holeTxt: {
-    alignSelf: 'center',
-    color: '#666',
-    fontSize: 12,
-  },
-  gross: {
-    flex: 1,
-    textAlign: 'center',
-    justifyContent: 'center',
-  },
-  grossTxt: {
-    alignSelf: 'center',
-    fontSize: 12,
-  },
-  hdcp: {
-    flex: 1,
-    textAlign: 'center',
-    justifyContent: 'center',
-  },
-  hdcpTxt: {
-    alignSelf: 'center',
-    color: '#666',
-    fontSize: 12,
-  },
-  adjusted: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  adjustedTxt: {
-    height: 21,
-    color: '#000',
-    borderColor: 'transparent',
-    borderWidth: 1,
-    paddingHorizontal: 15,
-    paddingVertical: 2,
-    textAlign: 'right',
-    alignSelf: 'center',
-    fontSize: 12,
-  },
-  isAdjusted: {
-    borderColor: '#111',
-    borderWidth: 1,
   },
 });

@@ -108,15 +108,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
+    margin: 5,
+    paddingBottom: 5,
     paddingLeft: 5,
     paddingRight: 5,
     paddingTop: 0,
-    paddingBottom: 5,
-    margin: 5,
   },
   settings_totals: {
     flexDirection: 'row',
-    paddingHorizontal: 5,
     marginHorizontal: 5,
+    paddingHorizontal: 5,
   },
 });

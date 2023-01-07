@@ -137,26 +137,26 @@ export default Games;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: 'white',
-  },
-  newGameButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  newGameText: {
-    color: blue,
-    paddingLeft: 5,
+    flex: 1,
   },
   gamesSubMenu: {
     alignItems: 'center',
     paddingTop: 10,
   },
-  title: {
-    color: '#111',
+  newGameButton: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  newGameText: {
+    color: blue,
+    paddingLeft: 5,
   },
   subtitle: {
     color: '#666',
     fontSize: 12,
+  },
+  title: {
+    color: '#111',
   },
 });

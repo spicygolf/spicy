@@ -56,7 +56,6 @@ const AddCourseSearchCourse = (props) => {
   //   }, []),
   // );
 
-
   // const header =
   //   data && data.searchCourse && data.searchCourse.length ? (
   //     <ListHeader title="Courses" />
@@ -84,12 +83,12 @@ export default AddCourseSearchCourse;
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 15,
     flex: 1,
+    paddingHorizontal: 15,
   },
   title: {
+    color: '#555',
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#555',
   },
 });
