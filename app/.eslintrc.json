@@ -1,5 +1,4 @@
 {
-  "NOTE": "This seeems to not be active, in favor of .eslint.js",
   "env": {
     "browser": true,
     "es2021": true,
@@ -8,23 +7,30 @@
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "@react-native-community"
   ],
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
   "parserOptions": {
+    "babelOptions": {
+      "presets": ["@babel/preset-react"]
+    },
     "ecmaFeatures": {
       "jsx": true
     },
     "ecmaVersion": 12,
+    "requireConfigFile": false,
     "sourceType": "module"
 },
   "plugins": [
+    "@babel",
     "react",
     "react-hooks",
     "react-native",
     "@typescript-eslint",
     "simple-import-sort"
   ],
+  "root": true,
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/prop-types": 0,
@@ -43,6 +49,11 @@
       }
     ],
     "simple-import-sort/imports": "error"
+  },
+  "settings": {
+    "react": {
+        "version": "detect"
+    }
   }
 }
 

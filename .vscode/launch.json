@@ -5,6 +5,47 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "api",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/api",
+      "runtimeExecutable": "${workspaceFolder}/api/node_modules/nodemon/bin/nodemon.js",
+      "runtimeArgs":[
+        "--watch", "${workspaceFolder}/api",
+        "--experimental-specifier-resolution=node",
+        "${workspaceFolder}/api/src/server.js"
+      ],
+    },
+    {
+      "name": "ghin",
+      "type": "lldb",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/ghin/",
+      "cargo": {
+        "args": [
+          "build",
+          "--manifest-path=${workspaceFolder}/ghin/Cargo.toml",
+          "--bin=ghin",
+          "--package=ghin"
+        ],
+        "filter": {
+          "name": "ghin",
+          "kind": "bin"
+        }
+      },
+      "console": "internalConsole",
+      "env": {
+        "RUST_LOG": "ghin=debug",
+      },
+      "args": []
+    },
+    {
+      "name": "app",
+      "cwd": "${workspaceFolder}/app",
+      "type": "reactnative",
+      "request": "attach"
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "app tests",
@@ -20,34 +61,6 @@
       "program": "${workspaceFolder}/test/common/utils/score.diff_options_diff_holes.test.js",
       "args": [
       ],
-    },
-    {
-      "name": "app",
-      "cwd": "${workspaceFolder}",
-      "type": "reactnative",
-      "request": "attach"
-    },
-    {
-      "type": "lldb",
-      "request": "launch",
-      "name": "ghin",
-      "cwd": "${workspaceFolder}/ghin/",
-      "cargo": {
-        "args": [
-          "build",
-          "--manifest-path=${workspaceFolder}/ghin/Cargo.toml",
-          "--bin=ghin",
-          "--package=ghin"
-        ],
-        "filter": {
-          "name": "ghin",
-          "kind": "bin"
-        }
-      },
-      "env": {
-        "RUST_LOG": "ghin=debug",
-      },
-      "args": []
     },
     {
       "type": "lldb",
@@ -67,16 +80,6 @@
       },
       "args": [],
       "cwd": "${workspaceFolder}/ghin"
-    },
-    {
-      "name": "api",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "nodemon",
-      "runtimeArgs":[
-        "--experimental-specifier-resolution=node",
-        "${workspaceFolder}/api/src/server.js"
-      ],
     },
     {
       "type": "node",
