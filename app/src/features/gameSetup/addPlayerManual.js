@@ -157,9 +157,17 @@ const AddPlayerManual = (props) => {
 export default AddPlayerManual;
 
 const styles = StyleSheet.create({
-  handicap_field_container: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  add: {
+    marginTop: 30,
+  },
+  field_input: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    color: '#000',
+    height: 40,
+    marginBottom: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   field_input_view: {
     flex: 1,
@@ -167,24 +175,16 @@ const styles = StyleSheet.create({
   },
   field_label: {
     fontWeight: 'bold',
-    marginTop: 5,
     marginBottom: 5,
+    marginTop: 5,
   },
-  field_input: {
-    height: 40,
-    color: '#000',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginBottom: 10,
+  handicap_field_container: {
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   handicap_field_input: {
-    width: 70,
     alignItems: 'center',
     marginLeft: 20,
-  },
-  add: {
-    marginTop: 30,
+    width: 70,
   },
 });

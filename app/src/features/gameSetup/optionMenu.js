@@ -63,15 +63,15 @@ const OptionMenu = (props) => {
 export default OptionMenu;
 
 const styles = StyleSheet.create({
-  container: {
-    // width: '100%',
-  },
   buttonStyle: {
-    borderWidth: 1,
-    borderColor: green,
+    alignSelf: 'flex-end',
     backgroundColor: '#fff',
+    borderColor: green,
+    borderWidth: 1,
     height: 40,
     width: '80%',
-    alignSelf: 'flex-end',
+  },
+  container: {
+    // width: '100%',
   },
 });

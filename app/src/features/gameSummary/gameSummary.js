@@ -93,47 +93,47 @@ const GameSummary = (props) => {
 export default GameSummary;
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    paddingVertical: 3,
-  },
-  player: {
-    flex: 3,
-    justifyContent: 'flex-start',
-  },
-  thru: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  thruTxt: {
-    fontSize: 11,
-  },
   gross: {
-    flex: 1,
     alignItems: 'center',
+    flex: 1,
   },
   grossToPar: {
-    flex: 1,
     alignItems: 'center',
-  },
-  points: {
     flex: 1,
-    alignItems: 'center',
-  },
-  number: {
-    alignItems: 'flex-end',
-    paddingRight: 6,
   },
   headerTxt: {
     color: '#666',
     fontSize: 12,
     paddingBottom: 5,
   },
+  number: {
+    alignItems: 'flex-end',
+    paddingRight: 6,
+  },
+  player: {
+    flex: 3,
+    justifyContent: 'flex-start',
+  },
+  points: {
+    alignItems: 'center',
+    flex: 1,
+  },
   post_button: {
     marginTop: 25,
   },
   post_button_title: {
     fontSize: 15,
+  },
+  row: {
+    flexDirection: 'row',
+    paddingVertical: 3,
+  },
+  thru: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  thruTxt: {
+    fontSize: 11,
   },
 });

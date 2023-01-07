@@ -26,16 +26,16 @@ const BackToLogin = (props) => {
 export default BackToLogin;
 
 const styles = StyleSheet.create({
-  login_view: {
-    paddingTop: 15,
-    paddingLeft: 15,
+  login_button: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginLeft: 6,
   },
   login_text: {
     color: '#ccc',
   },
-  login_button: {
-    fontWeight: 'bold',
-    marginLeft: 6,
-    color: '#fff',
+  login_view: {
+    paddingLeft: 15,
+    paddingTop: 15,
   },
 });

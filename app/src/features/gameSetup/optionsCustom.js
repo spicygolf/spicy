@@ -150,30 +150,30 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
-  title: {
-    alignSelf: 'center',
-    paddingVertical: 10,
-    flexDirection: 'row',
+  label: {
+    paddingRight: 10,
   },
   name: {
     fontWeight: 'bold',
     paddingHorizontal: 10,
   },
+  optionContainer: {
+    paddingVertical: 10,
+  },
   optionList: {
     flexGrow: 0,
     paddingBottom: 20,
   },
-  optionContainer: {
-    paddingVertical: 10,
-  },
-  valueContainer: {
+  title: {
+    alignSelf: 'center',
     flexDirection: 'row',
-  },
-  label: {
-    paddingRight: 10,
+    paddingVertical: 10,
   },
   value: {
     fontWeight: 'bold',
     paddingRight: 10,
+  },
+  valueContainer: {
+    flexDirection: 'row',
   },
 });

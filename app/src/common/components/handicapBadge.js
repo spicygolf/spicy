@@ -37,13 +37,13 @@ const HandicapBadge = (props) => {
 export default HandicapBadge;
 
 const styles = StyleSheet.create({
+  hdcp: {
+    alignItems: 'center',
+    flex: 2,
+  },
   row: {
     flexDirection: 'row',
     flex: 2,
-  },
-  hdcp: {
-    flex: 2,
-    alignItems: 'center',
   },
   txt: {
     fontSize: 11,

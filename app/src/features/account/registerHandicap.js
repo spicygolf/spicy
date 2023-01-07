@@ -84,9 +84,11 @@ const RegisterHandicap = () => {
 export default RegisterHandicap;
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#b30000',
-    flex: 12,
+  button_row: {
+    flexDirection: 'row',
+    flex: 1,
+    justifyContent: 'space-between',
+    padding: 15,
   },
   card_container: {
     flex: 11,
@@ -96,46 +98,44 @@ const styles = StyleSheet.create({
     margin: 0,
     padding: 0,
   },
-  field_input: {
-    color: '#000',
-    fontSize: 16,
-  },
-  button_row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 15,
-    flex: 1,
+  container: {
+    backgroundColor: '#b30000',
+    flex: 12,
   },
   divider: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
     marginVertical: 5,
-  },
-  hrLine: {
-    width: width / 3.5,
-    backgroundColor: blue,
-    height: 1,
   },
   dividerText: {
     color: blue,
     textAlign: 'center',
     width: width / 8,
   },
-  skip_view: {
-    paddingBottom: 15,
-    paddingHorizontal: 10,
-    justifyContent: 'flex-start',
+  field_input: {
+    color: '#000',
+    fontSize: 16,
   },
-  skip_text: {
-    fontWeight: 'bold',
-    marginLeft: 6,
-    color: blue,
+  hrLine: {
+    backgroundColor: blue,
+    height: 1,
+    width: width / 3.5,
+  },
+  next: {
+    width: 150,
   },
   prev: {
     width: 150,
   },
-  next: {
-    width: 150,
+  skip_text: {
+    color: blue,
+    fontWeight: 'bold',
+    marginLeft: 6,
+  },
+  skip_view: {
+    justifyContent: 'flex-start',
+    paddingBottom: 15,
+    paddingHorizontal: 10,
   },
 });

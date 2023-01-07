@@ -135,18 +135,18 @@ export default Option;
 
 const styles = StyleSheet.create({
   field_container: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   field_input_view: {
-    flex: 2,
-    justifyContent: 'flex-end',
-    flexDirection: 'row',
     alignItems: 'center',
+    flex: 2,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   field_label: {
     flex: 3,
-    marginTop: 5,
     marginBottom: 5,
+    marginTop: 5,
   },
 });

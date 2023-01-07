@@ -14,7 +14,7 @@ const GhinCourseSearchResults = (props) => {
   const keyExtractor = (c) => `${c?.course_id}`;
 
   const sortAndCleanCourses = (old) => {
-    const cleaned = old.map(c => {
+    const cleaned = old.map((c) => {
       let display_name = c.facility_name;
       if (c.facility_name !== c.course_name) {
         display_name = display_name + ' - ' + c.course_name;
@@ -24,7 +24,7 @@ const GhinCourseSearchResults = (props) => {
         ...c,
         display_name,
         city_state,
-      }
+      };
     });
     return orderBy(cleaned, ['display_name'], ['asc']);
   };
@@ -43,7 +43,9 @@ const GhinCourseSearchResults = (props) => {
         }}
       >
         <ListItem.Content style={styles.container}>
-          <ListItem.Title style={styles.course_name}>{course.display_name}</ListItem.Title>
+          <ListItem.Title style={styles.course_name}>
+            {course.display_name}
+          </ListItem.Title>
           <ListItem.Subtitle
             style={styles.course_citystate}
           >{`${course.city_state}`}</ListItem.Subtitle>
@@ -118,25 +120,25 @@ export default GhinCourseSearchResults;
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 4,
     marginHorizontal: 0,
     paddingHorizontal: 5,
-  },
-  emptyContainer: {
-    flex: 1,
-  },
-  course_name: {
-    // color: '#999',
-    // fontSize: 11,
+    paddingVertical: 4,
   },
   course_citystate: {
     color: '#999',
     fontSize: 11,
     fontWeight: 'bold',
   },
+  course_name: {
+    // color: '#999',
+    // fontSize: 11,
+  },
+  emptyContainer: {
+    flex: 1,
+  },
   no_results: {
-    color: '#999',
     alignSelf: 'center',
+    color: '#999',
     fontSize: 20,
   },
 });

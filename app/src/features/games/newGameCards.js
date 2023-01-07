@@ -128,25 +128,25 @@ const styles = StyleSheet.create({
     paddingBottom: 3,
   },
   title: {
-    textAlign: 'center',
-    fontWeight: 'bold',
     fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   subtitleRow: {
     flexDirection: 'row',
     paddingVertical: 3,
   },
   type: {
+    color: '#333',
     flex: 1,
     fontSize: 9,
     textAlign: 'left',
-    color: '#333',
   },
   subtitle: {
+    color: '#333',
     flex: 1,
     fontSize: 9,
     textAlign: 'right',
-    color: '#333',
   },
   scrollView: {
     paddingVertical: 5,

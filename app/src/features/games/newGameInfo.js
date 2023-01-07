@@ -95,8 +95,8 @@ const NewGameInfo = (props) => {
 export default NewGameInfo;
 
 const styles = StyleSheet.create({
-  name: {
-    paddingBottom: 20,
+  button: {
+    margin: 15,
   },
   date_time_view: {
     flexDirection: 'row',
@@ -104,27 +104,27 @@ const styles = StyleSheet.create({
   date_view: {
     flex: 1,
   },
+  label_txt: {
+    color: '#555',
+    fontWeight: 'bold',
+    paddingVertical: 10,
+  },
+  name: {
+    paddingBottom: 20,
+  },
+  note: {
+    fontSize: 10,
+    paddingVertical: 10,
+    textAlign: 'center',
+  },
   time_view: {
     flex: 1,
   },
-  label_txt: {
-    fontWeight: 'bold',
-    color: '#555',
-    paddingVertical: 10,
-  },
   value_txt: {
-    borderWidth: 1,
     borderColor: '#ddd',
-    textAlign: 'center',
-    padding: 10,
+    borderWidth: 1,
     marginRight: 10,
-  },
-  note: {
-    paddingVertical: 10,
-    fontSize: 10,
+    padding: 10,
     textAlign: 'center',
-  },
-  button: {
-    margin: 15,
   },
 });

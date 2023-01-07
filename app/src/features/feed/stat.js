@@ -72,10 +72,6 @@ const Stat = (props) => {
 export default Stat;
 
 const styles = StyleSheet.create({
-  tov: {
-    flex: 1,
-    marginVertical: 15,
-  },
   left: {
     marginLeft: 15,
     marginRight: 7,
@@ -88,5 +84,9 @@ const styles = StyleSheet.create({
     fontSize: 48,
     //fontWeight: 'bold',
     alignSelf: 'center',
+  },
+  tov: {
+    flex: 1,
+    marginVertical: 15,
   },
 });

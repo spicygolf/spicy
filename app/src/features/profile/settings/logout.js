@@ -32,12 +32,12 @@ const Logout = (props) => {
 export default Logout;
 
 const styles = StyleSheet.create({
-  note: {
-    fontSize: 14,
-    margin: 10,
-    color: dark,
-  },
   button: {
+    margin: 10,
+  },
+  note: {
+    color: dark,
+    fontSize: 14,
     margin: 10,
   },
 });

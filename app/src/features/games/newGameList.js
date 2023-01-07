@@ -55,14 +55,14 @@ export default NewGameList;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: 'white',
-  },
-  title: {
-    color: '#111',
+    flex: 1,
   },
   subtitle: {
     color: '#666',
     fontSize: 12,
+  },
+  title: {
+    color: '#111',
   },
 });

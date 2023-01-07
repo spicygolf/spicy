@@ -65,14 +65,8 @@ const PostScores = (props) => {
 export default PostScores;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  gameNav: {
-    flex: 1,
-  },
-  postScore: {
-    flex: 9,
+  button: {
+    width: 150,
   },
   buttonRow: {
     flex: 1,
@@ -81,10 +75,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingTop: 15,
   },
-  button: {
-    width: 150,
-  },
   button_title: {
     fontSize: 14,
+  },
+  container: {
+    flex: 1,
+  },
+  gameNav: {
+    flex: 1,
+  },
+  postScore: {
+    flex: 9,
   },
 });

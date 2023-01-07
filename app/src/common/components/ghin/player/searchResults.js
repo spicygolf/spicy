@@ -1,10 +1,9 @@
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
-
-import { GhinPlayerSearchContext } from 'common/components/ghin/player/searchContext';
-import { ListItem } from 'react-native-elements';
-import { SEARCH_PLAYER_QUERY } from 'features/players/graphql';
 import { useQuery } from '@apollo/client';
+import { GhinPlayerSearchContext } from 'common/components/ghin/player/searchContext';
+import { SEARCH_PLAYER_QUERY } from 'features/players/graphql';
+import React, { useContext, useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ListItem } from 'react-native-elements';
 
 const GhinPlayerSearchResults = (props) => {
   const { state, setState } = useContext(GhinPlayerSearchContext);
@@ -135,23 +134,23 @@ export default GhinPlayerSearchResults;
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 4,
     marginHorizontal: 0,
     paddingHorizontal: 5,
+    paddingVertical: 4,
   },
   emptyContainer: {
     flex: 1,
-  },
-  player_club: {
-    color: '#999',
-    fontSize: 11,
   },
   handicap: {
     fontSize: 20,
   },
   no_results: {
-    color: '#999',
     alignSelf: 'center',
+    color: '#999',
     fontSize: 20,
+  },
+  player_club: {
+    color: '#999',
+    fontSize: 11,
   },
 });

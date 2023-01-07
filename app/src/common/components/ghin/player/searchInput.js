@@ -103,8 +103,24 @@ export default GhinPlayerSearchInput;
 
 const styles = StyleSheet.create({
   container: {},
-  row: {
-    flexDirection: 'row',
+  field: {
+    flex: 1,
+  },
+  field_input: {
+    color: '#000',
+    marginHorizontal: 0,
+    paddingHorizontal: 0,
+  },
+  field_input_txt: {
+    fontSize: 16,
+  },
+  label: {
+    color: '#999',
+    fontSize: 12,
+    fontWeight: 'normal',
+  },
+  last_name: {
+    paddingRight: 5,
   },
   picker_country: {
     flex: 1,
@@ -113,23 +129,7 @@ const styles = StyleSheet.create({
   picker_state: {
     flex: 1,
   },
-  field: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: 'normal',
-  },
-  field_input: {
-    color: '#000',
-    marginHorizontal: 0,
-    paddingHorizontal: 0,
-  },
-  last_name: {
-    paddingRight: 5,
-  },
-  field_input_txt: {
-    fontSize: 16,
+  row: {
+    flexDirection: 'row',
   },
 });

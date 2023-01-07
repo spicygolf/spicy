@@ -194,21 +194,21 @@ const HoleJunk = (props) => {
 export default HoleJunk;
 
 const styles = StyleSheet.create({
+  button: {
+    borderColor: blue,
+    marginRight: 5,
+    padding: 2,
+  },
+  buttonTitle: {
+    fontSize: 13,
+    paddingBottom: 5,
+    paddingRight: 10,
+    paddingTop: 5,
+  },
   container: {
     flex: 1,
   },
   icon: {
     padding: 5,
-  },
-  button: {
-    padding: 2,
-    marginRight: 5,
-    borderColor: blue,
-  },
-  buttonTitle: {
-    paddingTop: 5,
-    paddingBottom: 5,
-    paddingRight: 10,
-    fontSize: 13,
   },
 });

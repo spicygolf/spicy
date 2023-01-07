@@ -68,22 +68,22 @@ const styles = StyleSheet.create({
     marginTop: 15,
     maxHeight: 30,
   },
-  selectedButton: {
-    backgroundColor: blue,
-  },
   buttonText: {
     fontSize: 14,
+  },
+  row: {
+    flexDirection: 'row',
+  },
+  selectedButton: {
+    backgroundColor: blue,
   },
   selectedButtonText: {
     color: 'white',
   },
   title: {
-    textAlign: 'center',
     fontSize: 20,
     fontWeight: 'bold',
     paddingTop: 10,
-  },
-  row: {
-    flexDirection: 'row',
+    textAlign: 'center',
   },
 });

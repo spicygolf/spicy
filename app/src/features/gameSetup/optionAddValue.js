@@ -40,14 +40,14 @@ const OptionAddValue = ({ option, addOptionValue }) => {
 export default OptionAddValue;
 
 const styles = StyleSheet.create({
-  row: {
-    display: 'flex',
-    flexDirection: 'row',
+  buttonContainer: {
+    flex: 1,
   },
   inputContainer: {
     flex: 4,
   },
-  buttonContainer: {
-    flex: 1,
+  row: {
+    display: 'flex',
+    flexDirection: 'row',
   },
 });

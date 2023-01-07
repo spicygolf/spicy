@@ -137,29 +137,29 @@ const EditPlayer = (props) => {
 export default EditPlayer;
 
 const styles = StyleSheet.create({
-  scrollview_container: {
-    height: '100%',
-  },
-  label: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: 'normal',
-  },
   divider: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 40,
     marginBottom: 40,
-  },
-  hrLine: {
-    width: width / 3.5,
-    backgroundColor: blue,
-    height: 1,
+    marginTop: 40,
   },
   dividerText: {
     color: blue,
     textAlign: 'center',
     width: width / 8,
+  },
+  hrLine: {
+    backgroundColor: blue,
+    height: 1,
+    width: width / 3.5,
+  },
+  label: {
+    color: '#999',
+    fontSize: 12,
+    fontWeight: 'normal',
+  },
+  scrollview_container: {
+    height: '100%',
   },
 });

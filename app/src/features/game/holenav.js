@@ -69,25 +69,25 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
   },
-  direction: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   currentHole: {
     flex: 3,
     //flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  holeText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  direction: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
   },
   holeInfo: {
     fontSize: 9,
   },
   holeInfoValue: {
+    fontWeight: 'bold',
+  },
+  holeText: {
+    fontSize: 20,
     fontWeight: 'bold',
   },
 });

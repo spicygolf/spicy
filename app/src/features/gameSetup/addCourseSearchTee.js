@@ -112,19 +112,19 @@ const AddCourseSearchTee = (props) => {
 export default AddCourseSearchTee;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 10,
-  },
   cardTitle: {
+    alignItems: 'center',
     flexDirection: 'row',
     flex: 3,
-    alignItems: 'center',
     justifyContent: 'space-between',
   },
   citystate: {
-    fontSize: 12,
     color: '#555',
+    fontSize: 12,
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: 10,
   },
   listContainer: {
     margin: 0,

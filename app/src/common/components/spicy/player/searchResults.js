@@ -96,24 +96,24 @@ export default SpicyPlayerSearchResults;
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 5,
-    paddingHorizontal: 10,
     marginHorizontal: 0,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   emptyContainer: {
     flex: 1,
+  },
+  handicap: {
+    fontSize: 24,
+  },
+  no_results: {
+    alignSelf: 'center',
+    color: '#999',
+    fontSize: 20,
   },
   player_club: {
     color: '#999',
     fontSize: 12,
   },
-  handicap: {
-    fontSize: 24,
-  },
   results_list: {},
-  no_results: {
-    color: '#999',
-    alignSelf: 'center',
-    fontSize: 20,
-  },
 });
