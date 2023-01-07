@@ -20,25 +20,26 @@ const AddCourseFavorites = (props) => {
     );
   };
 
-  const { loading, error, data } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
-    variables: {
-      pkey: currentPlayerKey,
-      gametime: game.start,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
+  // const { loading, error, data } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
+  //   variables: {
+  //     pkey: currentPlayerKey,
+  //     gametime: game.start,
+  //   },
+  //   fetchPolicy: 'cache-and-network',
+  // });
 
-  if (loading) {
-    return <ActivityIndicator />;
-  }
-  if (error) {
-    return <Text>Error! ${error.message}</Text>;
-  }
+  // if (loading) {
+  //   return <ActivityIndicator />;
+  // }
+  // if (error) {
+  //   return <Text>Error! ${error.message}</Text>;
+  // }
 
   //console.log('client', client);
   //console.log('faveTees data', data);
 
-  const tees = data && data.getFavoriteTeesForPlayer ? data.getFavoriteTeesForPlayer : [];
+  // const tees = data && data.getFavoriteTeesForPlayer ? data.getFavoriteTeesForPlayer : [];
+  const tees = [];
   //console.log('tees', tees, currentPlayerKey);
 
   const newTees = tees.map((tee) => ({

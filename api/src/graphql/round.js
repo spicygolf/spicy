@@ -1,6 +1,7 @@
+import { withFilter } from 'apollo-server-hapi';
+
 import { Round } from '../models/round';
 import { pubsub } from '../server';
-import { withFilter } from 'apollo-server-hapi';
 
 export const RoundTypeDefs = `
 type Value {
@@ -147,5 +148,6 @@ export const RoundResolvers = {
       let r = new Round();
       return r.getPlayer(round._key);
     },
+    tee: () => {},
   },
 };

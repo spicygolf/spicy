@@ -1,4 +1,4 @@
-import { GhinPlayerSearchContext } from 'common/components/ghin/player/searchContext';
+import { GhinCourseSearchContext } from 'common/components/ghin/course/searchContext';
 import { baseUri, scheme } from 'common/config';
 import CountryPicker from 'features/account/countryPicker';
 import StatePicker from 'features/account/statePicker';
@@ -7,35 +7,34 @@ import React, { useContext, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Input } from 'react-native-elements';
 
-const GhinPlayerSearchInput = () => {
-  const { state, setState } = useContext(GhinPlayerSearchContext);
+const GhinCourseSearchInput = () => {
+  const { search, setSearch } = useContext(GhinCourseSearchContext);
 
-  const [countries, setCountries] = useState([]);
+  // const [countries, setCountries] = useState([]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const url = `${scheme}://${baseUri}/ghin/countries_and_states`;
+  //     const res = await fetch(url, {
+  //       method: 'GET',
+  //     });
+  //     const json = await res.json();
+  //     //console.log('countries json', json);
+  //     setCountries(json.countries);
+  //   };
+  //   fetchData();
+  // }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const url = `${scheme}://${baseUri}/ghin/countries_and_states`;
-      const res = await fetch(url, {
-        method: 'GET',
-      });
-      const json = await res.json();
-      //console.log('countries json', json);
-      setCountries(json.countries);
-    };
-    fetchData();
-  }, []);
+  // const c = find(countries, { code: state.country });
+  // let statelist = [];
+  // if (c && c.states) {
+  //   statelist = c.states;
+  // }
 
-  const c = find(countries, { code: state.country });
-  let statelist = [];
-  if (c && c.states) {
-    statelist = c.states;
-  }
-
-  //console.log('ghinPlayerSearch', ghinPlayerSearch);
+  //console.log('ghinCourseSearch', ghinCourseSearch);
 
   return (
     <View style={styles.container}>
-      <View style={styles.row}>
+      {/* <View style={styles.row}>
         <View style={styles.picker_country}>
           <CountryPicker
             countries={countries}
@@ -60,38 +59,22 @@ const GhinPlayerSearchInput = () => {
             }
           />
         </View>
-      </View>
+      </View> */}
       <View style={styles.row}>
         <View style={styles.field}>
           <Input
-            label="Last Name"
+            label="Course Name"
             labelStyle={styles.label}
-            containerStyle={[styles.field_input, styles.last_name]}
+            containerStyle={[styles.field_input, styles.name]}
             inputStyle={styles.field_input_txt}
             onChangeText={(text) => {
-              setState({
-                ...state,
-                lastName: text,
+              setSearch({
+                ...search,
+                course_name: text,
               });
             }}
             autoCapitalize="words"
-            value={state.lastName}
-          />
-        </View>
-        <View style={styles.field}>
-          <Input
-            label="First Name (optional)"
-            labelStyle={styles.label}
-            containerStyle={styles.field_input}
-            inputStyle={styles.field_input_txt}
-            onChangeText={(text) => {
-              setState({
-                ...state,
-                firstName: text,
-              });
-            }}
-            autoCapitalize="words"
-            value={state.firstName}
+            value={search.course_name}
           />
         </View>
       </View>
@@ -99,20 +82,20 @@ const GhinPlayerSearchInput = () => {
   );
 };
 
-export default GhinPlayerSearchInput;
+export default GhinCourseSearchInput;
 
 const styles = StyleSheet.create({
   container: {},
   row: {
     flexDirection: 'row',
   },
-  picker_country: {
-    flex: 1,
-    marginRight: 5,
-  },
-  picker_state: {
-    flex: 1,
-  },
+  // picker_country: {
+  //   flex: 1,
+  //   marginRight: 5,
+  // },
+  // picker_state: {
+  //   flex: 1,
+  // },
   field: {
     flex: 1,
   },
@@ -126,7 +109,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
-  last_name: {
+  name: {
     paddingRight: 5,
   },
   field_input_txt: {

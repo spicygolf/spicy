@@ -7,7 +7,7 @@ import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-const AddPlayerGHINSearch = (props) => {
+const AddPlayerGHINSearch = () => {
   const defaultNewPlayer = {
     country: 'USA',
     state: '',

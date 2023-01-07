@@ -1,12 +1,13 @@
-import { fileURLToPath } from 'url';
-import grpc from '@grpc/grpc-js';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+import grpc from '@grpc/grpc-js';
 import protoLoader from '@grpc/proto-loader';
 
 const HOST = '[::1]:50051'; // TODO: config value?
 
 const fn = fileURLToPath(import.meta.url);
-const PROTO_PATH = path.dirname(fn) + '/../../../sg_hdcp/proto/handicap.proto';
+const PROTO_PATH = path.dirname(fn) + '/../../../ghin/proto/handicap.proto';
 const INCLUDES = [];
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
@@ -66,6 +67,50 @@ export const searchPlayer = async ({ q, p }) => {
     .catch((e) => {
       console.error('searchPlayer GRPC Error', e.message);
       console.error(' for ', q, p);
+      return [];
+    });
+};
+
+export const getCourse = async ({ q }) => {
+  return new Promise((resolve, reject) => {
+    const deadline = new Date();
+    deadline.setSeconds(deadline.getSeconds() + 5);
+    handicapClient.getCourse(
+      { q },
+      { deadline },
+      (error, serverMessage) =>
+        error ? reject(error) : resolve(serverMessage),
+    );
+  })
+    .then((h) => {
+      // console.log('get_course', h);
+      return h;
+    })
+    .catch((e) => {
+      console.error('getCourse GRPC Error', e.message);
+      console.error(' for ', q);
+      return [];
+    });
+};
+
+export const searchCourse = async ({ q }) => {
+  return new Promise((resolve, reject) => {
+    const deadline = new Date();
+    deadline.setSeconds(deadline.getSeconds() + 5);
+    handicapClient.searchCourse(
+      { q },
+      { deadline },
+      (error, serverMessage) =>
+        error ? reject(error) : resolve(serverMessage),
+    );
+  })
+    .then((h) => {
+      // console.log('search_course', h);
+      return h;
+    })
+    .catch((e) => {
+      console.error('searchCourse GRPC Error', e.message);
+      console.error(' for ', q);
       return [];
     });
 };

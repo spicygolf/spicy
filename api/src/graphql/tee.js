@@ -2,37 +2,30 @@ import { Tee } from '../models/tee';
 
 export const TeeTypeDefs = `
 type Tee {
-  _key: String!
-  name: String
-  gender: String
   tee_id: Int
-  HolesNumber: Int
-  TotalYardage: Int
-  TotalMeters: Int
-  Ratings: [Rating]
+  tee_name: String
+  gender: String
+  holes_number: Int
+  total_yardage: Int
+  total_meters: Int
+  total_par: Int
+  ratings: [Rating]
   holes: [Hole]
-  course: Course
-  assigned: String
-}
-
-type TeeKey {
-  _key: String!
 }
 
 type Rating {
-  RatingType: String
-  CourseRating: Float
-  SlopeRating: Float
-  BogeyRating: Float
+  rating_type: String
+  course_rating: Float
+  slope_rating: Float
+  bogey_rating: Float
 }
 
 type Hole {
-  hole: String
-  length: String
-  par: String
-  handicap: String
-  pace: String
-  seq: String
+  number: Int
+  hole_id: Int
+  length: Int
+  par: Int
+  allocation: Int
 }
 `;
 
@@ -57,10 +50,10 @@ export const TeeResolvers = {
   },
   Mutation: {
   },
-  Tee: {
-    course: (tee) => {
-      const t = new Tee();
-      return t.getCourse(tee._key);
-    }
-  },
+  // Tee: {
+  //   course: (tee) => {
+  //     const t = new Tee();
+  //     return t.getCourse(tee._key);
+  //   }
+  // },
 };
