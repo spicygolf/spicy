@@ -1,7 +1,4 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
@@ -26,36 +23,47 @@
           "build",
           "--manifest-path=${workspaceFolder}/ghin/Cargo.toml",
           "--bin=ghin",
-          "--package=ghin"
+          "--package=ghin",
         ],
         "filter": {
           "name": "ghin",
-          "kind": "bin"
-        }
+          "kind": "bin",
+        },
       },
       "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart",
       "env": {
         "RUST_LOG": "ghin=debug",
       },
       "args": []
     },
     {
-      "name": "app",
+      "name": "app packager",
       "cwd": "${workspaceFolder}/app",
       "type": "reactnative",
-      "request": "attach"
+      "request": "attach",
+      "internalConsoleOptions": "openOnSessionStart",
+    },
+    {
+      "name": "app ios",
+      "request": "launch",
+      "type": "reactnative",
+      "cwd": "${workspaceFolder}/app",
+      "platform": "ios",
+      "runArguments": ["--simulator", "\"iPhone 14\""],
+      "internalConsoleOptions": "openOnSessionStart",
     },
     {
       "type": "node",
       "request": "launch",
       "name": "app tests",
       "skipFiles": [
-        "<node_internals>/**"
+        "<node_internals>/**",
       ],
       "runtimeArgs": [
         "--inspect-brk",
         "${workspaceRoot}/node_modules/.bin/jest",
-        "--runInBand"
+        "--runInBand",
       ],
       "console": "integratedTerminal",
       "program": "${workspaceFolder}/test/common/utils/score.diff_options_diff_holes.test.js",
@@ -63,62 +71,62 @@
       ],
     },
     {
+      "name": "ghin debug tests",
       "type": "lldb",
       "request": "launch",
-      "name": "ghin debug tests",
       "cargo": {
         "args": [
           "test",
           "--no-run",
           "--bin=ghin",
-          "--package=ghin"
+          "--package=ghin",
         ],
         "filter": {
           "name": "ghin",
-          "kind": "bin"
-        }
+          "kind": "bin",
+        },
       },
       "args": [],
-      "cwd": "${workspaceFolder}/ghin"
+      "cwd": "${workspaceFolder}/ghin",
     },
     {
-      "type": "node",
-      "request": "launch",
       "name": "api schema_update 20210602",
+      "type": "node",
+      "request": "launch",
       "skipFiles": [
-        "<node_internals>/**"
+        "<node_internals>/**",
       ],
       "cwd": "${workspaceFolder}/api",
       "args": [
         "--es-module-specifier-resolution=node",
-        "./util/arango/schema_updates/20210602.js"
+        "./util/arango/schema_updates/20210602.js",
       ],
     },
     {
-      "type": "node",
-      "request": "launch",
       "name": "api schema_update 20221219",
+      "type": "node",
+      "request": "launch",
       "skipFiles": [
-        "<node_internals>/**"
+        "<node_internals>/**",
       ],
       "cwd": "${workspaceFolder}/api",
       "args": [
         "--es-module-specifier-resolution=node",
-        "./util/arango/schema_updates/20221219.js"
+        "./util/arango/schema_updates/20221219.js",
       ],
     },
     {
+      "name": "api schema_update 20221220",
       "type": "node",
       "request": "launch",
-      "name": "api schema_update 20221220",
       "skipFiles": [
-        "<node_internals>/**"
+        "<node_internals>/**",
       ],
       "cwd": "${workspaceFolder}/api",
       "args": [
         "--es-module-specifier-resolution=node",
-        "./util/arango/schema_updates/20221220.js"
+        "./util/arango/schema_updates/20221220.js",
       ],
-    }
+    },
   ]
 }
