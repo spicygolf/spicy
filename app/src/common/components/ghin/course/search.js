@@ -13,8 +13,7 @@ const GhinSearchCourse = ({ search, setSearch, course, setCourse, tee, setTee })
         setCourse,
         tee,
         setTee,
-      }}
-    >
+      }}>
       <GhinCourseSearchInput />
       <GhinCourseSearchResults />
     </GhinCourseSearchContext.Provider>

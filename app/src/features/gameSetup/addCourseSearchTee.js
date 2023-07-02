@@ -1,26 +1,29 @@
-import { useQuery } from '@apollo/client';
-import { useFocusEffect } from '@react-navigation/native';
 import { getRatings } from 'common/utils/game';
 import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
 import { GameContext } from 'features/game/gameContext';
 import Tee from 'features/gameSetup/Tee';
 import { find, orderBy } from 'lodash';
-import React, { useCallback, useContext, useRef } from 'react';
+import React, { useContext } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
-import { Card, Icon, ListItem } from 'react-native-elements';
+import { Icon, ListItem } from 'react-native-elements';
+
+import { useGetCourseQuery } from '../courses/useGetCourseQuery';
 
 const AddCourseSearchTee = (props) => {
   const { course, setCourse } = props;
   const { game, currentPlayerKey } = useContext(GameContext);
-  const searchInputRef = useRef(null);
+  const course_id = parseInt(course.course_id, 10) || 0;
 
   const _renderCourseTee = ({ item }) => {
+    const { total_par, total_yardage } = item;
+    const par = total_par ? ` - par ${total_par}` : '';
+    const distance = total_yardage ? ` - ${total_yardage} yards` : '';
     const { rating, slope } = getRatings(game.scope.holes, item);
     return (
       <Tee
         item={item}
-        title={item.name}
-        subtitle={`${item.gender} - ${rating}/${slope}`}
+        title={item.tee_name}
+        subtitle={`${item.gender} - ${rating}/${slope}${par}${distance}`}
       />
     );
   };
@@ -28,14 +31,6 @@ const AddCourseSearchTee = (props) => {
   const _removeCourse = () => {
     setCourse(null);
   };
-
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     if (searchInputRef && searchInputRef.current) {
-  //       searchInputRef.current.focus();
-  //     }
-  //   }, []),
-  // );
 
   // const { loading, error, data } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
   //   variables: {
@@ -58,36 +53,55 @@ const AddCourseSearchTee = (props) => {
   //   data?.getFavoriteTeesForPlayer ? data.getFavoriteTeesForPlayer : [];
   const faveTees = [];
 
-  // let tees = course.tees.map((tee) => {
-  //   const { rating } = getRatings(game.scope.holes, tee);
-  //   return {
-  //     ...tee,
-  //     order: rating,
-  //     fave: {
-  //       faved: find(faveTees, { _key: tee._key }) ? true : false,
-  //       from: { type: 'player', value: currentPlayerKey },
-  //       to: { type: 'tee', value: tee._key },
-  //       refetchQueries: [
-  //         {
-  //           query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
-  //           variables: {
-  //             pkey: currentPlayerKey,
-  //             gametime: game.start,
-  //           },
-  //         },
-  //       ],
-  //     },
-  //   };
-  // });
-  // tees = orderBy(tees, ['gender', 'order'], ['desc', 'desc']);
-  const tees = [];
+  const { loading, error, data } = useGetCourseQuery({
+    variables: {
+      q: {
+        source: 'ghin',
+        course_id: course_id,
+      },
+    },
+  });
+
+  if (loading) {
+    return <ActivityIndicator />;
+  }
+  if (error) {
+    console.log(error);
+    // TODO: error component
+    return <Text>Error</Text>;
+  }
+
+  let tees = data?.getCourse?.tees?.map((tee) => {
+    const { rating } = getRatings(game.scope.holes, tee);
+    return {
+      ...tee,
+      order: rating,
+      fave: {
+        faved: find(faveTees, { _key: tee._key }) ? true : false,
+        from: { type: 'player', value: currentPlayerKey },
+        to: { type: 'tee', value: tee._key },
+        refetchQueries: [
+          {
+            query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
+            variables: {
+              pkey: currentPlayerKey,
+              gametime: game.start,
+            },
+          },
+        ],
+      },
+    };
+  });
+  tees = orderBy(tees, ['gender', 'order'], ['desc', 'desc']);
 
   return (
     <View style={styles.container}>
       <ListItem style={styles.course_row}>
         <ListItem.Content>
           <ListItem.Title>{course.display_name}</ListItem.Title>
-          <ListItem.Subtitle>{course.city_state}</ListItem.Subtitle>
+          <ListItem.Subtitle style={styles.citystate}>
+            {course.city_state}
+          </ListItem.Subtitle>
         </ListItem.Content>
         <Icon
           name="remove-circle"
@@ -101,7 +115,7 @@ const AddCourseSearchTee = (props) => {
         <FlatList
           data={tees}
           renderItem={_renderCourseTee}
-          keyExtractor={(item) => item._key}
+          keyExtractor={(item) => item.tee_id.toString()}
           keyboardShouldPersistTaps={'handled'}
         />
       </View>
@@ -112,21 +126,16 @@ const AddCourseSearchTee = (props) => {
 export default AddCourseSearchTee;
 
 const styles = StyleSheet.create({
-  cardTitle: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    flex: 3,
-    justifyContent: 'space-between',
-  },
-  citystate: {
-    color: '#555',
-    fontSize: 12,
-  },
   container: {
     flex: 1,
     paddingHorizontal: 10,
   },
+  citystate: {
+    color: '#999',
+    fontSize: 12,
+  },
   listContainer: {
+    flex: 1,
     margin: 0,
   },
 });

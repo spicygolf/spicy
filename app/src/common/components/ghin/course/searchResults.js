@@ -40,15 +40,14 @@ const GhinCourseSearchResults = (props) => {
         key={course.course_id}
         onPress={() => {
           setCourse(course);
-        }}
-      >
+        }}>
         <ListItem.Content style={styles.container}>
           <ListItem.Title style={styles.course_name}>
             {course.display_name}
           </ListItem.Title>
-          <ListItem.Subtitle
-            style={styles.course_citystate}
-          >{`${course.city_state}`}</ListItem.Subtitle>
+          <ListItem.Subtitle style={styles.course_citystate}>
+            {`${course.city_state}`}
+          </ListItem.Subtitle>
         </ListItem.Content>
       </ListItem>
     );

@@ -125,7 +125,7 @@ struct TeesResponse {
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
 struct TeeResponse {
-    TeeSetRatingID: Option<i32>,
+    TeeSetRatingId: Option<i32>,
     TeeSetRatingName: Option<String>,
     Gender: Option<String>,
     HolesNumber: Option<i32>,
@@ -636,7 +636,7 @@ fn _get_tees(tee_sets: &Vec<TeeResponse>) -> Vec<Tee> {
     let ret = tee_sets
         .iter()
         .map(|t| Tee {
-            tee_id: get_i32(&t.TeeSetRatingID),
+            tee_id: get_i32(&t.TeeSetRatingId),
             tee_name: get_str(&t.TeeSetRatingName),
             gender: get_str(&t.Gender),
             holes_number: get_i32(&t.HolesNumber),
