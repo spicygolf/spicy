@@ -15,6 +15,7 @@
     "prettier:check": "prettier '**/*.{js,ts,tsx}' --check",
     "lint": "eslint '**/*.{js,jsx,ts,tsx}' --max-warnings=0",
     "lint:fix": "eslint '**/*.{js,jsx,ts,tsx}' --fix",
+    "postinstall": "patch-package",
     "postversion": "react-native-version",
     "build:ios": "node node_modules/react-native/local-cli/cli.js bundle --entry-file='index.js' --bundle-output='./ios/spicygolf/main.jsbundle' --dev=false --platform='ios' --assets-dest='./ios'",
     "build:android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res"
@@ -78,9 +79,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
-    "@babel/eslint-parser": "^7.19.1",
-    "@babel/eslint-plugin": "^7.19.1",
-    "@babel/preset-react": "^7.18.6",
     "@babel/runtime": "^7.20.7",
     "@react-native-community/cli": "^4.6.3",
     "@react-native-community/eslint-config": "^1.1.0",

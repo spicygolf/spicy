@@ -38,19 +38,12 @@
       "args": []
     },
     {
-      "name": "app packager",
-      "cwd": "${workspaceFolder}/app",
-      "type": "reactnative",
-      "request": "attach",
-      "internalConsoleOptions": "openOnSessionStart",
-    },
-    {
       "name": "app ios",
       "request": "launch",
       "type": "reactnative",
       "cwd": "${workspaceFolder}/app",
       "platform": "ios",
-      "runArguments": ["--simulator", "\"iPhone 14\""],
+      "runArguments": ["--simulator", "iPhone 14"],
       "internalConsoleOptions": "openOnSessionStart",
     },
     {
