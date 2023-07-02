@@ -33,13 +33,13 @@ export const getRatings = (holes, tee) => {
 
   switch (holes) {
     case 'front9':
-      ratings = find(tee.Ratings, { RatingType: 'Front' });
+      ratings = find(tee.ratings, { rating_type: 'Front' });
       break;
     case 'back9':
-      ratings = find(tee.Ratings, { RatingType: 'Back' });
+      ratings = find(tee.ratings, { rating_type: 'Back' });
       break;
     case 'all18':
-      ratings = find(tee.Ratings, { RatingType: 'Total' });
+      ratings = find(tee.ratings, { rating_type: 'Total' });
       break;
     default:
       console.log(`course_handicap - invalid value for holes: '${holes}'`);
@@ -48,16 +48,16 @@ export const getRatings = (holes, tee) => {
 
   if (!ratings) {
     ratings = {
-      CourseRating: 0,
-      SlopeRating: 0,
-      BogeyRating: 0,
+      course_rating: 0,
+      slope_rating: 0,
+      bogey_rating: 0,
     };
   }
 
   return {
-    rating: ratings.CourseRating,
-    slope: ratings.SlopeRating,
-    bogey: ratings.BogeyRating,
+    rating: Math.round((ratings.course_rating + Number.EPSILON) * 10) / 10,
+    slope: ratings.slope_rating,
+    bogey: ratings.bogey_rating,
   };
 };
 

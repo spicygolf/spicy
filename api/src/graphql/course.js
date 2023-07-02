@@ -2,7 +2,7 @@ import { Course } from '../models/course';
 
 export const CourseTypeDefs = `
 type Course {
-  course_id: ID
+  course_id: Int
   course_status: String
   course_name: String
   facility_id: Int

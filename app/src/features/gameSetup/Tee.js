@@ -7,6 +7,7 @@ import { GameContext } from 'features/game/gameContext';
 import { GET_GAME_QUERY } from 'features/game/graphql';
 import { AddCourseContext } from 'features/gameSetup/addCourseContext';
 import React, { useContext } from 'react';
+import { StyleSheet } from 'react-native';
 import { ListItem } from 'react-native-elements';
 
 import { course_handicap } from '../../common/utils/handicap';
@@ -142,15 +143,27 @@ const Tee = (props) => {
         // after all that, go back to GameSetup
         navigation.navigate('GameSetup');
       }}
-      testID={`favorite_tee_${item._key}`}
-    >
+      containerStyle={styles.listItemContainer}
+      testID={`favorite_tee_${item._key}`}>
       <FavoriteIcon fave={item.fave} />
       <ListItem.Content>
         <ListItem.Title>{title}</ListItem.Title>
-        <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
+        <ListItem.Subtitle style={styles.subtitle}>{subtitle}</ListItem.Subtitle>
       </ListItem.Content>
     </ListItem>
   );
 };
 
 export default Tee;
+
+const styles = StyleSheet.create({
+  subtitle: {
+    color: '#999',
+    fontSize: 12,
+  },
+  listItemContainer: {
+    marginHorizontal: 0,
+    paddingHorizontal: 5,
+    paddingVertical: 4,
+  },
+});

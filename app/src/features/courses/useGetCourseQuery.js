@@ -26,6 +26,9 @@ const query = gql`
         tee_id
         tee_name
         gender
+        total_yardage
+        total_meters
+        total_par
         ratings {
           rating_type
           course_rating
