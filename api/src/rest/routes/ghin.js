@@ -4,10 +4,6 @@ const {
   API_VERSION: api,
 } = process.env;
 
-
-
-const base_url = 'http://localhost:3000';
-
 const handlers = {
   countries_and_states: async (req, h) => {
     return countries_and_states_json;

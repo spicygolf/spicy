@@ -501,12 +501,21 @@ export const getCoursesPlayersTxt = (game) => {
   let courses = [],
     acronyms = [],
     players = [];
-  game.rounds.map((r) => {
-    if (r && r.player && r.player[0]) {
+  (game?.rounds ?? []).map((r) => {
+    if (r?.player[0]) {
       players.push(last(r.player[0].name));
     }
-    if (r && r.tee && r.tee.course && r.tee.course.name) {
-      const c = r.tee.course.name;
+    const tee_courses = reduce(
+      r?.tees,
+      (cum, t) => {
+        if (cum.indexOf(t.course?.course_name) < 0) {
+          cum.push(t.course.course_name);
+        }
+        return cum;
+      },
+      [],
+    );
+    tee_courses.map((c) => {
       if (courses.indexOf(c) < 0) {
         courses.push(c);
       }
@@ -514,7 +523,7 @@ export const getCoursesPlayersTxt = (game) => {
       if (acronyms.indexOf(a) < 0) {
         acronyms.push(a);
       }
-    }
+    });
   });
 
   const courseFull = courses.length === 1 ? courses[0] : acronyms.join(', ');

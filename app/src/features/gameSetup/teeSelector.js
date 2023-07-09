@@ -7,10 +7,14 @@ import { Button } from 'react-native-elements';
 const TeeSelector = (props) => {
   const navigation = useNavigation();
 
-  const { game, tee, rkey, player, readonly, testID } = props;
+  const { game, tees, rkey, player, readonly, testID } = props;
 
-  const course = tee && tee.course && tee.name ? ' - ' + acronym(tee.course.name) : '';
-  let buttonName = tee && tee.name ? `${tee.name}${course}` : 'Select Course/Tee';
+  // TODO: here we now have `tees` instead of `tee`
+  //       handle none, one (most common), and multiple `tees`
+  const tee = (tees && tees[0]) || {};
+
+  const course = tee?.course?.course_name ? ' - ' + acronym(tee.course.course_name) : '';
+  let buttonName = tee && tee.tee_name ? `${tee.tee_name}${course}` : 'Select Course/Tee';
   let pressFn;
 
   if (readonly) {
@@ -27,7 +31,6 @@ const TeeSelector = (props) => {
     pressFn = () =>
       navigation.navigate('AddCourse', {
         rkey: rkey,
-        oldTee: tee,
       });
   } else {
     pressFn = () => navigation.navigate('LinkRoundList', { game, player });

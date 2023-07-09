@@ -58,11 +58,5 @@ export const CourseResolvers = {
       return ret?.courses || [];
     },
   },
-  // Course: {
-  //   tees: async (course) => {
-  //     const c = new Course();
-  //     return c.getTees(course._id);
-  //   },
-  // },
   Mutation: {},
 };

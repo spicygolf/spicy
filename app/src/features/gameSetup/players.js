@@ -53,12 +53,12 @@ const Players = (props) => {
       const name = item.name || '';
       const pkey = item._key;
 
-      let rkey, tee, ch, gh, hi;
+      let rkey, tees, ch, gh, hi;
 
       const round = get_round_for_player(rounds, pkey);
       if (round) {
         rkey = round._key;
-        tee = round.tee;
+        tees = round.tees;
         ch = round.course_handicap;
         gh = round.game_handicap;
         hi = round.handicap_index;
@@ -67,7 +67,7 @@ const Players = (props) => {
       const subtitle = (
         <TeeSelector
           game={game}
-          tee={tee}
+          tees={tees}
           rkey={rkey}
           player={item}
           readonly={readonly}

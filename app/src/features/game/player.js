@@ -37,7 +37,7 @@ const Player = (props) => {
   const holeScore = hole ? (
     <HoleScore hole={hole} score={score} rkey={rkey} test={test} />
   ) : (
-    <TeeSelector game={game} tee={round.tee} rkey={rkey} player={player} />
+    <TeeSelector game={game} tees={round.tees} rkey={rkey} player={player} />
   );
 
   const holeJunk = hole ? (

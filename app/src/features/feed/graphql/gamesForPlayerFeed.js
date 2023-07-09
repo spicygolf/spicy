@@ -55,27 +55,22 @@ export const GAMES_FOR_PLAYER_FEED = gql`
           _key
           name
         }
-        tee {
-          _key
-          name
+        tees {
+          tee_id
+          tee_name
           gender
-          Ratings {
-            RatingType
-            CourseRating
-            SlopeRating
-            BogeyRating
-          }
-          assigned
-          course {
-            _key
-            name
+          ratings {
+            rating_type
+            course_rating
+            slope_rating
+            bogey_rating
           }
           holes {
-            hole
+            number
+            hole_id
             length
             par
-            handicap
-            seq
+            allocation
           }
         }
       }

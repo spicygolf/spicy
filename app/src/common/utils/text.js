@@ -1,4 +1,7 @@
 export const acronym = (orig) => {
+  if (!orig) {
+    return '';
+  }
   if (orig && orig.length < 10) {
     return orig;
   }
