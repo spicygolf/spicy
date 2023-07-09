@@ -6,27 +6,22 @@ export const GET_ROUNDS_FOR_PLAYER_DAY_QUERY = gql`
       _key
       date
       seq
-      tee {
-        _key
-        name
+      tees {
+        tee_id
+        tee_name
         gender
-        Ratings {
-          RatingType
-          CourseRating
-          SlopeRating
-          BogeyRating
-        }
-        assigned
-        course {
-          _key
-          name
+        ratings {
+          rating_type
+          course_rating
+          slope_rating
+          bogey_rating
         }
         holes {
-          hole
+          number
+          hole_id
           length
           par
-          handicap
-          seq
+          allocation
         }
       }
     }

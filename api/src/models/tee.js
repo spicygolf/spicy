@@ -3,7 +3,6 @@ import datefnstz from 'date-fns-tz';
 import { isEqual } from 'lodash-es';
 
 import { db } from '../db/db';
-import { refreshEdge } from '../util/ghin';
 import { Doc } from './doc';
 
 const { zonedTimeToUtc } = datefnstz;
@@ -29,22 +28,6 @@ class Tee extends Doc {
     `;
     const cursor = await db.query(q);
     return cursor.next();
-  }
-
-  async getTeeForGame(gkey) {
-    const gameID = `games/${gkey}`;
-    const q = aql`
-      FOR v, e
-          IN 1..1
-          ANY ${gameID}
-          GRAPH 'games'
-          FILTER e.type == 'game2tee'
-          LIMIT 1
-          RETURN v
-    `;
-
-    const cursor = await db.query(q);
-    return cursor.all();
   }
 
   async getFavoriteTeesForPlayer(pkey, gametime) {

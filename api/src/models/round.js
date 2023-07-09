@@ -3,6 +3,9 @@ import { login, postRound } from '../util/ghin';
 import { Doc } from './doc';
 import { aql } from 'arangojs';
 import { db } from '../db/db';
+import {
+  getTee as getTeeGRPC,
+} from '../clients/handicap';
 
 const collection = db.collection('rounds');
 
@@ -11,6 +14,18 @@ const collection = db.collection('rounds');
 class Round extends Doc {
   constructor() {
     super(collection);
+  }
+
+  async getTees(round) {
+    if (!round?.tees) return [];
+    return await Promise.all(
+      round.tees.map(async (tee) => await getTeeGRPC({
+        q: {
+          source: 'ghin',
+          tee_id: tee.tee_id,
+        }
+      }))
+    );
   }
 
   async getPlayer(rkey) {
@@ -37,7 +52,7 @@ class Round extends Doc {
   }
 
   async getCourseTee(rkey) {
-
+    console.error("api/src/models/round.js/getCourseTee needs refactoring b/c there's no more tee2course edges - see #37");
     const round = 'rounds/' + rkey;
 
     const teeCourse = aql`
@@ -208,12 +223,29 @@ class Round extends Doc {
       _key: rkey,
       posting,
     };
-}
+  }
 
   getService(player) {
     if( player && player.handicap && player.handicap.source )
       return player.handicap.source.toLowerCase();
     return null;
+  }
+
+  /**
+    This will add a tee/course object to the `tees` array element of the round document.
+    note: unique is set to true, so if it's already there, this is basically a no-op
+  */
+  async addTeeToRound(rkey, course_id, tee_id) {
+    const round_id = `rounds/${rkey}`;
+    const mutation = aql`
+      LET existing = FIRST(FOR r IN rounds FILTER r._id == ${round_id} RETURN r)
+      UPDATE existing WITH {
+          tees: PUSH(existing.tees, {course_id: ${course_id}, tee_id: ${tee_id}}, true) // unique = true
+      } IN rounds
+      RETURN NEW
+    `;
+    const cursor = await db.query(mutation);
+    return cursor.next();
   }
 };
 

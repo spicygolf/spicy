@@ -70,7 +70,7 @@ export const GET_GAME_QUERY = gql`
             revDate
           }
         }
-        tee {
+        tees {
           tee_id
           tee_name
           gender
@@ -86,6 +86,14 @@ export const GET_GAME_QUERY = gql`
             length
             par
             allocation
+          }
+          course {
+            course_id
+            course_status
+            course_name
+            course_number
+            course_city
+            course_state
           }
         }
       }

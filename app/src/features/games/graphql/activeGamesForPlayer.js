@@ -19,6 +19,11 @@ export default gql`
           name
           short
         }
+        tees {
+          course {
+            course_name
+          }
+        }
       }
     }
   }

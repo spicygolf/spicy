@@ -82,8 +82,7 @@ const Game = (props) => {
             currentPlayerKey,
             activeGameSpec,
             readonly,
-          }}
-        >
+          }}>
           {game_listener}
           {round_listeners}
           <GameStack />

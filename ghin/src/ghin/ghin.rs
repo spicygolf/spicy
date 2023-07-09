@@ -1,11 +1,11 @@
-use anyhow::{anyhow, Result};
-// use async_recursion::async_recursion;
 use crate::handicap::{
-    Club, Course, GetCourse, GetHandicapResponse, GetTeesResponse, GpaResponse, Hole, Pagination,
-    Rating, SearchCourse, SearchCourseResponse, SearchPlayer, SearchPlayerResponse, SearchTee, Tee,
+    Club, Course, GetCourse, GetHandicapResponse, GetTee, GetTeesResponse, GpaResponse, Hole,
+    Pagination, Rating, SearchCourse, SearchCourseResponse, SearchPlayer, SearchPlayerResponse,
+    SearchTee, Tee, TeeCourse,
 };
 use crate::settings::Settings;
 use crate::token::Token;
+use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use log::{debug, error, info};
 use reqwest::{Client, StatusCode};
@@ -115,6 +115,18 @@ struct CourseResponse {
     UpdatedOn: Option<String>,
 }
 
+// We need this struct to match the GHIN API json fields
+#[derive(Deserialize, Debug)]
+#[allow(non_snake_case)]
+struct TeeCourseResponse {
+    CourseId: Option<i32>,
+    CourseStatus: Option<String>,
+    CourseName: Option<String>,
+    CourseNumber: Option<i32>,
+    CourseCity: Option<String>,
+    CourseState: Option<String>,
+}
+
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
 struct TeesResponse {
@@ -134,6 +146,7 @@ struct TeeResponse {
     TotalPar: Option<i32>,
     Ratings: Vec<RatingResponse>,
     Holes: Vec<HoleResponse>,
+    Course: TeeCourseResponse,
 }
 
 // We need this struct to match the GHIN API json fields
@@ -187,6 +200,8 @@ pub trait GhinHandicapService {
         q: SearchCourse,
     ) -> Result<SearchCourseResponse>;
     async fn get_tees(&self, attempts: u8, token: &Token, q: SearchTee) -> Result<GetTeesResponse>;
+    async fn get_tee(&self, attempts: u8, token: &Token, q: GetTee) -> Result<Tee>;
+
     async fn request_gpa(
         &self,
         attempts: u8,
@@ -308,7 +323,6 @@ impl GhinHandicapService for Ghin {
         }
 
         let t = token.token().await;
-        // let uri = self.settings.ghin.url.to_owned() + "/courses/{}.json";
         let uri = format!(
             "{}/courses/{}.json",
             self.settings.ghin.url.to_owned(),
@@ -358,7 +372,7 @@ impl GhinHandicapService for Ghin {
                     country: None,
                     fullname: None,
                     updated_on: None,
-                    tees: _get_tees(ts),
+                    tees: get_tees(ts),
                 };
                 Ok(ret)
             }
@@ -490,7 +504,7 @@ impl GhinHandicapService for Ghin {
 
                 let TeesResponse { TeeSets } = response.json::<TeesResponse>().await?;
                 let ret = GetTeesResponse {
-                    tees: _get_tees(&TeeSets),
+                    tees: get_tees(&TeeSets),
                 };
                 Ok(ret)
             }
@@ -505,6 +519,73 @@ impl GhinHandicapService for Ghin {
                 Err(anyhow!("bad request for get_tees"))
             }
             _ => Err(anyhow!("Unknown get_tees error")),
+        }
+    }
+
+    async fn get_tee(&self, attempts: u8, token: &Token, q: GetTee) -> Result<Tee> {
+        if attempts == 2 {
+            return Err(anyhow!("Too many unsuccessful attempts to get tee."));
+        }
+
+        let t = token.token().await;
+        let uri = format!(
+            "{}/TeeSetRatings/{}.json",
+            self.settings.ghin.url.to_owned(),
+            &q.tee_id
+        );
+
+        let response = self
+            .client
+            .get(uri)
+            .query(&[("teeSetRatingId", &q.tee_id)])
+            .query(&[("include_tee_sets", false)])
+            .bearer_auth(t)
+            .send()
+            .await?;
+
+        // return result
+        match response.status() {
+            StatusCode::OK => {
+                // let resp_text = response.text().await;
+                // debug!("response text: {:?}", resp_text);
+                // Ok(Tee {
+                //   tee_id: 1234
+                // })
+
+                let tee = response.json::<TeeResponse>().await?;
+                let c = tee.Course;
+                let ret = Tee {
+                    tee_id: get_i32(&tee.TeeSetRatingId),
+                    tee_name: get_str(&tee.TeeSetRatingName),
+                    gender: get_str(&tee.Gender),
+                    holes_number: get_i32(&tee.HolesNumber),
+                    total_yardage: get_i32(&tee.TotalYardage),
+                    total_meters: get_i32(&tee.TotalMeters),
+                    total_par: get_i32(&tee.TotalPar),
+                    ratings: get_ratings(&tee.Ratings),
+                    holes: get_holes(&tee.Holes),
+                    course: Some(TeeCourse {
+                        course_id: get_i32(&c.CourseId),
+                        course_status: get_str(&c.CourseStatus),
+                        course_name: get_str(&c.CourseName),
+                        course_number: get_i32(&c.CourseNumber),
+                        course_city: get_str(&c.CourseCity),
+                        course_state: get_str(&c.CourseState),
+                    }),
+                };
+                Ok(ret)
+            }
+            StatusCode::UNAUTHORIZED => {
+                self.login(&token).await?;
+                let next_attempt = attempts + 1;
+                self.get_tee(next_attempt, &token, q).await
+            }
+            StatusCode::BAD_REQUEST => {
+                let r = response.text().await?;
+                error!("BAD_REQUEST: {:?}", r);
+                Err(anyhow!("bad request for get_tee"))
+            }
+            _ => Err(anyhow!("Unknown get_tee error")),
         }
     }
 
@@ -632,7 +713,7 @@ fn get_club(g: &Golfer) -> Vec<Club> {
     }])
 }
 
-fn _get_tees(tee_sets: &Vec<TeeResponse>) -> Vec<Tee> {
+fn get_tees(tee_sets: &Vec<TeeResponse>) -> Vec<Tee> {
     let ret = tee_sets
         .iter()
         .map(|t| Tee {
@@ -645,6 +726,7 @@ fn _get_tees(tee_sets: &Vec<TeeResponse>) -> Vec<Tee> {
             total_par: get_i32(&t.TotalPar),
             ratings: get_ratings(&t.Ratings),
             holes: get_holes(&t.Holes),
+            course: None,
         })
         .collect::<Vec<Tee>>();
     return ret;

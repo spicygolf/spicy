@@ -16,8 +16,7 @@ const AddCourse = (props) => {
         value={{
           rkey: rkey,
           oldTee: oldTee,
-        }}
-      >
+        }}>
         <AddCourseTabs />
       </AddCourseContext.Provider>
     </View>

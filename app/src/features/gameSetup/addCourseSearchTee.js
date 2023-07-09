@@ -57,7 +57,7 @@ const AddCourseSearchTee = (props) => {
     variables: {
       q: {
         source: 'ghin',
-        course_id: course_id,
+        course_id,
       },
     },
   });
@@ -75,9 +75,10 @@ const AddCourseSearchTee = (props) => {
     const { rating } = getRatings(game.scope.holes, tee);
     return {
       ...tee,
+      course_id,
       order: rating,
       fave: {
-        faved: find(faveTees, { _key: tee._key }) ? true : false,
+        faved: find(faveTees, { _key: tee.tee_id }) ? true : false,
         from: { type: 'player', value: currentPlayerKey },
         to: { type: 'tee', value: tee._key },
         refetchQueries: [

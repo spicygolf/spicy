@@ -1,7 +1,6 @@
-import { withFilter } from 'apollo-server-hapi';
-
 import { Round } from '../models/round';
 import { pubsub } from '../server';
+import { withFilter } from 'apollo-server-hapi';
 
 export const RoundTypeDefs = `
 type Value {
@@ -32,7 +31,7 @@ type Round {
   _key: String!
   date: String!
   seq: Int!
-  tee: Tee
+  tees: [Tee]
   scores: [Score]
   player: [Player]
   handicap_index: String
@@ -72,11 +71,12 @@ type Posting {
 `;
 
 export const RoundQuerySigs = `
-  getRound(_key: String!): Round
   getRoundsForPlayerDay(pkey: String!, day: String!): [Round]
 `;
 
 export const RoundMutationSigs = `
+  addTeeToRound(rkey: String!, course_id: Int, tee_id: Int): Round
+  removeTeeFromRound(rkey: String!, tee_id: Int): Round
   addRound(round: RoundInput!): RoundKey
   postScore(rkey: String!, score: ScoreInput!): Round
   deleteRound(rkey: String!): RoundKey
@@ -94,16 +94,17 @@ const SCORE_POSTED = 'SCORE_POSTED';
 
 export const RoundResolvers = {
   Query: {
-    getRound: (_, { rkey }) => {
-      let r = new Round();
-      return r.load(rkey);
-    },
     getRoundsForPlayerDay: async (_, { pkey, day }) => {
       let r = new Round();
       return r.getRoundsForPlayerDay(pkey, day);
     },
   },
   Mutation: {
+    addTeeToRound: async (_, { rkey, course_id, tee_id }) => {
+      let r = new Round();
+      return r.addTeeToRound(rkey, course_id, tee_id);
+    },
+    // TODO: implement removeTeeFromRound here and in models
     addRound: (_, { round }) => {
       // TODO: add to immutable message log?
       let r = new Round();
@@ -148,6 +149,9 @@ export const RoundResolvers = {
       let r = new Round();
       return r.getPlayer(round._key);
     },
-    tee: () => {},
+    tees: (round) => {
+      let r = new Round();
+      return r.getTees(round);
+    },
   },
 };

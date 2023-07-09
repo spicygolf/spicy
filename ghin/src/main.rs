@@ -5,7 +5,8 @@ use handicap::handicap_server::{Handicap, HandicapServer};
 use handicap::{
     GetHandicapRequest, GetHandicapResponse, GpaRequest, GpaResponse, Pagination,
     SearchCourseRequest, SearchCourseResponse, SearchPlayer, SearchPlayerRequest,
-    SearchPlayerResponse, GetTeesRequest, GetTeesResponse, GetCourseRequest, Course
+    SearchPlayerResponse, GetTeesRequest, GetTeesResponse, GetCourseRequest, Course,
+    GetTeeRequest, Tee
 };
 use log::{error, info};
 use tonic::{transport::Server, Code, Request, Response, Status};
@@ -151,6 +152,30 @@ impl Handicap for HandicapService {
             "ghin" => {
                 let g = Ghin::default();
                 g.get_tees(0, &self.ghin_token, q.to_owned())
+                    .await
+            }
+            _ => Err(anyhow!("unknown handicap source: '{}'", q.source)),
+        };
+
+        match response {
+            Ok(r) => Ok(Response::new(r)),
+            Err(e) => {
+                error!("{:?} for {:#?}", e, q);
+                Err(Status::new(Code::Unknown, e.to_string()))
+            }
+        }
+    }
+
+    async fn get_tee(
+        &self,
+        request: Request<GetTeeRequest>,
+    ) -> Result<Response<Tee>, Status> {
+        let q = request.get_ref().q.as_ref().unwrap().to_owned();
+
+        let response = match q.source.as_str() {
+            "ghin" => {
+                let g = Ghin::default();
+                g.get_tee(0, &self.ghin_token, q.to_owned())
                     .await
             }
             _ => Err(anyhow!("unknown handicap source: '{}'", q.source)),

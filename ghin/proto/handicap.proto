@@ -16,6 +16,8 @@ service Handicap {
   rpc SearchCourse(SearchCourseRequest) returns (SearchCourseResponse) {}
   // get tees
   rpc GetTees(GetTeesRequest) returns (GetTeesResponse) {}
+  // get tee
+  rpc GetTee(GetTeeRequest) returns (Tee) {}
   // request access to the GPA (Golfer Product Access) API
   rpc RequestGpa(GpaRequest) returns (GpaResponse) {}
 }
@@ -166,7 +168,16 @@ message Tee {
   int32 total_par = 7;
   repeated Rating ratings = 8;
   repeated Hole holes = 9;
+  TeeCourse course = 10;
+}
 
+message TeeCourse {
+  int32 course_id = 1;
+  string course_status = 2;
+  string course_name = 3;
+  int32 course_number = 4;
+  string course_city = 5;
+  string course_state = 6;
 }
 
 // TODO: enums for the choice fields?
@@ -184,6 +195,16 @@ message GetTeesRequest {
 
 message GetTeesResponse {
   repeated Tee tees = 1;
+}
+
+message GetTee {
+  string source = 1;
+  int32 tee_id = 2;
+  bool include_altered_tees = 3;
+}
+
+message GetTeeRequest {
+  GetTee q = 1;
 }
 
 // -----------------------------------------------------------------------------

@@ -1,4 +1,3 @@
-import { aql } from 'arangojs';
 import datefnstz from 'date-fns-tz';
 
 import {
@@ -27,30 +26,6 @@ class Course extends Doc {
     return searchCourseGRPC({ q });
   }
 
-
-  async getTees(courseID) {
-    const cursor = await db.query(aql`
-      FOR v, e
-          IN 1..1
-          ANY ${courseID}
-          GRAPH 'games'
-          FILTER e.type == 'tee2course'
-          AND (
-            (
-              (IS_DATESTRING(v.effective.start) AND DATE_TIMESTAMP(v.effective.start) <= DATE_TIMESTAMP(${this.gameTS}))
-              OR NOT IS_DATESTRING(v.effective.start)
-            )
-            AND
-            (
-              (IS_DATESTRING(v.effective.end) AND DATE_TIMESTAMP(v.effective.end) > DATE_TIMESTAMP(${this.gameTS}))
-              OR NOT IS_DATESTRING(v.effective.end)
-            )
-          )
-         SORT v.TotalYardage DESC
-         RETURN v
-    `);
-    return await cursor.all();
-  }
 
   _normalize(orig) {
     return {

@@ -11,6 +11,7 @@ type Tee {
   total_par: Int
   ratings: [Rating]
   holes: [Hole]
+  course: TeeCourse
 }
 
 type Rating {
@@ -27,10 +28,18 @@ type Hole {
   par: Int
   allocation: Int
 }
+
+type TeeCourse {
+  course_id: Int
+  course_status: String
+  course_name: String
+  course_number: Int
+  course_city: String
+  course_state: String
+}
 `;
 
 export const TeeQuerySigs = `
-  getTeeForGame(gkey: String!): Tee
   getFavoriteTeesForPlayer(pkey: String!, gametime: String): [Tee]
 `;
 
@@ -39,10 +48,6 @@ export const TeeMutationSigs = `
 
 export const TeeResolvers = {
   Query: {
-    getTeeForGame: async (_, { gkey }) => {
-      const t = new Tee();
-      return t.getTeeForGame(gkey);
-    },
     getFavoriteTeesForPlayer: async (_, { pkey, gametime }) => {
       const t = new Tee();
       return t.getFavoriteTeesForPlayer(pkey, gametime);
