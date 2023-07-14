@@ -556,11 +556,11 @@ export const getLocalHoleInfo = ({ game, currentHole }) => {
   let sameCourse = true;
   game.rounds.map((r) => {
     // check to see if tee is set yet
-    if (!r.tee) {
+    if (!(r?.tees?.length === 1)) {
       return { hole: currentHole };
     }
 
-    const teeHole = find(r.tee.holes, { hole: currentHole });
+    const teeHole = find(r.tees[0].holes, { number: parseInt(currentHole, 10) });
     if (!teeHole) {
       sameCourse = false;
       return;
@@ -575,10 +575,10 @@ export const getLocalHoleInfo = ({ game, currentHole }) => {
     } else {
       length = teeHole.length;
     }
-    if (handicap && handicap !== teeHole.handicap) {
+    if (handicap && handicap !== teeHole.allocation) {
       sameCourse = false;
     } else {
-      handicap = teeHole.handicap;
+      handicap = teeHole.allocation;
     }
   });
   if (sameCourse) {
@@ -589,8 +589,8 @@ export const getLocalHoleInfo = ({ game, currentHole }) => {
 
 export const isTeeSameForAllPlayers = ({ game }) => {
   const distinct_tees = groupBy(game.rounds, (r) => {
-    if (r && r.tee && r.tee._key) {
-      return r.tee._key;
+    if (r?.tees?.length === 1) {
+      return r.tees[0].tee_id;
     }
     return null;
   });
