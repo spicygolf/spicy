@@ -168,7 +168,7 @@ message Tee {
   int32 total_par = 7;
   repeated Rating ratings = 8;
   repeated Hole holes = 9;
-  TeeCourse course = 10;
+  optional TeeCourse course = 10;
 }
 
 message TeeCourse {
