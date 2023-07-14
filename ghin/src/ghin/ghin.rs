@@ -146,7 +146,7 @@ struct TeeResponse {
     TotalPar: Option<i32>,
     Ratings: Vec<RatingResponse>,
     Holes: Vec<HoleResponse>,
-    Course: TeeCourseResponse,
+    Course: Option<TeeCourseResponse>,
 }
 
 // We need this struct to match the GHIN API json fields
@@ -341,11 +341,9 @@ impl GhinHandicapService for Ghin {
         // return result
         match response.status() {
             StatusCode::OK => {
-                // let resp_text = response.text().await;
+                // let resp_text = &response.text().await;
                 // debug!("response text: {:?}", resp_text);
-                // Ok(SearchCourseResponse {
-                //   courses: vec![]
-                // })
+                // Err(anyhow!("testing"))
 
                 let c = response.json::<GetCourseResp>().await?;
                 let f = &c.Facility;
@@ -372,7 +370,7 @@ impl GhinHandicapService for Ghin {
                     country: None,
                     fullname: None,
                     updated_on: None,
-                    tees: get_tees(ts),
+                    tees: _get_tees(ts),
                 };
                 Ok(ret)
             }
@@ -504,7 +502,7 @@ impl GhinHandicapService for Ghin {
 
                 let TeesResponse { TeeSets } = response.json::<TeesResponse>().await?;
                 let ret = GetTeesResponse {
-                    tees: get_tees(&TeeSets),
+                    tees: _get_tees(&TeeSets),
                 };
                 Ok(ret)
             }
@@ -553,7 +551,6 @@ impl GhinHandicapService for Ghin {
                 // })
 
                 let tee = response.json::<TeeResponse>().await?;
-                let c = tee.Course;
                 let ret = Tee {
                     tee_id: get_i32(&tee.TeeSetRatingId),
                     tee_name: get_str(&tee.TeeSetRatingName),
@@ -564,14 +561,7 @@ impl GhinHandicapService for Ghin {
                     total_par: get_i32(&tee.TotalPar),
                     ratings: get_ratings(&tee.Ratings),
                     holes: get_holes(&tee.Holes),
-                    course: Some(TeeCourse {
-                        course_id: get_i32(&c.CourseId),
-                        course_status: get_str(&c.CourseStatus),
-                        course_name: get_str(&c.CourseName),
-                        course_number: get_i32(&c.CourseNumber),
-                        course_city: get_str(&c.CourseCity),
-                        course_state: get_str(&c.CourseState),
-                    }),
+                    course: _get_tee_course(tee.Course),
                 };
                 Ok(ret)
             }
@@ -713,7 +703,7 @@ fn get_club(g: &Golfer) -> Vec<Club> {
     }])
 }
 
-fn get_tees(tee_sets: &Vec<TeeResponse>) -> Vec<Tee> {
+fn _get_tees(tee_sets: &Vec<TeeResponse>) -> Vec<Tee> {
     let ret = tee_sets
         .iter()
         .map(|t| Tee {
@@ -730,6 +720,22 @@ fn get_tees(tee_sets: &Vec<TeeResponse>) -> Vec<Tee> {
         })
         .collect::<Vec<Tee>>();
     return ret;
+}
+
+fn _get_tee_course(course: Option<TeeCourseResponse>) -> Option<TeeCourse> {
+    match course {
+        Some(c) => {
+            Some(TeeCourse {
+                course_id: get_i32(&c.CourseId),
+                course_status: get_str(&c.CourseStatus),
+                course_name: get_str(&c.CourseName),
+                course_number: get_i32(&c.CourseNumber),
+                course_city: get_str(&c.CourseCity),
+                course_state: get_str(&c.CourseState),
+            })
+        },
+        None => None
+    }
 }
 
 fn get_ratings(ratings: &Vec<RatingResponse>) -> Vec<Rating> {
