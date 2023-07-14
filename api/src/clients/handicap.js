@@ -31,7 +31,7 @@ const handicapClient = new handicapServiceProto.handicap.Handicap(
 const doGRPC = async (name, args) => {
   return new Promise((resolve, reject) => {
     const deadline = new Date();
-    deadline.setSeconds(deadline.getSeconds() + 5);
+    deadline.setSeconds(deadline.getSeconds() + 15);
     handicapClient[name](
       args,
       { deadline },

@@ -120,8 +120,7 @@ const HoleScore = (props) => {
       <TouchableHighlight
         onPress={() => setScore(item)}
         onLongPress={() => setScore(item)}
-        testID={testID}
-      >
+        testID={testID}>
         <View style={score_styles}>
           <View style={outerShape}>
             <View style={innerShape}>{content}</View>
