@@ -110,8 +110,7 @@ const AppStack = (props) => {
         initialRouteName="GamesStack"
         shifting={true}
         activeColor="#fff"
-        inactiveColor="#ccc"
-      >
+        inactiveColor="#ccc">
         <Tab.Screen
           name="FeedStack"
           component={FeedStack}
@@ -184,8 +183,7 @@ const AppStack = (props) => {
         impersonate,
         setImpersonate,
         user,
-      }}
-    >
+      }}>
       {content}
     </CurrentPlayerContext.Provider>
   );
