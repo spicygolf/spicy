@@ -12,6 +12,9 @@
         "--experimental-specifier-resolution=node",
         "${workspaceFolder}/api/src/server.js"
       ],
+      "env": {
+        "NODE_ENV": "local",
+      },
     },
     {
       "name": "ghin",

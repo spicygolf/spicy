@@ -1,6 +1,7 @@
 import { useLazyQuery } from '@apollo/client';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { blue } from 'common/colors';
+import Error from 'common/components/error';
 import { getCoursesPlayersTxt } from 'common/utils/game';
 import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
@@ -97,7 +98,7 @@ const Games = (props) => {
     fetchPolicy: 'cache-and-network',
   });
   if (error && error.message !== 'Network request failed') {
-    return <Text>Error! {error.message}</Text>;
+    return <Error error={error} />;
   }
 
   const games = data && data.activeGamesForPlayer ? data.activeGamesForPlayer : [];

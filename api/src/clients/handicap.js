@@ -44,8 +44,7 @@ const doGRPC = async (name, args) => {
       return h;
     })
     .catch((e) => {
-      console.error(`${name} GRPC Error`, e.message);
-      console.error(' for ', ...args);
+      console.error(`${name} GRPC Error`, e.message, ', for: ', JSON.stringify(args, null, null));
     });
 };
 

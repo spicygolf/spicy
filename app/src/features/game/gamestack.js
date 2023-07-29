@@ -40,8 +40,7 @@ const GameStack = (props) => {
           labelStyle: styles.tabBarLabel,
           style: styles.tabBar,
         }}
-        swipeEnabled={false}
-      >
+        swipeEnabled={false}>
         <Tab.Screen
           name="Leaderboard"
           component={Leaderboard}
