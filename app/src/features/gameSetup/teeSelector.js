@@ -30,7 +30,9 @@ const TeeSelector = (props) => {
   if (rkey) {
     pressFn = () =>
       navigation.navigate('AddCourse', {
-        rkey: rkey,
+        rkey,
+        tees,
+        player,
       });
   } else {
     pressFn = () => navigation.navigate('LinkRoundList', { game, player });

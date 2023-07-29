@@ -1,23 +1,26 @@
 import GameNav from 'features/games/gamenav';
 import { AddCourseContext } from 'features/gameSetup/addCourseContext';
 import AddCourseTabs from 'features/gameSetup/addCourseTabs';
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 const AddCourse = (props) => {
   const { route } = props;
-  const { rkey, oldTee } = route.params;
-  //  console.log('AddCourse', rkey, tee);
+  const { rkey, tees, player } = route.params;
+  const [course, setCourse] = useState(null);
 
   return (
     <View style={styles.container}>
       <GameNav title="Course & Tees" showBack={true} backTo={'GameSetup'} />
       <AddCourseContext.Provider
         value={{
-          rkey: rkey,
-          oldTee: oldTee,
+          course,
+          setCourse,
+          rkey,
+          tees,
+          player,
         }}>
-        <AddCourseTabs />
+        <AddCourseTabs player={player} />
       </AddCourseContext.Provider>
     </View>
   );

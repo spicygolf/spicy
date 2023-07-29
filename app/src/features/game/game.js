@@ -51,10 +51,10 @@ const Game = (props) => {
     //console.log('data', currentGameKey, data);
     if (data && data.getGame) {
       const game = data.getGame;
-      console.log('game  ', game);
+      console.log('game:   ', game);
 
       const scores = scoring(game);
-      console.log('scores', scores);
+      console.log('scores: ', scores);
 
       const { _key: gkey } = game;
       const activeGameSpec =

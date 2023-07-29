@@ -24,7 +24,6 @@ const Games = (props) => {
   });
 
   const buildSubtitle = (game) => {
-    //console.log('game', game);
     const { coursesTxt, playersTxt } = getCoursesPlayersTxt(game);
 
     const startTime = format(new Date(game.start), 'PPp');

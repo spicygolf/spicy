@@ -2,8 +2,6 @@ import { find, values } from 'lodash';
 
 // return teams only if they are complete
 export const getTeams = (game, hole) => {
-  //console.log('getTeams - game', game, 'hole', hole);
-
   if (game && game.holes) {
     let onTeam = {};
     game.players.map((p) => {
@@ -14,7 +12,6 @@ export const getTeams = (game, hole) => {
     });
 
     const h = find(game.holes, { hole: hole });
-    //console.log('getTeams hole', h);
     if (!h || !h.teams) {
       return null;
     }
@@ -27,7 +24,6 @@ export const getTeams = (game, hole) => {
       }
       team.players.map((pkey) => {
         const p = find(game.players, { _key: pkey });
-        //console.log('p', p);
         if (p) {
           onTeam[pkey] = true;
         }

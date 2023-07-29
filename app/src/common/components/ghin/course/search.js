@@ -3,7 +3,7 @@ import GhinCourseSearchInput from 'common/components/ghin/course/searchInput';
 import GhinCourseSearchResults from 'common/components/ghin/course/searchResults';
 import React from 'react';
 
-const GhinSearchCourse = ({ search, setSearch, course, setCourse, tee, setTee }) => {
+const GhinSearchCourse = ({ search, setSearch, course, setCourse }) => {
   return (
     <GhinCourseSearchContext.Provider
       value={{
@@ -11,8 +11,6 @@ const GhinSearchCourse = ({ search, setSearch, course, setCourse, tee, setTee })
         setSearch,
         course,
         setCourse,
-        tee,
-        setTee,
       }}>
       <GhinCourseSearchInput />
       <GhinCourseSearchResults />

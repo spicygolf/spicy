@@ -1,37 +1,34 @@
 import GhinSearchCourse from 'common/components/ghin/course/search';
-import React, { useState } from 'react';
+import { AddCourseContext } from 'features/gameSetup/addCourseContext';
+import AddCourseSearchTee from 'features/gameSetup/addCourseSearchTee';
+import React, { useContext, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import AddCourseSearchTee from './addCourseSearchTee';
-
 const AddCourseSearchCourse = (props) => {
+  const { course, setCourse } = useContext(AddCourseContext);
   const defaultCourseSearch = {
     source: 'ghin',
     country: '',
     state: '',
     course_name: '',
   };
-
   const [courseSearch, setCourseSearch] = useState(defaultCourseSearch);
-  const [course, setCourse] = useState(null);
-  const [tee, setTee] = useState(null);
 
-  if (!course) {
-    return (
-      <View style={styles.container}>
-        <GhinSearchCourse
-          search={courseSearch}
-          setSearch={setCourseSearch}
-          course={course}
-          setCourse={setCourse}
-          tee={tee}
-          setTee={setTee}
-        />
-      </View>
-    );
-  } else {
-    return <AddCourseSearchTee course={course} setCourse={setCourse} />;
+  if (course) {
+    return <AddCourseSearchTee />;
   }
+
+  // tees or course not set yet, so show search
+  return (
+    <View style={styles.container}>
+      <GhinSearchCourse
+        search={courseSearch}
+        setSearch={setCourseSearch}
+        course={course}
+        setCourse={setCourse}
+      />
+    </View>
+  );
 };
 
 export default AddCourseSearchCourse;

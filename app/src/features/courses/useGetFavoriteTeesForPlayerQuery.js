@@ -1,6 +1,7 @@
 import { gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 
-export const GET_FAVORITE_TEES_FOR_PLAYER_QUERY = gql`
+const query = gql`
   query GetFavoriteTeesForPlayer($pkey: String!, $gametime: String) {
     getFavoriteTeesForPlayer(pkey: $pkey, gametime: $gametime) {
       _key
@@ -23,3 +24,9 @@ export const GET_FAVORITE_TEES_FOR_PLAYER_QUERY = gql`
     }
   }
 `;
+
+const useGetFavoriteTeesForPlayerQuery = (options) => {
+  return useQuery(query, options);
+};
+
+export { useGetFavoriteTeesForPlayerQuery, query };

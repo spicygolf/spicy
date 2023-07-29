@@ -1,59 +1,41 @@
 import { getRatings } from 'common/utils/game';
-import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
+import { addFavesToTee } from 'common/utils/tees';
+import { useGetCourseQuery } from 'features/courses/useGetCourseQuery';
+// import { useGetFavoriteTeesForPlayerQuery } from 'features/courses/useGetFavoriteTeesForPlayerQuery';
 import { GameContext } from 'features/game/gameContext';
-import Tee from 'features/gameSetup/Tee';
-import { find, orderBy } from 'lodash';
+import { AddCourseContext } from 'features/gameSetup/addCourseContext';
+import TeeList from 'features/gameSetup/TeeList';
+import { orderBy } from 'lodash';
 import React, { useContext } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 
-import { useGetCourseQuery } from '../courses/useGetCourseQuery';
-
 const AddCourseSearchTee = (props) => {
-  const { course, setCourse } = props;
+  const { course, setCourse } = useContext(AddCourseContext);
   const { game, currentPlayerKey } = useContext(GameContext);
   const course_id = parseInt(course.course_id, 10) || 0;
 
-  const _renderCourseTee = ({ item }) => {
-    const { total_par, total_yardage } = item;
-    const par = total_par ? ` - par ${total_par}` : '';
-    const distance = total_yardage ? ` - ${total_yardage} yards` : '';
-    const { rating, slope } = getRatings(game.scope.holes, item);
-    return (
-      <Tee
-        item={item}
-        title={item.tee_name}
-        subtitle={`${item.gender} - ${rating}/${slope}${par}${distance}`}
-      />
-    );
-  };
-
-  const _removeCourse = () => {
-    setCourse(null);
-  };
-
-  // const { loading, error, data } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
+  // const faves = useGetFavoriteTeesForPlayerQuery({
   //   variables: {
   //     pkey: currentPlayerKey,
   //     gametime: game.start,
   //   },
   // });
 
-  // if (loading) {
+  // if (faves.loading) {
   //   return <ActivityIndicator />;
   // }
-  // if (error) {
+  // if (faves.error) {
   //   console.log(error);
   //   // TODO: error component
   //   return <Text>Error</Text>;
   // }
 
-  // console.log('faves data', data);
-  // const faveTees = []
-  //   data?.getFavoriteTeesForPlayer ? data.getFavoriteTeesForPlayer : [];
-  const faveTees = [];
+  // const faveTees = faves.data?.getFavoriteTeesForPlayer ?? [];
+  const faves = [];
 
-  const { loading, error, data } = useGetCourseQuery({
+  // get selected course from GHIN (the full course details with tee sets)
+  const selectedCourse = useGetCourseQuery({
     variables: {
       q: {
         source: 'ghin',
@@ -62,35 +44,23 @@ const AddCourseSearchTee = (props) => {
     },
   });
 
-  if (loading) {
+  if (selectedCourse.loading) {
     return <ActivityIndicator />;
   }
-  if (error) {
-    console.log(error);
+  if (selectedCourse.error) {
+    console.log(selectedCourse.error);
     // TODO: error component
     return <Text>Error</Text>;
   }
 
-  let tees = data?.getCourse?.tees?.map((tee) => {
+  // decorate tees with faves data
+  let tees = selectedCourse.data?.getCourse?.tees?.map((tee) => {
     const { rating } = getRatings(game.scope.holes, tee);
+    let newTee = addFavesToTee({ tee, faves, game, currentPlayerKey });
     return {
-      ...tee,
+      ...newTee,
       course_id,
       order: rating,
-      fave: {
-        faved: find(faveTees, { _key: tee.tee_id }) ? true : false,
-        from: { type: 'player', value: currentPlayerKey },
-        to: { type: 'tee', value: tee._key },
-        refetchQueries: [
-          {
-            query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
-            variables: {
-              pkey: currentPlayerKey,
-              gametime: game.start,
-            },
-          },
-        ],
-      },
     };
   });
   tees = orderBy(tees, ['gender', 'order'], ['desc', 'desc']);
@@ -99,27 +69,14 @@ const AddCourseSearchTee = (props) => {
     <View style={styles.container}>
       <ListItem style={styles.course_row}>
         <ListItem.Content>
-          <ListItem.Title>{course.display_name}</ListItem.Title>
+          <ListItem.Title>{course.course_name}</ListItem.Title>
           <ListItem.Subtitle style={styles.citystate}>
             {course.city_state}
           </ListItem.Subtitle>
         </ListItem.Content>
-        <Icon
-          name="remove-circle"
-          color="red"
-          onPress={() => {
-            _removeCourse();
-          }}
-        />
+        <Icon name="remove-circle" color="red" onPress={() => setCourse(null)} />
       </ListItem>
-      <View style={styles.listContainer}>
-        <FlatList
-          data={tees}
-          renderItem={_renderCourseTee}
-          keyExtractor={(item) => item.tee_id.toString()}
-          keyboardShouldPersistTaps={'handled'}
-        />
-      </View>
+      <TeeList tees={tees} showRemove={false} />
     </View>
   );
 };

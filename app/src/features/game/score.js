@@ -13,7 +13,7 @@ import { Card, Icon } from 'react-native-elements';
 
 const Score = (props) => {
   const { game, gkey, scores } = useContext(GameContext);
-  const [currentHole, setCurrentHole] = useState();
+  const [currentHole, setCurrentHole] = useState('1');
 
   let content = null;
   let holeInfo = { hole: currentHole };
@@ -81,12 +81,10 @@ const Score = (props) => {
     );
   }
   const holes = getHoles(game);
-  //console.log('holes', holes);
 
   useEffect(() => {
     const init = async () => {
       const gameMeta = await getGameMeta(gkey);
-      //console.log('meta', gameMeta);
       if (!gameMeta || !gameMeta.currentHole) {
         setCurrentHole('1');
       } else {
