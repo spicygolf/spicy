@@ -10,7 +10,6 @@ import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Card, Icon, Overlay } from 'react-native-elements';
 
 const Teams = ({ teams, scoring, currentHole }) => {
-  //console.log('Teams teams', teams);
   const { game, activeGameSpec } = useContext(GameContext);
   const { players } = game;
   const ordered_teams = orderBy(teams, ['team'], ['asc']);

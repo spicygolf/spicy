@@ -1,10 +1,12 @@
-import { useQuery } from '@apollo/client';
 import { getRatings } from 'common/utils/game';
-import { GET_FAVORITE_TEES_FOR_PLAYER_QUERY } from 'features/courses/graphql';
+import {
+  query,
+  useGetFavoriteTeesForPlayerQuery,
+} from 'features/courses/useGetFavoriteTeesForPlayerQuery';
 import { GameContext } from 'features/game/gameContext';
 import Tee from 'features/gameSetup/Tee';
 import React, { useContext } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 
 const AddCourseFavorites = (props) => {
   const { game, currentPlayerKey } = useContext(GameContext);
@@ -20,7 +22,7 @@ const AddCourseFavorites = (props) => {
     );
   };
 
-  // const { loading, error, data } = useQuery(GET_FAVORITE_TEES_FOR_PLAYER_QUERY, {
+  // const { loading, error, data } = useGetFavoriteTeesForPlayerQuery({
   //   variables: {
   //     pkey: currentPlayerKey,
   //     gametime: game.start,
@@ -50,7 +52,7 @@ const AddCourseFavorites = (props) => {
       to: { type: 'tee', value: tee._key },
       refetchQueries: [
         {
-          query: GET_FAVORITE_TEES_FOR_PLAYER_QUERY,
+          query,
           variables: {
             pkey: currentPlayerKey,
             gametime: game.start,

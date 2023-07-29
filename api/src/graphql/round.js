@@ -75,8 +75,8 @@ export const RoundQuerySigs = `
 `;
 
 export const RoundMutationSigs = `
-  addTeeToRound(rkey: String!, course_id: Int, tee_id: Int): Round
-  removeTeeFromRound(rkey: String!, tee_id: Int): Round
+  addTeeToRound(rkey: String!, course_id: Int, tee_id: Int, course_handicap: Int): Round
+  removeTeeFromRound(rkey: String!, course_id: Int, tee_id: Int, course_handicap: Int): Round
   addRound(round: RoundInput!): RoundKey
   postScore(rkey: String!, score: ScoreInput!): Round
   deleteRound(rkey: String!): RoundKey
@@ -100,16 +100,19 @@ export const RoundResolvers = {
     },
   },
   Mutation: {
-    addTeeToRound: async (_, { rkey, course_id, tee_id }) => {
-      let r = new Round();
-      return r.addTeeToRound(rkey, course_id, tee_id);
-    },
-    // TODO: implement removeTeeFromRound here and in models
     addRound: (_, { round }) => {
       // TODO: add to immutable message log?
       let r = new Round();
       r.set(round);
       return r.save();
+    },
+    addTeeToRound: async (_, tee) => {
+      let r = new Round();
+      return r.addTeeToRound(tee);
+    },
+    removeTeeFromRound: async (_, tee) => {
+      let r = new Round();
+      return r.removeTeeFromRound(tee);
     },
     postScore: (_root, args, _context) => {
       const { rkey, score } = args;

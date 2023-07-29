@@ -15,10 +15,10 @@ const FavoriteIcon = (props) => {
     name: fave?.faved ? 'star' : 'star-border',
     fn: fave?.faved ? removeLink : addLink,
     variables: fave?.faved
-      ? { from: fave.from, to: fave.to }
+      ? { from: fave?.from, to: fave?.to }
       : {
-          from: fave.from,
-          to: fave.to,
+          from: fave?.from,
+          to: fave?.to,
           other: [{ key: 'favorite', value: 'true' }],
         },
   };
