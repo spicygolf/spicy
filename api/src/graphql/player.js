@@ -97,6 +97,7 @@ export const PlayerMutationSigs = `
   addPlayer(player: PlayerInput!): PlayerKey
   mergePlayers(source: PlayerKeyInput!, target: HandicapInput!): Player
   updatePlayer(player: PlayerInput!): Player
+  removePlayerFromGame(pkey: String!, gkey: String!, rkey: String!): Response
 `;
 
 export const PlayerResolvers = {
@@ -176,6 +177,10 @@ export const PlayerResolvers = {
     mergePlayers: (_, { source, target }) => {
       const p = new Player();
       return p.merge({ source, target });
+    },
+    removePlayerFromGame: (_, args) => {
+      const p = new Player();
+      return p.removePlayerFromGame(args)
     },
   },
 };

@@ -1,77 +1,59 @@
-import { useMutation } from '@apollo/client';
-import { REMOVE_LINK_MUTATION } from 'common/graphql/unlink';
 import { GET_GAME_QUERY } from 'features/game/graphql';
-import React from 'react';
+import { useRemovePlayerFromGameMutation } from 'features/gameSetup/hooks/useRemovePlayerFromGameMutation';
+import React, { useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { Icon } from 'react-native-elements';
+
+import ErrorModal from '../../common/components/errorModal';
 
 const RemovePlayer = (props) => {
   const { pkey, gkey, rkey } = props;
-  const [unlink] = useMutation(REMOVE_LINK_MUTATION);
+  const [showError, setShowError] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [removePlayerFromGame, { error }] = useRemovePlayerFromGameMutation();
 
-  const _removePlayer = () => {
-    //console.log('removePlayer', pkey, gkey, rkey);
-    if (pkey && gkey) {
-      _removePlayer2Game();
-    }
-    if (rkey && gkey) {
-      _removeRound2Game();
-    }
+  let resp = {};
+
+  const toggle = () => {
+    setShowError(!showError);
   };
 
-  const _removePlayer2Game = () => {
-    // remove player2game link
-    try {
-      const { error } = unlink({
-        variables: {
-          from: { type: 'player', value: pkey },
-          to: { type: 'game', value: gkey },
-        },
-        refetchQueries: [
-          {
-            query: GET_GAME_QUERY,
-            variables: {
-              gkey: gkey,
-            },
+  const removePlayer = async () => {
+    setIsRemoving(true);
+    resp = await removePlayerFromGame({
+      variables: {
+        pkey,
+        gkey,
+        rkey,
+      },
+      refetchQueries: () => [
+        {
+          query: GET_GAME_QUERY,
+          variables: {
+            gkey: gkey,
           },
-        ],
-        awaitRefetchQueries: true,
-      });
-      if (error) {
-        throw error;
-      }
-    } catch (e) {
-      // TODO: error component
-      console.log('error removing player from game', e);
-    }
-  };
-
-  const _removeRound2Game = () => {
-    try {
-      const { error } = unlink({
-        variables: {
-          from: { type: 'round', value: rkey },
-          to: { type: 'game', value: gkey },
         },
-        refetchQueries: [
-          {
-            query: GET_GAME_QUERY,
-            variables: {
-              gkey: gkey,
-            },
-          },
-        ],
-        awaitRefetchQueries: true,
-      });
-      if (error) {
-        throw error;
-      }
-    } catch (e) {
-      // TODO: error component
-      console.log('error removing round from game', e);
+      ],
+      awaitRefetchQueries: true,
+    });
+
+    if (error || resp?.success === false) {
+      setShowError(true);
     }
   };
 
-  return <Icon name="remove-circle" color="red" onPress={() => _removePlayer()} />;
+  let icon = <Icon name="remove-circle" color="red" onPress={() => removePlayer()} />;
+  if (isRemoving) {
+    icon = <ActivityIndicator />;
+  }
+  // TODO: the modal doesn't seem to fire when the API is shut off.
+  //       Only Apollo GraphQL errors are in yellow box :(
+  return (
+    <View>
+      {icon}
+      <ErrorModal visible={showError} toggle={toggle} error={error || resp} />
+    </View>
+  );
 };
 
 export default RemovePlayer;

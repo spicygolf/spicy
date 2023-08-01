@@ -494,6 +494,88 @@ class Player extends Doc {
       //console.log('gm_res', gm_res);
     });
   }
+
+  async removePlayerFromGame({ pkey, gkey, rkey }) {
+    const pid = `players/${pkey}`;
+    const gid = `games/${gkey}`;
+    const rid = `rounds/${rkey}`;
+
+    // start transaction
+    const trx = await db.beginTransaction({ write: ["games", "edges"] });
+    let q;
+
+    // remove player2game edge
+    q = aql`
+      FOR e IN edges
+        FILTER e.type == 'player2game'
+        FILTER e._from == ${pid}
+        FILTER e._to == ${gid}
+        REMOVE e IN edges
+        RETURN 1
+    `;
+    const p2g = await trx.step(async () => db.query(q));
+
+    // remove round2game edges
+    q = aql`
+      FOR e IN edges
+        FILTER e.type == 'round2game'
+        FILTER e._from == ${rid}
+        FILTER e._to == ${gid}
+        REMOVE e IN edges
+        RETURN 1
+    `;
+    const r2g = await trx.step(async () => db.query(q));
+
+    // remove player from:
+    //   game.holes[*].teams[*].players
+    //   game.holes[*].teams[*].junk
+    q = aql`
+      LET game = FIRST(FOR g IN games FILTER g._id == ${gid} RETURN g)
+      LET holes = (
+        FOR h IN game.holes
+          LET teams = (
+            FOR t IN h.teams
+              LET players = (
+                FOR p IN t.players
+                  FILTER p != ${pkey}
+                  RETURN p
+              )
+              LET junk = (
+                FOR j IN t.junk
+                  FILTER j.player != ${pkey}
+                  RETURN j
+              )
+              RETURN MERGE(t, {players, junk})
+          )
+          RETURN MERGE(h, {teams})
+      )
+      UPDATE game WITH {holes} IN games
+      RETURN NEW
+    `;
+    const g = await trx.step(async () => db.query(q));
+
+    // commit transaction
+    const result = await trx.commit();
+
+    let messages = [];
+    switch (result.status) {
+      case 'aborted':
+        messages = [
+          {
+            message: 'Error removing player from game: transaction aborted',
+            p2g,
+            r2g,
+            g,
+          }
+        ];
+    }
+
+    return {
+      success: result.status === 'committed',
+      _key: gkey,
+      messages,
+    };
+  }
 }
 
 export { Player };
