@@ -21,7 +21,7 @@ export const get_hole = (hole, round) => {
       return ret;
     } else {
       // TODO: handle a round with more than one tee
-      console.error('TODO: handle a round with more than one tee');
+      console.log('TODO: handle a round with more than one tee');
       return null;
     }
   } else {
