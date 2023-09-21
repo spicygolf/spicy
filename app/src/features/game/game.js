@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client';
+import Error from 'common/components/error';
 import { scoring } from 'common/utils/score';
 import { GameContext } from 'features/game/gameContext';
 import GameStack from 'features/game/gamestack';
@@ -8,21 +9,16 @@ import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import ScorePostedListener from 'features/rounds/scorePostedListener';
 import useAppState from 'hooks/useAppState';
 import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 
 const Game = (props) => {
   const { route } = props;
   const { currentGameKey, readonly } = route.params;
-  // console.log('currentGameKey', currentGameKey);
 
   const { currentPlayerKey } = useContext(CurrentPlayerContext);
   const { justBecameActive } = useAppState();
 
-  const [content, setContent] = useState(
-    <View>
-      <ActivityIndicator />
-    </View>,
-  );
+  const [content, setContent] = useState(<ActivityIndicator />);
 
   // execute the getGame query
   const { loading, error, refetch, data } = useQuery(GET_GAME_QUERY, {
@@ -31,30 +27,19 @@ const Game = (props) => {
     },
   });
 
-  // console.log('cache', client.cache.data.data);
-
   useEffect(() => {
     if (loading) {
-      setContent(
-        <View>
-          <ActivityIndicator />
-        </View>,
-      );
+      setContent(<ActivityIndicator />);
     }
 
     if (error && error.message !== 'Network request failed') {
-      console.log('error', error);
-      // TODO: error component
-      setContent(<Text>Error Loading Game: `{error.message}`</Text>);
+      setContent(<Error error={error} />);
     }
 
-    //console.log('data', currentGameKey, data);
-    if (data && data.getGame) {
+    if (data?.getGame) {
       const game = data.getGame;
-      console.log('game:   ', game);
-
       const scores = scoring(game);
-      console.log('scores: ', scores);
+      console.log({ game, scores, ts: new Date() });
 
       const { _key: gkey } = game;
       const activeGameSpec =
@@ -93,13 +78,10 @@ const Game = (props) => {
 
   useEffect(() => {
     if (justBecameActive) {
-      // console.log('justBecameActive getGame');
       refetch();
     }
   }, [justBecameActive, refetch]);
 
-  // console.log('game content', content); // use this to find too many re-renders
-  // console.log(currentGameKey, currentPlayerKey, data, readonly);
   return content;
 };
 

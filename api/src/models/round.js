@@ -175,13 +175,7 @@ class Round extends Doc {
     const player = await this.getPlayer0(rkey);
     const { course, tee } = await this.getCourseTee(rkey);
     const service = this.getService(player);
-    /*
-    console.log('postRoundToHandicapService round', round);
-    console.log('postRoundToHandicapService player', player);
-    console.log('postRoundToHandicapService course', course);
-    console.log('postRoundToHandicapService tee', tee);
-    console.log('service', service);
-    */
+
     let posting = {
       success: false,
       messages: [],
@@ -254,7 +248,7 @@ class Round extends Doc {
             tees: PUSH(existing.tees, {
               course_id: ${course_id},
               tee_id: ${tee_id},
-              course_handicap: ${course_handicap || ""}
+              course_handicap: ${course_handicap || null}
             }, true) // unique = true
         } IN rounds
         RETURN NEW

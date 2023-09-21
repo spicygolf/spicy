@@ -10,10 +10,13 @@ use async_trait::async_trait;
 use log::{debug, error, info};
 use reqwest::{Client, StatusCode};
 use serde::{Deserialize, Serialize};
+use tonic::{Code, Request, Response, Status};
 
 pub struct Ghin {
-    client: Client,
-    settings: Settings,
+    pub client: Client,
+    pub settings: Settings,
+    pub attempts: u8,
+    pub token: String,
 }
 
 #[derive(Serialize, Debug)]
@@ -180,11 +183,19 @@ struct GpaPostResponse {
     success: String,
 }
 
+pub struct ApiCall<REQ, RES> {
+    pub name: String,
+    pub call_fn: fn(ghin: Ghin, request: Request<REQ>) -> Result<reqwest::Response, reqwest::Error>,
+    pub process_fn: fn(response: reqwest::Response) -> Result<Response<RES>, Status>,
+    pub retries: u8,
+}
+
 #[async_trait]
 pub trait GhinHandicapService {
     fn new() -> Self;
     // #[async_recursion]
-    async fn login(&self, user_token: &Token) -> Result<()>;
+    async fn login(&self) -> Result<()>;
+
     async fn search_player(
         &self,
         attempts: u8,
@@ -223,10 +234,12 @@ impl GhinHandicapService for Ghin {
         Self {
             client: Client::default(),
             settings: Settings::default(),
+            attempts: 0,
+            token: "".to_string(),
         }
     }
 
-    async fn login(&self, user_token: &Token) -> Result<()> {
+    async fn login(&self) -> Result<()> {
         // body/payload
         let user = User {
             email: self.settings.ghin.username.to_owned(),
@@ -243,7 +256,8 @@ impl GhinHandicapService for Ghin {
 
         let LoginResponse { token } = response.json::<LoginResponse>().await?;
         info!("Refreshing GHIN token");
-        user_token.set_token(token).await
+        self.token = token;
+        Ok(())
     }
 
     async fn search_player(
@@ -304,7 +318,7 @@ impl GhinHandicapService for Ghin {
                 }
             }
             StatusCode::UNAUTHORIZED => {
-                self.login(&token).await?;
+                self.login().await?;
                 let next_attempt = attempts + 1;
                 self.search_player(next_attempt, &token, q, p).await
             }
@@ -375,7 +389,7 @@ impl GhinHandicapService for Ghin {
                 Ok(ret)
             }
             StatusCode::UNAUTHORIZED => {
-                self.login(&token).await?;
+                self.login().await?;
                 let next_attempt = attempts + 1;
                 self.get_course(next_attempt, &token, q).await
             }
@@ -456,7 +470,7 @@ impl GhinHandicapService for Ghin {
                 Ok(ret)
             }
             StatusCode::UNAUTHORIZED => {
-                self.login(&token).await?;
+                self.login().await?;
                 let next_attempt = attempts + 1;
                 self.search_course(next_attempt, &token, q).await
             }
@@ -507,7 +521,7 @@ impl GhinHandicapService for Ghin {
                 Ok(ret)
             }
             StatusCode::UNAUTHORIZED => {
-                self.login(&token).await?;
+                self.login().await?;
                 let next_attempt = attempts + 1;
                 self.get_tees(next_attempt, &token, q).await
             }
@@ -566,7 +580,7 @@ impl GhinHandicapService for Ghin {
                 Ok(ret)
             }
             StatusCode::UNAUTHORIZED => {
-                self.login(&token).await?;
+                self.login().await?;
                 let next_attempt = attempts + 1;
                 self.get_tee(next_attempt, &token, q).await
             }
@@ -618,7 +632,7 @@ impl GhinHandicapService for Ghin {
                 Ok(GpaResponse { success })
             }
             StatusCode::UNAUTHORIZED => {
-                self.login(&token).await?;
+                self.login().await?;
                 let next_attempt = attempts + 1;
                 self.request_gpa(next_attempt, &token, id, email).await
             }
@@ -633,6 +647,52 @@ impl GhinHandicapService for Ghin {
 }
 
 // -----------------------------------------------------------------------------
+
+pub async fn call<REQ, RES>(
+    ghin: Ghin,
+    api_call: ApiCall<REQ, RES>,
+    request: Request<REQ>,
+) -> Result<Response<RES>, Status> {
+    if ghin.attempts == api_call.retries {
+        return Err(Status::new(
+            Code::Unknown,
+            format!(
+                "Too many unsuccessful attempts ({}) to {}.",
+                api_call.retries, api_call.name
+            ),
+        ));
+    }
+
+    let api_request = (api_call.call_fn)(ghin, request);
+    match api_request {
+        Ok(response) => match response.status() {
+            StatusCode::OK => {
+                (api_call.process_fn)(response)
+            },
+            StatusCode::UNAUTHORIZED => {
+                ghin.login().await;
+                let next_attempt = ghin.attempts + 1;
+                call(ghin, api_call, request).await
+            }
+            StatusCode::BAD_REQUEST => {
+                let r = response.text().await;
+                error!("BAD_REQUEST: {:?}", r);
+                Err(Status::new(
+                    Code::Unknown,
+                    format!("bad request for {}", api_call.name),
+                ))
+            }
+            _ => Err(Status::new(
+                Code::Unknown,
+                format!("Unknown {} error", api_call.name),
+            )),
+        },
+        Err(err) => Err(Status::new(
+            Code::Unknown,
+            format!("Unknown {} error: {}", api_call.name, err),
+        )),
+    }
+}
 
 fn rollup_golfer(golfers: &Vec<Golfer>) -> Result<SearchPlayerResponse> {
     let g = golfers.iter().nth(0);
@@ -724,17 +784,15 @@ fn _get_tees(tee_sets: &Vec<TeeResponse>) -> Vec<Tee> {
 
 fn _get_tee_course(course: Option<TeeCourseResponse>) -> Option<TeeCourse> {
     match course {
-        Some(c) => {
-            Some(TeeCourse {
-                course_id: get_i32(&c.CourseId),
-                course_status: get_str(&c.CourseStatus),
-                course_name: get_str(&c.CourseName),
-                course_number: get_i32(&c.CourseNumber),
-                course_city: get_str(&c.CourseCity),
-                course_state: get_str(&c.CourseState),
-            })
-        },
-        None => None
+        Some(c) => Some(TeeCourse {
+            course_id: get_i32(&c.CourseId),
+            course_status: get_str(&c.CourseStatus),
+            course_name: get_str(&c.CourseName),
+            course_number: get_i32(&c.CourseNumber),
+            course_city: get_str(&c.CourseCity),
+            course_state: get_str(&c.CourseState),
+        }),
+        None => None,
     }
 }
 

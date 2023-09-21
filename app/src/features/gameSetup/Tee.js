@@ -1,14 +1,11 @@
-import { useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 import FavoriteIcon from 'common/components/favoriteIcon';
 import { course_handicap } from 'common/utils/handicap';
 import { GameContext } from 'features/game/gameContext';
 import { GET_GAME_QUERY } from 'features/game/graphql';
 import { AddCourseContext } from 'features/gameSetup/addCourseContext';
-import {
-  ADD_TEE_TO_ROUND_MUTATION,
-  REMOVE_TEE_FROM_ROUND_MUTATION,
-} from 'features/rounds/graphql';
+import { useAddTeeToRoundMutation } from 'features/rounds/hooks/useAddTeeToRoundMutation';
+import { useRemoveTeeFromRoundMutation } from 'features/rounds/hooks/useRemoveTeeFromRoundMutation';
 import { find } from 'lodash-es';
 import React, { useContext } from 'react';
 import { StyleSheet } from 'react-native';
@@ -22,8 +19,8 @@ const Tee = (props) => {
   const { _key: gkey } = game;
   const { rkey } = useContext(AddCourseContext);
 
-  const [addTeeToRound] = useMutation(ADD_TEE_TO_ROUND_MUTATION);
-  const [removeTeeFromRound] = useMutation(REMOVE_TEE_FROM_ROUND_MUTATION);
+  const [addTeeToRound] = useAddTeeToRoundMutation();
+  const [removeTeeFromRound] = useRemoveTeeFromRoundMutation();
 
   const selectTee = async () => {
     await add(rkey);
@@ -31,7 +28,6 @@ const Tee = (props) => {
     // add the same tee to the other players' rounds in this game
     // if they don't have any tees assigned already
     game.rounds.map(async (round) => {
-      // console.log('round map', round);
       if (!round || round._key === rkey) {
         return;
       }
@@ -39,27 +35,6 @@ const Tee = (props) => {
       if (!round.tees) {
         await add(round._key);
       }
-
-      // // here is one place we can calculate the course_handicap
-      // // on the round2game edges
-      // if (round?.player[0]?.handicap?.index) {
-      //   const index = round.player[0].handicap.index;
-      //   //console.log('index', index)
-
-      //   // tee is 'tee' if it's the one being changed
-      //   // otherwise, it's round.tee
-      //   const t = round.tee ? round.tee : tee;
-
-      //   const ch = course_handicap(index, t, game.scope.holes);
-      //   //console.log('ch', ch);
-      //   if (ch && ch !== round.course_handicap) {
-      //     //console.log('updating course_handicap to ', ch);
-      //     await update(round._key, [
-      //       { key: 'handicap_index', value: index.toString() },
-      //       { key: 'course_handicap', value: ch.toString() },
-      //     ]);
-      //   }
-      // }
     });
 
     // after all that, go back to GameSetup

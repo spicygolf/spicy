@@ -95,6 +95,8 @@ export const GET_GAME_QUERY = gql`
             course_city
             course_state
           }
+          course_handicap
+          game_handicap
         }
       }
       players {

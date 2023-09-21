@@ -6,8 +6,9 @@ fn main() {
 
     tonic_build::configure()
         .build_server(true)
-        .file_descriptor_set_path(out_dir.join("greeter_descriptor.bin"))
+        .file_descriptor_set_path(out_dir.join("handicap_descriptor.bin"))
         .out_dir("./src/generated")
+        .message_attribute(".handicap", "#[derive(serde::Deserialize, serde::Serialize)]")
         .compile(&[proto_file], &["."])
         .unwrap_or_else(|e| panic!("protobuf compile error: {}", e));
 
