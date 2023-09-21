@@ -12,6 +12,8 @@ type Tee {
   ratings: [Rating]
   holes: [Hole]
   course: TeeCourse
+  course_handicap: Int
+  game_handicap: Int
 }
 
 type Rating {

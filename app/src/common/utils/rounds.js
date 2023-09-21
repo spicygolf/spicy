@@ -14,7 +14,7 @@ export const get_round_for_player = (rounds, pkey) => {
 
 // given a hole (string, "1") and round, return the course's 'hole' object
 export const get_hole = (hole, round) => {
-  if (round?.tees) {
+  if (round?.tees?.length > 0) {
     if (round.tees.length === 1) {
       const ret = find(round.tees[0]?.holes, (h) => h.number.toString() === hole);
       //console.log('hole', hole);

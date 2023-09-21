@@ -1,6 +1,4 @@
 export { ADD_ROUND_MUTATION } from './addRoundMutation';
-export { ADD_TEE_TO_ROUND_MUTATION } from './addTeeToRoundMutation';
-export { REMOVE_TEE_FROM_ROUND_MUTATION } from './removeTeeFromRoundMutation';
 export { DELETE_ROUND_MUTATION } from './deleteRound';
 export { POST_SCORE_MUTATION } from './postScoreMutation';
 export { POST_ROUND_MUTATION } from './postRoundMutation';

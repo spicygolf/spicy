@@ -18,6 +18,8 @@ service Handicap {
   rpc GetTees(GetTeesRequest) returns (GetTeesResponse) {}
   // get tee
   rpc GetTee(GetTeeRequest) returns (Tee) {}
+  // get playing handicaps
+  rpc GetPlayingHandicaps(GetPlayingHandicapsRequest) returns (GetPlayingHandicapsResponse) {}
   // request access to the GPA (Golfer Product Access) API
   rpc RequestGpa(GpaRequest) returns (GpaResponse) {}
 }
@@ -205,6 +207,38 @@ message GetTee {
 
 message GetTeeRequest {
   GetTee q = 1;
+}
+
+// -----------------------------------------------------------------------------
+//  player handicaps
+// -----------------------------------------------------------------------------
+message Golfers {
+  optional int32 golfer_id = 1;
+  optional float handicap_index = 2;
+  int32 tee_set_id = 3;
+  string tee_set_side = 4;
+}
+
+message PlayingHandicap {
+  int32 playing_handicap = 1;
+  string playing_handicap_display = 2;
+  string shots_off = 3;
+}
+
+message Golfer {
+  map<string, PlayingHandicap> golfer = 1;
+}
+
+message Percent {
+  map<string, Golfer> percent = 1;
+}
+
+message GetPlayingHandicapsRequest {
+  repeated Golfers golfers = 1;
+}
+
+message GetPlayingHandicapsResponse {
+  repeated Percent percents = 1;
 }
 
 // -----------------------------------------------------------------------------

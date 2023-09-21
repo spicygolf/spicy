@@ -3,28 +3,30 @@ use crate::token::Token;
 use anyhow::anyhow;
 use handicap::handicap_server::{Handicap, HandicapServer};
 use handicap::{
-    GetHandicapRequest, GetHandicapResponse, GpaRequest, GpaResponse, Pagination,
-    SearchCourseRequest, SearchCourseResponse, SearchPlayer, SearchPlayerRequest,
-    SearchPlayerResponse, GetTeesRequest, GetTeesResponse, GetCourseRequest, Course,
-    GetTeeRequest, Tee
+    Course, GetCourseRequest, GetHandicapRequest, GetHandicapResponse, GetPlayingHandicapsRequest,
+    GetPlayingHandicapsResponse, GetTeeRequest, GetTeesRequest, GetTeesResponse, GpaRequest,
+    GpaResponse, Pagination, SearchCourseRequest, SearchCourseResponse, SearchPlayer,
+    SearchPlayerRequest, SearchPlayerResponse, Tee,
 };
 use log::{error, info};
 use tonic::{transport::Server, Code, Request, Response, Status};
 
-mod ghin {
-    include!("ghin/ghin.rs");
-}
+#[allow(non_snake_case)]
 mod handicap {
     include!("generated/handicap.rs");
     pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
-        tonic::include_file_descriptor_set!("greeter_descriptor");
+        tonic::include_file_descriptor_set!("handicap_descriptor");
 }
+
+mod ghin;
+mod playing_handicaps;
 mod settings;
 mod token;
 
 #[derive(Default)]
 pub struct HandicapService {
     ghin_token: Token,
+    ghin: Ghin,
 }
 
 #[tonic::async_trait]
@@ -33,7 +35,7 @@ impl Handicap for HandicapService {
         &self,
         request: Request<GetHandicapRequest>,
     ) -> Result<Response<GetHandicapResponse>, Status> {
-        let source = request.get_ref().source.to_owned();
+        let source: String = request.get_ref().source.to_owned();
         let id = request.get_ref().id.to_owned();
 
         let response = match source.as_str() {
@@ -103,8 +105,7 @@ impl Handicap for HandicapService {
         let response = match q.source.as_str() {
             "ghin" => {
                 let g = Ghin::default();
-                g.get_course(0, &self.ghin_token, q.to_owned())
-                    .await
+                g.get_course(0, &self.ghin_token, q.to_owned()).await
             }
             _ => Err(anyhow!("unknown handicap source: '{}'", q.source)),
         };
@@ -127,8 +128,7 @@ impl Handicap for HandicapService {
         let response = match q.source.as_str() {
             "ghin" => {
                 let g = Ghin::default();
-                g.search_course(0, &self.ghin_token, q.to_owned())
-                    .await
+                g.search_course(0, &self.ghin_token, q.to_owned()).await
             }
             _ => Err(anyhow!("unknown handicap source: '{}'", q.source)),
         };
@@ -151,8 +151,7 @@ impl Handicap for HandicapService {
         let response = match q.source.as_str() {
             "ghin" => {
                 let g = Ghin::default();
-                g.get_tees(0, &self.ghin_token, q.to_owned())
-                    .await
+                g.get_tees(0, &self.ghin_token, q.to_owned()).await
             }
             _ => Err(anyhow!("unknown handicap source: '{}'", q.source)),
         };
@@ -166,17 +165,13 @@ impl Handicap for HandicapService {
         }
     }
 
-    async fn get_tee(
-        &self,
-        request: Request<GetTeeRequest>,
-    ) -> Result<Response<Tee>, Status> {
+    async fn get_tee(&self, request: Request<GetTeeRequest>) -> Result<Response<Tee>, Status> {
         let q = request.get_ref().q.as_ref().unwrap().to_owned();
 
         let response = match q.source.as_str() {
             "ghin" => {
                 let g = Ghin::default();
-                g.get_tee(0, &self.ghin_token, q.to_owned())
-                    .await
+                g.get_tee(0, &self.ghin_token, q.to_owned()).await
             }
             _ => Err(anyhow!("unknown handicap source: '{}'", q.source)),
         };
@@ -188,6 +183,14 @@ impl Handicap for HandicapService {
                 Err(Status::new(Code::Unknown, e.to_string()))
             }
         }
+    }
+
+    async fn get_playing_handicaps(
+        &self,
+        request: Request<GetPlayingHandicapsRequest>,
+    ) -> Result<Response<GetPlayingHandicapsResponse>, Status> {
+        let api_call = playing_handicaps::get_call();
+        ghin::call(self.ghin, api_call, request).await
     }
 
     async fn request_gpa(
