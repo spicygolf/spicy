@@ -2,7 +2,7 @@ import { aql } from 'arangojs';
 import { find } from 'lodash-es';
 
 import { db } from '../db/db';
-import { pubsub } from '../server';
+// import { pubsub } from '../server';
 import { Doc } from './doc';
 
 const collection = db.collection('games');
@@ -59,10 +59,10 @@ class Game extends Doc {
     // write to db
     const newGame = await this.update(newG, {returnNew: true});
 
-    // publish changes for subscriptions
-        pubsub.publish(GAME_UPDATED, {
-      gameUpdated: newG,
-    });
+    // // publish changes for subscriptions
+    // pubsub.publish(GAME_UPDATED, {
+    //   gameUpdated: newG,
+    // });
     //console.log('_updateGame output', newGame.new);
     return newGame.new;
   }

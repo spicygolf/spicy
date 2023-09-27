@@ -11,12 +11,24 @@ import { titleize } from '../util/text';
 import { Club } from './club';
 import { Doc } from './doc';
 import { Game } from './game';
+import { next } from '../util/database';
 
 const collection = db.collection('players');
 
 class Player extends Doc {
   constructor() {
     super(collection);
+  }
+
+  async getPlayer(pkey) {
+    const player_id = `players/${pkey}`;
+    const query = aql`
+      FOR p IN players
+        FILTER p._id == ${player_id}
+        RETURN p
+    `;
+    return next(query);
+
   }
 
   async searchPlayer({ q, p }) {

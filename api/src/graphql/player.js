@@ -104,7 +104,7 @@ export const PlayerResolvers = {
   Query: {
     getPlayer: async (root, { _key }) => {
       const p = new Player();
-      return await p.load(_key);
+      return await p.getPlayer(_key);
     },
     getPlayerByEmail: async (root, { email, needToken }) => {
       const p = new Player();
