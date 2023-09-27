@@ -1,3 +1,7 @@
+use futures_util::future::BoxFuture;
+use tokio::sync::Mutex;
+use std::future::Future;
+
 use crate::handicap::{
     Club, Course, GetCourse, GetHandicapResponse, GetTee, GetTeesResponse, GpaResponse, Hole,
     Pagination, Rating, SearchCourse, SearchCourseResponse, SearchPlayer, SearchPlayerResponse,
@@ -181,13 +185,6 @@ struct GpaPayload {
 #[derive(Deserialize, Debug)]
 struct GpaPostResponse {
     success: String,
-}
-
-pub struct ApiCall<REQ, RES> {
-    pub name: String,
-    pub call_fn: fn(ghin: Ghin, request: Request<REQ>) -> Result<reqwest::Response, reqwest::Error>,
-    pub process_fn: fn(response: reqwest::Response) -> Result<Response<RES>, Status>,
-    pub retries: u8,
 }
 
 #[async_trait]
@@ -647,52 +644,96 @@ impl GhinHandicapService for Ghin {
 }
 
 // -----------------------------------------------------------------------------
+// ApiCall
 
-pub async fn call<REQ, RES>(
-    ghin: Ghin,
-    api_call: ApiCall<REQ, RES>,
-    request: Request<REQ>,
-) -> Result<Response<RES>, Status> {
-    if ghin.attempts == api_call.retries {
-        return Err(Status::new(
-            Code::Unknown,
-            format!(
-                "Too many unsuccessful attempts ({}) to {}.",
-                api_call.retries, api_call.name
-            ),
-        ));
-    }
+#[async_trait(?Send)]
+trait AsyncCallFn<REQ> {
+    fn call(
+        &self,
+        ghin: &Ghin,
+        request: &tonic::Request<REQ>,
+    ) -> BoxFuture<'static, Result<reqwest::Response, reqwest::Error>>;
+}
 
-    let api_request = (api_call.call_fn)(ghin, request);
-    match api_request {
-        Ok(response) => match response.status() {
-            StatusCode::OK => {
-                (api_call.process_fn)(response)
-            },
-            StatusCode::UNAUTHORIZED => {
-                ghin.login().await;
-                let next_attempt = ghin.attempts + 1;
-                call(ghin, api_call, request).await
-            }
-            StatusCode::BAD_REQUEST => {
-                let r = response.text().await;
-                error!("BAD_REQUEST: {:?}", r);
-                Err(Status::new(
-                    Code::Unknown,
-                    format!("bad request for {}", api_call.name),
-                ))
-            }
-            _ => Err(Status::new(
-                Code::Unknown,
-                format!("Unknown {} error", api_call.name),
-            )),
-        },
-        Err(err) => Err(Status::new(
-            Code::Unknown,
-            format!("Unknown {} error: {}", api_call.name, err),
-        )),
+#[async_trait(?Send)]
+impl<T, F, REQ> AsyncCallFn<REQ> for T
+where
+    T: Fn(&Ghin, &tonic::Request<REQ>) -> F,
+    F: Future<Output = Result<reqwest::Response, reqwest::Error>> + Send,
+{
+    fn call(
+        &self,
+        ghin: &Ghin,
+        request: &tonic::Request<REQ>,
+    ) -> BoxFuture<'static, Result<reqwest::Response, reqwest::Error>> {
+        Box::pin(self(ghin, request))
     }
 }
+
+pub struct ApiCall<REQ, RES> {
+    pub name: String,
+    pub call_fn: Box<dyn AsyncCallFn<REQ>>,
+    pub process_fn: fn(response: reqwest::Response) -> Result<RES>,
+    pub retries: u8,
+}
+
+impl Ghin {
+    // #[async_recursion]
+    pub async fn execute<REQ, RES>(
+        &mut self,
+        m: &Mutex<ApiCall<REQ, RES>>,
+        request: &Request<REQ>,
+    ) -> Result<Response<RES>, Status> {
+        let api_call = m.lock().await;
+        if self.attempts == api_call.retries {
+            return Err(Status::new(
+                Code::Unknown,
+                format!(
+                    "Too many unsuccessful attempts ({}) to {}.",
+                    api_call.retries, api_call.name
+                ),
+            ));
+        }
+
+        let api_request = api_call.call_fn.call(&self, request).await;
+        match api_request {
+            Ok(response) => match response.status() {
+                StatusCode::OK => match (api_call.process_fn)(response) {
+                    Ok(res) => Ok(Response::new(res)),
+                    Err(err) => Err(Status::new(
+                        Code::Unknown,
+                        format!("Unknown {} error: {}", api_call.name, err),
+                    )),
+                },
+                // // TODO: implement retry/recursive 'call'
+                // StatusCode::UNAUTHORIZED => {
+                //     ghin.login().await;
+                //     ghin.attempts += 1;
+                //     self.call(ghin, &request).await
+                // }
+                StatusCode::BAD_REQUEST => {
+                    let r = response.text().await;
+                    error!("BAD_REQUEST: {:?}", r);
+                    Err(Status::new(
+                        Code::Unknown,
+                        format!("bad request for {}", api_call.name),
+                    ))
+                }
+                _ => Err(Status::new(
+                    Code::Unknown,
+                    format!("Unknown {} error", api_call.name),
+                )),
+            },
+            Err(err) => Err(Status::new(
+                Code::Unknown,
+                format!("Unknown {} error: {}", api_call.name, err),
+            )),
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// helper fns
 
 fn rollup_golfer(golfers: &Vec<Golfer>) -> Result<SearchPlayerResponse> {
     let g = golfers.iter().nth(0);

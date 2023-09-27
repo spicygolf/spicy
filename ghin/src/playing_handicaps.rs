@@ -2,29 +2,28 @@ use crate::{
     ghin::{Ghin, ApiCall},
     handicap::{GetPlayingHandicapsRequest, GetPlayingHandicapsResponse},
 };
-use reqwest::{Error, Response};
-use tonic::{Request, Status};
+use reqwest::Error;
+use tonic::Request;
 
 #[allow(non_snake_case)]
 mod handicap {
     include!("generated/handicap.rs");
 }
 
-// TODO: make into a call trait?
 pub fn get_call() -> ApiCall<GetPlayingHandicapsRequest, GetPlayingHandicapsResponse> {
     ApiCall {
         name: "get_playing_handicaps".to_string(),
-        call_fn,
-        process_fn,
+        call_fn: Box::new(call_fn),
+        process_fn: process_fn,
         retries: 2,
     }
 }
 
 
 async fn call_fn(
-    ghin: Ghin,
-    request: Request<GetPlayingHandicapsRequest>,
-) -> Result<Response, Error> {
+    ghin: &Ghin,
+    request: &Request<GetPlayingHandicapsRequest>,
+) -> Result<reqwest::Response, Error> {
 
     let uri = format!(
         "{}/playing_handicaps.json",
@@ -37,12 +36,12 @@ async fn call_fn(
         .client
         .post(uri)
         .json(&payload)
-        .bearer_auth(ghin.token)
+        .bearer_auth(&ghin.token)
         .send()
         .await
 }
 
-fn process_fn(response: reqwest::Response) -> Result<GetPlayingHandicapsResponse, Status> {
+fn process_fn(response: reqwest::Response) -> Result<GetPlayingHandicapsResponse, anyhow::Error> {
     // let resp_text = &response.text().await;
     // debug!("response text: {:?}", resp_text);
     // Err(anyhow!("testing"))
