@@ -7,6 +7,7 @@ util/arango/*.bz2
 util/arango/*.gz
 util/arango/*.tar
 util/arango/tmp/*
+.env
 config.js
 
 coverage/*
