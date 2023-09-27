@@ -1,6 +1,4 @@
 import { Round } from '../models/round';
-import { pubsub } from '../server';
-import { withFilter } from 'apollo-server-hapi';
 
 export const RoundTypeDefs = `
 type Value {
@@ -116,12 +114,13 @@ export const RoundResolvers = {
     },
     postScore: (_root, args, _context) => {
       const { rkey, score } = args;
-      pubsub.publish(SCORE_POSTED, {
-        scorePosted: {
-          _key: rkey,
-          scores: [score],
-        },
-      });
+      // // publish changes for subscriptions
+      // pubsub.publish(SCORE_POSTED, {
+      //   scorePosted: {
+      //     _key: rkey,
+      //     scores: [score],
+      //   },
+      // });
       let r = new Round();
       return r.postScore(rkey, score);
     },
@@ -134,19 +133,19 @@ export const RoundResolvers = {
       return r.postRoundToHandicapService(rkey, posted_by);
     },
   },
-  Subscription: {
-    scorePosted: {
-      subscribe: withFilter(
-        () => {
-          //console.log('scorePosted subscribe', pubsub);
-          return pubsub.asyncIterator([SCORE_POSTED]);
-        },
-        (payload, variables) => {
-          return (payload.scorePosted._key === variables.rkey);
-        },
-      ),
-    }
-  },
+  // Subscription: {
+  //   scorePosted: {
+  //     subscribe: withFilter(
+  //       () => {
+  //         //console.log('scorePosted subscribe', pubsub);
+  //         return pubsub.asyncIterator([SCORE_POSTED]);
+  //       },
+  //       (payload, variables) => {
+  //         return (payload.scorePosted._key === variables.rkey);
+  //       },
+  //     ),
+  //   }
+  // },
   Round: {
     player: (round) => {
       let r = new Round();

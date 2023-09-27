@@ -1,4 +1,3 @@
-import { gql } from 'apollo-server-hapi';
 import { flattenDeep, merge } from 'lodash-es';
 
 import {
@@ -133,10 +132,10 @@ const resolvers = merge(
 
 export const schema = {
   typeDefs: flattenDeep([
-    gql`${TypeDefs}`,
-    gql`${RootQuery}`,
-    gql`${RootMutation}`,
-    gql`${RootSubscription}`,
+    TypeDefs,
+    RootQuery,
+    RootMutation,
+    RootSubscription,
   ]),
   resolvers: resolvers,
 };
