@@ -1,8 +1,5 @@
 import { cloneDeep } from 'lodash-es';
-import customenv from 'custom-env';
 import { db } from '../../../src/db/db';
-
-customenv.env();
 
 
 /*

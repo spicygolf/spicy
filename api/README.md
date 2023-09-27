@@ -4,7 +4,7 @@ Node, Hapi, Apollo GraphQL Server API layer for Spicy Golf mobile app and websit
 
 ## Development Setup
 
- * Install NodeJS, ArangoDB
+ * Install Bun, ArangoDB
  * Install XCode
  * Install command-line developer tools
 
@@ -12,17 +12,15 @@ Node, Hapi, Apollo GraphQL Server API layer for Spicy Golf mobile app and websit
 
  * Install dependencies
 
-        yarn install
-        yarn global add pm2
+        bun install
 
  * Setup a database, with username and password: all with the names/values of `dg`
  * To seed the development database, ask someone for an arangodb dump of PROD or DEV db.
 
- * Add `config.js` to the project root folder.  Ask someone for it.
+ * Add `.env` and `src/config.js` to the project root folder.  Ask someone for them.
  * Start up the API
 
-        yarn start:dev
-        yarn logs
+        bun run start:dev
 
 ## Production Setup
 

@@ -3,43 +3,20 @@
   "configurations": [
     {
       "name": "api",
-      "type": "node",
+      "type": "bun",
       "request": "launch",
       "cwd": "${workspaceFolder}/api",
-      "runtimeExecutable": "${workspaceFolder}/api/node_modules/nodemon/bin/nodemon.js",
-      "runtimeArgs": [
-        "--watch",
-        "${workspaceFolder}/api",
-        "--experimental-specifier-resolution=node",
-        "${workspaceFolder}/api/src/server.js"
-      ],
-      "env": {
-        "NODE_ENV": "local"
-      }
+      "program": "src/server.js",
+      "watchMode": "hot",
+      "internalConsoleOptions": "openOnSessionStart",
     },
     {
-      "name": "ghin",
-      "type": "lldb",
+      "name": "ghin dev testing - bun",
+      "type": "bun",
       "request": "launch",
-      "cwd": "${workspaceFolder}/ghin/",
-      "cargo": {
-        "args": [
-          "build",
-          "--manifest-path=${workspaceFolder}/ghin/Cargo.toml",
-          "--bin=ghin",
-          "--package=ghin"
-        ],
-        "filter": {
-          "name": "ghin",
-          "kind": "bin"
-        }
-      },
-      "console": "internalConsole",
+      "cwd": "${workspaceFolder}/api",
+      "program": "src/ghin/dev.ts",
       "internalConsoleOptions": "openOnSessionStart",
-      "env": {
-        "RUST_LOG": "ghin=debug"
-      },
-      "args": []
     },
     {
       "name": "app ios",
@@ -64,28 +41,44 @@
       "program": "${workspaceFolder}/test/common/utils/score.diff_options_diff_holes.test.js",
       "args": []
     },
-    {
-      "name": "ghin debug tests",
-      "type": "lldb",
-      "request": "launch",
-      "cargo": {
-        "args": ["test", "--no-run", "--bin=ghin", "--package=ghin"],
-        "filter": {
-          "name": "ghin",
-          "kind": "bin"
-        }
-      },
-      "args": [],
-      "cwd": "${workspaceFolder}/ghin"
-    },
-    {
-      "name": "ghin testing - node",
-      "type": "bun",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/api",
-      "program": "src/ghin/ghin.ts",
-      "internalConsoleOptions": "openOnSessionStart",
-    },
+    // {
+    //   "name": "ghin - rust",
+    //   "type": "lldb",
+    //   "request": "launch",
+    //   "cwd": "${workspaceFolder}/ghin/",
+    //   "cargo": {
+    //     "args": [
+    //       "build",
+    //       "--manifest-path=${workspaceFolder}/ghin/Cargo.toml",
+    //       "--bin=ghin",
+    //       "--package=ghin"
+    //     ],
+    //     "filter": {
+    //       "name": "ghin",
+    //       "kind": "bin"
+    //     }
+    //   },
+    //   "console": "internalConsole",
+    //   "internalConsoleOptions": "openOnSessionStart",
+    //   "env": {
+    //     "RUST_LOG": "ghin=debug"
+    //   },
+    //   "args": []
+    // },
+    // {
+    //   "name": "ghin debug tests - rust",
+    //   "type": "lldb",
+    //   "request": "launch",
+    //   "cargo": {
+    //     "args": ["test", "--no-run", "--bin=ghin", "--package=ghin"],
+    //     "filter": {
+    //       "name": "ghin",
+    //       "kind": "bin"
+    //     }
+    //   },
+    //   "args": [],
+    //   "cwd": "${workspaceFolder}/ghin"
+    // },
     {
       "name": "api schema_update 20210602",
       "type": "node",

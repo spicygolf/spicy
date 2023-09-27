@@ -1,14 +1,11 @@
 import { ApolloServer, PubSub } from 'apollo-server-hapi';
 
 import config from './config';
-import customenv from 'custom-env';
 import { server as hapiServer } from '@hapi/hapi';
 import jwt2Hapi from 'hapi-auth-jwt2';
 import { restRoutes } from './rest';
 import { schema } from './graphql/schema';
 import { validate } from './auth';
-
-customenv.env();
 
 const {
   crypto: { privateKey },
@@ -24,7 +21,7 @@ const {
   SUBSCRIPTION_ENDPOINT: subscription,
 } = process.env;
 
-async function StartServer() {
+const StartServer = async () => {
   const graphqlPath = `/${api}/${graphql}`;
   const subscriptionPath = `/${api}/${subscription}`;
 
