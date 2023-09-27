@@ -10,6 +10,7 @@ use handicap::{
 };
 use log::{error, info};
 use tonic::{transport::Server, Code, Request, Response, Status};
+use tokio::sync::Mutex;
 
 #[allow(non_snake_case)]
 mod handicap {
@@ -190,7 +191,7 @@ impl Handicap for HandicapService {
         request: Request<GetPlayingHandicapsRequest>,
     ) -> Result<Response<GetPlayingHandicapsResponse>, Status> {
         let api_call = playing_handicaps::get_call();
-        ghin::call(self.ghin, api_call, request).await
+        self.ghin.execute(&Mutex::new(api_call), &request).await
     }
 
     async fn request_gpa(
