@@ -1,9 +1,6 @@
 import { cloneDeep } from 'lodash-es';
-import customenv from 'custom-env';
 import { db } from '../../../src/db/db';
 import { refreshEdge } from '../../../src/util/ghin';
-
-customenv.env();
 
 /*
 
