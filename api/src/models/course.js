@@ -1,9 +1,5 @@
 import datefnstz from 'date-fns-tz';
 
-import {
-  getCourse as getCourseGRPC,
-  searchCourse as searchCourseGRPC
-} from '../clients/handicap';
 import { db } from '../db/db';
 import { Doc } from './doc';
 

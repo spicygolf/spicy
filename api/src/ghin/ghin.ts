@@ -1,7 +1,9 @@
 import axios, { AxiosResponse } from 'axios';
 
-const { GHIN_BASE_URL } = process.env;
-const retries = 3;
+const { GHIN_BASE_URL, GHIN_EMAIL, GHIN_PASS } = process.env;
+// le sigh, global :(
+const retries: number = 3;
+let ghinToken: string | null = null;
 
 const instance = axios.create({
   baseURL: GHIN_BASE_URL,
@@ -21,7 +23,17 @@ type GhinRequest = {
   attempts: number;
 };
 
-export const ghin_request = async ({method, url, params, data, token, attempts}: GhinRequest) => {
+export type Pagination = {
+  page: number;
+  per_page: number;
+};
+
+export const ghinRequest = async ({method, url, params, data, attempts}: GhinRequest) => {
+
+  if (ghinToken === null) {
+    ghinToken = await login()
+  }
+
   attempts++;
 
   if (attempts > retries) {
@@ -29,10 +41,11 @@ export const ghin_request = async ({method, url, params, data, token, attempts}:
     return null;
   }
 
-  const headers = (token !== null) ? {
-    Authorization: `Bearer ${token}`
+  const headers = (ghinToken !== null) ? {
+    Authorization: `Bearer ${ghinToken}`
   } : {};
 
+  console.log('ghin request', url, params, data)
   try {
     const resp: AxiosResponse = await instance.request({
       method,
@@ -41,19 +54,36 @@ export const ghin_request = async ({method, url, params, data, token, attempts}:
       data,
       headers,
     });
-    // TODO: inspect resp for 40x, 200, etc.
-    // retries...
-    console.log('resp status', resp.status)
-    return resp;
+
+    switch (resp.status) {
+      case 200: // ok
+        return resp;
+      case 401: // unauthorized
+        // reset token to null to force another login
+        ghinToken = null;
+        return await ghinRequest({method, url, params, data, attempts});
+      default:
+        console.error("ghin response statusText", resp.statusText);
+        console.log('ghin response', resp);
+    }
+    return null;
   } catch(error) {
     console.error({method, url, params, data, error});
   }
-
-
 };
 
-export type Pagination = {
-  page: number;
-  per_page: number;
+const login = async (): Promise<string | null> => {
+  const resp = await instance.request({
+    method: 'post',
+    url: '/users/login.json',
+    data: {
+      user: {
+        email: GHIN_EMAIL,
+        password: GHIN_PASS,
+        remember_me: true,
+      }
+    },
+  });
+  console.log("ghin login");
+  return resp?.data?.token || null;
 };
-

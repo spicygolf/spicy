@@ -1,10 +1,7 @@
 import { aql } from 'arangojs';
 
 import { createToken } from '../auth';
-import {
-  getHandicap as getHandicapGRPC,
-  searchPlayer as searchPlayerGRPC,
-} from '../clients/handicap';
+import { searchPlayer as searchPlayerGhin } from '../ghin';
 import { db } from '../db/db';
 import { login } from '../util/ghin';
 import { titleize } from '../util/text';
@@ -28,11 +25,11 @@ class Player extends Doc {
         RETURN p
     `;
     return next(query);
-
   }
 
   async searchPlayer({ q, p }) {
-    return searchPlayerGRPC({
+    return searchPlayerGhin({
+      token: null,
       q,
       p,
     });
@@ -118,8 +115,8 @@ class Player extends Doc {
     if (needToken) {
       player.token = createToken({
         pkey: player._key,
-        level: player.level || 0
-      })
+        level: player.level || 0,
+      });
     }
     return player;
   }
@@ -438,14 +435,30 @@ class Player extends Doc {
     return new_res.new;
   }
 
-  async getHandicap({ source, id }) {
-    if (source !== '') {
-      return getHandicapGRPC({
-        source,
-        id,
-      });
-    } else {
-      return {};
+  async getHandicap({ id }) {
+    const resp = await searchPlayerGhin({
+      q: {
+        golfer_id: id,
+      },
+      p: {
+        page: 1,
+        per_page: 50,
+      },
+    });
+
+    const golfer = resp?.golfers[0] || {};
+    const clubs = resp.golfers.map(golfer => ({
+      id: golfer.club_id,
+      name: golfer.club_name,
+      state: golfer.state,
+    }));
+
+    return {
+      source: "ghin",
+      index: golfer.hi_value,
+      revDate: golfer.rev_date,
+      gender: golfer.gender,
+      clubs,
     }
   }
 
@@ -513,7 +526,7 @@ class Player extends Doc {
     const rid = `rounds/${rkey}`;
 
     // start transaction
-    const trx = await db.beginTransaction({ write: ["games", "edges"] });
+    const trx = await db.beginTransaction({ write: ['games', 'edges'] });
     let q;
 
     // remove player2game edge
@@ -578,7 +591,7 @@ class Player extends Doc {
             p2g,
             r2g,
             g,
-          }
+          },
         ];
     }
 

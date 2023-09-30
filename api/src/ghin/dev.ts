@@ -1,26 +1,15 @@
-import { search_player } from './search_player';
-import { login } from './login';
-
-const { GHIN_EMAIL, GHIN_PASS } = process.env;
+import { searchPlayer } from './searchPlayer';
 
 const main = async () => {
 
-  // login & get token
-  const token = await login({
-    email: GHIN_EMAIL,
-    password: GHIN_PASS,
-    remember_me: true
-  });
-
   // search for a player
-  const search_player_resp = await search_player({
-    token,
+  const searchPlayerResp = await searchPlayer({
     q: {
-      last_name: 'anderson%',
-      first_name: 'b%',
+      last_name: 'einhorn%',
+      first_name: '',
       country: 'US',
-      state: 'GA',
-      status: 'Active',
+      state: 'WI',
+      // status: 'Active',
       sorting_criteria: 'last_name_first_name',
       order: 'ASC'
     },
@@ -29,7 +18,7 @@ const main = async () => {
       per_page: 50,
     }
   });
-  console.log('search_player', search_player_resp);
+  console.log('search_player', searchPlayerResp);
 
 
 };
