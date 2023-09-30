@@ -1,7 +1,6 @@
-import { ghin_request, Pagination } from './ghin';
+import { ghinRequest, Pagination } from './ghin';
 
 type SearchPlayerRequest = {
-  token: string | null;
   q: SearchPlayerQuery;
   p: Pagination;
 };
@@ -30,19 +29,18 @@ type SearchPlayerResponse = {
 
 };
 
-export const search_player = async ({token, q, p}: SearchPlayerRequest): Promise<SearchPlayerResponse | null> => {
+export const searchPlayer = async ({q, p}: SearchPlayerRequest): Promise<SearchPlayerResponse | null> => {
 
   const params = {
     ...p,
     ...q,
   };
 
-  const resp = await ghin_request({
+  const resp = await ghinRequest({
     method: 'get',
     url: '/golfers/search.json',
     params,
     data: {},
-    token,
     attempts: 0,
   });
 

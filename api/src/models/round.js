@@ -3,7 +3,6 @@ import { login, postRound } from '../util/ghin';
 import { Doc } from './doc';
 import { aql } from 'arangojs';
 import { db } from '../db/db';
-import { getTee as getTeeGRPC } from '../clients/handicap';
 import { next } from '../util/database';
 
 const collection = db.collection('rounds');
