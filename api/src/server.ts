@@ -2,16 +2,13 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import http from 'http';
 import { json } from 'body-parser';
 import cors from 'cors';
+import { GraphQLError } from 'graphql';
 
-import config from './config';
 import { schema } from './graphql/schema';
-
-interface MyContext {
-  token?: string;
-}
 
 const {
   APP_HOST: host,
@@ -19,6 +16,7 @@ const {
   API_VERSION: api,
   GRAPHQL_ENDPOINT: graphql,
   SUBSCRIPTION_ENDPOINT: subscription,
+  JWT_SECRET,
 } = process.env;
 
 const StartServer = async () => {
@@ -65,7 +63,7 @@ const StartServer = async () => {
     cors<cors.CorsRequest>(),
     json(),
     expressMiddleware(server, {
-      context: async ({ req }) => ({ token: req.headers.token }),
+      context,
     }),
   );
 
@@ -87,3 +85,47 @@ process.on('unhandledRejection', (err) => {
 });
 
 StartServer().catch((error) => console.log(error));
+
+
+
+const context = async ({ req }) => {
+  if (!useAuthentication(req.body?.query)) {
+    return
+  };
+
+  // validate token for all other endpoints
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader?.split(' ')[1];
+
+  let user = null;
+  try {
+    user = jwt.verify(token, JWT_SECRET);
+  } catch(_) {}
+  if (!user) {
+    throw new GraphQLError('User is not authenticated', {
+      extensions: {
+        code: 'UNAUTHENTICATED',
+        http: { status: 401 },
+      },
+    });
+  }
+  return user;
+};
+
+const useAuthentication = (query: string) => {
+  const no_auth_queries = [
+    'queryIntrospectionQuery', // TODO: remove me after dev work
+    'querylogin',
+    'queryregister',
+  ];
+
+  let ret = true;
+
+  query = query.replace(/\s/g, "");
+  no_auth_queries.map((no_auth) => {
+    if (query.startsWith(no_auth)) {
+      ret = false;
+    }
+  });
+  return ret;
+};

@@ -1,6 +1,12 @@
 import { flattenDeep, merge } from 'lodash-es';
 
 import {
+  AccountMutationSigs,
+  AccountQuerySigs,
+  AccountResolvers,
+  AccountTypeDefs
+} from './account';
+import {
   ClubMutationSigs,
   ClubQuerySigs,
   ClubResolvers,
@@ -67,6 +73,7 @@ import {
 } from './tee';
 
 const TypeDefs = [
+  AccountTypeDefs,
   SharedTypeDefs,
   ClubTypeDefs,
   CourseTypeDefs,
@@ -82,6 +89,7 @@ const TypeDefs = [
 
 const RootQuery = `
 type Query {
+  ${AccountQuerySigs}
   ${ClubQuerySigs}
   ${CourseQuerySigs}
   ${EventQuerySigs}
@@ -97,6 +105,7 @@ type Query {
 
 const RootMutation = `
 type Mutation {
+  ${AccountMutationSigs}
   ${ClubMutationSigs}
   ${CourseMutationSigs}
   ${EventMutationSigs}
@@ -118,6 +127,7 @@ const RootSubscription = `
 `;
 
 const resolvers = merge(
+  AccountResolvers,
   ClubResolvers,
   CourseResolvers,
   EventResolvers,

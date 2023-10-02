@@ -84,7 +84,6 @@ type SearchPlayer {
 
 export const PlayerQuerySigs = `
   getPlayer(_key: String!): Player
-  getPlayerByEmail(email: String!, needToken: Boolean!): Player
   searchPlayer(q: Search!, p: Pagination!): [SearchPlayer]
   activeGamesForPlayer(pkey: String!): [Game]
   gameSpecsForPlayer(pkey: String!): [GameSpecWithCount]
@@ -105,10 +104,6 @@ export const PlayerResolvers = {
     getPlayer: async (root, { _key }) => {
       const p = new Player();
       return await p.getPlayer(_key);
-    },
-    getPlayerByEmail: async (root, { email, needToken }) => {
-      const p = new Player();
-      return await p.loadByEmail(email, needToken);
     },
     searchPlayer: async (_, { q, p }, context) => {
       let pl = new Player();
