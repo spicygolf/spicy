@@ -1,6 +1,5 @@
 import { aql } from 'arangojs';
 
-import { createToken } from '../auth';
 import { searchPlayer as searchPlayerGhin } from '../ghin';
 import { db } from '../db/db';
 import { login } from '../util/ghin';
@@ -24,7 +23,7 @@ class Player extends Doc {
         FILTER p._id == ${player_id}
         RETURN p
     `;
-    return next(query);
+    return next({query});
   }
 
   async searchPlayer({ q, p }) {
@@ -94,32 +93,7 @@ class Player extends Doc {
     return cursor.all();
   }
 
-  async loadByEmail(email, needToken = false) {
-    const query = aql`
-      FOR p IN players
-        FILTER p.email == ${email}
-        RETURN p
-    `;
-    const cursor = await db.query(query, { maxRuntime: 5 });
-    const results = await cursor.all();
-    if (results.length > 1) {
-      console.error(
-        `Error: There are '${results.length}' players with email '${q}'.`,
-      );
-      return null;
-    }
-    let player = null;
-    if (results && results[0]) {
-      player = results[0];
-    }
-    if (needToken) {
-      player.token = createToken({
-        pkey: player._key,
-        level: player.level || 0,
-      });
-    }
-    return player;
-  }
+
 
   async loadByHandicap(h) {
     const query = aql`
