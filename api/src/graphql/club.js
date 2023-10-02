@@ -1,5 +1,3 @@
-import { Club } from '../models/club';
-
 export const ClubTypeDefs = `
 type Club {
   id: String

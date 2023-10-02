@@ -42,7 +42,7 @@ export const all = async (query, options = {}, debug) => {
   }
 };
 
-export const next = async (query, options = {}, debug) => {
+export const next = async ({query, options = {}, debug}) => {
   try {
     const cursor = await db.query(query, options);
     if (debug) {

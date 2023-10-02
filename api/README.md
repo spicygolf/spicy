@@ -17,7 +17,7 @@ Node, Hapi, Apollo GraphQL Server API layer for Spicy Golf mobile app and websit
  * Setup a database, with username and password: all with the names/values of `dg`
  * To seed the development database, ask someone for an arangodb dump of PROD or DEV db.
 
- * Add `.env` and `src/config.js` to the project root folder.  Ask someone for them.
+ * Add `.env` to the project root folder.  Ask someone for a copy.
  * Start up the API
 
         bun run start:dev
