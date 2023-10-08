@@ -508,7 +508,7 @@ export const getCoursesPlayersTxt = (game) => {
     const tee_courses = reduce(
       r?.tees,
       (cum, t) => {
-        if (t && cum.indexOf(t?.course?.course_name) < 0) {
+        if (t && cum.indexOf(t?.course?.course_name || '') < 0) {
           cum.push(t.course.course_name);
         }
         return cum;

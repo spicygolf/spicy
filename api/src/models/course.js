@@ -2,6 +2,7 @@ import datefnstz from 'date-fns-tz';
 
 import { db } from '../db/db';
 import { Doc } from './doc';
+import { getCourse as getCourseGhin, searchCourse as searchCourseGhin } from '../ghin';
 
 const { zonedTimeToUtc } = datefnstz;
 
@@ -15,11 +16,11 @@ class Course extends Doc {
   }
 
   async getCourse({ q }) {
-    return getCourseGRPC({ q });
+    return getCourseGhin({ q });
   }
 
   async searchCourse({ q }) {
-    return searchCourseGRPC({ q });
+    return searchCourseGhin({ q });
   }
 
 

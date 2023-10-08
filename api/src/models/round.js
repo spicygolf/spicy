@@ -4,6 +4,7 @@ import { Doc } from './doc';
 import { aql } from 'arangojs';
 import { db } from '../db/db';
 import { next } from '../util/database';
+import { getTee as getTeeGhin } from '../ghin';
 
 const collection = db.collection('rounds');
 
@@ -18,9 +19,8 @@ class Round extends Doc {
       const ret = await Promise.all(
         round.tees.map(
           async (tee) =>
-            await getTeeGRPC({
+            await getTeeGhin({
               q: {
-                source: 'ghin',
                 tee_id: tee.tee_id,
               },
             }),
