@@ -7,8 +7,13 @@ import http from 'http';
 import { json } from 'body-parser';
 import cors from 'cors';
 import { GraphQLError } from 'graphql';
+import { WebSocketServer } from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
+import { PubSub } from 'graphql-subscriptions';
 
 import { schema } from './graphql/schema';
+
+export const pubsub = new PubSub();
 
 const {
   APP_HOST: host,
@@ -36,24 +41,25 @@ const StartServer = async () => {
     ...schema,
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              await wsServerCleanup.dispose();
+            },
+          };
+        },
+      },
     ],
-    subscriptions: {
-      path: subscriptionPath,
-      onConnect: (connectionParams, webSocket, context) => {
-        console.log('subscription connect', connectionParams, webSocket, context);
-      },
-      onOperation: (message, params, webSocket) => {
-        console.log('subscription operation', message, params, webSocket);
-      },
-      onDisconnect: (webSocket, context) => {
-        console.log('subscription disconnect', webSocket, context);
-      },
-    },
   });
 
-  // TODO: subscriptions and pubsub
-  // // subscriptions
-  // server.installSubscriptionHandlers(app.listener);
+  // WebSocket server
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: subscriptionPath,
+  });
+
+  const wsServerCleanup = useServer({ schema }, wsServer);
 
   // Ensure we wait for our server to start
   await server.start();
@@ -75,7 +81,7 @@ const StartServer = async () => {
 
   console.log("🚀 Spicy Golf API 🚀");
   console.log(`Server        ready at: http://${host}:${port}${graphqlPath}`);
-  // console.log(`Subscriptions ready at: http://${host}:${port}${subscriptionPath}`);
+  console.log(`Subscriptions ready at: http://${host}:${port}${subscriptionPath}`);
 
 };
 

@@ -1,3 +1,4 @@
+import { getTee } from './getTee';
 import { searchPlayer } from './searchPlayer';
 
 const main = async () => {
@@ -18,7 +19,15 @@ const main = async () => {
       per_page: 50,
     }
   });
-  console.log('search_player', searchPlayerResp);
+  console.log('searchPlayer', searchPlayerResp);
+
+  // get a tee set
+  const getTeeResp = await getTee({
+    q: {
+      tee_id: '456824',
+    }
+  });
+  console.log('getTee', getTeeResp);
 
 
 };

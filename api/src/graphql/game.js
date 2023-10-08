@@ -1,6 +1,7 @@
 import { Game } from '../models/game';
+import { withFilter } from 'graphql-subscriptions';
 
-// const GAME_UPDATED = 'GAME_UPDATED';
+const GAME_UPDATED = 'GAME_UPDATED';
 
 export const GameTypeDefs = `
 type Game {
@@ -215,19 +216,19 @@ export const GameResolvers = {
       return g.remove(gkey);
     },
   },
-  // Subscription: {
-  //   gameUpdated: {
-  //     subscribe: withFilter(
-  //       () => {
-  //         //console.log('gameUpdated subscribe', pubsub);
-  //         return pubsub.asyncIterator([GAME_UPDATED]);
-  //       },
-  //       (payload, variables) => {
-  //         return payload.gameUpdated._key === variables.gkey;
-  //       },
-  //     ),
-  //   },
-  // },
+  Subscription: {
+    gameUpdated: {
+      subscribe: withFilter(
+        () => {
+          //console.log('gameUpdated subscribe', pubsub);
+          return pubsub.asyncIterator([GAME_UPDATED]);
+        },
+        (payload, variables) => {
+          return payload.gameUpdated._key === variables.gkey;
+        },
+      ),
+    },
+  },
   Game: {
     deleteGameInfo: (game) => {
       const g = new Game();
