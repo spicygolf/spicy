@@ -30,10 +30,10 @@ input GetCourse {
 }
 
 input SearchCourse {
-  source: String!
+  name: String
+  facility_id: Int
   country: String
   state: String
-  course_name: String
 }
 `;
 
@@ -54,8 +54,7 @@ export const CourseResolvers = {
     searchCourse: async (_, { q }) => {
       if (q.course_name === '') return [];
       let c = new Course();
-      const ret = await c.searchCourse({ q });
-      return ret?.courses || [];
+      return c.searchCourse({ q });
     },
   },
   Mutation: {},

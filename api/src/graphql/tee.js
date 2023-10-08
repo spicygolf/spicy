@@ -57,10 +57,4 @@ export const TeeResolvers = {
   },
   Mutation: {
   },
-  // Tee: {
-  //   course: (tee) => {
-  //     const t = new Tee();
-  //     return t.getCourse(tee._key);
-  //   }
-  // },
 };
