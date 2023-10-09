@@ -18,12 +18,17 @@ class Round extends Doc {
     try {
       const ret = await Promise.all(
         round.tees.map(
-          async (tee) =>
-            await getTeeGhin({
+          async (tee) => {
+            const ghinTee = await getTeeGhin({
               q: {
                 tee_id: tee.tee_id,
               },
-            }),
+            });
+            return {
+              ...tee,
+              ...ghinTee,
+            };
+          }
         ),
       );
       return ret;
@@ -241,37 +246,38 @@ class Round extends Doc {
   */
   async addTeeToRound({ rkey, course_id, tee_id, course_handicap }) {
     const round_id = `rounds/${rkey}`;
-    const mutation = aql`
+    const query = aql`
         LET existing = FIRST(FOR r IN rounds FILTER r._id == ${round_id} RETURN r)
         UPDATE existing WITH {
             tees: PUSH(existing.tees, {
               course_id: ${course_id},
               tee_id: ${tee_id},
-              course_handicap: ${course_handicap || null}
-            }, true) // unique = true
+              course_handicap: ${course_handicap}
+            }, true)
         } IN rounds
         RETURN NEW
       `;
-    return next(mutation, {}, true);
+    return next({query, debug: true});
   }
 
   /**
     This will remove a tee/course object from the `tees` array element of the round document.
   */
-  async removeTeeFromRound({ rkey, course_id, tee_id, course_handicap }) {
+  async removeTeeFromRound({ rkey, tee_id }) {
     const round_id = `rounds/${rkey}`;
-    const mutation = aql`
+    const query = aql`
       LET existing = FIRST(FOR r IN rounds FILTER r._id == ${round_id} RETURN r)
+      LET newTees = (
+        FOR tee IN existing.tees
+          FILTER tee.tee_id != ${tee_id}
+          RETURN tee
+      )
       UPDATE existing WITH {
-          tees: REMOVE_VALUE(existing.tees, {
-            course_id: ${course_id},
-            tee_id: ${tee_id},
-            course_handicap: ${course_handicap || ""}
-          })
+          tees: newTees
       } IN rounds
       RETURN NEW
     `;
-    return next(mutation, {}, true);
+    return next({query, debug: true});
   }
 }
 

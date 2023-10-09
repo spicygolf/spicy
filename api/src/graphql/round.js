@@ -77,7 +77,7 @@ export const RoundQuerySigs = `
 
 export const RoundMutationSigs = `
   addTeeToRound(rkey: String!, course_id: Int, tee_id: Int, course_handicap: Int): Round
-  removeTeeFromRound(rkey: String!, course_id: Int, tee_id: Int, course_handicap: Int): Round
+  removeTeeFromRound(rkey: String!, tee_id: Int): Round
   addRound(round: RoundInput!): RoundKey
   postScore(rkey: String!, score: ScoreInput!): Round
   deleteRound(rkey: String!): RoundKey

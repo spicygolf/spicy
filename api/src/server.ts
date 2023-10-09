@@ -2,12 +2,12 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import express from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import http from 'http';
 import { json } from 'body-parser';
 import cors from 'cors';
 import { GraphQLError } from 'graphql';
-import { WebSocketServer } from 'ws';
+import { Server as WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { PubSub } from 'graphql-subscriptions';
 
@@ -76,7 +76,7 @@ const StartServer = async () => {
   // start express
   await new Promise<void>((resolve) => httpServer.listen({
     host,
-    port: parseInt(port, 10),
+    port: parseInt(port || '3010', 10),
   }, resolve));
 
   console.log("🚀 Spicy Golf API 🚀");
@@ -103,9 +103,9 @@ const context = async ({ req }) => {
   const authHeader = req.headers.authorization || '';
   const token = authHeader?.split(' ')[1];
 
-  let user = null;
+  let user: string | JwtPayload = "";
   try {
-    user = jwt.verify(token, JWT_SECRET);
+    user = jwt.verify(token, JWT_SECRET || '');
   } catch(_) {}
   if (!user) {
     throw new GraphQLError('User is not authenticated', {

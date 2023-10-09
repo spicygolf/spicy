@@ -39,8 +39,19 @@ export const getTee = async ({q}: GetTeeRequest): Promise<GetTeeResponse | null>
       total_yardage: t.TotalYardage,
       total_meters: t.TotalMeters,
       total_par: t.TotalPar,
-      ratings: t.Ratings,
-      holes: t.Holes,
+      ratings: t.Ratings.map((r) => ({
+        rating_type: r.RatingType,
+        course_rating: r.CourseRating,
+        slope_rating: r.SlopeRating,
+        bogey_rating: r.BogeyRating,
+      })),
+      holes: t.Holes.map((h) => ({
+        number: h.Number,
+        hole_id: h.HoleId,
+        length: h.Length,
+        par: h.Par,
+        allocation: h.Allocation,
+      })),
       course: {
         course_id: c.CourseId,
         course_status: c.CourseStatus,

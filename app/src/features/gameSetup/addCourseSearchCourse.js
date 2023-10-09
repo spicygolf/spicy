@@ -7,10 +7,9 @@ import { StyleSheet, View } from 'react-native';
 const AddCourseSearchCourse = (props) => {
   const { course, setCourse } = useContext(AddCourseContext);
   const defaultCourseSearch = {
-    source: 'ghin',
+    name: '',
     country: '',
     state: '',
-    course_name: '',
   };
   const [courseSearch, setCourseSearch] = useState(defaultCourseSearch);
 
