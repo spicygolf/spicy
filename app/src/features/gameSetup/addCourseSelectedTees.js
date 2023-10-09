@@ -11,6 +11,10 @@ const AddCourseSelectedTees = (props) => {
   const { game, currentPlayerKey } = useContext(GameContext);
   const { tees } = useContext(AddCourseContext);
 
+  if (tees.length === 0) {
+    return null;
+  }
+
   // const faves = useGetFavoriteTeesForPlayerQuery({
   //   variables: {
   //     pkey: currentPlayerKey,
@@ -44,7 +48,7 @@ const AddCourseSelectedTees = (props) => {
   return (
     <View>
       <Text style={styles.label}>selected tees for game</Text>
-      <TeeList tees={selected} showRemove={true} />
+      <TeeList tees={selected} showRemove={true} allowAddToRound={false} />
     </View>
   );
 };

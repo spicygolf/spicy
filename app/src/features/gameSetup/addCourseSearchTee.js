@@ -76,7 +76,7 @@ const AddCourseSearchTee = (props) => {
         </ListItem.Content>
         <Icon name="remove-circle" color="red" onPress={() => setCourse(null)} />
       </ListItem>
-      <TeeList tees={tees} showRemove={false} />
+      <TeeList tees={tees} showRemove={false} allowAddToRound={true} />
     </View>
   );
 };

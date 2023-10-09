@@ -5,7 +5,7 @@ import React, { useContext } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 
 const TeeList = (props) => {
-  const { tees, showRemove } = props;
+  const { tees, showRemove, allowAddToRound } = props;
   const { game } = useContext(GameContext);
 
   const renderTee = ({ item: tee }) => {
@@ -15,7 +15,15 @@ const TeeList = (props) => {
     const { rating, slope } = getRatings(game.scope.holes, tee);
     const title = tee.tee_name;
     const subtitle = `${tee.gender} - ${rating}/${slope}${par}${distance}`;
-    return <Tee tee={tee} title={title} subtitle={subtitle} showRemove={showRemove} />;
+    return (
+      <Tee
+        tee={tee}
+        title={title}
+        subtitle={subtitle}
+        showRemove={showRemove}
+        allowAddToRound={allowAddToRound}
+      />
+    );
   };
 
   return (

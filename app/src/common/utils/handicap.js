@@ -1,5 +1,7 @@
 import { getRatings } from 'common/utils/game';
+import { orderBy } from 'lodash-es';
 
+// TODO: deprecate in favor of GHIN API's player_handicap endpoint
 export const course_handicap = (strIndex, tee, holes) => {
   if (!tee || !holes) {
     //console.log('course_handicap, no tee or no holes', tee, holes);
@@ -19,15 +21,12 @@ export const course_handicap = (strIndex, tee, holes) => {
   switch (holes) {
     case 'front9':
       par = get_par(tee, 1, 9);
-      par = 36;
       break;
     case 'back9':
       par = get_par(tee, 10, 18);
-      par = 36;
       break;
     case 'all18':
       par = get_par(tee, 1, 18);
-      par = 72;
       break;
     default:
       console.log(`course_handicap - invalid value for holes: '${holes}'`);
@@ -52,7 +51,11 @@ export const formatCourseHandicap = (CH) => {
   return CH.toString();
 };
 
-const get_par = (min, max) => {
-  // TODO: implement me
-  return;
+const get_par = (tee, min, max) => {
+  let par = 0;
+  const holes = orderBy(tee.holes, ['number'], ['asc']);
+  for (let i = min; i <= max; i++) {
+    par += holes[i - 1].par;
+  }
+  return par;
 };
