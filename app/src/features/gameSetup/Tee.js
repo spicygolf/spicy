@@ -12,7 +12,7 @@ import { StyleSheet } from 'react-native';
 import { Icon, ListItem } from 'react-native-elements';
 
 const Tee = (props) => {
-  const { tee, title, subtitle, showRemove } = props;
+  const { tee, title, subtitle, showRemove, allowAddToRound } = props;
 
   const navigation = useNavigation();
   const { game } = useContext(GameContext);
@@ -23,6 +23,10 @@ const Tee = (props) => {
   const [removeTeeFromRound] = useRemoveTeeFromRoundMutation();
 
   const selectTee = async () => {
+    if (!allowAddToRound) {
+      return;
+    }
+
     await add(rkey);
 
     // add the same tee to the other players' rounds in this game
