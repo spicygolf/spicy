@@ -59,8 +59,8 @@ const Players = (props) => {
       if (round) {
         rkey = round._key;
         tees = round.tees;
-        ch = round.course_handicap;
-        gh = round.game_handicap;
+        ch = tees[0]?.course_handicap;
+        gh = tees[0]?.game_handicap;
         hi = round.handicap_index;
       }
 

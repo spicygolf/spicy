@@ -43,7 +43,7 @@ const Tee = (props) => {
 
   const add = async (roundKey) => {
     let ch = null;
-    const round = find(game.rounds, { _key: rkey });
+    const round = find(game.rounds, { _key: roundKey });
     if (round?.player[0]?.handicap?.index) {
       const index = round.player[0].handicap.index;
       ch = course_handicap(index, tee, game.scope.holes);
@@ -75,7 +75,6 @@ const Tee = (props) => {
     const { error } = await removeTeeFromRound({
       variables: {
         rkey: roundKey,
-        course_id: tee.course.course_id,
         tee_id: tee.tee_id,
       },
       refetchQueries: () => [

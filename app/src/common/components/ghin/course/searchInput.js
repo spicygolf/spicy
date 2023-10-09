@@ -70,11 +70,11 @@ const GhinCourseSearchInput = () => {
             onChangeText={(text) => {
               setSearch({
                 ...search,
-                course_name: text,
+                name: text,
               });
             }}
             autoCapitalize="words"
-            value={search.course_name}
+            value={search.name}
           />
         </View>
       </View>

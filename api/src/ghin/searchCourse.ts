@@ -26,6 +26,11 @@ type SearchCourseResponse = {
 
 export const searchCourse = async ({q}: SearchCourseRequest): Promise<SearchCourseResponse | null> => {
 
+  // don't search unless we have at least three characters
+  if (q.name.length < 3) {
+    return [];
+  }
+
   const params = {
     ...q,
   };
