@@ -11,14 +11,6 @@
       "internalConsoleOptions": "openOnSessionStart",
     },
     {
-      "name": "ghin dev testing - bun",
-      "type": "bun",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/api",
-      "program": "src/ghin/dev.ts",
-      "internalConsoleOptions": "openOnSessionStart",
-    },
-    {
       "name": "app ios",
       "request": "launch",
       "type": "reactnative",
@@ -26,6 +18,14 @@
       "platform": "ios",
       "runArguments": ["--simulator", "iPhone 14"],
       "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "name": "ghin dev testing - bun",
+      "type": "bun",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/api",
+      "program": "src/ghin/dev.ts",
+      "internalConsoleOptions": "openOnSessionStart",
     },
     {
       "type": "node",
@@ -41,44 +41,6 @@
       "program": "${workspaceFolder}/test/common/utils/score.diff_options_diff_holes.test.js",
       "args": []
     },
-    // {
-    //   "name": "ghin - rust",
-    //   "type": "lldb",
-    //   "request": "launch",
-    //   "cwd": "${workspaceFolder}/ghin/",
-    //   "cargo": {
-    //     "args": [
-    //       "build",
-    //       "--manifest-path=${workspaceFolder}/ghin/Cargo.toml",
-    //       "--bin=ghin",
-    //       "--package=ghin"
-    //     ],
-    //     "filter": {
-    //       "name": "ghin",
-    //       "kind": "bin"
-    //     }
-    //   },
-    //   "console": "internalConsole",
-    //   "internalConsoleOptions": "openOnSessionStart",
-    //   "env": {
-    //     "RUST_LOG": "ghin=debug"
-    //   },
-    //   "args": []
-    // },
-    // {
-    //   "name": "ghin debug tests - rust",
-    //   "type": "lldb",
-    //   "request": "launch",
-    //   "cargo": {
-    //     "args": ["test", "--no-run", "--bin=ghin", "--package=ghin"],
-    //     "filter": {
-    //       "name": "ghin",
-    //       "kind": "bin"
-    //     }
-    //   },
-    //   "args": [],
-    //   "cwd": "${workspaceFolder}/ghin"
-    // },
     {
       "name": "api schema_update 20210602",
       "type": "node",
@@ -111,6 +73,15 @@
         "--es-module-specifier-resolution=node",
         "./util/arango/schema_updates/20221220.js"
       ]
-    }
+    },
+    {
+      "name": "api schema_update 20231009",
+      "type": "bun",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/api",
+      "program": "util/arango/schema_updates/20221220.js",
+      "watchMode": "hot",
+      "internalConsoleOptions": "openOnSessionStart",
+    },
   ]
 }

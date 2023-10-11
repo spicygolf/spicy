@@ -15,7 +15,7 @@ import { Button, Card, Overlay } from 'react-native-elements';
 
 const Admin = (props) => {
   const { gkey, game } = useContext(GameContext);
-  const { currentPlayerKey } = useContext(CurrentPlayerContext);
+  const { currentPlayer } = useContext(CurrentPlayerContext);
 
   const navigation = useNavigation();
 
@@ -80,7 +80,7 @@ const Admin = (props) => {
     });
 
     // remove game
-    await rmgame(lGKey, currentPlayerKey, deleteGame);
+    await rmgame(lGKey, currentPlayer._key, deleteGame);
 
     navigation.navigate('Games');
   };

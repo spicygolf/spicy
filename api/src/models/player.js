@@ -420,15 +420,14 @@ class Player extends Doc {
       },
     });
 
-    const golfer = resp?.golfers[0] || {};
-    const clubs = resp.golfers.map(golfer => ({
-      id: golfer.club_id,
-      name: golfer.club_name,
-      state: golfer.state,
+    const golfer = resp[0] || {};
+    const clubs = resp.map(g => ({
+      id: g.club_id,
+      name: g.club_name,
+      state: g.state,
     }));
 
     return {
-      source: "ghin",
       index: golfer.hi_value,
       revDate: golfer.rev_date,
       gender: golfer.gender,

@@ -32,14 +32,14 @@ const SpicyPlayerSearchResults = () => {
     );
   };
 
-  const { currentPlayerKey } = useContext(CurrentPlayerContext);
+  const { currentPlayer } = useContext(CurrentPlayerContext);
   const gameCtx = useContext(GameContext);
   const game = gameCtx && gameCtx.game ? gameCtx.game : null;
 
   // get this player's favorite players
   const { data: fData } = useQuery(GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY, {
     variables: {
-      pkey: currentPlayerKey,
+      pkey: currentPlayer._key,
     },
   });
   const favorites =
@@ -62,13 +62,13 @@ const SpicyPlayerSearchResults = () => {
       ...p,
       fave: {
         faved: find(favorites, { _key: p._key }) ? true : false,
-        from: { type: 'player', value: currentPlayerKey },
+        from: { type: 'player', value: currentPlayer._key },
         to: { type: 'player', value: p._key },
         refetchQueries: [
           {
             query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
             variables: {
-              pkey: currentPlayerKey,
+              pkey: currentPlayer._key,
             },
           },
         ],

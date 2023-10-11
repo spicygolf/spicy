@@ -1,6 +1,7 @@
 import { gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 
-export const GET_GAME_QUERY = gql`
+export const query = gql`
   query GetGame($gkey: String!) {
     getGame(_key: $gkey) {
       _key
@@ -35,8 +36,6 @@ export const GET_GAME_QUERY = gql`
         date
         seq
         handicap_index
-        game_handicap
-        course_handicap
         scores {
           hole
           values {
@@ -179,3 +178,9 @@ export const GET_GAME_QUERY = gql`
     }
   }
 `;
+
+const useGetGameQuery = (options: object) => {
+  return useQuery(query, options);
+};
+
+export { useGetGameQuery };

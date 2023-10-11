@@ -3,14 +3,14 @@ import auth from '@react-native-firebase/auth';
 import { NavigationContainer } from '@react-navigation/native';
 import configureClient from 'app/client/configureClient';
 import AccountStack from 'app/components/accountstack';
-import AppStack from 'app/components/appstack';
+import AppStack from 'app/components/AppStack';
 import Splash from 'features/splash/splash';
 import React, { useEffect, useState } from 'react';
 import { LogBox } from 'react-native';
 import RNBootSplash from 'react-native-bootsplash';
 import { Provider as PaperProvider } from 'react-native-paper';
 
-const App = (props) => {
+const App = () => {
   const [client, setClient] = useState(undefined);
 
   const [initializing, setInitializing] = useState(true);
@@ -18,11 +18,7 @@ const App = (props) => {
 
   // Handle user state changes
   const onAuthStateChanged = (u) => {
-    //console.log('user', u);
     setUser(u);
-    if (initializing) {
-      setInitializing(false);
-    }
   };
 
   useEffect(() => {
@@ -39,6 +35,23 @@ const App = (props) => {
     configClient();
   }, []);
 
+  // get data from firebaseUser
+  const [email, setEmail] = useState('');
+  const [fbToken, setFbToken] = useState('');
+  useEffect(() => {
+    const getFbData = async (fbUser) => {
+      const fbt = await fbUser.getIdToken();
+      setFbToken(fbt);
+      setEmail(fbUser.email);
+      if (initializing) {
+        setInitializing(false);
+      }
+    };
+    if (user) {
+      getFbData(user);
+    }
+  }, [initializing, user]);
+
   useEffect(() => {
     LogBox.ignoreLogs([
       'VirtualizedLists should never be nested',
@@ -53,14 +66,13 @@ const App = (props) => {
   let content = null;
   if (initializing || !client) {
     return <Splash />;
-  } else {
-    if (user) {
-      content = <AppStack user={user} />;
-    } else {
-      content = <AccountStack />;
-    }
   }
 
+  if (user && email && fbToken) {
+    content = <AppStack email={email} fbToken={fbToken} fbUser={user} />;
+  } else {
+    content = <AccountStack />;
+  }
   return (
     <ApolloProvider client={client}>
       <NavigationContainer>

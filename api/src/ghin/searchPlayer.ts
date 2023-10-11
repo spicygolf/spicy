@@ -44,5 +44,5 @@ export const searchPlayer = async ({q, p}: SearchPlayerRequest): Promise<SearchP
     attempts: 0,
   });
 
-  return resp?.data;
+  return resp?.data?.golfers || [];
 };

@@ -20,10 +20,10 @@ export const login = async (_: any, {email, fbToken}: LoginRequest) => {
       FILTER p.email == "${email}"
       RETURN p
   `;
-  const player = await next({query});
+  let player = await next({query});
   if (!player) {
     return {
-      message: "email_does_not_exist",
+      message: "user_not_logged_in",
     }
   }
 
@@ -31,18 +31,23 @@ export const login = async (_: any, {email, fbToken}: LoginRequest) => {
   const match = true; // TODO: validate
   if (!match) {
     return {
-      message: "firebase_token_not_valid",
+      message: "user_not_logged_in",
     }
   }
 
   // generate token and return pkey/token
   if( player && match ) {
+    delete player.fbUser;
+    delete player.handicap; // some old users have this
     return ({
-      pkey: player._key,
-      token: createToken({
-        pkey: player._key,
-        level: player.level || ""
-      })
+      player: {
+        ...player,
+        token: createToken({
+          pkey: player._key,
+          level: player.level || ""
+        }),
+      },
+      message: "user_logged_in",
     });
   }
 

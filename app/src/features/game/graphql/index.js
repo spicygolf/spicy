@@ -1,4 +1,3 @@
-export { GET_GAME_QUERY } from './getGame';
 export { UPDATE_GAME_MUTATION } from './updateGame';
 export { UPDATE_GAME_HOLES_MUTATION } from './updateGameHoles';
 export { UPDATE_GAME_SCOPE_MUTATION } from './updateGameScope';
