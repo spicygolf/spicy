@@ -2,8 +2,7 @@ import { login } from '../models/account';
 
 export const AccountTypeDefs = `
   type LoginResponse {
-    pkey: String
-    token: String
+    player: Player
     message: String
   }
 `;

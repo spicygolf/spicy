@@ -26,7 +26,7 @@ const LinkRound = (props) => {
   const { game, player, round, isNew } = props;
   //console.log('LinkRound props', game, player, round, isNew);
 
-  const { currentPlayerKey } = useContext(CurrentPlayerContext);
+  const { currentPlayer } = useContext(CurrentPlayerContext);
 
   const { _key: gkey, start: game_start } = game;
   const { _key: pkey } = player;
@@ -87,7 +87,7 @@ const LinkRound = (props) => {
           pkey,
           gkey,
           playerToGame,
-          currentPlayerKey,
+          currentPlayerKey: currentPlayer._key,
         });
 
         // if not a team game, add player to her own team and update game

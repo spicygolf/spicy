@@ -18,12 +18,12 @@ const TabIcon = ({ name, color }) => {
 
 const NewGameScreen = () => {
   let total = 0;
-  const { currentPlayerKey } = useContext(CurrentPlayerContext);
+  const { currentPlayer } = useContext(CurrentPlayerContext);
   const [gameList, setGameList] = useState();
 
   const { data, loading, error } = useQuery(GAMESPECS_FOR_PLAYER_QUERY, {
     variables: {
-      pkey: currentPlayerKey,
+      pkey: currentPlayer._key,
     },
     fetchPolicy: 'cache-and-network',
   });
@@ -88,8 +88,7 @@ const NewGameScreen = () => {
             justifyContent: 'flex-start',
           },
           showIcon: true,
-        }}
-      >
+        }}>
         <Tab.Screen
           name="NewGameList"
           component={NewGameList}
@@ -119,8 +118,7 @@ const NewGameScreen = () => {
       value={{
         gameList,
         setGameList,
-      }}
-    >
+      }}>
       {content}
     </GameListContext.Provider>
   );

@@ -7,8 +7,7 @@ import { StyleSheet, Text } from 'react-native';
 import { Button, Card } from 'react-native-elements';
 
 const Logout = (props) => {
-  const { setCurrentPlayer, setCurrentPlayerKey, setToken } =
-    useContext(CurrentPlayerContext);
+  const { setCurrentPlayer } = useContext(CurrentPlayerContext);
 
   const client = useApolloClient();
 
@@ -20,8 +19,6 @@ const Logout = (props) => {
         buttonStyle={styles.button}
         onPress={() => {
           setCurrentPlayer(null);
-          setCurrentPlayerKey(null);
-          setToken(null);
           logout(client);
         }}
       />

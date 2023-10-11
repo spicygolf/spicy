@@ -49,7 +49,6 @@ const Account = (props) => {
       autoCap: 'none',
       errorMessage: 'Please enter a valid email address',
       update: async (newValue) => {
-        //console.log('update email to: ', newValue);
         try {
           await user.updateEmail(newValue.trim());
           return updatePlayer({ field: 'email', newValue });
@@ -96,8 +95,7 @@ const Account = (props) => {
       <ListItem
         onPress={async () => {
           navigation.navigate('AccountChange', item);
-        }}
-      >
+        }}>
         <ListItem.Content>
           <ListItem.Title style={styles.title}>{item.name}</ListItem.Title>
           <ListItem.Subtitle style={styles.subtitle}>{item.value}</ListItem.Subtitle>

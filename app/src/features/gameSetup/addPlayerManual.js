@@ -14,7 +14,7 @@ import { Button, Card } from 'react-native-elements';
 const AddPlayerManual = (props) => {
   const { game } = useContext(GameContext);
   const { _key: gkey } = game;
-  const { currentPlayerKey } = useContext(CurrentPlayerContext);
+  const { currentPlayer } = useContext(CurrentPlayerContext);
   const [addPlayer] = useMutation(ADD_PLAYER_MUTATION);
   const navigation = useNavigation();
 
@@ -26,7 +26,7 @@ const AddPlayerManual = (props) => {
       index: '',
     },
     statusAuthz: ['prod'],
-    createdBy: currentPlayerKey,
+    createdBy: currentPlayer._key,
     createdDate: '',
   });
 

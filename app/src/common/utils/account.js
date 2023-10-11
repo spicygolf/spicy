@@ -76,7 +76,6 @@ export const login = async (fbUser) => {
 export const logout = async (client) => {
   // zap local storage
   await AsyncStorage.removeItem('token');
-  await AsyncStorage.removeItem('currentPlayer');
 
   // zap cache
   try {

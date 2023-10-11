@@ -1,4 +1,3 @@
-import { useQuery } from '@apollo/client';
 import Error from 'common/components/error';
 import { scoring } from 'common/utils/score';
 import { GameContext } from 'features/game/gameContext';
@@ -15,7 +14,7 @@ const Game = (props) => {
   const { route } = props;
   const { currentGameKey, readonly } = route.params;
 
-  const { currentPlayerKey } = useContext(CurrentPlayerContext);
+  const { currentPlayer } = useContext(CurrentPlayerContext);
   const { justBecameActive } = useAppState();
 
   const [content, setContent] = useState(<ActivityIndicator />);
@@ -64,7 +63,7 @@ const Game = (props) => {
             gkey,
             game,
             scores,
-            currentPlayerKey,
+            currentPlayerKey: currentPlayer._key,
             activeGameSpec,
             readonly,
           }}>

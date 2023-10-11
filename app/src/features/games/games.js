@@ -13,7 +13,7 @@ import { Icon, ListItem } from 'react-native-elements';
 
 const Games = (props) => {
   const navigation = useNavigation();
-  const { currentPlayerKey } = useContext(CurrentPlayerContext);
+  const { currentPlayer } = useContext(CurrentPlayerContext);
   //console.log('currentPlayerKey', currentPlayerKey);
   const [isFetching, setIsFetching] = useState(false);
 
@@ -92,7 +92,7 @@ const Games = (props) => {
 
   const [getGameList, { error, data }] = useLazyQuery(ACTIVE_GAMES_FOR_PLAYER_QUERY, {
     variables: {
-      pkey: currentPlayerKey,
+      pkey: currentPlayer._key,
     },
     fetchPolicy: 'cache-and-network',
   });
