@@ -9,7 +9,7 @@ import { StyleSheet, View } from 'react-native';
 
 const AddPlayerGHINSearch = () => {
   const defaultNewPlayer = {
-    country: 'USA',
+    country: 'USA', // TODO: make this default player-specific
     state: '',
     last_name: '',
     first_name: '',
