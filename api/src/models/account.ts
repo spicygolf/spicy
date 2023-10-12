@@ -1,5 +1,6 @@
 import { next } from '../util/database';
 import jwt from 'jsonwebtoken';
+import { getCountriesAndStates as getCountriesAndStatesGhin } from '../ghin/getCountriesAndStates';
 
 type LoginRequest = {
   email: string;
@@ -55,4 +56,8 @@ export const login = async (_: any, {email, fbToken}: LoginRequest) => {
 export const createToken = (payload: TokenPayload) => {
   const {JWT_SECRET} = process.env;
   return jwt.sign(payload, JWT_SECRET, {expiresIn: "30d"});
+};
+
+export const getCountriesAndStates = async () => {
+  return await getCountriesAndStatesGhin();
 };

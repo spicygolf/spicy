@@ -179,8 +179,6 @@ export const query = gql`
   }
 `;
 
-const useGetGameQuery = (options: object) => {
+export const useGetGameQuery = (options: object) => {
   return useQuery(query, options);
 };
-
-export { useGetGameQuery };
