@@ -2,7 +2,7 @@ import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client';
 
 export const query = gql`
-  query GetGame($gkey: String!) {
+  query getGame($gkey: String!) {
     getGame(_key: $gkey) {
       _key
       name

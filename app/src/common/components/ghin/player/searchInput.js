@@ -71,7 +71,7 @@ const GhinPlayerSearchInput = () => {
             onChangeText={(text) => {
               setState({
                 ...state,
-                lastName: text,
+                last_name: text,
               });
             }}
             autoCapitalize="words"
@@ -87,7 +87,7 @@ const GhinPlayerSearchInput = () => {
             onChangeText={(text) => {
               setState({
                 ...state,
-                firstName: text,
+                first_name: text,
               });
             }}
             autoCapitalize="words"
