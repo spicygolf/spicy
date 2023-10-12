@@ -38,7 +38,6 @@ const AddCourseSearchTee = (props) => {
   const selectedCourse = useGetCourseQuery({
     variables: {
       q: {
-        source: 'ghin',
         course_id,
       },
     },

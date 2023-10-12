@@ -38,7 +38,6 @@ export const login = async (_: any, {email, fbToken}: LoginRequest) => {
   // generate token and return pkey/token
   if( player && match ) {
     delete player.fbUser;
-    delete player.handicap; // some old users have this
     return ({
       player: {
         ...player,

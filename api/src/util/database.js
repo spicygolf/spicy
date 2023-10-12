@@ -1,13 +1,13 @@
 import { db } from '../db/db';
 
-export const mutate = async (mutation, options = {}, debug) => {
+export const mutate = async ({mutation, options = {}, debug}) => {
   let ret = {
     success: false,
     message: 'Unknown error',
   };
 
   try {
-    const cursor = await db.query(mutation);
+    const cursor = await db.query(mutation, options);
     const res = await cursor.next();
     if (debug) {
       console.log("mutate", res);
@@ -26,7 +26,7 @@ export const mutate = async (mutation, options = {}, debug) => {
   return ret;
 };
 
-export const all = async (query, options = {}, debug) => {
+export const all = async ({query, options = {}, debug}) => {
   try {
     const cursor = await db.query(query, options);
     if (debug) {
@@ -38,7 +38,8 @@ export const all = async (query, options = {}, debug) => {
     }
   } catch (e) {
     console.error(e);
-    return null;
+    // TODO: throw a slug for front end graphql?
+    return e;
   }
 };
 
@@ -54,6 +55,7 @@ export const next = async ({query, options = {}, debug}) => {
     }
   } catch (e) {
     console.error(e);
+    // TODO: throw a slug for front end graphql?
     return e;
   }
 };

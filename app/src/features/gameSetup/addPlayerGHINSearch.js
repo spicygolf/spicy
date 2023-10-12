@@ -11,8 +11,9 @@ const AddPlayerGHINSearch = () => {
   const defaultNewPlayer = {
     country: 'USA',
     state: '',
-    lastName: '',
-    firstName: '',
+    last_name: '',
+    first_name: '',
+    status: 'Active',
   };
   const [newPlayer, setNewPlayer] = useState(defaultNewPlayer);
   const [lookupPkey, { data: lPkey }] = useLazyQuery(LOOKUP_PLAYER_BY_GHIN);

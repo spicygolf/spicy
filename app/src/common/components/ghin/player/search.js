@@ -9,8 +9,7 @@ const GhinSearchPlayer = ({ state, setState }) => {
       value={{
         state,
         setState,
-      }}
-    >
+      }}>
       <GhinPlayerSearchInput />
       <GhinPlayerSearchResults />
     </GhinPlayerSearchContext.Provider>
