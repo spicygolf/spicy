@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
+import { useSubscription } from '@apollo/client';
 
-// don't put _key in here, or cache will be updated without critical data/fields
-export const SCORE_POSTED_SUBSCRIPTION = gql`
+const query = gql`
   subscription onScorePosted($rkey: String!) {
     scorePosted(rkey: $rkey) {
       _key
@@ -16,3 +16,7 @@ export const SCORE_POSTED_SUBSCRIPTION = gql`
     }
   }
 `;
+
+export const useScorePostedSubscription = (options: object) => {
+  return useSubscription(query, options);
+};

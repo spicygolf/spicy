@@ -3,11 +3,11 @@ import { scoring } from 'common/utils/score';
 import { GameContext } from 'features/game/gameContext';
 import GameStack from 'features/game/gamestack';
 import GameUpdatedListener from 'features/game/gameUpdatedListener';
-import { GET_GAME_QUERY } from 'features/game/graphql';
+import { useGetGameQuery } from 'features/game/hooks/useGetGameQuery';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import ScorePostedListener from 'features/rounds/scorePostedListener';
 import useAppState from 'hooks/useAppState';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 
 const Game = (props) => {
@@ -17,71 +17,76 @@ const Game = (props) => {
   const { currentPlayer } = useContext(CurrentPlayerContext);
   const { justBecameActive } = useAppState();
 
-  const [content, setContent] = useState(<ActivityIndicator />);
-
   // execute the getGame query
-  const { loading, error, refetch, data } = useQuery(GET_GAME_QUERY, {
+  const { loading, error, refetch, data } = useGetGameQuery({
     variables: {
       gkey: currentGameKey,
     },
   });
 
-  useEffect(() => {
-    if (loading) {
-      setContent(<ActivityIndicator />);
-    }
+  useEffect(
+    () => {
+      if (justBecameActive) {
+        refetch();
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [justBecameActive],
+  );
 
-    if (error && error.message !== 'Network request failed') {
-      setContent(<Error error={error} />);
-    }
+  if (loading) {
+    return <ActivityIndicator />;
+  }
 
-    if (data?.getGame) {
-      const game = data.getGame;
-      const scores = scoring(game);
-      console.log({ game, scores, ts: new Date() });
+  if (error && error.message !== 'Network request failed') {
+    return <Error error={error} />;
+  }
 
-      const { _key: gkey } = game;
-      const activeGameSpec =
-        game && game.gamespecs && game.gamespecs[0] ? game.gamespecs[0] : null;
+  if (data?.getGame) {
+    const game = data.getGame;
+    const scores = scoring(game);
+    console.log({ game, scores, ts: new Date() });
 
-      const game_listener = <GameUpdatedListener gkey={game._key} />;
+    const { _key: gkey } = game;
+    const activeGameSpec =
+      game && game.gamespecs && game.gamespecs[0] ? game.gamespecs[0] : null;
 
-      /* This is the place where we have all players' rounds as data. It can be
-          updated by other players, so here is a good place to kick off a
-          subscription to listen for those other changes, update the cache and
-          therefore update the display with the scores others have entered.
-          We need key as well as rkey, because we include listeners as children of
-          the GameContext.Provider below, even tho they don't render anything.
-        */
-      const round_listeners = game.rounds.map((r) => (
-        <ScorePostedListener key={r._key} rkey={r._key} />
-      ));
+    const game_listener = <GameUpdatedListener gkey={game._key} />;
 
-      setContent(
-        <GameContext.Provider
-          value={{
-            gkey,
-            game,
-            scores,
-            currentPlayerKey: currentPlayer._key,
-            activeGameSpec,
-            readonly,
-          }}>
-          {game_listener}
-          {round_listeners}
-          <GameStack />
-        </GameContext.Provider>,
-      );
-    }
-  }, [currentGameKey, currentPlayerKey, data, error, loading, readonly]);
+    /* This is the place where we have all players' rounds as data. It can be
+        updated by other players, so here is a good place to kick off a
+        subscription to listen for those other changes, update the cache and
+        therefore update the display with the scores others have entered.
+        We need key as well as rkey, because we include listeners as children of
+        the GameContext.Provider below, even tho they don't render anything.
+      */
+    const round_listeners = game.rounds.map((r) => <ScorePostedListener rkey={r._key} />);
 
-  useEffect(() => {
-    if (justBecameActive) {
-      refetch();
-    }
-  }, [justBecameActive, refetch]);
+    return (
+      <GameContext.Provider
+        value={{
+          gkey,
+          game,
+          scores,
+          currentPlayerKey: currentPlayer._key,
+          activeGameSpec,
+          readonly,
+        }}>
+        {game_listener}
+        {round_listeners}
+        <GameStack />
+      </GameContext.Provider>
+    );
+  }
 
-  return content;
+  return (
+    <Error
+      error={{
+        message: 'getGame query returned nothing.  Cache funkiness?',
+        remedy: 'Profile -> Settings -> Clear Local Data',
+      }}
+    />
+  );
 };
 
 export default Game;

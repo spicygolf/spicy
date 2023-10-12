@@ -1,8 +1,7 @@
 import { useSubscription } from '@apollo/client';
 import { GAME_UPDATED_SUBSCRIPTION } from 'features/game/graphql';
 
-const GameUpdatedListener = (props) => {
-  const { gkey } = props;
+const GameUpdatedListener = ({ gkey }) => {
   const { loading, error, data } = useSubscription(GAME_UPDATED_SUBSCRIPTION, {
     variables: { gkey },
   });

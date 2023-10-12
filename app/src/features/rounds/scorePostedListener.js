@@ -1,10 +1,7 @@
-import { useSubscription } from '@apollo/client';
-import { SCORE_POSTED_SUBSCRIPTION } from 'features/rounds/graphql';
+import { useScorePostedSubscription } from 'features/rounds/hooks/useScorePostedSubscription';
 
-const ScorePostedListener = (props) => {
-  const { rkey } = props;
-
-  const { loading, error, data } = useSubscription(SCORE_POSTED_SUBSCRIPTION, {
+const ScorePostedListener = ({ rkey }) => {
+  const { loading, error, data } = useScorePostedSubscription({
     variables: { rkey },
   });
 
@@ -16,7 +13,7 @@ const ScorePostedListener = (props) => {
   }
 
   if (data && data.scorePosted) {
-    //console.log('data', data);
+    console.log('data', data);
   }
 
   // non-display component
