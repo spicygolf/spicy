@@ -61,11 +61,11 @@ input PlayerInput {
 }
 
 input Search {
-  source: String!
-  firstName: String
-  lastName: String!
+  first_name: String
+  last_name: String
   state: String
   country: String
+  status: String
 }
 
 type SearchPlayer {

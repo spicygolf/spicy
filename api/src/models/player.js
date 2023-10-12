@@ -7,7 +7,7 @@ import { titleize } from '../util/text';
 import { Club } from './club';
 import { Doc } from './doc';
 import { Game } from './game';
-import { next } from '../util/database';
+import { all, next } from '../util/database';
 
 const collection = db.collection('players');
 
@@ -281,15 +281,15 @@ class Player extends Doc {
 
   async getFavoritePlayersForPlayer(pkey) {
     const playerID = `players/${pkey}`;
-    const cursor = await db.query(aql`
+    const query = aql`
       FOR v, e
           IN 1..1
           OUTBOUND ${playerID}
           GRAPH 'games'
           FILTER e.type == 'player2player' AND e.favorite == 'true'
           RETURN DISTINCT(v)
-    `);
-    return await cursor.all();
+    `;
+    return all({query});
   }
 
   async lookupPlayerByGhin(ghin) {
@@ -413,6 +413,7 @@ class Player extends Doc {
     const resp = await searchPlayerGhin({
       q: {
         golfer_id: id,
+        status: 'Active',
       },
       p: {
         page: 1,
@@ -428,7 +429,7 @@ class Player extends Doc {
     }));
 
     return {
-      index: golfer.hi_value,
+      index: golfer.hi_display,
       revDate: golfer.rev_date,
       gender: golfer.gender,
       clubs,

@@ -25,11 +25,26 @@ type SearchPlayerQuery = {
   is_test?: boolean;
 };
 
+// TODO: codegen from graphql, use those types
 type SearchPlayerResponse = {
-
+  golfer_id?: string;
+  last_name?: string;
+  first_name?: string;
+  status?: string;
+  hi_display?: string;
 };
 
-export const searchPlayer = async ({q, p}: SearchPlayerRequest): Promise<SearchPlayerResponse | null> => {
+export const searchPlayer = async ({q, p}: SearchPlayerRequest): Promise<object[] | null> => {
+
+  // don't search unless we have at least three characters
+  if (q?.last_name?.length < 3 ) {
+    return [];
+  }
+
+  // don't search unless field conditions are met
+  if (!(q.last_name || q.golfer_id)) {
+    return [];
+  }
 
   const params = {
     ...p,
@@ -44,5 +59,13 @@ export const searchPlayer = async ({q, p}: SearchPlayerRequest): Promise<SearchP
     attempts: 0,
   });
 
-  return resp?.data?.golfers || [];
+  const golfers = resp?.data?.golfers || [];
+  return golfers.map((g: SearchPlayerResponse) => ({
+    ...g,
+    firstName: g.first_name,
+    lastName: g.last_name,
+    playerName: `${g.first_name} ${g.last_name}`,
+    active: g.status === 'Active',
+    index: g.hi_display,
+  }));
 };

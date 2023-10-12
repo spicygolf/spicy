@@ -34,8 +34,7 @@ const AddPlayerTabs = (props) => {
           justifyContent: 'flex-start',
         },
         showIcon: true,
-      }}
-    >
+      }}>
       <Tab.Screen
         name="AddPlayerFavorites"
         component={AddPlayerFavorites}

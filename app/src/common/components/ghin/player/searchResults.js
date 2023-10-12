@@ -38,8 +38,8 @@ const GhinPlayerSearchResults = (props) => {
           setState({
             country: state.country,
             state: state.state,
-            firstName: state.firstName,
-            lastName: state.lastName,
+            first_name: state.firstName,
+            last_name: state.lastName,
             handicap: {
               source: 'ghin',
               id: gn,
@@ -48,8 +48,7 @@ const GhinPlayerSearchResults = (props) => {
             name: player_name,
             short: fn,
           });
-        }}
-      >
+        }}>
         <ListItem.Content style={styles.container}>
           <ListItem.Title style={styles.player_name}>{player_name}</ListItem.Title>
           <ListItem.Subtitle style={styles.player_club}>{player_club}</ListItem.Subtitle>
@@ -62,11 +61,11 @@ const GhinPlayerSearchResults = (props) => {
   const { loading, error, data } = useQuery(SEARCH_PLAYER_QUERY, {
     variables: {
       q: {
-        source: 'ghin',
         country: state.country,
         state: state.state,
-        firstName: state.firstName,
-        lastName: state.lastName,
+        first_name: state.firstName,
+        last_name: state.lastName,
+        status: 'Active',
       },
       p: {
         page,
