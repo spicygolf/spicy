@@ -3,7 +3,7 @@ import { login, postRound } from '../util/ghin';
 import { Doc } from './doc';
 import { aql } from 'arangojs';
 import { db } from '../db/db';
-import { next } from '../util/database';
+import { mutate, next } from '../util/database';
 import { getTee as getTeeGhin } from '../ghin';
 
 const collection = db.collection('rounds');
@@ -14,7 +14,7 @@ class Round extends Doc {
   }
 
   async getTees(round) {
-    if (!round?.tees) return [];
+    if (!(round?.tees)) return [];
     try {
       const ret = await Promise.all(
         round.tees.map(
@@ -62,6 +62,8 @@ class Round extends Doc {
     console.error(
       "api/src/models/round.js/getCourseTee needs refactoring b/c there's no more tee2course edges - see #37",
     );
+    return;
+
     const round = 'rounds/' + rkey;
 
     const teeCourse = aql`
@@ -242,22 +244,26 @@ class Round extends Doc {
 
   /**
     This will add a tee/course object to the `tees` array element of the round document.
-    note: unique is set to true, so if it's already there, this is basically a no-op
   */
   async addTeeToRound({ rkey, course_id, tee_id, course_handicap }) {
+    // send in a minimal round object to getTees that are decorated with GHIN info
+    const newTees = await this.getTees({
+      tees: [{
+        course_id,
+        tee_id,
+        course_handicap,
+      }],
+    });
+
     const round_id = `rounds/${rkey}`;
     const query = aql`
         LET existing = FIRST(FOR r IN rounds FILTER r._id == ${round_id} RETURN r)
         UPDATE existing WITH {
-            tees: PUSH(existing.tees, {
-              course_id: ${course_id},
-              tee_id: ${tee_id},
-              course_handicap: ${course_handicap}
-            }, true)
+            tees: ${newTees}
         } IN rounds
         RETURN NEW
       `;
-    return next({query, debug: true});
+    return next({query});
   }
 
   /**
@@ -280,6 +286,124 @@ class Round extends Doc {
     return next({query, debug: true});
   }
 }
+
+/**
+ * Links round to appropriate other vertices via edges.
+ * This is an all-in-one ArangoDB query and is easier on the client.
+ *
+ * @param {any} _ parent document from graphql query - unused
+ * @param {object} args arguments supplied from graphql query
+ * @returns
+ */
+export const linkRound = async (_, args) => {
+  const { gkey, player, isNewRound, round, newHoles, currentPlayerKey } = args;
+  const gid = `games/${gkey}`;
+  const pid = `players/${player._key}`;
+  let q, cursor;
+
+  // start transaction
+  const trx = await db.beginTransaction({ write: ['games', 'rounds', 'edges']});
+
+  try {
+
+    // link player to game
+    q = aql`
+      LET p2g = {
+          _from: ${pid},
+          _to: ${gid},
+          type: "player2game",
+          ts: DATE_ISO8601(DATE_NOW()),
+          by: ${currentPlayerKey}
+      }
+      UPSERT { _from: ${pid}, _to: ${gid} }
+      INSERT p2g
+      REPLACE p2g
+      IN edges
+    `;
+    const p2g = await trx.step(async () => db.query(q));
+
+    // update game with new teams (on the 'holes' key)
+    q = aql`
+      UPDATE {_key: ${gkey}, holes: ${newHoles}} IN games
+    `;
+    const g = await trx.step(async () => db.query(q));
+
+    // insert new round or set to supplied round
+    q = aql`
+      RETURN ${isNewRound} ? (INSERT ${round} INTO rounds RETURN NEW) : ${round}
+    `;
+    cursor = await trx.step(async () => db.query(q));
+    const r = await cursor.next();
+    if (!r || !r[0]) {
+      throw new Error('error adding round');
+    }
+    const rid = `rounds/${r[0]._key}`;
+
+    // link round to game
+    q = aql`
+      LET r2g = {
+          _from: ${rid},
+          _to: ${gid},
+          type: "round2game",
+          ts: DATE_ISO8601(DATE_NOW()),
+          by: ${currentPlayerKey},
+          handicap_index: ${player.handicap.index}
+      }
+      UPSERT { _from: ${rid}, _to: ${gid} }
+      INSERT r2g
+      REPLACE r2g
+      IN edges
+    `;
+    const r2g = await trx.step(async () => db.query(q));
+
+    // link round to player
+    q = aql`
+      LET r2p = {
+          _from: ${rid},
+          _to: ${pid},
+          type: "round2player",
+          ts: DATE_ISO8601(DATE_NOW()),
+          by: ${currentPlayerKey}
+      }
+      UPSERT { _from: ${rid}, _to: ${pid} }
+      INSERT r2p
+      REPLACE r2p
+      IN edges
+    `;
+    const r2p = await trx.step(async () => db.query(q));
+
+    // commit transaction
+    const result = await trx.commit();
+
+    let message = '';
+    switch (result.status) {
+      case 'aborted':
+        message = JSON.stringify(
+          {
+            message: 'Error linking round: transaction aborted',
+            p2g,
+            g,
+            r2g,
+            r2p,
+          }, null, 2
+        );
+    }
+
+    return {
+      success: result.status === 'committed',
+      _key: r._key,
+      message,
+    };
+  } catch (e) {
+    console.error(e);
+    trx.abort();
+    return {
+      success: false,
+      _key: null,
+      message: e.message,
+    };
+  }
+};
 
 const _Round = Round;
 export { _Round as Round };

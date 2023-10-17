@@ -51,7 +51,7 @@ input HandicapInput {
 input PlayerInput {
   _key: String
   email: String
-  name: String!
+  name: String
   short: String
   statusAuthz: [String]
   level: String

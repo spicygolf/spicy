@@ -24,7 +24,6 @@ type Course {
 }
 
 input GetCourse {
-  source: String!
   course_id: Int!
   include_altered_tees: Boolean
 }

@@ -2,8 +2,10 @@ import { aql } from 'arangojs';
 import { find } from 'lodash-es';
 
 import { db } from '../db/db';
-// import { pubsub } from '../server';
+import { next } from '../util/database';
+import { pubsub } from '../server';
 import { Doc } from './doc';
+// import { Round } from './round';
 
 const collection = db.collection('games');
 const GAME_UPDATED = 'GAME_UPDATED';
@@ -59,10 +61,10 @@ class Game extends Doc {
     // write to db
     const newGame = await this.update(newG, {returnNew: true});
 
-    // // publish changes for subscriptions
-    // pubsub.publish(GAME_UPDATED, {
-    //   gameUpdated: newG,
-    // });
+    // publish changes for subscriptions
+    pubsub.publish(GAME_UPDATED, {
+      gameUpdated: newG,
+    });
     //console.log('_updateGame output', newGame.new);
     return newGame.new;
   }
@@ -70,7 +72,7 @@ class Game extends Doc {
   async query(gkey) {
     const gid = `games/${gkey}`;
 
-    const getGameQuery = aql`
+    const query = aql`
       FOR g IN games
         FILTER g._id == ${gid}
         LET rounds = (
@@ -79,22 +81,7 @@ class Game extends Doc {
                 ANY g._id
                 GRAPH 'games'
                 FILTER re.type == 'round2game' AND rv != null
-                LET tee = (
-                    FOR tv, te
-                    IN 1..1
-                    ANY rv._id
-                    GRAPH 'games'
-                    FILTER te.type == 'round2tee'
-                    RETURN MERGE(tv, {
-                        assigned: te.assigned
-                    })
-                )
-                RETURN MERGE(rv, {
-                    handicap_index: re.handicap_index,
-                    game_handicap: re.game_handicap,
-                    course_handicap: re.course_handicap,
-                    tee: FIRST(tee)
-                })
+                RETURN MERGE(rv, { handicap_index: re.handicap_index })
         )
         LET players = (
           FOR pv, pe
@@ -130,12 +117,40 @@ class Game extends Doc {
         })
     `;
 
-    const cursor = await db.query(getGameQuery);
-    const game = await cursor.next(); // only return one, so use 'next' for this.
+    let game = await next({query}); // only return one, so use 'next' for this.
+    // game = await this.checkRoundTees(game);
     const gameWithPops = this._calculatePops(game);
-    // console.log('getGame', JSON.stringify(gameWithPops, null, 2));
     return gameWithPops;
   }
+
+  // async checkRoundTees(game) {
+  //   let ret = game;
+  //   if (game?.rounds) {
+  //     const newRounds = game.rounds.map((round) => {
+  //       if (!round.tees) {
+  //         return round;
+  //       }
+  //       const rkey = round._key;
+  //       // because of the way addTeeToRound works, this map returns rounds
+  //       const newRoundWithTees = round.tees.map((tee) => {
+  //         if (tee.tee_id && !tee.holes) {
+  //           // we have a tee_id, but no ghin information
+  //           const r = new Round();
+  //           return r.addTeeToRound({ rkey, ...tee });
+  //         } else {
+  //           return round;
+  //         }
+  //       });
+  //       // because of the way addTeeToRound works, we want to take the last element in newRoundWithTees
+  //       return newRoundWithTees[newRoundWithTees.length - 1];
+  //     });
+  //     ret = {
+  //       ...game,
+  //       rounds: newRounds,
+  //     };
+  //   }
+  //   return ret;
+  // }
 
   _calculatePops(game) {
 
@@ -148,35 +163,33 @@ class Game extends Doc {
         lowIndex = this._getLowIndex(game);
       }
     }
-    /*
-    console.log('use_handicaps option', useHandicapsOption);
-    console.log('handicap_index_from option', handicapIndexFrom);
-    console.log('lowIndex', lowIndex);
-    */
+
     const newRounds = game.rounds.map(r => {
       // if no tee information, can't calculate strokes/pops
-      if( !(r && r.tee && r.tee.holes) ) return r;
+      if( !(r && r.tees && r.tees[0]) ) return r;
+      const tee = r.tees[0] || null;
 
       // player's handicap for this game
       const hdcp = (
-        r.game_handicap
-          ? r.game_handicap
-          : (r.course_handicap || '0')
+        tee.game_handicap ? tee.game_handicap : (tee.course_handicap || '0')
       ) - lowIndex;
 
-      let newR = { ...r, scores: [] };
+      let newR = {
+        ...r,
+        scores: []
+      };
 
       // loop thru the tee holes and add pops
-      // TODO: this assumes r.tee.holes is complete
-      // ^ may want to detect if we have r.scores holes that aren't in r.tee.holes
-      r.tee.holes.map(tHole => {
+      // TODO: this assumes tee.holes is complete
+      // ^ may want to detect if we have r.scores holes that aren't in tee.holes
+      tee.holes.map(tHole => {
         const pops = useHandicapsOption.value
           ? this._getPops(tHole.handicap, hdcp)
-          : "0";
-        const coursePops = this._getPops(tHole.handicap, r.course_handicap || '0');
-        let rHole = find(r.scores, { hole: tHole.hole.toString()});
+          : '0';
+        const coursePops = this._getPops(tHole.allocation, hdcp || '0');
+        let rHole = find(r.scores, { hole: tHole.number.toString()});
         if( !rHole ) {
-          rHole = {hole: tHole.hole, values: [], pops, coursePops}
+          rHole = {hole: tHole.number, values: [], pops, coursePops}
         } else {
           rHole.pops = pops;
           rHole.coursePops = coursePops;
@@ -212,15 +225,15 @@ class Game extends Doc {
     if( playerHdcp >= 0 ) pop = ( holeHdcp <= remPops ) ? 1 : 0;
     if( playerHdcp < 0 ) pop = ( (18-holeHdcp) < (-1*remPops) ) ? -1 : 0;
     const holePops = basePops + pop;
-    //console.log(holeHdcp, playerHdcp, basePops, remPops, pop, holePops);
     return holePops;
   }
 
   _getLowIndex(game) {
     let lowIndex = 0.0;
     game.rounds.map((r, i) => {
-      if( !r ) return lowIndex; // edge case when round has been deleted, but not the round2game edge
-      const hdcp = r.game_handicap ? r.game_handicap : (r.course_handicap || 0);
+      if( !(r?.tees && r.tees[0]) ) return lowIndex;
+      const tee = r.tees[0];
+      const hdcp = tee.game_handicap ? tee.game_handicap : (tee.course_handicap || 0);
       if( i == 0 ) lowIndex = hdcp; // set initial lowIndex from first round
       if( parseFloat(hdcp) < lowIndex ) lowIndex = hdcp;
     });

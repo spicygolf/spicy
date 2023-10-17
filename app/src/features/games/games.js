@@ -3,7 +3,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { blue } from 'common/colors';
 import Error from 'common/components/error';
 import { getCoursesPlayersTxt } from 'common/utils/game';
-import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
+import { query as activeGamesForPlayerQuery } from 'features/games/hooks/useActiveGamesForPlayerQuery';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { filter, reverse, sortBy } from 'lodash';
 import moment from 'moment';
@@ -90,7 +90,7 @@ const Games = (props) => {
     setIsFetching(false);
   }, [getGameList]);
 
-  const [getGameList, { error, data }] = useLazyQuery(ACTIVE_GAMES_FOR_PLAYER_QUERY, {
+  const [getGameList, { error, data }] = useLazyQuery(activeGamesForPlayerQuery, {
     variables: {
       pkey: currentPlayer._key,
     },

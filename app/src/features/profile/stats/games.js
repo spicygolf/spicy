@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client';
-import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
+import { query as activeGamesForPlayerQuery } from 'features/games/hooks/useActiveGamesForPlayerQuery';
 import React from 'react';
 import { Text, View } from 'react-native';
 
@@ -8,7 +8,7 @@ import { styles } from './styles';
 const GamesStat = ({ pkey }) => {
   let stat = ' ';
 
-  const { error, data } = useQuery(ACTIVE_GAMES_FOR_PLAYER_QUERY, {
+  const { error, data } = useQuery(activeGamesForPlayerQuery, {
     variables: {
       pkey,
     },

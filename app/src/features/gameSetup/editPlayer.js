@@ -4,7 +4,7 @@ import { UPDATE_LINK_MUTATION } from 'common/graphql/link';
 import { course_handicap } from 'common/utils/handicap';
 import { get_round_for_player } from 'common/utils/rounds';
 import { GameContext } from 'features/game/gameContext';
-import { GET_GAME_QUERY } from 'features/game/graphql';
+import { query as getGameQuery } from 'features/game/hooks/useGetGameQuery';
 import GameNav from 'features/games/gamenav';
 import HandicapInput from 'features/gameSetup/handicapInput';
 import React, { useContext } from 'react';
@@ -80,7 +80,7 @@ const EditPlayer = (props) => {
       },
       refetchQueries: () => [
         {
-          query: GET_GAME_QUERY,
+          query: getGameQuery,
           variables: {
             gkey: game._key,
           },

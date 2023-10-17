@@ -3,8 +3,8 @@ import { useNavigation } from '@react-navigation/core';
 import { getHoles, isSameHolesList } from 'common/utils/game';
 import { getNewGameForUpdate } from 'common/utils/game';
 import { GameContext } from 'features/game/gameContext';
-import { GET_GAME_QUERY } from 'features/game/graphql';
 import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
+import { query as getGameQuery } from 'features/game/hooks/useGetGameQuery';
 import OptionBool from 'features/gameSetup/optionBool';
 import OptionDisplay from 'features/gameSetup/optionDisplay';
 import OptionMenu from 'features/gameSetup/optionMenu';
@@ -56,7 +56,7 @@ const Option = ({ item }) => {
       },
       refetchQueries: [
         {
-          query: GET_GAME_QUERY,
+          query: getGameQuery,
           variables: {
             gkey: gkey,
           },
@@ -106,8 +106,7 @@ const Option = ({ item }) => {
     <Text
       onPress={async () => {
         navigation.navigate('OptionsCustom', { okey: item.key, setOption });
-      }}
-    >
+      }}>
       custom
     </Text>
   ) : (

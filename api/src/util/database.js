@@ -17,6 +17,8 @@ export const mutate = async ({mutation, options = {}, debug}) => {
       _key: res?._key,
     };
   } catch (e) {
+    console.error(e);
+    // TODO: throw a slug for front end graphql?
     ret = {
       success: false,
       message: e.message,

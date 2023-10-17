@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import FavoriteIcon from 'common/components/favoriteIcon';
 import { course_handicap } from 'common/utils/handicap';
 import { GameContext } from 'features/game/gameContext';
-import { GET_GAME_QUERY } from 'features/game/graphql';
+import { query as getGameQuery } from 'features/game/hooks/useGetGameQuery';
 import { AddCourseContext } from 'features/gameSetup/addCourseContext';
 import { useAddTeeToRoundMutation } from 'features/rounds/hooks/useAddTeeToRoundMutation';
 import { useRemoveTeeFromRoundMutation } from 'features/rounds/hooks/useRemoveTeeFromRoundMutation';
@@ -61,7 +61,7 @@ const Tee = (props) => {
       },
       refetchQueries: () => [
         {
-          query: GET_GAME_QUERY,
+          query: getGameQuery,
           variables: {
             gkey: gkey,
           },
@@ -83,7 +83,7 @@ const Tee = (props) => {
       },
       refetchQueries: () => [
         {
-          query: GET_GAME_QUERY,
+          query: getGameQuery,
           variables: {
             gkey: gkey,
           },
