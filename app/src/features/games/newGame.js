@@ -2,6 +2,7 @@ import { useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 import { ADD_LINK_MUTATION } from 'common/graphql/link';
 import { getHoles, omitTypename } from 'common/utils/game';
+import { omitDeep } from 'common/utils/game';
 import { ADD_GAME_MUTATION } from 'features/games/graphql';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -116,11 +117,8 @@ const NewGame = (props) => {
         ...newGameWithoutTypes,
         gamespecs: [gamespec],
       };
-      const player = {
-        _key: currentPlayer._key,
-        name: currentPlayer.name,
-        handicap: currentPlayer.handicap,
-      };
+      const player = omitDeep(currentPlayer, '__typename');
+      delete player.token;
       // TODO: maybe read a user setting and not do this?
       // Caddies & scorers wouldn't always want to be added.
       // If setting is false, navigate to 'Game' only

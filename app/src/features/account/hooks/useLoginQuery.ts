@@ -12,6 +12,9 @@ export const query = gql`
         statusAuthz
         level
         token
+        handicap {
+          id
+        }
       }
       message
     }

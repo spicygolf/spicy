@@ -27,7 +27,7 @@ const AddPlayerFavorites = (props) => {
           const player = {
             _key: lItem._key,
             name: lItem.name,
-            handicap: lItem.handicap,
+            handicap: { index: lItem?.handicap?.index },
           };
           navigation.navigate('LinkRoundList', { game, player });
         }}
