@@ -39,6 +39,13 @@ type TeeCourse {
   course_city: String
   course_state: String
 }
+
+input TeeInput {
+  tee_id: Int
+  # see if we can get away with not having all the other fields
+  game_handicap: Int
+  course_handicap: Int
+}
 `;
 
 export const TeeQuerySigs = `

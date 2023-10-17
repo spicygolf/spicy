@@ -3,8 +3,8 @@ import { login, postRound } from '../util/ghin';
 import { Doc } from './doc';
 import { aql } from 'arangojs';
 import { db } from '../db/db';
-import { mutate, next } from '../util/database';
-import { getTee as getTeeGhin } from '../ghin';
+import { next } from '../util/database';
+import { getTee as getTeeGhin, searchPlayer } from '../ghin';
 
 const collection = db.collection('rounds');
 
@@ -299,6 +299,7 @@ export const linkRound = async (_, args) => {
   const { gkey, player, isNewRound, round, newHoles, currentPlayerKey } = args;
   const gid = `games/${gkey}`;
   const pid = `players/${player._key}`;
+  const hi = await getHandicap(player);
   let q, cursor;
 
   // start transaction
@@ -329,15 +330,17 @@ export const linkRound = async (_, args) => {
     const g = await trx.step(async () => db.query(q));
 
     // insert new round or set to supplied round
-    q = aql`
-      RETURN ${isNewRound} ? (INSERT ${round} INTO rounds RETURN NEW) : ${round}
-    `;
-    cursor = await trx.step(async () => db.query(q));
-    const r = await cursor.next();
-    if (!r || !r[0]) {
-      throw new Error('error adding round');
+    let r;
+    if (isNewRound) {
+      q = aql`
+        INSERT ${round} INTO rounds RETURN NEW
+      `;
+      cursor = await trx.step(async () => db.query(q));
+      r = await cursor.next();
+    } else {
+      r = round;
     }
-    const rid = `rounds/${r[0]._key}`;
+    const rid = `rounds/${r._key}`;
 
     // link round to game
     q = aql`
@@ -347,7 +350,7 @@ export const linkRound = async (_, args) => {
           type: "round2game",
           ts: DATE_ISO8601(DATE_NOW()),
           by: ${currentPlayerKey},
-          handicap_index: ${player.handicap.index}
+          handicap_index: ${hi}
       }
       UPSERT { _from: ${rid}, _to: ${gid} }
       INSERT r2g
@@ -403,6 +406,32 @@ export const linkRound = async (_, args) => {
       message: e.message,
     };
   }
+};
+
+const getHandicap = async (player) => {
+  if (player?.handicap?.index) {
+    return player.handicap.index;
+  }
+
+  if (player?.handicap?.id) {
+    const search = await searchPlayer({
+      q: {
+        golfer_id: player.handicap.id,
+      },
+      p: {
+        page: 1,
+        perPage: 50,
+      },
+    });
+
+    if (search[0] && search[0].hi_display) {
+      return search[0].hi_display;
+    }
+  }
+
+  // didn't find anything
+  console.error('models/round.js getHandicap - error no data', player);
+  return '';
 };
 
 const _Round = Round;

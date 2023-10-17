@@ -140,7 +140,7 @@ export const PlayerResolvers = {
     //   return p.getClubs(player._id);
     // },
     handicap: async (player) => {
-      if( player?.handicap?.source ) {
+      if( player?.handicap?.id ) {
         const p = new Player();
         return p.getHandicap(player.handicap);
       } else {

@@ -20,7 +20,7 @@ const LinkRound = (props) => {
 
   let round =
     r && !isNewRound
-      ? r
+      ? omitDeep(r, '__typename')
       : {
           date: game_start,
           seq: 1,

@@ -36,8 +36,6 @@ type Round {
   scores: [Score]
   player: [Player]
   handicap_index: String
-  game_handicap: String
-  course_handicap: String
   posting: Posting
 }
 
@@ -46,11 +44,13 @@ type RoundKey {
 }
 
 input RoundInput {
+  _key: String
   date: String!
   seq: Int!
+  tees: [TeeInput]
   scores: [ScoreInput]
-  game_handicap: Int
-  course_handicap: Int
+  player: [PlayerInput]
+  handicap_index: String
 }
 
 type ScorePostedSubscription {

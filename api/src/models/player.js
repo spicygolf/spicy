@@ -429,6 +429,7 @@ class Player extends Doc {
     }));
 
     return {
+      id: golfer.ghin,
       index: golfer.hi_display,
       revDate: golfer.rev_date,
       gender: golfer.gender,
