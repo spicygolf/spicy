@@ -1,4 +1,4 @@
-import { GET_GAME_QUERY } from 'features/game/graphql';
+import { query as getGameQuery } from 'features/game/hooks/useGetGameQuery';
 import { useRemovePlayerFromGameMutation } from 'features/gameSetup/hooks/useRemovePlayerFromGameMutation';
 import React, { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
@@ -28,7 +28,7 @@ const RemovePlayer = (props) => {
       },
       refetchQueries: () => [
         {
-          query: GET_GAME_QUERY,
+          query: getGameQuery,
           variables: {
             gkey: gkey,
           },

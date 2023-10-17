@@ -1,5 +1,5 @@
 import { acronym, last } from 'common/utils/text';
-import { ACTIVE_GAMES_FOR_PLAYER_QUERY } from 'features/games/graphql';
+import { query as activeGamesForPlayerQuery } from 'features/games/hooks/useActiveGamesForPlayerQuery';
 import { cloneDeep, filter, find, findIndex, groupBy, isEqual, reduce } from 'lodash';
 
 /**
@@ -334,7 +334,7 @@ export const rmgame = async (gkey, currentPlayerKey, mutation) => {
     },
     refetchQueries: [
       {
-        query: ACTIVE_GAMES_FOR_PLAYER_QUERY,
+        query: activeGamesForPlayerQuery,
         variables: {
           pkey: currentPlayerKey,
         },
@@ -393,8 +393,10 @@ export const getHolesToUpdate = (term, game, currentHole) => {
   return ret;
 };
 
-export const addPlayerToOwnTeam = async ({ pkey, game, updateGame }) => {
-  const { _key: gkey } = game;
+/**
+ * calculates a new 'holes' value for the provided game object and returns this value.
+ */
+export const addPlayerToOwnTeam = ({ pkey, game }) => {
   let newGame = getNewGameForUpdate(game);
 
   const holesToUpdate = getHolesToUpdate(newGame.scope.teams_rotate, game);
@@ -448,17 +450,7 @@ export const addPlayerToOwnTeam = async ({ pkey, game, updateGame }) => {
       }
     }
   });
-  //console.log('addPlayerToOwnTeam newGame', newGame);
-  const { error } = await updateGame({
-    variables: {
-      gkey: gkey,
-      game: newGame,
-    },
-  });
-
-  if (error) {
-    console.log('Error updating game - addPlayerToOwnTeam', error);
-  }
+  return newGame.holes;
 };
 
 export const playerListIndividual = ({ game }) => {

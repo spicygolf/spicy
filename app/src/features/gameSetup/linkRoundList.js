@@ -62,8 +62,7 @@ const LinkRoundList = (props) => {
                   <ListItem
                     key={index}
                     onPress={() => chooseRound(item, false)}
-                    testID={`choose_existing_round_${index}`}
-                  >
+                    testID={`choose_existing_round_${index}`}>
                     <ListItem.Content>
                       <ListItem.Title>{moment(item.date).format('llll')}</ListItem.Title>
                     </ListItem.Content>
@@ -84,7 +83,7 @@ const LinkRoundList = (props) => {
   }
 
   if (gotoLinkRound) {
-    // console.log('going to LinkRound', game, player, round, isNew);
+    // console.log('going to LinkRound', { game, player, round, isNew });
     return <LinkRound game={game} player={player} round={round} isNew={isNew} />;
   }
 

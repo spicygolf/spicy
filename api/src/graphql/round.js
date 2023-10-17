@@ -1,4 +1,4 @@
-import { Round } from '../models/round';
+import { Round, linkRound } from '../models/round';
 import { withFilter } from 'graphql-subscriptions';
 
 const SCORE_POSTED = "SCORE_POSTED"
@@ -76,6 +76,14 @@ export const RoundQuerySigs = `
 `;
 
 export const RoundMutationSigs = `
+  linkRound(
+    gkey: String!
+    player: PlayerInput!
+    isNewRound: Boolean!
+    round: RoundInput
+    newHoles: [GameHoleInput]
+    currentPlayerKey: String!
+  ): Response
   addTeeToRound(rkey: String!, course_id: Int, tee_id: Int, course_handicap: Int): Round
   removeTeeFromRound(rkey: String!, tee_id: Int): Round
   addRound(round: RoundInput!): RoundKey
@@ -99,6 +107,7 @@ export const RoundResolvers = {
     },
   },
   Mutation: {
+    linkRound,
     addRound: (_, { round }) => {
       // TODO: add to immutable message log?
       let r = new Round();

@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { green } from 'common/colors';
 import { validateFloat, validateName } from 'common/utils/account';
 import { GameContext } from 'features/game/gameContext';
-import { GET_GAME_QUERY } from 'features/game/graphql';
+import { query as getGameQuery } from 'features/game/hooks/useGetGameQuery';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
 import { ADD_PLAYER_MUTATION } from 'features/players/graphql';
 import moment from 'moment';
@@ -39,7 +39,7 @@ const AddPlayerManual = (props) => {
       },
       refetchQueries: [
         {
-          query: GET_GAME_QUERY,
+          query: getGameQuery,
           variables: {
             gkey: gkey,
           },

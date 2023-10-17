@@ -1,118 +1,83 @@
-import { gql, useMutation } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
-import { UPSERT_LINK_MUTATION } from 'common/graphql/link';
+import Error from 'common/components/error';
 import { addPlayerToOwnTeam, getGamespecKVs } from 'common/utils/game';
-import { linkPlayerToGame, linkRoundToGameAndPlayer } from 'common/utils/links';
+import { omitDeep } from 'common/utils/game';
+import { query as getGameQuery } from 'features/game/hooks/useGetGameQuery';
+import { query as activeGamesForPlayerQuery } from 'features/games/hooks/useActiveGamesForPlayerQuery';
+import { useLinkRoundMutation } from 'features/gameSetup/hooks/useLinkRoundMutation';
 import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { ADD_ROUND_MUTATION } from 'features/rounds/graphql';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 
 const LinkRound = (props) => {
-  const UPDATE_GAME_MUTATION = gql`
-    mutation UpdateGame($gkey: String!, $game: GameInput!) {
-      updateGame(gkey: $gkey, game: $game) {
-        holes {
-          hole
-          teams {
-            team
-            players
-          }
-        }
-      }
-    }
-  `;
-
-  const { game, player, round, isNew } = props;
-  //console.log('LinkRound props', game, player, round, isNew);
-
-  const { currentPlayer } = useContext(CurrentPlayerContext);
+  const navigation = useNavigation();
+  const { game, player: p, round: r, isNew: isNewRound } = props;
 
   const { _key: gkey, start: game_start } = game;
-  const { _key: pkey } = player;
+
+  const { _key: pkey } = p;
+  const player = omitDeep(p, '__typename');
+
+  let round =
+    r && !isNewRound
+      ? r
+      : {
+          date: game_start,
+          seq: 1,
+          scores: [],
+        };
+
   const teamGame = getGamespecKVs(game, 'teams').includes(true);
+  const newHoles = teamGame ? addPlayerToOwnTeam({ pkey, game }) : null;
 
-  const navigation = useNavigation();
+  const { currentPlayer } = useContext(CurrentPlayerContext);
+  const { _key: currentPlayerKey } = currentPlayer;
 
-  const [addRound] = useMutation(ADD_ROUND_MUTATION);
-  const [updateGame] = useMutation(UPDATE_GAME_MUTATION);
-  const [playerToGame] = useMutation(UPSERT_LINK_MUTATION);
-  const [roundToGame] = useMutation(UPSERT_LINK_MUTATION);
-  const [roundToPlayer] = useMutation(UPSERT_LINK_MUTATION);
-
-  const createNewRound = useCallback(
-    async () => {
-      //console.log('createNewRound');
-      // add round
-      const { error, data } = await addRound({
+  const [linkRound, { loading, error, data }] = useLinkRoundMutation({
+    variables: {
+      gkey,
+      player,
+      isNewRound,
+      round,
+      newHoles,
+      currentPlayerKey,
+    },
+    refetchQueries: () => [
+      {
+        query: getGameQuery,
+        variables: { gkey },
+      },
+      {
+        query: activeGamesForPlayerQuery,
         variables: {
-          round: {
-            date: game_start,
-            seq: 1,
-            scores: [],
-          },
+          pkey: currentPlayerKey,
         },
-      });
-      if (error) {
-        console.log('Error creating new round', error);
-        return null;
-      }
-      return data.addRound;
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [game_start],
-  );
+        fetchPolicy: 'cache-and-network',
+      },
+    ],
+    awaitRefetchQueries: true,
+  });
 
-  const linkRound = useCallback(
-    async (r) => {
-      //console.log('linkRound');
-      await linkRoundToGameAndPlayer({
-        round: r,
-        game,
-        player,
-        isNew,
-        roundToGame,
-        roundToPlayer,
-      });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [game, isNew, player],
-  );
+  useEffect(() => {
+    linkRound();
+  }, [linkRound]);
 
-  useEffect(
-    () => {
-      const init = async () => {
-        // link player to game
-        await linkPlayerToGame({
-          pkey,
-          gkey,
-          playerToGame,
-          currentPlayerKey: currentPlayer._key,
-        });
+  if (loading) {
+    return <ActivityIndicator />;
+  }
+  if (error) {
+    return <Error error={error} />;
+  }
 
-        // if not a team game, add player to her own team and update game
-        if (!teamGame) {
-          //console.log('firing add player to own team');
-          await addPlayerToOwnTeam({ pkey, game, updateGame });
-        }
-        // link round
-        let r = round && !isNew ? round : await createNewRound();
-        await linkRound(r);
-
-        //console.log('LinkRound navigating to GameSetup');
-        navigation.navigate('Game', {
-          currentGameKey: gkey,
-          screen: 'Setup',
-          params: {
-            screen: 'GameSetup',
-          },
-        });
-      };
-      init();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props],
-  );
+  if (data) {
+    navigation.navigate('Game', {
+      currentGameKey: gkey,
+      screen: 'Setup',
+      params: {
+        screen: 'GameSetup',
+      },
+    });
+  }
 
   return <ActivityIndicator />;
 };
