@@ -2,9 +2,7 @@ import { aql } from 'arangojs';
 
 import { searchPlayer as searchPlayerGhin } from '../ghin';
 import { db } from '../db/db';
-import { login } from '../util/ghin';
 import { titleize } from '../util/text';
-import { Club } from './club';
 import { Doc } from './doc';
 import { Game } from './game';
 import { all, next } from '../util/database';
@@ -38,7 +36,7 @@ class Player extends Doc {
   // TODO: get only active, inactive, or all
   async games() {
     const pkey = this._doc._id;
-    const cursor = await db.query(aql`
+    const query = aql`
       FOR v, e
         IN 1..1
         ANY ${pkey}
@@ -61,8 +59,8 @@ class Player extends Doc {
       RETURN MERGE(v, {
         rounds: rounds
       })
-  `);
-    return cursor.all();
+    `;
+    return all({query});
   }
 
   // get the gamespecs this player usually accesses
@@ -135,148 +133,133 @@ class Player extends Doc {
   }
 
   async register(player) {
+    console.error('TODO: rework models.player.register()');
+    return;
     //console.log('player', JSON.stringify(player, null, ' '));
-    let newPlayer = {};
+    // let newPlayer = {};
 
-    try {
-      let ghinData = player.ghinData || [];
-      let token = null;
-      if (ghinData && ghinData.length > 0) {
-        token = ghinData[0].NewUserToken;
-      } else {
-        const ret = await login(
-          player.ghinNumber?.trim(),
-          player.lastName?.trim(),
-        );
-        token = ret.token;
-      }
+    // try {
+    //   let ghinData = player.ghinData || [];
+    //   let token = null;
+    //   if (ghinData && ghinData.length > 0) {
+    //     token = ghinData[0].NewUserToken;
+    //   } else {
+    //     const ret = await login(
+    //       player.ghinNumber?.trim(),
+    //       player.lastName?.trim(),
+    //     );
+    //     token = ret.token;
+    //   }
 
-      const ghinNumber =
-        ghinData && ghinData.length ? ghinData[0].GHINNumber : null;
+    //   const ghinNumber =
+    //     ghinData && ghinData.length ? ghinData[0].GHINNumber : null;
 
-      // see if there's a player already claiming this ghin info
-      const claimedQuery = aql`
-        FOR p IN players
-          FILTER p.email != null
-             AND p.fbUser != null
-             AND p.handicap.source == 'ghin'
-             AND p.handicap.id == ${ghinNumber}
-          RETURN p
-      `;
-      const claimedCursor = await db.query(claimedQuery);
-      const claimed = await claimedCursor.next();
-      //console.log('claimed', claimed);
-      if (claimed) {
-        if (claimed.email == player.email?.trim()) {
-          // claimed and the same email, which shouldn't be possible with
-          // firebase, so return a 409
-          console.log('Player & email exists, so stopping.');
-          return {
-            error: {
-              code: 409,
-              message: 'Error registering player: Email already exists.',
-            },
-          };
-        } else if (player.email) {
-          console.log(`Player claimed but new email: ${player.email}`);
-          // claimed but new email, so proceed, but delete the ghin stuffs
-          delete player.handicap;
-          delete player.ghinData;
-          ghinData = [];
-        } else {
-          // do nothing - makes CLI --add-player-num-name call idempotent
-        }
-      }
+    //   // see if there's a player already claiming this ghin info
+    //   const claimedQuery = aql`
+    //     FOR p IN players
+    //       FILTER p.email != null
+    //          AND p.fbUser != null
+    //          AND p.handicap.source == 'ghin'
+    //          AND p.handicap.id == ${ghinNumber}
+    //       RETURN p
+    //   `;
+    //   const claimedCursor = await db.query(claimedQuery);
+    //   const claimed = await claimedCursor.next();
+    //   //console.log('claimed', claimed);
+    //   if (claimed) {
+    //     if (claimed.email == player.email?.trim()) {
+    //       // claimed and the same email, which shouldn't be possible with
+    //       // firebase, so return a 409
+    //       console.log('Player & email exists, so stopping.');
+    //       return {
+    //         error: {
+    //           code: 409,
+    //           message: 'Error registering player: Email already exists.',
+    //         },
+    //       };
+    //     } else if (player.email) {
+    //       console.log(`Player claimed but new email: ${player.email}`);
+    //       // claimed but new email, so proceed, but delete the ghin stuffs
+    //       delete player.handicap;
+    //       delete player.ghinData;
+    //       ghinData = [];
+    //     } else {
+    //       // do nothing - makes CLI --add-player-num-name call idempotent
+    //     }
+    //   }
 
-      // see if there's already a player crawled, but not registered
-      const existingQuery = aql`
-        FOR p IN players
-          FILTER p.email == null
-             AND p.fbUser == null
-             AND p.handicap.source == 'ghin'
-             AND p.handicap.id == ${ghinNumber}
-          RETURN p
-      `;
-      const existingCursor = await db.query(existingQuery);
-      const existing = await existingCursor.next();
-      //console.log('register existing', existing);
-      if (existing) {
-        //console.log('player exists already in our db');
-        newPlayer = Object.assign(existing, player);
-        delete newPlayer._rev;
-      } else {
-        newPlayer = Object.assign({}, player);
-      }
-      delete newPlayer.ghinData;
+    //   // see if there's already a player crawled, but not registered
+    //   const existingQuery = aql`
+    //     FOR p IN players
+    //       FILTER p.email == null
+    //          AND p.fbUser == null
+    //          AND p.handicap.source == 'ghin'
+    //          AND p.handicap.id == ${ghinNumber}
+    //       RETURN p
+    //   `;
+    //   const existingCursor = await db.query(existingQuery);
+    //   const existing = await existingCursor.next();
+    //   //console.log('register existing', existing);
+    //   if (existing) {
+    //     //console.log('player exists already in our db');
+    //     newPlayer = Object.assign(existing, player);
+    //     delete newPlayer._rev;
+    //   } else {
+    //     newPlayer = Object.assign({}, player);
+    //   }
+    //   delete newPlayer.ghinData;
 
-      // not sure this below 'if' statement works for registrations,
-      // but does work for CLI --add-player-num-name call
-      if (claimed && claimed.email && claimed.email !== newPlayer.email) {
-        newPlayer = {
-          ...claimed,
-          handicap: player.handicap,
-        };
-      }
+    //   // not sure this below 'if' statement works for registrations,
+    //   // but does work for CLI --add-player-num-name call
+    //   if (claimed && claimed.email && claimed.email !== newPlayer.email) {
+    //     newPlayer = {
+    //       ...claimed,
+    //       handicap: player.handicap,
+    //     };
+    //   }
 
-      if (!newPlayer.statusAuthz) newPlayer.statusAuthz = ['prod'];
+    //   if (!newPlayer.statusAuthz) newPlayer.statusAuthz = ['prod'];
 
-      // trim whitespace off of all string fields, and make Title Case
-      for (let [key, value] of Object.entries(newPlayer)) {
-        if (typeof value === 'string') {
-          newPlayer[key] = titleize(value.trim());
-        }
-      }
+    //   // trim whitespace off of all string fields, and make Title Case
+    //   for (let [key, value] of Object.entries(newPlayer)) {
+    //     if (typeof value === 'string') {
+    //       newPlayer[key] = titleize(value.trim());
+    //     }
+    //   }
 
-      // make sure all emails are lower case, to match firebase
-      if (newPlayer.email) newPlayer.email = newPlayer.email.toLowerCase();
+    //   // make sure all emails are lower case, to match firebase
+    //   if (newPlayer.email) newPlayer.email = newPlayer.email.toLowerCase();
 
-      // write new player to db
-      this.set(newPlayer);
-      const ret = await this.save({ overwrite: true });
+    //   // write new player to db
+    //   this.set(newPlayer);
+    //   const ret = await this.save({ overwrite: true });
 
-      //console.log('register save ret', ret, ghinData);
+    //   //console.log('register save ret', ret, ghinData);
 
-      if (ret && ret._id && ghinData && ghinData.length) {
-        // crawl this new player's club(s)
-        let clubs = [];
-        ghinData.map((gp) => {
-          if (gp.Active == 'true') {
-            clubs.push({
-              club_id: gp.ClubId,
-              name: gp.ClubName,
-              assn: gp.Assoc,
-              num: gp.Club,
-            });
-          }
-        });
-        clubs.map(async (club) => {
-          console.log('register club', club);
-          const c = new Club();
-          await c.register(ret._id, club, token);
-        });
-      }
-      return ret;
-    } catch (err) {
-      //console.log('register save error', err);
-      if (err && err.response && err.response.body && err.response.body.error) {
-        return {
-          error: err.response.body,
-        };
-      }
-      throw err;
-    }
-  }
-
-  async getClubs(playerID) {
-    const cursor = await db.query(aql`
-      FOR v, e
-          IN 1..1
-          ANY ${playerID}
-          GRAPH 'games'
-          FILTER e.type == 'player2club'
-          RETURN v
-    `);
-    return await cursor.all();
+    //   if (ret && ret._id && ghinData && ghinData.length) {
+    //     // crawl this new player's club(s)
+    //     let clubs = [];
+    //     ghinData.map((gp) => {
+    //       if (gp.Active == 'true') {
+    //         clubs.push({
+    //           club_id: gp.ClubId,
+    //           name: gp.ClubName,
+    //           assn: gp.Assoc,
+    //           num: gp.Club,
+    //         });
+    //       }
+    //     });
+    //   }
+    //   return ret;
+    // } catch (err) {
+    //   //console.log('register save error', err);
+    //   if (err && err.response && err.response.body && err.response.body.error) {
+    //     return {
+    //       error: err.response.body,
+    //     };
+    //   }
+    //   throw err;
+    // }
   }
 
   async getFavoritePlayersForPlayer(pkey) {

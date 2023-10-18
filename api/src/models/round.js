@@ -1,5 +1,3 @@
-import { login, postRound } from '../util/ghin';
-
 import { Doc } from './doc';
 import { aql } from 'arangojs';
 import { db } from '../db/db';
@@ -177,6 +175,9 @@ class Round extends Doc {
   }
 
   async postRoundToHandicapService(rkey, posted_by) {
+    console.error('TODO: rework postRoundToHandicapService');
+    return;
+
     const round = await this.load(rkey);
     const player = await this.getPlayer0(rkey);
     const { course, tee } = await this.getCourseTee(rkey);

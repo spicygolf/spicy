@@ -80,6 +80,14 @@ type SearchPlayer {
   clubs: [Club]
 }
 
+type Club {
+  id: String
+  name: String
+  assn: Int
+  state: String
+  country: String
+}
+
 `;
 
 export const PlayerQuerySigs = `
@@ -135,10 +143,6 @@ export const PlayerResolvers = {
     },
   },
   Player: {
-    // clubs: async (player) => {
-    //   const p = new Player();
-    //   return p.getClubs(player._id);
-    // },
     handicap: async (player) => {
       if( player?.handicap?.id ) {
         const p = new Player();

@@ -7,12 +7,6 @@ import {
   AccountTypeDefs
 } from './account';
 import {
-  ClubMutationSigs,
-  ClubQuerySigs,
-  ClubResolvers,
-  ClubTypeDefs
-} from './club';
-import {
   CourseMutationSigs,
   CourseQuerySigs,
   CourseResolvers,
@@ -75,7 +69,6 @@ import {
 const TypeDefs = [
   AccountTypeDefs,
   SharedTypeDefs,
-  ClubTypeDefs,
   CourseTypeDefs,
   EventTypeDefs,
   GameSpecTypeDefs,
@@ -90,7 +83,6 @@ const TypeDefs = [
 const RootQuery = `
 type Query {
   ${AccountQuerySigs}
-  ${ClubQuerySigs}
   ${CourseQuerySigs}
   ${EventQuerySigs}
   ${GameSpecQuerySigs}
@@ -106,7 +98,6 @@ type Query {
 const RootMutation = `
 type Mutation {
   ${AccountMutationSigs}
-  ${ClubMutationSigs}
   ${CourseMutationSigs}
   ${EventMutationSigs}
   ${GameSpecMutationSigs}
@@ -128,7 +119,6 @@ const RootSubscription = `
 
 const resolvers = merge(
   AccountResolvers,
-  ClubResolvers,
   CourseResolvers,
   EventResolvers,
   GameSpecResolvers,
