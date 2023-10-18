@@ -330,33 +330,33 @@ class Game extends Doc {
         cursor = await db.query(query);
         break;
       case 'myclubs':
-        query = `
-        FOR g IN games
-          FILTER g.start > '${begDate}' AND g.start < '${endDate}'
-          LET players = (
-            FOR pv, pe
-              IN 1..1
-              ANY g._id
-              GRAPH 'games'
-              FILTER pe.type == 'player2game'
-              LET myclubs = (
-                /*
-                FOR cv, ce
-                  IN 1..1
-                  ANY pv._id
-                  GRAPH 'games'
-                  FILTER ce.type == 'player2club'
-                    AND CONTAINS(@myClubs, ce._to)
-                */
-                  RETURN true
-              )
-              RETURN POSITION(myclubs, true)
-          )
-          FILTER POSITION(players, true)
-          COLLECT WITH COUNT INTO length
-          RETURN length
-        `;
-        cursor = await db.query(query, {myClubs});
+        // query = `
+        // FOR g IN games
+        //   FILTER g.start > '${begDate}' AND g.start < '${endDate}'
+        //   LET players = (
+        //     FOR pv, pe
+        //       IN 1..1
+        //       ANY g._id
+        //       GRAPH 'games'
+        //       FILTER pe.type == 'player2game'
+        //       LET myclubs = (
+        //         /*
+        //         FOR cv, ce
+        //           IN 1..1
+        //           ANY pv._id
+        //           GRAPH 'games'
+        //           FILTER ce.type == 'player2club'
+        //             AND CONTAINS(@myClubs, ce._to)
+        //         */
+        //           RETURN true
+        //       )
+        //       RETURN POSITION(myclubs, true)
+        //   )
+        //   FILTER POSITION(players, true)
+        //   COLLECT WITH COUNT INTO length
+        //   RETURN length
+        // `;
+        // cursor = await db.query(query, {myClubs});
         break;
       case 'faves':
         query = `
@@ -455,54 +455,54 @@ class Game extends Doc {
         cursor = await db.query(query);
         break;
       case 'myclubs':
-        query = `
-        FOR g IN games
-          FILTER g.start > '${begDate}' AND g.start < '${endDate}'
-          LET rounds = (
-            FOR rv, re
-              IN 1..1
-              ANY g._id
-              GRAPH 'games'
-              FILTER re.type == 'round2game' AND rv != null
-              LET tee = (
-                FOR tv, te
-                IN 1..1
-                ANY rv._id
-                GRAPH 'games'
-                FILTER te.type == 'round2tee'
-                RETURN MERGE(tv, {
-                  assigned: te.assigned
-                })
-              )
-              RETURN MERGE(rv, {
-                handicap_index: re.handicap_index,
-                game_handicap: re.game_handicap,
-                course_handicap: re.course_handicap,
-                tee: FIRST(tee)
-              })
-          )
-          LET players = (
-            FOR pv, pe
-              IN 1..1
-              ANY g._id
-              GRAPH 'games'
-              FILTER pe.type == 'player2game'
-              LET myclubs = (
-                FOR cv, ce
-                  IN 1..1
-                  ANY pv._id
-                  GRAPH 'games'
-                  FILTER ce.type == 'player2club'
-                    AND CONTAINS(@myClubs, ce._to)
-                  RETURN true
-              )
-              RETURN {player: pv, fltr: POSITION(myclubs, true)}
-          )
-          FILTER POSITION( players[*].fltr, true )
-          SORT g.start DESC
-          RETURN MERGE(g, {players: players[*].player, rounds})
-        `;
-        cursor = await db.query(query, {myClubs});
+        // query = `
+        // FOR g IN games
+        //   FILTER g.start > '${begDate}' AND g.start < '${endDate}'
+        //   LET rounds = (
+        //     FOR rv, re
+        //       IN 1..1
+        //       ANY g._id
+        //       GRAPH 'games'
+        //       FILTER re.type == 'round2game' AND rv != null
+        //       LET tee = (
+        //         FOR tv, te
+        //         IN 1..1
+        //         ANY rv._id
+        //         GRAPH 'games'
+        //         FILTER te.type == 'round2tee'
+        //         RETURN MERGE(tv, {
+        //           assigned: te.assigned
+        //         })
+        //       )
+        //       RETURN MERGE(rv, {
+        //         handicap_index: re.handicap_index,
+        //         game_handicap: re.game_handicap,
+        //         course_handicap: re.course_handicap,
+        //         tee: FIRST(tee)
+        //       })
+        //   )
+        //   LET players = (
+        //     FOR pv, pe
+        //       IN 1..1
+        //       ANY g._id
+        //       GRAPH 'games'
+        //       FILTER pe.type == 'player2game'
+        //       LET myclubs = (
+        //         FOR cv, ce
+        //           IN 1..1
+        //           ANY pv._id
+        //           GRAPH 'games'
+        //           FILTER ce.type == 'player2club'
+        //             AND CONTAINS(@myClubs, ce._to)
+        //           RETURN true
+        //       )
+        //       RETURN {player: pv, fltr: POSITION(myclubs, true)}
+        //   )
+        //   FILTER POSITION( players[*].fltr, true )
+        //   SORT g.start DESC
+        //   RETURN MERGE(g, {players: players[*].player, rounds})
+        // `;
+        // cursor = await db.query(query, {myClubs});
         break;
       case 'faves':
         query = `

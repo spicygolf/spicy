@@ -61,3 +61,20 @@ export const next = async ({query, options = {}, debug}) => {
     return e;
   }
 };
+
+export const refreshEdge = async (type, f, t, data = {}) => {
+  let newEdge = {
+    type: type,
+    _from: f,
+    _to: t,
+    ...data,
+  };
+  const edge = new Edge(type);
+  const existing = await edge.find({type: type, _from: f, _to: t});
+  if( existing && existing.length ) {
+    newEdge._key = existing[0]._key;
+  }
+  edge.set(newEdge);
+  await edge.save({overwrite: true});
+};
+

@@ -1,5 +1,5 @@
 import { db } from '../../../src/db/db';
-import { refreshEdge } from '../../../src/util/ghin';
+import { refreshEdge } from '../../../src/util/database';
 
 /*
 
