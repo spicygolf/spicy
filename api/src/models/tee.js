@@ -15,6 +15,8 @@ class Tee extends Doc {
   }
 
   async getCourse(tKey) {
+    console.error('TODO: refactor models/tee/getCourse');
+    return;
     const teeID = `tees/${tKey}`;
     //console.log('teeID', teeID);
     const q = aql`
@@ -61,6 +63,8 @@ class Tee extends Doc {
 
 
   async _getExistingTee(courseid, name, gender) {
+    console.error('TODO: refactor models/tee/_getExistingTee');
+    return;
     const q = aql`
       FOR v, e
         IN 1..1
