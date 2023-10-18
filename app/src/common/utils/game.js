@@ -173,7 +173,7 @@ export const getAllOptions = ({ game, type }) => {
       if (gso.type === type) {
         let values = gso.values;
         if (typeof values === 'undefined' || values === null || values.length === 0) {
-          values = [{ value: gso.default, holes: game.holes.map((h) => h.hole) }];
+          values = [{ value: gso.default, holes: (game.holes || []).map((h) => h.hole) }];
         }
         values = values.map((v) => ({
           ...v,

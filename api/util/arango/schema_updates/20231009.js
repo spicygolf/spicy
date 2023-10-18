@@ -13,9 +13,22 @@ import { next } from '../../../src/util/database';
 const main = async () => {
   try {
 
-    // remove all tees
+    // TODO: copy all tee docs into round docs first, before deleting docs and edges below
+
+    // TODO: copy all player2tee "favorites" somewhere before deleting docs and edges below
+
+    // remove collections
     const tees = db.collection('tees');
     await tees.drop();
+
+    const associations = db.collection('associations');
+    await associations.drop();
+
+    const clubs = db.collection('clubs');
+    await clubs.drop();
+
+    const courses = db.collection('courses');
+    await courses.drop();
 
     // remove all edges to tees
     let query = `
@@ -28,6 +41,21 @@ const main = async () => {
     query = `
       FOR e IN edges
         FILTER e.type LIKE "tee2%"
+        REMOVE {_key: e._key} IN edges
+    `;
+    await next({query});
+
+    // remove all edges to clubs
+    query = `
+      FOR e IN edges
+        FILTER e.type LIKE "%2club"
+        REMOVE {_key: e._key} IN edges
+    `;
+    await next({query});
+
+    query = `
+      FOR e IN edges
+        FILTER e.type LIKE "club2%"
         REMOVE {_key: e._key} IN edges
     `;
     await next({query});
