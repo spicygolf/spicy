@@ -2,6 +2,24 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "ws",
+      "type": "bun",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/ws",
+      "program": "src/index.ts",
+      "watchMode": "hot",
+      "internalConsoleOptions": "openOnSessionStart",
+    },
+    {
+      "name": "web",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/web",
+      "runtimeExecutable": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+      "internalConsoleOptions": "openOnSessionStart",
+    },
+    {
       "name": "api",
       "type": "bun",
       "request": "launch",

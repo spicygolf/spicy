@@ -1,0 +1,13 @@
+{
+  "name": "spicylib",
+  "type": "module",
+  "exports": {
+    "./types": "./src/types/index.ts"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
