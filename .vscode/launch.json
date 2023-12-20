@@ -28,15 +28,24 @@
       "watchMode": "hot",
       "internalConsoleOptions": "openOnSessionStart",
     },
-    {
-      "name": "app ios",
-      "request": "launch",
-      "type": "reactnative",
-      "cwd": "${workspaceFolder}/app",
-      "platform": "ios",
-      "runArguments": ["--simulator", "iPhone 14"],
-      "internalConsoleOptions": "openOnSessionStart"
-    },
+    // {
+    //   "name": "app ios",
+    //   "request": "launch",
+    //   "type": "reactnative",
+    //   "cwd": "${workspaceFolder}/app",
+    //   "platform": "ios",
+    //   "runArguments": ["--simulator", "iPhone 14"],
+    //   "internalConsoleOptions": "openOnSessionStart"
+    // },
+    // {
+    //   "name": "phone ios",
+    //   "request": "launch",
+    //   "type": "reactnative",
+    //   "cwd": "${workspaceFolder}/phone",
+    //   "platform": "ios",
+    //   "runArguments": ["--simulator", "iPhone 14"],
+    //   "internalConsoleOptions": "openOnSessionStart"
+    // },
     {
       "name": "ghin dev testing - bun",
       "type": "bun",

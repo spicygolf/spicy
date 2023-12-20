@@ -20,6 +20,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "../lib/src/types/game.ts"],
+  "include": [
+    "src",
+    "../lib/src/types/game.ts",
+    "../lib/src/utils/datetime.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

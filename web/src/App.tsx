@@ -1,10 +1,8 @@
 import spicyLogo from '/spicygolf.png';
 import './App.css';
-import Games from './Games';
+import Games from './components/Games';
 
 function App() {
-  // // connect to ws api
-  // init();
 
   return (
     <>

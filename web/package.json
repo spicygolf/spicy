@@ -10,10 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fireproof/core": "^0.15.1",
     "date-fns-tz": "^2.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "use-fireproof": "^0.14.0"
+    "use-fireproof": "^0.14.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
