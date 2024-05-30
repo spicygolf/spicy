@@ -2,6 +2,20 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "react-native-ide",
+      "request": "launch",
+      "name": "phone",
+      "appRoot": "./packages/phone/",
+      "metroConfigPath": "./packages/phone/metro.config.js",
+      "suppressMultipleSessionWarning": true,
+      "ios": {
+        "configuration": "Debug"
+      },
+      "android": {
+        "buildType": "debug"
+      }
+    },
+    {
       "name": "ws",
       "type": "bun",
       "request": "launch",
