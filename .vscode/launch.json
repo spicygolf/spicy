@@ -16,15 +16,6 @@
       }
     },
     {
-      "name": "ws",
-      "type": "bun",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/ws",
-      "program": "src/index.ts",
-      "watchMode": "hot",
-      "internalConsoleOptions": "openOnSessionStart",
-    },
-    {
       "name": "web",
       "type": "chrome",
       "request": "launch",
@@ -64,8 +55,8 @@
       "name": "ghin dev testing - bun",
       "type": "bun",
       "request": "launch",
-      "cwd": "${workspaceFolder}/api",
-      "program": "src/ghin/dev.ts",
+      "cwd": "${workspaceFolder}/packages/ghin",
+      "program": "src/dev.ts",
       "internalConsoleOptions": "openOnSessionStart",
     },
     {
