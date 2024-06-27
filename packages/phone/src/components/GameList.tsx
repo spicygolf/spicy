@@ -1,29 +1,20 @@
-import React, {useEffect, useState} from 'react';
-import {Button, FlatList, ListRenderItemInfo, Text, View} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Button, FlatList, ListRenderItemInfo, Text, View } from 'react-native';
+// @ts-ignore FIXME
 import { Doc } from '@fireproof/core';
-import {useFireproof} from '@fireproof/react-native';
+import { useFireproof } from '@fireproof/react-native';
 
-import {getUTCNowISO, i18n} from 'spicylib/utils';
-
-type Game = {
-  name: string,
-  start: string,
-  gamespec: number;
-};
-
-type GameSpec = {
-  name: string;
-  gamespec: number;
-};
+import { getUTCNowISO, i18n } from 'spicylib/utils';
+import type { Game, GameSpec } from 'spicylib/types';
 
 export type GameFromAllDocs = { key: string; value: Doc<Game>; };
 
 const GameList = () => {
   const {database : db, useLiveQuery} = useFireproof('spicy', {public: true});
   const defaultGame: Game = {
+    _type: 'game',
     name: '',
     start: '',
-    gamespec: -1,
   };
 
   const [game, setGame] = useState<Game>(defaultGame);
@@ -59,8 +50,8 @@ const GameList = () => {
 
 
   const gamespecs: GameSpec[] = [
-    {name: 'Five Points', gamespec: 1},
-    {name: 'Match Play', gamespec: 2},
+    {_type: 'gamespec', name: 'Five Points', version: 1, status: 'prod', type: 'points', min_players: 2, location_type: 'local', teams: true},
+    {_type: 'gamespec', name: 'Match Play', version: 1, status: 'prod', type: 'match', min_players: 2, location_type: 'local', teams: true},
   ];
 
   const renderGameSpecs = ({item, index}: ListRenderItemInfo<GameSpec>) => {

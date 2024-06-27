@@ -2,12 +2,14 @@ import React from 'react';
 import {
   SafeAreaView
 } from 'react-native';
-import GameList from './GameList';
+// import GameList from './GameList';
+import TestGame from './TestGame';
 
 function App(): React.JSX.Element {
   return (
     <SafeAreaView>
-      <GameList />
+      {/* <GameList /> */}
+      <TestGame />
     </SafeAreaView>
   );
 }

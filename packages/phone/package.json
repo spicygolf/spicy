@@ -15,6 +15,7 @@
     "react": "18.2.0",
     "react-native": "0.74.1",
     "react-native-fast-encoder": "^0.1.12",
+    "react-native-fs": "^2.20.0",
     "react-native-mmkv": "<3",
     "react-native-quick-crypto": "^0.7.0-rc.9",
     "spicylib": "workspace:^"
