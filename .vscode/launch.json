@@ -2,29 +2,61 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "radon-ide",
+      "request": "launch",
+      "name": "mobile 0.3",
+      "appRoot": "./packages/app-0.3/",
+      "metroConfigPath": "./packages/app-0.3/metro.config.js",
+      "suppressMultipleSessionWarning": true,
+      "ios": {
+        "configuration": "Debug"
+      },
+      "android": {
+        "buildType": "debug"
+      }
+    },
+    {
+      "name": "web",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/web",
+      "runtimeExecutable": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+      "internalConsoleOptions": "openOnSessionStart",
+    },
+    {
       "name": "api",
       "type": "bun",
       "request": "launch",
-      "cwd": "${workspaceFolder}/api",
+      "cwd": "${workspaceFolder}/packages/api",
       "program": "src/server.ts",
       "watchMode": "hot",
       "internalConsoleOptions": "openOnSessionStart",
     },
-    {
-      "name": "app ios",
-      "request": "launch",
-      "type": "reactnative",
-      "cwd": "${workspaceFolder}/app",
-      "platform": "ios",
-      "runArguments": ["--simulator", "iPhone 14"],
-      "internalConsoleOptions": "openOnSessionStart"
-    },
+    // {
+    //   "name": "app ios",
+    //   "request": "launch",
+    //   "type": "reactnative",
+    //   "cwd": "${workspaceFolder}/app",
+    //   "platform": "ios",
+    //   "runArguments": ["--simulator", "iPhone 14"],
+    //   "internalConsoleOptions": "openOnSessionStart"
+    // },
+    // {
+    //   "name": "phone ios",
+    //   "request": "launch",
+    //   "type": "reactnative",
+    //   "cwd": "${workspaceFolder}/phone",
+    //   "platform": "ios",
+    //   "runArguments": ["--simulator", "iPhone 14"],
+    //   "internalConsoleOptions": "openOnSessionStart"
+    // },
     {
       "name": "ghin dev testing - bun",
       "type": "bun",
       "request": "launch",
-      "cwd": "${workspaceFolder}/api",
-      "program": "src/ghin/dev.ts",
+      "cwd": "${workspaceFolder}/packages/ghin",
+      "program": "src/dev.ts",
       "internalConsoleOptions": "openOnSessionStart",
     },
     {
@@ -46,7 +78,7 @@
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
-      "cwd": "${workspaceFolder}/api",
+      "cwd": "${workspaceFolder}/packages/api",
       "args": [
         "--es-module-specifier-resolution=node",
         "./util/arango/schema_updates/20210602.js"
@@ -57,7 +89,7 @@
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
-      "cwd": "${workspaceFolder}/api",
+      "cwd": "${workspaceFolder}/packages/api",
       "args": [
         "--es-module-specifier-resolution=node",
         "./util/arango/schema_updates/20221219.js"
@@ -68,7 +100,7 @@
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
-      "cwd": "${workspaceFolder}/api",
+      "cwd": "${workspaceFolder}/packages/api",
       "args": [
         "--es-module-specifier-resolution=node",
         "./util/arango/schema_updates/20221220.js"
@@ -78,7 +110,7 @@
       "name": "api schema_update 20231009",
       "type": "bun",
       "request": "launch",
-      "cwd": "${workspaceFolder}/api",
+      "cwd": "${workspaceFolder}/packages/api",
       "program": "util/arango/schema_updates/20221220.js",
       "watchMode": "hot",
       "internalConsoleOptions": "openOnSessionStart",

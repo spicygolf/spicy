@@ -1,0 +1,17 @@
+{
+  "name": "spicylib",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./types": "./types/index.ts",
+    "./utils": "./utils/index.ts"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "dependencies": {
+    "date-fns-tz": "^2.0.0",
+    "spicylib": "workspace:^",
+    "typescript": "^5.0.0"
+  }
+}
