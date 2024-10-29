@@ -2,11 +2,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "react-native-ide",
+      "type": "radon-ide",
       "request": "launch",
-      "name": "phone",
-      "appRoot": "./packages/phone/",
-      "metroConfigPath": "./packages/phone/metro.config.js",
+      "name": "mobile 0.3",
+      "appRoot": "./packages/app-0.3/",
+      "metroConfigPath": "./packages/app-0.3/metro.config.js",
       "suppressMultipleSessionWarning": true,
       "ios": {
         "configuration": "Debug"
@@ -28,7 +28,7 @@
       "name": "api",
       "type": "bun",
       "request": "launch",
-      "cwd": "${workspaceFolder}/api",
+      "cwd": "${workspaceFolder}/packages/api",
       "program": "src/server.ts",
       "watchMode": "hot",
       "internalConsoleOptions": "openOnSessionStart",
@@ -78,7 +78,7 @@
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
-      "cwd": "${workspaceFolder}/api",
+      "cwd": "${workspaceFolder}/packages/api",
       "args": [
         "--es-module-specifier-resolution=node",
         "./util/arango/schema_updates/20210602.js"
@@ -89,7 +89,7 @@
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
-      "cwd": "${workspaceFolder}/api",
+      "cwd": "${workspaceFolder}/packages/api",
       "args": [
         "--es-module-specifier-resolution=node",
         "./util/arango/schema_updates/20221219.js"
@@ -100,7 +100,7 @@
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
-      "cwd": "${workspaceFolder}/api",
+      "cwd": "${workspaceFolder}/packages/api",
       "args": [
         "--es-module-specifier-resolution=node",
         "./util/arango/schema_updates/20221220.js"
@@ -110,7 +110,7 @@
       "name": "api schema_update 20231009",
       "type": "bun",
       "request": "launch",
-      "cwd": "${workspaceFolder}/api",
+      "cwd": "${workspaceFolder}/packages/api",
       "program": "util/arango/schema_updates/20221220.js",
       "watchMode": "hot",
       "internalConsoleOptions": "openOnSessionStart",

@@ -1,0 +1,26 @@
+{
+  "name": "spicy-mono",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "workspaces": [
+    "packages/api",
+    "packages/app-0.3",
+    "packages/ghin",
+    "packages/lib",
+    "packages/web"
+  ],
+  "trustedDependencies": [
+    "core-js",
+    "core-js-pure",
+    "fsevents",
+    "husky",
+    "protobufjs",
+    "react-native-elements",
+    "spicygolf"
+  ]
+}

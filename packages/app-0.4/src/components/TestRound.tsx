@@ -38,7 +38,7 @@ const TestRound = ({roundId}: Props): ReactNode => {
               display = `created: ${v.created} seq: ${v.seq}`;
               break;
             case 'score_kv':
-              display = `gross: ${v.v}`;
+              display = `seq: ${v.seq} gross: ${v.v}`;
               break;
           }
           return (
