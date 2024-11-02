@@ -4,7 +4,7 @@ import type { GhinRequestFn } from './types';
 const { GHIN_BASE_URL, GHIN_EMAIL, GHIN_PASS } = process.env;
 // le sigh, global :(
 const retries: number = 3;
-let ghinToken: string | null = null;
+let ghinToken: string | undefined = undefined;
 
 const instance = axios.create({
   baseURL: GHIN_BASE_URL,
@@ -17,7 +17,7 @@ const instance = axios.create({
 
 export const ghinRequest: GhinRequestFn = async ({method, url, params, data, attempts}) => {
 
-  if (ghinToken === null) {
+  if (!ghinToken) {
     ghinToken = await login()
   }
 
@@ -28,7 +28,7 @@ export const ghinRequest: GhinRequestFn = async ({method, url, params, data, att
     return null;
   }
 
-  const headers = (ghinToken !== null) ? {
+  const headers = ghinToken ? {
     Authorization: `Bearer ${ghinToken}`
   } : {};
 
@@ -46,8 +46,8 @@ export const ghinRequest: GhinRequestFn = async ({method, url, params, data, att
       case 200: // ok
         return resp;
       case 401: // unauthorized
-        // reset token to null to force another login
-        ghinToken = null;
+        // reset token to force another login
+        ghinToken = undefined;
         return await ghinRequest({method, url, params, data, attempts});
       default:
         console.error("ghin response statusText", resp.statusText);
@@ -59,7 +59,12 @@ export const ghinRequest: GhinRequestFn = async ({method, url, params, data, att
   }
 };
 
-const login = async (): Promise<string | null> => {
+const login = async (): Promise<string | undefined> => {
+  // Get this from ghin.com website after logging in
+  const { GHIN_TOKEN } = process.env;
+  return GHIN_TOKEN;
+
+  // or use this after access to sandbox/uat is granted
   const resp = await instance.request({
     method: 'post',
     url: '/users/login.json',
@@ -71,6 +76,6 @@ const login = async (): Promise<string | null> => {
       }
     },
   });
-  console.log("ghin login");
-  return resp?.data?.token || null;
+  console.log("ghin login", resp?.data);
+  return resp?.data?.token || undefined;
 };

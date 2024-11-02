@@ -6,10 +6,10 @@ const main = async () => {
   // search for a player
   const searchPlayerResp = await searchPlayer({
     q: {
-      last_name: 'einhorn%',
+      last_name: 'anderson%',
       first_name: '',
       country: 'US',
-      state: 'WI',
+      state: 'GA',
       // status: 'Active',
       sorting_criteria: 'last_name_first_name',
       order: 'ASC'
