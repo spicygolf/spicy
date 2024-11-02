@@ -13,18 +13,22 @@ import { Provider as PaperProvider } from 'react-native-paper';
 const App = () => {
   const [client, setClient] = useState(undefined);
 
-  const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState();
+  const user = {};
+  const email = 'brad@sankatygroup.com';
+  const fbToken = '123456789';
 
-  // Handle user state changes
-  const onAuthStateChanged = (u) => {
-    setUser(u);
-  };
+  // const [initializing, setInitializing] = useState(true);
+  // const [user, setUser] = useState();
+
+  // // Handle user state changes
+  // const onAuthStateChanged = (u) => {
+  //   setUser(u);
+  // };
 
   useEffect(() => {
     RNBootSplash.hide({ duration: 250 });
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
+    // const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    // return subscriber; // unsubscribe on unmount
   });
 
   useEffect(() => {
@@ -36,21 +40,21 @@ const App = () => {
   }, []);
 
   // get data from firebaseUser
-  const [email, setEmail] = useState('');
-  const [fbToken, setFbToken] = useState('');
-  useEffect(() => {
-    const getFbData = async (fbUser) => {
-      const fbt = await fbUser.getIdToken();
-      setFbToken(fbt);
-      setEmail(fbUser.email);
-      if (initializing) {
-        setInitializing(false);
-      }
-    };
-    if (user) {
-      getFbData(user);
-    }
-  }, [initializing, user]);
+  // const [email, setEmail] = useState('');
+  // const [fbToken, setFbToken] = useState('');
+  // useEffect(() => {
+  //   const getFbData = async (fbUser) => {
+  //     const fbt = await fbUser.getIdToken();
+  //     setFbToken(fbt);
+  //     setEmail(fbUser.email);
+  //     if (initializing) {
+  //       setInitializing(false);
+  //     }
+  //   };
+  //   if (user) {
+  //     getFbData(user);
+  //   }
+  // }, [initializing, user]);
 
   useEffect(() => {
     LogBox.ignoreLogs([
@@ -63,16 +67,16 @@ const App = () => {
     ]);
   }, []);
 
-  let content = null;
-  if (initializing || !client) {
+  // let content = null;
+  if (!client) {
     return <Splash />;
   }
 
-  if (user && email && fbToken) {
-    content = <AppStack email={email} fbToken={fbToken} fbUser={user} />;
-  } else {
-    content = <AccountStack />;
-  }
+  // if (user && email && fbToken) {
+  const content = <AppStack email={email} fbToken={fbToken} fbUser={user} />;
+  // } else {
+  //   content = <AccountStack />;
+  // }
   return (
     <ApolloProvider client={client}>
       <NavigationContainer>

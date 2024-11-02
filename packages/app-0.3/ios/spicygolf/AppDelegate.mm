@@ -1,7 +1,7 @@
 #import "AppDelegate.h"
 
 #import <React/RCTBundleURLProvider.h>
-@import Firebase;
+//@import Firebase;
 #import "RNBootSplash.h"
 
 @implementation AppDelegate
@@ -29,8 +29,9 @@
 #else
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
+}
 
-
+@end
 
 
 // TODO: 0.63.4 -> 0.74.6 upgrade leftovers

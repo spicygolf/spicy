@@ -29,7 +29,7 @@ export type Pagination = {
 };
 
 export const ghinRequest = async ({method, url, params, data, attempts}: GhinRequest) => {
-
+  return null;
   if (ghinToken === null) {
     ghinToken = await login()
   }

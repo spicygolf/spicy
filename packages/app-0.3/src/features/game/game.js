@@ -46,6 +46,10 @@ const Game = (props) => {
     const game = data.getGame;
     const scores = scoring(game);
     console.log({ game, scores, ts: new Date() });
+    // console.log('game');
+    // console.log(JSON.stringify(game, null, 2));
+    // console.log('scores');
+    // console.log(JSON.stringify(scores, null, 2));
 
     const { _key: gkey } = game;
     const activeGameSpec =

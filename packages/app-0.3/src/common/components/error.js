@@ -1,14 +1,16 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, ScrollView } from 'react-native';
 
 const Error = (props) => {
   const { error } = props;
 
   return (
-    <View>
+    <SafeAreaView>
       <Text style={styles.title}>Sorry, the app just took a double bogey.</Text>
-      <Text style={styles.message}>{JSON.stringify(error, null, 2)}</Text>
-    </View>
+      <ScrollView>
+        <Text style={styles.message}>{JSON.stringify(error, null, 2)}</Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -21,5 +23,6 @@ export const styles = StyleSheet.create({
   },
   message: {
     fontFamily: 'Courier New',
+    fontSize: 9,
   },
 });
