@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "spicygolf",
+    "slug": "spicygolf",
+    "version": "0.5.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "golf.spicy"
+    },
+    "android": {
+      "package": "golf.spicy"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
