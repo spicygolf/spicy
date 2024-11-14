@@ -2,11 +2,18 @@ import { Stack } from "expo-router/stack";
 
 export default function GamesLayout() {
   return (
-    <Stack initialRouteName="gamelist">
+    <Stack initialRouteName="list">
       <Stack.Screen
-        name="gamelist"
+        name="list"
         options={{
           title: "Games",
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="new"
+        options={{
+          title: "New Game",
           headerShown: false,
         }}
       />

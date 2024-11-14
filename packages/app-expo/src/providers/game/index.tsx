@@ -1,6 +1,6 @@
 import { SafeAreaView, View } from "react-native";
 import { Game } from "@/schema/games";
-import BackToGames from "@/components/BackToGames";
+import Back from "@/components/Back";
 import { useCoState } from "@/providers/jazz";
 import { ID } from "jazz-tools";
 import { createContext } from "react";
@@ -11,9 +11,9 @@ interface GameProviderProps {
 }
 
 export const GameContext = createContext<{
-  game: Game;
+  game?: Game;
 }>({
-  game: null,
+  game: undefined,
 });
 
 // TODO: add more to the header than just the back button
@@ -27,7 +27,7 @@ function GameProvider({ gameId, children }: GameProviderProps) {
     <GameContext.Provider value={{ game }}>
       <SafeAreaView className="flex-1 bg-white dark:bg-neutral-900">
         <View className="flex-1 m-3">
-          <BackToGames />
+          <Back />
           {children}
         </View>
       </SafeAreaView>

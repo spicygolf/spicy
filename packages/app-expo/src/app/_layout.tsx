@@ -5,15 +5,17 @@ import { Jazz } from "@/providers/jazz/";
 import { ThemeProvider } from "@/providers/theme";
 import "@/global.css";
 
+
 export default function Layout() {
   const [auth, state] = useDemoAuth();
+  if (!auth) return null;
 
   return (
     <StrictMode>
       <ThemeProvider>
         <Jazz.Provider
           auth={auth}
-          peer="wss://cloud.jazz.tools/?key=jazzgolf@jazz.golf"
+          peer="wss://cloud.jazz.tools/?key=admin@spicy.golf"
           storage={undefined}
         >
           <Stack>
@@ -22,7 +24,7 @@ export default function Layout() {
         </Jazz.Provider>
       </ThemeProvider>
       {state.state !== "signedIn" ? (
-        <DemoAuthBasicUI appName="JazzGolf" state={state} />
+        <DemoAuthBasicUI appName="Spicy Golf" state={state} />
       ) : null}
     </StrictMode>
   );

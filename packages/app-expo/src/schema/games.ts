@@ -1,7 +1,8 @@
-import { CoList, CoMap, Profile, co } from "jazz-tools";
-import { Player } from "@/schema/players";
-import { ListOfTeams } from "@/schema/teams";
+import { CoList, CoMap, co } from "jazz-tools";
+import { ListOfPlayers } from "@/schema/players";
 import { ListOfRoundToGames } from "@/schema/rounds";
+import { ListOfGameSpecs } from "@/schema/gamespecs";
+import { ListOfGameHoles } from "@/schema/gameholes";
 
 export class Game extends CoMap {
   start = co.Date;
@@ -10,30 +11,17 @@ export class Game extends CoMap {
   holes = co.ref(ListOfGameHoles);
   players = co.ref(ListOfPlayers);
   rounds = co.ref(ListOfRoundToGames);
-}
 
-export class GameSpec extends CoMap {
-  name = co.string;
-  version = co.number;
-  status = co.literal("prod", "dev", "test");
-  type = co.literal("points", "skins");
-  min_players = co.number;
-  location_type = co.literal("local", "virtual");
-  teams = co.boolean;
-}
+  // const createGame = () => {
+  //   const group = Group.create({ owner: me });
+  //   group.addMember("everyone", "writer");
+  //   const game = Game.create(
+  //     { name: "My Game", start: new Date() },
+  //     { owner: group }
+  //   );
+  //   games.push(game);
+  // };
 
-export class GameHole extends CoMap {
-  hole = co.string;
-  seq = co.number;
-  teams = co.ref(ListOfTeams);
-  // multipliers = co.ref(ListOfMultipliers);
 }
-
 
 export class ListOfGames extends CoList.Of(co.ref(Game)) {}
-
-export class ListOfGameSpecs extends CoList.Of(co.ref(GameSpec)) {}
-
-export class ListOfGameHoles extends CoList.Of(co.ref(GameHole)) {}
-
-export class ListOfPlayers extends CoList.Of(co.ref(Player)) {}
