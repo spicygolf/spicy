@@ -8,6 +8,7 @@ export const brad = {
     source: "ghin",
     identifier: "111",
     gender: "M",
+    index: "3.0",
   },
 };
 
@@ -17,6 +18,7 @@ export const jp = {
     source: "ghin",
     identifier: "112",
     gender: "M",
+    index: "9.2",
   },
   email: "jp@jazz.golf",
   short: "jp",
@@ -28,6 +30,7 @@ export const efro = {
     source: "ghin",
     identifier: "113",
     gender: "M",
+    index: "11.6",
   },
   email: "efro@jazz.golf",
   short: "efro",
@@ -40,6 +43,7 @@ export const landers = {
     source: "ghin",
     identifier: "114",
     gender: "M",
+    index: "+0.3",
   },
   email: "landers@jazz.golf",
   short: "landers",
@@ -67,3 +71,5 @@ export const kb = {
   email: "kb@jazz.golf",
   short: "kb",
 };
+
+// TODO: Arjuna or Don - no handicap or ridiculous plus handicap

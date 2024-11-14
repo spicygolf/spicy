@@ -23,26 +23,35 @@ describe("Big Game", async () => {
     expect(game.start).toBeInstanceOf(Date);
   });
 
-  // gamespecs
+  // game specs
   test("should have two gamespecs", () => {
-    expect(game.specs.length).toBe(2);
-    expect(game.specs[0].name).toBe("Modified Stableford");
-    expect(game.specs[1].name).toBe("Skins");
+    if (!game.specs) throw new Error("game.specs is null");
+    expect(game.specs!.length).toBe(2);
+    expect(game.specs[0]!.name).toBe("Modified Stableford");
+    expect(game.specs[1]!.name).toBe("Skins");
   });
 
-  // gameholes
+  // game holes
   test("should have 18 holes", () => {
+    if (!game.holes) throw new Error("game.holes is null");
     expect(game.holes.length).toBe(18);
     const h = game.holes[17];
-    expect(h.hole).toBe("18");
+    expect(h!.hole).toBe("18");
   });
 
-  // players/rounds
-  test("should have players with rounds", () => {
-    expect(game.players_rounds.length).toBe(6);
-    expect(game.players_rounds[0].round).not.toBeNull();
-    expect(game.players_rounds[0].round.scores.length).toBeGreaterThan(0);
-    expect(game.players_rounds[0].round.scores[0].values[0].v).toBe("3");
-    expect(game.players_rounds[0].player.name).toBe("Brad Anderson");
+  // players
+  test("should have players", () => {
+    expect(game.players!.length).toBe(6);
+    expect(game.players![0]!.name).toBe("Brad Anderson");
+  });
+
+  // rounds
+  test("should have rounds", () => {
+    expect(game.rounds!.length).toBe(6);
+    expect(game.rounds![0]!.round).not.toBeNull();
+    expect(game.rounds![0]!.round!.scores!.length).toBeGreaterThan(0);
+    expect(game.rounds![0]!.round!.scores![0]!.values![0]!.v).toBe("3");
+    // TODO: add tests for handicap_index, course_handicap, game_handicap etc.
+
   });
 });

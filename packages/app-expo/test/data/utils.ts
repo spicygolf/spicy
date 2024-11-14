@@ -1,8 +1,8 @@
-import { Game, GameHole, GameSpec, ListOfGameHoles, ListOfGameSpecs, ListOfPlayerRounds, PlayerRound } from "@/schema/games";
-import { Handicap, Player } from "@/schema/players";
-import { Round } from "@/schema/rounds";
-import { ListOfScores, ListOfValues, Score, Value } from "@/schema/scores";
-import { fromZonedTime } from "date-fns-tz";
+import { Game, GameHole, GameSpec, ListOfGameHoles, ListOfGameSpecs } from "@/schema/games";
+import { Handicap, ListOfPlayers, Player } from "@/schema/players";
+import { Round,  RoundToGame, ListOfRoundToGames } from "@/schema/rounds";
+import { Team, ListOfTeams } from "@/schema/teams";
+import { ListOfScores, ListOfScoreUpdate, ListOfValues, Score, Value } from "@/schema/scores";
 import { Account } from "jazz-tools";
 export const getUTCTimeISO = (time?: Date): string => {
   if (!time) return "";
@@ -48,11 +48,14 @@ export const loadGame = async (
   jGame.holes = jGameHoles;
 
   // players, rounds, scores
-  const jPlayerRounds = ListOfPlayerRounds.create([], { owner });
+  const jPlayers = ListOfPlayers.create([], { owner });
+  const jRoundToGames = ListOfRoundToGames.create([], { owner });
   players.map((player: any) => {
+    // player
     const jHandicap = Handicap.create(player.handicap, { owner });
     const jPlayer = Player.create(player, { owner });
     jPlayer.handicap = jHandicap;
+    jPlayers.push(jPlayer);
 
     // build list of scores
     const jScores = ListOfScores.create([], { owner });
@@ -81,13 +84,14 @@ export const loadGame = async (
       handicap_index: player.handicap.index,
       scores: jScores,
     }, { owner });
-    const jPlayerRound = PlayerRound.create({
-      player: jPlayer,
+    const jRoundToGame = RoundToGame.create({
       round: jRound,
+      handicap_index: player.handicap.index,
     }, { owner });
-    jPlayerRounds.push(jPlayerRound);
+    jRoundToGames.push(jRoundToGame);
   });
-  jGame.players_rounds = jPlayerRounds;
+  jGame.players = jPlayers;
+  jGame.rounds = jRoundToGames;
 
   console.log(JSON.stringify(jGame, null, 2));
   return jGame;
