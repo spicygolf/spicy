@@ -2,11 +2,22 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "test - Big Game",
+      "type": "bun",
+      "runtimeArgs": ["test"],
+      "internalConsoleOptions": "openOnSessionStart",
+      "request": "launch",
+      "program": "${workspaceFolder}/packages/app-expo/test/big_game.test.ts",
+      "cwd": "${workspaceFolder}",
+      "watchMode": true,
+    },
+    {
       "type": "radon-ide",
       "request": "launch",
-      "name": "mobile 0.3",
-      "appRoot": "./packages/app-0.3/",
-      "metroConfigPath": "./packages/app-0.3/metro.config.js",
+      "name": "mobile expo",
+      "appRoot": "./packages/app-expo/",
+      "metroConfigPath": "./packages/app-expo/metro.config.js",
+      "isExpo": true,
       "suppressMultipleSessionWarning": true,
       "ios": {
         "configuration": "Debug"
