@@ -9,7 +9,7 @@
   },
   "workspaces": [
     "packages/api",
-    "packages/app-expo",
+    "packages/app",
     "packages/app-0.3",
     "packages/ghin",
     "packages/lib",
