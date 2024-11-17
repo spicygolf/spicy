@@ -1,8 +1,9 @@
-import { Account, CoMap, Profile, co } from "jazz-tools";
+import { Account, CoMap, CoMapInit, Profile, co } from "jazz-tools";
 import { ListOfGames } from "@/schema/games";
-import { ListOfGameSpecs } from "@/schema/gamespecs";
+import { defaultSpec, GameSpec, ListOfGameSpecs } from "@/schema/gamespecs";
 
 export class PlayerAccountRoot extends CoMap {
+  name = co.string;
   games = co.ref(ListOfGames);
   specs = co.ref(ListOfGameSpecs)
   // TODO: link Player to this account somewhere (I think here, maybe in PlayerAccount?)
@@ -15,11 +16,14 @@ export class PlayerAccount extends Account {
   migrate(this: PlayerAccount, creationProps?: { name: string }) {
     super.migrate(creationProps);
     if (!this._refs.root) {
+      const name = creationProps?.name || "";
+      const games = ListOfGames.create([], { owner: this });
+      const specs = ListOfGameSpecs.create([], { owner: this });
+      const spec = GameSpec.create(defaultSpec, { owner: this });
+      specs.push(spec);
+
       this.root = PlayerAccountRoot.create(
-        {
-          games: ListOfGames.create([], { owner: this }),
-          specs: ListOfGameSpecs.create([], { owner: this }),
-        },
+        { name, games, specs },
         { owner: this }
       );
     }

@@ -1,4 +1,5 @@
 import React, { StrictMode } from "react";
+import { View } from "react-native";
 import { useDemoAuth, DemoAuthBasicUI } from "jazz-react-native";
 import { Stack } from "expo-router/stack";
 import { Jazz } from "@/providers/jazz/";
@@ -13,6 +14,9 @@ export default function Layout() {
   return (
     <StrictMode>
       <ThemeProvider>
+        {state.state !== "signedIn" ? (
+          <DemoAuthBasicUI appName="Spicy Golf" state={state} />
+        ) : null}
         <Jazz.Provider
           auth={auth}
           peer="wss://cloud.jazz.tools/?key=admin@spicy.golf"
@@ -23,9 +27,6 @@ export default function Layout() {
           </Stack>
         </Jazz.Provider>
       </ThemeProvider>
-      {state.state !== "signedIn" ? (
-        <DemoAuthBasicUI appName="Spicy Golf" state={state} />
-      ) : null}
     </StrictMode>
   );
 }

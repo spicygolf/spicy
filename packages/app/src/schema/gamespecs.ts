@@ -1,4 +1,4 @@
-import { Account, co, CoList, CoMap } from "jazz-tools";
+import { co, CoList, CoMap } from "jazz-tools";
 
 export class GameSpec extends CoMap {
   name = co.string;
@@ -15,24 +15,16 @@ export class GameSpec extends CoMap {
    */
   specs = co.optional.ref(ListOfGameSpecs);
 
-  static seedRootSpecs = (owner: Account) => {
-    if (!owner.root) {
-      throw new Error("GameSpec.seedRootSpecs - owner does not have a root");
-    }
-
-    const specs = ListOfGameSpecs.create([], { owner });
-    specs.push(GameSpec.create({
-      name: "Five Points",
-      version: 1,
-      status: "prod",
-      type: "points",
-      min_players: 2,
-      location_type: "local",
-      teams: true,
-    }, { owner }));
-    owner.root.specs = specs;
-  };
-
 }
 
 export class ListOfGameSpecs extends CoList.Of(co.ref(GameSpec)) {}
+
+export const defaultSpec = {
+  name: "Five Points",
+  version: 1,
+  status: "prod",
+  type: "points",
+  min_players: 2,
+  location_type: "local",
+  teams: true,
+};
