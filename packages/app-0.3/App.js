@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { LogBox } from 'react-native';
 import RNBootSplash from 'react-native-bootsplash';
 import { Provider as PaperProvider } from 'react-native-paper';
+import { clearCache } from './src/common/utils/account';
 
 const App = () => {
   const [client, setClient] = useState(undefined);
@@ -34,6 +35,7 @@ const App = () => {
   useEffect(() => {
     const configClient = async () => {
       const c = await configureClient();
+      // await clearCache(c); // Don't always need this, but it's handy for dev
       setClient(c);
     };
     configClient();
@@ -61,6 +63,11 @@ const App = () => {
       'VirtualizedLists should never be nested',
       'Non-serializable values were found in the navigation state',
       'Require cycle',
+      'VirtualizedLists should never be nested',
+      'Warning: Overlay: Support for defaultProps',
+      'Warning: TextElement: Support for defaultProps',
+      'TypeError: _reactNative.AppState.removeEventListener',
+      'Possible unhandled Promise rejection',
       //        'Cannot update a component from inside',
       //        'Cache data may be lost',
       //        'Remote debugger is in',

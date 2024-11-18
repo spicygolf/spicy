@@ -13,7 +13,6 @@
   "workspaces": [
     "packages/api",
     "packages/app",
-    "packages/app-0.3",
     "packages/ghin",
     "packages/lib",
     "packages/web"

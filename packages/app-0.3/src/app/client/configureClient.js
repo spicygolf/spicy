@@ -3,16 +3,16 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/link-context';
 import { onError } from '@apollo/link-error';
 import { WebSocketLink } from '@apollo/link-ws';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import OfflineLink from 'apollo-link-offline';
-import { persistCache } from 'apollo3-cache-persist';
+// import { persistCache } from 'apollo3-cache-persist';
 import possibleTypes from 'app/client/possibleTypes';
 import typePolicies from 'app/client/typePolicies';
 import { baseUri, scheme } from 'common/config';
 
 const configureClient = async () => {
   const cache = new InMemoryCache({
-    dataIdFromObject: (object) => {
+    dataIdFromObject: object => {
       //console.log('object', object);
       return object._key || null;
     },
@@ -25,7 +25,7 @@ const configureClient = async () => {
     return (
       AsyncStorage.getItem('token')
         // return the headers to the context so httpLink can read them
-        .then((token) => {
+        .then(token => {
           //console.log('token', token);
           return {
             headers: {
@@ -34,7 +34,7 @@ const configureClient = async () => {
             },
           };
         })
-        .catch((_err) => {
+        .catch(_err => {
           return headers;
         })
     );
@@ -54,7 +54,7 @@ const configureClient = async () => {
 
     if (networkError) {
       // ignore these, because we're building this thing 'offline-first'
-      //console.log(`[Network error]: ${networkError}`);
+      console.log(`[Network error]: ${networkError}`);
     }
   });
 
@@ -109,12 +109,12 @@ const configureClient = async () => {
     defaultOptions: defaultOptions,
   });
 
-  await persistCache({
-    cache,
-    storage: AsyncStorage,
-    maxSize: false,
-    debug: false,
-  });
+  // await persistCache({
+  //   cache,
+  //   storage: AsyncStorage,
+  //   maxSize: false,
+  //   debug: false,
+  // });
 
   offlineLink.setup(client);
 
