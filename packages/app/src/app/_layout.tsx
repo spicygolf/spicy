@@ -1,5 +1,4 @@
 import React, { StrictMode } from "react";
-import { View } from "react-native";
 import { useDemoAuth, DemoAuthBasicUI } from "jazz-react-native";
 import { Stack } from "expo-router/stack";
 import { Jazz } from "@/providers/jazz/";
@@ -19,7 +18,7 @@ export default function Layout() {
         ) : null}
         <Jazz.Provider
           auth={auth}
-          peer="wss://cloud.jazz.tools/?key=admin@spicy.golf"
+          peer={`wss://cloud.jazz.tools/?key=dev@druid.golf`}
           storage={undefined}
         >
           <Stack>

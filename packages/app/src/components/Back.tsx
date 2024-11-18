@@ -1,11 +1,19 @@
-import { router } from "expo-router";
-import { Text, TouchableOpacity } from "react-native";
+import { Href, Link, router } from "expo-router";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useColorScheme } from "nativewind";
+import colors from "@/utils/colors";
 
-export default function Back() {
-  if (!router.canGoBack()) return null;
+type Props = { home: Href };
+
+export default function Back({ home }: Props) {
+  const { colorScheme } = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+  const color = isDarkMode ? colors.white : colors.black;
+
+  const replace = { replace: router.canGoBack() };
   return (
-    <TouchableOpacity onPress={() => router.back()}>
-      <Text className="font-bold text-2xl text-black dark:text-white my-2">&lt;</Text>
-    </TouchableOpacity>
+    <Link {...replace} href={home} >
+      <FontAwesome name="chevron-left" size={20} color={color} />
+    </Link>
   );
 }

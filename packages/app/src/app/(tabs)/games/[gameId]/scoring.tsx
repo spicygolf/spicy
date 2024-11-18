@@ -4,7 +4,8 @@ import { GameContext } from "@/providers/game";
 
 function GameScoring() {
   const { game } = useContext(GameContext);
-
+  if (!game) return null;
+  
   return (
     <View className="flex-1 bg-white dark:bg-neutral-900">
       <Text className="text-black dark:text-white">

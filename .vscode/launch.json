@@ -20,12 +20,10 @@
       "isExpo": true,
       "suppressMultipleSessionWarning": true,
       "ios": {
-        "configuration": "Debug",
-        "scheme": "spicygolf"
+        "configuration": "Debug"
       },
       "android": {
-        "buildType": "debug",
-        "package": "golf.spicy"
+        "buildType": "debug"
       }
     },
     {

@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import GamePlayersList from "@/components/GamePlayersList";
+import GamePlayersList from "@/components/game/settings/GamePlayersList";
 import { GameContext } from "@/providers/game";
 import { Group } from "jazz-tools";
 import { useAccount } from "@/providers/jazz";
@@ -15,7 +15,7 @@ function GameSettingsPlayers() {
     const group = Group.create({ owner: me });
     group.addMember("everyone", "writer");
     const player = Player.create(
-      { name: "Brad Anderson", short: "boorad" },
+      { name: "Brad Anderson", email: "brad@spicy.golf", short: "boorad" },
       { owner: group }
     );
     players.push(player);

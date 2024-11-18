@@ -94,15 +94,13 @@ export const logout = async client => {
 
 export const clearCache = async client => {
   await client.clearStore();
-  client.cache.data.clear();
-  /*
+  // client.cache.data.clear();
   for( const key of Object.keys(client.cache.data.data) ) {
     const e = client.cache.evict({id: key});
     console.log('evict', key, e);
   }
   const gc = client.cache.gc();
   console.log('gc', gc);
-*/
   console.log('cache', client.cache.data.data);
   return true;
 };
