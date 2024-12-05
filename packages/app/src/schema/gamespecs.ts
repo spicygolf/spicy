@@ -26,9 +26,9 @@ export const defaultSpec = {
   name: "Five Points",
   short: "Team game with low ball, low team, and prox. 5 points per hole, presses, birdies",
   version: 1,
-  status: "prod",
-  type: "points",
+  status: co.literal("prod"),
+  type: co.literal("points"),
   min_players: 2,
-  location_type: "local",
+  location_type: co.literal("local"),
   teams: true,
 };

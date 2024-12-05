@@ -37,7 +37,7 @@
     "expo-symbols": "~0.2.0",
     "expo-system-ui": "~4.0.3",
     "expo-web-browser": "~14.0.1",
-    "jazz-react-native": "0.8.21",
+    "jazz-react-native": "0.8.35",
     "nativewind": "^4.1.23",
     "react": "18.3.1",
     "react-dom": "18.3.1",

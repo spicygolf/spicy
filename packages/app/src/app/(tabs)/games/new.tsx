@@ -7,6 +7,7 @@ import SpecList from "@/components/game/new/SpecList";
 
 export default function NewGameScreen() {
   const { me } = useAccount();
+  console.log("me.root", me.root?.toJSON());
   const specs = useCoState(ListOfGameSpecs, me.root?.specs?.id, [{}]);
 
   return (
