@@ -1,5 +1,5 @@
 import { FlatList, View } from "react-native";
-import GameListItem from "@/components/GameListItem";
+import GameListItem from "@/components/game/list/GameListItem";
 import { ListOfGames } from "@/schema/games";
 
 function GameList({ games }: { games: ListOfGames }) {
@@ -13,7 +13,7 @@ function GameList({ games }: { games: ListOfGames }) {
       <FlatList
         data={games}
         renderItem={({ item }) => (
-          <GameListItem game={item} deleteGame={deleteGame} />
+          <GameListItem game={item!} deleteGame={deleteGame} />
         )}
         keyExtractor={(item) => item!.id}
       />

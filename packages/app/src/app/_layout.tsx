@@ -13,9 +13,12 @@ export default function Layout() {
   return (
     <StrictMode>
       <ThemeProvider>
+        {state.state !== "signedIn" ? (
+          <DemoAuthBasicUI appName="Spicy Golf" state={state} />
+        ) : null}
         <Jazz.Provider
           auth={auth}
-          peer="wss://cloud.jazz.tools/?key=admin@spicy.golf"
+          peer={`wss://cloud.jazz.tools/?key=dev@druid.golf`}
           storage={undefined}
         >
           <Stack>
@@ -23,9 +26,6 @@ export default function Layout() {
           </Stack>
         </Jazz.Provider>
       </ThemeProvider>
-      {state.state !== "signedIn" ? (
-        <DemoAuthBasicUI appName="Spicy Golf" state={state} />
-      ) : null}
     </StrictMode>
   );
 }

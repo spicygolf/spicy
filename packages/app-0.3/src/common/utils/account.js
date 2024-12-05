@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
 import { baseUri, scheme } from 'common/config';
 
@@ -22,7 +22,7 @@ export const registerPlayer = async (registration, fbUser) => {
   return payload;
 };
 
-export const login = async (fbUser) => {
+export const login = async fbUser => {
   let token = '';
   if (fbUser.getIdToken) {
     token = await fbUser.getIdToken();
@@ -73,7 +73,7 @@ export const login = async (fbUser) => {
   return ret;
 };
 
-export const logout = async (client) => {
+export const logout = async client => {
   // zap local storage
   await AsyncStorage.removeItem('token');
 
@@ -92,31 +92,29 @@ export const logout = async (client) => {
   return true;
 };
 
-export const clearCache = async (client) => {
+export const clearCache = async client => {
   await client.clearStore();
-  client.cache.data.clear();
-  /*
+  // client.cache.data.clear();
   for( const key of Object.keys(client.cache.data.data) ) {
     const e = client.cache.evict({id: key});
     console.log('evict', key, e);
   }
   const gc = client.cache.gc();
   console.log('gc', gc);
-*/
   console.log('cache', client.cache.data.data);
   return true;
 };
 
-export const getCurrentUser = (fbUser) => {
+export const getCurrentUser = fbUser => {
   return login(fbUser)
-    .then((login_res) => {
+    .then(login_res => {
       // console.log('login_res', login_res);
       return {
         ...login_res,
         fbUser: fbUser,
       };
     })
-    .catch((e) => {
+    .catch(e => {
       //console.log('getCurrentUser error', e);
       return e;
     });
@@ -148,7 +146,7 @@ export const validate = (type, text) => {
   return ret;
 };
 
-export const validateEmail = (email) => {
+export const validateEmail = email => {
   if (email === '') {
     return true;
   }
@@ -160,7 +158,7 @@ export const validateEmail = (email) => {
   return re.test(String(email).toLowerCase());
 };
 
-export const validatePassword = (pass) => {
+export const validatePassword = pass => {
   if (pass === '') {
     return true;
   }
@@ -172,7 +170,7 @@ export const validatePassword = (pass) => {
   }
 };
 
-export const validateName = (name) => {
+export const validateName = name => {
   if (!name) {
     return false;
   }
@@ -180,21 +178,21 @@ export const validateName = (name) => {
   return re.test(String(name).toLowerCase());
 };
 
-export const validateInteger = (number) => {
+export const validateInteger = number => {
   if (!number) {
     return false;
   }
   return Number.isInteger(parseInt(number, 10));
 };
 
-export const validateFloat = (number) => {
+export const validateFloat = number => {
   if (!number) {
     return false;
   }
   return !Number.isNaN(parseFloat(number));
 };
 
-export const build_qs = (args) => {
+export const build_qs = args => {
   const a = [];
   for (let key in args) {
     if (args.hasOwnProperty(key)) {
@@ -204,7 +202,7 @@ export const build_qs = (args) => {
   return a.join('&');
 };
 
-export const parseFirebaseError = (e) => {
+export const parseFirebaseError = e => {
   const split = e.message.split(']');
   let slug = '';
   if (split && split[0]) {

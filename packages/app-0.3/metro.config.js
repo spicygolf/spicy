@@ -1,7 +1,7 @@
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
-const path = require('path')
+// const path = require('path')
 
-const topNodeModules = path.resolve(__dirname, '../../node_modules')
+// const topNodeModules = path.resolve(__dirname, '../../node_modules')
 
 /**
  * Metro configuration
@@ -10,13 +10,13 @@ const topNodeModules = path.resolve(__dirname, '../../node_modules')
  * @type {import('metro-config').MetroConfig}
  */
 const config = {
-  watchFolders: [topNodeModules],
-  resolver: {
-    nodeModulesPaths: [
-      'node_modules',
-      topNodeModules,
-    ],
-  },
+  // watchFolders: [topNodeModules],
+  // resolver: {
+  //   nodeModulesPaths: [
+  //     'node_modules',
+  //     topNodeModules,
+  //   ],
+  // },
 };
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);

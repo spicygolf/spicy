@@ -1,6 +1,9 @@
 {
   "name": "spicy-mono",
   "type": "module",
+  "scripts": {
+    "clean": "del-cli node_modules"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -10,7 +13,6 @@
   "workspaces": [
     "packages/api",
     "packages/app",
-    "packages/app-0.3",
     "packages/ghin",
     "packages/lib",
     "packages/web"

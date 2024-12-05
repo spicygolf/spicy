@@ -7,16 +7,16 @@
       "runtimeArgs": ["test"],
       "internalConsoleOptions": "openOnSessionStart",
       "request": "launch",
-      "program": "${workspaceFolder}/packages/app-expo/test/big_game.test.ts",
+      "program": "${workspaceFolder}/packages/app/test/big_game.test.ts",
       "cwd": "${workspaceFolder}",
-      "watchMode": true,
+      "watchMode": true
     },
     {
+      "name": "mobile",
       "type": "radon-ide",
       "request": "launch",
-      "name": "mobile expo",
-      "appRoot": "./packages/app-expo/",
-      "metroConfigPath": "./packages/app-expo/metro.config.js",
+      "appRoot": "./packages/app/",
+      "metroConfigPath": "./packages/app/metro.config.js",
       "isExpo": true,
       "suppressMultipleSessionWarning": true,
       "ios": {
@@ -33,7 +33,7 @@
       "url": "http://localhost:5173",
       "webRoot": "${workspaceFolder}/web",
       "runtimeExecutable": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
-      "internalConsoleOptions": "openOnSessionStart",
+      "internalConsoleOptions": "openOnSessionStart"
     },
     {
       "name": "api",
@@ -42,33 +42,15 @@
       "cwd": "${workspaceFolder}/packages/api",
       "program": "src/server.ts",
       "watchMode": "hot",
-      "internalConsoleOptions": "openOnSessionStart",
+      "internalConsoleOptions": "openOnSessionStart"
     },
-    // {
-    //   "name": "app ios",
-    //   "request": "launch",
-    //   "type": "reactnative",
-    //   "cwd": "${workspaceFolder}/app",
-    //   "platform": "ios",
-    //   "runArguments": ["--simulator", "iPhone 14"],
-    //   "internalConsoleOptions": "openOnSessionStart"
-    // },
-    // {
-    //   "name": "phone ios",
-    //   "request": "launch",
-    //   "type": "reactnative",
-    //   "cwd": "${workspaceFolder}/phone",
-    //   "platform": "ios",
-    //   "runArguments": ["--simulator", "iPhone 14"],
-    //   "internalConsoleOptions": "openOnSessionStart"
-    // },
     {
       "name": "ghin dev testing - bun",
       "type": "bun",
       "request": "launch",
       "cwd": "${workspaceFolder}/packages/ghin",
       "program": "src/dev.ts",
-      "internalConsoleOptions": "openOnSessionStart",
+      "internalConsoleOptions": "openOnSessionStart"
     },
     {
       "type": "node",
@@ -124,7 +106,7 @@
       "cwd": "${workspaceFolder}/packages/api",
       "program": "util/arango/schema_updates/20221220.js",
       "watchMode": "hot",
-      "internalConsoleOptions": "openOnSessionStart",
-    },
+      "internalConsoleOptions": "openOnSessionStart"
+    }
   ]
 }

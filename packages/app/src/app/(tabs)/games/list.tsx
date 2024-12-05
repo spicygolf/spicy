@@ -1,5 +1,5 @@
 import { useAccount, useCoState } from "@/providers/jazz";
-import GameList from "@/components/GameList";
+import GameList from "@/components/game/list/GameList";
 import { ListOfGames } from "@/schema/games";
 import { SafeAreaView, Text, View } from "react-native";
 import { Link } from "expo-router";

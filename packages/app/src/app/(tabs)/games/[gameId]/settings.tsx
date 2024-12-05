@@ -1,11 +1,12 @@
 import { useContext } from "react";
 import { Text, View } from "react-native";
 import { GameContext } from "@/providers/game";
-import GameSettingsPlayers from "@/components/GameSettingsPlayers";
+import GameSettingsPlayers from "@/components/game/settings/GameSettingsPlayers";
 
 function GameSettings() {
   const { game } = useContext(GameContext);
-
+  if (!game) return null;
+  
   return (
     <View className="flex-1 bg-white dark:bg-neutral-900">
       <Text className="text-black dark:text-white">
