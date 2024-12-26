@@ -1,15 +1,15 @@
 import {FlatList, View} from 'react-native';
-import GameListItem from 'components/game/list/GameListItem';
+import {GameListItem} from 'components/game/list/GameListItem';
 import {ListOfGames} from 'schema/games';
 
-function GameList({games}: {games: ListOfGames}) {
+export function GameList({games}: {games: ListOfGames}) {
   const deleteGame = (id: string) => {
     const idx = games.findIndex(game => game!.id === id);
     games.splice(idx, 1);
   };
 
   return (
-    <View className="flex">
+    <View>
       <FlatList
         data={games}
         renderItem={({item}) => (
@@ -20,5 +20,3 @@ function GameList({games}: {games: ListOfGames}) {
     </View>
   );
 }
-
-export default GameList;

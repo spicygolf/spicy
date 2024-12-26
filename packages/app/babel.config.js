@@ -7,6 +7,7 @@ module.exports = {
       alias: {
         app: './src/app',
         components: './src/components',
+        hooks: './src/hooks',
         navigators: './src/navigators',
         providers: './src/providers',
         schema: './src/schema',

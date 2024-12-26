@@ -1,28 +1,48 @@
 import React from 'react';
-import { SafeAreaView, Text } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
+import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useColors } from 'hooks/useColors';
+import { GamesNavigator } from 'navigators/GamesNavigator';
+import { ProfileNavigator } from 'navigators/ProfileNavigator';
 
-// import { createStaticNavigation } from '@react-navigation/native';
-// import { createNativeStackNavigator } from '@react-navigation/native-stack';
+export function AppNavigator() {
+  const Tabs = createBottomTabNavigator();
+  const { colors, isDarkMode } = useColors();
 
-export default function AppNavigator() {
   return (
-    <SafeAreaView styles={styles.container}>
-      <Text style={styles.title}>AppNavigator</Text>
-    </SafeAreaView>
+    <Tabs.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: isDarkMode ? colors.white : colors.black,
+        tabBarInactiveTintColor: 'gray',
+        tabBarStyle: {
+          backgroundColor: isDarkMode ? colors.black : colors.white,
+          borderTopWidth: 0,
+        },
+      }}
+      initialRouteName="games"
+    >
+      <Tabs.Screen
+        name="games"
+        component={GamesNavigator}
+        options={{
+          title: 'Games',
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <FontAwesome6 size={28} name="pencil" color={color} iconStyle='solid' />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        component={ProfileNavigator}
+        options={{
+          title: 'Profile',
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <FontAwesome6 size={28} name="user" color={color} iconStyle='solid' />
+          ),
+        }}
+      />
+    </Tabs.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#222',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-});

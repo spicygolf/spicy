@@ -1380,6 +1380,27 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-vector-icons (11.0.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - React-nativeconfig (0.76.3)
   - React-NativeModulesApple (0.76.3):
     - glog
@@ -1692,27 +1713,6 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNVectorIcons (10.2.0):
-    - DoubleConversion
-    - glog
-    - hermes-engine
-    - RCT-Folly (= 2024.01.01.00)
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - Yoga
   - SocketRocket (0.7.1)
   - Unistyles (3.0.0-beta.4):
     - DoubleConversion
@@ -1782,6 +1782,7 @@ DEPENDENCIES:
   - react-native-mmkv (from `../../../node_modules/react-native-mmkv`)
   - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
+  - "react-native-vector-icons (from `../../../node_modules/@react-native-vector-icons/common`)"
   - React-nativeconfig (from `../../../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../../../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../../../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -1810,7 +1811,6 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
   - RNScreens (from `../../../node_modules/react-native-screens`)
-  - RNVectorIcons (from `../../../node_modules/react-native-vector-icons`)
   - Unistyles (from `../../../node_modules/react-native-unistyles`)
   - Yoga (from `../../../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1903,6 +1903,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@react-native-community/netinfo"
   react-native-safe-area-context:
     :path: "../../../node_modules/react-native-safe-area-context"
+  react-native-vector-icons:
+    :path: "../../../node_modules/@react-native-vector-icons/common"
   React-nativeconfig:
     :path: "../../../node_modules/react-native/ReactCommon"
   React-NativeModulesApple:
@@ -1959,8 +1961,6 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native/ReactCommon"
   RNScreens:
     :path: "../../../node_modules/react-native-screens"
-  RNVectorIcons:
-    :path: "../../../node_modules/react-native-vector-icons"
   Unistyles:
     :path: "../../../node_modules/react-native-unistyles"
   Yoga:
@@ -2009,6 +2009,7 @@ SPEC CHECKSUMS:
   react-native-mmkv: eca12be5e3400be2d995a2edaa3c6c2e67b5e3ec
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
   react-native-safe-area-context: 819935871d06a80e963546208027f839aa972a85
+  react-native-vector-icons: df0ba25fd039d1af44c3db5e959448e36a46ef42
   React-nativeconfig: aeed6e2a8ac02b2df54476afcc7c663416c12bf7
   React-NativeModulesApple: c0783e5e21c71aa2764ac33120abc96208466fa6
   React-perflogger: 2991d4258277af250eb7a2705980ebb3ef9ba85e
@@ -2037,7 +2038,6 @@ SPEC CHECKSUMS:
   ReactCodegen: 0800cc0f7912d8c3504ac2e2a9e2a33120a8a3ca
   ReactCommon: b8485556b596ef2f44f59bc586113bda138fb804
   RNScreens: 06e1f09654d2da4ff95dee6621b2b13b033e9c5a
-  RNVectorIcons: a24016b773380b1aa37fca501ec6b94a951890a0
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Unistyles: d5a8cb7dd26a08ad534251ed5c94487d7dd42db2
   Yoga: 3deb2471faa9916c8a82dda2a22d3fba2620ad37
