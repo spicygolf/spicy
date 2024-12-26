@@ -18,12 +18,21 @@
     "packages/web"
   ],
   "trustedDependencies": [
+    "@apollo/protobufjs",
+    "@parcel/watcher",
+    "@sveltejs/kit",
+    "@swc/core",
+    "better-sqlite3",
     "core-js",
     "core-js-pure",
+    "edgedriver",
+    "esbuild",
     "fsevents",
+    "geckodriver",
     "husky",
     "protobufjs",
     "react-native-elements",
+    "react-native-nitro-modules",
     "spicygolf"
   ]
 }
