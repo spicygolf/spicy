@@ -1,9 +1,9 @@
-import { SafeAreaView, View } from 'react-native';
-import { Game } from 'schema/games';
-import Back from 'components/Back';
-import { useCoState } from 'providers/jazz';
-import { ID } from 'jazz-tools';
 import React, { createContext } from 'react';
+import { SafeAreaView, View } from 'react-native';
+import { ID } from 'jazz-tools';
+import Back from '@/components/Back';
+import { useCoState } from '@/providers/jazz';
+import { Game } from '@/schema/games';
 
 interface GameProviderProps {
   gameId: string | string[];
@@ -28,9 +28,9 @@ function GameProvider({ gameId, children }: GameProviderProps) {
 
   return (
     <GameContext.Provider value={{ game }}>
-      <SafeAreaView className="flex-1 bg-white dark:bg-neutral-900">
-        <View className="flex-1 m-3">
-          <Back />
+      <SafeAreaView>
+        <View>
+          <Back home="/" />
           {children}
         </View>
       </SafeAreaView>

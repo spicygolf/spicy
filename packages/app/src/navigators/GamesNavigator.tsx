@@ -1,5 +1,7 @@
+import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import GamesList from 'screens/GamesList';
+import GamesList from '@/screens/GamesList';
+import { NewGame } from '@/screens/NewGame';
 
 export function GamesNavigator() {
   const Stack = createNativeStackNavigator();
@@ -10,19 +12,19 @@ export function GamesNavigator() {
         name="GamesList"
         component={GamesList}
         options={{
-          title: "Games",
-          headerShown: false,
-        }}
-      />
-      {/* <Stack.Screen
-        name="NewGame"
-        component={NewGame}
-        options={{
-          title: "New Game",
+          title: 'Games',
           headerShown: false,
         }}
       />
       <Stack.Screen
+        name="NewGame"
+        component={NewGame}
+        options={{
+          title: 'New Game',
+          headerShown: false,
+        }}
+      />
+      {/* <Stack.Screen
         name="Game"
         component={GameStack}
         options={{

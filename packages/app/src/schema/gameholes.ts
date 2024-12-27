@@ -1,5 +1,5 @@
 import { co, CoList, CoMap } from 'jazz-tools';
-import { ListOfTeams } from 'schema/teams';
+import { ListOfTeams } from '@/schema/teams';
 
 export class GameHole extends CoMap {
   hole = co.string;

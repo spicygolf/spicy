@@ -1,6 +1,6 @@
 import { Account, CoMap, Profile, co } from 'jazz-tools';
-import { ListOfGames } from 'schema/games';
-import { defaultSpec, GameSpec, ListOfGameSpecs } from 'schema/gamespecs';
+import { ListOfGames } from '@/schema/games';
+import { defaultSpec, GameSpec, ListOfGameSpecs } from '@/schema/gamespecs';
 
 export class PlayerAccountRoot extends CoMap {
   name = co.string;
@@ -15,6 +15,7 @@ export class PlayerAccount extends Account {
 
   migrate(this: PlayerAccount, creationProps?: { name: string }) {
     super.migrate(creationProps);
+    console.log('this._refs.root', this._refs.root);
     if (!this._refs.root) {
       const name = creationProps?.name || '';
       const games = ListOfGames.create([], { owner: this });
@@ -24,7 +25,7 @@ export class PlayerAccount extends Account {
 
       this.root = PlayerAccountRoot.create(
         { name, games, specs },
-        { owner: this }
+        { owner: this },
       );
     }
   }

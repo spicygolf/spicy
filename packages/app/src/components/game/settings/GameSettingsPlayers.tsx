@@ -4,7 +4,7 @@ import GamePlayersList from 'components/game/settings/GamePlayersList';
 import {GameContext} from 'providers/game';
 import {Group} from 'jazz-tools';
 import {useAccount} from 'providers/jazz';
-import {Player} from 'schema/players';
+import {Player} from '@/schema/players';
 
 function GameSettingsPlayers() {
   const {game} = useContext(GameContext);

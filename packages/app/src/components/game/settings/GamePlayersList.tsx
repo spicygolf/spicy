@@ -1,4 +1,4 @@
-import {GameContext} from 'providers/game';
+import {GameContext} from '@/providers/game';
 import {useContext} from 'react';
 import {FlatList, Text} from 'react-native';
 

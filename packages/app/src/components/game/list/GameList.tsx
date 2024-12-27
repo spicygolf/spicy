@@ -1,6 +1,6 @@
 import {FlatList, View} from 'react-native';
-import {GameListItem} from 'components/game/list/GameListItem';
-import {ListOfGames} from 'schema/games';
+import {GameListItem} from '@/components/game/list/GameListItem';
+import {ListOfGames} from '@/schema/games';
 
 export function GameList({games}: {games: ListOfGames}) {
   const deleteGame = (id: string) => {

@@ -1,48 +1,63 @@
 import React from 'react';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useColors } from 'hooks/useColors';
-import { GamesNavigator } from 'navigators/GamesNavigator';
-import { ProfileNavigator } from 'navigators/ProfileNavigator';
+import { StyleSheet } from 'react-native-unistyles';
+import { GamesNavigator } from '@/navigators/GamesNavigator';
+import { ProfileNavigator } from '@/navigators/ProfileNavigator';
+
+type AppNavigatorParamList = {
+  Games: undefined;
+  Profile: undefined;
+};
 
 export function AppNavigator() {
-  const Tabs = createBottomTabNavigator();
-  const { colors, isDarkMode } = useColors();
+  const Tabs = createBottomTabNavigator<AppNavigatorParamList>();
 
   return (
     <Tabs.Navigator
       screenOptions={{
-        tabBarActiveTintColor: isDarkMode ? colors.white : colors.black,
-        tabBarInactiveTintColor: 'gray',
-        tabBarStyle: {
-          backgroundColor: isDarkMode ? colors.black : colors.white,
-          borderTopWidth: 0,
-        },
+        tabBarStyle: styles.tabBarStyle,
       }}
-      initialRouteName="games"
-    >
+      initialRouteName="Games">
       <Tabs.Screen
-        name="games"
+        name="Games"
         component={GamesNavigator}
         options={{
           title: 'Games',
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <FontAwesome6 size={28} name="pencil" color={color} iconStyle='solid' />
+            <FontAwesome6
+              size={28}
+              name="pencil"
+              color={color}
+              iconStyle="solid"
+            />
           ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="Profile"
         component={ProfileNavigator}
         options={{
           title: 'Profile',
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <FontAwesome6 size={28} name="user" color={color} iconStyle='solid' />
+            <FontAwesome6
+              size={28}
+              name="user"
+              color={color}
+              iconStyle="solid"
+            />
           ),
         }}
       />
     </Tabs.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBarStyle: {
+    backgroundColor: 'transparent',
+    borderTopWidth: 1,
+  },
+});

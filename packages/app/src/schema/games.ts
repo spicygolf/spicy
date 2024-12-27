@@ -1,8 +1,8 @@
 import { CoList, CoMap, co } from 'jazz-tools';
-import { ListOfPlayers } from 'schema/players';
-import { ListOfRoundToGames } from 'schema/rounds';
-import { ListOfGameSpecs } from 'schema/gamespecs';
-import { ListOfGameHoles } from 'schema/gameholes';
+import { ListOfGameHoles } from '@/schema/gameholes';
+import { ListOfGameSpecs } from '@/schema/gamespecs';
+import { ListOfPlayers } from '@/schema/players';
+import { ListOfRoundToGames } from '@/schema/rounds';
 
 export class Game extends CoMap {
   start = co.Date;
@@ -21,7 +21,6 @@ export class Game extends CoMap {
   //   );
   //   games.push(game);
   // };
-
 }
 
 export class ListOfGames extends CoList.Of(co.ref(Game)) {}

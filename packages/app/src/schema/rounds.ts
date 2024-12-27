@@ -1,5 +1,5 @@
 import { co, CoList, CoMap } from 'jazz-tools';
-import { ListOfScores } from 'schema/scores';
+import { ListOfScores } from '@/schema/scores';
 
 export class Round extends CoMap {
   created_at = co.Date;
@@ -12,7 +12,6 @@ export class Round extends CoMap {
    *  game scoring.  It may be overridden by the `RoundToGame` edge.
    */
   handicap_index = co.string;
-
 
   scores = co.ref(ListOfScores);
   // tees = co.ref(ListOfTees);

@@ -1,13 +1,14 @@
-import {FlatList, View} from 'react-native';
-import SpecListItem from 'components/game/new/SpecListItem';
-import {ListOfGameSpecs} from 'schema/gamespecs';
+import React from 'react';
+import { FlatList, View } from 'react-native';
+import { SpecListItem } from '@/components/game/new/SpecListItem';
+import { ListOfGameSpecs } from '@/schema/gamespecs';
 
-function SpecList({specs}: {specs: ListOfGameSpecs}) {
+function SpecList({ specs }: { specs: ListOfGameSpecs | undefined }) {
   return (
-    <View className="flex">
+    <View>
       <FlatList
         data={specs}
-        renderItem={({item}) => <SpecListItem spec={item!} />}
+        renderItem={({ item }) => <SpecListItem spec={item} />}
         keyExtractor={item => item!.id}
       />
     </View>

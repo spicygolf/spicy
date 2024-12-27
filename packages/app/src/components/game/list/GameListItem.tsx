@@ -1,5 +1,5 @@
 import {Text, TouchableOpacity, View} from 'react-native';
-import {Game} from 'schema/games';
+import {Game} from '@/schema/games';
 
 export function GameListItem({
   game,

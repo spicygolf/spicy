@@ -1,5 +1,6 @@
+import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import ProfileHome from 'screens/ProfileHome';
+import ProfileHome from '@/screens/ProfileHome';
 
 export function ProfileNavigator() {
   const Stack = createNativeStackNavigator();
@@ -10,7 +11,7 @@ export function ProfileNavigator() {
         name="ProfileHome"
         component={ProfileHome}
         options={{
-          title: "Profile",
+          title: 'Profile',
           headerShown: false,
         }}
       />

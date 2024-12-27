@@ -17,14 +17,13 @@ export class GameSpec extends CoMap {
    *  TODO: should this extend GameSpec in some way?
    */
   specs = co.optional.ref(ListOfGameSpecs);
-
 }
 
 export class ListOfGameSpecs extends CoList.Of(co.ref(GameSpec)) {}
 
 export const defaultSpec = {
   name: 'Five Points',
-  short: 'Team game with low ball, low team, and prox. 5 points per hole, presses, birdies',
+  short: `Team game with low ball, low team, and prox. 5 points per hole, presses, birdies`,
   version: 1,
   status: co.literal('prod'),
   type: co.literal('points'),

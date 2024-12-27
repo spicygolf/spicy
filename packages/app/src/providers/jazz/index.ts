@@ -1,5 +1,5 @@
 import { createJazzRNApp } from 'jazz-react-native';
-import { PlayerAccount } from 'schema/accounts';
+import { PlayerAccount } from '@/schema/accounts';
 import { MMKVStore } from './mmkv-store';
 
 export const Jazz = createJazzRNApp({
