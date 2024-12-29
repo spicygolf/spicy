@@ -1,16 +1,27 @@
 import React from 'react';
+import { NavigatorScreenParams } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import GamesList from '@/screens/GamesList';
-import { NewGame } from '@/screens/NewGame';
+import {
+  GameNavigator,
+  GameNavigatorParamList,
+} from '@/navigators/GameNavigator';
+import { GameListScreen } from '@/screens/games/GameList';
+import { NewGame } from '@/screens/games/NewGame';
+
+export type GamesNavigatorParamList = {
+  GamesList: undefined;
+  NewGame: undefined;
+  Game: NavigatorScreenParams<GameNavigatorParamList>;
+};
 
 export function GamesNavigator() {
-  const Stack = createNativeStackNavigator();
+  const Stack = createNativeStackNavigator<GamesNavigatorParamList>();
 
   return (
     <Stack.Navigator initialRouteName="GamesList">
       <Stack.Screen
         name="GamesList"
-        component={GamesList}
+        component={GameListScreen}
         options={{
           title: 'Games',
           headerShown: false,
@@ -24,14 +35,14 @@ export function GamesNavigator() {
           headerShown: false,
         }}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="Game"
-        component={GameStack}
+        component={GameNavigator}
         options={{
-          title: "Game",
+          title: 'Game',
           headerShown: false,
         }}
-      /> */}
+      />
     </Stack.Navigator>
   );
 }

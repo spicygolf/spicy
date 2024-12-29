@@ -5,7 +5,7 @@ export class GameSpec extends CoMap {
   short = co.string;
   version = co.number;
   status = co.literal('prod', 'dev', 'test');
-  type = co.literal('points', 'skins');
+  spec_type = co.literal('points', 'skins');
   min_players = co.number;
   location_type = co.literal('local', 'virtual');
   teams = co.boolean;
@@ -25,9 +25,9 @@ export const defaultSpec = {
   name: 'Five Points',
   short: `Team game with low ball, low team, and prox. 5 points per hole, presses, birdies`,
   version: 1,
-  status: co.literal('prod'),
-  type: co.literal('points'),
+  status: 'prod' as const,
+  spec_type: 'points' as const,
   min_players: 2,
-  location_type: co.literal('local'),
+  location_type: 'local' as const,
   teams: true,
 };

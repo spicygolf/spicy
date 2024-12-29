@@ -46,12 +46,6 @@ export default function ProfileScreen() {
           <Text style={styles.label}>Account ID:</Text>
           <Text>{me.id}</Text>
         </View>
-        <View>
-          <Button title="Log Out" onPress={logOut} />
-        </View>
-        <View>
-          <Button title="Reset App" onPress={reset} />
-        </View>
         <View style={styles.row}>
           <Text style={styles.label}>Theme:</Text>
           <SegmentedControl
@@ -62,6 +56,12 @@ export default function ProfileScreen() {
             fontStyle={styles.themeInactiveFont}
             activeFontStyle={styles.themeActiveFont}
           />
+        </View>
+        <View>
+          <Button title="Log Out" onPress={logOut} />
+        </View>
+        <View>
+          <Button title="Reset App" onPress={reset} />
         </View>
       </View>
     </Screen>

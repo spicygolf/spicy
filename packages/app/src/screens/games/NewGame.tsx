@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import Back from '@/components/Back';
-import SpecList from '@/components/game/new/SpecList';
+import { SpecList } from '@/components/game/new/SpecList';
 import { useAccount, useCoState } from '@/providers/jazz';
 import { ListOfGameSpecs } from '@/schema/gamespecs';
 import { Screen, Text } from '@/ui';

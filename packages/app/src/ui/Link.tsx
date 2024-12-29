@@ -2,7 +2,11 @@ import React from 'react';
 import { Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-export type Href = { name: string; params?: Record<string, unknown> };
+export type Href = {
+  name: string;
+  params?: Record<string, unknown>;
+  path?: string;
+};
 
 type Props = {
   href: Href;
@@ -17,6 +21,7 @@ export function Link({ href, children }: Props) {
         if (navigation.canGoBack()) {
           navigation.goBack();
         }
+        // TODO: never?  Probably going to have to type up the navigators
         navigation.navigate(href as never);
       }}>
       {children}

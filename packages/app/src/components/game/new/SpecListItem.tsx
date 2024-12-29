@@ -1,30 +1,37 @@
-import React from 'react';
-import { View } from 'react-native';
+import React, { useContext } from 'react';
+import { Pressable, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
 import { co } from 'jazz-tools';
 import { StyleSheet } from 'react-native-unistyles';
+import { GamesNavigatorParamList } from '@/navigators/GamesNavigator';
+import { GameContext } from '@/providers/game';
+import { useAccount } from '@/providers/jazz';
+import { Game } from '@/schema/games';
 import { GameSpec } from '@/schema/gamespecs';
-import { Link, Text } from '@/ui';
+import { Text } from '@/ui';
 
 export function SpecListItem({ spec }: { spec: co<GameSpec | null> }) {
+  const navigation = useNavigation<NavigationProp<GamesNavigatorParamList>>();
+  const { me } = useAccount();
+  const { setGame } = useContext(GameContext);
   if (!spec) return null;
-
-  // TODO: figure out how to get value of co.literal
-  console.log('spec.type', spec.get('type'));
 
   return (
     <View style={styles.row}>
-      <Link
-        href={{
-          name: 'GameSettings',
-          params: { spec },
+      <Pressable
+        onPress={() => {
+          const game = Game.createGame(spec, me);
+          setGame(game);
+          navigation.navigate('Game', { screen: 'GameSettings' });
         }}>
         <View style={styles.specContainer}>
-          <Text style={styles.specName}>{spec.name.toString()}</Text>
+          <Text style={styles.specName}>{spec.name}</Text>
           <Text style={styles.specSub}>
-            {spec.type.toString()} - {spec.short.toString()}
+            {spec.spec_type} - {spec.short}
           </Text>
         </View>
-      </Link>
+      </Pressable>
     </View>
   );
 }

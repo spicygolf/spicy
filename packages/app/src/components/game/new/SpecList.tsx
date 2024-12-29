@@ -3,7 +3,7 @@ import { FlatList, View } from 'react-native';
 import { SpecListItem } from '@/components/game/new/SpecListItem';
 import { ListOfGameSpecs } from '@/schema/gamespecs';
 
-function SpecList({ specs }: { specs: ListOfGameSpecs | undefined }) {
+export function SpecList({ specs }: { specs: ListOfGameSpecs | undefined }) {
   return (
     <View>
       <FlatList
@@ -14,5 +14,3 @@ function SpecList({ specs }: { specs: ListOfGameSpecs | undefined }) {
     </View>
   );
 }
-
-export default SpecList;

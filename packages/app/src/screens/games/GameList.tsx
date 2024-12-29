@@ -4,7 +4,7 @@ import { useAccount, useCoState } from '@/providers/jazz';
 import { ListOfGames } from '@/schema/games';
 import { Link, Screen, Text } from '@/ui';
 
-export default function GameListScreen() {
+export function GameListScreen() {
   const { me } = useAccount();
   const games = useCoState(ListOfGames, me.root?.games?.id, [{}]);
   console.log('games', games);
@@ -18,7 +18,7 @@ export default function GameListScreen() {
         }}>
         <Text>New Game</Text>
       </Link>
-      <GameList games={games!} />
+      <GameList games={games} />
     </Screen>
   );
 }

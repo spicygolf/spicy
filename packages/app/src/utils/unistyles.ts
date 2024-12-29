@@ -4,9 +4,9 @@ const system = UnistylesRuntime.colorScheme === 'dark' ? 'dark' : 'light';
 
 const light = {
   colors: {
-    primary: '#111',
-    secondary: '#1ff4ff',
-    background: '#eee',
+    primary: '#222',
+    secondary: '#555',
+    background: '#ddd',
   },
   // functions, external imports, etc.
   gap: (v: number) => v * 8,
@@ -14,9 +14,9 @@ const light = {
 
 const dark = {
   colors: {
-    primary: '#eee',
-    secondary: 'pink',
-    background: '#111',
+    primary: '#ddd',
+    secondary: '#999',
+    background: '#222',
   },
   gap: (v: number) => v * 8,
 };
