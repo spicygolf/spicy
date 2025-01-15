@@ -1,10 +1,10 @@
 import React, { StrictMode } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { useDemoAuth, DemoAuthBasicUI } from 'jazz-react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppNavigator } from '@/navigators/AppNavigator';
 import { Jazz } from '@/providers/jazz/';
 import { MMKVStore } from '@/providers/jazz/mmkv-store';
+import { NavigationProvider } from '@/providers/navigation';
 
 export default function App() {
   const store = new MMKVStore();
@@ -23,9 +23,9 @@ export default function App() {
           auth={auth}
           peer={'wss://cloud.jazz.tools/?key=spicy.dev@druid.golf'}
           storage={undefined}>
-          <NavigationContainer>
+          <NavigationProvider>
             <AppNavigator />
-          </NavigationContainer>
+          </NavigationProvider>
         </Jazz.Provider>
       </SafeAreaProvider>
     </StrictMode>

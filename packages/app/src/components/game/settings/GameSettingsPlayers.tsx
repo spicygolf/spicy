@@ -8,7 +8,7 @@ import { useAccount } from '@/providers/jazz';
 import { Player } from '@/schema/players';
 import { Text } from '@/ui';
 
-function GameSettingsPlayers() {
+export function GameSettingsPlayers() {
   const { game } = useContext(GameContext);
   console.log('game', game);
   const { me } = useAccount();
@@ -34,5 +34,3 @@ function GameSettingsPlayers() {
     </View>
   );
 }
-
-export default GameSettingsPlayers;

@@ -8,6 +8,7 @@ export function GameListScreen() {
   const { me } = useAccount();
   const games = useCoState(ListOfGames, me.root?.games?.id, [{}]);
   console.log('games', games);
+  if (!games) return null;
 
   return (
     <Screen>
