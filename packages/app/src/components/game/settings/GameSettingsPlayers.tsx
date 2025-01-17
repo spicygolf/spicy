@@ -4,18 +4,16 @@ import { TouchableOpacity, View } from 'react-native';
 import { Group } from 'jazz-tools';
 import GamePlayersList from '@/components/game/settings/GamePlayersList';
 import { GameContext } from '@/providers/game';
-import { useAccount } from '@/providers/jazz';
 import { Player } from '@/schema/players';
 import { Text } from '@/ui';
 
 export function GameSettingsPlayers() {
   const { game } = useContext(GameContext);
   console.log('game', game);
-  const { me } = useAccount();
   const players = []; //game?.players;
 
   const addPlayer = () => {
-    const group = Group.create({ owner: me });
+    const group = Group.create();
     group.addMember('everyone', 'writer');
     const player = Player.create(
       { name: 'Brad Anderson', email: 'brad@spicy.golf', short: 'boorad' },

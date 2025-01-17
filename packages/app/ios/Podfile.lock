@@ -30,6 +30,29 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - op-sqlite (11.2.13):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React
+    - React-callinvoker
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - OpenSSL-Universal (3.3.2000)
   - QuickCrypto (1.0.0-beta.9):
     - DoubleConversion
@@ -1748,6 +1771,7 @@ DEPENDENCIES:
   - glog (from `../../../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../../../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - NitroModules (from `../../../node_modules/react-native-nitro-modules`)
+  - "op-sqlite (from `../../../node_modules/@op-engineering/op-sqlite`)"
   - QuickCrypto (from `../../../node_modules/react-native-quick-crypto`)
   - RCT-Folly (from `../../../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../../../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
@@ -1838,6 +1862,8 @@ EXTERNAL SOURCES:
     :tag: hermes-2024-11-12-RNv0.76.2-5b4aa20c719830dcf5684832b89a6edb95ac3d64
   NitroModules:
     :path: "../../../node_modules/react-native-nitro-modules"
+  op-sqlite:
+    :path: "../../../node_modules/@op-engineering/op-sqlite"
   QuickCrypto:
     :path: "../../../node_modules/react-native-quick-crypto"
   RCT-Folly:
@@ -1979,6 +2005,7 @@ SPEC CHECKSUMS:
   glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
   hermes-engine: 0555a84ea495e8e3b4bde71b597cd87fbb382888
   NitroModules: 47399393665e69228b29a17f501c7b453679ccc0
+  op-sqlite: 3cffd1c89eee93406fb428c55d294fbaab6da759
   OpenSSL-Universal: b60a3702c9fea8b3145549d421fdb018e53ab7b4
   QuickCrypto: 0b8c8760ad1da6b41758fbc844136c68958f04b6
   RCT-Folly: 84578c8756030547307e4572ab1947de1685c599

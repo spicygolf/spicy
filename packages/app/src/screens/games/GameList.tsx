@@ -1,6 +1,6 @@
 import React from 'react';
+import { useAccount, useCoState } from 'jazz-react-native';
 import { GameList } from '@/components/game/list/GameList';
-import { useAccount, useCoState } from '@/providers/jazz';
 import { ListOfGames } from '@/schema/games';
 import { Link, Screen, Text } from '@/ui';
 

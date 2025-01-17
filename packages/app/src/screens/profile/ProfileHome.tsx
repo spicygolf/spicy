@@ -1,13 +1,12 @@
 import React from 'react';
 import { Button, View } from 'react-native';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
+import { useAccount } from 'jazz-react-native';
 import {
   StyleSheet,
   UnistylesRuntime,
   UnistylesThemes,
 } from 'react-native-unistyles';
-import { useAccount } from '@/providers/jazz';
-import { MMKVStore } from '@/providers/jazz/mmkv-store';
 import { Screen, Text } from '@/ui';
 
 export default function ProfileScreen() {
@@ -16,8 +15,9 @@ export default function ProfileScreen() {
   // const profile = useCoState(PlayerProfile, user?.profile?.id, [{}]);
 
   const reset = () => {
-    const store = new MMKVStore();
-    store.clearAll();
+    // TODO: reset Jazz sqlite store
+    // const store = new MMKVStore();
+    // store.clearAll();
   };
 
   const themes = ['light', 'dark', 'system'];

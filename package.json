@@ -1,22 +1,14 @@
 {
   "name": "spicy-mono",
-  "type": "module",
-  "scripts": {
-    "clean": "del-cli node_modules"
-  },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "workspaces": [
-    "packages/api",
-    "packages/app",
-    "packages/ghin",
-    "packages/lib",
-    "packages/web"
-  ],
+  "scripts": {
+    "clean": "del-cli node_modules"
+  },
   "trustedDependencies": [
     "@apollo/protobufjs",
     "@parcel/watcher",
@@ -34,5 +26,13 @@
     "react-native-elements",
     "react-native-nitro-modules",
     "spicygolf"
+  ],
+  "type": "module",
+  "workspaces": [
+    "packages/api",
+    "packages/app",
+    "packages/ghin",
+    "packages/lib",
+    "packages/web"
   ]
 }
