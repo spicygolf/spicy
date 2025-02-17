@@ -5,7 +5,7 @@ import { Href, Link } from '@/ui/Link';
 
 type Props = { home: Href };
 
-export default function Back({ home }: Props) {
+export function Back({ home }: Props) {
   const theme = UnistylesRuntime.getTheme();
   return (
     <Link href={home}>

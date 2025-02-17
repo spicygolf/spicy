@@ -2,7 +2,6 @@
 
 // @ts-expect-error - @types/react-native doesn't cover this file
 import { polyfillGlobal } from 'react-native/Libraries/Utilities/PolyfillFunctions';
-// import 'react-native-polyfill-globals/auto';
 
 import { Buffer } from 'buffer';
 polyfillGlobal('Buffer', () => Buffer);

@@ -8,19 +8,16 @@ module.exports = {
     'react',
     'react-native',
   ],
-  extends: [
-    '@react-native',
-    'plugin:prettier/recommended',
-  ],
+  extends: ['@react-native', 'plugin:prettier/recommended'],
   rules: {
     'no-alert': 'off',
-    'react/no-unstable-nested-components': ['error', {allowAsProps: true}],
+    'react/no-unstable-nested-components': ['error', { allowAsProps: true }],
     '@typescript-eslint/no-shadow': 'error',
     'import/order': [
       'error',
       {
         'newlines-between': 'never',
-        alphabetize: {order: 'asc', caseInsensitive: true},
+        alphabetize: { order: 'asc', caseInsensitive: true },
         pathGroups: [
           {
             pattern: 'react',
@@ -69,6 +66,7 @@ module.exports = {
     ],
     '@hesamse/recommended/no-tsx-without-jsx': 'error',
     'react-native/no-unused-styles': 'error',
+    'import/no-default-export': 'error',
   },
   overrides: [],
 };

@@ -9,7 +9,7 @@ import {
 } from 'react-native-unistyles';
 import { Screen, Text } from '@/ui';
 
-export default function ProfileScreen() {
+export function ProfileHome() {
   const { me, logOut } = useAccount();
   // const user = useCoState(PlayerAccount, me.id, [{}]);
   // const profile = useCoState(PlayerProfile, user?.profile?.id, [{}]);

@@ -4,7 +4,7 @@ import { AppNavigator } from '@/navigators/AppNavigator';
 import { JazzAndAuth } from '@/providers/jazz';
 import { NavigationProvider } from '@/providers/navigation';
 
-export default function App() {
+export function App() {
   return (
     <StrictMode>
       <SafeAreaProvider>

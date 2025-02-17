@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { useAccount, useCoState } from 'jazz-react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import Back from '@/components/Back';
+import { Back } from '@/components/Back';
 import { SpecList } from '@/components/game/new/SpecList';
 import { ListOfGameSpecs } from '@/schema/gamespecs';
 import { Screen, Text } from '@/ui';
@@ -20,7 +20,7 @@ export function NewGame() {
             <Text style={styles.titleText}>New Game</Text>
           </View>
         </View>
-        <SpecList specs={specs} />
+        <SpecList specs={specs || undefined} />
       </View>
     </Screen>
   );

@@ -2,7 +2,7 @@ import React from 'react';
 import { useContext } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { Group } from 'jazz-tools';
-import GamePlayersList from '@/components/game/settings/GamePlayersList';
+import { GamePlayersList } from '@/components/game/settings/GamePlayersList';
 import { GameContext } from '@/providers/game';
 import { Player } from '@/schema/players';
 import { Text } from '@/ui';
