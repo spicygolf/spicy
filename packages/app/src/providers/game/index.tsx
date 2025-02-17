@@ -1,38 +1,17 @@
-import { SafeAreaView, View } from "react-native";
-import { Game } from "@/schema/games";
-import Back from "@/components/Back";
-import { useCoState } from "@/providers/jazz";
-import { ID } from "jazz-tools";
-import { createContext } from "react";
-
-interface GameProviderProps {
-  gameId: string | string[];
-  children: React.ReactNode;
-}
+import React, { createContext, useState } from 'react';
+import { Game } from '@/schema/games';
 
 export const GameContext = createContext<{
   game?: Game;
-}>({
-  game: undefined,
-});
+  setGame: (game: Game) => void;
+}>({ game: undefined, setGame: () => {} });
 
-// TODO: add more to the header than just the back button
-// TODO: bro, get the header out of the provider?
-function GameProvider({ gameId, children }: GameProviderProps) {
-  const gameIdParsed = gameId.toString() as ID<Game>;
-  const game = useCoState(Game, gameIdParsed);
-  if (!game) return null; // don't return anything if game is being fetched
+export const GameProvider = ({ children }: { children: React.ReactNode }) => {
+  const [game, setGame] = useState<Game | undefined>(undefined);
 
   return (
-    <GameContext.Provider value={{ game }}>
-      <SafeAreaView className="flex-1 bg-white dark:bg-neutral-900">
-        <View className="flex-1 m-3">
-          <Back />
-          {children}
-        </View>
-      </SafeAreaView>
+    <GameContext.Provider value={{ game, setGame }}>
+      {children}
     </GameContext.Provider>
   );
-}
-
-export default GameProvider;
+};

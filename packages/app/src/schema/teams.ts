@@ -1,5 +1,5 @@
-import { co, CoList, CoMap } from "jazz-tools";
-import { ListOfPlayers } from "./players";
+import { co, CoList, CoMap } from 'jazz-tools';
+import { ListOfPlayers } from './players';
 
 export class Team extends CoMap {
   team = co.string;

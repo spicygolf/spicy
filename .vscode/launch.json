@@ -17,7 +17,7 @@
       "request": "launch",
       "appRoot": "./packages/app/",
       "metroConfigPath": "./packages/app/metro.config.js",
-      "isExpo": true,
+      "isExpo": false,
       "suppressMultipleSessionWarning": true,
       "ios": {
         "configuration": "Debug"

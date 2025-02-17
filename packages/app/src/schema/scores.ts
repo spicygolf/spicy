@@ -1,5 +1,5 @@
-import { co, CoList, CoMap } from "jazz-tools";
-import { Player } from "./players";
+import { co, CoList, CoMap } from 'jazz-tools';
+import { Player } from './players';
 
 // per-hole score object
 export class Score extends CoMap {

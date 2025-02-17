@@ -1,13 +1,13 @@
-import { co, CoList, CoMap } from "jazz-tools";
+import { co, CoList, CoMap } from 'jazz-tools';
 
 export class GameSpec extends CoMap {
   name = co.string;
   short = co.string;
   version = co.number;
-  status = co.literal("prod", "dev", "test");
-  type = co.literal("points", "skins");
+  status = co.literal('prod', 'dev', 'test');
+  spec_type = co.literal('points', 'skins');
   min_players = co.number;
-  location_type = co.literal("local", "virtual");
+  location_type = co.literal('local', 'virtual');
   teams = co.boolean;
 
   /**
@@ -17,18 +17,17 @@ export class GameSpec extends CoMap {
    *  TODO: should this extend GameSpec in some way?
    */
   specs = co.optional.ref(ListOfGameSpecs);
-
 }
 
 export class ListOfGameSpecs extends CoList.Of(co.ref(GameSpec)) {}
 
 export const defaultSpec = {
-  name: "Five Points",
-  short: "Team game with low ball, low team, and prox. 5 points per hole, presses, birdies",
+  name: 'Five Points',
+  short: `Team game with low ball, low team, and prox. 5 points per hole, presses, birdies`,
   version: 1,
-  status: co.literal("prod"),
-  type: co.literal("points"),
+  status: 'prod' as const,
+  spec_type: 'points' as const,
   min_players: 2,
-  location_type: co.literal("local"),
+  location_type: 'local' as const,
   teams: true,
 };

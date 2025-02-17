@@ -1,19 +1,20 @@
-import { Href, Link, router } from "expo-router";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useColorScheme } from "nativewind";
-import colors from "@/utils/colors";
+import React from 'react';
+import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
+import { UnistylesRuntime } from 'react-native-unistyles';
+import { Href, Link } from '@/ui/Link';
 
 type Props = { home: Href };
 
-export default function Back({ home }: Props) {
-  const { colorScheme } = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
-  const color = isDarkMode ? colors.white : colors.black;
-
-  const replace = { replace: router.canGoBack() };
+export function Back({ home }: Props) {
+  const theme = UnistylesRuntime.getTheme();
   return (
-    <Link {...replace} href={home} >
-      <FontAwesome name="chevron-left" size={20} color={color} />
+    <Link href={home}>
+      <FontAwesome6
+        name="chevron-left"
+        size={20}
+        color={theme.colors.primary}
+        iconStyle="solid"
+      />
     </Link>
   );
 }

@@ -1,5 +1,4 @@
-import { Stack } from 'expo-router/stack';
-import { Account, CoList, CoMap, Profile, co } from "jazz-tools";
+import { CoList, CoMap, co } from 'jazz-tools';
 
 // TODO: can this extend Account?
 //  use case: a player can be an account, but maybe just player if they haven't

@@ -1,29 +1,38 @@
 {
   "name": "spicy-mono",
-  "type": "module",
-  "scripts": {
-    "clean": "del-cli node_modules"
-  },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
+  "scripts": {
+    "clean": "del-cli node_modules"
+  },
+  "trustedDependencies": [
+    "@apollo/protobufjs",
+    "@parcel/watcher",
+    "@sveltejs/kit",
+    "@swc/core",
+    "better-sqlite3",
+    "core-js",
+    "core-js-pure",
+    "edgedriver",
+    "esbuild",
+    "fsevents",
+    "geckodriver",
+    "husky",
+    "protobufjs",
+    "react-native-elements",
+    "react-native-nitro-modules",
+    "spicygolf"
+  ],
+  "type": "module",
   "workspaces": [
     "packages/api",
     "packages/app",
     "packages/ghin",
     "packages/lib",
     "packages/web"
-  ],
-  "trustedDependencies": [
-    "core-js",
-    "core-js-pure",
-    "fsevents",
-    "husky",
-    "protobufjs",
-    "react-native-elements",
-    "spicygolf"
   ]
 }

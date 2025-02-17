@@ -1,6 +1,6 @@
 # Spicy Golf App
 
-### created by (when default@beta was sdk 52):
+created with:
 ```bash
-bunx create-expo-app --template default@beta spicygolf
+bunx @react-native-community/cli init spicygolf --version 0.76.3 --install-pods true --skip-git-init true --directory app
 ```
