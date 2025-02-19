@@ -67,6 +67,8 @@ module.exports = {
     '@hesamse/recommended/no-tsx-without-jsx': 'error',
     'react-native/no-unused-styles': 'error',
     'import/no-default-export': 'error',
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/consistent-type-imports': 'error',
   },
   overrides: [],
 };

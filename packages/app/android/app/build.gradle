@@ -105,6 +105,11 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+
+    // until https://github.com/facebook/react-native/pull/49449 is released in RN
+    androidResources {
+        noCompress += ["bundle"]
+    }
 }
 
 dependencies {
