@@ -15,7 +15,7 @@ export function ClerkProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ClerkProviderReactNative
-      // tokenCache={tokenCache}
+      // TODO: tokenCache={tokenCache}
       publishableKey={publishableKey}>
       <ClerkLoaded>{children}</ClerkLoaded>
     </ClerkProviderReactNative>

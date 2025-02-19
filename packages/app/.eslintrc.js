@@ -61,6 +61,11 @@ module.exports = {
             ],
             message: 'Please use "@/*" alias instead.',
           },
+          {
+            group: ['react-native'],
+            importNames: ['TextInput', 'Text'],
+            message: 'Please use "@/ui" instead of "react-native"',
+          },
         ],
       },
     ],
