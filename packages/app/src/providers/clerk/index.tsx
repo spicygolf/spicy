@@ -1,11 +1,16 @@
 import React from 'react';
 import {
   ClerkLoaded,
-  ClerkProvider as ClerkProviderReactNative,
+  ClerkProvider,
+  SecureTokenCache,
 } from '@clerk/clerk-react-native';
 import { CLERK_PUBLISHABLE_KEY } from '@env';
 
-export function ClerkProvider({ children }: { children: React.ReactNode }) {
+export function ClerkProviderReactNative({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const publishableKey = CLERK_PUBLISHABLE_KEY;
   if (!publishableKey) {
     throw new Error(
@@ -14,10 +19,10 @@ export function ClerkProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <ClerkProviderReactNative
-      // TODO: tokenCache={tokenCache}
+    <ClerkProvider
+      tokenCache={SecureTokenCache}
       publishableKey={publishableKey}>
       <ClerkLoaded>{children}</ClerkLoaded>
-    </ClerkProviderReactNative>
+    </ClerkProvider>
   );
 }
