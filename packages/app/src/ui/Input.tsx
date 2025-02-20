@@ -1,4 +1,5 @@
 import React from 'react';
+// eslint-disable-next-line no-restricted-imports
 import { TextInput, View } from 'react-native';
 import type { TextInputProps } from 'react-native';
 import { useController } from 'react-hook-form';
@@ -62,7 +63,7 @@ const styles = StyleSheet.create(theme => ({
   input: {
     borderRadius: 5,
     borderWidth: 0.5,
-    borderColor: '#999',
+    borderColor: theme.colors.secondary,
     padding: 8,
     color: theme.colors.primary,
   },

@@ -86,7 +86,11 @@ export function Register() {
           {pendingVerification ? 'Verify Email' : 'Sign Up'}
         </Text>
 
-        {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
+        {errorMessage && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.error}>{errorMessage}</Text>
+          </View>
+        )}
 
         {!pendingVerification && (
           <View>
@@ -177,6 +181,9 @@ const styles = StyleSheet.create(theme => ({
   },
   login_label: {
     color: theme.colors.secondary,
+  },
+  errorContainer: {
+    paddingVertical: 10,
   },
   error: {
     color: 'red',

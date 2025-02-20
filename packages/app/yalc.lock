@@ -2,7 +2,7 @@
   "version": "v1",
   "packages": {
     "@clerk/clerk-react-native": {
-      "signature": "a9772fa1254dcd1a9b088df7e737d71e",
+      "signature": "3f1f8d83ddb8ce1a63d9e1fc93760640",
       "file": true
     }
   }

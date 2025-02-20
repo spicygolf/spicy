@@ -17,6 +17,7 @@ const Stack = createNativeStackNavigator<AuthStackParamList>();
 export function AuthNavigator() {
   return (
     <Stack.Navigator
+      initialRouteName="Register"
       screenOptions={{
         headerShown: false,
       }}>
