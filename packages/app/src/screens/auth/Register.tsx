@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, View } from 'react-native';
-import { useSignUp } from '@clerk/clerk-react-native';
+// import { useSignUp } from '@clerk/clerk-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
@@ -20,63 +20,58 @@ interface VerifyForm {
 }
 
 export function Register() {
-  const { isLoaded, signUp, setActive } = useSignUp();
-  const [pendingVerification, setPendingVerification] = useState(false);
-  const [errorMessage, setErrorMessage] = React.useState('');
+  // const { isLoaded, signUp, setActive } = useSignUp();
+  const [pendingVerification, _setPendingVerification] = useState(false);
+  const [errorMessage, _setErrorMessage] = React.useState('');
   const { control, handleSubmit, watch } = useForm<RegisterForm>();
   const { control: controlVerify, handleSubmit: handleSubmitVerify } =
     useForm<VerifyForm>();
   const password = watch('password');
   const navigation = useNavigation<AuthStackNavigationProp>();
 
-  const onSignupPress: SubmitHandler<RegisterForm> = async data => {
-    if (!isLoaded) return;
-    try {
-      const res1 = await signUp.create({
-        emailAddress: data.email,
-        password: data.password,
-      });
-      console.log('res1', res1);
-
-      const res2 = await signUp.prepareEmailAddressVerification({
-        strategy: 'email_code',
-      });
-      console.log('res2', res2);
-
-      setPendingVerification(true);
-    } catch (e: unknown) {
-      const err = e as Error;
-      // console.error(err.stack);
-      console.error(JSON.stringify(err, null, 2));
-      if (err.message) {
-        setErrorMessage(err.message);
-      } else {
-        setErrorMessage('An unexpected error occurred. Please try again.');
-      }
-    }
+  const onSignupPress: SubmitHandler<RegisterForm> = async _data => {
+    //   if (!isLoaded) return;
+    //   try {
+    //     const res1 = await signUp.create({
+    //       emailAddress: data.email,
+    //       password: data.password,
+    //     });
+    //     console.log('res1', res1);
+    //     const res2 = await signUp.prepareEmailAddressVerification({
+    //       strategy: 'email_code',
+    //     });
+    //     console.log('res2', res2);
+    //     setPendingVerification(true);
+    //   } catch (e: unknown) {
+    //     const err = e as Error;
+    //     // console.error(err.stack);
+    //     console.error(JSON.stringify(err, null, 2));
+    //     if (err.message) {
+    //       setErrorMessage(err.message);
+    //     } else {
+    //       setErrorMessage('An unexpected error occurred. Please try again.');
+    //     }
+    //   }
   };
 
-  const onVerifyPress: SubmitHandler<VerifyForm> = async data => {
-    if (!isLoaded) return;
-
-    setErrorMessage('');
-
-    try {
-      const completeSignUp = await signUp.attemptEmailAddressVerification({
-        code: data.code,
-      });
-
-      if (completeSignUp.status === 'complete') {
-        await setActive({ session: completeSignUp.createdSessionId });
-      } else {
-        console.error(JSON.stringify(completeSignUp, null, 2));
-        setErrorMessage('Failed to verify. Please check your code.');
-      }
-    } catch (e: unknown) {
-      const err = e as Error;
-      console.error(JSON.stringify(err, null, 2));
-      setErrorMessage('Invalid verification code. Please try again.');
-    }
+  const onVerifyPress: SubmitHandler<VerifyForm> = async _data => {
+    // if (!isLoaded) return;
+    // setErrorMessage('');
+    // try {
+    //   const completeSignUp = await signUp.attemptEmailAddressVerification({
+    //     code: data.code,
+    //   });
+    //   if (completeSignUp.status === 'complete') {
+    //     await setActive({ session: completeSignUp.createdSessionId });
+    //   } else {
+    //     console.error(JSON.stringify(completeSignUp, null, 2));
+    //     setErrorMessage('Failed to verify. Please check your code.');
+    //   }
+    // } catch (e: unknown) {
+    //   const err = e as Error;
+    //   console.error(JSON.stringify(err, null, 2));
+    //   setErrorMessage('Invalid verification code. Please try again.');
+    // }
   };
 
   return (
