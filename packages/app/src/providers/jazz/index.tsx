@@ -1,6 +1,6 @@
 import React from 'react';
 import { useClerk } from '@clerk/clerk-react-native';
-import { RNQuickCrypto } from 'jazz-react-native';
+import { RNQuickCrypto } from 'jazz-react-native/crypto';
 import { JazzProviderWithClerk } from 'jazz-react-native-auth-clerk';
 import { PlayerAccount } from '@/schema/accounts';
 import { MMKVStore } from './mmkv-store';
