@@ -66,7 +66,7 @@
         "react-native-dotenv": "^3.4.11",
         "react-native-edge-to-edge": "1.1.3",
         "react-native-get-random-values": "1.11.0",
-        "react-native-mmkv": "3.2.0",
+        "react-native-mmkv": "3.3.0",
         "react-native-nitro-modules": "0.26.2",
         "react-native-quick-crypto": "1.0.0-beta.18",
         "react-native-safe-area-context": "5.5.0",
@@ -2312,7 +2312,7 @@
 
     "react-native-is-edge-to-edge": ["react-native-is-edge-to-edge@1.1.7", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-EH6i7E8epJGIcu7KpfXYXiV2JFIYITtq+rVS8uEb+92naMRBdxhTuS8Wn2Q7j9sqyO0B+Xbaaf9VdipIAmGW4w=="],
 
-    "react-native-mmkv": ["react-native-mmkv@3.2.0", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-9y7K//1MaU46TFrXkyU0wT5VGk9Y2FDLFV6NPl+z3jTbm2G7SC1UIxneF6CfhSmBX5CfKze9SO7kwDuRx7flpQ=="],
+    "react-native-mmkv": ["react-native-mmkv@3.3.0", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-2iPjIJ+IAODXN35wm53EN6nv+hR/0NXLLiLWOdPA/0gXDB2dYVrr6MqvoiFpxhLhdj0B8fkf5ARNVavJaSvuuQ=="],
 
     "react-native-nitro-modules": ["react-native-nitro-modules@0.26.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-PvTUOryU/J1RDsPh1IvmAEDkYVVL32wCIYxkg6HsKgq+Dl+C8lth/MtW7cRZ+fJ0qW21NILbhBdhSXFzBx51fA=="],
 
@@ -3119,6 +3119,8 @@
     "istanbul-lib-source-maps/source-map": ["source-map@0.6.1", "", {}, "sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g=="],
 
     "jazz-tools/@op-engineering/op-sqlite": ["@op-engineering/op-sqlite@11.4.9", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-gVj/m7UDCC11h8Fb/elLtT8Q2Fm8wIURkKRWZvV0FP1sLpZB+07N6ezktjGJroN7TV4/VQjGrYuu3GxgHse4HA=="],
+
+    "jazz-tools/react-native-mmkv": ["react-native-mmkv@3.2.0", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-9y7K//1MaU46TFrXkyU0wT5VGk9Y2FDLFV6NPl+z3jTbm2G7SC1UIxneF6CfhSmBX5CfKze9SO7kwDuRx7flpQ=="],
 
     "jazz-tools/react-native-nitro-modules": ["react-native-nitro-modules@0.25.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-rL+X0LzB8BXvpdrUE/+oZ5v4qS/1nZIq0M8Uctbvqq2q53sVCHX4995ffT8+lGIJe/f0QcBvvrEeXtBPl86iwQ=="],
 
