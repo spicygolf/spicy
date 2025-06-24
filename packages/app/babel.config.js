@@ -3,7 +3,9 @@ module.exports = {
   plugins: [
     ['@babel/plugin-transform-class-static-block'],
     ['module:react-native-dotenv'],
-    ['react-native-unistyles/plugin'],
+    ['react-native-unistyles/plugin', {
+      root: 'src',
+    }],
     [
       'module-resolver',
       {

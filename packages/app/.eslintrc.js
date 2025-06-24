@@ -6,7 +6,7 @@ module.exports = {
     'prettier',
     '@hesamse/recommended',
     'react',
-    'react-native',
+    '@react-native',
   ],
   extends: ['@react-native', 'plugin:prettier/recommended'],
   rules: {
