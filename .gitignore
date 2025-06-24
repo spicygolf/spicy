@@ -3,3 +3,4 @@ node_modules
 _old_expo_app_dir/*
 zz_*
 .env
+.vscode/mcp.json
