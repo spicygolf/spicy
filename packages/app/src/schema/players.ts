@@ -1,27 +1,27 @@
-import { CoList, CoMap, co } from 'jazz-tools';
+import { co, z } from 'jazz-tools';
 
-// TODO: can this extend Account?
-//  use case: a player can be an account, but maybe just player if they haven't
-//  signed up yet
-export class Player extends CoMap {
-  name = co.string;
-  email = co.string;
-  short = co.string;
-  handicap? = co.ref(Handicap);
-  // meta
-  envs? = co.ref(ListOfEnvironments);
-  level? = co.string;
-}
-
-export class Handicap extends CoMap {
-  source = co.literal('ghin', 'manual');
-  identifier = co.string; // TODO: optional (for manual handicaps)?
+export const Handicap = co.map({
+  source: z.literal(['ghin', 'manual']),
+  identifier: z.string(), // TODO: optional (for manual handicaps)?
   // TODO: get index, revDate, gender from GHIN API
-  // index = co.string;
-  // revDate = co.Date;
-  // gender = co.literal('M', 'F');
-}
+  // index = z.string();
+  // revDate = z.date();
+  // gender = z.literal(['M', 'F']);
+});
+type Handicap = co.loaded<typeof Handicap>;
 
-export class ListOfPlayers extends CoList.Of(co.ref(Player)) {}
+export const ListOfEnvironments = co.list(z.string());
+type ListOfEnvironments = co.loaded<typeof ListOfEnvironments>;
 
-export class ListOfEnvironments extends CoList.Of(co.string) {}
+export const Player = co.map({
+  name: z.string(),
+  email: z.string(),
+  short: z.string(),
+  handicap: z.optional(Handicap),
+  // meta
+  envs: z.optional(ListOfEnvironments),
+  level: z.string(),
+});
+
+export const ListOfPlayers = co.list(Player);
+type ListOfPlayers = co.loaded<typeof ListOfPlayers>;

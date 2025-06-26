@@ -1,26 +1,35 @@
-import { Account, CoMap, co } from 'jazz-tools';
+import { co, z } from 'jazz-tools';
 import { ListOfGames } from '@/schema/games';
-import { defaultSpec, GameSpec, ListOfGameSpecs } from '@/schema/gamespecs';
+import { ListOfGameSpecs } from '@/schema/gamespecs';
 import { Player } from '@/schema/players';
 
-export class PlayerAccountRoot extends CoMap {
-  player = co.ref(Player);
-  games = co.ref(ListOfGames);
-  specs = co.ref(ListOfGameSpecs);
-}
+export const PlayerAccountRoot = co.map({
+  player: Player,
+  games: ListOfGames,
+  specs: ListOfGameSpecs,
+});
 
-export class PlayerAccount extends Account {
-  // profile = co.ref(Profile); // using default profile for now
-  root = co.ref(PlayerAccountRoot);
+export const PlayerAccountProfile = co.map({
+  name: z.string(),
+  short: z.string(),
+  email: z.string(),
+  level: z.string(),
+});
 
-  async migrate(creationProps?: { name: string }) {
-    if (this.root === undefined) {
-      const name = creationProps?.name || '';
-      this.root = PlayerAccountRoot.create({
-        player: Player.create({ name, short: name, email: '', level: '' }),
-        games: ListOfGames.create([], { owner: this }),
-        specs: ListOfGameSpecs.create([GameSpec.create(defaultSpec)]),
-      });
-    }
-  }
-}
+export const PlayerAccount = co.account({
+  root: PlayerAccountRoot,
+  profile: PlayerAccountProfile,
+});
+export type PlayerAccount = co.loaded<typeof PlayerAccount>;
+
+//   async migrate(creationProps?: { name: string }) {
+//     if (this.root === undefined) {
+//       const name = creationProps?.name || '';
+//       this.root = PlayerAccountRoot.create({
+//         player: Player.create({ name, short: name, email: '', level: '' }),
+//         games: ListOfGames.create([], { owner: this }),
+//         specs: ListOfGameSpecs.create([GameSpec.create(defaultSpec)]),
+//       });
+//     }
+//   }
+// }

@@ -1,9 +1,11 @@
-import { co, CoList, CoMap } from 'jazz-tools';
+import { co, z } from 'jazz-tools';
 import { ListOfPlayers } from './players';
 
-export class Team extends CoMap {
-  team = co.string;
-  players = co.ref(ListOfPlayers);
-}
+export const Team = co.map({
+  team: z.string(),
+  players: ListOfPlayers,
+});
+type Team = co.loaded<typeof Team>;
 
-export class ListOfTeams extends CoList.Of(co.ref(Team)) {}
+export const ListOfTeams = co.list(Team);
+type ListOfTeams = co.loaded<typeof ListOfTeams>;
