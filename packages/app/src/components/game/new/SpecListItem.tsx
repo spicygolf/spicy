@@ -1,14 +1,12 @@
 import React, { useContext } from 'react';
 import { Pressable, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
-import { useAccount } from 'jazz-react-native';
-import { co } from 'jazz-tools';
+import { useNavigation } from '@react-navigation/native';
+import { useAccount } from 'jazz-tools/react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { GamesNavigatorParamList } from '@/navigators/GamesNavigator';
+import type { GamesNavigatorParamList } from '@/navigators/GamesNavigator';
 import { GameContext } from '@/providers/game';
 import { Game } from '@/schema/games';
-import { GameSpec } from '@/schema/gamespecs';
 import { Text } from '@/ui';
 
 export function SpecListItem({ spec }: { spec: co<GameSpec | null> }) {
@@ -24,7 +22,8 @@ export function SpecListItem({ spec }: { spec: co<GameSpec | null> }) {
           const game = Game.createGame(spec, me);
           setGame(game);
           navigation.navigate('Game', { screen: 'GameSettings' });
-        }}>
+        }}
+      >
         <View style={styles.specContainer}>
           <Text style={styles.specName}>{spec.name}</Text>
           <Text style={styles.specSub}>

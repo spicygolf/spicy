@@ -1,24 +1,24 @@
 import React from 'react';
-import { JazzProvider } from 'jazz-react-native';
-// import { RNQuickCrypto } from 'jazz-react-native-core/crypto';
+import { JazzReactNativeProvider } from 'jazz-tools/react-native';
+// import { RNQuickCrypto } from 'jazz-tools/react-native-core/crypto';
 import { PlayerAccount } from '@/schema/accounts';
 
 export function JazzAndAuth({ children }: { children: React.ReactNode }) {
   const peer = 'wss://cloud.jazz.tools/?key=spicy.dev@druid.golf';
 
   return (
-    <JazzProvider
+    <JazzReactNativeProvider
       sync={{ peer }}
       AccountSchema={PlayerAccount}
       // CryptoProvider={RNQuickCrypto}
     >
       {children}
-    </JazzProvider>
+    </JazzReactNativeProvider>
   );
 }
 
 // Register the Account schema so `useAccount` returns our custom `PlayerAccount`
-declare module 'jazz-react-native' {
+declare module 'jazz-tools/react-native' {
   interface Register {
     Account: PlayerAccount;
   }
