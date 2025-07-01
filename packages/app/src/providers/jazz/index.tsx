@@ -1,4 +1,5 @@
 import React from 'react';
+import { AuthProvider } from 'jazz-react-native-auth-betterauth';
 import { JazzReactNativeProvider } from 'jazz-tools/react-native';
 // import { RNQuickCrypto } from 'jazz-tools/react-native-core/crypto';
 import { PlayerAccount } from '@/schema/accounts';
@@ -12,7 +13,13 @@ export function JazzAndAuth({ children }: { children: React.ReactNode }) {
       AccountSchema={PlayerAccount}
       // CryptoProvider={RNQuickCrypto}
     >
-      {children}
+      <AuthProvider
+        options={{
+          baseURL: 'http://localhost:3040/v4/auth/',
+        }}
+      >
+        {children}
+      </AuthProvider>
     </JazzReactNativeProvider>
   );
 }

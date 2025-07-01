@@ -1,8 +1,9 @@
 import React from 'react';
 import { Button, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useForm } from 'react-hook-form';
+import { useAuth } from 'jazz-react-native-auth-betterauth';
 import type { SubmitHandler } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { StyleSheet } from 'react-native-unistyles';
 import type { AuthStackNavigationProp } from '@/navigators/AuthNavigator';
 import { Screen, Text } from '@/ui';
@@ -14,11 +15,25 @@ interface LoginForm {
 }
 
 export function Login() {
+  const auth = useAuth();
   const { control, handleSubmit } = useForm<LoginForm>();
   const navigation = useNavigation<AuthStackNavigationProp>();
 
-  const onSubmit: SubmitHandler<LoginForm> = data => {
-    console.log(data);
+  const onSubmit: SubmitHandler<LoginForm> = async ({ email, password }) => {
+    await auth.authClient.signIn.email(
+      { email, password },
+      {
+        onSuccess: async () => {
+          await auth.logIn();
+          const session = await auth.authClient.getSession();
+          console.log('session', session);
+          // router.push("/");
+        },
+        onError: (e: unknown) => {
+          console.error(e);
+        },
+      },
+    );
   };
 
   return (
@@ -30,6 +45,7 @@ export function Login() {
           name="email"
           label="Email Address"
           keyboardType="email-address"
+          autoCapitalize="none"
         />
         <Input<LoginForm>
           control={control}

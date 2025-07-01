@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, View } from 'react-native';
-// import { useSignUp } from '@clerk/clerk-react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useAuth } from 'jazz-react-native-auth-betterauth';
 import { useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import { StyleSheet } from 'react-native-unistyles';
@@ -20,7 +20,7 @@ interface VerifyForm {
 }
 
 export function Register() {
-  // const { isLoaded, signUp, setActive } = useSignUp();
+  const auth = useAuth();
   const [pendingVerification, _setPendingVerification] = useState(false);
   const [errorMessage, _setErrorMessage] = React.useState('');
   const { control, handleSubmit, watch } = useForm<RegisterForm>();
@@ -29,7 +29,30 @@ export function Register() {
   const password = watch('password');
   const navigation = useNavigation<AuthStackNavigationProp>();
 
-  const onSignupPress: SubmitHandler<RegisterForm> = async _data => {
+  const onSignupPress: SubmitHandler<RegisterForm> = async data => {
+    await auth.authClient.signUp.email(
+      {
+        email: data.email,
+        password: data.password,
+        name: data.email,
+      },
+      {
+        onSuccess: async () => {
+          await auth.signIn();
+          // TODO: check that isAuthenticated routes to <AppNavigator />
+          // navigation.replace("Games");
+        },
+        onError: (e: unknown) => {
+          console.log('onSignupPress error', e);
+          const error = e as Error;
+          console.log(error.stack);
+          console.error('Sign up error', {
+            description: error.message,
+          });
+        },
+      },
+    );
+
     //   if (!isLoaded) return;
     //   try {
     //     const res1 = await signUp.create({

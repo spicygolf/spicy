@@ -1,10 +1,8 @@
 import React from 'react';
-import { NavigatorScreenParams } from '@react-navigation/native';
+import type { NavigatorScreenParams } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import {
-  GameNavigator,
-  GameNavigatorParamList,
-} from '@/navigators/GameNavigator';
+import type { GameNavigatorParamList } from '@/navigators/GameNavigator';
+import { GameNavigator } from '@/navigators/GameNavigator';
 import { GameListScreen } from '@/screens/games/GameList';
 import { NewGame } from '@/screens/games/NewGame';
 

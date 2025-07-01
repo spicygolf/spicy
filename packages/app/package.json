@@ -19,15 +19,17 @@
     "@azure/core-asynciterator-polyfill": "1.0.2",
     "@bacons/text-decoder": "0.0.0",
     "@op-engineering/op-sqlite": "11.2.14",
-    "@react-native/new-app-screen": "0.80.0",
     "@react-native-community/netinfo": "11.4.1",
     "@react-native-segmented-control/segmented-control": "2.5.7",
     "@react-native-vector-icons/common": "11.0.0",
     "@react-native-vector-icons/fontawesome6": "6.7.1",
+    "@react-native/new-app-screen": "0.80.0",
     "@react-navigation/bottom-tabs": "7.4.1",
     "@react-navigation/native": "7.1.14",
     "@react-navigation/native-stack": "7.3.20",
-    "jazz-tools": "0.15.1",
+    "jazz-auth-betterauth": "file:.yalc/jazz-auth-betterauth",
+    "jazz-react-native-auth-betterauth": "file:.yalc/jazz-react-native-auth-betterauth",
+    "jazz-tools": "file:.yalc/jazz-tools",
     "react": "19.1.0",
     "react-hook-form": "^7.54.2",
     "react-native": "0.80.0",
@@ -40,7 +42,8 @@
     "react-native-safe-area-context": "5.5.0",
     "react-native-screens": "4.11.1",
     "react-native-unistyles": "3.0.0-rc.5",
-    "readable-stream": "4.7.0"
+    "readable-stream": "4.7.0",
+    "yalc": "^1.0.0-pre.53"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -73,5 +76,10 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "overrides": {
+    "jazz-auth-betterauth": "file:.yalc/jazz-auth-betterauth",
+    "jazz-react-native-auth-betterauth": "file:.yalc/jazz-react-native-auth-betterauth",
+    "jazz-tools": "file:.yalc/jazz-tools"
   }
 }

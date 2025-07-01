@@ -12,7 +12,7 @@ export const Game = co.map({
   players: ListOfPlayers,
   rounds: ListOfRoundToGames,
 });
-type Game = co.loaded<typeof Game>;
+export type Game = co.loaded<typeof Game>;
 
 //   static createGame(spec: GameSpec, owner: PlayerAccount): Game {
 //     const group = Group.create({ owner });
@@ -47,3 +47,4 @@ type Game = co.loaded<typeof Game>;
 // }
 
 export const ListOfGames = co.list(Game);
+export type ListOfGames = co.loaded<typeof ListOfGames>;

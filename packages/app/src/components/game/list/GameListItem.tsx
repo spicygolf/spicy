@@ -1,14 +1,13 @@
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
-import { co } from 'jazz-tools';
-import { Game } from '@/schema/games';
+import type { Game } from '@/schema/games';
 import { Link, Text } from '@/ui';
 
 export function GameListItem({
   game,
   deleteGame,
 }: {
-  game: co<Game | null>;
+  game: Game | null;
   deleteGame: (id: string) => void;
 }) {
   if (!game) return null;
@@ -17,7 +16,8 @@ export function GameListItem({
       <Link
         href={{
           path: `/games/${game.id}/settings`,
-        }}>
+        }}
+      >
         <View>
           <Text>{game.name}</Text>
           <Text>

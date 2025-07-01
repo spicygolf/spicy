@@ -1,5 +1,5 @@
 import React, { createContext, useState } from 'react';
-import { Game } from '@/schema/games';
+import type { Game } from '@/schema/games';
 
 export const GameContext = createContext<{
   game?: Game;

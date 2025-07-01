@@ -18,7 +18,8 @@ export function AppNavigator() {
       screenOptions={{
         tabBarStyle: styles.tabBarStyle,
       }}
-      initialRouteName="Games">
+      initialRouteName="Games"
+    >
       <Tabs.Screen
         name="Games"
         component={GamesNavigator}

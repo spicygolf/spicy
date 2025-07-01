@@ -3,7 +3,7 @@ const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
 const topNodeModules = path.resolve(__dirname, '../../node_modules');
 // const jazzPackages = path.resolve(__dirname, '../../../../jazz/packages');
-// const yalcNodeModules = path.resolve(__dirname, '.yalc');
+const yalcNodeModules = path.resolve(__dirname, '.yalc');
 
 /**
  * Metro configuration
@@ -17,7 +17,7 @@ const config = {
       'node_modules',
       topNodeModules,
       // jazzPackages,
-      // yalcNodeModules,
+      yalcNodeModules,
     ],
     unstable_enablePackageExports: true,
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.mjs', '.cjs'],
@@ -25,7 +25,7 @@ const config = {
   watchFolders: [
     topNodeModules,
     // jazzPackages,
-    // yalcNodeModules,
+    yalcNodeModules,
   ],
 };
 

@@ -15,10 +15,10 @@ export const GameSpec = co.map({
   //   return ListOfGameSpecs.create([]);
   // },
 });
-type GameSpec = co.loaded<typeof GameSpec>;
+export type GameSpec = co.loaded<typeof GameSpec>;
 
 export const ListOfGameSpecs = co.list(GameSpec);
-type ListOfGameSpecs = co.loaded<typeof ListOfGameSpecs>;
+export type ListOfGameSpecs = co.loaded<typeof ListOfGameSpecs>;
 
 export const defaultSpec = {
   name: 'Five Points',
