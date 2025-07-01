@@ -1,6 +1,6 @@
 import React, { StrictMode } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AppNavigator } from '@/navigators/AppNavigator';
+import { RootNavigator } from '@/navigators/RootNavigator';
 import { JazzAndAuth } from '@/providers/jazz';
 import { NavigationProvider } from '@/providers/navigation';
 
@@ -10,7 +10,7 @@ export function App() {
       <SafeAreaProvider>
         <JazzAndAuth>
           <NavigationProvider>
-            <AppNavigator />
+            <RootNavigator />
           </NavigationProvider>
         </JazzAndAuth>
       </SafeAreaProvider>

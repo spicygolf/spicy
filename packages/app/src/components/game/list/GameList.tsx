@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, View } from 'react-native';
 import { GameListItem } from '@/components/game/list/GameListItem';
-import { ListOfGames } from '@/schema/games';
+import type { ListOfGames } from '@/schema/games';
 
 export function GameList({ games }: { games: ListOfGames | undefined }) {
   const deleteGame = (id: string) => {

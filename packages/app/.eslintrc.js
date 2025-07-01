@@ -6,7 +6,7 @@ module.exports = {
     'prettier',
     '@hesamse/recommended',
     'react',
-    'react-native',
+    '@react-native',
   ],
   extends: ['@react-native', 'plugin:prettier/recommended'],
   rules: {
@@ -61,12 +61,19 @@ module.exports = {
             ],
             message: 'Please use "@/*" alias instead.',
           },
+          {
+            group: ['react-native'],
+            importNames: ['TextInput', 'Text'],
+            message: 'Please use "@/ui" instead of "react-native"',
+          },
         ],
       },
     ],
     '@hesamse/recommended/no-tsx-without-jsx': 'error',
     'react-native/no-unused-styles': 'error',
     'import/no-default-export': 'error',
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/consistent-type-imports': 'error',
   },
   overrides: [],
 };

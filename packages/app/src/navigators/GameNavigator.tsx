@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   createNativeStackNavigator,
-  NativeStackScreenProps,
+  type NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 import { GameProvider } from '@/providers/game';
 import { GameScoring } from '@/screens/game/GameScoring';

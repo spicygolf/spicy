@@ -1,4 +1,4 @@
-import { KvStore } from 'jazz-react-native';
+import type { KvStore } from 'jazz-tools/react-native';
 import { MMKV } from 'react-native-mmkv';
 
 const storage = new MMKV({

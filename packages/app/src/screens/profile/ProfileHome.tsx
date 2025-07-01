@@ -1,12 +1,9 @@
 import React from 'react';
 import { Button, View } from 'react-native';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
-import { useAccount } from 'jazz-react-native';
-import {
-  StyleSheet,
-  UnistylesRuntime,
-  UnistylesThemes,
-} from 'react-native-unistyles';
+import { useAccount } from 'jazz-tools/react-native';
+import type { UnistylesThemes } from 'react-native-unistyles';
+import { StyleSheet, UnistylesRuntime } from 'react-native-unistyles';
 import { Screen, Text } from '@/ui';
 
 export function ProfileHome() {

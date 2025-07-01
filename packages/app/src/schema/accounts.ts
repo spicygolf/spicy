@@ -1,26 +1,42 @@
-import { Account, CoMap, co } from 'jazz-tools';
+import { co, z } from 'jazz-tools';
 import { ListOfGames } from '@/schema/games';
-import { defaultSpec, GameSpec, ListOfGameSpecs } from '@/schema/gamespecs';
+import { ListOfGameSpecs } from '@/schema/gamespecs';
 import { Player } from '@/schema/players';
 
-export class PlayerAccountRoot extends CoMap {
-  player = co.ref(Player);
-  games = co.ref(ListOfGames);
-  specs = co.ref(ListOfGameSpecs);
-}
+export const PlayerAccountRoot = co.map({
+  player: Player,
+  games: ListOfGames,
+  specs: ListOfGameSpecs,
+});
+export type PlayerAccountRoot = co.loaded<typeof PlayerAccountRoot>;
 
-export class PlayerAccount extends Account {
-  // profile = co.ref(Profile); // using default profile for now
-  root = co.ref(PlayerAccountRoot);
+export const PlayerAccountProfile = co.map({
+  name: z.string(),
+  short: z.string(),
+  email: z.string(),
+  level: z.string(),
+});
+export type PlayerAccountProfile = co.loaded<typeof PlayerAccountProfile>;
 
-  async migrate(creationProps?: { name: string }) {
-    if (this.root === undefined) {
+export const PlayerAccount = co
+  .account({
+    root: PlayerAccountRoot,
+    profile: PlayerAccountProfile,
+  })
+  .withMigration((account, creationProps?: { name: string }) => {
+    if (account.root === undefined) {
       const name = creationProps?.name || '';
-      this.root = PlayerAccountRoot.create({
-        player: Player.create({ name, short: name, email: '', level: '' }),
-        games: ListOfGames.create([], { owner: this }),
-        specs: ListOfGameSpecs.create([GameSpec.create(defaultSpec)]),
-      });
+      account.root = PlayerAccountRoot.create(
+        {
+          player: Player.create(
+            { name, short: name, email: '', level: '' },
+            { owner: account },
+          ),
+          games: ListOfGames.create([], { owner: account }),
+          specs: ListOfGameSpecs.create([], { owner: account }),
+        },
+        { owner: account },
+      );
     }
-  }
-}
+  });
+export type PlayerAccount = co.loaded<typeof PlayerAccount>;

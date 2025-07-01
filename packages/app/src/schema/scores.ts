@@ -1,30 +1,36 @@
-import { co, CoList, CoMap } from 'jazz-tools';
+import { co, z } from 'jazz-tools';
 import { Player } from './players';
 
-// per-hole score object
-export class Score extends CoMap {
-  seq = co.number;
-  values = co.ref(ListOfValues);
-  history = co.ref(ListOfScoreUpdate);
-}
-
 // per-score value object (holding current)
-export class Value extends CoMap {
-  k = co.string;
-  v = co.string;
-  by = co.ref(Player);
-  at = co.Date;
-}
+export const Value = co.map({
+  k: z.string(),
+  v: z.string(),
+  by: Player,
+  at: z.date(),
+});
+export type Value = co.loaded<typeof Value>;
 
 // history of score updates
-export class ScoreUpdate extends CoMap {
-  by = co.ref(Player);
-  at = co.Date;
-  old = co.ref(Value);
-}
+export const ScoreUpdate = co.map({
+  by: Player,
+  at: z.date(),
+  old: Value,
+});
+export type ScoreUpdate = co.loaded<typeof ScoreUpdate>;
 
-export class ListOfScores extends CoList.Of(co.ref(Score)) {}
+export const ListOfValues = co.list(Value);
+export type ListOfValues = co.loaded<typeof ListOfValues>;
 
-export class ListOfValues extends CoList.Of(co.ref(Value)) {}
+export const ListOfScoreUpdate = co.list(ScoreUpdate);
+export type ListOfScoreUpdate = co.loaded<typeof ListOfScoreUpdate>;
 
-export class ListOfScoreUpdate extends CoList.Of(co.ref(ScoreUpdate)) {}
+// per-hole score object
+export const Score = co.map({
+  seq: z.number(),
+  values: ListOfValues,
+  history: ListOfScoreUpdate,
+});
+export type Score = co.loaded<typeof Score>;
+
+export const ListOfScores = co.list(Score);
+export type ListOfScores = co.loaded<typeof ListOfScores>;

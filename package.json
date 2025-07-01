@@ -15,6 +15,7 @@
     "@sveltejs/kit",
     "@swc/core",
     "better-sqlite3",
+    "browser-tabs-lock",
     "core-js",
     "core-js-pure",
     "edgedriver",

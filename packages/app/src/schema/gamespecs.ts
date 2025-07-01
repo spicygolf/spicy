@@ -1,25 +1,24 @@
-import { co, CoList, CoMap } from 'jazz-tools';
+import { co, z } from 'jazz-tools';
 
-export class GameSpec extends CoMap {
-  name = co.string;
-  short = co.string;
-  version = co.number;
-  status = co.literal('prod', 'dev', 'test');
-  spec_type = co.literal('points', 'skins');
-  min_players = co.number;
-  location_type = co.literal('local', 'virtual');
-  teams = co.boolean;
+export const GameSpec = co.map({
+  name: z.string(),
+  short: z.string(),
+  version: z.number(),
+  status: z.literal(['prod', 'dev', 'test']),
+  spec_type: z.literal(['points', 'skins']),
+  min_players: z.number(),
+  location_type: z.literal(['local', 'virtual']),
+  teams: z.boolean(),
+  // recursive field specs contains a list of game specs
+  // TODO: not working yet: https://zod.dev/v4?id=recursive-objects
+  // get specs(): typeof co.list<typeof GameSpec> {
+  //   return ListOfGameSpecs.create([]);
+  // },
+});
+export type GameSpec = co.loaded<typeof GameSpec>;
 
-  /**
-   *  A gamespec may have a list of sub-specs that are used in one single game.
-   *  ex: The Big Game is Stableford & Skins.
-   *
-   *  TODO: should this extend GameSpec in some way?
-   */
-  specs = co.optional.ref(ListOfGameSpecs);
-}
-
-export class ListOfGameSpecs extends CoList.Of(co.ref(GameSpec)) {}
+export const ListOfGameSpecs = co.list(GameSpec);
+export type ListOfGameSpecs = co.loaded<typeof ListOfGameSpecs>;
 
 export const defaultSpec = {
   name: 'Five Points',
