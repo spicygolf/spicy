@@ -16,7 +16,7 @@ Current efforts are:
 - modernize the mobile app to work offline and use [Jazz](https://jazz.tools) as a local-first data store
 - style the mobile app using our own components, styled with `react-native-unistyles` v3+
 - add proper support for the new [GHIN API](https://app.swaggerhub.com/apis-docs/GHIN/Admin/1.0)
-- move mobile auth from Firebase to Clerk
+- move mobile auth from Firebase to BetterAuth
 - get revenue-ready for the app store releases
 
 ## Components

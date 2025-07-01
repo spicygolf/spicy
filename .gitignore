@@ -1,6 +1,5 @@
 node_modules
 .DS_Store
-_old_expo_app_dir/*
 zz_*
 .env
 .vscode/mcp.json

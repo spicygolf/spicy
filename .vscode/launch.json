@@ -40,7 +40,7 @@
       "type": "bun",
       "request": "launch",
       "cwd": "${workspaceFolder}/packages/api",
-      "program": "src/server.ts",
+      "program": "src/index.ts",
       "watchMode": "hot",
       "internalConsoleOptions": "openOnSessionStart"
     },
