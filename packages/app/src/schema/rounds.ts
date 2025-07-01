@@ -17,7 +17,7 @@ export const Round = co.map({
   // tees = co.ref(ListOfTees);
   // posting = co.ref(Posting);
 });
-type Round = co.loaded<typeof Round>;
+export type Round = co.loaded<typeof Round>;
 
 /**
  *  This is graph edge between rounds and games.  It is used to link a round to
@@ -53,7 +53,7 @@ export const RoundToGame = co.map({
    */
   game_handicap: z.optional(z.number()),
 });
-type RoundToGame = co.loaded<typeof RoundToGame>;
+export type RoundToGame = co.loaded<typeof RoundToGame>;
 
 export const ListOfRoundToGames = co.list(RoundToGame);
-type ListOfRoundToGames = co.loaded<typeof ListOfRoundToGames>;
+export type ListOfRoundToGames = co.loaded<typeof ListOfRoundToGames>;

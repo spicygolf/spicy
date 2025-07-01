@@ -8,7 +8,7 @@ export const Value = co.map({
   by: Player,
   at: z.date(),
 });
-type Value = co.loaded<typeof Value>;
+export type Value = co.loaded<typeof Value>;
 
 // history of score updates
 export const ScoreUpdate = co.map({
@@ -16,13 +16,13 @@ export const ScoreUpdate = co.map({
   at: z.date(),
   old: Value,
 });
-type ScoreUpdate = co.loaded<typeof ScoreUpdate>;
+export type ScoreUpdate = co.loaded<typeof ScoreUpdate>;
 
 export const ListOfValues = co.list(Value);
-type ListOfValues = co.loaded<typeof ListOfValues>;
+export type ListOfValues = co.loaded<typeof ListOfValues>;
 
 export const ListOfScoreUpdate = co.list(ScoreUpdate);
-type ListOfScoreUpdate = co.loaded<typeof ListOfScoreUpdate>;
+export type ListOfScoreUpdate = co.loaded<typeof ListOfScoreUpdate>;
 
 // per-hole score object
 export const Score = co.map({
@@ -30,7 +30,7 @@ export const Score = co.map({
   values: ListOfValues,
   history: ListOfScoreUpdate,
 });
-type Score = co.loaded<typeof Score>;
+export type Score = co.loaded<typeof Score>;
 
 export const ListOfScores = co.list(Score);
-type ListOfScores = co.loaded<typeof ListOfScores>;
+export type ListOfScores = co.loaded<typeof ListOfScores>;

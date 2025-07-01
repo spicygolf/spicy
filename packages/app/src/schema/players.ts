@@ -22,6 +22,7 @@ export const Player = co.map({
   envs: z.optional(ListOfEnvironments),
   level: z.string(),
 });
+export type Player = co.loaded<typeof Player>;
 
 export const ListOfPlayers = co.list(Player);
-type ListOfPlayers = co.loaded<typeof ListOfPlayers>;
+export type ListOfPlayers = co.loaded<typeof ListOfPlayers>;

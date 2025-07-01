@@ -7,7 +7,7 @@ export const GameHole = co.map({
   teams: ListOfTeams,
   // multipliers = co.ref(ListOfMultipliers);
 });
-type GameHole = co.loaded<typeof GameHole>;
+export type GameHole = co.loaded<typeof GameHole>;
 
 export const ListOfGameHoles = co.list(GameHole);
-type ListOfGameHoles = co.loaded<typeof ListOfGameHoles>;
+export type ListOfGameHoles = co.loaded<typeof ListOfGameHoles>;

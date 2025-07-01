@@ -16,7 +16,7 @@ export const PlayerAccountProfile = co.map({
   email: z.string(),
   level: z.string(),
 });
-type PlayerAccountProfile = co.loaded<typeof PlayerAccountProfile>;
+export type PlayerAccountProfile = co.loaded<typeof PlayerAccountProfile>;
 
 export const PlayerAccount = co
   .account({
@@ -26,12 +26,17 @@ export const PlayerAccount = co
   .withMigration((account, creationProps?: { name: string }) => {
     if (account.root === undefined) {
       const name = creationProps?.name || '';
-      account.root = PlayerAccountRoot.create({
-        player: Player.create({ name, short: name, email: '', level: '' }),
-        games: ListOfGames.create([], { owner: account }),
-        specs: ListOfGameSpecs.create([], { owner: account }),
-      });
+      account.root = PlayerAccountRoot.create(
+        {
+          player: Player.create(
+            { name, short: name, email: '', level: '' },
+            { owner: account },
+          ),
+          games: ListOfGames.create([], { owner: account }),
+          specs: ListOfGameSpecs.create([], { owner: account }),
+        },
+        { owner: account },
+      );
     }
   });
-
 export type PlayerAccount = co.loaded<typeof PlayerAccount>;
