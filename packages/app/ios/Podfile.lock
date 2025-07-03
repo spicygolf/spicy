@@ -38,7 +38,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - op-sqlite (11.2.14):
+  - op-sqlite (14.1.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2473,7 +2473,7 @@ DEPENDENCIES:
   - glog (from `../../../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../../../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - NitroModules (from `../../../node_modules/react-native-nitro-modules`)
-  - "op-sqlite (from `../../../node_modules/@op-engineering/op-sqlite`)"
+  - "op-sqlite (from `../node_modules/@op-engineering/op-sqlite`)"
   - QuickCrypto (from `../../../node_modules/react-native-quick-crypto`)
   - RCT-Folly (from `../../../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../../../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
@@ -2575,7 +2575,7 @@ EXTERNAL SOURCES:
   NitroModules:
     :path: "../../../node_modules/react-native-nitro-modules"
   op-sqlite:
-    :path: "../../../node_modules/@op-engineering/op-sqlite"
+    :path: "../node_modules/@op-engineering/op-sqlite"
   QuickCrypto:
     :path: "../../../node_modules/react-native-quick-crypto"
   RCT-Folly:
@@ -2734,7 +2734,7 @@ SPEC CHECKSUMS:
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 7068e976238b29e97b3bafd09a994542af7d5c0b
   NitroModules: b5f759d2a05356da680bfe43cd20aaa8f689917f
-  op-sqlite: b17b7ffb018778f6f6751cd6a18e9ff5cb3dc215
+  op-sqlite: 11caeb381964751c263209ce125442ea57cae253
   OpenSSL-Universal: b60a3702c9fea8b3145549d421fdb018e53ab7b4
   QuickCrypto: c738fd22834654b818de51a054b4b6e76f15049d
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669

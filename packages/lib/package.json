@@ -7,11 +7,11 @@
     "./utils": "./utils/index.ts"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "typescript": "*"
   },
   "dependencies": {
     "date-fns-tz": "^2.0.0",
-    "spicylib": "workspace:*",
-    "typescript": "^5.0.0"
+    "spicylib": "workspace:*"
   }
 }

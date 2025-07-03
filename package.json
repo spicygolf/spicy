@@ -34,6 +34,11 @@
     "packages/app",
     "packages/ghin",
     "packages/lib",
-    "packages/web"
-  ]
+    "packages/web",
+    "../jazz/packages/*"
+  ],
+  "overrides": {
+    "typescript": "5.6.2",
+    "vitest": "3.1.3"
+  }
 }
