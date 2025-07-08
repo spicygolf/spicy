@@ -3,7 +3,6 @@ import {
   createNativeStackNavigator,
   type NativeStackScreenProps,
 } from '@react-navigation/native-stack';
-import { GameProvider } from '@/providers/game';
 import { GameScoring } from '@/screens/game/GameScoring';
 import { GameSettings } from '@/screens/game/GameSettings';
 
@@ -25,25 +24,23 @@ export function GameNavigator() {
   const Stack = createNativeStackNavigator<GameNavigatorParamList>();
 
   return (
-    <GameProvider>
-      <Stack.Navigator initialRouteName="GameSettings">
-        <Stack.Screen
-          name="GameSettings"
-          component={GameSettings}
-          options={{
-            title: 'Settings',
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="GameScoring"
-          component={GameScoring}
-          options={{
-            title: 'Scoring',
-            headerShown: false,
-          }}
-        />
-      </Stack.Navigator>
-    </GameProvider>
+    <Stack.Navigator initialRouteName="GameSettings">
+      <Stack.Screen
+        name="GameSettings"
+        component={GameSettings}
+        options={{
+          title: 'Settings',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="GameScoring"
+        component={GameScoring}
+        options={{
+          title: 'Scoring',
+          headerShown: false,
+        }}
+      />
+    </Stack.Navigator>
   );
 }
