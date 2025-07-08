@@ -1,5 +1,5 @@
 import React from 'react';
-import { AuthProvider } from 'jazz-react-native-auth-betterauth';
+import { AuthProvider } from 'jazz-react-auth-betterauth';
 import { JazzReactNativeProvider } from 'jazz-tools/react-native';
 // import { RNQuickCrypto } from 'jazz-tools/react-native-core/crypto';
 import { PlayerAccount } from '@/schema/accounts';

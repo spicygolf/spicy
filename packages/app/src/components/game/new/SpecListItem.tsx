@@ -2,16 +2,16 @@ import React, { useContext } from 'react';
 import { Pressable, View } from 'react-native';
 import type { NavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
-import { useAccount } from 'jazz-tools/react-native';
 import { StyleSheet } from 'react-native-unistyles';
+import { useCreateGame } from '@/hooks';
 import type { GamesNavigatorParamList } from '@/navigators/GamesNavigator';
 import { GameContext } from '@/providers/game';
-import { Game } from '@/schema/games';
+import type { GameSpec } from '@/schema/gamespecs';
 import { Text } from '@/ui';
 
-export function SpecListItem({ spec }: { spec: co<GameSpec | null> }) {
+export function SpecListItem({ spec }: { spec: GameSpec | null }) {
   const navigation = useNavigation<NavigationProp<GamesNavigatorParamList>>();
-  const { me } = useAccount();
+  const createGame = useCreateGame();
   const { setGame } = useContext(GameContext);
   if (!spec) return null;
 
@@ -19,7 +19,8 @@ export function SpecListItem({ spec }: { spec: co<GameSpec | null> }) {
     <View style={styles.row}>
       <Pressable
         onPress={() => {
-          const game = Game.createGame(spec, me);
+          const game = createGame(spec);
+          if (!game) return;
           setGame(game);
           navigation.navigate('Game', { screen: 'GameSettings' });
         }}

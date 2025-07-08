@@ -11,12 +11,12 @@ bun i
 ```
 
 Current efforts are:
-- switch to using `bun` instead of `yarn` for all development
-- switch from `js` to `ts` for all packages
+- ~~switch to using `bun` instead of `yarn` for all development~~
+- ~~switch from `js` to `ts` for all packages~~
 - modernize the mobile app to work offline and use [Jazz](https://jazz.tools) as a local-first data store
 - style the mobile app using our own components, styled with `react-native-unistyles` v3+
 - add proper support for the new [GHIN API](https://app.swaggerhub.com/apis-docs/GHIN/Admin/1.0)
-- move mobile auth from Firebase to BetterAuth
+- ~~move mobile auth from Firebase to BetterAuth~~
 - get revenue-ready for the app store releases
 
 ## Components
@@ -39,12 +39,20 @@ bun start
 
 ### API
 
-Currently needs a reworking away from the old GraphQL schema and models, and ArangoDB backend.  It needs to support Jazz sync and server workers, as well as provide a light (but authenticated) API for the mobile app to interact with GHIN.  (tbh, I'm not sure if `packages/api/src/ghin` or `packages/ghin` will survive.  I think they are the same ish? code right now)
+Just recently reworked as an Elysia server, with server-side bits for BetterAuth.  It needs to support Jazz sync and server workers, as well as provide a light (but authenticated) API for the mobile app to interact with GHIN.  (tbh, I'm not sure if `packages/api/src/ghin` or `packages/ghin` will survive.  I think they are the same ish? code right now)
+
+The old API (in `packages/api-0.3`) is kept for posterity, but we are moving away from the GraphQL schema and models, and ArangoDB backend.
 
 ```bash
 cd packages/api
 bun i
-bun run start:dev
+
+# better-auth schema migrations
+bun generate
+bun migrate
+
+# start the server
+bun dev
 ```
 
 ### GHIN

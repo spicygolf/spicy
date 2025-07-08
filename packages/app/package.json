@@ -18,7 +18,7 @@
   "dependencies": {
     "@azure/core-asynciterator-polyfill": "1.0.2",
     "@bacons/text-decoder": "0.0.0",
-    "@op-engineering/op-sqlite": "11.2.14",
+    "@op-engineering/op-sqlite": "14.1.0",
     "@react-native-community/netinfo": "11.4.1",
     "@react-native-segmented-control/segmented-control": "2.5.7",
     "@react-native-vector-icons/common": "11.0.0",
@@ -27,9 +27,9 @@
     "@react-navigation/bottom-tabs": "7.4.1",
     "@react-navigation/native": "7.1.14",
     "@react-navigation/native-stack": "7.3.20",
-    "jazz-auth-betterauth": "file:.yalc/jazz-auth-betterauth",
-    "jazz-react-native-auth-betterauth": "file:.yalc/jazz-react-native-auth-betterauth",
-    "jazz-tools": "file:.yalc/jazz-tools",
+    "jazz-auth-betterauth": "workspace:*",
+    "jazz-react-auth-betterauth": "workspace:*",
+    "jazz-tools": "workspace:*",
     "react": "19.1.0",
     "react-hook-form": "^7.54.2",
     "react-native": "0.80.0",
@@ -42,8 +42,7 @@
     "react-native-safe-area-context": "5.5.0",
     "react-native-screens": "4.11.1",
     "react-native-unistyles": "3.0.0-rc.5",
-    "readable-stream": "4.7.0",
-    "yalc": "^1.0.0-pre.53"
+    "readable-stream": "4.7.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -58,8 +57,8 @@
     "@react-native/eslint-config": "0.80.0",
     "@react-native/metro-config": "0.80.0",
     "@react-native/typescript-config": "0.80.0",
-    "@types/jest": "29.5.13",
     "@types/react": "19.1.0",
+    "@types/jest": "29.5.13",
     "@types/react-test-renderer": "19.1.0",
     "babel-jest": "^29.6.3",
     "babel-plugin-module-resolver": "^5.0.2",
@@ -72,14 +71,9 @@
     "jest": "^29.6.3",
     "prettier": "3.4.2",
     "react-test-renderer": "19.1.0",
-    "typescript": "5.0.4"
+    "typescript": "5.6.2"
   },
   "engines": {
     "node": ">=20"
-  },
-  "overrides": {
-    "jazz-auth-betterauth": "file:.yalc/jazz-auth-betterauth",
-    "jazz-react-native-auth-betterauth": "file:.yalc/jazz-react-native-auth-betterauth",
-    "jazz-tools": "file:.yalc/jazz-tools"
   }
 }

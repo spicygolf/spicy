@@ -22,7 +22,7 @@ export type ListOfGameSpecs = co.loaded<typeof ListOfGameSpecs>;
 
 export const defaultSpec = {
   name: 'Five Points',
-  short: `Team game with low ball, low team, and prox. 5 points per hole, presses, birdies`,
+  short: `Team game with low ball (2), low team (2), and prox (1). 5 points per hole, presses, birdies`,
   version: 1,
   status: 'prod' as const,
   spec_type: 'points' as const,

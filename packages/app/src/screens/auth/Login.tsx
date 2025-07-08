@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useAuth } from 'jazz-react-native-auth-betterauth';
+import { useAuth } from 'jazz-react-auth-betterauth';
 import type { SubmitHandler } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { StyleSheet } from 'react-native-unistyles';
