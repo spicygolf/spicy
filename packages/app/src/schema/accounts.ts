@@ -1,6 +1,6 @@
 import { co, z } from 'jazz-tools';
 import { ListOfGames } from '@/schema/games';
-import { ListOfGameSpecs } from '@/schema/gamespecs';
+import { defaultSpec, GameSpec, ListOfGameSpecs } from '@/schema/gamespecs';
 import { Player } from '@/schema/players';
 
 export const PlayerAccountRoot = co.map({
@@ -12,9 +12,6 @@ export type PlayerAccountRoot = co.loaded<typeof PlayerAccountRoot>;
 
 export const PlayerAccountProfile = co.map({
   name: z.string(),
-  short: z.string(),
-  email: z.string(),
-  level: z.string(),
 });
 export type PlayerAccountProfile = co.loaded<typeof PlayerAccountProfile>;
 
@@ -29,11 +26,21 @@ export const PlayerAccount = co
       account.root = PlayerAccountRoot.create(
         {
           player: Player.create(
-            { name, short: name, email: '', level: '' },
+            {
+              name,
+              short: name,
+              email: '',
+              level: '',
+              handicap: undefined,
+              envs: undefined,
+            },
             { owner: account },
           ),
           games: ListOfGames.create([], { owner: account }),
-          specs: ListOfGameSpecs.create([], { owner: account }),
+          specs: ListOfGameSpecs.create(
+            [GameSpec.create(defaultSpec, { owner: account })],
+            { owner: account },
+          ),
         },
         { owner: account },
       );
