@@ -1,4 +1,4 @@
-import { co, z } from 'jazz-tools';
+import { co, Group, z } from 'jazz-tools';
 import { ListOfGames } from '@/schema/games';
 import { defaultSpec, GameSpec, ListOfGameSpecs } from '@/schema/gamespecs';
 import { Player } from '@/schema/players';
@@ -23,6 +23,8 @@ export const PlayerAccount = co
   .withMigration((account, creationProps?: { name: string }) => {
     if (account.root === undefined) {
       const name = creationProps?.name || '';
+      const gsGroup = Group.create();
+      gsGroup.addMember(account, 'writer');
       account.root = PlayerAccountRoot.create(
         {
           player: Player.create(
@@ -38,7 +40,7 @@ export const PlayerAccount = co
           ),
           games: ListOfGames.create([], { owner: account }),
           specs: ListOfGameSpecs.create(
-            [GameSpec.create(defaultSpec, { owner: account })],
+            [GameSpec.create(defaultSpec, { owner: gsGroup })],
             { owner: account },
           ),
         },
