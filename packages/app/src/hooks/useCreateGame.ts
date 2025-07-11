@@ -1,3 +1,4 @@
+import { Group } from 'jazz-tools';
 import { useAccount } from 'jazz-tools/react-core';
 import { PlayerAccount } from '@/schema/accounts';
 import { ListOfGameHoles } from '@/schema/gameholes';
@@ -22,12 +23,14 @@ export function useCreateGame() {
       console.error('useCreateGame: user account not loaded');
       return;
     }
-    const owner = me;
+    // create a group for the game
+    const group = Group.create();
+    group.addMember(me, 'admin');
 
-    const specs = ListOfGameSpecs.create([], { owner });
+    const specs = ListOfGameSpecs.create([], { owner: group });
     specs.push(spec);
-    const holes = ListOfGameHoles.create([], { owner });
-    const players = ListOfPlayers.create([], { owner });
+    const holes = ListOfGameHoles.create([], { owner: group });
+    const players = ListOfPlayers.create([], { owner: group });
     const player = me.root?.player;
 
     if (!player) {
@@ -40,12 +43,12 @@ export function useCreateGame() {
             handicap: player.handicap ?? undefined,
             envs: player.envs ?? undefined,
           },
-          { owner },
+          { owner: group },
         ),
       );
     }
 
-    const rounds = ListOfRoundToGames.create([], { owner });
+    const rounds = ListOfRoundToGames.create([], { owner: group });
 
     const game = Game.create(
       {
@@ -56,7 +59,7 @@ export function useCreateGame() {
         players,
         rounds,
       },
-      { owner },
+      { owner: group },
     );
 
     me.root.games?.push(game);
