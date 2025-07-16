@@ -1,6 +1,7 @@
 {
   "name": "spicy-mono",
   "devDependencies": {
+    "@biomejs/biome": "^2.1.1",
     "@types/bun": "latest"
   },
   "peerDependencies": {
@@ -29,6 +30,9 @@
     "spicygolf"
   ],
   "type": "module",
+  "resolutions": {
+    "jazz-tools": "0.15.11"
+  },
   "workspaces": [
     "packages/api",
     "packages/app",

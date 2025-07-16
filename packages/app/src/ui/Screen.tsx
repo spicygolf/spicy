@@ -1,8 +1,8 @@
-import React from 'react';
-import { View } from 'react-native';
-import type { ViewStyle } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet } from 'react-native-unistyles';
+import type React from "react";
+import type { ViewStyle } from "react-native";
+import { View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet } from "react-native-unistyles";
 
 type Props = {
   children: React.ReactNode;
@@ -17,7 +17,7 @@ export function Screen({ children, style }: Props) {
   );
 }
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   sav: {
     flex: 1,
     padding: 5,

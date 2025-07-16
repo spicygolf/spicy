@@ -1,12 +1,11 @@
-import React from 'react';
-import { Pressable, View } from 'react-native';
-import type { NavigationProp } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
-import { StyleSheet } from 'react-native-unistyles';
-import { useCreateGame } from '@/hooks';
-import type { GamesNavigatorParamList } from '@/navigators/GamesNavigator';
-import type { GameSpec } from '@/schema/gamespecs';
-import { Text } from '@/ui';
+import type { NavigationProp } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import { Pressable, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { useCreateGame } from "@/hooks";
+import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
+import type { GameSpec } from "@/schema/gamespecs";
+import { Text } from "@/ui";
 
 export function SpecListItem({ spec }: { spec: GameSpec | null }) {
   const navigation = useNavigation<NavigationProp<GamesNavigatorParamList>>();
@@ -19,8 +18,8 @@ export function SpecListItem({ spec }: { spec: GameSpec | null }) {
         onPress={() => {
           const game = createGame(spec);
           if (!game) return;
-          navigation.navigate('Game', {
-            screen: 'GameSettings',
+          navigation.navigate("Game", {
+            screen: "GameSettings",
             params: { gameId: game.id },
           });
         }}
@@ -36,19 +35,19 @@ export function SpecListItem({ spec }: { spec: GameSpec | null }) {
   );
 }
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   specContainer: {
     flex: 10,
-    flexDirection: 'column',
+    flexDirection: "column",
     marginVertical: 2,
   },
   specName: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   specSub: {
     fontSize: 14,

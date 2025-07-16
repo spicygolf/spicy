@@ -1,24 +1,23 @@
-import React from 'react';
-import { View } from 'react-native';
-import { GamePlayersList } from '@/components/game/settings/GamePlayersList';
-import type { Game } from '@/schema/games';
-import { Player } from '@/schema/players';
-import { Button } from '@/ui';
+import { View } from "react-native";
+import { GamePlayersList } from "@/components/game/settings/GamePlayersList";
+import type { Game } from "@/schema/games";
+import { Player } from "@/schema/players";
+import { Button } from "@/ui";
 
 export function GameSettingsPlayers({ game }: { game: Game | null }) {
   const addPlayer = () => {
     if (!game?.players) {
-      console.error('GameSettingsPlayers: no players in game');
+      console.error("GameSettingsPlayers: no players in game");
       return;
     }
     const group = game.players._owner;
     // TODO: do we need this?
     const player = Player.create(
       {
-        name: 'Brad Anderson',
-        email: 'brad@spicy.golf',
-        short: 'boorad',
-        level: '',
+        name: "Brad Anderson",
+        email: "brad@spicy.golf",
+        short: "boorad",
+        level: "",
       },
       { owner: group },
     );

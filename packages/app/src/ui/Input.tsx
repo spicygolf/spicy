@@ -1,16 +1,15 @@
-import React from 'react';
-// eslint-disable-next-line no-restricted-imports
-import { TextInput, View } from 'react-native';
-import type { TextInputProps } from 'react-native';
-import { useController } from 'react-hook-form';
 import type {
   Control,
   FieldValues,
   Path,
   RegisterOptions,
-} from 'react-hook-form';
-import { StyleSheet } from 'react-native-unistyles';
-import { Text } from '@/ui';
+} from "react-hook-form";
+import { useController } from "react-hook-form";
+import type { TextInputProps } from "react-native";
+// biome-ignore lint/style/noRestrictedImports: This component is a wrapper around the React Native component.
+import { TextInput, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { Text } from "@/ui";
 
 interface InputProps<F extends FieldValues> extends TextInputProps {
   name: Path<F>;
@@ -18,7 +17,7 @@ interface InputProps<F extends FieldValues> extends TextInputProps {
   control: Control<F>;
   rules?: Omit<
     RegisterOptions<F, Path<F>>,
-    'valueAsNumber' | 'valueAsDate' | 'setValueAs' | 'disabled'
+    "valueAsNumber" | "valueAsDate" | "setValueAs" | "disabled"
   >;
 }
 
@@ -52,9 +51,9 @@ export function Input<F extends FieldValues>({
   );
 }
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   label: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 3,
   },
   inputContainer: {
@@ -68,10 +67,10 @@ const styles = StyleSheet.create(theme => ({
     color: theme.colors.primary,
   },
   inputError: {
-    borderColor: '#dc3545',
+    borderColor: "#dc3545",
   },
   errorText: {
-    color: '#dc3545',
+    color: "#dc3545",
     fontSize: 12,
     marginTop: 3,
   },

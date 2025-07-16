@@ -1,10 +1,9 @@
-import { GameScoring } from '@/screens/game/GameScoring';
-import { GameSettings } from '@/screens/game/GameSettings';
 import {
   createNativeStackNavigator,
   type NativeStackScreenProps,
-} from '@react-navigation/native-stack';
-import React from 'react';
+} from "@react-navigation/native-stack";
+import { GameScoring } from "@/screens/game/GameScoring";
+import { GameSettings } from "@/screens/game/GameSettings";
 
 export type GameNavigatorParamList = {
   GameSettings: { gameId: string };
@@ -13,11 +12,11 @@ export type GameNavigatorParamList = {
 
 export type GameSettingsProps = NativeStackScreenProps<
   GameNavigatorParamList,
-  'GameSettings'
+  "GameSettings"
 >;
 export type GameScoringProps = NativeStackScreenProps<
   GameNavigatorParamList,
-  'GameScoring'
+  "GameScoring"
 >;
 
 export function GameNavigator() {
@@ -29,7 +28,7 @@ export function GameNavigator() {
         name="GameSettings"
         component={GameSettings}
         options={{
-          title: 'Settings',
+          title: "Settings",
           headerShown: false,
         }}
       />
@@ -37,7 +36,7 @@ export function GameNavigator() {
         name="GameScoring"
         component={GameScoring}
         options={{
-          title: 'Scoring',
+          title: "Scoring",
           headerShown: false,
         }}
       />

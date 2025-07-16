@@ -1,12 +1,11 @@
-import React from 'react';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useAccount, useCoState } from 'jazz-tools/react-native';
-import { GameList } from '@/components/game/list/GameList';
-import type { GamesNavigatorParamList } from '@/navigators/GamesNavigator';
-import { PlayerAccount } from '@/schema/accounts';
-import { ListOfGames } from '@/schema/games';
-import { Button, Screen } from '@/ui';
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useAccount, useCoState } from "jazz-tools/react-native";
+import { GameList } from "@/components/game/list/GameList";
+import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
+import { PlayerAccount } from "@/schema/accounts";
+import { ListOfGames } from "@/schema/games";
+import { Button, Screen } from "@/ui";
 
 export function GameListScreen() {
   const navigation =
@@ -38,7 +37,7 @@ export function GameListScreen() {
       <Button
         label="New Game"
         onPress={() => {
-          navigation.navigate('NewGame');
+          navigation.navigate("NewGame");
         }}
       />
       <GameList games={games} />

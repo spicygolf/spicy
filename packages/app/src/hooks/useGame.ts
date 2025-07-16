@@ -1,5 +1,5 @@
-import { useCoState } from 'jazz-tools/react';
-import { Game } from '@/schema/games';
+import { useCoState } from "jazz-tools/react";
+import { Game } from "@/schema/games";
 
 export function useGame(gameId: string) {
   const game = useCoState(Game, gameId, {

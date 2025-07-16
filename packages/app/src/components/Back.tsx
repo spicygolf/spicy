@@ -1,8 +1,7 @@
-import React from 'react';
-import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
-import { UnistylesRuntime } from 'react-native-unistyles';
-import type { Href } from '@/ui/Link';
-import { Link } from '@/ui/Link';
+import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
+import { UnistylesRuntime } from "react-native-unistyles";
+import type { Href } from "@/ui/Link";
+import { Link } from "@/ui/Link";
 
 type Props = { home: Href };
 

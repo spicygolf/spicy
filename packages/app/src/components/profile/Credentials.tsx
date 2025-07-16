@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from 'react';
-// eslint-disable-next-line no-restricted-imports
-import { TextInput, TouchableOpacity, View } from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
-import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
-import { KvStoreContext, useAccount } from 'jazz-tools/react-native';
-import { StyleSheet } from 'react-native-unistyles';
-import { PlayerAccount } from '@/schema/accounts';
-import { Text } from '@/ui';
+import Clipboard from "@react-native-clipboard/clipboard";
+import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
+import { KvStoreContext, useAccount } from "jazz-tools/react-native";
+import { useEffect, useState } from "react";
+// biome-ignore lint/style/noRestrictedImports: This component is a wrapper around the React Native component.
+import { TextInput, TouchableOpacity, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { PlayerAccount } from "@/schema/accounts";
+import { Text } from "@/ui";
 
 const CopyIcon = () => <FontAwesome6 name="copy" size={12} color="gray" />;
 
 export function Credentials() {
-  const [secret, setSecret] = useState<string>('');
+  const [secret, setSecret] = useState<string>("");
   useEffect(() => {
     const getSecret = async () => {
       const kvStoreContext = KvStoreContext.getInstance();
       const store = kvStoreContext.getStorage();
-      const jlis = await store.get('jazz-logged-in-secret');
-      setSecret(jlis ?? '');
+      const jlis = await store.get("jazz-logged-in-secret");
+      setSecret(jlis ?? "");
     };
     getSecret();
   }, []);
@@ -71,35 +71,35 @@ export function Credentials() {
   );
 }
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     paddingBottom: 10,
   },
   title: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     paddingBottom: theme.gap(1),
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: theme.gap(1),
   },
   label: {
     fontSize: 10,
-    fontWeight: 'bold',
-    width: '30%',
+    fontWeight: "bold",
+    width: "30%",
     paddingRight: 5,
-    textAlign: 'right',
+    textAlign: "right",
   },
   value: {
     fontSize: 10,
-    width: '60%',
+    width: "60%",
   },
   copy: {
-    width: '10%',
-    alignItems: 'center',
+    width: "10%",
+    alignItems: "center",
   },
   secret: {
-    color: 'gray',
+    color: "gray",
   },
 }));

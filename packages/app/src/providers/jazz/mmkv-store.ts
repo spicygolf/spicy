@@ -1,8 +1,8 @@
-import type { KvStore } from 'jazz-tools/react-native';
-import { MMKV } from 'react-native-mmkv';
+import type { KvStore } from "jazz-tools/react-native";
+import { MMKV } from "react-native-mmkv";
 
 const storage = new MMKV({
-  id: 'spicygolf.default',
+  id: "spicygolf.default",
 });
 
 export class MMKVStore implements KvStore {

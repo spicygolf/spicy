@@ -1,8 +1,7 @@
-import React from 'react';
-import { Pressable, View } from 'react-native';
-import { StyleSheet } from 'react-native-unistyles';
-import type { Game } from '@/schema/games';
-import { Link, Text } from '@/ui';
+import { Pressable, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import type { Game } from "@/schema/games";
+import { Link, Text } from "@/ui";
 
 export function GameListItem({
   game,
@@ -26,7 +25,7 @@ export function GameListItem({
         </Text>
       </View>
       <Pressable
-        onPress={e => {
+        onPress={(e) => {
           e.preventDefault();
           deleteGame(game.id);
         }}
@@ -38,23 +37,23 @@ export function GameListItem({
   );
 }
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: theme.gap(1),
   },
   game: {
     flex: 1,
   },
   actions: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   gameName: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   gameDateTime: {
     fontSize: 14,

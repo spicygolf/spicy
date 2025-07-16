@@ -1,5 +1,5 @@
-import { co, z } from 'jazz-tools';
-import { ListOfTeams } from '@/schema/teams';
+import { co, z } from "jazz-tools";
+import { ListOfTeams } from "@/schema/teams";
 
 export const GameHole = co.map({
   hole: z.string(),

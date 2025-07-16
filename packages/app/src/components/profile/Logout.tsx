@@ -1,5 +1,5 @@
-import { Button } from 'react-native';
-import { useAccount } from 'jazz-tools/react-native';
+import { useAccount } from "jazz-tools/react-native";
+import { Button } from "react-native";
 
 export function Logout() {
   const { logOut } = useAccount();

@@ -1,10 +1,9 @@
-import type { GameNavigatorParamList } from '@/navigators/GameNavigator';
-import { GameNavigator } from '@/navigators/GameNavigator';
-import { GameListScreen } from '@/screens/games/GameList';
-import { NewGame } from '@/screens/games/NewGame';
-import type { NavigatorScreenParams } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
+import type { NavigatorScreenParams } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import type { GameNavigatorParamList } from "@/navigators/GameNavigator";
+import { GameNavigator } from "@/navigators/GameNavigator";
+import { GameListScreen } from "@/screens/games/GameList";
+import { NewGame } from "@/screens/games/NewGame";
 
 export type GamesNavigatorParamList = {
   GamesList: undefined;
@@ -21,7 +20,7 @@ export function GamesNavigator() {
         name="GamesList"
         component={GameListScreen}
         options={{
-          title: 'Games',
+          title: "Games",
           headerShown: false,
         }}
       />
@@ -29,7 +28,7 @@ export function GamesNavigator() {
         name="NewGame"
         component={NewGame}
         options={{
-          title: 'New Game',
+          title: "New Game",
           headerShown: false,
         }}
       />
@@ -37,7 +36,7 @@ export function GamesNavigator() {
         name="Game"
         component={GameNavigator}
         options={{
-          title: 'Game',
+          title: "Game",
           headerShown: false,
         }}
       />

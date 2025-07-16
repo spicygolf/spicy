@@ -1,17 +1,17 @@
-import { co, z } from 'jazz-tools';
+import { co, z } from "jazz-tools";
 
 export const Handicap = co.map({
-  source: z.literal(['ghin', 'manual']),
+  source: z.literal(["ghin", "manual"]),
   identifier: z.string(), // TODO: optional (for manual handicaps)?
   // TODO: get index, revDate, gender from GHIN API
   // index = z.string();
   // revDate = z.date();
   // gender = z.literal(['M', 'F']);
 });
-type Handicap = co.loaded<typeof Handicap>;
+export type Handicap = co.loaded<typeof Handicap>;
 
 export const ListOfEnvironments = co.list(z.string());
-type ListOfEnvironments = co.loaded<typeof ListOfEnvironments>;
+export type ListOfEnvironments = co.loaded<typeof ListOfEnvironments>;
 
 export const Player = co.map({
   name: z.string(),

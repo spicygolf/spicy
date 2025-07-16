@@ -1,0 +1,75 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.1.1/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        "useSelfClosingElements": "error",
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "../../*": {
+                "message": "Imports from more than one level up are not allowed. Try importing using the @/* alias."
+              },
+              "app/*": {
+                "message": "Please use '@/*' alias instead."
+              },
+              "components/*": {
+                "message": "Please use '@/*' alias instead."
+              },
+              "hooks/*": {
+                "message": "Please use '@/*' alias instead."
+              },
+              "navigators/*": {
+                "message": "Please use '@/*' alias instead."
+              },
+              "providers/*": {
+                "message": "Please use '@/*' alias instead."
+              },
+              "schema/*": {
+                "message": "Please use '@/*' alias instead."
+              },
+              "screens/*": {
+                "message": "Please use '@/*' alias instead."
+              },
+              "ui/*": {
+                "message": "Please use '@/*' alias instead."
+              },
+              "utils/*": {
+                "message": "Please use '@/*' alias instead."
+              },
+              "react-native": {
+                "importNames": ["TextInput", "Text"],
+                "message": "Please use '@/ui' instead of 'react-native'"
+              }
+            }
+          }
+        }
+      },
+      "nursery": {
+        "noNestedComponentDefinitions": "error",
+        "noReactPropAssign": "error"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/coverage",
+      "!**/.next",
+      "!**/.expo",
+      "!**/.yalc"
+    ]
+  }
+}

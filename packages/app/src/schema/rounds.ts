@@ -1,5 +1,5 @@
-import { co, z } from 'jazz-tools';
-import { ListOfScores } from '@/schema/scores';
+import { co, z } from "jazz-tools";
+import { ListOfScores } from "@/schema/scores";
 
 export const Round = co.map({
   created_at: z.date(),

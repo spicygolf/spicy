@@ -1,8 +1,8 @@
-import { co, z } from 'jazz-tools';
-import { ListOfGameHoles } from '@/schema/gameholes';
-import { ListOfGameSpecs } from '@/schema/gamespecs';
-import { ListOfPlayers } from '@/schema/players';
-import { ListOfRoundToGames } from '@/schema/rounds';
+import { co, z } from "jazz-tools";
+import { ListOfGameHoles } from "@/schema/gameholes";
+import { ListOfGameSpecs } from "@/schema/gamespecs";
+import { ListOfPlayers } from "@/schema/players";
+import { ListOfRoundToGames } from "@/schema/rounds";
 
 export const Game = co.map({
   start: z.date(),
