@@ -47,7 +47,8 @@
               }
             }
           }
-        }
+        },
+        "useNodejsImportProtocol": "off"
       },
       "nursery": {
         "noNestedComponentDefinitions": "error",
