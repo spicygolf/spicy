@@ -1,12 +1,11 @@
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
-import { Group } from 'jazz-tools';
 import { GamePlayersList } from '@/components/game/settings/GamePlayersList';
 import type { Game } from '@/schema/games';
 import { Player } from '@/schema/players';
 import { Text } from '@/ui';
 
-export function GameSettingsPlayers(game: Game | null) {
+export function GameSettingsPlayers({ game }: { game: Game | null }) {
   console.log('game', game);
 
   const addPlayer = () => {
