@@ -1,9 +1,9 @@
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { View } from 'react-native';
 import { GamePlayersList } from '@/components/game/settings/GamePlayersList';
 import type { Game } from '@/schema/games';
 import { Player } from '@/schema/players';
-import { Text } from '@/ui';
+import { Button } from '@/ui';
 
 export function GameSettingsPlayers({ game }: { game: Game | null }) {
   const addPlayer = () => {
@@ -27,10 +27,7 @@ export function GameSettingsPlayers({ game }: { game: Game | null }) {
 
   return (
     <View>
-      <TouchableOpacity onPress={addPlayer}>
-        <Text>Add Player</Text>
-      </TouchableOpacity>
-
+      <Button label="Add Player" onPress={addPlayer} />
       <GamePlayersList game={game} />
     </View>
   );

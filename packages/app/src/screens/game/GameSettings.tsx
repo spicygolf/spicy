@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
 import { GameSettingsPlayers } from '@/components/game/settings/GameSettingsPlayers';
 import { useGame } from '@/hooks';
 import type { GameSettingsProps } from '@/navigators/GameNavigator';
@@ -15,12 +16,26 @@ export function GameSettings(props: GameSettingsProps) {
   return (
     <Screen>
       <View>
-        <Text>Game: {game.name}</Text>
+        <Text style={styles.name}>{game.name}</Text>
       </View>
-      <Text>
+      <Text style={styles.date}>
         {game.start.toLocaleDateString()} - {game.start.toLocaleTimeString()}
       </Text>
       <GameSettingsPlayers game={game} />
     </Screen>
   );
 }
+
+const styles = StyleSheet.create(theme => ({
+  name: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+  },
+  date: {
+    fontSize: 14,
+    color: theme.colors.secondary,
+    alignSelf: 'center',
+    marginBottom: theme.gap(2),
+  },
+}));

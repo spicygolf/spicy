@@ -12,21 +12,15 @@ type Props = {
 export function Screen({ children, style }: Props) {
   return (
     <View style={styles.v}>
-      <SafeAreaView style={styles.savTop} />
       <SafeAreaView style={[styles.sav, style]}>{children}</SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create(theme => ({
-  savTop: {
-    flex: 0,
-    backgroundColor: theme.colors.background,
-  },
   sav: {
     flex: 1,
     padding: 5,
-    margin: 5,
   },
   v: {
     flex: 1,

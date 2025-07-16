@@ -1,6 +1,6 @@
+import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
 import { ActivityIndicator } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 import { linking } from './linking';
 
 export const NavigationProvider = ({

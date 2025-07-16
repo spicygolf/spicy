@@ -7,6 +7,7 @@ const light = {
     primary: '#222',
     secondary: '#555',
     background: '#ddd',
+    action: '#007AFF',
   },
   // functions, external imports, etc.
   gap: (v: number) => v * 8,
@@ -17,6 +18,7 @@ const dark = {
     primary: '#ddd',
     secondary: '#999',
     background: '#222',
+    action: '#007AFF',
   },
   gap: (v: number) => v * 8,
 };

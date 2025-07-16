@@ -1,10 +1,10 @@
-import React from 'react';
+import { GameScoring } from '@/screens/game/GameScoring';
+import { GameSettings } from '@/screens/game/GameSettings';
 import {
   createNativeStackNavigator,
   type NativeStackScreenProps,
 } from '@react-navigation/native-stack';
-import { GameScoring } from '@/screens/game/GameScoring';
-import { GameSettings } from '@/screens/game/GameSettings';
+import React from 'react';
 
 export type GameNavigatorParamList = {
   GameSettings: { gameId: string };
