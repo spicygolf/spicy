@@ -1,5 +1,6 @@
 {
   "name": "spicy-mono",
+  "license": "FSL-1.1-ALv2",
   "devDependencies": {
     "@biomejs/biome": "^2.1.1",
     "@types/bun": "latest",
