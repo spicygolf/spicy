@@ -26,7 +26,7 @@ Current efforts are:
 The main mobile app of Spicy Golf, written in `react-native`.
 
 A bit of history:
-- The 0.3 version is in the `packages/app-0.3` folder.  It requires an API (`packages/api`) to be running, as well as an ArangoDB database.  Note that the `packages/api` folder may be undergoing changes to support the new mobile app.
+- The 0.3 version is in the `packages/app-0.3` folder.  It requires an API (`packages/api-0.3`) to be running, as well as an ArangoDB database.  Note that the `packages/api` folder just got some changes to support the new mobile app.
 - The 0.4 version is in the `packages/app-0.4` folder, and is an experiment with using the new `@fireproof/react-native` library for offline/local-first.  Probably ded.
 - The 0.5 version is in the `packages/app` folder, and is the first version to use Jazz library for offline/local-first.  `packages/app` is the go-forward version.
 
