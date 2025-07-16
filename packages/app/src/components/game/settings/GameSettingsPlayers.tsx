@@ -6,8 +6,6 @@ import { Player } from '@/schema/players';
 import { Text } from '@/ui';
 
 export function GameSettingsPlayers({ game }: { game: Game | null }) {
-  console.log('game', game);
-
   const addPlayer = () => {
     if (!game?.players) {
       console.error('GameSettingsPlayers: no players in game');

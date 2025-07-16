@@ -34,8 +34,7 @@
     "packages/app",
     "packages/ghin",
     "packages/lib",
-    "packages/web",
-    "../jazz/packages/*"
+    "packages/web"
   ],
   "overrides": {
     "typescript": "5.6.2",

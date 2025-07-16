@@ -10,8 +10,8 @@
   "dependencies": {
     "@elysiajs/cors": "^1.3.3",
     "better-auth": "^1.2.12",
-    "elysia": "latest",
-    "jazz-betterauth-server-plugin": "workspace:*"
+    "elysia": "1.3.5",
+    "jazz-betterauth-server-plugin": "0.15.11"
   },
   "devDependencies": {
     "@better-auth/cli": "^1.2.12"

@@ -1,5 +1,6 @@
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
+  ignorePatterns: ['metro.config.js', '.eslintrc.js'],
   root: true,
   plugins: [
     'import',

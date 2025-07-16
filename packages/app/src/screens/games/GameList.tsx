@@ -25,7 +25,6 @@ export function GameListScreen() {
     },
   });
   const games = useCoState(ListOfGames, me?.root?.games?.id);
-  console.log('games', games);
   if (!games) return null;
 
   return (
