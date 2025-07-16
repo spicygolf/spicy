@@ -71,16 +71,18 @@ export function Credentials() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create(theme => ({
   container: {
     paddingBottom: 10,
   },
   title: {
-    paddingBottom: 5,
+    fontWeight: 'bold',
+    paddingBottom: theme.gap(1),
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: theme.gap(1),
   },
   label: {
     fontSize: 10,
@@ -100,4 +102,4 @@ const styles = StyleSheet.create({
   secret: {
     color: 'gray',
   },
-});
+}));

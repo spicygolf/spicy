@@ -10,16 +10,17 @@ export function ProfileHome() {
   return (
     <Screen>
       <View style={styles.container}>
-        <Credentials />
         <Theme />
+        <Credentials />
         <Logout />
       </View>
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create(theme => ({
   container: {
     flex: 1,
+    padding: theme.gap(2),
   },
-});
+}));

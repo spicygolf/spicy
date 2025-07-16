@@ -21,26 +21,27 @@ export function Theme() {
   };
 
   return (
-    <View>
-      <View style={styles.row}>
-        <Text style={styles.title}>Theme</Text>
-        <SegmentedControl
-          values={themes}
-          selectedIndex={2}
-          onChange={event => setTheme(event.nativeEvent.selectedSegmentIndex)}
-          sliderStyle={styles.themeTabs}
-          fontStyle={styles.themeInactiveFont}
-          activeFontStyle={styles.themeActiveFont}
-        />
-      </View>
+    <View style={styles.container}>
+      <Text style={styles.title}>Theme</Text>
+      <SegmentedControl
+        values={themes}
+        selectedIndex={2}
+        onChange={event => setTheme(event.nativeEvent.selectedSegmentIndex)}
+        sliderStyle={styles.themeTabs}
+        fontStyle={styles.themeInactiveFont}
+        activeFontStyle={styles.themeActiveFont}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  row: {},
+const styles = StyleSheet.create(theme => ({
+  container: {
+    marginBottom: theme.gap(2),
+  },
   title: {
-    paddingBottom: 5,
+    fontWeight: 'bold',
+    paddingBottom: theme.gap(1),
   },
   themeTabs: {
     backgroundColor: '#666',
@@ -51,4 +52,4 @@ const styles = StyleSheet.create({
   themeInactiveFont: {
     color: 'gray',
   },
-});
+}));
