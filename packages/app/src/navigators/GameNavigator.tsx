@@ -7,8 +7,8 @@ import { GameScoring } from '@/screens/game/GameScoring';
 import { GameSettings } from '@/screens/game/GameSettings';
 
 export type GameNavigatorParamList = {
-  GameSettings: undefined;
-  GameScoring: undefined;
+  GameSettings: { gameId: string };
+  GameScoring: { gameId: string };
 };
 
 export type GameSettingsProps = NativeStackScreenProps<

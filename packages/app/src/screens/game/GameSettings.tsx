@@ -1,21 +1,16 @@
-import React, { useContext } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import React from 'react';
+import { View } from 'react-native';
 import { GameSettingsPlayers } from '@/components/game/settings/GameSettingsPlayers';
+import { useGame } from '@/hooks';
 import type { GameSettingsProps } from '@/navigators/GameNavigator';
-import { GameContext } from '@/providers/game';
 import { Screen, Text } from '@/ui';
 
 export function GameSettings(props: GameSettingsProps) {
-  console.log('GameSettings props', props);
-
-  const { game } = useContext(GameContext);
-  console.log('GameSettings game', game);
-  if (!game)
-    return (
-      <Screen>
-        <ActivityIndicator />
-      </Screen>
-    );
+  const { game } = useGame(props.route.params.gameId);
+  if (!game) {
+    console.log('GameSettings: game is null');
+    return null;
+  }
 
   return (
     <Screen>
@@ -25,7 +20,7 @@ export function GameSettings(props: GameSettingsProps) {
       <Text>
         {game.start.toLocaleDateString()} - {game.start.toLocaleTimeString()}
       </Text>
-      <GameSettingsPlayers />
+      <GameSettingsPlayers game={game} />
     </Screen>
   );
 }

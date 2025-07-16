@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, View } from 'react-native';
 import { SpecListItem } from '@/components/game/new/SpecListItem';
-import { ListOfGameSpecs } from '@/schema/gamespecs';
+import type { ListOfGameSpecs } from '@/schema/gamespecs';
 
 export function SpecList({ specs }: { specs: ListOfGameSpecs | undefined }) {
   return (

@@ -1,18 +1,16 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Pressable, View } from 'react-native';
 import type { NavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { StyleSheet } from 'react-native-unistyles';
 import { useCreateGame } from '@/hooks';
 import type { GamesNavigatorParamList } from '@/navigators/GamesNavigator';
-import { GameContext } from '@/providers/game';
 import type { GameSpec } from '@/schema/gamespecs';
 import { Text } from '@/ui';
 
 export function SpecListItem({ spec }: { spec: GameSpec | null }) {
   const navigation = useNavigation<NavigationProp<GamesNavigatorParamList>>();
   const createGame = useCreateGame();
-  const { setGame } = useContext(GameContext);
   if (!spec) return null;
 
   return (
@@ -21,8 +19,10 @@ export function SpecListItem({ spec }: { spec: GameSpec | null }) {
         onPress={() => {
           const game = createGame(spec);
           if (!game) return;
-          setGame(game);
-          navigation.navigate('Game', { screen: 'GameSettings' });
+          navigation.navigate('Game', {
+            screen: 'GameSettings',
+            params: { gameId: game.id },
+          });
         }}
       >
         <View style={styles.specContainer}>

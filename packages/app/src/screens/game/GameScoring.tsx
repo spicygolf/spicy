@@ -1,9 +1,10 @@
-import React, { useContext } from 'react';
-import { GameContext } from '@/providers/game';
+import React from 'react';
+import { useGame } from '@/hooks';
+import type { GameScoringProps } from '@/navigators/GameNavigator';
 import { Screen, Text } from '@/ui';
 
-export function GameScoring() {
-  const { game } = useContext(GameContext);
+export function GameScoring(props: GameScoringProps) {
+  const { game } = useGame(props.route.params.gameId);
   if (!game) return null;
 
   return (

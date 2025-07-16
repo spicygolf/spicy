@@ -13,8 +13,8 @@ export const linking = {
           NewGame: 'games/new',
           Game: {
             screens: {
-              GameSettings: 'games/:game/settings',
-              GameScoring: 'games/:game/scoring',
+              GameSettings: 'games/:gameId/settings',
+              GameScoring: 'games/:gameId/scoring',
             },
           },
         },
