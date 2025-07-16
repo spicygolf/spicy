@@ -2,7 +2,9 @@
   "name": "spicy-mono",
   "devDependencies": {
     "@biomejs/biome": "^2.1.1",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -10,7 +12,12 @@
   "scripts": {
     "clean": "del-cli node_modules",
     "lint": "bun run --filter './packages/app' lint",
-    "format": "bun run --filter './packages/app' format"
+    "format": "bun run --filter './packages/app' format",
+    "lint-staged": "lint-staged --no-stash",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"]
   },
   "trustedDependencies": [
     "@apollo/protobufjs",
