@@ -1,5 +1,5 @@
-import { co, z } from 'jazz-tools';
-import { ListOfPlayers } from './players';
+import { co, z } from "jazz-tools";
+import { ListOfPlayers } from "./players";
 
 export const Team = co.map({
   team: z.string(),

@@ -1,2 +1,3 @@
-export { useGamespecs } from './useGamespecs';
-export { useCreateGame } from './useCreateGame';
+export { useCreateGame } from "./useCreateGame";
+export { useGame } from "./useGame";
+export { useGamespecs } from "./useGamespecs";

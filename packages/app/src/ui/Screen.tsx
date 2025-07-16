@@ -1,8 +1,8 @@
-import React from 'react';
-import { View } from 'react-native';
-import type { ViewStyle } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet } from 'react-native-unistyles';
+import type React from "react";
+import type { ViewStyle } from "react-native";
+import { View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet } from "react-native-unistyles";
 
 type Props = {
   children: React.ReactNode;
@@ -12,21 +12,15 @@ type Props = {
 export function Screen({ children, style }: Props) {
   return (
     <View style={styles.v}>
-      <SafeAreaView style={styles.savTop} />
       <SafeAreaView style={[styles.sav, style]}>{children}</SafeAreaView>
     </View>
   );
 }
 
-const styles = StyleSheet.create(theme => ({
-  savTop: {
-    flex: 0,
-    backgroundColor: theme.colors.background,
-  },
+const styles = StyleSheet.create((theme) => ({
   sav: {
     flex: 1,
     padding: 5,
-    margin: 5,
   },
   v: {
     flex: 1,

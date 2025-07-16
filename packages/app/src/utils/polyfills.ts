@@ -1,17 +1,18 @@
 /* eslint-disable import/order */
 
+import { Buffer } from "node:buffer";
 // @ts-expect-error - @types/react-native doesn't cover this file
-import { polyfillGlobal } from 'react-native/Libraries/Utilities/PolyfillFunctions';
+import { polyfillGlobal } from "react-native/Libraries/Utilities/PolyfillFunctions";
 
-import { Buffer } from 'buffer';
-polyfillGlobal('Buffer', () => Buffer);
+polyfillGlobal("Buffer", () => Buffer);
 
 // @ts-expect-error - @types/readable-stream doesn't have ReadableStream type
-import { ReadableStream } from 'readable-stream';
-polyfillGlobal('ReadableStream', () => ReadableStream);
+import { ReadableStream } from "readable-stream";
 
-import '@azure/core-asynciterator-polyfill';
+polyfillGlobal("ReadableStream", () => ReadableStream);
 
-import '@bacons/text-decoder/install';
+import "@azure/core-asynciterator-polyfill";
 
-import 'react-native-get-random-values';
+import "@bacons/text-decoder/install";
+
+import "react-native-get-random-values";

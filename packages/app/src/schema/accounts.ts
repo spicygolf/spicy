@@ -1,7 +1,7 @@
-import { co, Group, z } from 'jazz-tools';
-import { ListOfGames } from '@/schema/games';
-import { defaultSpec, GameSpec, ListOfGameSpecs } from '@/schema/gamespecs';
-import { Player } from '@/schema/players';
+import { co, Group, z } from "jazz-tools";
+import { ListOfGames } from "@/schema/games";
+import { defaultSpec, GameSpec, ListOfGameSpecs } from "@/schema/gamespecs";
+import { Player } from "@/schema/players";
 
 export const PlayerAccountRoot = co.map({
   player: Player,
@@ -22,17 +22,17 @@ export const PlayerAccount = co
   })
   .withMigration((account, creationProps?: { name: string }) => {
     if (account.root === undefined) {
-      const name = creationProps?.name || '';
+      const name = creationProps?.name || "";
       const gsGroup = Group.create();
-      gsGroup.addMember(account, 'writer');
+      gsGroup.addMember(account, "writer");
       account.root = PlayerAccountRoot.create(
         {
           player: Player.create(
             {
               name,
               short: name,
-              email: '',
-              level: '',
+              email: "",
+              level: "",
               handicap: undefined,
               envs: undefined,
             },

@@ -1,23 +1,28 @@
-import React from 'react';
-import { useAccount, useCoState } from 'jazz-tools/react-native';
-import { GameList } from '@/components/game/list/GameList';
-import { PlayerAccount } from '@/schema/accounts';
-import { ListOfGames } from '@/schema/games';
-import { Link, Screen, Text } from '@/ui';
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useAccount, useCoState } from "jazz-tools/react-native";
+import { GameList } from "@/components/game/list/GameList";
+import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
+import { PlayerAccount } from "@/schema/accounts";
+import { ListOfGames } from "@/schema/games";
+import { Button, Screen } from "@/ui";
 
 export function GameListScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<GamesNavigatorParamList>>();
+
+  // TODO: move to useGameList() hook?
   const { me } = useAccount(PlayerAccount, {
     resolve: {
       root: {
         player: true,
         games: {
           $each: {
+            // @ts-expect-error TODO: smth with first element in resolve object
             start: true,
             name: true,
             players: {
-              $each: {
-                name: true,
-              },
+              $each: true,
             },
           },
         },
@@ -25,19 +30,16 @@ export function GameListScreen() {
     },
   });
   const games = useCoState(ListOfGames, me?.root?.games?.id);
-  console.log('games', games);
   if (!games) return null;
 
   return (
     <Screen>
-      <Link
-        href={{
-          name: 'NewGame',
-          params: {},
+      <Button
+        label="New Game"
+        onPress={() => {
+          navigation.navigate("NewGame");
         }}
-      >
-        <Text>New Game</Text>
-      </Link>
+      />
       <GameList games={games} />
     </Screen>
   );

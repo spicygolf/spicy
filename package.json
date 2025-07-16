@@ -1,13 +1,16 @@
 {
   "name": "spicy-mono",
   "devDependencies": {
+    "@biomejs/biome": "^2.1.1",
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "clean": "del-cli node_modules"
+    "clean": "del-cli node_modules",
+    "lint": "bun run --filter './packages/app' lint",
+    "format": "bun run --filter './packages/app' format"
   },
   "trustedDependencies": [
     "@apollo/protobufjs",
@@ -29,13 +32,15 @@
     "spicygolf"
   ],
   "type": "module",
+  "resolutions": {
+    "jazz-tools": "0.15.11"
+  },
   "workspaces": [
     "packages/api",
     "packages/app",
     "packages/ghin",
     "packages/lib",
-    "packages/web",
-    "../jazz/packages/*"
+    "packages/web"
   ],
   "overrides": {
     "typescript": "5.6.2",

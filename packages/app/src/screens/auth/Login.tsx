@@ -1,13 +1,12 @@
-import React from 'react';
-import { Button, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useAuth } from 'jazz-react-auth-betterauth';
-import type { SubmitHandler } from 'react-hook-form';
-import { useForm } from 'react-hook-form';
-import { StyleSheet } from 'react-native-unistyles';
-import type { AuthStackNavigationProp } from '@/navigators/AuthNavigator';
-import { Screen, Text } from '@/ui';
-import { Input } from '@/ui/Input';
+import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "jazz-react-auth-betterauth";
+import type { SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import { Button, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import type { AuthStackNavigationProp } from "@/navigators/AuthNavigator";
+import { Screen, Text } from "@/ui";
+import { Input } from "@/ui/Input";
 
 interface LoginForm {
   email: string;
@@ -26,7 +25,7 @@ export function Login() {
         onSuccess: async () => {
           await auth.logIn();
           const session = await auth.authClient.getSession();
-          console.log('session', session);
+          console.log("session", session);
           // router.push("/");
         },
         onError: (e: unknown) => {
@@ -58,7 +57,7 @@ export function Login() {
           <Text style={styles.register_label}>Don't have an account?</Text>
           <Button
             onPress={() => {
-              navigation.replace('Register');
+              navigation.replace("Register");
             }}
             title="Sign Up"
           />
@@ -68,18 +67,18 @@ export function Login() {
   );
 }
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     padding: 10,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   register_view: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 25,
   },
   register_label: {

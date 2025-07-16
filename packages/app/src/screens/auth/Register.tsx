@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Button, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useAuth } from 'jazz-react-auth-betterauth';
-import { useForm } from 'react-hook-form';
-import type { SubmitHandler } from 'react-hook-form';
-import { StyleSheet } from 'react-native-unistyles';
-import type { AuthStackNavigationProp } from '@/navigators/AuthNavigator';
-import { Screen, Text } from '@/ui';
-import { Input } from '@/ui/Input';
+import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "jazz-react-auth-betterauth";
+import React, { useState } from "react";
+import type { SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import { Button, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import type { AuthStackNavigationProp } from "@/navigators/AuthNavigator";
+import { Screen, Text } from "@/ui";
+import { Input } from "@/ui/Input";
 
 interface RegisterForm {
   email: string;
@@ -22,14 +22,14 @@ interface VerifyForm {
 export function Register() {
   const auth = useAuth();
   const [pendingVerification, _setPendingVerification] = useState(false);
-  const [errorMessage, _setErrorMessage] = React.useState('');
+  const [errorMessage, _setErrorMessage] = React.useState("");
   const { control, handleSubmit, watch } = useForm<RegisterForm>();
   const { control: controlVerify, handleSubmit: handleSubmitVerify } =
     useForm<VerifyForm>();
-  const password = watch('password');
+  const password = watch("password");
   const navigation = useNavigation<AuthStackNavigationProp>();
 
-  const onSignupPress: SubmitHandler<RegisterForm> = async data => {
+  const onSignupPress: SubmitHandler<RegisterForm> = async (data) => {
     await auth.authClient.signUp.email(
       {
         email: data.email,
@@ -43,10 +43,10 @@ export function Register() {
           // navigation.replace("Games");
         },
         onError: (e: unknown) => {
-          console.log('onSignupPress error', e);
+          console.log("onSignupPress error", e);
           const error = e as Error;
           console.log(error.stack);
-          console.error('Sign up error', {
+          console.error("Sign up error", {
             description: error.message,
           });
         },
@@ -77,7 +77,7 @@ export function Register() {
     //   }
   };
 
-  const onVerifyPress: SubmitHandler<VerifyForm> = async _data => {
+  const onVerifyPress: SubmitHandler<VerifyForm> = async (_data) => {
     // if (!isLoaded) return;
     // setErrorMessage('');
     // try {
@@ -101,7 +101,7 @@ export function Register() {
     <Screen>
       <View style={styles.container}>
         <Text style={styles.title}>
-          {pendingVerification ? 'Verify Email' : 'Sign Up'}
+          {pendingVerification ? "Verify Email" : "Sign Up"}
         </Text>
 
         {errorMessage && (
@@ -119,10 +119,10 @@ export function Register() {
               keyboardType="email-address"
               autoCapitalize="none"
               rules={{
-                required: 'Email is required',
+                required: "Email is required",
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Invalid email address',
+                  message: "Invalid email address",
                 },
               }}
             />
@@ -132,10 +132,10 @@ export function Register() {
               name="password"
               secureTextEntry
               rules={{
-                required: 'Password is required',
+                required: "Password is required",
                 minLength: {
                   value: 8,
-                  message: 'Password must be at least 8 characters',
+                  message: "Password must be at least 8 characters",
                 },
               }}
             />
@@ -145,9 +145,9 @@ export function Register() {
               name="confirmPassword"
               secureTextEntry
               rules={{
-                required: 'Please confirm your password',
-                validate: value =>
-                  value === password || 'The passwords do not match',
+                required: "Please confirm your password",
+                validate: (value) =>
+                  value === password || "The passwords do not match",
               }}
             />
             <Button title="Sign Up" onPress={handleSubmit(onSignupPress)} />
@@ -155,7 +155,7 @@ export function Register() {
               <Text style={styles.login_label}>Already have an account?</Text>
               <Button
                 onPress={() => {
-                  navigation.replace('Login');
+                  navigation.replace("Login");
                 }}
                 title="Sign In"
               />
@@ -183,18 +183,18 @@ export function Register() {
   );
 }
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     padding: 10,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   login_view: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 25,
   },
   login_label: {
@@ -204,6 +204,6 @@ const styles = StyleSheet.create(theme => ({
     paddingVertical: 10,
   },
   error: {
-    color: 'red',
+    color: "red",
   },
 }));

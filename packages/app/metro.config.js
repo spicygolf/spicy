@@ -1,8 +1,8 @@
-const path = require('path');
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const path = require("node:path");
+const { getDefaultConfig, mergeConfig } = require("@react-native/metro-config");
 
-const topNodeModules = path.resolve(__dirname, '../../node_modules');
-const jazzPackages = path.resolve(__dirname, '../../../jazz/packages');
+const topNodeModules = path.resolve(__dirname, "../../node_modules");
+// const jazzPackages = path.resolve(__dirname, '../../../jazz/packages');
 
 /**
  * Metro configuration
@@ -13,16 +13,16 @@ const jazzPackages = path.resolve(__dirname, '../../../jazz/packages');
 const config = {
   resolver: {
     nodeModulesPaths: [
-      'node_modules',
+      "node_modules",
       topNodeModules,
-      jazzPackages,
+      // jazzPackages,
     ],
     unstable_enablePackageExports: true,
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.mjs', '.cjs'],
+    extensions: [".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs"],
   },
   watchFolders: [
     topNodeModules,
-    jazzPackages,
+    // jazzPackages,
   ],
 };
 

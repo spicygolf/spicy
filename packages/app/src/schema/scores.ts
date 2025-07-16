@@ -1,5 +1,5 @@
-import { co, z } from 'jazz-tools';
-import { Player } from './players';
+import { co, z } from "jazz-tools";
+import { Player } from "./players";
 
 // per-score value object (holding current)
 export const Value = co.map({

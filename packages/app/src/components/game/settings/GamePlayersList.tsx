@@ -1,18 +1,13 @@
-import React from 'react';
-import { useContext } from 'react';
-import { FlatList, Text } from 'react-native';
-import { GameContext } from '@/providers/game';
+import { FlatList } from "react-native";
+import type { Game } from "@/schema/games";
+import { Text } from "@/ui";
 
-export function GamePlayersList() {
-  const { game } = useContext(GameContext);
-  const players = game?.players;
-  console.log({ players });
-
+export function GamePlayersList({ game }: { game: Game | null }) {
   return (
     <FlatList
-      data={players}
+      data={game?.players}
       renderItem={({ item: player }) => <Text>{player?.name}</Text>}
-      keyExtractor={item => item?.id || ''}
+      keyExtractor={(item) => item?.id || ""}
     />
   );
 }

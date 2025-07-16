@@ -1,31 +1,40 @@
-import React, { useContext } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { GameSettingsPlayers } from '@/components/game/settings/GameSettingsPlayers';
-import type { GameSettingsProps } from '@/navigators/GameNavigator';
-import { GameContext } from '@/providers/game';
-import { Screen, Text } from '@/ui';
+import { View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { GameSettingsPlayers } from "@/components/game/settings/GameSettingsPlayers";
+import { useGame } from "@/hooks";
+import type { GameSettingsProps } from "@/navigators/GameNavigator";
+import { Screen, Text } from "@/ui";
 
 export function GameSettings(props: GameSettingsProps) {
-  console.log('GameSettings props', props);
-
-  const { game } = useContext(GameContext);
-  console.log('GameSettings game', game);
-  if (!game)
-    return (
-      <Screen>
-        <ActivityIndicator />
-      </Screen>
-    );
+  const { game } = useGame(props.route.params.gameId);
+  if (!game) {
+    console.log("GameSettings: game is null");
+    return null;
+  }
 
   return (
     <Screen>
       <View>
-        <Text>Game: {game.name}</Text>
+        <Text style={styles.name}>{game.name}</Text>
       </View>
-      <Text>
+      <Text style={styles.date}>
         {game.start.toLocaleDateString()} - {game.start.toLocaleTimeString()}
       </Text>
-      <GameSettingsPlayers />
+      <GameSettingsPlayers game={game} />
     </Screen>
   );
 }
+
+const styles = StyleSheet.create((theme) => ({
+  name: {
+    fontSize: 24,
+    fontWeight: "bold",
+    alignSelf: "center",
+  },
+  date: {
+    fontSize: 14,
+    color: theme.colors.secondary,
+    alignSelf: "center",
+    marginBottom: theme.gap(2),
+  },
+}));
