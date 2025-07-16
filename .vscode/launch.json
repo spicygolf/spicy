@@ -4,19 +4,21 @@
     {
       "name": "test - Big Game",
       "type": "bun",
-      "runtimeArgs": ["test"],
+      "runtimeArgs": [
+        "test"
+      ],
       "internalConsoleOptions": "openOnSessionStart",
       "request": "launch",
-      "program": "${workspaceFolder}/packages/app/test/big_game.test.ts",
-      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/packages/app-0.4/test/big_game.test.ts",
+      "cwd": "${workspaceFolder}/packages/app-0.4",
       "watchMode": true
     },
     {
-      "name": "mobile",
+      "name": "mobile - app-0.3",
       "type": "radon-ide",
       "request": "launch",
-      "appRoot": "./packages/app/",
-      "metroConfigPath": "./packages/app/metro.config.js",
+      "appRoot": "./packages/app-0.3",
+      "metroConfigPath": "./packages/app-0.3/metro.config.js",
       "isExpo": false,
       "suppressMultipleSessionWarning": true,
       "ios": {
@@ -53,10 +55,21 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
+      "name": "api-0.3",
+      "type": "bun",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/packages/api-0.3",
+      "program": "src/server.ts",
+      "watchMode": "hot",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "app tests",
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "runtimeArgs": [
         "--inspect-brk",
         "${workspaceRoot}/node_modules/.bin/jest",
@@ -70,7 +83,9 @@
       "name": "api schema_update 20210602",
       "type": "node",
       "request": "launch",
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "cwd": "${workspaceFolder}/packages/api",
       "args": [
         "--es-module-specifier-resolution=node",
@@ -81,7 +96,9 @@
       "name": "api schema_update 20221219",
       "type": "node",
       "request": "launch",
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "cwd": "${workspaceFolder}/packages/api",
       "args": [
         "--es-module-specifier-resolution=node",
@@ -92,7 +109,9 @@
       "name": "api schema_update 20221220",
       "type": "node",
       "request": "launch",
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "cwd": "${workspaceFolder}/packages/api",
       "args": [
         "--es-module-specifier-resolution=node",

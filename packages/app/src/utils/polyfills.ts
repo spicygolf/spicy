@@ -1,9 +1,9 @@
 /* eslint-disable import/order */
 
-import { Buffer } from "node:buffer";
 // @ts-expect-error - @types/react-native doesn't cover this file
 import { polyfillGlobal } from "react-native/Libraries/Utilities/PolyfillFunctions";
 
+import { Buffer } from "buffer";
 polyfillGlobal("Buffer", () => Buffer);
 
 // @ts-expect-error - @types/readable-stream doesn't have ReadableStream type
