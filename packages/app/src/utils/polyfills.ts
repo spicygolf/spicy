@@ -1,4 +1,4 @@
-/* eslint-disable import/order */
+// biome-ignore organizeImports: The order of imports rule is ignored for polyfills.
 
 // @ts-expect-error - @types/react-native doesn't cover this file
 import { polyfillGlobal } from "react-native/Libraries/Utilities/PolyfillFunctions";
