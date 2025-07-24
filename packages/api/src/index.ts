@@ -1,17 +1,13 @@
-import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import type { Context } from "elysia";
-import { auth } from './lib/auth';
+import { Elysia } from "elysia";
+import { auth } from "./lib/auth";
 
-const {
-  API_HOST: host,
-  API_PORT: port,
-  API_VERSION: api,
-} = process.env;
+const { API_HOST: host, API_PORT: port, API_VERSION: api } = process.env;
 
-const betterAuth = new Elysia({ name: "better-auth"})
+const betterAuth = new Elysia({ name: "better-auth" })
   .all(`${api}/auth/*`, (context: Context) => {
-    if (['POST', 'GET'].includes(context.request.method)) {
+    if (["POST", "GET"].includes(context.request.method)) {
       return auth.handler(context.request);
     }
     context.status(405);
@@ -31,15 +27,17 @@ const betterAuth = new Elysia({ name: "better-auth"})
         };
       },
     },
-  })
+  });
 
 const app = new Elysia()
-  .use(cors({
-    origin: "http://localhost:3030",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  }))
+  .use(
+    cors({
+      origin: "http://localhost:3030",
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    }),
+  )
   .use(betterAuth)
   .get("/", () => "Spicy Golf API")
   .get(`/${api}/user`, ({ user }) => user, {
@@ -47,9 +45,9 @@ const app = new Elysia()
   })
   .listen({
     port: port || 3030,
-    hostname: host || 'localhost',
+    hostname: host || "localhost",
   });
 
 console.log(
-  `⛳️ Spicy Golf API is running at http://${app.server?.hostname}:${app.server?.port} ⛳️`
+  `⛳️ Spicy Golf API is running at http://${app.server?.hostname}:${app.server?.port} ⛳️`,
 );

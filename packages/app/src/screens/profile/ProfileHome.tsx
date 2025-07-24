@@ -17,9 +17,8 @@ export function ProfileHome() {
   );
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create(() => ({
   container: {
     flex: 1,
-    padding: theme.gap(2),
   },
 }));

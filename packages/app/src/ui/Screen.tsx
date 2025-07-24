@@ -1,7 +1,6 @@
 import type React from "react";
 import type { ViewStyle } from "react-native";
 import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native-unistyles";
 
 type Props = {
@@ -10,20 +9,13 @@ type Props = {
 };
 
 export function Screen({ children, style }: Props) {
-  return (
-    <View style={styles.v}>
-      <SafeAreaView style={[styles.sav, style]}>{children}</SafeAreaView>
-    </View>
-  );
+  return <View style={[styles.v, style]}>{children}</View>;
 }
 
 const styles = StyleSheet.create((theme) => ({
-  sav: {
-    flex: 1,
-    padding: 5,
-  },
   v: {
     flex: 1,
     backgroundColor: theme.colors.background,
+    padding: theme.gap(1),
   },
 }));

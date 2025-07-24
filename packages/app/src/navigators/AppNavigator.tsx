@@ -58,6 +58,6 @@ export function AppNavigator() {
 const styles = StyleSheet.create({
   tabBarStyle: {
     backgroundColor: "transparent",
-    borderTopWidth: 1,
+    borderTopWidth: 0.5,
   },
 });

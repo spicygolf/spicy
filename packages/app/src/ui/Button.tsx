@@ -26,5 +26,6 @@ const styles = StyleSheet.create((theme) => ({
   text: {
     fontSize: 16,
     fontWeight: "bold",
+    color: theme.colors.actionText,
   },
 }));

@@ -12,9 +12,13 @@ export const linking = {
           GamesList: "games",
           NewGame: "games/new",
           Game: {
+            path: "games/:gameId",
+            parse: {
+              gameId: (gameId: string) => gameId,
+            },
             screens: {
-              GameSettings: "games/:gameId/settings",
-              GameScoring: "games/:gameId/scoring",
+              GameSettings: "settings",
+              GameScoring: "scoring",
             },
           },
         },

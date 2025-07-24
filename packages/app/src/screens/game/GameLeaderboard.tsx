@@ -1,7 +1,7 @@
 import { useGameContext } from "@/contexts/GameContext";
 import { Screen, Text } from "@/ui";
 
-export function GameScoring() {
+export function GameLeaderboard() {
   // Get the current game from context
   const { game } = useGameContext();
 
@@ -12,7 +12,7 @@ export function GameScoring() {
 
   return (
     <Screen>
-      <Text>scoring</Text>
+      <Text>leaderboard</Text>
     </Screen>
   );
 }
