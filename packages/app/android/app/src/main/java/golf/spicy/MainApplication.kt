@@ -1,4 +1,4 @@
-package com.spicygolf
+package golf.spicy
 
 import android.app.Application
 import com.facebook.react.PackageList

@@ -1,7 +1,6 @@
-import { betterAuth } from "better-auth";
 import { Database } from "bun:sqlite";
+import { betterAuth } from "better-auth";
 import { jazzPlugin } from "jazz-betterauth-server-plugin";
-
 
 export const auth = betterAuth({
   appName: "Spicy Golf",

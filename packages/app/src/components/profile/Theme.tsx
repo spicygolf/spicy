@@ -1,11 +1,34 @@
-import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { View } from "react-native";
 import type { UnistylesThemes } from "react-native-unistyles";
 import { StyleSheet, UnistylesRuntime } from "react-native-unistyles";
-import { Text } from "@/ui";
+import { ButtonGroup, Text } from "@/ui";
 
 export function Theme() {
   const themes = ["light", "dark", "system"];
+  const buttons = [
+    {
+      label: "light",
+      iconName: "sun",
+      onPress: () => {
+        setTheme(0);
+      },
+    },
+    {
+      label: "dark",
+      iconName: "moon",
+      onPress: () => {
+        setTheme(1);
+      },
+    },
+    {
+      label: "system",
+      iconName: "computer",
+      onPress: () => {
+        setTheme(2);
+      },
+    },
+  ];
+
   const setTheme = (scheme: number) => {
     const system =
       UnistylesRuntime.colorScheme === "dark"
@@ -23,14 +46,7 @@ export function Theme() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Theme</Text>
-      <SegmentedControl
-        values={themes}
-        selectedIndex={2}
-        onChange={(event) => setTheme(event.nativeEvent.selectedSegmentIndex)}
-        sliderStyle={styles.themeTabs}
-        fontStyle={styles.themeInactiveFont}
-        activeFontStyle={styles.themeActiveFont}
-      />
+      <ButtonGroup buttons={buttons} selectedIndex={2} />
     </View>
   );
 }

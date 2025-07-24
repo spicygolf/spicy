@@ -1,20 +1,15 @@
-import { Pressable, View } from "react-native";
+import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "@/schema/games";
 import { Link, Text } from "@/ui";
 
-export function GameListItem({
-  game,
-  deleteGame,
-}: {
-  game: Game | null;
-  deleteGame: (id: string) => void;
-}) {
+export function GameListItem({ game }: { game: Game | null }) {
   if (!game) return null;
   return (
     <Link
       href={{
-        path: `/games/${game.id}/settings`,
+        path: `/games/${game.id}/scoring`,
       }}
       style={styles.container}
     >
@@ -24,15 +19,12 @@ export function GameListItem({
           {game.start.toLocaleDateString()} - {game.start.toLocaleTimeString()}
         </Text>
       </View>
-      <Pressable
-        onPress={(e) => {
-          e.preventDefault();
-          deleteGame(game.id);
-        }}
+      <Link
+        href={{ path: `/games/${game.id}/settings` }}
         style={styles.actions}
       >
-        <Text>X</Text>
-      </Pressable>
+        <FontAwesome6 name="gear" size={18} color="#666" iconStyle="solid" />
+      </Link>
     </Link>
   );
 }
@@ -42,7 +34,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: theme.gap(1),
+    paddingVertical: theme.gap(1),
   },
   game: {
     flex: 1,
