@@ -17,7 +17,19 @@ export const linking = {
               gameId: (gameId: string) => gameId,
             },
             screens: {
-              GameSettings: "settings",
+              GameSettingsNavigator: {
+                path: "settings",
+                screens: {
+                  AddPlayerNavigator: {
+                    path: "add-player",
+                    screens: {
+                      AddPlayerFavorites: "favorites",
+                      AddPlayerGHIN: "ghin",
+                      AddPlayerManual: "manual",
+                    },
+                  },
+                },
+              },
               GameScoring: "scoring",
             },
           },

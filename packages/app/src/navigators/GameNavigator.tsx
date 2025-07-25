@@ -9,9 +9,9 @@ import { StyleSheet } from "react-native-unistyles";
 import { GameHeader } from "@/components/game/GameHeader";
 import { useGameContext } from "@/contexts/GameContext";
 import { useGame } from "@/hooks";
+import { GameSettingsNavigator } from "@/navigators/GameSettingsNavigator";
 import { GameLeaderboard } from "@/screens/game/GameLeaderboard";
 import { GameScoring } from "@/screens/game/GameScoring";
-import { GameSettings } from "@/screens/game/GameSettings";
 
 // Types for the navigation stack
 type GameScreenRouteProp = {
@@ -37,8 +37,8 @@ type GameNavigatorProps = {
 
 export type GameNavigatorParamList = {
   GameLeaderboard: { gameId: string };
-  GameSettings: { gameId: string };
   GameScoring: { gameId: string };
+  GameSettingsNavigator: { gameId: string };
 };
 
 export type GameLeaderboardProps = MaterialTopTabScreenProps<
@@ -53,7 +53,7 @@ export type GameScoringProps = MaterialTopTabScreenProps<
 
 export type GameSettingsProps = MaterialTopTabScreenProps<
   GameNavigatorParamList,
-  "GameSettings"
+  "GameSettingsNavigator"
 >;
 
 export function GameNavigator({ route }: GameNavigatorProps) {
@@ -117,8 +117,8 @@ export function GameNavigator({ route }: GameNavigatorProps) {
           }}
         />
         <Tabs.Screen
-          name="GameSettings"
-          component={GameSettings}
+          name="GameSettingsNavigator"
+          component={GameSettingsNavigator}
           initialParams={{ gameId: route.params.gameId }}
           options={{
             title: "Settings",
