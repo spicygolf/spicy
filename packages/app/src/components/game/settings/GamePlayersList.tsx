@@ -1,6 +1,7 @@
 import { FlatList } from "react-native";
+import { GamePlayersListItem } from "@/components/game/settings/GamePlayersListItem";
 import { useGameContext } from "@/contexts/GameContext";
-import { Text } from "@/ui";
+import { EmptyPlayersList } from "./EmptyPlayersList";
 
 export function GamePlayersList() {
   const { game } = useGameContext();
@@ -8,8 +9,9 @@ export function GamePlayersList() {
   return (
     <FlatList
       data={game?.players}
-      renderItem={({ item: player }) => <Text>{player?.name}</Text>}
+      renderItem={({ item }) => <GamePlayersListItem player={item} />}
       keyExtractor={(item) => item?.id || ""}
+      ListEmptyComponent={<EmptyPlayersList />}
     />
   );
 }
