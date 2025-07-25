@@ -36,6 +36,9 @@ type SearchPlayerResponse = {
 
 export const searchPlayer = async ({q, p}: SearchPlayerRequest): Promise<object[] | null> => {
 
+  console.log('searchPlayer', q, p);
+  return [];
+  
   // don't search unless we have at least three characters
   if (q?.last_name?.length < 3 ) {
     return [];

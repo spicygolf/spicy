@@ -1,8 +1,10 @@
 import { FlatList } from "react-native";
-import type { Game } from "@/schema/games";
+import { useGameContext } from "@/contexts/GameContext";
 import { Text } from "@/ui";
 
-export function GamePlayersList({ game }: { game: Game | null }) {
+export function GamePlayersList() {
+  const { game } = useGameContext();
+
   return (
     <FlatList
       data={game?.players}

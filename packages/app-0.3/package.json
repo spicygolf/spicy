@@ -13,10 +13,6 @@
     "start": "react-native start",
     "test": "jest",
     "type-check": "tsc",
-    "prettier": "prettier '**/*.{js,ts,tsx}' --write",
-    "prettier:check": "prettier '**/*.{js,ts,tsx}' --check",
-    "lint": "eslint .",
-    "lint:fix": "eslint '**/*.{js,jsx,ts,tsx}' --fix",
     "postversion": "react-native-version",
     "build:ios": "node node_modules/react-native/local-cli/cli.js bundle --entry-file='index.js' --bundle-output='./ios/spicygolf/main.jsbundle' --dev=false --platform='ios' --assets-dest='./ios'",
     "build:android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
@@ -58,7 +54,7 @@
     "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "^1.5.6",
     "react-native-markdown-display": "^7.0.0-alpha.2",
-    "react-native-material-dropdown": "github.com:boorad/react-native-material-dropdown",
+    "react-native-element-dropdown": "2.12.4",
     "react-native-paper": "4.12.8",
     "react-native-reanimated": "^1.7.0",
     "react-native-safe-area-context": "^0.7.2",
@@ -92,11 +88,9 @@
     "eslint-plugin-react-hooks": "^5.0.0-next-819687279-20221208",
     "eslint-plugin-react-native": "^3.11.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
-    "husky": "^4.3.5",
     "import-sort-style-module": "^6.0.0",
     "jest": "^29.6.3",
     "jest-circus": "^26.5.3",
-    "lint-staged": "^10.4.0",
     "metro-react-native-babel-preset": "^0.59.0",
     "prettier": "^2.8.8",
     "prettier-plugin-import-sort": "^0.0.7",
@@ -125,17 +119,6 @@
       "^.+\\.js$": "<rootDir>/node_modules/react-native/jest/preprocessor.js"
     }
   },
-  "lint-staged": {
-    "*.{js,ts,tsx}": [
-      "yarn prettier",
-      "yarn lint:fix"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "importSort": {
     ".js, .jsx": {
       "parser": "babylon",
@@ -153,7 +136,6 @@
   },
   "trustedDependencies": [
     "core-js",
-    "husky",
     "react-native-elements"
   ]
 }

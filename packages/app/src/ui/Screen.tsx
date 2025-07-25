@@ -4,7 +4,7 @@ import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 type Props = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   style?: ViewStyle;
 };
 

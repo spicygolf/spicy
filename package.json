@@ -18,7 +18,11 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"]
+    "packages/app/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"],
+    "packages/api/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"],
+    "packages/ghin/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"],
+    "packages/lib/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"],
+    "packages/web/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"]
   },
   "trustedDependencies": [
     "@apollo/protobufjs",
