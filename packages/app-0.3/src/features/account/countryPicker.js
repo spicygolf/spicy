@@ -1,35 +1,24 @@
-import { find } from 'lodash';
-import React from 'react';
-import { Dropdown } from 'react-native-material-dropdown';
+import { Dropdown } from 'react-native-element-dropdown';
 
-const CountryPicker = (props) => {
+const CountryPicker = props => {
   const { countries, selectedValue, onValueChange } = props;
 
-  let items = countries.map((country) => ({
-    value: country.name,
+  const items = countries.map(country => ({
+    label: country.name,
+    value: country.code,
   }));
 
-  const getValue = (code) => {
-    const country = find(countries, { code: code });
-    if (!country) {
-      return '';
-    }
-    return country.name;
-  };
-
-  const onChange = (text) => {
-    const country = find(countries, { name: text });
-    onValueChange(country.code);
+  const onChange = selection => {
+    onValueChange(selection.value);
   };
 
   return (
     <Dropdown
-      value={getValue(selectedValue)}
+      value={selectedValue}
       data={items}
-      label="Country"
-      onChangeText={(text) => {
-        onChange(text);
-      }}
+      labelField="label"
+      valueField="value"
+      onChange={onChange}
     />
   );
 };

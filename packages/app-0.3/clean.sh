@@ -2,7 +2,7 @@
 
 echo "Cleaning up node modules";
 rm -rf node_modules;
-yarn install;
+bun install;
 echo "Cleaning all temp directories";
 rm -rf $TMPDIR/react-native-packager-cache-*;
 rm -rf $TMPDIR/metro-*;
@@ -23,4 +23,4 @@ cd android;
 rm -rf build;
 echo "PLEASE DELETE THE APP AND RESTART SIMULATOR after cache is reset";
 cd ..;
-npm start -- --reset-cache;
+bun start -- --reset-cache;

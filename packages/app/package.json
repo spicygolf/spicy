@@ -11,9 +11,9 @@
     "pods": "RCT_NEW_ARCH_ENABLED=1 bundle install && bundle exec pod install --project-directory=ios",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
-    "format": "biome format .",
     "lint:fix": "biome check --write .",
     "lint:fix:unsafe": "biome check --write --unsafe .",
+    "format": "biome format .",
     "format:fix": "biome format --write ."
   },
   "dependencies": {

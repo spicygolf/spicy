@@ -14,6 +14,21 @@
       "watchMode": true
     },
     {
+      "name": "mobile - app",
+      "type": "radon-ide",
+      "request": "launch",
+      "appRoot": "./packages/app",
+      "metroConfigPath": "./packages/app/metro.config.js",
+      "isExpo": false,
+      "suppressMultipleSessionWarning": true,
+      "ios": {
+        "configuration": "Debug"
+      },
+      "android": {
+        "buildType": "debug"
+      }
+    },
+    {
       "name": "mobile - app-0.3",
       "type": "radon-ide",
       "request": "launch",
@@ -126,6 +141,15 @@
       "program": "util/arango/schema_updates/20221220.js",
       "watchMode": "hot",
       "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "name": "Spicy Golf",
+      "type": "radon-ide",
+      "request": "launch",
+      "appRoot": "./packages/app",
+      "env": {},
+      "ios": {},
+      "android": {}
     }
   ]
 }

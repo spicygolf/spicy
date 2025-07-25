@@ -1,45 +1,27 @@
-import { find } from 'lodash';
-import React from 'react';
-import { StyleSheet } from 'react-native';
-import { Dropdown } from 'react-native-material-dropdown';
+import { Dropdown } from 'react-native-element-dropdown';
 
-const StatePicker = (props) => {
+const StatePicker = props => {
   const { states, selectedValue, onValueChange } = props;
 
-  let items = states.map((state) => ({
+  const items = states.map(state => ({
+    label: state.name,
     value: state.name,
   }));
 
-  const getValue = (code) => {
-    const state = find(states, { code: code });
-    if (!state) {
-      return '';
-    }
-    return state.name;
-  };
-
-  const onChange = (text) => {
-    const state = find(states, { name: text });
-    onValueChange(state.code);
+  const onChange = selection => {
+    onValueChange(selection.value);
   };
 
   return (
     <Dropdown
-      value={getValue(selectedValue)}
+      value={selectedValue}
       data={items}
-      label="State/Territory"
-      pickerStyle={styles.picker}
-      onChangeText={(text) => {
-        onChange(text);
-      }}
+      labelField="label"
+      valueField="value"
+      placeholder="Select a state/province"
+      onChange={onChange}
     />
   );
 };
 
 export default StatePicker;
-
-const styles = StyleSheet.create({
-  picker: {
-    height: '50%',
-  },
-});
