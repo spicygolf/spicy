@@ -2,7 +2,7 @@ import { AuthProvider } from "jazz-react-auth-betterauth";
 import { JazzReactNativeProvider } from "jazz-tools/react-native";
 import type React from "react";
 // import { RNQuickCrypto } from 'jazz-tools/react-native-core/crypto';
-import { PlayerAccount } from "@/schema/accounts";
+import { PlayerAccount } from "spicylib/schema";
 
 export function JazzAndAuth({ children }: { children: React.ReactNode }) {
   const peer = "wss://cloud.jazz.tools/?key=spicy.dev@druid.golf";

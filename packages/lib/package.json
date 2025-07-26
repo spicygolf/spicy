@@ -4,14 +4,15 @@
   "type": "module",
   "exports": {
     "./types": "./types/index.ts",
-    "./utils": "./utils/index.ts"
+    "./utils": "./utils/index.ts",
+    "./schema": "./schema/index.ts"
   },
   "devDependencies": {
     "bun-types": "latest",
     "typescript": "*"
   },
   "dependencies": {
-    "date-fns-tz": "^2.0.0",
+    "date-fns-tz": "3.2.0",
     "spicylib": "workspace:*"
   }
 }

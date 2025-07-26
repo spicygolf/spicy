@@ -1,6 +1,6 @@
 import { FlatList, View } from "react-native";
+import type { ListOfGameSpecs } from "spicylib/schema";
 import { SpecListItem } from "@/components/game/new/SpecListItem";
-import type { ListOfGameSpecs } from "@/schema/gamespecs";
 
 export function SpecList({
   specs,

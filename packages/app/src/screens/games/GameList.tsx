@@ -1,10 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAccount, useCoState } from "jazz-tools/react-native";
+import { ListOfGames, PlayerAccount } from "spicylib/schema";
 import { GameList } from "@/components/game/list/GameList";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
-import { PlayerAccount } from "@/schema/accounts";
-import { ListOfGames } from "@/schema/games";
 import { Button, Screen } from "@/ui";
 
 export function GameListScreen() {

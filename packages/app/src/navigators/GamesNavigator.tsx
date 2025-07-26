@@ -8,7 +8,13 @@ import { NewGame } from "@/screens/games/NewGame";
 export type GamesNavigatorParamList = {
   GamesList: undefined;
   NewGame: undefined;
-  Game: { gameId: string };
+  Game: {
+    gameId: string;
+    screen?: "GameSettingsNavigator" | "GameScoring";
+    params?: {
+      screen?: "GameSettings" | "AddPlayerNavigator";
+    };
+  };
 };
 
 const Stack = createNativeStackNavigator<GamesNavigatorParamList>();

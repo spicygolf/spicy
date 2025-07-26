@@ -1,6 +1,6 @@
 import { FlatList, View } from "react-native";
+import type { ListOfGames } from "spicylib/schema";
 import { GameListItem } from "@/components/game/list/GameListItem";
-import type { ListOfGames } from "@/schema/games";
 
 export function GameList({ games }: { games: ListOfGames | undefined }) {
   return (

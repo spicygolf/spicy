@@ -1,7 +1,7 @@
 import { co, Group, z } from "jazz-tools";
-import { ListOfGames } from "@/schema/games";
-import { defaultSpec, GameSpec, ListOfGameSpecs } from "@/schema/gamespecs";
-import { Player } from "@/schema/players";
+import { ListOfGames } from "./games";
+import { defaultSpec, GameSpec, ListOfGameSpecs } from "./gamespecs";
+import { Player } from "./players";
 
 export const PlayerAccountRoot = co.map({
   player: Player,
