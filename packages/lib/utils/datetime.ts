@@ -1,9 +1,8 @@
-import { zonedTimeToUtc } from 'date-fns-tz';
-
+import { zonedTimeToUtc } from "date-fns-tz";
 
 export const getUTCTimeISO = (time: Date | null) => {
   if (!time) {
-    return '';
+    return "";
   }
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return zonedTimeToUtc(time, timezone).toISOString();

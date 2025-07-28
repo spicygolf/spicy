@@ -1,11 +1,17 @@
 {
   "name": "spicylib",
-  "version": "0.0.1",
+  "version": "0.5.0",
   "type": "module",
   "exports": {
     "./types": "./types/index.ts",
     "./utils": "./utils/index.ts",
     "./schema": "./schema/index.ts"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write ."
   },
   "devDependencies": {
     "bun-types": "latest",
@@ -13,6 +19,6 @@
   },
   "dependencies": {
     "date-fns-tz": "3.2.0",
-    "spicylib": "workspace:*"
+    "ghin": "workspace:*"
   }
 }

@@ -1,19 +1,25 @@
+import { type Country as GhinCountry, getCountriesAndStates } from "ghin";
 import { co, Group, z } from "jazz-tools";
 import { ListOfGames } from "./games";
 import { defaultSpec, GameSpec, ListOfGameSpecs } from "./gamespecs";
+import { Country, ListOfCountries, ListOfStates, State } from "./ghin";
 import { Player } from "./players";
+
+const { JAZZ_WORKER_ACCOUNT } = process.env;
+const RESET = false; // for DEV
 
 export const PlayerAccountRoot = co.map({
   player: Player,
   games: ListOfGames,
   specs: ListOfGameSpecs,
 });
-export type PlayerAccountRoot = co.loaded<typeof PlayerAccountRoot>;
 
-export const PlayerAccountProfile = co.map({
+export const PlayerAccountProfile = co.profile({
   name: z.string(),
+  /** used by Server Worker to store countries and states from GHIN */
+  countries: ListOfCountries,
+  updated_at: z.date(),
 });
-export type PlayerAccountProfile = co.loaded<typeof PlayerAccountProfile>;
 
 export const PlayerAccount = co
   .account({
@@ -47,5 +53,135 @@ export const PlayerAccount = co
         { owner: account },
       );
     }
+  })
+  .withMigration(async (account) => {
+    if (account.id === JAZZ_WORKER_ACCOUNT) {
+      if (account.profile === undefined || RESET) {
+        const group = Group.create();
+        group.addMember(account, "admin");
+        group.addMember("everyone", "reader");
+        account.profile = PlayerAccountProfile.create(
+          {
+            name: "Spicy Golf Server Worker",
+            countries: await getCountries(group),
+            updated_at: new Date(),
+          },
+          { owner: group },
+        );
+        return;
+      }
+
+      if (profileNeedsUpdate(account.profile) && account.profile !== null) {
+        account.profile.countries = await getCountries(
+          account.profile._owner as Group,
+        );
+        account.profile.updated_at = new Date();
+      }
+    }
   });
-export type PlayerAccount = co.loaded<typeof PlayerAccount>;
+
+type ListOfCountriesType = co.loaded<typeof ListOfCountries>;
+
+async function getCountries(group: Group): Promise<ListOfCountriesType> {
+  const data = await getCountriesAndStates();
+  if (!data) {
+    throw new Error("Failed to get GHIN countries and states");
+  }
+
+  const listOfCountries = ListOfCountries.create([], { owner: group });
+
+  for (const countryData of data as GhinCountry[]) {
+    if (!countryData.code || !countryData.name) continue;
+
+    // Check if country already exists by code
+    const existingCountry = listOfCountries.find(
+      (c) => c?.code === countryData.code,
+    );
+
+    if (!existingCountry) {
+      // Create states list for this country
+      const statesForCountry = ListOfStates.create([], { owner: group });
+
+      // Process states for this country
+      if (countryData.states) {
+        for (const stateData of countryData.states) {
+          if (!stateData.code || !stateData.name) continue;
+
+          // Check if state already exists by code
+          const existingState = statesForCountry.find(
+            (s) => s?.code === stateData.code,
+          );
+
+          if (!existingState) {
+            // Create new state
+            const newState = State.create(
+              {
+                name: stateData.name,
+                code: stateData.code,
+                course_code: stateData.course_code || "",
+              },
+              { owner: group },
+            );
+
+            statesForCountry.push(newState);
+          }
+        }
+      }
+
+      // Create new country
+      const newCountry = Country.create(
+        {
+          name: countryData.name,
+          code: countryData.code,
+          crs_code: countryData.crs_code || "",
+          states: statesForCountry,
+        },
+        { owner: group },
+      );
+
+      listOfCountries.push(newCountry);
+    } else {
+      // Country exists, update its states if needed
+      if (countryData.states) {
+        for (const stateData of countryData.states) {
+          if (!stateData.code || !stateData.name) continue;
+
+          // Check if state already exists in the existing country
+          const existingState = existingCountry.states?.find(
+            (s) => s?.code === stateData.code,
+          );
+
+          if (!existingState && existingCountry.states) {
+            // Create new state and add to existing country
+            const newState = State.create(
+              {
+                name: stateData.name,
+                code: stateData.code,
+                course_code: stateData.course_code || "",
+              },
+              { owner: group },
+            );
+
+            existingCountry.states.push(newState);
+          }
+        }
+      }
+    }
+  }
+
+  return listOfCountries;
+}
+
+type PlayerAccountProfileType = co.loaded<typeof PlayerAccountProfile>;
+
+function profileNeedsUpdate(
+  profile: PlayerAccountProfileType | undefined | null,
+): boolean {
+  if (!profile) return true;
+  const now = new Date();
+  const lastUpdated = profile.updated_at;
+  if (!lastUpdated) return true;
+  const diff = now.getTime() - lastUpdated.getTime();
+  // return diff > 24 * 60 * 60 * 1000; // 24 hours
+  return diff > 10 * 1000; // 10 seconds for DEV
+}

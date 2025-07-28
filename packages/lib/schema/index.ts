@@ -2,6 +2,7 @@ export * from "./accounts";
 export * from "./gameholes";
 export * from "./games";
 export * from "./gamespecs";
+export * from "./ghin";
 export * from "./players";
 export * from "./rounds";
 export * from "./scores";
