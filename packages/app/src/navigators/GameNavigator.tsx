@@ -6,7 +6,7 @@ import {
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect } from "react";
 import { View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { GameHeader } from "@/components/game/GameHeader";
 import { useGameContext } from "@/contexts/GameContext";
 import { useGame } from "@/hooks";
@@ -43,6 +43,7 @@ export type GameSettingsProps = MaterialTopTabScreenProps<
 >;
 
 export function GameNavigator({ route }: GameNavigatorProps) {
+  const { theme } = useUnistyles();
   const { setGame } = useGameContext();
   // Extract gameId from route params
   const gameId = route.params.gameId;
@@ -68,11 +69,13 @@ export function GameNavigator({ route }: GameNavigatorProps) {
     swipeEnabled: false,
     tabBarStyle: {
       height: 35,
+      backgroundColor: theme.colors.background,
     },
     tabBarLabelStyle: {
       padding: 0,
       marginTop: 0,
       marginBottom: 20,
+      color: theme.colors.primary,
     },
   };
 

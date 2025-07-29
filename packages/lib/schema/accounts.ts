@@ -59,7 +59,7 @@ export const PlayerAccount = co
       if (account.profile === undefined || RESET) {
         const group = Group.create();
         group.addMember(account, "admin");
-        group.addMember("everyone", "reader");
+        group.makePublic();
         account.profile = PlayerAccountProfile.create(
           {
             name: "Spicy Golf Server Worker",

@@ -1,4 +1,5 @@
 import { StrictMode } from "react";
+import { LogBox } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RootNavigator } from "@/navigators/RootNavigator";
 import { JazzAndAuth } from "@/providers/jazz";
@@ -17,3 +18,8 @@ export function App() {
     </StrictMode>
   );
 }
+
+LogBox.ignoreLogs([
+  "Open debugger to view warnings",
+  "findNodeHandle is deprecated in StrictMode",
+]);
