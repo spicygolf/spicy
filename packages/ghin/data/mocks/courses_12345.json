@@ -1,0 +1,91 @@
+{
+  "CourseId": 12345,
+  "CourseName": "Pebble Beach Golf Links",
+  "CourseStatus": "Active",
+  "CourseNumber": 1,
+  "CourseCity": "Pebble Beach",
+  "CourseState": "CA",
+  "Facility": {
+    "FacilityId": 1001,
+    "FacilityName": "Pebble Beach Company",
+    "FacilityStatus": "Active",
+    "FacilityNumber": "PB001",
+    "GeoLocationFormattedAddress": "1700 17-Mile Drive, Pebble Beach, CA 93953",
+    "GeoLocationLatitude": 36.5681,
+    "GeoLocationLongitude": -121.9486
+  },
+  "Season": {
+    "SeasonName": "Year Round",
+    "SeasonStartDate": "2024-01-01",
+    "SeasonEndDate": "2024-12-31",
+    "IsAllYear": true
+  },
+  "TeeSets": [
+    {
+      "TeeSetRatingId": 101,
+      "TeeSetRatingName": "Championship Tees",
+      "Gender": "M",
+      "HolesNumber": 18,
+      "TotalYardage": 6828,
+      "TotalMeters": 6244,
+      "TotalPar": 72,
+      "Ratings": [
+        {
+          "RatingType": "Regular",
+          "CourseRating": 75.5,
+          "SlopeRating": 144,
+          "BogeyRating": 101.2
+        }
+      ],
+      "Holes": [
+        {
+          "Number": 1,
+          "HoleId": "PB001-1",
+          "Length": 381,
+          "Par": 4,
+          "Allocation": 11
+        },
+        {
+          "Number": 2,
+          "HoleId": "PB001-2",
+          "Length": 502,
+          "Par": 5,
+          "Allocation": 15
+        }
+      ]
+    },
+    {
+      "TeeSetRatingId": 102,
+      "TeeSetRatingName": "Blue Tees",
+      "Gender": "M",
+      "HolesNumber": 18,
+      "TotalYardage": 6325,
+      "TotalMeters": 5784,
+      "TotalPar": 72,
+      "Ratings": [
+        {
+          "RatingType": "Regular",
+          "CourseRating": 72.8,
+          "SlopeRating": 140,
+          "BogeyRating": 98.5
+        }
+      ],
+      "Holes": [
+        {
+          "Number": 1,
+          "HoleId": "PB001-1",
+          "Length": 350,
+          "Par": 4,
+          "Allocation": 11
+        },
+        {
+          "Number": 2,
+          "HoleId": "PB001-2",
+          "Length": 465,
+          "Par": 5,
+          "Allocation": 15
+        }
+      ]
+    }
+  ]
+}

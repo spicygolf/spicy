@@ -1,7 +1,8 @@
 import { cors } from "@elysiajs/cors";
 import type { Context } from "elysia";
 import { Elysia } from "elysia";
-import { setupWorker } from "./jazz_worker";
+import { getCountries } from "./countries";
+// import { setupWorker } from "./jazz_worker";
 import { auth } from "./lib/auth";
 import { PlayerSearchSchema, playerSearch } from "./players";
 
@@ -50,16 +51,19 @@ const app = new Elysia()
   .get(`/${api}`, () => "Spicy Golf API")
   .get(`/${api}/user`, ({ user }) => user, { auth: true })
   .post(`/${api}/ghin/players/search`, ({ body }) => playerSearch(body), {
-    auth: true,
+    // auth: true,
     body: PlayerSearchSchema,
+  })
+  .get(`/${api}/ghin/countries`, () => getCountries(), {
+    // auth: true,
   })
   .listen({
     port: port || 3040,
     hostname: host || "localhost",
   });
 
-setupWorker();
+// setupWorker();
 
 console.log(
-  `⛳️ Spicy Golf API is running at ${scheme}://${app.server?.hostname}:${app.server?.port} ⛳️`,
+  `⛳️ Spicy Golf API is running at ${scheme}://${app.server?.hostname}:${app.server?.port}/${api} ⛳️`,
 );

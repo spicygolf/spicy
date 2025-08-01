@@ -1,0 +1,39 @@
+{
+  "courses": [
+    {
+      "CourseID": 12345,
+      "CourseStatus": "Active",
+      "CourseName": "Pebble Beach Golf Links",
+      "GeoLocationLatitude": 36.5681,
+      "GeoLocationLongitude": -121.9486,
+      "FacilityID": 1001,
+      "FacilityStatus": "Active",
+      "FacilityName": "Pebble Beach Company",
+      "FullName": "Pebble Beach Golf Links",
+      "Address1": "1700 17-Mile Drive",
+      "Address2": "",
+      "City": "Pebble Beach",
+      "State": "CA",
+      "Zip": 93953,
+      "Country": "US",
+      "UpdatedOn": "2024-01-15T10:30:00Z",
+      "Ratings": [
+        {
+          "TeeSetRatingId": 101,
+          "TeeSetRatingName": "Championship Tees",
+          "TeeSetStatus": "Active"
+        },
+        {
+          "TeeSetRatingId": 102,
+          "TeeSetRatingName": "Blue Tees",
+          "TeeSetStatus": "Active"
+        },
+        {
+          "TeeSetRatingId": 103,
+          "TeeSetRatingName": "White Tees",
+          "TeeSetStatus": "Active"
+        }
+      ]
+    }
+  ]
+}

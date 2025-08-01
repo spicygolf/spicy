@@ -1,164 +1,105 @@
-import { useContext } from "react";
+import type { SearchPlayerResponse } from "ghin";
+import { useContext, useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { GhinPlayerSearchContext } from "@/contexts/GhinPlayerSearchContext";
-// import {
-//   ActivityIndicator,
-//   FlatList,
-//   StyleSheet,
-//   View,
-// } from "react-native";
-// import { Text } from "@/ui";
+import { useGhinSearchPlayerQuery } from "@/hooks/useGhinSearchPlayerQuery";
+import { Text } from "@/ui";
+import { Player } from "./Player";
 
 export function GhinPlayerSearchResults() {
-  const { state, setState: _ } = useContext(GhinPlayerSearchContext);
+  const { state, setState } = useContext(GhinPlayerSearchContext);
   console.log("ghin player search", state);
-  return null;
 
-  // const [page, setPage] = useState(1);
-  // const [golfers, setGolfers] = useState([]);
-  // const perPage = 25;
+  const [page, setPage] = useState(1);
+  const [golfers, setGolfers] = useState<SearchPlayerResponse[]>([]);
+  const per_page = 25;
 
-  // const handicap = (h) => (
-  //   <View>
-  //     <Text style={styles.handicap}>{h}</Text>
-  //   </View>
-  // );
+  const { isPending, isError, error, data } = useGhinSearchPlayerQuery(
+    state,
+    page,
+    per_page,
+  );
 
-  // const keyExtractor = (g) => `${g?.id}-${g?.clubs[0]?.id}-${g?.playerName}`;
+  // if state changes at all, reset everything
+  useEffect(() => {
+    setPage(1);
+    setGolfers([]);
+  }, []);
 
-  // const renderGolfer = ({ item }) => {
-  //   if (!item) {
-  //     return null;
-  //   }
-  //   const fn = item.firstName;
-  //   const gn = item.id;
-  //   const key = keyExtractor(item);
-  //   const player_name = item.playerName;
-  //   const player_club = item.clubs[0]?.name;
-  //   const hdcp = item.index;
+  // when new data arrives, add it to `golfers` array
+  useEffect(() => {
+    if (data) {
+      setGolfers((g) => g.concat(data));
+    }
+  }, [data]);
 
-  //   return (
-  //     <ListItem
-  //       containerStyle={styles.container}
-  //       key={key}
-  //       onPress={() => {
-  //         setState({
-  //           country: state.country,
-  //           state: state.state,
-  //           first_name: state.firstName,
-  //           last_name: state.lastName,
-  //           handicap: {
-  //             source: "ghin",
-  //             id: gn,
-  //             index: hdcp,
-  //           },
-  //           name: player_name,
-  //           short: fn,
-  //         });
-  //       }}
-  //     >
-  //       <ListItem.Content style={styles.container}>
-  //         <ListItem.Title style={styles.player_name}>
-  //           {player_name}
-  //         </ListItem.Title>
-  //         <ListItem.Subtitle style={styles.player_club}>
-  //           {player_club}
-  //         </ListItem.Subtitle>
-  //       </ListItem.Content>
-  //       {handicap(hdcp)}
-  //     </ListItem>
-  //   );
-  // };
+  if (isPending) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
-  // const { loading, error, data } = useQuery(SEARCH_PLAYER_QUERY, {
-  //   variables: {
-  //     q: {
-  //       country: state.country,
-  //       state: state.state,
-  //       first_name: state.firstName,
-  //       last_name: state.lastName,
-  //       status: "Active",
-  //     },
-  //     p: {
-  //       page,
-  //       perPage,
-  //     },
-  //   },
-  // });
+  if (isError) {
+    console.log(error);
+    console.log(error.stack);
+    // TODO: error component
+    return <Text>{error.message}</Text>;
+  }
 
-  // // if state changes at all, reset everything
-  // useEffect(() => {
-  //   setPage(1);
-  //   setGolfers([]);
-  // }, [state]);
+  const keyExtractor = (g: SearchPlayerResponse) =>
+    `${g?.ghin}-${g?.club_id}-${g?.player_name}`;
 
-  // // when new data arrives, add it to `golfers` array
-  // useEffect(() => {
-  //   setGolfers((g) => g.concat(data?.searchPlayer));
-  // }, [data]);
+  return (
+    <FlatList
+      data={golfers}
+      renderItem={({ item }) => (
+        <Player item={item} state={state} setState={setState} />
+      )}
+      keyExtractor={keyExtractor}
+      onEndReachedThreshold={0.8}
+      onEndReached={async () => {
+        // TODO: I wasn't tracking on the whole state.handicap.id thing here.
+        //       Maybe if it's full, a player has been selected and we can stop?
+        // // should only be in 'search' part where we want to peform
+        // // infinite scroll pagination
+        // if (state.last_name && state.handicap?.id) {
+        //   return;
+        // }
 
-  // if (loading) {
-  //   return (
-  //     <View style={styles.results_list}>
-  //       <ActivityIndicator />
-  //     </View>
-  //   );
-  // }
-
-  // if (error && error.message !== "Network request failed") {
-  //   console.log(error);
-  //   // TODO: error component
-  //   return <Text>Error Searching Players: `{error.message}`</Text>;
-  // }
-
-  // // console.log(state, page, data?.searchPlayer, golfers.length);
-
-  // return (
-  //   <FlatList
-  //     data={golfers}
-  //     renderItem={renderGolfer}
-  //     keyExtractor={keyExtractor}
-  //     onEndReachedThreshold={0.8}
-  //     onEndReached={async () => {
-  //       // should only be in 'search' part where we want to peform
-  //       // infinite scroll pagination
-  //       if (state.lastName && state.handicap?.id) {
-  //         return;
-  //       }
-
-  //       // data is as long as perPage, so we're not at end yet
-  //       if (data.searchPlayer.length === perPage) {
-  //         setPage((p) => p + 1);
-  //       }
-  //     }}
-  //     keyboardShouldPersistTaps="handled"
-  //     ListEmptyComponent={
-  //       <View style={styles.emptyContainer}>
-  //         <Text style={styles.no_results}>No Results</Text>
-  //       </View>
-  //     }
-  //   />
-  // );
+        // data is as long as per_page, so we're not at end yet
+        if (data?.length === per_page) {
+          setPage((p) => p + 1);
+        }
+      }}
+      keyboardShouldPersistTaps="handled"
+      ListEmptyComponent={
+        <View style={styles.emptyContainer}>
+          <Text style={styles.no_results}>No Results</Text>
+        </View>
+      }
+    />
+  );
 }
 
-// const styles = StyleSheet.create({
-//   container: {
-//     marginHorizontal: 0,
-//     paddingHorizontal: 5,
-//     paddingVertical: 4,
-//   },
-//   emptyContainer: {
-//     flex: 1,
-//   },
-//   handicap: {
-//     fontSize: 20,
-//   },
-//   no_results: {
-//     alignSelf: "center",
-//     color: "#999",
-//     fontSize: 20,
-//   },
-//   player_club: {
-//     color: "#999",
-//     fontSize: 11,
-//   },
-// });
+const styles = StyleSheet.create({
+  container: {
+    marginHorizontal: 0,
+    paddingHorizontal: 5,
+    paddingVertical: 4,
+  },
+  emptyContainer: {
+    flex: 1,
+  },
+  no_results: {
+    alignSelf: "center",
+    color: "#999",
+    fontSize: 20,
+  },
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

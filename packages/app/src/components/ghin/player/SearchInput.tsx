@@ -10,8 +10,16 @@ import { Input, Picker } from "@/ui";
 // import Error from '@/components/error';
 
 export function GhinPlayerSearchInput() {
-  const { state, setState } = useContext(GhinPlayerSearchContext);
+  const context = useContext(GhinPlayerSearchContext);
   const { countries } = useGetCountriesAndStates();
+
+  if (!context) {
+    throw new Error(
+      "GhinPlayerSearchInput must be used within a GhinPlayerSearchContext.Provider",
+    );
+  }
+
+  const { state, setState } = context;
   const handleChange = (data: GhinPlayerSearchState) => setState(data);
 
   if (countries) {

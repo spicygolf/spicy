@@ -83,9 +83,9 @@ const callGetCountriesAndStates = async () => {
 };
 
 const main = async () => {
-  // await callSearchPlayer();
+  await callSearchPlayer();
   // await callSearchCourse();
-  await callGetCourse();
+  // await callGetCourse();
   // await callGetTee();
   // await callGetCountriesAndStates();
 };

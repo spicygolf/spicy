@@ -17,5 +17,6 @@ export const PlayerSearchSchema = t.Object({
 export type PlayerSearchSchema = typeof PlayerSearchSchema.static;
 
 export function playerSearch(body: PlayerSearchSchema) {
+  console.log("playerSearch", body);
   return searchPlayer(body);
 }

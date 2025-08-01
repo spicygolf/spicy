@@ -1,4 +1,3 @@
-import { type Country as GhinCountry, getCountriesAndStates } from "ghin";
 import { co, Group, z } from "jazz-tools";
 import { ListOfGames } from "./games";
 import { defaultSpec, GameSpec, ListOfGameSpecs } from "./gamespecs";
@@ -82,11 +81,43 @@ export const PlayerAccount = co
 
 type ListOfCountriesType = co.loaded<typeof ListOfCountries>;
 
-async function getCountries(group: Group): Promise<ListOfCountriesType> {
-  const data = await getCountriesAndStates();
-  if (!data) {
-    throw new Error("Failed to get GHIN countries and states");
+// Local type definitions that match the ghin package types
+// without importing the ghin package (due to app being RN)
+type GhinState = {
+  name?: string;
+  code?: string;
+  course_code?: string;
+};
+
+type GhinCountry = {
+  name?: string;
+  code?: string;
+  crs_code?: string;
+  states?: GhinState[];
+};
+
+async function getCountriesFromAPI(): Promise<GhinCountry[]> {
+  const { API_SCHEME, API_HOST, API_PORT, API_VERSION } = process.env;
+  const baseUrl = `${API_SCHEME}://${API_HOST}:${API_PORT}/${API_VERSION}`;
+
+  try {
+    const response = await fetch(`${baseUrl}/ghin/countries`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = (await response.json()) as GhinCountry[];
+    if (!data || data.length === 0) {
+      throw new Error("Failed to get GHIN countries and states from API");
+    }
+    return data;
+  } catch (error) {
+    console.error("Error fetching countries from API:", error);
+    throw error;
   }
+}
+
+async function getCountries(group: Group): Promise<ListOfCountriesType> {
+  const data = await getCountriesFromAPI();
 
   const listOfCountries = ListOfCountries.create([], { owner: group });
 

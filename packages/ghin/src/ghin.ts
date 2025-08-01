@@ -1,7 +1,8 @@
 import axios, { type AxiosResponse } from "axios";
+import { getMockResponse, isMockingEnabled } from "./mock";
 import type { GhinRequestFn } from "./types";
 
-const { GHIN_BASE_URL, _GHIN_EMAIL, _GHIN_PASS } = process.env;
+const { GHIN_BASE_URL, GHIN_TOKEN, _GHIN_EMAIL, _GHIN_PASS } = process.env;
 // le sigh, global :(
 const retries: number = 3;
 let ghinToken: string | undefined;
@@ -39,6 +40,24 @@ export const ghinRequest: GhinRequestFn = async ({
     : {};
 
   console.log("ghin request", url, params, data);
+
+  // Check if mocking is enabled and return mock response
+  if (isMockingEnabled()) {
+    const mockResponse = getMockResponse({
+      method,
+      url,
+      params,
+      data,
+      attempts,
+    });
+    if (mockResponse) {
+      return mockResponse;
+    }
+    console.warn(
+      "Mock enabled but no mock data found, falling back to real API",
+    );
+  }
+
   try {
     const resp: AxiosResponse = await instance.request({
       method,
@@ -68,7 +87,6 @@ export const ghinRequest: GhinRequestFn = async ({
 
 const login = async (): Promise<string | undefined> => {
   // Get this from ghin.com website after logging in
-  const { GHIN_TOKEN } = process.env;
   return GHIN_TOKEN;
 
   // // or use this after access to sandbox/uat is granted
