@@ -20,6 +20,7 @@ export const linking = {
               GameSettingsNavigator: {
                 path: "settings",
                 screens: {
+                  GameSettings: "",
                   AddPlayerNavigator: {
                     path: "add-player",
                     screens: {

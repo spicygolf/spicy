@@ -1,6 +1,5 @@
-
 export type Round = {
-  _type: 'round';
+  _type: "round";
   created: string;
   seq: number;
 };
@@ -11,7 +10,7 @@ export type RoundScore = {
 };
 
 export type ScoreKV = {
-  _type: 'score_kv';
+  _type: "score_kv";
   k: string;
   v: number | boolean | string;
   ts: string;

@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Game } from "@/schema/games";
+import type { Game } from "spicylib/schema";
 import { Text } from "@/ui";
 
 export function GameHeader({ game }: { game: Game }) {

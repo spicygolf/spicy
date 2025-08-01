@@ -1,0 +1,49 @@
+diff --git a/Users/brad/dev/spicy/node_modules/react-native-element-dropdown/.bun-tag-7aaf89ef19a4adb0 b/.bun-tag-7aaf89ef19a4adb0
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/lib/typescript/components/Dropdown/model.d.ts b/lib/typescript/components/Dropdown/model.d.ts
+index a0b17d4568dc1684719040202aaa9709dc8aaf56..24a4e68fac305e9c5f85398678e8417d13eaeeb8 100644
+--- a/lib/typescript/components/Dropdown/model.d.ts
++++ b/lib/typescript/components/Dropdown/model.d.ts
+@@ -22,6 +22,7 @@ export interface DropdownProps<T> {
+     fontFamily?: string;
+     iconColor?: string;
+     activeColor?: string;
++    activeTextColor?: string;
+     data: T[];
+     value?: T | string | null | undefined;
+     placeholder?: string;
+diff --git a/src/components/Dropdown/index.tsx b/src/components/Dropdown/index.tsx
+index 2a73f2f70cfd0dd3dfb13db740cf083c16a4f531..0224a47846f3d7f4ae61be261b9b33d5dd138d02 100644
+--- a/src/components/Dropdown/index.tsx
++++ b/src/components/Dropdown/index.tsx
+@@ -63,6 +63,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
+       searchField,
+       value,
+       activeColor = '#F6F7F8',
++      activeTextColor,
+       fontFamily,
+       iconColor = 'gray',
+       searchPlaceholder,
+@@ -514,6 +515,9 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
+                       styles.textItem,
+                       itemTextStyle,
+                       font(),
++                      selected && !!activeTextColor && {
++                        color: activeTextColor
++                      }
+                     ])}
+                   >
+                     {_get(item, labelField)}
+diff --git a/src/components/Dropdown/model.ts b/src/components/Dropdown/model.ts
+index e4212a9ce223991295a81ff6f0419be08a2334a4..f3ad33b9ec70c2b57b31863546ec2bf8c78ae455 100644
+--- a/src/components/Dropdown/model.ts
++++ b/src/components/Dropdown/model.ts
+@@ -35,6 +35,7 @@ export interface DropdownProps<T> {
+   fontFamily?: string;
+   iconColor?: string;
+   activeColor?: string;
++  activeTextColor?: string;
+   data: T[];
+   value?: T | string | null | undefined;
+   placeholder?: string;

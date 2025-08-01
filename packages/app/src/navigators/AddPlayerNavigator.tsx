@@ -3,7 +3,7 @@ import {
   type MaterialTopTabNavigationOptions,
 } from "@react-navigation/material-top-tabs";
 import { View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import GameNav from "@/components/game/GameNav";
 import { AddPlayerFavorites } from "@/screens/game/settings/AddPlayerFavorites";
 import { AddPlayerGhin } from "@/screens/game/settings/AddPlayerGhin";
@@ -16,24 +16,30 @@ export type AddPlayerTabParamList = {
 };
 
 export function AddPlayerNavigator() {
+  const { theme } = useUnistyles();
   const Tabs = createMaterialTopTabNavigator<AddPlayerTabParamList>();
 
   const tabScreenOptions: MaterialTopTabNavigationOptions = {
     tabBarIndicatorStyle: styles.selectedTabLine,
     tabBarStyle: {
       height: 35,
+      backgroundColor: theme.colors.background,
     },
     tabBarLabelStyle: {
       padding: 0,
       marginTop: 0,
       marginBottom: 20,
+      color: theme.colors.primary,
     },
   };
 
   return (
     <View style={styles.container}>
       <GameNav title="Add Player" showBack={true} />
-      <Tabs.Navigator screenOptions={tabScreenOptions}>
+      <Tabs.Navigator
+        screenOptions={tabScreenOptions}
+        initialRouteName="AddPlayerGHIN"
+      >
         <Tabs.Screen
           name="AddPlayerFavorites"
           component={AddPlayerFavorites}

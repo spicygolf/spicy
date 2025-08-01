@@ -1,4 +1,4 @@
-import type { Game, ListOfGames } from "@/schema/games";
+import type { Game, ListOfGames } from "spicylib/schema";
 import { Button } from "@/ui";
 
 // TODO: will we be able to get `games` list to this component, if it's located

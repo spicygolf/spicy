@@ -1,15 +1,16 @@
-import { ghinRequest } from './ghin';
+import { ghinRequest } from "./ghin";
 import type {
-  SearchCourseResponse,
-  SearchCourseRequest,
   ResponseCourse,
-  ResponseTeeSetRating
-} from './types';
+  ResponseTeeSetRating,
+  SearchCourseRequest,
+  SearchCourseResponse,
+} from "./types";
 
-export const searchCourse = async ({q}: SearchCourseRequest): Promise<SearchCourseResponse> => {
-
+export const searchCourse = async ({
+  q,
+}: SearchCourseRequest): Promise<SearchCourseResponse> => {
   // don't search unless we have at least three characters
-  if (q.name && q.name.length < 3 ) {
+  if (q.name && q.name.length < 3) {
     return [];
   }
 
@@ -18,7 +19,7 @@ export const searchCourse = async ({q}: SearchCourseRequest): Promise<SearchCour
   };
 
   const resp = await ghinRequest({
-    method: 'get',
+    method: "get",
     url: `/courses/search.json`,
     params,
     data: {},

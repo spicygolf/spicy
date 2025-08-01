@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Player } from "@/schema/players";
+import type { Player } from "spicylib/schema";
 import { Text } from "@/ui";
 import { PlayerDelete } from "./PlayerDelete";
 

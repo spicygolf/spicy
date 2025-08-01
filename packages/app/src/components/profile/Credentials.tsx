@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 // biome-ignore lint/style/noRestrictedImports: This component is a wrapper around the React Native component.
 import { TextInput, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { PlayerAccount } from "@/schema/accounts";
+import { PlayerAccount } from "spicylib/schema";
 import { Text } from "@/ui";
 
 const CopyIcon = () => <FontAwesome6 name="copy" size={12} color="gray" />;

@@ -1,12 +1,15 @@
 import { Group } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-core";
-import { PlayerAccount } from "@/schema/accounts";
-import { ListOfGameHoles } from "@/schema/gameholes";
-import { Game } from "@/schema/games";
-import type { GameSpec } from "@/schema/gamespecs";
-import { ListOfGameSpecs } from "@/schema/gamespecs";
-import { ListOfPlayers, Player } from "@/schema/players";
-import { ListOfRoundToGames } from "@/schema/rounds";
+import type { GameSpec } from "spicylib/schema";
+import {
+  Game,
+  ListOfGameHoles,
+  ListOfGameSpecs,
+  ListOfPlayers,
+  ListOfRoundToGames,
+  Player,
+  PlayerAccount,
+} from "spicylib/schema";
 
 export function useCreateGame() {
   const { me } = useAccount(PlayerAccount, {

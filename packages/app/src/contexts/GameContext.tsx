@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
-import type { Game } from "@/schema/games";
+import type { Game } from "spicylib/schema";
 
 type GameContextType = {
   game: Game | null;

@@ -1,5 +1,5 @@
+import { Player } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
-import { Player } from "@/schema/players";
 
 export function AddPlayer() {
   const { game } = useGameContext();
