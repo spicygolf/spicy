@@ -1,5 +1,6 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { SearchPlayerResponse } from "ghin";
+import type { CoMapInit } from "jazz-tools";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
@@ -21,7 +22,7 @@ export function PlayerItem({ item }: { item: SearchPlayerResponse }) {
   const player_club = item.club_name;
   const hdcp = item.handicap_index;
 
-  const makePlayer = (): Player => {
+  const makePlayer = (): CoMapInit<Player> => {
     return {
       name: player_name || "",
       email: "",
