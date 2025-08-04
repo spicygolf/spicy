@@ -1,10 +1,8 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { SearchPlayerResponse } from "ghin";
-import type { CoMapInit } from "jazz-tools";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Player } from "spicylib/schema";
-import { useAddPlayerToGame } from "@/hooks";
+import { type PlayerData, useAddPlayerToGame } from "@/hooks";
 import { Text } from "@/ui";
 
 export function PlayerItem({ item }: { item: SearchPlayerResponse }) {
@@ -22,11 +20,12 @@ export function PlayerItem({ item }: { item: SearchPlayerResponse }) {
   const player_club = item.club_name;
   const hdcp = item.handicap_index;
 
-  const makePlayer = (): CoMapInit<Player> => {
+  const makePlayer = (): PlayerData => {
     return {
       name: player_name || "",
       email: "",
       short: item.first_name || "",
+      level: "",
       handicap: item.ghin
         ? {
             source: "ghin" as const,
