@@ -1,10 +1,11 @@
+import type { CoMapInit } from "jazz-tools";
 import { Player } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
 
 export function useAddPlayerToGame() {
   const { game } = useGameContext();
 
-  const addPlayerToGame = (p: Player) => {
+  const addPlayerToGame = (p: CoMapInit<Player>) => {
     if (!game?.players) {
       console.error("useAddPlayerToGame: no players in game");
       return;
