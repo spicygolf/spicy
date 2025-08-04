@@ -74,8 +74,14 @@ export function useGhinSearchPlayerQuery(
   per_page: number = 25,
 ) {
   const api = useApi();
+  // add wildcards to names
+  const q = {
+    ...searchState,
+    last_name: `${searchState.last_name}%`,
+    first_name: `${searchState.first_name}%`,
+  };
   const searchParams: SearchParams = {
-    q: searchState,
+    q,
     p: { page, per_page },
   };
 

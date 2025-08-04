@@ -16,7 +16,7 @@
     "better-auth": "^1.2.12",
     "elysia": "1.3.5",
     "ghin": "workspace:*",
-    "jazz-betterauth-server-plugin": "0.15.11",
+    "jazz-betterauth-server-plugin": "0.16.3",
     "spicylib": "workspace:*"
   },
   "devDependencies": {

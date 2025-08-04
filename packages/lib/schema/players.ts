@@ -17,9 +17,9 @@ export const Player = co.map({
   name: z.string(),
   email: z.string(),
   short: z.string(),
-  handicap: z.optional(Handicap),
+  handicap: co.optional(Handicap),
   // meta
-  envs: z.optional(ListOfEnvironments),
+  envs: co.optional(ListOfEnvironments),
   level: z.string(),
 });
 export type Player = co.loaded<typeof Player>;

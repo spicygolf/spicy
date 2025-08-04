@@ -1,3 +1,4 @@
+export * from "./useAddPlayerToGame";
 export * from "./useApi";
 export * from "./useCreateGame";
 export * from "./useGame";

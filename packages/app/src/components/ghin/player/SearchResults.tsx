@@ -4,11 +4,10 @@ import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { GhinPlayerSearchContext } from "@/contexts/GhinPlayerSearchContext";
 import { useGhinSearchPlayerQuery } from "@/hooks/useGhinSearchPlayerQuery";
 import { Text } from "@/ui";
-import { Player } from "./Player";
+import { PlayerItem } from "./PlayerItem";
 
 export function GhinPlayerSearchResults() {
-  const { state, setState } = useContext(GhinPlayerSearchContext);
-  console.log("ghin player search", state);
+  const { state } = useContext(GhinPlayerSearchContext);
 
   const [page, setPage] = useState(1);
   const [golfers, setGolfers] = useState<SearchPlayerResponse[]>([]);
@@ -54,9 +53,7 @@ export function GhinPlayerSearchResults() {
   return (
     <FlatList
       data={golfers}
-      renderItem={({ item }) => (
-        <Player item={item} state={state} setState={setState} />
-      )}
+      renderItem={({ item }) => <PlayerItem item={item} />}
       keyExtractor={keyExtractor}
       onEndReachedThreshold={0.8}
       onEndReached={async () => {
