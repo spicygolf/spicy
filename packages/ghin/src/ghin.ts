@@ -2,7 +2,7 @@ import axios, { type AxiosResponse } from "axios";
 import { getMockResponse, isMockingEnabled } from "./mock";
 import type { GhinRequestFn } from "./types";
 
-const { GHIN_BASE_URL, GHIN_TOKEN, _GHIN_EMAIL, _GHIN_PASS } = process.env;
+const { GHIN_BASE_URL, GHIN_TOKEN, _GHIN_USERNAME, _GHIN_PASSWORD } = process.env;
 // le sigh, global :(
 const retries: number = 3;
 let ghinToken: string | undefined;
@@ -95,8 +95,8 @@ const login = async (): Promise<string | undefined> => {
   //   url: '/users/login.json',
   //   data: {
   //     user: {
-  //       email: GHIN_EMAIL,
-  //       password: GHIN_PASS,
+  //       email: GHIN_USERNAME,
+  //       password: GHIN_PASSWORD,
   //       remember_me: true,
   //     }
   //   },
