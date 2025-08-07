@@ -1,10 +1,8 @@
+import type { GolfersSearchRequest } from "ghin";
 import { useContext } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import {
-  GhinPlayerSearchContext,
-  type GhinPlayerSearchState,
-} from "@/contexts/GhinPlayerSearchContext";
+import { GhinPlayerSearchContext } from "@/contexts/GhinPlayerSearchContext";
 import { useGetCountriesAndStates } from "@/hooks/useGetCountriesAndStates";
 import { Input, Picker } from "@/ui";
 // import Error from '@/components/error';
@@ -20,7 +18,7 @@ export function GhinPlayerSearchInput() {
   }
 
   const { state, setState } = context;
-  const handleChange = (data: GhinPlayerSearchState) => setState(data);
+  const handleChange = (data: GolfersSearchRequest) => setState(data);
 
   if (countries) {
     const country = countries.find((c) => c?.code === state.country);

@@ -9,7 +9,7 @@ export interface PickerItem {
 interface PickerProps {
   title: string;
   items: PickerItem[];
-  selectedValue: string;
+  selectedValue: string | undefined;
   onValueChange: (value: string) => void;
 }
 

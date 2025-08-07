@@ -1,22 +1,24 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import type { SearchPlayerResponse } from "ghin";
+import type { Golfer } from "ghin";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { type PlayerData, useAddPlayerToGame } from "@/hooks";
 import { Text } from "@/ui";
 
-export function PlayerItem({ item }: { item: SearchPlayerResponse }) {
+export function PlayerItem({ item }: { item: Golfer }) {
   const addPlayerToGame = useAddPlayerToGame();
 
-  if (!item || !item.player_name) {
+  const full_name = [item.first_name, item.middle_name, item.last_name].join(
+    " ",
+  );
+  if (!item || !full_name) {
     return null;
   }
 
-  const keyExtractor = (g: SearchPlayerResponse) =>
-    `${g?.ghin}-${g?.club_id}-${g?.player_name}`;
+  const keyExtractor = (g: Golfer) => `${g?.ghin}-${g?.club_id}-${full_name}`;
 
   const key = keyExtractor(item);
-  const player_name = item.player_name;
+  const player_name = full_name;
   const player_club = item.club_name;
   const hdcp = item.handicap_index;
 
@@ -26,10 +28,10 @@ export function PlayerItem({ item }: { item: SearchPlayerResponse }) {
       email: "",
       short: item.first_name || "",
       level: "",
-      handicap: item.ghin
+      handicap: item.handicap_index
         ? {
             source: "ghin" as const,
-            identifier: item.ghin,
+            identifier: item.ghin.toString(),
           }
         : undefined,
     };

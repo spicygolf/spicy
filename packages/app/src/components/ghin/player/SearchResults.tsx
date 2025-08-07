@@ -1,23 +1,23 @@
-import type { SearchPlayerResponse } from "ghin";
+import type { Golfer } from "ghin";
 import { useContext, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { PlayerItem } from "@/components/game/settings/PlayerItem";
 import { GhinPlayerSearchContext } from "@/contexts/GhinPlayerSearchContext";
 import { useGhinSearchPlayerQuery } from "@/hooks/useGhinSearchPlayerQuery";
 import { Text } from "@/ui";
-import { PlayerItem } from "./PlayerItem";
 
 export function GhinPlayerSearchResults() {
   const { state } = useContext(GhinPlayerSearchContext);
 
   const [page, setPage] = useState(1);
-  const [golfers, setGolfers] = useState<SearchPlayerResponse[]>([]);
+  const [golfers, setGolfers] = useState<Golfer[]>([]);
   const per_page = 25;
 
-  const { isPending, isError, error, data } = useGhinSearchPlayerQuery(
-    state,
+  const { isPending, isError, error, data } = useGhinSearchPlayerQuery({
+    ...state,
     page,
     per_page,
-  );
+  });
 
   // if state changes at all, reset everything
   useEffect(() => {
@@ -47,8 +47,8 @@ export function GhinPlayerSearchResults() {
     return <Text>{error.message}</Text>;
   }
 
-  const keyExtractor = (g: SearchPlayerResponse) =>
-    `${g?.ghin}-${g?.club_id}-${g?.player_name}`;
+  const keyExtractor = (g: Golfer) =>
+    `${g?.ghin}-${g?.club_id}-${g?.last_name}-${g?.first_name}`;
 
   return (
     <FlatList

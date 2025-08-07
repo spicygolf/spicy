@@ -1,14 +1,14 @@
+import type { GolfersSearchRequest } from "ghin";
 import { useState } from "react";
 import {
   defaultState,
   GhinPlayerSearchContext,
-  type GhinPlayerSearchState,
 } from "@/contexts/GhinPlayerSearchContext";
 import { GhinPlayerSearchInput } from "./SearchInput";
 import { GhinPlayerSearchResults } from "./SearchResults";
 
 export function GhinPlayerSearch() {
-  const [state, setState] = useState<GhinPlayerSearchState>(defaultState);
+  const [state, setState] = useState<GolfersSearchRequest>(defaultState);
 
   return (
     <GhinPlayerSearchContext.Provider

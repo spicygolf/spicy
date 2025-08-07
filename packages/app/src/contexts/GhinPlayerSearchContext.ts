@@ -1,28 +1,19 @@
+import type { GolfersSearchRequest } from "ghin";
 import { createContext } from "react";
 
 interface GhinPlayerSearchContextType {
-  state: GhinPlayerSearchState;
-  setState: (state: GhinPlayerSearchState) => void;
+  state: GolfersSearchRequest;
+  setState: (state: GolfersSearchRequest) => void;
 }
 
-export interface GhinPlayerSearchState {
-  country: string;
-  state: string;
-  first_name: string;
-  last_name: string;
-  status: "Active" | "Inactive";
-  sorting_criteria?: "last_name_first_name" | "first_name_last_name";
-  order?: "ASC" | "DESC";
-}
-
-export const defaultState: GhinPlayerSearchState = {
+export const defaultState: GolfersSearchRequest = {
   country: "USA",
-  state: "GA",
+  state: "",
   first_name: "",
   last_name: "Smith",
   status: "Active",
   sorting_criteria: "last_name_first_name",
-  order: "ASC",
+  order: "asc",
 };
 
 export const GhinPlayerSearchContext =
