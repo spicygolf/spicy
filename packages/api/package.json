@@ -15,7 +15,7 @@
     "@elysiajs/cors": "^1.3.3",
     "better-auth": "^1.2.12",
     "elysia": "1.3.5",
-    "ghin": "file:/Users/brad/dev/ghin",
+    "ghin": "github:boorad/ghin#feat/approved-api-access",
     "jazz-betterauth-server-plugin": "0.16.3",
     "spicylib": "workspace:*"
   },
