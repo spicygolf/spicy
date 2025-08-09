@@ -18,20 +18,22 @@ export function PlayerItem({ item }: { item: Golfer }) {
   const keyExtractor = (g: Golfer) => `${g?.ghin}-${g?.club_id}-${full_name}`;
 
   const key = keyExtractor(item);
-  const player_name = full_name;
-  const player_club = item.club_name;
-  const hdcp = item.handicap_index;
 
   const makePlayer = (): PlayerData => {
     return {
-      name: player_name || "",
+      name: full_name || "",
       email: "",
       short: item.first_name || "",
+      gender: item.gender,
       level: "",
-      handicap: item.handicap_index
+      handicap: item.ghin
         ? {
             source: "ghin" as const,
             identifier: item.ghin.toString(),
+            hi_display: item.hi_display,
+            hi_value:
+              typeof item.hi_value === "number" ? item.hi_value : undefined,
+            rev_date: item.rev_date || undefined,
           }
         : undefined,
     };
@@ -50,11 +52,14 @@ export function PlayerItem({ item }: { item: Golfer }) {
         }}
       >
         <View style={styles.player_name_container}>
-          <Text style={styles.player_name}>{player_name}</Text>
-          <Text style={styles.player_club}>{player_club}</Text>
+          <Text style={styles.player_name}>{full_name}</Text>
+          <Text style={styles.player_club}>
+            {item.club_name}
+            {item.state ? `, ${item.state}` : ""}
+          </Text>
         </View>
         <View style={styles.handicap_container}>
-          <Text style={styles.handicap}>{hdcp}</Text>
+          <Text style={styles.handicap}>{item.hi_display}</Text>
         </View>
       </TouchableOpacity>
     </View>
@@ -66,7 +71,7 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginVertical: theme.gap(0.25),
+    marginVertical: theme.gap(1),
   },
   fave_container: {
     width: "10%",
@@ -86,7 +91,8 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "bold",
   },
   player_club: {
-    fontSize: 12,
+    fontSize: 11,
+    fontStyle: "italic",
   },
   handicap_container: {
     width: "20%",

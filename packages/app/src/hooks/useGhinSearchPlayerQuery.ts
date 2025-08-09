@@ -17,7 +17,14 @@ async function searchPlayer(
       // withCredentials: true, // Include cookies for authentication
     });
 
-    return response.data;
+    // Transform the response to convert ISO date strings back to Date objects
+    const golfers: Golfer[] = response.data.map((golfer: Golfer) => ({
+      ...golfer,
+      rev_date: golfer.rev_date ? new Date(golfer.rev_date) : null,
+      low_hi_date: golfer.low_hi_date ? new Date(golfer.low_hi_date) : null,
+    }));
+
+    return golfers;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw new Error(`Failed to search players: ${error.message}`);
@@ -32,6 +39,10 @@ export function useGhinSearchPlayerQuery(search: GolfersSearchRequest) {
   // add wildcards to names
   search.last_name = `${search.last_name}%`;
   search.first_name = `${search.first_name}%`;
+
+  // Ensure pagination fields are present
+  search.page = search.page || 1;
+  search.per_page = search.per_page || 10;
 
   // Calculate stale time to expire at next 4:00 AM EST
   const staleTime = getMillisecondsUntilTargetTime(

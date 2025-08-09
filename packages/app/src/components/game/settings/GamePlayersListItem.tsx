@@ -19,6 +19,6 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: theme.gap(0.5),
+    paddingVertical: theme.gap(1),
   },
 }));
