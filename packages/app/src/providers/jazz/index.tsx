@@ -1,21 +1,18 @@
 import { AuthProvider } from "jazz-react-auth-betterauth";
 import { JazzReactNativeProvider } from "jazz-tools/react-native";
 import type React from "react";
-// import { RNQuickCrypto } from 'jazz-tools/react-native-core/crypto';
-import { PlayerAccount } from "@/schema/accounts";
+import { PlayerAccount } from "spicylib/schema";
+import { useApi } from "@/hooks";
 
 export function JazzAndAuth({ children }: { children: React.ReactNode }) {
-  const peer = "wss://cloud.jazz.tools/?key=spicy.dev@druid.golf";
+  const api = useApi();
+  const peer = "wss://cloud.jazz.tools/?key=spicy-dev@druid.golf";
 
   return (
-    <JazzReactNativeProvider
-      sync={{ peer }}
-      AccountSchema={PlayerAccount}
-      // CryptoProvider={RNQuickCrypto}
-    >
+    <JazzReactNativeProvider sync={{ peer }} AccountSchema={PlayerAccount}>
       <AuthProvider
         options={{
-          baseURL: "http://localhost:3040/v4/auth/",
+          baseURL: `${api}/auth`,
         }}
       >
         {children}
@@ -27,6 +24,6 @@ export function JazzAndAuth({ children }: { children: React.ReactNode }) {
 // Register the Account schema so `useAccount` returns our custom `PlayerAccount`
 declare module "jazz-tools/react-native" {
   interface Register {
-    Account: PlayerAccount;
+    Account: typeof PlayerAccount;
   }
 }

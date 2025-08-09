@@ -2,9 +2,9 @@ import type { NavigationProp } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import type { GameSpec } from "spicylib/schema";
 import { useCreateGame } from "@/hooks";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
-import type { GameSpec } from "@/schema/gamespecs";
 import { Text } from "@/ui";
 
 export function SpecListItem({ spec }: { spec: GameSpec | null }) {
@@ -19,8 +19,11 @@ export function SpecListItem({ spec }: { spec: GameSpec | null }) {
           const game = createGame(spec);
           if (!game) return;
           navigation.navigate("Game", {
-            screen: "GameSettings",
-            params: { gameId: game.id },
+            gameId: game.id,
+            screen: "GameSettingsNavigator",
+            params: {
+              screen: "GameSettings",
+            },
           });
         }}
       >

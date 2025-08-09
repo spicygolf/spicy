@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { TouchableOpacity } from "react-native";
+import type { Player } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
-import type { Player } from "@/schema/players";
 
 export function PlayerDelete({ player }: { player: Player }) {
   const { game } = useGameContext();

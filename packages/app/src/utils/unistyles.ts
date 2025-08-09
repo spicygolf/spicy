@@ -4,9 +4,9 @@ const system = UnistylesRuntime.colorScheme === "dark" ? "dark" : "light";
 
 const light = {
   colors: {
-    primary: "#222",
+    primary: "#111",
     secondary: "#555",
-    background: "#ddd",
+    background: "#eee",
     action: "#007AFF",
     actionText: "#fff",
   },
@@ -16,9 +16,9 @@ const light = {
 
 const dark = {
   colors: {
-    primary: "#ddd",
+    primary: "#eee",
     secondary: "#999",
-    background: "#222",
+    background: "#111",
     action: "#007AFF",
     actionText: "#fff",
   },

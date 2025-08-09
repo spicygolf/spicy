@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Game } from "@/schema/games";
+import type { Game } from "spicylib/schema";
 import { Link, Text } from "@/ui";
 
 export function GameListItem({ game }: { game: Game | null }) {

@@ -1,4 +1,4 @@
-import { ID } from ".";
+import type { ID } from ".";
 
 export type Player = {
   _type: string;
@@ -6,17 +6,25 @@ export type Player = {
   email?: string;
   short?: string;
   statusAuthz?: AuthorizedRole[];
-  level?: 'admin';
+  level?: "admin";
   handicap?: HandicapInfo;
   round_id?: ID;
 };
 
-export type AuthorizedRole = 'dev' | 'test' | 'prod';
+export type AuthorizedRole = "dev" | "test" | "prod";
 
-export type Gender = 'M' | 'm' | 'Male' | 'male' | 'F' | 'f' | 'Female' | 'female';
+export type Gender =
+  | "M"
+  | "m"
+  | "Male"
+  | "male"
+  | "F"
+  | "f"
+  | "Female"
+  | "female";
 
 export type HandicapInfo = {
-  source: 'ghin' | 'manual';
+  source: "ghin" | "manual";
   id?: string;
   firstName?: string;
   lastName?: string;

@@ -1,4 +1,3 @@
-import { getCountriesAndStates } from './../../../api/src/models/account';
 import type { AxiosResponse } from "axios";
 
 export type GhinRequest = {
@@ -10,7 +9,9 @@ export type GhinRequest = {
   attempts: number;
 };
 
-export type GhinRequestFn = (options: GhinRequest) => Promise<AxiosResponse<any, any> | null | undefined>;
+export type GhinRequestFn = (
+  options: GhinRequest,
+) => Promise<AxiosResponse | null | undefined>;
 
 export type Pagination = {
   page: number;
@@ -44,12 +45,20 @@ export type SearchPlayerQuery = {
   is_test?: boolean;
 };
 
-type GenderString = 'M' | 'Male' | 'm' | 'male' | 'F' | 'Female' | 'f' | 'female';
+type GenderString =
+  | "M"
+  | "Male"
+  | "m"
+  | "male"
+  | "F"
+  | "Female"
+  | "f"
+  | "female";
 
 export enum Gender {
-  Male = 'Male',
-  Female = 'Female',
-};
+  Male = "Male",
+  Female = "Female",
+}
 
 export type ResponsePlayer = {
   ghin?: string;
@@ -87,7 +96,7 @@ export type SearchPlayerResponse = {
   hi_value?: number;
   hi_display?: string;
   rev_date?: string;
-}
+};
 
 // Search Course
 
@@ -222,7 +231,6 @@ export type GetCourseResponse = {
   is_all_year?: boolean;
   tees?: TeeSet[];
 };
-
 
 // Get Tee
 

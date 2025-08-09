@@ -1,11 +1,13 @@
-import { ghinRequest } from './ghin';
-import { Gender, type SearchPlayerRequest, type SearchPlayerResponse } from './types';
-import { getGenderEnum } from './util';
+import { ghinRequest } from "./ghin";
+import type { SearchPlayerRequest, SearchPlayerResponse } from "./types";
+import { getGenderEnum } from "./util";
 
-export const searchPlayer = async ({q, p}: SearchPlayerRequest): Promise<SearchPlayerResponse[]> => {
-
-  // don't search unless we have at least three characters
-  if (q.last_name && q.last_name.length < 3 ) {
+export const searchPlayer = async ({
+  q,
+  p,
+}: SearchPlayerRequest): Promise<SearchPlayerResponse[]> => {
+  // don't search unless we have at least two characters (An, Ng, etc)
+  if (q.last_name && q.last_name.length < 2) {
     return [];
   }
 
@@ -20,8 +22,8 @@ export const searchPlayer = async ({q, p}: SearchPlayerRequest): Promise<SearchP
   };
 
   const resp = await ghinRequest({
-    method: 'get',
-    url: '/golfers/search.json',
+    method: "get",
+    url: "/golfers/search.json",
     params,
     data: {},
     attempts: 0,

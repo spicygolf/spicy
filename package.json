@@ -12,21 +12,24 @@
   },
   "scripts": {
     "clean": "del-cli node_modules",
-    "lint": "bun run --filter './packages/app' lint",
-    "format": "bun run --filter './packages/app' format",
+    "format": "bun run --filter './packages/*' format",
+    "format:fix": "bun run --filter './packages/*' format:fix",
+    "lint": "bun run --filter './packages/*' lint",
+    "lint:fix": "bun run --filter './packages/*' lint:fix",
     "lint-staged": "lint-staged --no-stash",
     "prepare": "husky"
   },
   "lint-staged": {
     "packages/app/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"],
     "packages/api/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"],
-    "packages/ghin/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"],
-    "packages/lib/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"],
-    "packages/web/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"]
+    "packages/lib/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"]
   },
   "trustedDependencies": [
     "@apollo/protobufjs",
+    "@biomejs/biome",
     "@parcel/watcher",
+    "@prisma/client",
+    "@prisma/engines",
     "@sveltejs/kit",
     "@swc/core",
     "better-sqlite3",
@@ -38,6 +41,7 @@
     "fsevents",
     "geckodriver",
     "husky",
+    "prisma",
     "protobufjs",
     "react-native-elements",
     "react-native-nitro-modules",
@@ -50,12 +54,13 @@
   "workspaces": [
     "packages/api",
     "packages/app",
-    "packages/ghin",
-    "packages/lib",
-    "packages/web"
+    "packages/lib"
   ],
   "overrides": {
     "typescript": "5.6.2",
     "vitest": "3.1.3"
+  },
+  "patchedDependencies": {
+    "react-native-element-dropdown@2.12.4": "patches/react-native-element-dropdown@2.12.4.patch"
   }
 }

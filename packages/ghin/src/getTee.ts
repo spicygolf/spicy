@@ -1,5 +1,4 @@
-import { ghinRequest } from './ghin';
-import { Gender } from './types';
+import { ghinRequest } from "./ghin";
 import type {
   GetTeeRequest,
   GetTeeResponse,
@@ -7,12 +6,11 @@ import type {
   ResponseTee,
   ResponseTeeCourse,
   ResponseTeeHole,
-  TeeSet
-} from './types';
-import { getGenderEnum } from './util';
+  TeeSet,
+} from "./types";
+import { getGenderEnum } from "./util";
 
-export const getTee = async ({q}: GetTeeRequest): Promise<GetTeeResponse> => {
-
+export const getTee = async ({ q }: GetTeeRequest): Promise<GetTeeResponse> => {
   const { tee_id } = q;
 
   const params = {
@@ -20,7 +18,7 @@ export const getTee = async ({q}: GetTeeRequest): Promise<GetTeeResponse> => {
   };
 
   const resp = await ghinRequest({
-    method: 'get',
+    method: "get",
     url: `/TeeSetRatings/${tee_id}.json`,
     params,
     data: {},

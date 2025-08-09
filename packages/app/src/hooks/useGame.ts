@@ -1,6 +1,6 @@
 import { useCoState } from "jazz-tools/react";
+import { Game } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
-import { Game } from "@/schema/games";
 
 type UseGameOptions = {
   requireGame?: boolean;

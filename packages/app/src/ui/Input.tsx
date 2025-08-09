@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type {
   Control,
   FieldValues,
@@ -14,14 +15,29 @@ import { Text } from "@/ui";
 interface InputProps<F extends FieldValues> extends TextInputProps {
   name: Path<F>;
   label: string;
-  control: Control<F>;
+  control?: Control<F>;
   rules?: Omit<
     RegisterOptions<F, Path<F>>,
     "valueAsNumber" | "valueAsDate" | "setValueAs" | "disabled"
   >;
 }
 
-export function Input<F extends FieldValues>({
+// Standalone props for when not using react-hook-form
+interface StandaloneInputProps
+  extends Omit<TextInputProps, "value" | "onChangeText"> {
+  label: string;
+  value?: string;
+  onChangeText?: (text: string) => void;
+  error?: string;
+}
+
+// Union type for both use cases
+type InputComponentProps<F extends FieldValues> =
+  | InputProps<F>
+  | StandaloneInputProps;
+
+// Form-controlled version
+function FormControlledInput<F extends FieldValues>({
   name,
   label,
   control,
@@ -32,13 +48,14 @@ export function Input<F extends FieldValues>({
     field,
     fieldState: { error },
   } = useController({ name, control, rules });
+
   return (
     <View>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.inputContainer}>
         <TextInput
           style={[styles.input, error && styles.inputError]}
-          value={field.value}
+          value={field.value || ""}
           onChangeText={field.onChange}
           onBlur={field.onBlur}
           {...rest}
@@ -51,19 +68,62 @@ export function Input<F extends FieldValues>({
   );
 }
 
+// Standalone version
+function StandaloneInput({
+  label,
+  value,
+  onChangeText,
+  error,
+  ...rest
+}: StandaloneInputProps) {
+  const [internalValue, setInternalValue] = useState(value || "");
+
+  const handleChangeText = (text: string) => {
+    setInternalValue(text);
+    onChangeText?.(text);
+  };
+
+  return (
+    <View>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[styles.input, error && styles.inputError]}
+          value={value !== undefined ? value : internalValue}
+          onChangeText={handleChangeText}
+          {...rest}
+        />
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      </View>
+    </View>
+  );
+}
+
+export function Input<F extends FieldValues>(props: InputComponentProps<F>) {
+  // Check if this is a form-controlled input
+  const isFormControlled = "control" in props && "name" in props;
+
+  if (isFormControlled) {
+    return <FormControlledInput {...(props as InputProps<F>)} />;
+  } else {
+    return <StandaloneInput {...(props as StandaloneInputProps)} />;
+  }
+}
+
 const styles = StyleSheet.create((theme) => ({
   label: {
-    fontWeight: "bold",
+    color: theme.colors.secondary,
+    fontSize: 10,
     marginBottom: 3,
   },
   inputContainer: {
     marginBottom: 10,
   },
   input: {
-    borderRadius: 5,
-    borderWidth: 0.5,
+    borderRadius: theme.gap(0.75),
+    borderWidth: 0.75,
     borderColor: theme.colors.secondary,
-    padding: 8,
+    padding: theme.gap(1),
     color: theme.colors.primary,
   },
   inputError: {

@@ -2,11 +2,10 @@ import { co, z } from "jazz-tools";
 
 export const Handicap = co.map({
   source: z.literal(["ghin", "manual"]),
-  identifier: z.string(), // TODO: optional (for manual handicaps)?
-  // TODO: get index, revDate, gender from GHIN API
-  // index = z.string();
-  // revDate = z.date();
-  // gender = z.literal(['M', 'F']);
+  identifier: z.string().optional(),
+  hi_display: z.string().optional(),
+  hi_value: z.number().optional(),
+  rev_date: z.date().optional(),
 });
 export type Handicap = co.loaded<typeof Handicap>;
 
@@ -17,9 +16,10 @@ export const Player = co.map({
   name: z.string(),
   email: z.string(),
   short: z.string(),
-  handicap: z.optional(Handicap),
+  gender: z.literal(["M", "F"]),
+  handicap: co.optional(Handicap),
   // meta
-  envs: z.optional(ListOfEnvironments),
+  envs: co.optional(ListOfEnvironments),
   level: z.string(),
 });
 export type Player = co.loaded<typeof Player>;

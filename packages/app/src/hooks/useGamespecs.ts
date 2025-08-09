@@ -1,7 +1,11 @@
 import { Group } from "jazz-tools";
 import { useAccount, useCoState } from "jazz-tools/react-core";
-import { PlayerAccount } from "@/schema/accounts";
-import { defaultSpec, GameSpec, ListOfGameSpecs } from "@/schema/gamespecs";
+import {
+  defaultSpec,
+  GameSpec,
+  ListOfGameSpecs,
+  PlayerAccount,
+} from "spicylib/schema";
 
 export function useGamespecs() {
   const { me } = useAccount(PlayerAccount, {
