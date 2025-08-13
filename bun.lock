@@ -21,7 +21,7 @@
         "better-auth": "^1.2.12",
         "elysia": "1.3.5",
         "ghin": "github:boorad/ghin#feat/approved-api-access",
-        "jazz-betterauth-server-plugin": "0.16.3",
+        "jazz-betterauth-server-plugin": "0.16.5",
         "spicylib": "workspace:*",
       },
       "devDependencies": {
@@ -46,9 +46,9 @@
         "@react-navigation/native-stack": "7.3.20",
         "@tanstack/react-query": "5.83.0",
         "axios": "1.11.0",
-        "jazz-auth-betterauth": "0.16.3",
-        "jazz-react-auth-betterauth": "0.16.3",
-        "jazz-tools": "0.16.3",
+        "jazz-auth-betterauth": "0.16.5",
+        "jazz-react-auth-betterauth": "0.16.5",
+        "jazz-tools": "0.16.5",
         "react": "19.1.0",
         "react-hook-form": "7.61.1",
         "react-native": "0.80.0",
@@ -94,7 +94,7 @@
       "version": "0.5.0",
       "dependencies": {
         "date-fns-tz": "3.2.0",
-        "jazz-tools": "0.16.3",
+        "jazz-tools": "0.16.5",
       },
       "devDependencies": {
         "bun-types": "latest",
@@ -856,7 +856,7 @@
 
     "buffer-from": ["buffer-from@1.1.2", "", {}, "sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ=="],
 
-    "bun-types": ["bun-types@1.2.19", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-uAOTaZSPuYsWIXRpj7o56Let0g/wjihKCkeRqUBhlLVM/Bt+Fj9xTo+LhC1OV1XDaGkz4hNC80et5xgy+9KTHQ=="],
+    "bun-types": ["bun-types@1.2.20", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-pxTnQYOrKvdOwyiyd/7sMt9yFOenN004Y6O4lCcCUoKVej48FS5cvTw9geRaEcB9TsDZaJKAxPTVvi8tFsVuXA=="],
 
     "bytes": ["bytes@3.1.2", "", {}, "sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg=="],
 
@@ -912,11 +912,11 @@
 
     "co": ["co@4.6.0", "", {}, "sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ=="],
 
-    "cojson": ["cojson@0.16.3", "", { "dependencies": { "@noble/ciphers": "^1.3.0", "@noble/curves": "^1.9.1", "@noble/hashes": "^1.8.0", "@opentelemetry/api": "^1.9.0", "@scure/base": "1.2.1", "jazz-crypto-rs": "0.0.7", "neverthrow": "^7.0.1", "unicode-segmenter": "^0.12.0" } }, "sha512-QePuXSECH7ZGQgBJkVD0LoDm0awiXJgqFMPIDgQ8f6us5lynhSXxz6g2hB0QfuvTCpBT1HT+kkbB1ACKUajv3w=="],
+    "cojson": ["cojson@0.16.5", "", { "dependencies": { "@noble/ciphers": "^1.3.0", "@noble/curves": "^1.9.1", "@noble/hashes": "^1.8.0", "@opentelemetry/api": "^1.9.0", "@scure/base": "1.2.1", "jazz-crypto-rs": "0.0.7", "neverthrow": "^7.0.1", "unicode-segmenter": "^0.12.0" } }, "sha512-oy9fNfZ7izHZq34TPPLPSBSHjjAqu3n2aoRVlk2r6L6IX00+IYsrs0xc1e/XUqdJclNzvqwQSULrkc/9eiQYqA=="],
 
-    "cojson-storage-indexeddb": ["cojson-storage-indexeddb@0.16.3", "", { "dependencies": { "cojson": "0.16.3" } }, "sha512-yW75R5NAwW21I9HGLKnOZ5G3HuXKeByAf5yTKsXn3EZ6GYWsaFZXSJwjZwewV0DwqLipCMzIt2YMU89iSZhS2w=="],
+    "cojson-storage-indexeddb": ["cojson-storage-indexeddb@0.16.5", "", { "dependencies": { "cojson": "0.16.5" } }, "sha512-J4eS2EOqzJOF0ivB1Ag+JnRAAUyJt/wLP4jWDKm/czrTVOrcA5B/0FF7BetxIbCx5emoHZmC4+VZczf/TRLhiw=="],
 
-    "cojson-transport-ws": ["cojson-transport-ws@0.16.3", "", { "dependencies": { "cojson": "0.16.3" } }, "sha512-4Rcqi3wPp6nCR3wnk2bbx0u4BC7ZVnIktwkhIRkQ86PmiLPzvgPijYkZt3mNAMIA2xWh+bbWsVov6MT+4LOZww=="],
+    "cojson-transport-ws": ["cojson-transport-ws@0.16.5", "", { "dependencies": { "cojson": "0.16.5" } }, "sha512-VQ9krkR9rzSxgS9XWgYDPlBw/wzADILV908HvZ0AdgJm23IumIoYyQWW/2phnZVILzLsRkLfv4UFVq/yOn3YxQ=="],
 
     "collect-v8-coverage": ["collect-v8-coverage@1.0.2", "", {}, "sha512-lHl4d5/ONEbLlJvaJNtsF/Lz+WvB07u2ycqTYbdrq7UypDXailES4valYb2eWiJFxZlVmpGekfqoxQhzyFdT4Q=="],
 
@@ -1318,17 +1318,17 @@
 
     "jackspeak": ["jackspeak@3.4.3", "", { "dependencies": { "@isaacs/cliui": "^8.0.2" }, "optionalDependencies": { "@pkgjs/parseargs": "^0.11.0" } }, "sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw=="],
 
-    "jazz-auth-betterauth": ["jazz-auth-betterauth@0.16.3", "", { "dependencies": { "cojson": "0.16.3", "jazz-betterauth-client-plugin": "0.16.3", "jazz-tools": "0.16.3" } }, "sha512-kb8ffNkdcfiLKh9cPcrDyUiHjESJL0sCME50jRT3f+wgk4/rhLWqIEPjzR/OVIKH0NXU3Y6O+foMse+cPk+tlg=="],
+    "jazz-auth-betterauth": ["jazz-auth-betterauth@0.16.5", "", { "dependencies": { "cojson": "0.16.5", "jazz-betterauth-client-plugin": "0.16.5", "jazz-tools": "0.16.5" } }, "sha512-7PPaVaRcEzq+4oIx4uFZ8j/QRvbfAdfard9GQkrPyufKrXcl19cPVXJlnEyPxQbm8Y2rwYk39PYMER+Jr53iUQ=="],
 
-    "jazz-betterauth-client-plugin": ["jazz-betterauth-client-plugin@0.16.3", "", { "dependencies": { "jazz-betterauth-server-plugin": "0.16.3" } }, "sha512-8INkdkoL7t+EPWj35OT9h1Z1PPN8yNarQT36whkGpUOjLnqzWJGa20oGJSHhsHRs+eYQmzJ5UXRcaGctWM7DuQ=="],
+    "jazz-betterauth-client-plugin": ["jazz-betterauth-client-plugin@0.16.5", "", { "dependencies": { "jazz-betterauth-server-plugin": "0.16.5" } }, "sha512-XKHfsO/arPeLuOWslcRqLW+x5U0YHPBOEoKHyqviT3IXu1qoXTDacAnLZ7VMKl9oanEzk2c3kD86k9fVbje8pw=="],
 
-    "jazz-betterauth-server-plugin": ["jazz-betterauth-server-plugin@0.16.3", "", { "dependencies": { "better-auth": "^1.2.4", "better-sqlite3": "^11.9.1", "cojson": "0.16.3", "jazz-tools": "0.16.3", "zod": "3.25.76" } }, "sha512-uCJk1wBoDloA5tkKtzZnwY4wM/AEiJpN38MK4gP2qtyaK/LaR9plkIo2coBa30rkJ4YgkHttbvSCNYE+u0cO5Q=="],
+    "jazz-betterauth-server-plugin": ["jazz-betterauth-server-plugin@0.16.5", "", { "dependencies": { "better-auth": "^1.2.4", "better-sqlite3": "^11.9.1", "cojson": "0.16.5", "jazz-tools": "0.16.5", "zod": "3.25.76" } }, "sha512-C9sIQexZIu5WomZUbbJ1Zgb9VckUq7icFDhkKQ79chXr0qBmywCGXBtwrFZeQ62CtmC/YS5nDb7uTJKB7G7jgA=="],
 
     "jazz-crypto-rs": ["jazz-crypto-rs@0.0.7", "", {}, "sha512-Pzs8Zu1zgKVURkBVvqqF1B2r78FaSZdwPbmeCWx0Nb3nibzPuB/kSKEO7LJsKnb3P5HO0v+lTIJ53mGC5H1urQ=="],
 
-    "jazz-react-auth-betterauth": ["jazz-react-auth-betterauth@0.16.3", "", { "dependencies": { "cojson": "0.16.3", "jazz-auth-betterauth": "0.16.3", "jazz-betterauth-client-plugin": "0.16.3", "jazz-tools": "0.16.3" }, "peerDependencies": { "react": "*" } }, "sha512-7ztLrnK/qt+Pj76SbCXAbWP1/JqjPaoXkFOM6n7CwJsjWxJkaR8MmWJ3x9XY3rrwplFKS7gAK2H90tWWGL47/A=="],
+    "jazz-react-auth-betterauth": ["jazz-react-auth-betterauth@0.16.5", "", { "dependencies": { "cojson": "0.16.5", "jazz-auth-betterauth": "0.16.5", "jazz-betterauth-client-plugin": "0.16.5", "jazz-tools": "0.16.5" }, "peerDependencies": { "react": "*" } }, "sha512-dq5hQ9HnbPqhBWa3wGI8/mBKEiwS1IDw7cYy8eApwFcsif+vPEZ8cbdPJYXYwdQGmHyGQG8IKx+HON/IJ8yppQ=="],
 
-    "jazz-tools": ["jazz-tools@0.16.3", "", { "dependencies": { "@manuscripts/prosemirror-recreate-steps": "^0.1.4", "@scure/base": "1.2.1", "@scure/bip39": "^1.3.0", "@tiptap/core": "^2.12.0", "@types/image-blob-reduce": "^4.1.1", "clsx": "^2.0.0", "cojson": "0.16.3", "cojson-storage-indexeddb": "0.16.3", "cojson-transport-ws": "0.16.3", "fast-myers-diff": "^3.2.0", "goober": "^2.1.16", "image-blob-reduce": "^4.1.0", "pica": "^9.0.1", "prosemirror-example-setup": "^1.2.2", "prosemirror-menu": "^1.2.4", "prosemirror-model": "^1.21.1", "prosemirror-schema-basic": "^1.2.2", "prosemirror-state": "^1.4.3", "prosemirror-transform": "^1.9.0", "zod": "3.25.76" }, "peerDependencies": { "@bam.tech/react-native-image-resizer": "*", "@op-engineering/op-sqlite": "^11.4.8", "@react-native-community/netinfo": "*", "expo-file-system": "*", "expo-secure-store": "*", "expo-sqlite": "15.2.9", "react": "*", "react-dom": "*", "react-native": "*", "react-native-fast-encoder": "^0.2.0", "react-native-mmkv": "^3.2.0", "react-native-nitro-modules": "0.25.2", "react-native-quick-crypto": "1.0.0-beta.16", "svelte": "^5.0.0" }, "optionalPeers": ["@bam.tech/react-native-image-resizer", "@op-engineering/op-sqlite", "@react-native-community/netinfo", "expo-file-system", "expo-secure-store", "expo-sqlite", "react", "react-dom", "react-native", "react-native-fast-encoder", "react-native-mmkv", "react-native-nitro-modules", "react-native-quick-crypto", "svelte"] }, "sha512-TMJO04LlbACCXk8GcQcg0luZHJOUH1OGTXg1eQaiYUWau87O3P3cHB6shEt+va8Pdzi2+URf0ieLuMq3BEDszw=="],
+    "jazz-tools": ["jazz-tools@0.16.5", "", { "dependencies": { "@manuscripts/prosemirror-recreate-steps": "^0.1.4", "@scure/base": "1.2.1", "@scure/bip39": "^1.3.0", "@tiptap/core": "^2.12.0", "@types/image-blob-reduce": "^4.1.1", "clsx": "^2.0.0", "cojson": "0.16.5", "cojson-storage-indexeddb": "0.16.5", "cojson-transport-ws": "0.16.5", "fast-myers-diff": "^3.2.0", "goober": "^2.1.16", "image-blob-reduce": "^4.1.0", "pica": "^9.0.1", "prosemirror-example-setup": "^1.2.2", "prosemirror-menu": "^1.2.4", "prosemirror-model": "^1.21.1", "prosemirror-schema-basic": "^1.2.2", "prosemirror-state": "^1.4.3", "prosemirror-transform": "^1.9.0", "zod": "3.25.76" }, "peerDependencies": { "@bam.tech/react-native-image-resizer": "*", "@op-engineering/op-sqlite": "^11.4.8", "@react-native-community/netinfo": "*", "expo-file-system": "*", "expo-secure-store": "*", "expo-sqlite": "15.2.9", "react": "*", "react-dom": "*", "react-native": "*", "react-native-fast-encoder": "^0.2.0", "react-native-mmkv": "^3.2.0", "react-native-nitro-modules": "0.25.2", "react-native-quick-crypto": "1.0.0-beta.16", "svelte": "^5.0.0" }, "optionalPeers": ["@bam.tech/react-native-image-resizer", "@op-engineering/op-sqlite", "@react-native-community/netinfo", "expo-file-system", "expo-secure-store", "expo-sqlite", "react", "react-dom", "react-native", "react-native-fast-encoder", "react-native-mmkv", "react-native-nitro-modules", "react-native-quick-crypto", "svelte"] }, "sha512-24titLFX182esUBGkYR8PskKEz+OiTnWXv6lA4cNCk9Vo8eIAUBDpQFFt9fFLEgTnp6V67JIuLkX0+fmeDXcbA=="],
 
     "jest": ["jest@29.7.0", "", { "dependencies": { "@jest/core": "^29.7.0", "@jest/types": "^29.6.3", "import-local": "^3.0.2", "jest-cli": "^29.7.0" }, "peerDependencies": { "node-notifier": "^8.0.1 || ^9.0.0 || ^10.0.0" }, "optionalPeers": ["node-notifier"], "bin": { "jest": "bin/jest.js" } }, "sha512-NIy3oAFp9shda19hy4HK0HRTWKtPJmGdnvywu01nOqNC2vZg+Z+fvJDxpMQA88eb2I9EcafcdjYgsDthnYTvGw=="],
 
@@ -1773,8 +1773,6 @@
     "react": ["react@19.1.0", "", {}, "sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg=="],
 
     "react-devtools-core": ["react-devtools-core@6.1.2", "", { "dependencies": { "shell-quote": "^1.6.1", "ws": "^7" } }, "sha512-ldFwzufLletzCikNJVYaxlxMLu7swJ3T2VrGfzXlMsVhZhPDKXA38DEROidaYZVgMAmQnIjymrmqto5pyfrwPA=="],
-
-    "react-dom": ["react-dom@18.3.1", "", { "dependencies": { "loose-envify": "^1.1.0", "scheduler": "^0.23.2" }, "peerDependencies": { "react": "^18.3.1" } }, "sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw=="],
 
     "react-freeze": ["react-freeze@1.0.4", "", { "peerDependencies": { "react": ">=17.0.0" } }, "sha512-r4F0Sec0BLxWicc7HEyo2x3/2icUTrRmDjaaRyzzn+7aDyFZliszMDOgLVwSnQnYENOlL1o569Ze2HZefk8clA=="],
 
@@ -2655,10 +2653,6 @@
     "rc/strip-json-comments": ["strip-json-comments@2.0.1", "", {}, "sha512-4gB8na07fecVVkOI6Rs4e7T6NOTki5EmL7TUduTs6bu3EdnSycntVJ4re8kgZA+wx9IueI2Y11bfbgwtzuE0KQ=="],
 
     "react-devtools-core/ws": ["ws@7.5.10", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": "^5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ=="],
-
-    "react-dom/react": ["react@18.3.1", "", { "dependencies": { "loose-envify": "^1.1.0" } }, "sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ=="],
-
-    "react-dom/scheduler": ["scheduler@0.23.2", "", { "dependencies": { "loose-envify": "^1.1.0" } }, "sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ=="],
 
     "react-native/chalk": ["chalk@4.1.2", "", { "dependencies": { "ansi-styles": "^4.1.0", "supports-color": "^7.1.0" } }, "sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA=="],
 
