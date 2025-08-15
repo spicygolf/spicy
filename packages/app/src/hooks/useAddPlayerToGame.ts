@@ -1,12 +1,12 @@
-import { Player } from "spicylib/schema";
+import { Player, PlayerAccount } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
 import { useJazzWorker } from "./useJazzWorker";
 
 export type PlayerData = Parameters<typeof Player.create>[0];
 
-export async function useAddPlayerToGame() {
+export function useAddPlayerToGame() {
   const { game } = useGameContext();
-  const { account: workerAccount } = await useJazzWorker();
+  const { id } = useJazzWorker();
 
   const addPlayerToGame = async (p: PlayerData) => {
     if (!game?.players) {
@@ -18,6 +18,7 @@ export async function useAddPlayerToGame() {
       return;
     }
     const group = game.players._owner;
+    const workerAccount = await PlayerAccount.load(id);
     // Give the worker account admin access to this player's group
     if (workerAccount && "addMember" in group) {
       try {

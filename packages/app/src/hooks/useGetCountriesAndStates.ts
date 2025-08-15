@@ -1,13 +1,20 @@
+import type { co } from "jazz-tools";
+import { useEffect, useState } from "react";
+import { type ListOfCountries, PlayerAccount } from "spicylib/schema";
 import { useJazzWorker } from "./useJazzWorker";
 
-export async function useGetCountriesAndStates() {
-  const { account } = await useJazzWorker({
-    resolve: {
-      profile: {
-        countries: true,
-      },
-    },
-  });
+type Countries = co.loaded<typeof ListOfCountries>;
 
-  return { countries: account?.profile?.countries ?? [] };
+export function useGetCountriesAndStates() {
+  const [countries, setCountries] = useState<Countries | null>(null);
+  const { id } = useJazzWorker();
+  const account = PlayerAccount.load(id);
+
+  useEffect(() => {
+    account.then((account) => {
+      setCountries(account?.profile?.countries ?? null);
+    });
+  }, [account]);
+
+  return { countries };
 }
