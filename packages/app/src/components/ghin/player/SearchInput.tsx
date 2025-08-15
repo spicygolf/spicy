@@ -81,7 +81,7 @@ export function GhinPlayerSearchInput() {
             <Input
               name="first_name"
               label="First Name (optional)"
-              value={state.first_name}
+              value={state.first_name || ""}
               onChangeText={(value) =>
                 handleChange({ ...state, first_name: value })
               }

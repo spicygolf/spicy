@@ -1,12 +1,14 @@
 import { Player } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
+import { useJazzWorker } from "./useJazzWorker";
 
 export type PlayerData = Parameters<typeof Player.create>[0];
 
-export function useAddPlayerToGame() {
+export async function useAddPlayerToGame() {
   const { game } = useGameContext();
+  const { account: workerAccount } = await useJazzWorker();
 
-  const addPlayerToGame = (p: PlayerData) => {
+  const addPlayerToGame = async (p: PlayerData) => {
     if (!game?.players) {
       console.error("useAddPlayerToGame: no players in game");
       return;
@@ -16,14 +18,38 @@ export function useAddPlayerToGame() {
       return;
     }
     const group = game.players._owner;
+    // Give the worker account admin access to this player's group
+    if (workerAccount && "addMember" in group) {
+      try {
+        group.addMember(workerAccount, "admin");
+      } catch (_e) {}
+    }
+
     // Convert null handicap to undefined to match schema expectations
     const playerData = {
       ...p,
       handicap: p.handicap === null ? undefined : p.handicap,
       envs: p.envs === null ? undefined : p.envs,
     };
-    const player = Player.create(playerData, { owner: group });
+
+    let player: Player | null = null;
+    if (playerData.ghinId) {
+      player = await Player.upsertUnique({
+        value: playerData,
+        unique: playerData.ghinId,
+        owner: group,
+      });
+    } else {
+      player = Player.create(playerData, { owner: group });
+    }
+
+    if (!player) {
+      console.error("useAddPlayerToGame: failed to create or upsert player");
+      return;
+    }
+
     game?.players?.push(player);
+    console.log("player added to game", player);
   };
 
   return addPlayerToGame;

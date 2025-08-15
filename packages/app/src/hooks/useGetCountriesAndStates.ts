@@ -1,22 +1,13 @@
-import type { CoValue, ID } from "jazz-tools";
-import { useCoState } from "jazz-tools/react-core";
-import { PlayerAccount } from "spicylib/schema";
+import { useJazzWorker } from "./useJazzWorker";
 
-export function useGetCountriesAndStates() {
-  // TODO: get from server
-  const workerAccountId = "co_zEGutjQVsanzKS2wawLZcZkZPDL";
-
-  const workerAccount = useCoState(
-    PlayerAccount,
-    workerAccountId as unknown as ID<CoValue>,
-    {
-      resolve: {
-        profile: {
-          countries: true,
-        },
+export async function useGetCountriesAndStates() {
+  const { account } = await useJazzWorker({
+    resolve: {
+      profile: {
+        countries: true,
       },
     },
-  );
+  });
 
-  return { countries: workerAccount?.profile?.countries ?? [] };
+  return { countries: account?.profile?.countries ?? [] };
 }

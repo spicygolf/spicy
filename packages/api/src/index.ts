@@ -3,7 +3,7 @@ import type { Context } from "elysia";
 import { Elysia } from "elysia";
 import type { GolfersSearchRequest } from "ghin";
 import { getCountries } from "./countries";
-// import { setupWorker } from "./jazz_worker";
+import { setupWorker } from "./jazz_worker";
 import { auth } from "./lib/auth";
 import { playerSearch } from "./players";
 
@@ -66,7 +66,7 @@ const app = new Elysia()
     hostname: host || "localhost",
   });
 
-// setupWorker();
+setupWorker();
 
 console.log(
   `⛳️ Spicy Golf API is running at ${scheme}://${app.server?.hostname}:${app.server?.port}/${api} ⛳️`,
