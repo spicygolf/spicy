@@ -4,5 +4,12 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",
     "source.organizeImports.biome": "explicit"
-  }
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["**/package.json"],
+      "url": "https://json.schemastore.org/package.json"
+    }
+  ],
+  "json.schemaDownload.enable": false
 }

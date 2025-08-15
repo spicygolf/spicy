@@ -19,6 +19,6 @@
   },
   "dependencies": {
     "date-fns-tz": "3.2.0",
-    "jazz-tools": "0.17.0"
+    "jazz-tools": "0.16.6"
   }
 }

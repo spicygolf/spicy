@@ -16,7 +16,7 @@
     "better-auth": "^1.2.12",
     "elysia": "1.3.5",
     "ghin": "github:boorad/ghin#feat/approved-api-access",
-    "jazz-betterauth-server-plugin": "0.17.0",
+    "jazz-betterauth-server-plugin": "0.16.6",
     "spicylib": "workspace:*"
   },
   "devDependencies": {
