@@ -11,20 +11,7 @@ export interface GolferWithJazzId extends Golfer {
 async function findPlayerByGhinId(ghinId: string): Promise<string | undefined> {
   try {
     const { id } = await getJazzWorker();
-    const player = await Player.loadUnique(
-      {
-        handicap: {
-          source: "ghin",
-          identifier: ghinId,
-        },
-      },
-      id,
-      {
-        resolve: {
-          handicap: true,
-        },
-      },
-    );
+    const player = await Player.loadUnique(ghinId, id);
     return player?.id || undefined;
   } catch (error) {
     console.error(`Error finding Jazz Player for GHIN ${ghinId}:`, error);

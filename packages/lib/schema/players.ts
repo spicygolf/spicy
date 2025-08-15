@@ -2,10 +2,9 @@ import { co, z } from "jazz-tools";
 
 export const Handicap = co.map({
   source: z.literal(["ghin", "manual"]),
-  identifier: z.string().optional(),
-  hi_display: z.string().optional(),
-  hi_value: z.number().optional(),
-  rev_date: z.date().optional(),
+  display: z.string().optional(),
+  value: z.number().optional(),
+  revDate: z.date().optional(),
 });
 export type Handicap = co.loaded<typeof Handicap>;
 
@@ -17,6 +16,7 @@ export const Player = co.map({
   email: z.string(),
   short: z.string(),
   gender: z.literal(["M", "F"]),
+  ghinId: z.string().optional(),
   handicap: co.optional(Handicap),
   // meta
   envs: co.optional(ListOfEnvironments),

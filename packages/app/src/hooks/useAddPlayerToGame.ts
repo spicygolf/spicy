@@ -4,9 +4,9 @@ import { useJazzWorker } from "./useJazzWorker";
 
 export type PlayerData = Parameters<typeof Player.create>[0];
 
-export function useAddPlayerToGame() {
+export async function useAddPlayerToGame() {
   const { game } = useGameContext();
-  const { id } = useJazzWorker();
+  const { account: workerAccount } = await useJazzWorker();
 
   const addPlayerToGame = async (p: PlayerData) => {
     if (!game?.players) {
@@ -19,9 +19,9 @@ export function useAddPlayerToGame() {
     }
     const group = game.players._owner;
     // Give the worker account admin access to this player's group
-    if (id && "addMember" in group) {
+    if (workerAccount && "addMember" in group) {
       try {
-        group.addMember(id, "admin");
+        group.addMember(workerAccount, "admin");
       } catch (_e) {}
     }
 
@@ -32,16 +32,21 @@ export function useAddPlayerToGame() {
       envs: p.envs === null ? undefined : p.envs,
     };
 
-    const player = await Player.upsertUnique({
-      value: playerData,
-      unique: {
-        handicap: {
-          source: "ghin",
-          identifier: playerData.handicap?.identifier,
-        },
-      },
-      owner: group,
-    });
+    let player: Player | null = null;
+    if (playerData.ghinId) {
+      player = await Player.upsertUnique({
+        value: playerData,
+        unique: playerData.ghinId,
+        owner: group,
+      });
+    } else {
+      player = Player.create(playerData, { owner: group });
+    }
+
+    if (!player) {
+      console.error("useAddPlayerToGame: failed to create or upsert player");
+      return;
+    }
 
     game?.players?.push(player);
     console.log("player added to game", player);

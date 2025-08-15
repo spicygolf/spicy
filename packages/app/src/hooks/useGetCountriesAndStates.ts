@@ -1,11 +1,7 @@
-import { useCoState } from "jazz-tools/react-core";
-import { PlayerAccount } from "spicylib/schema";
 import { useJazzWorker } from "./useJazzWorker";
 
-export function useGetCountriesAndStates() {
-  const { id } = useJazzWorker();
-
-  const workerAccount = useCoState(PlayerAccount, id, {
+export async function useGetCountriesAndStates() {
+  const { account } = await useJazzWorker({
     resolve: {
       profile: {
         countries: true,
@@ -13,5 +9,5 @@ export function useGetCountriesAndStates() {
     },
   });
 
-  return { countries: workerAccount?.profile?.countries ?? [] };
+  return { countries: account?.profile?.countries ?? [] };
 }

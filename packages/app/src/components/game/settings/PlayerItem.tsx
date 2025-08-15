@@ -26,14 +26,14 @@ export function PlayerItem({ item }: { item: Golfer }) {
       short: item.first_name || "",
       gender: item.gender,
       level: "",
+      ghinId: item.ghin.toString(),
       handicap: item.ghin
         ? {
             source: "ghin" as const,
-            identifier: item.ghin.toString(),
-            hi_display: item.hi_display,
-            hi_value:
+            display: item.hi_display,
+            value:
               typeof item.hi_value === "number" ? item.hi_value : undefined,
-            rev_date: item.rev_date || undefined,
+            revDate: item.rev_date || undefined,
           }
         : undefined,
     };
