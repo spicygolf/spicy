@@ -6,7 +6,7 @@ Every time you choose to apply a rule(s), explicitly state the rule(s) in the ou
 
 - This is a monorepo of packages for Spicy Golf, a golf app that tracks games played with complex rules, points, and calculations.
 - The app calls the api package sparingly, and only for data that it can't get or doesn't have locally.  This allows almost all of the app's functionality to work when the device is offline.  To achieve this, we use Jazz Tools, a local-first database with sync capabilities.
-- Use the documentation of Jazz Tools if you have access locally to its `llms.txt` file.  If not, use documentation here: https://jazz.tools/llms-full.txt
+- Use the documentation of Jazz Tools if you have access locally to its `llms.txt` file.  It should be located at ~/dev/llms/jazz/llms-full.txt.  If not, use documentation here: https://jazz.tools/llms-full.txt
 
 
 ## Tech Stack

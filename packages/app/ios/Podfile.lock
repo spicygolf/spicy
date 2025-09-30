@@ -141,7 +141,6 @@ PODS:
     - React-RCTText (= 0.80.0)
     - React-RCTVibration (= 0.80.0)
   - React-callinvoker (0.80.0)
-  - React-Codegen (0.1.0)
   - React-Core (0.80.0):
     - boost
     - DoubleConversion
@@ -1745,36 +1744,6 @@ PODS:
     - SocketRocket
   - react-native-get-random-values (1.11.0):
     - React-Core
-  - react-native-image-resizer (3.0.11):
-    - boost
-    - DoubleConversion
-    - fast_float
-    - fmt
-    - glog
-    - hermes-engine
-    - RCT-Folly
-    - RCT-Folly/Fabric
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Codegen
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-hermes
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - SocketRocket
-    - Yoga
   - react-native-mmkv (3.3.0):
     - boost
     - DoubleConversion
@@ -2569,7 +2538,6 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../../../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../../../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-get-random-values (from `../../../node_modules/react-native-get-random-values`)
-  - "react-native-image-resizer (from `../../../node_modules/@bam.tech/react-native-image-resizer`)"
   - react-native-mmkv (from `../../../node_modules/react-native-mmkv`)
   - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
   - react-native-pager-view (from `../../../node_modules/react-native-pager-view`)
@@ -2615,7 +2583,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - OpenSSL-Universal
-    - React-Codegen
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -2708,8 +2675,6 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-get-random-values:
     :path: "../../../node_modules/react-native-get-random-values"
-  react-native-image-resizer:
-    :path: "../../../node_modules/@bam.tech/react-native-image-resizer"
   react-native-mmkv:
     :path: "../../../node_modules/react-native-mmkv"
   react-native-netinfo:
@@ -2809,7 +2774,6 @@ SPEC CHECKSUMS:
   RCTTypeSafety: a5cf7a7e80baf972e331dc028e5d5c19bb2535a4
   React: 606d4dccbcf29aec4dc84a7921405a28e1701a22
   React-callinvoker: 0e13bd3c039df9ceef04f7381a81f017655c8361
-  React-Codegen: 4b8b4817cea7a54b83851d4c1f91f79aa73de30a
   React-Core: d118e66b5b561f5ab999dd7f9cf14f54dab376a7
   React-CoreModules: 6ec48c52c9ff2ca3fa110153de09e4c2379f1860
   React-cxxreact: cb406100002503e44de4b725e581ce24f47003b9
@@ -2838,7 +2802,6 @@ SPEC CHECKSUMS:
   React-Mapbuffer: f5754c33877eaf36e4c76c613b35615a181c85c5
   React-microtasksnativemodule: 23df6374a3ac422d8c2927839bcaeed61fee3dad
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
-  react-native-image-resizer: 8537d9fdbd14b9d5f301a2d319c469bf56f6e9a0
   react-native-mmkv: 7fb4729ad5cb787a4394e6c4bd48e4b8ec30f25c
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
   react-native-pager-view: 6e60acfd433ace1a7a1af75bd80b619a41478640

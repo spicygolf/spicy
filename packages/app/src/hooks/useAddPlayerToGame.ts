@@ -1,4 +1,5 @@
-import { Player, PlayerAccount } from "spicylib/schema";
+import { Group } from "jazz-tools";
+import { Player } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
 import { useJazzWorker } from "./useJazzWorker";
 
@@ -6,7 +7,7 @@ export type PlayerData = Parameters<typeof Player.create>[0];
 
 export function useAddPlayerToGame() {
   const { game } = useGameContext();
-  const { id } = useJazzWorker();
+  const worker = useJazzWorker();
 
   const addPlayerToGame = async (p: PlayerData) => {
     if (!game?.players) {
@@ -17,12 +18,15 @@ export function useAddPlayerToGame() {
       console.error("useAddPlayerToGame: no player");
       return;
     }
+    if (!worker?.account) {
+      console.error("useAddPlayerToGame: worker account not loaded");
+      return;
+    }
     const group = game.players._owner;
-    const workerAccount = await PlayerAccount.load(id);
     // Give the worker account admin access to this player's group
-    if (workerAccount && "addMember" in group) {
+    if (group instanceof Group) {
       try {
-        group.addMember(workerAccount, "admin");
+        group.addMember(worker.account, "admin");
       } catch (_e) {}
     }
 

@@ -7,9 +7,9 @@ import {
   ListOfGameSpecs,
   ListOfPlayers,
   ListOfRoundToGames,
-  Player,
   PlayerAccount,
 } from "spicylib/schema";
+import { useJazzWorker } from "./useJazzWorker";
 
 export function useCreateGame() {
   const { me } = useAccount(PlayerAccount, {
@@ -20,15 +20,20 @@ export function useCreateGame() {
       },
     },
   });
+  const worker = useJazzWorker();
 
   return (spec: GameSpec): Game | undefined => {
     if (!me || !me.root) {
       console.error("useCreateGame: user account not loaded");
       return;
     }
+    if (!worker?.account) {
+      console.error("useCreateGame: worker account not loaded");
+      return;
+    }
     // create a group for the game
-    const group = Group.create();
-    group.addMember(me, "admin");
+    const group = Group.create({ owner: me });
+    group.addMember(worker.account, "admin");
 
     const specs = ListOfGameSpecs.create([], { owner: group });
     specs.push(spec);
@@ -39,16 +44,7 @@ export function useCreateGame() {
     if (!player) {
       console.warn("useCreateGame: no player in PlayerAccount");
     } else {
-      players.push(
-        Player.create(
-          {
-            ...player,
-            handicap: player.handicap ?? undefined,
-            envs: player.envs ?? undefined,
-          },
-          { owner: group },
-        ),
-      );
+      players.push(player);
     }
 
     const rounds = ListOfRoundToGames.create([], { owner: group });

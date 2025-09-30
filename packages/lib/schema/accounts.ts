@@ -25,11 +25,21 @@ export const PlayerAccount = co
     root: PlayerAccountRoot,
     profile: PlayerAccountProfile,
   })
-  .withMigration((account, creationProps?: { name: string }) => {
-    if (account.root === undefined) {
+  .withMigration(async (account, creationProps?: { name: string }) => {
+    if (account.root === undefined || RESET) {
       const name = creationProps?.name || "";
-      const gsGroup = Group.create();
-      gsGroup.addMember(account, "writer");
+
+      if (!JAZZ_WORKER_ACCOUNT) {
+        throw new Error("JAZZ_WORKER_ACCOUNT not set");
+      }
+      // create a group for the account, add worker as admin
+      const group = Group.create(account);
+      const workerAccount = await PlayerAccount.load(JAZZ_WORKER_ACCOUNT);
+      if (!workerAccount) {
+        throw new Error("Jazz Worker Account not found");
+      }
+      group.addMember(workerAccount, "admin");
+
       account.root = PlayerAccountRoot.create(
         {
           // TODO: make this optional? or make player search GHIN for themselves
@@ -44,15 +54,15 @@ export const PlayerAccount = co
               handicap: undefined,
               envs: undefined,
             },
-            { owner: account },
+            { owner: group },
           ),
-          games: ListOfGames.create([], { owner: account }),
+          games: ListOfGames.create([], { owner: group }),
           specs: ListOfGameSpecs.create(
-            [GameSpec.create(defaultSpec, { owner: gsGroup })],
-            { owner: account },
+            [GameSpec.create(defaultSpec, { owner: group })],
+            { owner: group },
           ),
         },
-        { owner: account },
+        { owner: group },
       );
     }
   })

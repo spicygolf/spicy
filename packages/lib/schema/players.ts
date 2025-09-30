@@ -18,9 +18,7 @@ export const Player = co.map({
   gender: z.literal(["M", "F"]),
   ghinId: z.string().optional(),
   handicap: co.optional(Handicap),
-  // meta
   envs: co.optional(ListOfEnvironments),
-  level: z.string(),
 });
 export type Player = co.loaded<typeof Player>;
 
