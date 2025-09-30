@@ -1,24 +1,22 @@
 import { useIsAuthenticated } from "jazz-tools/react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import { AppNavigator } from "./AppNavigator";
 import { AuthNavigator } from "./AuthNavigator";
 
 export function RootNavigator() {
   const isAuthenticated = useIsAuthenticated();
-  const { theme } = useUnistyles();
+
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      edges={["top", "left", "right"]}
-    >
+    <SafeAreaView style={styles.container}>
       {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create(() => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
 }));

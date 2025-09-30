@@ -28,7 +28,7 @@ export function GameListScreen() {
       },
     },
   });
-  const games = useCoState(ListOfGames, me?.root?.games?.id);
+  const games = useCoState(ListOfGames, me?.root?.games?.$jazz.id);
   if (!games) return null;
 
   return (

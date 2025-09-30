@@ -12,7 +12,7 @@ export function SpecList({
       <FlatList
         data={specs}
         renderItem={({ item }) => <SpecListItem spec={item} />}
-        keyExtractor={(item, index) => item?.id ?? index.toString()}
+        keyExtractor={(item, index) => item?.$jazz.id ?? index.toString()}
       />
     </View>
   );

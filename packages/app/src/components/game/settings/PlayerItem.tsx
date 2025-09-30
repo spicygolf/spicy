@@ -25,7 +25,6 @@ export function PlayerItem({ item }: { item: Golfer }) {
       email: "",
       short: item.first_name || "",
       gender: item.gender,
-      level: "",
       ghinId: item.ghin.toString(),
       handicap: item.ghin
         ? {

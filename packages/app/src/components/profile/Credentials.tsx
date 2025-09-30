@@ -44,10 +44,10 @@ export function Credentials() {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Account ID</Text>
-        <Text style={styles.value}>{me.id}</Text>
+        <Text style={styles.value}>{me.$jazz.id}</Text>
         <TouchableOpacity
           style={styles.copy}
-          onPress={() => Clipboard.setString(me.id)}
+          onPress={() => Clipboard.setString(me.$jazz.id)}
         >
           <CopyIcon />
         </TouchableOpacity>

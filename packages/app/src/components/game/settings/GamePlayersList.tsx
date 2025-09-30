@@ -10,7 +10,7 @@ export function GamePlayersList() {
     <FlatList
       data={game?.players}
       renderItem={({ item }) => <GamePlayersListItem player={item} />}
-      keyExtractor={(item) => item?.id || ""}
+      keyExtractor={(item) => item?.$jazz.id || ""}
       ListEmptyComponent={<EmptyPlayersList />}
     />
   );

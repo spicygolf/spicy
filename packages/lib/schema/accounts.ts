@@ -26,7 +26,7 @@ export const PlayerAccount = co
     profile: PlayerAccountProfile,
   })
   .withMigration(async (account, creationProps?: { name: string }) => {
-    if (account.root === undefined || RESET) {
+    if (!account.$jazz.has("root") || RESET) {
       const name = creationProps?.name || "";
 
       if (!JAZZ_WORKER_ACCOUNT) {
@@ -40,45 +40,50 @@ export const PlayerAccount = co
       }
       group.addMember(workerAccount, "admin");
 
-      account.root = PlayerAccountRoot.create(
-        {
-          // TODO: make this optional? or make player search GHIN for themselves
-          // upon sign up, or enter manually if they don't have a GHIN account
-          player: Player.create(
-            {
-              name,
-              short: name,
-              email: "",
-              gender: "M", // TODO: make this optional?
-              level: "",
-              handicap: undefined,
-              envs: undefined,
-            },
-            { owner: group },
-          ),
-          games: ListOfGames.create([], { owner: group }),
-          specs: ListOfGameSpecs.create(
-            [GameSpec.create(defaultSpec, { owner: group })],
-            { owner: group },
-          ),
-        },
-        { owner: group },
+      account.$jazz.set(
+        "root",
+        PlayerAccountRoot.create(
+          {
+            // TODO: make this optional? or make player search GHIN for themselves
+            // upon sign up, or enter manually if they don't have a GHIN account
+            player: Player.create(
+              {
+                name,
+                short: name,
+                email: "",
+                gender: "M", // TODO: make this optional?
+                handicap: undefined,
+                envs: undefined,
+              },
+              { owner: group },
+            ),
+            games: ListOfGames.create([], { owner: group }),
+            specs: ListOfGameSpecs.create(
+              [GameSpec.create(defaultSpec, { owner: group })],
+              { owner: group },
+            ),
+          },
+          { owner: group },
+        ),
       );
     }
   })
   .withMigration(async (account) => {
-    if (account.id === JAZZ_WORKER_ACCOUNT) {
-      if (account.profile === undefined || RESET) {
+    if (account.$jazz.id === JAZZ_WORKER_ACCOUNT) {
+      if (!account.$jazz.has("profile") || RESET) {
         const group = Group.create();
         group.addMember(account, "admin");
         group.makePublic();
-        account.profile = PlayerAccountProfile.create(
-          {
-            name: "Spicy Golf Server Worker",
-            countries: ListOfCountries.create([], { owner: group }),
-            updated_at: new Date(1971, 8, 29),
-          },
-          { owner: group },
+        account.$jazz.set(
+          "profile",
+          PlayerAccountProfile.create(
+            {
+              name: "Spicy Golf Server Worker",
+              countries: ListOfCountries.create([], { owner: group }),
+              updated_at: new Date(1971, 8, 29),
+            },
+            { owner: group },
+          ),
         );
         return;
       }

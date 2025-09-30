@@ -1,4 +1,4 @@
-import { useCoState } from "jazz-tools/react";
+import { useCoState } from "jazz-tools/react-native";
 import { Game } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
 
@@ -20,7 +20,7 @@ type GameResolve = {
 
 export function useGame(gameId?: string, options: UseGameOptions = {}) {
   const { game: ctxGame } = useGameContext();
-  const effectiveGameId = gameId || ctxGame?.id;
+  const effectiveGameId = gameId || ctxGame?.$jazz.id;
 
   const resolve: GameResolve | undefined = effectiveGameId
     ? {

@@ -6,7 +6,7 @@ import { useGamespecs } from "@/hooks";
 import { Screen, Text } from "@/ui";
 
 export function NewGame() {
-  const specs = useGamespecs();
+  const { specs } = useGamespecs();
   return (
     <Screen>
       <View style={styles.container}>

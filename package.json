@@ -48,9 +48,6 @@
     "spicygolf"
   ],
   "type": "module",
-  "resolutions": {
-    "jazz-tools": "0.15.11"
-  },
   "workspaces": {
     "packages": [
       "packages/api",
@@ -59,10 +56,7 @@
     ],
     "catalogs": {
       "jazz": {
-        "jazz-tools": "0.17.2",
-        "jazz-auth-betterauth": "0.17.2",
-        "jazz-betterauth-server-plugin": "0.17.2",
-        "jazz-react-auth-betterauth": "0.17.2"
+        "jazz-tools": "0.18.20"
       }
     }
   },

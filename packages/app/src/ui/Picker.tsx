@@ -38,6 +38,7 @@ export function Picker({
       itemContainerStyle={styles.itemContainer}
       itemTextStyle={styles.itemText}
       activeColor={theme.colors.action}
+      // @ts-expect-error patched react-native-element-dropdown, but not types (I think)
       activeTextColor={theme.colors.actionText}
     />
   );

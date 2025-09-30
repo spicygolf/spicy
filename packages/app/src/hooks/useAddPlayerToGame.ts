@@ -22,7 +22,7 @@ export function useAddPlayerToGame() {
       console.error("useAddPlayerToGame: worker account not loaded");
       return;
     }
-    const group = game.players._owner;
+    const group = game.players.$jazz.owner;
     // Give the worker account admin access to this player's group
     if (group instanceof Group) {
       try {

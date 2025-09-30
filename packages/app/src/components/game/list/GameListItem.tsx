@@ -9,7 +9,7 @@ export function GameListItem({ game }: { game: Game | null }) {
   return (
     <Link
       href={{
-        path: `/games/${game.id}/scoring`,
+        path: `/games/${game.$jazz.id}/scoring`,
       }}
       style={styles.container}
     >
@@ -20,7 +20,7 @@ export function GameListItem({ game }: { game: Game | null }) {
         </Text>
       </View>
       <Link
-        href={{ path: `/games/${game.id}/settings` }}
+        href={{ path: `/games/${game.$jazz.id}/settings` }}
         style={styles.actions}
       >
         <FontAwesome6 name="gear" size={18} color="#666" iconStyle="solid" />
