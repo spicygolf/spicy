@@ -33,16 +33,16 @@ async function searchPlayer(
   }
 }
 
-// Custom hook for GHIN player search
 export function useGhinSearchPlayerQuery(search: GolfersSearchRequest) {
   const api = useApi();
-  // add wildcards to names
-  search.last_name = `${search.last_name}%`;
-  search.first_name = `${search.first_name}%`;
 
-  // Ensure pagination fields are present
-  search.page = search.page || 1;
-  search.per_page = search.per_page || 10;
+  const searchParams = {
+    ...search,
+    last_name: `${search.last_name}%`,
+    first_name: `${search.first_name}%`,
+    page: search.page || 1,
+    per_page: search.per_page || 10,
+  };
 
   // Calculate stale time to expire at next 4:00 AM EST
   const staleTime = getMillisecondsUntilTargetTime(
@@ -54,8 +54,8 @@ export function useGhinSearchPlayerQuery(search: GolfersSearchRequest) {
   );
 
   return useQuery({
-    queryKey: ["ghin-player-search", search],
-    queryFn: () => searchPlayer(api, search),
+    queryKey: ["ghin-player-search", searchParams],
+    queryFn: () => searchPlayer(api, searchParams),
     // Enable when we have at least a name to search
     // TODO: put rules in place here, like at least 3 letters of last name
     //       one of last, country, state... whatever rules are in GHIN API

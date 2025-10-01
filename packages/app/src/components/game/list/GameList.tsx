@@ -8,7 +8,7 @@ export function GameList({ games }: { games: ListOfGames | undefined }) {
       <FlatList
         data={games}
         renderItem={({ item }) => <GameListItem game={item} />}
-        keyExtractor={(item, index) => item?.id ?? index.toString()}
+        keyExtractor={(item, index) => item?.$jazz.id ?? index.toString()}
       />
     </View>
   );

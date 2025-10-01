@@ -11,9 +11,11 @@ export function GameDelete({
   game: Game;
 }) {
   const deleteGame = (id: string) => {
-    const idx = games.findIndex((game) => game?.id === id);
-    games.splice(idx, 1);
+    const idx = games.findIndex((game) => game?.$jazz.id === id);
+    games.$jazz.splice(idx, 1);
   };
 
-  return <Button label="Delete Game" onPress={() => deleteGame(game.id)} />;
+  return (
+    <Button label="Delete Game" onPress={() => deleteGame(game.$jazz.id)} />
+  );
 }

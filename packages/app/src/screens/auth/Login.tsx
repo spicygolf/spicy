@@ -1,9 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "jazz-react-auth-betterauth";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { Button, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { betterAuthClient } from "@/lib/auth-client";
 import type { AuthStackNavigationProp } from "@/navigators/AuthNavigator";
 import { Screen, Text } from "@/ui";
 import { Input } from "@/ui/Input";
@@ -14,22 +14,18 @@ interface LoginForm {
 }
 
 export function Login() {
-  const auth = useAuth();
   const { control, handleSubmit } = useForm<LoginForm>();
   const navigation = useNavigation<AuthStackNavigationProp>();
 
   const onSubmit: SubmitHandler<LoginForm> = async ({ email, password }) => {
-    await auth.authClient.signIn.email(
+    await betterAuthClient.signIn.email(
       { email, password },
       {
         onSuccess: async () => {
-          await auth.logIn();
-          const session = await auth.authClient.getSession();
-          console.log("session", session);
-          // router.push("/");
+          console.log("Sign in successful");
         },
         onError: (e: unknown) => {
-          console.error(e);
+          console.error("Sign in error:", e);
         },
       },
     );

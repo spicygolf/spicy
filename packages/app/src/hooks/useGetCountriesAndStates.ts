@@ -1,22 +1,31 @@
-import type { CoValue, ID } from "jazz-tools";
-import { useCoState } from "jazz-tools/react-core";
-import { PlayerAccount } from "spicylib/schema";
+import type { co } from "jazz-tools";
+import { useEffect, useState } from "react";
+import type { ListOfCountries } from "spicylib/schema";
+import { useJazzWorker } from "./useJazzWorker";
+
+type Countries = co.loaded<typeof ListOfCountries>;
 
 export function useGetCountriesAndStates() {
-  // TODO: get from server
-  const workerAccountId = "co_zEGutjQVsanzKS2wawLZcZkZPDL";
-
-  const workerAccount = useCoState(
-    PlayerAccount,
-    workerAccountId as unknown as ID<CoValue>,
-    {
-      resolve: {
-        profile: {
-          countries: true,
+  const [countries, setCountries] = useState<Countries | null>(null);
+  const worker = useJazzWorker({
+    profile: {
+      countries: {
+        $each: {
+          states: {
+            $each: true,
+          },
         },
       },
     },
-  );
+  });
 
-  return { countries: workerAccount?.profile?.countries ?? [] };
+  useEffect(() => {
+    if (!worker?.account) {
+      return;
+    }
+
+    setCountries(worker.account.profile?.countries ?? null);
+  }, [worker?.account]);
+
+  return { countries };
 }

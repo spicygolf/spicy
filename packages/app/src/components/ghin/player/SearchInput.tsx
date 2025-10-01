@@ -20,78 +20,74 @@ export function GhinPlayerSearchInput() {
   const { state, setState } = context;
   const handleChange = (data: GolfersSearchRequest) => setState(data);
 
-  if (countries) {
-    const country = countries.find((c) => c?.code === state.country);
+  const country = countries?.find((c) => c?.code === state.country);
 
-    return (
-      <View style={styles.container}>
-        <View style={styles.row}>
-          <View style={styles.picker_country}>
-            <Picker
-              title="Country"
-              items={countries.flatMap((c) =>
-                c
-                  ? [
-                      {
-                        label: c.name,
-                        value: c.code,
-                      },
-                    ]
-                  : [],
-              )}
-              selectedValue={state.country}
-              onValueChange={(value) =>
-                handleChange({ ...state, country: value })
-              }
-            />
-          </View>
-          <View style={styles.picker_state}>
-            <Picker
-              title="State/Province"
-              items={(country?.states ?? []).flatMap((s) =>
-                s
-                  ? [
-                      {
-                        label: s.name,
-                        value: s.code,
-                      },
-                    ]
-                  : [],
-              )}
-              selectedValue={state.state}
-              onValueChange={(value) =>
-                handleChange({ ...state, state: value })
-              }
-            />
-          </View>
+  return (
+    <View style={styles.container}>
+      <View style={styles.row}>
+        <View style={styles.picker_country}>
+          <Picker
+            title="Country"
+            items={(countries ?? []).flatMap((c) =>
+              c
+                ? [
+                    {
+                      label: c.name,
+                      value: c.code,
+                    },
+                  ]
+                : [],
+            )}
+            selectedValue={state.country}
+            onValueChange={(value) =>
+              handleChange({ ...state, country: value })
+            }
+          />
         </View>
-        <View style={styles.row}>
-          <View style={[styles.field, styles.last_name]}>
-            <Input
-              name="last_name"
-              label="Last Name"
-              value={state.last_name}
-              onChangeText={(value) =>
-                handleChange({ ...state, last_name: value })
-              }
-              autoCapitalize="words"
-            />
-          </View>
-          <View style={styles.field}>
-            <Input
-              name="first_name"
-              label="First Name (optional)"
-              value={state.first_name}
-              onChangeText={(value) =>
-                handleChange({ ...state, first_name: value })
-              }
-              autoCapitalize="words"
-            />
-          </View>
+        <View style={styles.picker_state}>
+          <Picker
+            title="State/Province"
+            items={(country?.states ?? []).flatMap((s) =>
+              s
+                ? [
+                    {
+                      label: s.name,
+                      value: s.code,
+                    },
+                  ]
+                : [],
+            )}
+            selectedValue={state.state}
+            onValueChange={(value) => handleChange({ ...state, state: value })}
+          />
         </View>
       </View>
-    );
-  }
+      <View style={styles.row}>
+        <View style={[styles.field, styles.last_name]}>
+          <Input
+            name="last_name"
+            label="Last Name"
+            value={state.last_name}
+            onChangeText={(value) =>
+              handleChange({ ...state, last_name: value })
+            }
+            autoCapitalize="words"
+          />
+        </View>
+        <View style={styles.field}>
+          <Input
+            name="first_name"
+            label="First Name (optional)"
+            value={state.first_name || ""}
+            onChangeText={(value) =>
+              handleChange({ ...state, first_name: value })
+            }
+            autoCapitalize="words"
+          />
+        </View>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create((theme) => ({

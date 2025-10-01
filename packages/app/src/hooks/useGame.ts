@@ -1,4 +1,4 @@
-import { useCoState } from "jazz-tools/react";
+import { useCoState } from "jazz-tools/react-native";
 import { Game } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
 
@@ -11,8 +11,6 @@ type GameWithRelations = Awaited<ReturnType<typeof Game.load>> | null;
 // Define the resolve type specifically for Game
 type GameResolve = {
   resolve: {
-    start: true;
-    name: true;
     specs: { $each: true };
     holes: { $each: true };
     players: { $each: true };
@@ -22,14 +20,11 @@ type GameResolve = {
 
 export function useGame(gameId?: string, options: UseGameOptions = {}) {
   const { game: ctxGame } = useGameContext();
-  const effectiveGameId = gameId || ctxGame?.id;
+  const effectiveGameId = gameId || ctxGame?.$jazz.id;
 
-  // Create the resolve object with proper typing
   const resolve: GameResolve | undefined = effectiveGameId
     ? {
         resolve: {
-          start: true,
-          name: true,
           specs: { $each: true },
           holes: { $each: true },
           players: { $each: true },

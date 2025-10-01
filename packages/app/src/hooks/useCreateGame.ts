@@ -1,5 +1,5 @@
 import { Group } from "jazz-tools";
-import { useAccount } from "jazz-tools/react-core";
+import { useAccount } from "jazz-tools/react-native";
 import type { GameSpec } from "spicylib/schema";
 import {
   Game,
@@ -7,65 +7,48 @@ import {
   ListOfGameSpecs,
   ListOfPlayers,
   ListOfRoundToGames,
-  Player,
   PlayerAccount,
 } from "spicylib/schema";
 
 export function useCreateGame() {
-  const { me } = useAccount(PlayerAccount, {
-    resolve: {
-      root: {
-        player: true,
-        games: true,
-      },
-    },
-  });
+  const { me } = useAccount(PlayerAccount);
 
-  return (spec: GameSpec): Game | undefined => {
-    if (!me || !me.root) {
-      console.error("useCreateGame: user account not loaded");
-      return;
-    }
-    // create a group for the game
+  const createGame = async (name: string, specs: GameSpec[]) => {
+    if (!me?.root) return null;
+
     const group = Group.create();
     group.addMember(me, "admin");
 
-    const specs = ListOfGameSpecs.create([], { owner: group });
-    specs.push(spec);
-    const holes = ListOfGameHoles.create([], { owner: group });
+    // Create game specs list
+    const gameSpecs = ListOfGameSpecs.create(specs, { owner: group });
+
+    // Create players list
     const players = ListOfPlayers.create([], { owner: group });
-    const player = me.root?.player;
 
-    if (!player) {
-      console.warn("useCreateGame: no player in PlayerAccount");
-    } else {
-      players.push(
-        Player.create(
-          {
-            ...player,
-            handicap: player.handicap ?? undefined,
-            envs: player.envs ?? undefined,
-          },
-          { owner: group },
-        ),
-      );
-    }
+    // Create game holes list (empty for now)
+    const holes = ListOfGameHoles.create([], { owner: group });
 
-    const rounds = ListOfRoundToGames.create([], { owner: group });
+    // Create round to games list (empty for now)
+    const roundToGames = ListOfRoundToGames.create([], { owner: group });
 
+    // Create the game
     const game = Game.create(
       {
         start: new Date(),
-        name: spec.name,
-        specs,
+        name,
+        specs: gameSpecs,
         holes,
         players,
-        rounds,
+        rounds: roundToGames,
       },
       { owner: group },
     );
 
-    me.root.games?.push(game);
+    // Add game to user's games list
+    me.root.games?.$jazz.push(game);
+
     return game;
   };
+
+  return { createGame };
 }

@@ -9,17 +9,17 @@ import { Text } from "@/ui";
 
 export function SpecListItem({ spec }: { spec: GameSpec | null }) {
   const navigation = useNavigation<NavigationProp<GamesNavigatorParamList>>();
-  const createGame = useCreateGame();
+  const { createGame } = useCreateGame();
   if (!spec) return null;
 
   return (
     <View style={styles.row}>
       <Pressable
-        onPress={() => {
-          const game = createGame(spec);
+        onPress={async () => {
+          const game = await createGame(spec.name, [spec]);
           if (!game) return;
           navigation.navigate("Game", {
-            gameId: game.id,
+            gameId: game.$jazz.id,
             screen: "GameSettingsNavigator",
             params: {
               screen: "GameSettings",

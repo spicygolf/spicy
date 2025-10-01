@@ -25,12 +25,15 @@ export function GhinPlayerSearchResults() {
     setGolfers([]);
   }, []);
 
-  // when new data arrives, add it to `golfers` array
   useEffect(() => {
     if (data) {
-      setGolfers((g) => g.concat(data));
+      if (page === 1) {
+        setGolfers(data);
+      } else {
+        setGolfers((g) => g.concat(data));
+      }
     }
-  }, [data]);
+  }, [data, page]);
 
   if (isPending) {
     return (

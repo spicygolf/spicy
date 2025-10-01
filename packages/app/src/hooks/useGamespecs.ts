@@ -1,27 +1,30 @@
 import { Group } from "jazz-tools";
-import { useAccount, useCoState } from "jazz-tools/react-core";
-import {
-  defaultSpec,
-  GameSpec,
-  ListOfGameSpecs,
-  PlayerAccount,
-} from "spicylib/schema";
+import { useAccount } from "jazz-tools/react-native";
+import { type defaultSpec, GameSpec, PlayerAccount } from "spicylib/schema";
 
 export function useGamespecs() {
   const { me } = useAccount(PlayerAccount, {
     resolve: {
       root: {
-        specs: {
-          $each: true,
-        },
+        specs: { $each: true },
       },
     },
   });
-  const specs = useCoState(ListOfGameSpecs, me?.root?.specs?.id);
-  if (specs?.length === 0 && me) {
+
+  const createGameSpec = (spec: typeof defaultSpec) => {
+    if (!me?.root) return null;
+
     const group = Group.create();
-    group.addMember(me, "writer");
-    specs.push(GameSpec.create(defaultSpec, { owner: group }));
-  }
-  return specs;
+    group.addMember(me, "admin");
+
+    const gameSpec = GameSpec.create(spec, { owner: group });
+    me.root.specs.$jazz.push(gameSpec);
+
+    return gameSpec;
+  };
+
+  return {
+    specs: me?.root?.specs || null,
+    createGameSpec,
+  };
 }
