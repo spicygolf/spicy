@@ -53,7 +53,7 @@ export function useAddPlayerToGame() {
       return;
     }
 
-    game?.players?.push(player);
+    game?.players?.$jazz.push(player);
     console.log("player added to game", player);
   };
 
