@@ -20,8 +20,11 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Run linter
+      - name: Check Linting
         run: bun lint
 
-      - name: Check formatting
+      - name: Check Formatting
         run: bun format
+
+      - name: Check TypeScript
+        run: bun tsc

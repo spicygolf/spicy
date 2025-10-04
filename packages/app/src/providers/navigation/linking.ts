@@ -7,40 +7,8 @@ export const linking = {
   ],
   config: {
     screens: {
-      Games: {
-        screens: {
-          GamesList: "games",
-          NewGame: "games/new",
-          Game: {
-            path: "games/:gameId",
-            parse: {
-              gameId: (gameId: string) => gameId,
-            },
-            screens: {
-              GameSettingsNavigator: {
-                path: "settings",
-                screens: {
-                  GameSettings: "",
-                  AddPlayerNavigator: {
-                    path: "add-player",
-                    screens: {
-                      AddPlayerFavorites: "favorites",
-                      AddPlayerGHIN: "ghin",
-                      AddPlayerManual: "manual",
-                    },
-                  },
-                },
-              },
-              GameScoring: "scoring",
-            },
-          },
-        },
-      },
-      Profile: {
-        screens: {
-          ProfileHome: "profile/home",
-        },
-      },
+      Games: "games",
+      Profile: "profile",
     },
   },
 };
