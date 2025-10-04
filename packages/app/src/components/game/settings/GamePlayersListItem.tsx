@@ -1,22 +1,29 @@
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
+import { Handicap } from "@/components/handicap/Handicap";
 import { Text } from "@/ui";
 import { PlayerDelete } from "./PlayerDelete";
 
 export function GamePlayersListItem({ player }: { player: Player | null }) {
   if (!player) return null;
   const courseHandicap = undefined; // TODO: Implement course/game handicap calculation
+  const gameHandicap = undefined; // TODO: Implement game handicap calculation (overrides course)
+
+  const label = gameHandicap ? "game" : "course";
+  const courseGameHandicap = gameHandicap ?? courseHandicap;
 
   return (
     <View style={styles.container}>
-      <View style={styles.left}>
+      <View style={styles.player}>
         <Text style={styles.player_name}>{player.name}</Text>
         <Text style={styles.player_tees}>Select Course/Tee</Text>
       </View>
-      <View style={styles.right}>
-        <Text style={styles.handicap}>{player?.handicap?.display}</Text>
-        <Text style={styles.handicap}>{courseHandicap || "-"}</Text>
+      <View style={styles.handicaps}>
+        <Handicap label="index" display={player?.handicap?.display} />
+        <Handicap label={label} display={courseGameHandicap} />
+      </View>
+      <View style={styles.delete}>
         <PlayerDelete player={player} />
       </View>
     </View>
@@ -30,7 +37,7 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "space-between",
     paddingVertical: theme.gap(1),
   },
-  left: {
+  player: {
     flex: 5,
     flexDirection: "column",
   },
@@ -43,15 +50,13 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     fontSize: 14,
   },
-  right: {
+  handicaps: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
   },
-  handicap: {
-    fontSize: 16,
-    textAlign: "right",
-    marginRight: theme.gap(2),
+  delete: {
+    marginLeft: theme.gap(2),
   },
 }));

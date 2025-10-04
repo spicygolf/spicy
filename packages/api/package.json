@@ -12,15 +12,15 @@
     "format:fix": "biome format --write ."
   },
   "dependencies": {
-    "@elysiajs/cors": "^1.3.3",
-    "better-auth": "^1.2.12",
-    "elysia": "1.3.5",
+    "@elysiajs/cors": "1.4.0",
+    "better-auth": "1.3.26",
+    "elysia": "1.4.9",
     "ghin": "github:boorad/ghin#feat/approved-api-access",
     "jazz-tools": "catalog:jazz",
     "spicylib": "workspace:*"
   },
   "devDependencies": {
-    "@better-auth/cli": "^1.2.12"
+    "@better-auth/cli": "1.3.26"
   },
   "module": "src/index.js"
 }
