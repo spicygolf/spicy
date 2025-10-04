@@ -16,13 +16,26 @@
     "format:fix": "bun run --filter './packages/*' format:fix",
     "lint": "bun run --filter './packages/*' lint",
     "lint:fix": "bun run --filter './packages/*' lint:fix",
+    "tsc": "bun run --filter './packages/*' tsc",
     "lint-staged": "lint-staged --no-stash",
     "prepare": "husky"
   },
   "lint-staged": {
-    "packages/app/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"],
-    "packages/api/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"],
-    "packages/lib/**/*.{js,jsx,ts,tsx}": ["bun lint", "bun format"]
+    "packages/app/**/*.{js,jsx,ts,tsx}": [
+      "bun lint",
+      "bun format",
+      "bun tsc"
+    ],
+    "packages/api/**/*.{js,jsx,ts,tsx}": [
+      "bun lint",
+      "bun format",
+      "bun tsc"
+    ],
+    "packages/lib/**/*.{js,jsx,ts,tsx}": [
+      "bun lint",
+      "bun format",
+      "bun tsc"
+    ]
   },
   "trustedDependencies": [
     "@apollo/protobufjs",

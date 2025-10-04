@@ -12,7 +12,7 @@ export function PlayerItem({ item }: { item: Golfer }) {
 
   // Check if player is already in the game
   const isPlayerAlreadyAdded =
-    game?.players?.some((player) => player.ghinId === item.ghin.toString()) ||
+    game?.players?.some((player) => player?.ghinId === item.ghin.toString()) ||
     false;
 
   const full_name = [item.first_name, item.middle_name, item.last_name].join(
