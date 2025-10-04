@@ -1,10 +1,10 @@
-import { GameSettingsPlayers } from "@/components/game/settings/GameSettingsPlayers";
+import { GamePlayersList } from "@/components/game/settings/GamePlayersList";
 import { Screen } from "@/ui";
 
 export function GameSettings() {
   return (
     <Screen>
-      <GameSettingsPlayers />
+      <GamePlayersList />
       {/* <GameSettingsOptions /> */}
       {/* <GameSettingsAdmin /> */}
     </Screen>
