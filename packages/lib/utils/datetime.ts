@@ -48,16 +48,28 @@ export const getMillisecondsUntilTargetTime = (
 };
 
 /**
- * Check if two dates are the same calendar day
+ * Check if two dates are the same calendar day in a specific timezone
  * @param date1 - First date to compare
  * @param date2 - Second date to compare
- * @returns true if both dates are on the same calendar day
+ * @param timezone - Timezone to use for comparison (defaults to device timezone)
+ * @returns true if both dates are on the same calendar day in the specified timezone
  */
-export function isSameDay(date1: Date, date2: Date): boolean {
+export function isSameDay(
+  date1: Date,
+  date2: Date,
+  timezone?: string,
+): boolean {
+  // Default to device timezone if not specified
+  const tz = timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  // Convert both dates to the specified timezone
+  const zonedDate1 = toZonedTime(date1, tz);
+  const zonedDate2 = toZonedTime(date2, tz);
+
   return (
-    date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate()
+    zonedDate1.getFullYear() === zonedDate2.getFullYear() &&
+    zonedDate1.getMonth() === zonedDate2.getMonth() &&
+    zonedDate1.getDate() === zonedDate2.getDate()
   );
 }
 
