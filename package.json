@@ -53,6 +53,7 @@
     "esbuild",
     "fsevents",
     "geckodriver",
+    "ghin",
     "husky",
     "prisma",
     "protobufjs",
