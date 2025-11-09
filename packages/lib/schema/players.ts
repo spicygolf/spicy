@@ -1,4 +1,5 @@
 import { co, z } from "jazz-tools";
+import { ListOfRounds } from "./rounds";
 
 export const Handicap = co.map({
   source: z.literal(["ghin", "manual"]),
@@ -19,6 +20,7 @@ export const Player = co.map({
   ghinId: z.string().optional(),
   handicap: co.optional(Handicap),
   envs: co.optional(ListOfEnvironments),
+  rounds: co.optional(ListOfRounds),
 });
 export type Player = co.loaded<typeof Player>;
 

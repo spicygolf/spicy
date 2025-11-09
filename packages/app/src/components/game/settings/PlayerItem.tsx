@@ -1,12 +1,18 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { Golfer } from "ghin";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useGameContext } from "@/contexts/GameContext";
 import { type PlayerData, useAddPlayerToGame } from "@/hooks";
+import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
 import { Text } from "@/ui";
 
+type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
+
 export function PlayerItem({ item }: { item: Golfer }) {
+  const { navigate } = useNavigation<NavigationProp>();
   const addPlayerToGame = useAddPlayerToGame();
   const { game } = useGameContext();
 
@@ -59,7 +65,15 @@ export function PlayerItem({ item }: { item: Golfer }) {
         disabled={isPlayerAlreadyAdded}
         onPress={async () => {
           if (!isPlayerAlreadyAdded) {
-            await addPlayerToGame(makePlayer());
+            const result = await addPlayerToGame(makePlayer());
+            if (result.isOk()) {
+              const player = result.value;
+              navigate("AddRoundToGame", { playerId: player.$jazz.id });
+            } else {
+              const error = result.error;
+              // TODO error component
+              console.error(error);
+            }
           }
         }}
       >

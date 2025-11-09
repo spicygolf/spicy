@@ -9,9 +9,7 @@ import { betterAuthClient } from "@/lib/auth-client";
 export function JazzAndAuth({ children }: { children: React.ReactNode }) {
   const { data: credentials, isLoading } = useJazzCredentials();
 
-  // Only show loading if we don't have credentials at all
-  // (on first launch before credentials are fetched and cached)
-  if (!credentials) {
+  if (!credentials || isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />

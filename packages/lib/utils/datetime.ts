@@ -46,3 +46,41 @@ export const getMillisecondsUntilTargetTime = (
   // Return milliseconds until target time
   return Math.max(0, targetUTC.getTime() - now.getTime());
 };
+
+/**
+ * Check if two dates are the same calendar day
+ * @param date1 - First date to compare
+ * @param date2 - Second date to compare
+ * @returns true if both dates are on the same calendar day
+ */
+export function isSameDay(date1: Date, date2: Date): boolean {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+}
+
+/**
+ * Format a date as a localized time string (h:mm AM/PM)
+ * @param date - Date to format
+ * @param locale - Locale string (defaults to 'en-US')
+ * @returns Formatted time string
+ */
+export function formatTime(date: Date, locale = "en-US"): string {
+  return date.toLocaleTimeString(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+/**
+ * Format a date as a localized date string
+ * @param date - Date to format
+ * @param locale - Locale string (defaults to 'en-US')
+ * @returns Formatted date string
+ */
+export function formatDate(date: Date, locale = "en-US"): string {
+  return date.toLocaleDateString(locale);
+}

@@ -14,8 +14,8 @@ Every time you choose to apply a rule(s), explicitly state the rule(s) in the ou
 - React Native
 - TypeScript
 - Jazz Tools
+  - local docs are at /Users/brad/dev/llms/jazz/llms-full.txt
   - docs are at https://jazz.tools/docs
-  - do not attempt to download the llm docs here: https://jazz.tools/llms-full.txt, as it crashes the AI thread.
 - TypeScript package manager is `bun` 1.3 or higher
 - Don't ask to run tests. They have to be run in a React Native app.
 

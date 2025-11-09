@@ -8,26 +8,22 @@ type UseGameOptions = {
 
 type GameWithRelations = Awaited<ReturnType<typeof Game.load>> | null;
 
-// Define the resolve type specifically for Game
-type GameResolve = {
-  resolve: {
-    specs: { $each: true };
-    holes: { $each: true };
-    players: { $each: true };
-    rounds: { $each: true };
-  };
-};
-
 export function useGame(gameId?: string, options: UseGameOptions = {}) {
   const { game: ctxGame } = useGameContext();
   const effectiveGameId = gameId || ctxGame?.$jazz.id;
 
-  const resolve: GameResolve | undefined = effectiveGameId
+  const resolve = effectiveGameId
     ? {
         resolve: {
           specs: { $each: true },
           holes: { $each: true },
-          players: { $each: true },
+          players: {
+            $each: {
+              handicap: true,
+              envs: true,
+              rounds: { $each: true },
+            },
+          },
           rounds: { $each: true },
         },
       }

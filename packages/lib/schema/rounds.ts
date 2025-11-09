@@ -1,15 +1,14 @@
 import { co, z } from "jazz-tools";
 import { Course, Tee } from "./courses";
-import { Player } from "./players";
 import { ListOfScores } from "./scores";
 
 export const Round = co.map({
   createdAt: z.date(),
 
   /**
-   * A reference to the `Player` for this round.
+   * The ID of the `Player` who played this round.
    */
-  player: Player,
+  playerId: z.string(),
 
   /**
    *  A string representing the handicap index in decimal form.  Plus handicaps
@@ -64,6 +63,9 @@ export const RoundToGame = co.map({
   gameHandicap: z.optional(z.number()),
 });
 export type RoundToGame = co.loaded<typeof RoundToGame>;
+
+export const ListOfRounds = co.list(Round);
+export type ListOfRounds = co.loaded<typeof ListOfRounds>;
 
 export const ListOfRoundToGames = co.list(RoundToGame);
 export type ListOfRoundToGames = co.loaded<typeof ListOfRoundToGames>;
