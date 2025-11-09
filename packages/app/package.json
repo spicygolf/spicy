@@ -57,7 +57,7 @@
     "@babel/plugin-transform-class-static-block": "^7.26.0",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
-    "@react-native-community/cli": "19.0.0",
+    "@react-native-community/cli": "19.1.2",
     "@react-native-community/cli-platform-android": "19.0.0",
     "@react-native-community/cli-platform-ios": "19.0.0",
     "@react-native/babel-preset": "0.80.0",
