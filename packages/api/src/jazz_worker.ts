@@ -20,7 +20,7 @@ export async function getJazzWorker(): Promise<{
   try {
     workerInstance = await startWorker({
       AccountSchema: PlayerAccount,
-      syncServer: "wss://cloud.jazz.tools/?key=spicy-dev@druid.golf",
+      syncServer: `wss://cloud.jazz.tools/?key=${process.env.JAZZ_API_KEY}`,
       accountID: process.env.JAZZ_WORKER_ACCOUNT,
       accountSecret: process.env.JAZZ_WORKER_SECRET,
     });

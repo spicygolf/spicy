@@ -1,12 +1,27 @@
 import { AuthProvider } from "jazz-tools/better-auth/auth/react";
 import { JazzReactNativeProvider } from "jazz-tools/react-native";
 import type React from "react";
+import { ActivityIndicator, View } from "react-native";
 import { PlayerAccount } from "spicylib/schema";
+import { useJazzCredentials } from "@/hooks/useJazzCredentials";
 import { betterAuthClient } from "@/lib/auth-client";
 
 export function JazzAndAuth({ children }: { children: React.ReactNode }) {
+  const { data: credentials, isLoading } = useJazzCredentials();
+
+  // Only show loading if we don't have credentials at all
+  // (on first launch before credentials are fetched and cached)
+  if (!credentials) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   const peer =
-    "wss://cloud.jazz.tools/?key=Y29femp3RHlqamV5Y3BYcGVSejdKTHM5eGh0N2NYfGNvX3pIUjV4WlRUbXdLVnNTYnoxeFU4VzdrYUhxZnxjb196NFJMZ2F3SlBZUkY3UFNuV25zTnFicXJWUFk";
+    `wss://cloud.jazz.tools/?key=${credentials.apiKey}` as `wss://${string}`;
+
   return (
     <JazzReactNativeProvider sync={{ peer }} AccountSchema={PlayerAccount}>
       <AuthProvider betterAuthClient={betterAuthClient}>
