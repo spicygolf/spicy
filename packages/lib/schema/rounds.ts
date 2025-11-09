@@ -1,9 +1,14 @@
 import { co, z } from "jazz-tools";
+import { Course, Tee } from "./courses";
 import { ListOfScores } from "./scores";
 
 export const Round = co.map({
-  created_at: z.date(),
-  seq: z.number(),
+  createdAt: z.date(),
+
+  /**
+   * The ID of the `Player` who played this round.
+   */
+  playerId: z.string(),
 
   /**
    *  A string representing the handicap index in decimal form.  Plus handicaps
@@ -11,10 +16,14 @@ export const Round = co.map({
    *  date of the round, persisted here to maintain history and consistency of
    *  game scoring.  It may be overridden by the `RoundToGame` edge.
    */
-  handicap_index: z.string(),
+  handicapIndex: z.string(),
+
+  course: co.optional(Course),
+
+  tee: co.optional(Tee),
 
   scores: ListOfScores,
-  // tees = co.ref(ListOfTees);
+
   // posting = co.ref(Posting);
 });
 export type Round = co.loaded<typeof Round>;
@@ -38,22 +47,25 @@ export const RoundToGame = co.map({
    *  game scoring.  Also, this will override the player's handicap_index field
    *  value.
    */
-  handicap_index: z.string(),
+  handicapIndex: z.string(),
 
   /**
    *  A number representing the course handicap in integer form.  Plus handicaps
    *  are negative here.  ex: -2
    */
-  course_handicap: z.optional(z.number()),
+  courseHandicap: z.optional(z.number()),
 
   /**
    *  A number representing the game handicap in integer form.  This is an
    *  agreed-upon change that overrirdes the course handicap.  Plus handicaps
    *  are negative here.  ex: -2
    */
-  game_handicap: z.optional(z.number()),
+  gameHandicap: z.optional(z.number()),
 });
 export type RoundToGame = co.loaded<typeof RoundToGame>;
+
+export const ListOfRounds = co.list(Round);
+export type ListOfRounds = co.loaded<typeof ListOfRounds>;
 
 export const ListOfRoundToGames = co.list(RoundToGame);
 export type ListOfRoundToGames = co.loaded<typeof ListOfRoundToGames>;

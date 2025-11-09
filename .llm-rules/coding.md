@@ -26,3 +26,7 @@
 - Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
 - Use declarative JSX.
 - Use Biome for consistent code formatting and linting.
+- When making changes, ensure the following commands still pass, as they need to for pre-commit hooks:
+  - `bun format`
+  - `bun lint`
+  - `bun tsc`

@@ -12,7 +12,7 @@ async function findPlayerByGhinId(ghinId: string): Promise<string | undefined> {
   try {
     const { id } = await getJazzWorker();
     const player = await Player.loadUnique(ghinId, id);
-    return player?.id || undefined;
+    return player?.$jazz.id || undefined;
   } catch (error) {
     console.error(`Error finding Jazz Player for GHIN ${ghinId}:`, error);
     return undefined;

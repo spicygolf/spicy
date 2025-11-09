@@ -14,7 +14,8 @@
     "lint:fix": "biome check --write .",
     "lint:fix:unsafe": "biome check --write --unsafe .",
     "format": "biome format .",
-    "format:fix": "biome format --write ."
+    "format:fix": "biome format --write .",
+    "tsc": "sh -c 'tsc --noEmit'"
   },
   "dependencies": {
     "@azure/core-asynciterator-polyfill": "1.0.2",
@@ -33,6 +34,7 @@
     "axios": "1.12.0",
     "better-auth": "^1.2.12",
     "jazz-tools": "catalog:jazz",
+    "neverthrow": "8.2.0",
     "react": "19.1.0",
     "react-hook-form": "7.61.1",
     "react-native": "0.80.0",

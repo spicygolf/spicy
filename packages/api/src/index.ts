@@ -61,6 +61,10 @@ const app = new Elysia()
   .get(`/${api}/ghin/countries`, () => getCountries(), {
     // auth: true,
   })
+  .get(`/${api}/jazz/credentials`, () => ({
+    apiKey: process.env.JAZZ_API_KEY,
+    workerAccount: process.env.JAZZ_WORKER_ACCOUNT,
+  }))
   .listen({
     port: port || 3040,
     hostname: host || "localhost",

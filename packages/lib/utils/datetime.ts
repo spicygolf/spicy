@@ -46,3 +46,53 @@ export const getMillisecondsUntilTargetTime = (
   // Return milliseconds until target time
   return Math.max(0, targetUTC.getTime() - now.getTime());
 };
+
+/**
+ * Check if two dates are the same calendar day in a specific timezone
+ * @param date1 - First date to compare
+ * @param date2 - Second date to compare
+ * @param timezone - Timezone to use for comparison (defaults to device timezone)
+ * @returns true if both dates are on the same calendar day in the specified timezone
+ */
+export function isSameDay(
+  date1: Date,
+  date2: Date,
+  timezone?: string,
+): boolean {
+  // Default to device timezone if not specified
+  const tz = timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  // Convert both dates to the specified timezone
+  const zonedDate1 = toZonedTime(date1, tz);
+  const zonedDate2 = toZonedTime(date2, tz);
+
+  return (
+    zonedDate1.getFullYear() === zonedDate2.getFullYear() &&
+    zonedDate1.getMonth() === zonedDate2.getMonth() &&
+    zonedDate1.getDate() === zonedDate2.getDate()
+  );
+}
+
+/**
+ * Format a date as a localized time string (h:mm AM/PM)
+ * @param date - Date to format
+ * @param locale - Locale string (defaults to 'en-US')
+ * @returns Formatted time string
+ */
+export function formatTime(date: Date, locale = "en-US"): string {
+  return date.toLocaleTimeString(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+/**
+ * Format a date as a localized date string
+ * @param date - Date to format
+ * @param locale - Locale string (defaults to 'en-US')
+ * @returns Formatted date string
+ */
+export function formatDate(date: Date, locale = "en-US"): string {
+  return date.toLocaleDateString(locale);
+}

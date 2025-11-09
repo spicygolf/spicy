@@ -1,18 +1,17 @@
 import { co, z } from "jazz-tools";
-import { Player } from "./players";
 
 // per-score value object (holding current)
 export const Value = co.map({
   k: z.string(),
   v: z.string(),
-  by: Player,
+  byPlayerId: z.string(),
   at: z.date(),
 });
 export type Value = co.loaded<typeof Value>;
 
 // history of score updates
 export const ScoreUpdate = co.map({
-  by: Player,
+  byPlayerId: z.string(),
   at: z.date(),
   old: Value,
 });

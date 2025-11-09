@@ -29,6 +29,7 @@ export const linking = {
                       AddPlayerManual: "manual",
                     },
                   },
+                  AddRoundToGame: "add-round",
                 },
               },
               GameScoring: "scoring",
