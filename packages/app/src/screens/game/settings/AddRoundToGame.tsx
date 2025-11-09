@@ -141,17 +141,18 @@ export function AddRoundToGame({ route, navigation }: Props) {
           </Text>
           <FlatList
             data={roundsForToday}
-            renderItem={({ item }) => {
+            renderItem={({ item, index }) => {
               const roundTime = item?.createdAt
                 ? formatTime(item.createdAt)
                 : "";
               const roundDate = item?.createdAt
                 ? formatDate(item.createdAt)
                 : "";
+              const isLastItem = index === roundsForToday.length - 1;
 
               return (
                 <TouchableOpacity
-                  style={styles.roundItem}
+                  style={[styles.roundItem, isLastItem && styles.lastRoundItem]}
                   onPress={() => item && handleSelectRound(item)}
                 >
                   <View>
@@ -219,6 +220,9 @@ const styles = StyleSheet.create((theme) => ({
     padding: theme.gap(2),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.secondary,
+  },
+  lastRoundItem: {
+    borderBottomWidth: 0,
   },
   roundText: {
     fontSize: 16,
