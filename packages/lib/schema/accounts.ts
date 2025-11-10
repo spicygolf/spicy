@@ -1,7 +1,6 @@
 import { co, Group, z } from "jazz-tools";
 import { ListOfGames } from "./games";
 import { defaultSpec, GameSpec, ListOfGameSpecs } from "./gamespecs";
-import { ListOfCountries } from "./ghin";
 import { Player } from "./players";
 
 const { JAZZ_WORKER_ACCOUNT } = process.env;
@@ -15,9 +14,6 @@ export const PlayerAccountRoot = co.map({
 
 export const PlayerAccountProfile = co.profile({
   name: z.string(),
-  /** used by Server Worker to store countries and states from GHIN */
-  countries: ListOfCountries,
-  updated_at: z.date(),
 });
 
 export const PlayerAccount = co
@@ -79,8 +75,6 @@ export const PlayerAccount = co
           PlayerAccountProfile.create(
             {
               name: "Spicy Golf Server Worker",
-              countries: ListOfCountries.create([], { owner: group }),
-              updated_at: new Date(1971, 8, 29),
             },
             { owner: group },
           ),

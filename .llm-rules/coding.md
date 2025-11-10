@@ -13,6 +13,7 @@
   - Maintenance overhead
   - Testing strategy
 - Code examples should follow TypeScript best practices.
+- Dependencies should use exact versions, no carets or tildes.
 
 ## React and React Native Best Practices
 
