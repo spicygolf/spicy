@@ -1,11 +1,18 @@
-import { View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
 import { Handicap } from "@/components/handicap/Handicap";
+import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
 import { Text } from "@/ui";
 import { PlayerDelete } from "./PlayerDelete";
 
+type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
+
 export function GamePlayersListItem({ player }: { player: Player | null }) {
+  const navigation = useNavigation<NavigationProp>();
+
   if (!player) return null;
   const courseHandicap = undefined; // TODO: Implement course/game handicap calculation
   const gameHandicap = undefined; // TODO: Implement game handicap calculation (overrides course)
@@ -13,12 +20,33 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
   const label = gameHandicap ? "game" : "course";
   const courseGameHandicap = gameHandicap ?? courseHandicap;
 
+  // Determine the subtitle and navigation behavior
+  const hasRounds = player.rounds && player.rounds.length > 0;
+  const needsCourseAndTee =
+    hasRounds && player.rounds.some((round) => !round?.course || !round?.tee);
+
+  let subtitle = "";
+  let onPress: (() => void) | undefined;
+
+  if (!hasRounds) {
+    subtitle = "Select Round";
+    onPress = () =>
+      navigation.navigate("AddRoundToGame", { playerId: player.$jazz.id });
+  } else if (needsCourseAndTee) {
+    subtitle = "Select Course/Tee";
+    // TODO: Navigate to course/tee selection screen
+  }
+
   return (
     <View style={styles.container}>
-      <View style={styles.player}>
+      <TouchableOpacity
+        style={styles.player}
+        onPress={onPress}
+        disabled={!onPress}
+      >
         <Text style={styles.player_name}>{player.name}</Text>
-        <Text style={styles.player_tees}>Select Course/Tee</Text>
-      </View>
+        {subtitle && <Text style={styles.player_tees}>{subtitle}</Text>}
+      </TouchableOpacity>
       <View style={styles.handicaps}>
         <Handicap label="index" display={player?.handicap?.display} />
         <Handicap label={label} display={courseGameHandicap} />
