@@ -1,6 +1,6 @@
 import { Group } from "jazz-tools";
 import { err, ok, type Result } from "neverthrow";
-import { ListOfRounds, Player } from "spicylib/schema";
+import { Handicap, ListOfRounds, Player } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
 import { useJazzWorker } from "./useJazzWorker";
 
@@ -54,10 +54,24 @@ export function useAddPlayerToGame() {
       }
     }
 
-    // Convert null handicap to undefined to match schema expectations
+    // Convert handicap to Jazz CoMap if provided
+    let handicap: Handicap | undefined;
+    if (p.handicap && p.handicap !== null) {
+      handicap = Handicap.create(
+        {
+          source: p.handicap.source,
+          display: p.handicap.display,
+          value: p.handicap.value,
+          revDate: p.handicap.revDate,
+        },
+        { owner: group },
+      );
+    }
+
+    // Convert null envs to undefined to match schema expectations
     const playerData = {
       ...p,
-      handicap: p.handicap === null ? undefined : p.handicap,
+      handicap,
       envs: p.envs === null ? undefined : p.envs,
     };
 
@@ -78,7 +92,7 @@ export function useAddPlayerToGame() {
 
         // Ensure the player is loaded with rounds to check if rounds field exists
         player = await upsertedPlayer.$jazz.ensureLoaded({
-          resolve: { rounds: true },
+          resolve: { rounds: true, handicap: true, envs: true },
         });
       } else {
         player = Player.create(playerData, { owner: group });

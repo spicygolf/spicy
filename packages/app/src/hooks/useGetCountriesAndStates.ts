@@ -1,31 +1,42 @@
-import type { co } from "jazz-tools";
-import { useEffect, useState } from "react";
-import type { ListOfCountries } from "spicylib/schema";
-import { useJazzWorker } from "./useJazzWorker";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { useApi } from "./useApi";
 
-type Countries = co.loaded<typeof ListOfCountries>;
+interface State {
+  name: string;
+  code: string;
+  course_code: string;
+}
+
+interface Country {
+  name: string;
+  code: string;
+  crs_code: string;
+  states: State[];
+}
+
+async function fetchCountries(apiUrl: string): Promise<Country[]> {
+  const response = await axios.get(`${apiUrl}/ghin/countries`);
+  return response.data || [];
+}
+
+const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function useGetCountriesAndStates() {
-  const [countries, setCountries] = useState<Countries | null>(null);
-  const worker = useJazzWorker({
-    profile: {
-      countries: {
-        $each: {
-          states: {
-            $each: true,
-          },
-        },
-      },
-    },
+  const api = useApi();
+
+  const { data: countries } = useQuery({
+    queryKey: ["ghin-countries"],
+    queryFn: () => fetchCountries(api),
+    staleTime: ONE_MONTH_MS,
+    gcTime: Number.POSITIVE_INFINITY,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 3,
+    retryDelay: 1000,
+    networkMode: "offlineFirst",
   });
 
-  useEffect(() => {
-    if (!worker?.account) {
-      return;
-    }
-
-    setCountries(worker.account.profile?.countries ?? null);
-  }, [worker?.account]);
-
-  return { countries };
+  return { countries: countries ?? null };
 }
