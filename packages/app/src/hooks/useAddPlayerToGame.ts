@@ -1,6 +1,6 @@
 import { Group } from "jazz-tools";
 import { err, ok, type Result } from "neverthrow";
-import { ListOfRounds, Player } from "spicylib/schema";
+import { Handicap, ListOfRounds, Player } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
 import { useJazzWorker } from "./useJazzWorker";
 
@@ -54,17 +54,43 @@ export function useAddPlayerToGame() {
       }
     }
 
-    // Convert null handicap to undefined to match schema expectations
+    // Convert handicap to Jazz CoMap if provided
+    let handicap: Handicap | undefined;
+    if (p.handicap && p.handicap !== null) {
+      handicap = Handicap.create(
+        {
+          source: p.handicap.source,
+          display: p.handicap.display,
+          value: p.handicap.value,
+          revDate: p.handicap.revDate,
+        },
+        { owner: group },
+      );
+    }
+
+    // Convert null envs to undefined to match schema expectations
     const playerData = {
       ...p,
-      handicap: p.handicap === null ? undefined : p.handicap,
+      handicap,
       envs: p.envs === null ? undefined : p.envs,
     };
+
+    console.log("[useAddPlayerToGame] Creating player with data:", {
+      name: playerData.name,
+      ghinId: playerData.ghinId,
+      hasHandicap: !!playerData.handicap,
+      handicap: p.handicap,
+    });
 
     let player: Player | null = null;
 
     try {
       if (playerData.ghinId) {
+        console.log(
+          "[useAddPlayerToGame] Upserting player with ghinId:",
+          playerData.ghinId,
+        );
+
         // Load the player with rounds resolved to check if it already has a rounds field
         const upsertedPlayer = await Player.upsertUnique({
           value: playerData,
@@ -76,14 +102,25 @@ export function useAddPlayerToGame() {
           throw new Error("Failed to upsert player");
         }
 
+        console.log("[useAddPlayerToGame] Player upserted, loading fields...");
+
         // Ensure the player is loaded with rounds to check if rounds field exists
         player = await upsertedPlayer.$jazz.ensureLoaded({
-          resolve: { rounds: true },
+          resolve: { rounds: true, handicap: true, envs: true },
+        });
+
+        console.log("[useAddPlayerToGame] Player loaded:", {
+          id: player.$jazz.id,
+          hasRounds: player.$jazz.has("rounds"),
+          hasHandicap: player.$jazz.has("handicap"),
+          hasEnvs: player.$jazz.has("envs"),
         });
       } else {
+        console.log("[useAddPlayerToGame] Creating player without ghinId");
         player = Player.create(playerData, { owner: group });
       }
     } catch (error) {
+      console.error("[useAddPlayerToGame] Error creating player:", error);
       return err({
         type: "PLAYER_CREATION_FAILED",
         message:

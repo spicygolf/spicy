@@ -45,7 +45,7 @@ export function PlayerItem({ item }: { item: Golfer }) {
             display: item.hi_display,
             value:
               typeof item.hi_value === "number" ? item.hi_value : undefined,
-            revDate: item.rev_date || undefined,
+            revDate: item.rev_date instanceof Date ? item.rev_date : undefined,
           }
         : undefined,
     };
