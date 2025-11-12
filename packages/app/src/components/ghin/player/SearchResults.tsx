@@ -1,4 +1,4 @@
-import type { Golfer } from "ghin";
+import type { Golfer } from "@spicygolf/ghin";
 import { useContext, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { PlayerItem } from "@/components/game/settings/PlayerItem";

@@ -1,8 +1,13 @@
 import { cors } from "@elysiajs/cors";
+import type {
+  CourseDetailsRequest,
+  CourseSearchRequest,
+  GolfersSearchRequest,
+} from "@spicygolf/ghin";
 import type { Context } from "elysia";
 import { Elysia } from "elysia";
-import type { GolfersSearchRequest } from "ghin";
 import { getCountries } from "./countries";
+import { getCourseDetails, searchCourses } from "./courses";
 import { setupWorker } from "./jazz_worker";
 import { auth } from "./lib/auth";
 import { playerSearch } from "./players";
@@ -61,6 +66,20 @@ const app = new Elysia()
   .get(`/${api}/ghin/countries`, () => getCountries(), {
     // auth: true,
   })
+  .post(
+    `/${api}/ghin/courses/search`,
+    ({ body }) => searchCourses(body as CourseSearchRequest),
+    {
+      // auth: true,
+    },
+  )
+  .post(
+    `/${api}/ghin/courses/details`,
+    ({ body }) => getCourseDetails(body as CourseDetailsRequest),
+    {
+      // auth: true,
+    },
+  )
   .get(`/${api}/jazz/credentials`, () => ({
     apiKey: process.env.JAZZ_API_KEY,
     workerAccount: process.env.JAZZ_WORKER_ACCOUNT,

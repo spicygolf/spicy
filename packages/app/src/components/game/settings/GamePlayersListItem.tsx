@@ -34,7 +34,17 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
       navigation.navigate("AddRoundToGame", { playerId: player.$jazz.id });
   } else if (needsCourseAndTee) {
     subtitle = "Select Course/Tee";
-    // TODO: Navigate to course/tee selection screen
+    // Find the first round that needs course/tee selection
+    const roundNeedingSelection = player.rounds.find(
+      (round) => !round?.course || !round?.tee,
+    );
+    if (roundNeedingSelection) {
+      onPress = () =>
+        navigation.navigate("SelectCourseTee", {
+          playerId: player.$jazz.id,
+          roundId: roundNeedingSelection.$jazz.id,
+        });
+    }
   }
 
   return (

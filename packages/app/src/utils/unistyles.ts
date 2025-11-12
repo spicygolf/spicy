@@ -9,6 +9,8 @@ const light = {
     background: "#eee",
     action: "#007AFF",
     actionText: "#fff",
+    error: "#ff3b30",
+    border: "#e0e0e0",
   },
   // functions, external imports, etc.
   gap: (v: number) => v * 8,
@@ -21,6 +23,8 @@ const dark = {
     background: "#111",
     action: "#007AFF",
     actionText: "#fff",
+    error: "#ff453a",
+    border: "#38383a",
   },
   gap: (v: number) => v * 8,
 };

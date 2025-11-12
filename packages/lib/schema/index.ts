@@ -1,4 +1,5 @@
 export * from "./accounts";
+export * from "./courses";
 export * from "./gameholes";
 export * from "./games";
 export * from "./gamespecs";

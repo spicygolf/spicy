@@ -1,4 +1,4 @@
-import type { GolfersSearchRequest } from "ghin";
+import type { GolfersSearchRequest } from "@spicygolf/ghin";
 import { useState } from "react";
 import {
   defaultState,

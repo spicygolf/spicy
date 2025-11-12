@@ -1,6 +1,6 @@
+import type { Golfer, GolfersSearchRequest } from "@spicygolf/ghin";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import type { Golfer, GolfersSearchRequest } from "ghin";
 import { getMillisecondsUntilTargetTime } from "spicylib/utils";
 import { useApi } from "@/hooks";
 

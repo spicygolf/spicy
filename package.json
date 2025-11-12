@@ -1,6 +1,5 @@
 {
   "name": "spicy-mono",
-  "license": "FSL-1.1-ALv2",
   "devDependencies": {
     "@biomejs/biome": "^2.1.1",
     "@types/bun": "latest",
@@ -10,16 +9,7 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "scripts": {
-    "clean": "del-cli node_modules",
-    "format": "bun run --filter './packages/*' format",
-    "format:fix": "bun run --filter './packages/*' format:fix",
-    "lint": "bun run --filter './packages/*' lint",
-    "lint:fix": "bun run --filter './packages/*' lint:fix",
-    "tsc": "bun run --filter './packages/*' tsc",
-    "lint-staged": "lint-staged --no-stash",
-    "prepare": "husky"
-  },
+  "license": "FSL-1.1-ALv2",
   "lint-staged": {
     "packages/app/**/*.{js,jsx,ts,tsx}": [
       "bun lint",
@@ -36,6 +26,19 @@
       "bun format",
       "bun tsc"
     ]
+  },
+  "patchedDependencies": {
+    "react-native-element-dropdown@2.12.4": "patches/react-native-element-dropdown@2.12.4.patch"
+  },
+  "scripts": {
+    "clean": "del-cli node_modules",
+    "format": "bun run --filter './packages/*' format",
+    "format:fix": "bun run --filter './packages/*' format:fix",
+    "lint": "bun run --filter './packages/*' lint",
+    "lint:fix": "bun run --filter './packages/*' lint:fix",
+    "tsc": "bun run --filter './packages/*' tsc",
+    "lint-staged": "lint-staged --no-stash",
+    "prepare": "husky"
   },
   "trustedDependencies": [
     "@apollo/protobufjs",
@@ -74,7 +77,7 @@
       }
     }
   },
-  "patchedDependencies": {
-    "react-native-element-dropdown@2.12.4": "patches/react-native-element-dropdown@2.12.4.patch"
+  "dependencies": {
+    "@spicygolf/ghin": "file:../ghin"
   }
 }
