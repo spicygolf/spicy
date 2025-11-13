@@ -46,8 +46,13 @@ export function useGhinSearchCourseQuery(search: CourseSearchRequest) {
       console.log("Course search result:", result);
       return result;
     },
-    // GHIN API requires country + state together (or facility_id)
-    enabled: !!((search.country && search.state) || search.facility_id),
+    // Require at least 2 characters in course name before searching
+    // State is now optional, but country is still required
+    enabled:
+      !!search.country &&
+      !!search.name &&
+      search.name.length >= 2 &&
+      !search.facility_id,
     staleTime: staleTime,
     gcTime: staleTime + 24 * 60 * 60 * 1000, // Keep in cache for 24 hours after stale
   });

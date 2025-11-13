@@ -43,7 +43,7 @@ export function GhinCourseSearchResults({
   if (!results) {
     return (
       <View style={styles.centerContainer}>
-        <Text>Select a state to search for courses</Text>
+        <Text>Enter at least 2 characters of course name to search</Text>
       </View>
     );
   }
@@ -65,24 +65,22 @@ export function GhinCourseSearchResults({
           style={styles.courseItem}
           onPress={() => onSelectCourse(item.CourseID)}
         >
+          <TouchableOpacity
+            style={styles.favoriteButton}
+            onPress={() => {
+              // TODO: Implement favorites when ready
+              console.log("Favorite pressed for course:", item.CourseID);
+            }}
+          >
+            <FontAwesome6
+              name="star"
+              iconStyle="regular"
+              size={20}
+              color="#666"
+            />
+          </TouchableOpacity>
           <View style={styles.courseInfo}>
-            <View style={styles.courseHeader}>
-              <Text style={styles.courseName}>{item.CourseName}</Text>
-              <TouchableOpacity
-                style={styles.favoriteButton}
-                onPress={() => {
-                  // TODO: Implement favorites when ready
-                  console.log("Favorite pressed for course:", item.CourseID);
-                }}
-              >
-                <FontAwesome6
-                  name="star"
-                  iconStyle="regular"
-                  size={20}
-                  color="#666"
-                />
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.courseName}>{item.CourseName}</Text>
             <Text style={styles.facilityName}>{item.FacilityName}</Text>
             <Text style={styles.courseLocation}>
               {item.City}, {item.State}
@@ -126,21 +124,15 @@ const styles = StyleSheet.create((theme) => ({
   },
   courseInfo: {
     flex: 1,
+    marginLeft: theme.gap(1),
     marginRight: theme.gap(2),
-  },
-  courseHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
   },
   courseName: {
     fontSize: 16,
     fontWeight: "bold",
-    flex: 1,
   },
   favoriteButton: {
     padding: theme.gap(0.5),
-    marginLeft: theme.gap(1),
   },
   facilityName: {
     fontSize: 14,

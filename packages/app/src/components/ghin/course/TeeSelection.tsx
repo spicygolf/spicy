@@ -15,7 +15,7 @@ export function TeeSelection({
   onSelectTee,
   playerGender = "M",
 }: TeeSelectionProps) {
-  // Filter tees based on gender if needed
+  // Filter tees based on player gender (includes Mixed tees)
   const availableTees = courseDetails.TeeSets.filter((tee) => {
     if (tee.Gender === "Mixed") return true;
     if (playerGender === "M" && tee.Gender === "Male") return true;
@@ -57,27 +57,23 @@ export function TeeSelection({
                 onSelectTee(item.TeeSetRatingId, item.TeeSetRatingName)
               }
             >
+              <TouchableOpacity
+                style={styles.favoriteButton}
+                onPress={() => {
+                  // TODO: Implement favorites when ready
+                  console.log("Favorite pressed for tee:", item.TeeSetRatingId);
+                }}
+              >
+                <FontAwesome6
+                  name="star"
+                  iconStyle="regular"
+                  size={18}
+                  color="#666"
+                />
+              </TouchableOpacity>
+
               <View style={styles.teeInfo}>
-                <View style={styles.teeHeader}>
-                  <Text style={styles.teeName}>{item.TeeSetRatingName}</Text>
-                  <TouchableOpacity
-                    style={styles.favoriteButton}
-                    onPress={() => {
-                      // TODO: Implement favorites when ready
-                      console.log(
-                        "Favorite pressed for tee:",
-                        item.TeeSetRatingId,
-                      );
-                    }}
-                  >
-                    <FontAwesome6
-                      name="star"
-                      iconStyle="regular"
-                      size={18}
-                      color="#666"
-                    />
-                  </TouchableOpacity>
-                </View>
+                <Text style={styles.teeName}>{item.TeeSetRatingName}</Text>
 
                 <View style={styles.teeDetails}>
                   <Text style={styles.teeDetailText}>
@@ -145,20 +141,14 @@ const styles = StyleSheet.create((theme) => ({
   },
   teeInfo: {
     flex: 1,
-  },
-  teeHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    marginLeft: theme.gap(1),
   },
   teeName: {
     fontSize: 16,
     fontWeight: "600",
-    flex: 1,
   },
   favoriteButton: {
     padding: theme.gap(0.5),
-    marginLeft: theme.gap(1),
   },
   teeDetails: {
     marginTop: theme.gap(0.5),

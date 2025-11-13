@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Course, Tee } from "spicylib/schema";
+import { normalizeGender } from "spicylib/utils";
 import { Back } from "@/components/Back";
 import { GhinCourseSearchInput } from "@/components/ghin/course/SearchInput";
 import { GhinCourseSearchResults } from "@/components/ghin/course/SearchResults";
@@ -56,7 +57,7 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
   }, []);
 
   const handleSelectTee = useCallback(
-    async (teeId: number, teeName: string) => {
+    async (teeId: number, _teeName: string) => {
       if (!round || !selectedCourseId || !courseDetailsQuery.data) {
         return;
       }
@@ -70,7 +71,7 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         return;
       }
 
-      // Create Course and Tee objects in Jazz
+      // Get the group owner for Jazz objects
       const group = round.$jazz.owner;
 
       const facilityData = courseData.Facility;
@@ -131,45 +132,76 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         }
       });
 
-      // Create Tee object
-      const tee = Tee.create(
-        {
-          id: teeData.TeeSetRatingId.toString(),
-          name: teeData.TeeSetRatingName,
-          gender: teeData.Gender === "Male" ? "M" : "F",
-          holes,
-          holesCount: teeData.HolesNumber,
-          totalYardage: teeData.TotalYardage,
-          totalMeters: teeData.TotalMeters,
-          ratings,
-        },
-        { owner: group },
-      );
+      // Use upsertUnique for Tee to avoid duplicates
+      const teeValue = {
+        id: teeData.TeeSetRatingId.toString(),
+        name: teeData.TeeSetRatingName,
+        gender: normalizeGender(teeData.Gender),
+        holes,
+        holesCount: teeData.HolesNumber,
+        totalYardage: teeData.TotalYardage,
+        totalMeters: teeData.TotalMeters,
+        ratings,
+      };
 
-      // Create Course object
-      const course = Course.create(
-        {
-          id: courseData.CourseId.toString(),
-          status: courseData.CourseStatus,
-          name: courseData.CourseName,
-          number: courseData.CourseNumber?.toString(),
-          city: courseData.CourseCity,
-          state: courseData.CourseState,
-          facility,
-          season: {
-            name: courseData.Season.SeasonName,
-            start_date: courseData.Season.SeasonStartDate || undefined,
-            end_date: courseData.Season.SeasonEndDate || undefined,
-            all_year: courseData.Season.IsAllYear,
-          },
-          default_tee: {
-            male: player?.gender === "M" ? tee : undefined,
-            female: player?.gender === "F" ? tee : undefined,
-          },
-          tees: [tee],
+      const upsertedTee = await Tee.upsertUnique({
+        value: teeValue,
+        unique: teeData.TeeSetRatingId.toString(),
+        owner: group,
+      });
+
+      if (!upsertedTee) {
+        console.error("Failed to upsert tee");
+        return;
+      }
+
+      // Ensure the tee is loaded
+      const tee = await upsertedTee.$jazz.ensureLoaded({
+        resolve: { holes: { $each: true } },
+      });
+
+      // Use upsertUnique for Course to avoid duplicates
+      const courseValue = {
+        id: courseData.CourseId.toString(),
+        status: courseData.CourseStatus,
+        name: courseData.CourseName,
+        number: courseData.CourseNumber?.toString(),
+        city: courseData.CourseCity,
+        state: courseData.CourseState,
+        facility,
+        season: {
+          name: courseData.Season.SeasonName,
+          start_date: courseData.Season.SeasonStartDate || undefined,
+          end_date: courseData.Season.SeasonEndDate || undefined,
+          all_year: courseData.Season.IsAllYear,
         },
-        { owner: group },
-      );
+        default_tee: {
+          male: player?.gender === "M" ? tee : undefined,
+          female: player?.gender === "F" ? tee : undefined,
+        },
+        tees: [tee],
+      };
+
+      const upsertedCourse = await Course.upsertUnique({
+        value: courseValue,
+        unique: courseData.CourseId.toString(),
+        owner: group,
+      });
+
+      if (!upsertedCourse) {
+        console.error("Failed to upsert course");
+        return;
+      }
+
+      // Ensure the course is loaded
+      const course = await upsertedCourse.$jazz.ensureLoaded({
+        resolve: { tees: { $each: true }, facility: true },
+      });
+
+      // Initialize tees list if it doesn't exist
+      if (!course.$jazz.has("tees")) {
+        course.$jazz.set("tees", [tee]);
+      }
 
       // Update the round with course and tee
       round.$jazz.set("course", course);

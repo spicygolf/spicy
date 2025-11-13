@@ -3,6 +3,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
+import { acronym } from "spicylib/utils";
 import { Handicap } from "@/components/handicap/Handicap";
 import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
 import { Text } from "@/ui";
@@ -22,6 +23,8 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
 
   // Determine the subtitle and navigation behavior
   const hasRounds = player.rounds && player.rounds.length > 0;
+  const firstRound = hasRounds ? player.rounds[0] : null;
+  const hasSelectedCourseTee = firstRound?.course && firstRound?.tee;
   const needsCourseAndTee =
     hasRounds && player.rounds.some((round) => !round?.course || !round?.tee);
 
@@ -32,6 +35,17 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
     subtitle = "Select Round";
     onPress = () =>
       navigation.navigate("AddRoundToGame", { playerId: player.$jazz.id });
+  } else if (hasSelectedCourseTee) {
+    // Show the selected course and tee names
+    const courseName = acronym(firstRound.course.name);
+    const teeName = firstRound.tee.name;
+    subtitle = `${courseName} • ${teeName}`;
+    // Allow changing the selection
+    onPress = () =>
+      navigation.navigate("SelectCourseTee", {
+        playerId: player.$jazz.id,
+        roundId: firstRound.$jazz.id,
+      });
   } else if (needsCourseAndTee) {
     subtitle = "Select Course/Tee";
     // Find the first round that needs course/tee selection
