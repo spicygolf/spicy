@@ -158,7 +158,7 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
 
       console.log("DEBUG: upsertUnique returned:", upsertedTee?.$jazz.id);
 
-      if (!upsertedTee) {
+      if (!upsertedTee.$isLoaded) {
         console.error("Failed to upsert tee");
         return;
       }

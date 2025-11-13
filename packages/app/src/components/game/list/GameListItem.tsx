@@ -5,7 +5,7 @@ import type { Game } from "spicylib/schema";
 import { Link, Text } from "@/ui";
 
 export function GameListItem({ game }: { game: Game | null }) {
-  if (!game) return null;
+  if (!game?.$isLoaded) return null;
   return (
     <Link
       href={{

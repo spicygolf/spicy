@@ -13,7 +13,7 @@ import { PlayerDelete } from "./PlayerDelete";
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 
 const PlayerCourseTeeInfo = memo(({ round }: { round: Round | null }) => {
-  if (!round) return null;
+  if (!round?.$isLoaded) return null;
 
   try {
     if (round.$jazz.has("course") && round.$jazz.has("tee")) {
@@ -38,7 +38,7 @@ const PlayerCourseTeeInfo = memo(({ round }: { round: Round | null }) => {
 export function GamePlayersListItem({ player }: { player: Player | null }) {
   const navigation = useNavigation<NavigationProp>();
 
-  if (!player) return null;
+  if (!player?.$isLoaded) return null;
   const courseHandicap = undefined; // TODO: Implement course/game handicap calculation
   const gameHandicap = undefined; // TODO: Implement game handicap calculation (overrides course)
 

@@ -18,7 +18,14 @@ interface RegisterForm {
 }
 
 export function Register() {
-  const { me } = useAccount(PlayerAccount);
+  const me = useAccount(PlayerAccount, {
+    select: (me) =>
+      me.$isLoaded
+        ? me
+        : me.$jazz.loadingState === "loading"
+          ? undefined
+          : null,
+  });
   const { control, handleSubmit, watch } = useForm<RegisterForm>();
   const password = watch("password");
   const navigation = useNavigation<AuthStackNavigationProp>();

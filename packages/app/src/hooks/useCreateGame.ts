@@ -11,7 +11,14 @@ import {
 } from "spicylib/schema";
 
 export function useCreateGame() {
-  const { me } = useAccount(PlayerAccount);
+  const me = useAccount(PlayerAccount, {
+    select: (me) =>
+      me.$isLoaded
+        ? me
+        : me.$jazz.loadingState === "loading"
+          ? undefined
+          : null,
+  });
 
   const createGame = async (name: string, specs: GameSpec[]) => {
     if (!me?.root) return null;

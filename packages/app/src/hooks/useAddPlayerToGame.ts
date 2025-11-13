@@ -86,7 +86,7 @@ export function useAddPlayerToGame() {
           owner: group,
         });
 
-        if (!upsertedPlayer) {
+        if (!upsertedPlayer.$isLoaded) {
           throw new Error("Failed to upsert player");
         }
 
@@ -107,7 +107,7 @@ export function useAddPlayerToGame() {
       });
     }
 
-    if (!player) {
+    if (!player?.$isLoaded) {
       return err({
         type: "PLAYER_CREATION_FAILED",
         message: "Failed to create or upsert player",

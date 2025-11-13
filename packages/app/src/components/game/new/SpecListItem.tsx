@@ -10,7 +10,7 @@ import { Text } from "@/ui";
 export function SpecListItem({ spec }: { spec: GameSpec | null }) {
   const navigation = useNavigation<NavigationProp<GamesNavigatorParamList>>();
   const { createGame } = useCreateGame();
-  if (!spec) return null;
+  if (!spec?.$isLoaded) return null;
 
   return (
     <View style={styles.row}>

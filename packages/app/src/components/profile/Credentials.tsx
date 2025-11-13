@@ -22,12 +22,18 @@ export function Credentials() {
     getSecret();
   }, []);
 
-  const { me } = useAccount(PlayerAccount, {
+  const me = useAccount(PlayerAccount, {
     resolve: {
       root: {
         player: true,
       },
     },
+    select: (me) =>
+      me.$isLoaded
+        ? me
+        : me.$jazz.loadingState === "loading"
+          ? undefined
+          : null,
   });
   if (!me) return null;
 
