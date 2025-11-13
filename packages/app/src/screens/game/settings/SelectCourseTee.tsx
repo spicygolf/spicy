@@ -1,8 +1,8 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useMemo, useState } from "react";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { Course, Tee } from "spicylib/schema";
+import { Course, Facility, Tee, TeeHole } from "spicylib/schema";
 import { normalizeGender } from "spicylib/utils";
 import { Back } from "@/components/Back";
 import { GhinCourseSearchInput } from "@/components/ghin/course/SearchInput";
@@ -76,28 +76,37 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
 
       const facilityData = courseData.Facility;
       const facility = facilityData
-        ? {
-            id: facilityData.FacilityId.toString(),
-            status: facilityData.FacilityStatus,
-            name: facilityData.FacilityName,
-            number: facilityData.FacilityNumber?.toString(),
-            geolocation: {
-              formatted_address: facilityData.GeoLocationFormattedAddress || "",
-              latitude: facilityData.GeoLocationLatitude || 0,
-              longitude: facilityData.GeoLocationLongitude || 0,
+        ? Facility.create(
+            {
+              id: facilityData.FacilityId.toString(),
+              status: facilityData.FacilityStatus,
+              name: facilityData.FacilityName,
+              number: facilityData.FacilityNumber?.toString(),
+              geolocation: {
+                formatted_address:
+                  facilityData.GeoLocationFormattedAddress || "",
+                latitude: facilityData.GeoLocationLatitude || 0,
+                longitude: facilityData.GeoLocationLongitude || 0,
+              },
             },
-          }
+            { owner: group },
+          )
         : undefined;
 
-      // Create Tee holes
-      const holes = teeData.Holes.map((h) => ({
-        id: h.HoleId.toString(),
-        number: h.Number,
-        par: h.Par,
-        yards: h.Length,
-        meters: Math.round(h.Length * 0.9144), // Convert yards to meters
-        handicap: h.Allocation,
-      }));
+      // Create Tee holes as Jazz CoMaps
+      const holes = teeData.Holes.map((h) =>
+        TeeHole.create(
+          {
+            id: h.HoleId.toString(),
+            number: h.Number,
+            par: h.Par,
+            yards: h.Length,
+            meters: Math.round(h.Length * 0.9144), // Convert yards to meters
+            handicap: h.Allocation,
+          },
+          { owner: group },
+        ),
+      );
 
       // Create ratings
       const ratings = {
@@ -132,20 +141,18 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         }
       });
 
-      // Use upsertUnique for Tee to avoid duplicates
-      const teeValue = {
-        id: teeData.TeeSetRatingId.toString(),
-        name: teeData.TeeSetRatingName,
-        gender: normalizeGender(teeData.Gender),
-        holes,
-        holesCount: teeData.HolesNumber,
-        totalYardage: teeData.TotalYardage,
-        totalMeters: teeData.TotalMeters,
-        ratings,
-      };
-
+      // Use upsertUnique to avoid duplicate Tee objects
       const upsertedTee = await Tee.upsertUnique({
-        value: teeValue,
+        value: {
+          id: teeData.TeeSetRatingId.toString(),
+          name: teeData.TeeSetRatingName,
+          gender: normalizeGender(teeData.Gender),
+          holes,
+          holesCount: teeData.HolesNumber,
+          totalYardage: teeData.TotalYardage,
+          totalMeters: teeData.TotalMeters,
+          ratings,
+        },
         unique: teeData.TeeSetRatingId.toString(),
         owner: group,
       });
@@ -155,35 +162,38 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         return;
       }
 
-      // Ensure the tee is loaded
-      const tee = await upsertedTee.$jazz.ensureLoaded({
-        resolve: { holes: { $each: true } },
-      });
+      // Ensure the tee is loaded before using it
+      const tee = await upsertedTee.$jazz.ensureLoaded({ resolve: {} });
 
-      // Use upsertUnique for Course to avoid duplicates
-      const courseValue = {
-        id: courseData.CourseId.toString(),
-        status: courseData.CourseStatus,
-        name: courseData.CourseName,
-        number: courseData.CourseNumber?.toString(),
-        city: courseData.CourseCity,
-        state: courseData.CourseState,
-        facility,
-        season: {
-          name: courseData.Season.SeasonName,
-          start_date: courseData.Season.SeasonStartDate || undefined,
-          end_date: courseData.Season.SeasonEndDate || undefined,
-          all_year: courseData.Season.IsAllYear,
-        },
-        default_tee: {
-          male: player?.gender === "M" ? tee : undefined,
-          female: player?.gender === "F" ? tee : undefined,
-        },
-        tees: [tee],
-      };
-
+      // Use upsertUnique to avoid duplicate Course objects
       const upsertedCourse = await Course.upsertUnique({
-        value: courseValue,
+        value: {
+          id: courseData.CourseId.toString(),
+          status: courseData.CourseStatus,
+          name: courseData.CourseName,
+          number: courseData.CourseNumber?.toString(),
+          city: courseData.CourseCity,
+          state: courseData.CourseState,
+          facility,
+          season: courseData.Season
+            ? {
+                name: courseData.Season.SeasonName || undefined,
+                start_date: courseData.Season.SeasonStartDate || undefined,
+                end_date: courseData.Season.SeasonEndDate || undefined,
+                all_year: courseData.Season.IsAllYear,
+              }
+            : {
+                name: undefined,
+                start_date: undefined,
+                end_date: undefined,
+                all_year: true,
+              },
+          default_tee: {
+            male: player?.gender === "M" ? tee : undefined,
+            female: player?.gender === "F" ? tee : undefined,
+          },
+          tees: [tee],
+        },
         unique: courseData.CourseId.toString(),
         owner: group,
       });
@@ -193,15 +203,8 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         return;
       }
 
-      // Ensure the course is loaded
-      const course = await upsertedCourse.$jazz.ensureLoaded({
-        resolve: { tees: { $each: true }, facility: true },
-      });
-
-      // Initialize tees list if it doesn't exist
-      if (!course.$jazz.has("tees")) {
-        course.$jazz.set("tees", [tee]);
-      }
+      // Ensure the course is loaded before using it
+      const course = await upsertedCourse.$jazz.ensureLoaded({ resolve: {} });
 
       // Update the round with course and tee
       round.$jazz.set("course", course);
@@ -241,6 +244,16 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
             onSelectCourse={handleSelectCourse}
           />
         </>
+      ) : courseDetailsQuery.isError ? (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.errorText}>
+            Error loading course details:{" "}
+            {courseDetailsQuery.error?.message || "Unknown error"}
+          </Text>
+          <TouchableOpacity onPress={() => setSelectedCourseId(null)}>
+            <Text style={styles.retryText}>← Back to search</Text>
+          </TouchableOpacity>
+        </View>
       ) : courseDetailsQuery.data ? (
         <TeeSelection
           courseDetails={courseDetailsQuery.data}
@@ -250,6 +263,16 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
       ) : (
         <View style={styles.loadingContainer}>
           <Text>Loading course details...</Text>
+          <Text style={styles.debugText}>Course ID: {selectedCourseId}</Text>
+          <Text style={styles.debugText}>
+            Loading: {courseDetailsQuery.isLoading ? "Yes" : "No"}
+          </Text>
+          <Text style={styles.debugText}>
+            Fetching: {courseDetailsQuery.isFetching ? "Yes" : "No"}
+          </Text>
+          <TouchableOpacity onPress={() => setSelectedCourseId(null)}>
+            <Text style={styles.retryText}>← Back to search</Text>
+          </TouchableOpacity>
         </View>
       )}
     </Screen>
@@ -291,5 +314,22 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: theme.gap(2),
+  },
+  errorText: {
+    color: theme.colors.error,
+    textAlign: "center",
+    marginBottom: theme.gap(2),
+  },
+  retryText: {
+    color: theme.colors.primary,
+    textAlign: "center",
+    textDecorationLine: "underline",
+    marginTop: theme.gap(2),
+  },
+  debugText: {
+    fontSize: 12,
+    color: theme.colors.secondary,
+    marginTop: theme.gap(0.5),
   },
 }));

@@ -24,7 +24,19 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
   // Determine the subtitle and navigation behavior
   const hasRounds = player.rounds && player.rounds.length > 0;
   const firstRound = hasRounds ? player.rounds[0] : null;
-  const hasSelectedCourseTee = firstRound?.course && firstRound?.tee;
+
+  // Check if course and tee exist and have accessible data
+  const course = firstRound?.course;
+  const tee = firstRound?.tee;
+  // Try to access the name property - if it's accessible, they're loaded
+  let hasSelectedCourseTee = false;
+  try {
+    hasSelectedCourseTee = !!(course?.name && tee?.name);
+  } catch {
+    // If accessing the property throws "value is unavailable", catch it
+    hasSelectedCourseTee = false;
+  }
+
   const needsCourseAndTee =
     hasRounds && player.rounds.some((round) => !round?.course || !round?.tee);
 
@@ -35,10 +47,10 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
     subtitle = "Select Round";
     onPress = () =>
       navigation.navigate("AddRoundToGame", { playerId: player.$jazz.id });
-  } else if (hasSelectedCourseTee) {
+  } else if (hasSelectedCourseTee && course && tee) {
     // Show the selected course and tee names
-    const courseName = acronym(firstRound.course.name);
-    const teeName = firstRound.tee.name;
+    const courseName = acronym(course.name);
+    const teeName = tee.name;
     subtitle = `${courseName} • ${teeName}`;
     // Allow changing the selection
     onPress = () =>

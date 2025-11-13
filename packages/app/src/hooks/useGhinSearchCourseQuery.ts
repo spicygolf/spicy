@@ -40,12 +40,7 @@ export function useGhinSearchCourseQuery(search: CourseSearchRequest) {
 
   return useQuery({
     queryKey: ["ghin-course-search", search],
-    queryFn: async () => {
-      console.log("Course search request:", search);
-      const result = await searchCourses(api, search);
-      console.log("Course search result:", result);
-      return result;
-    },
+    queryFn: () => searchCourses(api, search),
     // Require at least 2 characters in course name before searching
     // State is now optional, but country is still required
     enabled:

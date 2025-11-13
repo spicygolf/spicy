@@ -40,15 +40,5 @@ export async function getCourseDetails(
     baseUrl: GHIN_BASE_URL,
   });
 
-  console.log("Calling ghin.courses.getDetails with request:", request);
-  const response = await ghin.courses.getDetails(request);
-  console.log(
-    "Raw GHIN response Facility.GeoLocationFormattedAddress:",
-    response.Facility.GeoLocationFormattedAddress,
-  );
-  console.log(
-    "Response type:",
-    typeof response.Facility.GeoLocationFormattedAddress,
-  );
-  return response;
+  return await ghin.courses.getDetails(request);
 }
