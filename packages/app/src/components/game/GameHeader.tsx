@@ -4,6 +4,10 @@ import type { Game } from "spicylib/schema";
 import { Text } from "@/ui";
 
 export function GameHeader({ game }: { game: Game }) {
+  if (!game.$isLoaded) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.gameInfo}>

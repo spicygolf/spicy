@@ -35,18 +35,24 @@ export function Credentials() {
           ? undefined
           : null,
   });
-  if (!me) return null;
+  if (!me?.$isLoaded) return null;
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Credentials</Text>
       <View style={styles.row}>
         <Text style={styles.label}>Logged In As</Text>
-        <Text style={styles.value}>{me.profile?.name}</Text>
+        <Text style={styles.value}>
+          {me.profile?.$isLoaded ? me.profile.name : ""}
+        </Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Root Player Name</Text>
-        <Text style={styles.value}>{me.root?.player?.name}</Text>
+        <Text style={styles.value}>
+          {me.root?.$isLoaded && me.root.player?.$isLoaded
+            ? me.root.player.name
+            : ""}
+        </Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Account ID</Text>

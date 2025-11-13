@@ -14,17 +14,22 @@ export function GamePlayersList() {
   const { game } = useGameContext();
   const navigation = useNavigation<NavigationProp>();
 
+  const players = game?.players?.$isLoaded
+    ? game.players.filter((p) => p?.$isLoaded)
+    : [];
+  const playerCount = players.length || 0;
+
   return (
     <View>
-      <Text style={styles.title}>Players ({game?.players?.length || 0})</Text>
+      <Text style={styles.title}>Players ({playerCount})</Text>
       <Button
         label="Add Player"
         onPress={() => navigation.navigate("AddPlayerNavigator")}
       />
       <FlatList
-        data={game?.players}
+        data={players}
         renderItem={({ item }) => <GamePlayersListItem player={item} />}
-        keyExtractor={(item) => item?.$jazz.id || ""}
+        keyExtractor={(item) => item.$jazz.id}
         ListEmptyComponent={<EmptyPlayersList />}
         contentContainerStyle={styles.flatlist}
       />

@@ -7,12 +7,14 @@ export function SpecList({
 }: {
   specs: ListOfGameSpecs | null | undefined;
 }) {
+  const loadedSpecs = specs?.$isLoaded ? specs.filter((s) => s?.$isLoaded) : [];
+
   return (
     <View>
       <FlatList
-        data={specs}
+        data={loadedSpecs}
         renderItem={({ item }) => <SpecListItem spec={item} />}
-        keyExtractor={(item, index) => item?.$jazz.id ?? index.toString()}
+        keyExtractor={(item) => item.$jazz.id}
       />
     </View>
   );

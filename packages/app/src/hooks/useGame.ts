@@ -30,7 +30,8 @@ export function useGame(gameId?: string, options: UseGameOptions = {}) {
     : undefined;
 
   // Use the hook with proper typing
-  const game = useCoState(Game, effectiveGameId || "", resolve, {
+  const game = useCoState(Game, effectiveGameId || "", {
+    ...resolve,
     select: (value) =>
       value.$isLoaded
         ? value

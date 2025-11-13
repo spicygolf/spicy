@@ -27,30 +27,32 @@ export function AddRoundToGame({ route, navigation }: Props) {
 
   // Get the player from the game context
   const player = useMemo(() => {
-    if (!game?.players) {
+    if (!game?.players?.$isLoaded) {
       return null;
     }
 
-    return game.players.find((p) => p?.$jazz.id === playerId) || null;
+    return (
+      game.players.find((p) => p?.$isLoaded && p.$jazz.id === playerId) || null
+    );
   }, [game?.players, playerId]);
 
-  const gameDate = game?.start || new Date();
+  const gameDate = game?.$isLoaded ? game.start : new Date();
 
   const roundsForToday = useMemo(() => {
-    if (!player?.rounds) return [];
+    if (!player?.$isLoaded || !player.rounds?.$isLoaded) return [];
 
     return player.rounds.filter((round) => {
-      if (!round) return false;
+      if (!round?.$isLoaded) return false;
       return isSameDay(round.createdAt, gameDate);
     });
-  }, [player?.rounds, gameDate]);
+  }, [player, gameDate]);
 
   if (!player) {
     return null;
   }
 
   function handleCreateNewRound() {
-    if (!game?.rounds || !game?.players) return;
+    if (!game?.rounds?.$isLoaded || !game?.players?.$isLoaded) return;
 
     setIsCreating(true);
 
@@ -59,10 +61,10 @@ export function AddRoundToGame({ route, navigation }: Props) {
 
     // Get the player from game.players to ensure we modify the right instance
     const gamePlayer = game.players.find(
-      (p) => p?.$jazz.id === player?.$jazz.id,
+      (p) => p?.$isLoaded && p.$jazz.id === player?.$jazz.id,
     );
 
-    if (!gamePlayer) {
+    if (!gamePlayer?.$isLoaded) {
       setIsCreating(false);
       return;
     }
@@ -71,14 +73,16 @@ export function AddRoundToGame({ route, navigation }: Props) {
       {
         createdAt: gameDate,
         playerId: gamePlayer.$jazz.id,
-        handicapIndex: gamePlayer.handicap?.display || "0.0",
+        handicapIndex: gamePlayer.handicap?.$isLoaded
+          ? gamePlayer.handicap.display || "0.0"
+          : "0.0",
         scores: ListOfScores.create([], { owner: group }),
       },
       { owner: group },
     );
 
     // Initialize rounds list if it doesn't exist
-    if (!gamePlayer.rounds) {
+    if (!gamePlayer.$jazz.has("rounds") || !gamePlayer.rounds?.$isLoaded) {
       const roundsList = ListOfRounds.create([newRound], {
         owner: playerGroup,
       });
@@ -92,7 +96,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
   }
 
   function addRoundToGame(round: RoundType) {
-    if (!game?.rounds) return;
+    if (!game?.rounds?.$isLoaded) return;
 
     const group = game.rounds.$jazz.owner;
 
@@ -117,7 +121,9 @@ export function AddRoundToGame({ route, navigation }: Props) {
       <View style={styles.header}>
         <Back />
         <View style={styles.title}>
-          <Text style={styles.titleText}>Rounds: {player.name}</Text>
+          <Text style={styles.titleText}>
+            Rounds: {player.$isLoaded ? player.name : ""}
+          </Text>
         </View>
       </View>
 
@@ -142,26 +148,33 @@ export function AddRoundToGame({ route, navigation }: Props) {
           <FlatList
             data={roundsForToday}
             renderItem={({ item, index }) => {
-              const roundTime = item?.createdAt
-                ? formatTime(item.createdAt)
-                : "";
-              const roundDate = item?.createdAt
-                ? formatDate(item.createdAt)
-                : "";
+              const roundTime =
+                item?.$isLoaded && item.createdAt
+                  ? formatTime(item.createdAt)
+                  : "";
+              const roundDate =
+                item?.$isLoaded && item.createdAt
+                  ? formatDate(item.createdAt)
+                  : "";
               const isLastItem = index === roundsForToday.length - 1;
 
               return (
                 <TouchableOpacity
                   style={[styles.roundItem, isLastItem && styles.lastRoundItem]}
-                  onPress={() => item && handleSelectRound(item)}
+                  onPress={() => item?.$isLoaded && handleSelectRound(item)}
                 >
                   <View>
                     <Text style={styles.roundText}>
                       {roundDate} {roundTime}
                     </Text>
                     <Text style={styles.roundSubtext}>
-                      {item?.course?.name || "No Course"} •{" "}
-                      {item?.tee?.name || "No Tee"}
+                      {item?.$isLoaded && item.course?.$isLoaded
+                        ? item.course.name
+                        : "No Course"}{" "}
+                      •{" "}
+                      {item?.$isLoaded && item.tee?.$isLoaded
+                        ? item.tee.name
+                        : "No Tee"}
                     </Text>
                   </View>
                 </TouchableOpacity>

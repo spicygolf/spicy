@@ -21,7 +21,7 @@ export function useCreateGame() {
   });
 
   const createGame = async (name: string, specs: GameSpec[]) => {
-    if (!me?.root) return null;
+    if (!me?.$isLoaded || !me.root?.$isLoaded) return null;
 
     const group = Group.create();
     group.addMember(me, "admin");
@@ -52,7 +52,9 @@ export function useCreateGame() {
     );
 
     // Add game to user's games list
-    me.root.games?.$jazz.push(game);
+    if (me.root.games?.$isLoaded) {
+      me.root.games.$jazz.push(game);
+    }
 
     return game;
   };

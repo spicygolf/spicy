@@ -43,7 +43,7 @@ export function Register() {
       },
       {
         onSuccess: async () => {
-          if (me?.profile) {
+          if (me?.$isLoaded && me.profile?.$isLoaded) {
             me.profile.$jazz.set("name", name);
           }
           console.log("Registration successful");

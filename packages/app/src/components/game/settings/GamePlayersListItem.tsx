@@ -20,7 +20,7 @@ const PlayerCourseTeeInfo = memo(({ round }: { round: Round | null }) => {
       const course = round.course;
       const tee = round.tee;
 
-      if (course?.name && tee?.name) {
+      if (course?.$isLoaded && tee?.$isLoaded && course.name && tee.name) {
         return (
           <Text
             style={styles.player_tees}
@@ -45,14 +45,20 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
   const label = gameHandicap ? "game" : "course";
   const courseGameHandicap = gameHandicap ?? courseHandicap;
 
-  const hasRounds = player.rounds && player.rounds.length > 0;
+  const hasRounds = player.rounds?.$isLoaded && player.rounds.length > 0;
   const firstRound = hasRounds ? player.rounds[0] : null;
 
   const hasSelectedCourseTee =
-    firstRound?.$jazz.has("course") && firstRound?.$jazz.has("tee");
+    firstRound?.$isLoaded &&
+    firstRound.$jazz.has("course") &&
+    firstRound.$jazz.has("tee");
 
   const needsCourseAndTee =
-    hasRounds && player.rounds.some((round) => !round?.course || !round?.tee);
+    hasRounds &&
+    player.rounds.$isLoaded &&
+    player.rounds.some(
+      (round) => !round?.$isLoaded || !round.course || !round.tee,
+    );
 
   let subtitle = "";
   let onPress: (() => void) | undefined;
@@ -61,19 +67,19 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
     subtitle = "Select Round";
     onPress = () =>
       navigation.navigate("AddRoundToGame", { playerId: player.$jazz.id });
-  } else if (needsCourseAndTee) {
+  } else if (needsCourseAndTee && player.rounds.$isLoaded) {
     subtitle = "Select Course/Tee";
     const roundNeedingSelection = player.rounds.find(
-      (round) => !round?.course || !round?.tee,
+      (round) => round?.$isLoaded && (!round.course || !round.tee),
     );
-    if (roundNeedingSelection) {
+    if (roundNeedingSelection?.$isLoaded) {
       onPress = () =>
         navigation.navigate("SelectCourseTee", {
           playerId: player.$jazz.id,
           roundId: roundNeedingSelection.$jazz.id,
         });
     }
-  } else if (hasSelectedCourseTee && firstRound) {
+  } else if (hasSelectedCourseTee && firstRound?.$isLoaded) {
     onPress = () =>
       navigation.navigate("SelectCourseTee", {
         playerId: player.$jazz.id,
@@ -95,7 +101,12 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
         )}
       </TouchableOpacity>
       <View style={styles.handicaps}>
-        <Handicap label="index" display={player?.handicap?.display} />
+        <Handicap
+          label="index"
+          display={
+            player?.handicap?.$isLoaded ? player.handicap.display : undefined
+          }
+        />
         <Handicap label={label} display={courseGameHandicap} />
       </View>
       <View style={styles.delete}>

@@ -52,13 +52,15 @@ export function GameNavigator({ route }: GameNavigatorProps) {
 
   // Update the current game in context when the route changes
   useEffect(() => {
-    setGame(game);
+    if (game?.$isLoaded) {
+      setGame(game);
+    }
     return () => {
       setGame(null);
     };
   }, [game, setGame]);
 
-  if (!game) {
+  if (!game?.$isLoaded) {
     return null; // or a loading spinner
   }
 

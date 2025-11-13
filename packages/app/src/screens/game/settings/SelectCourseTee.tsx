@@ -30,17 +30,22 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
 
   // Get the player from the game context
   const player = useMemo(() => {
-    if (!game?.players) {
+    if (!game?.players?.$isLoaded) {
       return null;
     }
-    return game.players.find((p) => p?.$jazz.id === playerId) || null;
+    return (
+      game.players.find((p) => p?.$isLoaded && p.$jazz.id === playerId) || null
+    );
   }, [game?.players, playerId]);
 
   // Get the round if roundId is provided
   const round = useMemo(() => {
-    if (!roundId || !player?.rounds) return null;
-    return player.rounds.find((r) => r?.$jazz.id === roundId) || null;
-  }, [player?.rounds, roundId]);
+    if (!roundId || !player?.$isLoaded || !player.rounds?.$isLoaded)
+      return null;
+    return (
+      player.rounds.find((r) => r?.$isLoaded && r.$jazz.id === roundId) || null
+    );
+  }, [player, roundId]);
 
   // Course search hook
   const { state: searchState } = useGhinCourseSearchContext();
@@ -58,7 +63,7 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
 
   const handleSelectTee = useCallback(
     async (teeId: number, _teeName: string) => {
-      if (!round || !selectedCourseId || !courseDetailsQuery.data) {
+      if (!round?.$isLoaded || !selectedCourseId || !courseDetailsQuery.data) {
         return;
       }
 
@@ -193,8 +198,9 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
                 all_year: true,
               },
           default_tee: {
-            male: player?.gender === "M" ? tee : undefined,
-            female: player?.gender === "F" ? tee : undefined,
+            male: player?.$isLoaded && player.gender === "M" ? tee : undefined,
+            female:
+              player?.$isLoaded && player.gender === "F" ? tee : undefined,
           },
           tees: [tee],
         },
@@ -226,7 +232,9 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         <Back />
         <View style={styles.title}>
           <Text style={styles.titleText}>Select Course & Tees</Text>
-          <Text style={styles.subtitleText}>{player.name}</Text>
+          <Text style={styles.subtitleText}>
+            {player.$isLoaded ? player.name : ""}
+          </Text>
         </View>
       </View>
 
@@ -254,7 +262,7 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         <TeeSelection
           courseDetails={courseDetailsQuery.data}
           onSelectTee={handleSelectTee}
-          playerGender={player.gender}
+          playerGender={player.$isLoaded ? player.gender : "M"}
         />
       ) : (
         <View style={styles.loadingContainer}>

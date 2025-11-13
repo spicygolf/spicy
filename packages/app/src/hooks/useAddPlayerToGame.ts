@@ -22,7 +22,7 @@ export function useAddPlayerToGame() {
   const addPlayerToGame = async (
     p: PlayerData,
   ): Promise<Result<Player, AddPlayerError>> => {
-    if (!game?.players) {
+    if (!game?.players?.$isLoaded) {
       return err({
         type: "NO_PLAYERS",
         message: "No players collection in game",
@@ -36,7 +36,7 @@ export function useAddPlayerToGame() {
       });
     }
 
-    if (!worker?.account) {
+    if (!worker?.account?.$isLoaded) {
       return err({
         type: "NO_WORKER_ACCOUNT",
         message: "Worker account not loaded",
@@ -123,7 +123,7 @@ export function useAddPlayerToGame() {
 
     // Check if player is already in the game
     const existingPlayer = game.players.find(
-      (p) => p?.$jazz.id === player.$jazz.id,
+      (p) => p?.$isLoaded && p.$jazz.id === player.$jazz.id,
     );
 
     // Only add if not already in the game
@@ -131,7 +131,7 @@ export function useAddPlayerToGame() {
       game.players.$jazz.push(player);
     } else {
       // If player exists but doesn't have rounds, initialize it
-      if (!existingPlayer.$jazz.has("rounds")) {
+      if (existingPlayer.$isLoaded && !existingPlayer.$jazz.has("rounds")) {
         const roundsList = ListOfRounds.create([], { owner: group });
         existingPlayer.$jazz.set("rounds", roundsList);
       }
@@ -139,10 +139,14 @@ export function useAddPlayerToGame() {
 
     // Return the player from the game context to ensure we have the latest version
     const gamePlayer = game.players.find(
-      (p) => p?.$jazz.id === player.$jazz.id,
+      (p) => p?.$isLoaded && p.$jazz.id === player.$jazz.id,
     );
 
-    return ok(gamePlayer || player);
+    if (gamePlayer?.$isLoaded) {
+      return ok(gamePlayer);
+    }
+
+    return ok(player);
   };
 
   return addPlayerToGame;

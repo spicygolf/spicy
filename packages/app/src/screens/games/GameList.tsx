@@ -34,14 +34,18 @@ export function GameListScreen() {
           ? undefined
           : null,
   });
-  const games = useCoState(ListOfGames, me?.root?.games?.$jazz.id, {
-    select: (games) =>
-      games.$isLoaded
-        ? games
-        : games.$jazz.loadingState === "loading"
-          ? undefined
-          : null,
-  });
+  const games = useCoState(
+    ListOfGames,
+    me?.$isLoaded && me.root?.$isLoaded ? me.root.games?.$jazz.id : undefined,
+    {
+      select: (games) =>
+        games.$isLoaded
+          ? games
+          : games.$jazz.loadingState === "loading"
+            ? undefined
+            : null,
+    },
+  );
   if (!games) return null;
 
   return (
