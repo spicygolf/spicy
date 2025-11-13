@@ -16,7 +16,7 @@
     "@elysiajs/cors": "1.4.0",
     "better-auth": "1.3.26",
     "elysia": "1.4.9",
-    "@spicygolf/ghin": "file:../../../ghin",
+    "@spicygolf/ghin": "0.8.5",
     "jazz-tools": "catalog:jazz",
     "spicylib": "workspace:*"
   },

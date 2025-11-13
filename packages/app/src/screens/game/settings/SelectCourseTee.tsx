@@ -93,7 +93,6 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
           )
         : undefined;
 
-      // Create Tee holes as Jazz CoMaps
       const holes = teeData.Holes.map((h) =>
         TeeHole.create(
           {
@@ -101,7 +100,7 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
             number: h.Number,
             par: h.Par,
             yards: h.Length,
-            meters: Math.round(h.Length * 0.9144), // Convert yards to meters
+            meters: Math.round(h.Length * 0.9144),
             handicap: h.Allocation,
           },
           { owner: group },
@@ -141,7 +140,7 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         }
       });
 
-      // Use upsertUnique to avoid duplicate Tee objects
+      console.log("DEBUG: Calling upsertUnique...");
       const upsertedTee = await Tee.upsertUnique({
         value: {
           id: teeData.TeeSetRatingId.toString(),
@@ -157,17 +156,22 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         owner: group,
       });
 
+      console.log("DEBUG: upsertUnique returned:", upsertedTee?.$jazz.id);
+
       if (!upsertedTee) {
         console.error("Failed to upsert tee");
         return;
       }
 
-      // Ensure the tee is loaded before using it
-      const tee = await upsertedTee.$jazz.ensureLoaded({ resolve: {} });
+      console.log("DEBUG: Calling ensureLoaded on tee...");
+      const tee = await upsertedTee.$jazz.ensureLoaded({
+        resolve: { holes: { $each: true } },
+      });
+      console.log("DEBUG: Tee loaded:", tee.$jazz.id);
 
-      // Use upsertUnique to avoid duplicate Course objects
-      const upsertedCourse = await Course.upsertUnique({
-        value: {
+      // TODO: Re-add course creation
+      const course = Course.create(
+        {
           id: courseData.CourseId.toString(),
           status: courseData.CourseStatus,
           name: courseData.CourseName,
@@ -194,24 +198,16 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
           },
           tees: [tee],
         },
-        unique: courseData.CourseId.toString(),
-        owner: group,
-      });
+        { owner: group },
+      );
 
-      if (!upsertedCourse) {
-        console.error("Failed to upsert course");
-        return;
-      }
-
-      // Ensure the course is loaded before using it
-      const course = await upsertedCourse.$jazz.ensureLoaded({ resolve: {} });
-
-      // Update the round with course and tee
+      console.log("DEBUG: Setting course and tee on round...");
       round.$jazz.set("course", course);
       round.$jazz.set("tee", tee);
+      console.log("DEBUG: Course and tee set, navigating back...");
 
-      // Navigate back
       navigation.goBack();
+      console.log("DEBUG: goBack called");
     },
     [round, selectedCourseId, courseDetailsQuery.data, player, navigation],
   );

@@ -73,11 +73,10 @@
     ],
     "catalogs": {
       "jazz": {
-        "jazz-tools": "0.18.20"
+        "jazz-tools": "0.19.1"
       }
     }
   },
   "dependencies": {
-    "@spicygolf/ghin": "file:../ghin"
   }
 }
