@@ -54,7 +54,6 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
   // Course details hook (when a course is selected)
   const courseDetailsQuery = useGhinCourseDetailsQuery({
     course_id: selectedCourseId || 0,
-    include_altered_tees: false,
   });
 
   const handleSelectCourse = useCallback((courseId: number) => {
