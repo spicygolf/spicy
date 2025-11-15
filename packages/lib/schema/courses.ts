@@ -13,7 +13,7 @@ export type TeeHole = co.loaded<typeof TeeHole>;
 export const Tee = co.map({
   id: z.string(),
   name: z.string(),
-  gender: z.literal(["M", "F"]),
+  gender: z.literal(["M", "F", "Mixed"]),
   holes: co.list(TeeHole),
   holesCount: z.number(),
   totalYardage: z.number(),

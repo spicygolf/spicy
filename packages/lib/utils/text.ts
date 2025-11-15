@@ -22,6 +22,37 @@ export function acronym(orig: string | null | undefined): string {
 }
 
 /**
+ * Creates a display string for a golf course, handling facility vs course names.
+ * If facility exists and differs from course name, shows "FACILITY_ACRONYM - Course Name".
+ * Otherwise, shows the course acronym.
+ *
+ * @param courseName - The course name
+ * @param facilityName - Optional facility name
+ * @returns Display string for the course
+ *
+ * @example
+ * courseAcronym("Blue Course", "Congressional CC") // returns "CCC - Blue Course"
+ * courseAcronym("Druid Hills Golf Club", "Druid Hills Golf Club") // returns "DHGC"
+ * courseAcronym("Pebble Beach Golf Links") // returns "PBGL"
+ */
+export function courseAcronym(
+  courseName: string | null | undefined,
+  facilityName?: string | null | undefined,
+): string {
+  if (!courseName) {
+    return "";
+  }
+
+  // If facility exists and is different from course name
+  if (facilityName && facilityName !== courseName) {
+    return `${acronym(facilityName)} - ${courseName}`;
+  }
+
+  // Otherwise just use the course acronym
+  return acronym(courseName);
+}
+
+/**
  * Returns the first name from a full name string.
  *
  * @param name - The full name string
@@ -34,14 +65,38 @@ export function first(name: string): string {
 
 /**
  * Returns the last name from a full name string.
- * TODO: handle name suffixes such as III, Jr. Sr. etc.
+ * Handles common name suffixes (Jr, Sr, Jr., Sr., II, III, IV, etc.)
  *
  * @param name - The full name string
- * @returns The last name
+ * @returns The last name, excluding suffixes
  */
 export function last(name: string): string {
   const names = name.split(" ");
-  return names[names.length - 1] || "";
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0] || "";
+
+  const suffixes = [
+    "Jr",
+    "Jr.",
+    "Sr",
+    "Sr.",
+    "II",
+    "III",
+    "IV",
+    "V",
+    "VI",
+    "VII",
+    "VIII",
+    "IX",
+    "X",
+  ];
+  const lastPart = names[names.length - 1] || "";
+
+  if (suffixes.includes(lastPart)) {
+    return names[names.length - 2] || lastPart;
+  }
+
+  return lastPart;
 }
 
 /**

@@ -66,21 +66,6 @@ export function GhinCourseSearchResults({
           style={styles.courseItem}
           onPress={() => onSelectCourse(item.CourseID)}
         >
-          <TouchableOpacity
-            style={styles.favoriteButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              // TODO: Implement favorites when ready
-              console.log("Favorite pressed for course:", item.CourseID);
-            }}
-          >
-            <FontAwesome6
-              name="star"
-              iconStyle="regular"
-              size={20}
-              color="#666"
-            />
-          </TouchableOpacity>
           <View style={styles.courseInfo}>
             <Text style={styles.courseName}>{item.CourseName}</Text>
             {item.FacilityName !== item.CourseName && (
@@ -123,22 +108,18 @@ const styles = StyleSheet.create((theme) => ({
   },
   courseItem: {
     paddingVertical: theme.gap(2),
-    paddingRight: theme.gap(2),
+    paddingHorizontal: theme.gap(2),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   courseInfo: {
     flex: 1,
-    marginLeft: theme.gap(1),
     marginRight: theme.gap(2),
   },
   courseName: {
     fontSize: 16,
     fontWeight: "bold",
-  },
-  favoriteButton: {
-    padding: theme.gap(0.5),
   },
   facilityName: {
     fontSize: 14,
