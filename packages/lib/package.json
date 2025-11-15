@@ -12,7 +12,8 @@
     "lint:fix": "biome check --write .",
     "format": "biome format .",
     "format:fix": "biome format --write .",
-    "tsc": "sh -c 'tsc --noEmit'"
+    "tsc": "sh -c 'tsc --noEmit'",
+    "test": "bun test"
   },
   "devDependencies": {
     "bun-types": "latest",

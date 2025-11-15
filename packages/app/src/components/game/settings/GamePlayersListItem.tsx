@@ -4,7 +4,7 @@ import { memo } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player, Round } from "spicylib/schema";
-import { acronym } from "spicylib/utils";
+import { courseAcronym } from "spicylib/utils";
 import { Handicap } from "@/components/handicap/Handicap";
 import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
 import { Text } from "@/ui";
@@ -21,10 +21,13 @@ const PlayerCourseTeeInfo = memo(({ round }: { round: Round | null }) => {
       const tee = round.tee;
 
       if (course?.$isLoaded && tee?.$isLoaded && course.name && tee.name) {
+        const facilityName = course.facility?.$isLoaded
+          ? course.facility.name
+          : undefined;
         return (
-          <Text
-            style={styles.player_tees}
-          >{`${acronym(course.name)} • ${tee.name}`}</Text>
+          <Text style={styles.player_tees}>
+            {courseAcronym(course.name, facilityName)} • {tee.name}
+          </Text>
         );
       }
     }
