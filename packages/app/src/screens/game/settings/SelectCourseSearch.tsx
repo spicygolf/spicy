@@ -52,6 +52,10 @@ export function SelectCourseSearch({ route, navigation }: Props) {
     setSelectedCourseId(courseId);
   }, []);
 
+  const handleBack = useCallback(() => {
+    setSelectedCourseId(null);
+  }, []);
+
   const handleSelectTee = useCallback(
     async (teeId: number, _teeName: string) => {
       if (!round?.$isLoaded || !selectedCourseId || !courseDetailsQuery.data) {
@@ -234,6 +238,7 @@ export function SelectCourseSearch({ route, navigation }: Props) {
         <TeeSelection
           courseDetails={courseDetailsQuery.data}
           onSelectTee={handleSelectTee}
+          onBack={handleBack}
           playerGender={player.$isLoaded ? player.gender : "M"}
         />
       ) : (

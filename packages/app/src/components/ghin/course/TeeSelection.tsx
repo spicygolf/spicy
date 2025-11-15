@@ -7,12 +7,14 @@ import { Text } from "@/ui";
 interface TeeSelectionProps {
   courseDetails: CourseDetailsResponse;
   onSelectTee: (teeId: number, teeName: string) => void;
+  onBack?: () => void;
   playerGender?: "M" | "F";
 }
 
 export function TeeSelection({
   courseDetails,
   onSelectTee,
+  onBack,
   playerGender = "M",
 }: TeeSelectionProps) {
   // Filter tees based on player gender (includes Mixed tees) and sort by yardage descending
@@ -36,10 +38,26 @@ export function TeeSelection({
   return (
     <View style={styles.container}>
       <View style={styles.courseHeader}>
-        <Text style={styles.courseName}>{courseDetails.CourseName}</Text>
-        <Text style={styles.courseLocation}>
-          {courseDetails.CourseCity}, {courseDetails.CourseState}
-        </Text>
+        <View style={styles.courseHeaderContent}>
+          <View style={styles.courseTextContainer}>
+            <Text style={styles.courseName}>{courseDetails.CourseName}</Text>
+            <Text style={styles.courseLocation}>
+              {courseDetails.CourseCity}, {courseDetails.CourseState}
+            </Text>
+          </View>
+          {onBack && (
+            <TouchableOpacity style={styles.closeButton} onPress={onBack}>
+              <View style={styles.closeCircle}>
+                <FontAwesome6
+                  name="xmark"
+                  iconStyle="solid"
+                  size={14}
+                  color="#FFFFFF"
+                />
+              </View>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <Text style={styles.sectionTitle}>Select Tees</Text>
@@ -114,6 +132,25 @@ const styles = StyleSheet.create((theme) => ({
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
   },
+  courseHeaderContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  courseTextContainer: {
+    flex: 1,
+  },
+  closeButton: {
+    marginLeft: theme.gap(2),
+  },
+  closeCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#FF3B30",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   courseName: {
     fontSize: 18,
     fontWeight: "bold",
@@ -133,7 +170,8 @@ const styles = StyleSheet.create((theme) => ({
     paddingBottom: theme.gap(2),
   },
   teeItem: {
-    padding: theme.gap(2),
+    paddingVertical: theme.gap(2),
+    paddingRight: theme.gap(2),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

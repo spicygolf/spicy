@@ -3,7 +3,8 @@ import type { CourseSearchResponse } from "@spicygolf/ghin";
 import { useMemo } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { Button, Text } from "@/ui";
+import { stateCode } from "spicylib/utils";
+import { Text } from "@/ui";
 
 interface CourseSearchResultsProps {
   results: CourseSearchResponse | undefined;
@@ -67,7 +68,8 @@ export function GhinCourseSearchResults({
         >
           <TouchableOpacity
             style={styles.favoriteButton}
-            onPress={() => {
+            onPress={(e) => {
+              e.stopPropagation();
               // TODO: Implement favorites when ready
               console.log("Favorite pressed for course:", item.CourseID);
             }}
@@ -81,20 +83,23 @@ export function GhinCourseSearchResults({
           </TouchableOpacity>
           <View style={styles.courseInfo}>
             <Text style={styles.courseName}>{item.CourseName}</Text>
-            <Text style={styles.facilityName}>{item.FacilityName}</Text>
+            {item.FacilityName !== item.CourseName && (
+              <Text style={styles.facilityName}>{item.FacilityName}</Text>
+            )}
             <Text style={styles.courseLocation}>
-              {item.City}, {item.State}
+              {item.City}, {stateCode(item.State)}
             </Text>
             {item.CourseStatus === "INACTIVE" && (
               <Text style={styles.inactiveStatus}>Inactive</Text>
             )}
           </View>
-          <View style={styles.selectButton}>
-            <Button
-              label="Select Tees"
-              onPress={() => onSelectCourse(item.CourseID)}
-            />
-          </View>
+          <FontAwesome6
+            name="chevron-right"
+            iconStyle="solid"
+            size={16}
+            color="#999"
+            style={styles.chevron}
+          />
         </TouchableOpacity>
       )}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -117,7 +122,8 @@ const styles = StyleSheet.create((theme) => ({
     paddingBottom: theme.gap(2),
   },
   courseItem: {
-    padding: theme.gap(2),
+    paddingVertical: theme.gap(2),
+    paddingRight: theme.gap(2),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -150,8 +156,8 @@ const styles = StyleSheet.create((theme) => ({
     marginTop: theme.gap(0.5),
     fontStyle: "italic",
   },
-  selectButton: {
-    minWidth: 100,
+  chevron: {
+    marginLeft: theme.gap(1),
   },
   separator: {
     height: 1,

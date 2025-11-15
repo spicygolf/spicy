@@ -63,3 +63,25 @@ export function normalizeGender(
   if (ghinGender === "Female") return "F";
   return "M"; // Default to "M" for "Male", "Mixed", null, or undefined
 }
+
+/**
+ * Extracts the state code from a GHIN API state string.
+ * GHIN state format is "COUNTRY-STATE" (e.g., "US-TN", "US-GA").
+ * Returns just the state code portion.
+ *
+ * @param state - State string from GHIN API (e.g., "US-TN")
+ * @returns State code (e.g., "TN"), or original value if no hyphen found
+ *
+ * @example
+ * stateCode("US-TN") // returns "TN"
+ * stateCode("US-GA") // returns "GA"
+ * stateCode("TN") // returns "TN" (no hyphen)
+ * stateCode(null) // returns null
+ */
+export function stateCode(
+  state: string | null | undefined,
+): string | null | undefined {
+  if (!state) return state;
+  const parts = state.split("-");
+  return parts.length > 1 ? parts[1] : state;
+}
