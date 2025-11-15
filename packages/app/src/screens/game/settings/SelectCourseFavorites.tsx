@@ -185,8 +185,6 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
                 isFavorited={true}
                 onToggle={() => removeFavorite(item)}
                 size={20}
-                activeColor="#FFD700"
-                inactiveColor="#999999"
               />
 
               <View style={styles.favoriteInfo}>
@@ -257,10 +255,10 @@ const styles = StyleSheet.create((theme) => ({
     lineHeight: 20,
   },
   listContainer: {
-    paddingVertical: theme.gap(1),
+    paddingBottom: theme.gap(1),
   },
   favoriteItem: {
-    paddingVertical: theme.gap(2),
+    paddingVertical: theme.gap(0.5),
     paddingRight: theme.gap(2),
     flexDirection: "row",
     alignItems: "center",

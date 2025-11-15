@@ -133,8 +133,6 @@ export function TeeSelection({
                   );
                 }}
                 size={20}
-                activeColor="#FFD700"
-                inactiveColor="#999999"
               />
 
               <View style={styles.teeInfo}>
