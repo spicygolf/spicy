@@ -74,14 +74,14 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
     );
     if (roundNeedingSelection?.$isLoaded) {
       onPress = () =>
-        navigation.navigate("SelectCourseTee", {
+        navigation.navigate("SelectCourseNavigator", {
           playerId: player.$jazz.id,
           roundId: roundNeedingSelection.$jazz.id,
         });
     }
   } else if (hasSelectedCourseTee && firstRound?.$isLoaded) {
     onPress = () =>
-      navigation.navigate("SelectCourseTee", {
+      navigation.navigate("SelectCourseNavigator", {
         playerId: player.$jazz.id,
         roundId: firstRound.$jazz.id,
       });

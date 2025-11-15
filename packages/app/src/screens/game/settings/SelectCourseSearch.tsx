@@ -1,34 +1,29 @@
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
 import { useCallback, useMemo, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Course, Facility, Tee, TeeHole } from "spicylib/schema";
 import { normalizeGender } from "spicylib/utils";
-import { Back } from "@/components/Back";
 import { GhinCourseSearchInput } from "@/components/ghin/course/SearchInput";
 import { GhinCourseSearchResults } from "@/components/ghin/course/SearchResults";
 import { TeeSelection } from "@/components/ghin/course/TeeSelection";
 import { useGameContext } from "@/contexts/GameContext";
-import {
-  GhinCourseSearchProvider,
-  useGhinCourseSearchContext,
-} from "@/contexts/GhinCourseSearchContext";
+import { useGhinCourseSearchContext } from "@/contexts/GhinCourseSearchContext";
 import { useGhinCourseDetailsQuery } from "@/hooks/useGhinCourseDetailsQuery";
 import { useGhinSearchCourseQuery } from "@/hooks/useGhinSearchCourseQuery";
-import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
+import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
 import { Screen, Text } from "@/ui";
 
-type Props = NativeStackScreenProps<
-  GameSettingsStackParamList,
-  "SelectCourseTee"
+type Props = MaterialTopTabScreenProps<
+  SelectCourseTabParamList,
+  "SelectCourseSearch"
 >;
 
-function SelectCourseTeeContent({ route, navigation }: Props) {
+export function SelectCourseSearch({ route, navigation }: Props) {
   const { playerId, roundId } = route.params;
   const { game } = useGameContext();
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
 
-  // Get the player from the game context
   const player = useMemo(() => {
     if (!game?.players?.$isLoaded) {
       return null;
@@ -38,7 +33,6 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
     );
   }, [game?.players, playerId]);
 
-  // Get the round if roundId is provided
   const round = useMemo(() => {
     if (!roundId || !player?.$isLoaded || !player.rounds?.$isLoaded)
       return null;
@@ -47,11 +41,9 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
     );
   }, [player, roundId]);
 
-  // Course search hook
   const { state: searchState } = useGhinCourseSearchContext();
   const courseSearchQuery = useGhinSearchCourseQuery(searchState);
 
-  // Course details hook (when a course is selected)
   const courseDetailsQuery = useGhinCourseDetailsQuery({
     course_id: selectedCourseId || 0,
   });
@@ -75,7 +67,6 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         return;
       }
 
-      // Get the group owner for Jazz objects
       const group = round.$jazz.owner;
 
       const facilityData = courseData.Facility;
@@ -111,7 +102,6 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         ),
       );
 
-      // Create ratings
       const ratings = {
         total: {
           rating: 0,
@@ -144,7 +134,6 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         }
       });
 
-      console.log("DEBUG: Calling upsertUnique...");
       const upsertedTee = await Tee.upsertUnique({
         value: {
           id: teeData.TeeSetRatingId.toString(),
@@ -160,20 +149,15 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         owner: group,
       });
 
-      console.log("DEBUG: upsertUnique returned:", upsertedTee?.$jazz.id);
-
       if (!upsertedTee.$isLoaded) {
         console.error("Failed to upsert tee");
         return;
       }
 
-      console.log("DEBUG: Calling ensureLoaded on tee...");
       const tee = await upsertedTee.$jazz.ensureLoaded({
         resolve: { holes: { $each: true } },
       });
-      console.log("DEBUG: Tee loaded:", tee.$jazz.id);
 
-      // TODO: Re-add course creation
       const course = Course.create(
         {
           id: courseData.CourseId.toString(),
@@ -206,37 +190,26 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
         { owner: group },
       );
 
-      console.log("DEBUG: Setting course and tee on round...");
       round.$jazz.set("course", course);
       round.$jazz.set("tee", tee);
-      console.log("DEBUG: Course and tee set, navigating back...");
 
-      navigation.goBack();
-      console.log("DEBUG: goBack called");
+      navigation.getParent()?.goBack();
     },
     [round, selectedCourseId, courseDetailsQuery.data, player, navigation],
   );
 
   if (!player) {
     return (
-      <View style={styles.container}>
-        <Text>Player not found</Text>
-      </View>
+      <Screen>
+        <View style={styles.container}>
+          <Text>Player not found</Text>
+        </View>
+      </Screen>
     );
   }
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Back />
-        <View style={styles.title}>
-          <Text style={styles.titleText}>Select Course & Tees</Text>
-          <Text style={styles.subtitleText}>
-            {player.$isLoaded ? player.name : ""}
-          </Text>
-        </View>
-      </View>
-
       {!selectedCourseId ? (
         <>
           <GhinCourseSearchInput />
@@ -266,13 +239,6 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
       ) : (
         <View style={styles.loadingContainer}>
           <Text>Loading course details...</Text>
-          <Text style={styles.debugText}>Course ID: {selectedCourseId}</Text>
-          <Text style={styles.debugText}>
-            Loading: {courseDetailsQuery.isLoading ? "Yes" : "No"}
-          </Text>
-          <Text style={styles.debugText}>
-            Fetching: {courseDetailsQuery.isFetching ? "Yes" : "No"}
-          </Text>
           <TouchableOpacity onPress={() => setSelectedCourseId(null)}>
             <Text style={styles.retryText}>← Back to search</Text>
           </TouchableOpacity>
@@ -282,36 +248,10 @@ function SelectCourseTeeContent({ route, navigation }: Props) {
   );
 }
 
-export function SelectCourseTee(props: Props) {
-  return (
-    <GhinCourseSearchProvider>
-      <SelectCourseTeeContent {...props} />
-    </GhinCourseSearchProvider>
-  );
-}
-
 const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     padding: theme.gap(2),
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: theme.gap(2),
-  },
-  title: {
-    flex: 1,
-    alignItems: "center",
-  },
-  titleText: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  subtitleText: {
-    fontSize: 14,
-    color: theme.colors.secondary,
-    marginTop: theme.gap(0.25),
   },
   loadingContainer: {
     flex: 1,
@@ -329,10 +269,5 @@ const styles = StyleSheet.create((theme) => ({
     textAlign: "center",
     textDecorationLine: "underline",
     marginTop: theme.gap(2),
-  },
-  debugText: {
-    fontSize: 12,
-    color: theme.colors.secondary,
-    marginTop: theme.gap(0.5),
   },
 }));

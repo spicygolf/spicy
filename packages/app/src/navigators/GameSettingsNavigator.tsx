@@ -1,16 +1,31 @@
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useUnistyles } from "react-native-unistyles";
+import { GhinCourseSearchProvider } from "@/contexts/GhinCourseSearchContext";
 import { AddPlayerNavigator } from "@/navigators/AddPlayerNavigator";
+import { SelectCourseNavigator } from "@/navigators/SelectCourseNavigator";
 import { AddRoundToGame } from "@/screens/game/settings/AddRoundToGame";
 import { GameSettings } from "@/screens/game/settings/GameSettings";
-import { SelectCourseTee } from "@/screens/game/settings/SelectCourseTee";
 
 export type GameSettingsStackParamList = {
   GameSettings: undefined;
   AddPlayerNavigator: undefined;
   AddRoundToGame: { playerId: string };
-  SelectCourseTee: { playerId: string; roundId?: string };
+  SelectCourseNavigator: { playerId: string; roundId?: string };
 };
+
+function SelectCourseNavigatorWithProvider(
+  props: NativeStackScreenProps<
+    GameSettingsStackParamList,
+    "SelectCourseNavigator"
+  >,
+) {
+  return (
+    <GhinCourseSearchProvider>
+      <SelectCourseNavigator {...props} />
+    </GhinCourseSearchProvider>
+  );
+}
 
 export function GameSettingsNavigator() {
   const Stack = createNativeStackNavigator<GameSettingsStackParamList>();
@@ -27,7 +42,10 @@ export function GameSettingsNavigator() {
       <Stack.Screen name="GameSettings" component={GameSettings} />
       <Stack.Screen name="AddPlayerNavigator" component={AddPlayerNavigator} />
       <Stack.Screen name="AddRoundToGame" component={AddRoundToGame} />
-      <Stack.Screen name="SelectCourseTee" component={SelectCourseTee} />
+      <Stack.Screen
+        name="SelectCourseNavigator"
+        component={SelectCourseNavigatorWithProvider}
+      />
     </Stack.Navigator>
   );
 }
