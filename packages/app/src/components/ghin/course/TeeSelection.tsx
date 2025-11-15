@@ -15,13 +15,13 @@ export function TeeSelection({
   onSelectTee,
   playerGender = "M",
 }: TeeSelectionProps) {
-  // Filter tees based on player gender (includes Mixed tees)
+  // Filter tees based on player gender (includes Mixed tees) and sort by yardage descending
   const availableTees = courseDetails.TeeSets.filter((tee) => {
     if (tee.Gender === "Mixed") return true;
     if (playerGender === "M" && tee.Gender === "Male") return true;
     if (playerGender === "F" && tee.Gender === "Female") return true;
     return false;
-  });
+  }).sort((a, b) => b.TotalYardage - a.TotalYardage);
 
   const getRatingInfo = (tee: (typeof courseDetails.TeeSets)[0]) => {
     const totalRating = tee.Ratings.find((r) => r.RatingType === "Total");
