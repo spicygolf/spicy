@@ -30,11 +30,15 @@ export function useGame(gameId?: string, options: UseGameOptions = {}) {
     : undefined;
 
   // Use the hook with proper typing
-  const game = useCoState(
-    Game,
-    effectiveGameId || "",
-    resolve,
-  ) as unknown as GameWithRelations;
+  const game = useCoState(Game, effectiveGameId || "", {
+    ...resolve,
+    select: (value) =>
+      value.$isLoaded
+        ? value
+        : value.$jazz.loadingState === "loading"
+          ? undefined
+          : null,
+  }) as unknown as GameWithRelations;
 
   if (!effectiveGameId) {
     if (options.requireGame) {

@@ -31,7 +31,7 @@ export const PlayerAccount = co
       // create a group for the account, add worker as admin
       const group = Group.create(account);
       const workerAccount = await PlayerAccount.load(JAZZ_WORKER_ACCOUNT);
-      if (!workerAccount) {
+      if (!workerAccount?.$isLoaded) {
         throw new Error("Jazz Worker Account not found");
       }
       group.addMember(workerAccount, "admin");

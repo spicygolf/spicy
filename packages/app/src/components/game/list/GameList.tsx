@@ -3,12 +3,18 @@ import type { ListOfGames } from "spicylib/schema";
 import { GameListItem } from "@/components/game/list/GameListItem";
 
 export function GameList({ games }: { games: ListOfGames | undefined }) {
+  if (!games?.$isLoaded) {
+    return null;
+  }
+
+  const loadedGames = games.filter((g) => g?.$isLoaded);
+
   return (
     <View>
       <FlatList
-        data={games}
+        data={loadedGames}
         renderItem={({ item }) => <GameListItem game={item} />}
-        keyExtractor={(item, index) => item?.$jazz.id ?? index.toString()}
+        keyExtractor={(item) => item.$jazz.id}
       />
     </View>
   );

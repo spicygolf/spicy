@@ -1,29 +1,32 @@
-import type { GolfersSearchRequest } from "@spicygolf/ghin";
-import { useContext } from "react";
+import type { CourseSearchRequest } from "@spicygolf/ghin";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { GhinPlayerSearchContext } from "@/contexts/GhinPlayerSearchContext";
+import { useGhinCourseSearchContext } from "@/contexts/GhinCourseSearchContext";
 import { useGetCountriesAndStates } from "@/hooks/useGetCountriesAndStates";
 import { Input, Picker } from "@/ui";
-// import Error from '@/components/error';
 
-export function GhinPlayerSearchInput() {
-  const context = useContext(GhinPlayerSearchContext);
+export function GhinCourseSearchInput() {
+  const { state, setState } = useGhinCourseSearchContext();
   const { countries } = useGetCountriesAndStates();
 
-  if (!context) {
-    throw new Error(
-      "GhinPlayerSearchInput must be used within a GhinPlayerSearchContext.Provider",
-    );
-  }
-
-  const { state, setState } = context;
-  const handleChange = (data: GolfersSearchRequest) => setState(data);
+  const handleChange = (data: CourseSearchRequest) => setState(data);
 
   const country = countries?.find((c) => c?.code === state.country);
 
   return (
     <View style={styles.container}>
+      <View style={styles.row}>
+        <View style={styles.field}>
+          <Input
+            name="course_name"
+            label="Course Name"
+            value={state.name || ""}
+            onChangeText={(value) => handleChange({ ...state, name: value })}
+            autoCapitalize="words"
+            placeholder="Enter course name"
+          />
+        </View>
+      </View>
       <View style={styles.row}>
         <View style={styles.picker_country}>
           <Picker
@@ -52,37 +55,13 @@ export function GhinPlayerSearchInput() {
                 ? [
                     {
                       label: s.name,
-                      value: s.code,
+                      value: s.course_code,
                     },
                   ]
                 : [],
             )}
             selectedValue={state.state}
             onValueChange={(value) => handleChange({ ...state, state: value })}
-          />
-        </View>
-      </View>
-      <View style={styles.row}>
-        <View style={[styles.field, styles.last_name]}>
-          <Input
-            name="last_name"
-            label="Last Name"
-            value={state.last_name}
-            onChangeText={(value) =>
-              handleChange({ ...state, last_name: value })
-            }
-            autoCapitalize="words"
-          />
-        </View>
-        <View style={styles.field}>
-          <Input
-            name="first_name"
-            label="First Name (optional)"
-            value={state.first_name || ""}
-            onChangeText={(value) =>
-              handleChange({ ...state, first_name: value })
-            }
-            autoCapitalize="words"
           />
         </View>
       </View>
@@ -94,22 +73,6 @@ const styles = StyleSheet.create((theme) => ({
   container: {},
   field: {
     flex: 1,
-  },
-  field_input: {
-    color: "#000",
-    marginHorizontal: 0,
-    paddingHorizontal: 0,
-  },
-  field_input_txt: {
-    fontSize: 16,
-  },
-  label: {
-    color: "#999",
-    fontSize: 12,
-    fontWeight: "normal",
-  },
-  last_name: {
-    paddingRight: 5,
   },
   picker_country: {
     flex: 1,

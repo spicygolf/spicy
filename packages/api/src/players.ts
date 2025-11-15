@@ -1,4 +1,8 @@
-import { GhinClient, type Golfer, type GolfersSearchRequest } from "ghin";
+import {
+  GhinClient,
+  type Golfer,
+  type GolfersSearchRequest,
+} from "@spicygolf/ghin";
 import { Player } from "spicylib/schema";
 import { getJazzWorker } from "./jazz_worker";
 

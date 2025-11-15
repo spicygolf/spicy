@@ -1,4 +1,4 @@
-import { GhinClient } from "ghin";
+import { GhinClient } from "@spicygolf/ghin";
 
 const { GHIN_BASE_URL, GHIN_USERNAME, GHIN_PASSWORD } = process.env;
 

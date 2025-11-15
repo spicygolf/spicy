@@ -8,7 +8,7 @@ export function RootNavigator() {
   const isAuthenticated = useIsAuthenticated();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
     </SafeAreaView>
   );

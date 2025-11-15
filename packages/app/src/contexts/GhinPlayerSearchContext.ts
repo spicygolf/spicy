@@ -1,4 +1,4 @@
-import type { GolfersSearchRequest } from "ghin";
+import type { GolfersSearchRequest } from "@spicygolf/ghin";
 import { createContext } from "react";
 
 interface GhinPlayerSearchContextType {

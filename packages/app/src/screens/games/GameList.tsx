@@ -11,7 +11,7 @@ export function GameListScreen() {
     useNavigation<NativeStackNavigationProp<GamesNavigatorParamList>>();
 
   // TODO: move to useGameList() hook?
-  const { me } = useAccount(PlayerAccount, {
+  const me = useAccount(PlayerAccount, {
     resolve: {
       root: {
         player: true,
@@ -27,8 +27,25 @@ export function GameListScreen() {
         },
       },
     },
+    select: (me) =>
+      me.$isLoaded
+        ? me
+        : me.$jazz.loadingState === "loading"
+          ? undefined
+          : null,
   });
-  const games = useCoState(ListOfGames, me?.root?.games?.$jazz.id);
+  const games = useCoState(
+    ListOfGames,
+    me?.$isLoaded && me.root?.$isLoaded ? me.root.games?.$jazz.id : undefined,
+    {
+      select: (games) =>
+        games.$isLoaded
+          ? games
+          : games.$jazz.loadingState === "loading"
+            ? undefined
+            : null,
+    },
+  );
   if (!games) return null;
 
   return (

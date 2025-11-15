@@ -3,12 +3,18 @@ import { useAccount } from "jazz-tools/react-native";
 import { type defaultSpec, GameSpec, PlayerAccount } from "spicylib/schema";
 
 export function useGamespecs() {
-  const { me } = useAccount(PlayerAccount, {
+  const me = useAccount(PlayerAccount, {
     resolve: {
       root: {
         specs: { $each: true },
       },
     },
+    select: (me) =>
+      me.$isLoaded
+        ? me
+        : me.$jazz.loadingState === "loading"
+          ? undefined
+          : null,
   });
 
   const createGameSpec = (spec: typeof defaultSpec) => {

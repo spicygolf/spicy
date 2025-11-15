@@ -9,6 +9,12 @@ export function useJazzWorker(resolve?: object) {
     resolve: resolve || {
       profile: true,
     },
+    select: (account) =>
+      account.$isLoaded
+        ? account
+        : account.$jazz.loadingState === "loading"
+          ? undefined
+          : null,
   });
 
   return {
