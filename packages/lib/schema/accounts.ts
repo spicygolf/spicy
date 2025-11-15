@@ -1,4 +1,5 @@
 import { co, Group, z } from "jazz-tools";
+import { Favorites } from "./favorites";
 import { ListOfGames } from "./games";
 import { defaultSpec, GameSpec, ListOfGameSpecs } from "./gamespecs";
 import { Player } from "./players";
@@ -10,6 +11,7 @@ export const PlayerAccountRoot = co.map({
   player: Player,
   games: ListOfGames,
   specs: ListOfGameSpecs,
+  favorites: co.optional(Favorites),
 });
 
 export const PlayerAccountProfile = co.profile({

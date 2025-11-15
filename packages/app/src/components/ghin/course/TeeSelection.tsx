@@ -1,12 +1,20 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { CourseDetailsResponse } from "@spicygolf/ghin";
+import { useAccount } from "jazz-tools/react-native";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { PlayerAccount } from "spicylib/schema";
+import { stateCode } from "spicylib/utils";
+import { FavoriteButton } from "@/components/common/FavoriteButton";
 import { Text } from "@/ui";
 
 interface TeeSelectionProps {
   courseDetails: CourseDetailsResponse;
-  onSelectTee: (teeId: number, teeName: string) => void;
+  onSelectTee: (
+    teeId: number,
+    teeName: string,
+    shouldFavorite: boolean,
+  ) => void;
   onBack?: () => void;
   playerGender?: "M" | "F";
 }
@@ -17,6 +25,15 @@ export function TeeSelection({
   onBack,
   playerGender = "M",
 }: TeeSelectionProps) {
+  const me = useAccount(PlayerAccount, {
+    resolve: {
+      root: {
+        favorites: {
+          courseTees: { $each: { course: true, tee: true } },
+        },
+      },
+    },
+  });
   // Filter tees based on player gender (includes Mixed tees) and sort by yardage descending
   const availableTees = courseDetails.TeeSets.filter((tee) => {
     if (tee.Gender === "Mixed") return true;
@@ -35,6 +52,29 @@ export function TeeSelection({
     };
   };
 
+  const isTeeInFavorites = (teeId: string, courseId: string): boolean => {
+    if (
+      !me?.$isLoaded ||
+      !me.root?.$isLoaded ||
+      !me.root.favorites?.$isLoaded
+    ) {
+      return false;
+    }
+    const favorites = me.root.favorites;
+    if (!favorites.courseTees?.$isLoaded) {
+      return false;
+    }
+    return favorites.courseTees.some((fav) => {
+      return (
+        fav?.$isLoaded &&
+        fav.tee?.$isLoaded &&
+        fav.course?.$isLoaded &&
+        fav.tee.id === teeId &&
+        fav.course.id === courseId
+      );
+    });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.courseHeader}>
@@ -42,7 +82,7 @@ export function TeeSelection({
           <View style={styles.courseTextContainer}>
             <Text style={styles.courseName}>{courseDetails.CourseName}</Text>
             <Text style={styles.courseLocation}>
-              {courseDetails.CourseCity}, {courseDetails.CourseState}
+              {courseDetails.CourseCity}, {stateCode(courseDetails.CourseState)}
             </Text>
           </View>
           {onBack && (
@@ -67,28 +107,35 @@ export function TeeSelection({
         keyExtractor={(item) => item.TeeSetRatingId.toString()}
         renderItem={({ item }) => {
           const ratingInfo = getRatingInfo(item);
+          const teeIdStr = item.TeeSetRatingId.toString();
+          const courseIdStr = courseDetails.CourseId.toString();
+          const isFavorited = isTeeInFavorites(teeIdStr, courseIdStr);
 
           return (
             <TouchableOpacity
               style={styles.teeItem}
               onPress={() =>
-                onSelectTee(item.TeeSetRatingId, item.TeeSetRatingName)
+                onSelectTee(
+                  item.TeeSetRatingId,
+                  item.TeeSetRatingName,
+                  isFavorited,
+                )
               }
             >
-              <TouchableOpacity
-                style={styles.favoriteButton}
-                onPress={() => {
-                  // TODO: Implement favorites when ready
-                  console.log("Favorite pressed for tee:", item.TeeSetRatingId);
+              <FavoriteButton
+                isFavorited={isFavorited}
+                onToggle={(newState) => {
+                  // When user clicks favorite, select the tee and mark it to be favorited
+                  onSelectTee(
+                    item.TeeSetRatingId,
+                    item.TeeSetRatingName,
+                    newState,
+                  );
                 }}
-              >
-                <FontAwesome6
-                  name="star"
-                  iconStyle="regular"
-                  size={18}
-                  color="#666"
-                />
-              </TouchableOpacity>
+                size={20}
+                activeColor="#FFD700"
+                inactiveColor="#999999"
+              />
 
               <View style={styles.teeInfo}>
                 <Text style={styles.teeName}>{item.TeeSetRatingName}</Text>

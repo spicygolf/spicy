@@ -1,6 +1,6 @@
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useUnistyles } from "react-native-unistyles";
 import { GameProvider } from "@/contexts/GameContext";
 import { GameNavigator } from "@/navigators/GameNavigator";
 import { GameListScreen } from "@/screens/games/GameList";
