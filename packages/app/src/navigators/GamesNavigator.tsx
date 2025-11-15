@@ -1,5 +1,6 @@
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { GameProvider } from "@/contexts/GameContext";
 import { GameNavigator } from "@/navigators/GameNavigator";
 import { GameListScreen } from "@/screens/games/GameList";
@@ -20,9 +21,16 @@ export type GamesNavigatorParamList = {
 const Stack = createNativeStackNavigator<GamesNavigatorParamList>();
 
 export function GamesNavigator() {
+  const { theme } = useUnistyles();
+
   return (
     <GameProvider>
-      <Stack.Navigator initialRouteName="GamesList">
+      <Stack.Navigator
+        initialRouteName="GamesList"
+        screenOptions={{
+          contentStyle: { backgroundColor: theme.colors.background },
+        }}
+      >
         <Stack.Screen
           name="GamesList"
           component={GameListScreen}
