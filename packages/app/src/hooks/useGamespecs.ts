@@ -29,8 +29,10 @@ export function useGamespecs() {
     return gameSpec;
   };
 
+  const specs = me?.root?.specs || null;
+
   return {
-    specs: me?.root?.specs || null,
+    specs,
     createGameSpec,
   };
 }

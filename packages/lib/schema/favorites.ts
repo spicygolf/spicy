@@ -30,6 +30,8 @@ export const FavoriteSpec = co.map({
   addedAt: z.date(),
 });
 
+export type FavoriteSpec = co.loaded<typeof FavoriteSpec>;
+
 export const ListOfFavoriteSpecs = co.list(FavoriteSpec);
 
 // Favorites container that can be extended

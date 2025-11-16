@@ -3,6 +3,7 @@ import { co, z } from "jazz-tools";
 export const GameSpec = co.map({
   name: z.string(),
   short: z.string(),
+  long_description: z.string().optional(), // Markdown description
   version: z.number(),
   status: z.literal(["prod", "dev", "test"]),
   spec_type: z.literal(["points", "skins"]),
