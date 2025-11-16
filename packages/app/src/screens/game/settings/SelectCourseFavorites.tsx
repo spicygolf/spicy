@@ -165,47 +165,56 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
           onLongPress={drag}
           delayLongPress={200}
         >
-          <FavoriteButton
-            isFavorited={true}
-            onToggle={() => removeFavorite(item)}
-            size={20}
-          />
-
-          <View style={styles.favoriteInfo}>
-            <Text style={styles.teeName}>{tee.name}</Text>
-            <Text style={styles.courseName}>{course.name}</Text>
-            {course.facility?.$isLoaded &&
-              course.facility.name !== course.name && (
-                <Text style={styles.facilityName}>{course.facility.name}</Text>
-              )}
-            <Text style={styles.courseLocation}>
-              {course.city}, {stateCode(course.state)}
-            </Text>
-            <Text style={styles.teeDetailText}>
-              {tee.gender} • {tee.totalYardage} yards • Par{" "}
-              {tee.holes?.$isLoaded
-                ? tee.holes.reduce(
-                    (sum, h) => sum + (h?.$isLoaded ? h.par : 0),
-                    0,
-                  )
-                : "—"}
-              {tee.ratings?.$isLoaded && tee.ratings.total?.$isLoaded && (
-                <>
-                  {" "}
-                  • Rating: {tee.ratings.total.rating.toFixed(1)} • Slope:{" "}
-                  {tee.ratings.total.slope}
-                </>
-              )}
-            </Text>
-          </View>
-
-          <View style={styles.dragHandle}>
-            <FontAwesome6
-              name="grip-lines"
-              iconStyle="solid"
-              size={16}
-              color="#999"
+          <View style={styles.itemRow}>
+            <FavoriteButton
+              isFavorited={true}
+              onToggle={() => removeFavorite(item)}
+              size={20}
             />
+
+            <View style={styles.contentArea}>
+              <View style={styles.topRow}>
+                <View style={styles.favoriteInfo}>
+                  <Text style={styles.teeName}>{tee.name}</Text>
+                  <Text style={styles.courseName}>{course.name}</Text>
+                  {course.facility?.$isLoaded &&
+                    course.facility.name !== course.name && (
+                      <Text style={styles.facilityName}>
+                        {course.facility.name}
+                      </Text>
+                    )}
+                  <Text style={styles.courseLocation}>
+                    {course.city}, {stateCode(course.state)}
+                  </Text>
+                </View>
+
+                <View style={styles.dragHandle}>
+                  <FontAwesome6
+                    name="grip-lines"
+                    iconStyle="solid"
+                    size={16}
+                    color="#999"
+                  />
+                </View>
+              </View>
+
+              <Text style={styles.teeDetailText}>
+                {tee.gender} • {tee.totalYardage} yards • Par{" "}
+                {tee.holes?.$isLoaded
+                  ? tee.holes.reduce(
+                      (sum, h) => sum + (h?.$isLoaded ? h.par : 0),
+                      0,
+                    )
+                  : "—"}
+                {tee.ratings?.$isLoaded && tee.ratings.total?.$isLoaded && (
+                  <>
+                    {" "}
+                    • Rating: {tee.ratings.total.rating.toFixed(1)} • Slope:{" "}
+                    {tee.ratings.total.slope}
+                  </>
+                )}
+              </Text>
+            </View>
           </View>
         </TouchableOpacity>
       );
@@ -295,8 +304,7 @@ const styles = StyleSheet.create((theme) => ({
   favoriteItem: {
     paddingVertical: theme.gap(0.5),
     paddingRight: theme.gap(2),
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "column",
     backgroundColor: theme.colors.background,
   },
   draggingItem: {
@@ -307,9 +315,20 @@ const styles = StyleSheet.create((theme) => ({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
+  itemRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  contentArea: {
+    flex: 1,
+    marginLeft: theme.gap(1),
+  },
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   favoriteInfo: {
     flex: 1,
-    marginHorizontal: theme.gap(1),
   },
   teeName: {
     fontSize: 18,
