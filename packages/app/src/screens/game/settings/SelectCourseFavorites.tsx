@@ -1,8 +1,12 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
+import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
 import { useCallback, useMemo } from "react";
-import { FlatList, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+import DraggableFlatList, {
+  type RenderItemParams,
+} from "react-native-draggable-flatlist";
 import { StyleSheet } from "react-native-unistyles";
 import type { CourseTee } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
@@ -118,6 +122,96 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     [me],
   );
 
+  const handleReorder = useCallback(
+    ({ data }: { data: MaybeLoaded<CourseTee>[] }) => {
+      if (
+        !me?.$isLoaded ||
+        !me.root?.$isLoaded ||
+        !me.root.favorites?.$isLoaded ||
+        !me.root.favorites.courseTees?.$isLoaded
+      ) {
+        return;
+      }
+
+      const courseTees = me.root.favorites.courseTees;
+
+      // Clear and rebuild list in new order
+      while (courseTees.length > 0) {
+        courseTees.$jazz.splice(0, 1);
+      }
+      for (const item of data) {
+        // Type assertion needed because items from DraggableFlatList are already loaded
+        // biome-ignore lint/suspicious/noExplicitAny: Jazz list type compatibility
+        courseTees.$jazz.push(item as any);
+      }
+    },
+    [me],
+  );
+
+  const renderItem = useCallback(
+    ({ item, drag, isActive }: RenderItemParams<MaybeLoaded<CourseTee>>) => {
+      if (!item?.$isLoaded || !item.course?.$isLoaded || !item.tee?.$isLoaded) {
+        return null;
+      }
+
+      const course = item.course;
+      const tee = item.tee;
+
+      return (
+        <TouchableOpacity
+          style={[styles.favoriteItem, isActive && styles.draggingItem]}
+          onPress={() => handleSelectTee(item)}
+          onLongPress={drag}
+          delayLongPress={200}
+        >
+          <FavoriteButton
+            isFavorited={true}
+            onToggle={() => removeFavorite(item)}
+            size={20}
+          />
+
+          <View style={styles.favoriteInfo}>
+            <Text style={styles.teeName}>{tee.name}</Text>
+            <Text style={styles.courseName}>{course.name}</Text>
+            {course.facility?.$isLoaded &&
+              course.facility.name !== course.name && (
+                <Text style={styles.facilityName}>{course.facility.name}</Text>
+              )}
+            <Text style={styles.courseLocation}>
+              {course.city}, {stateCode(course.state)}
+            </Text>
+            <Text style={styles.teeDetailText}>
+              {tee.gender} • {tee.totalYardage} yards • Par{" "}
+              {tee.holes?.$isLoaded
+                ? tee.holes.reduce(
+                    (sum, h) => sum + (h?.$isLoaded ? h.par : 0),
+                    0,
+                  )
+                : "—"}
+              {tee.ratings?.$isLoaded && tee.ratings.total?.$isLoaded && (
+                <>
+                  {" "}
+                  • Rating: {tee.ratings.total.rating.toFixed(1)} • Slope:{" "}
+                  {tee.ratings.total.slope}
+                </>
+              )}
+            </Text>
+          </View>
+
+          <View style={styles.dragHandle}>
+            <FontAwesome6
+              name="grip-lines"
+              iconStyle="solid"
+              size={16}
+              color="#999"
+            />
+          </View>
+        </TouchableOpacity>
+      );
+    },
+    [handleSelectTee, removeFavorite],
+  );
+
   if (!player) {
     return (
       <Screen>
@@ -161,71 +255,11 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
 
   return (
     <Screen>
-      <FlatList
+      <DraggableFlatList
         data={favoritedTees}
         keyExtractor={(item) => item.$jazz.id}
-        renderItem={({ item }) => {
-          if (
-            !item?.$isLoaded ||
-            !item.course?.$isLoaded ||
-            !item.tee?.$isLoaded
-          ) {
-            return null;
-          }
-
-          const course = item.course;
-          const tee = item.tee;
-
-          return (
-            <TouchableOpacity
-              style={styles.favoriteItem}
-              onPress={() => handleSelectTee(item)}
-            >
-              <FavoriteButton
-                isFavorited={true}
-                onToggle={() => removeFavorite(item)}
-                size={20}
-              />
-
-              <View style={styles.favoriteInfo}>
-                <Text style={styles.teeName}>{tee.name}</Text>
-                <Text style={styles.courseName}>{course.name}</Text>
-                {course.facility?.$isLoaded &&
-                  course.facility.name !== course.name && (
-                    <Text style={styles.facilityName}>
-                      {course.facility.name}
-                    </Text>
-                  )}
-                <Text style={styles.courseLocation}>
-                  {course.city}, {stateCode(course.state)}
-                </Text>
-                <Text style={styles.teeDetailText}>
-                  {tee.gender} • {tee.totalYardage} yards • Par{" "}
-                  {tee.holes?.$isLoaded
-                    ? tee.holes.reduce(
-                        (sum, h) => sum + (h?.$isLoaded ? h.par : 0),
-                        0,
-                      )
-                    : "—"}
-                  {tee.ratings?.$isLoaded && tee.ratings.total?.$isLoaded && (
-                    <>
-                      {" "}
-                      • Rating: {tee.ratings.total.rating.toFixed(1)} • Slope:{" "}
-                      {tee.ratings.total.slope}
-                    </>
-                  )}
-                </Text>
-              </View>
-
-              <FontAwesome6
-                name="chevron-right"
-                iconStyle="solid"
-                size={16}
-                color="#999"
-              />
-            </TouchableOpacity>
-          );
-        }}
+        renderItem={renderItem}
+        onDragEnd={handleReorder}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={styles.listContainer}
       />
@@ -264,6 +298,14 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     backgroundColor: theme.colors.background,
   },
+  draggingItem: {
+    opacity: 0.7,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
   favoriteInfo: {
     flex: 1,
     marginHorizontal: theme.gap(1),
@@ -291,6 +333,10 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 13,
     color: theme.colors.secondary,
     marginTop: theme.gap(0.5),
+  },
+  dragHandle: {
+    padding: theme.gap(1),
+    marginLeft: theme.gap(1),
   },
   separator: {
     height: 1,

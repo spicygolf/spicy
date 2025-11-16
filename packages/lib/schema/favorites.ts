@@ -9,6 +9,7 @@ export const CourseTee = co.map({
   tee: Tee,
   addedAt: z.date(),
 });
+
 export type CourseTee = co.loaded<typeof CourseTee>;
 
 export const ListOfCourseTees = co.list(CourseTee);
