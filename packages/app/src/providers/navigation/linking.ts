@@ -25,7 +25,7 @@ export const linking = {
                     path: "add-player",
                     screens: {
                       AddPlayerFavorites: "favorites",
-                      AddPlayerGHIN: "ghin",
+                      AddPlayerSearch: "search",
                       AddPlayerManual: "manual",
                     },
                   },

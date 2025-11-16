@@ -6,12 +6,12 @@ import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import GameNav from "@/components/game/GameNav";
 import { AddPlayerFavorites } from "@/screens/game/settings/AddPlayerFavorites";
-import { AddPlayerGhin } from "@/screens/game/settings/AddPlayerGhin";
 import { AddPlayerManual } from "@/screens/game/settings/AddPlayerManual";
+import { AddPlayerSearch } from "@/screens/game/settings/AddPlayerSearch";
 
 export type AddPlayerTabParamList = {
   AddPlayerFavorites: undefined;
-  AddPlayerGHIN: undefined;
+  AddPlayerSearch: undefined;
   AddPlayerManual: undefined;
 };
 
@@ -48,10 +48,10 @@ export function AddPlayerNavigator() {
           }}
         />
         <Tabs.Screen
-          name="AddPlayerGHIN"
-          component={AddPlayerGhin}
+          name="AddPlayerSearch"
+          component={AddPlayerSearch}
           options={{
-            title: "GHIN®",
+            title: "Search",
           }}
         />
         <Tabs.Screen
