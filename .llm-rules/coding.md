@@ -31,3 +31,8 @@
   - `bun format`
   - `bun lint`
   - `bun tsc`
+
+## Styling
+
+- Use React Native Unistyles
+- There should be no or very few color string constants.  See app/src/utils/unistyles.ts

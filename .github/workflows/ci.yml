@@ -28,3 +28,6 @@ jobs:
 
       - name: Check TypeScript
         run: bun tsc
+
+      - name: Run Unit Tests
+        run: bun run test # note `bun test` works differently than the "test" scripts

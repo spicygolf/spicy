@@ -1,8 +1,18 @@
 import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
+import { useAccount } from "jazz-tools/react-native";
 import { useCallback, useMemo, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { Course, Facility, Tee, TeeHole } from "spicylib/schema";
+import {
+  Course,
+  CourseTee,
+  Facility,
+  Favorites,
+  ListOfCourseTees,
+  PlayerAccount,
+  Tee,
+  TeeHole,
+} from "spicylib/schema";
 import { normalizeGender } from "spicylib/utils";
 import { GhinCourseSearchInput } from "@/components/ghin/course/SearchInput";
 import { GhinCourseSearchResults } from "@/components/ghin/course/SearchResults";
@@ -23,6 +33,16 @@ export function SelectCourseSearch({ route, navigation }: Props) {
   const { playerId, roundId } = route.params;
   const { game } = useGameContext();
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
+
+  const me = useAccount(PlayerAccount, {
+    resolve: {
+      root: {
+        favorites: {
+          courseTees: { $each: { course: true, tee: true } },
+        },
+      },
+    },
+  });
 
   const player = useMemo(() => {
     if (!game?.players?.$isLoaded) {
@@ -57,7 +77,7 @@ export function SelectCourseSearch({ route, navigation }: Props) {
   }, []);
 
   const handleSelectTee = useCallback(
-    async (teeId: number, _teeName: string) => {
+    async (teeId: number, _teeName: string, shouldFavorite: boolean) => {
       if (!round?.$isLoaded || !selectedCourseId || !courseDetailsQuery.data) {
         return;
       }
@@ -197,9 +217,71 @@ export function SelectCourseSearch({ route, navigation }: Props) {
       round.$jazz.set("course", course);
       round.$jazz.set("tee", tee);
 
+      // Handle favoriting if requested
+      if (shouldFavorite && me?.$isLoaded && me.root?.$isLoaded) {
+        const root = me.root;
+        const loaded = await root.$jazz.ensureLoaded({
+          resolve: { favorites: { courseTees: { $each: true } } },
+        });
+
+        // Initialize favorites if not exists
+        if (!loaded.$jazz.has("favorites")) {
+          const favoritesGroup = root.$jazz.owner;
+          const newFavorites = Favorites.create(
+            {
+              courseTees: ListOfCourseTees.create([], {
+                owner: favoritesGroup,
+              }),
+            },
+            { owner: favoritesGroup },
+          );
+          loaded.$jazz.set("favorites", newFavorites);
+        }
+
+        const favorites = loaded.favorites;
+        if (favorites?.$isLoaded) {
+          // Ensure courseTees list is initialized
+          if (!favorites.$jazz.has("courseTees")) {
+            const favoritesGroup = favorites.$jazz.owner;
+            favorites.$jazz.set(
+              "courseTees",
+              ListOfCourseTees.create([], { owner: favoritesGroup }),
+            );
+          }
+
+          const courseTees = favorites.courseTees;
+          if (courseTees?.$isLoaded) {
+            // Check if already favorited
+            const existingIndex = courseTees.findIndex((fav) => {
+              return (
+                fav?.$isLoaded &&
+                fav.tee?.$isLoaded &&
+                fav.course?.$isLoaded &&
+                fav.tee.id === tee.id &&
+                fav.course.id === course.id
+              );
+            });
+
+            if (existingIndex < 0) {
+              // Add to favorites
+              const favoritesGroup = courseTees.$jazz.owner;
+              const newFavorite = CourseTee.create(
+                {
+                  course,
+                  tee,
+                  addedAt: new Date(),
+                },
+                { owner: favoritesGroup },
+              );
+              courseTees.$jazz.push(newFavorite);
+            }
+          }
+        }
+      }
+
       navigation.getParent()?.goBack();
     },
-    [round, selectedCourseId, courseDetailsQuery.data, player, navigation],
+    [round, selectedCourseId, courseDetailsQuery.data, player, navigation, me],
   );
 
   if (!player) {

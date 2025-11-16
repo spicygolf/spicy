@@ -37,6 +37,7 @@
     "lint": "bun run --filter './packages/*' lint",
     "lint:fix": "bun run --filter './packages/*' lint:fix",
     "tsc": "bun run --filter './packages/*' tsc",
+    "test": "bun test ./packages/app/ ./packages/api/ ./packages/lib/",
     "lint-staged": "lint-staged --no-stash",
     "prepare": "husky"
   },
@@ -77,6 +78,5 @@
       }
     }
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
