@@ -38,7 +38,7 @@ export function AddPlayerNavigator() {
       <GameNav title="Add Player" showBack={true} />
       <Tabs.Navigator
         screenOptions={tabScreenOptions}
-        initialRouteName="AddPlayerGHIN"
+        initialRouteName="AddPlayerFavorites"
       >
         <Tabs.Screen
           name="AddPlayerFavorites"

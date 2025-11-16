@@ -4,14 +4,15 @@ import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
 import { useCallback, useMemo } from "react";
 import { TouchableOpacity, View } from "react-native";
-import DraggableFlatList, {
-  type RenderItemParams,
-} from "react-native-draggable-flatlist";
 import { StyleSheet } from "react-native-unistyles";
 import type { CourseTee } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
 import { stateCode } from "spicylib/utils";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
+import {
+  type RenderItemParams,
+  SafeDraggableFlatList,
+} from "@/components/common/SafeDraggableFlatList";
 import { useGameContext } from "@/contexts/GameContext";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
 import { Screen, Text } from "@/ui";
@@ -255,7 +256,7 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
 
   return (
     <Screen>
-      <DraggableFlatList
+      <SafeDraggableFlatList
         data={favoritedTees}
         keyExtractor={(item) => item.$jazz.id}
         renderItem={renderItem}

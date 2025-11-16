@@ -9,6 +9,15 @@ export const Handicap = co.map({
 });
 export type Handicap = co.loaded<typeof Handicap>;
 
+export const Club = co.map({
+  name: z.string(),
+  state: z.string().optional(),
+});
+export type Club = co.loaded<typeof Club>;
+
+export const ListOfClubs = co.list(Club);
+export type ListOfClubs = co.loaded<typeof ListOfClubs>;
+
 export const ListOfEnvironments = co.list(z.string());
 export type ListOfEnvironments = co.loaded<typeof ListOfEnvironments>;
 
@@ -19,6 +28,7 @@ export const Player = co.map({
   gender: z.literal(["M", "F"]),
   ghinId: z.string().optional(),
   handicap: co.optional(Handicap),
+  clubs: co.optional(ListOfClubs),
   envs: co.optional(ListOfEnvironments),
   rounds: co.optional(ListOfRounds),
 });

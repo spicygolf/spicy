@@ -20,6 +20,8 @@ export const FavoritePlayer = co.map({
   addedAt: z.date(),
 });
 
+export type FavoritePlayer = co.loaded<typeof FavoritePlayer>;
+
 export const ListOfFavoritePlayers = co.list(FavoritePlayer);
 
 // Future: Favorite game spec

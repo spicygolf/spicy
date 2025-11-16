@@ -1,9 +1,19 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { Golfer } from "@spicygolf/ghin";
+import { useAccount } from "jazz-tools/react-native";
+import { useCallback, useMemo } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import {
+  Club,
+  FavoritePlayer,
+  ListOfClubs,
+  ListOfFavoritePlayers,
+  Player,
+  PlayerAccount,
+} from "spicylib/schema";
+import { FavoriteButton } from "@/components/common/FavoriteButton";
 import { useGameContext } from "@/contexts/GameContext";
 import { type PlayerData, useAddPlayerToGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
@@ -16,6 +26,25 @@ export function PlayerItem({ item }: { item: Golfer }) {
   const addPlayerToGame = useAddPlayerToGame();
   const { game } = useGameContext();
 
+  const me = useAccount(PlayerAccount, {
+    resolve: {
+      root: {
+        favorites: {
+          players: {
+            $each: {
+              player: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Check if player is already in the game
+  const full_name = [item.first_name, item.middle_name, item.last_name].join(
+    " ",
+  );
+
   // Check if player is already in the game
   const isPlayerAlreadyAdded =
     (game?.players?.$isLoaded &&
@@ -24,15 +53,129 @@ export function PlayerItem({ item }: { item: Golfer }) {
       )) ||
     false;
 
-  const full_name = [item.first_name, item.middle_name, item.last_name].join(
-    " ",
+  // Check if player is in favorites
+  const isFavorited = useMemo(() => {
+    if (
+      !me?.$isLoaded ||
+      !me.root?.$isLoaded ||
+      !me.root.favorites?.$isLoaded ||
+      !me.root.favorites.players?.$isLoaded
+    ) {
+      return false;
+    }
+    return me.root.favorites.players.some(
+      (fav) =>
+        fav?.$isLoaded &&
+        fav.player?.$isLoaded &&
+        fav.player.ghinId === item.ghin.toString(),
+    );
+  }, [me, item.ghin]);
+
+  const handleToggleFavorite = useCallback(
+    async (newState: boolean) => {
+      if (
+        !me?.$isLoaded ||
+        !me.root?.$isLoaded ||
+        !me.root.favorites?.$isLoaded
+      ) {
+        return;
+      }
+
+      const favorites = me.root.favorites;
+      const group = me.root.$jazz.owner;
+
+      if (newState) {
+        // Add to favorites
+        if (!favorites.$jazz.has("players")) {
+          favorites.$jazz.set(
+            "players",
+            ListOfFavoritePlayers.create([], { owner: group }),
+          );
+        }
+        const playersList = favorites.players;
+        if (playersList?.$isLoaded) {
+          // Check if already favorited
+          const alreadyFavorited = playersList.some(
+            (fav) =>
+              fav?.$isLoaded &&
+              fav.player?.$isLoaded &&
+              fav.player.ghinId === item.ghin.toString(),
+          );
+
+          if (!alreadyFavorited) {
+            // Create club info if available
+            let clubs: ListOfClubs | undefined;
+            if (item.club_name) {
+              const club = Club.create(
+                {
+                  name: item.club_name,
+                  state: item.state || undefined,
+                },
+                { owner: group },
+              );
+              clubs = ListOfClubs.create([club], { owner: group });
+            }
+
+            // Create a new player entity for the favorite
+            const newPlayer = Player.create(
+              {
+                name: full_name,
+                email: "",
+                short: item.first_name || "",
+                gender: item.gender,
+                ghinId: item.ghin.toString(),
+                handicap:
+                  item.hi_value && typeof item.hi_value === "number"
+                    ? {
+                        source: "ghin" as const,
+                        display: item.hi_display,
+                        value: item.hi_value,
+                        revDate:
+                          item.rev_date instanceof Date
+                            ? item.rev_date
+                            : undefined,
+                      }
+                    : undefined,
+                clubs,
+              },
+              { owner: group },
+            );
+
+            const favoritePlayer = FavoritePlayer.create(
+              {
+                player: newPlayer,
+                addedAt: new Date(),
+              },
+              { owner: group },
+            );
+
+            playersList.$jazz.push(favoritePlayer);
+          }
+        }
+      } else {
+        // Remove from favorites
+        if (favorites.players?.$isLoaded) {
+          const index = favorites.players.findIndex(
+            (fav) =>
+              fav?.$isLoaded &&
+              fav.player?.$isLoaded &&
+              fav.player.ghinId === item.ghin.toString(),
+          );
+          if (index >= 0) {
+            favorites.players.$jazz.splice(index, 1);
+          }
+        }
+      }
+    },
+    [me, item, full_name],
   );
+
+  // Early return after all hooks
   if (!item || !full_name) {
     return null;
   }
 
   const keyExtractor = (g: Golfer) => `${g?.ghin}-${g?.club_id}-${full_name}`;
-
   const key = keyExtractor(item);
 
   const makePlayer = (): PlayerData => {
@@ -57,7 +200,11 @@ export function PlayerItem({ item }: { item: Golfer }) {
   return (
     <View style={styles.container}>
       <View style={styles.fave_container}>
-        <FontAwesome6 name="star" color="#666" size={24} />
+        <FavoriteButton
+          isFavorited={isFavorited}
+          onToggle={handleToggleFavorite}
+          size={24}
+        />
       </View>
       <TouchableOpacity
         style={[
@@ -155,13 +302,13 @@ const styles = StyleSheet.create((theme) => ({
     opacity: 0.6,
   },
   player_name_disabled: {
-    color: "#666",
+    color: theme.colors.secondary,
   },
   player_club_disabled: {
-    color: "#999",
+    color: theme.colors.secondary,
     fontStyle: "italic",
   },
   handicap_disabled: {
-    color: "#666",
+    color: theme.colors.secondary,
   },
 }));
