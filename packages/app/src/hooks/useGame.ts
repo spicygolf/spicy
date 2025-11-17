@@ -24,7 +24,20 @@ export function useGame(gameId?: string, options: UseGameOptions = {}) {
               rounds: { $each: true },
             },
           },
-          rounds: { $each: true },
+          rounds: {
+            $each: {
+              round: {
+                tee: {
+                  ratings: {
+                    total: true,
+                    front: true,
+                    back: true,
+                  },
+                },
+                course: true,
+              },
+            },
+          },
         },
       }
     : undefined;
