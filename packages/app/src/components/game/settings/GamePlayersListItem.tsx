@@ -5,7 +5,8 @@ import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player, Round } from "spicylib/schema";
 import { courseAcronym } from "spicylib/utils";
-import { Handicap } from "@/components/handicap/Handicap";
+import { Handicaps } from "@/components/handicap/Handicaps";
+import { useGameContext } from "@/contexts/GameContext";
 import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
 import { Text } from "@/ui";
 import { PlayerDelete } from "./PlayerDelete";
@@ -40,16 +41,22 @@ const PlayerCourseTeeInfo = memo(({ round }: { round: Round | null }) => {
 
 export function GamePlayersListItem({ player }: { player: Player | null }) {
   const navigation = useNavigation<NavigationProp>();
+  const { game } = useGameContext();
 
   if (!player?.$isLoaded) return null;
-  const courseHandicap = undefined; // TODO: Implement course/game handicap calculation
-  const gameHandicap = undefined; // TODO: Implement game handicap calculation (overrides course)
-
-  const label = gameHandicap ? "game" : "course";
-  const courseGameHandicap = gameHandicap ?? courseHandicap;
 
   const hasRounds = player.rounds?.$isLoaded && player.rounds.length > 0;
   const firstRound = hasRounds ? player.rounds[0] : null;
+
+  const roundToGame =
+    game?.rounds?.$isLoaded && firstRound?.$isLoaded
+      ? game.rounds.find(
+          (rtg) =>
+            rtg?.$isLoaded &&
+            rtg.round?.$isLoaded &&
+            rtg.round.$jazz.id === firstRound.$jazz.id,
+        )
+      : undefined;
 
   const hasSelectedCourseTee =
     firstRound?.$isLoaded &&
@@ -104,13 +111,20 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
         )}
       </TouchableOpacity>
       <View style={styles.handicaps}>
-        <Handicap
-          label="index"
-          display={
-            player?.handicap?.$isLoaded ? player.handicap.display : undefined
+        <Handicaps
+          player={player}
+          round={roundToGame?.$isLoaded ? roundToGame.round : firstRound}
+          roundToGame={roundToGame}
+          onPress={
+            roundToGame?.$isLoaded
+              ? () =>
+                  navigation.navigate("HandicapAdjustment", {
+                    playerId: player.$jazz.id,
+                    roundToGameId: roundToGame.$jazz.id,
+                  })
+              : undefined
           }
         />
-        <Handicap label={label} display={courseGameHandicap} />
       </View>
       <View style={styles.delete}>
         <PlayerDelete player={player} />

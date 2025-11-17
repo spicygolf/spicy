@@ -6,12 +6,14 @@ import { AddPlayerNavigator } from "@/navigators/AddPlayerNavigator";
 import { SelectCourseNavigator } from "@/navigators/SelectCourseNavigator";
 import { AddRoundToGame } from "@/screens/game/settings/AddRoundToGame";
 import { GameSettings } from "@/screens/game/settings/GameSettings";
+import { HandicapAdjustment } from "@/screens/game/settings/HandicapAdjustment";
 
 export type GameSettingsStackParamList = {
   GameSettings: undefined;
   AddPlayerNavigator: undefined;
   AddRoundToGame: { playerId: string };
   SelectCourseNavigator: { playerId: string; roundId?: string };
+  HandicapAdjustment: { playerId: string; roundToGameId?: string };
 };
 
 function SelectCourseNavigatorWithProvider(
@@ -46,6 +48,7 @@ export function GameSettingsNavigator() {
         name="SelectCourseNavigator"
         component={SelectCourseNavigatorWithProvider}
       />
+      <Stack.Screen name="HandicapAdjustment" component={HandicapAdjustment} />
     </Stack.Navigator>
   );
 }

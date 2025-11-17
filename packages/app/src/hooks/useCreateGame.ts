@@ -3,6 +3,7 @@ import { useAccount } from "jazz-tools/react-native";
 import type { GameSpec } from "spicylib/schema";
 import {
   Game,
+  GameScope,
   ListOfGameHoles,
   ListOfGameSpecs,
   ListOfPlayers,
@@ -38,11 +39,20 @@ export function useCreateGame() {
     // Create round to games list (empty for now)
     const roundToGames = ListOfRoundToGames.create([], { owner: group });
 
+    // Create game scope
+    const scope = GameScope.create(
+      {
+        holes: "all18",
+      },
+      { owner: group },
+    );
+
     // Create the game
     const game = Game.create(
       {
         start: new Date(),
         name,
+        scope,
         specs: gameSpecs,
         holes,
         players,

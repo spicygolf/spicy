@@ -5,13 +5,14 @@ import { Text } from "@/ui/Text";
 interface Props {
   label: string;
   display?: string;
+  color?: string;
 }
 
-export function Handicap({ label, display }: Props) {
+export function Handicap({ label, display, color }: Props) {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.display}>{display || "-"}</Text>
+      <Text style={[styles.label, color && { color }]}>{label}</Text>
+      <Text style={[styles.display, color && { color }]}>{display || "-"}</Text>
     </View>
   );
 }
@@ -20,7 +21,8 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     flexDirection: "column",
     alignItems: "center",
-    padding: theme.gap(1),
+    paddingVertical: theme.gap(1),
+    paddingHorizontal: theme.gap(0.5),
   },
   label: {
     fontSize: 8,
