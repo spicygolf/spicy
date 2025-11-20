@@ -15,22 +15,13 @@ import {
 export function cloneTeamsToHole(sourceHole: GameHole, targetHole: GameHole) {
   const sourceTeams = sourceHole.teams;
   if (!sourceTeams?.$isLoaded || sourceTeams.length === 0) {
-    console.log("No source teams to clone");
     return;
   }
-
-  console.log(
-    `[cloneTeamsToHole] Cloning ${sourceTeams.length} teams from hole ${sourceHole.hole} to hole ${targetHole.hole}`,
-  );
 
   const newTeams = ListOfTeams.create([], { owner: targetHole.$jazz.owner });
 
   for (const sourceTeam of sourceTeams) {
     if (!sourceTeam?.$isLoaded || !sourceTeam.rounds?.$isLoaded) continue;
-
-    console.log(
-      `[cloneTeamsToHole] Team ${sourceTeam.team} has ${sourceTeam.rounds.length} players`,
-    );
 
     const roundToTeams = ListOfRoundToTeams.create([], {
       owner: targetHole.$jazz.owner,
@@ -44,7 +35,7 @@ export function cloneTeamsToHole(sourceHole: GameHole, targetHole: GameHole) {
         continue;
 
       const roundToTeam = RoundToTeam.create(
-        { roundToGame: sourceRoundToTeam.roundToGame }, // Reference to the same player
+        { roundToGame: sourceRoundToTeam.roundToGame },
         { owner: targetHole.$jazz.owner },
       );
       roundToTeams.$jazz.push(roundToTeam);
@@ -52,7 +43,7 @@ export function cloneTeamsToHole(sourceHole: GameHole, targetHole: GameHole) {
 
     const team = Team.create(
       {
-        team: sourceTeam.team, // Same team number
+        team: sourceTeam.team,
         rounds: roundToTeams,
       },
       { owner: targetHole.$jazz.owner },
@@ -61,9 +52,6 @@ export function cloneTeamsToHole(sourceHole: GameHole, targetHole: GameHole) {
   }
 
   targetHole.$jazz.set("teams", newTeams);
-  console.log(
-    `[cloneTeamsToHole] Successfully cloned ${newTeams.length} teams from hole ${sourceHole.hole} to hole ${targetHole.hole}`,
-  );
 }
 
 /**
@@ -71,25 +59,22 @@ export function cloneTeamsToHole(sourceHole: GameHole, targetHole: GameHole) {
  * Returns true if teams were loaded/copied, false if teams need to be chosen.
  */
 export function ensureHoleHasTeams(
-  game: Game,
+  _game: Game,
   holes: MaybeLoaded<ListOfGameHoles> | undefined,
   holeIndex: number,
   rotateEvery: number,
 ): boolean {
   if (!holes?.$isLoaded || holes.length === 0) {
-    console.log("Holes not loaded");
     return false;
   }
 
   const hole = holes[holeIndex];
   if (!hole?.$isLoaded) {
-    console.log(`Hole ${holeIndex} not loaded`);
     return false;
   }
 
   // If hole already has teams, we're good
   if (hole.teams?.$isLoaded && hole.teams.length > 0) {
-    console.log(`Hole ${holeIndex} already has teams`);
     return true;
   }
 
@@ -97,20 +82,12 @@ export function ensureHoleHasTeams(
   if (rotateEvery === 0 && holeIndex > 0) {
     const firstHole = holes[0];
     if (!firstHole?.$isLoaded) {
-      console.log(
-        "[ensureHoleHasTeams] First hole not loaded, cannot copy teams",
-      );
       return false;
     }
 
     if (!firstHole.teams?.$isLoaded || firstHole.teams.length === 0) {
-      console.log("[ensureHoleHasTeams] First hole has no teams set yet");
       return false;
     }
-
-    console.log(
-      `[ensureHoleHasTeams] Hole ${holeIndex} needs teams, copying from hole 1 which has ${firstHole.teams.length} teams`,
-    );
 
     // Clone teams from hole 1 to this hole
     cloneTeamsToHole(firstHole, hole);
@@ -118,7 +95,6 @@ export function ensureHoleHasTeams(
   }
 
   // Teams need to be chosen (either hole 1 initially, or rotating teams)
-  console.log(`Hole ${holeIndex} needs teams to be chosen`);
   return false;
 }
 
@@ -195,13 +171,11 @@ export function saveTeamAssignmentsToHole(
   teamCount: number,
 ) {
   if (!holes?.$isLoaded || holes.length === 0 || !game?.rounds?.$isLoaded) {
-    console.log("Holes or game rounds not loaded");
     return;
   }
 
   const hole = holes[holeIndex];
   if (!hole?.$isLoaded) {
-    console.log(`Hole ${holeIndex} not loaded`);
     return;
   }
 
@@ -246,5 +220,4 @@ export function saveTeamAssignmentsToHole(
   }
 
   hole.$jazz.set("teams", newTeams);
-  console.log(`Saved ${newTeams.length} teams to hole ${hole.hole}`);
 }

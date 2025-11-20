@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import { TeamChooser } from "@/components/game/TeamChooser";
 import { useGameContext } from "@/contexts/GameContext";
 import { Button, Screen, Text } from "@/ui";
@@ -13,10 +13,8 @@ import {
 
 export function GameScoring() {
   const { game } = useGameContext();
-  const { theme } = useUnistyles();
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [showChooser, setShowChooser] = useState(false);
-  const [isLoadingHole, setIsLoadingHole] = useState(false);
 
   const rotateEvery = useMemo(() => {
     if (!game?.scope?.$isLoaded || !game.scope.$jazz.has("teamsConfig")) {
@@ -60,14 +58,12 @@ export function GameScoring() {
 
       // First ensure holes array is loaded
       if (!game.holes?.$isLoaded) {
-        setIsLoadingHole(true);
         await game.$jazz.ensureLoaded({
           resolve: { holes: { $each: true } },
         });
       }
 
       if (!game.holes?.$isLoaded) {
-        setIsLoadingHole(false);
         return;
       }
 
@@ -75,7 +71,6 @@ export function GameScoring() {
 
       // If hole doesn't exist or teams aren't loaded, load them
       if (hole?.$isLoaded && !hole.teams?.$isLoaded) {
-        setIsLoadingHole(true);
         // @ts-expect-error - TypeScript doesn't narrow MaybeLoaded properly
         await hole.teams.$jazz.ensureLoaded({});
       }
@@ -119,8 +114,6 @@ export function GameScoring() {
           }
         }
       }
-
-      setIsLoadingHole(false);
 
       if (!game.holes?.$isLoaded) return;
 

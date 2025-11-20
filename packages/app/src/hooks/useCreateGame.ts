@@ -67,29 +67,14 @@ export function useCreateGame() {
 
     // If the first spec has a teamsConfig, create a copy for the game scope
     const firstSpec = specs[0];
-    console.log("useCreateGame: First spec name:", firstSpec?.name);
-    console.log("useCreateGame: First spec $isLoaded:", firstSpec?.$isLoaded);
-    console.log(
-      "useCreateGame: Has teamsConfig:",
-      firstSpec?.$jazz.has("teamsConfig"),
-    );
 
     if (firstSpec?.$isLoaded && firstSpec.$jazz.has("teamsConfig")) {
-      console.log("useCreateGame: Ensuring teamsConfig is loaded...");
       // Ensure teamsConfig is loaded before reading its values
       const loadedSpec = await firstSpec.$jazz.ensureLoaded({
         resolve: { teamsConfig: true },
       });
 
-      console.log(
-        "useCreateGame: teamsConfig loaded:",
-        loadedSpec.teamsConfig?.$isLoaded,
-      );
       if (loadedSpec.teamsConfig?.$isLoaded) {
-        console.log(
-          "useCreateGame: Creating TeamsConfig for game with rotateEvery:",
-          loadedSpec.teamsConfig.rotateEvery,
-        );
         // Create a new TeamsConfig instance for this game with the spec's values
         const { TeamsConfig } = await import("spicylib/schema");
         const teamsConfig = TeamsConfig.create(
@@ -102,10 +87,7 @@ export function useCreateGame() {
           { owner: group },
         );
         scope.$jazz.set("teamsConfig", teamsConfig);
-        console.log("useCreateGame: TeamsConfig set on scope");
       }
-    } else {
-      console.log("useCreateGame: Spec does not have teamsConfig, skipping");
     }
 
     // Create the game

@@ -23,11 +23,9 @@ export function useAddGameSpecs() {
 
     // Clear all existing specs if requested
     if (clearExisting) {
-      console.log("Clearing all existing specs...");
       while (specs.length > 0) {
         specs.$jazz.splice(0, 1);
       }
-      console.log("All specs cleared");
     }
 
     // Specs configuration - name is the unique identifier
@@ -131,8 +129,6 @@ export function useAddGameSpecs() {
 
         if (existingSpec) {
           // Update existing spec
-          console.log(`Updating existing spec: ${specData.name}`);
-
           // Update basic fields
           existingSpec.$jazz.set("short", specData.short);
           if (specData.long_description) {
@@ -156,8 +152,6 @@ export function useAddGameSpecs() {
           }
         } else {
           // Create new spec
-          console.log(`Creating new spec: ${specData.name}`);
-
           // Create TeamsConfig if it exists in specData
           let teamsConfig: ReturnType<typeof TeamsConfig.create> | undefined;
           if ("teamsConfig" in specData && specData.teamsConfig) {

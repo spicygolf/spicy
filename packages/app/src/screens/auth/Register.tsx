@@ -46,7 +46,6 @@ export function Register() {
           if (me?.$isLoaded && me.profile?.$isLoaded) {
             me.profile.$jazz.set("name", name);
           }
-          console.log("Registration successful");
         },
         onError: (error: unknown) => {
           console.error("Registration error:", error);

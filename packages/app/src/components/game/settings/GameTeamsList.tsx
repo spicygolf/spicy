@@ -88,62 +88,34 @@ export function GameTeamsList() {
   const getCurrentTeamAssignments = useCallback((): Map<string, number> => {
     const assignments = new Map<string, number>();
 
-    console.log(
-      "getCurrentTeamAssignments - game.holes loaded?",
-      game?.holes?.$isLoaded,
-    );
-
     if (!game?.holes?.$isLoaded) {
-      console.log("No holes loaded, returning empty assignments");
       return assignments;
     }
 
     const firstHole = game.holes[0];
     if (!firstHole?.$isLoaded) {
-      console.log("First hole not loaded");
       return assignments;
     }
-
-    console.log("First hole:", firstHole.hole);
-    console.log("First hole teams loaded?", firstHole.teams?.$isLoaded);
 
     if (!firstHole.teams?.$isLoaded) {
-      console.log("First hole teams not loaded, returning empty assignments");
       return assignments;
     }
-
-    console.log("First hole teams count:", firstHole.teams.length);
 
     for (const team of firstHole.teams) {
       if (!team?.$isLoaded) continue;
-
-      console.log(
-        "Team:",
-        team.team,
-        "loaded?",
-        team.$isLoaded,
-        "rounds loaded?",
-        team.rounds?.$isLoaded,
-      );
 
       if (!team.rounds?.$isLoaded) continue;
 
       const teamNumber = Number.parseInt(team.team, 10);
       if (Number.isNaN(teamNumber)) continue;
 
-      console.log(`Team ${teamNumber} has ${team.rounds.length} rounds`);
-
       for (const roundToTeam of team.rounds) {
         if (!roundToTeam?.$isLoaded || !roundToTeam.roundToGame?.$isLoaded)
           continue;
         assignments.set(roundToTeam.roundToGame.$jazz.id, teamNumber);
-        console.log(
-          `Assigned roundToGame ${roundToTeam.roundToGame.$jazz.id} to team ${teamNumber}`,
-        );
       }
     }
 
-    console.log("Total assignments loaded:", assignments.size);
     return assignments;
   }, [game]);
 
@@ -187,18 +159,13 @@ export function GameTeamsList() {
   }, [allPlayerRounds, teamAssignments, teamCount]);
 
   const saveTeamAssignmentsToGame = useCallback(
-    (assignments: Map<string, number>) => {
+    async (assignments: Map<string, number>) => {
       if (!game?.holes?.$isLoaded) {
-        console.log("Game holes not loaded");
         return;
       }
 
-      console.log("Saving team assignments:", assignments);
-      console.log("Current holes count:", game.holes.length);
-
       // If no holes exist, create them based on game scope
       if (game.holes.length === 0) {
-        console.log("No holes exist, creating them...");
         const { GameHole } = require("spicylib/schema");
 
         const scopeHoles = game.scope?.$isLoaded ? game.scope.holes : "all18";
@@ -223,13 +190,20 @@ export function GameTeamsList() {
           );
           game.holes.$jazz.push(gameHole);
         }
+      }
 
-        console.log(`Created ${holeNumbers.length} holes`);
+      // Load all holes first (level-by-level as per Jazz rules)
+      // @ts-expect-error - TypeScript requires resolve but we're loading the list itself
+      await game.holes.$jazz.ensureLoaded({});
+      for (const hole of game.holes) {
+        if (!hole?.$isLoaded) {
+          // @ts-expect-error - TypeScript doesn't narrow MaybeLoaded properly
+          await hole.$jazz.ensureLoaded({});
+        }
       }
 
       for (const hole of game.holes) {
         if (!hole?.$isLoaded) {
-          console.log("Hole not loaded, skipping");
           continue;
         }
 
@@ -265,16 +239,13 @@ export function GameTeamsList() {
           newTeams.$jazz.push(team);
         }
 
-        console.log(`Setting teams for hole ${hole.hole}:`, newTeams.length);
         hole.$jazz.set("teams", newTeams);
       }
-
-      console.log("Team assignments saved to all holes");
     },
     [game, allPlayerRounds, teamCount],
   );
 
-  const handleTossBalls = useCallback(() => {
+  const handleTossBalls = useCallback(async () => {
     const shuffled = [...allPlayerRounds].sort(() => Math.random() - 0.5);
     const newAssignments = new Map<string, number>();
 
@@ -284,21 +255,19 @@ export function GameTeamsList() {
     });
 
     setTeamAssignments(newAssignments);
-    saveTeamAssignmentsToGame(newAssignments);
+    await saveTeamAssignmentsToGame(newAssignments);
   }, [allPlayerRounds, teamCount, saveTeamAssignmentsToGame]);
 
   const handleDrop = useCallback(
-    (playerId: string, targetTeam: number) => {
-      console.log(`handleDrop: player ${playerId} to team ${targetTeam}`);
+    async (playerId: string, targetTeam: number) => {
       const newAssignments = new Map(teamAssignments);
       if (targetTeam === 0) {
         newAssignments.delete(playerId);
       } else {
         newAssignments.set(playerId, targetTeam);
       }
-      console.log("New assignments:", newAssignments);
       setTeamAssignments(newAssignments);
-      saveTeamAssignmentsToGame(newAssignments);
+      await saveTeamAssignmentsToGame(newAssignments);
     },
     [teamAssignments, saveTeamAssignmentsToGame],
   );
