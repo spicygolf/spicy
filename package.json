@@ -1,7 +1,7 @@
 {
   "name": "spicy-mono",
   "devDependencies": {
-    "@biomejs/biome": "^2.1.1",
+    "@biomejs/biome": "^2.3.6",
     "@types/bun": "latest",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2"
