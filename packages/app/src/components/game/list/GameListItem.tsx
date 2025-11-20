@@ -25,6 +25,22 @@ export function GameListItem({ game }: { game: Game | null }) {
     });
   };
 
+  const formatPlayerName = (name: string | null | undefined): string => {
+    if (!name) return "";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return name;
+    const firstInitial = parts[0][0];
+    const lastName = parts[parts.length - 1];
+    return `${firstInitial}. ${lastName}`;
+  };
+
+  const playerNames = game.players?.$isLoaded
+    ? game.players
+        .filter((p) => p?.$isLoaded)
+        .map((p) => formatPlayerName(p?.name))
+        .join(" ")
+    : "";
+
   return (
     <TouchableOpacity onPress={handleGamePress} style={styles.container}>
       <View style={styles.game}>
@@ -32,6 +48,7 @@ export function GameListItem({ game }: { game: Game | null }) {
         <Text style={styles.gameDateTime}>
           {game.start.toLocaleDateString()} - {game.start.toLocaleTimeString()}
         </Text>
+        {playerNames && <Text style={styles.playerNames}>{playerNames}</Text>}
       </View>
       <TouchableOpacity onPress={handleSettingsPress} style={styles.actions}>
         <FontAwesome6 name="gear" size={18} color="#666" iconStyle="solid" />
@@ -62,5 +79,10 @@ const styles = StyleSheet.create((theme) => ({
   gameDateTime: {
     fontSize: 14,
     color: theme.colors.secondary,
+  },
+  playerNames: {
+    fontSize: 12,
+    color: theme.colors.secondary,
+    marginTop: theme.gap(0.5),
   },
 }));
