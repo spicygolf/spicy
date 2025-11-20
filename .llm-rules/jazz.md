@@ -47,6 +47,41 @@ resolve: {
 await player.$jazz.ensureLoaded({ resolve: { rounds: true } });  // MUST await
 ```
 
+### Lazy Loading with ensureLoaded
+
+**CRITICAL: Load lists level-by-level, NOT with nested $each**
+
+Jazz CoLists must be loaded explicitly at each level. `$each: { nested }` does NOT load list items - only resolves nested data IF items are already loaded.
+
+```ts
+// WRONG: Nested $each doesn't load the list items themselves
+await hole.$jazz.ensureLoaded({
+  resolve: {
+    teams: {
+      $each: {  // This won't load teams if they aren't loaded already!
+        rounds: { $each: { roundToGame: true } }
+      }
+    }
+  }
+});
+
+// CORRECT: Load each list explicitly, level by level
+await hole.teams.$jazz.ensureLoaded({});  // Load teams list
+for (const team of hole.teams) {
+  await team.$jazz.ensureLoaded({});  // Load team object
+  await team.rounds.$jazz.ensureLoaded({});  // Load rounds list
+  for (const round of team.rounds) {
+    await round.$jazz.ensureLoaded({ resolve: { roundToGame: true } });
+  }
+}
+```
+
+### Performance: Load What You Need
+
+- **Initial load**: Don't include expensive nested data in `useCoState` resolve
+- **On-demand**: Use `ensureLoaded()` when accessing specific tabs/features
+- **Minimal depth**: Load only the nesting level you actually need
+
 ## Working with References
 
 Always modify entities from authoritative source (e.g., game context), not stale references:

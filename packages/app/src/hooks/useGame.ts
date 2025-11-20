@@ -4,6 +4,7 @@ import { useGameContext } from "@/contexts/GameContext";
 
 type UseGameOptions = {
   requireGame?: boolean;
+  loadHoles?: boolean;
 };
 
 type GameWithRelations = Awaited<ReturnType<typeof Game.load>> | null;
@@ -19,19 +20,22 @@ export function useGame(gameId?: string, options: UseGameOptions = {}) {
           scope: {
             teamsConfig: true,
           },
-          holes: {
-            $each: {
-              teams: {
-                $each: {
-                  rounds: {
-                    $each: {
-                      roundToGame: true,
+          // PERFORMANCE: Only load holes if requested via loadHoles option
+          ...(options.loadHoles && {
+            holes: {
+              $each: {
+                teams: {
+                  $each: {
+                    rounds: {
+                      $each: {
+                        roundToGame: true,
+                      },
                     },
                   },
                 },
               },
             },
-          },
+          }),
           players: {
             $each: {
               handicap: true,
