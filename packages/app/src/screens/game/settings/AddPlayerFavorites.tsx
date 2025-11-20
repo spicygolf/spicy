@@ -5,16 +5,15 @@ import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
 import { useCallback, useMemo } from "react";
 import { TouchableOpacity, View } from "react-native";
+import DraggableFlatList, {
+  type RenderItemParams,
+} from "react-native-draggable-flatlist";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { type FavoritePlayer, PlayerAccount } from "spicylib/schema";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
-import {
-  type RenderItemParams,
-  SafeDraggableFlatList,
-} from "@/components/common/SafeDraggableFlatList";
 import { useGameContext } from "@/contexts/GameContext";
 import { useAddPlayerToGame } from "@/hooks";
-import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
+import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Screen, Text } from "@/ui";
 
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
@@ -259,7 +258,7 @@ export function AddPlayerFavorites() {
           />
           <Text style={styles.emptyTitle}>No Favorite Players Yet</Text>
           <Text style={styles.emptyText}>
-            When you favorite a player from the GHIN® search tab,{"\n"}they will
+            When you favorite a player from the search tab,{"\n"}they will
             appear here for quick access.
           </Text>
         </View>
@@ -269,7 +268,7 @@ export function AddPlayerFavorites() {
 
   return (
     <Screen>
-      <SafeDraggableFlatList
+      <DraggableFlatList
         data={favoritedPlayers as MaybeLoaded<FavoritePlayer>[]}
         keyExtractor={(item) => item.$jazz.id}
         renderItem={renderItem}

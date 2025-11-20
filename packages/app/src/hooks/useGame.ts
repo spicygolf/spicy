@@ -16,7 +16,22 @@ export function useGame(gameId?: string, options: UseGameOptions = {}) {
     ? {
         resolve: {
           specs: { $each: true },
-          holes: { $each: true },
+          scope: {
+            teamsConfig: true,
+          },
+          holes: {
+            $each: {
+              teams: {
+                $each: {
+                  rounds: {
+                    $each: {
+                      roundToGame: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
           players: {
             $each: {
               handicap: true,

@@ -13,22 +13,40 @@ import {
 
 export function useCreateGame() {
   const me = useAccount(PlayerAccount, {
-    select: (me) =>
-      me.$isLoaded
-        ? me
-        : me.$jazz.loadingState === "loading"
-          ? undefined
-          : null,
+    resolve: {
+      root: {
+        games: { $each: true },
+      },
+    },
   });
 
   const createGame = async (name: string, specs: GameSpec[]) => {
-    if (!me?.$isLoaded || !me.root?.$isLoaded) return null;
+    if (!me?.$isLoaded || !me.root?.$isLoaded) {
+      return null;
+    }
 
-    const group = Group.create();
+    if (!me.root.$jazz.has("games")) {
+      console.error("useCreateGame: Account root doesn't have games field");
+      return null;
+    }
+
+    if (!me.root.games?.$isLoaded) {
+      console.error("useCreateGame: Account games list not loaded");
+      return null;
+    }
+
+    const group = Group.create(me);
     group.addMember(me, "admin");
 
-    // Create game specs list
-    const gameSpecs = ListOfGameSpecs.create(specs, { owner: group });
+    // Create an empty list and push the spec references
+    // We can't pass existing specs to create() because they may have different owners
+    const gameSpecs = ListOfGameSpecs.create([], { owner: group });
+    for (const spec of specs) {
+      if (spec?.$isLoaded) {
+        // biome-ignore lint/suspicious/noExplicitAny: Jazz list type compatibility
+        gameSpecs.$jazz.push(spec as any);
+      }
+    }
 
     // Create players list
     const players = ListOfPlayers.create([], { owner: group });
@@ -39,13 +57,56 @@ export function useCreateGame() {
     // Create round to games list (empty for now)
     const roundToGames = ListOfRoundToGames.create([], { owner: group });
 
-    // Create game scope
+    // Create game scope - start with just holes, add teamsConfig later if needed
     const scope = GameScope.create(
       {
         holes: "all18",
       },
       { owner: group },
     );
+
+    // If the first spec has a teamsConfig, create a copy for the game scope
+    const firstSpec = specs[0];
+    console.log("useCreateGame: First spec name:", firstSpec?.name);
+    console.log("useCreateGame: First spec $isLoaded:", firstSpec?.$isLoaded);
+    console.log(
+      "useCreateGame: Has teamsConfig:",
+      firstSpec?.$jazz.has("teamsConfig"),
+    );
+
+    if (firstSpec?.$isLoaded && firstSpec.$jazz.has("teamsConfig")) {
+      console.log("useCreateGame: Ensuring teamsConfig is loaded...");
+      // Ensure teamsConfig is loaded before reading its values
+      const loadedSpec = await firstSpec.$jazz.ensureLoaded({
+        resolve: { teamsConfig: true },
+      });
+
+      console.log(
+        "useCreateGame: teamsConfig loaded:",
+        loadedSpec.teamsConfig?.$isLoaded,
+      );
+      if (loadedSpec.teamsConfig?.$isLoaded) {
+        console.log(
+          "useCreateGame: Creating TeamsConfig for game with rotateEvery:",
+          loadedSpec.teamsConfig.rotateEvery,
+        );
+        // Create a new TeamsConfig instance for this game with the spec's values
+        const { TeamsConfig } = await import("spicylib/schema");
+        const teamsConfig = TeamsConfig.create(
+          {
+            rotateEvery: loadedSpec.teamsConfig.rotateEvery,
+            teamCount: loadedSpec.teamsConfig.teamCount,
+            maxPlayersPerTeam: loadedSpec.teamsConfig.maxPlayersPerTeam,
+            teamLeadOrder: loadedSpec.teamsConfig.teamLeadOrder,
+          },
+          { owner: group },
+        );
+        scope.$jazz.set("teamsConfig", teamsConfig);
+        console.log("useCreateGame: TeamsConfig set on scope");
+      }
+    } else {
+      console.log("useCreateGame: Spec does not have teamsConfig, skipping");
+    }
 
     // Create the game
     const game = Game.create(

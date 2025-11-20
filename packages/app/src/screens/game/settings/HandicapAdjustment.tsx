@@ -6,7 +6,7 @@ import { StyleSheet } from "react-native-unistyles";
 import { calculateCourseHandicap, formatCourseHandicap } from "spicylib/utils";
 import { Back } from "@/components/Back";
 import { useGameContext } from "@/contexts/GameContext";
-import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
+import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Input, Screen, Text } from "@/ui";
 
 type Props = NativeStackScreenProps<

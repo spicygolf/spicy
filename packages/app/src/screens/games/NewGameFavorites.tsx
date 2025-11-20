@@ -5,14 +5,13 @@ import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
 import { useCallback, useMemo } from "react";
 import { TouchableOpacity, View } from "react-native";
+import DraggableFlatList, {
+  type RenderItemParams,
+} from "react-native-draggable-flatlist";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { FavoriteSpec, GameSpec } from "spicylib/schema";
 import { type ListOfGameSpecs, PlayerAccount } from "spicylib/schema";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
-import {
-  type RenderItemParams,
-  SafeDraggableFlatList,
-} from "@/components/common/SafeDraggableFlatList";
 import { SpecDescription } from "@/components/game/new/SpecDescription";
 import { useCreateGame } from "@/hooks";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
@@ -59,10 +58,6 @@ export function NewGameFavorites({ viewMode }: NewGameFavoritesProps) {
       if (!game) return;
       navigation.navigate("Game", {
         gameId: game.$jazz.id,
-        screen: "GameSettingsNavigator",
-        params: {
-          screen: "GameSettings",
-        },
       });
     },
     [createGame, navigation],
@@ -223,7 +218,7 @@ export function NewGameFavorites({ viewMode }: NewGameFavoritesProps) {
 
   return (
     <Screen>
-      <SafeDraggableFlatList
+      <DraggableFlatList
         data={favoritedSpecs as MaybeLoaded<FavoriteSpec>[]}
         keyExtractor={(item) => item.$jazz.id}
         renderItem={renderListItem}

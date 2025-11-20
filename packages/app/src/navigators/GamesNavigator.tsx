@@ -11,10 +11,7 @@ export type GamesNavigatorParamList = {
   NewGame: undefined;
   Game: {
     gameId: string;
-    screen?: "GameSettingsNavigator" | "GameScoring";
-    params?: {
-      screen?: "GameSettings" | "AddPlayerNavigator";
-    };
+    initialView?: "leaderboard" | "scoring" | "settings";
   };
 };
 

@@ -3,6 +3,7 @@ import { ListOfGameHoles } from "./gameholes";
 import { ListOfGameSpecs } from "./gamespecs";
 import { ListOfPlayers } from "./players";
 import { ListOfRoundToGames } from "./rounds";
+import { TeamsConfig } from "./teamsconfig";
 
 export const GameScope = co.map({
   /**
@@ -14,20 +15,11 @@ export const GameScope = co.map({
   holes: z.literal(["all18", "front9", "back9"]),
 
   /**
-   * How often teams rotate/change during the game (in holes).
-   * 0 - teams never rotate (stay the same throughout)
-   * 1 - teams change every hole
-   * 3 - teams change every 3 holes
-   * 6 - teams change every 6 holes
-   * 9 - teams change every 9 holes
+   * Team configuration for this game.
+   * If present, the game uses teams. Check rotateEvery to determine
+   * whether teams are set in settings (0) or during play (>0).
    */
-  teamsRotateEvery: z.optional(z.number()),
-
-  /**
-   * Order of player IDs for determining team lead rotation (e.g., Wolf, Captain).
-   * Used by games that rotate a special role among players.
-   */
-  teamLeadOrder: z.optional(z.array(z.string())),
+  teamsConfig: co.optional(TeamsConfig),
 });
 export type GameScope = co.loaded<typeof GameScope>;
 

@@ -1,12 +1,19 @@
-import { TouchableOpacity, View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { useState } from "react";
+import { Switch, TouchableOpacity, View } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useAddGameSpecs } from "@/hooks/useAddGameSpecs";
 import { useCheckSpecs } from "@/hooks/useCheckSpecs";
 import { Screen, Text } from "@/ui";
 
 export function DeveloperToolsScreen() {
+  const { theme } = useUnistyles();
   const { addGameSpecs } = useAddGameSpecs();
   const { checkSpecs } = useCheckSpecs();
+  const [clearExisting, setClearExisting] = useState(false);
+
+  const handleAddSpecs = () => {
+    addGameSpecs(clearExisting);
+  };
 
   return (
     <Screen>
@@ -20,8 +27,25 @@ export function DeveloperToolsScreen() {
             <Text style={styles.buttonText}>Check Specs</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={addGameSpecs} style={styles.button}>
-            <Text style={styles.buttonText}>Add Default Specs</Text>
+          <View style={styles.optionRow}>
+            <Text style={styles.optionLabel}>Clear existing specs first</Text>
+            <Switch
+              value={clearExisting}
+              onValueChange={setClearExisting}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.action,
+              }}
+              thumbColor={theme.colors.background}
+            />
+          </View>
+
+          <TouchableOpacity onPress={handleAddSpecs} style={styles.button}>
+            <Text style={styles.buttonText}>
+              {clearExisting
+                ? "Clear & Add Default Specs"
+                : "Add Default Specs"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -46,6 +70,16 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: theme.gap(2),
+  },
+  optionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: theme.gap(2),
+    paddingVertical: theme.gap(1),
+  },
+  optionLabel: {
+    fontSize: 16,
   },
   button: {
     backgroundColor: theme.colors.action,

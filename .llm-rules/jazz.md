@@ -81,3 +81,33 @@ Use string IDs instead of direct references:
 // Round uses playerId: z.string() instead of player: Player
 // Player can have rounds: co.optional(ListOfRounds)
 ```
+
+## Creating CoMaps with Optional Fields
+
+When creating CoMaps, pass only required fields to `.create()`. Set optional fields AFTER creation:
+
+```ts
+// WRONG: Passing optional field with nested CoMap to .create() - causes "right operand of 'in' is not an object" error
+const scope = GameScope.create(
+  {
+    holes: "all18",
+    teamsConfig: someTeamsConfig,  // ERROR: Can't pass CoMap instances in initial value
+  },
+  { owner: group }
+);
+
+// CORRECT: Create with required fields only, then set optional fields
+const scope = GameScope.create(
+  {
+    holes: "all18",
+  },
+  { owner: group }
+);
+
+// Set optional CoMap field after creation
+if (teamsConfig) {
+  scope.$jazz.set("teamsConfig", teamsConfig);
+}
+```
+
+This is because Jazz `.create()` expects plain values, not CoMap instances, in the initial object.

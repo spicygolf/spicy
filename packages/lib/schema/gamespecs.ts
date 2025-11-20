@@ -1,4 +1,5 @@
 import { co, z } from "jazz-tools";
+import { TeamsConfig } from "./teamsconfig";
 
 export const GameSpec = co.map({
   name: z.string(),
@@ -9,7 +10,15 @@ export const GameSpec = co.map({
   spec_type: z.literal(["points", "skins"]),
   min_players: z.number(),
   location_type: z.literal(["local", "virtual"]),
-  teams: z.boolean(),
+
+  /**
+   * Team configuration for this game spec.
+   * Defines how teams work for this game type.
+   */
+  teamsConfig: co.optional(TeamsConfig),
+
+  // TODO: DEPRECATED - remove after migration
+  teams: z.optional(z.boolean()),
   // recursive field specs contains a list of game specs
   // TODO: not working yet: https://zod.dev/v4?id=recursive-objects
   // get specs(): typeof co.list<typeof GameSpec> {
@@ -29,5 +38,5 @@ export const defaultSpec = {
   spec_type: "points" as const,
   min_players: 2,
   location_type: "local" as const,
-  teams: true,
+  // teamsConfig will be added separately using co.optional
 };
