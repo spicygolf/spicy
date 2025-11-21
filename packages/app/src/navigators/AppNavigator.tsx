@@ -55,9 +55,11 @@ export function AppNavigator() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   tabBarStyle: {
-    backgroundColor: "transparent",
     borderTopWidth: 0.5,
+    borderTopColor: theme.colors.border,
+    elevation: 0,
+    shadowOpacity: 0,
   },
-});
+}));

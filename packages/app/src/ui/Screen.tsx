@@ -15,7 +15,6 @@ export function Screen({ children, style }: Props) {
 const styles = StyleSheet.create((theme) => ({
   v: {
     flex: 1,
-    backgroundColor: theme.colors.background,
     padding: theme.gap(1),
   },
 }));

@@ -16,7 +16,6 @@ export function ProfileNavigator() {
     <Stack.Navigator
       initialRouteName="ProfileHome"
       screenOptions={{
-        contentStyle: { backgroundColor: theme.colors.background },
         headerStyle: {
           backgroundColor: theme.colors.background,
         },

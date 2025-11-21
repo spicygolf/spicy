@@ -23,7 +23,6 @@ export function AddPlayerNavigator() {
     tabBarIndicatorStyle: styles.selectedTabLine,
     tabBarStyle: {
       height: 35,
-      backgroundColor: theme.colors.background,
     },
     tabBarLabelStyle: {
       padding: 0,

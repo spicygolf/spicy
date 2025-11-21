@@ -11,6 +11,7 @@ const light = {
     actionText: "#fff",
     error: "#ff3b30",
     border: "#e0e0e0",
+    statusBar: "dark-content" as const,
     fave: {
       active: "#34C759",
       inactive: "#999999",
@@ -29,6 +30,7 @@ const dark = {
     actionText: "#fff",
     error: "#ff453a",
     border: "#38383a",
+    statusBar: "light-content" as const,
     fave: {
       active: "#34C759",
       inactive: "#666666",

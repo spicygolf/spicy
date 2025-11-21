@@ -68,7 +68,6 @@ function GameSettingsTabs() {
     swipeEnabled: true,
     tabBarStyle: {
       height: 35,
-      backgroundColor: theme.colors.background,
     },
     tabBarLabelStyle: {
       padding: 0,
@@ -103,7 +102,6 @@ function GameSettingsTabs() {
 }
 
 export function GameSettings() {
-  const { theme } = useUnistyles();
   const Stack = createNativeStackNavigator<GameSettingsStackParamList>();
 
   return (
@@ -111,7 +109,6 @@ export function GameSettings() {
       initialRouteName="GameSettingsTabs"
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: theme.colors.background },
       }}
     >
       <Stack.Screen name="GameSettingsTabs" component={GameSettingsTabs} />

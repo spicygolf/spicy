@@ -67,11 +67,4 @@ Pre-commit hooks require:
 
 See [ORCHESTRATION-GUIDE.md](./ORCHESTRATION-GUIDE.md) for detailed usage patterns, examples, and best practices.
 
-## Migration from .llm-rules
-
-The old `.llm-rules/*.md` files have been converted to:
-- `.claude/rules/architecture.xml` (from architecture.md, general.md)
-- `.claude/rules/code-typescript.xml` (from coding.md)
-- `.claude/rules/jazz.xml` (from jazz.md)
-
 The XML format allows for better context management and agent-specific loading.
