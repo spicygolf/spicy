@@ -8,3 +8,4 @@ export * from "./players";
 export * from "./rounds";
 export * from "./scores";
 export * from "./teams";
+export * from "./teamsconfig";

@@ -16,7 +16,7 @@ import {
 import { FavoriteButton } from "@/components/common/FavoriteButton";
 import { useGameContext } from "@/contexts/GameContext";
 import { type PlayerData, useAddPlayerToGame } from "@/hooks";
-import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
+import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Text } from "@/ui";
 
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;

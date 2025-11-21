@@ -34,4 +34,6 @@ const styles = StyleSheet.create({
 LogBox.ignoreLogs([
   "Open debugger to view warnings",
   "findNodeHandle is deprecated in StrictMode",
+  "findHostInstance_DEPRECATED",
+  "findHostInstance_DEPRECATED is deprecated in StrictMode",
 ]);

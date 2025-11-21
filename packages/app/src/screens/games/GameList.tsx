@@ -17,36 +17,16 @@ export function GameListScreen() {
         player: true,
         games: {
           $each: {
-            // @ts-expect-error TODO: smth with first element in resolve object
-            start: true,
-            name: true,
-            players: {
-              $each: true,
-            },
+            players: { $each: true },
           },
         },
       },
     },
-    select: (me) =>
-      me.$isLoaded
-        ? me
-        : me.$jazz.loadingState === "loading"
-          ? undefined
-          : null,
   });
   const games = useCoState(
     ListOfGames,
-    me?.$isLoaded && me.root?.$isLoaded ? me.root.games?.$jazz.id : undefined,
-    {
-      select: (games) =>
-        games.$isLoaded
-          ? games
-          : games.$jazz.loadingState === "loading"
-            ? undefined
-            : null,
-    },
+    me?.$isLoaded ? me.root?.games?.$jazz.id : undefined,
   );
-  if (!games) return null;
 
   return (
     <Screen>

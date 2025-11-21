@@ -21,9 +21,7 @@ export function Login() {
     await betterAuthClient.signIn.email(
       { email, password },
       {
-        onSuccess: async () => {
-          console.log("Sign in successful");
-        },
+        onSuccess: async () => {},
         onError: (e: unknown) => {
           console.error("Sign in error:", e);
         },

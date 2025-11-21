@@ -44,8 +44,6 @@ export function GhinPlayerSearchResults() {
   }
 
   if (isError) {
-    console.log(error);
-    console.log(error.stack);
     // TODO: error component
     return <Text>{error.message}</Text>;
   }

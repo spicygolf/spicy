@@ -7,7 +7,7 @@ import type { Player, Round } from "spicylib/schema";
 import { courseAcronym } from "spicylib/utils";
 import { Handicaps } from "@/components/handicap/Handicaps";
 import { useGameContext } from "@/contexts/GameContext";
-import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
+import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Text } from "@/ui";
 import { PlayerDelete } from "./PlayerDelete";
 

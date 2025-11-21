@@ -4,7 +4,7 @@ import { FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { GamePlayersListItem } from "@/components/game/settings/GamePlayersListItem";
 import { useGameContext } from "@/contexts/GameContext";
-import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
+import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Text } from "@/ui";
 import { EmptyPlayersList } from "./EmptyPlayersList";
 

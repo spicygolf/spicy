@@ -6,7 +6,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import GameNav from "@/components/game/GameNav";
-import type { GameSettingsStackParamList } from "@/navigators/GameSettingsNavigator";
+import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { SelectCourseFavorites } from "@/screens/game/settings/SelectCourseFavorites";
 import { SelectCourseManual } from "@/screens/game/settings/SelectCourseManual";
 import { SelectCourseSearch } from "@/screens/game/settings/SelectCourseSearch";
