@@ -101,6 +101,7 @@ gamePlayer.rounds.$jazz.push(newRound);
 - Set optional fields: `obj.$jazz.set("field", value)`
 - Add to list: `list.$jazz.push(item)`
 - Get owner: `obj.$jazz.owner`
+- useState() is a code smell. Use properly-loaded Jazz data with no sync'ing to state
 
 ## Debugging Loading
 

@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from "react";
 import { View } from "react-native";
 import { DraxProvider } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import type { RoundToGame } from "spicylib/schema";
 import {
   ListOfRoundToTeams,
   ListOfTeams,
@@ -27,7 +26,7 @@ export function GameTeamsList() {
   const [pendingRotationValue, setPendingRotationValue] = useState<
     number | null
   >(null);
-  const [rotationChangeOption, setRotationChangeOption] =
+  const [_rotationChangeOption, setRotationChangeOption] =
     useState<RotationChangeOption>("clearExceptFirst");
 
   const hasTeamsConfig = useMemo(() => {
@@ -86,7 +85,8 @@ export function GameTeamsList() {
     return items;
   }, [game]);
 
-  const getCurrentTeamAssignments = useCallback((): Map<string, number> => {
+  // Derive team assignments directly from Jazz data - no local state needed
+  const teamAssignments = useMemo((): Map<string, number> => {
     const assignments = new Map<string, number>();
 
     if (!game?.holes?.$isLoaded) {
@@ -118,18 +118,7 @@ export function GameTeamsList() {
     }
 
     return assignments;
-  }, [game]);
-
-  const [teamAssignments, setTeamAssignments] = useState<Map<string, number>>(
-    () => getCurrentTeamAssignments(),
-  );
-
-  useMemo(() => {
-    const current = getCurrentTeamAssignments();
-    if (current.size > 0) {
-      setTeamAssignments(current);
-    }
-  }, [getCurrentTeamAssignments]);
+  }, [game?.holes]);
 
   const saveTeamAssignmentsToGame = useCallback(
     async (assignments: Map<string, number>) => {
@@ -200,7 +189,6 @@ export function GameTeamsList() {
       newAssignments.set(player.id, teamNumber);
     });
 
-    setTeamAssignments(newAssignments);
     await saveTeamAssignmentsToGame(newAssignments);
   }, [allPlayerRounds, teamCount, saveTeamAssignmentsToGame]);
 
@@ -212,7 +200,6 @@ export function GameTeamsList() {
       } else {
         newAssignments.set(playerId, targetTeam);
       }
-      setTeamAssignments(newAssignments);
       await saveTeamAssignmentsToGame(newAssignments);
     },
     [teamAssignments, saveTeamAssignmentsToGame],
@@ -277,7 +264,6 @@ export function GameTeamsList() {
             hole.$jazz.set("teams", emptyTeams);
           }
         }
-        setTeamAssignments(new Map());
       }
 
       if (!game.scope.$jazz.has("teamsConfig")) {
