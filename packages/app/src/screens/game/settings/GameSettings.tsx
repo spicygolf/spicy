@@ -6,7 +6,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { GamePlayersList } from "@/components/game/settings/GamePlayersList";
-import { GameTeamsList } from "@/components/game/settings/GameTeamsList";
+import { GameTeamsList } from "@/components/game/settings/teams";
 import { GhinCourseSearchProvider } from "@/contexts/GhinCourseSearchContext";
 import { AddPlayerNavigator } from "@/navigators/AddPlayerNavigator";
 import { SelectCourseNavigator } from "@/navigators/SelectCourseNavigator";
