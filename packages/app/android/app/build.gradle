@@ -106,6 +106,13 @@ android {
         }
     }
 
+    // Handle duplicate native libraries from multiple modules
+    packaging {
+        pickFirst "**/libNitroModules.so"
+        pickFirst "**/libc++_shared.so"
+        pickFirst "**/libfbjni.so"
+    }
+
     // until https://github.com/facebook/react-native/pull/49449 is released in RN
     androidResources {
         noCompress += ["bundle"]
