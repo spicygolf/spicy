@@ -138,6 +138,9 @@ You must enforce these across ALL specialists:
 - `bun lint` must pass
 - `bun tsc` must pass
 
+### Git Etiquette
+- never commit code or push to remotes without user permission
+
 ## Context Management
 
 Each specialist receives:
