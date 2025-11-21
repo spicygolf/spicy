@@ -1,11 +1,56 @@
 import type { MaybeLoaded } from "jazz-tools";
 import type { Game, GameHole, ListOfGameHoles } from "spicylib/schema";
 import {
+  GameHole as GameHoleClass,
   ListOfRoundToTeams,
   ListOfTeams,
   RoundToTeam,
   Team,
 } from "spicylib/schema";
+
+/**
+ * Ensures that holes exist for the game based on game.scope.holes configuration.
+ * Creates holes if they don't exist.
+ * Returns true if holes were created or already exist, false if game data is invalid.
+ */
+export function ensureGameHoles(game: Game): boolean {
+  if (!game?.$isLoaded || !game.holes?.$isLoaded) {
+    return false;
+  }
+
+  // If holes already exist, we're good
+  if (game.holes.length > 0) {
+    return true;
+  }
+
+  // Determine which holes to create based on scope
+  const scopeHoles = game.scope?.$isLoaded ? game.scope.holes : "all18";
+  let holeNumbers: number[] = [];
+
+  if (scopeHoles === "front9") {
+    holeNumbers = Array.from({ length: 9 }, (_, i) => i + 1);
+  } else if (scopeHoles === "back9") {
+    holeNumbers = Array.from({ length: 9 }, (_, i) => i + 10);
+  } else {
+    // Default to all18
+    holeNumbers = Array.from({ length: 18 }, (_, i) => i + 1);
+  }
+
+  // Create holes
+  for (const holeNum of holeNumbers) {
+    const gameHole = GameHoleClass.create(
+      {
+        hole: holeNum.toString(),
+        seq: holeNum,
+        teams: ListOfTeams.create([], { owner: game.$jazz.owner }),
+      },
+      { owner: game.$jazz.owner },
+    );
+    game.holes.$jazz.push(gameHole);
+  }
+
+  return true;
+}
 
 /**
  * Deep clones teams from one hole to another, creating new Jazz objects.
@@ -100,11 +145,13 @@ export function ensureHoleHasTeams(
 
 /**
  * Determines if the team chooser should be shown for the current hole.
+ * Requires game parameter to check if all players are assigned.
  */
 export function shouldShowTeamChooser(
   holes: MaybeLoaded<ListOfGameHoles> | undefined,
   currentHoleIndex: number,
   rotateEvery: number | undefined,
+  game?: Game,
 ): boolean {
   if (!holes?.$isLoaded || holes.length === 0 || rotateEvery === undefined) {
     return false;
@@ -120,11 +167,32 @@ export function shouldShowTeamChooser(
     return true;
   }
 
+  // Count how many players are assigned to teams on this hole
+  let allPlayersAssigned = false;
+  if (game?.rounds?.$isLoaded) {
+    const totalPlayers = game.rounds.length;
+    let assignedPlayers = 0;
+
+    for (const team of currentHole.teams) {
+      if (!team?.$isLoaded || !team.rounds?.$isLoaded) continue;
+      assignedPlayers += team.rounds.length;
+    }
+
+    allPlayersAssigned = assignedPlayers >= totalPlayers;
+
+    // If not all players are assigned, show the chooser
+    if (!allPlayersAssigned) {
+      return true;
+    }
+  }
+
   // If we're at a rotation boundary (and not hole 0), show chooser
+  // BUT only if teams aren't already fully assigned
   if (
     rotateEvery > 0 &&
     currentHoleIndex > 0 &&
-    currentHoleIndex % rotateEvery === 0
+    currentHoleIndex % rotateEvery === 0 &&
+    !allPlayersAssigned
   ) {
     return true;
   }

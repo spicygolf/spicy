@@ -1,10 +1,12 @@
+import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { Modal, Pressable, View } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { TeamChooser } from "@/components/game/TeamChooser";
 import { useGameContext } from "@/contexts/GameContext";
 import { Button, Screen, Text } from "@/ui";
 import {
+  ensureGameHoles,
   ensureHoleHasTeams,
   getTeamAssignmentsFromHole,
   saveTeamAssignmentsToHole,
@@ -13,8 +15,13 @@ import {
 
 export function GameScoring() {
   const { game } = useGameContext();
+  const { theme } = useUnistyles();
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [showChooser, setShowChooser] = useState(false);
+  const [showChangeTeamsModal, setShowChangeTeamsModal] = useState(false);
+  const [changeTeamsScope, setChangeTeamsScope] = useState<
+    "current" | "period"
+  >("period");
 
   const rotateEvery = useMemo(() => {
     if (!game?.scope?.$isLoaded || !game.scope.$jazz.has("teamsConfig")) {
@@ -66,6 +73,9 @@ export function GameScoring() {
       if (!game.holes?.$isLoaded) {
         return;
       }
+
+      // Ensure holes exist - create them if they don't
+      ensureGameHoles(game);
 
       const hole = game.holes[currentHoleIndex];
 
@@ -125,6 +135,7 @@ export function GameScoring() {
         game.holes,
         currentHoleIndex,
         rotateEvery,
+        game,
       );
 
       setShowChooser(needsChooser);
@@ -147,23 +158,69 @@ export function GameScoring() {
     });
   }, [holesList.length]);
 
+  const handleChangeTeamsConfirm = useCallback(() => {
+    if (!game?.holes?.$isLoaded || rotateEvery === undefined) return;
+
+    // Clear teams for the selected scope
+    const holesToClear: number[] = [];
+
+    if (changeTeamsScope === "current") {
+      // Just current hole
+      holesToClear.push(currentHoleIndex);
+    } else {
+      // Rest of rotation period
+      if (rotateEvery > 0) {
+        const rotationPeriodStart =
+          Math.floor(currentHoleIndex / rotateEvery) * rotateEvery;
+        const rotationPeriodEnd = Math.min(
+          rotationPeriodStart + rotateEvery,
+          holesList.length,
+        );
+        for (let i = currentHoleIndex; i < rotationPeriodEnd; i++) {
+          holesToClear.push(i);
+        }
+      } else {
+        // rotateEvery === 0, just current hole
+        holesToClear.push(currentHoleIndex);
+      }
+    }
+
+    // Clear teams on selected holes
+    for (const holeIndex of holesToClear) {
+      const hole = game.holes[holeIndex];
+      if (hole?.$isLoaded) {
+        const { ListOfTeams } = require("spicylib/schema");
+        const emptyTeams = ListOfTeams.create([], { owner: hole.$jazz.owner });
+        hole.$jazz.set("teams", emptyTeams);
+      }
+    }
+
+    // Close modal and show chooser
+    setShowChangeTeamsModal(false);
+    setShowChooser(true);
+  }, [game, rotateEvery, changeTeamsScope, currentHoleIndex, holesList.length]);
+
   const handleTeamAssignmentsChange = useCallback(
     (assignments: Map<string, number>) => {
-      if (!game?.holes?.$isLoaded) return;
+      if (!game?.holes?.$isLoaded || rotateEvery === undefined) return;
 
-      // Save to current hole
-      saveTeamAssignmentsToHole(
-        game,
-        game.holes,
-        currentHoleIndex,
-        assignments,
-        teamCount,
-      );
+      // Check if all players are assigned
+      const totalPlayers = game.rounds?.$isLoaded ? game.rounds.length : 0;
+      const assignedPlayers = assignments.size;
+      const allPlayersAssigned = assignedPlayers === totalPlayers;
 
-      // If this is hole 1 and rotateEvery > 0, we may need to apply to multiple holes
-      if (currentHoleIndex === 0 && rotateEvery && rotateEvery > 0) {
-        // For rotating teams, save to holes until next rotation point
-        for (let i = 1; i < rotateEvery && i < holesList.length; i++) {
+      // When rotateEvery > 0, save assignments to all holes in the current rotation period
+      if (rotateEvery > 0) {
+        // Calculate the start of the current rotation period
+        const rotationPeriodStart =
+          Math.floor(currentHoleIndex / rotateEvery) * rotateEvery;
+        const rotationPeriodEnd = Math.min(
+          rotationPeriodStart + rotateEvery,
+          holesList.length,
+        );
+
+        // Save to all holes in this rotation period
+        for (let i = rotationPeriodStart; i < rotationPeriodEnd; i++) {
           saveTeamAssignmentsToHole(
             game,
             game.holes,
@@ -172,10 +229,21 @@ export function GameScoring() {
             teamCount,
           );
         }
+      } else {
+        // rotateEvery === 0: teams never rotate, just save to current hole
+        saveTeamAssignmentsToHole(
+          game,
+          game.holes,
+          currentHoleIndex,
+          assignments,
+          teamCount,
+        );
       }
 
-      // Hide the chooser after teams are set
-      setShowChooser(false);
+      // Hide the chooser only if all players are assigned
+      if (allPlayersAssigned) {
+        setShowChooser(false);
+      }
     },
     [game, currentHoleIndex, teamCount, rotateEvery, holesList.length],
   );
@@ -223,9 +291,15 @@ export function GameScoring() {
             </View>
           ) : (
             <View style={styles.scoringContainer}>
-              <Text style={styles.debugTitle}>
-                Scoring UI for Hole {currentHoleNumber}
-              </Text>
+              <View style={styles.scoringHeader}>
+                <Text style={styles.debugTitle}>
+                  Scoring UI for Hole {currentHoleNumber}
+                </Text>
+                <Button
+                  label="Change Teams"
+                  onPress={() => setShowChangeTeamsModal(true)}
+                />
+              </View>
               <Text style={styles.debugSection}>Teams Debug Info:</Text>
               {currentHole?.teams?.$isLoaded ? (
                 <>
@@ -286,6 +360,118 @@ export function GameScoring() {
             </View>
           )}
         </View>
+
+        {/* Change Teams Modal */}
+        <Modal
+          visible={showChangeTeamsModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowChangeTeamsModal(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowChangeTeamsModal(false)}
+          >
+            <Pressable
+              style={styles.modalContent}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Change Teams</Text>
+                <Pressable onPress={() => setShowChangeTeamsModal(false)}>
+                  <FontAwesome6
+                    name="xmark"
+                    iconStyle="solid"
+                    size={20}
+                    color={theme.colors.primary}
+                  />
+                </Pressable>
+              </View>
+
+              <Text style={styles.modalDescription}>
+                Clear team assignments and choose new teams for:
+              </Text>
+
+              <View style={styles.scopeOptions}>
+                <Pressable
+                  style={[
+                    styles.scopeOption,
+                    changeTeamsScope === "current" &&
+                      styles.scopeOptionSelected,
+                  ]}
+                  onPress={() => setChangeTeamsScope("current")}
+                >
+                  <FontAwesome6
+                    name={
+                      changeTeamsScope === "current" ? "circle-dot" : "circle"
+                    }
+                    iconStyle="regular"
+                    size={20}
+                    color={
+                      changeTeamsScope === "current"
+                        ? theme.colors.action
+                        : theme.colors.secondary
+                    }
+                  />
+                  <View style={styles.scopeOptionText}>
+                    <Text style={styles.scopeOptionLabel}>
+                      Current Hole Only
+                    </Text>
+                    <Text style={styles.scopeOptionDesc}>
+                      Hole {currentHoleNumber}
+                    </Text>
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  style={[
+                    styles.scopeOption,
+                    changeTeamsScope === "period" && styles.scopeOptionSelected,
+                  ]}
+                  onPress={() => setChangeTeamsScope("period")}
+                >
+                  <FontAwesome6
+                    name={
+                      changeTeamsScope === "period" ? "circle-dot" : "circle"
+                    }
+                    iconStyle="regular"
+                    size={20}
+                    color={
+                      changeTeamsScope === "period"
+                        ? theme.colors.action
+                        : theme.colors.secondary
+                    }
+                  />
+                  <View style={styles.scopeOptionText}>
+                    <Text style={styles.scopeOptionLabel}>
+                      {rotateEvery === 0
+                        ? "All Holes"
+                        : "Rest of Rotation Period"}
+                    </Text>
+                    <Text style={styles.scopeOptionDesc}>
+                      {rotateEvery === 0
+                        ? "Teams never rotate"
+                        : `Holes ${currentHoleNumber} - ${Math.min(
+                            Math.floor(currentHoleIndex / (rotateEvery || 1)) *
+                              (rotateEvery || 1) +
+                              (rotateEvery || 1),
+                            holesList.length,
+                          )}`}
+                    </Text>
+                  </View>
+                </Pressable>
+              </View>
+
+              <View style={styles.modalButtons}>
+                <Button
+                  label="Cancel"
+                  onPress={() => setShowChangeTeamsModal(false)}
+                />
+                <Button label="Change" onPress={handleChangeTeamsConfirm} />
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
       </View>
     </Screen>
   );
@@ -343,10 +529,15 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     padding: theme.gap(2),
   },
+  scoringHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.gap(2),
+  },
   debugTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: theme.gap(2),
   },
   debugSection: {
     fontSize: 16,
@@ -373,5 +564,72 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 14,
     marginLeft: theme.gap(1),
     marginBottom: theme.gap(0.25),
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.gap(2),
+  },
+  modalContent: {
+    backgroundColor: theme.colors.background,
+    borderRadius: 12,
+    padding: theme.gap(2),
+    width: "100%",
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.gap(2),
+    paddingBottom: theme.gap(1),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalDescription: {
+    fontSize: 14,
+    color: theme.colors.secondary,
+    marginBottom: theme.gap(2),
+  },
+  scopeOptions: {
+    gap: theme.gap(1.5),
+    marginBottom: theme.gap(3),
+  },
+  scopeOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: theme.gap(2),
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: 8,
+    gap: theme.gap(1.5),
+  },
+  scopeOptionSelected: {
+    borderColor: theme.colors.action,
+    borderWidth: 2,
+    backgroundColor: `${theme.colors.action}10`,
+  },
+  scopeOptionText: {
+    flex: 1,
+  },
+  scopeOptionLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: theme.gap(0.5),
+  },
+  scopeOptionDesc: {
+    fontSize: 14,
+    color: theme.colors.secondary,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: theme.gap(1.5),
   },
 }));

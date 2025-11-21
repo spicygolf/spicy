@@ -1,6 +1,6 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useCallback, useMemo, useState } from "react";
-import { View } from "react-native";
+import { Modal, Pressable, View } from "react-native";
 import { DraxProvider, DraxScrollView, DraxView } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { RoundToGame } from "spicylib/schema";
@@ -9,9 +9,11 @@ import {
   ListOfTeams,
   RoundToTeam,
   Team,
+  TeamsConfig,
 } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
-import { Button, Text } from "@/ui";
+import { Button, Input, Text } from "@/ui";
+import { ensureGameHoles } from "@/utils/gameTeams";
 
 interface PlayerRoundItem {
   id: string;
@@ -26,9 +28,31 @@ interface TeamSection {
   players: PlayerRoundItem[];
 }
 
+interface RotationOption {
+  value: number;
+  label: string;
+  description: string;
+}
+
+const ROTATION_OPTIONS: RotationOption[] = [
+  { value: 0, label: "Never", description: "Teams stay the same all game" },
+  { value: 1, label: "Every 1", description: "Teams change every hole" },
+  { value: 3, label: "Every 3", description: "Teams change every 3 holes" },
+  { value: 6, label: "Every 6", description: "Teams change every 6 holes" },
+  {
+    value: -1,
+    label: "Custom",
+    description: "Enter custom rotation frequency",
+  },
+];
+
 export function GameTeamsList() {
   const { game } = useGameContext();
   const { theme } = useUnistyles();
+
+  const [showRotationPicker, setShowRotationPicker] = useState(false);
+  const [customRotateValue, setCustomRotateValue] = useState<string>("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const hasTeamsConfig = useMemo(() => {
     if (!game?.scope?.$isLoaded) return false;
@@ -164,33 +188,8 @@ export function GameTeamsList() {
         return;
       }
 
-      // If no holes exist, create them based on game scope
-      if (game.holes.length === 0) {
-        const { GameHole } = require("spicylib/schema");
-
-        const scopeHoles = game.scope?.$isLoaded ? game.scope.holes : "all18";
-        let holeNumbers: number[] = [];
-
-        if (scopeHoles === "front9") {
-          holeNumbers = Array.from({ length: 9 }, (_, i) => i + 1);
-        } else if (scopeHoles === "back9") {
-          holeNumbers = Array.from({ length: 9 }, (_, i) => i + 10);
-        } else {
-          holeNumbers = Array.from({ length: 18 }, (_, i) => i + 1);
-        }
-
-        for (const holeNum of holeNumbers) {
-          const gameHole = GameHole.create(
-            {
-              hole: holeNum.toString(),
-              seq: holeNum,
-              teams: ListOfTeams.create([], { owner: game.$jazz.owner }),
-            },
-            { owner: game.$jazz.owner },
-          );
-          game.holes.$jazz.push(gameHole);
-        }
-      }
+      // Ensure holes exist - create them if they don't
+      ensureGameHoles(game);
 
       // Load all holes first (level-by-level as per Jazz rules)
       // @ts-expect-error - TypeScript requires resolve but we're loading the list itself
@@ -272,135 +271,341 @@ export function GameTeamsList() {
     [teamAssignments, saveTeamAssignmentsToGame],
   );
 
-  if (!hasTeamsConfig || rotateEvery !== 0) {
-    return (
-      <View style={styles.centerContainer}>
-        <View style={styles.emptyIcon}>
-          <FontAwesome6
-            name="user-group"
-            iconStyle="solid"
-            size={48}
-            color={theme.colors.secondary}
-          />
-        </View>
-        <Text style={styles.emptyTitle}>Teams Not Configured</Text>
-        <Text style={styles.emptyText}>
-          This game doesn't use fixed teams, or teams rotate during play.
-        </Text>
-      </View>
-    );
-  }
+  const getRotationLabel = useCallback(() => {
+    if (rotateEvery === undefined) return "Not set";
+    if (rotateEvery === 0) return "Never";
+    if (rotateEvery === 1) return "Every hole";
+    return `Every ${rotateEvery} holes`;
+  }, [rotateEvery]);
 
-  if (allPlayerRounds.length === 0) {
-    return (
-      <View style={styles.centerContainer}>
-        <View style={styles.emptyIcon}>
-          <FontAwesome6
-            name="user-group"
-            iconStyle="solid"
-            size={48}
-            color={theme.colors.secondary}
-          />
-        </View>
-        <Text style={styles.emptyTitle}>No Players Yet</Text>
-        <Text style={styles.emptyText}>
-          Add players in the Players tab to assign them to teams.
-        </Text>
-      </View>
+  const handleRotationChange = useCallback(
+    async (value: number) => {
+      if (!game?.scope?.$isLoaded) return;
+
+      // Handle "Custom" option
+      if (value === -1) {
+        setShowCustomInput(true);
+        return;
+      }
+
+      setShowCustomInput(false);
+      setShowRotationPicker(false);
+
+      // Create or update teams config
+      if (!game.scope.$jazz.has("teamsConfig")) {
+        const config = TeamsConfig.create(
+          {
+            rotateEvery: value,
+            teamCount: teamCount,
+          },
+          { owner: game.$jazz.owner },
+        );
+        game.scope.$jazz.set("teamsConfig", config);
+      } else if (game.scope.teamsConfig?.$isLoaded) {
+        game.scope.teamsConfig.$jazz.set("rotateEvery", value);
+      }
+    },
+    [game, teamCount],
+  );
+
+  const handleCustomRotateSubmit = useCallback(async () => {
+    const numValue = Number.parseInt(customRotateValue, 10);
+    if (Number.isNaN(numValue) || numValue < 0) {
+      return;
+    }
+
+    if (!game?.scope?.$isLoaded) return;
+
+    // Create or update teams config with custom value
+    if (!game.scope.$jazz.has("teamsConfig")) {
+      const config = TeamsConfig.create(
+        {
+          rotateEvery: numValue,
+          teamCount: teamCount,
+        },
+        { owner: game.$jazz.owner },
+      );
+      game.scope.$jazz.set("teamsConfig", config);
+    } else if (game.scope.teamsConfig?.$isLoaded) {
+      game.scope.teamsConfig.$jazz.set("rotateEvery", numValue);
+    }
+
+    setShowCustomInput(false);
+    setShowRotationPicker(false);
+    setCustomRotateValue("");
+  }, [customRotateValue, game, teamCount]);
+
+  // Initialize teams config if not present
+  if (!hasTeamsConfig && game?.scope?.$isLoaded) {
+    const config = TeamsConfig.create(
+      {
+        rotateEvery: 0,
+        teamCount: 2,
+      },
+      { owner: game.$jazz.owner },
     );
+    game.scope.$jazz.set("teamsConfig", config);
   }
 
   return (
     <DraxProvider>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Team Assignments</Text>
-          <Button label="Toss Balls" onPress={handleTossBalls} />
-        </View>
-
-        <DraxScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={true}
+        {/* Compact Rotation Picker Row */}
+        <Pressable
+          style={styles.rotationPickerRow}
+          onPress={() => setShowRotationPicker(true)}
         >
-          {teamSections.map((section) => (
-            <DraxView
-              key={section.teamNumber}
-              style={styles.teamSection}
-              onReceiveDragDrop={(event) => {
-                if (event.dragged.payload) {
-                  handleDrop(
-                    event.dragged.payload as string,
-                    section.teamNumber,
-                  );
-                }
-              }}
-              receivingStyle={styles.teamSectionReceiving}
+          <Text style={styles.rotationPickerLabel}>Teams Rotate:</Text>
+          <View style={styles.rotationPickerValue}>
+            <Text style={styles.rotationPickerValueText}>
+              {getRotationLabel()}
+            </Text>
+            <FontAwesome6
+              name="chevron-right"
+              iconStyle="solid"
+              size={14}
+              color={theme.colors.secondary}
+            />
+          </View>
+        </Pressable>
+
+        {/* Rotation Picker Modal */}
+        <Modal
+          visible={showRotationPicker}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowRotationPicker(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => {
+              setShowRotationPicker(false);
+              setShowCustomInput(false);
+            }}
+          >
+            <Pressable
+              style={styles.modalContent}
+              onPress={(e) => e.stopPropagation()}
             >
-              <View
-                style={[
-                  styles.teamHeader,
-                  section.teamNumber === 0 && styles.unassignedHeader,
-                ]}
-              >
-                <Text style={styles.teamHeaderText}>{section.teamName}</Text>
-                <Text style={styles.playerCount}>
-                  {section.players.length} player
-                  {section.players.length !== 1 ? "s" : ""}
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Teams Rotate</Text>
+                <Pressable
+                  onPress={() => {
+                    setShowRotationPicker(false);
+                    setShowCustomInput(false);
+                  }}
+                >
+                  <FontAwesome6
+                    name="xmark"
+                    iconStyle="solid"
+                    size={20}
+                    color={theme.colors.primary}
+                  />
+                </Pressable>
+              </View>
+
+              <View style={styles.rotationOptions}>
+                {ROTATION_OPTIONS.map((option) => {
+                  const isSelected =
+                    option.value === -1
+                      ? showCustomInput
+                      : rotateEvery === option.value;
+                  const isCustomValue =
+                    rotateEvery !== undefined &&
+                    rotateEvery !== 0 &&
+                    rotateEvery !== 1 &&
+                    rotateEvery !== 3 &&
+                    rotateEvery !== 6;
+
+                  return (
+                    <Pressable
+                      key={option.value}
+                      style={[
+                        styles.rotationOption,
+                        (isSelected ||
+                          (option.value === -1 && isCustomValue)) &&
+                          styles.rotationOptionSelected,
+                      ]}
+                      onPress={() => handleRotationChange(option.value)}
+                    >
+                      <Text
+                        style={[
+                          styles.rotationOptionLabel,
+                          (isSelected ||
+                            (option.value === -1 && isCustomValue)) &&
+                            styles.rotationOptionLabelSelected,
+                        ]}
+                      >
+                        {option.label}
+                        {option.value === -1 &&
+                          isCustomValue &&
+                          ` (${rotateEvery})`}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.rotationOptionDesc,
+                          (isSelected ||
+                            (option.value === -1 && isCustomValue)) &&
+                            styles.rotationOptionDescSelected,
+                        ]}
+                      >
+                        {option.description}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {showCustomInput && (
+                <View style={styles.customInputContainer}>
+                  <View style={styles.customInputRow}>
+                    <Input
+                      label="Rotation frequency (holes)"
+                      keyboardType="number-pad"
+                      value={customRotateValue}
+                      onChangeText={setCustomRotateValue}
+                      placeholder="e.g., 9"
+                    />
+                    <View style={styles.customInputButton}>
+                      <Button label="Set" onPress={handleCustomRotateSubmit} />
+                    </View>
+                  </View>
+                </View>
+              )}
+            </Pressable>
+          </Pressable>
+        </Modal>
+
+        {/* Team Assignments Section - only show if rotateEvery === 0 */}
+        {rotateEvery === 0 ? (
+          <>
+            <View style={styles.header}>
+              <Text style={styles.title}>Team Assignments</Text>
+              <Button label="Toss Balls" onPress={handleTossBalls} />
+            </View>
+
+            {allPlayerRounds.length === 0 ? (
+              <View style={styles.centerContainer}>
+                <View style={styles.emptyIcon}>
+                  <FontAwesome6
+                    name="user-group"
+                    iconStyle="solid"
+                    size={48}
+                    color={theme.colors.secondary}
+                  />
+                </View>
+                <Text style={styles.emptyTitle}>No Players Yet</Text>
+                <Text style={styles.emptyText}>
+                  Add players in the Players tab to assign them to teams.
                 </Text>
               </View>
+            ) : (
+              <DraxScrollView
+                contentContainerStyle={styles.scrollContainer}
+                showsVerticalScrollIndicator={true}
+              >
+                {teamSections.map((section) => (
+                  <DraxView
+                    key={section.teamNumber}
+                    style={styles.teamSection}
+                    onReceiveDragDrop={(event) => {
+                      if (event.dragged.payload) {
+                        handleDrop(
+                          event.dragged.payload as string,
+                          section.teamNumber,
+                        );
+                      }
+                    }}
+                    receivingStyle={styles.teamSectionReceiving}
+                  >
+                    <View
+                      style={[
+                        styles.teamHeader,
+                        section.teamNumber === 0 && styles.unassignedHeader,
+                      ]}
+                    >
+                      <Text style={styles.teamHeaderText}>
+                        {section.teamName}
+                      </Text>
+                      <Text style={styles.playerCount}>
+                        {section.players.length} player
+                        {section.players.length !== 1 ? "s" : ""}
+                      </Text>
+                    </View>
 
-              <View style={styles.dropZone}>
-                {section.players.length > 0 ? (
-                  <View style={styles.playersList}>
-                    {section.players.map((player) => {
-                      return (
-                        <DraxView
-                          key={player.id}
-                          style={styles.playerItem}
-                          draggingStyle={styles.playerDragging}
-                          dragReleasedStyle={styles.playerReleased}
-                          dragPayload={player.id}
-                          renderContent={({ viewState }) => (
-                            <View
-                              style={[
-                                styles.playerContent,
-                                viewState?.dragStatus === 2 &&
-                                  styles.playerContentDragging,
-                              ]}
-                            >
-                              <View style={styles.dragHandle}>
-                                <FontAwesome6
-                                  name="grip-lines"
-                                  iconStyle="solid"
-                                  size={16}
-                                  color={theme.colors.secondary}
-                                />
-                              </View>
-                              <View style={styles.playerInfo}>
-                                <Text style={styles.playerName}>
-                                  {player.playerName}
-                                </Text>
-                                {player.handicap && (
-                                  <Text style={styles.handicap}>
-                                    HI: {player.handicap}
-                                  </Text>
+                    <View style={styles.dropZone}>
+                      {section.players.length > 0 ? (
+                        <View style={styles.playersList}>
+                          {section.players.map((player) => {
+                            return (
+                              <DraxView
+                                key={player.id}
+                                style={styles.playerItem}
+                                draggingStyle={styles.playerDragging}
+                                dragReleasedStyle={styles.playerReleased}
+                                dragPayload={player.id}
+                                renderContent={({ viewState }) => (
+                                  <View
+                                    style={[
+                                      styles.playerContent,
+                                      viewState?.dragStatus === 2 &&
+                                        styles.playerContentDragging,
+                                    ]}
+                                  >
+                                    <View style={styles.dragHandle}>
+                                      <FontAwesome6
+                                        name="grip-lines"
+                                        iconStyle="solid"
+                                        size={16}
+                                        color={theme.colors.secondary}
+                                      />
+                                    </View>
+                                    <View style={styles.playerInfo}>
+                                      <Text style={styles.playerName}>
+                                        {player.playerName}
+                                      </Text>
+                                      {player.handicap && (
+                                        <Text style={styles.handicap}>
+                                          HI: {player.handicap}
+                                        </Text>
+                                      )}
+                                    </View>
+                                  </View>
                                 )}
-                              </View>
-                            </View>
-                          )}
-                        />
-                      );
-                    })}
-                  </View>
-                ) : (
-                  <View style={styles.emptyTeam}>
-                    <Text style={styles.emptyTeamText}>Drag players here</Text>
-                  </View>
-                )}
-              </View>
-            </DraxView>
-          ))}
-        </DraxScrollView>
+                              />
+                            );
+                          })}
+                        </View>
+                      ) : (
+                        <View style={styles.emptyTeam}>
+                          <Text style={styles.emptyTeamText}>
+                            Drag players here
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </DraxView>
+                ))}
+              </DraxScrollView>
+            )}
+          </>
+        ) : (
+          <View style={styles.centerContainer}>
+            <View style={styles.emptyIcon}>
+              <FontAwesome6
+                name="arrows-rotate"
+                iconStyle="solid"
+                size={48}
+                color={theme.colors.secondary}
+              />
+            </View>
+            <Text style={styles.emptyTitle}>Rotating Teams</Text>
+            <Text style={styles.emptyText}>
+              Teams will be chosen during gameplay every {rotateEvery} hole
+              {rotateEvery !== 1 ? "s" : ""}.
+            </Text>
+          </View>
+        )}
       </View>
     </DraxProvider>
   );
@@ -429,6 +634,108 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.secondary,
     textAlign: "center",
     lineHeight: 20,
+  },
+  rotationPickerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: theme.gap(2),
+    paddingVertical: theme.gap(1.5),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    backgroundColor: theme.colors.background,
+  },
+  rotationPickerLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: theme.colors.primary,
+  },
+  rotationPickerValue: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(1),
+  },
+  rotationPickerValueText: {
+    fontSize: 16,
+    color: theme.colors.secondary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.gap(2),
+  },
+  modalContent: {
+    backgroundColor: theme.colors.background,
+    borderRadius: 12,
+    padding: theme.gap(2),
+    width: "100%",
+    maxWidth: 500,
+    maxHeight: "80%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.gap(2),
+    paddingBottom: theme.gap(1),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  rotationOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.gap(1.5),
+  },
+  rotationOption: {
+    flex: 1,
+    minWidth: "45%",
+    paddingVertical: theme.gap(1.5),
+    paddingHorizontal: theme.gap(1.5),
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: 8,
+    backgroundColor: theme.colors.background,
+  },
+  rotationOptionSelected: {
+    borderColor: theme.colors.action,
+    borderWidth: 2,
+    backgroundColor: `${theme.colors.action}10`,
+  },
+  rotationOptionLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: theme.gap(0.5),
+    color: theme.colors.primary,
+  },
+  rotationOptionLabelSelected: {
+    color: theme.colors.action,
+  },
+  rotationOptionDesc: {
+    fontSize: 12,
+    color: theme.colors.secondary,
+  },
+  rotationOptionDescSelected: {
+    color: theme.colors.action,
+  },
+  customInputContainer: {
+    marginTop: theme.gap(2),
+    padding: theme.gap(2),
+    backgroundColor: `${theme.colors.action}05`,
+    borderRadius: 8,
+  },
+  customInputRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: theme.gap(1),
+  },
+  customInputButton: {
+    marginBottom: theme.gap(1.25),
   },
   header: {
     flexDirection: "row",
