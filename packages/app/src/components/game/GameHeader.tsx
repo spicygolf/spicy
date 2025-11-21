@@ -1,4 +1,5 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
+import { useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
@@ -18,6 +19,17 @@ export function GameHeader({
   onViewChange,
 }: GameHeaderProps) {
   const { theme } = useUnistyles();
+  const [previousView, setPreviousView] = useState<"leaderboard" | "scoring">(
+    "scoring",
+  );
+
+  // Track the previous view (leaderboard or scoring) when switching to settings
+  // This hook must come before any early returns
+  useEffect(() => {
+    if (currentView === "leaderboard" || currentView === "scoring") {
+      setPreviousView(currentView);
+    }
+  }, [currentView]);
 
   if (!game.$isLoaded) {
     return null;
@@ -27,19 +39,45 @@ export function GameHeader({
   const getIconColor = (view: GameView) =>
     currentView === view ? theme.colors.action : theme.colors.secondary;
 
+  // Toggle between leaderboard and scoring when the left button is clicked
+  const handleToggle = () => {
+    if (currentView === "settings") {
+      // If on settings, go back to the previous view
+      onViewChange?.(previousView);
+    } else if (currentView === "leaderboard") {
+      // If on leaderboard, go to scoring
+      onViewChange?.("scoring");
+    } else {
+      // If on scoring, go to leaderboard
+      onViewChange?.("leaderboard");
+    }
+  };
+
+  // Determine which icon to show on the left toggle button
+  const getToggleIcon = () => {
+    if (currentView === "settings") {
+      // When on settings, show the icon for the previous view
+      return previousView === "leaderboard" ? "list-ul" : "pencil";
+    } else if (currentView === "leaderboard") {
+      return "pencil"; // Show pencil when on leaderboard (to switch to scoring)
+    }
+    return "list-ul"; // Show list when on scoring (to switch to leaderboard)
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        {/* Left Icon - Leaderboard */}
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={() => onViewChange?.("leaderboard")}
-        >
+        {/* Left Icon - Toggle between Leaderboard/Scoring */}
+        <TouchableOpacity style={styles.iconButton} onPress={handleToggle}>
           <FontAwesome6
-            name="trophy"
+            name={getToggleIcon()}
             iconStyle="solid"
             size={iconSize}
-            color={getIconColor("leaderboard")}
+            color={
+              currentView === "settings"
+                ? theme.colors.secondary
+                : theme.colors.action
+            }
           />
         </TouchableOpacity>
 
@@ -56,31 +94,18 @@ export function GameHeader({
           </Text>
         </View>
 
-        {/* Right Icons - Scoring & Settings */}
-        <View style={styles.rightIcons}>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => onViewChange?.("scoring")}
-          >
-            <FontAwesome6
-              name="golf-ball-tee"
-              iconStyle="solid"
-              size={iconSize}
-              color={getIconColor("scoring")}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => onViewChange?.("settings")}
-          >
-            <FontAwesome6
-              name="gear"
-              iconStyle="solid"
-              size={iconSize}
-              color={getIconColor("settings")}
-            />
-          </TouchableOpacity>
-        </View>
+        {/* Right Icon - Settings */}
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => onViewChange?.("settings")}
+        >
+          <FontAwesome6
+            name="gear"
+            iconStyle="solid"
+            size={iconSize}
+            color={getIconColor("settings")}
+          />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -107,10 +132,6 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: theme.gap(2),
-  },
-  rightIcons: {
-    flexDirection: "row",
-    gap: theme.gap(1),
   },
   name: {
     fontSize: 14,
