@@ -1,0 +1,161 @@
+<rules category="typescript">
+  <metadata>
+    <trigger>glob</trigger>
+    <globs>*.ts,*.tsx</globs>
+  </metadata>
+
+  <rule severity="CRITICAL" enforcement="BLOCKING">
+    <name>No Any Types</name>
+    <description>No `any` types. Use proper TypeScript types or create new interfaces/types as needed.</description>
+    <rationale>Type safety is critical for catching bugs at compile time. any types bypass all type checking.</rationale>
+    <mustAcknowledge>true</mustAcknowledge>
+    <instructions>
+      When encountering data without types, create proper interfaces or types. If the shape is truly unknown, use type guards and validation instead of `any`.
+    </instructions>
+  </rule>
+
+  <rule severity="CRITICAL" enforcement="BLOCKING">
+    <name>No Unknown Types</name>
+    <description>Avoid `unknown` types. Use explicit types with proper type guards if needed.</description>
+    <rationale>Unknown is just deferred any - we need explicit types. Casting to unknown defeats the purpose of type safety.</rationale>
+    <mustAcknowledge>true</mustAcknowledge>
+    <instructions>
+      Instead of using `unknown`, create type guard functions that validate the shape of the data and return properly typed values.
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Stack Requirements</name>
+    <description>Use Bun 1.3+ as package manager</description>
+    <stack>
+      <tool>Bun 1.3+ - Package manager (not npm/yarn/pnpm)</tool>
+      <tool>React Native - Mobile framework</tool>
+      <tool>TypeScript - Type system</tool>
+      <tool>Jazz Tools - Local-first database with sync</tool>
+      <tool>Biome - Formatting and linting</tool>
+    </stack>
+    <instructions>
+      Always use Bun for package management. Remove any package-lock.json or yarn.lock files if present.
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Style Guidelines</name>
+    <description>Consistent coding style across the codebase</description>
+    <style_rules>
+      <rule>Interfaces over types for object shapes</rule>
+      <rule>Lowercase-dash directories (e.g., auth-wizard)</rule>
+      <rule>Named exports (no default exports)</rule>
+      <rule>No enums - use explicit types and maps instead</rule>
+      <rule>Functional components for React/React Native</rule>
+      <rule>Strict mode enabled</rule>
+      <rule>Pin dependencies - no `^` carets in package.json</rule>
+    </style_rules>
+    <instructions>
+      Follow all style rules consistently. When adding dependencies, pin exact versions without caret (^) or tilde (~) prefixes.
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Interfaces Over Types</name>
+    <description>Prefer interfaces over type aliases for object shapes. Types are for unions, intersections, and computed types.</description>
+    <examples>
+      <example type="good">
+        interface User { name: string; email: string; }
+      </example>
+      <example type="bad">
+        type User = { name: string; email: string; }
+      </example>
+      <example type="good-type-usage">
+        type Status = 'active' | 'inactive' | 'pending';
+      </example>
+    </examples>
+    <instructions>
+      - Use `interface` for object shapes and class contracts
+      - Use `type` for unions, intersections, mapped types, and conditional types
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>No Enums</name>
+    <description>Do not use TypeScript enums. Use explicit types and maps instead.</description>
+    <examples>
+      <example type="bad">
+        enum Status { Active, Inactive, Pending }
+      </example>
+      <example type="good">
+        type Status = 'active' | 'inactive' | 'pending';
+        const StatusLabels: Record&lt;Status, string&gt; = {
+          active: 'Active',
+          inactive: 'Inactive',
+          pending: 'Pending'
+        };
+      </example>
+    </examples>
+    <instructions>
+      Use union types for values and Record types for mappings instead of enums.
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Quality Checks Required</name>
+    <description>Code must pass format, lint, and type checking before completion</description>
+    <commands>
+      <command>bun format - Format code with Biome</command>
+      <command>bun lint - Run linter with Biome</command>
+      <command>bun tsc - Type check with TypeScript</command>
+    </commands>
+    <instructions>
+      When making changes, ensure the following commands still pass as they are required for pre-commit hooks:
+      - bun format
+      - bun lint
+      - bun tsc
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>React and React Native Best Practices</name>
+    <description>React Native-specific guidelines for components and hooks</description>
+    <react_guidelines>
+      <guideline>Minimize `useEffect` usage - use it as a last resort</guideline>
+      <guideline>Use named functions for effect callbacks with meaningful names</guideline>
+      <guideline>Avoid adding unnecessary comments on effect behavior</guideline>
+      <guideline>Favor small components over large components</guideline>
+      <guideline>Break functionality into multiple components/files to avoid complex re-rendering</guideline>
+      <guideline>Write declarative JSX</guideline>
+      <guideline>Use `function` keyword for pure functions</guideline>
+      <guideline>Avoid unnecessary curly braces in conditionals</guideline>
+      <guideline>Functional components only (no class components)</guideline>
+    </react_guidelines>
+    <instructions>
+      When writing React Native components, prefer declarative patterns and avoid imperative code. Break large components into smaller, focused ones to prevent re-rendering issues.
+    </instructions>
+  </rule>
+
+  <rule severity="MEDIUM" enforcement="RECOMMENDED">
+    <name>Styling with Unistyles</name>
+    <description>Use React Native Unistyles for styling. Avoid string color constants.</description>
+    <instructions>
+      - Use Unistyles theme system (see app/src/utils/unistyles.ts)
+      - There should be no or very few color string constants
+      - Reference theme colors instead of hardcoding values
+    </instructions>
+  </rule>
+
+  <rule severity="MEDIUM" enforcement="RECOMMENDED">
+    <name>Named Exports Only</name>
+    <description>Use named exports exclusively. No default exports.</description>
+    <instructions>
+      Export all functions, classes, and values using named exports. This makes refactoring easier and imports more explicit.
+    </instructions>
+  </rule>
+
+  <rule severity="MEDIUM" enforcement="RECOMMENDED">
+    <name>Explicit Return Types</name>
+    <description>Always specify return types on functions, even if TypeScript can infer them.</description>
+    <rationale>Makes API contracts explicit and prevents accidental breaking changes</rationale>
+    <instructions>
+      Add explicit return type annotations to all function declarations, including arrow functions in exported code.
+    </instructions>
+  </rule>
+</rules>
