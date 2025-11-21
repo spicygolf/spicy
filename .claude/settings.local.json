@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:jazz.tools)",
+      "WebFetch(domain:docs.bun.sh)",
+      "Read(//Users/brad/.claude/projects/-Users-brad-dev-spicy/**)",
+      "Bash(chmod:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

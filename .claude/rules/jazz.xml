@@ -1,0 +1,220 @@
+<rules category="jazz">
+  <metadata>
+    <trigger>glob</trigger>
+    <globs>*.ts,*.tsx</globs>
+  </metadata>
+
+  <rule severity="CRITICAL" enforcement="BLOCKING">
+    <name>Field Existence Checking with $jazz.has()</name>
+    <description>Use `$jazz.has("field")` NOT `!obj.field` to check if optional fields exist. Optional fields may be unloaded but exist in the database.</description>
+    <rationale>Checking with !obj.field can return false for unloaded fields, leading to data loss when re-initializing them</rationale>
+    <mustAcknowledge>true</mustAcknowledge>
+    <examples>
+      <example type="wrong">
+        if (!player.rounds) {
+          player.$jazz.set("rounds", ListOfRounds.create([]));
+        }
+      </example>
+      <example type="correct">
+        if (!player.$jazz.has("rounds")) {
+          player.$jazz.set("rounds", ListOfRounds.create([]));
+        }
+      </example>
+    </examples>
+    <instructions>
+      Always use `$jazz.has("field")` to check if optional fields exist before initializing them. Never use truthiness checks on optional fields.
+    </instructions>
+  </rule>
+
+  <rule severity="CRITICAL" enforcement="BLOCKING">
+    <name>ensureLoaded After upsertUnique</name>
+    <description>After `upsertUnique`, always `ensureLoaded` before checking optional fields.</description>
+    <rationale>upsertUnique may return partially loaded objects. Checking fields without loading leads to false negatives.</rationale>
+    <mustAcknowledge>true</mustAcknowledge>
+    <examples>
+      <example type="correct">
+        player = await Player.upsertUnique({ value, unique, owner });
+        const loaded = await player.$jazz.ensureLoaded({ resolve: { rounds: true } });
+        if (!loaded.$jazz.has("rounds")) {
+          // safe to initialize
+        }
+      </example>
+    </examples>
+    <instructions>
+      Always call ensureLoaded after upsertUnique with the appropriate resolve structure before accessing optional fields.
+    </instructions>
+  </rule>
+
+  <rule severity="CRITICAL" enforcement="BLOCKING">
+    <name>Lazy Loading Lists Level-by-Level</name>
+    <description>Jazz CoLists must be loaded explicitly at each level. Nested $each does NOT load list items - it only resolves nested data IF items are already loaded.</description>
+    <rationale>Common misconception that $each loads the list. It doesn't - you must explicitly load each list level.</rationale>
+    <mustAcknowledge>true</mustAcknowledge>
+    <examples>
+      <example type="wrong">
+        await hole.$jazz.ensureLoaded({
+          resolve: {
+            teams: {
+              $each: {  // This won't load teams if they aren't loaded already!
+                rounds: { $each: { roundToGame: true } }
+              }
+            }
+          }
+        });
+      </example>
+      <example type="correct">
+        await hole.teams.$jazz.ensureLoaded({});  // Load teams list
+        for (const team of hole.teams) {
+          await team.$jazz.ensureLoaded({});  // Load team object
+          await team.rounds.$jazz.ensureLoaded({});  // Load rounds list
+          for (const round of team.rounds) {
+            await round.$jazz.ensureLoaded({ resolve: { roundToGame: true } });
+          }
+        }
+      </example>
+    </examples>
+    <instructions>
+      Load lists explicitly level-by-level. Use $each only to resolve nested data on already-loaded list items, not to load the list itself.
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>ensureLoaded is Async</name>
+    <description>Always await ensureLoaded calls. They are asynchronous operations.</description>
+    <examples>
+      <example type="correct">
+        await player.$jazz.ensureLoaded({ resolve: { rounds: true } });  // MUST await
+      </example>
+    </examples>
+    <instructions>
+      Never forget to await ensureLoaded() calls. Missing await can cause race conditions and unloaded data access.
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Avoid useState with Jazz Data</name>
+    <description>useState() is a code smell when working with Jazz data. Use properly-loaded Jazz data with no syncing to state.</description>
+    <rationale>Jazz provides reactive data updates. Syncing to useState creates unnecessary complexity and bugs.</rationale>
+    <instructions>
+      - Use Jazz's reactive data system directly
+      - Use useCoState or similar Jazz hooks
+      - Only use useState for truly local UI state (modals, form inputs)
+      - Never sync Jazz data to React state
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Modify Entities from Authoritative Source</name>
+    <description>Always modify entities from the authoritative source (e.g., game context), not from stale references.</description>
+    <examples>
+      <example type="wrong">
+        const { player } = route.params;
+        player.rounds.$jazz.push(newRound);
+      </example>
+      <example type="correct">
+        const gamePlayer = game.players.find(p => p?.$jazz.id === player.$jazz.id);
+        gamePlayer.rounds.$jazz.push(newRound);
+      </example>
+    </examples>
+    <instructions>
+      Always retrieve the current version of an entity from its authoritative context before modification to avoid working with stale references.
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Creating CoMaps with Optional Fields</name>
+    <description>When creating CoMaps, pass only required fields to `.create()`. Set optional fields AFTER creation.</description>
+    <rationale>Jazz .create() expects plain values, not CoMap instances. Passing CoMaps in initial value causes "right operand of 'in' is not an object" errors.</rationale>
+    <examples>
+      <example type="wrong">
+        const scope = GameScope.create(
+          {
+            holes: "all18",
+            teamsConfig: someTeamsConfig,  // ERROR: Can't pass CoMap instances
+          },
+          { owner: group }
+        );
+      </example>
+      <example type="correct">
+        const scope = GameScope.create(
+          {
+            holes: "all18",
+          },
+          { owner: group }
+        );
+        // Set optional CoMap field after creation
+        if (teamsConfig) {
+          scope.$jazz.set("teamsConfig", teamsConfig);
+        }
+      </example>
+    </examples>
+    <instructions>
+      Create CoMaps with only required primitive fields. Use $jazz.set() to add optional fields, especially if they are other CoMaps.
+    </instructions>
+  </rule>
+
+  <rule severity="MEDIUM" enforcement="RECOMMENDED">
+    <name>Performance: Load What You Need</name>
+    <description>Optimize Jazz loading by only loading data when needed, not all upfront.</description>
+    <loading_strategy>
+      <strategy>Initial load: Don't include expensive nested data in useCoState resolve</strategy>
+      <strategy>On-demand: Use ensureLoaded() when accessing specific tabs/features</strategy>
+      <strategy>Minimal depth: Load only the nesting level you actually need</strategy>
+    </loading_strategy>
+    <instructions>
+      Don't over-fetch data. Load expensive nested structures only when the user navigates to features that need them.
+    </instructions>
+  </rule>
+
+  <rule severity="MEDIUM" enforcement="RECOMMENDED">
+    <name>Circular Dependencies with String IDs</name>
+    <description>Avoid circular dependencies between CoMaps by using string IDs instead of direct references.</description>
+    <examples>
+      <example type="pattern">
+        // Round uses playerId: z.string() instead of player: Player
+        // Player can have rounds: co.optional(ListOfRounds)
+      </example>
+    </examples>
+    <instructions>
+      When two entities would reference each other, use string IDs in one direction to break the circular dependency.
+    </instructions>
+  </rule>
+
+  <rule severity="MEDIUM" enforcement="RECOMMENDED">
+    <name>Jazz API Patterns</name>
+    <description>Common Jazz API patterns for working with data</description>
+    <api_patterns>
+      <pattern>Set optional fields: `obj.$jazz.set("field", value)`</pattern>
+      <pattern>Add to list: `list.$jazz.push(item)`</pattern>
+      <pattern>Get owner: `obj.$jazz.owner`</pattern>
+      <pattern>Get ID: `obj.$jazz.id`</pattern>
+      <pattern>Check loaded: `obj.$isLoaded`</pattern>
+      <pattern>Check loading state: `obj.$jazz.loadingState`</pattern>
+      <pattern>Check field exists: `obj.$jazz.has("field")`</pattern>
+    </api_patterns>
+    <instructions>
+      Use these standard Jazz patterns consistently across the codebase.
+    </instructions>
+  </rule>
+
+  <rule severity="MEDIUM" enforcement="RECOMMENDED">
+    <name>Debugging Loading Issues</name>
+    <description>Tools for debugging Jazz loading problems</description>
+    <debugging_tools>
+      <tool>`$isLoaded` - Check if object is fully loaded</tool>
+      <tool>`$jazz.loadingState` - Check loading state (undefined = not tried yet)</tool>
+      <tool>`$jazz.has("field")` - Check if optional field exists in DB</tool>
+    </debugging_tools>
+    <instructions>
+      When data isn't loading as expected, check loadingState and $isLoaded to diagnose the issue.
+    </instructions>
+  </rule>
+
+  <rule severity="LOW" enforcement="ADVISORY">
+    <name>Jazz Documentation</name>
+    <description>Jazz Tools documentation is available at https://jazz.tools/docs and via Context7 MCP</description>
+    <instructions>
+      For detailed Jazz Tools API documentation, check https://jazz.tools/docs or use the Context7 MCP to fetch library docs.
+    </instructions>
+  </rule>
+</rules>
