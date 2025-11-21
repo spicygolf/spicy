@@ -84,6 +84,14 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+
+        // Enable 16KB page size support for Android 15+ (required for Play Store)
+        // See: https://developer.android.com/guide/practices/page-sizes
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+            }
+        }
     }
     signingConfigs {
         debug {
@@ -104,6 +112,13 @@ android {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
+    }
+
+    // Handle duplicate native libraries from multiple modules
+    packaging {
+        pickFirst "**/libNitroModules.so"
+        pickFirst "**/libc++_shared.so"
+        pickFirst "**/libfbjni.so"
     }
 
     // until https://github.com/facebook/react-native/pull/49449 is released in RN

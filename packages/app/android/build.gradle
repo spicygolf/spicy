@@ -4,7 +4,8 @@ buildscript {
         minSdkVersion = 24
         compileSdkVersion = 35
         targetSdkVersion = 35
-        ndkVersion = "27.1.12297006"
+        // Using NDK 28.x which has fixes for CMake LTO hanging issues on macOS
+        ndkVersion = "28.2.13676358"
         kotlinVersion = "2.1.20"
     }
     repositories {
