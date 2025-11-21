@@ -16,12 +16,17 @@ interface JazzCredentials {
 }
 
 async function fetchJazzCredentials(api: string): Promise<JazzCredentials> {
+  const url = `${api}/jazz/credentials`;
   try {
-    const response = await axios.get(`${api}/jazz/credentials`);
+    const response = await axios.get(url);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      throw new Error(`Failed to fetch Jazz credentials: ${error.message}`);
+      const status = error.response?.status;
+      const message = error.message;
+      throw new Error(
+        `Cannot reach API at ${url}\n${status ? `Status: ${status}\n` : ""}${message}`,
+      );
     }
     throw error;
   }

@@ -1,6 +1,7 @@
 import type { CoList, MaybeLoaded } from "jazz-tools";
 import { useRef } from "react";
-import { FlatList, View } from "react-native";
+import { FlatList } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
 import { GameListItem } from "@/components/game/list/GameListItem";
 
@@ -37,12 +38,17 @@ export function GameList({
   }
 
   return (
-    <View>
-      <FlatList
-        data={displayGames}
-        renderItem={({ item }) => <GameListItem game={item} />}
-        keyExtractor={(item) => item.$jazz.id}
-      />
-    </View>
+    <FlatList
+      data={displayGames}
+      renderItem={({ item }) => <GameListItem game={item} />}
+      keyExtractor={(item) => item.$jazz.id}
+      contentContainerStyle={styles.flatlist}
+    />
   );
 }
+
+const styles = StyleSheet.create((theme) => ({
+  flatlist: {
+    marginVertical: theme.gap(1),
+  },
+}));

@@ -31,7 +31,6 @@ export function SelectCourseNavigator({ route }: Props) {
     tabBarIndicatorStyle: styles.selectedTabLine,
     tabBarStyle: {
       height: 35,
-      backgroundColor: theme.colors.background,
     },
     tabBarLabelStyle: {
       padding: 0,

@@ -297,8 +297,6 @@ export function GameTeamsList() {
     game.scope.$jazz.set("teamsConfig", config);
   }
 
-  const styles = useStyles;
-
   return (
     <DraxProvider>
       <View style={styles.container}>
@@ -348,7 +346,7 @@ export function GameTeamsList() {
   );
 }
 
-const useStyles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
   },

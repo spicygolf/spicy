@@ -9,7 +9,7 @@ import { useController } from "react-hook-form";
 import type { TextInputProps } from "react-native";
 // biome-ignore lint/style/noRestrictedImports: This component is a wrapper around the React Native component.
 import { TextInput, View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";
 
 interface InputProps<F extends FieldValues> extends TextInputProps {
@@ -49,6 +49,8 @@ function FormControlledInput<F extends FieldValues>({
     fieldState: { error },
   } = useController({ name, control, rules });
 
+  const { theme } = useUnistyles();
+
   return (
     <View>
       <Text style={styles.label}>{label}</Text>
@@ -58,6 +60,7 @@ function FormControlledInput<F extends FieldValues>({
           value={field.value || ""}
           onChangeText={field.onChange}
           onBlur={field.onBlur}
+          placeholderTextColor={theme.colors.secondary}
           {...rest}
         />
         {error?.message ? (
@@ -77,6 +80,7 @@ function StandaloneInput({
   ...rest
 }: StandaloneInputProps) {
   const [internalValue, setInternalValue] = useState(value || "");
+  const { theme } = useUnistyles();
 
   const handleChangeText = (text: string) => {
     setInternalValue(text);
@@ -91,6 +95,7 @@ function StandaloneInput({
           style={[styles.input, error && styles.inputError]}
           value={value !== undefined ? value : internalValue}
           onChangeText={handleChangeText}
+          placeholderTextColor={theme.colors.secondary}
           {...rest}
         />
         {error ? <Text style={styles.errorText}>{error}</Text> : null}

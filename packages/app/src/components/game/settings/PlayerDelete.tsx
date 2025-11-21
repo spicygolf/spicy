@@ -77,9 +77,9 @@ export function PlayerDelete({ player }: { player: Player }) {
   return (
     <TouchableOpacity onPress={() => deletePlayer()}>
       <FontAwesome6
-        name="delete-left"
-        size={18}
-        color="#666"
+        name="circle-xmark"
+        size={24}
+        color="#FF0000"
         iconStyle="solid"
       />
     </TouchableOpacity>

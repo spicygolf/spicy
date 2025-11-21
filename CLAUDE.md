@@ -52,11 +52,9 @@ spicy/
 │   └── lib/          # Shared utilities and business logic
 │
 ├── .claude/          # Orchestration configuration
-│   ├── agents/       # Specialist agent definitions
-│   ├── rules/        # XML rules for context management
-│   └── ORCHESTRATION-GUIDE.md
-│
-└── .llm-rules/       # Legacy rules (migrated to .claude/rules/)
+    ├── agents/       # Specialist agent definitions
+    ├── rules/        # XML rules for context management
+    └── ORCHESTRATION-GUIDE.md
 ```
 
 ## Tech Stack
@@ -120,13 +118,6 @@ For full details, see `.claude/rules/*.xml`:
 - ✅ Simple bug fixes
 - ✅ Formatting/style updates
 - ✅ Documentation
-
-## Legacy Migration
-
-The old `.llm-rules/*.md` files have been converted to:
-- `architecture.md` + `general.md` → `.claude/rules/architecture.xml`
-- `coding.md` → `.claude/rules/code-typescript.xml`
-- `jazz.md` → `.claude/rules/jazz.xml`
 
 The XML format allows better context management for specialized agents.
 
