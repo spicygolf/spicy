@@ -1,7 +1,11 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import {
+  StyleSheet,
+  UnistylesRuntime,
+  useUnistyles,
+} from "react-native-unistyles";
 import { Button, Text } from "@/ui";
 import type { RotationChangeOption } from "./types";
 import { getRotationLabel } from "./utils";
@@ -34,8 +38,6 @@ export function RotationChangeModal({
     onCancel();
     setSelectedOption("clearExceptFirst");
   };
-
-  const styles = useStyles;
 
   return (
     <Modal
@@ -174,10 +176,10 @@ export function RotationChangeModal({
   );
 }
 
-const useStyles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme) => ({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: theme.colors.modalOverlay,
     justifyContent: "center",
     alignItems: "center",
     padding: theme.gap(2),

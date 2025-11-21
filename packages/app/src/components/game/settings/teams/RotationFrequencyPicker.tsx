@@ -1,7 +1,11 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import {
+  StyleSheet,
+  UnistylesRuntime,
+  useUnistyles,
+} from "react-native-unistyles";
 import { Button, Input, Text } from "@/ui";
 import { getRotationLabel, ROTATION_OPTIONS } from "./utils";
 
@@ -52,8 +56,6 @@ export function RotationFrequencyPicker({
     rotateEvery !== 1 &&
     rotateEvery !== 3 &&
     rotateEvery !== 6;
-
-  const styles = useStyles;
 
   return (
     <>
@@ -168,12 +170,11 @@ export function RotationFrequencyPicker({
   );
 }
 
-const useStyles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme) => ({
   rotationPickerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: theme.gap(2),
     paddingVertical: theme.gap(1.5),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -195,7 +196,7 @@ const useStyles = StyleSheet.create((theme) => ({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: theme.colors.modalOverlay,
     justifyContent: "center",
     alignItems: "center",
     padding: theme.gap(2),

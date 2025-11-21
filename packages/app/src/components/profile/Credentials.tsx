@@ -4,11 +4,14 @@ import { KvStoreContext, useAccount } from "jazz-tools/react-native";
 import { useEffect, useState } from "react";
 // biome-ignore lint/style/noRestrictedImports: This component is a wrapper around the React Native component.
 import { TextInput, TouchableOpacity, View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { PlayerAccount } from "spicylib/schema";
 import { Text } from "@/ui";
 
-const CopyIcon = () => <FontAwesome6 name="copy" size={12} color="gray" />;
+const CopyIcon = () => {
+  const { theme } = useUnistyles();
+  return <FontAwesome6 name="copy" size={12} color={theme.colors.secondary} />;
+};
 
 export function Credentials() {
   const [secret, setSecret] = useState<string>("");
@@ -112,6 +115,6 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
   },
   secret: {
-    color: "gray",
+    color: theme.colors.secondary,
   },
 }));

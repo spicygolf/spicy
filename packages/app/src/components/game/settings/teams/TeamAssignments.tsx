@@ -22,7 +22,6 @@ export function TeamAssignments({
   onTossBalls,
 }: TeamAssignmentsProps) {
   const { theme } = useUnistyles();
-  const styles = useStyles;
 
   const teamSections = useMemo((): TeamSection[] => {
     const sections: TeamSection[] = [];
@@ -162,7 +161,7 @@ export function TeamAssignments({
   );
 }
 
-const useStyles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme) => ({
   centerContainer: {
     flex: 1,
     justifyContent: "center",
@@ -188,7 +187,6 @@ const useStyles = StyleSheet.create((theme) => ({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: theme.gap(2),
-    paddingHorizontal: theme.gap(2),
     paddingTop: theme.gap(2),
   },
   title: {
@@ -196,7 +194,6 @@ const useStyles = StyleSheet.create((theme) => ({
     fontWeight: "bold",
   },
   scrollContainer: {
-    paddingHorizontal: theme.gap(2),
     paddingBottom: theme.gap(4),
   },
   teamSection: {

@@ -25,7 +25,11 @@ const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 export function useGetCountriesAndStates() {
   const api = useApi();
 
-  const { data: countries } = useQuery({
+  const {
+    data: countries,
+    error,
+    isLoading,
+  } = useQuery({
     queryKey: ["ghin-countries"],
     queryFn: () => fetchCountries(api),
     staleTime: ONE_MONTH_MS,
@@ -38,5 +42,5 @@ export function useGetCountriesAndStates() {
     networkMode: "offlineFirst",
   });
 
-  return { countries: countries ?? null };
+  return { countries: countries ?? null, error, isLoading };
 }

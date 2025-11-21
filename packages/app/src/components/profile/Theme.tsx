@@ -59,13 +59,4 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "bold",
     paddingBottom: theme.gap(1),
   },
-  themeTabs: {
-    backgroundColor: "#666",
-  },
-  themeActiveFont: {
-    color: "#24a0ed",
-  },
-  themeInactiveFont: {
-    color: "gray",
-  },
 }));

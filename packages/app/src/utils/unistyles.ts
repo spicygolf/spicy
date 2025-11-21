@@ -12,6 +12,7 @@ const light = {
     error: "#ff3b30",
     border: "#e0e0e0",
     statusBar: "dark-content" as const,
+    modalOverlay: "rgba(0, 0, 0, 0.5)",
     fave: {
       active: "#34C759",
       inactive: "#999999",
@@ -31,6 +32,7 @@ const dark = {
     error: "#ff453a",
     border: "#38383a",
     statusBar: "light-content" as const,
+    modalOverlay: "rgba(255, 255, 255, 0.5)",
     fave: {
       active: "#34C759",
       inactive: "#666666",
