@@ -36,7 +36,7 @@
     "prettier": "^3.0.3"
   },
   "scripts": {
-    "start:dev": "bun run --watch server.js",
+    "start:dev": "bun run --watch src/server.js",
     "start:prod": "pm2 start ecosystem.config.yaml --env production",
     "stop:prod": "pm2 stop ecosystem.config.yaml --env production",
     "test": "jest",

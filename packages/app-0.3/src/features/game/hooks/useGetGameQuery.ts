@@ -36,6 +36,7 @@ export const query = gql`
         date
         seq
         handicap_index
+        course_handicap
         scores {
           hole
           values {
@@ -149,6 +150,7 @@ export const query = gql`
             disp
           }
           default
+          value
           limit
           scope
           icon
@@ -166,6 +168,35 @@ export const query = gql`
             value
             holes
           }
+        }
+        junk {
+          name
+          disp
+          seq
+          type
+          sub_type
+          value
+          limit
+          scope
+          icon
+          show_in
+          score_to_par
+          based_on
+          calculation
+          availability
+          logic
+          better
+        }
+        multipliers {
+          name
+          disp
+          seq
+          value
+          icon
+          based_on
+          scope
+          availability
+          override
         }
       }
       options {

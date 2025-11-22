@@ -18,8 +18,8 @@ export default function useAppState() {
   }
 
   useEffect(() => {
-    AppState.addEventListener('change', onChange);
-    return () => AppState.removeEventListener('change', onChange);
+    const subscription = AppState.addEventListener('change', onChange);
+    return () => subscription.remove();
   }, []);
 
   return {

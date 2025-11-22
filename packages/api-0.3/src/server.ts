@@ -95,27 +95,30 @@ StartServer().catch((error) => console.log(error));
 
 
 const context = async ({ req }) => {
-  if (!useAuthentication(req.body?.query)) {
-    return
-  };
+  // TEMPORARILY DISABLED FOR DEVELOPMENT
+  return {};
 
-  // validate token for all other endpoints
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader?.split(' ')[1];
+  // if (!useAuthentication(req.body?.query)) {
+  //   return
+  // };
 
-  let user: string | JwtPayload = "";
-  try {
-    user = jwt.verify(token, JWT_SECRET || '');
-  } catch(_) {}
-  if (!user) {
-    throw new GraphQLError('User is not authenticated', {
-      extensions: {
-        code: 'UNAUTHENTICATED',
-        http: { status: 401 },
-      },
-    });
-  }
-  return user;
+  // // validate token for all other endpoints
+  // const authHeader = req.headers.authorization || '';
+  // const token = authHeader?.split(' ')[1];
+
+  // let user: string | JwtPayload = "";
+  // try {
+  //   user = jwt.verify(token, JWT_SECRET || '');
+  // } catch(_) {}
+  // if (!user) {
+  //   throw new GraphQLError('User is not authenticated', {
+  //     extensions: {
+  //       code: 'UNAUTHENTICATED',
+  //       http: { status: 401 },
+  //     },
+  //   });
+  // }
+  // return user;
 };
 
 const useAuthentication = (query: string) => {

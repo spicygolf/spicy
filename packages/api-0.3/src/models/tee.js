@@ -54,8 +54,28 @@ class Tee extends Doc {
               OR NOT IS_DATESTRING(v.effective.end)
             )
           )
+          LET course = FIRST(
+            FOR c, ce
+              IN 1..1
+              ANY v._id
+              GRAPH 'games'
+              FILTER ce.type == 'tee2course'
+              RETURN c
+          )
           SORT e.ts ASC
-          RETURN v
+          RETURN MERGE(v, {
+            tee_name: v.name,
+            total_yardage: v.TotalYardage,
+            total_meters: v.TotalMeters,
+            ratings: v.Ratings,
+            holes_number: v.HolesNumber,
+            course: course ? {
+              course_id: course.course_id,
+              course_name: course.name,
+              course_city: course.city,
+              course_state: course.state
+            } : null
+          })
     `);
     return await cursor.all();
   }
