@@ -3,7 +3,7 @@ import { validateFloat } from 'common/utils/account';
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, TextInput } from 'react-native';
 
-const OptionNum = (props) => {
+const OptionNum = props => {
   const { option, setOption, readonly, index = 0 } = props;
   const [value, setValue] = useState(option.values[0].value || null);
 
@@ -24,7 +24,7 @@ const OptionNum = (props) => {
     <TextInput
       editable={!readonly}
       style={[styles.field_input, oValid]}
-      onChangeText={(text) => {
+      onChangeText={text => {
         setValue(text);
         validate('num', text);
       }}
@@ -41,7 +41,7 @@ const OptionNum = (props) => {
         }
       }}
       keyboardType="decimal-pad"
-      value={value.toString()}
+      value={value ? value.toString() : ''}
     />
   );
 };

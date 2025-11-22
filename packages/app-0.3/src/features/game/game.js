@@ -10,7 +10,7 @@ import useAppState from 'hooks/useAppState';
 import React, { useContext, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 
-const Game = (props) => {
+const Game = props => {
   const { route } = props;
   const { currentGameKey, readonly } = route.params;
 
@@ -22,6 +22,7 @@ const Game = (props) => {
     variables: {
       gkey: currentGameKey,
     },
+    fetchPolicy: 'network-only',
   });
 
   useEffect(
@@ -64,7 +65,9 @@ const Game = (props) => {
         We need key as well as rkey, because we include listeners as children of
         the GameContext.Provider below, even tho they don't render anything.
       */
-    const round_listeners = game.rounds.map((r) => <ScorePostedListener rkey={r._key} />);
+    const round_listeners = game.rounds.map(r => (
+      <ScorePostedListener key={r._key} rkey={r._key} />
+    ));
 
     return (
       <GameContext.Provider

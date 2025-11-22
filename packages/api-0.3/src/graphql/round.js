@@ -36,6 +36,7 @@ type Round {
   scores: [Score]
   player: [Player]
   handicap_index: String
+  course_handicap: String
   posting: Posting
 }
 
@@ -164,6 +165,38 @@ export const RoundResolvers = {
     tees: (round) => {
       let r = new Round();
       return r.getTees(round);
+    },
+    course_handicap: async (round) => {
+      // Get course_handicap from the tees array (it's in the first tee)
+      let r = new Round();
+      const tees = await r.getTees(round);
+      return tees && tees[0] && tees[0].course_handicap ? tees[0].course_handicap.toString() : null;
+    },
+    scores: async (round) => {
+      // Calculate pops for each score based on course_handicap and hole allocation
+      if (!round.scores || round.scores.length === 0) {
+        return [];
+      }
+
+      let r = new Round();
+      const tees = await r.getTees(round);
+      const courseHandicap = tees && tees[0] && tees[0].course_handicap ? parseInt(tees[0].course_handicap) : 0;
+
+      return round.scores.map(score => {
+        // Find the hole in the tee data
+        const holeNumber = parseInt(score.hole);
+        const hole = tees && tees[0] && tees[0].holes ? tees[0].holes.find(h => h.number === holeNumber) : null;
+        const allocation = hole ? hole.allocation : 18;
+
+        // Calculate pops (strokes received on this hole)
+        const pops = courseHandicap >= allocation ? 1 : 0;
+
+        return {
+          ...score,
+          pops: pops.toString(),
+          coursePops: pops.toString(),
+        };
+      });
     },
   },
 };

@@ -14,6 +14,7 @@ type OptionSpec {
   sub_type: String
   choices: [Choice]
   default: String
+  value: Float
   limit: String
   scope: String
   icon: String

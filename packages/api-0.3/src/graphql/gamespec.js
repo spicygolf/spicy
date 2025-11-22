@@ -48,6 +48,8 @@ type GameSpec {
   team_change_every: Int
   scoring: ScoringSpec
   options: [OptionSpec]
+  junk: [OptionSpec]
+  multipliers: [OptionSpec]
 }
 
 type GameSpecKey {
@@ -96,9 +98,10 @@ export const GameSpecResolvers = {
   },
   Mutation: {},
   GameSpec: {
-    options: async (gamespec) => {
-      const gs = new GameSpec();
-      return gs.getOptions(gamespec._id);
-    },
+    // Commented out custom resolver - just return options array from document
+    // options: async (gamespec) => {
+    //   const gs = new GameSpec();
+    //   return gs.getOptions(gamespec._id);
+    // },
   },
 };

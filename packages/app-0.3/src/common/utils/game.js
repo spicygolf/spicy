@@ -6,12 +6,12 @@ import { cloneDeep, filter, find, findIndex, groupBy, isEqual, reduce } from 'lo
  *  return array of strings - hole numbers in the game
  *
  */
-export const getHoles = (game) => {
+export const getHoles = game => {
   if (!game.holes || !game.holes.length) {
     let ret = [];
     switch (game.scope.holes) {
       case 'all18':
-        ret = Array.from(Array(18).keys()).map((x) => (++x).toString());
+        ret = Array.from(Array(18).keys()).map(x => (++x).toString());
         break;
       case 'front9':
         ret = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -25,7 +25,7 @@ export const getHoles = (game) => {
     }
     return ret;
   }
-  return game.holes.map((h) => h.hole.toString());
+  return game.holes.map(h => h.hole.toString());
 };
 
 export const getRatings = (holes, tee) => {
@@ -61,7 +61,7 @@ export const getRatings = (holes, tee) => {
   };
 };
 
-export const getNewGameForUpdate = (game) => {
+export const getNewGameForUpdate = game => {
   // do this to get the exact right doc structure of a game to send
   // to updateGame mutation (i.e. no __typename keys that come from cache)
   let ret = {
@@ -73,16 +73,16 @@ export const getNewGameForUpdate = (game) => {
       teams_rotate: game.scope.teams_rotate,
     },
     holes: game.holes
-      ? game.holes.map((h) => {
+      ? game.holes.map(h => {
           return {
             hole: h.hole,
             teams: h.teams
-              ? h.teams.map((t) => {
+              ? h.teams.map(t => {
                   return {
                     team: t.team,
                     players: t.players,
                     junk: t.junk
-                      ? t.junk.map((j) => {
+                      ? t.junk.map(j => {
                           return {
                             name: j.name,
                             player: j.player,
@@ -94,7 +94,7 @@ export const getNewGameForUpdate = (game) => {
                 })
               : [],
             multipliers: h.multipliers
-              ? h.multipliers.map((m) => {
+              ? h.multipliers.map(m => {
                   return {
                     name: m.name,
                     team: m.team,
@@ -106,11 +106,11 @@ export const getNewGameForUpdate = (game) => {
         })
       : [],
     options: game.options
-      ? game.options.map((o) => {
+      ? game.options.map(o => {
           return {
             name: o.name,
             values: o.values
-              ? o.values.map((v) => {
+              ? o.values.map(v => {
                   return {
                     value: v.value,
                     holes: v.holes,
@@ -138,7 +138,7 @@ function isNumeric(str) {
 // From https://gist.github.com/Billy-/d94b65998501736bfe6521eadc1ab538
 export const omitDeep = (value, key) => {
   if (Array.isArray(value)) {
-    return value.map((i) => omitDeep(i, key));
+    return value.map(i => omitDeep(i, key));
   } else if (typeof value === 'object' && value !== null) {
     return Object.keys(value).reduce((newObject, k) => {
       if (k === key) {
@@ -150,17 +150,43 @@ export const omitDeep = (value, key) => {
   return value;
 };
 
-export const omitTypename = (value) => omitDeep(value, '__typename');
+export const omitTypename = value => omitDeep(value, '__typename');
 
-export const getAllGamespecOptions = (game) => {
+export const getAllGamespecOptions = game => {
   let options = [];
-  game.gamespecs.map((gs) => {
-    gs.options.map((o) => {
-      options.push({
-        ...o,
-        gamespec_key: gs._key,
+  game.gamespecs.map(gs => {
+    // Include options from options array
+    if (gs.options) {
+      gs.options.map(o => {
+        options.push({
+          ...o,
+          sub_type: o.type, // Move original type (e.g., 'num', 'bool', 'menu') to sub_type
+          type: 'game', // Set type to 'game' so getAllOptions({type: 'game'}) finds them
+          gamespec_key: gs._key,
+        });
       });
-    });
+    }
+    // Include junk items (store original type in sub_type, use 'junk' as type for filtering)
+    if (gs.junk) {
+      gs.junk.map(o => {
+        options.push({
+          ...o,
+          sub_type: o.type, // Move original type (e.g., 'dot') to sub_type
+          type: 'junk', // Set type to 'junk' so getAllOptions({type: 'junk'}) finds them
+          gamespec_key: gs._key,
+        });
+      });
+    }
+    // Include multipliers (they're also options with type='multiplier')
+    if (gs.multipliers) {
+      gs.multipliers.map(o => {
+        options.push({
+          ...o,
+          type: 'multiplier', // Ensure type is set
+          gamespec_key: gs._key,
+        });
+      });
+    }
   });
   return options;
 };
@@ -169,15 +195,17 @@ export const getAllOptions = ({ game, type }) => {
   let options = [];
   const gsOptions = getAllGamespecOptions(game);
   if (gsOptions && gsOptions.length) {
-    gsOptions.map((gso) => {
+    gsOptions.map(gso => {
       if (gso.type === type) {
         let values = gso.values;
         if (typeof values === 'undefined' || values === null || values.length === 0) {
-          values = [{ value: gso.default, holes: (game.holes || []).map((h) => h.hole) }];
+          // For junk/multipliers, use gso.value; for regular options, use gso.default
+          const optionValue = gso.value !== undefined ? gso.value : gso.default;
+          values = [{ value: optionValue, holes: (game.holes || []).map(h => h.hole) }];
         }
-        values = values.map((v) => ({
+        values = values.map(v => ({
           ...v,
-          holes: v.holes !== null ? v.holes : game.holes.map((h) => h.hole),
+          holes: v.holes !== null ? v.holes : game.holes.map(h => h.hole),
         }));
         // console.log('values', values);
         let o = {
@@ -205,7 +233,7 @@ export const getOptionValue = ({ hole, option }) => {
   let ret = null;
 
   if (option && option.values) {
-    option.values.map((v) => {
+    option.values.map(v => {
       if (v.holes.includes(hole)) {
         ret = v.value;
       }
@@ -233,7 +261,7 @@ export const isOptionOnThisHole = ({ option, hole }) => {
     return false;
   }
   let ret = false;
-  option.values.map((v) => {
+  option.values.map(v => {
     if (v.holes?.indexOf(hole) >= 0) {
       ret = true;
     }
@@ -250,7 +278,7 @@ export const isSameHolesList = (holes1, holes2) => {
 
 export const getGamespecKVs = (game, key) => {
   //console.log('getGamespecKVs game', game);
-  const ret = game.gamespecs.map((gs) => {
+  const ret = game.gamespecs.map(gs => {
     return gs[key];
   });
   return ret;
@@ -264,7 +292,7 @@ export const getJunk = (junkName, pkey, game, holeNum) => {
   if (!gHole || !gHole.teams) {
     return null;
   }
-  const gTeam = find(gHole.teams, (t) => t && t.players && t.players.includes(pkey));
+  const gTeam = find(gHole.teams, t => t && t.players && t.players.includes(pkey));
   if (!gTeam || !gTeam.junk) {
     return null;
   }
@@ -279,7 +307,7 @@ export const getJunk = (junkName, pkey, game, holeNum) => {
 };
 
 export const setTeamJunk = (t, junk, newValue, pkey) => {
-  if (findIndex(t.players, (p) => p === pkey) >= 0) {
+  if (findIndex(t.players, p => p === pkey) >= 0) {
     // this is the player's team for junk being set
     let newJunk = [];
     //console.log('team junk', t.junk);
@@ -292,7 +320,7 @@ export const setTeamJunk = (t, junk, newValue, pkey) => {
       });
     }
     if (t.junk && t.junk.length) {
-      t.junk.map((j) => {
+      t.junk.map(j => {
         if (j.name === junk.name) {
           if ((!junk.limit || junk.limit !== 'one_per_group') && j.player !== pkey) {
             newJunk.push(j);
@@ -310,7 +338,7 @@ export const setTeamJunk = (t, junk, newValue, pkey) => {
     // this is not the player's team for junk being set
     let newJunk = [];
     if (t.junk && t.junk.length) {
-      t.junk.map((j) => {
+      t.junk.map(j => {
         if (j.name === junk.name) {
           if (junk.limit !== 'one_per_group') {
             newJunk.push(j);
@@ -404,7 +432,7 @@ export const addPlayerToOwnTeam = ({ pkey, game }) => {
     newGame.holes = [];
   }
   //console.log('holesToUpdate', holesToUpdate);
-  holesToUpdate.map((h) => {
+  holesToUpdate.map(h => {
     const holeIndex = findIndex(newGame.holes, { hole: h });
     if (holeIndex < 0) {
       // if hole data doesn't exist, create it with the single player team
@@ -455,7 +483,7 @@ export const addPlayerToOwnTeam = ({ pkey, game }) => {
 
 export const playerListIndividual = ({ game }) => {
   return filter(
-    game.players.map((p) => {
+    game.players.map(p => {
       if (!p) {
         return null;
       }
@@ -466,7 +494,7 @@ export const playerListIndividual = ({ game }) => {
         team: '0',
       };
     }),
-    (p) => p != null,
+    p => p != null,
   );
 };
 
@@ -475,8 +503,8 @@ export const playerListWithTeams = ({ game, scores }) => {
   if (!scores || !scores.holes || !scores.holes[0]) {
     return ret;
   }
-  scores.holes[0].teams.map((t) => {
-    t.players.map((p) => {
+  scores.holes[0].teams.map(t => {
+    t.players.map(p => {
       const gP = find(game.players, { _key: p.pkey });
       ret.push({
         key: p.pkey,
@@ -486,14 +514,14 @@ export const playerListWithTeams = ({ game, scores }) => {
       });
     });
   });
-  return filter(ret, (p) => p != null);
+  return filter(ret, p => p != null);
 };
 
-export const getCoursesPlayersTxt = (game) => {
+export const getCoursesPlayersTxt = game => {
   let courses = [],
     acronyms = [],
     players = [];
-  (game?.rounds ?? []).map((r) => {
+  (game?.rounds ?? []).map(r => {
     if (r?.player[0]) {
       players.push(last(r.player[0].name));
     }
@@ -507,7 +535,7 @@ export const getCoursesPlayersTxt = (game) => {
       },
       [],
     );
-    tee_courses.map((c) => {
+    tee_courses.map(c => {
       if (courses.indexOf(c) < 0) {
         courses.push(c);
       }
@@ -539,14 +567,14 @@ export const teamsRotateOptions = [
   { slug: 'every6', caption: 'Every 6' },
 ];
 
-export const teamsRotate = (game) =>
+export const teamsRotate = game =>
   game && game.scope && game.scope.teams_rotate && game.scope.teams_rotate !== 'never';
 
 export const getLocalHoleInfo = ({ game, currentHole }) => {
   // we should have already checked gamespec.location_type == 'local' but...
   let par, length, handicap;
   let sameCourse = true;
-  game.rounds.map((r) => {
+  game.rounds.map(r => {
     // check to see if tee is set yet
     if (!(r?.tees?.length === 1)) {
       return { hole: currentHole };
@@ -580,7 +608,7 @@ export const getLocalHoleInfo = ({ game, currentHole }) => {
 };
 
 export const isTeeSameForAllPlayers = ({ game }) => {
-  const distinct_tees = groupBy(game.rounds, (r) => {
+  const distinct_tees = groupBy(game.rounds, r => {
     if (r?.tees?.length === 1) {
       return r.tees[0]?.tee_id;
     }
@@ -620,14 +648,14 @@ export const getWolfPlayerIndex = ({ game, currentHole }) => {
   return remainder;
 };
 
-export const isBinary = (option) =>
+export const isBinary = option =>
   option.sub_type === 'bool' ||
   (option.sub_type === 'menu' && option.choices.length === 2);
 
 // return
-export const getPreMultiplierTotal = (hole) => {
+export const getPreMultiplierTotal = hole => {
   let tot = 1;
-  hole.multipliers.map((m) => {
+  hole.multipliers.map(m => {
     if (m.name.startsWith('pre_')) {
       tot *= parseInt(m.default, 10);
     }

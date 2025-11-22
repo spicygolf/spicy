@@ -97,18 +97,20 @@ class Game extends Doc {
               ANY g._id
               GRAPH 'games'
               FILTER gse.type == 'game2gamespec'
-              LET options = (
-                FOR ov, oe
-                    IN 1..1
-                    ANY gsv._id
-                    GRAPH 'games'
-                    FILTER oe.type == 'option2gamespec'
-                    RETURN MERGE(ov, {
-                      default: oe.default ? oe.default : ov.default,
-                      values: oe.values ? oe.values : ov.values
-                    })
-              )
-              RETURN MERGE(gsv, {options})
+              // Commented out graph traversal for options - just use options array from gamespec document
+              // LET options = (
+              //   FOR ov, oe
+              //       IN 1..1
+              //       ANY gsv._id
+              //       GRAPH 'games'
+              //       FILTER oe.type == 'option2gamespec'
+              //       RETURN MERGE(ov, {
+              //         default: oe.default ? oe.default : ov.default,
+              //         values: oe.values ? oe.values : ov.values
+              //       })
+              // )
+              // RETURN MERGE(gsv, {options})
+              RETURN gsv
         )
         RETURN MERGE(g, {
           rounds: rounds,

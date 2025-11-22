@@ -12,27 +12,62 @@ class Round extends Doc {
   }
 
   async getTees(round) {
-    if (!(round?.tees)) return [];
-    try {
-      const ret = await Promise.all(
-        round.tees.map(
-          async (tee) => {
-            const ghinTee = await getTeeGhin({
-              q: {
-                tee_id: tee.tee_id,
-              },
-            });
-            return {
-              ...tee,
-              ...ghinTee,
-            };
-          }
-        ),
-      );
-      return ret;
-    } catch (e) {
-      console.error('error', e);
-    }
+    // Fetch tees from round2tee edges in the graph
+    const roundID = `rounds/${round._key}`;
+
+    const cursor = await db.query(aql`
+      FOR tv, te
+        IN 1..1
+        OUTBOUND ${roundID}
+        GRAPH 'games'
+        FILTER te.type == 'round2tee'
+        SORT te.ts DESC
+        LIMIT 1
+        LET course = FIRST(
+          FOR cv, ce
+            IN 1..1
+            ANY tv._id
+            GRAPH 'games'
+            FILTER ce.type == 'tee2course'
+            RETURN cv
+        )
+        LET gameEdge = FIRST(
+          FOR e IN edges
+            FILTER e._from == ${roundID}
+              AND e.type == 'round2game'
+            RETURN e
+        )
+        RETURN MERGE(tv, {
+          tee_name: tv.name,
+          total_yardage: tv.TotalYardage,
+          total_meters: tv.TotalMeters,
+          total_par: tv.TotalPar,
+          holes_number: tv.HolesNumber,
+          ratings: tv.Ratings,
+          holes: tv.holes ? (
+            FOR h IN tv.holes
+              RETURN {
+                number: h.hole,
+                hole_id: h.hole_id,
+                length: h.length,
+                par: h.par,
+                allocation: h.handicap
+              }
+          ) : [],
+          course_handicap: gameEdge ? gameEdge.course_handicap : null,
+          game_handicap: gameEdge ? gameEdge.game_handicap : null,
+          course: course ? {
+            course_id: course.course_id,
+            course_name: course.name,
+            course_city: course.city,
+            course_state: course.state,
+            course_number: course.number,
+            course_status: course.status
+          } : null
+        })
+    `);
+
+    return await cursor.all();
   }
 
   async getPlayer(rkey) {
