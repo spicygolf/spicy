@@ -12,7 +12,7 @@ import React, { useContext } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Button, Icon } from 'react-native-elements';
 
-const HoleJunk = (props) => {
+const HoleJunk = props => {
   const { hole, score, pkey, test } = props;
   // some testing things
   const { team, player_index } = test;
@@ -55,10 +55,10 @@ const HoleJunk = (props) => {
       return;
     }
 
-    let newHoles = game.holes.map((nh) => {
+    let newHoles = game.holes.map(nh => {
       let newHole = { ...nh };
       if (nh.hole === hole.hole) {
-        let newTeams = newHole.teams.map((t) => {
+        let newTeams = newHole.teams.map(t => {
           return setTeamJunk({ ...t }, junk, newValue.toString(), pkey);
         });
         newHole.teams = newTeams;
@@ -103,7 +103,7 @@ const HoleJunk = (props) => {
     return logic;
   };
 
-  const renderJunk = (junk) => {
+  const renderJunk = junk => {
     // go through all reasons to not show junk and return null
     if (junk.show_in === 'none') {
       return null;
@@ -128,7 +128,12 @@ const HoleJunk = (props) => {
     // if junk shouldn't be rendered except if a condition is achieved, then
     // return null
     if (junk.show_in === 'score') {
-      if (junk.scope === 'team' && scoreTeamForPlayer.players.length === 1) {
+      if (
+        junk.scope === 'team' &&
+        scoreTeamForPlayer &&
+        scoreTeamForPlayer.players &&
+        scoreTeamForPlayer.players.length === 1
+      ) {
         // show team junk for one-person teams here, if achieved
         //console.log('one-person team junk', scoreTeamForPlayer);
         const junkFind = find(scoreTeamForPlayer.junk, { name: junk.name });

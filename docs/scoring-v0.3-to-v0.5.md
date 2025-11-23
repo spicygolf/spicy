@@ -660,7 +660,7 @@ for (const gamespec of game.specs) {
   }
 }
 
-// GOOD: Ensure loaded upfront
+// GOOD: Ensure loaded upfront, check resolve query argument in ensureLoaded
 await ensureLoaded(game.specs);
 await Promise.all(
   game.specs.map(gs => ensureLoaded(gs.gameOptions))

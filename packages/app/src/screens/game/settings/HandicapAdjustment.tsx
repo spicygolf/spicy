@@ -2,7 +2,7 @@ import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMemo, useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { calculateCourseHandicap, formatCourseHandicap } from "spicylib/utils";
 import { Back } from "@/components/Back";
 import { useGameContext } from "@/contexts/GameContext";
@@ -17,6 +17,7 @@ type Props = NativeStackScreenProps<
 export function HandicapAdjustment({ route, navigation }: Props) {
   const { playerId, roundToGameId } = route.params;
   const { game } = useGameContext();
+  const { theme } = useUnistyles();
 
   const player = useMemo(() => {
     if (!game?.players?.$isLoaded) return null;
@@ -201,9 +202,9 @@ export function HandicapAdjustment({ route, navigation }: Props) {
                   onPress={handleClearIndexOverride}
                 >
                   <FontAwesome6
-                    name="circle-xmark"
-                    size={24}
-                    color="#FF0000"
+                    name="delete-left"
+                    size={18}
+                    color={theme.colors.secondary}
                     iconStyle="solid"
                   />
                 </TouchableOpacity>
@@ -265,7 +266,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
                 label=""
                 value={gameHandicap}
                 onChangeText={setGameHandicap}
-                placeholder="e.g., 10 or -2"
+                placeholder="e.g., 10 or +2"
                 keyboardType="numbers-and-punctuation"
               />
             </View>
@@ -277,9 +278,9 @@ export function HandicapAdjustment({ route, navigation }: Props) {
                   onPress={handleClearGameHandicap}
                 >
                   <FontAwesome6
-                    name="circle-xmark"
-                    size={24}
-                    color="#FF0000"
+                    name="delete-left"
+                    size={18}
+                    color={theme.colors.secondary}
                     iconStyle="solid"
                   />
                 </TouchableOpacity>

@@ -10,7 +10,7 @@ import { Text } from "@/ui";
 
 export function JazzAndAuth({ children }: { children: React.ReactNode }) {
   const { data: credentials, isLoading, error } = useJazzCredentials();
-  const api = useApi();
+  const _api = useApi();
 
   if (error) {
     return (

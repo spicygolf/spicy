@@ -5,4 +5,6 @@ export * from "./useGame";
 export * from "./useGamespecs";
 export * from "./useGetCountriesAndStates";
 export * from "./useGhinSearchPlayerQuery";
+export * from "./useHoleNavigation";
 export * from "./useJazzCredentials";
+export * from "./useScoreManagement";

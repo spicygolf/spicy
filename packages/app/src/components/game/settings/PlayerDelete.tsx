@@ -1,10 +1,12 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { TouchableOpacity } from "react-native";
+import { useUnistyles } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
 import { useGameContext } from "@/contexts/GameContext";
 
 export function PlayerDelete({ player }: { player: Player }) {
   const { game } = useGameContext();
+  const { theme } = useUnistyles();
 
   const deletePlayer = () => {
     // TODO: detect whether there are other things in the game linked to this
@@ -77,9 +79,9 @@ export function PlayerDelete({ player }: { player: Player }) {
   return (
     <TouchableOpacity onPress={() => deletePlayer()}>
       <FontAwesome6
-        name="circle-xmark"
-        size={24}
-        color="#FF0000"
+        name="delete-left"
+        size={18}
+        color={theme.colors.secondary}
         iconStyle="solid"
       />
     </TouchableOpacity>
