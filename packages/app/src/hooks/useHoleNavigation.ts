@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import type { Game, GameHole } from "spicylib/schema";
 
 export interface HoleInfo {
@@ -21,51 +21,48 @@ export interface UseHoleNavigationReturn {
 export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
 
-  const holesList = useMemo(() => {
-    if (!game?.holes?.$isLoaded) return [];
-    return game.holes
+  // Jazz provides reactive updates - no useMemo needed (jazz.xml)
+  let holesList: string[] = [];
+  if (game?.holes?.$isLoaded) {
+    holesList = game.holes
       .map((h) => (h?.$isLoaded ? h.hole : null))
       .filter(Boolean) as string[];
-  }, [game]);
+  }
 
-  const currentHole = useMemo(() => {
-    if (!game?.holes?.$isLoaded || currentHoleIndex >= game.holes.length) {
-      return null;
-    }
+  // Direct access to Jazz data - Jazz reactivity handles updates
+  let currentHole: GameHole | null = null;
+  if (game?.holes?.$isLoaded && currentHoleIndex < game.holes.length) {
     const hole = game.holes[currentHoleIndex];
-    return hole?.$isLoaded ? hole : null;
-  }, [game, currentHoleIndex]);
+    currentHole = hole?.$isLoaded ? hole : null;
+  }
 
   const currentHoleNumber = currentHole?.hole || "1";
 
-  // Get hole info from first player's tee
-  const holeInfo = useMemo((): HoleInfo | null => {
-    if (!game?.rounds?.$isLoaded || game.rounds.length === 0) {
-      return null;
-    }
-
+  // Get hole info from first player's tee - direct Jazz access
+  let holeInfo: HoleInfo | null = null;
+  if (game?.rounds?.$isLoaded && game.rounds.length > 0) {
     const firstRoundToGame = game.rounds[0];
-    if (!firstRoundToGame?.$isLoaded) return null;
+    if (firstRoundToGame?.$isLoaded) {
+      const round = firstRoundToGame.round;
+      if (round?.$isLoaded) {
+        const tee = round.tee;
+        if (tee?.$isLoaded && tee.holes?.$isLoaded) {
+          const hole = tee.holes.find(
+            (h) => h?.$isLoaded && h.number?.toString() === currentHoleNumber,
+          );
 
-    const round = firstRoundToGame.round;
-    if (!round?.$isLoaded) return null;
-
-    const tee = round.tee;
-    if (!tee?.$isLoaded || !tee.holes?.$isLoaded) return null;
-
-    const hole = tee.holes.find(
-      (h) => h?.$isLoaded && h.number?.toString() === currentHoleNumber,
-    );
-
-    if (!hole?.$isLoaded) return null;
-
-    return {
-      number: currentHoleNumber,
-      par: hole.par ?? 4,
-      yards: hole.yards ?? 0,
-      handicap: hole.handicap ?? 18,
-    };
-  }, [game, currentHoleNumber]);
+          if (hole?.$isLoaded) {
+            holeInfo = {
+              number: currentHoleNumber,
+              par: hole.par ?? 4,
+              yards: hole.yards ?? 0,
+              handicap: hole.handicap ?? 18,
+            };
+          }
+        }
+      }
+    }
+  }
 
   const handlePrevHole = useCallback(() => {
     setCurrentHoleIndex((prev) => {

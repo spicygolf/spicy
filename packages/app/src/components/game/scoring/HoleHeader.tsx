@@ -93,7 +93,7 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: theme.gap(2),
   },
   holeNumber: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: theme.gap(0.25),
   },

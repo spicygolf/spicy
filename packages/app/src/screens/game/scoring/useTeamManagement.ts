@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Game } from "spicylib/schema";
 import {
   ensureGameHoles,
@@ -30,25 +30,23 @@ export function useTeamManagement(
     "current" | "period"
   >("period");
 
-  const rotateEvery = useMemo(() => {
-    if (!game?.scope?.$isLoaded || !game.scope.$jazz.has("teamsConfig")) {
-      return undefined;
-    }
-    return game.scope.teamsConfig?.$isLoaded
+  // Direct access to Jazz data - no useMemo needed per jazz.xml patterns
+  let rotateEvery: number | undefined;
+  if (game?.scope?.$isLoaded && game.scope.$jazz.has("teamsConfig")) {
+    rotateEvery = game.scope.teamsConfig?.$isLoaded
       ? game.scope.teamsConfig.rotateEvery
       : undefined;
-  }, [game]);
+  }
 
-  const teamCount = useMemo(() => {
-    if (!game?.scope?.$isLoaded || !game.scope.$jazz.has("teamsConfig")) {
-      return 2;
-    }
-    return game.scope.teamsConfig?.$isLoaded
+  let teamCount = 2;
+  if (game?.scope?.$isLoaded && game.scope.$jazz.has("teamsConfig")) {
+    teamCount = game.scope.teamsConfig?.$isLoaded
       ? game.scope.teamsConfig.teamCount
       : 2;
-  }, [game]);
+  }
 
   // Load current hole's teams and check if we need to show the team chooser
+  // biome-ignore lint/correctness/useExhaustiveDependencies: game causes infinite loop due to Jazz reactivity
   useEffect(() => {
     async function loadCurrentHole() {
       if (!game?.$isLoaded || rotateEvery === undefined) return;
@@ -61,9 +59,28 @@ export function useTeamManagement(
 
       if (!game.holes?.$isLoaded) return;
 
+      // Ensure we have holes for the game
       ensureGameHoles(game);
 
       const hole = game.holes[currentHoleIndex];
+
+      // Early exit if this hole's teams are already loaded and populated
+      if (hole?.$isLoaded && hole.teams?.$isLoaded && hole.teams.length > 0) {
+        const firstTeam = hole.teams[0];
+        if (firstTeam?.$isLoaded && firstTeam.rounds?.$isLoaded) {
+          // Data already loaded, just check if we need the chooser
+          const needsChooser = shouldShowTeamChooser(
+            game.holes,
+            currentHoleIndex,
+            rotateEvery,
+            game,
+          );
+          setShowChooser((prev) =>
+            prev !== needsChooser ? needsChooser : prev,
+          );
+          return;
+        }
+      }
 
       if (hole?.$isLoaded && !hole.teams?.$isLoaded) {
         // @ts-expect-error - TypeScript doesn't narrow MaybeLoaded properly
@@ -143,7 +160,9 @@ export function useTeamManagement(
     }
 
     loadCurrentHole();
-  }, [game, currentHoleIndex, rotateEvery]);
+    // Only depend on stable values, not the reactive game object itself
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentHoleIndex, rotateEvery]);
 
   const handleChangeTeamsConfirm = useCallback(() => {
     if (!game?.holes?.$isLoaded || rotateEvery === undefined) return;

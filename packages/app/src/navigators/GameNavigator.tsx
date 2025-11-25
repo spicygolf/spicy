@@ -72,6 +72,7 @@ export function GameNavigator({ route }: GameNavigatorProps) {
     return () => {
       setGame(null);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game, setGame]);
 
   if (!game?.$isLoaded) {

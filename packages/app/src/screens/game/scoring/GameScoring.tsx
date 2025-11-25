@@ -36,7 +36,7 @@ export function GameScoring() {
   } = useTeamManagement(game, currentHoleIndex, holesList);
 
   // Hook 3: Score management (Jazz database updates)
-  const { handleScoreChange } = useScoreManagement(
+  const { handleScoreChange, handleUnscore } = useScoreManagement(
     game,
     currentHoleIndex,
     holeInfo,
@@ -89,6 +89,7 @@ export function GameScoring() {
             onPrevHole={handlePrevHole}
             onNextHole={handleNextHole}
             onScoreChange={handleScoreChange}
+            onUnscore={handleUnscore}
             onChangeTeams={() => setShowChangeTeamsModal(true)}
           />
         )}

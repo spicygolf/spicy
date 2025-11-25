@@ -45,6 +45,9 @@ export function useGame(gameId?: string, options: UseGameOptions = {}) {
           },
           rounds: {
             $each: {
+              handicapIndex: true,
+              courseHandicap: true,
+              gameHandicap: true,
               round: {
                 tee: {
                   ratings: {
