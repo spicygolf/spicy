@@ -4,6 +4,7 @@ import type { Game, GameHole, Score } from "spicylib/schema";
 import {
   calculateNetScore,
   calculatePops,
+  getEffectiveHandicap,
   getGrossScore,
   getPops,
 } from "spicylib/utils";
@@ -22,6 +23,7 @@ export interface ScoringViewProps {
   onPrevHole: () => void;
   onNextHole: () => void;
   onScoreChange: (roundToGameId: string, newGross: number) => void;
+  onUnscore: (roundToGameId: string) => void;
   onChangeTeams: () => void;
 }
 
@@ -33,8 +35,13 @@ export function ScoringView({
   onPrevHole,
   onNextHole,
   onScoreChange,
+  onUnscore,
   onChangeTeams,
 }: ScoringViewProps) {
+  // Handicap mode - for now hardcoded to "full"
+  // TODO: Read from game.optionOverrides when we implement game options UI
+  // Jazz's reactivity handles updates automatically - no useMemo needed
+
   return (
     <>
       <HoleHeader hole={holeInfo} onPrevious={onPrevHole} onNext={onNextHole} />
@@ -79,12 +86,31 @@ export function ScoringView({
                 const net =
                   gross !== null ? calculateNetScore(gross, pops) : null;
 
-                // Calculate pops based on course handicap if no score exists
+                // Calculate pops based on effective handicap
+                // Priority: gameHandicap > courseHandicap
                 const courseHandicap = rtg.courseHandicap ?? 0;
-                const calculatedPops = calculatePops(
+                const effectiveHandicap = getEffectiveHandicap(
                   courseHandicap,
+                  rtg.gameHandicap,
+                );
+
+                // TODO: Use adjusted handicap if in "low" mode
+                // const handicapForPops = adjustedHandicaps?.get(round.playerId) ?? effectiveHandicap;
+
+                const calculatedPops = calculatePops(
+                  effectiveHandicap,
                   holeInfo.handicap,
                 );
+
+                console.log("[ScoringView] Player pops calculation:", {
+                  playerName: player.name,
+                  holeNumber: holeInfo.number,
+                  holeHandicap: holeInfo.handicap,
+                  courseHandicap,
+                  gameHandicap: rtg.gameHandicap,
+                  effectiveHandicap,
+                  calculatedPops,
+                });
 
                 return (
                   <PlayerScoreRow
@@ -97,6 +123,7 @@ export function ScoringView({
                     onScoreChange={(newGross) =>
                       onScoreChange(rtg.$jazz.id, newGross)
                     }
+                    onUnscore={() => onUnscore(rtg.$jazz.id)}
                     readonly={false}
                   />
                 );

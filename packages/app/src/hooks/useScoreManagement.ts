@@ -1,10 +1,17 @@
 import { useCallback } from "react";
 import type { Game } from "spicylib/schema";
-import { calculatePops, setGrossScore, setPops } from "spicylib/utils";
+import {
+  calculatePops,
+  getEffectiveHandicap,
+  removeGrossScore,
+  setGrossScore,
+  setPops,
+} from "spicylib/utils";
 import type { HoleInfo } from "./useHoleNavigation";
 
 export interface UseScoreManagementReturn {
   handleScoreChange: (roundToGameId: string, newGross: number) => void;
+  handleUnscore: (roundToGameId: string) => void;
 }
 
 export function useScoreManagement(
@@ -80,9 +87,15 @@ export function useScoreManagement(
         console.log("[GameScoring] New score created", { id: score.$jazz.id });
       }
 
-      // Calculate pops based on course handicap
+      // Calculate pops based on effective handicap
+      // Priority: gameHandicap > courseHandicap
+      // TODO: Once we implement "low" handicap mode, this will need to adjust
       const courseHandicap = roundToGame.courseHandicap ?? 0;
-      const pops = calculatePops(courseHandicap, holeInfo.handicap);
+      const effectiveHandicap = getEffectiveHandicap(
+        courseHandicap,
+        roundToGame.gameHandicap,
+      );
+      const pops = calculatePops(effectiveHandicap, holeInfo.handicap);
 
       console.log("[GameScoring] Setting score values", {
         newGross,
@@ -113,7 +126,57 @@ export function useScoreManagement(
     [game, currentHoleIndex, holeInfo],
   );
 
+  const handleUnscore = useCallback(
+    (roundToGameId: string) => {
+      console.log("[GameScoring] handleUnscore called", {
+        roundToGameId,
+        hasGame: !!game,
+        roundsLoaded: game?.rounds?.$isLoaded,
+      });
+
+      if (!game?.rounds?.$isLoaded) {
+        console.log("[GameScoring] Early return - missing data");
+        return;
+      }
+
+      // Find the RoundToGame by ID
+      const roundToGame = game.rounds.find(
+        (rtg) => rtg?.$isLoaded && rtg.$jazz.id === roundToGameId,
+      );
+
+      if (!roundToGame?.$isLoaded) {
+        console.log("[GameScoring] RoundToGame not found or not loaded");
+        return;
+      }
+
+      const round = roundToGame.round;
+      if (!round?.$isLoaded || !round.scores?.$isLoaded) {
+        console.log("[GameScoring] Round or scores not loaded");
+        return;
+      }
+
+      // Get score for this hole
+      const score = round.scores[currentHoleIndex];
+
+      if (!score?.$isLoaded) {
+        console.log("[GameScoring] Score not found or not loaded");
+        return;
+      }
+
+      console.log("[GameScoring] Removing score for hole", {
+        currentHoleIndex,
+        scoreId: score.$jazz.id,
+      });
+
+      // Remove the gross score (and pops)
+      removeGrossScore(score);
+      console.log("[GameScoring] Score removed successfully");
+    },
+    [game, currentHoleIndex],
+  );
+
   return {
     handleScoreChange,
+    handleUnscore,
   };
 }

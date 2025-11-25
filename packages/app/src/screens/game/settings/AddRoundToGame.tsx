@@ -9,7 +9,12 @@ import {
   RoundToGame,
   type Round as RoundType,
 } from "spicylib/schema";
-import { formatDate, formatTime, isSameDay } from "spicylib/utils";
+import {
+  calculateCourseHandicap,
+  formatDate,
+  formatTime,
+  isSameDay,
+} from "spicylib/utils";
 import { Back } from "@/components/Back";
 import { useGameContext } from "@/contexts/GameContext";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
@@ -100,10 +105,30 @@ export function AddRoundToGame({ route, navigation }: Props) {
 
     const group = game.rounds.$jazz.owner;
 
+    // Calculate course handicap if we have the necessary data
+    let courseHandicap: number | undefined;
+    if (
+      round.$isLoaded &&
+      round.tee?.$isLoaded &&
+      round.tee.ratings?.$isLoaded &&
+      round.tee.ratings.total?.$isLoaded &&
+      round.handicapIndex
+    ) {
+      const calculated = calculateCourseHandicap({
+        handicapIndex: round.handicapIndex,
+        tee: round.tee,
+        holesPlayed: "all18",
+      });
+      // calculateCourseHandicap returns number | null, but we only want number | undefined
+      courseHandicap = calculated !== null ? calculated : undefined;
+    }
+
     const roundToGame = RoundToGame.create(
       {
         round,
         handicapIndex: round.handicapIndex,
+        ...(courseHandicap !== undefined &&
+          courseHandicap !== null && { courseHandicap }),
       },
       { owner: group },
     );

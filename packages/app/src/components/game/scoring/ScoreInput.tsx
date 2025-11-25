@@ -12,6 +12,7 @@ interface ScoreInputProps {
   onIncrement: () => void;
   onDecrement: () => void;
   onScoreTap?: () => void;
+  onUnscore?: () => void;
   readonly?: boolean;
 }
 
@@ -23,6 +24,7 @@ export function ScoreInput({
   onIncrement,
   onDecrement,
   onScoreTap,
+  onUnscore,
   readonly = false,
 }: ScoreInputProps) {
   const { theme } = useUnistyles();
@@ -35,9 +37,11 @@ export function ScoreInput({
   const scoreToPar = gross !== null ? gross - par : 0;
   const { label, color } = getScoreToParInfo(scoreToPar);
 
-  // Display values - show par/netPar if no score, otherwise actual values
-  const displayGross = hasScore ? gross : par;
-  const displayNet = hasScore ? (net ?? netPar) : netPar;
+  // Display values - show net par as default when unscored
+  // If unscored: show gross that would result in net par (par + pops)
+  const displayGross = hasScore ? gross : par + (par - netPar); // par + pops
+  // When unscored, display the hole's par as the net (which is what net par means)
+  const displayNet = hasScore ? (net ?? netPar) : par;
   const showNet = displayNet !== displayGross;
 
   const handleDecrement = (): void => {
@@ -54,9 +58,15 @@ export function ScoreInput({
     console.log("[ScoreInput] Score tapped", { gross, par });
     if (onScoreTap) {
       onScoreTap();
-    } else {
-      // Default behavior: act like increment button
-      handleIncrement();
+    }
+    // When no score exists, tapping activates at par (handled by parent)
+    // When score exists, tapping does nothing
+  };
+
+  const handleLongPress = (): void => {
+    console.log("[ScoreInput] Score long-pressed", { gross, par });
+    if (onUnscore && gross !== null) {
+      onUnscore();
     }
   };
 
@@ -89,6 +99,7 @@ export function ScoreInput({
         <TouchableOpacity
           style={styles.scoreContainer}
           onPress={handleScoreTap}
+          onLongPress={handleLongPress}
           disabled={readonly}
           activeOpacity={0.6}
           accessibilityLabel={`Score: ${displayGross}${showNet ? ` net ${displayNet}` : ""}`}
@@ -259,7 +270,6 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    // gap: theme.gap(2),
   },
   button: {
     width: 36,
@@ -334,33 +344,33 @@ const styles = StyleSheet.create((theme) => ({
   },
   // Double circle (eagle, albatross, and birdie with transparent outer)
   outerCircle: {
-    width: 64,
-    height: 64,
+    width: 56,
+    height: 56,
     borderWidth: 2,
-    borderRadius: 32,
+    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
   },
   innerCircle: {
-    width: 52,
-    height: 52,
+    width: 48,
+    height: 48,
     borderWidth: 2,
-    borderRadius: 26,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
   },
   // Double square (double bogey, triple bogey+, and bogey with transparent outer)
   outerSquare: {
-    width: 64,
-    height: 64,
+    width: 56,
+    height: 56,
     borderWidth: 2,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },
   innerSquare: {
-    width: 52,
-    height: 52,
+    width: 48,
+    height: 48,
     borderWidth: 2,
     borderRadius: 6,
     alignItems: "center",

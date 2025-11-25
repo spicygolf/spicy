@@ -12,6 +12,7 @@ interface PlayerScoreRowProps {
   par: number;
   pops: number;
   onScoreChange: (newGross: number) => void;
+  onUnscore: () => void;
   readonly?: boolean;
 }
 
@@ -22,6 +23,7 @@ export function PlayerScoreRow({
   par,
   pops,
   onScoreChange,
+  onUnscore,
   readonly = false,
 }: PlayerScoreRowProps) {
   const netPar = par - pops;
@@ -33,8 +35,9 @@ export function PlayerScoreRow({
       netPar,
     });
     if (gross === null) {
-      // If no score, start at net par
-      onScoreChange(netPar);
+      // If no score, start at net par + 1 (e.g., par 4 with 1 pop: 5 + 1 = 6)
+      const startGross = par + pops; // net par as gross
+      onScoreChange(Math.min(12, startGross + 1));
     } else if (gross < 12) {
       onScoreChange(gross + 1);
     }
@@ -47,11 +50,26 @@ export function PlayerScoreRow({
       netPar,
     });
     if (gross === null) {
-      // If no score, start at net par - 1
-      onScoreChange(Math.max(1, netPar - 1));
+      // If no score, start at net par - 1 (e.g., par 4 with 1 pop: 5 - 1 = 4)
+      const startGross = par + pops; // net par as gross
+      onScoreChange(Math.max(1, startGross - 1));
     } else if (gross > 1) {
       onScoreChange(gross - 1);
     }
+  };
+
+  const handleScoreTap = (): void => {
+    console.log("[PlayerScoreRow] handleScoreTap called", {
+      gross,
+      par,
+      netPar,
+    });
+    if (gross === null) {
+      // If no score, activate at net par (e.g., par 4 with 1 pop: gross = 5 for net 4)
+      const startGross = par + pops; // net par as gross
+      onScoreChange(startGross);
+    }
+    // If score exists, do nothing
   };
 
   // Placeholder for options - will be implemented when options/junk system is added
@@ -76,6 +94,8 @@ export function PlayerScoreRow({
         netPar={netPar}
         onIncrement={handleIncrement}
         onDecrement={handleDecrement}
+        onScoreTap={handleScoreTap}
+        onUnscore={onUnscore}
         readonly={readonly}
       />
 
