@@ -34,14 +34,45 @@ export function calculateNetScore(gross: number, pops: number): number {
 }
 
 /**
- * Calculate pops (strokes received) based on course handicap and hole allocation
- * Returns 1 if player receives a stroke on this hole, 0 otherwise
+ * Calculate pops (strokes received/given) based on course handicap and hole allocation
+ *
+ * Positive handicaps (e.g., 12): Player receives strokes on hardest holes
+ * - Handicap 12 gets 1 stroke on holes with allocation 1-12
+ * - Returns: 1 (stroke received)
+ *
+ * Negative/Plus handicaps (e.g., -4 for +4): Player gives strokes to course on easiest holes
+ * - Handicap -4 gives stroke on holes with allocation 15-18 (18 - 4 + 1 = 15)
+ * - Returns: -1 (stroke given)
+ *
+ * @param courseHandicap - The player's course handicap (negative for plus handicaps)
+ * @param holeAllocation - The hole's handicap index (1=hardest, 18=easiest)
+ * @returns Number of strokes: 1 (received), 0 (none), -1 (given to course)
+ *
+ * @example
+ * calculatePops(12, 5)  // 12 >= 5 → 1 stroke received
+ * calculatePops(12, 15) // 12 < 15 → 0 strokes
+ * calculatePops(-4, 17) // 17 > (18 - 4) → -1 stroke given to course
+ * calculatePops(-4, 14) // 14 <= (18 - 4) → 0 strokes
  */
 export function calculatePops(
   courseHandicap: number,
   holeAllocation: number,
 ): number {
-  return courseHandicap >= holeAllocation ? 1 : 0;
+  // Positive handicaps: receive strokes on hardest holes
+  if (courseHandicap > 0) {
+    return courseHandicap >= holeAllocation ? 1 : 0;
+  }
+
+  // Negative/Plus handicaps: give strokes to course on easiest holes
+  if (courseHandicap < 0) {
+    const absHandicap = Math.abs(courseHandicap);
+    // Give strokes on holes where allocation > (18 - absHandicap)
+    // e.g., +4 (-4) gives on holes 15,16,17,18 (allocation > 14)
+    return holeAllocation > 18 - absHandicap ? -1 : 0;
+  }
+
+  // Zero handicap: scratch player, no strokes
+  return 0;
 }
 
 /**
@@ -159,4 +190,37 @@ export function setPops(
   owner: { id: string },
 ): void {
   setScoreValue(score, "pops", pops.toString(), playerId, owner);
+}
+
+/**
+ * Remove a value from a score's values list by key
+ * This effectively "unscores" a hole for that value type
+ */
+export function removeScoreValue(score: Score, key: string): void {
+  if (!score.$isLoaded) {
+    throw new Error("Score must be loaded before removing values");
+  }
+
+  if (!score.values?.$isLoaded) {
+    throw new Error("Score values must be loaded before removing values");
+  }
+
+  // Find existing value with this key
+  const existingIndex = score.values.findIndex(
+    (v) => v?.$isLoaded && v.k === key,
+  );
+
+  if (existingIndex >= 0) {
+    // Remove the value using Jazz remove method
+    score.values.$jazz.remove(existingIndex);
+  }
+}
+
+/**
+ * Remove gross score from a score object (unscores the hole)
+ */
+export function removeGrossScore(score: Score): void {
+  removeScoreValue(score, "gross");
+  // Also remove pops when unscoring to keep data clean
+  removeScoreValue(score, "pops");
 }

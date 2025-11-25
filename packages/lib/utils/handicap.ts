@@ -6,6 +6,57 @@ interface CourseHandicapParams {
   holesPlayed?: "front9" | "back9" | "all18";
 }
 
+export interface PlayerHandicap {
+  playerId: string;
+  courseHandicap: number;
+  gameHandicap?: number;
+}
+
+/**
+ * Adjust handicaps relative to the lowest handicap player
+ * Used in "low" handicap mode where strokes are based on differences
+ *
+ * @param playerHandicaps - Array of player handicaps
+ * @returns Map of playerId to adjusted handicap (relative to lowest)
+ *
+ * @example
+ * Input: [{playerId: "p1", courseHandicap: 3}, {playerId: "p2", courseHandicap: -4}]
+ * Output: Map { "p1" => 7, "p2" => 0 }
+ */
+export function adjustHandicapsToLow(
+  playerHandicaps: PlayerHandicap[],
+): Map<string, number> {
+  if (playerHandicaps.length === 0) {
+    return new Map();
+  }
+
+  // Find the lowest handicap (could be negative for plus handicaps)
+  const lowestHandicap = Math.min(
+    ...playerHandicaps.map((p) => p.gameHandicap ?? p.courseHandicap),
+  );
+
+  // Calculate adjusted handicaps relative to the lowest
+  const adjustedMap = new Map<string, number>();
+  for (const player of playerHandicaps) {
+    const effectiveHandicap = player.gameHandicap ?? player.courseHandicap;
+    const adjusted = effectiveHandicap - lowestHandicap;
+    adjustedMap.set(player.playerId, adjusted);
+  }
+
+  return adjustedMap;
+}
+
+/**
+ * Get the effective handicap for a player
+ * Priority: gameHandicap > courseHandicap
+ */
+export function getEffectiveHandicap(
+  courseHandicap: number,
+  gameHandicap?: number,
+): number {
+  return gameHandicap ?? courseHandicap;
+}
+
 export function calculateCourseHandicap({
   handicapIndex,
   tee,

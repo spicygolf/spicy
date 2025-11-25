@@ -1,6 +1,7 @@
 import { co, z } from "jazz-tools";
 import { ListOfGameHoles } from "./gameholes";
 import { ListOfGameSpecs } from "./gamespecs";
+import { ListOfGameOptionValues } from "./options";
 import { ListOfPlayers } from "./players";
 import { ListOfRoundToGames } from "./rounds";
 import { TeamsConfig } from "./teamsconfig";
@@ -31,6 +32,13 @@ export const Game = co.map({
   holes: ListOfGameHoles,
   players: ListOfPlayers,
   rounds: ListOfRoundToGames,
+
+  /**
+   * Option overrides for this specific game instance.
+   * Allows overriding default values from GameSpec options.
+   * Example: Change handicap mode from "full" to "low" for this game.
+   */
+  optionOverrides: co.optional(ListOfGameOptionValues),
 });
 export type Game = co.loaded<typeof Game>;
 
