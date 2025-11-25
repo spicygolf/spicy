@@ -56,7 +56,7 @@ export function GameNavigator({ route }: GameNavigatorProps) {
   // Extract gameId from route params
   const gameId = route.params.gameId;
 
-  const { game } = useGame(gameId, { requireGame: true });
+  const { game } = useGame(gameId, { requireGame: true, loadHoles: false });
 
   // Calculate facility name - show only if all players are on the same course
   const facilityName = useMemo(() => {

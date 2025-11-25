@@ -2,7 +2,13 @@ import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ChangeTeamsModal } from "@/components/game/scoring";
 import { useGameContext } from "@/contexts/GameContext";
-import { useHoleNavigation, useScoreManagement } from "@/hooks";
+import {
+  useCurrentHoleData,
+  useGameInitialization,
+  useHoleInitialization,
+  useHoleNavigation,
+  useScoreManagement,
+} from "@/hooks";
 import { Screen, Text } from "@/ui";
 import { ScoringView } from "./ScoringView";
 import { TeamChooserView } from "./TeamChooserView";
@@ -10,6 +16,9 @@ import { useTeamManagement } from "./useTeamManagement";
 
 export function GameScoring() {
   const { game } = useGameContext();
+
+  // One-time game initialization (creates holes if needed)
+  useGameInitialization(game);
 
   // Hook 1: Hole navigation (current hole, prev/next)
   const {
@@ -34,6 +43,12 @@ export function GameScoring() {
     handleChangeTeamsConfirm,
     handleTeamAssignmentsChange,
   } = useTeamManagement(game, currentHoleIndex, holesList);
+
+  // Per-hole initialization (ensures teams exist for current hole)
+  useHoleInitialization(game, currentHoleIndex, rotateEvery);
+
+  // Touch current hole data to trigger Jazz lazy loading
+  useCurrentHoleData(game, currentHoleIndex);
 
   // Hook 3: Score management (Jazz database updates)
   const { handleScoreChange, handleUnscore } = useScoreManagement(
