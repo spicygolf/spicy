@@ -55,18 +55,22 @@ export function useScoreManagement(
         return;
       }
 
+      // Use string key for MapOfScores access
+      const holeKey = String(currentHoleIndex);
+
       console.log("[GameScoring] Processing score update", {
         currentHoleIndex,
-        scoresLength: round.scores.length,
+        holeKey,
       });
 
       // Get or create score for this hole
-      let score = round.scores[currentHoleIndex];
+      let score = round.scores[holeKey];
 
       // If score doesn't exist, create it
       if (!score || !score.$isLoaded) {
         console.log("[GameScoring] Creating new score for hole", {
           currentHoleIndex,
+          holeKey,
         });
 
         const { Score, ListOfValues } = require("spicylib/schema");
@@ -82,7 +86,8 @@ export function useScoreManagement(
           { owner: round.$jazz.owner },
         );
 
-        round.scores.$jazz.push(newScore);
+        // Set score in map using string key
+        round.scores.$jazz.set(holeKey, newScore);
         score = newScore;
         console.log("[GameScoring] New score created", { id: score.$jazz.id });
       }
@@ -155,8 +160,11 @@ export function useScoreManagement(
         return;
       }
 
+      // Use string key for MapOfScores access
+      const holeKey = String(currentHoleIndex);
+
       // Get score for this hole
-      const score = round.scores[currentHoleIndex];
+      const score = round.scores[holeKey];
 
       if (!score?.$isLoaded) {
         console.log("[GameScoring] Score not found or not loaded");
@@ -165,6 +173,7 @@ export function useScoreManagement(
 
       console.log("[GameScoring] Removing score for hole", {
         currentHoleIndex,
+        holeKey,
         scoreId: score.$jazz.id,
       });
 

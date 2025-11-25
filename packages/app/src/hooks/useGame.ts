@@ -28,7 +28,11 @@ export function useGame(gameId?: string, options: UseGameOptions = {}) {
                   $each: {
                     rounds: {
                       $each: {
-                        roundToGame: true,
+                        roundToGame: {
+                          round: {
+                            scores: true,
+                          },
+                        },
                       },
                     },
                   },

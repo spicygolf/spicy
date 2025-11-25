@@ -3,7 +3,6 @@ import { StyleSheet } from "react-native-unistyles";
 import { ChangeTeamsModal } from "@/components/game/scoring";
 import { useGameContext } from "@/contexts/GameContext";
 import {
-  useCurrentHoleData,
   useGameInitialization,
   useHoleInitialization,
   useHoleNavigation,
@@ -46,9 +45,6 @@ export function GameScoring() {
 
   // Per-hole initialization (ensures teams exist for current hole)
   useHoleInitialization(game, currentHoleIndex, rotateEvery);
-
-  // Touch current hole data to trigger Jazz lazy loading
-  useCurrentHoleData(game, currentHoleIndex);
 
   // Hook 3: Score management (Jazz database updates)
   const { handleScoreChange, handleUnscore } = useScoreManagement(

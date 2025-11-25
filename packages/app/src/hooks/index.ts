@@ -1,7 +1,6 @@
 export * from "./useAddPlayerToGame";
 export * from "./useApi";
 export * from "./useCreateGame";
-export * from "./useCurrentHoleData";
 export * from "./useGame";
 export * from "./useGameInitialization";
 export * from "./useGamespecs";

@@ -74,11 +74,11 @@ export function ScoringView({
 
                 if (!player?.$isLoaded) return null;
 
-                // Get score for current hole
+                // Get score for current hole (use string key for MapOfScores)
+                const holeKey = String(currentHoleIndex);
                 const score =
-                  round.scores?.$isLoaded &&
-                  round.scores[currentHoleIndex]?.$isLoaded
-                    ? (round.scores[currentHoleIndex] as Score)
+                  round.scores?.$isLoaded && round.scores[holeKey]?.$isLoaded
+                    ? (round.scores[holeKey] as Score)
                     : null;
 
                 const gross = getGrossScore(score);

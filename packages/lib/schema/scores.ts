@@ -33,3 +33,7 @@ export type Score = co.loaded<typeof Score>;
 
 export const ListOfScores = co.list(Score);
 export type ListOfScores = co.loaded<typeof ListOfScores>;
+
+/** Map of hole index (as string) to Score. Use string keys like "0", "1", ... "17" */
+export const MapOfScores = co.record(z.string(), Score);
+export type MapOfScores = co.loaded<typeof MapOfScores>;

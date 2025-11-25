@@ -4,7 +4,7 @@ import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
   ListOfRounds,
-  ListOfScores,
+  MapOfScores,
   Round,
   RoundToGame,
   type Round as RoundType,
@@ -81,7 +81,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
         handicapIndex: gamePlayer.handicap?.$isLoaded
           ? gamePlayer.handicap.display || "0.0"
           : "0.0",
-        scores: ListOfScores.create([], { owner: group }),
+        scores: MapOfScores.create({}, { owner: group }),
       },
       { owner: group },
     );
