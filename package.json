@@ -74,7 +74,7 @@
     ],
     "catalogs": {
       "jazz": {
-        "jazz-tools": "0.19.1"
+        "jazz-tools": "link:../jazz/packages/jazz-tools"
       }
     }
   },

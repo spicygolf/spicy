@@ -70,7 +70,7 @@ PODS:
     - SocketRocket
     - Yoga
   - OpenSSL-Universal (3.3.3001)
-  - QuickCrypto (1.0.0-beta.18):
+  - QuickCrypto (1.0.0-beta.21):
     - boost
     - DoubleConversion
     - fast_float
@@ -78,7 +78,7 @@ PODS:
     - glog
     - hermes-engine
     - NitroModules
-    - OpenSSL-Universal
+    - OpenSSL-Universal (= 3.3.3001)
     - RCT-Folly
     - RCT-Folly/Fabric
     - RCTRequired
@@ -1742,6 +1742,35 @@ PODS:
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
     - SocketRocket
+  - react-native-fast-encoder (0.3.1):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - react-native-get-random-values (1.11.0):
     - React-Core
   - react-native-mmkv (3.3.0):
@@ -2747,6 +2776,7 @@ DEPENDENCIES:
   - React-logger (from `../../../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../../../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../../../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
+  - react-native-fast-encoder (from `../../../node_modules/react-native-fast-encoder`)
   - react-native-get-random-values (from `../../../node_modules/react-native-get-random-values`)
   - react-native-mmkv (from `../../../node_modules/react-native-mmkv`)
   - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
@@ -2886,6 +2916,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../../../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
+  react-native-fast-encoder:
+    :path: "../../../node_modules/react-native-fast-encoder"
   react-native-get-random-values:
     :path: "../../../node_modules/react-native-get-random-values"
   react-native-mmkv:
@@ -2986,7 +3018,7 @@ SPEC CHECKSUMS:
   NitroModules: 06397834ddc39e1fa37e75a8a241cc8103f64161
   op-sqlite: 11caeb381964751c263209ce125442ea57cae253
   OpenSSL-Universal: 6082b0bf950e5636fe0d78def171184e2b3899c2
-  QuickCrypto: c738fd22834654b818de51a054b4b6e76f15049d
+  QuickCrypto: 1e79f3a9192cd747d9a38e204f2c5560eb95e9a5
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
   RCTDeprecation: ff787f6c860a1b97dd1bc27264b61d23ad1994da
   RCTRequired: 664eb8399ed8a83e26ab65af7c2ad390f7e61696
@@ -3020,6 +3052,7 @@ SPEC CHECKSUMS:
   React-logger: dce52a571ba0e0149c3f0fcc6866cbc0c8552c5e
   React-Mapbuffer: f5754c33877eaf36e4c76c613b35615a181c85c5
   React-microtasksnativemodule: 23df6374a3ac422d8c2927839bcaeed61fee3dad
+  react-native-fast-encoder: 035ec5cc6e29634b448c02fee71530319c98af41
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
   react-native-mmkv: 7fb4729ad5cb787a4394e6c4bd48e4b8ec30f25c
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187

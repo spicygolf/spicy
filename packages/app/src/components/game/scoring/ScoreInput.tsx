@@ -314,7 +314,7 @@ const styles = StyleSheet.create((theme) => ({
     opacity: 0.6,
   },
   grossText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
     color: theme.colors.primary,
   },
@@ -325,7 +325,7 @@ const styles = StyleSheet.create((theme) => ({
     marginHorizontal: theme.gap(0.5),
   },
   netText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
     color: theme.colors.secondary,
   },

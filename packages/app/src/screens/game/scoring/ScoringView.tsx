@@ -102,16 +102,6 @@ export function ScoringView({
                   holeInfo.handicap,
                 );
 
-                console.log("[ScoringView] Player pops calculation:", {
-                  playerName: player.name,
-                  holeNumber: holeInfo.number,
-                  holeHandicap: holeInfo.handicap,
-                  courseHandicap,
-                  gameHandicap: rtg.gameHandicap,
-                  effectiveHandicap,
-                  calculatedPops,
-                });
-
                 return (
                   <PlayerScoreRow
                     key={rtg.$jazz.id}
