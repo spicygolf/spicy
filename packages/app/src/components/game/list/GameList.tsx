@@ -1,5 +1,4 @@
 import type { CoList, MaybeLoaded } from "jazz-tools";
-import { useRef } from "react";
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
@@ -10,36 +9,27 @@ export function GameList({
 }: {
   games: MaybeLoaded<CoList<MaybeLoaded<Game>>> | undefined;
 }) {
-  const lastLoadedGames = useRef<Game[]>([]);
-
-  const currentLoadedGames = games?.$isLoaded
-    ? games.filter((g) => g?.$isLoaded)
-    : [];
-
-  if (currentLoadedGames.length > 0) {
-    lastLoadedGames.current = currentLoadedGames;
-  }
-
-  const sortGamesByDate = (games: Game[]) => {
-    return [...games].sort((a, b) => {
-      const dateA = a?.start?.getTime() ?? 0;
-      const dateB = b?.start?.getTime() ?? 0;
-      return dateB - dateA; // descending order (newest first)
-    });
-  };
-
-  const displayGames =
-    currentLoadedGames.length > 0
-      ? sortGamesByDate(currentLoadedGames)
-      : sortGamesByDate(lastLoadedGames.current);
-
-  if (!games && displayGames.length === 0) {
+  if (!games?.$isLoaded) {
     return null;
   }
 
+  // Just access Jazz data directly - no hooks needed
+  const loadedGames: Game[] = [];
+  for (const game of games as Iterable<(typeof games)[number]>) {
+    if (game?.$isLoaded) {
+      loadedGames.push(game);
+    }
+  }
+
+  const sortedGames = loadedGames.sort((a, b) => {
+    const dateA = a.start?.getTime() ?? 0;
+    const dateB = b.start?.getTime() ?? 0;
+    return dateB - dateA;
+  });
+
   return (
     <FlatList
-      data={displayGames}
+      data={sortedGames}
       renderItem={({ item }) => <GameListItem game={item} />}
       keyExtractor={(item) => item.$jazz.id}
       contentContainerStyle={styles.flatlist}

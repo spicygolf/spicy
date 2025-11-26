@@ -64,7 +64,22 @@ export function GameNavigator({ route }: GameNavigatorProps) {
   // Extract gameId from route params
   const gameId = route.params.gameId;
 
-  const { game } = useGame(gameId, { requireGame: true, loadHoles: false });
+  const { game } = useGame(gameId, {
+    requireGame: true,
+    resolve: {
+      name: true,
+      start: true,
+      rounds: {
+        $each: {
+          round: {
+            course: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
   // Calculate facility name - show only if all players are on the same course
   // CRITICAL: Don't use useMemo with Jazz data - just calculate directly

@@ -11,7 +11,17 @@ import { EmptyPlayersList } from "./EmptyPlayersList";
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 
 export function GamePlayersList() {
-  const { game } = useGame();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: {
+        $each: {
+          name: true,
+          handicap: true,
+          rounds: true,
+        },
+      },
+    },
+  });
   const navigation = useNavigation<NavigationProp>();
 
   const players =

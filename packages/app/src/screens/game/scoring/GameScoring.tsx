@@ -15,7 +15,38 @@ import { TeamChooserView } from "./TeamChooserView";
 import { useTeamManagement } from "./useTeamManagement";
 
 export function GameScoring() {
-  const { game } = useGame();
+  const { game } = useGame(undefined, {
+    resolve: {
+      name: true,
+      start: true,
+      scope: { teamsConfig: true },
+      specs: { $each: true },
+      holes: true, // Load holes list shallowly - individual holes loaded by useCurrentHole
+      players: {
+        $each: {
+          name: true,
+          handicap: true,
+          envs: true,
+        },
+      },
+      rounds: {
+        $each: {
+          handicapIndex: true,
+          courseHandicap: true,
+          gameHandicap: true,
+          round: {
+            playerId: true,
+            tee: {
+              holes: { $each: true },
+              ratings: { total: true, front: true, back: true },
+            },
+            course: true,
+            scores: true,
+          },
+        },
+      },
+    },
+  });
 
   // One-time game initialization (creates holes if needed)
   useGameInitialization(game);

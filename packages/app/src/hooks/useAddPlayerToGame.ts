@@ -16,7 +16,17 @@ export interface AddPlayerError {
 }
 
 export function useAddPlayerToGame() {
-  const { game } = useGame();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: {
+        $each: {
+          name: true,
+          handicap: true,
+          rounds: true,
+        },
+      },
+    },
+  });
   const worker = useJazzWorker();
 
   const addPlayerToGame = async (

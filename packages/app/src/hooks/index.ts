@@ -11,4 +11,6 @@ export * from "./useGhinSearchPlayerQuery";
 export * from "./useHoleInitialization";
 export * from "./useHoleNavigation";
 export * from "./useJazzCredentials";
+export * from "./usePlayer";
+export * from "./useRound";
 export * from "./useScoreManagement";

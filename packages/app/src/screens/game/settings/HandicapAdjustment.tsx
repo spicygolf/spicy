@@ -17,7 +17,27 @@ type Props = NativeStackScreenProps<
 
 export function HandicapAdjustment({ route, navigation }: Props) {
   const { playerId, roundToGameId } = route.params;
-  const { game } = useGame();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: { $each: { name: true } },
+      rounds: {
+        $each: {
+          handicapIndex: true,
+          courseHandicap: true,
+          gameHandicap: true,
+          round: {
+            playerId: true,
+            handicapIndex: true,
+            tee: {
+              ratings: {
+                total: { slope: true, rating: true },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
   const { theme } = useUnistyles();
 
   const player = useMemo(() => {

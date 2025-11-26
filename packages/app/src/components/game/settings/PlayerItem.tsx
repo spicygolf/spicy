@@ -23,7 +23,11 @@ type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 export function PlayerItem({ item }: { item: Golfer }) {
   const { navigate } = useNavigation<NavigationProp>();
   const addPlayerToGame = useAddPlayerToGame();
-  const { game } = useGame();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: { $each: { ghinId: true } },
+    },
+  });
 
   const me = useAccount(PlayerAccount, {
     resolve: {

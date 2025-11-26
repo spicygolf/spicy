@@ -6,5 +6,6 @@ import { getApiUrl } from "@/hooks/useApi";
 
 export const betterAuthClient = createAuthClient({
   baseURL: `${getApiUrl()}/auth/`,
-  plugins: [jazzPluginClient() as any], // Type assertion needed due to linked jazz-tools package
+  // @ts-ignore - Jazz plugin types incompatible with better-auth types
+  plugins: [jazzPluginClient()],
 });

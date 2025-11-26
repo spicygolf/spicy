@@ -41,7 +41,18 @@ const PlayerCourseTeeInfo = memo(({ round }: { round: Round | null }) => {
 
 export function GamePlayersListItem({ player }: { player: Player | null }) {
   const navigation = useNavigation<NavigationProp>();
-  const { game } = useGame();
+  const { game } = useGame(undefined, {
+    resolve: {
+      rounds: {
+        $each: {
+          round: true,
+          handicapIndex: true,
+          courseHandicap: true,
+          gameHandicap: true,
+        },
+      },
+    },
+  });
 
   if (!player?.$isLoaded) return null;
 

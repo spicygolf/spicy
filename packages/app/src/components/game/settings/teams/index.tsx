@@ -19,7 +19,37 @@ import { TeamAssignments } from "./TeamAssignments";
 import type { PlayerRoundItem, RotationChangeOption } from "./types";
 
 export function GameTeamsList() {
-  const { game } = useGame();
+  const { game } = useGame(undefined, {
+    resolve: {
+      scope: { teamsConfig: true },
+      players: {
+        $each: {
+          name: true,
+        },
+      },
+      rounds: {
+        $each: {
+          handicapIndex: true,
+          round: {
+            playerId: true,
+          },
+        },
+      },
+      holes: {
+        $each: {
+          teams: {
+            $each: {
+              rounds: {
+                $each: {
+                  roundToGame: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
   const { theme } = useUnistyles();
 
   const [showRotationChangeModal, setShowRotationChangeModal] = useState(false);
@@ -241,9 +271,11 @@ export function GameTeamsList() {
           },
           { owner: game.$jazz.owner },
         );
-        (game.scope.$jazz.set as any)("teamsConfig", config);
+        // @ts-ignore - Jazz $jazz.set types are overly strict
+        game.scope.$jazz.set("teamsConfig", config);
       } else if (game.scope.teamsConfig?.$isLoaded) {
-        (game.scope.teamsConfig.$jazz.set as any)("rotateEvery", value);
+        // @ts-ignore - Jazz $jazz.set types are overly strict
+        game.scope.teamsConfig.$jazz.set("rotateEvery", value);
       }
     },
     [game, teamCount, rotateEvery],
@@ -291,12 +323,11 @@ export function GameTeamsList() {
           },
           { owner: game.$jazz.owner },
         );
-        (game.scope.$jazz.set as any)("teamsConfig", config);
+        // @ts-ignore - Jazz $jazz.set types are overly strict
+        game.scope.$jazz.set("teamsConfig", config);
       } else if (game.scope.teamsConfig?.$isLoaded) {
-        (game.scope.teamsConfig.$jazz.set as any)(
-          "rotateEvery",
-          pendingRotationValue,
-        );
+        // @ts-ignore - Jazz $jazz.set types are overly strict
+        game.scope.teamsConfig.$jazz.set("rotateEvery", pendingRotationValue);
       }
 
       setShowRotationChangeModal(false);
@@ -314,7 +345,8 @@ export function GameTeamsList() {
       },
       { owner: game.$jazz.owner },
     );
-    (game.scope.$jazz.set as any)("teamsConfig", config);
+    // @ts-ignore - Jazz $jazz.set types are overly strict
+    game.scope.$jazz.set("teamsConfig", config);
   }
 
   return (

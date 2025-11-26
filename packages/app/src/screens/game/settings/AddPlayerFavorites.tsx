@@ -20,7 +20,11 @@ type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 export function AddPlayerFavorites() {
   const { navigate } = useNavigation<NavigationProp>();
   const addPlayerToGame = useAddPlayerToGame();
-  const { game } = useGame();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: { $each: { ghinId: true } },
+    },
+  });
   const { theme } = useUnistyles();
 
   const me = useAccount(PlayerAccount, {

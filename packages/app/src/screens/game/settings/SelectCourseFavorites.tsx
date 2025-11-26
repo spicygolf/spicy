@@ -23,7 +23,11 @@ type Props = MaterialTopTabScreenProps<
 
 export function SelectCourseFavorites({ route, navigation }: Props) {
   const { playerId, roundId } = route.params;
-  const { game } = useGame();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: { $each: { gender: true, rounds: { $each: true } } },
+    },
+  });
 
   const me = useAccount(PlayerAccount, {
     resolve: {

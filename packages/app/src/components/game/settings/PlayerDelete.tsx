@@ -5,7 +5,31 @@ import type { Player } from "spicylib/schema";
 import { useGame } from "@/hooks";
 
 export function PlayerDelete({ player }: { player: Player }) {
-  const { game } = useGame();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: true,
+      rounds: {
+        $each: {
+          round: {
+            playerId: true,
+          },
+        },
+      },
+      holes: {
+        $each: {
+          teams: {
+            $each: {
+              rounds: {
+                $each: {
+                  roundToGame: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
   const { theme } = useUnistyles();
 
   const deletePlayer = () => {

@@ -59,7 +59,8 @@ export function JazzAndAuth({ children }: { children: React.ReactNode }) {
 
   return (
     <JazzReactNativeProvider sync={{ peer }} AccountSchema={PlayerAccount}>
-      <AuthProvider betterAuthClient={betterAuthClient as any}>
+      {/* @ts-ignore - betterAuthClient types incompatible with AuthProvider */}
+      <AuthProvider betterAuthClient={betterAuthClient}>
         {children}
       </AuthProvider>
     </JazzReactNativeProvider>

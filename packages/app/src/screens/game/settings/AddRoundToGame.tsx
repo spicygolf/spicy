@@ -28,7 +28,27 @@ type Props = NativeStackScreenProps<
 
 export function AddRoundToGame({ route, navigation }: Props) {
   const { playerId } = route.params;
-  const { game } = useGame();
+  const { game } = useGame(undefined, {
+    resolve: {
+      start: true,
+      players: {
+        $each: {
+          name: true,
+          handicap: true,
+          rounds: {
+            $each: {
+              createdAt: true,
+              playerId: true,
+              handicapIndex: true,
+              course: { name: true },
+              tee: { name: true, ratings: { total: true } },
+            },
+          },
+        },
+      },
+      rounds: true,
+    },
+  });
   const [isCreating, setIsCreating] = useState(false);
 
   // Get the player from the game context
