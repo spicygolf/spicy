@@ -125,7 +125,11 @@ export function GameNavigator({ route }: GameNavigatorProps) {
       />
       <View style={styles.content}>
         {currentView === "leaderboard" && <GameLeaderboard />}
-        {currentView === "scoring" && <GameScoring />}
+        {currentView === "scoring" && (
+          <GameScoring
+            onNavigateToSettings={() => setCurrentView("settings")}
+          />
+        )}
         {currentView === "settings" && <GameSettings />}
       </View>
     </View>

@@ -45,7 +45,16 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
     resolve: {
       rounds: {
         $each: {
-          round: true,
+          round: {
+            playerId: true,
+            course: {
+              name: true,
+              facility: { name: true },
+            },
+            tee: {
+              name: true,
+            },
+          },
           handicapIndex: true,
           courseHandicap: true,
           gameHandicap: true,
@@ -69,17 +78,15 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
         )
       : undefined;
 
+  // Check if the round attached to THIS game has course/tee selected
+  const gameRound = roundToGame?.$isLoaded ? roundToGame.round : null;
   const hasSelectedCourseTee =
-    firstRound?.$isLoaded &&
-    firstRound.$jazz.has("course") &&
-    firstRound.$jazz.has("tee");
+    gameRound?.$isLoaded &&
+    gameRound.$jazz.has("course") &&
+    gameRound.$jazz.has("tee");
 
   const needsCourseAndTee =
-    hasRounds &&
-    player.rounds.$isLoaded &&
-    player.rounds.some(
-      (round) => !round?.$isLoaded || !round.course || !round.tee,
-    );
+    hasRounds && gameRound?.$isLoaded && (!gameRound.course || !gameRound.tee);
 
   let subtitle = "";
   let onPress: (() => void) | undefined;
@@ -88,23 +95,18 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
     subtitle = "Select Round";
     onPress = () =>
       navigation.navigate("AddRoundToGame", { playerId: player.$jazz.id });
-  } else if (needsCourseAndTee && player.rounds.$isLoaded) {
+  } else if (needsCourseAndTee && gameRound?.$isLoaded) {
     subtitle = "Select Course/Tee";
-    const roundNeedingSelection = player.rounds.find(
-      (round) => round?.$isLoaded && (!round.course || !round.tee),
-    );
-    if (roundNeedingSelection?.$isLoaded) {
-      onPress = () =>
-        navigation.navigate("SelectCourseNavigator", {
-          playerId: player.$jazz.id,
-          roundId: roundNeedingSelection.$jazz.id,
-        });
-    }
-  } else if (hasSelectedCourseTee && firstRound?.$isLoaded) {
     onPress = () =>
       navigation.navigate("SelectCourseNavigator", {
         playerId: player.$jazz.id,
-        roundId: firstRound.$jazz.id,
+        roundId: gameRound.$jazz.id,
+      });
+  } else if (hasSelectedCourseTee && gameRound?.$isLoaded) {
+    onPress = () =>
+      navigation.navigate("SelectCourseNavigator", {
+        playerId: player.$jazz.id,
+        roundId: gameRound.$jazz.id,
       });
   }
 
@@ -116,9 +118,19 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
         disabled={!onPress}
       >
         <Text style={styles.player_name}>{player.name}</Text>
-        {subtitle && <Text style={styles.player_tees}>{subtitle}</Text>}
+        {subtitle && (
+          <Text
+            style={
+              needsCourseAndTee
+                ? styles.player_tees_highlight
+                : styles.player_tees
+            }
+          >
+            {subtitle}
+          </Text>
+        )}
         {hasSelectedCourseTee && !subtitle && (
-          <PlayerCourseTeeInfo round={firstRound} />
+          <PlayerCourseTeeInfo round={gameRound} />
         )}
       </TouchableOpacity>
       <View style={styles.handicaps}>
@@ -163,6 +175,12 @@ const styles = StyleSheet.create((theme) => ({
   player_tees: {
     flex: 1,
     fontSize: 14,
+  },
+  player_tees_highlight: {
+    flex: 1,
+    fontSize: 14,
+    color: theme.colors.action,
+    fontWeight: "600",
   },
   handicaps: {
     flex: 1,

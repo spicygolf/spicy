@@ -5,9 +5,9 @@ import { Text } from "@/ui";
 
 interface HoleInfo {
   number: string;
-  par: number;
-  yards: number;
-  handicap: number;
+  par?: number;
+  yards?: number;
+  handicap?: number;
 }
 
 interface HoleHeaderProps {
@@ -41,13 +41,19 @@ export function HoleHeader({ hole, onPrevious, onNext }: HoleHeaderProps) {
         {/* Hole Info */}
         <View style={styles.holeInfo}>
           <Text style={styles.holeNumber}>{hole.number}</Text>
-          <View style={styles.holeDetails}>
-            <Text style={styles.detail}>Par {hole.par}</Text>
-            <Text style={styles.detailSeparator}>•</Text>
-            <Text style={styles.detail}>{hole.yards} yds</Text>
-            <Text style={styles.detailSeparator}>•</Text>
-            <Text style={styles.detail}>Hdcp {hole.handicap}</Text>
-          </View>
+          {hole.par !== undefined &&
+          hole.yards !== undefined &&
+          hole.handicap !== undefined ? (
+            <View style={styles.holeDetails}>
+              <Text style={styles.detail}>Par {hole.par}</Text>
+              <Text style={styles.detailSeparator}>•</Text>
+              <Text style={styles.detail}>{hole.yards} yds</Text>
+              <Text style={styles.detailSeparator}>•</Text>
+              <Text style={styles.detail}>Hdcp {hole.handicap}</Text>
+            </View>
+          ) : (
+            <Text style={styles.detailVarious}>Various</Text>
+          )}
         </View>
 
         {/* Next Button */}
@@ -109,5 +115,10 @@ const styles = StyleSheet.create((theme) => ({
   detailSeparator: {
     fontSize: 12,
     color: theme.colors.border,
+  },
+  detailVarious: {
+    fontSize: 12,
+    color: theme.colors.secondary,
+    fontStyle: "italic",
   },
 }));

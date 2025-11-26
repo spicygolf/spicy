@@ -47,26 +47,37 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
     ? currentHole.$jazz.id
     : undefined;
 
-  // Get hole info from first player's tee - direct Jazz access
+  // Get hole info from first player's tee - but only if ALL players have course/tee selected
   let holeInfo: HoleInfo | null = null;
   if (game?.rounds?.$isLoaded && game.rounds.length > 0) {
-    const firstRoundToGame = game.rounds[0];
-    if (firstRoundToGame?.$isLoaded) {
-      const round = firstRoundToGame.round;
-      if (round?.$isLoaded) {
-        const tee = round.tee;
-        if (tee?.$isLoaded && tee.holes?.$isLoaded) {
-          const hole = tee.holes.find(
-            (h) => h?.$isLoaded && h.number?.toString() === currentHoleNumber,
-          );
+    // Check that ALL players have course and tee selected
+    const allPlayersHaveSelections = game.rounds.every((rtg) => {
+      if (!rtg?.$isLoaded) return false;
+      const round = rtg.round;
+      if (!round?.$isLoaded) return false;
+      return round.course && round.tee;
+    });
 
-          if (hole?.$isLoaded) {
-            holeInfo = {
-              number: currentHoleNumber,
-              par: hole.par ?? 4,
-              yards: hole.yards ?? 0,
-              handicap: hole.handicap ?? 18,
-            };
+    // Only proceed if all players have selections
+    if (allPlayersHaveSelections) {
+      const firstRoundToGame = game.rounds[0];
+      if (firstRoundToGame?.$isLoaded) {
+        const round = firstRoundToGame.round;
+        if (round?.$isLoaded) {
+          const tee = round.tee;
+          if (tee?.$isLoaded && tee.holes?.$isLoaded) {
+            const hole = tee.holes.find(
+              (h) => h?.$isLoaded && h.number?.toString() === currentHoleNumber,
+            );
+
+            if (hole?.$isLoaded) {
+              holeInfo = {
+                number: currentHoleNumber,
+                par: hole.par ?? 4,
+                yards: hole.yards ?? 0,
+                handicap: hole.handicap ?? 18,
+              };
+            }
           }
         }
       }

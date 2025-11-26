@@ -9,12 +9,16 @@ import {
   useHoleNavigation,
   useScoreManagement,
 } from "@/hooks";
-import { Screen, Text } from "@/ui";
+import { Button, Screen, Text } from "@/ui";
 import { ScoringView } from "./ScoringView";
 import { TeamChooserView } from "./TeamChooserView";
 import { useTeamManagement } from "./useTeamManagement";
 
-export function GameScoring() {
+interface GameScoringProps {
+  onNavigateToSettings?: () => void;
+}
+
+export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   const { game } = useGame(undefined, {
     resolve: {
       name: true,
@@ -103,10 +107,32 @@ export function GameScoring() {
   }
 
   if (!holeInfo) {
+    // Check if the issue is missing course/tee selections
+    const hasMissingSelections =
+      game.rounds?.$isLoaded &&
+      game.rounds.some((rtg) => {
+        if (!rtg?.$isLoaded) return false;
+        const round = rtg.round;
+        if (!round?.$isLoaded) return false;
+        return !round.course || !round.tee;
+      });
+
     return (
       <Screen>
         <View style={styles.centerContainer}>
-          <Text style={styles.message}>Loading hole information...</Text>
+          <Text style={styles.message}>
+            {hasMissingSelections
+              ? "Course and tee selections are required for all players before scoring can begin."
+              : "Loading hole information..."}
+          </Text>
+          {hasMissingSelections && onNavigateToSettings && (
+            <View style={styles.buttonContainer}>
+              <Button
+                label="Go to Game Settings"
+                onPress={onNavigateToSettings}
+              />
+            </View>
+          )}
         </View>
       </Screen>
     );
@@ -170,5 +196,11 @@ const styles = StyleSheet.create((theme) => ({
   message: {
     fontSize: 16,
     color: theme.colors.secondary,
+    textAlign: "center",
+    marginBottom: theme.gap(3),
+  },
+  buttonContainer: {
+    marginTop: theme.gap(2),
+    minWidth: 200,
   },
 }));

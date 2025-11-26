@@ -2,19 +2,21 @@ import { useCoState } from "jazz-tools/react-native";
 import { useEffect, useRef } from "react";
 import type { ListOfRoundToGames } from "spicylib/schema";
 import { ListOfRoundToGames as ListOfRoundToGamesSchema } from "spicylib/schema";
+import { courseAcronym } from "spicylib/utils";
 
 /**
- * Returns the course name if all rounds in the game are on the same course.
- * Returns null if rounds are on different courses or still loading.
+ * Returns course and tee information in the format "SLUG • TeeName".
+ * Returns "various" if players have different courses/tees or incomplete selections.
+ * Returns null if still loading.
  *
- * PERFORMANCE: Only loads course names from rounds, not full round data.
+ * PERFORMANCE: Only loads course and tee names from rounds, not full round data.
  *
  * @param roundsId - ListOfRoundToGames ID to check
- * @returns Course name if same across all rounds, null otherwise
+ * @returns Course/tee string if same across all rounds, "various" if different, null if loading
  *
  * @example
  * const courseName = useGameCourseName(game?.rounds?.$jazz.id);
- * // Returns: "Pebble Beach Golf Links" or null
+ * // Returns: "DHGC • Presidents" or "various" or null
  */
 export function useGameCourseName(roundsId: string | undefined): string | null {
   const startTime = useRef(Date.now());
@@ -28,7 +30,10 @@ export function useGameCourseName(roundsId: string | undefined): string | null {
           resolve: {
             $each: {
               round: {
-                course: true,
+                course: {
+                  facility: true,
+                },
+                tee: true,
               },
             },
           },
@@ -56,12 +61,44 @@ export function useGameCourseName(roundsId: string | undefined): string | null {
 
   if (!rounds?.$isLoaded) return null;
 
-  const courses = new Set<string>();
+  // Track unique course/tee combinations
+  const courseTeeStrings = new Set<string>();
+  let hasIncompleteSelections = false;
+
   for (const rtg of rounds) {
-    if (rtg?.$isLoaded && rtg.round?.$isLoaded && rtg.round.course?.$isLoaded) {
-      courses.add(rtg.round.course.name);
+    if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) {
+      continue;
     }
+
+    const round = rtg.round;
+    const course = round.course;
+    const tee = round.tee;
+
+    // Check if this round has both course and tee selected
+    if (!course?.$isLoaded || !tee?.$isLoaded || !course.name || !tee.name) {
+      hasIncompleteSelections = true;
+      continue;
+    }
+
+    // Build the display string: "SLUG • TeeName"
+    const facilityName = course.facility?.$isLoaded
+      ? course.facility.name
+      : undefined;
+    const slug = courseAcronym(course.name, facilityName);
+    const courseTeeString = `${slug} • ${tee.name}`;
+    courseTeeStrings.add(courseTeeString);
   }
 
-  return courses.size === 1 ? Array.from(courses)[0] : null;
+  // If any player is missing course/tee selections, show "various"
+  if (hasIncompleteSelections) {
+    return "various";
+  }
+
+  // If all players have selections but they're different, show "various"
+  if (courseTeeStrings.size !== 1) {
+    return "various";
+  }
+
+  // All players have the same course/tee
+  return Array.from(courseTeeStrings)[0];
 }
