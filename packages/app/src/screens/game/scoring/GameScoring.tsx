@@ -1,8 +1,9 @@
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ChangeTeamsModal } from "@/components/game/scoring";
-import { useGameContext } from "@/contexts/GameContext";
 import {
+  useCurrentHole,
+  useGame,
   useGameInitialization,
   useHoleInitialization,
   useHoleNavigation,
@@ -14,7 +15,7 @@ import { TeamChooserView } from "./TeamChooserView";
 import { useTeamManagement } from "./useTeamManagement";
 
 export function GameScoring() {
-  const { game } = useGameContext();
+  const { game } = useGame();
 
   // One-time game initialization (creates holes if needed)
   useGameInitialization(game);
@@ -22,13 +23,16 @@ export function GameScoring() {
   // Hook 1: Hole navigation (current hole, prev/next)
   const {
     currentHoleIndex,
-    currentHole,
+    currentHoleId,
     currentHoleNumber,
     holeInfo,
     holesList,
     handlePrevHole,
     handleNextHole,
   } = useHoleNavigation(game);
+
+  // Hook 1b: Load current hole's teams with selector to prevent re-renders
+  const currentHole = useCurrentHole(currentHoleId, { currentHoleIndex });
 
   // Hook 2: Team management (chooser state, assignments, change teams)
   const {

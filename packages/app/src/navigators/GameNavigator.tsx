@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
@@ -49,9 +49,17 @@ function getFacilityName(game: Game): string | undefined {
 }
 
 export function GameNavigator({ route }: GameNavigatorProps) {
-  const { setGame } = useGameContext();
+  const { setGameId } = useGameContext();
   const initialView = route.params.initialView || "scoring";
   const [currentView, setCurrentView] = useState<GameView>(initialView);
+
+  // PERFORMANCE: Track load time - but only log ONCE when game first loads
+  const [startTime] = useState(() => {
+    const time = Date.now();
+    console.log("[PERF] GameNavigator render START", { time });
+    return time;
+  });
+  const [hasLoggedLoad, setHasLoggedLoad] = useState(false);
 
   // Extract gameId from route params
   const gameId = route.params.gameId;
@@ -59,23 +67,36 @@ export function GameNavigator({ route }: GameNavigatorProps) {
   const { game } = useGame(gameId, { requireGame: true, loadHoles: false });
 
   // Calculate facility name - show only if all players are on the same course
-  const facilityName = useMemo(() => {
-    if (!game?.$isLoaded) return undefined;
-    return getFacilityName(game);
-  }, [game]);
+  // CRITICAL: Don't use useMemo with Jazz data - just calculate directly
+  const facilityName = game?.$isLoaded ? getFacilityName(game) : undefined;
 
-  // Update the current game in context when the route changes
+  // PERFORMANCE: Track when game is FIRST loaded (not on every update)
   useEffect(() => {
-    if (game?.$isLoaded) {
-      setGame(game);
+    if (game?.$isLoaded && !hasLoggedLoad) {
+      const loadTime = Date.now() - startTime;
+      console.log("[PERF] GameNavigator game LOADED", {
+        loadTime,
+        gameId: game.$jazz.id,
+        hasRounds: game.rounds?.$isLoaded,
+        roundsCount: game.rounds?.$isLoaded ? game.rounds.length : 0,
+      });
+      setHasLoggedLoad(true);
     }
+  }, [game, hasLoggedLoad, startTime]);
+
+  // Update the current game ID in context - use gameId as stable dependency
+  useEffect(() => {
+    setGameId(gameId);
     return () => {
-      setGame(null);
+      setGameId(null);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game, setGame]);
+  }, [gameId, setGameId]);
 
   if (!game?.$isLoaded) {
+    console.log("[PERF] GameNavigator waiting for game to load", {
+      elapsed: Date.now() - startTime,
+      loadingState: game?.$jazz.loadingState,
+    });
     return null; // or a loading spinner
   }
 

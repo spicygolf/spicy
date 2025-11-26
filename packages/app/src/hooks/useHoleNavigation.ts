@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Game, GameHole } from "spicylib/schema";
 
 export interface HoleInfo {
@@ -11,6 +11,7 @@ export interface HoleInfo {
 export interface UseHoleNavigationReturn {
   currentHoleIndex: number;
   currentHole: GameHole | null;
+  currentHoleId: string | undefined;
   currentHoleNumber: string;
   holeInfo: HoleInfo | null;
   holesList: string[];
@@ -20,6 +21,11 @@ export interface UseHoleNavigationReturn {
 
 export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
+
+  // PERFORMANCE: Track first render only
+  useEffect(() => {
+    console.log("[PERF] useHoleNavigation MOUNTED");
+  }, []); // Run only once on mount
 
   // Jazz provides reactive updates - no useMemo needed (jazz.xml)
   let holesList: string[] = [];
@@ -37,6 +43,9 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
   }
 
   const currentHoleNumber = currentHole?.hole || "1";
+  const currentHoleId = currentHole?.$isLoaded
+    ? currentHole.$jazz.id
+    : undefined;
 
   // Get hole info from first player's tee - direct Jazz access
   let holeInfo: HoleInfo | null = null;
@@ -64,6 +73,14 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
     }
   }
 
+  // PERFORMANCE: Track when hole index changes (log once per hole navigation)
+  useEffect(() => {
+    console.log("[PERF] useHoleNavigation hole changed", {
+      currentHoleIndex,
+    });
+    // Only log when currentHoleIndex changes
+  }, [currentHoleIndex]);
+
   const handlePrevHole = useCallback(() => {
     setCurrentHoleIndex((prev) => {
       if (prev === 0) return holesList.length - 1;
@@ -81,6 +98,7 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
   return {
     currentHoleIndex,
     currentHole,
+    currentHoleId,
     currentHoleNumber,
     holeInfo,
     holesList,

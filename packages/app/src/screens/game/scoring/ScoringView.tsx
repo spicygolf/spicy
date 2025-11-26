@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole, Score } from "spicylib/schema";
@@ -38,6 +39,31 @@ export function ScoringView({
   onUnscore,
   onChangeTeams,
 }: ScoringViewProps) {
+  // PERFORMANCE: Track when view mounts and data loads
+  const mountTime = useRef(Date.now());
+  const teamsLoadLogged = useRef(false);
+
+  useEffect(() => {
+    if (currentHole?.teams?.$isLoaded && !teamsLoadLogged.current) {
+      const loadTime = Date.now() - mountTime.current;
+      console.log("[PERF] ScoringView teams READY FOR RENDER", {
+        loadTime,
+        teamsCount: currentHole.teams.length,
+        currentHoleIndex,
+      });
+      teamsLoadLogged.current = true;
+
+      // Track individual team data loading
+      currentHole.teams.forEach((team, idx) => {
+        if (team?.$isLoaded && team.rounds?.$isLoaded) {
+          console.log(`[PERF] ScoringView team[${idx}] rounds LOADED`, {
+            roundsCount: team.rounds.length,
+          });
+        }
+      });
+    }
+  }, [currentHole?.teams?.$isLoaded, currentHoleIndex, currentHole]);
+
   // Handicap mode - for now hardcoded to "full"
   // TODO: Read from game.optionOverrides when we implement game options UI
   // Jazz's reactivity handles updates automatically - no useMemo needed

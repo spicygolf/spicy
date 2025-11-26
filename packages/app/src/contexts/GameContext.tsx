@@ -1,9 +1,8 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
-import type { Game } from "spicylib/schema";
 
 type GameContextType = {
-  game: Game | null;
-  setGame: (game: Game | null) => void;
+  gameId: string | null;
+  setGameId: (gameId: string | null) => void;
 };
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -13,10 +12,10 @@ type GameProviderProps = {
 };
 
 export function GameProvider({ children }: GameProviderProps) {
-  const [game, setGame] = useState<Game | null>(null);
+  const [gameId, setGameId] = useState<string | null>(null);
 
   return (
-    <GameContext.Provider value={{ game, setGame }}>
+    <GameContext.Provider value={{ gameId, setGameId }}>
       {children}
     </GameContext.Provider>
   );

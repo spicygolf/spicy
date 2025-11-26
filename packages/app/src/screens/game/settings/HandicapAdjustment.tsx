@@ -1,11 +1,12 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { MaybeLoaded } from "jazz-tools";
 import { useMemo, useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { calculateCourseHandicap, formatCourseHandicap } from "spicylib/utils";
 import { Back } from "@/components/Back";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Input, Screen, Text } from "@/ui";
 
@@ -16,24 +17,29 @@ type Props = NativeStackScreenProps<
 
 export function HandicapAdjustment({ route, navigation }: Props) {
   const { playerId, roundToGameId } = route.params;
-  const { game } = useGameContext();
+  const { game } = useGame();
   const { theme } = useUnistyles();
 
   const player = useMemo(() => {
-    if (!game?.players?.$isLoaded) return null;
+    if (!game?.$isLoaded || !game.players?.$isLoaded) return null;
     return (
-      game.players.find((p) => p?.$isLoaded && p.$jazz.id === playerId) || null
-    );
-  }, [game?.players, playerId]);
-
-  const roundToGame = useMemo(() => {
-    if (!game?.rounds?.$isLoaded || !roundToGameId) return null;
-    return (
-      game.rounds.find(
-        (rtg) => rtg?.$isLoaded && rtg.$jazz.id === roundToGameId,
+      game.players.find(
+        (p: MaybeLoaded<(typeof game.players)[0]>) =>
+          p?.$isLoaded && p.$jazz.id === playerId,
       ) || null
     );
-  }, [game?.rounds, roundToGameId]);
+  }, [game, playerId]);
+
+  const roundToGame = useMemo(() => {
+    if (!game?.$isLoaded || !game.rounds?.$isLoaded || !roundToGameId)
+      return null;
+    return (
+      game.rounds.find(
+        (rtg: MaybeLoaded<(typeof game.rounds)[0]>) =>
+          rtg?.$isLoaded && rtg.$jazz.id === roundToGameId,
+      ) || null
+    );
+  }, [game, roundToGameId]);
 
   const round = useMemo(() => {
     if (!roundToGame?.$isLoaded || !roundToGame.round?.$isLoaded) return null;

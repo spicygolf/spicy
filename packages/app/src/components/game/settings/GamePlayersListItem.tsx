@@ -6,7 +6,7 @@ import { StyleSheet } from "react-native-unistyles";
 import type { Player, Round } from "spicylib/schema";
 import { courseAcronym } from "spicylib/utils";
 import { Handicaps } from "@/components/handicap/Handicaps";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Text } from "@/ui";
 import { PlayerDelete } from "./PlayerDelete";
@@ -41,7 +41,7 @@ const PlayerCourseTeeInfo = memo(({ round }: { round: Round | null }) => {
 
 export function GamePlayersListItem({ player }: { player: Player | null }) {
   const navigation = useNavigation<NavigationProp>();
-  const { game } = useGameContext();
+  const { game } = useGame();
 
   if (!player?.$isLoaded) return null;
 
@@ -49,7 +49,7 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
   const firstRound = hasRounds ? player.rounds[0] : null;
 
   const roundToGame =
-    game?.rounds?.$isLoaded && firstRound?.$isLoaded
+    game?.$isLoaded && game.rounds?.$isLoaded && firstRound?.$isLoaded
       ? game.rounds.find(
           (rtg) =>
             rtg?.$isLoaded &&

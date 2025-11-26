@@ -12,7 +12,7 @@ import type { CourseTee } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
 import { stateCode } from "spicylib/utils";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGame } from "@/hooks";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
 import { Screen, Text } from "@/ui";
 
@@ -23,7 +23,7 @@ type Props = MaterialTopTabScreenProps<
 
 export function SelectCourseFavorites({ route, navigation }: Props) {
   const { playerId, roundId } = route.params;
-  const { game } = useGameContext();
+  const { game } = useGame();
 
   const me = useAccount(PlayerAccount, {
     resolve: {
@@ -45,19 +45,25 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
   });
 
   const player = useMemo(() => {
-    if (!game?.players?.$isLoaded) {
+    if (!game?.$isLoaded || !game.players?.$isLoaded) {
       return null;
     }
     return (
-      game.players.find((p) => p?.$isLoaded && p.$jazz.id === playerId) || null
+      game.players.find(
+        (p: MaybeLoaded<(typeof game.players)[0]>) =>
+          p?.$isLoaded && p.$jazz.id === playerId,
+      ) || null
     );
-  }, [game?.players, playerId]);
+  }, [game, playerId]);
 
   const round = useMemo(() => {
     if (!roundId || !player?.$isLoaded || !player.rounds?.$isLoaded)
       return null;
     return (
-      player.rounds.find((r) => r?.$isLoaded && r.$jazz.id === roundId) || null
+      player.rounds.find(
+        (r: MaybeLoaded<(typeof player.rounds)[0]>) =>
+          r?.$isLoaded && r.$jazz.id === roundId,
+      ) || null
     );
   }, [player, roundId]);
 

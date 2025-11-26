@@ -1,4 +1,5 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { MaybeLoaded } from "jazz-tools";
 import { useMemo, useState } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -16,7 +17,7 @@ import {
   isSameDay,
 } from "spicylib/utils";
 import { Back } from "@/components/Back";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Screen, Text } from "@/ui";
 
@@ -27,19 +28,22 @@ type Props = NativeStackScreenProps<
 
 export function AddRoundToGame({ route, navigation }: Props) {
   const { playerId } = route.params;
-  const { game } = useGameContext();
+  const { game } = useGame();
   const [isCreating, setIsCreating] = useState(false);
 
   // Get the player from the game context
   const player = useMemo(() => {
-    if (!game?.players?.$isLoaded) {
+    if (!game?.$isLoaded || !game.players?.$isLoaded) {
       return null;
     }
 
     return (
-      game.players.find((p) => p?.$isLoaded && p.$jazz.id === playerId) || null
+      game.players.find(
+        (p: MaybeLoaded<(typeof game.players)[0]>) =>
+          p?.$isLoaded && p.$jazz.id === playerId,
+      ) || null
     );
-  }, [game?.players, playerId]);
+  }, [game, playerId]);
 
   const gameDate = game?.$isLoaded ? game.start : new Date();
 
@@ -57,7 +61,8 @@ export function AddRoundToGame({ route, navigation }: Props) {
   }
 
   function handleCreateNewRound() {
-    if (!game?.rounds?.$isLoaded || !game?.players?.$isLoaded) return;
+    if (!game?.$isLoaded || !game.rounds?.$isLoaded || !game.players?.$isLoaded)
+      return;
 
     setIsCreating(true);
 
@@ -66,7 +71,8 @@ export function AddRoundToGame({ route, navigation }: Props) {
 
     // Get the player from game.players to ensure we modify the right instance
     const gamePlayer = game.players.find(
-      (p) => p?.$isLoaded && p.$jazz.id === player?.$jazz.id,
+      (p: MaybeLoaded<(typeof game.players)[0]>) =>
+        p?.$isLoaded && p.$jazz.id === player?.$jazz.id,
     );
 
     if (!gamePlayer?.$isLoaded) {
@@ -101,7 +107,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
   }
 
   function addRoundToGame(round: RoundType) {
-    if (!game?.rounds?.$isLoaded) return;
+    if (!game?.$isLoaded || !game.rounds?.$isLoaded) return;
 
     const group = game.rounds.$jazz.owner;
 

@@ -87,6 +87,76 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    }
    ```
 
+**CRITICAL - PERFORMANCE PATTERNS:**
+
+1. **NEVER Store Jazz Objects in React State**
+   - Causes 20-40+ re-renders as nested data loads progressively
+   - Store IDs (strings) instead, use useCoState directly
+   ```typescript
+   // WRONG - causes 24+ re-renders!
+   const [game, setGame] = useState<Game | null>(null);
+   useEffect(() => setGame(game), [game]);
+   
+   // CORRECT - store ID only
+   const [gameId, setGameId] = useState<string | null>(null);
+   const game = useCoState(Game, gameId || "", { resolve: {...} });
+   ```
+
+2. **Use Selectors to Batch Progressive Loads**
+   - Without selectors: component re-renders on every nested data load
+   - With selectors: component renders once when all data loaded
+   ```typescript
+   // WRONG - re-renders 24+ times
+   const game = useCoState(Game, gameId, {
+     resolve: { rounds: { $each: { round: { course: true } } } }
+   });
+   
+   // CORRECT - re-renders once
+   const game = useCoState(Game, gameId, {
+     resolve: { rounds: { $each: { round: { course: true } } } },
+     select: (g) => {
+       if (!g.$isLoaded || !g.rounds?.$isLoaded) return undefined;
+       for (const rtg of g.rounds) {
+         if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) return undefined;
+       }
+       return g; // Only return when fully loaded
+     }
+   });
+   ```
+   **Performance impact**: Before 24+ re-renders over 3s, After 1 render in 1.5s (55% faster)
+
+3. **Load Current View Only**
+   - Don't load all 18 holes when viewing hole 1
+   - Load shallowly, then load current item deeply
+   ```typescript
+   // WRONG - loads 18 holes × 2 teams × 2 rounds = 72+ objects
+   const game = useCoState(Game, gameId, {
+     resolve: {
+       holes: { $each: { teams: { $each: { rounds: { $each: true } } } } }
+     }
+   });
+   
+   // CORRECT - load current hole only
+   const game = useCoState(Game, gameId, {
+     resolve: { holes: true, rounds: { $each: true } }
+   });
+   const currentHole = useCoState(GameHole, currentHoleId, {
+     resolve: { teams: { $each: { rounds: { $each: true } } } },
+     select: (h) => h.$isLoaded && h.teams?.$isLoaded ? h : null
+   });
+   ```
+
+4. **Avoid React Hooks with Jazz Data**
+   - Don't use useMemo, useEffect, useState for Jazz data
+   - Jazz is already reactive - just access it directly
+   ```typescript
+   // WRONG - fighting Jazz with React patterns
+   const facilityName = useMemo(() => getFacilityName(game), [game]);
+   
+   // CORRECT - just access directly
+   const facilityName = game?.$isLoaded ? getFacilityName(game) : undefined;
+   ```
+
 **HIGH - ENFORCE STRICTLY:**
 
 1. **Circular Dependencies**

@@ -14,8 +14,7 @@ import {
   PlayerAccount,
 } from "spicylib/schema";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
-import { useGameContext } from "@/contexts/GameContext";
-import { type PlayerData, useAddPlayerToGame } from "@/hooks";
+import { type PlayerData, useAddPlayerToGame, useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Text } from "@/ui";
 
@@ -24,7 +23,7 @@ type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 export function PlayerItem({ item }: { item: Golfer }) {
   const { navigate } = useNavigation<NavigationProp>();
   const addPlayerToGame = useAddPlayerToGame();
-  const { game } = useGameContext();
+  const { game } = useGame();
 
   const me = useAccount(PlayerAccount, {
     resolve: {
@@ -47,7 +46,8 @@ export function PlayerItem({ item }: { item: Golfer }) {
 
   // Check if player is already in the game
   const isPlayerAlreadyAdded =
-    (game?.players?.$isLoaded &&
+    (game?.$isLoaded &&
+      game.players?.$isLoaded &&
       game.players.some(
         (player) => player?.$isLoaded && player.ghinId === item.ghin.toString(),
       )) ||

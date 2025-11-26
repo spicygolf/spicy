@@ -10,7 +10,7 @@ import {
   Team,
   TeamsConfig,
 } from "spicylib/schema";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGame } from "@/hooks";
 import { Text } from "@/ui";
 import { ensureGameHoles } from "@/utils/gameTeams";
 import { RotationChangeModal } from "./RotationChangeModal";
@@ -19,7 +19,7 @@ import { TeamAssignments } from "./TeamAssignments";
 import type { PlayerRoundItem, RotationChangeOption } from "./types";
 
 export function GameTeamsList() {
-  const { game } = useGameContext();
+  const { game } = useGame();
   const { theme } = useUnistyles();
 
   const [showRotationChangeModal, setShowRotationChangeModal] = useState(false);
@@ -30,14 +30,18 @@ export function GameTeamsList() {
     useState<RotationChangeOption>("clearExceptFirst");
 
   const hasTeamsConfig = useMemo(() => {
-    if (!game?.scope?.$isLoaded) return false;
+    if (!game?.$isLoaded || !game.scope?.$isLoaded) return false;
     return (
       game.scope.$jazz.has("teamsConfig") && game.scope.teamsConfig?.$isLoaded
     );
   }, [game]);
 
   const rotateEvery = useMemo(() => {
-    if (!game?.scope?.$isLoaded || !game.scope.$jazz.has("teamsConfig")) {
+    if (
+      !game?.$isLoaded ||
+      !game.scope?.$isLoaded ||
+      !game.scope.$jazz.has("teamsConfig")
+    ) {
       return undefined;
     }
     return game.scope.teamsConfig?.$isLoaded
@@ -46,7 +50,11 @@ export function GameTeamsList() {
   }, [game]);
 
   const teamCount = useMemo(() => {
-    if (!game?.scope?.$isLoaded || !game.scope.$jazz.has("teamsConfig")) {
+    if (
+      !game?.$isLoaded ||
+      !game.scope?.$isLoaded ||
+      !game.scope.$jazz.has("teamsConfig")
+    ) {
       return 2;
     }
     return game.scope.teamsConfig?.$isLoaded
@@ -55,17 +63,21 @@ export function GameTeamsList() {
   }, [game]);
 
   const allPlayerRounds = useMemo(() => {
-    if (!game?.rounds?.$isLoaded) return [];
+    if (!game?.$isLoaded || !game.rounds?.$isLoaded) return [];
 
     const items: PlayerRoundItem[] = [];
-    for (const roundToGame of game.rounds) {
+    for (const roundToGame of game.rounds as Iterable<
+      (typeof game.rounds)[number]
+    >) {
       if (!roundToGame?.$isLoaded || !roundToGame.round?.$isLoaded) continue;
 
       const playerId = roundToGame.round.playerId;
 
       let player = null;
       if (game.players?.$isLoaded) {
-        for (const p of game.players) {
+        for (const p of game.players as Iterable<
+          (typeof game.players)[number]
+        >) {
           if (p?.$isLoaded && p.$jazz.id === playerId) {
             player = p;
             break;
@@ -89,7 +101,7 @@ export function GameTeamsList() {
   const teamAssignments = useMemo((): Map<string, number> => {
     const assignments = new Map<string, number>();
 
-    if (!game?.holes?.$isLoaded) {
+    if (!game?.$isLoaded || !game.holes?.$isLoaded) {
       return assignments;
     }
 
@@ -118,26 +130,24 @@ export function GameTeamsList() {
     }
 
     return assignments;
-  }, [game?.holes]);
+  }, [game]);
 
   const saveTeamAssignmentsToGame = useCallback(
     async (assignments: Map<string, number>) => {
-      if (!game?.holes?.$isLoaded) {
+      if (!game?.$isLoaded || !game.holes?.$isLoaded) {
         return;
       }
 
       ensureGameHoles(game);
 
-      // @ts-expect-error - TypeScript requires resolve but we're loading the list itself
-      await game.holes.$jazz.ensureLoaded({});
-      for (const hole of game.holes) {
-        if (!hole?.$isLoaded) {
-          // @ts-expect-error - TypeScript doesn't narrow MaybeLoaded properly
-          await hole.$jazz.ensureLoaded({});
+      await game.holes.$jazz.ensureLoaded({ resolve: {} });
+      for (const hole of game.holes as Iterable<(typeof game.holes)[number]>) {
+        if (hole?.$isLoaded) {
+          await hole.$jazz.ensureLoaded({ resolve: {} });
         }
       }
 
-      for (const hole of game.holes) {
+      for (const hole of game.holes as Iterable<(typeof game.holes)[number]>) {
         if (!hole?.$isLoaded) {
           continue;
         }
@@ -207,7 +217,7 @@ export function GameTeamsList() {
 
   const handleRotationChange = useCallback(
     async (value: number) => {
-      if (!game?.scope?.$isLoaded) return;
+      if (!game?.$isLoaded || !game.scope?.$isLoaded) return;
 
       const currentRotateEvery = rotateEvery !== undefined ? rotateEvery : 0;
       const hasExistingTeams =
@@ -231,9 +241,9 @@ export function GameTeamsList() {
           },
           { owner: game.$jazz.owner },
         );
-        game.scope.$jazz.set("teamsConfig", config);
+        (game.scope.$jazz.set as any)("teamsConfig", config);
       } else if (game.scope.teamsConfig?.$isLoaded) {
-        game.scope.teamsConfig.$jazz.set("rotateEvery", value);
+        (game.scope.teamsConfig.$jazz.set as any)("rotateEvery", value);
       }
     },
     [game, teamCount, rotateEvery],
@@ -241,7 +251,12 @@ export function GameTeamsList() {
 
   const handleRotationChangeConfirm = useCallback(
     (option: RotationChangeOption) => {
-      if (!game?.scope?.$isLoaded || pendingRotationValue === null) return;
+      if (
+        !game?.$isLoaded ||
+        !game.scope?.$isLoaded ||
+        pendingRotationValue === null
+      )
+        return;
 
       setRotationChangeOption(option);
 
@@ -256,7 +271,9 @@ export function GameTeamsList() {
           }
         }
       } else if (option === "clearAll" && game.holes?.$isLoaded) {
-        for (const hole of game.holes) {
+        for (const hole of game.holes as Iterable<
+          (typeof game.holes)[number]
+        >) {
           if (hole?.$isLoaded) {
             const emptyTeams = ListOfTeams.create([], {
               owner: hole.$jazz.owner,
@@ -274,9 +291,12 @@ export function GameTeamsList() {
           },
           { owner: game.$jazz.owner },
         );
-        game.scope.$jazz.set("teamsConfig", config);
+        (game.scope.$jazz.set as any)("teamsConfig", config);
       } else if (game.scope.teamsConfig?.$isLoaded) {
-        game.scope.teamsConfig.$jazz.set("rotateEvery", pendingRotationValue);
+        (game.scope.teamsConfig.$jazz.set as any)(
+          "rotateEvery",
+          pendingRotationValue,
+        );
       }
 
       setShowRotationChangeModal(false);
@@ -286,7 +306,7 @@ export function GameTeamsList() {
     [game, pendingRotationValue, teamCount],
   );
 
-  if (!hasTeamsConfig && game?.scope?.$isLoaded) {
+  if (!hasTeamsConfig && game?.$isLoaded && game.scope?.$isLoaded) {
     const config = TeamsConfig.create(
       {
         rotateEvery: 0,
@@ -294,7 +314,7 @@ export function GameTeamsList() {
       },
       { owner: game.$jazz.owner },
     );
-    game.scope.$jazz.set("teamsConfig", config);
+    (game.scope.$jazz.set as any)("teamsConfig", config);
   }
 
   return (

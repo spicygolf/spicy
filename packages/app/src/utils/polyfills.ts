@@ -1,5 +1,4 @@
 // biome-ignore-all assist/source/organizeImports: order of imports ignored for polyfills
-// biome-ignore all
 import { Buffer } from "buffer";
 if (!globalThis.Buffer) {
   globalThis.Buffer = Buffer;
@@ -19,7 +18,9 @@ import "react-native-get-random-values";
 import FastTextEncoder from "react-native-fast-encoder";
 
 // Add encodeInto method which the fast encoder doesn't provide
+// @ts-expect-error encodeInto is being added here
 if (!FastTextEncoder.prototype.encodeInto) {
+  // @ts-expect-error encodeInto is being added here
   FastTextEncoder.prototype.encodeInto = function (
     source: string,
     destination: Uint8Array,
@@ -32,6 +33,7 @@ if (!FastTextEncoder.prototype.encodeInto) {
     return { read: source.length, written: writeLength };
   };
 }
-
+// @ts-expect-error polyfills, amirite?
 globalThis.TextEncoder = FastTextEncoder;
+// @ts-expect-error polyfills, amirite?
 globalThis.TextDecoder = FastTextEncoder;
