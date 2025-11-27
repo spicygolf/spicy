@@ -45,17 +45,14 @@ export function ScoreInput({
   const showNet = displayNet !== displayGross;
 
   const handleDecrement = (): void => {
-    console.log("[ScoreInput] Decrement pressed", { gross, par });
     onDecrement();
   };
 
   const handleIncrement = (): void => {
-    console.log("[ScoreInput] Increment pressed", { gross, par });
     onIncrement();
   };
 
   const handleScoreTap = (): void => {
-    console.log("[ScoreInput] Score tapped", { gross, par });
     if (onScoreTap) {
       onScoreTap();
     }
@@ -64,7 +61,6 @@ export function ScoreInput({
   };
 
   const handleLongPress = (): void => {
-    console.log("[ScoreInput] Score long-pressed", { gross, par });
     if (onUnscore && gross !== null) {
       onUnscore();
     }

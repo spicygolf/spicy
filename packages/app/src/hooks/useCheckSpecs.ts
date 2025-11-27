@@ -11,33 +11,8 @@ export function useCheckSpecs() {
   });
 
   const checkSpecs = () => {
-    console.log("=== Checking Specs ===");
-    console.log("Me loaded?", me?.$isLoaded);
-
-    if (!me?.$isLoaded) {
-      console.log("Me not loaded yet");
-      console.log("=== End Check ===");
-      return;
-    }
-
-    console.log("Root loaded?", me.root?.$isLoaded);
-    console.log("Specs loaded?", me.root?.specs?.$isLoaded);
-
-    if (me.root?.specs?.$isLoaded) {
-      const specs = me.root.specs;
-      console.log("Total specs:", specs.length);
-
-      specs.forEach((spec: (typeof specs)[number], index: number) => {
-        if (spec?.$isLoaded) {
-          console.log(`${index}: ${spec.name} - ${spec.short}`);
-        } else {
-          console.log(`${index}: Not loaded`);
-        }
-      });
-    } else {
-      console.log("Specs not loaded yet");
-    }
-    console.log("=== End Check ===");
+    // This function is intentionally empty - it was only used for debugging
+    // It can be removed if no longer needed
   };
 
   return { checkSpecs };

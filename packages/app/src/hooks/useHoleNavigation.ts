@@ -1,5 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type { Game, GameHole } from "spicylib/schema";
+import {
+  DEFAULT_HANDICAP_ALLOCATION,
+  DEFAULT_PAR,
+  DEFAULT_YARDS,
+} from "@/constants/golf";
 
 export interface HoleInfo {
   number: string;
@@ -21,11 +26,6 @@ export interface UseHoleNavigationReturn {
 
 export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
-
-  // PERFORMANCE: Track first render only
-  useEffect(() => {
-    console.log("[PERF] useHoleNavigation MOUNTED");
-  }, []); // Run only once on mount
 
   // Jazz provides reactive updates - no useMemo needed (jazz.xml)
   let holesList: string[] = [];
@@ -73,9 +73,9 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
             if (hole?.$isLoaded) {
               holeInfo = {
                 number: currentHoleNumber,
-                par: hole.par ?? 4,
-                yards: hole.yards ?? 0,
-                handicap: hole.handicap ?? 18,
+                par: hole.par ?? DEFAULT_PAR,
+                yards: hole.yards ?? DEFAULT_YARDS,
+                handicap: hole.handicap ?? DEFAULT_HANDICAP_ALLOCATION,
               };
             }
           }
@@ -83,14 +83,6 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
       }
     }
   }
-
-  // PERFORMANCE: Track when hole index changes (log once per hole navigation)
-  useEffect(() => {
-    console.log("[PERF] useHoleNavigation hole changed", {
-      currentHoleIndex,
-    });
-    // Only log when currentHoleIndex changes
-  }, [currentHoleIndex]);
 
   const handlePrevHole = useCallback(() => {
     setCurrentHoleIndex((prev) => {

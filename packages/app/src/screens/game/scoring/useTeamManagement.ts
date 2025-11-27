@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { Game } from "spicylib/schema";
+import { type Game, ListOfTeams } from "spicylib/schema";
 import {
   saveTeamAssignmentsToHole,
   shouldShowTeamChooser,
@@ -76,7 +76,6 @@ export function useTeamManagement(
     for (const holeIndex of holesToClear) {
       const hole = game.holes[holeIndex];
       if (hole?.$isLoaded) {
-        const { ListOfTeams } = require("spicylib/schema");
         const emptyTeams = ListOfTeams.create([], { owner: hole.$jazz.owner });
         hole.$jazz.set("teams", emptyTeams);
       }

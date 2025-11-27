@@ -1,4 +1,4 @@
-import type { Score } from "../schema/scores";
+import { type Score, Value } from "../schema/scores";
 
 /**
  * Get a value from a score's values list by key (e.g., "gross", "pops", "net")
@@ -130,7 +130,7 @@ export function setScoreValue(
   key: string,
   value: string,
   playerId: string,
-  owner: { id: string },
+  owner: Score["$jazz"]["owner"],
 ): void {
   if (!score.$isLoaded) {
     throw new Error("Score must be loaded before setting values");
@@ -144,9 +144,6 @@ export function setScoreValue(
   const existingIndex = score.values.findIndex(
     (v) => v?.$isLoaded && v.k === key,
   );
-
-  // Import at runtime to avoid circular dependencies
-  const { Value } = require("../schema/scores");
 
   // Create new value
   const newValue = Value.create(
@@ -175,7 +172,7 @@ export function setGrossScore(
   score: Score,
   gross: number,
   playerId: string,
-  owner: { id: string },
+  owner: Score["$jazz"]["owner"],
 ): void {
   setScoreValue(score, "gross", gross.toString(), playerId, owner);
 }
@@ -187,7 +184,7 @@ export function setPops(
   score: Score,
   pops: number,
   playerId: string,
-  owner: { id: string },
+  owner: Score["$jazz"]["owner"],
 ): void {
   setScoreValue(score, "pops", pops.toString(), playerId, owner);
 }

@@ -29,11 +29,6 @@ export function PlayerScoreRow({
   const netPar = par - pops;
 
   const handleIncrement = (): void => {
-    console.log("[PlayerScoreRow] handleIncrement called", {
-      gross,
-      par,
-      netPar,
-    });
     if (gross === null) {
       // If no score, start at net par + 1 (e.g., par 4 with 1 pop: 5 + 1 = 6)
       const startGross = par + pops; // net par as gross
@@ -44,11 +39,6 @@ export function PlayerScoreRow({
   };
 
   const handleDecrement = (): void => {
-    console.log("[PlayerScoreRow] handleDecrement called", {
-      gross,
-      par,
-      netPar,
-    });
     if (gross === null) {
       // If no score, start at net par - 1 (e.g., par 4 with 1 pop: 5 - 1 = 4)
       const startGross = par + pops; // net par as gross
@@ -59,11 +49,6 @@ export function PlayerScoreRow({
   };
 
   const handleScoreTap = (): void => {
-    console.log("[PlayerScoreRow] handleScoreTap called", {
-      gross,
-      par,
-      netPar,
-    });
     if (gross === null) {
       // If no score, activate at net par (e.g., par 4 with 1 pop: gross = 5 for net 4)
       const startGross = par + pops; // net par as gross
@@ -74,9 +59,8 @@ export function PlayerScoreRow({
 
   // Placeholder for options - will be implemented when options/junk system is added
   const options: never[] = [];
-  const handleOptionPress = (optionName: string): void => {
+  const handleOptionPress = (_optionName: string): void => {
     // TODO: Implement option toggle when options/junk system is ready
-    console.log("Option pressed:", optionName);
   };
 
   return (

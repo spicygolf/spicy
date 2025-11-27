@@ -30,28 +30,24 @@ export type GameOption = co.loaded<typeof GameOption>;
 /**
  * Junk option - side bets/dots awarded during play
  * Example: birdies, sandies, greenies
- * TODO: Implement fully when scoring engine is built
  */
 export const JunkOption = co.map({
   name: z.string(),
   disp: z.string(),
   type: z.literal(["junk"]),
   value: z.number(), // Point value
-  // TODO: Add logic/conditions when we implement scoring engine
 });
 export type JunkOption = co.loaded<typeof JunkOption>;
 
 /**
  * Multiplier option - modifiers that multiply points
  * Example: doubles, presses
- * TODO: Implement fully when scoring engine is built
  */
 export const MultiplierOption = co.map({
   name: z.string(),
   disp: z.string(),
   type: z.literal(["multiplier"]),
   value: z.number(), // Multiplier value (e.g., 2 for double)
-  // TODO: Add availability logic when we implement scoring engine
 });
 export type MultiplierOption = co.loaded<typeof MultiplierOption>;
 

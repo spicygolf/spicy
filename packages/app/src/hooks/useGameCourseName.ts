@@ -1,5 +1,4 @@
 import { useCoState } from "jazz-tools/react-native";
-import { useEffect, useRef } from "react";
 import type { ListOfRoundToGames } from "spicylib/schema";
 import { ListOfRoundToGames as ListOfRoundToGamesSchema } from "spicylib/schema";
 import { courseAcronym } from "spicylib/utils";
@@ -19,9 +18,6 @@ import { courseAcronym } from "spicylib/utils";
  * // Returns: "DHGC • Presidents" or "various" or null
  */
 export function useGameCourseName(roundsId: string | undefined): string | null {
-  const startTime = useRef(Date.now());
-  const loggedLoad = useRef(false);
-
   const rounds = useCoState(
     ListOfRoundToGamesSchema,
     roundsId || "",
@@ -46,18 +42,6 @@ export function useGameCourseName(roundsId: string | undefined): string | null {
         }
       : undefined,
   ) as ListOfRoundToGames | null;
-
-  // Performance tracking
-  useEffect(() => {
-    if (rounds?.$isLoaded && !loggedLoad.current) {
-      loggedLoad.current = true;
-      const elapsed = Date.now() - startTime.current;
-      console.log("[PERF] useGameCourseName LOADED", {
-        elapsed,
-        roundsCount: rounds.length,
-      });
-    }
-  }, [rounds]);
 
   if (!rounds?.$isLoaded) return null;
 
