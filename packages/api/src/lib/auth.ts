@@ -6,6 +6,11 @@ export const auth = betterAuth({
   appName: "Spicy Golf",
   basePath: `/${process.env.API_VERSION || "v4"}/auth/`,
   database: new Database("./data/auth.db"),
+  trustedOrigins: [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://0.0.0.0:3040",
+  ],
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
