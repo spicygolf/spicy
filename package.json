@@ -3,6 +3,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.3.6",
     "@types/bun": "latest",
+    "del-cli": "^6.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2"
   },
@@ -31,8 +32,8 @@
     "react-native-element-dropdown@2.12.4": "patches/react-native-element-dropdown@2.12.4.patch"
   },
   "scripts": {
-    "clean": "del-cli node_modules packages/*/node_modules",
-    "clean:deep": "del-cli node_modules packages/*/node_modules && bun install",
+    "clean": "del-cli node_modules && bun run --filter './packages/*' clean",
+    "clean:deep": "del-cli node_modules && bun run --filter './packages/*' clean && bun install",
     "format": "bun run --filter './packages/*' format",
     "format:fix": "bun run --filter './packages/*' format:fix",
     "lint": "bun run --filter './packages/*' lint",

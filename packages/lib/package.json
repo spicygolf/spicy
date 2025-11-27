@@ -8,6 +8,7 @@
     "./schema": "./schema/index.ts"
   },
   "scripts": {
+    "clean": "del-cli node_modules",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format .",

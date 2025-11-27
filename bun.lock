@@ -7,6 +7,7 @@
       "devDependencies": {
         "@biomejs/biome": "^2.3.6",
         "@types/bun": "latest",
+        "del-cli": "^6.0.0",
         "husky": "^9.1.7",
         "lint-staged": "^16.1.2",
       },
