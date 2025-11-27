@@ -1,12 +1,10 @@
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useAddGameSpecs } from "@/hooks/useAddGameSpecs";
-import { useCheckSpecs } from "@/hooks/useCheckSpecs";
 import { Button, Screen, Text } from "@/ui";
 
 export function DeveloperToolsScreen() {
   const { addGameSpecs } = useAddGameSpecs();
-  const { checkSpecs } = useCheckSpecs();
 
   const handleAddSpecs = () => {
     addGameSpecs(false);
@@ -19,10 +17,6 @@ export function DeveloperToolsScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Game Specs</Text>
-
-          <Button label="Check Specs" onPress={checkSpecs} />
-
-          <View style={styles.spacer} />
 
           <Button label="Add/Update Default Specs" onPress={handleAddSpecs} />
         </View>

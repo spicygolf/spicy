@@ -16,6 +16,11 @@ interface ErrorBoundaryState {
 /**
  * Error Boundary component to catch React errors in child components
  * Prevents the entire app from crashing when a component fails
+ *
+ * NOTE: This is a class component, which is an exception to the project's
+ * "functional components only" rule. React Error Boundaries MUST be class
+ * components as there is no functional equivalent (no hook exists for
+ * componentDidCatch). This is the only acceptable use case for class components.
  */
 export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
