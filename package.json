@@ -31,7 +31,8 @@
     "react-native-element-dropdown@2.12.4": "patches/react-native-element-dropdown@2.12.4.patch"
   },
   "scripts": {
-    "clean": "del-cli node_modules",
+    "clean": "del-cli node_modules packages/*/node_modules",
+    "clean:deep": "del-cli node_modules packages/*/node_modules && bun install",
     "format": "bun run --filter './packages/*' format",
     "format:fix": "bun run --filter './packages/*' format:fix",
     "lint": "bun run --filter './packages/*' lint",
