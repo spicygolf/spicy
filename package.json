@@ -73,8 +73,11 @@
       "packages/lib"
     ],
     "catalogs": {
-      "jazz": {
-        "jazz-tools": "link:../jazz/packages/jazz-tools"
+      "shared": {
+        "@better-auth/cli": "1.3.28",
+        "better-auth": "1.3.28",
+        "date-fns-tz": "3.2.0",
+        "jazz-tools": "0.19.6"
       }
     }
   },
