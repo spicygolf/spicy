@@ -1,6 +1,7 @@
 import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
+import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
@@ -17,8 +18,8 @@ import { normalizeGender } from "spicylib/utils";
 import { GhinCourseSearchInput } from "@/components/ghin/course/SearchInput";
 import { GhinCourseSearchResults } from "@/components/ghin/course/SearchResults";
 import { TeeSelection } from "@/components/ghin/course/TeeSelection";
-import { useGameContext } from "@/contexts/GameContext";
 import { useGhinCourseSearchContext } from "@/contexts/GhinCourseSearchContext";
+import { useGame } from "@/hooks";
 import { useGhinCourseDetailsQuery } from "@/hooks/useGhinCourseDetailsQuery";
 import { useGhinSearchCourseQuery } from "@/hooks/useGhinSearchCourseQuery";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
@@ -31,7 +32,11 @@ type Props = MaterialTopTabScreenProps<
 
 export function SelectCourseSearch({ route, navigation }: Props) {
   const { playerId, roundId } = route.params;
-  const { game } = useGameContext();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: { $each: { gender: true, rounds: { $each: true } } },
+    },
+  });
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
 
   const me = useAccount(PlayerAccount, {
@@ -44,22 +49,22 @@ export function SelectCourseSearch({ route, navigation }: Props) {
     },
   });
 
-  const player = useMemo(() => {
-    if (!game?.players?.$isLoaded) {
-      return null;
-    }
-    return (
-      game.players.find((p) => p?.$isLoaded && p.$jazz.id === playerId) || null
-    );
-  }, [game?.players, playerId]);
+  // Direct Jazz data access - no useMemo needed since Jazz reactivity is already optimized
+  const player =
+    game?.$isLoaded && game.players?.$isLoaded
+      ? game.players.find(
+          (p: MaybeLoaded<(typeof game.players)[0]>) =>
+            p?.$isLoaded && p.$jazz.id === playerId,
+        ) || null
+      : null;
 
-  const round = useMemo(() => {
-    if (!roundId || !player?.$isLoaded || !player.rounds?.$isLoaded)
-      return null;
-    return (
-      player.rounds.find((r) => r?.$isLoaded && r.$jazz.id === roundId) || null
-    );
-  }, [player, roundId]);
+  const round =
+    roundId && player?.$isLoaded && player.rounds?.$isLoaded
+      ? player.rounds.find(
+          (r: MaybeLoaded<(typeof player.rounds)[0]>) =>
+            r?.$isLoaded && r.$jazz.id === roundId,
+        ) || null
+      : null;
 
   const { state: searchState } = useGhinCourseSearchContext();
   const courseSearchQuery = useGhinSearchCourseQuery(searchState);

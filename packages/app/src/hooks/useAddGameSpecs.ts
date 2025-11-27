@@ -1,5 +1,12 @@
+import type { Group } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { GameSpec, PlayerAccount, TeamsConfig } from "spicylib/schema";
+import {
+  GameOption,
+  GameSpec,
+  ListOfGameOptions,
+  PlayerAccount,
+  TeamsConfig,
+} from "spicylib/schema";
 
 export function useAddGameSpecs() {
   const me = useAccount(PlayerAccount, {
@@ -150,6 +157,9 @@ export function useAddGameSpecs() {
             });
             existingSpec.$jazz.set("teamsConfig", teamsConfig);
           }
+
+          // Add or update defaultOptions (idempotent)
+          await addDefaultOptions(existingSpec, specsListOwner);
         } else {
           // Create new spec
           // Create TeamsConfig if it exists in specData
@@ -173,10 +183,81 @@ export function useAddGameSpecs() {
 
           // Add to specs list
           specs.$jazz.push(newSpec);
+
+          // Add default options to new spec
+          await addDefaultOptions(newSpec, specsListOwner);
         }
       } catch (error) {
         console.error(`Error adding/updating spec ${specData.name}:`, error);
       }
+    }
+  };
+
+  // Helper function to add default options to a game spec (idempotent)
+  const addDefaultOptions = async (
+    spec: GameSpec,
+    ownerGroup: Group,
+  ): Promise<void> => {
+    // Initialize gameOptions if it doesn't exist
+    if (!spec.$jazz.has("gameOptions")) {
+      const gameOptionsList = ListOfGameOptions.create([], {
+        owner: ownerGroup,
+      });
+      spec.$jazz.set("gameOptions", gameOptionsList);
+    }
+
+    const gameOptions = spec.gameOptions;
+    if (!gameOptions?.$isLoaded) return;
+
+    // Check if handicap_index_from option already exists
+    let hasHandicapOption = false;
+    for (let i = 0; i < gameOptions.length; i++) {
+      const opt = gameOptions[i];
+      if (opt?.$isLoaded && opt.name === "handicap_index_from") {
+        hasHandicapOption = true;
+        break;
+      }
+    }
+
+    // Add handicap_index_from option if it doesn't exist
+    if (!hasHandicapOption) {
+      const handicapOption = GameOption.create(
+        {
+          name: "handicap_index_from",
+          disp: "Index off of the low handicap or use full handicaps",
+          type: "game",
+          valueType: "menu",
+          defaultValue: "full",
+        },
+        { owner: ownerGroup },
+      );
+
+      // Create choices - inline co.list(co.map({name, disp}))
+      const { co, z } = await import("jazz-tools");
+      const ChoiceMap = co.map({
+        name: z.string(),
+        disp: z.string(),
+      });
+      const ChoiceList = co.list(ChoiceMap);
+      const choices = ChoiceList.create([], { owner: ownerGroup });
+
+      // Add choice options
+      const lowChoice = ChoiceMap.create(
+        { name: "low", disp: "Low" },
+        { owner: ownerGroup },
+      );
+      const fullChoice = ChoiceMap.create(
+        { name: "full", disp: "Full" },
+        { owner: ownerGroup },
+      );
+      choices.$jazz.push(lowChoice);
+      choices.$jazz.push(fullChoice);
+
+      // Set choices on the option
+      handicapOption.$jazz.set("choices", choices);
+
+      // Add to gameOptions list
+      gameOptions.$jazz.push(handicapOption);
     }
   };
 

@@ -1,11 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
-import {
-  StyleSheet,
-  UnistylesRuntime,
-  useUnistyles,
-} from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Button, Text } from "@/ui";
 import type { RotationChangeOption } from "./types";
 import { getRotationLabel } from "./utils";

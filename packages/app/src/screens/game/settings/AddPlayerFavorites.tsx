@@ -11,8 +11,7 @@ import DraggableFlatList, {
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { type FavoritePlayer, PlayerAccount } from "spicylib/schema";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
-import { useGameContext } from "@/contexts/GameContext";
-import { useAddPlayerToGame } from "@/hooks";
+import { useAddPlayerToGame, useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Screen, Text } from "@/ui";
 
@@ -21,7 +20,11 @@ type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 export function AddPlayerFavorites() {
   const { navigate } = useNavigation<NavigationProp>();
   const addPlayerToGame = useAddPlayerToGame();
-  const { game } = useGameContext();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: { $each: { ghinId: true } },
+    },
+  });
   const { theme } = useUnistyles();
 
   const me = useAccount(PlayerAccount, {
@@ -141,9 +144,10 @@ export function AddPlayerFavorites() {
   // Check if player is already in the game
   const isPlayerAlreadyAdded = useCallback(
     (ghinId: string | undefined) => {
-      if (!ghinId || !game?.players?.$isLoaded) return false;
+      if (!ghinId || !game?.$isLoaded || !game.players?.$isLoaded) return false;
       return game.players.some(
-        (player) => player?.$isLoaded && player.ghinId === ghinId,
+        (player: MaybeLoaded<(typeof game.players)[0]>) =>
+          player?.$isLoaded && player.ghinId === ghinId,
       );
     },
     [game],

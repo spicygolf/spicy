@@ -91,15 +91,88 @@
     </instructions>
   </rule>
 
-  <rule severity="HIGH" enforcement="STRICT">
-    <name>Avoid useState with Jazz Data</name>
-    <description>useState() is a code smell when working with Jazz data. Use properly-loaded Jazz data with no syncing to state.</description>
-    <rationale>Jazz provides reactive data updates. Syncing to useState creates unnecessary complexity and bugs.</rationale>
+  <rule severity="CRITICAL" enforcement="BLOCKING">
+    <name>Never Store Jazz Objects in React State</name>
+    <description>NEVER store Jazz CoValues (Game, Player, etc.) in React state (useState, useContext). Store IDs instead.</description>
+    <rationale>Jazz objects are reactive and update references as nested data loads. Storing them in React state causes excessive re-renders (20-40+) as each progressive load creates a new reference, triggering React's change detection.</rationale>
+    <mustAcknowledge>true</mustAcknowledge>
+    <examples>
+      <example type="wrong">
+        // GameContext storing the Game object - CAUSES 24+ RE-RENDERS!
+        const [game, setGame] = useState&lt;Game | null&gt;(null);
+
+        useEffect(() => {
+          if (game?.$isLoaded) {
+            setGame(game); // Triggers re-render on every nested data load
+          }
+        }, [game]);
+      </example>
+      <example type="correct">
+        // GameContext storing only the gameId string
+        const [gameId, setGameId] = useState&lt;string | null&gt;(null);
+
+        // Components use useCoState directly
+        const game = useCoState(Game, gameId || "", { resolve: {...} });
+      </example>
+    </examples>
+    <performance_impact>
+      <before>24+ re-renders over 3+ seconds as nested data loads</before>
+      <after>1 render when selector returns fully loaded data</after>
+      <speedup>55% faster perceived loading time</speedup>
+    </performance_impact>
     <instructions>
-      - Use Jazz's reactive data system directly
-      - Use useCoState or similar Jazz hooks
-      - Only use useState for truly local UI state (modals, form inputs)
-      - Never sync Jazz data to React state
+      - Store IDs (strings) in React state/context, NEVER Jazz objects
+      - Use useCoState directly in components that need the data
+      - Let Jazz's reactivity handle updates, not React's state system
+      - Use selectors in useCoState to control when components re-render
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Avoid React Hooks with Jazz Data</name>
+    <description>Minimize useState, useMemo, useEffect with Jazz data. Use Jazz hooks and functions instead.</description>
+    <rationale>Jazz provides reactive data updates. Wrapping Jazz in React patterns creates unnecessary complexity, bugs, and performance issues.</rationale>
+    <react_patterns_to_avoid>
+      <pattern name="useState">Never store Jazz objects in state</pattern>
+      <pattern name="useMemo">Don't memoize Jazz data - just access it directly</pattern>
+      <pattern name="useEffect">Don't sync Jazz data in effects - use selectors instead</pattern>
+      <pattern name="useCallback">Only for event handlers, never for Jazz data access</pattern>
+    </react_patterns_to_avoid>
+    <examples>
+      <example type="wrong">
+        // Fighting Jazz reactivity with React patterns
+        const [game, setGame] = useState&lt;Game | null&gt;(null);
+
+        const facilityName = useMemo(() => {
+          if (!game?.$isLoaded) return undefined;
+          return getFacilityName(game);
+        }, [game]); // Recomputes on every progressive load
+
+        useEffect(() => {
+          if (game?.$isLoaded) {
+            setGame(game); // Causes re-renders
+          }
+        }, [game]);
+      </example>
+      <example type="correct">
+        // Embracing Jazz reactivity
+        const game = useCoState(Game, gameId, {
+          resolve: {...},
+          select: (g) => g.$isLoaded ? g : undefined
+        });
+
+        // Just access directly - no useMemo needed
+        const facilityName = game?.$isLoaded ? getFacilityName(game) : undefined;
+
+        // No useEffect needed - Jazz is already reactive
+      </example>
+    </examples>
+    <instructions>
+      - Use Jazz's reactive data system directly with useCoState
+      - Use selectors to control when data is "ready"
+      - Only use useState for truly local UI state (modals, form inputs, toggles)
+      - Only use useEffect for side effects (navigation, API calls), not data syncing
+      - Just access Jazz data directly - no need for useMemo
     </instructions>
   </rule>
 
@@ -153,16 +226,122 @@
     </instructions>
   </rule>
 
-  <rule severity="MEDIUM" enforcement="RECOMMENDED">
-    <name>Performance: Load What You Need</name>
-    <description>Optimize Jazz loading by only loading data when needed, not all upfront.</description>
-    <loading_strategy>
-      <strategy>Initial load: Don't include expensive nested data in useCoState resolve</strategy>
-      <strategy>On-demand: Use ensureLoaded() when accessing specific tabs/features</strategy>
-      <strategy>Minimal depth: Load only the nesting level you actually need</strategy>
-    </loading_strategy>
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Use Selectors to Control Re-renders</name>
+    <description>Use the `select` option in useCoState to batch updates and prevent re-renders during progressive loading.</description>
+    <rationale>Jazz loads nested data progressively. Without selectors, components re-render on every nested data load (20-40+ times). Selectors let you return `undefined` until all required data is loaded, then return the full object once.</rationale>
+    <examples>
+      <example type="wrong">
+        // Re-renders 24+ times as nested data loads
+        const game = useCoState(Game, gameId, {
+          resolve: {
+            rounds: { $each: { round: { course: true, scores: true } } }
+          }
+        });
+      </example>
+      <example type="correct">
+        // Re-renders ONCE when all data is loaded
+        const game = useCoState(Game, gameId, {
+          resolve: {
+            rounds: { $each: { round: { course: true, scores: true } } }
+          },
+          select: (value) => {
+            if (!value.$isLoaded) return undefined;
+            if (!value.rounds?.$isLoaded) return undefined;
+            // Check all critical nested data is loaded
+            for (const rtg of value.rounds) {
+              if (!rtg?.$isLoaded) return undefined;
+              if (!rtg.round?.$isLoaded) return undefined;
+            }
+            return value; // Only return when fully loaded
+          }
+        });
+      </example>
+    </examples>
     <instructions>
-      Don't over-fetch data. Load expensive nested structures only when the user navigates to features that need them.
+      - Use `select` in useCoState when loading nested data
+      - Return `undefined` while data is loading
+      - Return the full object only when all required data is loaded
+      - This batches all progressive loads into a single render
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Progressive Loading is the Default</name>
+    <description>Jazz loads nested data progressively, not all at once. Understand this to avoid performance pitfalls.</description>
+    <rationale>When you specify deep resolve structures, Jazz loads objects level-by-level. Each level loaded triggers a new object reference, which triggers React re-renders if not handled with selectors.</rationale>
+    <loading_behavior>
+      <step>1. Load parent object</step>
+      <step>2. Load first-level references</step>
+      <step>3. Load second-level references</step>
+      <step>4. Continue until all resolve depth is loaded</step>
+      <impact>Each step creates a new object reference</impact>
+    </loading_behavior>
+    <instructions>
+      - Progressive loading is a feature, not a bug
+      - Use selectors to control when components see the data
+      - Don't fight progressive loading with React patterns (useEffect, useState)
+      - Embrace Jazz reactivity instead of React state management
+    </instructions>
+  </rule>
+
+  <rule severity="MEDIUM" enforcement="RECOMMENDED">
+    <name>Performance: Load What You Need, When You Need It</name>
+    <description>Optimize Jazz loading by loading data on-demand, not all upfront. Load current view's data, not all 18 holes.</description>
+    <loading_strategy>
+      <strategy>Initial load: Load minimal data needed for first render</strategy>
+      <strategy>Current view: Load only data for current screen/hole/tab</strategy>
+      <strategy>On-demand: Use ensureLoaded() when user navigates to new sections</strategy>
+      <strategy>Shallow first: Load lists shallowly, then load individual items as needed</strategy>
+    </loading_strategy>
+    <examples>
+      <example type="wrong">
+        // Loading all 18 holes with full teams/rounds/scores - 100+ CoValue objects!
+        const game = useCoState(Game, gameId, {
+          resolve: {
+            holes: {
+              $each: {
+                teams: {
+                  $each: {
+                    rounds: { $each: { roundToGame: { round: { scores: true } } } }
+                  }
+                }
+              }
+            }
+          }
+        });
+      </example>
+      <example type="correct">
+        // Load holes shallowly, only load current hole's teams
+        const game = useCoState(Game, gameId, {
+          resolve: { holes: true, rounds: { $each: true } }
+        });
+
+        // Separate hook for current hole only
+        const currentHole = useCoState(GameHole, currentHoleId, {
+          resolve: {
+            teams: {
+              $each: { rounds: { $each: { roundToGame: true } } }
+            }
+          },
+          select: (hole) => {
+            // Only return when current hole is fully loaded
+            if (!hole.$isLoaded) return null;
+            if (!hole.teams?.$isLoaded) return null;
+            for (const team of hole.teams) {
+              if (!team?.$isLoaded || !team.rounds?.$isLoaded) return null;
+            }
+            return hole;
+          }
+        });
+      </example>
+    </examples>
+    <performance_impact>
+      <wrong_way>Loading 18 holes × 2 teams × 2 rounds = 72+ objects = slow</wrong_way>
+      <right_way>Loading 1 hole × 2 teams × 2 rounds = 4 objects = fast</right_way>
+    </performance_impact>
+    <instructions>
+      Don't over-fetch data. Load only what the current view needs, load more as user navigates.
     </instructions>
   </rule>
 

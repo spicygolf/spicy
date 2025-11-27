@@ -1,7 +1,7 @@
 import { Group } from "jazz-tools";
 import { err, ok, type Result } from "neverthrow";
 import { Handicap, ListOfRounds, Player } from "spicylib/schema";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGame } from "./useGame";
 import { useJazzWorker } from "./useJazzWorker";
 
 export type PlayerData = Parameters<typeof Player.create>[0];
@@ -16,13 +16,23 @@ export interface AddPlayerError {
 }
 
 export function useAddPlayerToGame() {
-  const { game } = useGameContext();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: {
+        $each: {
+          name: true,
+          handicap: true,
+          rounds: true,
+        },
+      },
+    },
+  });
   const worker = useJazzWorker();
 
   const addPlayerToGame = async (
     p: PlayerData,
   ): Promise<Result<Player, AddPlayerError>> => {
-    if (!game?.players?.$isLoaded) {
+    if (!game?.$isLoaded || !game.players?.$isLoaded) {
       return err({
         type: "NO_PLAYERS",
         message: "No players collection in game",
@@ -121,7 +131,7 @@ export function useAddPlayerToGame() {
       player.$jazz.set("rounds", roundsList);
     }
 
-    // Check if player is already in the game
+    // Check if player is already in the game (we already verified game.$isLoaded above)
     const existingPlayer = game.players.find(
       (p) => p?.$isLoaded && p.$jazz.id === player.$jazz.id,
     );

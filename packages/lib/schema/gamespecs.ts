@@ -1,4 +1,9 @@
 import { co, z } from "jazz-tools";
+import {
+  ListOfGameOptions,
+  ListOfJunkOptions,
+  ListOfMultiplierOptions,
+} from "./options";
 import { TeamsConfig } from "./teamsconfig";
 
 export const GameSpec = co.map({
@@ -16,6 +21,14 @@ export const GameSpec = co.map({
    * Defines how teams work for this game type.
    */
   teamsConfig: co.optional(TeamsConfig),
+
+  /**
+   * Default options for this game spec
+   * Individual game instances can override these via Game.optionOverrides
+   */
+  gameOptions: co.optional(ListOfGameOptions),
+  junkOptions: co.optional(ListOfJunkOptions),
+  multiplierOptions: co.optional(ListOfMultiplierOptions),
 
   // TODO: DEPRECATED - remove after migration
   teams: z.optional(z.boolean()),

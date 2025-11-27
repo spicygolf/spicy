@@ -1,6 +1,6 @@
 import { co, z } from "jazz-tools";
 import { Course, Tee } from "./courses";
-import { ListOfScores } from "./scores";
+import { MapOfScores } from "./scores";
 
 export const Round = co.map({
   createdAt: z.date(),
@@ -22,7 +22,7 @@ export const Round = co.map({
 
   tee: co.optional(Tee),
 
-  scores: ListOfScores,
+  scores: MapOfScores,
 
   // posting = co.ref(Posting);
 });

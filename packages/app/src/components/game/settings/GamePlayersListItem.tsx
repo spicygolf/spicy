@@ -6,7 +6,7 @@ import { StyleSheet } from "react-native-unistyles";
 import type { Player, Round } from "spicylib/schema";
 import { courseAcronym } from "spicylib/utils";
 import { Handicaps } from "@/components/handicap/Handicaps";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Text } from "@/ui";
 import { PlayerDelete } from "./PlayerDelete";
@@ -41,7 +41,27 @@ const PlayerCourseTeeInfo = memo(({ round }: { round: Round | null }) => {
 
 export function GamePlayersListItem({ player }: { player: Player | null }) {
   const navigation = useNavigation<NavigationProp>();
-  const { game } = useGameContext();
+  const { game } = useGame(undefined, {
+    resolve: {
+      rounds: {
+        $each: {
+          round: {
+            playerId: true,
+            course: {
+              name: true,
+              facility: { name: true },
+            },
+            tee: {
+              name: true,
+            },
+          },
+          handicapIndex: true,
+          courseHandicap: true,
+          gameHandicap: true,
+        },
+      },
+    },
+  });
 
   if (!player?.$isLoaded) return null;
 
@@ -49,7 +69,7 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
   const firstRound = hasRounds ? player.rounds[0] : null;
 
   const roundToGame =
-    game?.rounds?.$isLoaded && firstRound?.$isLoaded
+    game?.$isLoaded && game.rounds?.$isLoaded && firstRound?.$isLoaded
       ? game.rounds.find(
           (rtg) =>
             rtg?.$isLoaded &&
@@ -58,17 +78,15 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
         )
       : undefined;
 
+  // Check if the round attached to THIS game has course/tee selected
+  const gameRound = roundToGame?.$isLoaded ? roundToGame.round : null;
   const hasSelectedCourseTee =
-    firstRound?.$isLoaded &&
-    firstRound.$jazz.has("course") &&
-    firstRound.$jazz.has("tee");
+    gameRound?.$isLoaded &&
+    gameRound.$jazz.has("course") &&
+    gameRound.$jazz.has("tee");
 
   const needsCourseAndTee =
-    hasRounds &&
-    player.rounds.$isLoaded &&
-    player.rounds.some(
-      (round) => !round?.$isLoaded || !round.course || !round.tee,
-    );
+    hasRounds && gameRound?.$isLoaded && (!gameRound.course || !gameRound.tee);
 
   let subtitle = "";
   let onPress: (() => void) | undefined;
@@ -77,23 +95,18 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
     subtitle = "Select Round";
     onPress = () =>
       navigation.navigate("AddRoundToGame", { playerId: player.$jazz.id });
-  } else if (needsCourseAndTee && player.rounds.$isLoaded) {
+  } else if (needsCourseAndTee && gameRound?.$isLoaded) {
     subtitle = "Select Course/Tee";
-    const roundNeedingSelection = player.rounds.find(
-      (round) => round?.$isLoaded && (!round.course || !round.tee),
-    );
-    if (roundNeedingSelection?.$isLoaded) {
-      onPress = () =>
-        navigation.navigate("SelectCourseNavigator", {
-          playerId: player.$jazz.id,
-          roundId: roundNeedingSelection.$jazz.id,
-        });
-    }
-  } else if (hasSelectedCourseTee && firstRound?.$isLoaded) {
     onPress = () =>
       navigation.navigate("SelectCourseNavigator", {
         playerId: player.$jazz.id,
-        roundId: firstRound.$jazz.id,
+        roundId: gameRound.$jazz.id,
+      });
+  } else if (hasSelectedCourseTee && gameRound?.$isLoaded) {
+    onPress = () =>
+      navigation.navigate("SelectCourseNavigator", {
+        playerId: player.$jazz.id,
+        roundId: gameRound.$jazz.id,
       });
   }
 
@@ -105,9 +118,19 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
         disabled={!onPress}
       >
         <Text style={styles.player_name}>{player.name}</Text>
-        {subtitle && <Text style={styles.player_tees}>{subtitle}</Text>}
+        {subtitle && (
+          <Text
+            style={
+              needsCourseAndTee
+                ? styles.player_tees_highlight
+                : styles.player_tees
+            }
+          >
+            {subtitle}
+          </Text>
+        )}
         {hasSelectedCourseTee && !subtitle && (
-          <PlayerCourseTeeInfo round={firstRound} />
+          <PlayerCourseTeeInfo round={gameRound} />
         )}
       </TouchableOpacity>
       <View style={styles.handicaps}>
@@ -152,6 +175,12 @@ const styles = StyleSheet.create((theme) => ({
   player_tees: {
     flex: 1,
     fontSize: 14,
+  },
+  player_tees_highlight: {
+    flex: 1,
+    fontSize: 14,
+    color: theme.colors.action,
+    fontWeight: "600",
   },
   handicaps: {
     flex: 1,

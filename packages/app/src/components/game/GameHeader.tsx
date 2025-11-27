@@ -11,12 +11,14 @@ interface GameHeaderProps {
   game: Game;
   currentView?: GameView;
   onViewChange?: (view: GameView) => void;
+  facilityName?: string;
 }
 
 export function GameHeader({
   game,
   currentView = "scoring",
   onViewChange,
+  facilityName,
 }: GameHeaderProps) {
   const { theme } = useUnistyles();
   const [previousView, setPreviousView] = useState<"leaderboard" | "scoring">(
@@ -92,6 +94,7 @@ export function GameHeader({
               hour12: true,
             })}
           </Text>
+          <Text style={styles.facilityName}>{facilityName}</Text>
         </View>
 
         {/* Right Icon - Settings */}
@@ -115,6 +118,9 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     backgroundColor: theme.colors.background,
     paddingTop: theme.gap(1),
+    paddingBottom: theme.gap(0.5),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   headerRow: {
     flexDirection: "row",
@@ -133,6 +139,10 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
     paddingHorizontal: theme.gap(2),
   },
+  facilityName: {
+    fontSize: 12,
+    color: theme.colors.secondary,
+  },
   name: {
     fontSize: 14,
     fontWeight: "bold",
@@ -140,6 +150,5 @@ const styles = StyleSheet.create((theme) => ({
   date: {
     fontSize: 12,
     color: theme.colors.secondary,
-    marginBottom: theme.gap(2),
   },
 }));

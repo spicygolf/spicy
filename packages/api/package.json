@@ -5,6 +5,7 @@
     "dev": "bun run --watch src/index.ts",
     "generate": "bunx --bun @better-auth/cli generate",
     "migrate": "bunx --bun @better-auth/cli migrate",
+    "clean": "del-cli node_modules",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format .",
@@ -13,14 +14,14 @@
   },
   "dependencies": {
     "@elysiajs/cors": "1.4.0",
-    "better-auth": "1.3.26",
+    "better-auth": "catalog:shared",
     "elysia": "1.4.9",
     "@spicygolf/ghin": "0.8.6",
-    "jazz-tools": "catalog:jazz",
+    "jazz-tools": "catalog:shared",
     "spicylib": "workspace:*"
   },
   "devDependencies": {
-    "@better-auth/cli": "1.3.26"
+    "@better-auth/cli": "catalog:shared"
   },
   "module": "src/index.js"
 }

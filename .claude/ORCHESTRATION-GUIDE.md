@@ -88,8 +88,13 @@ Orchestrator:
 - Always `ensureLoaded` after `upsertUnique`
 - Load lists level-by-level, not with nested $each
 - Create CoMaps with required fields only, set optional fields after
+- Never store Jazz objects in React state - store IDs instead
+- Use selectors to batch progressive loads and prevent re-renders
+- Load current view only, not all data upfront
 
-**These aren't suggestions - they prevent data loss!**
+**These aren't suggestions - they prevent data loss and performance issues!**
+
+See `.claude/rules/jazz.xml` and `.claude/agents/jazz-specialist.md` for detailed performance patterns.
 
 ### Quality is Enforced
 - `bun format` must pass

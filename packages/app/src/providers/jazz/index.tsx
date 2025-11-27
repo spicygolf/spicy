@@ -10,7 +10,7 @@ import { Text } from "@/ui";
 
 export function JazzAndAuth({ children }: { children: React.ReactNode }) {
   const { data: credentials, isLoading, error } = useJazzCredentials();
-  const api = useApi();
+  const _api = useApi();
 
   if (error) {
     return (
@@ -59,6 +59,7 @@ export function JazzAndAuth({ children }: { children: React.ReactNode }) {
 
   return (
     <JazzReactNativeProvider sync={{ peer }} AccountSchema={PlayerAccount}>
+      {/* @ts-ignore - betterAuthClient types incompatible with AuthProvider */}
       <AuthProvider betterAuthClient={betterAuthClient}>
         {children}
       </AuthProvider>

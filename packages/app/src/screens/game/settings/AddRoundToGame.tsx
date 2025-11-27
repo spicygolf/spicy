@@ -1,17 +1,23 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { MaybeLoaded } from "jazz-tools";
 import { useMemo, useState } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
   ListOfRounds,
-  ListOfScores,
+  MapOfScores,
   Round,
   RoundToGame,
   type Round as RoundType,
 } from "spicylib/schema";
-import { formatDate, formatTime, isSameDay } from "spicylib/utils";
+import {
+  calculateCourseHandicap,
+  formatDate,
+  formatTime,
+  isSameDay,
+} from "spicylib/utils";
 import { Back } from "@/components/Back";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Screen, Text } from "@/ui";
 
@@ -22,19 +28,42 @@ type Props = NativeStackScreenProps<
 
 export function AddRoundToGame({ route, navigation }: Props) {
   const { playerId } = route.params;
-  const { game } = useGameContext();
+  const { game } = useGame(undefined, {
+    resolve: {
+      start: true,
+      players: {
+        $each: {
+          name: true,
+          handicap: true,
+          rounds: {
+            $each: {
+              createdAt: true,
+              playerId: true,
+              handicapIndex: true,
+              course: { name: true },
+              tee: { name: true, ratings: { total: true } },
+            },
+          },
+        },
+      },
+      rounds: true,
+    },
+  });
   const [isCreating, setIsCreating] = useState(false);
 
   // Get the player from the game context
   const player = useMemo(() => {
-    if (!game?.players?.$isLoaded) {
+    if (!game?.$isLoaded || !game.players?.$isLoaded) {
       return null;
     }
 
     return (
-      game.players.find((p) => p?.$isLoaded && p.$jazz.id === playerId) || null
+      game.players.find(
+        (p: MaybeLoaded<(typeof game.players)[0]>) =>
+          p?.$isLoaded && p.$jazz.id === playerId,
+      ) || null
     );
-  }, [game?.players, playerId]);
+  }, [game, playerId]);
 
   const gameDate = game?.$isLoaded ? game.start : new Date();
 
@@ -52,7 +81,8 @@ export function AddRoundToGame({ route, navigation }: Props) {
   }
 
   function handleCreateNewRound() {
-    if (!game?.rounds?.$isLoaded || !game?.players?.$isLoaded) return;
+    if (!game?.$isLoaded || !game.rounds?.$isLoaded || !game.players?.$isLoaded)
+      return;
 
     setIsCreating(true);
 
@@ -61,7 +91,8 @@ export function AddRoundToGame({ route, navigation }: Props) {
 
     // Get the player from game.players to ensure we modify the right instance
     const gamePlayer = game.players.find(
-      (p) => p?.$isLoaded && p.$jazz.id === player?.$jazz.id,
+      (p: MaybeLoaded<(typeof game.players)[0]>) =>
+        p?.$isLoaded && p.$jazz.id === player?.$jazz.id,
     );
 
     if (!gamePlayer?.$isLoaded) {
@@ -76,7 +107,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
         handicapIndex: gamePlayer.handicap?.$isLoaded
           ? gamePlayer.handicap.display || "0.0"
           : "0.0",
-        scores: ListOfScores.create([], { owner: group }),
+        scores: MapOfScores.create({}, { owner: group }),
       },
       { owner: group },
     );
@@ -96,14 +127,34 @@ export function AddRoundToGame({ route, navigation }: Props) {
   }
 
   function addRoundToGame(round: RoundType) {
-    if (!game?.rounds?.$isLoaded) return;
+    if (!game?.$isLoaded || !game.rounds?.$isLoaded) return;
 
     const group = game.rounds.$jazz.owner;
+
+    // Calculate course handicap if we have the necessary data
+    let courseHandicap: number | undefined;
+    if (
+      round.$isLoaded &&
+      round.tee?.$isLoaded &&
+      round.tee.ratings?.$isLoaded &&
+      round.tee.ratings.total?.$isLoaded &&
+      round.handicapIndex
+    ) {
+      const calculated = calculateCourseHandicap({
+        handicapIndex: round.handicapIndex,
+        tee: round.tee,
+        holesPlayed: "all18",
+      });
+      // calculateCourseHandicap returns number | null, but we only want number | undefined
+      courseHandicap = calculated !== null ? calculated : undefined;
+    }
 
     const roundToGame = RoundToGame.create(
       {
         round,
         handicapIndex: round.handicapIndex,
+        ...(courseHandicap !== undefined &&
+          courseHandicap !== null && { courseHandicap }),
       },
       { owner: group },
     );

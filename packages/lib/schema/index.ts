@@ -4,6 +4,7 @@ export * from "./favorites";
 export * from "./gameholes";
 export * from "./games";
 export * from "./gamespecs";
+export * from "./options";
 export * from "./players";
 export * from "./rounds";
 export * from "./scores";

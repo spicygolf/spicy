@@ -2,12 +2,13 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import type { Game } from "spicylib/schema";
 import { GameHeader } from "@/components/game/GameHeader";
 import { useGameContext } from "@/contexts/GameContext";
 import { useGame } from "@/hooks";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
 import { GameLeaderboard } from "@/screens/game/GameLeaderboard";
-import { GameScoring } from "@/screens/game/GameScoring";
+import { GameScoring } from "@/screens/game/scoring";
 import { GameSettings } from "@/screens/game/settings/GameSettings";
 
 // Props type for the GameNavigator screen
@@ -18,27 +19,99 @@ type GameNavigatorProps = NativeStackScreenProps<
 
 type GameView = "leaderboard" | "scoring" | "settings";
 
+function getFacilityName(game: Game): string | undefined {
+  if (!game.rounds?.$isLoaded || game.rounds.length === 0) {
+    return undefined;
+  }
+
+  let firstFacilityName: string | undefined;
+
+  for (const rtg of game.rounds) {
+    if (!rtg?.$isLoaded) return undefined;
+
+    const round = rtg.round;
+    if (!round?.$isLoaded) return undefined;
+
+    const course = round.course;
+    if (!course?.$isLoaded) return undefined;
+
+    const courseName = course.name;
+
+    if (firstFacilityName === undefined) {
+      firstFacilityName = courseName;
+    } else if (firstFacilityName !== courseName) {
+      // Mismatch - return undefined
+      return undefined;
+    }
+  }
+
+  return firstFacilityName;
+}
+
 export function GameNavigator({ route }: GameNavigatorProps) {
-  const { setGame } = useGameContext();
+  const { setGameId } = useGameContext();
   const initialView = route.params.initialView || "scoring";
   const [currentView, setCurrentView] = useState<GameView>(initialView);
+
+  // PERFORMANCE: Track load time - but only log ONCE when game first loads
+  const [startTime] = useState(() => {
+    const time = Date.now();
+    console.log("[PERF] GameNavigator render START", { time });
+    return time;
+  });
+  const [hasLoggedLoad, setHasLoggedLoad] = useState(false);
 
   // Extract gameId from route params
   const gameId = route.params.gameId;
 
-  const { game } = useGame(gameId, { requireGame: true });
+  const { game } = useGame(gameId, {
+    requireGame: true,
+    resolve: {
+      name: true,
+      start: true,
+      rounds: {
+        $each: {
+          round: {
+            course: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
-  // Update the current game in context when the route changes
+  // Calculate facility name - show only if all players are on the same course
+  // CRITICAL: Don't use useMemo with Jazz data - just calculate directly
+  const facilityName = game?.$isLoaded ? getFacilityName(game) : undefined;
+
+  // PERFORMANCE: Track when game is FIRST loaded (not on every update)
   useEffect(() => {
-    if (game?.$isLoaded) {
-      setGame(game);
+    if (game?.$isLoaded && !hasLoggedLoad) {
+      const loadTime = Date.now() - startTime;
+      console.log("[PERF] GameNavigator game LOADED", {
+        loadTime,
+        gameId: game.$jazz.id,
+        hasRounds: game.rounds?.$isLoaded,
+        roundsCount: game.rounds?.$isLoaded ? game.rounds.length : 0,
+      });
+      setHasLoggedLoad(true);
     }
+  }, [game, hasLoggedLoad, startTime]);
+
+  // Update the current game ID in context - use gameId as stable dependency
+  useEffect(() => {
+    setGameId(gameId);
     return () => {
-      setGame(null);
+      setGameId(null);
     };
-  }, [game, setGame]);
+  }, [gameId, setGameId]);
 
   if (!game?.$isLoaded) {
+    console.log("[PERF] GameNavigator waiting for game to load", {
+      elapsed: Date.now() - startTime,
+      loadingState: game?.$jazz.loadingState,
+    });
     return null; // or a loading spinner
   }
 
@@ -48,10 +121,15 @@ export function GameNavigator({ route }: GameNavigatorProps) {
         game={game}
         currentView={currentView}
         onViewChange={setCurrentView}
+        facilityName={facilityName}
       />
       <View style={styles.content}>
         {currentView === "leaderboard" && <GameLeaderboard />}
-        {currentView === "scoring" && <GameScoring />}
+        {currentView === "scoring" && (
+          <GameScoring
+            onNavigateToSettings={() => setCurrentView("settings")}
+          />
+        )}
         {currentView === "settings" && <GameSettings />}
       </View>
     </View>

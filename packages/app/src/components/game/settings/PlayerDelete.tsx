@@ -1,15 +1,42 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { TouchableOpacity } from "react-native";
+import { useUnistyles } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGame } from "@/hooks";
 
 export function PlayerDelete({ player }: { player: Player }) {
-  const { game } = useGameContext();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: true,
+      rounds: {
+        $each: {
+          round: {
+            playerId: true,
+          },
+        },
+      },
+      holes: {
+        $each: {
+          teams: {
+            $each: {
+              rounds: {
+                $each: {
+                  roundToGame: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+  const { theme } = useUnistyles();
 
   const deletePlayer = () => {
     // TODO: detect whether there are other things in the game linked to this
     //       player, and if so, show a dialog to the user, confirming delete.
-    if (!game?.players?.$isLoaded || !game?.rounds?.$isLoaded) return;
+    if (!game?.$isLoaded || !game.players?.$isLoaded || !game.rounds?.$isLoaded)
+      return;
     if (!player?.rounds?.$isLoaded) return;
 
     // Get all round IDs for this player
@@ -26,7 +53,7 @@ export function PlayerDelete({ player }: { player: Player }) {
             rtg.round?.$isLoaded &&
             playerRoundIds.has(rtg.round.$jazz.id),
         )
-        .map((rtg) => rtg.$jazz.id),
+        .map((rtg) => rtg?.$jazz.id),
     );
 
     // Remove RoundToGame entries that reference this player's rounds
@@ -40,10 +67,12 @@ export function PlayerDelete({ player }: { player: Player }) {
 
     // Remove team assignments for this player from all holes
     if (game.holes?.$isLoaded) {
-      for (const hole of game.holes) {
+      for (const hole of game.holes as Iterable<(typeof game.holes)[number]>) {
         if (!hole?.$isLoaded || !hole.teams?.$isLoaded) continue;
 
-        for (const team of hole.teams) {
+        for (const team of hole.teams as Iterable<
+          (typeof hole.teams)[number]
+        >) {
           if (!team?.$isLoaded || !team.rounds?.$isLoaded) continue;
 
           // Filter out rounds that reference the deleted player
@@ -77,9 +106,9 @@ export function PlayerDelete({ player }: { player: Player }) {
   return (
     <TouchableOpacity onPress={() => deletePlayer()}>
       <FontAwesome6
-        name="circle-xmark"
-        size={24}
-        color="#FF0000"
+        name="delete-left"
+        size={18}
+        color={theme.colors.secondary}
         iconStyle="solid"
       />
     </TouchableOpacity>

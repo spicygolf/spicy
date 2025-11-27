@@ -3,7 +3,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { GamePlayersListItem } from "@/components/game/settings/GamePlayersListItem";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button } from "@/ui";
 import { EmptyPlayersList } from "./EmptyPlayersList";
@@ -11,12 +11,23 @@ import { EmptyPlayersList } from "./EmptyPlayersList";
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 
 export function GamePlayersList() {
-  const { game } = useGameContext();
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: {
+        $each: {
+          name: true,
+          handicap: true,
+          rounds: true,
+        },
+      },
+    },
+  });
   const navigation = useNavigation<NavigationProp>();
 
-  const players = game?.players?.$isLoaded
-    ? game.players.filter((p) => p?.$isLoaded)
-    : [];
+  const players =
+    game?.$isLoaded && game.players?.$isLoaded
+      ? game.players.filter((p) => p?.$isLoaded)
+      : [];
 
   return (
     <View>

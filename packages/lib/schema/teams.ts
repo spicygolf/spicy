@@ -30,7 +30,7 @@ export const Team = co.map({
   /**
    * List of rounds (via RoundToGame edges) that are on this team.
    * Access pattern for scoring:
-   *   team.rounds[i].roundToGame.round.scores[holeSeq]
+   *   team.rounds[i].roundToGame.round.scores[String(holeIndex)]
    *   team.rounds[i].roundToGame.courseHandicap
    */
   rounds: ListOfRoundToTeams,

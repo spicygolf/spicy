@@ -162,9 +162,22 @@ export function shouldShowTeamChooser(
     return false;
   }
 
-  // If hole has no teams, we need the chooser
-  if (!currentHole.teams?.$isLoaded || currentHole.teams.length === 0) {
+  // Don't show chooser while teams are still loading
+  if (!currentHole.teams?.$isLoaded) {
+    return false;
+  }
+
+  // If hole has no teams (empty list), we need the chooser
+  if (currentHole.teams.length === 0) {
     return true;
+  }
+
+  // Ensure all teams in the list are fully loaded before making a decision
+  for (const team of currentHole.teams) {
+    if (!team?.$isLoaded || !team.rounds?.$isLoaded) {
+      // Still loading, don't show chooser yet
+      return false;
+    }
   }
 
   // Count how many players are assigned to teams on this hole
