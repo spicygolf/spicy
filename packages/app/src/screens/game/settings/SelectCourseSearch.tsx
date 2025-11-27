@@ -1,7 +1,7 @@
 import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
 import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
@@ -49,28 +49,22 @@ export function SelectCourseSearch({ route, navigation }: Props) {
     },
   });
 
-  const player = useMemo(() => {
-    if (!game?.$isLoaded || !game.players?.$isLoaded) {
-      return null;
-    }
-    return (
-      game.players.find(
-        (p: MaybeLoaded<(typeof game.players)[0]>) =>
-          p?.$isLoaded && p.$jazz.id === playerId,
-      ) || null
-    );
-  }, [game, playerId]);
+  // Direct Jazz data access - no useMemo needed since Jazz reactivity is already optimized
+  const player =
+    game?.$isLoaded && game.players?.$isLoaded
+      ? game.players.find(
+          (p: MaybeLoaded<(typeof game.players)[0]>) =>
+            p?.$isLoaded && p.$jazz.id === playerId,
+        ) || null
+      : null;
 
-  const round = useMemo(() => {
-    if (!roundId || !player?.$isLoaded || !player.rounds?.$isLoaded)
-      return null;
-    return (
-      player.rounds.find(
-        (r: MaybeLoaded<(typeof player.rounds)[0]>) =>
-          r?.$isLoaded && r.$jazz.id === roundId,
-      ) || null
-    );
-  }, [player, roundId]);
+  const round =
+    roundId && player?.$isLoaded && player.rounds?.$isLoaded
+      ? player.rounds.find(
+          (r: MaybeLoaded<(typeof player.rounds)[0]>) =>
+            r?.$isLoaded && r.$jazz.id === roundId,
+        ) || null
+      : null;
 
   const { state: searchState } = useGhinCourseSearchContext();
   const courseSearchQuery = useGhinSearchCourseQuery(searchState);

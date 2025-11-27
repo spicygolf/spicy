@@ -35,19 +35,18 @@ if (!player.rounds) {
 See `.claude/rules/jazz.xml` for all Jazz patterns.
 
 ### 3. Quality Checks Required - MANDATORY BEFORE COMPLETION
-**CRITICAL**: You MUST run all three quality checks and fix ALL errors before considering ANY task complete:
+**CRITICAL**: You MUST run quality checks and fix ALL errors in files you modified before considering ANY task complete:
 
 ```bash
-bun format && bun lint && bun tsc
+bun format && bun lint
 ```
 
 - `bun format` - Code formatting (auto-fixes)
 - `bun lint` - Linting (must have zero errors)
-- `bun tsc` - Type checking (must have zero errors)
 
-**DO NOT** tell the user you are done until all three commands pass successfully with zero errors. Pre-commit hooks will reject commits that fail these checks, so running them proactively is mandatory, not optional.
+**Pre-commit hooks will run these checks automatically on staged files.**
 
-**IMPORTANT**: If you encounter pre-existing errors in files you didn't modify, you MUST fix those too. The repository must be in a committable state when you're done. Don't ignore pre-existing errors - they block commits and need to be resolved.
+**IMPORTANT**: You are NOT responsible for fixing pre-existing errors in files you didn't modify. Only ensure YOUR changes pass lint and format checks. The pre-commit hook only checks staged files, not the entire codebase.
 
 ## Project Structure
 

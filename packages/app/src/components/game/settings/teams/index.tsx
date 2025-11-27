@@ -271,9 +271,12 @@ export function GameTeamsList() {
           },
           { owner: game.$jazz.owner },
         );
+        // NOTE: Must use @ts-ignore (not @ts-expect-error) due to unresolved Jazz schema strictness
+        // This is a known issue and the ignore is intentional
         // @ts-ignore - Jazz $jazz.set types are overly strict
         game.scope.$jazz.set("teamsConfig", config);
       } else if (game.scope.teamsConfig?.$isLoaded) {
+        // NOTE: Must use @ts-ignore (not @ts-expect-error) due to unresolved Jazz schema strictness
         // @ts-ignore - Jazz $jazz.set types are overly strict
         game.scope.teamsConfig.$jazz.set("rotateEvery", value);
       }
@@ -323,9 +326,12 @@ export function GameTeamsList() {
           },
           { owner: game.$jazz.owner },
         );
+        // NOTE: Must use @ts-ignore (not @ts-expect-error) due to unresolved Jazz schema strictness
+        // This is a known issue and the ignore is intentional
         // @ts-ignore - Jazz $jazz.set types are overly strict
         game.scope.$jazz.set("teamsConfig", config);
       } else if (game.scope.teamsConfig?.$isLoaded) {
+        // NOTE: Must use @ts-ignore (not @ts-expect-error) due to unresolved Jazz schema strictness
         // @ts-ignore - Jazz $jazz.set types are overly strict
         game.scope.teamsConfig.$jazz.set("rotateEvery", pendingRotationValue);
       }

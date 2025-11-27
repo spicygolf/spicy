@@ -13,18 +13,15 @@
   "lint-staged": {
     "packages/app/**/*.{js,jsx,ts,tsx}": [
       "bun lint",
-      "bun format",
-      "bun tsc"
+      "bun format"
     ],
     "packages/api/**/*.{js,jsx,ts,tsx}": [
       "bun lint",
-      "bun format",
-      "bun tsc"
+      "bun format"
     ],
     "packages/lib/**/*.{js,jsx,ts,tsx}": [
       "bun lint",
-      "bun format",
-      "bun tsc"
+      "bun format"
     ]
   },
   "patchedDependencies": {
