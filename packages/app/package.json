@@ -8,7 +8,7 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "start": "react-native start --client-logs 2>&1 | tee /tmp/spicy-metro.log",
+    "start": "sh -c 'react-native start --client-logs \"$@\" 2>&1 | tee /tmp/spicy-metro.log' --",
     "test": "jest",
     "clean": "del-cli android/build android/app/build ios/build ios/Pods node_modules",
     "pods": "RCT_NEW_ARCH_ENABLED=1 RCT_USE_RN_DEP=1 RCT_USE_PREBUILT_RNCORE=1 bundle install && bundle exec pod install --project-directory=ios",
