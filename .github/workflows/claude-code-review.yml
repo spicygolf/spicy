@@ -42,6 +42,7 @@ jobs:
 
             Please review this pull request and provide feedback on:
             - Code quality and best practices
+              - This is run in a separate Github Actions workflow
             - Potential bugs or issues
             - Performance considerations
             - Security concerns

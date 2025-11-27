@@ -47,7 +47,7 @@
       <rule>Lowercase-dash directories (e.g., auth-wizard)</rule>
       <rule>Named exports (no default exports)</rule>
       <rule>No enums - use explicit types and maps instead</rule>
-      <rule>Functional components for React/React Native</rule>
+      <rule>Functional components for React/React Native (except Error Boundaries)</rule>
       <rule>Strict mode enabled</rule>
       <rule>Pin dependencies - no `^` carets in package.json</rule>
     </style_rules>
