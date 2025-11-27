@@ -1,5 +1,6 @@
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ChangeTeamsModal } from "@/components/game/scoring";
 import {
   useCurrentHole,
@@ -142,29 +143,31 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
     <Screen>
       <View style={styles.container}>
         {/* Content: Either Team Chooser or Scoring UI */}
-        {showChooser ? (
-          <TeamChooserView
-            game={game}
-            holeInfo={holeInfo}
-            teamCount={teamCount}
-            currentHole={currentHole}
-            onPrevHole={handlePrevHole}
-            onNextHole={handleNextHole}
-            onAssignmentsChange={handleTeamAssignmentsChange}
-          />
-        ) : (
-          <ScoringView
-            game={game}
-            holeInfo={holeInfo}
-            currentHole={currentHole}
-            currentHoleIndex={currentHoleIndex}
-            onPrevHole={handlePrevHole}
-            onNextHole={handleNextHole}
-            onScoreChange={handleScoreChange}
-            onUnscore={handleUnscore}
-            onChangeTeams={() => setShowChangeTeamsModal(true)}
-          />
-        )}
+        <ErrorBoundary>
+          {showChooser ? (
+            <TeamChooserView
+              game={game}
+              holeInfo={holeInfo}
+              teamCount={teamCount}
+              currentHole={currentHole}
+              onPrevHole={handlePrevHole}
+              onNextHole={handleNextHole}
+              onAssignmentsChange={handleTeamAssignmentsChange}
+            />
+          ) : (
+            <ScoringView
+              game={game}
+              holeInfo={holeInfo}
+              currentHole={currentHole}
+              currentHoleIndex={currentHoleIndex}
+              onPrevHole={handlePrevHole}
+              onNextHole={handleNextHole}
+              onScoreChange={handleScoreChange}
+              onUnscore={handleUnscore}
+              onChangeTeams={() => setShowChangeTeamsModal(true)}
+            />
+          )}
+        </ErrorBoundary>
 
         {/* Change Teams Modal */}
         <ChangeTeamsModal

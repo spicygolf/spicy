@@ -53,14 +53,6 @@ export function GameNavigator({ route }: GameNavigatorProps) {
   const initialView = route.params.initialView || "scoring";
   const [currentView, setCurrentView] = useState<GameView>(initialView);
 
-  // PERFORMANCE: Track load time - but only log ONCE when game first loads
-  const [startTime] = useState(() => {
-    const time = Date.now();
-    console.log("[PERF] GameNavigator render START", { time });
-    return time;
-  });
-  const [hasLoggedLoad, setHasLoggedLoad] = useState(false);
-
   // Extract gameId from route params
   const gameId = route.params.gameId;
 
@@ -85,20 +77,6 @@ export function GameNavigator({ route }: GameNavigatorProps) {
   // CRITICAL: Don't use useMemo with Jazz data - just calculate directly
   const facilityName = game?.$isLoaded ? getFacilityName(game) : undefined;
 
-  // PERFORMANCE: Track when game is FIRST loaded (not on every update)
-  useEffect(() => {
-    if (game?.$isLoaded && !hasLoggedLoad) {
-      const loadTime = Date.now() - startTime;
-      console.log("[PERF] GameNavigator game LOADED", {
-        loadTime,
-        gameId: game.$jazz.id,
-        hasRounds: game.rounds?.$isLoaded,
-        roundsCount: game.rounds?.$isLoaded ? game.rounds.length : 0,
-      });
-      setHasLoggedLoad(true);
-    }
-  }, [game, hasLoggedLoad, startTime]);
-
   // Update the current game ID in context - use gameId as stable dependency
   useEffect(() => {
     setGameId(gameId);
@@ -108,10 +86,6 @@ export function GameNavigator({ route }: GameNavigatorProps) {
   }, [gameId, setGameId]);
 
   if (!game?.$isLoaded) {
-    console.log("[PERF] GameNavigator waiting for game to load", {
-      elapsed: Date.now() - startTime,
-      loadingState: game?.$jazz.loadingState,
-    });
     return null; // or a loading spinner
   }
 

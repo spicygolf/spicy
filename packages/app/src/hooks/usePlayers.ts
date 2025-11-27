@@ -1,5 +1,4 @@
 import { useCoState } from "jazz-tools/react-native";
-import { useEffect, useRef } from "react";
 import type { ListOfPlayers } from "spicylib/schema";
 import { ListOfPlayers as ListOfPlayersSchema } from "spicylib/schema";
 
@@ -40,9 +39,6 @@ export function usePlayers(
   playersId: string | undefined,
   options: UsePlayersOptions = {},
 ): ListOfPlayers | null {
-  const startTime = useRef(Date.now());
-  const loggedLoad = useRef(false);
-
   const resolveQuery = options.resolve || {
     $each: {
       name: true,
@@ -64,18 +60,6 @@ export function usePlayers(
         }
       : undefined,
   ) as ListOfPlayers | null;
-
-  // Performance tracking
-  useEffect(() => {
-    if (players?.$isLoaded && !loggedLoad.current) {
-      loggedLoad.current = true;
-      const elapsed = Date.now() - startTime.current;
-      console.log("[PERF] usePlayers LOADED", {
-        elapsed,
-        playersCount: players.length,
-      });
-    }
-  }, [players]);
 
   return players;
 }
