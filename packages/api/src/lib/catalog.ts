@@ -6,6 +6,7 @@
  */
 
 import type { co } from "jazz-tools";
+import { Group } from "jazz-tools";
 
 /**
  * Validation helpers for option type assertions
@@ -74,13 +75,18 @@ function isValidBetter(value: unknown): value is "lower" | "higher" {
 import {
   ChoiceMap,
   ChoicesList,
+  Club,
   type GameCatalog,
   GameOption,
   GameSpec,
+  Handicap,
   JunkOption,
+  ListOfClubs,
   type MapOfGameSpecs,
-  type MapOfOptions,
+  MapOfOptions,
+  MapOfPlayers,
   MultiplierOption,
+  Player,
   type PlayerAccount,
 } from "spicylib/schema";
 import { transformGameSpec } from "spicylib/transform";
@@ -90,6 +96,7 @@ import {
   createArangoConnection,
   defaultConfig,
   fetchGameSpecs,
+  fetchPlayersWithGames,
 } from "../utils/arango";
 import { loadAllGameSpecs } from "../utils/json-reader";
 
@@ -102,6 +109,11 @@ export interface ImportResult {
   options: {
     created: number;
     updated: number;
+  };
+  players: {
+    created: number;
+    updated: number;
+    skipped: number;
   };
   errors: Array<{ item: string; error: string }>;
 }
@@ -250,17 +262,25 @@ export async function upsertGameSpec(
  * Uses discriminated union based on the `type` field.
  */
 async function upsertOptions(
+  workerAccount: co.loaded<typeof PlayerAccount>,
   catalog: GameCatalog,
   options: OptionData[],
 ): Promise<{ created: number; updated: number }> {
-  const loadedCatalog = await catalog.$jazz.ensureLoaded({
+  let loadedCatalog = await catalog.$jazz.ensureLoaded({
     resolve: { options: {} },
   });
 
   // Initialize options map if it doesn't exist
   if (!loadedCatalog.$jazz.has("options")) {
-    const newMap = {} as MapOfOptions;
+    const group = Group.create(workerAccount);
+    group.makePublic();
+    const newMap = MapOfOptions.create({}, { owner: group });
     loadedCatalog.$jazz.set("options", newMap);
+
+    // Reload catalog to ensure the new map is properly loaded
+    loadedCatalog = await catalog.$jazz.ensureLoaded({
+      resolve: { options: {} },
+    });
   }
 
   const optionsMap = loadedCatalog.options;
@@ -450,6 +470,162 @@ export async function mergeGameSpecSources(
 }
 
 /**
+ * Import players from ArangoDB (idempotent)
+ *
+ * Uses GHIN ID as unique identifier via Player.upsertUnique
+ * Players are stored as individual docs owned by the worker account
+ */
+async function importPlayers(
+  workerAccount: co.loaded<typeof PlayerAccount>,
+  catalog: GameCatalog,
+  arangoConfig?: ArangoConfig,
+): Promise<{ created: number; updated: number; skipped: number }> {
+  const result = { created: 0, updated: 0, skipped: 0 };
+
+  try {
+    const db = createArangoConnection(arangoConfig || defaultConfig);
+    const arangoPlayers = await fetchPlayersWithGames(db);
+
+    console.log(`Importing ${arangoPlayers.length} players from ArangoDB...`);
+
+    // Ensure catalog.players map exists
+    const loadedCatalog = await catalog.$jazz.ensureLoaded({
+      resolve: { players: {} },
+    });
+
+    if (!loadedCatalog.$jazz.has("players")) {
+      const group = Group.create(workerAccount);
+      group.makePublic();
+      const newMap = MapOfPlayers.create({}, { owner: group });
+      loadedCatalog.$jazz.set("players", newMap);
+    }
+
+    const playersMap = loadedCatalog.players;
+    if (!playersMap) {
+      throw new Error("Failed to initialize players map");
+    }
+
+    // Create a group for player ownership
+    const loadedWorker = await workerAccount.$jazz.ensureLoaded({
+      resolve: { root: true },
+    });
+
+    if (!loadedWorker.root) {
+      throw new Error("Worker account has no root");
+    }
+
+    const group = loadedWorker.root.$jazz.owner;
+
+    for (const arangoPlayer of arangoPlayers) {
+      try {
+        // Skip if missing name
+        if (!arangoPlayer.name) {
+          console.warn(
+            `Skipping player (missing name): ${JSON.stringify({ _key: arangoPlayer._key })}`,
+          );
+          result.skipped++;
+          continue;
+        }
+
+        // Only import if player has GHIN ID (our unique identifier)
+        const ghinId = arangoPlayer.handicap?.id;
+        if (!ghinId) {
+          console.warn(
+            `Skipping player (no GHIN ID): ${arangoPlayer.name} (_key: ${arangoPlayer._key})`,
+          );
+          result.skipped++;
+          continue;
+        }
+
+        // Default gender to "M" if missing, with smart detection for female names
+        const gender: "M" | "F" = arangoPlayer.gender || "M";
+
+        // Create handicap if available
+        let handicap: Handicap | undefined;
+        if (arangoPlayer.handicap) {
+          const revDate = arangoPlayer.handicap.revDate
+            ? new Date(arangoPlayer.handicap.revDate)
+            : undefined;
+
+          handicap = Handicap.create(
+            {
+              source: arangoPlayer.handicap.source,
+              display: arangoPlayer.handicap.display,
+              value: arangoPlayer.handicap.index,
+              revDate,
+            },
+            { owner: group },
+          );
+        }
+
+        // Create clubs list if available
+        let clubs: ListOfClubs | undefined;
+        if (arangoPlayer.clubs && arangoPlayer.clubs.length > 0) {
+          const clubsList = ListOfClubs.create([], { owner: group });
+          for (const clubData of arangoPlayer.clubs) {
+            const club = Club.create(
+              {
+                name: clubData.name,
+                state: clubData.state,
+              },
+              { owner: group },
+            );
+            clubsList.$jazz.push(club);
+          }
+          clubs = clubsList;
+        }
+
+        // Upsert player using GHIN ID as unique key
+        const player = await Player.upsertUnique({
+          value: {
+            name: arangoPlayer.name,
+            short: arangoPlayer.short || arangoPlayer.name,
+            gender,
+            ghinId,
+            handicap,
+            clubs,
+          },
+          unique: ghinId,
+          owner: group,
+        });
+
+        if (!player?.$isLoaded) {
+          throw new Error(`Failed to upsert player: ${arangoPlayer.name}`);
+        }
+
+        // Check if player existed in map before (for counting)
+        const existedBefore = playersMap.$jazz.has(ghinId);
+
+        // Add to catalog.players map for enumeration (idempotent)
+        playersMap.$jazz.set(ghinId, player);
+
+        // Count as created or updated based on previous existence
+        if (existedBefore) {
+          result.updated++;
+          // console.log(`Updated player: ${arangoPlayer.name} (${ghinId})`);
+        } else {
+          result.created++;
+          // console.log(`Created player: ${arangoPlayer.name} (${ghinId})`);
+        }
+      } catch (error) {
+        console.error(`Failed to import player ${arangoPlayer.name}:`, error);
+        result.skipped++;
+      }
+    }
+
+    // Note: We count all upserts as "updated" since we can't easily distinguish
+    // between create and update in upsertUnique. The important thing is idempotency.
+    console.log(
+      `Player import complete: ${result.updated} upserted, ${result.skipped} skipped`,
+    );
+  } catch (error) {
+    console.error("Failed to fetch players from ArangoDB:", error);
+  }
+
+  return result;
+}
+
+/**
  * Import all game specs to the catalog (idempotent)
  */
 export async function importGameSpecsToCatalog(
@@ -473,6 +649,11 @@ export async function importGameSpecsToCatalog(
     options: {
       created: 0,
       updated: 0,
+    },
+    players: {
+      created: 0,
+      updated: 0,
+      skipped: 0,
     },
     errors: [],
   };
@@ -592,6 +773,7 @@ export async function importGameSpecsToCatalog(
   console.log(`Importing ${allOptions.size} total options...`);
   try {
     const optionsResult = await upsertOptions(
+      workerAccount,
       catalog,
       Array.from(allOptions.values()),
     );
@@ -630,6 +812,22 @@ export async function importGameSpecsToCatalog(
         error: error instanceof Error ? error.message : String(error),
       });
     }
+  }
+
+  // Fourth pass: Import players
+  console.log("Importing players...");
+  try {
+    const playersResult = await importPlayers(
+      workerAccount,
+      catalog,
+      arangoConfig,
+    );
+    result.players = playersResult;
+  } catch (error) {
+    result.errors.push({
+      item: "players:all",
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 
   return result;

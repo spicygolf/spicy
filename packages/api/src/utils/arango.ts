@@ -85,3 +85,45 @@ export async function fetchGameSpecs(db: Database): Promise<GameSpecV03[]> {
     throw error;
   }
 }
+
+export interface PlayerV03 {
+  _key: string;
+  name: string;
+  short?: string;
+  gender: "M" | "F";
+  handicap?: {
+    source: "ghin" | "manual";
+    id?: string;
+    display?: string;
+    index?: number;
+    revDate?: string;
+  };
+  clubs?: Array<{
+    name: string;
+    state?: string;
+  }>;
+  statusAuthz?: string[];
+}
+
+export async function fetchPlayersWithGames(
+  db: Database,
+): Promise<PlayerV03[]> {
+  try {
+    const cursor = await db.query(`
+      FOR player IN players
+        LET hasGames = (
+          FOR v, e IN 1..1 ANY player._id GRAPH 'games'
+            FILTER e.type == 'player2game'
+            LIMIT 1
+            RETURN 1
+        )
+        FILTER LENGTH(hasGames) > 0
+        RETURN player
+    `);
+    const players = await cursor.all();
+    return players as PlayerV03[];
+  } catch (error) {
+    console.error("Failed to fetch players:", error);
+    throw error;
+  }
+}

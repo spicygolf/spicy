@@ -124,7 +124,6 @@ export function PlayerItem({ item }: { item: Golfer }) {
             const newPlayer = Player.create(
               {
                 name: full_name,
-                email: "",
                 short: item.first_name || "",
                 gender: item.gender,
                 ghinId: item.ghin.toString(),
@@ -185,7 +184,6 @@ export function PlayerItem({ item }: { item: Golfer }) {
   const makePlayer = (): PlayerData => {
     return {
       name: full_name || "",
-      email: "",
       short: item.first_name || "",
       gender: item.gender,
       ghinId: item.ghin.toString(),

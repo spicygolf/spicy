@@ -12,9 +12,10 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { PlayerAccount } from "spicylib/schema";
+import { PlayerAccount } from "spicylib/schema";
 import { CatalogBrowser } from "@/components/CatalogBrowser";
 import { LoginForm } from "@/components/LoginForm";
+import { PlayerBrowser } from "@/components/PlayerBrowser";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -47,16 +48,24 @@ import {
 export function App(): React.JSX.Element {
   const { toast } = useToast();
   const isAuthenticated = useIsAuthenticated();
-  const me = useAccount<typeof PlayerAccount>();
+  const me = useAccount(PlayerAccount);
   const [userEmail, setUserEmail] = useState<string | undefined>();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("import");
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isImporting, setIsImporting] = useState<boolean>(false);
   const [importProgress, setImportProgress] = useState<number>(0);
+  const [importResult, setImportResult] = useState<{
+    specs: { created: number; updated: number; skipped: number };
+    options: { created: number; updated: number };
+    players: { created: number; updated: number; skipped: number };
+    errors: Array<{ item: string; error: string }>;
+  } | null>(null);
   const [arangoConfig, setArangoConfig] = useState<ArangoConfig>(defaultConfig);
   const [ghinNumber, setGhinNumber] = useState<string>("");
   const [isMigrating, setIsMigrating] = useState<boolean>(false);
+  const [isLinkingPlayer, setIsLinkingPlayer] = useState<boolean>(false);
+  const [linkGhinId, setLinkGhinId] = useState<string>("");
 
   // Fetch user email and admin status from better-auth session
   useEffect(() => {
@@ -141,23 +150,20 @@ export function App(): React.JSX.Element {
 
       const result = await response.json();
       setImportProgress(100);
+      setImportResult(result);
 
-      const successMsg = [
-        `Specs: ${result.specs.created} created, ${result.specs.updated} updated, ${result.specs.skipped} skipped`,
-        `Options: ${result.options.created} created, ${result.options.updated} updated`,
-      ].join(" | ");
-
+      // Simple toast notification
       if (result.errors.length > 0) {
         toast({
           variant: "destructive",
           title: "Import completed with errors",
-          description: `${successMsg}. ${result.errors.length} errors occurred.`,
+          description: `${result.errors.length} errors occurred. See details below.`,
         });
         console.error("Import errors:", result.errors);
       } else {
         toast({
           title: "Import successful",
-          description: successMsg,
+          description: "See results below for details",
         });
       }
     } catch (error) {
@@ -170,6 +176,114 @@ export function App(): React.JSX.Element {
       setImportProgress(0);
     } finally {
       setIsImporting(false);
+    }
+  };
+
+  const handleLinkPlayer = async (): Promise<void> => {
+    if (!me) {
+      toast({
+        variant: "destructive",
+        title: "Authentication required",
+        description: "Please log in to link player",
+      });
+      return;
+    }
+
+    if (!linkGhinId.trim()) {
+      toast({
+        variant: "destructive",
+        title: "GHIN ID required",
+        description: "Please enter your GHIN ID",
+      });
+      return;
+    }
+
+    setIsLinkingPlayer(true);
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
+
+      const response = await fetch(`${apiUrl}/player/link`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ ghinId: linkGhinId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || `Link failed: ${response.statusText}`,
+        );
+      }
+
+      const result = await response.json();
+
+      // Wait for account to be loaded
+      // Note: useAccount without resolve might not load if root ref is broken
+      if (!me) {
+        throw new Error("Not authenticated");
+      }
+
+      // Check loading state
+      if (!me.$isLoaded) {
+        if (me.$jazz.loadingState === "loading") {
+          throw new Error(
+            "Your account is still loading - please try again in a moment",
+          );
+        }
+        throw new Error(
+          "Your account failed to load - there may be a broken reference in your account data",
+        );
+      }
+
+      const root = me.root;
+
+      if (!root) {
+        throw new Error(
+          `Your account has no root - please contact support. Account ID: ${me.$jazz.id}`,
+        );
+      }
+
+      if (!root.$isLoaded) {
+        throw new Error(
+          "Your account root is not loaded - there may be a permission issue",
+        );
+      }
+
+      const { Player } = await import("spicylib/schema");
+
+      // Wait a moment for Jazz to sync the group membership
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const player = await Player.load(result.playerId);
+
+      if (!player?.$isLoaded) {
+        throw new Error(
+          "Failed to load player after granting access. Jazz may still be syncing - try again in a moment.",
+        );
+      }
+
+      // Now we know root is loaded, we can use it
+      root.$jazz.set("player", player);
+
+      toast({
+        title: "Player linked successfully",
+        description: `Linked ${result.playerName} to your account`,
+      });
+
+      setLinkGhinId("");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Link failed",
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      });
+    } finally {
+      setIsLinkingPlayer(false);
     }
   };
 
@@ -380,18 +494,18 @@ export function App(): React.JSX.Element {
           <TabsContent value="import" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Import Game Specs to Catalog</CardTitle>
+                <CardTitle>Import v0.3 Data</CardTitle>
                 <CardDescription>
-                  Import game specifications from ArangoDB and JSON files into
-                  the shared catalog (worker account only)
+                  Import game specifications, options, and players from ArangoDB
+                  and JSON files (worker account only)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {!isAdmin && (
                   <div className="rounded-md border border-yellow-200 bg-yellow-50 p-4">
                     <p className="text-sm text-yellow-800">
-                      Only authorized administrators can import to the catalog.
-                      You can browse and customize specs instead.
+                      Only authorized administrators can import data. You can
+                      browse and customize specs instead.
                     </p>
                   </div>
                 )}
@@ -415,13 +529,134 @@ export function App(): React.JSX.Element {
                       ) : (
                         <Upload className="mr-2 h-4 w-4" />
                       )}
-                      Import Game Specs to Catalog
+                      Import v0.3 Data
                     </Button>
 
                     {importProgress > 0 && (
                       <div className="space-y-2">
                         <Label>Import Progress</Label>
                         <Progress value={importProgress} />
+                      </div>
+                    )}
+
+                    {importResult && (
+                      <div className="space-y-4 rounded-md border p-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold">
+                            Import Results
+                          </h3>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setImportResult(null)}
+                          >
+                            Dismiss
+                          </Button>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-3">
+                          <div className="rounded-md border p-3">
+                            <div className="text-sm font-medium text-muted-foreground">
+                              Game Specs
+                            </div>
+                            <div className="mt-2 space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-green-600">Created:</span>
+                                <span className="font-medium">
+                                  {importResult.specs.created}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-blue-600">Updated:</span>
+                                <span className="font-medium">
+                                  {importResult.specs.updated}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Skipped:</span>
+                                <span className="font-medium">
+                                  {importResult.specs.skipped}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="rounded-md border p-3">
+                            <div className="text-sm font-medium text-muted-foreground">
+                              Options
+                            </div>
+                            <div className="mt-2 space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-green-600">Created:</span>
+                                <span className="font-medium">
+                                  {importResult.options.created}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-blue-600">Updated:</span>
+                                <span className="font-medium">
+                                  {importResult.options.updated}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="rounded-md border p-3">
+                            <div className="text-sm font-medium text-muted-foreground">
+                              Players
+                            </div>
+                            <div className="mt-2 space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-blue-600">Imported:</span>
+                                <span className="font-medium">
+                                  {importResult.players.updated}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-yellow-600">
+                                  Skipped:
+                                </span>
+                                <span className="font-medium">
+                                  {importResult.players.skipped}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {importResult.errors.length > 0 && (
+                          <div className="rounded-md border border-red-200 bg-red-50 p-3">
+                            <div className="text-sm font-medium text-red-900">
+                              Errors ({importResult.errors.length})
+                            </div>
+                            <div className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs">
+                              {importResult.errors.map((err) => (
+                                <div
+                                  key={`${err.item}-${err.error}`}
+                                  className="text-red-800"
+                                >
+                                  <span className="font-medium">
+                                    {err.item}:
+                                  </span>{" "}
+                                  {err.error}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {importResult.players.skipped > 0 && (
+                          <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3">
+                            <div className="text-sm font-medium text-yellow-900">
+                              Why were players skipped?
+                            </div>
+                            <div className="mt-1 text-xs text-yellow-800">
+                              Players are skipped if they are missing required
+                              fields (name, gender) or don't have a GHIN ID.
+                              Check the console logs for details.
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </>
@@ -435,10 +670,59 @@ export function App(): React.JSX.Element {
                       Extracts and imports options (game settings, junk,
                       multipliers)
                     </li>
+                    <li>
+                      Imports players who participated in games (GHIN ID
+                      required)
+                    </li>
                     <li>ArangoDB data takes precedence on conflicts</li>
                     <li>Idempotent: safe to run multiple times</li>
                     <li>Updates existing items, creates new ones</li>
-                    <li>Catalog is public: all users can read</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Link Player to Account</CardTitle>
+                <CardDescription>
+                  Link an imported player record to your account using your GHIN
+                  ID
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="linkGhinId">Your GHIN ID</Label>
+                  <Input
+                    id="linkGhinId"
+                    placeholder="Enter your GHIN ID"
+                    value={linkGhinId}
+                    onChange={(e) => setLinkGhinId(e.target.value)}
+                    disabled={isLinkingPlayer}
+                  />
+                </div>
+
+                <Button
+                  onClick={handleLinkPlayer}
+                  disabled={isLinkingPlayer || !linkGhinId.trim()}
+                  className="w-full"
+                  size="lg"
+                >
+                  {isLinkingPlayer ? (
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <User className="mr-2 h-4 w-4" />
+                  )}
+                  Link Player
+                </Button>
+
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">How it works:</h3>
+                  <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                    <li>Finds the imported player by GHIN ID</li>
+                    <li>Grants you admin access to the player record</li>
+                    <li>Links the player to your account's root.player</li>
+                    <li>You can now view and modify your player data</li>
                   </ul>
                 </div>
               </CardContent>
@@ -448,17 +732,52 @@ export function App(): React.JSX.Element {
           <TabsContent value="browse" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Browse Game Catalog</CardTitle>
+                <CardTitle>Browse Data</CardTitle>
                 <CardDescription>
-                  View all available game specifications
+                  View imported game specifications, players, rounds, and games
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <CatalogBrowser
-                  workerAccountId={
-                    import.meta.env.VITE_JAZZ_WORKER_ACCOUNT || ""
-                  }
-                />
+                <Tabs defaultValue="catalog" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="catalog">Game Specs</TabsTrigger>
+                    <TabsTrigger value="players">Players</TabsTrigger>
+                    <TabsTrigger value="rounds">Rounds</TabsTrigger>
+                    <TabsTrigger value="games">Games</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="catalog">
+                    <CatalogBrowser
+                      workerAccountId={
+                        import.meta.env.VITE_JAZZ_WORKER_ACCOUNT || ""
+                      }
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="players">
+                    <PlayerBrowser
+                      workerAccountId={
+                        import.meta.env.VITE_JAZZ_WORKER_ACCOUNT || ""
+                      }
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="rounds">
+                    <div className="rounded-md border border-gray-200 bg-gray-50 p-8 text-center">
+                      <p className="text-sm text-muted-foreground">
+                        Round browser coming soon
+                      </p>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="games">
+                    <div className="rounded-md border border-gray-200 bg-gray-50 p-8 text-center">
+                      <p className="text-sm text-muted-foreground">
+                        Game browser coming soon
+                      </p>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </TabsContent>

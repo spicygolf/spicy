@@ -1,1 +1,4 @@
-{}
+{
+  "settle": 20,
+  "ignore_dirs": ["node_modules", ".git"]
+}
