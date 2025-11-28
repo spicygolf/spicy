@@ -12,25 +12,9 @@
   },
   "license": "FSL-1.1-ALv2",
   "lint-staged": {
-    "packages/app/**/*.{js,jsx,ts,tsx}": [
+    "packages/**/*.{js,jsx,ts,tsx}": [
       "bun lint",
-      "bun format",
-      "bun tsc"
-    ],
-    "packages/api/**/*.{js,jsx,ts,tsx}": [
-      "bun lint",
-      "bun format",
-      "bun tsc"
-    ],
-    "packages/lib/**/*.{js,jsx,ts,tsx}": [
-      "bun lint",
-      "bun format",
-      "bun tsc"
-    ],
-    "packages/web/**/*.{js,jsx,ts,tsx}": [
-      "bun lint",
-      "bun format",
-      "bun tsc"
+      "bun format"
     ]
   },
   "patchedDependencies": {

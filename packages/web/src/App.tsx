@@ -1,3 +1,4 @@
+import type { co } from "jazz-tools";
 import { useAccount, useIsAuthenticated } from "jazz-tools/react";
 import {
   BookOpen,
@@ -35,7 +36,7 @@ import {
   exportUserSpecs,
   migrateUserSpecs,
 } from "@/lib/user-migration";
-import { isAuthorizedAdmin, isWorkerAccount } from "@/lib/worker-auth";
+import { isWorkerAccount } from "@/lib/worker-auth";
 import {
   type ArangoConfig,
   createArangoConnection,
@@ -48,6 +49,7 @@ export function App(): React.JSX.Element {
   const isAuthenticated = useIsAuthenticated();
   const me = useAccount<typeof PlayerAccount>();
   const [userEmail, setUserEmail] = useState<string | undefined>();
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("import");
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isImporting, setIsImporting] = useState<boolean>(false);
@@ -56,7 +58,7 @@ export function App(): React.JSX.Element {
   const [ghinNumber, setGhinNumber] = useState<string>("");
   const [isMigrating, setIsMigrating] = useState<boolean>(false);
 
-  // Fetch user email from better-auth session
+  // Fetch user email and admin status from better-auth session
   useEffect(() => {
     if (isAuthenticated) {
       betterAuthClient
@@ -65,6 +67,8 @@ export function App(): React.JSX.Element {
           if (session.data?.user?.email) {
             setUserEmail(session.data.user.email);
           }
+          // isAdmin is set server-side via customSession plugin
+          setIsAdmin(session.data?.session?.isAdmin ?? false);
         })
         .catch((error) => {
           console.error("Failed to get session:", error);
@@ -127,6 +131,7 @@ export function App(): React.JSX.Element {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(arangoConfig),
       });
 
@@ -180,8 +185,9 @@ export function App(): React.JSX.Element {
     }
 
     try {
-      // @ts-expect-error - MaybeLoaded type mismatch with function signature
-      const exportData = await exportUserSpecs(me);
+      const exportData = await exportUserSpecs(
+        me as co.loaded<typeof PlayerAccount>,
+      );
       downloadExportAsJson(exportData);
 
       toast({
@@ -217,8 +223,9 @@ export function App(): React.JSX.Element {
     }
 
     try {
-      // @ts-expect-error - MaybeLoaded type mismatch with function signature
-      const count = await deleteUserSpecs(me);
+      const count = await deleteUserSpecs(
+        me as co.loaded<typeof PlayerAccount>,
+      );
 
       toast({
         title: "Specs deleted",
@@ -255,8 +262,9 @@ export function App(): React.JSX.Element {
     setIsMigrating(true);
 
     try {
-      // @ts-expect-error - MaybeLoaded type mismatch with function signature
-      const result = await migrateUserSpecs(me);
+      const result = await migrateUserSpecs(
+        me as co.loaded<typeof PlayerAccount>,
+      );
       downloadExportAsJson(result.export);
 
       toast({
@@ -298,7 +306,7 @@ export function App(): React.JSX.Element {
   };
 
   const isWorker = me ? isWorkerAccount(me.$jazz.id) : false;
-  const isAdmin = isAuthorizedAdmin(userEmail);
+  // Note: isAdmin is set server-side via better-auth customSession plugin
 
   // Show auth UI if not logged in
   if (!isAuthenticated) {

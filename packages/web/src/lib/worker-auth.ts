@@ -4,7 +4,7 @@
  * Utilities for checking the JAZZ_WORKER_ACCOUNT
  * This account owns the shared GameCatalog.
  * Note: The web client only needs the account ID to READ the public catalog.
- * Catalog modifications happen server-side via the API.
+ * Catalog modifications happen server-side via the API with proper authentication.
  */
 
 /**
@@ -33,18 +33,4 @@ export function isWorkerAccount(currentAccountId?: string): boolean {
   }
 
   return currentAccountId === workerAccountId;
-}
-
-/**
- * Check if user is authorized to perform admin operations
- * Currently limited to Brad Anderson's email addresses
- */
-export function isAuthorizedAdmin(userEmail?: string): boolean {
-  if (!userEmail) {
-    return false;
-  }
-
-  const authorizedEmails = ["brad@sankatygroup.com", "brad@druid.golf"];
-
-  return authorizedEmails.includes(userEmail.toLowerCase());
 }

@@ -5,7 +5,8 @@
   "exports": {
     "./types": "./types/index.ts",
     "./utils": "./utils/index.ts",
-    "./schema": "./schema/index.ts"
+    "./schema": "./schema/index.ts",
+    "./transform": "./src/transform/index.ts"
   },
   "scripts": {
     "clean": "del-cli node_modules",

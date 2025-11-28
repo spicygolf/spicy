@@ -15,6 +15,7 @@ import { auth } from "./lib/auth";
 import { importGameSpecsToCatalog } from "./lib/catalog";
 import { playerSearch } from "./players";
 import type { ArangoConfig } from "./utils/arango";
+import { requireAdmin } from "./utils/auth";
 
 const {
   API_SCHEME: scheme,
@@ -90,9 +91,12 @@ const app = new Elysia()
   }))
   .post(
     `/${api}/catalog/import`,
-    async ({ body }) => {
+    async ({ body, user }) => {
       try {
-        console.log("Catalog import started");
+        // Server-side admin authorization check
+        requireAdmin(user?.email);
+
+        console.log("Catalog import started by admin:", user.email);
         const arangoConfig = body as ArangoConfig | undefined;
         const { account } = await getJazzWorker();
 
@@ -109,7 +113,7 @@ const app = new Elysia()
       }
     },
     {
-      // auth: true, // TODO: Enable auth and check for admin role
+      auth: true,
     },
   )
   .listen({

@@ -43,18 +43,24 @@ export async function exportUserSpecs(
     },
   });
 
-  if (!user.root) {
+  // Check field existence before accessing
+  if (!user.$jazz.has("root")) {
     throw new Error("User has no root");
+  }
+
+  const root = user.root;
+  if (!root) {
+    throw new Error("User root is null");
   }
 
   // Type assertion needed due to jazz-tools version mismatch
   // biome-ignore lint/suspicious/noExplicitAny: Required for jazz-tools version compatibility
-  const root = user.root as any;
-  if (!user.$jazz.has("root") || !root.$jazz.has("specs")) {
+  const rootAny = root as any;
+  if (!rootAny.$jazz.has("specs")) {
     throw new Error("User has no specs to export");
   }
 
-  const specs = root.specs;
+  const specs = rootAny.specs;
   if (!specs) {
     throw new Error("Specs list is null");
   }

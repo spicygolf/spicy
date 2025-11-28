@@ -12,6 +12,7 @@ import {
   type MapOfGameSpecs,
   type PlayerAccount,
 } from "spicylib/schema";
+import { transformGameSpec } from "spicylib/transform";
 import type { GameSpecV03 } from "../utils/arango";
 import {
   type ArangoConfig,
@@ -20,7 +21,6 @@ import {
   fetchGameSpecs,
 } from "../utils/arango";
 import { loadAllGameSpecs } from "../utils/json-reader";
-import { transformGameSpec } from "../utils/transform";
 
 export interface ImportResult {
   created: number;

@@ -12,6 +12,7 @@ import {
   type MapOfGameSpecs,
   type PlayerAccount,
 } from "spicylib/schema";
+import { transformGameSpec } from "spicylib/transform";
 import type { GameSpecV03 } from "../utils/arango";
 import {
   type ArangoConfig,
@@ -26,19 +27,6 @@ export interface ImportResult {
   updated: number;
   skipped: number;
   errors: Array<{ spec: string; error: string }>;
-}
-
-function transformGameSpec(spec: GameSpecV03) {
-  return {
-    name: spec.disp,
-    short: spec.disp,
-    long_description: undefined,
-    version: spec.version,
-    status: spec.status as "prod" | "dev" | "test",
-    spec_type: spec.type,
-    min_players: spec.min_players || undefined,
-    location_type: spec.location_type || undefined,
-  };
 }
 
 /**
@@ -178,12 +166,32 @@ export async function importGameSpecsToCatalog(
 
   for (const spec of allSpecs) {
     try {
-      // Skip specs without required fields
-      if (!spec.disp || !spec.version) {
+      // Validate all required fields before creating GameSpec
+      if (!spec.disp || !spec.version || !spec.type || !spec.status) {
         result.skipped++;
         result.errors.push({
           spec: spec.name || spec._key || "unknown",
-          error: "Missing required fields (disp or version)",
+          error: "Missing required fields (disp, version, type, or status)",
+        });
+        continue;
+      }
+
+      // Validate numeric fields
+      if (typeof spec.min_players !== "number" || spec.min_players < 1) {
+        result.skipped++;
+        result.errors.push({
+          spec: spec.name || spec._key || "unknown",
+          error: "Invalid min_players: must be a number >= 1",
+        });
+        continue;
+      }
+
+      // Validate location_type
+      if (!spec.location_type || typeof spec.location_type !== "string") {
+        result.skipped++;
+        result.errors.push({
+          spec: spec.name || spec._key || "unknown",
+          error: "Invalid location_type: must be a non-empty string",
         });
         continue;
       }

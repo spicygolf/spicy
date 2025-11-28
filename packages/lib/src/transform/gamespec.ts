@@ -1,42 +1,19 @@
-import type { GameSpecV03 } from "./arango";
+/**
+ * Game Spec Transformation
+ *
+ * Transforms ArangoDB v0.3 game specs to the new schema format.
+ * Shared between API (catalog import) and web (user spec export).
+ */
 
-export interface TransformedGameOption {
-  name: string;
-  disp: string;
-  type: "game";
-  valueType: "bool" | "num" | "menu" | "text";
-  choices?: Array<{ name: string; disp: string }>;
-  defaultValue: string;
-}
+import type { GameSpecV03 } from "./arango-types";
+import type { TransformedGameSpec } from "./types";
 
-export interface TransformedJunkOption {
-  name: string;
-  disp: string;
-  type: "junk";
-  value: number;
-}
-
-export interface TransformedMultiplierOption {
-  name: string;
-  disp: string;
-  type: "multiplier";
-  value: number;
-}
-
-export interface TransformedGameSpec {
-  name: string;
-  short: string;
-  long_description?: string;
-  version: number;
-  status: "prod" | "dev" | "test";
-  spec_type: "points" | "skins";
-  min_players: number;
-  location_type: "local" | "virtual";
-  gameOptions?: TransformedGameOption[];
-  junkOptions?: TransformedJunkOption[];
-  multiplierOptions?: TransformedMultiplierOption[];
-}
-
+/**
+ * Transform a v0.3 game spec to the new format
+ *
+ * Includes core fields and optional transformation of game options,
+ * junk options, and multipliers.
+ */
 export function transformGameSpec(v03Spec: GameSpecV03): TransformedGameSpec {
   const transformed: TransformedGameSpec = {
     name: v03Spec.disp,
@@ -85,22 +62,18 @@ export function transformGameSpec(v03Spec: GameSpecV03): TransformedGameSpec {
   return transformed;
 }
 
+/**
+ * Infer the value type from an option's structure
+ */
 function inferValueType(option: {
   choices?: Array<{ name: string; disp: string }>;
   default?: unknown;
-}): "bool" | "num" | "menu" | "text" {
+}): "boolean" | "number" | "select" {
   if (option.choices && option.choices.length > 0) {
-    return "menu";
+    return "select";
   }
-
-  const defaultVal = option.default;
-  if (typeof defaultVal === "boolean") {
-    return "bool";
+  if (typeof option.default === "boolean") {
+    return "boolean";
   }
-
-  if (typeof defaultVal === "number") {
-    return "num";
-  }
-
-  return "text";
+  return "number";
 }
