@@ -29,21 +29,30 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            You are reviewing a pull request. Follow these steps:
 
-            IMPORTANT: Quality checks (bun format, bun lint, bun tsc) are automatically run in a separate CI workflow (ci.yml).
-            You can check the PR's CI status using `gh pr checks`. DO NOT ask the user to confirm they ran quality checks -
-            the CI workflow handles this automatically and will block merge if checks fail.
+            1. FIRST: Run `gh pr checks ${{ github.event.pull_request.number }}` to check if CI has passed
+               - If CI is still running, mention this in your review
+               - If CI failed, focus your review on why it failed
+               - If CI passed, proceed with code review knowing quality checks succeeded
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            2. Review the PR for:
+               - Code quality and best practices
+               - Potential bugs or issues
+               - Performance considerations
+               - Security concerns
+               - Test coverage
+               - Adherence to CLAUDE.md guidelines
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+            3. IMPORTANT:
+               - Quality checks (bun format, bun lint, bun tsc) run automatically in CI
+               - NEVER ask if quality checks were run - check CI status instead
+               - Only mention quality checks if CI failed
+
+            4. Leave your review using `gh pr comment ${{ github.event.pull_request.number }} --body "your review"`
+
+            Be constructive and helpful in your feedback.
 
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh pr checks:*)"'
