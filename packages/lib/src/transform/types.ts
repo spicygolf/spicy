@@ -9,7 +9,7 @@ export interface TransformedGameOption {
   name: string;
   disp: string;
   type: "game";
-  valueType: "boolean" | "number" | "select";
+  valueType: "bool" | "num" | "menu" | "text";
   choices?: Array<{ name: string; disp: string }>;
   defaultValue: string;
 }

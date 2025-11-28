@@ -517,75 +517,66 @@ export async function importGameSpecsToCatalog(
 
       validSpecs.push(spec);
 
-      // Collect game options
-      if (spec.options && spec.options.length > 0) {
-        for (const opt of spec.options) {
+      // Use transform layer to get properly typed options
+      const transformed = transformGameSpec(spec);
+      if (transformed.options && transformed.options.length > 0) {
+        for (const opt of transformed.options) {
           if (!allOptions.has(opt.name)) {
-            // Map v0.3 type names to new valueType names
-            let valueType: "bool" | "num" | "menu" | "text" = "num";
-            if (opt.type === "bool") valueType = "bool";
-            else if (opt.type === "menu") valueType = "menu";
-            else if (opt.type === "text") valueType = "text";
-            else if (opt.type === "pct") valueType = "num";
-            else if (opt.type === "num") valueType = "num";
-
-            allOptions.set(opt.name, {
-              type: "game",
-              name: opt.name,
-              disp: opt.disp,
-              version: String(spec.version),
-              valueType,
-              defaultValue: String(opt.default ?? ""),
-              choices: opt.choices,
-            });
-          }
-        }
-      }
-
-      // Collect junk options
-      if (spec.junk && spec.junk.length > 0) {
-        for (const junk of spec.junk) {
-          if (!allOptions.has(junk.name)) {
-            allOptions.set(junk.name, {
-              type: "junk",
-              name: junk.name,
-              disp: junk.disp,
-              version: String(spec.version),
-              sub_type: junk.type as string | undefined,
-              value: junk.value,
-              seq: junk.seq as number | undefined,
-              scope: junk.scope as string | undefined,
-              icon: junk.icon as string | undefined,
-              show_in: junk.show_in as string | undefined,
-              based_on: junk.based_on as string | undefined,
-              limit: junk.limit as string | undefined,
-              calculation: junk.calculation as string | undefined,
-              logic: junk.logic as string | undefined,
-              better: junk.better as string | undefined,
-              score_to_par: junk.score_to_par as string | undefined,
-            });
-          }
-        }
-      }
-
-      // Collect multiplier options
-      if (spec.multipliers && spec.multipliers.length > 0) {
-        for (const mult of spec.multipliers) {
-          if (!allOptions.has(mult.name)) {
-            allOptions.set(mult.name, {
-              type: "multiplier",
-              name: mult.name,
-              disp: mult.disp,
-              version: String(spec.version),
-              sub_type: mult.sub_type as string | undefined,
-              value: mult.value,
-              seq: mult.seq as number | undefined,
-              icon: mult.icon as string | undefined,
-              based_on: mult.based_on as string | undefined,
-              scope: mult.scope as string | undefined,
-              availability: mult.availability as string | undefined,
-              override: mult.override as boolean | undefined,
-            });
+            if (opt.type === "game") {
+              allOptions.set(opt.name, {
+                type: "game",
+                name: opt.name,
+                disp: opt.disp,
+                version: String(spec.version),
+                valueType: opt.valueType,
+                defaultValue: opt.defaultValue,
+                choices: opt.choices,
+              });
+            } else if (opt.type === "junk") {
+              // For junk and multiplier options, we still need the full v0.3 data
+              // since the transform layer only preserves basic fields
+              const junkData = spec.junk?.find((j) => j.name === opt.name);
+              if (junkData) {
+                allOptions.set(opt.name, {
+                  type: "junk",
+                  name: opt.name,
+                  disp: opt.disp,
+                  version: String(spec.version),
+                  sub_type: junkData.type as string | undefined,
+                  value: opt.value,
+                  seq: junkData.seq as number | undefined,
+                  scope: junkData.scope as string | undefined,
+                  icon: junkData.icon as string | undefined,
+                  show_in: junkData.show_in as string | undefined,
+                  based_on: junkData.based_on as string | undefined,
+                  limit: junkData.limit as string | undefined,
+                  calculation: junkData.calculation as string | undefined,
+                  logic: junkData.logic as string | undefined,
+                  better: junkData.better as string | undefined,
+                  score_to_par: junkData.score_to_par as string | undefined,
+                });
+              }
+            } else if (opt.type === "multiplier") {
+              const multData = spec.multipliers?.find(
+                (m) => m.name === opt.name,
+              );
+              if (multData) {
+                allOptions.set(opt.name, {
+                  type: "multiplier",
+                  name: opt.name,
+                  disp: opt.disp,
+                  version: String(spec.version),
+                  sub_type: multData.sub_type as string | undefined,
+                  value: opt.value,
+                  seq: multData.seq as number | undefined,
+                  icon: multData.icon as string | undefined,
+                  based_on: multData.based_on as string | undefined,
+                  scope: multData.scope as string | undefined,
+                  availability: multData.availability as string | undefined,
+                  override: multData.override as boolean | undefined,
+                });
+              }
+            }
           }
         }
       }

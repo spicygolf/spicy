@@ -75,14 +75,25 @@ export function transformGameSpec(v03Spec: GameSpecV03): TransformedGameSpec {
  * Infer the value type from an option's structure
  */
 function inferValueType(option: {
+  type?: string;
   choices?: Array<{ name: string; disp: string }>;
   default?: unknown;
-}): "boolean" | "number" | "select" {
+}): "bool" | "num" | "menu" | "text" {
+  // Use explicit type if available (v0.3 options have type field)
+  if (option.type === "bool") return "bool";
+  if (option.type === "text") return "text";
+  if (option.type === "menu") return "menu";
+  if (option.type === "num" || option.type === "pct") return "num";
+
+  // Fallback to inference for legacy data
   if (option.choices && option.choices.length > 0) {
-    return "select";
+    return "menu";
   }
   if (typeof option.default === "boolean") {
-    return "boolean";
+    return "bool";
   }
-  return "number";
+  if (typeof option.default === "string") {
+    return "text";
+  }
+  return "num";
 }
