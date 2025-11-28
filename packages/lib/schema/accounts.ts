@@ -56,6 +56,8 @@ export const PlayerAccount = co
         }
         group.addMember(workerAccount, "admin");
 
+        const favorites = Favorites.create({}, { owner: group });
+
         account.$jazz.set(
           "root",
           PlayerAccountRoot.create(
@@ -73,6 +75,7 @@ export const PlayerAccount = co
               ),
               games: ListOfGames.create([], { owner: group }),
               specs: ListOfGameSpecs.create([], { owner: group }),
+              favorites,
             },
             { owner: group },
           ),
