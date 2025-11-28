@@ -190,9 +190,10 @@ export async function loadOrCreateCatalog(
 export async function upsertGameSpec(
   catalog: GameCatalog,
   specData: GameSpecV03,
+  catalogOptions?: MapOfOptions,
 ): Promise<{ created: boolean; updated: boolean }> {
   const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { specs: {} },
+    resolve: { specs: {}, options: {} },
   });
 
   if (!loadedCatalog.specs) {
@@ -220,6 +221,21 @@ export async function upsertGameSpec(
 
   if (transformed.long_description) {
     newSpec.$jazz.set("long_description", transformed.long_description);
+  }
+
+  // Populate spec.options with references to catalog options
+  if (transformed.options && transformed.options.length > 0 && catalogOptions) {
+    const specOptionsMap: Record<string, unknown> = {};
+
+    for (const opt of transformed.options) {
+      // Reference the option from catalog.options
+      const catalogOption = catalogOptions[opt.name];
+      if (catalogOption) {
+        specOptionsMap[opt.name] = catalogOption;
+      }
+    }
+
+    newSpec.$jazz.set("options", specOptionsMap as MapOfOptions);
   }
 
   specs.$jazz.set(key, newSpec);
@@ -464,7 +480,9 @@ export async function importGameSpecsToCatalog(
   // Collect all unique options across all specs
   const allOptions = new Map<string, OptionData>();
 
-  // First pass: Import specs and collect options
+  // First pass: Validate specs and collect options
+  const validSpecs: GameSpecV03[] = [];
+
   for (const spec of allSpecs) {
     try {
       // Validate all required fields before creating GameSpec
@@ -497,15 +515,7 @@ export async function importGameSpecsToCatalog(
         continue;
       }
 
-      const { created, updated } = await upsertGameSpec(catalog, spec);
-
-      if (created) {
-        result.specs.created++;
-      } else if (updated) {
-        result.specs.updated++;
-      } else {
-        result.specs.skipped++;
-      }
+      validSpecs.push(spec);
 
       // Collect game options
       if (spec.options && spec.options.length > 0) {
@@ -587,7 +597,7 @@ export async function importGameSpecsToCatalog(
     }
   }
 
-  // Second pass: Import all collected options in a single call
+  // Second pass: Import all collected options
   console.log(`Importing ${allOptions.size} total options...`);
   try {
     const optionsResult = await upsertOptions(
@@ -600,6 +610,35 @@ export async function importGameSpecsToCatalog(
       item: "options:all",
       error: error instanceof Error ? error.message : String(error),
     });
+  }
+
+  // Third pass: Import specs with references to catalog options
+  const loadedCatalog = await catalog.$jazz.ensureLoaded({
+    resolve: { options: {} },
+  });
+
+  console.log(`Importing ${validSpecs.length} specs with option references...`);
+  for (const spec of validSpecs) {
+    try {
+      const { created, updated } = await upsertGameSpec(
+        catalog,
+        spec,
+        loadedCatalog.options || undefined,
+      );
+
+      if (created) {
+        result.specs.created++;
+      } else if (updated) {
+        result.specs.updated++;
+      } else {
+        result.specs.skipped++;
+      }
+    } catch (error) {
+      result.errors.push({
+        item: `spec:${spec.disp || spec.name || spec._key || "unknown"}`,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   return result;
