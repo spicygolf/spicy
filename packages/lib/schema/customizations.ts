@@ -1,10 +1,6 @@
 import { co, z } from "jazz-tools";
 import type { GameSpec } from "./gamespecs";
-import {
-  ListOfGameOptions,
-  ListOfJunkOptions,
-  ListOfMultiplierOptions,
-} from "./options";
+import { MapOfOptions } from "./options";
 
 /**
  * GameSpecCustomization - Lightweight override of a catalog game spec
@@ -30,15 +26,11 @@ export const GameSpecCustomization = co.map({
   short: z.optional(z.string()),
   long_description: z.optional(z.string()),
 
-  // Override specific options
-  optionOverrides: co.optional(ListOfGameOptions),
-  junkOverrides: co.optional(ListOfJunkOptions),
-  multiplierOverrides: co.optional(ListOfMultiplierOptions),
+  // Override options (unified map of all option types)
+  optionOverrides: co.optional(MapOfOptions),
 
   // If true, replace all options from base spec (not merge)
   replaceAllOptions: z.optional(z.boolean()),
-  replaceAllJunk: z.optional(z.boolean()),
-  replaceAllMultipliers: z.optional(z.boolean()),
 });
 export type GameSpecCustomization = co.loaded<typeof GameSpecCustomization>;
 
@@ -86,10 +78,8 @@ export function getEffectiveSpecMetadata(
  * For now, customizations are stored separately and displayed alongside base specs.
  *
  * Future implementation will handle:
- * - Merging gameOptions with overrides
- * - Merging junkOptions with overrides
- * - Merging multiplierOptions with overrides
+ * - Merging options with overrides (all three types in unified map)
  *
- * This requires proper Jazz CoList manipulation which is better done
+ * This requires proper Jazz CoMap manipulation which is better done
  * in the context of actual usage (web UI or app).
  */

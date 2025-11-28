@@ -20,30 +20,25 @@ export const GameOption = co.map({
   name: z.string(),
   disp: z.string(),
   type: z.literal(["game"]),
-  version: z.string(), // Version identifier (e.g., "0.3", "0.5")
-
-  // Value type for this option
+  version: z.string(),
   valueType: z.literal(["bool", "num", "menu", "text"]),
-
-  // For menu type: available choices
   choices: co.optional(ChoicesList),
-
-  // Default value
   defaultValue: z.string(),
+  seq: z.optional(z.number()),
 });
 export type GameOption = co.loaded<typeof GameOption>;
 
 /**
  * Junk option - side bets/dots awarded during play
- * Example: birdies, sandies, greenies
+ * Examples: birdies, sandies, greenies
  */
 export const JunkOption = co.map({
   name: z.string(),
   disp: z.string(),
   type: z.literal(["junk"]),
-  version: z.string(), // Version identifier (e.g., "0.3", "0.5")
+  version: z.string(),
   sub_type: z.optional(z.literal(["dot", "skin", "carryover"])),
-  value: z.number(), // Point value
+  value: z.number(),
   seq: z.optional(z.number()),
   scope: z.optional(
     z.literal(["player", "team", "hole", "rest_of_nine", "game"]),
@@ -51,54 +46,67 @@ export const JunkOption = co.map({
   icon: z.optional(z.string()),
   show_in: z.optional(z.literal(["score", "faves", "none"])),
   based_on: z.optional(z.literal(["gross", "net", "user"])),
-  limit: z.optional(z.string()), // e.g., "one_per_group", "one_team_per_group"
-  calculation: z.optional(z.string()), // e.g., "logic", "best_ball", "aggregate"
-  logic: z.optional(z.string()), // JSON Logic expression as string
+  limit: z.optional(z.string()),
+  calculation: z.optional(z.string()),
+  logic: z.optional(z.string()),
   better: z.optional(z.literal(["lower", "higher"])),
-  score_to_par: z.optional(z.string()), // e.g., "exactly -1"
+  score_to_par: z.optional(z.string()),
 });
 export type JunkOption = co.loaded<typeof JunkOption>;
 
 /**
  * Multiplier option - modifiers that multiply points
- * Example: doubles, presses
+ * Examples: doubles, presses
  */
 export const MultiplierOption = co.map({
   name: z.string(),
   disp: z.string(),
   type: z.literal(["multiplier"]),
-  version: z.string(), // Version identifier (e.g., "0.3", "0.5")
+  version: z.string(),
   sub_type: z.optional(z.literal(["bbq", "press", "automatic"])),
-  value: z.number(), // Multiplier value (e.g., 2 for double)
+  value: z.number(),
   seq: z.optional(z.number()),
   icon: z.optional(z.string()),
-  based_on: z.optional(z.string()), // Name of junk option or "user"
+  based_on: z.optional(z.string()),
   scope: z.optional(
     z.literal(["player", "team", "hole", "rest_of_nine", "game"]),
   ),
-  availability: z.optional(z.string()), // JSON Logic expression as string
+  availability: z.optional(z.string()),
   override: z.optional(z.boolean()),
 });
 export type MultiplierOption = co.loaded<typeof MultiplierOption>;
 
-// Separate lists for each option type
-export const ListOfGameOptions = co.list(GameOption);
-export type ListOfGameOptions = co.loaded<typeof ListOfGameOptions>;
+/**
+ * Unified Option type using discriminated union
+ * Single collection holds all three option types with type safety
+ */
+export const Option = co.discriminatedUnion("type", [
+  GameOption,
+  JunkOption,
+  MultiplierOption,
+]);
+export type Option = co.loaded<typeof Option>;
 
-export const ListOfJunkOptions = co.list(JunkOption);
-export type ListOfJunkOptions = co.loaded<typeof ListOfJunkOptions>;
-
-export const ListOfMultiplierOptions = co.list(MultiplierOption);
-export type ListOfMultiplierOptions = co.loaded<typeof ListOfMultiplierOptions>;
+/**
+ * Map of options keyed by option name for O(1) lookups
+ * Key: option name (e.g., "birdie", "stakes", "double")
+ * Value: Option union type
+ *
+ * Usage:
+ *   const birdie = gameSpec.options?.birdie;
+ *   const junkOptions = Object.values(gameSpec.options ?? {}).filter(opt => opt.type === "junk");
+ *   const sorted = Object.values(gameSpec.options ?? {}).sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
+ */
+export const MapOfOptions = co.record(z.string(), Option);
+export type MapOfOptions = co.loaded<typeof MapOfOptions>;
 
 /**
  * Option value override for a specific game instance
- * Allows overriding default values from GameSpec
  */
 export const GameOptionValue = co.map({
-  optionName: z.string(), // Reference by name (e.g., "handicap_index_from")
-  value: z.string(), // The override value (e.g., "low" or "full")
-  holes: co.list(z.string()), // Which holes this applies to (e.g., ["1","2",...,"18"])
+  optionName: z.string(),
+  value: z.string(),
+  holes: co.list(z.string()),
 });
 export type GameOptionValue = co.loaded<typeof GameOptionValue>;
 

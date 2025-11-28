@@ -1,9 +1,5 @@
 import { co, z } from "jazz-tools";
-import {
-  ListOfGameOptions,
-  ListOfJunkOptions,
-  ListOfMultiplierOptions,
-} from "./options";
+import { MapOfOptions } from "./options";
 import { TeamsConfig } from "./teamsconfig";
 
 export const GameSpec = co.map({
@@ -23,19 +19,22 @@ export const GameSpec = co.map({
   teamsConfig: co.optional(TeamsConfig),
 
   /**
-   * Default options for this game spec
+   * Unified options map for this game spec
    * Individual game instances can override these via Game.optionOverrides
    *
-   * TODO: Consider normalized architecture with edges
-   * Current: GameSpec embeds full option objects (duplicated across specs)
-   * Future: GameSpec references options by name from GameCatalog
-   *         Options could have reverse edges (OptionToSpec) back to specs
-   * Benefits: Single source of truth, easier updates, smaller data size
-   * Trade-offs: More complex loading, need to ensure catalog is loaded first
+   * Uses co.record() for O(1) lookups by name, which is critical during scoring
+   * when resolving references (e.g., multiplier.based_on = "birdie")
+   *
+   * Key: option name (e.g., "birdie", "stakes", "double")
+   * Value: Option (discriminated union of GameOption, JunkOption, MultiplierOption)
+   *
+   * Benefits over separate lists:
+   * - Single source for all options (no more gameOptions/junkOptions/multiplierOptions)
+   * - O(1) lookup by name: options["birdie"] instead of options.find(o => o.name === "birdie")
+   * - Type-safe via discriminated union on "type" field
+   * - Can filter by type: Object.values(options).filter(o => o.type === "junk")
    */
-  gameOptions: co.optional(ListOfGameOptions),
-  junkOptions: co.optional(ListOfJunkOptions),
-  multiplierOptions: co.optional(ListOfMultiplierOptions),
+  options: co.optional(MapOfOptions),
 
   // TODO: DEPRECATED - remove after migration
   teams: z.optional(z.boolean()),

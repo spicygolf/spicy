@@ -28,6 +28,11 @@ export interface TransformedMultiplierOption {
   value: number;
 }
 
+export type TransformedOption =
+  | TransformedGameOption
+  | TransformedJunkOption
+  | TransformedMultiplierOption;
+
 export interface TransformedGameSpec {
   name: string;
   short: string;
@@ -37,7 +42,5 @@ export interface TransformedGameSpec {
   spec_type: "points" | "skins";
   min_players: number;
   location_type: "local" | "virtual";
-  gameOptions?: TransformedGameOption[];
-  junkOptions?: TransformedJunkOption[];
-  multiplierOptions?: TransformedMultiplierOption[];
+  options?: TransformedOption[];
 }

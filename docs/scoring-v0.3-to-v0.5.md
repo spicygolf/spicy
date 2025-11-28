@@ -1,7 +1,39 @@
 # Spicy Golf v0.3 Scoring Engine Analysis & v0.5 Recommendations
 
-**Date**: 2025-11-21  
+**Date**: 2025-11-21 (Updated: 2025-11-28)  
 **Purpose**: Document how v0.3 scoring works and provide architectural recommendations for v0.5
+
+**Update 2025-11-28**: Unified options schema has been implemented in Jazz. See "Implemented v0.5 Schema" section.
+
+---
+
+## ✅ Implementation Status (2025-11-28)
+
+The unified options schema has been **fully implemented** and is ready for scoring engine development:
+
+### What's Done
+- ✅ **Discriminated Union Schema**: `Option = GameOption | JunkOption | MultiplierOption`
+- ✅ **Map-Based Storage**: `MapOfOptions = co.record(z.string(), Option)` for O(1) lookups
+- ✅ **GameSpec Updated**: Single `options` field replaces three separate lists
+- ✅ **GameCatalog Updated**: Single `options` field for all option types
+- ✅ **API Import**: Unified `upsertOptions()` function handles all three types
+- ✅ **Web Browser**: Updated to work with unified schema
+- ✅ **Transform Layer**: Converts v0.3 data to unified format
+- ✅ **Type Safety**: Full TypeScript type narrowing via discriminated union
+- ✅ **Quality Checks**: All tests, linting, and type-checking passing
+
+### Key Performance Benefits
+- **O(1) lookup by name**: `gameSpec.options["birdie"]` instead of array `.find()`
+- **Type-safe filtering**: `Object.values(options).filter(o => o.type === "junk")`
+- **Single source of truth**: No duplicate storage across multiple collections
+- **Cleaner traversal**: One map instead of three separate lists
+
+### Ready for Scoring Engine
+The schema is now optimized for the scoring pipeline patterns described in this document. When implementing the scoring engine, you can:
+- Quickly resolve option references (e.g., multiplier `based_on: "birdie"`)
+- Filter options by type for different scoring phases
+- Apply option values with minimal overhead
+- Leverage TypeScript's discriminated union for type-safe option handling
 
 ---
 
@@ -440,80 +472,83 @@ const RoundToGame = co.map({
 
 **The Solution**: Use CoMap references + CoLists to create bidirectional "edges".
 
-### Recommended Jazz Schema for Options
+### Implemented v0.5 Schema ✅
 
-#### 1. Option CoMap (The Vertices)
+**Status**: Fully implemented as of 2025-11-28
+
+#### 1. Unified Option Schema with Discriminated Union
+
+**File**: `packages/lib/schema/options.ts`
 
 ```typescript
-// packages/lib/schema/options.ts
 import { co, z } from "jazz-tools";
-
-// Base schema for all options
-const OptionBase = {
-  name: z.string(),
-  disp: z.string(),
-  seq: z.number(),
-  scope: z.literal(['player', 'team', 'hole', 'rest_of_nine', 'game']),
-  show_in: z.optional(z.literal(['score', 'faves', 'none'])),
-  icon: z.optional(z.string()),
-};
 
 // Game settings options
 export const GameOption = co.map({
-  ...OptionBase,
-  type: z.literal(['game']),
-  sub_type: z.literal(['num', 'bool', 'menu', 'pct']),
-  default: z.string(), // Store as string, parse as needed
-  choices: z.optional(z.array(z.object({
-    name: z.string(),
-    disp: z.string(),
-  }))),
+  name: z.string(),
+  disp: z.string(),
+  type: z.literal(["game"]),
+  version: z.string(),
+  valueType: z.literal(["bool", "num", "menu", "text"]),
+  choices: co.optional(ChoicesList),
+  defaultValue: z.string(),
+  seq: z.optional(z.number()),
 });
-export type GameOption = co.loaded<typeof GameOption>;
 
 // Junk (dots/side bets) options
 export const JunkOption = co.map({
-  ...OptionBase,
-  type: z.literal(['junk']),
-  sub_type: z.literal(['dot', 'skin', 'carryover']),
+  name: z.string(),
+  disp: z.string(),
+  type: z.literal(["junk"]),
+  version: z.string(),
+  sub_type: z.optional(z.literal(["dot", "skin", "carryover"])),
   value: z.number(),
-  limit: z.optional(z.literal(['one_per_group', 'one_team_per_group'])),
-  based_on: z.literal(['gross', 'net', 'user']),
-  score_to_par: z.optional(z.string()), // e.g., "exactly -1"
-  calculation: z.optional(z.literal(['logic', 'best_ball', 'aggregate'])),
+  seq: z.optional(z.number()),
+  scope: z.optional(z.literal(["player", "team", "hole", "rest_of_nine", "game"])),
+  icon: z.optional(z.string()),
+  show_in: z.optional(z.literal(["score", "faves", "none"])),
+  based_on: z.optional(z.literal(["gross", "net", "user"])),
+  limit: z.optional(z.string()),
+  calculation: z.optional(z.string()),
   logic: z.optional(z.string()), // JSON.stringify(jsonLogicExpression)
-  better: z.optional(z.literal(['lower', 'higher'])),
+  better: z.optional(z.literal(["lower", "higher"])),
+  score_to_par: z.optional(z.string()),
 });
-export type JunkOption = co.loaded<typeof JunkOption>;
 
 // Multiplier options
 export const MultiplierOption = co.map({
-  ...OptionBase,
-  type: z.literal(['multiplier']),
-  sub_type: z.optional(z.literal(['bbq', 'press', 'automatic'])),
+  name: z.string(),
+  disp: z.string(),
+  type: z.literal(["multiplier"]),
+  version: z.string(),
+  sub_type: z.optional(z.literal(["bbq", "press", "automatic"])),
   value: z.number(),
-  based_on: z.optional(z.string()), // Name of junk option, e.g., "birdie"
+  seq: z.optional(z.number()),
+  icon: z.optional(z.string()),
+  based_on: z.optional(z.string()), // Name of junk option
+  scope: z.optional(z.literal(["player", "team", "hole", "rest_of_nine", "game"])),
   availability: z.optional(z.string()), // JSON.stringify(jsonLogicExpression)
   override: z.optional(z.boolean()),
 });
-export type MultiplierOption = co.loaded<typeof MultiplierOption>;
 
-// Union type for TypeScript
-export type AnyOption = GameOption | JunkOption | MultiplierOption;
+// Discriminated union on "type" field
+export const Option = co.discriminatedUnion("type", [
+  GameOption,
+  JunkOption,
+  MultiplierOption,
+]);
+export type Option = co.loaded<typeof Option>;
 
-// Lists
-export const ListOfGameOptions = co.list(GameOption);
-export const ListOfJunkOptions = co.list(JunkOption);
-export const ListOfMultiplierOptions = co.list(MultiplierOption);
+// Map for O(1) lookups by name
+export const MapOfOptions = co.record(z.string(), Option);
+export type MapOfOptions = co.loaded<typeof MapOfOptions>;
 ```
 
-#### 2. GameSpec with Options (The Edges)
+#### 2. GameSpec with Unified Options Map
+
+**File**: `packages/lib/schema/gamespecs.ts`
 
 ```typescript
-// Updated packages/lib/schema/gamespecs.ts
-import { co, z } from "jazz-tools";
-import { ListOfGameOptions, ListOfJunkOptions, ListOfMultiplierOptions } from "./options";
-
 export const GameSpec = co.map({
   name: z.string(),
   short: z.string(),
@@ -525,27 +560,23 @@ export const GameSpec = co.map({
   location_type: z.literal(["local", "virtual"]),
   teamsConfig: co.optional(TeamsConfig),
   
-  // Options owned by this gamespec (composition)
-  gameOptions: ListOfGameOptions,
-  junkOptions: ListOfJunkOptions,
-  multiplierOptions: ListOfMultiplierOptions,
+  // Single unified options map (O(1) lookup by name)
+  options: co.optional(MapOfOptions),
 });
 export type GameSpec = co.loaded<typeof GameSpec>;
 ```
 
 #### 3. Game with Option Overrides
 
-```typescript
-// Updated packages/lib/schema/games.ts
-import { co, z } from "jazz-tools";
+**File**: `packages/lib/schema/games.ts`
 
+```typescript
 // Option value override for a game
 export const GameOptionValue = co.map({
-  optionName: z.string(),      // Reference by name (simpler than ID)
-  value: z.string(),            // The override value
-  holes: z.array(z.string()),   // Which holes this applies to
+  optionName: z.string(),
+  value: z.string(),
+  holes: co.list(z.string()),
 });
-export type GameOptionValue = co.loaded<typeof GameOptionValue>;
 
 export const ListOfGameOptionValues = co.list(GameOptionValue);
 
@@ -561,79 +592,104 @@ export const Game = co.map({
   // Option overrides for this specific game instance
   optionOverrides: ListOfGameOptionValues,
 });
-export type Game = co.loaded<typeof Game>;
 ```
 
-### Graph Traversal Pattern in Jazz
+#### 4. GameCatalog with Unified Options
 
-Since Jazz doesn't have graph queries, we traverse manually:
+**File**: `packages/lib/schema/catalog.ts`
 
 ```typescript
-// Get all options for a game
-function getAllOptionsForGame(game: Game): AnyOption[] {
-  const allOptions: AnyOption[] = [];
+export const GameCatalog = co.map({
+  specs: MapOfGameSpecs,
+  options: co.optional(MapOfOptions), // Single unified options map
+});
+```
+
+### Working with Unified Options in Jazz ✅
+
+**Status**: Implemented pattern using discriminated unions and Maps
+
+```typescript
+// Get all options for a game (O(n) where n = number of specs)
+function getAllOptionsForGame(game: Game): Option[] {
+  const allOptions: Option[] = [];
   
   // Traverse all gamespecs
   for (const gamespec of game.specs) {
-    // Collect game options
-    for (const opt of gamespec.gameOptions) {
-      allOptions.push({
-        ...opt,
-        type: 'game' as const,
-        gamespec_id: gamespec.id,
-      });
-    }
+    if (!gamespec.options) continue;
     
-    // Collect junk options
-    for (const opt of gamespec.junkOptions) {
-      allOptions.push({
-        ...opt,
-        type: 'junk' as const,
-        gamespec_id: gamespec.id,
-      });
-    }
-    
-    // Collect multiplier options
-    for (const opt of gamespec.multiplierOptions) {
-      allOptions.push({
-        ...opt,
-        type: 'multiplier' as const,
-        gamespec_id: gamespec.id,
-      });
-    }
+    // Options are already in a map - just collect values
+    const options = Object.values(gamespec.options);
+    allOptions.push(...options);
   }
   
   return allOptions;
 }
 
+// Get options by type (O(n) filter)
+function getOptionsByType(game: Game, type: "game" | "junk" | "multiplier"): Option[] {
+  const allOptions = getAllOptionsForGame(game);
+  return allOptions.filter(opt => opt.type === type);
+}
+
+// Lookup specific option by name (O(1) if you know which spec)
+function getOptionByName(gamespec: GameSpec, name: string): Option | undefined {
+  return gamespec.options?.[name];
+}
+
+// Lookup across all specs (O(n) where n = number of specs)
+function findOptionByName(game: Game, name: string): Option | undefined {
+  for (const gamespec of game.specs) {
+    const option = gamespec.options?.[name];
+    if (option) return option;
+  }
+  return undefined;
+}
+
 // Apply game-specific overrides
-function getOptionsWithOverrides(game: Game): AnyOption[] {
-  const baseOptions = getAllOptionsForGame(game);
+function getOptionsWithOverrides(game: Game): Map<string, { option: Option; values: Array<{ value: string; holes: string[] }> }> {
+  const allOptions = getAllOptionsForGame(game);
+  const optionsMap = new Map<string, { option: Option; values: Array<{ value: string; holes: string[] }> }>();
   
-  // Build override map
-  const overrideMap = new Map<string, GameOptionValue[]>();
-  for (const override of game.optionOverrides) {
-    if (!overrideMap.has(override.optionName)) {
-      overrideMap.set(override.optionName, []);
-    }
-    overrideMap.get(override.optionName)!.push(override);
+  // Index all base options
+  for (const opt of allOptions) {
+    optionsMap.set(opt.name, { option: opt, values: [] });
   }
   
   // Apply overrides
-  return baseOptions.map(opt => {
-    const overrides = overrideMap.get(opt.name);
-    if (!overrides) return opt;
-    
-    return {
-      ...opt,
-      values: overrides.map(o => ({
-        value: o.value,
-        holes: o.holes,
-      })),
-    };
-  });
+  for (const override of game.optionOverrides) {
+    const existing = optionsMap.get(override.optionName);
+    if (existing) {
+      existing.values.push({
+        value: override.value,
+        holes: Array.from(override.holes), // Convert CoList to array
+      });
+    }
+  }
+  
+  return optionsMap;
+}
+
+// Example: Get all junk options with their values
+function getJunkOptionsForScoring(game: Game): Array<{ option: JunkOption; values: any[] }> {
+  const optionsWithOverrides = getOptionsWithOverrides(game);
+  const junkOptions: Array<{ option: JunkOption; values: any[] }> = [];
+  
+  for (const [name, { option, values }] of optionsWithOverrides) {
+    if (option.type === "junk") {
+      junkOptions.push({ option: option as JunkOption, values });
+    }
+  }
+  
+  return junkOptions;
 }
 ```
+
+**Key Differences from Original Proposal**:
+1. ✅ Using `co.record(z.string(), Option)` instead of separate lists
+2. ✅ O(1) lookup by name within a gamespec: `gamespec.options["birdie"]`
+3. ✅ Type narrowing via discriminated union: `if (option.type === "junk") { /* option is JunkOption */ }`
+4. ✅ Simpler traversal - no need to iterate three separate collections
 
 ### Performance Considerations with Jazz
 

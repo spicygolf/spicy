@@ -11,6 +11,7 @@ import type { co } from "jazz-tools";
  * Validation helpers for option type assertions
  */
 const VALID_JUNK_SUB_TYPES = ["dot", "skin", "carryover"] as const;
+const VALID_MULTIPLIER_SUB_TYPES = ["bbq", "press", "automatic"] as const;
 const VALID_SCOPES = [
   "player",
   "team",
@@ -28,6 +29,15 @@ function isValidJunkSubType(
   return (
     typeof value === "string" &&
     (VALID_JUNK_SUB_TYPES as readonly string[]).includes(value)
+  );
+}
+
+function isValidMultiplierSubType(
+  value: unknown,
+): value is "bbq" | "press" | "automatic" {
+  return (
+    typeof value === "string" &&
+    (VALID_MULTIPLIER_SUB_TYPES as readonly string[]).includes(value)
   );
 }
 
@@ -68,10 +78,8 @@ import {
   GameOption,
   GameSpec,
   JunkOption,
-  type MapOfGameOptions,
   type MapOfGameSpecs,
-  type MapOfJunkOptions,
-  type MapOfMultiplierOptions,
+  type MapOfOptions,
   MultiplierOption,
   type PlayerAccount,
 } from "spicylib/schema";
@@ -92,12 +100,61 @@ export interface ImportResult {
     skipped: number;
   };
   options: {
-    game: { created: number; updated: number };
-    junk: { created: number; updated: number };
-    multiplier: { created: number; updated: number };
+    created: number;
+    updated: number;
   };
   errors: Array<{ item: string; error: string }>;
 }
+
+/**
+ * Union type for all option data shapes
+ */
+type GameOptionData = {
+  type: "game";
+  name: string;
+  disp: string;
+  version: string;
+  valueType: "bool" | "num" | "menu" | "text";
+  defaultValue: string;
+  seq?: number;
+  choices?: Array<{ name: string; disp: string }>;
+};
+
+type JunkOptionData = {
+  type: "junk";
+  name: string;
+  disp: string;
+  version: string;
+  sub_type?: string;
+  value: number;
+  seq?: number;
+  scope?: string;
+  icon?: string;
+  show_in?: string;
+  based_on?: string;
+  limit?: string;
+  calculation?: string;
+  logic?: string;
+  better?: string;
+  score_to_par?: string;
+};
+
+type MultiplierOptionData = {
+  type: "multiplier";
+  name: string;
+  disp: string;
+  version: string;
+  sub_type?: string;
+  value: number;
+  seq?: number;
+  icon?: string;
+  based_on?: string;
+  scope?: string;
+  availability?: string;
+  override?: boolean;
+};
+
+type OptionData = GameOptionData | JunkOptionData | MultiplierOptionData;
 
 /**
  * Load the GameCatalog for the worker account
@@ -171,61 +228,57 @@ export async function upsertGameSpec(
 }
 
 /**
- * Upsert game options into the catalog (idempotent)
+ * Upsert options into the catalog (idempotent)
  *
- * Note: This function is intentionally not abstracted with upsertJunkOptions
- * and upsertMultiplierOptions despite similar structure, because:
- * 1. Each has different field sets and validation requirements
- * 2. Type safety is better with explicit functions
- * 3. The pattern is clear and maintainable as-is
+ * Handles all three option types (game, junk, multiplier) in a single unified function.
+ * Uses discriminated union based on the `type` field.
  */
-async function upsertGameOptions(
+async function upsertOptions(
   catalog: GameCatalog,
-  options: Array<{
-    name: string;
-    disp: string;
-    version: string;
-    valueType: "bool" | "num" | "menu" | "text";
-    defaultValue: string;
-    choices?: Array<{ name: string; disp: string }>;
-  }>,
+  options: OptionData[],
 ): Promise<{ created: number; updated: number }> {
   const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { gameOptions: {} },
+    resolve: { options: {} },
   });
 
-  if (!loadedCatalog.$jazz.has("gameOptions")) {
-    const newMap = {} as MapOfGameOptions;
-    loadedCatalog.$jazz.set("gameOptions", newMap);
+  // Initialize options map if it doesn't exist
+  if (!loadedCatalog.$jazz.has("options")) {
+    const newMap = {} as MapOfOptions;
+    loadedCatalog.$jazz.set("options", newMap);
   }
 
-  const gameOptions = loadedCatalog.gameOptions;
-  if (!gameOptions) {
-    throw new Error("Failed to initialize gameOptions");
+  const optionsMap = loadedCatalog.options;
+  if (!optionsMap) {
+    throw new Error("Failed to initialize options");
   }
 
   let created = 0;
   let updated = 0;
 
   for (const opt of options) {
-    const exists = gameOptions.$jazz.has(opt.name);
+    const exists = optionsMap.$jazz.has(opt.name);
 
-    const newOption = GameOption.create(
-      {
-        name: opt.name,
-        disp: opt.disp,
-        type: "game",
-        version: opt.version,
-        valueType: opt.valueType,
-        defaultValue: opt.defaultValue,
-      },
-      { owner: gameOptions.$jazz.owner },
-    );
+    // Create the appropriate option type based on discriminator
+    if (opt.type === "game") {
+      const newOption = GameOption.create(
+        {
+          name: opt.name,
+          disp: opt.disp,
+          type: "game",
+          version: opt.version,
+          valueType: opt.valueType,
+          defaultValue: opt.defaultValue,
+        },
+        { owner: optionsMap.$jazz.owner },
+      );
 
-    // Add choices if present (for menu type options)
-    if (opt.choices && opt.choices.length > 0) {
-      // Create the choices list if it doesn't exist
-      if (!newOption.$jazz.has("choices")) {
+      // Set optional fields
+      if (opt.seq !== undefined && typeof opt.seq === "number") {
+        newOption.$jazz.set("seq", opt.seq);
+      }
+
+      // Add choices if present (for menu type options)
+      if (opt.choices && opt.choices.length > 0) {
         const choicesList = ChoicesList.create([], {
           owner: newOption.$jazz.owner,
         });
@@ -240,187 +293,93 @@ async function upsertGameOptions(
 
         newOption.$jazz.set("choices", choicesList);
       }
+
+      optionsMap.$jazz.set(opt.name, newOption);
+    } else if (opt.type === "junk") {
+      const newOption = JunkOption.create(
+        {
+          name: opt.name,
+          disp: opt.disp,
+          type: "junk",
+          version: opt.version,
+          value: opt.value,
+        },
+        { owner: optionsMap.$jazz.owner },
+      );
+
+      // Set optional fields with validation
+      if (opt.sub_type && isValidJunkSubType(opt.sub_type)) {
+        newOption.$jazz.set("sub_type", opt.sub_type);
+      }
+      if (opt.seq !== undefined && typeof opt.seq === "number") {
+        newOption.$jazz.set("seq", opt.seq);
+      }
+      if (opt.scope && isValidScope(opt.scope)) {
+        newOption.$jazz.set("scope", opt.scope);
+      }
+      if (opt.icon && typeof opt.icon === "string") {
+        newOption.$jazz.set("icon", opt.icon);
+      }
+      if (opt.show_in && isValidShowIn(opt.show_in)) {
+        newOption.$jazz.set("show_in", opt.show_in);
+      }
+      if (opt.based_on && isValidBasedOn(opt.based_on)) {
+        newOption.$jazz.set("based_on", opt.based_on);
+      }
+      if (opt.limit && typeof opt.limit === "string") {
+        newOption.$jazz.set("limit", opt.limit);
+      }
+      if (opt.calculation && typeof opt.calculation === "string") {
+        newOption.$jazz.set("calculation", opt.calculation);
+      }
+      if (opt.logic && typeof opt.logic === "string") {
+        newOption.$jazz.set("logic", opt.logic);
+      }
+      if (opt.better && isValidBetter(opt.better)) {
+        newOption.$jazz.set("better", opt.better);
+      }
+      if (opt.score_to_par && typeof opt.score_to_par === "string") {
+        newOption.$jazz.set("score_to_par", opt.score_to_par);
+      }
+
+      optionsMap.$jazz.set(opt.name, newOption);
+    } else if (opt.type === "multiplier") {
+      const newOption = MultiplierOption.create(
+        {
+          name: opt.name,
+          disp: opt.disp,
+          type: "multiplier",
+          version: opt.version,
+          value: opt.value,
+        },
+        { owner: optionsMap.$jazz.owner },
+      );
+
+      // Set optional fields with validation
+      if (opt.sub_type && isValidMultiplierSubType(opt.sub_type)) {
+        newOption.$jazz.set("sub_type", opt.sub_type);
+      }
+      if (opt.seq !== undefined && typeof opt.seq === "number") {
+        newOption.$jazz.set("seq", opt.seq);
+      }
+      if (opt.icon && typeof opt.icon === "string") {
+        newOption.$jazz.set("icon", opt.icon);
+      }
+      if (opt.based_on && typeof opt.based_on === "string") {
+        newOption.$jazz.set("based_on", opt.based_on);
+      }
+      if (opt.scope && isValidScope(opt.scope)) {
+        newOption.$jazz.set("scope", opt.scope);
+      }
+      if (opt.availability && typeof opt.availability === "string") {
+        newOption.$jazz.set("availability", opt.availability);
+      }
+      if (opt.override !== undefined && typeof opt.override === "boolean") {
+        newOption.$jazz.set("override", opt.override);
+      }
+
+      optionsMap.$jazz.set(opt.name, newOption);
     }
-
-    gameOptions.$jazz.set(opt.name, newOption);
-
-    if (exists) {
-      updated++;
-    } else {
-      created++;
-    }
-  }
-
-  return { created, updated };
-}
-
-/**
- * Upsert junk options into the catalog (idempotent)
- */
-async function upsertJunkOptions(
-  catalog: GameCatalog,
-  options: Array<{
-    name: string;
-    disp: string;
-    version: string;
-    type: string;
-    value: number;
-    seq?: number;
-    scope?: string;
-    icon?: string;
-    show_in?: string;
-    based_on?: string;
-    limit?: string;
-    calculation?: string;
-    logic?: string;
-    better?: string;
-    score_to_par?: string;
-  }>,
-): Promise<{ created: number; updated: number }> {
-  const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { junkOptions: {} },
-  });
-
-  if (!loadedCatalog.$jazz.has("junkOptions")) {
-    const newMap = {} as MapOfJunkOptions;
-    loadedCatalog.$jazz.set("junkOptions", newMap);
-  }
-
-  const junkOptions = loadedCatalog.junkOptions;
-  if (!junkOptions) {
-    throw new Error("Failed to initialize junkOptions");
-  }
-
-  let created = 0;
-  let updated = 0;
-
-  for (const opt of options) {
-    const exists = junkOptions.$jazz.has(opt.name);
-
-    const newOption = JunkOption.create(
-      {
-        name: opt.name,
-        disp: opt.disp,
-        type: "junk",
-        version: opt.version,
-        value: opt.value,
-      },
-      { owner: junkOptions.$jazz.owner },
-    );
-
-    // Set optional fields with validation
-    if (opt.type && isValidJunkSubType(opt.type)) {
-      newOption.$jazz.set("sub_type", opt.type);
-    }
-    if (opt.seq !== undefined && typeof opt.seq === "number") {
-      newOption.$jazz.set("seq", opt.seq);
-    }
-    if (opt.scope && isValidScope(opt.scope)) {
-      newOption.$jazz.set("scope", opt.scope);
-    }
-    if (opt.icon && typeof opt.icon === "string") {
-      newOption.$jazz.set("icon", opt.icon);
-    }
-    if (opt.show_in && isValidShowIn(opt.show_in)) {
-      newOption.$jazz.set("show_in", opt.show_in);
-    }
-    if (opt.based_on && isValidBasedOn(opt.based_on)) {
-      newOption.$jazz.set("based_on", opt.based_on);
-    }
-    if (opt.limit && typeof opt.limit === "string") {
-      newOption.$jazz.set("limit", opt.limit);
-    }
-    if (opt.calculation && typeof opt.calculation === "string") {
-      newOption.$jazz.set("calculation", opt.calculation);
-    }
-    if (opt.logic && typeof opt.logic === "string") {
-      newOption.$jazz.set("logic", opt.logic);
-    }
-    if (opt.better && isValidBetter(opt.better)) {
-      newOption.$jazz.set("better", opt.better);
-    }
-    if (opt.score_to_par && typeof opt.score_to_par === "string") {
-      newOption.$jazz.set("score_to_par", opt.score_to_par);
-    }
-
-    junkOptions.$jazz.set(opt.name, newOption);
-
-    if (exists) {
-      updated++;
-    } else {
-      created++;
-    }
-  }
-
-  return { created, updated };
-}
-
-/**
- * Upsert multiplier options into the catalog (idempotent)
- */
-async function upsertMultiplierOptions(
-  catalog: GameCatalog,
-  options: Array<{
-    name: string;
-    disp: string;
-    version: string;
-    value: number;
-    seq?: number;
-    icon?: string;
-    based_on?: string;
-    scope?: string;
-    availability?: string;
-  }>,
-): Promise<{ created: number; updated: number }> {
-  const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { multiplierOptions: {} },
-  });
-
-  if (!loadedCatalog.$jazz.has("multiplierOptions")) {
-    const newMap = {} as MapOfMultiplierOptions;
-    loadedCatalog.$jazz.set("multiplierOptions", newMap);
-  }
-
-  const multiplierOptions = loadedCatalog.multiplierOptions;
-  if (!multiplierOptions) {
-    throw new Error("Failed to initialize multiplierOptions");
-  }
-
-  let created = 0;
-  let updated = 0;
-
-  for (const opt of options) {
-    const exists = multiplierOptions.$jazz.has(opt.name);
-
-    const newOption = MultiplierOption.create(
-      {
-        name: opt.name,
-        disp: opt.disp,
-        type: "multiplier",
-        version: opt.version,
-        value: opt.value,
-      },
-      { owner: multiplierOptions.$jazz.owner },
-    );
-
-    // Set optional fields with validation
-    if (opt.seq !== undefined && typeof opt.seq === "number") {
-      newOption.$jazz.set("seq", opt.seq);
-    }
-    if (opt.icon && typeof opt.icon === "string") {
-      newOption.$jazz.set("icon", opt.icon);
-    }
-    if (opt.based_on && typeof opt.based_on === "string") {
-      newOption.$jazz.set("based_on", opt.based_on);
-    }
-    if (opt.scope && isValidScope(opt.scope)) {
-      newOption.$jazz.set("scope", opt.scope);
-    }
-    if (opt.availability && typeof opt.availability === "string") {
-      newOption.$jazz.set("availability", opt.availability);
-    }
-
-    multiplierOptions.$jazz.set(opt.name, newOption);
 
     if (exists) {
       updated++;
@@ -496,59 +455,14 @@ export async function importGameSpecsToCatalog(
       skipped: 0,
     },
     options: {
-      game: { created: 0, updated: 0 },
-      junk: { created: 0, updated: 0 },
-      multiplier: { created: 0, updated: 0 },
+      created: 0,
+      updated: 0,
     },
     errors: [],
   };
 
   // Collect all unique options across all specs
-  const allGameOptions = new Map<
-    string,
-    {
-      name: string;
-      disp: string;
-      version: string;
-      valueType: "bool" | "num" | "menu" | "text";
-      defaultValue: string;
-      choices?: Array<{ name: string; disp: string }>;
-    }
-  >();
-  const allJunkOptions = new Map<
-    string,
-    {
-      name: string;
-      disp: string;
-      version: string;
-      type: string;
-      value: number;
-      seq?: number;
-      scope?: string;
-      icon?: string;
-      show_in?: string;
-      based_on?: string;
-      limit?: string;
-      calculation?: string;
-      logic?: string;
-      better?: string;
-      score_to_par?: string;
-    }
-  >();
-  const allMultiplierOptions = new Map<
-    string,
-    {
-      name: string;
-      disp: string;
-      version: string;
-      value: number;
-      seq?: number;
-      icon?: string;
-      based_on?: string;
-      scope?: string;
-      availability?: string;
-    }
-  >();
+  const allOptions = new Map<string, OptionData>();
 
   // First pass: Import specs and collect options
   for (const spec of allSpecs) {
@@ -596,7 +510,7 @@ export async function importGameSpecsToCatalog(
       // Collect game options
       if (spec.options && spec.options.length > 0) {
         for (const opt of spec.options) {
-          if (!allGameOptions.has(opt.name)) {
+          if (!allOptions.has(opt.name)) {
             // Map v0.3 type names to new valueType names
             let valueType: "bool" | "num" | "menu" | "text" = "num";
             if (opt.type === "bool") valueType = "bool";
@@ -605,7 +519,8 @@ export async function importGameSpecsToCatalog(
             else if (opt.type === "pct") valueType = "num";
             else if (opt.type === "num") valueType = "num";
 
-            allGameOptions.set(opt.name, {
+            allOptions.set(opt.name, {
+              type: "game",
               name: opt.name,
               disp: opt.disp,
               version: String(spec.version),
@@ -620,12 +535,13 @@ export async function importGameSpecsToCatalog(
       // Collect junk options
       if (spec.junk && spec.junk.length > 0) {
         for (const junk of spec.junk) {
-          if (!allJunkOptions.has(junk.name)) {
-            allJunkOptions.set(junk.name, {
+          if (!allOptions.has(junk.name)) {
+            allOptions.set(junk.name, {
+              type: "junk",
               name: junk.name,
               disp: junk.disp,
               version: String(spec.version),
-              type: junk.type,
+              sub_type: junk.type as string | undefined,
               value: junk.value,
               seq: junk.seq as number | undefined,
               scope: junk.scope as string | undefined,
@@ -645,17 +561,20 @@ export async function importGameSpecsToCatalog(
       // Collect multiplier options
       if (spec.multipliers && spec.multipliers.length > 0) {
         for (const mult of spec.multipliers) {
-          if (!allMultiplierOptions.has(mult.name)) {
-            allMultiplierOptions.set(mult.name, {
+          if (!allOptions.has(mult.name)) {
+            allOptions.set(mult.name, {
+              type: "multiplier",
               name: mult.name,
               disp: mult.disp,
               version: String(spec.version),
+              sub_type: mult.sub_type as string | undefined,
               value: mult.value,
               seq: mult.seq as number | undefined,
               icon: mult.icon as string | undefined,
               based_on: mult.based_on as string | undefined,
               scope: mult.scope as string | undefined,
               availability: mult.availability as string | undefined,
+              override: mult.override as boolean | undefined,
             });
           }
         }
@@ -668,45 +587,17 @@ export async function importGameSpecsToCatalog(
     }
   }
 
-  // Second pass: Import all collected options
-  console.log(`Importing ${allGameOptions.size} game options...`);
+  // Second pass: Import all collected options in a single call
+  console.log(`Importing ${allOptions.size} total options...`);
   try {
-    const gameResult = await upsertGameOptions(
+    const optionsResult = await upsertOptions(
       catalog,
-      Array.from(allGameOptions.values()),
+      Array.from(allOptions.values()),
     );
-    result.options.game = gameResult;
+    result.options = optionsResult;
   } catch (error) {
     result.errors.push({
-      item: "options:game",
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-
-  console.log(`Importing ${allJunkOptions.size} junk options...`);
-  try {
-    const junkResult = await upsertJunkOptions(
-      catalog,
-      Array.from(allJunkOptions.values()),
-    );
-    result.options.junk = junkResult;
-  } catch (error) {
-    result.errors.push({
-      item: "options:junk",
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-
-  console.log(`Importing ${allMultiplierOptions.size} multiplier options...`);
-  try {
-    const multResult = await upsertMultiplierOptions(
-      catalog,
-      Array.from(allMultiplierOptions.values()),
-    );
-    result.options.multiplier = multResult;
-  } catch (error) {
-    result.errors.push({
-      item: "options:multiplier",
+      item: "options:all",
       error: error instanceof Error ? error.message : String(error),
     });
   }

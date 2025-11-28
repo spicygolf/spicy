@@ -5,6 +5,7 @@ import type {
   GameSpec,
   JunkOption,
   MultiplierOption,
+  Option,
   PlayerAccountProfile,
 } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
@@ -33,9 +34,7 @@ export function CatalogBrowser({
       profile: {
         catalog: {
           specs: true, // Load the specs map shallowly
-          gameOptions: true,
-          junkOptions: true,
-          multiplierOptions: true,
+          options: true, // Load the unified options map
         },
       },
     },
@@ -80,58 +79,27 @@ export function CatalogBrowser({
         }
       }
 
-      // Extract game options
-      if (catalog.gameOptions?.$isLoaded) {
-        const catalogGameOptions = catalog.gameOptions;
-        for (const key of Object.keys(catalogGameOptions)) {
+      // Extract options from unified map
+      if (catalog.options?.$isLoaded) {
+        const catalogOptions = catalog.options;
+        for (const key of Object.keys(catalogOptions)) {
           if (key.startsWith("_") || key.startsWith("$")) continue;
-          const opt =
-            catalogGameOptions[key as keyof typeof catalogGameOptions];
+          const opt = catalogOptions[key as keyof typeof catalogOptions];
           if (
             opt &&
             typeof opt === "object" &&
             "$jazz" in opt &&
             opt.$isLoaded
           ) {
-            gameOptions.push(opt as GameOption);
-          }
-        }
-      }
-
-      // Extract junk options
-      if (catalog.junkOptions?.$isLoaded) {
-        const catalogJunkOptions = catalog.junkOptions;
-        for (const key of Object.keys(catalogJunkOptions)) {
-          if (key.startsWith("_") || key.startsWith("$")) continue;
-          const opt =
-            catalogJunkOptions[key as keyof typeof catalogJunkOptions];
-          if (
-            opt &&
-            typeof opt === "object" &&
-            "$jazz" in opt &&
-            opt.$isLoaded
-          ) {
-            junkOptions.push(opt as JunkOption);
-          }
-        }
-      }
-
-      // Extract multiplier options
-      if (catalog.multiplierOptions?.$isLoaded) {
-        const catalogMultiplierOptions = catalog.multiplierOptions;
-        for (const key of Object.keys(catalogMultiplierOptions)) {
-          if (key.startsWith("_") || key.startsWith("$")) continue;
-          const opt =
-            catalogMultiplierOptions[
-              key as keyof typeof catalogMultiplierOptions
-            ];
-          if (
-            opt &&
-            typeof opt === "object" &&
-            "$jazz" in opt &&
-            opt.$isLoaded
-          ) {
-            multiplierOptions.push(opt as MultiplierOption);
+            const option = opt as Option;
+            // Filter by type into separate arrays
+            if (option.type === "game") {
+              gameOptions.push(option as GameOption);
+            } else if (option.type === "junk") {
+              junkOptions.push(option as JunkOption);
+            } else if (option.type === "multiplier") {
+              multiplierOptions.push(option as MultiplierOption);
+            }
           }
         }
       }
