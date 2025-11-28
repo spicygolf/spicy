@@ -1,4 +1,5 @@
 import { co, Group, z } from "jazz-tools";
+import { JAZZ_WORKER_ACCOUNT } from "../config/env";
 import { GameCatalog } from "./catalog";
 import { ListOfGameSpecCustomizations } from "./customizations";
 import { Favorites } from "./favorites";
@@ -6,19 +7,12 @@ import { ListOfGames } from "./games";
 import { ListOfGameSpecs, MapOfGameSpecs } from "./gamespecs";
 import { Player } from "./players";
 
-// Support both React Native (process.env) and web (import.meta.env)
-const JAZZ_WORKER_ACCOUNT =
-  (typeof process !== "undefined" && process.env?.JAZZ_WORKER_ACCOUNT) ||
-  (typeof import.meta !== "undefined" &&
-    (import.meta as { env?: { VITE_JAZZ_WORKER_ACCOUNT?: string } }).env
-      ?.VITE_JAZZ_WORKER_ACCOUNT) ||
-  undefined;
-
 const RESET = false; // for DEV
 const RESET_WORKER = false; // Catalog is now properly initialized
 
 export const PlayerAccountRoot = co.map({
   player: Player,
+  email: z.string().optional(),
   games: ListOfGames,
   specs: ListOfGameSpecs,
   favorites: co.optional(Favorites),
@@ -45,48 +39,47 @@ export const PlayerAccount = co
     if (!account.$jazz.has("root") || RESET) {
       const name = creationProps?.name || "";
 
-      // Skip this migration for worker account - it has its own migration
+      // Skip root creation for worker account
       if (account.$jazz.id === JAZZ_WORKER_ACCOUNT) {
-        return;
-      }
+        // Worker account doesn't need a root
+      } else {
+        if (!JAZZ_WORKER_ACCOUNT) {
+          throw new Error("JAZZ_WORKER_ACCOUNT not set");
+        }
 
-      if (!JAZZ_WORKER_ACCOUNT) {
-        throw new Error("JAZZ_WORKER_ACCOUNT not set");
-      }
-      // create a group for the account, add worker as admin
-      const group = Group.create(account);
-      const workerAccount = await PlayerAccount.load(JAZZ_WORKER_ACCOUNT);
-      if (!workerAccount?.$isLoaded) {
-        throw new Error("Jazz Worker Account not found");
-      }
-      group.addMember(workerAccount, "admin");
+        // create a group for the account, add worker as admin
+        const group = Group.create(account);
 
-      account.$jazz.set(
-        "root",
-        PlayerAccountRoot.create(
-          {
-            // TODO: make this optional? or make player search GHIN for themselves
-            // upon sign up, or enter manually if they don't have a GHIN account
-            player: Player.create(
-              {
-                name,
-                short: name,
-                email: "",
-                gender: "M", // TODO: make this optional?
-                handicap: undefined,
-                envs: undefined,
-              },
-              { owner: group },
-            ),
-            games: ListOfGames.create([], { owner: group }),
-            specs: ListOfGameSpecs.create([], { owner: group }),
-          },
-          { owner: group },
-        ),
-      );
+        const workerAccount = await PlayerAccount.load(JAZZ_WORKER_ACCOUNT);
+        if (!workerAccount?.$isLoaded) {
+          throw new Error("Jazz Worker Account not found");
+        }
+        group.addMember(workerAccount, "admin");
+
+        account.$jazz.set(
+          "root",
+          PlayerAccountRoot.create(
+            {
+              // TODO: make this optional? or make player search GHIN for themselves
+              // upon sign up, or enter manually if they don't have a GHIN account
+              player: Player.create(
+                {
+                  name,
+                  short: name,
+                  gender: "M", // TODO: make this optional?
+                  handicap: undefined,
+                },
+                { owner: group },
+              ),
+              games: ListOfGames.create([], { owner: group }),
+              specs: ListOfGameSpecs.create([], { owner: group }),
+            },
+            { owner: group },
+          ),
+        );
+      }
     }
-  })
-  .withMigration(async (account) => {
+
     // Migration 2: Initialize worker account profile with catalog
     if (account.$jazz.id === JAZZ_WORKER_ACCOUNT) {
       if (!account.$jazz.has("profile") || RESET || RESET_WORKER) {

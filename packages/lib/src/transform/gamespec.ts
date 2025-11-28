@@ -25,20 +25,25 @@ export function transformGameSpec(v03Spec: GameSpecV03): TransformedGameSpec {
     location_type: v03Spec.location_type,
   };
 
+  // Include long_description if present
+  if (v03Spec.long_description) {
+    transformed.long_description = v03Spec.long_description;
+  }
+
   const allOptions: TransformedOption[] = [];
 
   // Transform game options
+  // In v0.3, the options array contains game configuration options
+  // Their 'type' field is the value type (num, bool, menu, text), not "game"
   if (v03Spec.options && v03Spec.options.length > 0) {
-    const gameOptions = v03Spec.options
-      .filter((opt) => opt.type === "game")
-      .map((opt) => ({
-        name: opt.name,
-        disp: opt.disp,
-        type: "game" as const,
-        valueType: inferValueType(opt),
-        choices: opt.choices,
-        defaultValue: String(opt.default ?? ""),
-      }));
+    const gameOptions = v03Spec.options.map((opt) => ({
+      name: opt.name,
+      disp: opt.disp,
+      type: "game" as const,
+      valueType: inferValueType(opt),
+      choices: opt.choices,
+      defaultValue: String(opt.default ?? ""),
+    }));
     allOptions.push(...gameOptions);
   }
 

@@ -46,6 +46,43 @@
   </rule>
 
   <rule severity="CRITICAL" enforcement="BLOCKING">
+    <name>Check $isLoaded Before Using Jazz API</name>
+    <description>Always check `obj.$isLoaded` before calling `obj.$jazz.set()`, `obj.$jazz.owner`, or other Jazz API methods. TypeScript cannot infer that these properties exist on unloaded objects.</description>
+    <rationale>Jazz objects can be in NotLoaded state where $jazz API is not available. TypeScript will error if you try to access $jazz properties without checking $isLoaded first.</rationale>
+    <mustAcknowledge>true</mustAcknowledge>
+    <examples>
+      <example type="wrong">
+        const root = me.root;
+        if (root) {
+          root.$jazz.set("player", player); // ERROR: $jazz might not exist
+        }
+      </example>
+      <example type="correct">
+        const root = me.root;
+        if (!root?.$isLoaded) {
+          await root.$jazz.ensureLoaded({});
+        }
+        if (root.$isLoaded) {
+          root.$jazz.set("player", player); // OK: TypeScript knows root is loaded
+        }
+      </example>
+      <example type="correct_alternative">
+        // Or use ensureLoaded on parent and check result
+        const loadedMe = await me.$jazz.ensureLoaded({ resolve: { root: true } });
+        if (loadedMe.root?.$isLoaded) {
+          loadedMe.root.$jazz.set("player", player);
+        }
+      </example>
+    </examples>
+    <instructions>
+      - Always check `$isLoaded` before accessing `$jazz` API methods
+      - Use `obj?.$isLoaded` checks or `ensureLoaded()` to guarantee objects are loaded
+      - TypeScript will not let you access $jazz properties on possibly-unloaded objects
+      - This prevents runtime errors from calling methods on NotLoaded objects
+    </instructions>
+  </rule>
+
+  <rule severity="CRITICAL" enforcement="BLOCKING">
     <name>Lazy Loading Lists Level-by-Level</name>
     <description>Jazz CoLists must be loaded explicitly at each level. Nested $each does NOT load list items - it only resolves nested data IF items are already loaded.</description>
     <rationale>Common misconception that $each loads the list. It doesn't - you must explicitly load each list level.</rationale>

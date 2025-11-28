@@ -1,4 +1,5 @@
 import { Database } from "arangojs";
+import longDescriptionsData from "../../../api-0.3/util/arango/schema_updates/20221219.json";
 
 export interface ArangoConfig {
   url: string;
@@ -8,10 +9,10 @@ export interface ArangoConfig {
 }
 
 export const defaultConfig: ArangoConfig = {
-  url: "http://localhost:8529",
-  databaseName: "dg",
-  username: "dg",
-  password: "dg",
+  url: process.env.ARANGO_URL || "http://localhost:8529",
+  databaseName: process.env.ARANGO_DATABASE || "dg",
+  username: process.env.ARANGO_USERNAME || "dg",
+  password: process.env.ARANGO_PASSWORD || "dg",
 };
 
 export function createArangoConnection(
@@ -46,6 +47,7 @@ export interface GameSpecV03 {
   max_players: number;
   min_players: number;
   location_type: "local" | "virtual";
+  long_description?: string;
   teams?: boolean;
   team_size?: number;
   team_determination?: string;
@@ -78,10 +80,65 @@ export interface GameSpecV03 {
 export async function fetchGameSpecs(db: Database): Promise<GameSpecV03[]> {
   try {
     const cursor = await db.query("FOR spec IN gamespecs RETURN spec");
-    const specs = await cursor.all();
-    return specs as GameSpecV03[];
+    const specs = (await cursor.all()) as GameSpecV03[];
+
+    // Merge long_description data using _key from imported JSON
+    const longDescriptions = longDescriptionsData as Record<
+      string,
+      { long_description: string }
+    >;
+
+    for (const spec of specs) {
+      if (spec._key && longDescriptions[spec._key]) {
+        spec.long_description = longDescriptions[spec._key].long_description;
+      }
+    }
+
+    return specs;
   } catch (error) {
     console.error("Failed to fetch game specs:", error);
+    throw error;
+  }
+}
+
+export interface PlayerV03 {
+  _key: string;
+  name: string;
+  short?: string;
+  gender: "M" | "F";
+  handicap?: {
+    source: "ghin" | "manual";
+    id?: string;
+    display?: string;
+    index?: number;
+    revDate?: string;
+  };
+  clubs?: Array<{
+    name: string;
+    state?: string;
+  }>;
+  statusAuthz?: string[];
+}
+
+export async function fetchPlayersWithGames(
+  db: Database,
+): Promise<PlayerV03[]> {
+  try {
+    const cursor = await db.query(`
+      FOR player IN players
+        LET hasGames = (
+          FOR v, e IN 1..1 ANY player._id GRAPH 'games'
+            FILTER e.type == 'player2game'
+            LIMIT 1
+            RETURN 1
+        )
+        FILTER LENGTH(hasGames) > 0
+        RETURN player
+    `);
+    const players = await cursor.all();
+    return players as PlayerV03[];
+  } catch (error) {
+    console.error("Failed to fetch players:", error);
     throw error;
   }
 }

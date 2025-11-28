@@ -78,11 +78,10 @@ export function useAddPlayerToGame() {
       );
     }
 
-    // Convert null envs to undefined to match schema expectations
+    // Convert handicap to Jazz CoMap
     const playerData = {
       ...p,
       handicap,
-      envs: p.envs === null ? undefined : p.envs,
     };
 
     let player: Player | null = null;
@@ -102,7 +101,7 @@ export function useAddPlayerToGame() {
 
         // Ensure the player is loaded with rounds to check if rounds field exists
         player = await upsertedPlayer.$jazz.ensureLoaded({
-          resolve: { rounds: true, handicap: true, envs: true },
+          resolve: { rounds: true, handicap: true },
         });
       } else {
         player = Player.create(playerData, { owner: group });

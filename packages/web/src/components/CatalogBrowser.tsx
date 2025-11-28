@@ -47,6 +47,11 @@ export function CatalogBrowser({
       if (!catalog?.$isLoaded) return undefined;
       if (!catalog.specs?.$isLoaded) return undefined;
 
+      // Options field is optional - if it exists, wait for it to load
+      if (catalog.$jazz.has("options") && !catalog.options?.$isLoaded) {
+        return undefined;
+      }
+
       return account;
     },
   });

@@ -71,7 +71,6 @@ export function AddPlayerFavorites() {
       const player = favorite.player;
       const result = await addPlayerToGame({
         name: player.name,
-        email: player.email,
         short: player.short,
         gender: player.gender,
         ghinId: player.ghinId,

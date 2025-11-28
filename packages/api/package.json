@@ -2,7 +2,7 @@
   "name": "api",
   "version": "0.5.0",
   "scripts": {
-    "dev": "bun run --watch src/index.ts",
+    "dev": "bun run --watch src/index.ts 2>&1 | tee /tmp/spicy-api.log",
     "generate": "bunx --bun @better-auth/cli generate",
     "migrate": "bunx --bun @better-auth/cli migrate",
     "clean": "del-cli node_modules",
@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@elysiajs/cors": "1.4.0",
+    "arangojs": "10.1.2",
     "better-auth": "catalog:shared",
     "elysia": "1.4.9",
     "@spicygolf/ghin": "0.8.6",
