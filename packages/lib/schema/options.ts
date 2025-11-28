@@ -1,6 +1,18 @@
 import { co, z } from "jazz-tools";
 
 /**
+ * Choice map for menu-type game options
+ */
+export const ChoiceMap = co.map({
+  name: z.string(),
+  disp: z.string(),
+});
+export type ChoiceMap = co.loaded<typeof ChoiceMap>;
+
+export const ChoicesList = co.list(ChoiceMap);
+export type ChoicesList = co.loaded<typeof ChoicesList>;
+
+/**
  * Game option - configuration that affects gameplay
  * Examples: handicap mode, stakes, number of teams
  */
@@ -13,14 +25,7 @@ export const GameOption = co.map({
   valueType: z.literal(["bool", "num", "menu", "text"]),
 
   // For menu type: available choices
-  choices: co.optional(
-    co.list(
-      co.map({
-        name: z.string(),
-        disp: z.string(),
-      }),
-    ),
-  ),
+  choices: co.optional(ChoicesList),
 
   // Default value
   defaultValue: z.string(),

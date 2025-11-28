@@ -5,8 +5,10 @@
  * Handles idempotent imports from ArangoDB and JSON sources.
  */
 
-import { co, z } from "jazz-tools";
+import type { co } from "jazz-tools";
 import {
+  ChoiceMap,
+  ChoicesList,
   type GameCatalog,
   GameOption,
   GameSpec,
@@ -161,11 +163,6 @@ async function upsertGameOptions(
     if (opt.choices && opt.choices.length > 0) {
       // Create the choices list if it doesn't exist
       if (!newOption.$jazz.has("choices")) {
-        const ChoiceMap = co.map({
-          name: z.string(),
-          disp: z.string(),
-        });
-        const ChoicesList = co.list(ChoiceMap);
         const choicesList = ChoicesList.create([], {
           owner: newOption.$jazz.owner,
         });
