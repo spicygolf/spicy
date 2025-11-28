@@ -6,6 +6,61 @@
  */
 
 import type { co } from "jazz-tools";
+
+/**
+ * Validation helpers for option type assertions
+ */
+const VALID_JUNK_SUB_TYPES = ["dot", "skin", "carryover"] as const;
+const VALID_SCOPES = [
+  "player",
+  "team",
+  "hole",
+  "rest_of_nine",
+  "game",
+] as const;
+const VALID_SHOW_IN = ["score", "faves", "none"] as const;
+const VALID_BASED_ON = ["gross", "net", "user"] as const;
+const VALID_BETTER = ["lower", "higher"] as const;
+
+function isValidJunkSubType(
+  value: unknown,
+): value is "dot" | "skin" | "carryover" {
+  return (
+    typeof value === "string" &&
+    (VALID_JUNK_SUB_TYPES as readonly string[]).includes(value)
+  );
+}
+
+function isValidScope(
+  value: unknown,
+): value is "player" | "team" | "hole" | "rest_of_nine" | "game" {
+  return (
+    typeof value === "string" &&
+    (VALID_SCOPES as readonly string[]).includes(value)
+  );
+}
+
+function isValidShowIn(value: unknown): value is "score" | "faves" | "none" {
+  return (
+    typeof value === "string" &&
+    (VALID_SHOW_IN as readonly string[]).includes(value)
+  );
+}
+
+function isValidBasedOn(value: unknown): value is "gross" | "net" | "user" {
+  return (
+    typeof value === "string" &&
+    (VALID_BASED_ON as readonly string[]).includes(value)
+  );
+}
+
+function isValidBetter(value: unknown): value is "lower" | "higher" {
+  return (
+    typeof value === "string" &&
+    (VALID_BETTER as readonly string[]).includes(value)
+  );
+}
+
 import {
   ChoiceMap,
   ChoicesList,
@@ -117,12 +172,19 @@ export async function upsertGameSpec(
 
 /**
  * Upsert game options into the catalog (idempotent)
+ *
+ * Note: This function is intentionally not abstracted with upsertJunkOptions
+ * and upsertMultiplierOptions despite similar structure, because:
+ * 1. Each has different field sets and validation requirements
+ * 2. Type safety is better with explicit functions
+ * 3. The pattern is clear and maintainable as-is
  */
 async function upsertGameOptions(
   catalog: GameCatalog,
   options: Array<{
     name: string;
     disp: string;
+    version: string;
     valueType: "bool" | "num" | "menu" | "text";
     defaultValue: string;
     choices?: Array<{ name: string; disp: string }>;
@@ -153,6 +215,7 @@ async function upsertGameOptions(
         name: opt.name,
         disp: opt.disp,
         type: "game",
+        version: opt.version,
         valueType: opt.valueType,
         defaultValue: opt.defaultValue,
       },
@@ -199,6 +262,7 @@ async function upsertJunkOptions(
   options: Array<{
     name: string;
     disp: string;
+    version: string;
     type: string;
     value: number;
     seq?: number;
@@ -238,31 +302,46 @@ async function upsertJunkOptions(
         name: opt.name,
         disp: opt.disp,
         type: "junk",
+        version: opt.version,
         value: opt.value,
       },
       { owner: junkOptions.$jazz.owner },
     );
 
-    // Set optional fields
-    if (opt.type)
-      newOption.$jazz.set("sub_type", opt.type as "dot" | "skin" | "carryover");
-    if (opt.seq !== undefined) newOption.$jazz.set("seq", opt.seq);
-    if (opt.scope)
-      newOption.$jazz.set(
-        "scope",
-        opt.scope as "player" | "team" | "hole" | "rest_of_nine" | "game",
-      );
-    if (opt.icon) newOption.$jazz.set("icon", opt.icon);
-    if (opt.show_in)
-      newOption.$jazz.set("show_in", opt.show_in as "score" | "faves" | "none");
-    if (opt.based_on)
-      newOption.$jazz.set("based_on", opt.based_on as "gross" | "net" | "user");
-    if (opt.limit) newOption.$jazz.set("limit", opt.limit);
-    if (opt.calculation) newOption.$jazz.set("calculation", opt.calculation);
-    if (opt.logic) newOption.$jazz.set("logic", opt.logic);
-    if (opt.better)
-      newOption.$jazz.set("better", opt.better as "lower" | "higher");
-    if (opt.score_to_par) newOption.$jazz.set("score_to_par", opt.score_to_par);
+    // Set optional fields with validation
+    if (opt.type && isValidJunkSubType(opt.type)) {
+      newOption.$jazz.set("sub_type", opt.type);
+    }
+    if (opt.seq !== undefined && typeof opt.seq === "number") {
+      newOption.$jazz.set("seq", opt.seq);
+    }
+    if (opt.scope && isValidScope(opt.scope)) {
+      newOption.$jazz.set("scope", opt.scope);
+    }
+    if (opt.icon && typeof opt.icon === "string") {
+      newOption.$jazz.set("icon", opt.icon);
+    }
+    if (opt.show_in && isValidShowIn(opt.show_in)) {
+      newOption.$jazz.set("show_in", opt.show_in);
+    }
+    if (opt.based_on && isValidBasedOn(opt.based_on)) {
+      newOption.$jazz.set("based_on", opt.based_on);
+    }
+    if (opt.limit && typeof opt.limit === "string") {
+      newOption.$jazz.set("limit", opt.limit);
+    }
+    if (opt.calculation && typeof opt.calculation === "string") {
+      newOption.$jazz.set("calculation", opt.calculation);
+    }
+    if (opt.logic && typeof opt.logic === "string") {
+      newOption.$jazz.set("logic", opt.logic);
+    }
+    if (opt.better && isValidBetter(opt.better)) {
+      newOption.$jazz.set("better", opt.better);
+    }
+    if (opt.score_to_par && typeof opt.score_to_par === "string") {
+      newOption.$jazz.set("score_to_par", opt.score_to_par);
+    }
 
     junkOptions.$jazz.set(opt.name, newOption);
 
@@ -284,6 +363,7 @@ async function upsertMultiplierOptions(
   options: Array<{
     name: string;
     disp: string;
+    version: string;
     value: number;
     seq?: number;
     icon?: string;
@@ -317,21 +397,28 @@ async function upsertMultiplierOptions(
         name: opt.name,
         disp: opt.disp,
         type: "multiplier",
+        version: opt.version,
         value: opt.value,
       },
       { owner: multiplierOptions.$jazz.owner },
     );
 
-    // Set optional fields
-    if (opt.seq !== undefined) newOption.$jazz.set("seq", opt.seq);
-    if (opt.icon) newOption.$jazz.set("icon", opt.icon);
-    if (opt.based_on) newOption.$jazz.set("based_on", opt.based_on);
-    if (opt.scope)
-      newOption.$jazz.set(
-        "scope",
-        opt.scope as "player" | "team" | "hole" | "rest_of_nine" | "game",
-      );
-    if (opt.availability) newOption.$jazz.set("availability", opt.availability);
+    // Set optional fields with validation
+    if (opt.seq !== undefined && typeof opt.seq === "number") {
+      newOption.$jazz.set("seq", opt.seq);
+    }
+    if (opt.icon && typeof opt.icon === "string") {
+      newOption.$jazz.set("icon", opt.icon);
+    }
+    if (opt.based_on && typeof opt.based_on === "string") {
+      newOption.$jazz.set("based_on", opt.based_on);
+    }
+    if (opt.scope && isValidScope(opt.scope)) {
+      newOption.$jazz.set("scope", opt.scope);
+    }
+    if (opt.availability && typeof opt.availability === "string") {
+      newOption.$jazz.set("availability", opt.availability);
+    }
 
     multiplierOptions.$jazz.set(opt.name, newOption);
 
@@ -422,6 +509,7 @@ export async function importGameSpecsToCatalog(
     {
       name: string;
       disp: string;
+      version: string;
       valueType: "bool" | "num" | "menu" | "text";
       defaultValue: string;
       choices?: Array<{ name: string; disp: string }>;
@@ -432,6 +520,7 @@ export async function importGameSpecsToCatalog(
     {
       name: string;
       disp: string;
+      version: string;
       type: string;
       value: number;
       seq?: number;
@@ -451,6 +540,7 @@ export async function importGameSpecsToCatalog(
     {
       name: string;
       disp: string;
+      version: string;
       value: number;
       seq?: number;
       icon?: string;
@@ -518,6 +608,7 @@ export async function importGameSpecsToCatalog(
             allGameOptions.set(opt.name, {
               name: opt.name,
               disp: opt.disp,
+              version: String(spec.version),
               valueType,
               defaultValue: String(opt.default ?? ""),
               choices: opt.choices,
@@ -533,6 +624,7 @@ export async function importGameSpecsToCatalog(
             allJunkOptions.set(junk.name, {
               name: junk.name,
               disp: junk.disp,
+              version: String(spec.version),
               type: junk.type,
               value: junk.value,
               seq: junk.seq as number | undefined,
@@ -557,6 +649,7 @@ export async function importGameSpecsToCatalog(
             allMultiplierOptions.set(mult.name, {
               name: mult.name,
               disp: mult.disp,
+              version: String(spec.version),
               value: mult.value,
               seq: mult.seq as number | undefined,
               icon: mult.icon as string | undefined,

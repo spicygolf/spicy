@@ -25,6 +25,13 @@ export const GameSpec = co.map({
   /**
    * Default options for this game spec
    * Individual game instances can override these via Game.optionOverrides
+   *
+   * TODO: Consider normalized architecture with edges
+   * Current: GameSpec embeds full option objects (duplicated across specs)
+   * Future: GameSpec references options by name from GameCatalog
+   *         Options could have reverse edges (OptionToSpec) back to specs
+   * Benefits: Single source of truth, easier updates, smaller data size
+   * Trade-offs: More complex loading, need to ensure catalog is loaded first
    */
   gameOptions: co.optional(ListOfGameOptions),
   junkOptions: co.optional(ListOfJunkOptions),

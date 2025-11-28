@@ -226,6 +226,7 @@ export function useAddGameSpecs() {
           name: "handicap_index_from",
           disp: "Index off of the low handicap or use full handicaps",
           type: "game",
+          version: "0.5",
           valueType: "menu",
           defaultValue: "full",
         },

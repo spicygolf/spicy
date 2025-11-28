@@ -20,6 +20,7 @@ export const GameOption = co.map({
   name: z.string(),
   disp: z.string(),
   type: z.literal(["game"]),
+  version: z.string(), // Version identifier (e.g., "0.3", "0.5")
 
   // Value type for this option
   valueType: z.literal(["bool", "num", "menu", "text"]),
@@ -40,6 +41,7 @@ export const JunkOption = co.map({
   name: z.string(),
   disp: z.string(),
   type: z.literal(["junk"]),
+  version: z.string(), // Version identifier (e.g., "0.3", "0.5")
   sub_type: z.optional(z.literal(["dot", "skin", "carryover"])),
   value: z.number(), // Point value
   seq: z.optional(z.number()),
@@ -65,6 +67,7 @@ export const MultiplierOption = co.map({
   name: z.string(),
   disp: z.string(),
   type: z.literal(["multiplier"]),
+  version: z.string(), // Version identifier (e.g., "0.3", "0.5")
   sub_type: z.optional(z.literal(["bbq", "press", "automatic"])),
   value: z.number(), // Multiplier value (e.g., 2 for double)
   seq: z.optional(z.number()),
