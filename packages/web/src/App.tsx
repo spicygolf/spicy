@@ -144,7 +144,7 @@ export function App(): React.JSX.Element {
 
       const successMsg = [
         `Specs: ${result.specs.created} created, ${result.specs.updated} updated, ${result.specs.skipped} skipped`,
-        `Options: ${result.options.game.created + result.options.junk.created + result.options.multiplier.created} created, ${result.options.game.updated + result.options.junk.updated + result.options.multiplier.updated} updated`,
+        `Options: ${result.options.created} created, ${result.options.updated} updated`,
       ].join(" | ");
 
       if (result.errors.length > 0) {

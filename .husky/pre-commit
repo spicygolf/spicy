@@ -1,2 +1,2 @@
-# Run linting and formatting on staged files
-bun lint-staged
+# Run formatting, linting, and type checking on all packages
+bun run precommit

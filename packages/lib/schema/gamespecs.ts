@@ -20,7 +20,7 @@ export const GameSpec = co.map({
 
   /**
    * Unified options map for this game spec
-   * Individual game instances can override these via Game.optionOverrides
+   * Individual game instances get a copy of these via Game.options
    *
    * Uses co.record() for O(1) lookups by name, which is critical during scoring
    * when resolving references (e.g., multiplier.based_on = "birdie")

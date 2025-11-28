@@ -27,7 +27,8 @@ export const GameSpecCustomization = co.map({
   long_description: z.optional(z.string()),
 
   // Override options (unified map of all option types)
-  optionOverrides: co.optional(MapOfOptions),
+  // These are merged with base spec options when creating a game
+  options: co.optional(MapOfOptions),
 
   // If true, replace all options from base spec (not merge)
   replaceAllOptions: z.optional(z.boolean()),
