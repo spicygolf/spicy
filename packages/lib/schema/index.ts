@@ -1,5 +1,7 @@
 export * from "./accounts";
+export * from "./catalog";
 export * from "./courses";
+export * from "./customizations";
 export * from "./favorites";
 export * from "./gameholes";
 export * from "./games";

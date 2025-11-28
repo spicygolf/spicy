@@ -2,26 +2,15 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
+    branches: [main]
+    types: [opened, synchronize, reopened]
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       issues: read
       id-token: write
 
@@ -40,18 +29,30 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-              - This is run in a separate Github Actions workflow
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            You are reviewing a pull request. Follow these steps:
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            1. FIRST: Run `gh pr checks ${{ github.event.pull_request.number }}` to check if CI has passed
+               - If CI is still running, mention this in your review
+               - If CI failed, focus your review on why it failed
+               - If CI passed, proceed with code review knowing quality checks succeeded
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+            2. Review the PR for:
+               - Code quality and best practices
+               - Potential bugs or issues
+               - Performance considerations
+               - Security concerns
+               - Test coverage
+               - Adherence to CLAUDE.md guidelines
+
+            3. IMPORTANT:
+               - Quality checks (bun format, bun lint, bun tsc) run automatically in CI
+               - NEVER ask if quality checks were run - check CI status instead
+               - Only mention quality checks if CI failed
+
+            4. Leave your review using `gh pr comment ${{ github.event.pull_request.number }} --body "your review"`
+
+            Be constructive and helpful in your feedback.
 
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh pr checks:*)"'

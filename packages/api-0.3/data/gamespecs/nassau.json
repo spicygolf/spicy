@@ -1,7 +1,12 @@
 {
   "_key": "nassau",
-  "name": "Nassau",
+  "name": "nassau",
+  "disp": "Nassau",
+  "version": 1,
+  "status": "prod",
   "type": "skins",
+  "max_players": 4,
+  "min_players": 2,
   "location_type": "multiple",
   "scoring": {
     "hole": [

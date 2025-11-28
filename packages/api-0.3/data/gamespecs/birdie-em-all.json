@@ -1,6 +1,9 @@
 {
   "_key": "birdie_em_all",
-  "name": "Birdie-em-all",
+  "name": "birdie_em_all",
+  "disp": "Birdie-em-all",
+  "version": 1,
+  "status": "prod",
   "type": "points",
   "max_players": -1,
   "min_players": 2,

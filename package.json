@@ -1,7 +1,7 @@
 {
   "name": "spicy-mono",
   "devDependencies": {
-    "@biomejs/biome": "^2.3.6",
+    "@biomejs/biome": "2.3.6",
     "@types/bun": "latest",
     "del-cli": "^6.0.0",
     "husky": "^9.1.7",
@@ -12,20 +12,9 @@
   },
   "license": "FSL-1.1-ALv2",
   "lint-staged": {
-    "packages/app/**/*.{js,jsx,ts,tsx}": [
+    "packages/**/*.{js,jsx,ts,tsx}": [
       "bun lint",
-      "bun format",
-      "bun tsc"
-    ],
-    "packages/api/**/*.{js,jsx,ts,tsx}": [
-      "bun lint",
-      "bun format",
-      "bun tsc"
-    ],
-    "packages/lib/**/*.{js,jsx,ts,tsx}": [
-      "bun lint",
-      "bun format",
-      "bun tsc"
+      "bun format"
     ]
   },
   "patchedDependencies": {
@@ -72,7 +61,8 @@
     "packages": [
       "packages/api",
       "packages/app",
-      "packages/lib"
+      "packages/lib",
+      "packages/web"
     ],
     "catalogs": {
       "shared": {

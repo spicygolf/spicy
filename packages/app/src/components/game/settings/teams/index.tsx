@@ -271,12 +271,14 @@ export function GameTeamsList() {
           },
           { owner: game.$jazz.owner },
         );
-        // NOTE: Must use @ts-ignore (not @ts-expect-error) due to unresolved Jazz schema strictness
+        // NOTE: Must use ts-ignore (not ts-expect-error) due to unresolved Jazz schema strictness
         // This is a known issue and the ignore is intentional
+        // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
         // @ts-ignore - Jazz $jazz.set types are overly strict
         game.scope.$jazz.set("teamsConfig", config);
       } else if (game.scope.teamsConfig?.$isLoaded) {
-        // NOTE: Must use @ts-ignore (not @ts-expect-error) due to unresolved Jazz schema strictness
+        // NOTE: Must use ts-ignore (not ts-expect-error) due to unresolved Jazz schema strictness
+        // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
         // @ts-ignore - Jazz $jazz.set types are overly strict
         game.scope.teamsConfig.$jazz.set("rotateEvery", value);
       }
@@ -326,12 +328,14 @@ export function GameTeamsList() {
           },
           { owner: game.$jazz.owner },
         );
-        // NOTE: Must use @ts-ignore (not @ts-expect-error) due to unresolved Jazz schema strictness
+        // NOTE: Must use ts-ignore (not ts-expect-error) due to unresolved Jazz schema strictness
         // This is a known issue and the ignore is intentional
+        // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
         // @ts-ignore - Jazz $jazz.set types are overly strict
         game.scope.$jazz.set("teamsConfig", config);
       } else if (game.scope.teamsConfig?.$isLoaded) {
-        // NOTE: Must use @ts-ignore (not @ts-expect-error) due to unresolved Jazz schema strictness
+        // NOTE: Must use ts-ignore (not ts-expect-error) due to unresolved Jazz schema strictness
+        // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
         // @ts-ignore - Jazz $jazz.set types are overly strict
         game.scope.teamsConfig.$jazz.set("rotateEvery", pendingRotationValue);
       }
@@ -351,6 +355,7 @@ export function GameTeamsList() {
       },
       { owner: game.$jazz.owner },
     );
+    // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
     // @ts-ignore - Jazz $jazz.set types are overly strict
     game.scope.$jazz.set("teamsConfig", config);
   }
