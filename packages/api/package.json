@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@elysiajs/cors": "1.4.0",
+    "arangojs": "10.1.2",
     "better-auth": "catalog:shared",
     "elysia": "1.4.9",
     "@spicygolf/ghin": "0.8.6",
