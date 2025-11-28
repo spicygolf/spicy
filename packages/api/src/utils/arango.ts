@@ -9,10 +9,10 @@ export interface ArangoConfig {
 }
 
 export const defaultConfig: ArangoConfig = {
-  url: "http://localhost:8529",
-  databaseName: "dg",
-  username: "dg",
-  password: "dg",
+  url: process.env.ARANGO_URL || "http://localhost:8529",
+  databaseName: process.env.ARANGO_DATABASE || "dg",
+  username: process.env.ARANGO_USERNAME || "dg",
+  password: process.env.ARANGO_PASSWORD || "dg",
 };
 
 export function createArangoConnection(

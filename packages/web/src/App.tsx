@@ -2,7 +2,6 @@ import type { co } from "jazz-tools";
 import { useAccount, useIsAuthenticated } from "jazz-tools/react";
 import {
   BookOpen,
-  Database,
   Download,
   LogOut,
   RefreshCw,
@@ -38,12 +37,6 @@ import {
   migrateUserSpecs,
 } from "@/lib/user-migration";
 import { isWorkerAccount } from "@/lib/worker-auth";
-import {
-  type ArangoConfig,
-  createArangoConnection,
-  defaultConfig,
-  testConnection,
-} from "@/utils/arango";
 
 export function App(): React.JSX.Element {
   const { toast } = useToast();
@@ -52,7 +45,6 @@ export function App(): React.JSX.Element {
   const [userEmail, setUserEmail] = useState<string | undefined>();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("import");
-  const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isImporting, setIsImporting] = useState<boolean>(false);
   const [importProgress, setImportProgress] = useState<number>(0);
   const [importResult, setImportResult] = useState<{
@@ -61,7 +53,6 @@ export function App(): React.JSX.Element {
     players: { created: number; updated: number; skipped: number };
     errors: Array<{ item: string; error: string }>;
   } | null>(null);
-  const [arangoConfig, setArangoConfig] = useState<ArangoConfig>(defaultConfig);
   const [ghinNumber, setGhinNumber] = useState<string>("");
   const [isMigrating, setIsMigrating] = useState<boolean>(false);
   const [isLinkingPlayer, setIsLinkingPlayer] = useState<boolean>(false);
@@ -84,37 +75,6 @@ export function App(): React.JSX.Element {
         });
     }
   }, [isAuthenticated]);
-
-  const handleTestConnection = async (): Promise<void> => {
-    setIsConnecting(true);
-    try {
-      const db = createArangoConnection(arangoConfig);
-      const isConnected = await testConnection(db);
-
-      if (isConnected) {
-        toast({
-          title: "Connection successful",
-          description: `Connected to ArangoDB at ${arangoConfig.url}`,
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Connection failed",
-          description:
-            "Could not connect to ArangoDB. Please check your configuration.",
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Connection error",
-        description:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      });
-    } finally {
-      setIsConnecting(false);
-    }
-  };
 
   const handleImportToCatalog = async (): Promise<void> => {
     if (!me) {
@@ -141,7 +101,6 @@ export function App(): React.JSX.Element {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(arangoConfig),
       });
 
       if (!response.ok) {
@@ -480,10 +439,6 @@ export function App(): React.JSX.Element {
             <TabsTrigger value="migration">
               <Download className="mr-2 h-4 w-4" />
               Migration
-            </TabsTrigger>
-            <TabsTrigger value="arango">
-              <Database className="mr-2 h-4 w-4" />
-              ArangoDB
             </TabsTrigger>
             <TabsTrigger value="profile">
               <Settings className="mr-2 h-4 w-4" />
@@ -841,87 +796,6 @@ export function App(): React.JSX.Element {
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="arango" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>ArangoDB Configuration</CardTitle>
-                <CardDescription>
-                  Configure connection to ArangoDB instance
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="url">Database URL</Label>
-                    <Input
-                      id="url"
-                      value={arangoConfig.url}
-                      onChange={(e) =>
-                        setArangoConfig({
-                          ...arangoConfig,
-                          url: e.target.value,
-                        })
-                      }
-                      placeholder="http://localhost:8529"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="dbname">Database Name</Label>
-                    <Input
-                      id="dbname"
-                      value={arangoConfig.databaseName}
-                      onChange={(e) =>
-                        setArangoConfig({
-                          ...arangoConfig,
-                          databaseName: e.target.value,
-                        })
-                      }
-                      placeholder="dg"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="username">Username</Label>
-                    <Input
-                      id="username"
-                      value={arangoConfig.username}
-                      onChange={(e) =>
-                        setArangoConfig({
-                          ...arangoConfig,
-                          username: e.target.value,
-                        })
-                      }
-                      placeholder="dg"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={arangoConfig.password}
-                      onChange={(e) =>
-                        setArangoConfig({
-                          ...arangoConfig,
-                          password: e.target.value,
-                        })
-                      }
-                      placeholder="dg"
-                    />
-                  </div>
-                </div>
-
-                <Button onClick={handleTestConnection} disabled={isConnecting}>
-                  {isConnecting ? (
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Database className="mr-2 h-4 w-4" />
-                  )}
-                  Test Connection
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>
