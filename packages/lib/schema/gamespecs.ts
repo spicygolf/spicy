@@ -51,14 +51,3 @@ export type ListOfGameSpecs = co.loaded<typeof ListOfGameSpecs>;
 
 export const MapOfGameSpecs = co.record(z.string(), GameSpec);
 export type MapOfGameSpecs = co.loaded<typeof MapOfGameSpecs>;
-
-export const defaultSpec = {
-  name: "Five Points",
-  short: `Team game with low ball (2), low team (2), and prox (1). 5 points per hole, presses, birdies`,
-  version: 1,
-  status: "prod" as const,
-  spec_type: "points" as const,
-  min_players: 2,
-  location_type: "local" as const,
-  // teamsConfig will be added separately using co.optional
-};

@@ -1,6 +1,6 @@
 import { Group } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { type defaultSpec, GameSpec, PlayerAccount } from "spicylib/schema";
+import { GameSpec, PlayerAccount } from "spicylib/schema";
 
 export function useGamespecs() {
   const me = useAccount(PlayerAccount, {
@@ -17,7 +17,16 @@ export function useGamespecs() {
           : null,
   });
 
-  const createGameSpec = (spec: typeof defaultSpec) => {
+  const createGameSpec = (spec: {
+    name: string;
+    short: string;
+    long_description?: string;
+    version: number;
+    status: "prod" | "dev" | "test";
+    spec_type: "points" | "skins";
+    min_players: number;
+    location_type: "local" | "virtual";
+  }) => {
     if (!me?.root) return null;
 
     const group = Group.create();
