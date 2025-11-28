@@ -1,6 +1,12 @@
 import { useCoState } from "jazz-tools/react";
 import { Loader2, RefreshCw } from "lucide-react";
-import type { GameSpec, PlayerAccountProfile } from "spicylib/schema";
+import type {
+  GameOption,
+  GameSpec,
+  JunkOption,
+  MultiplierOption,
+  PlayerAccountProfile,
+} from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface CatalogBrowserProps {
   workerAccountId: string;
@@ -26,6 +33,9 @@ export function CatalogBrowser({
       profile: {
         catalog: {
           specs: true, // Load the specs map shallowly
+          gameOptions: true,
+          junkOptions: true,
+          multiplierOptions: true,
         },
       },
     },
@@ -42,23 +52,87 @@ export function CatalogBrowser({
     },
   });
 
-  // Extract specs directly from the loaded account
+  // Extract specs and options from the loaded account
   const specs: GameSpec[] = [];
+  const gameOptions: GameOption[] = [];
+  const junkOptions: JunkOption[] = [];
+  const multiplierOptions: MultiplierOption[] = [];
+
   if (workerAccount?.profile) {
     const profile = workerAccount.profile as PlayerAccountProfile;
     const catalog = profile.catalog;
-    if (catalog?.$isLoaded && catalog.specs?.$isLoaded) {
-      const catalogSpecs = catalog.specs;
-      for (const key of Object.keys(catalogSpecs)) {
-        if (key.startsWith("_") || key.startsWith("$")) continue;
-        const spec = catalogSpecs[key as keyof typeof catalogSpecs];
-        if (
-          spec &&
-          typeof spec === "object" &&
-          "$jazz" in spec &&
-          spec.$isLoaded
-        ) {
-          specs.push(spec as GameSpec);
+
+    if (catalog?.$isLoaded) {
+      // Extract specs
+      if (catalog.specs?.$isLoaded) {
+        const catalogSpecs = catalog.specs;
+        for (const key of Object.keys(catalogSpecs)) {
+          if (key.startsWith("_") || key.startsWith("$")) continue;
+          const spec = catalogSpecs[key as keyof typeof catalogSpecs];
+          if (
+            spec &&
+            typeof spec === "object" &&
+            "$jazz" in spec &&
+            spec.$isLoaded
+          ) {
+            specs.push(spec as GameSpec);
+          }
+        }
+      }
+
+      // Extract game options
+      if (catalog.gameOptions?.$isLoaded) {
+        const catalogGameOptions = catalog.gameOptions;
+        for (const key of Object.keys(catalogGameOptions)) {
+          if (key.startsWith("_") || key.startsWith("$")) continue;
+          const opt =
+            catalogGameOptions[key as keyof typeof catalogGameOptions];
+          if (
+            opt &&
+            typeof opt === "object" &&
+            "$jazz" in opt &&
+            opt.$isLoaded
+          ) {
+            gameOptions.push(opt as GameOption);
+          }
+        }
+      }
+
+      // Extract junk options
+      if (catalog.junkOptions?.$isLoaded) {
+        const catalogJunkOptions = catalog.junkOptions;
+        for (const key of Object.keys(catalogJunkOptions)) {
+          if (key.startsWith("_") || key.startsWith("$")) continue;
+          const opt =
+            catalogJunkOptions[key as keyof typeof catalogJunkOptions];
+          if (
+            opt &&
+            typeof opt === "object" &&
+            "$jazz" in opt &&
+            opt.$isLoaded
+          ) {
+            junkOptions.push(opt as JunkOption);
+          }
+        }
+      }
+
+      // Extract multiplier options
+      if (catalog.multiplierOptions?.$isLoaded) {
+        const catalogMultiplierOptions = catalog.multiplierOptions;
+        for (const key of Object.keys(catalogMultiplierOptions)) {
+          if (key.startsWith("_") || key.startsWith("$")) continue;
+          const opt =
+            catalogMultiplierOptions[
+              key as keyof typeof catalogMultiplierOptions
+            ];
+          if (
+            opt &&
+            typeof opt === "object" &&
+            "$jazz" in opt &&
+            opt.$isLoaded
+          ) {
+            multiplierOptions.push(opt as MultiplierOption);
+          }
         }
       }
     }
@@ -99,11 +173,10 @@ export function CatalogBrowser({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">
-            Game Catalog ({specs.length} specs)
-          </h3>
+          <h3 className="text-lg font-semibold">Game Catalog</h3>
           <p className="text-sm text-muted-foreground">
-            Shared game specifications available to all users
+            {specs.length} specs, {gameOptions.length} game options,{" "}
+            {junkOptions.length} junk, {multiplierOptions.length} multipliers
           </p>
         </div>
         <Button
@@ -116,56 +189,188 @@ export function CatalogBrowser({
         </Button>
       </div>
 
-      {specs.length === 0 ? (
-        <div className="rounded-md border border-gray-200 bg-gray-50 p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            No game specs in catalog yet. Import some specs to get started.
-          </p>
-        </div>
-      ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Short Name</TableHead>
-                <TableHead>Version</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Players</TableHead>
-                <TableHead>Location</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {specs.map((spec) => (
-                <TableRow key={spec.$jazz.id}>
-                  <TableCell className="font-medium">{spec.name}</TableCell>
-                  <TableCell>{spec.short}</TableCell>
-                  <TableCell>{spec.version}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{spec.spec_type}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        spec.status === "prod"
-                          ? "default"
-                          : spec.status === "dev"
-                            ? "secondary"
-                            : "outline"
-                      }
-                    >
-                      {spec.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{spec.min_players || "N/A"}</TableCell>
-                  <TableCell>{spec.location_type || "N/A"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <Tabs defaultValue="specs" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="specs">Specs ({specs.length})</TabsTrigger>
+          <TabsTrigger value="game">
+            Game Options ({gameOptions.length})
+          </TabsTrigger>
+          <TabsTrigger value="junk">Junk ({junkOptions.length})</TabsTrigger>
+          <TabsTrigger value="multipliers">
+            Multipliers ({multiplierOptions.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="specs">
+          {specs.length === 0 ? (
+            <div className="rounded-md border border-gray-200 bg-gray-50 p-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                No game specs in catalog yet. Import some specs to get started.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Short Name</TableHead>
+                    <TableHead>Version</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Players</TableHead>
+                    <TableHead>Location</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {specs.map((spec) => (
+                    <TableRow key={spec.$jazz.id}>
+                      <TableCell className="font-medium">{spec.name}</TableCell>
+                      <TableCell>{spec.short}</TableCell>
+                      <TableCell>{spec.version}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{spec.spec_type}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            spec.status === "prod"
+                              ? "default"
+                              : spec.status === "dev"
+                                ? "secondary"
+                                : "outline"
+                          }
+                        >
+                          {spec.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{spec.min_players || "N/A"}</TableCell>
+                      <TableCell>{spec.location_type || "N/A"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="game">
+          {gameOptions.length === 0 ? (
+            <div className="rounded-md border border-gray-200 bg-gray-50 p-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                No game options imported yet.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Display</TableHead>
+                    <TableHead>Value Type</TableHead>
+                    <TableHead>Default</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {gameOptions.map((opt) => (
+                    <TableRow key={opt.$jazz.id}>
+                      <TableCell className="font-medium">{opt.name}</TableCell>
+                      <TableCell>{opt.disp}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{opt.valueType}</Badge>
+                      </TableCell>
+                      <TableCell>{opt.defaultValue}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="junk">
+          {junkOptions.length === 0 ? (
+            <div className="rounded-md border border-gray-200 bg-gray-50 p-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                No junk options imported yet.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Display</TableHead>
+                    <TableHead>Sub Type</TableHead>
+                    <TableHead>Value</TableHead>
+                    <TableHead>Scope</TableHead>
+                    <TableHead>Based On</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {junkOptions.map((opt) => (
+                    <TableRow key={opt.$jazz.id}>
+                      <TableCell className="font-medium">{opt.name}</TableCell>
+                      <TableCell>{opt.disp}</TableCell>
+                      <TableCell>
+                        {opt.sub_type && (
+                          <Badge variant="outline">{opt.sub_type}</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>{opt.value}</TableCell>
+                      <TableCell>{opt.scope || "N/A"}</TableCell>
+                      <TableCell>{opt.based_on || "N/A"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="multipliers">
+          {multiplierOptions.length === 0 ? (
+            <div className="rounded-md border border-gray-200 bg-gray-50 p-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                No multiplier options imported yet.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Display</TableHead>
+                    <TableHead>Sub Type</TableHead>
+                    <TableHead>Value</TableHead>
+                    <TableHead>Scope</TableHead>
+                    <TableHead>Based On</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {multiplierOptions.map((opt) => (
+                    <TableRow key={opt.$jazz.id}>
+                      <TableCell className="font-medium">{opt.name}</TableCell>
+                      <TableCell>{opt.disp}</TableCell>
+                      <TableCell>
+                        {opt.sub_type && (
+                          <Badge variant="outline">{opt.sub_type}</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>{opt.value}x</TableCell>
+                      <TableCell>{opt.scope || "N/A"}</TableCell>
+                      <TableCell>{opt.based_on || "N/A"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

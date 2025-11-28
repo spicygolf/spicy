@@ -143,10 +143,9 @@ export function App(): React.JSX.Element {
       setImportProgress(100);
 
       const successMsg = [
-        `Created: ${result.created}`,
-        `Updated: ${result.updated}`,
-        `Skipped: ${result.skipped}`,
-      ].join(", ");
+        `Specs: ${result.specs.created} created, ${result.specs.updated} updated, ${result.specs.skipped} skipped`,
+        `Options: ${result.options.game.created + result.options.junk.created + result.options.multiplier.created} created, ${result.options.game.updated + result.options.junk.updated + result.options.multiplier.updated} updated`,
+      ].join(" | ");
 
       if (result.errors.length > 0) {
         toast({
@@ -431,10 +430,14 @@ export function App(): React.JSX.Element {
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">How it works:</h3>
                   <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                    <li>Merges game specs from ArangoDB and JSON files</li>
-                    <li>ArangoDB specs take precedence on conflicts</li>
+                    <li>Imports game specs from ArangoDB and JSON files</li>
+                    <li>
+                      Extracts and imports options (game settings, junk,
+                      multipliers)
+                    </li>
+                    <li>ArangoDB data takes precedence on conflicts</li>
                     <li>Idempotent: safe to run multiple times</li>
-                    <li>Updates existing specs, creates new ones</li>
+                    <li>Updates existing items, creates new ones</li>
                     <li>Catalog is public: all users can read</li>
                   </ul>
                 </div>
