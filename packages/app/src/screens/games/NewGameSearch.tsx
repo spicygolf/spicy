@@ -99,7 +99,7 @@ export function NewGameSearch({ viewMode }: NewGameSearchProps) {
     [me],
   );
 
-  const loadedSpecs = specs?.$isLoaded ? specs.filter((s) => s?.$isLoaded) : [];
+  const loadedSpecs: GameSpec[] = specs || [];
 
   if (viewMode === "description") {
     return (
