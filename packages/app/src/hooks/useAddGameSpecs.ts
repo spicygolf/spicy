@@ -3,7 +3,7 @@ import { useAccount } from "jazz-tools/react-native";
 import {
   GameOption,
   GameSpec,
-  ListOfGameOptions,
+  MapOfOptions,
   PlayerAccount,
   TeamsConfig,
 } from "spicylib/schema";
@@ -198,26 +198,22 @@ export function useAddGameSpecs() {
     spec: GameSpec,
     ownerGroup: Group,
   ): Promise<void> => {
-    // Initialize gameOptions if it doesn't exist
-    if (!spec.$jazz.has("gameOptions")) {
-      const gameOptionsList = ListOfGameOptions.create([], {
-        owner: ownerGroup,
-      });
-      spec.$jazz.set("gameOptions", gameOptionsList);
+    // Initialize options map if it doesn't exist
+    if (!spec.$jazz.has("options")) {
+      const optionsMap = MapOfOptions.create(
+        {},
+        {
+          owner: ownerGroup,
+        },
+      );
+      spec.$jazz.set("options", optionsMap);
     }
 
-    const gameOptions = spec.gameOptions;
-    if (!gameOptions?.$isLoaded) return;
+    const options = spec.options;
+    if (!options?.$isLoaded) return;
 
     // Check if handicap_index_from option already exists
-    let hasHandicapOption = false;
-    for (let i = 0; i < gameOptions.length; i++) {
-      const opt = gameOptions[i];
-      if (opt?.$isLoaded && opt.name === "handicap_index_from") {
-        hasHandicapOption = true;
-        break;
-      }
-    }
+    const hasHandicapOption = options.handicap_index_from !== undefined;
 
     // Add handicap_index_from option if it doesn't exist
     if (!hasHandicapOption) {
@@ -226,6 +222,7 @@ export function useAddGameSpecs() {
           name: "handicap_index_from",
           disp: "Index off of the low handicap or use full handicaps",
           type: "game",
+          version: "0.5",
           valueType: "menu",
           defaultValue: "full",
         },
@@ -256,8 +253,8 @@ export function useAddGameSpecs() {
       // Set choices on the option
       handicapOption.$jazz.set("choices", choices);
 
-      // Add to gameOptions list
-      gameOptions.$jazz.push(handicapOption);
+      // Add to options map using the option name as key
+      options.$jazz.set("handicap_index_from", handicapOption);
     }
   };
 

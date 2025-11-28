@@ -1,7 +1,7 @@
 import { co, z } from "jazz-tools";
 import { ListOfGameHoles } from "./gameholes";
 import { ListOfGameSpecs } from "./gamespecs";
-import { ListOfGameOptionValues } from "./options";
+import { MapOfOptions } from "./options";
 import { ListOfPlayers } from "./players";
 import { ListOfRoundToGames } from "./rounds";
 import { TeamsConfig } from "./teamsconfig";
@@ -34,11 +34,18 @@ export const Game = co.map({
   rounds: ListOfRoundToGames,
 
   /**
-   * Option overrides for this specific game instance.
-   * Allows overriding default values from GameSpec options.
-   * Example: Change handicap mode from "full" to "low" for this game.
+   * Options for this specific game instance.
+   * Copied from GameSpec.options when the game is created, then customized as needed.
+   *
+   * This is a snapshot/copy approach (not references):
+   * - When creating game: copy all options from gamespec
+   * - Users can modify values for this specific game
+   * - Games are self-contained and don't break when catalog changes
+   * - Historical games maintain their original scoring logic
+   *
+   * Example: Game starts with "stakes: 1" from gamespec, user changes to "stakes: 5"
    */
-  optionOverrides: co.optional(ListOfGameOptionValues),
+  options: co.optional(MapOfOptions),
 });
 export type Game = co.loaded<typeof Game>;
 

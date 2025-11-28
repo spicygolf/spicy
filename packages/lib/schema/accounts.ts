@@ -3,12 +3,7 @@ import { GameCatalog } from "./catalog";
 import { ListOfGameSpecCustomizations } from "./customizations";
 import { Favorites } from "./favorites";
 import { ListOfGames } from "./games";
-import {
-  defaultSpec,
-  GameSpec,
-  ListOfGameSpecs,
-  MapOfGameSpecs,
-} from "./gamespecs";
+import { ListOfGameSpecs, MapOfGameSpecs } from "./gamespecs";
 import { Player } from "./players";
 
 // Support both React Native (process.env) and web (import.meta.env)
@@ -84,12 +79,7 @@ export const PlayerAccount = co
               { owner: group },
             ),
             games: ListOfGames.create([], { owner: group }),
-            specs: ListOfGameSpecs.create(
-              [GameSpec.create(defaultSpec, { owner: group })],
-              {
-                owner: group,
-              },
-            ),
+            specs: ListOfGameSpecs.create([], { owner: group }),
           },
           { owner: group },
         ),

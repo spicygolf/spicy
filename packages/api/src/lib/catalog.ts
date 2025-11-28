@@ -6,10 +6,81 @@
  */
 
 import type { co } from "jazz-tools";
+
+/**
+ * Validation helpers for option type assertions
+ */
+const VALID_JUNK_SUB_TYPES = ["dot", "skin", "carryover"] as const;
+const VALID_MULTIPLIER_SUB_TYPES = ["bbq", "press", "automatic"] as const;
+const VALID_SCOPES = [
+  "player",
+  "team",
+  "hole",
+  "rest_of_nine",
+  "game",
+] as const;
+const VALID_SHOW_IN = ["score", "faves", "none"] as const;
+const VALID_BASED_ON = ["gross", "net", "user"] as const;
+const VALID_BETTER = ["lower", "higher"] as const;
+
+function isValidJunkSubType(
+  value: unknown,
+): value is "dot" | "skin" | "carryover" {
+  return (
+    typeof value === "string" &&
+    (VALID_JUNK_SUB_TYPES as readonly string[]).includes(value)
+  );
+}
+
+function isValidMultiplierSubType(
+  value: unknown,
+): value is "bbq" | "press" | "automatic" {
+  return (
+    typeof value === "string" &&
+    (VALID_MULTIPLIER_SUB_TYPES as readonly string[]).includes(value)
+  );
+}
+
+function isValidScope(
+  value: unknown,
+): value is "player" | "team" | "hole" | "rest_of_nine" | "game" {
+  return (
+    typeof value === "string" &&
+    (VALID_SCOPES as readonly string[]).includes(value)
+  );
+}
+
+function isValidShowIn(value: unknown): value is "score" | "faves" | "none" {
+  return (
+    typeof value === "string" &&
+    (VALID_SHOW_IN as readonly string[]).includes(value)
+  );
+}
+
+function isValidBasedOn(value: unknown): value is "gross" | "net" | "user" {
+  return (
+    typeof value === "string" &&
+    (VALID_BASED_ON as readonly string[]).includes(value)
+  );
+}
+
+function isValidBetter(value: unknown): value is "lower" | "higher" {
+  return (
+    typeof value === "string" &&
+    (VALID_BETTER as readonly string[]).includes(value)
+  );
+}
+
 import {
+  ChoiceMap,
+  ChoicesList,
   type GameCatalog,
+  GameOption,
   GameSpec,
+  JunkOption,
   type MapOfGameSpecs,
+  type MapOfOptions,
+  MultiplierOption,
   type PlayerAccount,
 } from "spicylib/schema";
 import { transformGameSpec } from "spicylib/transform";
@@ -23,11 +94,67 @@ import {
 import { loadAllGameSpecs } from "../utils/json-reader";
 
 export interface ImportResult {
-  created: number;
-  updated: number;
-  skipped: number;
-  errors: Array<{ spec: string; error: string }>;
+  specs: {
+    created: number;
+    updated: number;
+    skipped: number;
+  };
+  options: {
+    created: number;
+    updated: number;
+  };
+  errors: Array<{ item: string; error: string }>;
 }
+
+/**
+ * Union type for all option data shapes
+ */
+type GameOptionData = {
+  type: "game";
+  name: string;
+  disp: string;
+  version: string;
+  valueType: "bool" | "num" | "menu" | "text";
+  defaultValue: string;
+  seq?: number;
+  choices?: Array<{ name: string; disp: string }>;
+};
+
+type JunkOptionData = {
+  type: "junk";
+  name: string;
+  disp: string;
+  version: string;
+  sub_type?: string;
+  value: number;
+  seq?: number;
+  scope?: string;
+  icon?: string;
+  show_in?: string;
+  based_on?: string;
+  limit?: string;
+  calculation?: string;
+  logic?: string;
+  better?: string;
+  score_to_par?: string;
+};
+
+type MultiplierOptionData = {
+  type: "multiplier";
+  name: string;
+  disp: string;
+  version: string;
+  sub_type?: string;
+  value: number;
+  seq?: number;
+  icon?: string;
+  based_on?: string;
+  scope?: string;
+  availability?: string;
+  override?: boolean;
+};
+
+type OptionData = GameOptionData | JunkOptionData | MultiplierOptionData;
 
 /**
  * Load the GameCatalog for the worker account
@@ -63,9 +190,10 @@ export async function loadOrCreateCatalog(
 export async function upsertGameSpec(
   catalog: GameCatalog,
   specData: GameSpecV03,
+  catalogOptions?: MapOfOptions,
 ): Promise<{ created: boolean; updated: boolean }> {
   const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { specs: {} },
+    resolve: { specs: {}, options: {} },
   });
 
   if (!loadedCatalog.specs) {
@@ -95,9 +223,188 @@ export async function upsertGameSpec(
     newSpec.$jazz.set("long_description", transformed.long_description);
   }
 
+  // Populate spec.options with references to catalog options
+  if (transformed.options && transformed.options.length > 0 && catalogOptions) {
+    const specOptionsMap: Record<string, unknown> = {};
+
+    for (const opt of transformed.options) {
+      // Reference the option from catalog.options
+      const catalogOption = catalogOptions[opt.name];
+      if (catalogOption) {
+        specOptionsMap[opt.name] = catalogOption;
+      }
+    }
+
+    newSpec.$jazz.set("options", specOptionsMap as MapOfOptions);
+  }
+
   specs.$jazz.set(key, newSpec);
 
   return { created: !exists, updated: exists };
+}
+
+/**
+ * Upsert options into the catalog (idempotent)
+ *
+ * Handles all three option types (game, junk, multiplier) in a single unified function.
+ * Uses discriminated union based on the `type` field.
+ */
+async function upsertOptions(
+  catalog: GameCatalog,
+  options: OptionData[],
+): Promise<{ created: number; updated: number }> {
+  const loadedCatalog = await catalog.$jazz.ensureLoaded({
+    resolve: { options: {} },
+  });
+
+  // Initialize options map if it doesn't exist
+  if (!loadedCatalog.$jazz.has("options")) {
+    const newMap = {} as MapOfOptions;
+    loadedCatalog.$jazz.set("options", newMap);
+  }
+
+  const optionsMap = loadedCatalog.options;
+  if (!optionsMap) {
+    throw new Error("Failed to initialize options");
+  }
+
+  let created = 0;
+  let updated = 0;
+
+  for (const opt of options) {
+    const exists = optionsMap.$jazz.has(opt.name);
+
+    // Create the appropriate option type based on discriminator
+    if (opt.type === "game") {
+      const newOption = GameOption.create(
+        {
+          name: opt.name,
+          disp: opt.disp,
+          type: "game",
+          version: opt.version,
+          valueType: opt.valueType,
+          defaultValue: opt.defaultValue,
+        },
+        { owner: optionsMap.$jazz.owner },
+      );
+
+      // Set optional fields
+      if (opt.seq !== undefined && typeof opt.seq === "number") {
+        newOption.$jazz.set("seq", opt.seq);
+      }
+
+      // Add choices if present (for menu type options)
+      if (opt.choices && opt.choices.length > 0) {
+        const choicesList = ChoicesList.create([], {
+          owner: newOption.$jazz.owner,
+        });
+
+        for (const choice of opt.choices) {
+          const choiceItem = ChoiceMap.create(
+            { name: choice.name, disp: choice.disp },
+            { owner: newOption.$jazz.owner },
+          );
+          choicesList.$jazz.push(choiceItem);
+        }
+
+        newOption.$jazz.set("choices", choicesList);
+      }
+
+      optionsMap.$jazz.set(opt.name, newOption);
+    } else if (opt.type === "junk") {
+      const newOption = JunkOption.create(
+        {
+          name: opt.name,
+          disp: opt.disp,
+          type: "junk",
+          version: opt.version,
+          value: opt.value,
+        },
+        { owner: optionsMap.$jazz.owner },
+      );
+
+      // Set optional fields with validation
+      if (opt.sub_type && isValidJunkSubType(opt.sub_type)) {
+        newOption.$jazz.set("sub_type", opt.sub_type);
+      }
+      if (opt.seq !== undefined && typeof opt.seq === "number") {
+        newOption.$jazz.set("seq", opt.seq);
+      }
+      if (opt.scope && isValidScope(opt.scope)) {
+        newOption.$jazz.set("scope", opt.scope);
+      }
+      if (opt.icon && typeof opt.icon === "string") {
+        newOption.$jazz.set("icon", opt.icon);
+      }
+      if (opt.show_in && isValidShowIn(opt.show_in)) {
+        newOption.$jazz.set("show_in", opt.show_in);
+      }
+      if (opt.based_on && isValidBasedOn(opt.based_on)) {
+        newOption.$jazz.set("based_on", opt.based_on);
+      }
+      if (opt.limit && typeof opt.limit === "string") {
+        newOption.$jazz.set("limit", opt.limit);
+      }
+      if (opt.calculation && typeof opt.calculation === "string") {
+        newOption.$jazz.set("calculation", opt.calculation);
+      }
+      if (opt.logic && typeof opt.logic === "string") {
+        newOption.$jazz.set("logic", opt.logic);
+      }
+      if (opt.better && isValidBetter(opt.better)) {
+        newOption.$jazz.set("better", opt.better);
+      }
+      if (opt.score_to_par && typeof opt.score_to_par === "string") {
+        newOption.$jazz.set("score_to_par", opt.score_to_par);
+      }
+
+      optionsMap.$jazz.set(opt.name, newOption);
+    } else if (opt.type === "multiplier") {
+      const newOption = MultiplierOption.create(
+        {
+          name: opt.name,
+          disp: opt.disp,
+          type: "multiplier",
+          version: opt.version,
+          value: opt.value,
+        },
+        { owner: optionsMap.$jazz.owner },
+      );
+
+      // Set optional fields with validation
+      if (opt.sub_type && isValidMultiplierSubType(opt.sub_type)) {
+        newOption.$jazz.set("sub_type", opt.sub_type);
+      }
+      if (opt.seq !== undefined && typeof opt.seq === "number") {
+        newOption.$jazz.set("seq", opt.seq);
+      }
+      if (opt.icon && typeof opt.icon === "string") {
+        newOption.$jazz.set("icon", opt.icon);
+      }
+      if (opt.based_on && typeof opt.based_on === "string") {
+        newOption.$jazz.set("based_on", opt.based_on);
+      }
+      if (opt.scope && isValidScope(opt.scope)) {
+        newOption.$jazz.set("scope", opt.scope);
+      }
+      if (opt.availability && typeof opt.availability === "string") {
+        newOption.$jazz.set("availability", opt.availability);
+      }
+      if (opt.override !== undefined && typeof opt.override === "boolean") {
+        newOption.$jazz.set("override", opt.override);
+      }
+
+      optionsMap.$jazz.set(opt.name, newOption);
+    }
+
+    if (exists) {
+      updated++;
+    } else {
+      created++;
+    }
+  }
+
+  return { created, updated };
 }
 
 /**
@@ -158,19 +465,31 @@ export async function importGameSpecsToCatalog(
   console.log("Total specs to import:", allSpecs.length);
 
   const result: ImportResult = {
-    created: 0,
-    updated: 0,
-    skipped: 0,
+    specs: {
+      created: 0,
+      updated: 0,
+      skipped: 0,
+    },
+    options: {
+      created: 0,
+      updated: 0,
+    },
     errors: [],
   };
+
+  // Collect all unique options across all specs
+  const allOptions = new Map<string, OptionData>();
+
+  // First pass: Validate specs and collect options
+  const validSpecs: GameSpecV03[] = [];
 
   for (const spec of allSpecs) {
     try {
       // Validate all required fields before creating GameSpec
       if (!spec.disp || !spec.version || !spec.type || !spec.status) {
-        result.skipped++;
+        result.specs.skipped++;
         result.errors.push({
-          spec: spec.name || spec._key || "unknown",
+          item: `spec:${spec.name || spec._key || "unknown"}`,
           error: "Missing required fields (disp, version, type, or status)",
         });
         continue;
@@ -178,9 +497,9 @@ export async function importGameSpecsToCatalog(
 
       // Validate numeric fields
       if (typeof spec.min_players !== "number" || spec.min_players < 1) {
-        result.skipped++;
+        result.specs.skipped++;
         result.errors.push({
-          spec: spec.name || spec._key || "unknown",
+          item: `spec:${spec.name || spec._key || "unknown"}`,
           error: "Invalid min_players: must be a number >= 1",
         });
         continue;
@@ -188,26 +507,126 @@ export async function importGameSpecsToCatalog(
 
       // Validate location_type
       if (!spec.location_type || typeof spec.location_type !== "string") {
-        result.skipped++;
+        result.specs.skipped++;
         result.errors.push({
-          spec: spec.name || spec._key || "unknown",
+          item: `spec:${spec.name || spec._key || "unknown"}`,
           error: "Invalid location_type: must be a non-empty string",
         });
         continue;
       }
 
-      const { created, updated } = await upsertGameSpec(catalog, spec);
+      validSpecs.push(spec);
 
-      if (created) {
-        result.created++;
-      } else if (updated) {
-        result.updated++;
-      } else {
-        result.skipped++;
+      // Use transform layer to get properly typed options
+      const transformed = transformGameSpec(spec);
+      if (transformed.options && transformed.options.length > 0) {
+        for (const opt of transformed.options) {
+          if (!allOptions.has(opt.name)) {
+            if (opt.type === "game") {
+              allOptions.set(opt.name, {
+                type: "game",
+                name: opt.name,
+                disp: opt.disp,
+                version: String(spec.version),
+                valueType: opt.valueType,
+                defaultValue: opt.defaultValue,
+                choices: opt.choices,
+              });
+            } else if (opt.type === "junk") {
+              // For junk and multiplier options, we still need the full v0.3 data
+              // since the transform layer only preserves basic fields
+              const junkData = spec.junk?.find((j) => j.name === opt.name);
+              if (junkData) {
+                allOptions.set(opt.name, {
+                  type: "junk",
+                  name: opt.name,
+                  disp: opt.disp,
+                  version: String(spec.version),
+                  sub_type: junkData.type as string | undefined,
+                  value: opt.value,
+                  seq: junkData.seq as number | undefined,
+                  scope: junkData.scope as string | undefined,
+                  icon: junkData.icon as string | undefined,
+                  show_in: junkData.show_in as string | undefined,
+                  based_on: junkData.based_on as string | undefined,
+                  limit: junkData.limit as string | undefined,
+                  calculation: junkData.calculation as string | undefined,
+                  logic: junkData.logic as string | undefined,
+                  better: junkData.better as string | undefined,
+                  score_to_par: junkData.score_to_par as string | undefined,
+                });
+              }
+            } else if (opt.type === "multiplier") {
+              const multData = spec.multipliers?.find(
+                (m) => m.name === opt.name,
+              );
+              if (multData) {
+                allOptions.set(opt.name, {
+                  type: "multiplier",
+                  name: opt.name,
+                  disp: opt.disp,
+                  version: String(spec.version),
+                  sub_type: multData.sub_type as string | undefined,
+                  value: opt.value,
+                  seq: multData.seq as number | undefined,
+                  icon: multData.icon as string | undefined,
+                  based_on: multData.based_on as string | undefined,
+                  scope: multData.scope as string | undefined,
+                  availability: multData.availability as string | undefined,
+                  override: multData.override as boolean | undefined,
+                });
+              }
+            }
+          }
+        }
       }
     } catch (error) {
       result.errors.push({
-        spec: spec.disp || spec.name || spec._key || "unknown",
+        item: `spec:${spec.disp || spec.name || spec._key || "unknown"}`,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  // Second pass: Import all collected options
+  console.log(`Importing ${allOptions.size} total options...`);
+  try {
+    const optionsResult = await upsertOptions(
+      catalog,
+      Array.from(allOptions.values()),
+    );
+    result.options = optionsResult;
+  } catch (error) {
+    result.errors.push({
+      item: "options:all",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+
+  // Third pass: Import specs with references to catalog options
+  const loadedCatalog = await catalog.$jazz.ensureLoaded({
+    resolve: { options: {} },
+  });
+
+  console.log(`Importing ${validSpecs.length} specs with option references...`);
+  for (const spec of validSpecs) {
+    try {
+      const { created, updated } = await upsertGameSpec(
+        catalog,
+        spec,
+        loadedCatalog.options || undefined,
+      );
+
+      if (created) {
+        result.specs.created++;
+      } else if (updated) {
+        result.specs.updated++;
+      } else {
+        result.specs.skipped++;
+      }
+    } catch (error) {
+      result.errors.push({
+        item: `spec:${spec.disp || spec.name || spec._key || "unknown"}`,
         error: error instanceof Error ? error.message : String(error),
       });
     }

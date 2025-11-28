@@ -9,7 +9,7 @@ export interface TransformedGameOption {
   name: string;
   disp: string;
   type: "game";
-  valueType: "boolean" | "number" | "select";
+  valueType: "bool" | "num" | "menu" | "text";
   choices?: Array<{ name: string; disp: string }>;
   defaultValue: string;
 }
@@ -28,6 +28,11 @@ export interface TransformedMultiplierOption {
   value: number;
 }
 
+export type TransformedOption =
+  | TransformedGameOption
+  | TransformedJunkOption
+  | TransformedMultiplierOption;
+
 export interface TransformedGameSpec {
   name: string;
   short: string;
@@ -37,7 +42,5 @@ export interface TransformedGameSpec {
   spec_type: "points" | "skins";
   min_players: number;
   location_type: "local" | "virtual";
-  gameOptions?: TransformedGameOption[];
-  junkOptions?: TransformedJunkOption[];
-  multiplierOptions?: TransformedMultiplierOption[];
+  options?: TransformedOption[];
 }

@@ -39,7 +39,7 @@ export function ScoringView({
   onChangeTeams,
 }: ScoringViewProps) {
   // Handicap mode - for now hardcoded to "full"
-  // TODO: Read from game.optionOverrides when we implement game options UI
+  // TODO: Read from game.options when we implement game options UI
   // Jazz's reactivity handles updates automatically - no useMemo needed
 
   return (
