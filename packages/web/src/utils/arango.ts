@@ -37,6 +37,7 @@ export async function testConnection(db: Database): Promise<boolean> {
 }
 
 export interface GameSpecV03 {
+  _key?: string;
   name: string;
   disp: string;
   version: number;
@@ -45,6 +46,7 @@ export interface GameSpecV03 {
   max_players: number;
   min_players: number;
   location_type: "local" | "virtual";
+  long_description?: string;
   teams?: boolean;
   team_size?: number;
   team_determination?: string;

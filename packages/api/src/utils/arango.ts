@@ -1,4 +1,5 @@
 import { Database } from "arangojs";
+import longDescriptionsData from "../../../api-0.3/util/arango/schema_updates/20221219.json";
 
 export interface ArangoConfig {
   url: string;
@@ -46,6 +47,7 @@ export interface GameSpecV03 {
   max_players: number;
   min_players: number;
   location_type: "local" | "virtual";
+  long_description?: string;
   teams?: boolean;
   team_size?: number;
   team_determination?: string;
@@ -78,8 +80,21 @@ export interface GameSpecV03 {
 export async function fetchGameSpecs(db: Database): Promise<GameSpecV03[]> {
   try {
     const cursor = await db.query("FOR spec IN gamespecs RETURN spec");
-    const specs = await cursor.all();
-    return specs as GameSpecV03[];
+    const specs = (await cursor.all()) as GameSpecV03[];
+
+    // Merge long_description data using _key from imported JSON
+    const longDescriptions = longDescriptionsData as Record<
+      string,
+      { long_description: string }
+    >;
+
+    for (const spec of specs) {
+      if (spec._key && longDescriptions[spec._key]) {
+        spec.long_description = longDescriptions[spec._key].long_description;
+      }
+    }
+
+    return specs;
   } catch (error) {
     console.error("Failed to fetch game specs:", error);
     throw error;

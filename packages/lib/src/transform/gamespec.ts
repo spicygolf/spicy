@@ -25,6 +25,11 @@ export function transformGameSpec(v03Spec: GameSpecV03): TransformedGameSpec {
     location_type: v03Spec.location_type,
   };
 
+  // Include long_description if present
+  if (v03Spec.long_description) {
+    transformed.long_description = v03Spec.long_description;
+  }
+
   const allOptions: TransformedOption[] = [];
 
   // Transform game options
