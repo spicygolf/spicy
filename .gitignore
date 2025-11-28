@@ -3,6 +3,3 @@ node_modules
 zz_*
 .env
 .vscode/mcp.json
-
-# Watchman temporary files
-.watchman-cookie-*
