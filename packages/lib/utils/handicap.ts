@@ -103,58 +103,30 @@ export function formatHandicapIndex(handicapIndex: string | null): string {
   return handicapIndex;
 }
 
+type HolesPlayed = "front9" | "back9" | "all18";
+
 function getRatings(
   tee: Tee,
-  holesPlayed: "front9" | "back9" | "all18",
+  holesPlayed: HolesPlayed,
 ): { rating: number | null; slope: number | null; bogey: number | null } {
   if (!tee?.ratings) {
     return { rating: null, slope: null, bogey: null };
   }
 
-  let ratings: { rating: number; slope: number; bogey: number } | null = null;
-
-  switch (holesPlayed) {
-    case "front9":
-      ratings = tee.ratings.front ?? null;
-      break;
-    case "back9":
-      ratings = tee.ratings.back ?? null;
-      break;
-    case "all18":
-      ratings = tee.ratings.total ?? null;
-      break;
-  }
+  const ratings =
+    holesPlayed === "front9"
+      ? tee.ratings.front
+      : holesPlayed === "back9"
+        ? tee.ratings.back
+        : tee.ratings.total;
 
   if (!ratings) {
     return { rating: null, slope: null, bogey: null };
   }
 
-  // Handle both old CoMap structure and new JSON structure
-  // Old structure: ratings might be a CoMap with $isLoaded property
-  // New structure: ratings is a plain object
-  // biome-ignore lint/suspicious/noExplicitAny: Handle legacy CoMap ratings
-  const ratingsObj = ratings as any;
-
-  // If this is a legacy CoMap that's not loaded, return null
-  if (ratingsObj.$isLoaded === false) {
-    return { rating: null, slope: null, bogey: null };
-  }
-
-  // Extract values - works for both CoMap and plain object
-  const ratingValue =
-    typeof ratingsObj.rating === "number" ? ratingsObj.rating : null;
-  const slopeValue =
-    typeof ratingsObj.slope === "number" ? ratingsObj.slope : null;
-  const bogeyValue =
-    typeof ratingsObj.bogey === "number" ? ratingsObj.bogey : null;
-
-  if (ratingValue === null || slopeValue === null || bogeyValue === null) {
-    return { rating: null, slope: null, bogey: null };
-  }
-
   return {
-    rating: Math.round((ratingValue + Number.EPSILON) * 10) / 10,
-    slope: slopeValue,
-    bogey: bogeyValue,
+    rating: Math.round((ratings.rating + Number.EPSILON) * 10) / 10,
+    slope: ratings.slope,
+    bogey: ratings.bogey,
   };
 }
