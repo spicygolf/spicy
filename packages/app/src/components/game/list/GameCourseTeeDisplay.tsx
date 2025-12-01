@@ -28,56 +28,72 @@ export function GameCourseTeeDisplay({ rounds }: GameCourseTeeDisplayProps) {
       const courseTeeStrings = new Set<string>();
       let hasIncompleteSelections = false;
 
-      for (const rtg of rounds) {
-        if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) {
-          continue;
-        }
-
-        const round = rtg.round;
-
-        // Check if course and tee fields exist
-        const hasCourse = round.$jazz.has("course");
-        const hasTee = round.$jazz.has("tee");
-
-        if (!hasCourse || !hasTee) {
-          hasIncompleteSelections = true;
-          continue;
-        }
-
-        // Load course and tee data asynchronously
-        try {
-          const loadedRound = await round.$jazz.ensureLoaded({
-            resolve: {
-              course: {
-                facility: true,
-              },
-              tee: true,
-            },
-          });
-
-          const course = loadedRound.course;
-          const tee = loadedRound.tee;
-
-          if (
-            !course?.$isLoaded ||
-            !tee?.$isLoaded ||
-            !course.name ||
-            !tee.name
-          ) {
-            hasIncompleteSelections = true;
-            continue;
+      // Load all rounds in parallel for better performance
+      const results = await Promise.all(
+        rounds.map(async (rtg) => {
+          if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) {
+            return null;
           }
 
-          // Build the display string: "SLUG • TeeName"
-          const facilityName = course.facility?.$isLoaded
-            ? course.facility.name
-            : undefined;
-          const slug = courseAcronym(course.name, facilityName);
-          const courseTeeString = `${slug} • ${tee.name}`;
-          courseTeeStrings.add(courseTeeString);
-        } catch {
-          // Error loading course/tee data
+          const round = rtg.round;
+
+          // Check if course and tee fields exist
+          const hasCourse = round.$jazz.has("course");
+          const hasTee = round.$jazz.has("tee");
+
+          if (!hasCourse || !hasTee) {
+            return { incomplete: true };
+          }
+
+          // Load course and tee data asynchronously
+          try {
+            const loadedRound = await round.$jazz.ensureLoaded({
+              resolve: {
+                course: {
+                  facility: true,
+                },
+                tee: true,
+              },
+            });
+
+            const course = loadedRound.course;
+            const tee = loadedRound.tee;
+
+            if (
+              !course?.$isLoaded ||
+              !tee?.$isLoaded ||
+              !course.name ||
+              !tee.name
+            ) {
+              return { incomplete: true };
+            }
+
+            // Build the display string: "SLUG • TeeName"
+            const facilityName = course.facility?.$isLoaded
+              ? course.facility.name
+              : undefined;
+            const slug = courseAcronym(course.name, facilityName);
+            const courseTeeString = `${slug} • ${tee.name}`;
+            return { courseTeeString };
+          } catch (error) {
+            // Error loading course/tee data
+            if (__DEV__) {
+              console.warn("Failed to load course/tee data:", error);
+            }
+            return { incomplete: true };
+          }
+        }),
+      );
+
+      // Process results
+      for (const result of results) {
+        if (result === null) {
+          continue;
+        }
+        if (result.incomplete) {
           hasIncompleteSelections = true;
+        } else if (result.courseTeeString) {
+          courseTeeStrings.add(result.courseTeeString);
         }
       }
 

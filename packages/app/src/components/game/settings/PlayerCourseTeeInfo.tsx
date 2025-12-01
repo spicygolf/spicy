@@ -45,7 +45,10 @@ export function PlayerCourseTeeInfo({ round }: PlayerCourseTeeInfoProps) {
         } else {
           setCourseTeeName(null);
         }
-      } catch {
+      } catch (error) {
+        if (__DEV__) {
+          console.warn("Failed to load course/tee data:", error);
+        }
         setCourseTeeName(null);
       }
     };
