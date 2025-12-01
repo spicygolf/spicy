@@ -100,11 +100,13 @@ export function useGame(
         gameHandicap: true,
         round: {
           playerId: true,
+          handicapIndex: true,
           tee: {
             holes: { $each: true },
-            ratings: { total: true, front: true, back: true },
           },
-          course: true,
+          // NOTE: course is NOT resolved here to avoid "value is unavailable" errors
+          // during progressive loading when rounds are added. Components that need
+          // course data should load it themselves asynchronously.
           scores: true,
         },
       },

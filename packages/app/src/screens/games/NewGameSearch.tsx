@@ -87,10 +87,12 @@ export function NewGameSearch({ viewMode }: NewGameSearchProps) {
             "specs",
             ListOfFavoriteSpecs.create([], { owner: me }),
           );
-          await favorites.$jazz.ensureLoaded({ resolve: { specs: true } });
         }
 
-        const specs = favorites.specs;
+        const loadedFavorites = await favorites.$jazz.ensureLoaded({
+          resolve: { specs: true },
+        });
+        const specs = loadedFavorites.specs;
         if (!specs?.$isLoaded) return;
 
         const existingIndex = specs.findIndex(

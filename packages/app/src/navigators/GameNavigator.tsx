@@ -19,7 +19,7 @@ type GameNavigatorProps = NativeStackScreenProps<
 
 type GameView = "leaderboard" | "scoring" | "settings";
 
-function getFacilityName(game: Game): string | undefined {
+async function getFacilityName(game: Game): Promise<string | undefined> {
   if (!game.rounds?.$isLoaded || game.rounds.length === 0) {
     return undefined;
   }
@@ -27,21 +27,35 @@ function getFacilityName(game: Game): string | undefined {
   let firstFacilityName: string | undefined;
 
   for (const rtg of game.rounds) {
-    if (!rtg?.$isLoaded) return undefined;
+    if (!rtg?.$isLoaded) continue;
 
     const round = rtg.round;
-    if (!round?.$isLoaded) return undefined;
+    if (!round?.$isLoaded) continue;
 
-    const course = round.course;
-    if (!course?.$isLoaded) return undefined;
+    // Check if course field exists before accessing
+    if (!round.$jazz.has("course")) continue;
 
-    const courseName = course.name;
+    // Load course data asynchronously
+    try {
+      const loadedRound = await round.$jazz.ensureLoaded({
+        resolve: {
+          course: true,
+        },
+      });
 
-    if (firstFacilityName === undefined) {
-      firstFacilityName = courseName;
-    } else if (firstFacilityName !== courseName) {
-      // Mismatch - return undefined
-      return undefined;
+      const course = loadedRound.course;
+      if (!course?.$isLoaded || !course.name) continue;
+
+      const courseName = course.name;
+
+      if (firstFacilityName === undefined) {
+        firstFacilityName = courseName;
+      } else if (firstFacilityName !== courseName) {
+        // Mismatch - return undefined
+        return undefined;
+      }
+    } catch {
+      // Error loading course, skip this round
     }
   }
 
@@ -63,19 +77,25 @@ export function GameNavigator({ route }: GameNavigatorProps) {
       start: true,
       rounds: {
         $each: {
-          round: {
-            course: {
-              name: true,
-            },
-          },
+          round: true,
         },
       },
     },
   });
 
   // Calculate facility name - show only if all players are on the same course
-  // CRITICAL: Don't use useMemo with Jazz data - just calculate directly
-  const facilityName = game?.$isLoaded ? getFacilityName(game) : undefined;
+  const [facilityName, setFacilityName] = useState<string | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    if (!game?.$isLoaded) {
+      setFacilityName(undefined);
+      return;
+    }
+
+    getFacilityName(game).then(setFacilityName);
+  }, [game]);
 
   // Update the current game ID in context - use gameId as stable dependency
   useEffect(() => {

@@ -112,52 +112,55 @@ export function TeeSelection({
           const isFavorited = isTeeInFavorites(teeIdStr, courseIdStr);
 
           return (
-            <TouchableOpacity
-              style={styles.teeItem}
-              onPress={() =>
-                onSelectTee(
-                  item.TeeSetRatingId,
-                  item.TeeSetRatingName,
-                  isFavorited,
-                )
-              }
-            >
-              <FavoriteButton
-                isFavorited={isFavorited}
-                onToggle={(newState) => {
-                  // When user clicks favorite, select the tee and mark it to be favorited
+            <View style={styles.teeItem}>
+              <TouchableOpacity
+                onPress={() =>
+                  onSelectTee(item.TeeSetRatingId, item.TeeSetRatingName, true)
+                }
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <FavoriteButton
+                  isFavorited={isFavorited}
+                  onToggle={() => {}}
+                  size={20}
+                  disabled
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.teeContent}
+                onPress={() =>
                   onSelectTee(
                     item.TeeSetRatingId,
                     item.TeeSetRatingName,
-                    newState,
-                  );
-                }}
-                size={20}
-              />
+                    isFavorited,
+                  )
+                }
+              >
+                <View style={styles.teeInfo}>
+                  <Text style={styles.teeName}>{item.TeeSetRatingName}</Text>
 
-              <View style={styles.teeInfo}>
-                <Text style={styles.teeName}>{item.TeeSetRatingName}</Text>
-
-                <View style={styles.teeDetails}>
-                  <Text style={styles.teeDetailText}>
-                    {item.Gender} • {item.TotalYardage} yards • Par{" "}
-                    {item.TotalPar}
-                  </Text>
-                  {ratingInfo && (
-                    <Text style={styles.teeRating}>
-                      Rating: {ratingInfo.rating} / Slope: {ratingInfo.slope}
+                  <View style={styles.teeDetails}>
+                    <Text style={styles.teeDetailText}>
+                      {item.Gender} • {item.TotalYardage} yards • Par{" "}
+                      {item.TotalPar}
                     </Text>
-                  )}
+                    {ratingInfo && (
+                      <Text style={styles.teeRating}>
+                        Rating: {ratingInfo.rating} / Slope: {ratingInfo.slope}
+                      </Text>
+                    )}
+                  </View>
                 </View>
-              </View>
 
-              <FontAwesome6
-                name="chevron-right"
-                iconStyle="solid"
-                size={16}
-                color="#999"
-              />
-            </TouchableOpacity>
+                <FontAwesome6
+                  name="chevron-right"
+                  iconStyle="solid"
+                  size={16}
+                  color="#999"
+                />
+              </TouchableOpacity>
+            </View>
           );
         }}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -214,13 +217,23 @@ const styles = StyleSheet.create((theme) => ({
   listContainer: {
     paddingBottom: theme.gap(2),
   },
+  separator: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginLeft: theme.gap(2),
+  },
   teeItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.background,
+  },
+  teeContent: {
+    flex: 1,
     paddingVertical: theme.gap(2),
     paddingRight: theme.gap(2),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: theme.colors.background,
   },
   teeInfo: {
     flex: 1,
@@ -229,9 +242,6 @@ const styles = StyleSheet.create((theme) => ({
   teeName: {
     fontSize: 16,
     fontWeight: "600",
-  },
-  favoriteButton: {
-    padding: theme.gap(0.5),
   },
   teeDetails: {
     marginTop: theme.gap(0.5),
@@ -244,10 +254,5 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 13,
     color: theme.colors.secondary,
     marginTop: theme.gap(0.25),
-  },
-  separator: {
-    height: 1,
-    backgroundColor: theme.colors.border,
-    marginLeft: theme.gap(2),
   },
 }));

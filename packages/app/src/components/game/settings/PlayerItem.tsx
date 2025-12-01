@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { Golfer } from "@spicygolf/ghin";
 import { useAccount } from "jazz-tools/react-native";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
@@ -57,8 +57,8 @@ export function PlayerItem({ item }: { item: Golfer }) {
       )) ||
     false;
 
-  // Check if player is in favorites
-  const isFavorited = useMemo(() => {
+  // Check if player is in favorites - direct access, no useMemo (Jazz is already reactive)
+  const isFavorited = (() => {
     if (
       !me?.$isLoaded ||
       !me.root?.$isLoaded ||
@@ -73,7 +73,7 @@ export function PlayerItem({ item }: { item: Golfer }) {
         fav.player?.$isLoaded &&
         fav.player.ghinId === item.ghin.toString(),
     );
-  }, [me, item.ghin]);
+  })();
 
   const handleToggleFavorite = useCallback(
     async (newState: boolean) => {

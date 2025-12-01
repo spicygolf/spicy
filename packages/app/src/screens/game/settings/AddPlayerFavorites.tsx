@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { TouchableOpacity, View } from "react-native";
 import DraggableFlatList, {
   type RenderItemParams,
@@ -44,7 +44,7 @@ export function AddPlayerFavorites() {
     },
   });
 
-  const favoritedPlayers = useMemo(() => {
+  const favoritedPlayers = (() => {
     if (
       !me?.$isLoaded ||
       !me.root?.$isLoaded ||
@@ -54,7 +54,7 @@ export function AddPlayerFavorites() {
       return [];
     }
     return me.root.favorites.players;
-  }, [me]);
+  })();
 
   const handleSelectPlayer = useCallback(
     async (favorite: FavoritePlayer) => {
@@ -62,13 +62,13 @@ export function AddPlayerFavorites() {
         return;
       }
 
-      await favorite.player.$jazz.ensureLoaded({
+      const loadedFavorite = await favorite.player.$jazz.ensureLoaded({
         resolve: {
           clubs: { $each: true },
         },
       });
 
-      const player = favorite.player;
+      const player = loadedFavorite;
       const result = await addPlayerToGame({
         name: player.name,
         short: player.short,

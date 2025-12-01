@@ -10,6 +10,13 @@ export const TeeHole = co.map({
 });
 export type TeeHole = co.loaded<typeof TeeHole>;
 
+// Rating data for a nine (front/back) or full 18
+const TeeRating = z.object({
+  rating: z.number(),
+  slope: z.number(),
+  bogey: z.number(),
+});
+
 export const Tee = co.map({
   id: z.string(),
   name: z.string(),
@@ -18,22 +25,11 @@ export const Tee = co.map({
   holesCount: z.number(),
   totalYardage: z.number(),
   totalMeters: z.number(),
-  ratings: co.map({
-    total: co.map({
-      rating: z.number(),
-      slope: z.number(),
-      bogey: z.number(),
-    }),
-    front: co.map({
-      rating: z.number(),
-      slope: z.number(),
-      bogey: z.number(),
-    }),
-    back: co.map({
-      rating: z.number(),
-      slope: z.number(),
-      bogey: z.number(),
-    }),
+  // Ratings stored as plain JSON - static data from GHIN, never edited independently
+  ratings: z.object({
+    total: TeeRating,
+    front: TeeRating,
+    back: TeeRating,
   }),
 });
 export type Tee = co.loaded<typeof Tee>;

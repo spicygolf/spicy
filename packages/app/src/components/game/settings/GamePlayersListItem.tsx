@@ -1,43 +1,16 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { memo } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Player, Round } from "spicylib/schema";
-import { courseAcronym } from "spicylib/utils";
+import type { Player } from "spicylib/schema";
 import { Handicaps } from "@/components/handicap/Handicaps";
 import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Text } from "@/ui";
+import { PlayerCourseTeeInfo } from "./PlayerCourseTeeInfo";
 import { PlayerDelete } from "./PlayerDelete";
 
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
-
-const PlayerCourseTeeInfo = memo(({ round }: { round: Round | null }) => {
-  if (!round?.$isLoaded) return null;
-
-  try {
-    if (round.$jazz.has("course") && round.$jazz.has("tee")) {
-      const course = round.course;
-      const tee = round.tee;
-
-      if (course?.$isLoaded && tee?.$isLoaded && course.name && tee.name) {
-        const facilityName = course.facility?.$isLoaded
-          ? course.facility.name
-          : undefined;
-        return (
-          <Text style={styles.player_tees}>
-            {courseAcronym(course.name, facilityName)} • {tee.name}
-          </Text>
-        );
-      }
-    }
-  } catch {
-    // Course/tee not loaded yet
-  }
-
-  return null;
-});
 
 export function GamePlayersListItem({ player }: { player: Player | null }) {
   const navigation = useNavigation<NavigationProp>();
@@ -53,6 +26,7 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
             },
             tee: {
               name: true,
+              ratings: true,
             },
           },
           handicapIndex: true,
@@ -65,28 +39,30 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
 
   if (!player?.$isLoaded) return null;
 
-  const hasRounds = player.rounds?.$isLoaded && player.rounds.length > 0;
-  const firstRound = hasRounds ? player.rounds[0] : null;
-
+  // Find the round for this player in this game
   const roundToGame =
-    game?.$isLoaded && game.rounds?.$isLoaded && firstRound?.$isLoaded
+    game?.$isLoaded && game.rounds?.$isLoaded
       ? game.rounds.find(
           (rtg) =>
             rtg?.$isLoaded &&
             rtg.round?.$isLoaded &&
-            rtg.round.$jazz.id === firstRound.$jazz.id,
+            rtg.round.playerId === player.$jazz.id,
         )
       : undefined;
 
-  // Check if the round attached to THIS game has course/tee selected
   const gameRound = roundToGame?.$isLoaded ? roundToGame.round : null;
+  const hasRounds = !!roundToGame;
+
+  // Check if the round attached to THIS game has course/tee selected
   const hasSelectedCourseTee =
     gameRound?.$isLoaded &&
     gameRound.$jazz.has("course") &&
     gameRound.$jazz.has("tee");
 
   const needsCourseAndTee =
-    hasRounds && gameRound?.$isLoaded && (!gameRound.course || !gameRound.tee);
+    hasRounds &&
+    gameRound?.$isLoaded &&
+    (!gameRound.$jazz.has("course") || !gameRound.$jazz.has("tee"));
 
   let subtitle = "";
   let onPress: (() => void) | undefined;
@@ -136,7 +112,7 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
       <View style={styles.handicaps}>
         <Handicaps
           player={player}
-          round={roundToGame?.$isLoaded ? roundToGame.round : firstRound}
+          round={gameRound}
           roundToGame={roundToGame}
           onPress={
             roundToGame?.$isLoaded

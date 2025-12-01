@@ -48,7 +48,8 @@ export function useCurrentHoleScores(options: UseCurrentHoleScoresOptions) {
       if (!value.$isLoaded) {
         return value.$jazz.loadingState === "loading" ? undefined : null;
       }
-      if (!value.round?.$isLoaded) return undefined;
+      if (!value.$jazz.has("round") || !value.round?.$isLoaded)
+        return undefined;
       return value;
     },
   });

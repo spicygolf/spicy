@@ -55,7 +55,7 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
       if (!rtg?.$isLoaded) return false;
       const round = rtg.round;
       if (!round?.$isLoaded) return false;
-      return round.course && round.tee;
+      return round.$jazz.has("course") && round.$jazz.has("tee");
     });
 
     // Only proceed if all players have selections
@@ -63,7 +63,7 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
       const firstRoundToGame = game.rounds[0];
       if (firstRoundToGame?.$isLoaded) {
         const round = firstRoundToGame.round;
-        if (round?.$isLoaded) {
+        if (round?.$isLoaded && round.$jazz.has("tee")) {
           const tee = round.tee;
           if (tee?.$isLoaded && tee.holes?.$isLoaded) {
             const hole = tee.holes.find(

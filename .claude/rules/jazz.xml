@@ -213,6 +213,85 @@
     </instructions>
   </rule>
 
+  <rule severity="CRITICAL" enforcement="BLOCKING">
+    <name>Keep High-Level Subscriptions Shallow</name>
+    <description>High-level components that stay mounted (navigators, screens) should NOT deeply resolve nested objects in subscriptions. Let child components load their own data.</description>
+    <rationale>Deep resolution in high-level subscriptions causes "value is unavailable" errors during progressive loading. When a parent component subscribes deeply (e.g., course.name, tee.holes), it tries to access partially loaded nested data during Jazz's progressive loading cycle, triggering errors when toString() is called on CoValueLoadingState.</rationale>
+    <mustAcknowledge>true</mustAcknowledge>
+    <examples>
+      <example type="wrong">
+        // High-level screen resolving deeply - CAUSES ERRORS
+        const { game } = useGame(undefined, {
+          resolve: {
+            players: {
+              $each: {
+                rounds: {
+                  $each: {
+                    course: { name: true },  // Deep resolution in high-level subscription
+                    tee: { name: true, ratings: { total: true } },
+                  },
+                },
+              },
+            },
+          },
+        });
+      </example>
+      <example type="correct">
+        // High-level screen stays shallow
+        const { game } = useGame(undefined, {
+          resolve: {
+            players: {
+              $each: {
+                rounds: {
+                  $each: {
+                    // Don't resolve course/tee here
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        // Child component loads its own data
+        function RoundCourseTeeName({ round }: { round: MaybeLoaded&lt;Round&gt; | null }) {
+          const [courseTeeName, setCourseTeeName] = useState&lt;string&gt;("Loading...");
+
+          useEffect(() => {
+            if (!round?.$isLoaded) return;
+
+            const loadData = async () => {
+              if (round.$jazz.has("course") &amp;&amp; round.$jazz.has("tee")) {
+                await round.$jazz.ensureLoaded({
+                  resolve: {
+                    course: true,
+                    tee: true,
+                  },
+                });
+                setCourseTeeName(`${round.course?.name} • ${round.tee?.name}`);
+              }
+            };
+            loadData();
+          }, [round]);
+
+          return &lt;Text&gt;{courseTeeName}&lt;/Text&gt;;
+        }
+      </example>
+    </examples>
+    <pattern>
+      <principle>High-level components: Keep subscriptions shallow</principle>
+      <principle>Child components: Load their own deep data asynchronously</principle>
+      <principle>Use useEffect + ensureLoaded in child components</principle>
+      <principle>Check $jazz.has("field") before loading optional nested fields</principle>
+    </pattern>
+    <instructions>
+      - High-level components (navigators, screens) should only resolve shallow data
+      - Never resolve nested objects deeply (course.name, tee.holes) in high-level subscriptions
+      - Create child components that load their own nested data using useEffect + ensureLoaded
+      - This prevents accessing partially loaded data during progressive loading
+      - Pattern: Parent subscribes shallow, children load deep asynchronously
+    </instructions>
+  </rule>
+
   <rule severity="HIGH" enforcement="STRICT">
     <name>Modify Entities from Authoritative Source</name>
     <description>Always modify entities from the authoritative source (e.g., game context), not from stale references.</description>

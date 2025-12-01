@@ -41,11 +41,6 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
           gameHandicap: true,
           round: {
             playerId: true,
-            tee: {
-              holes: { $each: true },
-              ratings: { total: true, front: true, back: true },
-            },
-            course: true,
             scores: true,
           },
         },
@@ -115,7 +110,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
         if (!rtg?.$isLoaded) return false;
         const round = rtg.round;
         if (!round?.$isLoaded) return false;
-        return !round.course || !round.tee;
+        return !round.$jazz.has("course") || !round.$jazz.has("tee");
       });
 
     return (

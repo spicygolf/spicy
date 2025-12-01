@@ -17,9 +17,13 @@ export function GamePlayersList() {
         $each: {
           name: true,
           handicap: true,
-          rounds: true,
         },
       },
+    },
+    select: (g) => {
+      if (!g.$isLoaded) return null;
+      if (!g.players?.$isLoaded) return null;
+      return g;
     },
   });
   const navigation = useNavigation<NavigationProp>();

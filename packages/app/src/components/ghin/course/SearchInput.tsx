@@ -24,6 +24,7 @@ export function GhinCourseSearchInput() {
             onChangeText={(value) => handleChange({ ...state, name: value })}
             autoCapitalize="words"
             placeholder="Enter course name"
+            autoFocus={true}
           />
         </View>
       </View>

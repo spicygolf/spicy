@@ -5,7 +5,13 @@
  */
 
 // Get JAZZ_WORKER_ACCOUNT from environment
-// React Native: process.env.JAZZ_WORKER_ACCOUNT
+// React Native: Set via setJazzWorkerAccount() after fetching from API
 // Web: Will be replaced at build time by Vite
-export const JAZZ_WORKER_ACCOUNT =
+let _jazzWorkerAccount: string | undefined =
   typeof process !== "undefined" ? process.env.JAZZ_WORKER_ACCOUNT : undefined;
+
+export const JAZZ_WORKER_ACCOUNT = () => _jazzWorkerAccount;
+
+export function setJazzWorkerAccount(account: string): void {
+  _jazzWorkerAccount = account;
+}

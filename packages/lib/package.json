@@ -6,7 +6,8 @@
     "./types": "./types/index.ts",
     "./utils": "./utils/index.ts",
     "./schema": "./schema/index.ts",
-    "./transform": "./src/transform/index.ts"
+    "./transform": "./src/transform/index.ts",
+    "./config/env": "./config/env.ts"
   },
   "scripts": {
     "clean": "del-cli node_modules",

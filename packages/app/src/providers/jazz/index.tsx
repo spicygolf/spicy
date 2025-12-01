@@ -1,7 +1,9 @@
 import { AuthProvider } from "jazz-tools/better-auth/auth/react";
 import { JazzReactNativeProvider } from "jazz-tools/react-native";
 import type React from "react";
+import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { setJazzWorkerAccount } from "spicylib/config/env";
 import { PlayerAccount } from "spicylib/schema";
 import { useApi } from "@/hooks";
 import { useJazzCredentials } from "@/hooks/useJazzCredentials";
@@ -11,6 +13,13 @@ import { Text } from "@/ui";
 export function JazzAndAuth({ children }: { children: React.ReactNode }) {
   const { data: credentials, isLoading, error } = useJazzCredentials();
   const _api = useApi();
+
+  // Set worker account when credentials are loaded
+  useEffect(() => {
+    if (credentials?.workerAccount) {
+      setJazzWorkerAccount(credentials.workerAccount);
+    }
+  }, [credentials?.workerAccount]);
 
   if (error) {
     return (
