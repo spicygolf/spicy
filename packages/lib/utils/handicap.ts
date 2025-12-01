@@ -124,6 +124,15 @@ function getRatings(
     return { rating: null, slope: null, bogey: null };
   }
 
+  // Check if the rating object has the required properties (not just $isLoaded: false)
+  if (
+    typeof ratings.rating !== "number" ||
+    typeof ratings.slope !== "number" ||
+    typeof ratings.bogey !== "number"
+  ) {
+    return { rating: null, slope: null, bogey: null };
+  }
+
   return {
     rating: Math.round((ratings.rating + Number.EPSILON) * 10) / 10,
     slope: ratings.slope,
