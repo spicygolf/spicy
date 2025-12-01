@@ -7,7 +7,6 @@ import {
   calculatePops,
   getEffectiveHandicap,
   getGrossScore,
-  getPops,
 } from "spicylib/utils";
 import {
   HoleHeader,
@@ -77,15 +76,16 @@ export function ScoringView({
 
                 // Get score for current hole (use string key for MapOfScores)
                 const holeKey = String(currentHoleIndex);
+                const scoreObj = round.scores?.$isLoaded
+                  ? round.scores[holeKey]
+                  : null;
+                // Check if score AND its values list are loaded
                 const score =
-                  round.scores?.$isLoaded && round.scores[holeKey]?.$isLoaded
-                    ? (round.scores[holeKey] as Score)
+                  scoreObj?.$isLoaded && scoreObj.values?.$isLoaded
+                    ? (scoreObj as Score)
                     : null;
 
                 const gross = getGrossScore(score);
-                const pops = getPops(score);
-                const net =
-                  gross !== null ? calculateNetScore(gross, pops) : null;
 
                 // Calculate pops based on effective handicap
                 // Priority: gameHandicap > courseHandicap > calculated from tee
@@ -122,6 +122,12 @@ export function ScoringView({
                   effectiveHandicap,
                   holeInfo.handicap,
                 );
+
+                // Calculate net using the calculated pops (not stored pops from score)
+                const net =
+                  gross !== null
+                    ? calculateNetScore(gross, calculatedPops)
+                    : null;
 
                 return (
                   <PlayerScoreRow
