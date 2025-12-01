@@ -1,7 +1,7 @@
 import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
 import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
@@ -59,7 +59,10 @@ export function SelectCourseSearch({ route, navigation }: Props) {
       : null;
 
   const round =
-    roundId && player?.$isLoaded && player.rounds?.$isLoaded
+    roundId &&
+    player?.$isLoaded &&
+    player.$jazz.has("rounds") &&
+    player.rounds?.$isLoaded
       ? player.rounds.find(
           (r: MaybeLoaded<(typeof player.rounds)[0]>) =>
             r?.$isLoaded && r.$jazz.id === roundId,
@@ -73,221 +76,209 @@ export function SelectCourseSearch({ route, navigation }: Props) {
     course_id: selectedCourseId || 0,
   });
 
-  const handleSelectCourse = useCallback((courseId: number) => {
+  const handleSelectCourse = (courseId: number) => {
     setSelectedCourseId(courseId);
-  }, []);
+  };
 
-  const handleBack = useCallback(() => {
+  const handleBack = () => {
     setSelectedCourseId(null);
-  }, []);
+  };
 
-  const handleSelectTee = useCallback(
-    async (teeId: number, _teeName: string, shouldFavorite: boolean) => {
-      if (!round?.$isLoaded || !selectedCourseId || !courseDetailsQuery.data) {
-        return;
-      }
+  const handleSelectTee = async (
+    teeId: number,
+    _teeName: string,
+    shouldFavorite: boolean,
+  ) => {
+    if (!round?.$isLoaded || !selectedCourseId || !courseDetailsQuery.data) {
+      return;
+    }
 
-      const courseData = courseDetailsQuery.data;
-      const teeData = courseData.TeeSets.find(
-        (t) => t.TeeSetRatingId === teeId,
-      );
+    const courseData = courseDetailsQuery.data;
+    const teeData = courseData.TeeSets.find((t) => t.TeeSetRatingId === teeId);
 
-      if (!teeData) {
-        return;
-      }
+    if (!teeData) {
+      return;
+    }
 
-      const group = round.$jazz.owner;
+    const group = round.$jazz.owner;
 
-      const facilityData = courseData.Facility;
-      const facility = facilityData
-        ? Facility.create(
-            {
-              id: facilityData.FacilityId.toString(),
-              status: facilityData.FacilityStatus,
-              name: facilityData.FacilityName,
-              number: facilityData.FacilityNumber?.toString(),
-              geolocation: {
-                formatted_address:
-                  facilityData.GeoLocationFormattedAddress || "",
-                latitude: facilityData.GeoLocationLatitude || 0,
-                longitude: facilityData.GeoLocationLongitude || 0,
-              },
-            },
-            { owner: group },
-          )
-        : undefined;
-
-      const holes = teeData.Holes.map((h) =>
-        TeeHole.create(
+    const facilityData = courseData.Facility;
+    const facility = facilityData
+      ? Facility.create(
           {
-            id: h.HoleId.toString(),
-            number: h.Number,
-            par: h.Par,
-            yards: h.Length,
-            meters: Math.round(h.Length * 0.9144),
-            handicap: h.Allocation,
+            id: facilityData.FacilityId.toString(),
+            status: facilityData.FacilityStatus,
+            name: facilityData.FacilityName,
+            number: facilityData.FacilityNumber?.toString(),
+            geolocation: {
+              formatted_address: facilityData.GeoLocationFormattedAddress || "",
+              latitude: facilityData.GeoLocationLatitude || 0,
+              longitude: facilityData.GeoLocationLongitude || 0,
+            },
           },
           { owner: group },
-        ),
-      );
+        )
+      : undefined;
 
-      const ratings = {
-        total: {
-          rating: 0,
-          slope: 0,
-          bogey: 0,
-        },
-        front: {
-          rating: 0,
-          slope: 0,
-          bogey: 0,
-        },
-        back: {
-          rating: 0,
-          slope: 0,
-          bogey: 0,
-        },
-      };
-
-      teeData.Ratings.forEach((r) => {
-        const ratingKey = r.RatingType.toLowerCase() as
-          | "total"
-          | "front"
-          | "back";
-        if (ratingKey in ratings) {
-          ratings[ratingKey] = {
-            rating: r.CourseRating,
-            slope: r.SlopeRating,
-            bogey: r.BogeyRating,
-          };
-        }
-      });
-
-      const upsertedTee = await Tee.upsertUnique({
-        value: {
-          id: teeData.TeeSetRatingId.toString(),
-          name: teeData.TeeSetRatingName,
-          gender: normalizeGender(teeData.Gender),
-          holes,
-          holesCount: teeData.HolesNumber,
-          totalYardage: teeData.TotalYardage,
-          totalMeters: teeData.TotalMeters,
-          ratings,
-        },
-        unique: teeData.TeeSetRatingId.toString(),
-        owner: group,
-      });
-
-      if (!upsertedTee.$isLoaded) {
-        console.error("Failed to upsert tee");
-        return;
-      }
-
-      const tee = await upsertedTee.$jazz.ensureLoaded({
-        resolve: { holes: { $each: true } },
-      });
-
-      const course = Course.create(
+    const holes = teeData.Holes.map((h) =>
+      TeeHole.create(
         {
-          id: courseData.CourseId.toString(),
-          status: courseData.CourseStatus,
-          name: courseData.CourseName,
-          number: courseData.CourseNumber?.toString(),
-          city: courseData.CourseCity,
-          state: courseData.CourseState,
-          facility,
-          season: courseData.Season
-            ? {
-                name: courseData.Season.SeasonName || undefined,
-                start_date: courseData.Season.SeasonStartDate || undefined,
-                end_date: courseData.Season.SeasonEndDate || undefined,
-                all_year: courseData.Season.IsAllYear,
-              }
-            : {
-                name: undefined,
-                start_date: undefined,
-                end_date: undefined,
-                all_year: true,
-              },
-          default_tee: {
-            male: player?.$isLoaded && player.gender === "M" ? tee : undefined,
-            female:
-              player?.$isLoaded && player.gender === "F" ? tee : undefined,
-          },
-          tees: [tee],
+          id: h.HoleId.toString(),
+          number: h.Number,
+          par: h.Par,
+          yards: h.Length,
+          meters: Math.round(h.Length * 0.9144),
+          handicap: h.Allocation,
         },
         { owner: group },
-      );
+      ),
+    );
 
-      round.$jazz.set("course", course);
-      round.$jazz.set("tee", tee);
+    const ratings = {
+      total: { rating: 0, slope: 0, bogey: 0 },
+      front: { rating: 0, slope: 0, bogey: 0 },
+      back: { rating: 0, slope: 0, bogey: 0 },
+    };
 
-      // Handle favoriting if requested
-      if (shouldFavorite && me?.$isLoaded && me.root?.$isLoaded) {
-        const root = me.root;
-        const loaded = await root.$jazz.ensureLoaded({
-          resolve: { favorites: { courseTees: { $each: true } } },
-        });
+    teeData.Ratings.forEach((r) => {
+      const ratingKey = r.RatingType.toLowerCase() as
+        | "total"
+        | "front"
+        | "back";
+      if (ratingKey in ratings) {
+        ratings[ratingKey] = {
+          rating: r.CourseRating,
+          slope: r.SlopeRating,
+          bogey: r.BogeyRating,
+        };
+      }
+    });
 
-        // Initialize favorites if not exists
-        if (!loaded.$jazz.has("favorites")) {
-          const favoritesGroup = root.$jazz.owner;
-          const newFavorites = Favorites.create(
-            {
-              courseTees: ListOfCourseTees.create([], {
-                owner: favoritesGroup,
-              }),
+    const upsertedTee = await Tee.upsertUnique({
+      value: {
+        id: teeData.TeeSetRatingId.toString(),
+        name: teeData.TeeSetRatingName,
+        gender: normalizeGender(teeData.Gender),
+        holes,
+        holesCount: teeData.HolesNumber,
+        totalYardage: teeData.TotalYardage,
+        totalMeters: teeData.TotalMeters,
+        ratings,
+      },
+      unique: teeData.TeeSetRatingId.toString(),
+      owner: group,
+    });
+
+    if (!upsertedTee.$isLoaded) {
+      return;
+    }
+
+    const tee = await upsertedTee.$jazz.ensureLoaded({
+      resolve: { holes: { $each: true } },
+    });
+
+    const createdCourse = Course.create(
+      {
+        id: courseData.CourseId.toString(),
+        status: courseData.CourseStatus,
+        name: courseData.CourseName,
+        number: courseData.CourseNumber?.toString(),
+        city: courseData.CourseCity,
+        state: courseData.CourseState,
+        facility,
+        season: courseData.Season
+          ? {
+              name: courseData.Season.SeasonName || undefined,
+              start_date: courseData.Season.SeasonStartDate || undefined,
+              end_date: courseData.Season.SeasonEndDate || undefined,
+              all_year: courseData.Season.IsAllYear,
+            }
+          : {
+              name: undefined,
+              start_date: undefined,
+              end_date: undefined,
+              all_year: true,
             },
-            { owner: favoritesGroup },
+        default_tee: {
+          male: undefined,
+          female: undefined,
+        },
+        tees: [],
+      },
+      { owner: group },
+    );
+
+    const course = await createdCourse.$jazz.ensureLoaded({ resolve: true });
+
+    if (!course.$isLoaded || !round.$isLoaded) {
+      return;
+    }
+
+    round.$jazz.set("course", course);
+    round.$jazz.set("tee", tee);
+
+    // Handle favoriting if requested
+    if (shouldFavorite && me?.$isLoaded && me.root?.$isLoaded) {
+      const root = me.root;
+      const loaded = await root.$jazz.ensureLoaded({
+        resolve: { favorites: { courseTees: { $each: true } } },
+      });
+
+      if (!loaded.$jazz.has("favorites")) {
+        const favoritesGroup = root.$jazz.owner;
+        const newFavorites = Favorites.create(
+          {
+            courseTees: ListOfCourseTees.create([], {
+              owner: favoritesGroup,
+            }),
+          },
+          { owner: favoritesGroup },
+        );
+        loaded.$jazz.set("favorites", newFavorites);
+      }
+
+      const favorites = loaded.favorites;
+      if (favorites?.$isLoaded) {
+        if (!favorites.$jazz.has("courseTees")) {
+          const favoritesGroup = favorites.$jazz.owner;
+          favorites.$jazz.set(
+            "courseTees",
+            ListOfCourseTees.create([], { owner: favoritesGroup }),
           );
-          loaded.$jazz.set("favorites", newFavorites);
         }
 
-        const favorites = loaded.favorites;
-        if (favorites?.$isLoaded) {
-          // Ensure courseTees list is initialized
-          if (!favorites.$jazz.has("courseTees")) {
-            const favoritesGroup = favorites.$jazz.owner;
-            favorites.$jazz.set(
-              "courseTees",
-              ListOfCourseTees.create([], { owner: favoritesGroup }),
+        const courseTees = favorites.courseTees;
+        if (courseTees?.$isLoaded) {
+          const existingIndex = courseTees.findIndex((fav) => {
+            return (
+              fav?.$isLoaded &&
+              fav.$jazz.has("tee") &&
+              fav.$jazz.has("course") &&
+              fav.tee?.$isLoaded &&
+              fav.course?.$isLoaded &&
+              fav.tee.id === tee.id &&
+              fav.course.id === course.id
             );
-          }
+          });
 
-          const courseTees = favorites.courseTees;
-          if (courseTees?.$isLoaded) {
-            // Check if already favorited
-            const existingIndex = courseTees.findIndex((fav) => {
-              return (
-                fav?.$isLoaded &&
-                fav.tee?.$isLoaded &&
-                fav.course?.$isLoaded &&
-                fav.tee.id === tee.id &&
-                fav.course.id === course.id
-              );
-            });
-
-            if (existingIndex < 0) {
-              // Add to favorites
-              const favoritesGroup = courseTees.$jazz.owner;
-              const newFavorite = CourseTee.create(
-                {
-                  course,
-                  tee,
-                  addedAt: new Date(),
-                },
-                { owner: favoritesGroup },
-              );
-              courseTees.$jazz.push(newFavorite);
-            }
+          if (existingIndex < 0) {
+            const favoritesGroup = courseTees.$jazz.owner;
+            const newFavorite = CourseTee.create(
+              {
+                course,
+                tee,
+                addedAt: new Date(),
+              },
+              { owner: favoritesGroup },
+            );
+            courseTees.$jazz.push(newFavorite);
           }
         }
       }
+    }
 
-      navigation.getParent()?.goBack();
-    },
-    [round, selectedCourseId, courseDetailsQuery.data, player, navigation, me],
-  );
+    navigation.getParent()?.goBack();
+  };
 
   if (!player) {
     return (

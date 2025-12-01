@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
@@ -17,6 +17,7 @@ import {
   isSameDay,
 } from "spicylib/utils";
 import { Back } from "@/components/Back";
+import { RoundCourseTeeName } from "@/components/game/settings/RoundCourseTeeName";
 import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Screen, Text } from "@/ui";
@@ -40,8 +41,6 @@ export function AddRoundToGame({ route, navigation }: Props) {
               createdAt: true,
               playerId: true,
               handicapIndex: true,
-              course: { name: true },
-              tee: { name: true, ratings: { total: true } },
             },
           },
         },
@@ -51,8 +50,8 @@ export function AddRoundToGame({ route, navigation }: Props) {
   });
   const [isCreating, setIsCreating] = useState(false);
 
-  // Get the player from the game context
-  const player = useMemo(() => {
+  // Get the player from the game context - direct access (Jazz is reactive)
+  const player = (() => {
     if (!game?.$isLoaded || !game.players?.$isLoaded) {
       return null;
     }
@@ -63,18 +62,18 @@ export function AddRoundToGame({ route, navigation }: Props) {
           p?.$isLoaded && p.$jazz.id === playerId,
       ) || null
     );
-  }, [game, playerId]);
+  })();
 
   const gameDate = game?.$isLoaded ? game.start : new Date();
 
-  const roundsForToday = useMemo(() => {
+  const roundsForToday = (() => {
     if (!player?.$isLoaded || !player.rounds?.$isLoaded) return [];
 
     return player.rounds.filter((round) => {
       if (!round?.$isLoaded) return false;
       return isSameDay(round.createdAt, gameDate);
     });
-  }, [player, gameDate]);
+  })();
 
   if (!player) {
     return null;
@@ -126,27 +125,30 @@ export function AddRoundToGame({ route, navigation }: Props) {
     setIsCreating(false);
   }
 
-  function addRoundToGame(round: RoundType) {
+  async function addRoundToGame(round: RoundType) {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded) return;
 
     const group = game.rounds.$jazz.owner;
 
     // Calculate course handicap if we have the necessary data
     let courseHandicap: number | undefined;
-    if (
-      round.$isLoaded &&
-      round.tee?.$isLoaded &&
-      round.tee.ratings?.$isLoaded &&
-      round.tee.ratings.total?.$isLoaded &&
-      round.handicapIndex
-    ) {
-      const calculated = calculateCourseHandicap({
-        handicapIndex: round.handicapIndex,
-        tee: round.tee,
-        holesPlayed: "all18",
+    if (round.$isLoaded && round.$jazz.has("tee") && round.handicapIndex) {
+      // Load the tee data to calculate handicap
+      const loadedRound = await round.$jazz.ensureLoaded({
+        resolve: {
+          tee: true,
+        },
       });
-      // calculateCourseHandicap returns number | null, but we only want number | undefined
-      courseHandicap = calculated !== null ? calculated : undefined;
+
+      if (loadedRound.tee?.$isLoaded && loadedRound.tee.ratings?.total) {
+        const calculated = calculateCourseHandicap({
+          handicapIndex: loadedRound.handicapIndex,
+          tee: loadedRound.tee,
+          holesPlayed: "all18",
+        });
+        // calculateCourseHandicap returns number | null, but we only want number | undefined
+        courseHandicap = calculated !== null ? calculated : undefined;
+      }
     }
 
     const roundToGame = RoundToGame.create(
@@ -218,15 +220,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
                     <Text style={styles.roundText}>
                       {roundDate} {roundTime}
                     </Text>
-                    <Text style={styles.roundSubtext}>
-                      {item?.$isLoaded && item.course?.$isLoaded
-                        ? item.course.name
-                        : "No Course"}{" "}
-                      •{" "}
-                      {item?.$isLoaded && item.tee?.$isLoaded
-                        ? item.tee.name
-                        : "No Tee"}
-                    </Text>
+                    <RoundCourseTeeName round={item} />
                   </View>
                 </TouchableOpacity>
               );

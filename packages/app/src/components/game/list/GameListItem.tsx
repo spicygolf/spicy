@@ -4,18 +4,13 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
-import { useGameCourseName } from "@/hooks/useGameCourseName";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
 import { Text } from "@/ui";
+import { GameCourseTeeDisplay } from "./GameCourseTeeDisplay";
 
 export function GameListItem({ game }: { game: Game | null | undefined }) {
   const navigation =
     useNavigation<NativeStackNavigationProp<GamesNavigatorParamList>>();
-
-  // Load course name - TODO: optimize this to prevent re-render loops
-  const courseName = useGameCourseName(
-    game?.$isLoaded ? game.rounds?.$jazz.id : undefined,
-  );
 
   if (!game?.$isLoaded) return null;
 
@@ -55,7 +50,7 @@ export function GameListItem({ game }: { game: Game | null | undefined }) {
         <Text style={styles.gameDateTime}>
           {game.start.toLocaleDateString()} - {game.start.toLocaleTimeString()}
         </Text>
-        {courseName && <Text style={styles.courseName}>{courseName}</Text>}
+        <GameCourseTeeDisplay rounds={game.rounds} />
         {playerNames && <Text style={styles.playerNames}>{playerNames}</Text>}
       </View>
       <TouchableOpacity onPress={handleSettingsPress} style={styles.actions}>
@@ -87,12 +82,6 @@ const styles = StyleSheet.create((theme) => ({
   gameDateTime: {
     fontSize: 14,
     color: theme.colors.secondary,
-  },
-  courseName: {
-    fontSize: 13,
-    color: theme.colors.secondary,
-    marginTop: theme.gap(0.25),
-    fontStyle: "italic",
   },
   playerNames: {
     fontSize: 12,

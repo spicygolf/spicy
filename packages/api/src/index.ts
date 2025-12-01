@@ -6,8 +6,7 @@ import type {
 } from "@spicygolf/ghin";
 import type { Context } from "elysia";
 import { Elysia } from "elysia";
-import type { co } from "jazz-tools";
-import { Group } from "jazz-tools";
+import type { co, Group } from "jazz-tools";
 import { PlayerAccount } from "spicylib/schema";
 import { getCountries } from "./countries";
 import { getCourseDetails, searchCourses } from "./courses";

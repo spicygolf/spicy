@@ -1,5 +1,4 @@
 import type { MaybeLoaded } from "jazz-tools";
-import { useMemo } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player, Round, RoundToGame } from "spicylib/schema";
@@ -14,31 +13,36 @@ interface Props {
 }
 
 export function Handicaps({ player, round, roundToGame, onPress }: Props) {
-  const calculatedCourseHandicap = useMemo(() => {
+  // Calculate course handicap directly - no useState or useEffect needed
+  // Jazz is reactive, so this will recalculate when round or roundToGame changes
+  const calculatedCourseHandicap = (() => {
     if (!roundToGame?.$isLoaded || !round?.$isLoaded) return null;
-    if (!round.tee?.$isLoaded || !round.tee.ratings?.$isLoaded) return null;
-    if (!round.tee.ratings.total?.$isLoaded) return null;
+    if (!round.$jazz.has("tee")) return null;
+
+    const tee = round.tee;
+    if (!tee?.$isLoaded) return null;
+    if (!tee.ratings?.total) return null;
 
     const handicapIndex = roundToGame.handicapIndex || round.handicapIndex;
     if (!handicapIndex) return null;
 
     return calculateCourseHandicap({
       handicapIndex,
-      tee: round.tee,
+      tee,
       holesPlayed: "all18",
     });
-  }, [roundToGame, round]);
+  })();
 
-  const hasIndexOverride = useMemo(() => {
+  const hasIndexOverride = (() => {
     if (!roundToGame?.$isLoaded || !round?.$isLoaded) return false;
     return (
       roundToGame.$isLoaded &&
       round.$isLoaded &&
       roundToGame.handicapIndex !== round.handicapIndex
     );
-  }, [roundToGame, round]);
+  })();
 
-  const hasCourseGameOverride = useMemo(() => {
+  const hasCourseGameOverride = (() => {
     if (!roundToGame?.$isLoaded) return false;
     if (!roundToGame.$isLoaded) return false;
 
@@ -53,9 +57,9 @@ export function Handicaps({ player, round, roundToGame, onPress }: Props) {
     }
 
     return false;
-  }, [roundToGame, calculatedCourseHandicap]);
+  })();
 
-  const handicapIndexDisplay = useMemo(() => {
+  const handicapIndexDisplay = (() => {
     if (
       roundToGame?.$isLoaded &&
       roundToGame.$isLoaded &&
@@ -66,7 +70,7 @@ export function Handicaps({ player, round, roundToGame, onPress }: Props) {
     return player?.handicap?.$isLoaded && player.handicap.$isLoaded
       ? player.handicap.display
       : undefined;
-  }, [roundToGame, player]);
+  })();
 
   if (!player?.$isLoaded) return null;
 

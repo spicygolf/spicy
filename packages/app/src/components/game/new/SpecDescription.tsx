@@ -5,7 +5,7 @@ import type { GameSpec, ListOfGameSpecs } from "spicylib/schema";
 import { SpecCard } from "./SpecCard";
 
 interface SpecDescriptionProps {
-  specs: ListOfGameSpecs | null | undefined;
+  specs: ListOfGameSpecs | GameSpec[] | null | undefined;
   favoriteSpecIds?: Set<string>;
   onToggleFavorite?: (spec: GameSpec) => void;
 }
@@ -17,7 +17,12 @@ export function SpecDescription({
 }: SpecDescriptionProps) {
   const [scrollViewWidth, setScrollViewWidth] = useState(0);
   const pan = useRef(new Animated.Value(0)).current;
-  const loadedSpecs = specs?.$isLoaded ? specs.filter((s) => s?.$isLoaded) : [];
+
+  const loadedSpecs = Array.isArray(specs)
+    ? specs
+    : specs?.$isLoaded
+      ? specs.filter((s) => s?.$isLoaded)
+      : [];
 
   const boxWidth = scrollViewWidth * 0.8;
   const boxDistance = scrollViewWidth - boxWidth;

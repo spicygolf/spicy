@@ -8,6 +8,17 @@ import { NavigationProvider } from "@/providers/navigation";
 import { ReactQueryProvider } from "@/providers/react-query";
 
 export function App() {
+  // TODO: Re-enable jazzErrorReporter when jazz-tools is upgraded to support it
+  // useEffect(function subscribeToJazzErrors() {
+  //   const unsubscribe = jazzErrorReporter.onError((error) => {
+  //     console.error("🔴 JAZZ ERROR:", error.type);
+  //     console.error("  CoValue ID:", error.coValueId);
+  //     console.error("  Message:", error.message);
+  //     console.error("  📍 Subscription created at:", error.stack);
+  //   });
+  //   return unsubscribe;
+  // }, []);
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <StrictMode>

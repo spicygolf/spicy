@@ -40,21 +40,24 @@ export const PlayerAccount = co
       const name = creationProps?.name || "";
 
       // Skip root creation for worker account
-      if (account.$jazz.id === JAZZ_WORKER_ACCOUNT) {
+      const workerAccountId = JAZZ_WORKER_ACCOUNT();
+      if (account.$jazz.id === workerAccountId) {
         // Worker account doesn't need a root
       } else {
-        if (!JAZZ_WORKER_ACCOUNT) {
+        if (!workerAccountId) {
           throw new Error("JAZZ_WORKER_ACCOUNT not set");
         }
 
         // create a group for the account, add worker as admin
         const group = Group.create(account);
 
-        const workerAccount = await PlayerAccount.load(JAZZ_WORKER_ACCOUNT);
+        const workerAccount = await PlayerAccount.load(workerAccountId);
         if (!workerAccount?.$isLoaded) {
           throw new Error("Jazz Worker Account not found");
         }
         group.addMember(workerAccount, "admin");
+
+        const favorites = Favorites.create({}, { owner: group });
 
         account.$jazz.set(
           "root",
@@ -73,6 +76,7 @@ export const PlayerAccount = co
               ),
               games: ListOfGames.create([], { owner: group }),
               specs: ListOfGameSpecs.create([], { owner: group }),
+              favorites,
             },
             { owner: group },
           ),
@@ -81,7 +85,7 @@ export const PlayerAccount = co
     }
 
     // Migration 2: Initialize worker account profile with catalog
-    if (account.$jazz.id === JAZZ_WORKER_ACCOUNT) {
+    if (account.$jazz.id === JAZZ_WORKER_ACCOUNT()) {
       if (!account.$jazz.has("profile") || RESET || RESET_WORKER) {
         const group = Group.create();
         group.addMember(account, "admin");

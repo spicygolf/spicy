@@ -1,8 +1,3 @@
-import { useCoState } from "jazz-tools/react-native";
-import type { ListOfRoundToGames } from "spicylib/schema";
-import { ListOfRoundToGames as ListOfRoundToGamesSchema } from "spicylib/schema";
-import { courseAcronym } from "spicylib/utils";
-
 /**
  * Returns course and tee information in the format "SLUG • TeeName".
  * Returns "various" if players have different courses/tees or incomplete selections.
@@ -18,71 +13,9 @@ import { courseAcronym } from "spicylib/utils";
  * // Returns: "DHGC • Presidents" or "various" or null
  */
 export function useGameCourseName(roundsId: string | undefined): string | null {
-  const rounds = useCoState(
-    ListOfRoundToGamesSchema,
-    roundsId || "",
-    roundsId
-      ? {
-          resolve: {
-            $each: {
-              round: {
-                course: {
-                  facility: true,
-                },
-                tee: true,
-              },
-            },
-          },
-          select: (value) => {
-            if (!value.$isLoaded) {
-              return value.$jazz.loadingState === "loading" ? undefined : null;
-            }
-            return value;
-          },
-        }
-      : undefined,
-  ) as ListOfRoundToGames | null;
-
-  if (!rounds?.$isLoaded) return null;
-
-  // Track unique course/tee combinations
-  const courseTeeStrings = new Set<string>();
-  let hasIncompleteSelections = false;
-
-  for (const rtg of rounds) {
-    if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) {
-      continue;
-    }
-
-    const round = rtg.round;
-    const course = round.course;
-    const tee = round.tee;
-
-    // Check if this round has both course and tee selected
-    if (!course?.$isLoaded || !tee?.$isLoaded || !course.name || !tee.name) {
-      hasIncompleteSelections = true;
-      continue;
-    }
-
-    // Build the display string: "SLUG • TeeName"
-    const facilityName = course.facility?.$isLoaded
-      ? course.facility.name
-      : undefined;
-    const slug = courseAcronym(course.name, facilityName);
-    const courseTeeString = `${slug} • ${tee.name}`;
-    courseTeeStrings.add(courseTeeString);
-  }
-
-  // If any player is missing course/tee selections, show "various"
-  if (hasIncompleteSelections) {
-    return "various";
-  }
-
-  // If all players have selections but they're different, show "various"
-  if (courseTeeStrings.size !== 1) {
-    return "various";
-  }
-
-  // All players have the same course/tee
-  return Array.from(courseTeeStrings)[0];
+  // TODO: Re-implement without deep subscription to avoid errors during tee selection
+  // Temporarily disabled to debug subscription issues
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _unused = roundsId;
+  return null;
 }

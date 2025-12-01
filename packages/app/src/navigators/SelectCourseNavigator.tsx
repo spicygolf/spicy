@@ -45,7 +45,7 @@ export function SelectCourseNavigator({ route }: Props) {
       <GameNav title="Select Course & Tees" showBack={true} />
       <Tabs.Navigator
         screenOptions={tabScreenOptions}
-        initialRouteName="SelectCourseFavorites"
+        initialRouteName="SelectCourseSearch"
       >
         <Tabs.Screen
           name="SelectCourseFavorites"

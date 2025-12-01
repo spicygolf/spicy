@@ -2,11 +2,11 @@ import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole, Score } from "spicylib/schema";
 import {
+  calculateCourseHandicap,
   calculateNetScore,
   calculatePops,
   getEffectiveHandicap,
   getGrossScore,
-  getPops,
 } from "spicylib/utils";
 import {
   HoleHeader,
@@ -76,21 +76,42 @@ export function ScoringView({
 
                 // Get score for current hole (use string key for MapOfScores)
                 const holeKey = String(currentHoleIndex);
+                const scoreObj = round.scores?.$isLoaded
+                  ? round.scores[holeKey]
+                  : null;
+                // Check if score AND its values list are loaded
                 const score =
-                  round.scores?.$isLoaded && round.scores[holeKey]?.$isLoaded
-                    ? (round.scores[holeKey] as Score)
+                  scoreObj?.$isLoaded && scoreObj.values?.$isLoaded
+                    ? (scoreObj as Score)
                     : null;
 
                 const gross = getGrossScore(score);
-                const pops = getPops(score);
-                const net =
-                  gross !== null ? calculateNetScore(gross, pops) : null;
 
                 // Calculate pops based on effective handicap
-                // Priority: gameHandicap > courseHandicap
-                const courseHandicap = rtg.courseHandicap ?? 0;
+                // Priority: gameHandicap > courseHandicap > calculated from tee
+                let courseHandicap = rtg.courseHandicap;
+
+                // If courseHandicap is not set, calculate it from the tee data
+                if (courseHandicap === undefined && round.$jazz.has("tee")) {
+                  const tee = round.tee;
+                  if (tee?.$isLoaded) {
+                    const handicapIndex =
+                      rtg.handicapIndex || round.handicapIndex;
+                    const calculated = calculateCourseHandicap({
+                      handicapIndex,
+                      tee,
+                      holesPlayed: "all18", // TODO: Get from game.scope.holes
+                    });
+                    // Convert null to undefined for type compatibility
+                    courseHandicap = calculated ?? undefined;
+                  }
+                }
+
+                // Default to 0 if we still don't have a course handicap
+                const finalCourseHandicap = courseHandicap ?? 0;
+
                 const effectiveHandicap = getEffectiveHandicap(
-                  courseHandicap,
+                  finalCourseHandicap,
                   rtg.gameHandicap,
                 );
 
@@ -101,6 +122,12 @@ export function ScoringView({
                   effectiveHandicap,
                   holeInfo.handicap,
                 );
+
+                // Calculate net using the calculated pops (not stored pops from score)
+                const net =
+                  gross !== null
+                    ? calculateNetScore(gross, calculatedPops)
+                    : null;
 
                 return (
                   <PlayerScoreRow

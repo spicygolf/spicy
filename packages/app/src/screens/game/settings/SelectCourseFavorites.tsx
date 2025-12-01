@@ -2,16 +2,15 @@ import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
 import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { useCallback, useMemo } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { useCallback } from "react";
+import { View } from "react-native";
 import DraggableFlatList, {
   type RenderItemParams,
 } from "react-native-draggable-flatlist";
 import { StyleSheet } from "react-native-unistyles";
 import type { CourseTee } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
-import { stateCode } from "spicylib/utils";
-import { FavoriteButton } from "@/components/common/FavoriteButton";
+import { FavoriteTeeItem } from "@/components/game/settings/FavoriteTeeItem";
 import { useGame } from "@/hooks";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
 import { Screen, Text } from "@/ui";
@@ -34,21 +33,14 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
       root: {
         favorites: {
           courseTees: {
-            $each: {
-              course: {
-                facility: true,
-              },
-              tee: {
-                holes: { $each: true },
-              },
-            },
+            $each: true,
           },
         },
       },
     },
   });
 
-  const player = useMemo(() => {
+  const player = (() => {
     if (!game?.$isLoaded || !game.players?.$isLoaded) {
       return null;
     }
@@ -58,9 +50,9 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
           p?.$isLoaded && p.$jazz.id === playerId,
       ) || null
     );
-  }, [game, playerId]);
+  })();
 
-  const round = useMemo(() => {
+  const round = (() => {
     if (!roundId || !player?.$isLoaded || !player.rounds?.$isLoaded)
       return null;
     return (
@@ -69,9 +61,9 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
           r?.$isLoaded && r.$jazz.id === roundId,
       ) || null
     );
-  }, [player, roundId]);
+  })();
 
-  const favoritedTees = useMemo(() => {
+  const favoritedTees = (() => {
     if (
       !me?.$isLoaded ||
       !me.root?.$isLoaded ||
@@ -82,28 +74,36 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     }
     // Filter by player gender
     return me.root.favorites.courseTees.filter((fav) => {
-      if (!fav?.$isLoaded || !fav.tee?.$isLoaded) return false;
+      if (!fav?.$isLoaded || !fav.$jazz.has("tee") || !fav.tee?.$isLoaded)
+        return false;
       const teeGender = fav.tee.gender;
       const playerGender = player?.$isLoaded ? player.gender : "M";
       // Show mixed tees and gender-matching tees
       return teeGender === "Mixed" || teeGender === playerGender;
     });
-  }, [me, player]);
+  })();
 
   const handleSelectTee = useCallback(
-    async (favorite: CourseTee) => {
-      if (
-        !round?.$isLoaded ||
-        !favorite?.$isLoaded ||
-        !favorite.course?.$isLoaded ||
-        !favorite.tee?.$isLoaded
-      ) {
+    async (favorite: MaybeLoaded<CourseTee>) => {
+      if (!round?.$isLoaded || !favorite?.$isLoaded) {
+        return;
+      }
+
+      // Ensure course and tee are loaded
+      const loadedFavorite = await favorite.$jazz.ensureLoaded({
+        resolve: {
+          course: true,
+          tee: true,
+        },
+      });
+
+      if (!loadedFavorite.course?.$isLoaded || !loadedFavorite.tee?.$isLoaded) {
         return;
       }
 
       // Set the course and tee on the round
-      round.$jazz.set("course", favorite.course);
-      round.$jazz.set("tee", favorite.tee);
+      round.$jazz.set("course", loadedFavorite.course);
+      round.$jazz.set("tee", loadedFavorite.tee);
 
       navigation.getParent()?.goBack();
     },
@@ -111,12 +111,13 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
   );
 
   const removeFavorite = useCallback(
-    async (favorite: CourseTee) => {
+    async (favorite: MaybeLoaded<CourseTee>) => {
       if (
         !me?.$isLoaded ||
         !me.root?.$isLoaded ||
         !me.root.favorites?.$isLoaded ||
-        !me.root.favorites.courseTees?.$isLoaded
+        !me.root.favorites.courseTees?.$isLoaded ||
+        !favorite?.$isLoaded
       ) {
         return;
       }
@@ -160,72 +161,14 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
 
   const renderItem = useCallback(
     ({ item, drag, isActive }: RenderItemParams<MaybeLoaded<CourseTee>>) => {
-      if (!item?.$isLoaded || !item.course?.$isLoaded || !item.tee?.$isLoaded) {
-        return null;
-      }
-
-      const course = item.course;
-      const tee = item.tee;
-
       return (
-        <TouchableOpacity
-          style={[styles.favoriteItem, isActive && styles.draggingItem]}
+        <FavoriteTeeItem
+          item={item}
+          drag={drag}
+          isActive={isActive}
           onPress={() => handleSelectTee(item)}
-          onLongPress={drag}
-          delayLongPress={200}
-        >
-          <View style={styles.itemRow}>
-            <FavoriteButton
-              isFavorited={true}
-              onToggle={() => removeFavorite(item)}
-              size={20}
-            />
-
-            <View style={styles.contentArea}>
-              <View style={styles.topRow}>
-                <View style={styles.favoriteInfo}>
-                  <Text style={styles.teeName}>{tee.name}</Text>
-                  <Text style={styles.courseName}>{course.name}</Text>
-                  {course.facility?.$isLoaded &&
-                    course.facility.name !== course.name && (
-                      <Text style={styles.facilityName}>
-                        {course.facility.name}
-                      </Text>
-                    )}
-                  <Text style={styles.courseLocation}>
-                    {course.city}, {stateCode(course.state)}
-                  </Text>
-                </View>
-
-                <View style={styles.dragHandle}>
-                  <FontAwesome6
-                    name="grip-lines"
-                    iconStyle="solid"
-                    size={16}
-                    color="#999"
-                  />
-                </View>
-              </View>
-
-              <Text style={styles.teeDetailText}>
-                {tee.gender} • {tee.totalYardage} yards • Par{" "}
-                {tee.holes?.$isLoaded
-                  ? tee.holes.reduce(
-                      (sum, h) => sum + (h?.$isLoaded ? h.par : 0),
-                      0,
-                    )
-                  : "—"}
-                {tee.ratings?.$isLoaded && tee.ratings.total?.$isLoaded && (
-                  <>
-                    {" "}
-                    • Rating: {tee.ratings.total.rating.toFixed(1)} • Slope:{" "}
-                    {tee.ratings.total.slope}
-                  </>
-                )}
-              </Text>
-            </View>
-          </View>
-        </TouchableOpacity>
+          onRemove={() => removeFavorite(item)}
+        />
       );
     },
     [handleSelectTee, removeFavorite],
@@ -309,63 +252,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   listContainer: {
     paddingBottom: theme.gap(1),
-  },
-  favoriteItem: {
-    paddingVertical: theme.gap(0.5),
-    paddingRight: theme.gap(2),
-    flexDirection: "column",
-    backgroundColor: theme.colors.background,
-  },
-  draggingItem: {
-    opacity: 0.7,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  itemRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  contentArea: {
-    flex: 1,
-    marginLeft: theme.gap(1),
-  },
-  topRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  favoriteInfo: {
-    flex: 1,
-  },
-  teeName: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  courseName: {
-    fontSize: 15,
-    color: theme.colors.secondary,
-    marginTop: theme.gap(0.5),
-  },
-  facilityName: {
-    fontSize: 14,
-    color: theme.colors.secondary,
-    marginTop: theme.gap(0.25),
-  },
-  courseLocation: {
-    fontSize: 14,
-    color: theme.colors.secondary,
-    marginTop: theme.gap(0.5),
-  },
-  teeDetailText: {
-    fontSize: 13,
-    color: theme.colors.secondary,
-    marginTop: theme.gap(0.5),
-  },
-  dragHandle: {
-    padding: theme.gap(1),
-    marginLeft: theme.gap(1),
   },
   separator: {
     height: 1,

@@ -32,6 +32,11 @@ export function NewGameSearch({ viewMode }: NewGameSearchProps) {
         },
       },
     },
+    select: (account) => {
+      if (!account.$isLoaded) return null;
+      if (!account.root?.$isLoaded) return null;
+      return account;
+    },
   });
 
   const favoriteSpecIds = useMemo(() => {
@@ -52,54 +57,73 @@ export function NewGameSearch({ viewMode }: NewGameSearchProps) {
 
   const handleToggleFavorite = useCallback(
     async (spec: GameSpec) => {
-      if (
-        !me?.$isLoaded ||
-        !me.root?.$isLoaded ||
-        !me.root.favorites?.$isLoaded
-      ) {
-        return;
-      }
+      try {
+        if (!me?.$isLoaded || !me.root?.$isLoaded) {
+          return;
+        }
 
-      const favorites = me.root.favorites;
+        const root = me.root;
 
-      // Initialize specs list if it doesn't exist
-      if (!favorites.$jazz.has("specs")) {
-        favorites.$jazz.set(
-          "specs",
-          ListOfFavoriteSpecs.create([], { owner: me }),
+        // Initialize favorites if it doesn't exist
+        if (!root.$jazz.has("favorites")) {
+          const { Favorites } = await import("spicylib/schema");
+          root.$jazz.set("favorites", Favorites.create({}, { owner: me }));
+        }
+
+        // Ensure favorites is loaded
+        const loadedRoot = await root.$jazz.ensureLoaded({
+          resolve: { favorites: true },
+        });
+
+        if (!loadedRoot.favorites?.$isLoaded) {
+          return;
+        }
+
+        const favorites = loadedRoot.favorites;
+
+        // Initialize specs list if it doesn't exist
+        if (!favorites.$jazz.has("specs")) {
+          favorites.$jazz.set(
+            "specs",
+            ListOfFavoriteSpecs.create([], { owner: me }),
+          );
+        }
+
+        const loadedFavorites = await favorites.$jazz.ensureLoaded({
+          resolve: { specs: true },
+        });
+        const specs = loadedFavorites.specs;
+        if (!specs?.$isLoaded) return;
+
+        const existingIndex = specs.findIndex(
+          (f) =>
+            f?.$isLoaded &&
+            f.spec?.$isLoaded &&
+            f.spec.$jazz.id === spec.$jazz.id,
         );
-        await favorites.$jazz.ensureLoaded({ resolve: { specs: true } });
-      }
 
-      const specs = favorites.specs;
-      if (!specs?.$isLoaded) return;
-
-      const existingIndex = specs.findIndex(
-        (f) =>
-          f?.$isLoaded &&
-          f.spec?.$isLoaded &&
-          f.spec.$jazz.id === spec.$jazz.id,
-      );
-
-      if (existingIndex >= 0) {
-        // Remove from favorites
-        specs.$jazz.splice(existingIndex, 1);
-      } else {
-        // Add to favorites
-        const newFavorite = FavoriteSpec.create(
-          {
-            spec,
-            addedAt: new Date(),
-          },
-          { owner: me },
-        );
-        specs.$jazz.push(newFavorite);
+        if (existingIndex >= 0) {
+          // Remove from favorites
+          specs.$jazz.splice(existingIndex, 1);
+        } else {
+          // Add to favorites
+          const newFavorite = FavoriteSpec.create(
+            {
+              spec,
+              addedAt: new Date(),
+            },
+            { owner: me },
+          );
+          specs.$jazz.push(newFavorite);
+        }
+      } catch (error) {
+        console.error("handleToggleFavorite error:", error);
       }
     },
     [me],
   );
 
-  const loadedSpecs = specs?.$isLoaded ? specs.filter((s) => s?.$isLoaded) : [];
+  const loadedSpecs: GameSpec[] = specs || [];
 
   if (viewMode === "description") {
     return (

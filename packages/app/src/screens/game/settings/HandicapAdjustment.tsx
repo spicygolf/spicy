@@ -28,11 +28,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
           round: {
             playerId: true,
             handicapIndex: true,
-            tee: {
-              ratings: {
-                total: { slope: true, rating: true },
-              },
-            },
+            tee: true,
           },
         },
       },
@@ -259,16 +255,10 @@ export function HandicapAdjustment({ route, navigation }: Props) {
             )}
           {round?.$isLoaded &&
             round.tee?.$isLoaded &&
-            round.tee.ratings?.$isLoaded && (
+            round.tee.ratings?.total && (
               <Text style={styles.helpText}>
-                Using slope:{" "}
-                {round.tee.ratings.total?.$isLoaded
-                  ? round.tee.ratings.total.slope
-                  : "N/A"}
-                , rating:{" "}
-                {round.tee.ratings.total?.$isLoaded
-                  ? round.tee.ratings.total.rating
-                  : "N/A"}
+                Using slope: {round.tee.ratings.total.slope}, rating:{" "}
+                {round.tee.ratings.total.rating}
               </Text>
             )}
         </View>

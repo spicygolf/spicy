@@ -103,29 +103,33 @@ export function formatHandicapIndex(handicapIndex: string | null): string {
   return handicapIndex;
 }
 
+type HolesPlayed = "front9" | "back9" | "all18";
+
 function getRatings(
   tee: Tee,
-  holesPlayed: "front9" | "back9" | "all18",
+  holesPlayed: HolesPlayed,
 ): { rating: number | null; slope: number | null; bogey: number | null } {
-  if (!tee?.ratings?.$isLoaded) {
+  if (!tee?.ratings) {
     return { rating: null, slope: null, bogey: null };
   }
 
-  let ratings: { rating: number; slope: number; bogey: number } | null = null;
-
-  switch (holesPlayed) {
-    case "front9":
-      ratings = tee.ratings.front?.$isLoaded ? tee.ratings.front : null;
-      break;
-    case "back9":
-      ratings = tee.ratings.back?.$isLoaded ? tee.ratings.back : null;
-      break;
-    case "all18":
-      ratings = tee.ratings.total?.$isLoaded ? tee.ratings.total : null;
-      break;
-  }
+  const ratings =
+    holesPlayed === "front9"
+      ? tee.ratings.front
+      : holesPlayed === "back9"
+        ? tee.ratings.back
+        : tee.ratings.total;
 
   if (!ratings) {
+    return { rating: null, slope: null, bogey: null };
+  }
+
+  // Check if the rating object has the required properties (not just $isLoaded: false)
+  if (
+    typeof ratings.rating !== "number" ||
+    typeof ratings.slope !== "number" ||
+    typeof ratings.bogey !== "number"
+  ) {
     return { rating: null, slope: null, bogey: null };
   }
 
