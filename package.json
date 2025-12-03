@@ -3,11 +3,9 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.6",
     "@types/bun": "latest",
-    "del-cli": "^6.0.0",
-    "husky": "^9.1.7"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
+    "del-cli": "7.0.0",
+    "husky": "9.1.7",
+    "typescript": "5.9.3"
   },
   "license": "FSL-1.1-ALv2",
   "patchedDependencies": {

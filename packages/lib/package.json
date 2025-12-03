@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "bun-types": "latest",
-    "typescript": "*"
+    "del-cli": "7.0.0"
   },
   "dependencies": {
     "date-fns-tz": "catalog:shared",

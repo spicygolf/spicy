@@ -8,7 +8,7 @@ PODS:
   - hermes-engine (0.80.0):
     - hermes-engine/Pre-built (= 0.80.0)
   - hermes-engine/Pre-built (0.80.0)
-  - NitroModules (0.27.6):
+  - NitroModules (0.31.10):
     - boost
     - DoubleConversion
     - fast_float
@@ -70,7 +70,7 @@ PODS:
     - SocketRocket
     - Yoga
   - OpenSSL-Universal (3.3.3001)
-  - QuickCrypto (1.0.0-beta.21):
+  - QuickCrypto (1.0.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2699,7 +2699,7 @@ PODS:
     - SocketRocket
     - Yoga
   - SocketRocket (0.7.1)
-  - Unistyles (3.0.9):
+  - Unistyles (3.0.19):
     - boost
     - DoubleConversion
     - fast_float
@@ -3015,10 +3015,10 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 7068e976238b29e97b3bafd09a994542af7d5c0b
-  NitroModules: 06397834ddc39e1fa37e75a8a241cc8103f64161
+  NitroModules: 263f1c50a57f883a533c758100f80ba7d1c859e1
   op-sqlite: 11caeb381964751c263209ce125442ea57cae253
   OpenSSL-Universal: 6082b0bf950e5636fe0d78def171184e2b3899c2
-  QuickCrypto: 1e79f3a9192cd747d9a38e204f2c5560eb95e9a5
+  QuickCrypto: 6ed44b95a06e474fd0bf0a692d4198c89b92cc9a
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
   RCTDeprecation: ff787f6c860a1b97dd1bc27264b61d23ad1994da
   RCTRequired: 664eb8399ed8a83e26ab65af7c2ad390f7e61696
@@ -3096,7 +3096,7 @@ SPEC CHECKSUMS:
   RNScreens: ee2abe7e0c548eed14e92742e81ed991165c56aa
   RNWorklets: e0d8b8fe9e3540d4895b74c031aea9a97c74613a
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  Unistyles: 477ceb36c5b0d64ec5c32a02e662373edc9febff
+  Unistyles: d32838bf94b28afbe4e9f932af15576f9a53e3d3
   Yoga: 0c4b7d2aacc910a1f702694fa86be830386f4ceb
 
 PODFILE CHECKSUM: 5187bea4622e38f97164db017830d808af2a0070
