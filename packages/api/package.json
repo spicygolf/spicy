@@ -22,7 +22,8 @@
     "spicylib": "workspace:*"
   },
   "devDependencies": {
-    "@better-auth/cli": "catalog:shared"
+    "@better-auth/cli": "catalog:shared",
+    "del-cli": "7.0.0"
   },
   "module": "src/index.js"
 }
