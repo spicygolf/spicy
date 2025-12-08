@@ -12,7 +12,11 @@ import { getCountries } from "./countries";
 import { getCourseDetails, searchCourses } from "./courses";
 import { getJazzWorker, setupWorker } from "./jazz_worker";
 import { auth } from "./lib/auth";
-import { importGameSpecsToCatalog, loadOrCreateCatalog } from "./lib/catalog";
+import {
+  importGameSpecsToCatalog,
+  importGamesFromArango,
+  loadOrCreateCatalog,
+} from "./lib/catalog";
 import { playerSearch } from "./players";
 import { requireAdmin } from "./utils/auth";
 
@@ -107,6 +111,31 @@ const app = new Elysia()
         return result;
       } catch (error) {
         console.error("Import failed:", error);
+        throw error;
+      }
+    },
+    {
+      auth: true,
+    },
+  )
+  .post(
+    `/${api}/catalog/import-games`,
+    async ({ user }) => {
+      try {
+        // Server-side admin authorization check
+        requireAdmin(user?.email);
+
+        console.log("Games import started by admin:", user.email);
+        const { account } = await getJazzWorker();
+
+        console.log("Calling importGamesFromArango...");
+        const result = await importGamesFromArango(
+          account as co.loaded<typeof PlayerAccount>,
+        );
+        console.log("Games import result:", JSON.stringify(result));
+        return result;
+      } catch (error) {
+        console.error("Games import failed:", error);
         throw error;
       }
     },

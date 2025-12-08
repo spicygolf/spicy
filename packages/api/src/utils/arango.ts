@@ -142,3 +142,191 @@ export async function fetchPlayersWithGames(
     throw error;
   }
 }
+
+export interface TeeRating {
+  rating: number;
+  slope: number;
+  bogey: number;
+}
+
+export interface RoundV03 {
+  _key: string;
+  date: string;
+  seq: number;
+  scores: Array<{
+    hole: string;
+    values: Array<{ k: string; v: string; ts?: string }>;
+  }>;
+  tees: Array<{
+    tee_id: string;
+    course_id: string;
+    name: string;
+    TotalYardage: number;
+    holes: Array<{
+      hole: string;
+      par: number;
+      length: number;
+      handicap: number;
+    }>;
+    Ratings: {
+      total?: TeeRating;
+      front?: TeeRating;
+      back?: TeeRating;
+    };
+    course: {
+      course_id: string;
+      course_name: string;
+      course_city?: string;
+      course_state?: string;
+    };
+  }>;
+}
+
+export interface GameV03 {
+  _key: string;
+  name: string;
+  start: string;
+  scope: {
+    holes: string;
+    teams_rotate?: string;
+    wolf_order?: string[];
+  };
+  holes: Array<{
+    hole: string;
+    teams: Array<{
+      team: string;
+      players: string[];
+      junk?: Array<{ name: string; player: string; value: string }>;
+    }>;
+    multipliers?: Array<{
+      name: string;
+      team: string;
+      first_hole: string;
+      value: number;
+    }>;
+  }>;
+  options?: Array<{
+    name: string;
+    values: Array<{ value: string; holes: string[] }>;
+  }>;
+}
+
+export interface RoundToGameEdgeV03 {
+  handicap_index: string;
+  course_handicap?: number;
+  game_handicap?: number;
+}
+
+export interface GameWithRoundsV03 {
+  game: GameV03;
+  rounds: Array<{
+    round: RoundV03;
+    edge: RoundToGameEdgeV03;
+    playerId: string;
+  }>;
+  gamespecKey: string;
+}
+
+export interface GameListV03 {
+  _key: string;
+  name: string;
+  start: string;
+  playerCount: number;
+  roundCount: number;
+}
+
+export async function fetchGameWithRounds(
+  db: Database,
+  gameKey: string,
+): Promise<GameWithRoundsV03 | null> {
+  try {
+    const cursor = await db.query(
+      `
+      LET game = DOCUMENT("games", @gameKey)
+      LET gamespec = FIRST(
+        FOR v, e IN 1..1 OUTBOUND game._id GRAPH 'games'
+          FILTER e.type == 'game2gamespec'
+          RETURN v._key
+      )
+      LET rounds = (
+        FOR v, e IN 1..1 INBOUND game._id GRAPH 'games'
+          FILTER e.type == 'round2game'
+          LET player = FIRST(
+            FOR p, pe IN 1..1 OUTBOUND v._id GRAPH 'games'
+              FILTER pe.type == 'round2player'
+              RETURN p._key
+          )
+          RETURN { round: v, edge: e, playerId: player }
+      )
+      RETURN { game, rounds, gamespecKey: gamespec }
+    `,
+      { gameKey },
+    );
+
+    const result = await cursor.next();
+    if (!result || !result.game) {
+      return null;
+    }
+
+    return result as GameWithRoundsV03;
+  } catch (error) {
+    console.error(
+      `Failed to fetch game with rounds for key ${gameKey}:`,
+      error,
+    );
+    throw error;
+  }
+}
+
+export interface FetchAllGamesResult {
+  games: GameListV03[];
+  total: number;
+}
+
+export async function fetchAllGames(
+  db: Database,
+  offset = 0,
+  limit = 100,
+): Promise<FetchAllGamesResult> {
+  try {
+    // Get total count
+    const countCursor = await db.query(`
+      RETURN LENGTH(games)
+    `);
+    const total = (await countCursor.next()) as number;
+
+    // Get paginated games with metadata
+    const gamesCursor = await db.query(
+      `
+      FOR game IN games
+        SORT game.start DESC
+        LIMIT @offset, @limit
+        LET roundCount = LENGTH(
+          FOR v, e IN 1..1 INBOUND game._id GRAPH 'games'
+            FILTER e.type == 'round2game'
+            RETURN 1
+        )
+        LET playerCount = LENGTH(
+          FOR v, e IN 1..1 OUTBOUND game._id GRAPH 'games'
+            FILTER e.type == 'player2game'
+            RETURN 1
+        )
+        RETURN {
+          _key: game._key,
+          name: game.name,
+          start: game.start,
+          playerCount: playerCount,
+          roundCount: roundCount
+        }
+    `,
+      { offset, limit },
+    );
+
+    const games = (await gamesCursor.all()) as GameListV03[];
+
+    return { games, total };
+  } catch (error) {
+    console.error("Failed to fetch all games:", error);
+    throw error;
+  }
+}

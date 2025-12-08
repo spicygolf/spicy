@@ -23,6 +23,7 @@ export const Player = co.map({
   short: z.string(),
   gender: z.literal(["M", "F"]),
   ghinId: z.string().optional(),
+  legacyId: z.string().optional(),
   handicap: co.optional(Handicap),
   clubs: co.optional(ListOfClubs),
   rounds: co.optional(ListOfRounds),

@@ -46,6 +46,12 @@ export const Game = co.map({
    * Example: Game starts with "stakes: 1" from gamespec, user changes to "stakes: 5"
    */
   options: co.optional(MapOfOptions),
+
+  /**
+   * Legacy ID from ArangoDB v0.3 import (_key field).
+   * Used for idempotent imports and tracking migrated games.
+   */
+  legacyId: z.string().optional(),
 });
 export type Game = co.loaded<typeof Game>;
 
