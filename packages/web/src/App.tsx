@@ -133,11 +133,24 @@ export function App(): React.JSX.Element {
       }
 
       const gamesResult = await gamesResponse.json();
+
+      // Check if import was rejected due to already in progress
+      if (gamesResult.inProgress) {
+        toast({
+          variant: "destructive",
+          title: "Import already in progress",
+          description: "Please wait for the current import to complete.",
+        });
+        setImportProgress(0);
+        return;
+      }
+
       setImportProgress(100);
       setGamesImportResult(gamesResult);
 
       // Combined toast notification
-      const totalErrors = specsResult.errors.length + gamesResult.errors.length;
+      const totalErrors =
+        specsResult.errors.length + (gamesResult.errors?.length || 0);
       if (totalErrors > 0) {
         toast({
           variant: "destructive",

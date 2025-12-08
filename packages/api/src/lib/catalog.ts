@@ -71,7 +71,6 @@ function isValidBetter(value: unknown): value is "lower" | "higher" {
   );
 }
 
-import type { Database } from "arangojs";
 import {
   ChoiceMap,
   ChoicesList,
@@ -266,6 +265,11 @@ export async function upsertGameSpec(
     },
     { owner: specs.$jazz.owner },
   );
+
+  // Set legacyId from ArangoDB _key for matching during game import
+  if (specData._key) {
+    newSpec.$jazz.set("legacyId", specData._key);
+  }
 
   if (transformed.long_description) {
     newSpec.$jazz.set("long_description", transformed.long_description);
@@ -878,14 +882,15 @@ export interface GameImportResult {
 /**
  * Upsert a course and tee into the catalog (idempotent)
  *
- * @param catalog - The game catalog
+ * @param coursesMap - The already-loaded courses map from catalog
  * @param courseData - Course metadata from ArangoDB
  * @param teeData - Tee data from ArangoDB round
  * @param workerAccount - Worker account for creating groups
+ * @param courseCache - Cache of loaded courses to avoid repeated Course.load calls
  * @returns Object with courseId and teeId strings
  */
 async function upsertCourse(
-  catalog: GameCatalog,
+  coursesMap: MapOfCourses,
   courseData: {
     course_id: string;
     course_name: string;
@@ -909,28 +914,19 @@ async function upsertCourse(
     };
   },
   workerAccount: co.loaded<typeof PlayerAccount>,
-): Promise<{ courseId: string; teeId: string }> {
-  // Initialize catalog.courses if needed
-  const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { courses: {} },
-  });
-
-  if (!loadedCatalog.$jazz.has("courses")) {
-    const group = Group.create(workerAccount);
-    group.makePublic();
-    const newMap = MapOfCourses.create({}, { owner: group });
-    loadedCatalog.$jazz.set("courses", newMap);
-  }
-
-  const coursesMap = loadedCatalog.courses;
-  if (!coursesMap) {
-    throw new Error("Failed to initialize courses map");
-  }
-
-  const courseKey = courseData.course_id;
+  courseCache: Map<string, co.loaded<typeof Course>>,
+): Promise<{
+  courseId: string;
+  teeId: string;
+  courseCreated: boolean;
+  teeCreated: boolean;
+}> {
+  const courseKey = String(courseData.course_id);
+  let courseCreated = false;
 
   // Check if course exists, create if not
   if (!coursesMap.$jazz.has(courseKey)) {
+    courseCreated = true;
     const group = Group.create(workerAccount);
     group.makePublic();
 
@@ -949,20 +945,22 @@ async function upsertCourse(
     );
 
     coursesMap.$jazz.set(courseKey, newCourse);
+    // Add newly created course to cache immediately (it's already loaded since we just created it)
+    courseCache.set(courseKey, newCourse as co.loaded<typeof Course>);
   }
 
-  // Load course
-  const existingCourse = coursesMap[courseKey];
-  if (!existingCourse?.$isLoaded) {
-    throw new Error(`Course exists but is not loaded: ${courseKey}`);
-  }
-
-  const loadedCourse = await Course.load(existingCourse.$jazz.id, {
-    loadAs: workerAccount,
-    resolve: { tees: true },
-  });
-  if (!loadedCourse || !loadedCourse.$isLoaded) {
-    throw new Error(`Failed to load course: ${courseKey}`);
+  // Get course from cache - if not in cache, course already exists (from previous import)
+  // and we skip tee verification to avoid Jazz cloud timeouts
+  const loadedCourse = courseCache.get(courseKey);
+  if (!loadedCourse) {
+    // Course exists in map but not in our cache - it's from a previous import run
+    // Skip loading/verification to avoid timeouts
+    return {
+      courseId: courseKey,
+      teeId: teeData.tee_id,
+      courseCreated: false,
+      teeCreated: false,
+    };
   }
 
   // tees is now loaded via resolve - safe to access
@@ -971,6 +969,7 @@ async function upsertCourse(
   // Check if tee exists on course
   const teeKey = teeData.tee_id;
   let teeExists = false;
+  let teeCreated = false;
 
   for (let i = 0; i < teesList.length; i++) {
     const tee = teesList[i];
@@ -982,6 +981,7 @@ async function upsertCourse(
 
   // Create tee if it doesn't exist
   if (!teeExists) {
+    teeCreated = true;
     const group = loadedCourse.$jazz.owner as Group;
 
     // Create tee holes
@@ -1036,7 +1036,7 @@ async function upsertCourse(
     teesList.$jazz.push(tee);
   }
 
-  return { courseId: courseKey, teeId: teeKey };
+  return { courseId: courseKey, teeId: teeKey, courseCreated, teeCreated };
 }
 
 /**
@@ -1118,46 +1118,48 @@ function createRound(
  * @param db - ArangoDB database connection
  * @returns Result object with success status and optional error
  */
+// Type for the pre-loaded catalog with all maps available
+type LoadedCatalog = co.loaded<typeof GameCatalog>;
+
 async function importGame(
   workerAccount: co.loaded<typeof PlayerAccount>,
-  catalog: GameCatalog,
+  loadedCatalog: LoadedCatalog,
   gameData: GameWithRoundsV03,
-  db: Database,
-): Promise<{ success: boolean; error?: string }> {
+  playerGhinMap: Map<string, string | null>,
+  courseCache: Map<string, co.loaded<typeof Course>>,
+): Promise<{
+  success: boolean;
+  error?: string;
+  coursesCreated: number;
+  coursesUpdated: number;
+  roundsCreated: number;
+}> {
   const { game, rounds: roundsData, gamespecKey } = gameData;
 
-  // Load catalog with games map
-  let loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { games: {}, players: {}, specs: {}, courses: {} },
-  });
+  // Catalog is already loaded - just access the maps directly
+  // Use type assertions since we verified loading in importGamesFromArango
+  const gamesMap = loadedCatalog.games as MapOfGames | undefined;
+  const playersMap = loadedCatalog.players as MapOfPlayers | undefined;
+  const coursesMap = loadedCatalog.courses as MapOfCourses | undefined;
 
-  // Initialize games map if needed
-  if (!loadedCatalog.$jazz.has("games")) {
-    const group = Group.create(workerAccount);
-    group.makePublic();
-    const newMap = MapOfGames.create({}, { owner: group });
-    loadedCatalog.$jazz.set("games", newMap);
-
-    loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { games: {}, players: {}, specs: {}, courses: {} },
-    });
+  if (!gamesMap || !playersMap || !coursesMap) {
+    return {
+      success: false,
+      error: "Catalog maps not loaded",
+      coursesCreated: 0,
+      coursesUpdated: 0,
+      roundsCreated: 0,
+    };
   }
 
-  const gamesMap = loadedCatalog.games;
-  if (!gamesMap) {
-    throw new Error("Failed to initialize games map");
-  }
+  const gameAlreadyExists = gamesMap.$jazz.has(game._key);
 
-  // Skip if already imported (idempotent)
-  if (gamesMap.$jazz.has(game._key)) {
-    return { success: true }; // Already imported
-  }
+  // Track stats
+  let coursesCreated = 0;
+  let coursesUpdated = 0;
+  let roundsCreated = 0;
 
-  const playersMap = loadedCatalog.players;
-  if (!playersMap) {
-    return { success: false, error: "Players map not initialized" };
-  }
-
+  // Always process rounds to upsert courses
   // Create public group for game
   const gameGroup = Group.create(workerAccount);
   gameGroup.makePublic();
@@ -1169,46 +1171,57 @@ async function importGame(
     try {
       const { round, edge, playerId: playerLegacyId } = roundData;
 
-      // Look up player in catalog - try GHIN ID first, then manual ID
-      // Query ArangoDB to get player's GHIN ID
-      const playerCursor = await db.query(
-        `
-        FOR player IN players
-          FILTER player._key == @playerKey
-          RETURN player.handicap.id
-      `,
-        { playerKey: playerLegacyId },
-      );
-
-      const ghinId = (await playerCursor.next()) as string | undefined;
-      const mapKey = ghinId || `manual_${playerLegacyId}`;
-
-      if (!playersMap.$jazz.has(mapKey)) {
-        console.warn(`Player not found in catalog: ${mapKey}, skipping round`);
-        continue;
-      }
-
-      const player = playersMap[mapKey];
-      if (!player) {
-        console.warn(`Player is null: ${mapKey}, skipping round`);
-        continue;
-      }
-
-      // Get tee and course data from first tee in round
+      // Get tee and course data from first tee in round - do this FIRST before player lookup
       if (!round.tees || round.tees.length === 0) {
         console.warn(`Round ${round._key} has no tee data, skipping`);
         continue;
       }
 
       const teeData = round.tees[0];
-      const { courseId, teeId } = await upsertCourse(
-        catalog,
+      const { courseId, teeId, courseCreated, teeCreated } = await upsertCourse(
+        coursesMap,
         teeData.course,
         teeData,
         workerAccount,
+        courseCache,
       );
+      // Track course stats
+      if (courseCreated) {
+        coursesCreated++;
+      } else if (teeCreated) {
+        // Course existed but new tee was added - count as update
+        coursesUpdated++;
+      }
+
+      // Look up player in catalog - try GHIN ID first, then manual ID
+      // Skip round creation if player not found, but course was already upserted above
+      if (!playerLegacyId) {
+        console.warn(
+          `Round ${round._key} has no playerId, skipping round creation`,
+        );
+        continue;
+      }
+
+      // Look up player's GHIN ID from cache
+      const ghinId = playerGhinMap.get(playerLegacyId);
+      const mapKey = ghinId || `manual_${playerLegacyId}`;
+
+      if (!playersMap.$jazz.has(mapKey)) {
+        console.warn(
+          `Player not found in catalog: ${mapKey}, skipping round creation`,
+        );
+        continue;
+      }
+
+      const player = playersMap[mapKey];
+      if (!player) {
+        console.warn(`Player is null: ${mapKey}, skipping round creation`);
+        continue;
+      }
 
       // Create round
+      roundsCreated++;
+
       const createdRound = createRound(
         round,
         edge,
@@ -1262,17 +1275,8 @@ async function importGame(
           const rtg = roundToGames[j];
           if (!rtg?.round) continue;
 
-          // Query ArangoDB for player GHIN ID
-          const playerCursor = await db.query(
-            `
-            FOR player IN players
-              FILTER player._key == @playerKey
-              RETURN player.handicap.id
-          `,
-            { playerKey: playerLegacyId },
-          );
-
-          const ghinId = (await playerCursor.next()) as string | undefined;
+          // Look up player's GHIN ID from cache
+          const ghinId = playerGhinMap.get(playerLegacyId);
           const mapKey = ghinId || `manual_${playerLegacyId}`;
 
           const player = playersMap[mapKey];
@@ -1302,17 +1306,8 @@ async function importGame(
         });
 
         for (const junkItem of teamData.junk) {
-          // Query ArangoDB for player GHIN ID
-          const playerCursor = await db.query(
-            `
-            FOR player IN players
-              FILTER player._key == @playerKey
-              RETURN player.handicap.id
-          `,
-            { playerKey: junkItem.player },
-          );
-
-          const ghinId = (await playerCursor.next()) as string | undefined;
+          // Look up player's GHIN ID from cache
+          const ghinId = playerGhinMap.get(junkItem.player);
           const mapKey = ghinId || `manual_${junkItem.player}`;
 
           const player = playersMap[mapKey];
@@ -1353,8 +1348,12 @@ async function importGame(
       const holeOptions = MapOfOptions.create({}, { owner: gameGroup });
 
       for (const option of game.options) {
+        // Skip options without values array
+        if (!option?.values || !Array.isArray(option.values)) {
+          continue;
+        }
         for (const valueSet of option.values) {
-          if (valueSet.holes.includes(holeData.hole)) {
+          if (valueSet?.holes?.includes(holeData.hole)) {
             // Find option in catalog - use $jazz.has to check existence
             if (catalogOptions.$jazz.has(option.name)) {
               const catalogOption = catalogOptions[option.name];
@@ -1410,22 +1409,25 @@ async function importGame(
     }
   }
 
-  // Build specs list (try to find gamespec in catalog)
+  // Build specs list (try to find gamespec in catalog by legacyId)
   const specs = ListOfGameSpecs.create([], { owner: gameGroup });
-  if (gamespecKey && loadedCatalog.specs) {
-    // Try to find spec by matching name-version pattern
-    for (const key of Object.keys(loadedCatalog.specs)) {
-      if (key.includes(gamespecKey) || gamespecKey.includes(key)) {
-        const spec = loadedCatalog.specs[key];
-        if (spec?.$isLoaded) {
-          // Spec is loaded, safe to push
-          // @ts-expect-error - MaybeLoaded nested types in migration code
-          specs.$jazz.push(spec);
-          break;
-        }
+  const specsMap = loadedCatalog.specs as MapOfGameSpecs | undefined;
+  if (gamespecKey && specsMap) {
+    // Find spec by matching legacyId (ArangoDB _key)
+    for (const key of Object.keys(specsMap)) {
+      const spec = specsMap[key];
+      if (spec?.$isLoaded && spec.legacyId === gamespecKey) {
+        // @ts-expect-error - MaybeLoaded types in migration code, spec is verified loaded
+        specs.$jazz.push(spec);
+        break;
       }
     }
   }
+
+  // Debug: log what we're about to create
+  console.log(
+    `Creating game ${game._key}: rounds=${roundToGames.length}, players=${players.length}, specs=${specs.length}, holes=${gameHoles.length}`,
+  );
 
   // Create the game
   const createdGame = Game.create(
@@ -1442,10 +1444,13 @@ async function importGame(
     { owner: gameGroup },
   );
 
-  // Add to catalog
+  // Add to catalog (always replace to ensure latest data)
   gamesMap.$jazz.set(game._key, createdGame);
+  console.log(
+    `Set game ${game._key} in catalog, game.id=${createdGame.$jazz.id}`,
+  );
 
-  return { success: true };
+  return { success: true, coursesCreated, coursesUpdated, roundsCreated };
 }
 
 /**
@@ -1472,6 +1477,57 @@ export async function importGamesFromArango(
   };
 
   try {
+    // Load catalog ONCE with all required maps - avoid repeated ensureLoaded calls
+    console.log("Loading catalog maps...");
+    let loadedCatalog = await catalog.$jazz.ensureLoaded({
+      resolve: { games: {}, players: {}, specs: {}, options: {}, courses: {} },
+    });
+
+    // Initialize maps if needed (one-time setup)
+    if (!loadedCatalog.$jazz.has("games")) {
+      const group = Group.create(workerAccount);
+      group.makePublic();
+      loadedCatalog.$jazz.set("games", MapOfGames.create({}, { owner: group }));
+    }
+    if (!loadedCatalog.$jazz.has("courses")) {
+      const group = Group.create(workerAccount);
+      group.makePublic();
+      loadedCatalog.$jazz.set(
+        "courses",
+        MapOfCourses.create({}, { owner: group }),
+      );
+    }
+
+    // Re-load after initialization to get the new maps
+    loadedCatalog = await catalog.$jazz.ensureLoaded({
+      resolve: { games: {}, players: {}, specs: {}, options: {}, courses: {} },
+    });
+
+    if (
+      !loadedCatalog.games ||
+      !loadedCatalog.players ||
+      !loadedCatalog.courses
+    ) {
+      throw new Error("Failed to load catalog maps");
+    }
+
+    console.log("Catalog maps loaded");
+
+    // Create course cache to avoid repeated Course.load calls
+    const courseCache = new Map<string, co.loaded<typeof Course>>();
+
+    // Pre-fetch all player GHIN IDs to avoid N+1 queries
+    console.log("Pre-fetching player GHIN IDs...");
+    const playerGhinCursor = await db.query(`
+      FOR player IN players
+        RETURN { key: player._key, ghinId: player.handicap.id }
+    `);
+    const playerGhinMap = new Map<string, string | null>();
+    for await (const player of playerGhinCursor) {
+      playerGhinMap.set(player.key, player.ghinId || null);
+    }
+    console.log(`Cached ${playerGhinMap.size} player GHIN lookups`);
+
     // Fetch total count and first batch
     const { games, total } = await fetchAllGames(db, 0, batchSize);
     result.games.total = total;
@@ -1508,14 +1564,17 @@ export async function importGamesFromArango(
           // Import the game
           const importResult = await importGame(
             workerAccount,
-            catalog,
+            loadedCatalog,
             gameWithRounds,
-            db,
+            playerGhinMap,
+            courseCache,
           );
 
           if (importResult.success) {
             result.games.imported++;
-            result.rounds.created += gameWithRounds.rounds.length;
+            result.courses.created += importResult.coursesCreated;
+            result.courses.updated += importResult.coursesUpdated;
+            result.rounds.created += importResult.roundsCreated;
           } else {
             result.games.failed++;
             result.errors.push({

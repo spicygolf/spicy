@@ -27,6 +27,9 @@ const {
   API_VERSION: api,
 } = process.env;
 
+// Guard against concurrent game imports
+let gamesImportInProgress = false;
+
 const betterAuth = new Elysia({ name: "better-auth" })
   .all(`${api}/auth/*`, (context: Context) => {
     if (["POST", "GET"].includes(context.request.method)) {
@@ -125,17 +128,30 @@ const app = new Elysia()
         // Server-side admin authorization check
         requireAdmin(user?.email);
 
-        console.log("Games import started by admin:", user.email);
-        const { account } = await getJazzWorker();
+        // Prevent concurrent imports
+        if (gamesImportInProgress) {
+          console.log("Games import already in progress, rejecting request");
+          return { error: "Import already in progress", inProgress: true };
+        }
 
-        console.log("Calling importGamesFromArango...");
-        const result = await importGamesFromArango(
-          account as co.loaded<typeof PlayerAccount>,
-        );
-        console.log("Games import result:", JSON.stringify(result));
-        return result;
+        gamesImportInProgress = true;
+        console.log("Games import started by admin:", user.email);
+
+        try {
+          const { account } = await getJazzWorker();
+
+          console.log("Calling importGamesFromArango...");
+          const result = await importGamesFromArango(
+            account as co.loaded<typeof PlayerAccount>,
+          );
+          console.log("Games import result:", JSON.stringify(result));
+          return result;
+        } finally {
+          gamesImportInProgress = false;
+        }
       } catch (error) {
         console.error("Games import failed:", error);
+        gamesImportInProgress = false;
         throw error;
       }
     },

@@ -256,7 +256,29 @@ export async function fetchGameWithRounds(
               FILTER pe.type == 'round2player'
               RETURN p._key
           )
-          RETURN { round: v, edge: e, playerId: player }
+          LET tees = (
+            FOR t, te IN 1..1 OUTBOUND v._id GRAPH 'games'
+              FILTER te.type == 'round2tee'
+              LET course = FIRST(
+                FOR c, ce IN 1..1 OUTBOUND t._id GRAPH 'games'
+                  FILTER ce.type == 'tee2course'
+                  RETURN {
+                    course_id: c.course_id,
+                    course_name: c.name,
+                    course_city: c.city,
+                    course_state: c.state
+                  }
+              )
+              RETURN {
+                tee_id: t.tee_id || t._key,
+                name: t.name,
+                TotalYardage: t.TotalYardage,
+                holes: t.holes,
+                Ratings: t.Ratings,
+                course: course
+              }
+          )
+          RETURN { round: MERGE(v, { tees }), edge: e, playerId: player }
       )
       RETURN { game, rounds, gamespecKey: gamespec }
     `,
