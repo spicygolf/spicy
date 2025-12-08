@@ -1,5 +1,35 @@
 PODS:
   - boost (1.84.0)
+  - CojsonCoreRn (0.19.10):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - uniffi-bindgen-react-native (= 0.29.3-1)
+    - Yoga
   - DoubleConversion (1.1.6)
   - fast_float (8.0.0)
   - FBLazyVector (0.80.0)
@@ -50,39 +80,6 @@ PODS:
     - RCTRequired
     - RCTTypeSafety
     - React
-    - React-callinvoker
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-hermes
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - SocketRocket
-    - Yoga
-  - OpenSSL-Universal (3.3.3001)
-  - QuickCrypto (1.0.0):
-    - boost
-    - DoubleConversion
-    - fast_float
-    - fmt
-    - glog
-    - hermes-engine
-    - NitroModules
-    - OpenSSL-Universal (= 3.3.3001)
-    - RCT-Folly
-    - RCT-Folly/Fabric
-    - RCTRequired
-    - RCTTypeSafety
     - React-callinvoker
     - React-Core
     - React-debug
@@ -2699,6 +2696,8 @@ PODS:
     - SocketRocket
     - Yoga
   - SocketRocket (0.7.1)
+  - uniffi-bindgen-react-native (0.29.3-1):
+    - React-Core
   - Unistyles (3.0.19):
     - boost
     - DoubleConversion
@@ -2733,6 +2732,7 @@ PODS:
 
 DEPENDENCIES:
   - boost (from `../../../node_modules/react-native/third-party-podspecs/boost.podspec`)
+  - CojsonCoreRn (from `../../../node_modules/cojson-core-rn`)
   - DoubleConversion (from `../../../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - fast_float (from `../../../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
   - FBLazyVector (from `../../../node_modules/react-native/Libraries/FBLazyVector`)
@@ -2741,7 +2741,6 @@ DEPENDENCIES:
   - hermes-engine (from `../../../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - NitroModules (from `../../../node_modules/react-native-nitro-modules`)
   - "op-sqlite (from `../../../node_modules/@op-engineering/op-sqlite`)"
-  - QuickCrypto (from `../../../node_modules/react-native-quick-crypto`)
   - RCT-Folly (from `../../../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../../../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../../../node_modules/react-native/Libraries/Required`)
@@ -2825,12 +2824,14 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - OpenSSL-Universal
     - SocketRocket
+    - uniffi-bindgen-react-native
 
 EXTERNAL SOURCES:
   boost:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/boost.podspec"
+  CojsonCoreRn:
+    :path: "../../../node_modules/cojson-core-rn"
   DoubleConversion:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   fast_float:
@@ -2848,8 +2849,6 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-nitro-modules"
   op-sqlite:
     :path: "../../../node_modules/@op-engineering/op-sqlite"
-  QuickCrypto:
-    :path: "../../../node_modules/react-native-quick-crypto"
   RCT-Folly:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -3009,6 +3008,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
+  CojsonCoreRn: ce1aef505d87c801ddd0e03f3aaff58ad4644721
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: 778b815a6fb3fa1599f581ffb9a5e85fad313c1d
@@ -3017,8 +3017,6 @@ SPEC CHECKSUMS:
   hermes-engine: 7068e976238b29e97b3bafd09a994542af7d5c0b
   NitroModules: 263f1c50a57f883a533c758100f80ba7d1c859e1
   op-sqlite: 11caeb381964751c263209ce125442ea57cae253
-  OpenSSL-Universal: 6082b0bf950e5636fe0d78def171184e2b3899c2
-  QuickCrypto: 6ed44b95a06e474fd0bf0a692d4198c89b92cc9a
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
   RCTDeprecation: ff787f6c860a1b97dd1bc27264b61d23ad1994da
   RCTRequired: 664eb8399ed8a83e26ab65af7c2ad390f7e61696
@@ -3096,6 +3094,7 @@ SPEC CHECKSUMS:
   RNScreens: ee2abe7e0c548eed14e92742e81ed991165c56aa
   RNWorklets: e0d8b8fe9e3540d4895b74c031aea9a97c74613a
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
+  uniffi-bindgen-react-native: 125eae9e3a0cf34bf8f3d4b0ceed517df7cc0733
   Unistyles: d32838bf94b28afbe4e9f932af15576f9a53e3d3
   Yoga: 0c4b7d2aacc910a1f702694fa86be830386f4ceb
 

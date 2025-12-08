@@ -34,7 +34,7 @@ A bit of history:
 cd packages/app
 bun i
 bun pods
-bun start
+bun dev
 ```
 
 ### API

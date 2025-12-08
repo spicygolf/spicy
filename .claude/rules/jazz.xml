@@ -171,7 +171,7 @@
     <rationale>Jazz provides reactive data updates. Wrapping Jazz in React patterns creates unnecessary complexity, bugs, and performance issues.</rationale>
     <react_patterns_to_avoid>
       <pattern name="useState">Never store Jazz objects in state</pattern>
-      <pattern name="useMemo">Don't memoize Jazz data - just access it directly</pattern>
+      <pattern name="useMemo">Only for expensive computations, not simple data access</pattern>
       <pattern name="useEffect">Don't sync Jazz data in effects - use selectors instead</pattern>
       <pattern name="useCallback">Only for event handlers, never for Jazz data access</pattern>
     </react_patterns_to_avoid>
@@ -198,7 +198,7 @@
           select: (g) => g.$isLoaded ? g : undefined
         });
 
-        // Just access directly - no useMemo needed
+        // Just access directly - no useMemo needed for simple access
         const facilityName = game?.$isLoaded ? getFacilityName(game) : undefined;
 
         // No useEffect needed - Jazz is already reactive
@@ -209,7 +209,8 @@
       - Use selectors to control when data is "ready"
       - Only use useState for truly local UI state (modals, form inputs, toggles)
       - Only use useEffect for side effects (navigation, API calls), not data syncing
-      - Just access Jazz data directly - no need for useMemo
+      - For simple data access, just access Jazz data directly - no useMemo needed
+      - For expensive computations on Jazz data, see "Selectors vs useMemo for Expensive Operations" rule
     </instructions>
   </rule>
 
@@ -379,6 +380,50 @@
       - Return `undefined` while data is loading
       - Return the full object only when all required data is loaded
       - This batches all progressive loads into a single render
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Selectors vs useMemo for Expensive Operations</name>
+    <description>Don't perform expensive computations inside selectors. Use lightweight selectors + useMemo instead.</description>
+    <rationale>Selectors run on EVERY CoValue update, even if equalityFn prevents re-renders. Expensive operations in selectors execute unnecessarily on every update.</rationale>
+    <examples>
+      <example type="wrong">
+        // WRONG: Expensive sorting happens on EVERY Jazz update
+        const project = useCoState(Project, projectId, {
+          resolve: { tasks: { $each: true } },
+          select: (project) => {
+            // This runs on every update, even minor ones!
+            const sortedTasks = project.tasks
+              .slice(0)
+              .sort(someExpensiveSortFunction);
+            return { tasks: sortedTasks };
+          }
+        });
+      </example>
+      <example type="correct">
+        // CORRECT: Lightweight selector + useMemo for expensive work
+        const project = useCoState(Project, projectId, {
+          resolve: { tasks: { $each: true } },
+          select: (project) => ({
+            tasks: project.tasks,
+            taskIds: project.tasks.map(t => t.$jazz.id)  // Lightweight - just extract IDs
+          })
+        });
+
+        // useMemo only recomputes when taskIds change
+        const sortedTasks = useMemo(() => {
+          return project?.tasks
+            .slice(0)
+            .sort(someExpensiveSortFunction);
+        }, [project?.taskIds]);
+      </example>
+    </examples>
+    <instructions>
+      - Keep selectors lightweight: only check loading state and extract simple values
+      - For expensive computations (sorting, filtering, grouping), use useMemo outside the selector
+      - Use stable dependency arrays in useMemo (like IDs) to control when recomputation happens
+      - This ensures expensive work only runs when data actually changes, not on every Jazz update
     </instructions>
   </rule>
 

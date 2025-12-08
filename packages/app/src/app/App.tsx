@@ -1,3 +1,4 @@
+import { jazzConfig } from "jazz-tools";
 import { StrictMode } from "react";
 import { LogBox, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -7,8 +8,19 @@ import { JazzAndAuth } from "@/providers/jazz";
 import { NavigationProvider } from "@/providers/navigation";
 import { ReactQueryProvider } from "@/providers/react-query";
 
+if (__DEV__) {
+  jazzConfig.setCustomErrorReporter(
+    (error, { getPrettyStackTrace, jazzError }) => {
+      console.error("🔴 JAZZ ERROR:", jazzError.type);
+      console.error("  CoValue ID:", jazzError.id);
+      console.error("  Message:", error.message);
+      console.error("  📍 Subscription created at:");
+      console.error(getPrettyStackTrace());
+    },
+  );
+}
+
 export function App() {
-  // Note: jazzErrorReporter tracking in issue #258
   return (
     <GestureHandlerRootView style={styles.container}>
       <StrictMode>
