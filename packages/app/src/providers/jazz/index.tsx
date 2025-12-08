@@ -1,5 +1,6 @@
 import { AuthProvider } from "jazz-tools/better-auth/auth/react";
 import { JazzReactNativeProvider } from "jazz-tools/react-native";
+import { RNCrypto } from "jazz-tools/react-native-core/crypto/RNCrypto";
 import type React from "react";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -67,7 +68,11 @@ export function JazzAndAuth({ children }: { children: React.ReactNode }) {
     `wss://cloud.jazz.tools/?key=${credentials.apiKey}` as `wss://${string}`;
 
   return (
-    <JazzReactNativeProvider sync={{ peer }} AccountSchema={PlayerAccount}>
+    <JazzReactNativeProvider
+      sync={{ peer }}
+      CryptoProvider={RNCrypto}
+      AccountSchema={PlayerAccount}
+    >
       {/* @ts-ignore - betterAuthClient types incompatible with AuthProvider */}
       <AuthProvider betterAuthClient={betterAuthClient}>
         {children}
