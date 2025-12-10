@@ -5,6 +5,8 @@ import { MapOfScores } from "./scores";
 /**
  * TeeHoleOverride - Override for a specific hole's tee data
  * Used when importing legacy games where tee data may differ from current GHIN data
+ * Also used when players want to re-arrange pop holes or there's temporary construction
+ * on the course
  */
 export const TeeHoleOverride = co.map({
   hole: z.number(),
@@ -47,8 +49,16 @@ export const Round = co.map({
    */
   handicapIndex: z.string(),
 
+  /**
+   * The course where this round was played.
+   * Embedded for offline access during scoring.
+   */
   course: co.optional(Course),
 
+  /**
+   * The tee played for this round.
+   * Embedded for offline access during scoring (hole pars, yardages, handicaps).
+   */
   tee: co.optional(Tee),
 
   scores: MapOfScores,
@@ -60,21 +70,9 @@ export const Round = co.map({
   legacyId: z.string().optional(),
 
   /**
-   * GHIN course ID reference.
-   * Used when course is stored in catalog instead of embedded.
-   */
-  courseId: z.string().optional(),
-
-  /**
-   * GHIN tee ID reference.
-   * Used when tee is stored in catalog instead of embedded.
-   */
-  teeId: z.string().optional(),
-
-  /**
    * Tee data overrides for this round.
    * Used when importing legacy games where tee configuration differs from current GHIN data.
-   * Takes precedence over catalog tee data.
+   * Takes precedence over embedded tee data.
    */
   teeOverrides: co.optional(TeeOverrides),
 
