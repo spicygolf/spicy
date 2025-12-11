@@ -21,6 +21,32 @@ export type RoundToTeam = co.loaded<typeof RoundToTeam>;
 export const ListOfRoundToTeams = co.list(RoundToTeam);
 export type ListOfRoundToTeams = co.loaded<typeof ListOfRoundToTeams>;
 
+/**
+ * TeamOption - Option/junk attributed to a team or specific player
+ * Used for tracking junk (birdie, prox, etc.) and multipliers per team
+ */
+export const TeamOption = co.map({
+  /**
+   * Name of the option (e.g., "prox", "birdie", "double")
+   */
+  optionName: z.string(),
+
+  /**
+   * Value of the option (e.g., "true", "2")
+   */
+  value: z.string(),
+
+  /**
+   * Player ID who earned this option (optional).
+   * Used for junk attribution (e.g., which player got the birdie)
+   */
+  playerId: z.string().optional(),
+});
+export type TeamOption = co.loaded<typeof TeamOption>;
+
+export const ListOfTeamOptions = co.list(TeamOption);
+export type ListOfTeamOptions = co.loaded<typeof ListOfTeamOptions>;
+
 export const Team = co.map({
   /**
    * Team identifier/name (e.g., "1", "2", "Team A", "Team B")
@@ -34,6 +60,13 @@ export const Team = co.map({
    *   team.rounds[i].roundToGame.courseHandicap
    */
   rounds: ListOfRoundToTeams,
+
+  /**
+   * Options/junk for this team.
+   * Used for tracking junk (birdie, prox, etc.) and multipliers.
+   * Can be attributed to specific players via playerId.
+   */
+  options: co.optional(ListOfTeamOptions),
 });
 export type Team = co.loaded<typeof Team>;
 

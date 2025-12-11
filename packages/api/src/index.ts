@@ -12,7 +12,11 @@ import { getCountries } from "./countries";
 import { getCourseDetails, searchCourses } from "./courses";
 import { getJazzWorker, setupWorker } from "./jazz_worker";
 import { auth } from "./lib/auth";
-import { importGameSpecsToCatalog, loadOrCreateCatalog } from "./lib/catalog";
+import {
+  importGameSpecsToCatalog,
+  importGamesFromArango,
+  loadOrCreateCatalog,
+} from "./lib/catalog";
 import { playerSearch } from "./players";
 import { requireAdmin } from "./utils/auth";
 
@@ -22,6 +26,9 @@ const {
   API_PORT: port,
   API_VERSION: api,
 } = process.env;
+
+// Guard against concurrent game imports
+let gamesImportInProgress = false;
 
 const betterAuth = new Elysia({ name: "better-auth" })
   .all(`${api}/auth/*`, (context: Context) => {
@@ -107,6 +114,44 @@ const app = new Elysia()
         return result;
       } catch (error) {
         console.error("Import failed:", error);
+        throw error;
+      }
+    },
+    {
+      auth: true,
+    },
+  )
+  .post(
+    `/${api}/catalog/import-games`,
+    async ({ user }) => {
+      try {
+        // Server-side admin authorization check
+        requireAdmin(user?.email);
+
+        // Prevent concurrent imports
+        if (gamesImportInProgress) {
+          console.log("Games import already in progress, rejecting request");
+          return { error: "Import already in progress", inProgress: true };
+        }
+
+        gamesImportInProgress = true;
+        console.log("Games import started by admin:", user.email);
+
+        try {
+          const { account } = await getJazzWorker();
+
+          console.log("Calling importGamesFromArango...");
+          const result = await importGamesFromArango(
+            account as co.loaded<typeof PlayerAccount>,
+          );
+          console.log("Games import result:", JSON.stringify(result));
+          return result;
+        } finally {
+          gamesImportInProgress = false;
+        }
+      } catch (error) {
+        console.error("Games import failed:", error);
+        gamesImportInProgress = false;
         throw error;
       }
     },

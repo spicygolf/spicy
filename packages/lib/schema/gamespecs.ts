@@ -11,6 +11,7 @@ export const GameSpec = co.map({
   spec_type: z.literal(["points", "skins"]),
   min_players: z.number(),
   location_type: z.literal(["local", "virtual"]),
+  legacyId: z.string().optional(), // ArangoDB _key for matching during import
 
   /**
    * Team configuration for this game spec.

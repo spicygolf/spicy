@@ -53,10 +53,17 @@ export function App(): React.JSX.Element {
     players: { created: number; updated: number; skipped: number };
     errors: Array<{ item: string; error: string }>;
   } | null>(null);
+
   const [ghinNumber, setGhinNumber] = useState<string>("");
   const [isMigrating, setIsMigrating] = useState<boolean>(false);
   const [isLinkingPlayer, setIsLinkingPlayer] = useState<boolean>(false);
   const [linkGhinId, setLinkGhinId] = useState<string>("");
+  const [gamesImportResult, setGamesImportResult] = useState<{
+    games: { total: number; imported: number; failed: number };
+    courses: { created: number; updated: number };
+    rounds: { created: number };
+    errors: Array<{ gameId: string; error: string }>;
+  } | null>(null);
 
   // Fetch user email and admin status from better-auth session
   useEffect(() => {
@@ -81,21 +88,22 @@ export function App(): React.JSX.Element {
       toast({
         variant: "destructive",
         title: "Authentication required",
-        description: "Please log in to import game specs",
+        description: "Please log in to import data",
       });
       return;
     }
 
     setIsImporting(true);
     setImportProgress(10);
+    setImportResult(null);
+    setGamesImportResult(null);
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
 
+      // Step 1: Import specs & players (20-50%)
       setImportProgress(20);
-
-      // Call the API endpoint to import specs (only the server can modify the worker account)
-      const response = await fetch(`${apiUrl}/catalog/import`, {
+      const specsResponse = await fetch(`${apiUrl}/catalog/import`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -103,26 +111,58 @@ export function App(): React.JSX.Element {
         credentials: "include",
       });
 
-      if (!response.ok) {
-        throw new Error(`Import failed: ${response.statusText}`);
+      if (!specsResponse.ok) {
+        throw new Error(`Specs import failed: ${specsResponse.statusText}`);
       }
 
-      const result = await response.json();
-      setImportProgress(100);
-      setImportResult(result);
+      const specsResult = await specsResponse.json();
+      setImportProgress(50);
+      setImportResult(specsResult);
 
-      // Simple toast notification
-      if (result.errors.length > 0) {
+      // Step 2: Import games (50-100%)
+      const gamesResponse = await fetch(`${apiUrl}/catalog/import-games`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!gamesResponse.ok) {
+        throw new Error(`Games import failed: ${gamesResponse.statusText}`);
+      }
+
+      const gamesResult = await gamesResponse.json();
+
+      // Check if import was rejected due to already in progress
+      if (gamesResult.inProgress) {
+        toast({
+          variant: "destructive",
+          title: "Import already in progress",
+          description: "Please wait for the current import to complete.",
+        });
+        setImportProgress(0);
+        return;
+      }
+
+      setImportProgress(100);
+      setGamesImportResult(gamesResult);
+
+      // Combined toast notification
+      const totalErrors =
+        specsResult.errors.length + (gamesResult.errors?.length || 0);
+      if (totalErrors > 0) {
         toast({
           variant: "destructive",
           title: "Import completed with errors",
-          description: `${result.errors.length} errors occurred. See details below.`,
+          description: `${totalErrors} errors occurred. See details below.`,
         });
-        console.error("Import errors:", result.errors);
+        console.error("Specs import errors:", specsResult.errors);
+        console.error("Games import errors:", gamesResult.errors);
       } else {
         toast({
           title: "Import successful",
-          description: "See results below for details",
+          description: `Imported specs, players, and ${gamesResult.games.imported} games`,
         });
       }
     } catch (error) {
@@ -484,7 +524,7 @@ export function App(): React.JSX.Element {
                       ) : (
                         <Upload className="mr-2 h-4 w-4" />
                       )}
-                      Import v0.3 Data
+                      Import from ArangoDB
                     </Button>
 
                     {importProgress > 0 && (
@@ -614,24 +654,120 @@ export function App(): React.JSX.Element {
                         )}
                       </div>
                     )}
+
+                    {gamesImportResult && (
+                      <div className="space-y-4 rounded-md border p-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold">
+                            Games Import Results
+                          </h3>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setGamesImportResult(null)}
+                          >
+                            Dismiss
+                          </Button>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-3">
+                          <div className="rounded-md border p-3">
+                            <div className="text-sm font-medium text-muted-foreground">
+                              Games
+                            </div>
+                            <div className="mt-2 space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Total:</span>
+                                <span className="font-medium">
+                                  {gamesImportResult.games.total}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-green-600">
+                                  Imported:
+                                </span>
+                                <span className="font-medium">
+                                  {gamesImportResult.games.imported}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-red-600">Failed:</span>
+                                <span className="font-medium">
+                                  {gamesImportResult.games.failed}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="rounded-md border p-3">
+                            <div className="text-sm font-medium text-muted-foreground">
+                              Courses
+                            </div>
+                            <div className="mt-2 space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-green-600">Created:</span>
+                                <span className="font-medium">
+                                  {gamesImportResult.courses.created}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-blue-600">Updated:</span>
+                                <span className="font-medium">
+                                  {gamesImportResult.courses.updated}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="rounded-md border p-3">
+                            <div className="text-sm font-medium text-muted-foreground">
+                              Rounds
+                            </div>
+                            <div className="mt-2 space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-green-600">Created:</span>
+                                <span className="font-medium">
+                                  {gamesImportResult.rounds.created}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {gamesImportResult.errors.length > 0 && (
+                          <div className="rounded-md border border-red-200 bg-red-50 p-3">
+                            <div className="text-sm font-medium text-red-900">
+                              Errors ({gamesImportResult.errors.length})
+                            </div>
+                            <div className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs">
+                              {gamesImportResult.errors.map((err) => (
+                                <div
+                                  key={`${err.gameId}-${err.error}`}
+                                  className="text-red-800"
+                                >
+                                  <span className="font-medium">
+                                    Game {err.gameId}:
+                                  </span>{" "}
+                                  {err.error}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </>
                 )}
 
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">How it works:</h3>
                   <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                    <li>Imports game specs from ArangoDB and JSON files</li>
                     <li>
-                      Extracts and imports options (game settings, junk,
-                      multipliers)
-                    </li>
-                    <li>
-                      Imports players who participated in games (GHIN ID
-                      required)
+                      Imports game specs, options, players, games, rounds, and
+                      courses from ArangoDB
                     </li>
                     <li>ArangoDB data takes precedence on conflicts</li>
                     <li>Idempotent: safe to run multiple times</li>
-                    <li>Updates existing items, creates new ones</li>
                   </ul>
                 </div>
               </CardContent>
