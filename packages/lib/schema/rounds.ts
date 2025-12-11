@@ -1,6 +1,6 @@
 import { co, z } from "jazz-tools";
 import { Course, Tee } from "./courses";
-import { MapOfScores } from "./scores";
+import { RoundScores, ScoreHistory } from "./scores";
 
 /**
  * TeeHoleOverride - Override for a specific hole's tee data
@@ -61,7 +61,17 @@ export const Round = co.map({
    */
   tee: co.optional(Tee),
 
-  scores: MapOfScores,
+  /**
+   * Scores for this round, keyed by hole number (1-indexed: "1"-"18")
+   * Flat structure for direct access: round.scores["5"].gross
+   */
+  scores: RoundScores,
+
+  /**
+   * Optional history feed (lazy-loaded) tracking score changes
+   * Append-only log of all score modifications
+   */
+  history: co.optional(ScoreHistory),
 
   /**
    * Legacy ID from ArangoDB v0.3 import (_key field).

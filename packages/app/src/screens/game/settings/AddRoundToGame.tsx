@@ -5,8 +5,8 @@ import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
   ListOfRounds,
-  MapOfScores,
   Round,
+  RoundScores,
   RoundToGame,
   type Round as RoundType,
 } from "spicylib/schema";
@@ -106,7 +106,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
         handicapIndex: gamePlayer.handicap?.$isLoaded
           ? gamePlayer.handicap.display || "0.0"
           : "0.0",
-        scores: MapOfScores.create({}, { owner: group }),
+        scores: RoundScores.create({}, { owner: group }),
       },
       { owner: group },
     );

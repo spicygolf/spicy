@@ -84,6 +84,7 @@ import {
   GameScope,
   GameSpec,
   Handicap,
+  HoleScores,
   JunkOption,
   ListOfClubs,
   ListOfGameHoles,
@@ -92,30 +93,26 @@ import {
   ListOfRounds,
   ListOfRoundToGames,
   ListOfRoundToTeams,
-  ListOfScoreUpdate,
   ListOfTeamOptions,
   ListOfTeams,
   ListOfTeeHoles,
   ListOfTees,
-  ListOfValues,
   MapOfCourses,
   type MapOfGameSpecs,
   MapOfGames,
   MapOfOptions,
   MapOfPlayers,
-  MapOfScores,
   MultiplierOption,
   Player,
   type PlayerAccount,
   Round,
+  RoundScores,
   RoundToGame,
   RoundToTeam,
-  Score,
   Team,
   TeamOption,
   Tee,
   TeeHole,
-  Value,
 } from "spicylib/schema";
 import { transformGameSpec } from "spicylib/transform";
 import type {
@@ -1088,39 +1085,23 @@ async function upsertRound(
   const legacyId = roundData._key;
   const playerId = player.$jazz.id;
 
-  // Create scores map - convert hole numbers "1"-"18" to "0"-"17"
-  const scoresMap = MapOfScores.create({}, { owner: group });
+  // Create scores map with new flat structure (1-indexed: "1"-"18")
+  const scoresMap = RoundScores.create({}, { owner: group });
 
   for (const scoreData of roundData.scores) {
-    const holeNumber = Number.parseInt(scoreData.hole, 10);
-    const holeIndex = String(holeNumber - 1); // "1" -> "0", "18" -> "17"
+    const holeNumber = scoreData.hole; // Use as-is: "1"-"18" (1-indexed)
 
-    const valuesList = ListOfValues.create([], { owner: group });
-
+    // Create HoleScores record for this hole
+    const holeScoresData: Record<string, string> = {};
     for (const val of scoreData.values) {
-      const value = Value.create(
-        {
-          k: val.k,
-          v: val.v,
-          byPlayerId: playerId,
-          at: val.ts ? new Date(val.ts) : new Date(roundData.date),
-        },
-        { owner: group },
-      );
-      valuesList.$jazz.push(value);
+      holeScoresData[val.k] = val.v;
     }
 
-    const score = Score.create(
-      {
-        seq: holeNumber,
-        values: valuesList,
-        history: ListOfScoreUpdate.create([], { owner: group }),
-      },
-      { owner: group },
-    );
-
-    scoresMap.$jazz.set(holeIndex, score);
+    const holeScores = HoleScores.create(holeScoresData, { owner: group });
+    scoresMap.$jazz.set(holeNumber, holeScores);
   }
+
+  // Note: We skip history creation for imports as historical timestamps wouldn't be accurate
 
   // Upsert round using legacyId as unique key
   const round = await Round.upsertUnique({

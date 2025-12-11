@@ -1,10 +1,5 @@
 import { useCallback } from "react";
-import {
-  type Game,
-  ListOfScoreUpdate,
-  ListOfValues,
-  Score,
-} from "spicylib/schema";
+import type { Game } from "spicylib/schema";
 import {
   calculatePops,
   getEffectiveHandicap,
@@ -44,33 +39,11 @@ export function useScoreManagement(
         return;
       }
 
-      // Use string key for MapOfScores access
-      const holeKey = String(currentHoleIndex);
-
-      // Get or create score for this hole
-      let score = round.scores[holeKey];
-
-      // If score doesn't exist, create it
-      if (!score || !score.$isLoaded) {
-        const newScore = Score.create(
-          {
-            seq: currentHoleIndex,
-            values: ListOfValues.create([], { owner: round.$jazz.owner }),
-            history: ListOfScoreUpdate.create([], {
-              owner: round.$jazz.owner,
-            }),
-          },
-          { owner: round.$jazz.owner },
-        );
-
-        // Set score in map using string key
-        round.scores.$jazz.set(holeKey, newScore);
-        score = newScore;
-      }
+      // Convert 0-indexed hole to 1-indexed string ("0" -> "1", "17" -> "18")
+      const holeNum = String(currentHoleIndex + 1);
 
       // Calculate pops based on effective handicap
       // Priority: gameHandicap > courseHandicap
-      // TODO: Once we implement "low" handicap mode, this will need to adjust
       const courseHandicap = roundToGame.courseHandicap ?? 0;
       const effectiveHandicap = getEffectiveHandicap(
         courseHandicap,
@@ -78,11 +51,13 @@ export function useScoreManagement(
       );
       const pops = calculatePops(effectiveHandicap, holeInfo.handicap);
 
-      // Set gross and pops (score is guaranteed to be loaded at this point)
-      if (score.$isLoaded) {
-        setGrossScore(score, newGross, round.playerId, round.$jazz.owner);
-        setPops(score, pops, round.playerId, round.$jazz.owner);
-      }
+      // Get owner from round for creating HoleScores if needed
+      const owner = round.$jazz.owner;
+
+      // Set gross and pops using new utility functions
+      // trackHistory = true for live scoring
+      setGrossScore(round, holeNum, newGross, owner, true);
+      setPops(round, holeNum, pops, owner, true);
     },
     [game, currentHoleIndex, holeInfo],
   );
@@ -107,18 +82,15 @@ export function useScoreManagement(
         return;
       }
 
-      // Use string key for MapOfScores access
-      const holeKey = String(currentHoleIndex);
+      // Convert 0-indexed hole to 1-indexed string
+      const holeNum = String(currentHoleIndex + 1);
 
-      // Get score for this hole
-      const score = round.scores[holeKey];
+      // Get owner from round
+      const owner = round.$jazz.owner;
 
-      if (!score?.$isLoaded) {
-        return;
-      }
-
-      // Remove the gross score (and pops)
-      removeGrossScore(score);
+      // Remove the gross score (and pops) using new utility
+      // trackHistory = true for live scoring
+      removeGrossScore(round, holeNum, owner, true);
     },
     [game, currentHoleIndex],
   );

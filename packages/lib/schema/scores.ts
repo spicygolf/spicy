@@ -1,39 +1,39 @@
 import { co, z } from "jazz-tools";
 
-// per-score value object (holding current)
-export const Value = co.map({
-  k: z.string(),
-  v: z.string(),
-  byPlayerId: z.string(),
-  at: z.date(),
+/**
+ * HoleScores - All score values for a single hole
+ * Keys: "gross", "pops", "net", or junk names like "birdie", "sandy"
+ * Values: string (numbers as strings for consistency)
+ */
+export const HoleScores = co.record(z.string(), z.string());
+export type HoleScores = co.loaded<typeof HoleScores>;
+
+/**
+ * RoundScores - All scores for a round, keyed by hole number
+ * Keys: "1", "2", ... "18" (golfer-friendly, 1-indexed)
+ * Supports extra holes: "19", "20", etc.
+ */
+export const RoundScores = co.record(z.string(), HoleScores);
+export type RoundScores = co.loaded<typeof RoundScores>;
+
+/**
+ * ScoreChange - A single score change event
+ * Stored in a CoFeed for append-only history
+ *
+ * Note: playerId is not needed here because history lives on the Round,
+ * which already has playerId. Jazz provides createdAt and account attribution.
+ */
+export const ScoreChange = co.map({
+  hole: z.string(), // "5"
+  key: z.string(), // "gross"
+  value: z.string(), // "4"
+  prev: z.optional(z.string()), // previous value, if any
 });
-export type Value = co.loaded<typeof Value>;
+export type ScoreChange = co.loaded<typeof ScoreChange>;
 
-// history of score updates
-export const ScoreUpdate = co.map({
-  byPlayerId: z.string(),
-  at: z.date(),
-  old: Value,
-});
-export type ScoreUpdate = co.loaded<typeof ScoreUpdate>;
-
-export const ListOfValues = co.list(Value);
-export type ListOfValues = co.loaded<typeof ListOfValues>;
-
-export const ListOfScoreUpdate = co.list(ScoreUpdate);
-export type ListOfScoreUpdate = co.loaded<typeof ListOfScoreUpdate>;
-
-// per-hole score object
-export const Score = co.map({
-  seq: z.number(),
-  values: ListOfValues,
-  history: ListOfScoreUpdate,
-});
-export type Score = co.loaded<typeof Score>;
-
-export const ListOfScores = co.list(Score);
-export type ListOfScores = co.loaded<typeof ListOfScores>;
-
-/** Map of hole index (as string) to Score. Use string keys like "0", "1", ... "17" */
-export const MapOfScores = co.record(z.string(), Score);
-export type MapOfScores = co.loaded<typeof MapOfScores>;
+/**
+ * ScoreHistory - Append-only feed of score changes
+ * Jazz CoFeed provides: createdAt, session/account attribution, ordering
+ */
+export const ScoreHistory = co.feed(ScoreChange);
+export type ScoreHistory = co.loaded<typeof ScoreHistory>;

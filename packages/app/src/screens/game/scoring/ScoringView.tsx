@@ -1,6 +1,6 @@
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Game, GameHole, Score } from "spicylib/schema";
+import type { Game, GameHole } from "spicylib/schema";
 import {
   calculateCourseHandicap,
   calculateNetScore,
@@ -74,18 +74,9 @@ export function ScoringView({
 
                 if (!player?.$isLoaded) return null;
 
-                // Get score for current hole (use string key for MapOfScores)
-                const holeKey = String(currentHoleIndex);
-                const scoreObj = round.scores?.$isLoaded
-                  ? round.scores[holeKey]
-                  : null;
-                // Check if score AND its values list are loaded
-                const score =
-                  scoreObj?.$isLoaded && scoreObj.values?.$isLoaded
-                    ? (scoreObj as Score)
-                    : null;
-
-                const gross = getGrossScore(score);
+                // Get gross score for current hole (1-indexed: "1"-"18")
+                const holeNum = String(currentHoleIndex + 1);
+                const gross = getGrossScore(round, holeNum);
 
                 // Calculate pops based on effective handicap
                 // Priority: gameHandicap > courseHandicap > calculated from tee
