@@ -5,6 +5,7 @@ export * from "./useCurrentHole";
 export * from "./useCurrentHoleScores";
 export * from "./useGame";
 export * from "./useGameInitialization";
+export * from "./useGameList";
 export * from "./useGamespecs";
 export * from "./useGetCountriesAndStates";
 export * from "./useGhinSearchPlayerQuery";

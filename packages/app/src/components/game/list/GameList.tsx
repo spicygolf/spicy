@@ -1,38 +1,50 @@
 import type { CoList, MaybeLoaded } from "jazz-tools";
-import { FlatList } from "react-native";
+import { ActivityIndicator, FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
 import { GameListItem } from "@/components/game/list/GameListItem";
+import { useGameList } from "@/hooks/useGameList";
+import { Text } from "@/ui";
 
 export function GameList({
   games,
 }: {
   games: MaybeLoaded<CoList<MaybeLoaded<Game>>> | undefined;
 }) {
+  const {
+    games: paginatedGames,
+    hasMore,
+    loadMore,
+    isLoading,
+  } = useGameList(games);
+
   if (!games?.$isLoaded) {
     return null;
   }
 
-  // Just access Jazz data directly - no hooks needed
-  const loadedGames: Game[] = [];
-  for (const game of games as Iterable<(typeof games)[number]>) {
-    if (game?.$isLoaded) {
-      loadedGames.push(game);
-    }
-  }
+  const renderFooter = () => {
+    if (!hasMore) return null;
 
-  const sortedGames = loadedGames.sort((a, b) => {
-    const dateA = a.start?.getTime() ?? 0;
-    const dateB = b.start?.getTime() ?? 0;
-    return dateB - dateA;
-  });
+    return (
+      <View style={styles.footer}>
+        {isLoading ? (
+          <ActivityIndicator size="small" />
+        ) : (
+          <Text style={styles.loadMoreText}>Pull to load more...</Text>
+        )}
+      </View>
+    );
+  };
 
   return (
     <FlatList
-      data={sortedGames}
+      data={paginatedGames}
       renderItem={({ item }) => <GameListItem game={item} />}
       keyExtractor={(item) => item.$jazz.id}
       contentContainerStyle={styles.flatlist}
+      onEndReached={loadMore}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={renderFooter}
     />
   );
 }
@@ -40,5 +52,13 @@ export function GameList({
 const styles = StyleSheet.create((theme) => ({
   flatlist: {
     marginVertical: theme.gap(1),
+  },
+  footer: {
+    paddingVertical: theme.gap(2),
+    alignItems: "center",
+  },
+  loadMoreText: {
+    fontSize: 14,
+    color: theme.colors.secondary,
   },
 }));

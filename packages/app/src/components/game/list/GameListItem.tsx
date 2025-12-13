@@ -1,18 +1,46 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useCoState } from "jazz-tools/react-native";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Game } from "spicylib/schema";
+import { Game } from "spicylib/schema";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
 import { Text } from "@/ui";
 import { GameCourseTeeDisplay } from "./GameCourseTeeDisplay";
+
+function formatPlayerName(name: string | null | undefined): string {
+  if (!name) return "";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return name;
+  const firstInitial = parts[0][0];
+  const lastName = parts[parts.length - 1];
+  return `${firstInitial}. ${lastName}`;
+}
 
 export function GameListItem({ game }: { game: Game | null | undefined }) {
   const navigation =
     useNavigation<NativeStackNavigationProp<GamesNavigatorParamList>>();
 
-  if (!game?.$isLoaded) return null;
+  // Load game details on-demand with shallow subscription
+  const loadedGame = useCoState(Game, game?.$jazz.id || "", {
+    resolve: {
+      players: {
+        $each: true,
+      },
+      rounds: true,
+    },
+  });
+
+  if (!game?.$isLoaded || !loadedGame?.$isLoaded) return null;
+
+  // Generate player names directly from Jazz data - no useState/useEffect needed
+  const playerNames = loadedGame.players?.$isLoaded
+    ? loadedGame.players
+        .filter((p) => p?.$isLoaded)
+        .map((p) => formatPlayerName(p?.name))
+        .join(" ")
+    : "";
 
   const handleGamePress = () => {
     navigation.navigate("Game", { gameId: game.$jazz.id });
@@ -26,31 +54,15 @@ export function GameListItem({ game }: { game: Game | null | undefined }) {
     });
   };
 
-  const formatPlayerName = (name: string | null | undefined): string => {
-    if (!name) return "";
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return name;
-    const firstInitial = parts[0][0];
-    const lastName = parts[parts.length - 1];
-    return `${firstInitial}. ${lastName}`;
-  };
-
-  // Generate player names string (may load progressively)
-  const playerNames = game.players?.$isLoaded
-    ? game.players
-        .filter((p) => p?.$isLoaded)
-        .map((p) => formatPlayerName(p?.name))
-        .join(" ")
-    : "";
-
   return (
     <TouchableOpacity onPress={handleGamePress} style={styles.container}>
       <View style={styles.game}>
-        <Text style={styles.gameName}>{game.name}</Text>
+        <Text style={styles.gameName}>{loadedGame.name}</Text>
         <Text style={styles.gameDateTime}>
-          {game.start.toLocaleDateString()} - {game.start.toLocaleTimeString()}
+          {loadedGame.start.toLocaleDateString()} -{" "}
+          {loadedGame.start.toLocaleTimeString()}
         </Text>
-        <GameCourseTeeDisplay rounds={game.rounds} />
+        <GameCourseTeeDisplay rounds={loadedGame.rounds} />
         {playerNames && <Text style={styles.playerNames}>{playerNames}</Text>}
       </View>
       <TouchableOpacity onPress={handleSettingsPress} style={styles.actions}>
