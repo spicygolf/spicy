@@ -2,6 +2,7 @@ import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole } from "spicylib/schema";
 import {
+  adjustHandicapsToLow,
   calculateCourseHandicap,
   calculateNetScore,
   calculatePops,
@@ -14,6 +15,7 @@ import {
   TeamGroup,
 } from "@/components/game/scoring";
 import type { HoleInfo } from "@/hooks";
+import { useOptionValue } from "@/hooks/useOptionValue";
 
 export interface ScoringViewProps {
   game: Game;
@@ -38,9 +40,41 @@ export function ScoringView({
   onUnscore,
   onChangeTeams,
 }: ScoringViewProps) {
-  // Handicap mode - for now hardcoded to "full"
-  // TODO: Read from game.options when we implement game options UI
-  // Jazz's reactivity handles updates automatically - no useMemo needed
+  // Check if handicaps are used in this game
+  const useHandicapsValue = useOptionValue(
+    game,
+    currentHole,
+    "use_handicaps",
+    "game",
+  );
+  const useHandicaps =
+    useHandicapsValue === "true" || useHandicapsValue === "1";
+
+  // Check handicap mode from game options
+  // Options come from gamespec, with optional hole-level overrides
+  const handicapIndexFromValue = useOptionValue(
+    game,
+    currentHole,
+    "handicap_index_from",
+    "game",
+  );
+  const handicapMode = handicapIndexFromValue === "low" ? "low" : "full";
+
+  // Build adjusted handicaps map if in "low" mode and handicaps are used
+  let adjustedHandicaps: Map<string, number> | null = null;
+  if (useHandicaps && handicapMode === "low" && game.rounds?.$isLoaded) {
+    const playerHandicaps = [];
+    for (const rtg of game.rounds) {
+      if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+
+      playerHandicaps.push({
+        playerId: rtg.round.playerId,
+        courseHandicap: rtg.courseHandicap ?? 0,
+        gameHandicap: rtg.gameHandicap,
+      });
+    }
+    adjustedHandicaps = adjustHandicapsToLow(playerHandicaps);
+  }
 
   return (
     <>
@@ -98,27 +132,37 @@ export function ScoringView({
                   }
                 }
 
-                // Default to 0 if we still don't have a course handicap
-                const finalCourseHandicap = courseHandicap ?? 0;
+                // Calculate pops and net only if handicaps are used
+                let calculatedPops = 0;
+                let net: number | null = null;
 
-                const effectiveHandicap = getEffectiveHandicap(
-                  finalCourseHandicap,
-                  rtg.gameHandicap,
-                );
+                if (useHandicaps) {
+                  // Default to 0 if we still don't have a course handicap
+                  const finalCourseHandicap = courseHandicap ?? 0;
 
-                // TODO: Use adjusted handicap if in "low" mode
-                // const handicapForPops = adjustedHandicaps?.get(round.playerId) ?? effectiveHandicap;
+                  const effectiveHandicap = getEffectiveHandicap(
+                    finalCourseHandicap,
+                    rtg.gameHandicap,
+                  );
 
-                const calculatedPops = calculatePops(
-                  effectiveHandicap,
-                  holeInfo.handicap,
-                );
+                  // Use adjusted handicap if in "low" mode
+                  const handicapForPops =
+                    adjustedHandicaps?.get(round.playerId) ?? effectiveHandicap;
 
-                // Calculate net using the calculated pops (not stored pops from score)
-                const net =
-                  gross !== null
-                    ? calculateNetScore(gross, calculatedPops)
-                    : null;
+                  calculatedPops = calculatePops(
+                    handicapForPops,
+                    holeInfo.handicap,
+                  );
+
+                  // Calculate net using the calculated pops (not stored pops from score)
+                  net =
+                    gross !== null
+                      ? calculateNetScore(gross, calculatedPops)
+                      : null;
+                } else {
+                  // No handicaps - net equals gross
+                  net = gross;
+                }
 
                 return (
                   <PlayerScoreRow

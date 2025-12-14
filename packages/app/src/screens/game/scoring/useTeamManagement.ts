@@ -35,11 +35,12 @@ export function useTeamManagement(
       : undefined;
   }
 
-  let teamCount = 2;
+  // If no teamsConfig exists, calculate from number of players (individual games)
+  let teamCount = game?.players?.$isLoaded ? game.players.length : 2;
   if (game?.scope?.$isLoaded && game.scope.$jazz.has("teamsConfig")) {
     teamCount = game.scope.teamsConfig?.$isLoaded
       ? game.scope.teamsConfig.teamCount
-      : 2;
+      : teamCount;
   }
 
   // Calculate if we should show the chooser based on current data state

@@ -73,16 +73,19 @@ export function GameTeamsList() {
   }, [game]);
 
   const teamCount = useMemo(() => {
+    // If no teamsConfig exists, calculate from number of players (individual games)
+    const defaultTeamCount = game?.players?.$isLoaded ? game.players.length : 2;
+
     if (
       !game?.$isLoaded ||
       !game.scope?.$isLoaded ||
       !game.scope.$jazz.has("teamsConfig")
     ) {
-      return 2;
+      return defaultTeamCount;
     }
     return game.scope.teamsConfig?.$isLoaded
       ? game.scope.teamsConfig.teamCount
-      : 2;
+      : defaultTeamCount;
   }, [game]);
 
   const allPlayerRounds = useMemo(() => {

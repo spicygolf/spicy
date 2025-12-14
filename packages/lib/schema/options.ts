@@ -24,6 +24,7 @@ export const GameOption = co.map({
   valueType: z.literal(["bool", "num", "menu", "text"]),
   choices: co.optional(ChoicesList),
   defaultValue: z.string(),
+  value: z.optional(z.string()),
   seq: z.optional(z.number()),
 });
 export type GameOption = co.loaded<typeof GameOption>;

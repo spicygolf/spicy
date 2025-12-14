@@ -111,6 +111,7 @@ import {
   RoundToTeam,
   Team,
   TeamOption,
+  TeamsConfig,
   Tee,
   TeeHole,
 } from "spicylib/schema";
@@ -271,6 +272,42 @@ export async function upsertGameSpec(
 
   if (transformed.long_description) {
     newSpec.$jazz.set("long_description", transformed.long_description);
+  }
+
+  // Create TeamsConfig from v0.3 team fields
+  if (
+    specData.teams !== undefined ||
+    specData.team_change_every !== undefined
+  ) {
+    const rotateEvery = specData.team_change_every ?? 0;
+
+    // Calculate teamCount based on v0.3 data
+    let teamCount: number;
+    if (specData.teams === false) {
+      // Individual game - one team per player
+      teamCount = specData.min_players;
+    } else if (specData.team_size && specData.team_size > 0) {
+      // Team game - calculate number of teams from min_players / team_size
+      teamCount = Math.ceil(specData.min_players / specData.team_size);
+    } else {
+      // Default to min_players (individual)
+      teamCount = specData.min_players;
+    }
+
+    const teamsConfig = TeamsConfig.create(
+      {
+        teamCount,
+        rotateEvery,
+      },
+      { owner: specs.$jazz.owner },
+    );
+
+    // Set maxPlayersPerTeam if team_size is defined
+    if (specData.team_size && specData.team_size > 0) {
+      teamsConfig.$jazz.set("maxPlayersPerTeam", specData.team_size);
+    }
+
+    newSpec.$jazz.set("teamsConfig", teamsConfig);
   }
 
   // Populate spec.options with references to catalog options
@@ -1092,9 +1129,12 @@ async function upsertRound(
     const holeNumber = scoreData.hole; // Use as-is: "1"-"18" (1-indexed)
 
     // Create HoleScores record for this hole
+    // Filter out 'pops' - we calculate them dynamically based on handicaps
     const holeScoresData: Record<string, string> = {};
     for (const val of scoreData.values) {
-      holeScoresData[val.k] = val.v;
+      if (val.k !== "pops") {
+        holeScoresData[val.k] = val.v;
+      }
     }
 
     const holeScores = HoleScores.create(holeScoresData, { owner: group });
@@ -1424,8 +1464,12 @@ async function importGame(
       const holeOptions = MapOfOptions.create({}, { owner: gameGroup });
 
       for (const option of game.options) {
-        // Skip options without values array
-        if (!option?.values || !Array.isArray(option.values)) {
+        // Skip game-level options (they have a value field, not values array)
+        if (
+          !("values" in option) ||
+          !option.values ||
+          !Array.isArray(option.values)
+        ) {
           continue;
         }
         for (const valueSet of option.values) {
@@ -1450,15 +1494,6 @@ async function importGame(
 
     gameHoles.$jazz.push(gameHole);
   }
-
-  // Create Game
-  // Build scope
-  const scope = GameScope.create(
-    {
-      holes: game.scope.holes as "all18" | "front9" | "back9",
-    },
-    { owner: gameGroup },
-  );
 
   // Build players list
   const players = ListOfPlayers.create([], { owner: gameGroup });
@@ -1488,17 +1523,69 @@ async function importGame(
   // Build specs list (try to find gamespec in catalog by legacyId)
   const specs = ListOfGameSpecs.create([], { owner: gameGroup });
   const specsMap = loadedCatalog.specs as MapOfGameSpecs | undefined;
+  let gameSpec: GameSpec | null = null;
   if (gamespecKey && specsMap) {
     // Find spec by matching legacyId (ArangoDB _key)
     for (const key of Object.keys(specsMap)) {
       const spec = specsMap[key];
       if (spec?.$isLoaded && spec.legacyId === gamespecKey) {
+        gameSpec = spec as GameSpec;
         // @ts-expect-error - MaybeLoaded types in migration code, spec is verified loaded
         specs.$jazz.push(spec);
         break;
       }
     }
   }
+
+  // Build scope with teamsConfig
+  // Start with gamespec's teamsConfig as template, then apply instance-specific overrides
+  let teamCount: number;
+  let rotateEvery: number;
+  let maxPlayersPerTeam: number | undefined;
+
+  if (
+    gameSpec?.$isLoaded &&
+    gameSpec.$jazz.has("teamsConfig") &&
+    gameSpec.teamsConfig?.$isLoaded
+  ) {
+    // Use gamespec's teamsConfig as defaults
+    teamCount = gameSpec.teamsConfig.teamCount;
+    rotateEvery = gameSpec.teamsConfig.rotateEvery;
+    maxPlayersPerTeam = gameSpec.teamsConfig.maxPlayersPerTeam;
+  } else {
+    // Fallback if no gamespec teamsConfig
+    teamCount = players.length;
+    rotateEvery = 0;
+  }
+
+  // Override with instance-specific teams_rotate from v0.3 data if present
+  if (game.scope.teams_rotate) {
+    rotateEvery = Number.parseInt(game.scope.teams_rotate, 10);
+  }
+
+  const teamsConfig = TeamsConfig.create(
+    {
+      teamCount,
+      rotateEvery,
+    },
+    { owner: gameGroup },
+  );
+
+  // Set optional maxPlayersPerTeam if defined
+  if (maxPlayersPerTeam !== undefined) {
+    teamsConfig.$jazz.set("maxPlayersPerTeam", maxPlayersPerTeam);
+  }
+
+  // Create scope with required fields only
+  const scope = GameScope.create(
+    {
+      holes: game.scope.holes as "all18" | "front9" | "back9",
+    },
+    { owner: gameGroup },
+  );
+
+  // Set optional CoMap field after creation
+  scope.$jazz.set("teamsConfig", teamsConfig);
 
   // Debug: log what we're about to upsert
   console.log(
@@ -1523,6 +1610,73 @@ async function importGame(
 
   if (!createdGame || !createdGame.$isLoaded) {
     throw new Error(`Failed to upsert game: ${game._key}`);
+  }
+
+  // Import game-level option overrides from v0.3 data
+  // v0.3 game options have two types:
+  // 1. Game-level: {name, disp, type, value} - applies to entire game
+  // 2. Hole-level: {name, values: [{value, holes}]} - applies to specific holes
+  const catalogOptions = loadedCatalog.options;
+  if (game.options && game.options.length > 0 && catalogOptions?.$isLoaded) {
+    const gameOptionsMap = MapOfOptions.create({}, { owner: gameGroup });
+
+    for (const option of game.options) {
+      // Skip hole-level options (they have a values array, handled elsewhere)
+      if ("values" in option && option.values && Array.isArray(option.values)) {
+        continue;
+      }
+
+      // Game-level option - copy from catalog and set value override
+      if (
+        "value" in option &&
+        option.name &&
+        option.value &&
+        catalogOptions.$jazz.has(option.name)
+      ) {
+        const catalogOption = catalogOptions[option.name];
+        if (catalogOption?.$isLoaded && catalogOption.type === "game") {
+          const gameOption = catalogOption as GameOption;
+
+          // Create new option for this game
+          const newOption = GameOption.create(
+            {
+              name: gameOption.name,
+              disp: gameOption.disp,
+              type: "game",
+              version: gameOption.version,
+              valueType: gameOption.valueType,
+              defaultValue: gameOption.defaultValue,
+            },
+            { owner: gameGroup },
+          );
+
+          // Copy choices if they exist
+          if (
+            gameOption.$jazz.has("choices") &&
+            gameOption.choices?.$isLoaded
+          ) {
+            // @ts-expect-error - MaybeLoaded types in migration code
+            newOption.$jazz.set("choices", gameOption.choices);
+          }
+
+          // Copy seq if it exists
+          if (gameOption.$jazz.has("seq") && gameOption.seq !== undefined) {
+            newOption.$jazz.set("seq", gameOption.seq);
+          }
+
+          // Set the value from v0.3 data
+          newOption.$jazz.set("value", option.value);
+
+          // Add to game options map
+          gameOptionsMap.$jazz.set(option.name, newOption);
+        }
+      }
+    }
+
+    // Set game.options if we created any options
+    if (Object.keys(gameOptionsMap).length > 0) {
+      createdGame.$jazz.set("options", gameOptionsMap);
+    }
   }
 
   // Add to catalog map for enumeration (idempotent - same key overwrites)

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import type { Game } from "spicylib/schema";
 import {
+  adjustHandicapsToLow,
   calculatePops,
   getEffectiveHandicap,
   removeGrossScore,
@@ -8,6 +9,7 @@ import {
   setPops,
 } from "spicylib/utils";
 import type { HoleInfo } from "./useHoleNavigation";
+import { useOptionValue } from "./useOptionValue";
 
 export interface UseScoreManagementReturn {
   handleScoreChange: (roundToGameId: string, newGross: number) => void;
@@ -19,6 +21,20 @@ export function useScoreManagement(
   currentHoleIndex: number,
   holeInfo: HoleInfo | null,
 ): UseScoreManagementReturn {
+  // Check if handicaps are used in this game
+  const useHandicapsValue = useOptionValue(game, null, "use_handicaps", "game");
+  const useHandicaps =
+    useHandicapsValue === "true" || useHandicapsValue === "1";
+
+  // Get handicap mode from game options (no hole-level override for this option)
+  const handicapIndexFromValue = useOptionValue(
+    game,
+    null,
+    "handicap_index_from",
+    "game",
+  );
+  const handicapMode = handicapIndexFromValue === "low" ? "low" : "full";
+
   const handleScoreChange = useCallback(
     (roundToGameId: string, newGross: number) => {
       if (!game?.rounds?.$isLoaded || !holeInfo) {
@@ -42,24 +58,48 @@ export function useScoreManagement(
       // Convert 0-indexed hole to 1-indexed string ("0" -> "1", "17" -> "18")
       const holeNum = String(currentHoleIndex + 1);
 
-      // Calculate pops based on effective handicap
-      // Priority: gameHandicap > courseHandicap
-      const courseHandicap = roundToGame.courseHandicap ?? 0;
-      const effectiveHandicap = getEffectiveHandicap(
-        courseHandicap,
-        roundToGame.gameHandicap,
-      );
-      const pops = calculatePops(effectiveHandicap, holeInfo.handicap);
-
       // Get owner from round for creating HoleScores if needed
       const owner = round.$jazz.owner;
 
-      // Set gross and pops using new utility functions
+      // Set gross score
       // trackHistory = true for live scoring
       setGrossScore(round, holeNum, newGross, owner, true);
-      setPops(round, holeNum, pops, owner, true);
+
+      // Calculate and set pops only if handicaps are used
+      if (useHandicaps) {
+        let handicapForPops: number;
+
+        if (handicapMode === "low") {
+          // Build player handicaps and adjust to low
+          const playerHandicaps = [];
+          for (const rtg of game.rounds as Iterable<
+            (typeof game.rounds)[number]
+          >) {
+            if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+
+            playerHandicaps.push({
+              playerId: rtg.round.playerId,
+              courseHandicap: rtg.courseHandicap ?? 0,
+              gameHandicap: rtg.gameHandicap,
+            });
+          }
+
+          const adjustedHandicaps = adjustHandicapsToLow(playerHandicaps);
+          handicapForPops = adjustedHandicaps.get(round.playerId) ?? 0;
+        } else {
+          // Use full course handicap (or game handicap if set)
+          const courseHandicap = roundToGame.courseHandicap ?? 0;
+          handicapForPops = getEffectiveHandicap(
+            courseHandicap,
+            roundToGame.gameHandicap,
+          );
+        }
+
+        const pops = calculatePops(handicapForPops, holeInfo.handicap);
+        setPops(round, holeNum, pops, owner, true);
+      }
     },
-    [game, currentHoleIndex, holeInfo],
+    [game, currentHoleIndex, holeInfo, useHandicaps, handicapMode],
   );
 
   const handleUnscore = useCallback(
