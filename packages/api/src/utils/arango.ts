@@ -149,6 +149,52 @@ export interface TeeRating {
   bogey: number;
 }
 
+/**
+ * Raw rating format as stored in ArangoDB
+ * Array of objects with RatingType discriminator
+ */
+export interface ArangoTeeRating {
+  RatingType: "Total" | "Front" | "Back";
+  CourseRating: number;
+  SlopeRating: number;
+  BogeyRating: number;
+}
+
+/**
+ * Convert ArangoDB ratings array to the format used in Jazz schema
+ */
+export function convertArangoRatings(ratings: ArangoTeeRating[] | undefined): {
+  total: TeeRating;
+  front: TeeRating;
+  back: TeeRating;
+} {
+  const defaultRating: TeeRating = { rating: 0, slope: 0, bogey: 0 };
+
+  if (!ratings || !Array.isArray(ratings) || ratings.length === 0) {
+    return { total: defaultRating, front: defaultRating, back: defaultRating };
+  }
+
+  function findRating(ratingsArr: ArangoTeeRating[], type: string): TeeRating {
+    const r = ratingsArr.find(
+      (r) => r.RatingType?.toLowerCase() === type.toLowerCase(),
+    );
+    if (r) {
+      return {
+        rating: r.CourseRating,
+        slope: r.SlopeRating,
+        bogey: r.BogeyRating,
+      };
+    }
+    return defaultRating;
+  }
+
+  return {
+    total: findRating(ratings, "Total"),
+    front: findRating(ratings, "Front"),
+    back: findRating(ratings, "Back"),
+  };
+}
+
 export interface RoundV03 {
   _key: string;
   date: string;
@@ -168,11 +214,7 @@ export interface RoundV03 {
       length: number;
       handicap: number;
     }>;
-    Ratings: {
-      total?: TeeRating;
-      front?: TeeRating;
-      back?: TeeRating;
-    };
+    Ratings: ArangoTeeRating[];
     course: {
       course_id: string;
       course_name: string;

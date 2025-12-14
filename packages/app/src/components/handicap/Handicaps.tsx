@@ -44,9 +44,10 @@ export function Handicaps({ player, round, roundToGame, onPress }: Props) {
 
   const hasCourseGameOverride = (() => {
     if (!roundToGame?.$isLoaded) return false;
-    if (!roundToGame.$isLoaded) return false;
 
     // Check if there's a course handicap override
+    // Field must exist (has) AND have a non-undefined value
+    // Note: Use $jazz.delete() to remove fields, not $jazz.set(undefined)
     if (roundToGame.courseHandicap !== undefined) {
       return roundToGame.courseHandicap !== calculatedCourseHandicap;
     }

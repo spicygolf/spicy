@@ -97,18 +97,24 @@ const app = new Elysia()
   }))
   .post(
     `/${api}/catalog/import`,
-    async ({ user }) => {
+    async ({ user, body }) => {
       try {
-        // Server-side admin authorization check
         requireAdmin(user?.email);
 
-        console.log("Catalog import started by admin:", user.email);
+        const options = body as { specs?: boolean; players?: boolean } | null;
+        const importSpecs = options?.specs ?? true;
+        const importPlayers = options?.players ?? true;
+
+        console.log(
+          `Catalog import started by ${user.email} (specs: ${importSpecs}, players: ${importPlayers})`,
+        );
         const { account } = await getJazzWorker();
 
         console.log("Calling importGameSpecsToCatalog...");
-        // API uses its own ArangoDB config from environment variables
         const result = await importGameSpecsToCatalog(
           account as co.loaded<typeof PlayerAccount>,
+          undefined,
+          { specs: importSpecs, players: importPlayers },
         );
         console.log("Import result:", JSON.stringify(result));
         return result;
@@ -117,15 +123,12 @@ const app = new Elysia()
         throw error;
       }
     },
-    {
-      auth: true,
-    },
+    { auth: true },
   )
   .post(
     `/${api}/catalog/import-games`,
     async ({ user }) => {
       try {
-        // Server-side admin authorization check
         requireAdmin(user?.email);
 
         // Prevent concurrent imports
@@ -135,7 +138,7 @@ const app = new Elysia()
         }
 
         gamesImportInProgress = true;
-        console.log("Games import started by admin:", user.email);
+        console.log("Games import started by:", user.email);
 
         try {
           const { account } = await getJazzWorker();
@@ -155,9 +158,7 @@ const app = new Elysia()
         throw error;
       }
     },
-    {
-      auth: true,
-    },
+    { auth: true },
   )
   .post(
     `/${api}/player/link`,

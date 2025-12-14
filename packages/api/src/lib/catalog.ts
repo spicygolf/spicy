@@ -116,21 +116,21 @@ import {
   TeeHole,
 } from "spicylib/schema";
 import { transformGameSpec } from "spicylib/transform";
-import type {
-  GameSpecV03,
-  GameWithRoundsV03,
-  RoundToGameEdgeV03,
-  RoundV03,
-  TeeRating,
-} from "../utils/arango";
+
 import {
   type ArangoConfig,
+  type ArangoTeeRating,
+  convertArangoRatings,
   createArangoConnection,
   defaultConfig,
   fetchAllGames,
   fetchGameSpecs,
   fetchGameWithRounds,
   fetchPlayersWithGames,
+  type GameSpecV03,
+  type GameWithRoundsV03,
+  type RoundToGameEdgeV03,
+  type RoundV03,
 } from "../utils/arango";
 import { loadAllGameSpecs } from "../utils/json-reader";
 
@@ -706,13 +706,27 @@ async function importPlayers(
 }
 
 /**
+ * Import options for catalog import
+ */
+export interface CatalogImportOptions {
+  specs?: boolean;
+  players?: boolean;
+}
+
+/**
  * Import all game specs to the catalog (idempotent)
  */
 export async function importGameSpecsToCatalog(
   workerAccount: co.loaded<typeof PlayerAccount>,
   arangoConfig?: ArangoConfig,
+  options?: CatalogImportOptions,
 ): Promise<ImportResult> {
-  console.log("Starting import to catalog for worker:", workerAccount.$jazz.id);
+  const importSpecs = options?.specs ?? true;
+  const importPlayersFlag = options?.players ?? true;
+
+  console.log(
+    `Starting import to catalog for worker: ${workerAccount.$jazz.id} (specs: ${importSpecs}, players: ${importPlayersFlag})`,
+  );
 
   const catalog = await loadOrCreateCatalog(workerAccount);
   console.log("Catalog loaded/created:", catalog.$jazz.id);
@@ -849,65 +863,75 @@ export async function importGameSpecsToCatalog(
     }
   }
 
-  // Second pass: Import all collected options
-  console.log(`Importing ${allOptions.size} total options...`);
-  try {
-    const optionsResult = await upsertOptions(
-      workerAccount,
-      catalog,
-      Array.from(allOptions.values()),
-    );
-    result.options = optionsResult;
-  } catch (error) {
-    result.errors.push({
-      item: "options:all",
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-
-  // Third pass: Import specs with references to catalog options
-  const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { options: {} },
-  });
-
-  console.log(`Importing ${validSpecs.length} specs with option references...`);
-  for (const spec of validSpecs) {
+  // Second pass: Import all collected options (only if importing specs)
+  if (importSpecs) {
+    console.log(`Importing ${allOptions.size} total options...`);
     try {
-      const { created, updated } = await upsertGameSpec(
+      const optionsResult = await upsertOptions(
+        workerAccount,
         catalog,
-        spec,
-        loadedCatalog.options || undefined,
+        Array.from(allOptions.values()),
       );
-
-      if (created) {
-        result.specs.created++;
-      } else if (updated) {
-        result.specs.updated++;
-      } else {
-        result.specs.skipped++;
-      }
+      result.options = optionsResult;
     } catch (error) {
       result.errors.push({
-        item: `spec:${spec.disp || spec.name || spec._key || "unknown"}`,
+        item: "options:all",
         error: error instanceof Error ? error.message : String(error),
       });
     }
+
+    // Third pass: Import specs with references to catalog options
+    const loadedCatalog = await catalog.$jazz.ensureLoaded({
+      resolve: { options: {} },
+    });
+
+    console.log(
+      `Importing ${validSpecs.length} specs with option references...`,
+    );
+    for (const spec of validSpecs) {
+      try {
+        const { created, updated } = await upsertGameSpec(
+          catalog,
+          spec,
+          loadedCatalog.options || undefined,
+        );
+
+        if (created) {
+          result.specs.created++;
+        } else if (updated) {
+          result.specs.updated++;
+        } else {
+          result.specs.skipped++;
+        }
+      } catch (error) {
+        result.errors.push({
+          item: `spec:${spec.disp || spec.name || spec._key || "unknown"}`,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+  } else {
+    console.log("Skipping specs import (disabled)");
   }
 
-  // Fourth pass: Import players
-  console.log("Importing players...");
-  try {
-    const playersResult = await importPlayers(
-      workerAccount,
-      catalog,
-      arangoConfig,
-    );
-    result.players = playersResult;
-  } catch (error) {
-    result.errors.push({
-      item: "players:all",
-      error: error instanceof Error ? error.message : String(error),
-    });
+  // Fourth pass: Import players (only if enabled)
+  if (importPlayersFlag) {
+    console.log("Importing players...");
+    try {
+      const playersResult = await importPlayers(
+        workerAccount,
+        catalog,
+        arangoConfig,
+      );
+      result.players = playersResult;
+    } catch (error) {
+      result.errors.push({
+        item: "players:all",
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  } else {
+    console.log("Skipping players import (disabled)");
   }
 
   return result;
@@ -952,11 +976,7 @@ async function upsertCourse(
       length: number;
       handicap: number;
     }>;
-    Ratings: {
-      total?: TeeRating;
-      front?: TeeRating;
-      back?: TeeRating;
-    };
+    Ratings: ArangoTeeRating[];
   },
   workerAccount: co.loaded<typeof PlayerAccount>,
   courseCache: Map<string, co.loaded<typeof Course>>,
@@ -1077,12 +1097,8 @@ async function upsertCourse(
       gender = "F";
     }
 
-    // Build ratings object with proper types
-    const ratings = {
-      total: teeData.Ratings.total || { rating: 0, slope: 0, bogey: 0 },
-      front: teeData.Ratings.front || { rating: 0, slope: 0, bogey: 0 },
-      back: teeData.Ratings.back || { rating: 0, slope: 0, bogey: 0 },
-    };
+    // Convert ArangoDB ratings array format to Jazz schema format
+    const ratings = convertArangoRatings(teeData.Ratings);
 
     const newTee = Tee.create(
       {
@@ -1101,6 +1117,16 @@ async function upsertCourse(
     teesList.$jazz.push(newTee);
     existingTee = newTee as co.loaded<typeof Tee>;
     teeCache.set(teeKey, existingTee);
+  } else {
+    // Tee exists - check if ratings need to be updated (were imported with zeros)
+    const currentSlope = existingTee.ratings?.total?.slope ?? 0;
+    const newRatings = convertArangoRatings(teeData.Ratings);
+    const newSlope = newRatings.total.slope;
+
+    if (currentSlope === 0 && newSlope > 0) {
+      // Update tee with correct ratings from ArangoDB
+      existingTee.$jazz.set("ratings", newRatings);
+    }
   }
 
   return { course: loadedCourse, tee: existingTee, courseCreated, teeCreated };
@@ -1251,9 +1277,6 @@ async function importGame(
     };
   }
 
-  // Check if game already exists (for tracking created vs updated)
-  const gameAlreadyExists = gamesMap.$jazz.has(game._key);
-
   // Track stats
   const stats = {
     courses: { created: 0, updated: 0, skipped: 0 },
@@ -1261,10 +1284,13 @@ async function importGame(
     rounds: { created: 0, updated: 0, skipped: 0 },
   };
 
-  // Always process rounds to upsert courses
-  // Create public group for game
-  const gameGroup = Group.create(workerAccount);
-  gameGroup.makePublic();
+  // For idempotency: ALWAYS use workerGroup as owner for game-related upserts
+  // upsertUnique derives CoValue ID from (unique + owner), so using the same
+  // stable workerGroup ensures we always find/update existing games
+  const gameGroup = workerGroup;
+
+  // Check if game exists in catalog (for tracking created vs updated)
+  const gameExistedInCatalog = gamesMap.$jazz.has(game._key);
 
   // Import rounds
   const roundToGames = ListOfRoundToGames.create([], { owner: gameGroup });
@@ -1336,13 +1362,25 @@ async function importGame(
         continue;
       }
 
-      const player = playersMap[mapKey];
-      if (!player || !player.$isLoaded) {
-        console.warn(
-          `Player is null or not loaded: ${mapKey}, skipping round creation`,
-        );
+      // Get player reference and load if needed
+      let player = playersMap[mapKey];
+      if (!player) {
+        console.warn(`Player is null: ${mapKey}, skipping round creation`);
         stats.rounds.skipped++;
         continue;
+      }
+
+      // If player isn't loaded, try to load it
+      if (!player.$isLoaded) {
+        const loadedPlayer = await Player.load(player.$jazz.id, {});
+        if (!loadedPlayer || !loadedPlayer.$isLoaded) {
+          console.warn(
+            `Player failed to load: ${mapKey}, skipping round creation`,
+          );
+          stats.rounds.skipped++;
+          continue;
+        }
+        player = loadedPlayer;
       }
 
       // Upsert round with embedded course and tee (idempotent)
@@ -1358,22 +1396,32 @@ async function importGame(
         workerGroup,
       );
 
-      // Create RoundToGame edge
-      const roundToGame = RoundToGame.create(
-        {
+      // Upsert RoundToGame edge using composite key (round + game legacy IDs)
+      // NOTE: We intentionally do NOT import courseHandicap from ArangoDB.
+      // The app calculates it dynamically from handicapIndex and tee ratings.
+      // ArangoDB values were often off-by-one due to different rounding.
+      const roundToGame = await RoundToGame.upsertUnique({
+        unique: `${round._key}-${game._key}`,
+        value: {
           round: createdRound,
           handicapIndex: edge.handicap_index,
         },
-        { owner: gameGroup },
-      );
+        owner: gameGroup,
+      });
 
-      if (edge.course_handicap !== undefined) {
-        roundToGame.$jazz.set("courseHandicap", edge.course_handicap);
-      }
-      if (edge.game_handicap !== undefined) {
-        roundToGame.$jazz.set("gameHandicap", edge.game_handicap);
+      if (!roundToGame?.$isLoaded) {
+        throw new Error(`Failed to upsert RoundToGame for round ${round._key}`);
       }
 
+      // Delete any existing courseHandicap/gameHandicap - we calculate dynamically now
+      if (roundToGame.$jazz.has("courseHandicap")) {
+        roundToGame.$jazz.delete("courseHandicap");
+      }
+      if (roundToGame.$jazz.has("gameHandicap")) {
+        roundToGame.$jazz.delete("gameHandicap");
+      }
+
+      // @ts-expect-error - upsertUnique returns MaybeLoaded but we've verified $isLoaded above
       roundToGames.$jazz.push(roundToGame);
     } catch (error) {
       console.error(`Failed to import round ${roundData.round._key}:`, error);
@@ -1698,7 +1746,7 @@ async function importGame(
 
   return {
     success: true,
-    gameCreated: !gameAlreadyExists,
+    gameCreated: !gameExistedInCatalog,
     courses: stats.courses,
     tees: stats.tees,
     rounds: stats.rounds,
@@ -1775,6 +1823,7 @@ export async function importGamesFromArango(
       throw new Error("Worker account has no root");
     }
     const workerGroup = loadedWorker.root.$jazz.owner as Group;
+    console.log(`workerGroup ID: ${workerGroup.$jazz.id}`);
 
     // Create course cache to avoid repeated Course.load calls
     const courseCache = new Map<string, co.loaded<typeof Course>>();
