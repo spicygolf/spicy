@@ -1,25 +1,36 @@
-import { type Score, Value } from "../schema/scores";
+import type { Group } from "jazz-tools";
+import { HoleScores, type Round, ScoreChange, ScoreHistory } from "../schema";
 
 /**
- * Get a value from a score's values list by key (e.g., "gross", "pops", "net")
+ * Get a value from a hole's scores by key (e.g., "gross", "pops", "net")
+ * Flat access pattern: round.scores["5"]?.gross
  */
-export function getScoreValue(score: Score | null, key: string): string | null {
-  if (!score?.$isLoaded || !score.values?.$isLoaded) {
+export function getScoreValue(
+  round: Round | null,
+  holeNum: string,
+  key: string,
+): string | null {
+  if (!round?.$isLoaded || !round.scores?.$isLoaded) {
     return null;
   }
 
-  const value = score.values.find((v) => v?.$isLoaded && v.k === key);
-  return value?.$isLoaded ? value.v : null;
+  const holeScores = round.scores[holeNum];
+  if (!holeScores?.$isLoaded) {
+    return null;
+  }
+
+  return holeScores[key] ?? null;
 }
 
 /**
  * Get a numeric score value, returning null if not found or invalid
  */
 export function getScoreValueAsNumber(
-  score: Score | null,
+  round: Round | null,
+  holeNum: string,
   key: string,
 ): number | null {
-  const value = getScoreValue(score, key);
+  const value = getScoreValue(round, holeNum, key);
   if (value === null) return null;
 
   const num = Number.parseInt(value, 10);
@@ -78,25 +89,31 @@ export function calculatePops(
 /**
  * Get gross score as number, returns null if not found
  */
-export function getGrossScore(score: Score | null): number | null {
-  return getScoreValueAsNumber(score, "gross");
+export function getGrossScore(
+  round: Round | null,
+  holeNum: string,
+): number | null {
+  return getScoreValueAsNumber(round, holeNum, "gross");
 }
 
 /**
  * Get pops (strokes received) as number, returns 0 if not found
  */
-export function getPops(score: Score | null): number {
-  return getScoreValueAsNumber(score, "pops") ?? 0;
+export function getPops(round: Round | null, holeNum: string): number {
+  return getScoreValueAsNumber(round, holeNum, "pops") ?? 0;
 }
 
 /**
- * Get net score from a score object, calculating from gross and pops
+ * Get net score from a round/hole, calculating from gross and pops
  */
-export function getNetScore(score: Score | null): number | null {
-  const gross = getGrossScore(score);
+export function getNetScore(
+  round: Round | null,
+  holeNum: string,
+): number | null {
+  const gross = getGrossScore(round, holeNum);
   if (gross === null) return null;
 
-  const pops = getPops(score);
+  const pops = getPops(round, holeNum);
   return calculateNetScore(gross, pops);
 }
 
@@ -122,102 +139,157 @@ export function getScoreToParName(scoreToPar: number): string {
 }
 
 /**
- * Set a value in a score's values list, creating or updating as needed
- * This function modifies the score object in place
+ * Set a value in a hole's scores, creating HoleScores if needed
+ * New flat access pattern with optional history tracking
+ *
+ * @param round - The round to modify
+ * @param holeNum - Hole number as string (1-indexed: "1"-"18")
+ * @param key - Score key (e.g., "gross", "pops", "net")
+ * @param value - Score value as string
+ * @param owner - Jazz owner for creating new CoMaps
+ * @param trackHistory - Whether to record this change in history (default: false for imports)
  */
 export function setScoreValue(
-  score: Score,
+  round: Round,
+  holeNum: string,
   key: string,
   value: string,
-  playerId: string,
-  owner: Score["$jazz"]["owner"],
+  owner: Group,
+  trackHistory = false,
 ): void {
-  if (!score.$isLoaded) {
-    throw new Error("Score must be loaded before setting values");
+  if (!round.$isLoaded) {
+    throw new Error("Round must be loaded before setting scores");
   }
 
-  if (!score.values?.$isLoaded) {
-    throw new Error("Score values must be loaded before setting values");
+  if (!round.scores?.$isLoaded) {
+    throw new Error("Round scores must be loaded before setting scores");
   }
 
-  // Find existing value with this key
-  const existingIndex = score.values.findIndex(
-    (v) => v?.$isLoaded && v.k === key,
-  );
+  // Get or create HoleScores for this hole
+  let holeScores = round.scores[holeNum];
+  if (!holeScores?.$isLoaded) {
+    holeScores = HoleScores.create({}, { owner });
+    round.scores.$jazz.set(holeNum, holeScores);
+  }
 
-  // Create new value
-  const newValue = Value.create(
-    {
-      k: key,
-      v: value,
-      byPlayerId: playerId,
-      at: new Date(),
-    },
-    { owner },
-  );
+  // Track previous value for history
+  const prev = trackHistory ? holeScores[key] : undefined;
 
-  if (existingIndex >= 0) {
-    // Update existing value - MUST use $jazz.set
-    score.values.$jazz.set(existingIndex, newValue);
-  } else {
-    // Add new value
-    score.values.$jazz.push(newValue);
+  // Set the value
+  holeScores.$jazz.set(key, value);
+
+  // Record to history if requested
+  if (trackHistory) {
+    // Create history feed if it doesn't exist
+    if (!round.$jazz.has("history")) {
+      round.$jazz.set("history", ScoreHistory.create([], { owner }));
+    }
+
+    const history = round.history;
+    if (history?.$isLoaded) {
+      const change = ScoreChange.create(
+        {
+          hole: holeNum,
+          key,
+          value,
+          prev,
+        },
+        { owner },
+      );
+      history.$jazz.push(change);
+    }
   }
 }
 
 /**
- * Update gross score for a score object
+ * Update gross score for a hole
  */
 export function setGrossScore(
-  score: Score,
+  round: Round,
+  holeNum: string,
   gross: number,
-  playerId: string,
-  owner: Score["$jazz"]["owner"],
+  owner: Group,
+  trackHistory = false,
 ): void {
-  setScoreValue(score, "gross", gross.toString(), playerId, owner);
+  setScoreValue(round, holeNum, "gross", gross.toString(), owner, trackHistory);
 }
 
 /**
- * Update pops (strokes received) for a score object
+ * Update pops (strokes received) for a hole
  */
 export function setPops(
-  score: Score,
+  round: Round,
+  holeNum: string,
   pops: number,
-  playerId: string,
-  owner: Score["$jazz"]["owner"],
+  owner: Group,
+  trackHistory = false,
 ): void {
-  setScoreValue(score, "pops", pops.toString(), playerId, owner);
+  setScoreValue(round, holeNum, "pops", pops.toString(), owner, trackHistory);
 }
 
 /**
- * Remove a value from a score's values list by key
- * This effectively "unscores" a hole for that value type
+ * Remove a value from a hole's scores
+ * This effectively "unscores" that value for the hole
  */
-export function removeScoreValue(score: Score, key: string): void {
-  if (!score.$isLoaded) {
-    throw new Error("Score must be loaded before removing values");
+export function removeScoreValue(
+  round: Round,
+  holeNum: string,
+  key: string,
+  owner: Group,
+  trackHistory = false,
+): void {
+  if (!round.$isLoaded) {
+    throw new Error("Round must be loaded before removing scores");
   }
 
-  if (!score.values?.$isLoaded) {
-    throw new Error("Score values must be loaded before removing values");
+  if (!round.scores?.$isLoaded) {
+    throw new Error("Round scores must be loaded before removing scores");
   }
 
-  // Find existing value with this key
-  const existingIndex = score.values.findIndex(
-    (v) => v?.$isLoaded && v.k === key,
-  );
+  const holeScores = round.scores[holeNum];
+  if (!holeScores?.$isLoaded) {
+    return; // Nothing to remove
+  }
 
-  if (existingIndex >= 0) {
-    // Remove the value using Jazz remove method
-    score.values.$jazz.remove(existingIndex);
+  // Track previous value for history
+  const prev = trackHistory ? holeScores[key] : undefined;
+
+  // Remove the value using Jazz delete
+  holeScores.$jazz.delete(key);
+
+  // Record to history if requested and there was a previous value
+  if (trackHistory && prev !== undefined) {
+    if (!round.$jazz.has("history")) {
+      round.$jazz.set("history", ScoreHistory.create([], { owner }));
+    }
+
+    const history = round.history;
+    if (history?.$isLoaded) {
+      const change = ScoreChange.create(
+        {
+          hole: holeNum,
+          key,
+          value: "", // Empty string indicates deletion
+          prev,
+        },
+        { owner },
+      );
+      history.$jazz.push(change);
+    }
   }
 }
 
 /**
- * Remove gross score from a score object (unscores the hole)
+ * Remove gross score from a hole (unscores the hole)
+ * Also removes pops when unscoring to keep data clean
  */
-export function removeGrossScore(score: Score): void {
-  removeScoreValue(score, "gross");
+export function removeGrossScore(
+  round: Round,
+  holeNum: string,
+  owner: Group,
+  trackHistory = false,
+): void {
+  removeScoreValue(round, holeNum, "gross", owner, trackHistory);
   // Also remove pops when unscoring to keep data clean
-  removeScoreValue(score, "pops");
+  removeScoreValue(round, holeNum, "pops", owner, trackHistory);
 }

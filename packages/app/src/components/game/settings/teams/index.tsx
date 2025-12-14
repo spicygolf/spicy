@@ -59,13 +59,6 @@ export function GameTeamsList() {
   const [_rotationChangeOption, setRotationChangeOption] =
     useState<RotationChangeOption>("clearExceptFirst");
 
-  const hasTeamsConfig = useMemo(() => {
-    if (!game?.$isLoaded || !game.scope?.$isLoaded) return false;
-    return (
-      game.scope.$jazz.has("teamsConfig") && game.scope.teamsConfig?.$isLoaded
-    );
-  }, [game]);
-
   const rotateEvery = useMemo(() => {
     if (
       !game?.$isLoaded ||
@@ -80,16 +73,19 @@ export function GameTeamsList() {
   }, [game]);
 
   const teamCount = useMemo(() => {
+    // If no teamsConfig exists, calculate from number of players (individual games)
+    const defaultTeamCount = game?.players?.$isLoaded ? game.players.length : 2;
+
     if (
       !game?.$isLoaded ||
       !game.scope?.$isLoaded ||
       !game.scope.$jazz.has("teamsConfig")
     ) {
-      return 2;
+      return defaultTeamCount;
     }
     return game.scope.teamsConfig?.$isLoaded
       ? game.scope.teamsConfig.teamCount
-      : 2;
+      : defaultTeamCount;
   }, [game]);
 
   const allPlayerRounds = useMemo(() => {
@@ -346,19 +342,6 @@ export function GameTeamsList() {
     },
     [game, pendingRotationValue, teamCount],
   );
-
-  if (!hasTeamsConfig && game?.$isLoaded && game.scope?.$isLoaded) {
-    const config = TeamsConfig.create(
-      {
-        rotateEvery: 0,
-        teamCount: 2,
-      },
-      { owner: game.$jazz.owner },
-    );
-    // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
-    // @ts-ignore - Jazz $jazz.set types are overly strict
-    game.scope.$jazz.set("teamsConfig", config);
-  }
 
   return (
     <DraxProvider>

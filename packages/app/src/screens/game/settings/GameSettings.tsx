@@ -3,16 +3,16 @@ import {
   type MaterialTopTabNavigationOptions,
 } from "@react-navigation/material-top-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { GamePlayersList } from "@/components/game/settings/GamePlayersList";
+import { GameOptionsList } from "@/components/game/settings/options/GameOptionsList";
 import { GameTeamsList } from "@/components/game/settings/teams";
 import { GhinCourseSearchProvider } from "@/contexts/GhinCourseSearchContext";
 import { AddPlayerNavigator } from "@/navigators/AddPlayerNavigator";
 import { SelectCourseNavigator } from "@/navigators/SelectCourseNavigator";
 import { AddRoundToGame } from "@/screens/game/settings/AddRoundToGame";
 import { HandicapAdjustment } from "@/screens/game/settings/HandicapAdjustment";
-import { Screen, Text } from "@/ui";
+import { Screen } from "@/ui";
 
 // Stack navigation for the settings flows (add player, select course, etc.)
 export type GameSettingsStackParamList = {
@@ -49,12 +49,7 @@ function TeamsTab() {
 function OptionsTab() {
   return (
     <Screen>
-      <View style={styles.placeholderContainer}>
-        <Text style={styles.placeholderText}>Game Options</Text>
-        <Text style={styles.placeholderSubtext}>
-          Game-specific options coming soon
-        </Text>
-      </View>
+      <GameOptionsList />
     </Screen>
   );
 }

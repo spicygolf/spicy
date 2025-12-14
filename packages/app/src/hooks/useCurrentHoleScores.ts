@@ -12,7 +12,7 @@ interface UseCurrentHoleScoresOptions {
  *
  * @param options - Configuration options
  * @param options.roundToGameId - RoundToGame ID to load
- * @param options.currentHoleIndex - Current hole index (for score lookup)
+ * @param options.currentHoleIndex - Current hole index (0-indexed for array access)
  * @param options.resolve - Custom Jazz resolve query (overrides default)
  *
  * @example
@@ -63,12 +63,13 @@ export function useCurrentHoleScores(options: UseCurrentHoleScoresOptions) {
     return null;
   }
 
-  const holeKey = String(currentHoleIndex);
-  const score = round.scores?.$isLoaded ? round.scores[holeKey] : null;
+  // Convert 0-indexed hole to 1-indexed string for score lookup
+  const holeNum = String(currentHoleIndex + 1);
+  const holeScores = round.scores?.$isLoaded ? round.scores[holeNum] : null;
 
   return {
     roundToGame,
     round,
-    score: score?.$isLoaded ? score : null,
+    holeScores: holeScores?.$isLoaded ? holeScores : null,
   };
 }

@@ -252,7 +252,7 @@ export function App(): React.JSX.Element {
         );
       }
 
-      const { Player } = await import("spicylib/schema");
+      const { Player, Game } = await import("spicylib/schema");
 
       // Wait a moment for Jazz to sync the group membership
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -268,9 +268,56 @@ export function App(): React.JSX.Element {
       // Now we know root is loaded, we can use it
       root.$jazz.set("player", player);
 
+      // Initialize games list if it doesn't exist
+      const { ListOfGames } = await import("spicylib/schema");
+      if (!root.$jazz.has("games")) {
+        root.$jazz.set(
+          "games",
+          ListOfGames.create([], { owner: root.$jazz.owner }),
+        );
+      }
+
+      // Load and add each game to root.games
+      const gameIds = result.gameIds || [];
+      let gamesLinked = 0;
+
+      // Ensure games list is loaded before adding
+      const loadedRoot = await root.$jazz.ensureLoaded({
+        resolve: { games: true },
+      });
+
+      if (loadedRoot.games?.$isLoaded) {
+        // Get existing game IDs to avoid duplicates
+        const existingGameIds = new Set<string>();
+        const gamesList = loadedRoot.games as Iterable<
+          (typeof loadedRoot.games)[number]
+        >;
+        for (const existingGame of gamesList) {
+          if (existingGame?.$jazz?.id) {
+            existingGameIds.add(existingGame.$jazz.id);
+          }
+        }
+
+        for (const gameId of gameIds) {
+          if (existingGameIds.has(gameId)) {
+            continue; // Skip duplicates
+          }
+          const game = await Game.load(gameId);
+          if (game?.$isLoaded) {
+            loadedRoot.games.$jazz.push(game);
+            gamesLinked++;
+          } else {
+            console.warn(`Failed to load game ${gameId}`);
+          }
+        }
+        console.log(`Added ${gamesLinked} games to root.games`);
+      } else {
+        console.error("Failed to load root.games after ensureLoaded");
+      }
+
       toast({
         title: "Player linked successfully",
-        description: `Linked ${result.playerName} to your account`,
+        description: `Linked ${result.playerName} and ${gamesLinked} game(s) to your account`,
       });
 
       setLinkGhinId("");

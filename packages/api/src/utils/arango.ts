@@ -205,10 +205,20 @@ export interface GameV03 {
       value: number;
     }>;
   }>;
-  options?: Array<{
-    name: string;
-    values: Array<{ value: string; holes: string[] }>;
-  }>;
+  options?: Array<
+    | {
+        // Game-level option: applies to entire game
+        name: string;
+        disp?: string;
+        type?: string;
+        value: string;
+      }
+    | {
+        // Hole-level option: applies to specific holes
+        name: string;
+        values: Array<{ value: string; holes: string[] }>;
+      }
+  >;
 }
 
 export interface RoundToGameEdgeV03 {

@@ -196,7 +196,7 @@ Returns `{ games: GameListV03[], total: number }` for pagination.
 6. Return `{ courseId, teeId }`
 
 ### createRound(roundData, edgeData, playerId, courseId, teeId, group)
-1. Create MapOfScores from roundData.scores (convert "1"-"18" to "0"-"17" keys)
+1. Create RoundScores from roundData.scores (keys are "1"-"18", golfer-friendly)
 2. Create Round with legacyId, courseId, teeId, scores
 3. Return round
 

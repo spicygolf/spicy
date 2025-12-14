@@ -212,19 +212,37 @@ export function useAddGameSpecs() {
     const options = spec.options;
     if (!options?.$isLoaded) return;
 
-    // Check if handicap_index_from option already exists
-    const hasHandicapOption = options.handicap_index_from !== undefined;
+    // Add use_handicaps option if it doesn't exist
+    const hasUseHandicapsOption = options.use_handicaps !== undefined;
+    if (!hasUseHandicapsOption) {
+      const useHandicapsOption = GameOption.create(
+        {
+          name: "use_handicaps",
+          disp: "Use Handicaps",
+          type: "game",
+          version: "0.5",
+          valueType: "bool",
+          defaultValue: "false",
+          seq: 1,
+        },
+        { owner: ownerGroup },
+      );
+      options.$jazz.set("use_handicaps", useHandicapsOption);
+    }
 
     // Add handicap_index_from option if it doesn't exist
-    if (!hasHandicapOption) {
+    const hasHandicapIndexFromOption =
+      options.handicap_index_from !== undefined;
+    if (!hasHandicapIndexFromOption) {
       const handicapOption = GameOption.create(
         {
           name: "handicap_index_from",
-          disp: "Index off of the low handicap or use full handicaps",
+          disp: "Handicap Index From",
           type: "game",
           version: "0.5",
           valueType: "menu",
           defaultValue: "full",
+          seq: 2,
         },
         { owner: ownerGroup },
       );

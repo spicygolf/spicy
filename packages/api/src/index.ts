@@ -242,11 +242,72 @@ const app = new Elysia()
           console.warn("Player owner is not a group, cannot add user");
         }
 
+        // Find all games that this player participated in
+        const gameIds: string[] = [];
+
+        // Ensure catalog.games is loaded
+        const catalogWithGames = await loadedCatalog.$jazz.ensureLoaded({
+          resolve: { games: {} },
+        });
+
+        if (catalogWithGames.games) {
+          console.log(`Searching for games with player ${playerId}...`);
+
+          // Iterate through all games in the catalog
+          for (const [legacyId, gameRef] of Object.entries(
+            catalogWithGames.games,
+          )) {
+            // Skip if game is not loaded (shouldn't happen, but handle gracefully)
+            if (!gameRef.$isLoaded) {
+              console.warn(`Game ${legacyId} is not loaded, skipping`);
+              continue;
+            }
+
+            // Load the game to check its players list
+            const loadedGame = await gameRef.$jazz.ensureLoaded({
+              resolve: { players: true },
+            });
+
+            // Check if this player is in the game's players list
+            if (loadedGame.players?.$isLoaded) {
+              for (const player of loadedGame.players as Iterable<
+                (typeof loadedGame.players)[number]
+              >) {
+                if (player?.$isLoaded && player.$jazz.id === playerId) {
+                  console.log(`Found player in game ${legacyId}`);
+                  gameIds.push(gameRef.$jazz.id);
+
+                  // Add user to the game's owner group so they can access it
+                  const gameOwner = (
+                    gameRef as unknown as { $jazz: { owner: unknown } }
+                  ).$jazz.owner;
+
+                  if (
+                    gameOwner &&
+                    typeof gameOwner === "object" &&
+                    "addMember" in gameOwner
+                  ) {
+                    (gameOwner as Group).addMember(userAccount, "admin");
+                    console.log(
+                      `Added ${user?.email} to game ${legacyId} owner group`,
+                    );
+                  }
+
+                  break; // Player found in this game, move to next game
+                }
+              }
+            }
+          }
+
+          console.log(`Found ${gameIds.length} games for player ${playerId}`);
+        }
+
         return {
           success: true,
           playerId: playerId,
           playerName: playerName,
-          message: `Added you to player group. Setting root.player...`,
+          gameIds: gameIds,
+          message: `Added you to player group and ${gameIds.length} game(s). Setting root.player...`,
         };
       } catch (error) {
         console.error("Player link failed:", error);
