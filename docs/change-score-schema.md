@@ -1,6 +1,8 @@
 # Score Schema Redesign
 
-## Status: Approved
+## Status: Implemented (PR #264)
+
+Implemented in PR #264 - Complete Game Import, Options UI, and Handicap Fixes
 
 ## Problem Statement
 
@@ -220,8 +222,19 @@ for (const entry of loadedRound.history ?? []) {
 
 ## Next Steps
 
-1. Finalize schema design (this doc)
-2. Create implementation plan
-3. Use orchestrator for multi-file changes
-4. Update tests
-5. Run quality checks
+1. ✅ Finalize schema design (this doc)
+2. ✅ Create implementation plan
+3. ✅ Use orchestrator for multi-file changes
+4. ✅ Update tests
+5. ✅ Run quality checks
+
+## Migration Completed
+
+The score schema redesign was successfully implemented in PR #264. Key changes:
+
+- **Removed `pops` field from RoundScores**: Now calculated dynamically based on handicaps
+- **Updated import logic**: Filters out legacy pops values during v0.3 ArangoDB import
+- **Enhanced handicap calculation**: Properly handles "low" vs "full" handicap modes
+- **Dynamic pops calculation**: Prevents stale/incorrect data when handicaps change
+
+All legacy games imported successfully with the new schema structure.

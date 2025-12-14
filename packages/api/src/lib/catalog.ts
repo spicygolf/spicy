@@ -281,33 +281,42 @@ export async function upsertGameSpec(
   ) {
     const rotateEvery = specData.team_change_every ?? 0;
 
-    // Calculate teamCount based on v0.3 data
-    let teamCount: number;
-    if (specData.teams === false) {
-      // Individual game - one team per player
-      teamCount = specData.min_players;
-    } else if (specData.team_size && specData.team_size > 0) {
-      // Team game - calculate number of teams from min_players / team_size
-      teamCount = Math.ceil(specData.min_players / specData.team_size);
+    // Validate min_players before calculating teamCount
+    if (!specData.min_players || specData.min_players < 1) {
+      console.warn(
+        `GameSpec ${specData.name} has invalid min_players: ${specData.min_players}, skipping TeamsConfig`,
+      );
+      // Don't create TeamsConfig for invalid specs
+      // Fall through to not set teamsConfig on this spec
     } else {
-      // Default to min_players (individual)
-      teamCount = specData.min_players;
+      // Calculate teamCount based on v0.3 data
+      let teamCount: number;
+      if (specData.teams === false) {
+        // Individual game - one team per player
+        teamCount = specData.min_players;
+      } else if (specData.team_size && specData.team_size > 0) {
+        // Team game - calculate number of teams from min_players / team_size
+        teamCount = Math.ceil(specData.min_players / specData.team_size);
+      } else {
+        // Default to min_players (individual)
+        teamCount = specData.min_players;
+      }
+
+      const teamsConfig = TeamsConfig.create(
+        {
+          teamCount,
+          rotateEvery,
+        },
+        { owner: specs.$jazz.owner },
+      );
+
+      // Set maxPlayersPerTeam if team_size is defined
+      if (specData.team_size && specData.team_size > 0) {
+        teamsConfig.$jazz.set("maxPlayersPerTeam", specData.team_size);
+      }
+
+      newSpec.$jazz.set("teamsConfig", teamsConfig);
     }
-
-    const teamsConfig = TeamsConfig.create(
-      {
-        teamCount,
-        rotateEvery,
-      },
-      { owner: specs.$jazz.owner },
-    );
-
-    // Set maxPlayersPerTeam if team_size is defined
-    if (specData.team_size && specData.team_size > 0) {
-      teamsConfig.$jazz.set("maxPlayersPerTeam", specData.team_size);
-    }
-
-    newSpec.$jazz.set("teamsConfig", teamsConfig);
   }
 
   // Populate spec.options with references to catalog options
@@ -1129,7 +1138,9 @@ async function upsertRound(
     const holeNumber = scoreData.hole; // Use as-is: "1"-"18" (1-indexed)
 
     // Create HoleScores record for this hole
-    // Filter out 'pops' - we calculate them dynamically based on handicaps
+    // Filter out 'pops' - we calculate them dynamically based on handicaps and hole handicap.
+    // Storing pops led to stale/incorrect data when handicaps changed. Dynamic calculation
+    // ensures pops are always correct and handles "low" vs "full" handicap modes properly.
     const holeScoresData: Record<string, string> = {};
     for (const val of scoreData.values) {
       if (val.k !== "pops") {
