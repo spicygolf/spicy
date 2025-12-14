@@ -25,7 +25,12 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
       name: true,
       start: true,
       scope: { teamsConfig: true },
-      specs: { $each: true },
+      specs: {
+        $each: {
+          options: { $each: true },
+        },
+      },
+      options: { $each: true }, // Game-level option overrides
       holes: true, // Load holes list shallowly - individual holes loaded by useCurrentHole
       players: {
         $each: {
@@ -41,7 +46,9 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
           gameHandicap: true,
           round: {
             playerId: true,
+            handicapIndex: true,
             scores: true,
+            tee: { ratings: true },
           },
         },
       },
