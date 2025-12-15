@@ -1619,7 +1619,10 @@ async function importGame(
 
   // Override with instance-specific teams_rotate from v0.3 data if present
   if (game.scope.teams_rotate) {
-    rotateEvery = Number.parseInt(game.scope.teams_rotate, 10);
+    const parsed = Number.parseInt(game.scope.teams_rotate, 10);
+    if (!Number.isNaN(parsed)) {
+      rotateEvery = parsed;
+    }
   }
 
   const teamsConfig = TeamsConfig.create(

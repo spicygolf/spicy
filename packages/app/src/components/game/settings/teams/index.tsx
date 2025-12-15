@@ -67,9 +67,11 @@ export function GameTeamsList() {
     ) {
       return undefined;
     }
-    return game.scope.teamsConfig?.$isLoaded
+    const value = game.scope.teamsConfig?.$isLoaded
       ? game.scope.teamsConfig.rotateEvery
       : undefined;
+    // Normalize null to undefined (can happen with legacy imported data)
+    return value ?? undefined;
   }, [game]);
 
   const teamCount = useMemo(() => {
@@ -83,9 +85,11 @@ export function GameTeamsList() {
     ) {
       return defaultTeamCount;
     }
-    return game.scope.teamsConfig?.$isLoaded
+    const value = game.scope.teamsConfig?.$isLoaded
       ? game.scope.teamsConfig.teamCount
-      : defaultTeamCount;
+      : undefined;
+    // Normalize null to defaultTeamCount (can happen with legacy imported data)
+    return value ?? defaultTeamCount;
   }, [game]);
 
   const allPlayerRounds = useMemo(() => {

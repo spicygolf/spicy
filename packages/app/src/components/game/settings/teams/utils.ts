@@ -1,7 +1,7 @@
 import type { RotationOption } from "./types";
 
-export function getRotationLabel(value?: number): string {
-  if (value === undefined) return "Not set";
+export function getRotationLabel(value: number | null | undefined): string {
+  if (value === undefined || value === null) return "Not set";
   if (value === 0) return "Never";
   if (value === 1) return "Every hole";
   return `Every ${value} holes`;
