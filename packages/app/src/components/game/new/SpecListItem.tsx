@@ -43,6 +43,7 @@ export function SpecListItem({
           if (!game) return;
           navigation.navigate("Game", {
             gameId: game.$jazz.id,
+            initialView: "settings",
           });
         }}
       >

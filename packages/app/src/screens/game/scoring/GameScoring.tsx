@@ -110,9 +110,13 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   }
 
   if (!holeInfo) {
+    // Determine why we don't have hole info and show appropriate message
+    const hasPlayers = game.players?.$isLoaded && game.players.length > 0;
+    const hasRounds = game.rounds?.$isLoaded && game.rounds.length > 0;
+
     // Check if the issue is missing course/tee selections
     const hasMissingSelections =
-      game.rounds?.$isLoaded &&
+      hasRounds &&
       game.rounds.some((rtg) => {
         if (!rtg?.$isLoaded) return false;
         const round = rtg.round;
@@ -120,15 +124,23 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
         return !round.$jazz.has("course") || !round.$jazz.has("tee");
       });
 
+    let message = "Loading hole information...";
+    let showSettingsButton = false;
+
+    if (!hasPlayers) {
+      message = "Ready to tee off? Add players to get started! ⛳";
+      showSettingsButton = true;
+    } else if (hasMissingSelections) {
+      message =
+        "Course and tee selections are required for all players before scoring can begin.";
+      showSettingsButton = true;
+    }
+
     return (
       <Screen>
         <View style={styles.centerContainer}>
-          <Text style={styles.message}>
-            {hasMissingSelections
-              ? "Course and tee selections are required for all players before scoring can begin."
-              : "Loading hole information..."}
-          </Text>
-          {hasMissingSelections && onNavigateToSettings && (
+          <Text style={styles.message}>{message}</Text>
+          {showSettingsButton && onNavigateToSettings && (
             <View style={styles.buttonContainer}>
               <Button
                 label="Go to Game Settings"
