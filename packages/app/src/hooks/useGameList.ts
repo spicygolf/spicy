@@ -7,6 +7,7 @@ interface UseGameListResult {
   hasMore: boolean;
   loadMore: () => void;
   isLoading: boolean;
+  isInitialLoad: boolean;
 }
 
 interface GameMetadata {
@@ -22,6 +23,7 @@ export function useGameList(
   const [visibleCount, setVisibleCount] = useState(initialCount);
   const [isLoading, setIsLoading] = useState(false);
   const lastGamesListId = useRef<string | null>(null);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   // Reset visible count when games list changes
   const currentGamesListId = gamesList?.$isLoaded ? gamesList.$jazz.id : null;
@@ -48,15 +50,28 @@ export function useGameList(
     }
 
     // Sort by start time descending (newest first)
-    return metadata.sort((a, b) => b.startTime - a.startTime);
-  }, [gamesList]);
+    const sorted = metadata.sort((a, b) => b.startTime - a.startTime);
+
+    // Mark as loaded once we have processed all games in the list
+    if (
+      sorted.length === gamesList.length &&
+      sorted.length > 0 &&
+      !hasLoadedOnce
+    ) {
+      setHasLoadedOnce(true);
+    }
+
+    return sorted;
+  }, [gamesList, hasLoadedOnce]);
 
   // Second pass: take only the visible games
   const visibleGames = useMemo(() => {
-    return allGameMetadata
+    const games = allGameMetadata
       .slice(0, visibleCount)
       .map((meta) => meta.game)
       .filter((game): game is Game => game?.$isLoaded);
+
+    return games;
   }, [allGameMetadata, visibleCount]);
 
   if (!gamesList?.$isLoaded) {
@@ -65,8 +80,13 @@ export function useGameList(
       hasMore: false,
       loadMore: () => {},
       isLoading: false,
+      isInitialLoad: true,
     };
   }
+
+  // Show initial loading while games from the list are still being loaded
+  // Once we've successfully loaded games, don't show it again (even if list becomes empty)
+  const isInitialLoad = !hasLoadedOnce && gamesList.length > 0;
 
   const hasMore = visibleCount < allGameMetadata.length;
 
@@ -84,5 +104,6 @@ export function useGameList(
     hasMore,
     loadMore,
     isLoading,
+    isInitialLoad,
   };
 }
