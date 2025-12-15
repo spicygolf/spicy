@@ -127,18 +127,27 @@ const app = new Elysia()
   )
   .post(
     `/${api}/catalog/import-games`,
-    async ({ user }) => {
+    async ({ body, user }) => {
       try {
         requireAdmin(user?.email);
 
-        // Prevent concurrent imports
-        if (gamesImportInProgress) {
-          console.log("Games import already in progress, rejecting request");
-          return { error: "Import already in progress", inProgress: true };
+        const { legacyId } = body as { legacyId?: string };
+
+        // For single game imports, don't block on gamesImportInProgress
+        if (!legacyId) {
+          // Prevent concurrent batch imports
+          if (gamesImportInProgress) {
+            console.log("Games import already in progress, rejecting request");
+            return { error: "Import already in progress", inProgress: true };
+          }
+          gamesImportInProgress = true;
         }
 
-        gamesImportInProgress = true;
-        console.log("Games import started by:", user.email);
+        console.log(
+          legacyId
+            ? `Single game import started by: ${user.email} for legacyId: ${legacyId}`
+            : `Batch games import started by: ${user.email}`,
+        );
 
         try {
           const { account } = await getJazzWorker();
@@ -146,11 +155,15 @@ const app = new Elysia()
           console.log("Calling importGamesFromArango...");
           const result = await importGamesFromArango(
             account as co.loaded<typeof PlayerAccount>,
+            undefined,
+            legacyId ? { legacyId } : undefined,
           );
           console.log("Games import result:", JSON.stringify(result));
           return result;
         } finally {
-          gamesImportInProgress = false;
+          if (!legacyId) {
+            gamesImportInProgress = false;
+          }
         }
       } catch (error) {
         console.error("Games import failed:", error);

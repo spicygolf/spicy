@@ -1757,18 +1757,30 @@ async function importGame(
 }
 
 /**
+ * Options for game import
+ */
+export interface GameImportOptions {
+  /** If provided, only import this specific game by its legacy ArangoDB _key */
+  legacyId?: string;
+  /** Batch size for processing games (default: 10) */
+  batchSize?: number;
+}
+
+/**
  * Import games from ArangoDB in batches (idempotent)
  *
  * @param workerAccount - Worker account
  * @param arangoConfig - ArangoDB configuration (optional)
- * @param batchSize - Number of games to process per batch (default: 10)
+ * @param options - Import options (legacyId for single game, batchSize)
  * @returns GameImportResult with import statistics
  */
 export async function importGamesFromArango(
   workerAccount: co.loaded<typeof PlayerAccount>,
   arangoConfig?: ArangoConfig,
-  batchSize = 10,
+  options?: GameImportOptions,
 ): Promise<GameImportResult> {
+  const batchSize = options?.batchSize ?? 10;
+  const singleGameId = options?.legacyId;
   const db = createArangoConnection(arangoConfig || defaultConfig);
   const catalog = await loadOrCreateCatalog(workerAccount);
 
@@ -1803,8 +1815,15 @@ export async function importGamesFromArango(
     }
 
     // Re-load after initialization to get the new maps
+    // Load specs with $each: true to ensure each spec is loaded for legacyId matching
     loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { games: {}, players: {}, specs: {}, options: {}, courses: {} },
+      resolve: {
+        games: {},
+        players: {},
+        specs: { $each: true },
+        options: {},
+        courses: {},
+      },
     });
 
     if (
@@ -1844,7 +1863,67 @@ export async function importGamesFromArango(
     }
     console.log(`Cached ${playerGhinMap.size} player GHIN lookups`);
 
-    // Fetch total count and first batch
+    // Single game import mode
+    if (singleGameId) {
+      console.log(`Importing single game: ${singleGameId}`);
+
+      try {
+        const gameWithRounds = await fetchGameWithRounds(db, singleGameId);
+
+        if (!gameWithRounds) {
+          result.games.failed++;
+          result.errors.push({
+            gameId: singleGameId,
+            error: "Game not found",
+          });
+          return result;
+        }
+
+        const importResult = await importGame(
+          workerAccount,
+          loadedCatalog,
+          gameWithRounds,
+          playerGhinMap,
+          courseCache,
+          teeCache,
+          workerGroup,
+        );
+
+        if (importResult.success) {
+          if (importResult.gameCreated) {
+            result.games.created++;
+          } else {
+            result.games.updated++;
+          }
+          result.courses.created += importResult.courses.created;
+          result.courses.updated += importResult.courses.updated;
+          result.courses.skipped += importResult.courses.skipped;
+          result.tees.created += importResult.tees.created;
+          result.tees.updated += importResult.tees.updated;
+          result.tees.skipped += importResult.tees.skipped;
+          result.rounds.created += importResult.rounds.created;
+          result.rounds.updated += importResult.rounds.updated;
+          result.rounds.skipped += importResult.rounds.skipped;
+        } else {
+          result.games.failed++;
+          result.errors.push({
+            gameId: singleGameId,
+            error: importResult.error || "Unknown error",
+          });
+        }
+      } catch (error) {
+        result.games.failed++;
+        result.errors.push({
+          gameId: singleGameId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      console.log("Single game import complete:", result);
+      return result;
+    }
+
+    // Batch import mode - fetch total count and first batch
     const { games, total } = await fetchAllGames(db, 0, batchSize);
 
     console.log(`Importing ${total} games in batches of ${batchSize}...`);

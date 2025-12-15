@@ -69,6 +69,7 @@ export function App(): React.JSX.Element {
   const [importSpecs, setImportSpecs] = useState<boolean>(false);
   const [importPlayers, setImportPlayers] = useState<boolean>(false);
   const [importGames, setImportGames] = useState<boolean>(true);
+  const [gameLegacyId, setGameLegacyId] = useState<string>("");
 
   // Fetch user email and admin status from better-auth session
   useEffect(() => {
@@ -148,6 +149,9 @@ export function App(): React.JSX.Element {
           "Content-Type": "application/json",
         },
         credentials: "include",
+        body: JSON.stringify(
+          gameLegacyId.trim() ? { legacyId: gameLegacyId.trim() } : {},
+        ),
       });
 
       if (!gamesResponse.ok) {
@@ -597,6 +601,24 @@ export function App(): React.JSX.Element {
                           <span className="text-sm">Games</span>
                         </label>
                       </div>
+                      {importGames && (
+                        <div className="mt-3 space-y-2">
+                          <Label htmlFor="gameLegacyId" className="text-sm">
+                            Single Game Legacy ID (optional)
+                          </Label>
+                          <Input
+                            id="gameLegacyId"
+                            placeholder="Leave blank to import all games"
+                            value={gameLegacyId}
+                            onChange={(e) => setGameLegacyId(e.target.value)}
+                            disabled={isImporting}
+                            className="max-w-xs"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Enter an ArangoDB _key to import only that game
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     <Button
