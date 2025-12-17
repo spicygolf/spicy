@@ -3,7 +3,7 @@ import type { MaybeLoaded } from "jazz-tools";
 import { useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { CourseTee } from "spicylib/schema";
+import type { CourseTee, TeeStatus } from "spicylib/schema";
 import { stateCode } from "spicylib/utils";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
 import { Text } from "@/ui";
@@ -19,6 +19,7 @@ interface TeeData {
   par: number | null;
   rating: number | null;
   slope: number | null;
+  status: TeeStatus | undefined;
 }
 
 interface FavoriteTeeItemProps {
@@ -87,6 +88,7 @@ export function FavoriteTeeItem({
         par,
         rating,
         slope,
+        status: tee.status,
       });
     };
 
@@ -110,7 +112,14 @@ export function FavoriteTeeItem({
         <View style={styles.contentArea}>
           <View style={styles.topRow}>
             <View style={styles.favoriteInfo}>
-              <Text style={styles.teeName}>{teeData.teeName}</Text>
+              <View style={styles.teeNameRow}>
+                <Text style={styles.teeName}>{teeData.teeName}</Text>
+                {teeData.status === "inactive" && (
+                  <View style={styles.inactiveBadge}>
+                    <Text style={styles.inactiveBadgeText}>Inactive</Text>
+                  </View>
+                )}
+              </View>
               <Text style={styles.courseName}>{teeData.courseName}</Text>
               {teeData.facilityName && (
                 <Text style={styles.facilityName}>{teeData.facilityName}</Text>
@@ -176,9 +185,25 @@ const styles = StyleSheet.create((theme) => ({
   favoriteInfo: {
     flex: 1,
   },
+  teeNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   teeName: {
     fontSize: 18,
     fontWeight: "bold",
+  },
+  inactiveBadge: {
+    backgroundColor: "#FCD34D",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  inactiveBadgeText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#78350F",
   },
   courseName: {
     fontSize: 15,

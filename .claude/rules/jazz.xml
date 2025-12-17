@@ -595,6 +595,61 @@
     </instructions>
   </rule>
 
+  <rule severity="CRITICAL" enforcement="BLOCKING">
+    <name>CoRecord Map Access: Use Direct Access, Not $jazz.has()</name>
+    <description>For CoRecord maps (co.record()), use map[key] and check null/undefined. Do NOT use $jazz.has(key).</description>
+    <rationale>Maps with resolve: {map: {}} load structure but not all items. Direct access is reliable, $jazz.has() is not.</rationale>
+    <mustAcknowledge>true</mustAcknowledge>
+    <examples>
+      <example type="wrong">
+        if (catalogPlayers.$jazz.has(ghinId)) {
+          const player = catalogPlayers[ghinId];
+        }
+      </example>
+      <example type="correct">
+        const player = catalogPlayers[ghinId];
+        if (player) {
+          // Use player
+        }
+      </example>
+    </examples>
+    <instructions>
+      - $jazz.has("field"): ONLY for optional fields on CoMaps
+      - $jazz.has(key): NEVER for checking CoRecord map key existence
+      - CoRecord maps: const item = map[key]; if (item) {...}
+      - Item may be unloaded reference - OK to store in other CoMaps
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Storing Unloaded References</name>
+    <description>Unloaded CoMap references can be stored in other CoMaps. Cast to co.loaded&lt;typeof T&gt; to satisfy TypeScript.</description>
+    <examples>
+      <example type="correct">
+        const playerRef = catalogPlayers[ghinId]; // Unloaded OK
+        const favPlayer = FavoritePlayer.create({
+          player: playerRef as co.loaded&lt;typeof Player&gt;,
+          addedAt: new Date()
+        }, { owner });
+      </example>
+    </examples>
+    <instructions>
+      - Don't load references just to store them
+      - Cast: as co.loaded&lt;typeof T&gt; for TypeScript
+      - Jazz lazy-loads when accessed
+    </instructions>
+  </rule>
+
+  <rule severity="MEDIUM" enforcement="RECOMMENDED">
+    <name>Map Loading Levels</name>
+    <description>resolve: {map: {}} loads map structure (keys accessible). Does NOT load items. Use resolve: {map: {"co.items": {}}} to load all items (expensive).</description>
+    <instructions>
+      - resolve: {players: {}} - can iterate keys, items may be unloaded
+      - resolve: {players: {"co.items": {}}} - loads all items (avoid for large maps)
+      - Access items directly when needed, load on-demand
+    </instructions>
+  </rule>
+
   <rule severity="LOW" enforcement="ADVISORY">
     <name>Jazz Documentation</name>
     <description>Jazz Tools documentation is available at https://jazz.tools/docs and via Context7 MCP</description>

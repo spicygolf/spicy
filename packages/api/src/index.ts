@@ -231,18 +231,24 @@ const app = new Elysia()
           );
         }
 
+        // Get player ID and load it properly using Player.load()
         const playerId = playerRef.$jazz.id;
-        const playerName = playerRef.$isLoaded ? playerRef.name : "Player";
+        const { Player } = await import("spicylib/schema");
+        const loadedPlayer = await Player.load(playerId, {});
+
+        if (!loadedPlayer?.$isLoaded) {
+          throw new Error(`Failed to load player ${ghinId}`);
+        }
+
+        const playerName = loadedPlayer.name;
+        const legacyPlayerId = loadedPlayer.legacyId;
 
         console.log(
-          `Found player ${ghinId} in catalog: ${playerId}. Adding user ${user?.email} to owner group...`,
+          `Found player ${ghinId} in catalog: ${playerId} (legacy: ${legacyPlayerId}). Adding user ${user?.email} to owner group...`,
         );
 
-        // Access the owner group - $jazz.owner is available even on unloaded CoMaps
-        // TypeScript doesn't properly narrow the type, so we use a type assertion through unknown
-        const playerOwner = (
-          playerRef as unknown as { $jazz: { owner: unknown } }
-        ).$jazz.owner;
+        // Now we can safely access $jazz.owner on the loaded player
+        const playerOwner = loadedPlayer.$jazz.owner;
 
         if (
           playerOwner &&
@@ -259,61 +265,124 @@ const app = new Elysia()
         // Find all games that this player participated in
         const gameIds: string[] = [];
 
-        // Ensure catalog.games is loaded
-        const catalogWithGames = await loadedCatalog.$jazz.ensureLoaded({
-          resolve: { games: {} },
+        // TODO: Re-enable games linking after favorites import is working
+        console.log(`Skipping games linking for faster testing...`);
+
+        // // Ensure catalog.games is loaded
+        // const catalogWithGames = await loadedCatalog.$jazz.ensureLoaded({
+        //   resolve: { games: {} },
+        // });
+
+        // if (catalogWithGames.games) {
+        //   console.log(`Searching for games with player ${playerId}...`);
+
+        //   // Iterate through all games in the catalog
+        //   const { Game } = await import("spicylib/schema");
+        //   for (const [legacyId, gameRef] of Object.entries(
+        //     catalogWithGames.games,
+        //   )) {
+        //     // Load the game to check its players list
+        //     const gameId = gameRef.$jazz.id;
+        //     const loadedGame = await Game.load(gameId, {
+        //       resolve: { players: true },
+        //     });
+
+        //     if (!loadedGame?.$isLoaded) {
+        //       console.warn(`Game ${legacyId} failed to load, skipping`);
+        //       continue;
+        //     }
+
+        //     // Check if this player is in the game's players list
+        //     if (loadedGame.players?.$isLoaded) {
+        //       for (const player of loadedGame.players as Iterable<
+        //         (typeof loadedGame.players)[number]
+        //       >) {
+        //         if (player?.$isLoaded && player.$jazz.id === playerId) {
+        //           console.log(`Found player in game ${legacyId}`);
+        //           gameIds.push(loadedGame.$jazz.id);
+
+        //           // Add user to the game's owner group so they can access it
+        //           const gameOwner = loadedGame.$jazz.owner;
+
+        //           if (
+        //             gameOwner &&
+        //             typeof gameOwner === "object" &&
+        //             "addMember" in gameOwner
+        //           ) {
+        //             (gameOwner as Group).addMember(userAccount, "admin");
+        //             console.log(
+        //               `Added ${user?.email} to game ${legacyId} owner group`,
+        //             );
+        //           }
+
+        //           break; // Player found in this game, move to next game
+        //         }
+        //       }
+        //     }
+        //   }
+
+        //   console.log(`Found ${gameIds.length} games for player ${playerId}`);
+        // }
+
+        // Import favorites for this player
+        let favoritesResult = {
+          favoritePlayers: 0,
+          favoriteCourseTees: 0,
+          errors: [] as string[],
+        };
+
+        // Load userAccount.root to set the player and import favorites
+        const loadedUserAccount = await userAccount.$jazz.ensureLoaded({
+          resolve: { root: true },
         });
 
-        if (catalogWithGames.games) {
-          console.log(`Searching for games with player ${playerId}...`);
+        if (!loadedUserAccount.root?.$isLoaded) {
+          throw new Error("User account root not loaded");
+        }
 
-          // Iterate through all games in the catalog
-          for (const [legacyId, gameRef] of Object.entries(
-            catalogWithGames.games,
-          )) {
-            // Skip if game is not loaded (shouldn't happen, but handle gracefully)
-            if (!gameRef.$isLoaded) {
-              console.warn(`Game ${legacyId} is not loaded, skipping`);
-              continue;
-            }
+        // Set root.player so the web app can access it
+        loadedUserAccount.root.$jazz.set("player", loadedPlayer);
+        console.log(`Set root.player to ${playerName}`);
 
-            // Load the game to check its players list
-            const loadedGame = await gameRef.$jazz.ensureLoaded({
-              resolve: { players: true },
-            });
-
-            // Check if this player is in the game's players list
-            if (loadedGame.players?.$isLoaded) {
-              for (const player of loadedGame.players as Iterable<
-                (typeof loadedGame.players)[number]
-              >) {
-                if (player?.$isLoaded && player.$jazz.id === playerId) {
-                  console.log(`Found player in game ${legacyId}`);
-                  gameIds.push(gameRef.$jazz.id);
-
-                  // Add user to the game's owner group so they can access it
-                  const gameOwner = (
-                    gameRef as unknown as { $jazz: { owner: unknown } }
-                  ).$jazz.owner;
-
-                  if (
-                    gameOwner &&
-                    typeof gameOwner === "object" &&
-                    "addMember" in gameOwner
-                  ) {
-                    (gameOwner as Group).addMember(userAccount, "admin");
-                    console.log(
-                      `Added ${user?.email} to game ${legacyId} owner group`,
-                    );
-                  }
-
-                  break; // Player found in this game, move to next game
-                }
-              }
-            }
+        // Now import favorites using the legacyId
+        console.log(
+          `[/player/link] About to import favorites. legacyPlayerId=${legacyPlayerId}`,
+        );
+        if (legacyPlayerId) {
+          console.log(
+            `[/player/link] Calling importFavoritesForPlayer for ${legacyPlayerId}...`,
+          );
+          const { importFavoritesForPlayer, loadOrCreateCatalog } =
+            await import("./lib/catalog");
+          console.log(
+            `[/player/link] Function imported, getting catalog ID...`,
+          );
+          const catalog = await loadOrCreateCatalog(
+            workerAccount as co.loaded<typeof PlayerAccount>,
+          );
+          const catalogId = catalog.$jazz.id;
+          console.log(
+            `[/player/link] Calling with userAccount.id=${userAccount.$jazz.id}, catalogId=${catalogId}`,
+          );
+          favoritesResult = await importFavoritesForPlayer(
+            userAccount,
+            legacyPlayerId,
+            catalogId,
+            workerAccount as co.loaded<typeof PlayerAccount>,
+          );
+          console.log(
+            `[/player/link] Favorites imported: ${favoritesResult.favoritePlayers} players, ${favoritesResult.favoriteCourseTees} course/tees`,
+          );
+          if (favoritesResult.errors.length > 0) {
+            console.error(
+              `[/player/link] Favorites import errors:`,
+              favoritesResult.errors,
+            );
           }
-
-          console.log(`Found ${gameIds.length} games for player ${playerId}`);
+        } else {
+          console.warn(
+            "[/player/link] No legacyId found for player, skipping favorites import",
+          );
         }
 
         return {
@@ -321,7 +390,12 @@ const app = new Elysia()
           playerId: playerId,
           playerName: playerName,
           gameIds: gameIds,
-          message: `Added you to player group and ${gameIds.length} game(s). Setting root.player...`,
+          favorites: {
+            players: favoritesResult.favoritePlayers,
+            courseTees: favoritesResult.favoriteCourseTees,
+            errors: favoritesResult.errors,
+          },
+          message: `Added you to player group and ${gameIds.length} game(s). Imported ${favoritesResult.favoritePlayers} favorite players and ${favoritesResult.favoriteCourseTees} favorite course/tees.`,
         };
       } catch (error) {
         console.error("Player link failed:", error);
@@ -331,6 +405,102 @@ const app = new Elysia()
     {
       auth: true,
     },
+  )
+  .post(
+    `/${api}/catalog/import-course-by-id`,
+    async ({ body, user }) => {
+      try {
+        // Temporary endpoint - no admin check needed
+
+        const { courseId } = body as { courseId: string | number };
+        if (!courseId) {
+          throw new Error("courseId required");
+        }
+
+        console.log(`Importing course ${courseId} from GHIN by ${user.email}`);
+
+        const { account: workerAccount } = await getJazzWorker();
+        const { loadOrCreateCatalog } = await import("./lib/catalog");
+        const catalog = await loadOrCreateCatalog(
+          workerAccount as co.loaded<typeof PlayerAccount>,
+        );
+
+        // Load catalog courses map
+        const loadedCatalog = await catalog.$jazz.ensureLoaded({
+          resolve: { courses: {} },
+        });
+
+        if (!loadedCatalog.courses) {
+          throw new Error("Catalog courses not loaded");
+        }
+
+        const coursesMap = loadedCatalog.courses;
+        const courseKey = String(courseId);
+
+        // Check if course already exists
+        const existingCourse = coursesMap[courseKey];
+        if (existingCourse) {
+          return {
+            success: true,
+            existed: true,
+            message: `Course ${courseId} already exists in catalog`,
+          };
+        }
+
+        // Fetch course from GHIN API
+        const { getCourseDetails } = await import("./courses");
+        type CourseDetailsResponse = Awaited<
+          ReturnType<typeof getCourseDetails>
+        >;
+        let courseData: CourseDetailsResponse;
+        try {
+          courseData = await getCourseDetails({ course_id: Number(courseId) });
+        } catch (error) {
+          return {
+            success: false,
+            error: `Failed to fetch course from GHIN: ${error instanceof Error ? error.message : String(error)}`,
+          };
+        }
+
+        // Import the course (simplified version - just create the course, no tees for now)
+        const { Course, CourseDefaultTee, ListOfTees } = await import(
+          "spicylib/schema"
+        );
+        const { Group } = await import("jazz-tools");
+
+        const group = Group.create(workerAccount);
+        group.makePublic();
+
+        const newCourse = Course.create(
+          {
+            id: String(courseData.CourseId),
+            status: courseData.CourseStatus.toLowerCase(),
+            name: courseData.CourseName,
+            city: courseData.CourseCity || "",
+            state: courseData.CourseState || "",
+            season: { all_year: true },
+            default_tee: CourseDefaultTee.create({}, { owner: group }),
+            tees: ListOfTees.create([], { owner: group }),
+          },
+          { owner: group },
+        );
+
+        coursesMap.$jazz.set(courseKey, newCourse);
+
+        return {
+          success: true,
+          created: true,
+          courseId: courseData.CourseId,
+          courseName: courseData.CourseName,
+          courseStatus: courseData.CourseStatus,
+          message: `Course ${courseData.CourseName} (${courseId}) imported successfully`,
+        };
+      } catch (error) {
+        console.error("Course import failed:", error);
+        throw error;
+      }
+    },
+    { auth: true },
   )
   .listen({
     port: port || 3040,

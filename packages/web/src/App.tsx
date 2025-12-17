@@ -257,21 +257,10 @@ export function App(): React.JSX.Element {
 
       const root = me.root;
 
-      const { Player, Game } = await import("spicylib/schema");
+      const { Game } = await import("spicylib/schema");
 
-      // Wait a moment for Jazz to sync the group membership
+      // Wait a moment for Jazz to sync the group membership and root.player update from API
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const player = await Player.load(result.playerId);
-
-      if (!player?.$isLoaded) {
-        throw new Error(
-          "Failed to load player after granting access. Jazz may still be syncing - try again in a moment.",
-        );
-      }
-
-      // Now we know root is loaded, we can use it
-      root.$jazz.set("player", player);
 
       // Initialize games list if it doesn't exist
       const { ListOfGames } = await import("spicylib/schema");
@@ -324,8 +313,6 @@ export function App(): React.JSX.Element {
         title: "Player linked successfully",
         description: `Linked ${result.playerName} and ${gamesLinked} game(s) to your account`,
       });
-
-      setLinkGhinId("");
     } catch (error) {
       toast({
         variant: "destructive",

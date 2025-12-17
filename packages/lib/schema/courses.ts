@@ -24,6 +24,7 @@ export const Tee = co.map({
   id: z.string(),
   name: z.string(),
   gender: z.literal(["M", "F", "Mixed"]),
+  status: z.literal(["active", "inactive", "deleted"]).optional(),
   holes: ListOfTeeHoles,
   holesCount: z.number(),
   totalYardage: z.number(),
@@ -36,6 +37,7 @@ export const Tee = co.map({
   }),
 });
 export type Tee = co.loaded<typeof Tee>;
+export type TeeStatus = "active" | "inactive" | "deleted";
 
 export const FacilityGeolocation = co.map({
   formatted_address: z.string(),

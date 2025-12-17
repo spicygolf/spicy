@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Round } from "spicylib/schema";
+import type { Round, TeeStatus } from "spicylib/schema";
 import { courseAcronym } from "spicylib/utils";
 import { Text } from "@/ui";
 
@@ -8,8 +9,15 @@ interface PlayerCourseTeeInfoProps {
   round: Round | null;
 }
 
+interface CourseTeeData {
+  displayName: string;
+  status: TeeStatus | undefined;
+}
+
 export function PlayerCourseTeeInfo({ round }: PlayerCourseTeeInfoProps) {
-  const [courseTeeName, setCourseTeeName] = useState<string | null>(null);
+  const [courseTeeName, setCourseTeeName] = useState<CourseTeeData | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!round?.$isLoaded) {
@@ -41,7 +49,10 @@ export function PlayerCourseTeeInfo({ round }: PlayerCourseTeeInfoProps) {
             ? loadedRound.course.facility.name
             : undefined;
           const displayName = `${courseAcronym(loadedRound.course.name, facilityName)} • ${loadedRound.tee.name}`;
-          setCourseTeeName(displayName);
+          setCourseTeeName({
+            displayName,
+            status: loadedRound.tee.status,
+          });
         } else {
           setCourseTeeName(null);
         }
@@ -58,12 +69,37 @@ export function PlayerCourseTeeInfo({ round }: PlayerCourseTeeInfoProps) {
 
   if (!courseTeeName) return null;
 
-  return <Text style={styles.text}>{courseTeeName}</Text>;
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>{courseTeeName.displayName}</Text>
+      {courseTeeName.status === "inactive" && (
+        <View style={styles.inactiveBadge}>
+          <Text style={styles.inactiveBadgeText}>Inactive</Text>
+        </View>
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create(() => ({
-  text: {
+  container: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  text: {
     fontSize: 14,
+  },
+  inactiveBadge: {
+    backgroundColor: "#FCD34D",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 3,
+  },
+  inactiveBadgeText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#78350F",
   },
 }));

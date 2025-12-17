@@ -404,3 +404,76 @@ export async function fetchAllGames(
     throw error;
   }
 }
+
+export interface FavoritePlayerEdge {
+  playerKey: string;
+  favoritePlayerKey: string;
+  addedAt?: string;
+}
+
+export interface FavoriteCourseTeeEdge {
+  playerKey: string;
+  teeId: string;
+  courseId: string;
+  addedAt?: string;
+}
+
+/**
+ * Fetch favorite players for all players from ArangoDB
+ * Returns player2player edges where favorite == 'true'
+ */
+export async function fetchAllFavoritePlayers(
+  db: Database,
+): Promise<FavoritePlayerEdge[]> {
+  try {
+    const cursor = await db.query(`
+      FOR player IN players
+        FOR v, e, p IN 1..1 OUTBOUND player._id
+          GRAPH 'games'
+          FILTER e.type == 'player2player' AND e.favorite == 'true'
+          RETURN {
+            playerKey: player._key,
+            favoritePlayerKey: v._key,
+            addedAt: e.created_at
+          }
+    `);
+    const favorites = await cursor.all();
+    return favorites as FavoritePlayerEdge[];
+  } catch (error) {
+    console.error("Failed to fetch favorite players:", error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch favorite course/tees for all players from ArangoDB
+ * Returns player2tee edges where favorite == 'true'
+ */
+export async function fetchAllFavoriteCourseTees(
+  db: Database,
+): Promise<FavoriteCourseTeeEdge[]> {
+  try {
+    const cursor = await db.query(`
+      FOR player IN players
+        FOR v, e, p IN 1..1 OUTBOUND player._id
+          GRAPH 'games'
+          FILTER e.type == 'player2tee' AND e.favorite == 'true'
+          LET course = FIRST(
+            FOR c, ce IN 1..1 OUTBOUND v._id GRAPH 'games'
+              FILTER ce.type == 'tee2course'
+              RETURN c
+          )
+          RETURN {
+            playerKey: player._key,
+            teeId: v.tee_id || v._key,
+            courseId: course.course_id,
+            addedAt: e.created_at
+          }
+    `);
+    const favorites = await cursor.all();
+    return favorites as FavoriteCourseTeeEdge[];
+  } catch (error) {
+    console.error("Failed to fetch favorite course/tees:", error);
+    throw error;
+  }
+}
