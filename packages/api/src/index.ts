@@ -262,67 +262,64 @@ const app = new Elysia()
           console.warn("Player owner is not a group, cannot add user");
         }
 
-        // Find all games that this player participated in
+        // Find all games that this player participated in and grant access
         const gameIds: string[] = [];
 
-        // TODO: Re-enable games linking after favorites import is working
-        console.log(`Skipping games linking for faster testing...`);
+        // Ensure catalog.games is loaded
+        const catalogWithGames = await loadedCatalog.$jazz.ensureLoaded({
+          resolve: { games: {} },
+        });
 
-        // // Ensure catalog.games is loaded
-        // const catalogWithGames = await loadedCatalog.$jazz.ensureLoaded({
-        //   resolve: { games: {} },
-        // });
+        if (catalogWithGames.games) {
+          console.log(`Searching for games with player ${playerId}...`);
 
-        // if (catalogWithGames.games) {
-        //   console.log(`Searching for games with player ${playerId}...`);
+          // Iterate through all games in the catalog
+          const { Game } = await import("spicylib/schema");
+          for (const [legacyId, gameRef] of Object.entries(
+            catalogWithGames.games,
+          )) {
+            // Load the game to check its players list
+            const gameId = gameRef.$jazz.id;
+            const loadedGame = await Game.load(gameId, {
+              resolve: { players: true },
+            });
 
-        //   // Iterate through all games in the catalog
-        //   const { Game } = await import("spicylib/schema");
-        //   for (const [legacyId, gameRef] of Object.entries(
-        //     catalogWithGames.games,
-        //   )) {
-        //     // Load the game to check its players list
-        //     const gameId = gameRef.$jazz.id;
-        //     const loadedGame = await Game.load(gameId, {
-        //       resolve: { players: true },
-        //     });
+            if (!loadedGame?.$isLoaded) {
+              console.warn(`Game ${legacyId} failed to load, skipping`);
+              continue;
+            }
 
-        //     if (!loadedGame?.$isLoaded) {
-        //       console.warn(`Game ${legacyId} failed to load, skipping`);
-        //       continue;
-        //     }
+            // Check if this player is in the game's players list
+            if (loadedGame.players?.$isLoaded) {
+              for (const player of loadedGame.players as Iterable<
+                (typeof loadedGame.players)[number]
+              >) {
+                if (player?.$isLoaded && player.$jazz.id === playerId) {
+                  console.log(`Found player in game ${legacyId}`);
+                  gameIds.push(loadedGame.$jazz.id);
 
-        //     // Check if this player is in the game's players list
-        //     if (loadedGame.players?.$isLoaded) {
-        //       for (const player of loadedGame.players as Iterable<
-        //         (typeof loadedGame.players)[number]
-        //       >) {
-        //         if (player?.$isLoaded && player.$jazz.id === playerId) {
-        //           console.log(`Found player in game ${legacyId}`);
-        //           gameIds.push(loadedGame.$jazz.id);
+                  // Add user to the game's owner group so they can access it
+                  const gameOwner = loadedGame.$jazz.owner;
 
-        //           // Add user to the game's owner group so they can access it
-        //           const gameOwner = loadedGame.$jazz.owner;
+                  if (
+                    gameOwner &&
+                    typeof gameOwner === "object" &&
+                    "addMember" in gameOwner
+                  ) {
+                    (gameOwner as Group).addMember(userAccount, "admin");
+                    console.log(
+                      `Added ${user?.email} to game ${legacyId} owner group`,
+                    );
+                  }
 
-        //           if (
-        //             gameOwner &&
-        //             typeof gameOwner === "object" &&
-        //             "addMember" in gameOwner
-        //           ) {
-        //             (gameOwner as Group).addMember(userAccount, "admin");
-        //             console.log(
-        //               `Added ${user?.email} to game ${legacyId} owner group`,
-        //             );
-        //           }
+                  break; // Player found in this game, move to next game
+                }
+              }
+            }
+          }
 
-        //           break; // Player found in this game, move to next game
-        //         }
-        //       }
-        //     }
-        //   }
-
-        //   console.log(`Found ${gameIds.length} games for player ${playerId}`);
-        // }
+          console.log(`Found ${gameIds.length} games for player ${playerId}`);
+        }
 
         // Import favorites for this player
         let favoritesResult = {
