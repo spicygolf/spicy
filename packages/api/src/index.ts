@@ -6,17 +6,14 @@ import type {
 } from "@spicygolf/ghin";
 import type { Context } from "elysia";
 import { Elysia } from "elysia";
-import type { co, Group } from "jazz-tools";
+import type { co } from "jazz-tools";
 import { PlayerAccount } from "spicylib/schema";
 import { getCountries } from "./countries";
 import { getCourseDetails, searchCourses } from "./courses";
 import { getJazzWorker, setupWorker } from "./jazz_worker";
 import { auth } from "./lib/auth";
-import {
-  importGameSpecsToCatalog,
-  importGamesFromArango,
-  loadOrCreateCatalog,
-} from "./lib/catalog";
+import { importGameSpecsToCatalog, importGamesFromArango } from "./lib/catalog";
+import { linkPlayerToUser } from "./lib/link";
 import { playerSearch } from "./players";
 import { requireAdmin } from "./utils/auth";
 
@@ -199,201 +196,18 @@ const app = new Elysia()
           throw new Error("User account not found");
         }
 
-        // Find the imported player by GHIN ID
+        // Get the worker account
         const { account: workerAccount } = await getJazzWorker();
 
-        console.log(
-          `Looking for player with GHIN ${ghinId} owned by worker ${workerAccount.$jazz.id}`,
-        );
-
-        // Load the catalog using the helper function
-        const catalog = await loadOrCreateCatalog(
+        // Delegate to the link module
+        const result = await linkPlayerToUser(
+          userAccount,
+          ghinId,
           workerAccount as co.loaded<typeof PlayerAccount>,
+          user?.email || "unknown",
         );
 
-        // Ensure players map is loaded
-        const loadedCatalog = await catalog.$jazz.ensureLoaded({
-          resolve: { players: {} },
-        });
-
-        if (!loadedCatalog.players) {
-          throw new Error(
-            "Catalog players not initialized. Please run player import first.",
-          );
-        }
-
-        const catalogPlayers = loadedCatalog.players;
-        const playerRef = catalogPlayers[ghinId];
-
-        if (!playerRef) {
-          throw new Error(
-            `Player with GHIN ID ${ghinId} not found. Have you run the import?`,
-          );
-        }
-
-        // Get player ID and load it properly using Player.load()
-        const playerId = playerRef.$jazz.id;
-        const { Player } = await import("spicylib/schema");
-        const loadedPlayer = await Player.load(playerId, {});
-
-        if (!loadedPlayer?.$isLoaded) {
-          throw new Error(`Failed to load player ${ghinId}`);
-        }
-
-        const playerName = loadedPlayer.name;
-        const legacyPlayerId = loadedPlayer.legacyId;
-
-        console.log(
-          `Found player ${ghinId} in catalog: ${playerId} (legacy: ${legacyPlayerId}). Adding user ${user?.email} to owner group...`,
-        );
-
-        // Now we can safely access $jazz.owner on the loaded player
-        const playerOwner = loadedPlayer.$jazz.owner;
-
-        if (
-          playerOwner &&
-          typeof playerOwner === "object" &&
-          "addMember" in playerOwner
-        ) {
-          // Add user to the player's owner group so they can access it
-          (playerOwner as Group).addMember(userAccount, "admin");
-          console.log(`Added ${user?.email} as admin to player owner group`);
-        } else {
-          console.warn("Player owner is not a group, cannot add user");
-        }
-
-        // Find all games that this player participated in and grant access
-        const gameIds: string[] = [];
-
-        // Ensure catalog.games is loaded
-        const catalogWithGames = await loadedCatalog.$jazz.ensureLoaded({
-          resolve: { games: {} },
-        });
-
-        if (catalogWithGames.games) {
-          console.log(`Searching for games with player ${playerId}...`);
-
-          // Iterate through all games in the catalog
-          const { Game } = await import("spicylib/schema");
-          for (const [legacyId, gameRef] of Object.entries(
-            catalogWithGames.games,
-          )) {
-            // Load the game to check its players list
-            const gameId = gameRef.$jazz.id;
-            const loadedGame = await Game.load(gameId, {
-              resolve: { players: true },
-            });
-
-            if (!loadedGame?.$isLoaded) {
-              console.warn(`Game ${legacyId} failed to load, skipping`);
-              continue;
-            }
-
-            // Check if this player is in the game's players list
-            if (loadedGame.players?.$isLoaded) {
-              for (const player of loadedGame.players as Iterable<
-                (typeof loadedGame.players)[number]
-              >) {
-                if (player?.$isLoaded && player.$jazz.id === playerId) {
-                  console.log(`Found player in game ${legacyId}`);
-                  gameIds.push(loadedGame.$jazz.id);
-
-                  // Add user to the game's owner group so they can access it
-                  const gameOwner = loadedGame.$jazz.owner;
-
-                  if (
-                    gameOwner &&
-                    typeof gameOwner === "object" &&
-                    "addMember" in gameOwner
-                  ) {
-                    (gameOwner as Group).addMember(userAccount, "admin");
-                    console.log(
-                      `Added ${user?.email} to game ${legacyId} owner group`,
-                    );
-                  }
-
-                  break; // Player found in this game, move to next game
-                }
-              }
-            }
-          }
-
-          console.log(`Found ${gameIds.length} games for player ${playerId}`);
-        }
-
-        // Import favorites for this player
-        let favoritesResult = {
-          favoritePlayers: 0,
-          favoriteCourseTees: 0,
-          errors: [] as string[],
-        };
-
-        // Load userAccount.root to set the player and import favorites
-        const loadedUserAccount = await userAccount.$jazz.ensureLoaded({
-          resolve: { root: true },
-        });
-
-        if (!loadedUserAccount.root?.$isLoaded) {
-          throw new Error("User account root not loaded");
-        }
-
-        // Set root.player so the web app can access it
-        loadedUserAccount.root.$jazz.set("player", loadedPlayer);
-        console.log(`Set root.player to ${playerName}`);
-
-        // Now import favorites using the legacyId
-        console.log(
-          `[/player/link] About to import favorites. legacyPlayerId=${legacyPlayerId}`,
-        );
-        if (legacyPlayerId) {
-          console.log(
-            `[/player/link] Calling importFavoritesForPlayer for ${legacyPlayerId}...`,
-          );
-          const { importFavoritesForPlayer, loadOrCreateCatalog } =
-            await import("./lib/catalog");
-          console.log(
-            `[/player/link] Function imported, getting catalog ID...`,
-          );
-          const catalog = await loadOrCreateCatalog(
-            workerAccount as co.loaded<typeof PlayerAccount>,
-          );
-          const catalogId = catalog.$jazz.id;
-          console.log(
-            `[/player/link] Calling with userAccount.id=${userAccount.$jazz.id}, catalogId=${catalogId}`,
-          );
-          favoritesResult = await importFavoritesForPlayer(
-            userAccount,
-            legacyPlayerId,
-            catalogId,
-            workerAccount as co.loaded<typeof PlayerAccount>,
-          );
-          console.log(
-            `[/player/link] Favorites imported: ${favoritesResult.favoritePlayers} players, ${favoritesResult.favoriteCourseTees} course/tees`,
-          );
-          if (favoritesResult.errors.length > 0) {
-            console.error(
-              `[/player/link] Favorites import errors:`,
-              favoritesResult.errors,
-            );
-          }
-        } else {
-          console.warn(
-            "[/player/link] No legacyId found for player, skipping favorites import",
-          );
-        }
-
-        return {
-          success: true,
-          playerId: playerId,
-          playerName: playerName,
-          gameIds: gameIds,
-          favorites: {
-            players: favoritesResult.favoritePlayers,
-            courseTees: favoritesResult.favoriteCourseTees,
-            errors: favoritesResult.errors,
-          },
-          message: `Added you to player group and ${gameIds.length} game(s). Imported ${favoritesResult.favoritePlayers} favorite players and ${favoritesResult.favoriteCourseTees} favorite course/tees.`,
-        };
+        return result;
       } catch (error) {
         console.error("Player link failed:", error);
         throw error;
