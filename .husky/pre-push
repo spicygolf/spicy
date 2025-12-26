@@ -1,0 +1,38 @@
+#!/bin/sh
+
+echo ""
+echo "═══════════════════════════════════════════════════════════"
+echo "  PRE-PUSH CHECKLIST"
+echo "═══════════════════════════════════════════════════════════"
+echo ""
+echo "  Before pushing, ensure you have:"
+echo ""
+echo "  [ ] Run code-reviewer agent (checks Jazz patterns, architecture)"
+echo "  [ ] Fixed any critical issues found"
+echo "  [ ] Quality checks pass (bun format && bun lint && bun tsc)"
+echo ""
+echo "═══════════════════════════════════════════════════════════"
+echo ""
+
+# Check if running in interactive terminal
+if [ -t 0 ]; then
+    printf "  Proceed with push? [y/N] "
+    read -r response
+    case "$response" in
+        [yY][eE][sS]|[yY])
+            echo ""
+            echo "  Pushing..."
+            echo ""
+            exit 0
+            ;;
+        *)
+            echo ""
+            echo "  Push cancelled. Run code-reviewer agent first."
+            echo ""
+            exit 1
+            ;;
+    esac
+else
+    # Non-interactive (CI, scripts) - allow push
+    exit 0
+fi

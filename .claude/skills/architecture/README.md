@@ -21,9 +21,11 @@ Spicy Golf is a local-first application using Jazz Tools for data sync. The app 
 
 **Commits**: Commit frequently after each completed step. Commits are local and reversible - they enable handoff and recovery.
 
+**Review**: Before pushing, run the `code-reviewer` agent to check for Jazz pattern violations and architecture issues.
+
 **Pushes**: Never push to a remote without explicitly asking the user first.
 
-**Rationale**: Frequent commits support the orchestration pattern (handoff between sessions). Pushes require permission because they affect the shared repository.
+**Rationale**: Frequent commits support the orchestration pattern (handoff between sessions). Code review catches issues before they reach the shared repository. Pushes require permission because they affect others.
 
 ## Monorepo Structure
 
