@@ -8,6 +8,7 @@ on:
 
 jobs:
   checks:
+    name: Checks (Linting, Formatting, TypeScript)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -32,6 +33,7 @@ jobs:
         run: bun run test
 
   claude-review:
+    name: Claude Code Review
     needs: checks
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
