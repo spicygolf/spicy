@@ -52,3 +52,6 @@ updates:
     directory: "/packages/web"
     schedule:
       interval: "monthly"
+    ignore:
+      - dependency-name: "react"
+      - dependency-name: "@types/react"

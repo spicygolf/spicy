@@ -39,7 +39,6 @@
         "@react-native-community/netinfo": "11.4.1",
         "@react-native-vector-icons/common": "12.4.0",
         "@react-native-vector-icons/fontawesome6": "12.1.0",
-        "@react-native/new-app-screen": "0.80.0",
         "@react-navigation/bottom-tabs": "7.4.1",
         "@react-navigation/material-top-tabs": "7.4.11",
         "@react-navigation/native": "7.1.14",
@@ -818,8 +817,6 @@
     "@react-native/metro-babel-transformer": ["@react-native/metro-babel-transformer@0.80.0", "", { "dependencies": { "@babel/core": "^7.25.2", "@react-native/babel-preset": "0.80.0", "hermes-parser": "0.28.1", "nullthrows": "^1.1.1" } }, "sha512-5TldnaJE15IUNnZhjAelRz4+6qATlSO9yuzLqN1Y47qfJrAl/2lrI4KdSjFfvUaWrhezi94Aly1OKSJm9fjrXg=="],
 
     "@react-native/metro-config": ["@react-native/metro-config@0.80.0", "", { "dependencies": { "@react-native/js-polyfills": "0.80.0", "@react-native/metro-babel-transformer": "0.80.0", "metro-config": "^0.82.2", "metro-runtime": "^0.82.2" } }, "sha512-LJ1ZC9vs/B3wez6BsOIgJ3iw7N4QalMpiT/fb5b66L4vHUGqVucOWNUwpxbDb1m1/wlhTa8AljiAdjt401sFjA=="],
-
-    "@react-native/new-app-screen": ["@react-native/new-app-screen@0.80.0", "", { "peerDependencies": { "@types/react": "^19.0.0", "react": "*", "react-native": "*" }, "optionalPeers": ["@types/react"] }, "sha512-xDB/b76gZAH1vsFOqCghJnSw7Cl+C+F5Y3GT99kwN0wNi/aKS8GCJr9P6CWmxRDflY/8d/Q4+4OQHfo2gE8DcA=="],
 
     "@react-native/normalize-colors": ["@react-native/normalize-colors@0.80.0", "", {}, "sha512-bJZDSopadjJxMDvysc634eTfLL4w7cAx5diPe14Ez5l+xcKjvpfofS/1Ja14DlgdMJhxGd03MTXlrxoWust3zg=="],
 
