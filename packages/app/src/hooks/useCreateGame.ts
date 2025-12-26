@@ -10,8 +10,9 @@ import {
   ListOfRoundToGames,
   PlayerAccount,
 } from "spicylib/schema";
-import { addPlayerToGameDirect } from "../utils/addPlayerToGameDirect";
+import { addPlayerToGameCore } from "../utils/addPlayerToGameCore";
 import { playerToPlayerData } from "../utils/playerToPlayerData";
+import { useJazzWorker } from "./useJazzWorker";
 
 export function useCreateGame() {
   const me = useAccount(PlayerAccount, {
@@ -24,6 +25,7 @@ export function useCreateGame() {
       },
     },
   });
+  const worker = useJazzWorker();
 
   const createGame = async (name: string, specs: GameSpec[]) => {
     if (!me?.$isLoaded || !me.root?.$isLoaded) {
@@ -42,6 +44,15 @@ export function useCreateGame() {
 
     const group = Group.create(me);
     group.addMember(me, "admin");
+
+    // Give worker account admin access for sync
+    if (worker?.account?.$isLoaded) {
+      try {
+        group.addMember(worker.account, "admin");
+      } catch (_e) {
+        // Ignore - might already be a member
+      }
+    }
 
     // Create an empty list and push the spec references
     // We can't pass existing specs to create() because they may have different owners
@@ -117,7 +128,15 @@ export function useCreateGame() {
     // Auto-add current player to the game
     if (me.root.player?.$isLoaded) {
       const playerData = playerToPlayerData(me.root.player);
-      await addPlayerToGameDirect(game, playerData);
+      const result = await addPlayerToGameCore(
+        game,
+        playerData,
+        worker?.account?.$isLoaded ? worker.account : undefined,
+      );
+
+      if (result.isErr()) {
+        console.error("Failed to add current player to game:", result.error);
+      }
     }
 
     return game;

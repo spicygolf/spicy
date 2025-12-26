@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAccount } from "jazz-tools/react-native";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { PlayerAccount } from "spicylib/schema";
@@ -68,20 +68,27 @@ export function GamePlayersList() {
     });
   }, [me, game]);
 
+  const [isAddingMe, setIsAddingMe] = useState(false);
+
   const handleAddMe = useCallback(async () => {
     if (!me?.$isLoaded || !me.root?.$isLoaded || !me.root.player?.$isLoaded) {
       return;
     }
 
-    const playerData = playerToPlayerData(me.root.player);
-    const result = await addPlayerToGame(playerData);
+    setIsAddingMe(true);
+    try {
+      const playerData = playerToPlayerData(me.root.player);
+      const result = await addPlayerToGame(playerData);
 
-    if (result.isOk()) {
-      navigation.navigate("AddRoundToGame", {
-        playerId: result.value.$jazz.id,
-      });
-    } else {
-      console.error("Failed to add me to game:", result.error);
+      if (result.isOk()) {
+        navigation.navigate("AddRoundToGame", {
+          playerId: result.value.$jazz.id,
+        });
+      } else {
+        console.error("Failed to add me to game:", result.error);
+      }
+    } finally {
+      setIsAddingMe(false);
     }
   }, [me, addPlayerToGame, navigation]);
 
@@ -94,7 +101,9 @@ export function GamePlayersList() {
             onPress={() => navigation.navigate("AddPlayerNavigator")}
           />
         </View>
-        {!isMeInGame && <Button label="Add Me" onPress={handleAddMe} />}
+        {!isMeInGame && (
+          <Button label="Add Me" onPress={handleAddMe} disabled={isAddingMe} />
+        )}
       </View>
       <FlatList
         data={players}

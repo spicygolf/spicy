@@ -1,17 +1,18 @@
-import { Group } from "jazz-tools";
-import { err, ok, type Result } from "neverthrow";
-import { Handicap, ListOfRounds, Player } from "spicylib/schema";
+import { err, type Result } from "neverthrow";
+import type { Player } from "spicylib/schema";
+import {
+  type AddPlayerError,
+  addPlayerToGameCore,
+  type PlayerData,
+} from "../utils/addPlayerToGameCore";
 import { useGame } from "./useGame";
 import { useJazzWorker } from "./useJazzWorker";
 
-export type PlayerData = Parameters<typeof Player.create>[0];
+// Re-export types for consumers
+export type { AddPlayerError, PlayerData } from "../utils/addPlayerToGameCore";
 
-export interface AddPlayerError {
-  type:
-    | "NO_PLAYERS"
-    | "NO_PLAYER_DATA"
-    | "NO_WORKER_ACCOUNT"
-    | "PLAYER_CREATION_FAILED";
+export interface UseAddPlayerError {
+  type: AddPlayerError["type"] | "NO_WORKER_ACCOUNT";
   message: string;
 }
 
@@ -31,18 +32,11 @@ export function useAddPlayerToGame() {
 
   const addPlayerToGame = async (
     p: PlayerData,
-  ): Promise<Result<Player, AddPlayerError>> => {
+  ): Promise<Result<Player, UseAddPlayerError>> => {
     if (!game?.$isLoaded || !game.players?.$isLoaded) {
       return err({
-        type: "NO_PLAYERS",
-        message: "No players collection in game",
-      });
-    }
-
-    if (!p) {
-      return err({
-        type: "NO_PLAYER_DATA",
-        message: "No player data provided",
+        type: "GAME_NOT_LOADED",
+        message: "Game or players collection not loaded",
       });
     }
 
@@ -53,109 +47,7 @@ export function useAddPlayerToGame() {
       });
     }
 
-    const group = game.players.$jazz.owner;
-
-    // Give the worker account admin access to this player's group
-    if (group instanceof Group) {
-      try {
-        group.addMember(worker.account, "admin");
-      } catch (_e) {
-        // Ignore errors when adding member - might already be a member
-      }
-    }
-
-    // Convert handicap to Jazz CoMap if provided
-    let handicap: Handicap | undefined;
-    if (p.handicap && p.handicap !== null) {
-      handicap = Handicap.create(
-        {
-          source: p.handicap.source,
-          display: p.handicap.display,
-          value: p.handicap.value,
-          revDate: p.handicap.revDate,
-        },
-        { owner: group },
-      );
-    }
-
-    // Convert handicap to Jazz CoMap
-    const playerData = {
-      ...p,
-      handicap,
-    };
-
-    let player: Player | null = null;
-
-    try {
-      if (playerData.ghinId) {
-        // Load the player with rounds resolved to check if it already has a rounds field
-        const upsertedPlayer = await Player.upsertUnique({
-          value: playerData,
-          unique: playerData.ghinId,
-          owner: group,
-        });
-
-        if (!upsertedPlayer.$isLoaded) {
-          throw new Error("Failed to upsert player");
-        }
-
-        // Ensure the player is loaded with rounds to check if rounds field exists
-        player = await upsertedPlayer.$jazz.ensureLoaded({
-          resolve: { rounds: true, handicap: true },
-        });
-      } else {
-        player = Player.create(playerData, { owner: group });
-      }
-    } catch (error) {
-      return err({
-        type: "PLAYER_CREATION_FAILED",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Unknown error creating player",
-      });
-    }
-
-    if (!player?.$isLoaded) {
-      return err({
-        type: "PLAYER_CREATION_FAILED",
-        message: "Failed to create or upsert player",
-      });
-    }
-
-    // Initialize rounds field if it doesn't exist
-    // Use $jazz.has to check if the field actually exists vs just not loaded
-    if (!player.$jazz.has("rounds")) {
-      const roundsList = ListOfRounds.create([], { owner: group });
-      player.$jazz.set("rounds", roundsList);
-    }
-
-    // Check if player is already in the game (we already verified game.$isLoaded above)
-    const existingPlayer = game.players.find(
-      (p) => p?.$isLoaded && p.$jazz.id === player.$jazz.id,
-    );
-
-    // Only add if not already in the game
-    if (!existingPlayer) {
-      game.players.$jazz.push(player);
-    } else {
-      // If player exists but doesn't have rounds, initialize it
-      if (existingPlayer.$isLoaded && !existingPlayer.$jazz.has("rounds")) {
-        const roundsList = ListOfRounds.create([], { owner: group });
-        existingPlayer.$jazz.set("rounds", roundsList);
-      }
-    }
-
-    // Return the player from the game context to ensure we have the latest version
-    const gamePlayer = game.players.find(
-      (p) => p?.$isLoaded && p.$jazz.id === player.$jazz.id,
-    );
-
-    if (gamePlayer?.$isLoaded) {
-      return ok(gamePlayer);
-    }
-
-    return ok(player);
+    return addPlayerToGameCore(game, p, worker.account);
   };
 
   return addPlayerToGame;
