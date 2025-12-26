@@ -10,11 +10,16 @@ import {
   ListOfRoundToGames,
   PlayerAccount,
 } from "spicylib/schema";
+import { addPlayerToGameDirect } from "../utils/addPlayerToGameDirect";
+import { playerToPlayerData } from "../utils/playerToPlayerData";
 
 export function useCreateGame() {
   const me = useAccount(PlayerAccount, {
     resolve: {
       root: {
+        player: {
+          handicap: true,
+        },
         games: { $each: true },
       },
     },
@@ -107,6 +112,12 @@ export function useCreateGame() {
     // Add game to user's games list
     if (me.root.games?.$isLoaded) {
       me.root.games.$jazz.push(game);
+    }
+
+    // Auto-add current player to the game
+    if (me.root.player?.$isLoaded) {
+      const playerData = playerToPlayerData(me.root.player);
+      await addPlayerToGameDirect(game, playerData);
     }
 
     return game;
