@@ -61,6 +61,8 @@ export function useJazzCredentials() {
     placeholderData: storedCredentials || undefined,
     // If we have stored credentials, fetch in background without blocking
     enabled: true,
+    // Don't retry if we have cached credentials - work offline
+    retry: storedCredentials ? false : 3,
   });
 
   // Persist credentials when they're fetched
@@ -70,9 +72,17 @@ export function useJazzCredentials() {
     }
   }, [query.data]);
 
-  // Return stored credentials immediately if available, otherwise wait for fetch
+  // If we have stored credentials, suppress errors and use cached data
+  // This enables offline-first behavior after initial login
+  const hasValidData = query.data || storedCredentials;
+  const suppressError = hasValidData && query.error;
+
   return {
     ...query,
     data: query.data || storedCredentials || undefined,
+    // Suppress error if we have valid cached credentials (offline-first)
+    error: suppressError ? null : query.error,
+    // Not in error state if we have cached credentials
+    isError: suppressError ? false : query.isError,
   };
 }

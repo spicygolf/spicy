@@ -6,14 +6,12 @@ import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { setJazzWorkerAccount } from "spicylib/config/env";
 import { PlayerAccount } from "spicylib/schema";
-import { useApi } from "@/hooks";
 import { useJazzCredentials } from "@/hooks/useJazzCredentials";
 import { betterAuthClient } from "@/lib/auth-client";
 import { Text } from "@/ui";
 
 export function JazzAndAuth({ children }: { children: React.ReactNode }) {
   const { data: credentials, isLoading, error } = useJazzCredentials();
-  const _api = useApi();
 
   // Set worker account when credentials are loaded
   useEffect(() => {
@@ -51,15 +49,7 @@ export function JazzAndAuth({ children }: { children: React.ReactNode }) {
         }}
       >
         <ActivityIndicator size="large" />
-        <Text style={{ marginTop: 10 }}>Connecting to API...</Text>
-        <Text style={{ marginTop: 20, fontSize: 12, textAlign: "center" }}>
-          Debug:{"\n"}
-          isLoading: {String(isLoading)}
-          {"\n"}
-          hasCredentials: {String(!!credentials)}
-          {"\n"}
-          hasError: {String(!!error)}
-        </Text>
+        <Text style={{ marginTop: 10 }}>Loading...</Text>
       </View>
     );
   }
