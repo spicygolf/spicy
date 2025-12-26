@@ -88,11 +88,13 @@ export function GamePlayersList() {
   return (
     <View>
       <View style={styles.buttonRow}>
+        <View style={styles.addPlayerButton}>
+          <Button
+            label="Add Player"
+            onPress={() => navigation.navigate("AddPlayerNavigator")}
+          />
+        </View>
         {!isMeInGame && <Button label="Add Me" onPress={handleAddMe} />}
-        <Button
-          label="Add Player"
-          onPress={() => navigation.navigate("AddPlayerNavigator")}
-        />
       </View>
       <FlatList
         data={players}
@@ -109,6 +111,9 @@ const styles = StyleSheet.create((theme) => ({
   buttonRow: {
     flexDirection: "row",
     gap: theme.gap(1),
+  },
+  addPlayerButton: {
+    flex: 1,
   },
   flatlist: {
     marginVertical: theme.gap(1),
