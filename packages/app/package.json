@@ -41,7 +41,7 @@
     "jazz-tools": "catalog:shared",
     "neverthrow": "8.2.0",
     "react": "19.1.0",
-    "react-hook-form": "7.61.1",
+    "react-hook-form": "7.69.0",
     "react-native": "0.80.0",
     "react-native-dotenv": "3.4.11",
     "react-native-draggable-flatlist": "4.0.3",
