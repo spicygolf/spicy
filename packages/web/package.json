@@ -14,7 +14,7 @@
     "jazz": "bun run src/cli/jazz-inspect.ts"
   },
   "dependencies": {
-    "@radix-ui/react-dialog": "1.1.4",
+    "@radix-ui/react-dialog": "1.1.15",
     "@radix-ui/react-label": "2.1.1",
     "@radix-ui/react-progress": "1.1.8",
     "@radix-ui/react-select": "2.1.4",
