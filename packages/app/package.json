@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@azure/core-asynciterator-polyfill": "1.0.2",
-    "@op-engineering/op-sqlite": "14.1.0",
+    "@op-engineering/op-sqlite": "15.1.16",
     "@react-native-clipboard/clipboard": "1.16.3",
     "@react-native-community/netinfo": "11.4.1",
     "@react-native-vector-icons/common": "12.4.0",
