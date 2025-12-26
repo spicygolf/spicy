@@ -126,7 +126,13 @@ export function useCreateGame() {
     }
 
     // Auto-add current player to the game
-    if (me.root.player?.$isLoaded) {
+    // The game was just created synchronously with the players list,
+    // so it should be loaded, but we check defensively
+    if (
+      me.root.player?.$isLoaded &&
+      game.$isLoaded &&
+      game.players?.$isLoaded
+    ) {
       const playerData = playerToPlayerData(me.root.player);
       const result = await addPlayerToGameCore(
         game,

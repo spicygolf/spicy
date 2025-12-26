@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAccount } from "jazz-tools/react-native";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { PlayerAccount } from "spicylib/schema";
@@ -72,7 +72,9 @@ export function GamePlayersList() {
 
   const [isAddingMe, setIsAddingMe] = useState(false);
 
-  const handleAddMe = useCallback(async () => {
+  // No useCallback - Jazz CoValues (me) as dependencies don't work correctly
+  // because Jazz object references don't change when nested data loads
+  const handleAddMe = async () => {
     if (!me?.$isLoaded || !me.root?.$isLoaded || !me.root.player?.$isLoaded) {
       return;
     }
@@ -92,7 +94,7 @@ export function GamePlayersList() {
     } finally {
       setIsAddingMe(false);
     }
-  }, [me, addPlayerToGame, navigation]);
+  };
 
   return (
     <View>
