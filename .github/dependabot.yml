@@ -1,0 +1,54 @@
+version: 2
+
+updates:
+  # Root package.json (workspace root)
+  - package-ecosystem: "bun"
+    target-branch: "main"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    ignore:
+      - dependency-name: "react"
+      - dependency-name: "react-native"
+      - dependency-name: "@react-native/metro-config"
+      - dependency-name: "@react-native/eslint-config"
+      - dependency-name: "@react-native/gradle-plugin"
+      - dependency-name: "@react-native-community/cli"
+      - dependency-name: "@react-native-community/cli-platform-android"
+      - dependency-name: "@react-native-community/cli-platform-ios"
+      - dependency-name: "@types/react"
+
+  # Active packages only (ignoring old version folders like app-0.3, app-0.4, api-0.3)
+  - package-ecosystem: "bun"
+    target-branch: "main"
+    directory: "/packages/api"
+    schedule:
+      interval: "monthly"
+
+  - package-ecosystem: "bun"
+    target-branch: "main"
+    directory: "/packages/app"
+    schedule:
+      interval: "monthly"
+    ignore:
+      - dependency-name: "react"
+      - dependency-name: "react-native"
+      - dependency-name: "@react-native/metro-config"
+      - dependency-name: "@react-native/eslint-config"
+      - dependency-name: "@react-native/gradle-plugin"
+      - dependency-name: "@react-native-community/cli"
+      - dependency-name: "@react-native-community/cli-platform-android"
+      - dependency-name: "@react-native-community/cli-platform-ios"
+      - dependency-name: "@types/react"
+
+  - package-ecosystem: "bun"
+    target-branch: "main"
+    directory: "/packages/lib"
+    schedule:
+      interval: "monthly"
+
+  - package-ecosystem: "bun"
+    target-branch: "main"
+    directory: "/packages/web"
+    schedule:
+      interval: "monthly"

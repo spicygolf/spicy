@@ -74,6 +74,7 @@ bun format && bun lint && bun tsc
 | `packages/app` | React Native mobile app |
 | `packages/api` | Backend API (external data only) |
 | `packages/lib` | Shared utilities and logic |
+| `packages/web` | Web app for large-screen customizations before using mobile app (and admin screens for development tasks) |
 
 ## Skills
 

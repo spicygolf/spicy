@@ -112,3 +112,17 @@ Before marking task complete:
 - [ ] Progress file updated
 - [ ] Git committed with descriptive message
 - [ ] No `in_progress` steps left dangling
+
+## Debugging Tips
+
+**Dev server logs are tee'd to files for your review:**
+
+| Service | Log File |
+|---------|----------|
+| React Native Metro | `/tmp/spicy-metro.log` |
+| API Server | `/tmp/spicy-api.log` |
+
+Use `tail -100 /tmp/spicy-metro.log` to see recent app logs.
+Use `tail -100 /tmp/spicy-api.log` to see recent API logs.
+
+These logs persist across app refreshes - useful for debugging startup issues.

@@ -14,7 +14,12 @@ interface LoginForm {
 }
 
 export function Login() {
-  const { control, handleSubmit } = useForm<LoginForm>();
+  const { control, handleSubmit } = useForm<LoginForm>({
+    defaultValues: {
+      email: __DEV__ ? "brad@sankatygroup.com" : "",
+      password: __DEV__ ? "password" : "",
+    },
+  });
   const navigation = useNavigation<AuthStackNavigationProp>();
 
   const onSubmit: SubmitHandler<LoginForm> = async ({ email, password }) => {
