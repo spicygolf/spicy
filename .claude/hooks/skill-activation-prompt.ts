@@ -126,13 +126,15 @@ function loadSkillContent(skillPath: string): string | null {
 
 function main(): void {
   const input = process.env.CLAUDE_PROMPT || "";
-  if (!input) {
-    return;
-  }
 
   const config = loadSkillRules();
   const activatedSkills = getActivatedSkills(input, config);
   const progressState = loadProgressState();
+
+  // Always output context, even if prompt is empty (for always-on skills)
+  if (activatedSkills.length === 0 && !progressState.hasActiveTask) {
+    return;
+  }
 
   // Output progress reminder
   console.log("\n<!-- Session Context -->");
