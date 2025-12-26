@@ -1,14 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect } from "react";
-import { MMKV } from "react-native-mmkv";
 import { useApi } from "@/hooks";
+import { storage } from "@/providers/jazz/mmkv-store";
 
-const storage = new MMKV({
-  id: "spicygolf.jazz-credentials",
-});
-
-const CREDENTIALS_KEY = "jazz-credentials";
+const CREDENTIALS_KEY = "spicy-jazz-credentials";
 
 interface JazzCredentials {
   apiKey: string;
@@ -22,11 +18,7 @@ async function fetchJazzCredentials(api: string): Promise<JazzCredentials> {
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-      const message = error.message;
-      throw new Error(
-        `Cannot reach API at ${url}\n${status ? `Status: ${status}\n` : ""}${message}`,
-      );
+      throw new Error("Cannot reach Spicy Golf");
     }
     throw error;
   }
@@ -54,6 +46,7 @@ export function clearStoredCredentials(): void {
 
 export function useJazzCredentials() {
   const api = useApi();
+  // Read stored credentials synchronously on mount
   const storedCredentials = getStoredCredentials();
 
   const query = useQuery({
@@ -61,29 +54,26 @@ export function useJazzCredentials() {
     queryFn: () => fetchJazzCredentials(api),
     staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days - super rare updates
     gcTime: 30 * 24 * 60 * 60 * 1000, // 30 days
-    // Return stored credentials immediately while refetching in background
-    placeholderData: storedCredentials || undefined,
-    // If we have stored credentials, fetch in background without blocking
-    enabled: true,
+    // Use stored credentials as initial data so they persist after query errors
+    initialData: storedCredentials || undefined,
     // Don't retry if we have cached credentials - work offline
     retry: storedCredentials ? false : 3,
   });
 
-  // Persist credentials when they're fetched
+  // Persist credentials when they're freshly fetched from the API
   useEffect(() => {
-    if (query.data) {
+    if (query.data && query.isFetched && !query.isError) {
       storeCredentials(query.data);
     }
-  }, [query.data]);
+  }, [query.data, query.isFetched, query.isError]);
 
-  // If we have stored credentials, suppress errors and use cached data
+  // If we have valid data (from cache or fetch), suppress network errors
   // This enables offline-first behavior after initial login
-  const hasValidData = query.data || storedCredentials;
+  const hasValidData = !!query.data;
   const suppressError = hasValidData && query.error;
 
   return {
     ...query,
-    data: query.data || storedCredentials || undefined,
     // Suppress error if we have valid cached credentials (offline-first)
     error: suppressError ? null : query.error,
     // Not in error state if we have cached credentials
