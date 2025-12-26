@@ -39,7 +39,7 @@ export function GameListItem({ game }: { game: Game | null | undefined }) {
     ? loadedGame.players
         .filter((p) => p?.$isLoaded)
         .map((p) => formatPlayerName(p?.name))
-        .join(" ")
+        .join(" • ")
     : "";
 
   const handleGamePress = () => {

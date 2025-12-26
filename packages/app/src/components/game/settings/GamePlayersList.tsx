@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAccount } from "jazz-tools/react-native";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { PlayerAccount } from "spicylib/schema";
@@ -50,7 +50,9 @@ export function GamePlayersList() {
       : [];
 
   // Check if current player is already in the game
-  const isMeInGame = useMemo(() => {
+  // Computed directly - no useMemo needed since this is a simple check
+  // and Jazz reactive updates will trigger re-renders when data loads
+  const isMeInGame = (() => {
     if (!me?.$isLoaded || !me.root?.$isLoaded || !me.root.player?.$isLoaded) {
       return true; // Hide button if we can't determine
     }
@@ -66,7 +68,7 @@ export function GamePlayersList() {
       // Match by Jazz ID or GHIN ID
       return p.$jazz.id === myPlayerId || (myGhinId && p.ghinId === myGhinId);
     });
-  }, [me, game]);
+  })();
 
   const [isAddingMe, setIsAddingMe] = useState(false);
 
