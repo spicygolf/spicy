@@ -48,6 +48,10 @@ function storeCredentials(credentials: JazzCredentials): void {
   storage.set(CREDENTIALS_KEY, JSON.stringify(credentials));
 }
 
+export function clearStoredCredentials(): void {
+  storage.delete(CREDENTIALS_KEY);
+}
+
 export function useJazzCredentials() {
   const api = useApi();
   const storedCredentials = getStoredCredentials();
