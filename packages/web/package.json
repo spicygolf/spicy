@@ -27,7 +27,7 @@
     "jazz-tools": "catalog:shared",
     "lucide-react": "0.460.0",
     "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react-dom": "19.2.3",
     "spicylib": "workspace:*",
     "tailwind-merge": "3.4.0",
     "tailwindcss-animate": "1.0.7"
@@ -35,7 +35,7 @@
   "devDependencies": {
     "@types/node": "22.10.2",
     "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.0",
+    "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react-swc": "4.2.2",
     "autoprefixer": "10.4.20",
     "del-cli": "7.0.0",
