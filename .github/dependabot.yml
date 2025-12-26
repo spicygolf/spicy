@@ -22,3 +22,5 @@ updates:
       - dependency-name: "@react-native/*"
       - dependency-name: "@react-native-community/*"
       - dependency-name: "@types/react"
+      # Tailwind 4.x has breaking changes - update manually
+      - dependency-name: "tailwindcss"
