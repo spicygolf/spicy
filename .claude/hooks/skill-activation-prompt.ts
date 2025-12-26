@@ -160,6 +160,19 @@ function main(): void {
     for (const skill of activatedSkills) {
       console.log(`- ${skill.name} (${skill.description})`);
     }
+
+    // Inject full content for keyword-triggered skills (not always-on)
+    const keywordTriggeredSkills = activatedSkills.filter(
+      (s) => !s.triggers.always && s.triggers.keywords,
+    );
+
+    for (const skill of keywordTriggeredSkills) {
+      const content = loadSkillContent(skill.skillPath);
+      if (content) {
+        console.log(`\n## Skill: ${skill.name}\n`);
+        console.log(content);
+      }
+    }
   }
 
   console.log("<!-- End Session Context -->\n");

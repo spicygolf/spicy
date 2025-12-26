@@ -136,6 +136,43 @@ const game = useCoState(Game, gameId || "", { resolve: {...} });
 
 ---
 
+## Avoid React Hooks with Jazz Data
+
+**Severity**: CRITICAL | **Enforcement**: BLOCKING
+
+Don't use useMemo, useEffect, or useCallback with Jazz CoValues as dependencies. Jazz is already reactive - just compute values directly.
+
+**Rationale**: Jazz objects are reactive proxies. When nested data loads, the object reference doesn't change, so React dependency arrays won't trigger updates. This leads to stale computations.
+
+```typescript
+// WRONG - useMemo won't recalculate when game.players loads
+const isMeInGame = useMemo(() => {
+  return game?.players?.some(p => p.$jazz.id === myId);
+}, [game]);  // game reference doesn't change when players load!
+
+// CORRECT - compute directly, Jazz reactivity handles updates
+const isMeInGame = (() => {
+  if (!game?.$isLoaded || !game.players?.$isLoaded) return false;
+  return game.players.some(p => p?.$isLoaded && p.$jazz.id === myId);
+})();
+
+// WRONG - useEffect fighting Jazz reactivity
+useEffect(() => {
+  if (game?.$isLoaded) {
+    setPlayerCount(game.players?.length || 0);
+  }
+}, [game]);
+
+// CORRECT - derive directly from Jazz data
+const playerCount = game?.$isLoaded && game.players?.$isLoaded 
+  ? game.players.length 
+  : 0;
+```
+
+**Exception**: useMemo is OK when the dependency is a primitive derived from Jazz (like an ID array), not the Jazz object itself. See "Selectors vs useMemo" section.
+
+---
+
 ## Keep High-Level Subscriptions Shallow
 
 **Severity**: CRITICAL | **Enforcement**: BLOCKING

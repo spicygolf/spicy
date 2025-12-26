@@ -41,7 +41,11 @@
           "player",
           "game",
           "round",
-          "score"
+          "score",
+          "usememo",
+          "usestate",
+          "useeffect",
+          "usecallback"
         ]
       },
       "skillPath": "jazz-patterns",
