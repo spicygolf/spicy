@@ -1,70 +1,46 @@
-# Claude Code Configuration for Spicy Golf
+# Claude Code Configuration
 
-This directory contains the orchestration configuration for Claude Code agents working on Spicy Golf.
+Lightweight orchestration for all tasks - decompose, track, commit often.
 
-## Quick Start
+## Core Pattern
 
-### For Simple Tasks (1-2 files)
-Just work directly - no orchestration needed.
+Every task follows this flow:
 
-### For Complex Tasks (3+ files, cross-package)
-Invoke the orchestrator:
+1. **Read** `.claude/progress/claude-progress.md` and recent git log
+2. **Decompose** task into atomic steps
+3. **Work** on ONE step at a time
+4. **Commit** after each completed step
+5. **Update** progress file for handoff
 
-```
-User: "Add team scoring feature"
-→ Orchestrator analyzes and coordinates specialists
-```
+This prevents context exhaustion and enables seamless session handoffs.
 
-## Key Principles for Spicy Golf
+## Hooks
 
-### 1. Local-First Architecture
-- App MUST work offline (golf courses have poor connectivity)
-- User data stored in Jazz CoMaps/CoLists
-- API only for external data (course info, weather)
+| Hook | When | What |
+|------|------|------|
+| `UserPromptSubmit` | Every prompt | Shows active task, injects skills |
+| `PostToolUse` | After edits | Tracks file changes |
+| `Stop` | Session end | Quality checks, progress reminder |
 
-### 2. Jazz Patterns are CRITICAL
-These prevent data loss - follow them religiously:
-- Use `$jazz.has("field")` NOT `!obj.field`
-- Always `ensureLoaded` after `upsertUnique`
-- Load lists level-by-level
-- Create CoMaps with required fields only
+## Skills
 
-### 3. Quality is Enforced
-Pre-commit hooks require:
-- `bun format` passes
-- `bun lint` passes
-- `bun tsc` passes
+| Skill | Priority | Activation |
+|-------|----------|------------|
+| `architecture` | 100 | Always |
+| `orchestration` | 99 | Always |
+| `jazz-patterns` | 95 | Keywords |
+| `typescript-standards` | 80 | Keywords |
 
-## Agents Overview
+## Progress Tracking
 
-### orchestrator
-**When**: 3+ files, cross-package tasks, new features
-**Role**: Decomposes tasks, coordinates specialists, maintains architectural vision
-**Never**: Writes code directly
+`.claude/progress/claude-progress.md` tracks:
+- Current task and status
+- Steps with completion state
+- Session log for handoff
+- Files changed
 
-### app-specialist
-**Package**: packages/app
-**Focus**: React Native UI, Jazz integration, offline functionality
-**Rules**: architecture.xml, code-typescript.xml, jazz.xml
+## Key Principles
 
-### jazz-specialist
-**Focus**: Jazz schema design, data modeling, loading patterns
-**Expertise**: CoMaps, CoLists, circular dependencies, performance
-**Rules**: architecture.xml, code-typescript.xml, jazz.xml
-
-### api-specialist
-**Package**: packages/api
-**Focus**: External data endpoints, third-party integrations
-**Rules**: architecture.xml, code-typescript.xml
-
-### lib-specialist
-**Package**: packages/lib
-**Focus**: Shared utilities, business logic, types
-**Constraint**: Framework-agnostic (no React, Jazz, etc.)
-**Rules**: architecture.xml, code-typescript.xml
-
-## Read More
-
-See [ORCHESTRATION-GUIDE.md](./ORCHESTRATION-GUIDE.md) for detailed usage patterns, examples, and best practices.
-
-The XML format allows for better context management and agent-specific loading.
+1. **Local-First**: Jazz for user data, API only for external data
+2. **Jazz Patterns**: `$jazz.has()`, `ensureLoaded`, no Jazz in React state
+3. **Quality**: `bun format && bun lint && bun tsc` must pass

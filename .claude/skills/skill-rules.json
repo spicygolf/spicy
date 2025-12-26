@@ -1,0 +1,111 @@
+{
+  "version": "1.0.0",
+  "description": "Skill activation rules for Spicy Golf Claude Code sessions",
+  "skills": [
+    {
+      "name": "architecture",
+      "description": "Local-first architecture principles and monorepo structure",
+      "triggers": {
+        "always": true
+      },
+      "skillPath": "architecture",
+      "priority": 100
+    },
+    {
+      "name": "orchestration",
+      "description": "Lightweight task decomposition and progress tracking (always on)",
+      "triggers": {
+        "always": true
+      },
+      "skillPath": "orchestration",
+      "priority": 99
+    },
+    {
+      "name": "jazz-patterns",
+      "description": "Jazz Tools patterns for local-first data (CRITICAL for data integrity)",
+      "triggers": {
+        "keywords": [
+          "jazz",
+          "comap",
+          "colist",
+          "covalue",
+          "schema",
+          "$jazz",
+          "ensureloaded",
+          "usecostate",
+          "upsertunique",
+          "offline",
+          "sync",
+          "local-first",
+          "data model",
+          "player",
+          "game",
+          "round",
+          "score"
+        ],
+        "filePatterns": ["*.ts", "*.tsx"]
+      },
+      "skillPath": "jazz-patterns",
+      "priority": 95
+    },
+    {
+      "name": "typescript-standards",
+      "description": "TypeScript coding standards and React Native best practices",
+      "triggers": {
+        "keywords": [
+          "typescript",
+          "type",
+          "interface",
+          "component",
+          "react",
+          "hook",
+          "usestate",
+          "useeffect",
+          "style",
+          "unistyle"
+        ],
+        "filePatterns": ["*.ts", "*.tsx"]
+      },
+      "skillPath": "typescript-standards",
+      "priority": 80
+    },
+    {
+      "name": "app-development",
+      "description": "React Native mobile app development patterns",
+      "triggers": {
+        "keywords": [
+          "app",
+          "screen",
+          "navigation",
+          "component",
+          "ui",
+          "mobile",
+          "react native",
+          "expo",
+          "packages/app"
+        ],
+        "filePatterns": ["packages/app/**"]
+      },
+      "skillPath": "typescript-standards",
+      "priority": 70
+    },
+    {
+      "name": "api-development",
+      "description": "Backend API development with ElysiaJS",
+      "triggers": {
+        "keywords": [
+          "api",
+          "endpoint",
+          "backend",
+          "server",
+          "elysia",
+          "route",
+          "packages/api"
+        ],
+        "filePatterns": ["packages/api/**"]
+      },
+      "skillPath": "architecture",
+      "priority": 60
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# Progress Tracking Directory
+
+This directory stores progress tracking files for long-running Claude Code sessions.
+
+Files in this directory (except .gitkeep and templates) are typically gitignored
+as they contain session-specific state.
