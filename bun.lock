@@ -34,7 +34,7 @@
       "version": "0.5.0",
       "dependencies": {
         "@azure/core-asynciterator-polyfill": "1.0.2",
-        "@op-engineering/op-sqlite": "14.1.0",
+        "@op-engineering/op-sqlite": "15.1.16",
         "@react-native-clipboard/clipboard": "1.16.3",
         "@react-native-community/netinfo": "11.4.1",
         "@react-native-vector-icons/common": "12.4.0",
@@ -656,7 +656,7 @@
 
     "@nodelib/fs.walk": ["@nodelib/fs.walk@1.2.8", "", { "dependencies": { "@nodelib/fs.scandir": "2.1.5", "fastq": "^1.6.0" } }, "sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg=="],
 
-    "@op-engineering/op-sqlite": ["@op-engineering/op-sqlite@14.1.0", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-+OjIbm0Iv0PulNM8yJV7cGgqr/EfT44C4vnXnAzHdCPyGhq2i/yq7hH2lH1XgEXYTRb/LvEfMEUEifWn7Th8Xg=="],
+    "@op-engineering/op-sqlite": ["@op-engineering/op-sqlite@15.1.16", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-nyywOk95+AtHOkvEPnq+OgyKxaPQ59Yp+AEAoyLxc5a0xHLCDu/EZDADg7k4UbstzORvQXLDwkGMzjkb1btaNw=="],
 
     "@opentelemetry/api": ["@opentelemetry/api@1.9.0", "", {}, "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="],
 
