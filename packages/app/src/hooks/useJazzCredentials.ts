@@ -40,8 +40,17 @@ function storeCredentials(credentials: JazzCredentials): void {
   storage.set(CREDENTIALS_KEY, JSON.stringify(credentials));
 }
 
+const JAZZ_AUTH_SECRET_KEY = "jazz-logged-in-secret";
+
 export function clearStoredCredentials(): void {
   storage.delete(CREDENTIALS_KEY);
+}
+
+export function clearAllAuthData(): void {
+  // Clear our Jazz API credentials
+  storage.delete(CREDENTIALS_KEY);
+  // Clear Jazz's auth secret (enables offline logout)
+  storage.delete(JAZZ_AUTH_SECRET_KEY);
 }
 
 export function useJazzCredentials() {
@@ -58,6 +67,9 @@ export function useJazzCredentials() {
     initialData: storedCredentials || undefined,
     // Don't retry if we have cached credentials - work offline
     retry: storedCredentials ? false : 3,
+    // Don't refetch on mount/focus - we have initialData and want stable error state
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Persist credentials when they're freshly fetched from the API
