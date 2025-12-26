@@ -149,6 +149,52 @@ export interface TeeRating {
   bogey: number;
 }
 
+/**
+ * Raw rating format as stored in ArangoDB
+ * Array of objects with RatingType discriminator
+ */
+export interface ArangoTeeRating {
+  RatingType: "Total" | "Front" | "Back";
+  CourseRating: number;
+  SlopeRating: number;
+  BogeyRating: number;
+}
+
+/**
+ * Convert ArangoDB ratings array to the format used in Jazz schema
+ */
+export function convertArangoRatings(ratings: ArangoTeeRating[] | undefined): {
+  total: TeeRating;
+  front: TeeRating;
+  back: TeeRating;
+} {
+  const defaultRating: TeeRating = { rating: 0, slope: 0, bogey: 0 };
+
+  if (!ratings || !Array.isArray(ratings) || ratings.length === 0) {
+    return { total: defaultRating, front: defaultRating, back: defaultRating };
+  }
+
+  function findRating(ratingsArr: ArangoTeeRating[], type: string): TeeRating {
+    const r = ratingsArr.find(
+      (r) => r.RatingType?.toLowerCase() === type.toLowerCase(),
+    );
+    if (r) {
+      return {
+        rating: r.CourseRating,
+        slope: r.SlopeRating,
+        bogey: r.BogeyRating,
+      };
+    }
+    return defaultRating;
+  }
+
+  return {
+    total: findRating(ratings, "Total"),
+    front: findRating(ratings, "Front"),
+    back: findRating(ratings, "Back"),
+  };
+}
+
 export interface RoundV03 {
   _key: string;
   date: string;
@@ -168,11 +214,7 @@ export interface RoundV03 {
       length: number;
       handicap: number;
     }>;
-    Ratings: {
-      total?: TeeRating;
-      front?: TeeRating;
-      back?: TeeRating;
-    };
+    Ratings: ArangoTeeRating[];
     course: {
       course_id: string;
       course_name: string;
@@ -359,6 +401,79 @@ export async function fetchAllGames(
     return { games, total };
   } catch (error) {
     console.error("Failed to fetch all games:", error);
+    throw error;
+  }
+}
+
+export interface FavoritePlayerEdge {
+  playerKey: string;
+  favoritePlayerKey: string;
+  addedAt?: string;
+}
+
+export interface FavoriteCourseTeeEdge {
+  playerKey: string;
+  teeId: string;
+  courseId: string;
+  addedAt?: string;
+}
+
+/**
+ * Fetch favorite players for all players from ArangoDB
+ * Returns player2player edges where favorite == 'true'
+ */
+export async function fetchAllFavoritePlayers(
+  db: Database,
+): Promise<FavoritePlayerEdge[]> {
+  try {
+    const cursor = await db.query(`
+      FOR player IN players
+        FOR v, e, p IN 1..1 OUTBOUND player._id
+          GRAPH 'games'
+          FILTER e.type == 'player2player' AND e.favorite == 'true'
+          RETURN {
+            playerKey: player._key,
+            favoritePlayerKey: v._key,
+            addedAt: e.created_at
+          }
+    `);
+    const favorites = await cursor.all();
+    return favorites as FavoritePlayerEdge[];
+  } catch (error) {
+    console.error("Failed to fetch favorite players:", error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch favorite course/tees for all players from ArangoDB
+ * Returns player2tee edges where favorite == 'true'
+ */
+export async function fetchAllFavoriteCourseTees(
+  db: Database,
+): Promise<FavoriteCourseTeeEdge[]> {
+  try {
+    const cursor = await db.query(`
+      FOR player IN players
+        FOR v, e, p IN 1..1 OUTBOUND player._id
+          GRAPH 'games'
+          FILTER e.type == 'player2tee' AND e.favorite == 'true'
+          LET course = FIRST(
+            FOR c, ce IN 1..1 OUTBOUND v._id GRAPH 'games'
+              FILTER ce.type == 'tee2course'
+              RETURN c
+          )
+          RETURN {
+            playerKey: player._key,
+            teeId: v.tee_id || v._key,
+            courseId: course.course_id,
+            addedAt: e.created_at
+          }
+    `);
+    const favorites = await cursor.all();
+    return favorites as FavoriteCourseTeeEdge[];
+  } catch (error) {
+    console.error("Failed to fetch favorite course/tees:", error);
     throw error;
   }
 }

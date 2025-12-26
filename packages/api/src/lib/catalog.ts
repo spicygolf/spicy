@@ -116,21 +116,21 @@ import {
   TeeHole,
 } from "spicylib/schema";
 import { transformGameSpec } from "spicylib/transform";
-import type {
-  GameSpecV03,
-  GameWithRoundsV03,
-  RoundToGameEdgeV03,
-  RoundV03,
-  TeeRating,
-} from "../utils/arango";
+
 import {
   type ArangoConfig,
+  type ArangoTeeRating,
+  convertArangoRatings,
   createArangoConnection,
   defaultConfig,
   fetchAllGames,
   fetchGameSpecs,
   fetchGameWithRounds,
   fetchPlayersWithGames,
+  type GameSpecV03,
+  type GameWithRoundsV03,
+  type RoundToGameEdgeV03,
+  type RoundV03,
 } from "../utils/arango";
 import { loadAllGameSpecs } from "../utils/json-reader";
 
@@ -706,13 +706,524 @@ async function importPlayers(
 }
 
 /**
+ * Import favorites for a player from ArangoDB to Jazz (permanent API function)
+ *
+ * This function runs in the USER's context (authenticated endpoint), so it can
+ * access and modify the user's account.root.favorites without authorization issues.
+ *
+ * @param playerAccount - The player's loaded PlayerAccount (user's account)
+ * @param legacyPlayerId - The player's legacy ArangoDB _key
+ * @param catalogId - The worker's catalog ID for looking up players/courses
+ * @param arangoConfig - ArangoDB configuration (optional)
+ * @returns Object with counts of imported favorites
+ */
+export async function importFavoritesForPlayer(
+  playerAccount: co.loaded<typeof PlayerAccount>,
+  legacyPlayerId: string,
+  catalogId: string,
+  workerAccount: co.loaded<typeof PlayerAccount>,
+  arangoConfig?: ArangoConfig,
+): Promise<{
+  favoritePlayers: number;
+  favoriteCourseTees: number;
+  errors: string[];
+}> {
+  console.log(
+    `[importFavoritesForPlayer] START for legacyPlayerId: ${legacyPlayerId}`,
+  );
+  console.log(
+    `[importFavoritesForPlayer] Running in user context: ${playerAccount.$jazz.id}`,
+  );
+  console.log(`[importFavoritesForPlayer] Using catalog: ${catalogId}`);
+
+  const result = {
+    favoritePlayers: 0,
+    favoriteCourseTees: 0,
+    errors: [] as string[],
+  };
+
+  try {
+    console.log(`[importFavoritesForPlayer] Creating ArangoDB connection...`);
+    const db = createArangoConnection(arangoConfig || defaultConfig);
+
+    console.log(`[importFavoritesForPlayer] Loading catalog by ID...`);
+    const { GameCatalog } = await import("spicylib/schema");
+    const catalog = await GameCatalog.load(catalogId, {
+      resolve: { players: {}, courses: {} },
+    });
+
+    if (!catalog?.$isLoaded) {
+      result.errors.push("Failed to load catalog");
+      return result;
+    }
+    console.log(`[importFavoritesForPlayer] Catalog loaded successfully`);
+
+    console.log(`[importFavoritesForPlayer] Checking player account root...`);
+    // Player account should already be loaded with root from the calling context
+    if (!playerAccount.root?.$isLoaded) {
+      console.error(
+        `[importFavoritesForPlayer] Player account root not loaded!`,
+      );
+      result.errors.push("Player account root not loaded");
+      return result;
+    }
+
+    console.log(`[importFavoritesForPlayer] Player account root is loaded`);
+    const root = playerAccount.root;
+    const { Favorites } = await import("spicylib/schema");
+
+    // Load or create favorites object (idempotent)
+    let favorites: co.loaded<typeof Favorites>;
+    if (root.$jazz.has("favorites") && root.favorites) {
+      console.log(
+        `[importFavoritesForPlayer] Loading existing favorites object...`,
+      );
+      const loadedRoot = await root.$jazz.ensureLoaded({
+        resolve: { favorites: { players: {}, courseTees: {} } },
+      });
+      if (loadedRoot.favorites?.$isLoaded) {
+        favorites = loadedRoot.favorites;
+        console.log(
+          `[importFavoritesForPlayer] Existing favorites loaded (isLoaded: ${favorites.$isLoaded}, players: ${favorites.players?.$isLoaded}, courseTees: ${favorites.courseTees?.$isLoaded})`,
+        );
+      } else {
+        throw new Error("Failed to load existing favorites");
+      }
+    } else {
+      console.log(
+        `[importFavoritesForPlayer] Creating new favorites object...`,
+      );
+      const group = root.$jazz.owner as Group;
+      favorites = Favorites.create({}, { owner: group });
+      root.$jazz.set("favorites", favorites);
+      console.log(
+        `[importFavoritesForPlayer] New favorites created (isLoaded: ${favorites.$isLoaded})`,
+      );
+    }
+
+    // Import favorite players
+    const { fetchAllFavoritePlayers } = await import("../utils/arango");
+    console.log(`Fetching all favorite players from ArangoDB...`);
+    const allFavoritePlayers = await fetchAllFavoritePlayers(db);
+    console.log(
+      `Total favorite player edges in DB: ${allFavoritePlayers.length}`,
+    );
+
+    const playerFavorites = allFavoritePlayers.filter(
+      (f) => f.playerKey === legacyPlayerId,
+    );
+
+    console.log(
+      `Found ${playerFavorites.length} favorite players for legacy player ${legacyPlayerId}`,
+    );
+
+    if (playerFavorites.length > 0) {
+      // Load catalog players map
+      const loadedCatalog = await catalog.$jazz.ensureLoaded({
+        resolve: { players: {} },
+      });
+
+      if (!loadedCatalog.players) {
+        result.errors.push("Catalog players not loaded");
+        return result;
+      }
+
+      const catalogPlayers = loadedCatalog.players;
+
+      // Debug: Log first few catalog player keys
+      const catalogKeys: string[] = [];
+      for (const key in catalogPlayers) {
+        catalogKeys.push(key);
+        if (catalogKeys.length >= 10) break;
+      }
+      console.log(
+        `[DEBUG] Sample catalog player keys: ${catalogKeys.join(", ")}`,
+      );
+
+      // Initialize favorites.players list if not present
+      if (!favorites.$jazz.has("players")) {
+        const { ListOfFavoritePlayers } = await import("spicylib/schema");
+        const group = favorites.$jazz.owner as Group;
+        favorites.$jazz.set(
+          "players",
+          ListOfFavoritePlayers.create([], { owner: group }),
+        );
+      }
+
+      const favoritePlayersList = favorites.players;
+      if (!favoritePlayersList) {
+        result.errors.push("Failed to initialize favorite players list");
+        return result;
+      }
+      console.log(
+        `[importFavoritesForPlayer] Favorite players list ready (loaded: ${favoritePlayersList.$isLoaded})`,
+      );
+
+      // Look up GHIN IDs for favorite players to find them in catalog
+      const favPlayerGhinMap = new Map<string, string | null>();
+      for (const fav of playerFavorites) {
+        const cursor = await db.query(
+          `
+          LET player = DOCUMENT("players", @key)
+          RETURN player.handicap.id
+        `,
+          { key: fav.favoritePlayerKey },
+        );
+        const ghinId = await cursor.next();
+        favPlayerGhinMap.set(fav.favoritePlayerKey, ghinId || null);
+      }
+
+      // Load all existing favorites with their player references to check for duplicates
+      const existingPlayerIds = new Set<string>();
+      const existingPlayerGhinIds = new Set<string>();
+      if (favoritePlayersList?.$isLoaded && favoritePlayersList.length > 0) {
+        await favoritePlayersList.$jazz.ensureLoaded({
+          resolve: { $each: { player: true } },
+        });
+
+        for (let i = 0; i < favoritePlayersList.length; i++) {
+          const favPlayer = favoritePlayersList[i];
+          if (favPlayer?.$isLoaded && favPlayer.player?.$isLoaded) {
+            existingPlayerIds.add(favPlayer.player.$jazz.id);
+            if (favPlayer.player.ghinId) {
+              existingPlayerGhinIds.add(favPlayer.player.ghinId);
+            }
+            if (favPlayer.player.legacyId) {
+              existingPlayerGhinIds.add(`manual_${favPlayer.player.legacyId}`);
+            }
+          }
+        }
+      }
+
+      console.log(
+        `[importFavoritesForPlayer] Found ${existingPlayerIds.size} existing favorite players before import`,
+      );
+
+      for (const fav of playerFavorites) {
+        const ghinId = favPlayerGhinMap.get(fav.favoritePlayerKey);
+
+        // Try to find player in catalog - first by GHIN ID, then by manual_{legacyId}
+        let player = null;
+
+        if (ghinId && catalogPlayers.$jazz.has(ghinId)) {
+          player = catalogPlayers[ghinId];
+        } else {
+          // Try manual key
+          const manualKey = `manual_${fav.favoritePlayerKey}`;
+          if (catalogPlayers.$jazz.has(manualKey)) {
+            player = catalogPlayers[manualKey];
+          }
+        }
+
+        if (!player) {
+          console.log(
+            `[DEBUG] Failed to find player - ghinId: ${ghinId}, manualKey: manual_${fav.favoritePlayerKey}, favoritePlayerKey: ${fav.favoritePlayerKey}`,
+          );
+          result.errors.push(
+            `Favorite player not found in catalog: ${ghinId || `manual_${fav.favoritePlayerKey}`}`,
+          );
+          continue;
+        }
+
+        // Skip if already in favorites (check by both Jazz ID and GHIN ID for idempotency)
+        const playerId = player.$isLoaded
+          ? player.$jazz.id
+          : (player as { $jazz?: { id: string } })?.$jazz?.id;
+
+        // Check by Jazz ID
+        if (playerId && existingPlayerIds.has(playerId)) {
+          console.log(
+            `[importFavoritesForPlayer] Skipping duplicate player (Jazz ID): ${playerId}`,
+          );
+          continue;
+        }
+
+        // Check by GHIN ID or legacy ID
+        const playerGhinId = ghinId;
+        const playerManualKey = `manual_${fav.favoritePlayerKey}`;
+        if (
+          (playerGhinId && existingPlayerGhinIds.has(playerGhinId)) ||
+          existingPlayerGhinIds.has(playerManualKey)
+        ) {
+          console.log(
+            `[importFavoritesForPlayer] Skipping duplicate player (GHIN/Legacy ID): ${playerGhinId || playerManualKey}`,
+          );
+          continue;
+        }
+
+        // Add to tracking sets to prevent duplicates within this same import run
+        if (playerId) {
+          existingPlayerIds.add(playerId);
+        }
+        if (playerGhinId) {
+          existingPlayerGhinIds.add(playerGhinId);
+        } else {
+          existingPlayerGhinIds.add(playerManualKey);
+        }
+
+        const { FavoritePlayer } = await import("spicylib/schema");
+        const addedAt = fav.addedAt ? new Date(fav.addedAt) : new Date();
+        const favPlayer = FavoritePlayer.create(
+          {
+            player: player as co.loaded<typeof Player>,
+            addedAt,
+          },
+          { owner: favorites.$jazz.owner },
+        );
+
+        if (favoritePlayersList?.$isLoaded) {
+          favoritePlayersList.$jazz.push(favPlayer);
+        }
+        result.favoritePlayers++;
+      }
+    }
+
+    // Import favorite course/tees
+    const { fetchAllFavoriteCourseTees } = await import("../utils/arango");
+    console.log(`Fetching all favorite course/tees from ArangoDB...`);
+    const allFavoriteCourseTees = await fetchAllFavoriteCourseTees(db);
+    console.log(
+      `Total favorite course/tee edges in DB: ${allFavoriteCourseTees.length}`,
+    );
+
+    const courseTeesFavorites = allFavoriteCourseTees.filter(
+      (f) => f.playerKey === legacyPlayerId,
+    );
+
+    console.log(
+      `Found ${courseTeesFavorites.length} favorite course/tees for legacy player ${legacyPlayerId}`,
+    );
+
+    if (courseTeesFavorites.length > 0) {
+      // Load catalog courses
+      const loadedCatalog = await catalog.$jazz.ensureLoaded({
+        resolve: { courses: {} },
+      });
+
+      if (!loadedCatalog.courses) {
+        result.errors.push("Catalog courses not loaded");
+        return result;
+      }
+
+      const catalogCourses = loadedCatalog.courses;
+
+      // Initialize favorites.courseTees list if not present
+      if (!favorites.$jazz.has("courseTees")) {
+        const { ListOfCourseTees } = await import("spicylib/schema");
+        const group = favorites.$jazz.owner as Group;
+        favorites.$jazz.set(
+          "courseTees",
+          ListOfCourseTees.create([], { owner: group }),
+        );
+      }
+
+      const courseTeesList = favorites.courseTees;
+      if (!courseTeesList) {
+        result.errors.push("Failed to initialize course tees list");
+        return result;
+      }
+      console.log(
+        `[importFavoritesForPlayer] Favorite course/tees list ready (loaded: ${courseTeesList.$isLoaded})`,
+      );
+
+      // Ensure all existing course/tee items are loaded with their course and tee references
+      if (courseTeesList?.$isLoaded && courseTeesList.length > 0) {
+        await courseTeesList.$jazz.ensureLoaded({
+          resolve: { $each: { course: {}, tee: {} } },
+        });
+      }
+
+      // Check for duplicate course/tee combinations based on GHIN IDs
+      const existingCourseTees = new Set<string>();
+      if (courseTeesList?.$isLoaded) {
+        for (let i = 0; i < courseTeesList.length; i++) {
+          const ct = courseTeesList[i];
+          if (ct?.$isLoaded && ct.course?.$isLoaded && ct.tee?.$isLoaded) {
+            // Use course.id (GHIN courseId) and tee.id (GHIN teeSetRatingId) for duplicate check
+            const key = `${ct.course.id}-${ct.tee.id}`;
+            existingCourseTees.add(key);
+            console.log(`[DEBUG] Found existing favorite: ${key}`);
+          }
+        }
+      }
+      console.log(
+        `[DEBUG] Starting with ${existingCourseTees.size} existing course/tee favorites`,
+      );
+
+      const { Course } = await import("spicylib/schema");
+
+      // Debug: Log first few catalog course keys
+      const catalogCourseKeys: string[] = [];
+      for (const key in catalogCourses) {
+        catalogCourseKeys.push(key);
+        if (catalogCourseKeys.length >= 10) break;
+      }
+      console.log(
+        `[DEBUG] Sample catalog course keys: ${catalogCourseKeys.join(", ")}`,
+      );
+
+      // Add favorite course/tees to the list
+      for (const fav of courseTeesFavorites) {
+        // Find course in catalog by courseId
+        const courseKey = String(fav.courseId);
+
+        console.log(
+          `[DEBUG] Looking for course ${courseKey}, tee ${fav.teeId}`,
+        );
+
+        // Access course directly from map
+        let courseRef = catalogCourses[courseKey];
+
+        if (!courseRef) {
+          console.log(
+            `[DEBUG] Course ${courseKey} not found in catalog, attempting to import from GHIN...`,
+          );
+          // Try to import from GHIN
+          const imported = await importCourseFromGhin(
+            Number(fav.courseId),
+            catalogCourses,
+            workerAccount,
+          );
+          if (imported) {
+            courseRef = imported;
+          } else {
+            console.log(
+              `[DEBUG] Failed to import course ${courseKey} from GHIN, skipping`,
+            );
+            continue;
+          }
+        }
+
+        // Load course to access its tees list and find the matching tee
+        const course = courseRef.$isLoaded
+          ? courseRef
+          : await Course.load(courseRef.$jazz.id, { resolve: { tees: {} } });
+
+        if (!course?.$isLoaded) {
+          result.errors.push(`Favorite course failed to load: ${courseKey}`);
+          continue;
+        }
+
+        // Ensure tees list is loaded
+        if (!course.tees?.$isLoaded) {
+          result.errors.push(`Course tees not loaded: ${courseKey}`);
+          continue;
+        }
+
+        // Find the tee by teeId - the tee might not be loaded but we can check the reference
+        let teeRef = null;
+        for (let i = 0; i < course.tees.length; i++) {
+          const t = course.tees[i];
+          if (t?.$isLoaded && t.id === fav.teeId) {
+            teeRef = t;
+            break;
+          }
+        }
+
+        // If tee exists but doesn't have status field, set it to "active"
+        // (tees from catalog are active since getCourseDetails only returns active tees)
+        if (teeRef && !teeRef.status) {
+          teeRef.$jazz.set("status", "active");
+          console.log(
+            `[DEBUG] Updated tee ${fav.teeId} status to "active" (was missing)`,
+          );
+        }
+
+        if (!teeRef) {
+          console.log(
+            `[DEBUG] Tee ${fav.teeId} not found on course ${courseKey}, attempting to import from GHIN...`,
+          );
+          // Try to import from GHIN (includes inactive tees)
+          const imported = await importTeeFromGhin(
+            Number(fav.teeId),
+            course,
+            workerAccount,
+          );
+          if (imported) {
+            teeRef = imported;
+          } else {
+            console.log(
+              `[DEBUG] Failed to import tee ${fav.teeId} from GHIN, skipping`,
+            );
+            continue;
+          }
+        }
+
+        // Get IDs for duplicate check using GHIN IDs
+        const courseId = course.id; // GHIN courseId
+        const teeId = teeRef.id; // GHIN teeSetRatingId
+        const key = `${courseId}-${teeId}`;
+
+        if (existingCourseTees.has(key)) {
+          console.log(
+            `[DEBUG] Skipping duplicate course/tee: ${courseId}-${teeId}`,
+          );
+          continue;
+        }
+
+        // Add to set so we don't add it again in this same import
+        existingCourseTees.add(key);
+        console.log(`[DEBUG] Adding new favorite: ${key}`);
+
+        const { CourseTee } = await import("spicylib/schema");
+        const addedAt = fav.addedAt ? new Date(fav.addedAt) : new Date();
+        const courseTee = CourseTee.create(
+          {
+            course: course as co.loaded<typeof Course>,
+            tee: teeRef as co.loaded<typeof Tee>,
+            addedAt,
+          },
+          { owner: favorites.$jazz.owner },
+        );
+
+        if (courseTeesList?.$isLoaded) {
+          courseTeesList.$jazz.push(courseTee);
+        }
+        result.favoriteCourseTees++;
+      }
+    }
+
+    console.log(
+      `Favorites import complete for ${legacyPlayerId}: ${result.favoritePlayers} players, ${result.favoriteCourseTees} course/tees`,
+    );
+
+    if (result.errors.length > 0) {
+      console.warn(
+        `Favorites import had ${result.errors.length} errors:`,
+        result.errors,
+      );
+    }
+  } catch (error) {
+    console.error("Failed to import favorites (exception):", error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    result.errors.push(errorMsg);
+  }
+
+  return result;
+}
+
+/**
+ * Import options for catalog import
+ */
+export interface CatalogImportOptions {
+  specs?: boolean;
+  players?: boolean;
+}
+
+/**
  * Import all game specs to the catalog (idempotent)
  */
 export async function importGameSpecsToCatalog(
   workerAccount: co.loaded<typeof PlayerAccount>,
   arangoConfig?: ArangoConfig,
+  options?: CatalogImportOptions,
 ): Promise<ImportResult> {
-  console.log("Starting import to catalog for worker:", workerAccount.$jazz.id);
+  const importSpecs = options?.specs ?? true;
+  const importPlayersFlag = options?.players ?? true;
+
+  console.log(
+    `Starting import to catalog for worker: ${workerAccount.$jazz.id} (specs: ${importSpecs}, players: ${importPlayersFlag})`,
+  );
 
   const catalog = await loadOrCreateCatalog(workerAccount);
   console.log("Catalog loaded/created:", catalog.$jazz.id);
@@ -849,65 +1360,75 @@ export async function importGameSpecsToCatalog(
     }
   }
 
-  // Second pass: Import all collected options
-  console.log(`Importing ${allOptions.size} total options...`);
-  try {
-    const optionsResult = await upsertOptions(
-      workerAccount,
-      catalog,
-      Array.from(allOptions.values()),
-    );
-    result.options = optionsResult;
-  } catch (error) {
-    result.errors.push({
-      item: "options:all",
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-
-  // Third pass: Import specs with references to catalog options
-  const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { options: {} },
-  });
-
-  console.log(`Importing ${validSpecs.length} specs with option references...`);
-  for (const spec of validSpecs) {
+  // Second pass: Import all collected options (only if importing specs)
+  if (importSpecs) {
+    console.log(`Importing ${allOptions.size} total options...`);
     try {
-      const { created, updated } = await upsertGameSpec(
+      const optionsResult = await upsertOptions(
+        workerAccount,
         catalog,
-        spec,
-        loadedCatalog.options || undefined,
+        Array.from(allOptions.values()),
       );
-
-      if (created) {
-        result.specs.created++;
-      } else if (updated) {
-        result.specs.updated++;
-      } else {
-        result.specs.skipped++;
-      }
+      result.options = optionsResult;
     } catch (error) {
       result.errors.push({
-        item: `spec:${spec.disp || spec.name || spec._key || "unknown"}`,
+        item: "options:all",
         error: error instanceof Error ? error.message : String(error),
       });
     }
+
+    // Third pass: Import specs with references to catalog options
+    const loadedCatalog = await catalog.$jazz.ensureLoaded({
+      resolve: { options: {} },
+    });
+
+    console.log(
+      `Importing ${validSpecs.length} specs with option references...`,
+    );
+    for (const spec of validSpecs) {
+      try {
+        const { created, updated } = await upsertGameSpec(
+          catalog,
+          spec,
+          loadedCatalog.options || undefined,
+        );
+
+        if (created) {
+          result.specs.created++;
+        } else if (updated) {
+          result.specs.updated++;
+        } else {
+          result.specs.skipped++;
+        }
+      } catch (error) {
+        result.errors.push({
+          item: `spec:${spec.disp || spec.name || spec._key || "unknown"}`,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+  } else {
+    console.log("Skipping specs import (disabled)");
   }
 
-  // Fourth pass: Import players
-  console.log("Importing players...");
-  try {
-    const playersResult = await importPlayers(
-      workerAccount,
-      catalog,
-      arangoConfig,
-    );
-    result.players = playersResult;
-  } catch (error) {
-    result.errors.push({
-      item: "players:all",
-      error: error instanceof Error ? error.message : String(error),
-    });
+  // Fourth pass: Import players (only if enabled)
+  if (importPlayersFlag) {
+    console.log("Importing players...");
+    try {
+      const playersResult = await importPlayers(
+        workerAccount,
+        catalog,
+        arangoConfig,
+      );
+      result.players = playersResult;
+    } catch (error) {
+      result.errors.push({
+        item: "players:all",
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  } else {
+    console.log("Skipping players import (disabled)");
   }
 
   return result;
@@ -922,6 +1443,219 @@ export interface GameImportResult {
   tees: { created: number; updated: number; skipped: number };
   rounds: { created: number; updated: number; skipped: number };
   errors: Array<{ gameId: string; error: string }>;
+}
+
+/**
+ * Import a course from GHIN API by ID (temporary helper for favorites import)
+ */
+async function importCourseFromGhin(
+  courseId: number,
+  coursesMap: MapOfCourses,
+  workerAccount: co.loaded<typeof PlayerAccount>,
+): Promise<co.loaded<typeof Course> | null> {
+  try {
+    const { getCourseDetails } = await import("../courses");
+    const courseData = await getCourseDetails({ course_id: courseId });
+
+    const courseKey = String(courseData.CourseId);
+    const group = Group.create(workerAccount);
+    group.makePublic();
+
+    const newCourse = Course.create(
+      {
+        id: String(courseData.CourseId),
+        status: courseData.CourseStatus.toLowerCase(),
+        name: courseData.CourseName,
+        city: courseData.CourseCity || "",
+        state: courseData.CourseState || "",
+        season: { all_year: true },
+        default_tee: CourseDefaultTee.create({}, { owner: group }),
+        tees: ListOfTees.create([], { owner: group }),
+      },
+      { owner: group },
+    );
+
+    coursesMap.$jazz.set(courseKey, newCourse);
+    console.log(
+      `Imported course ${courseData.CourseName} (${courseId}) from GHIN with status: ${courseData.CourseStatus}`,
+    );
+    return newCourse;
+  } catch (error) {
+    console.error(`Failed to import course ${courseId} from GHIN:`, error);
+    return null;
+  }
+}
+
+/**
+ * Import a tee from GHIN API by teeSetRatingId and add it to a course
+ */
+async function importTeeFromGhin(
+  teeSetRatingId: number,
+  course: co.loaded<typeof Course>,
+  _workerAccount: co.loaded<typeof PlayerAccount>,
+): Promise<co.loaded<typeof Tee> | null> {
+  try {
+    const { GHIN_USERNAME, GHIN_PASSWORD, GHIN_BASE_URL } = process.env;
+    if (!GHIN_USERNAME || !GHIN_PASSWORD) {
+      throw new Error("GHIN credentials not configured");
+    }
+
+    const { GhinClient } = await import("@spicygolf/ghin");
+    const ghinClient = new GhinClient({
+      username: GHIN_USERNAME,
+      password: GHIN_PASSWORD,
+      apiAccess: true,
+      baseUrl: GHIN_BASE_URL,
+    });
+
+    const teeData = await ghinClient.courses.getTeeSetRating({
+      tee_set_rating_id: teeSetRatingId,
+      include_altered_tees: true,
+    });
+
+    console.log(
+      `[importTeeFromGhin] GHIN API returned TeeSetStatus: ${teeData.TeeSetStatus} for tee ${teeSetRatingId}`,
+    );
+
+    // Ensure the course tees list is loaded
+    if (!course.tees?.$isLoaded) {
+      await course.$jazz.ensureLoaded({ resolve: { tees: {} } });
+    }
+
+    if (!course.tees) {
+      console.error(`Course ${course.id} has no tees list`);
+      return null;
+    }
+
+    // Check if tee already exists (idempotent)
+    const teeIdString = String(teeSetRatingId);
+    if (course.tees?.$isLoaded) {
+      for (let i = 0; i < course.tees.length; i++) {
+        const existingTee = course.tees[i];
+        if (existingTee?.$isLoaded && existingTee.id === teeIdString) {
+          console.log(
+            `Tee ${teeIdString} already exists in course ${course.name}, updating status if needed`,
+          );
+          console.log(
+            `[DEBUG] Existing tee status: ${existingTee.status}, GHIN TeeSetStatus: ${teeData.TeeSetStatus}`,
+          );
+          // Update status if it's different
+          if (
+            teeData.TeeSetStatus &&
+            existingTee.status !== teeData.TeeSetStatus
+          ) {
+            existingTee.$jazz.set("status", teeData.TeeSetStatus);
+            console.log(
+              `Updated tee ${teeIdString} status to ${teeData.TeeSetStatus}`,
+            );
+          } else if (!teeData.TeeSetStatus) {
+            console.log(
+              `[WARNING] GHIN API did not return TeeSetStatus for tee ${teeIdString}`,
+            );
+          }
+          return existingTee;
+        }
+      }
+    }
+
+    // Create the tee with holes
+    const group = course.$jazz.owner as Group;
+    const { Tee, TeeHole, ListOfTeeHoles } = await import("spicylib/schema");
+
+    const teeHolesList = ListOfTeeHoles.create([], { owner: group });
+    for (const holeData of teeData.Holes) {
+      const teeHole = TeeHole.create(
+        {
+          id: String(holeData.HoleId),
+          number: holeData.Number,
+          par: holeData.Par,
+          yards: holeData.Length,
+          meters: Math.round(holeData.Length * 0.9144),
+          handicap: holeData.Allocation,
+        },
+        { owner: group },
+      );
+      teeHolesList.$jazz.push(teeHole);
+    }
+
+    // Find the ratings
+    const totalRating = teeData.Ratings.find(
+      (r: { RatingType: string }) => r.RatingType === "Total",
+    );
+    const frontRating = teeData.Ratings.find(
+      (r: { RatingType: string }) => r.RatingType === "Front",
+    );
+    const backRating = teeData.Ratings.find(
+      (r: { RatingType: string }) => r.RatingType === "Back",
+    );
+
+    if (!totalRating) {
+      console.error(`No Total rating found for tee ${teeSetRatingId}`);
+      return null;
+    }
+
+    // Map gender from GHIN format to our schema format
+    let gender: "M" | "F" | "Mixed" = "M";
+    if (teeData.Gender === "Female") {
+      gender = "F";
+    } else if (teeData.Gender === "Mixed") {
+      gender = "Mixed";
+    }
+
+    const newTee = Tee.create(
+      {
+        id: String(teeSetRatingId),
+        name: teeData.TeeSetRatingName,
+        gender,
+        status: teeData.TeeSetStatus,
+        holes: teeHolesList,
+        holesCount: teeData.HolesNumber,
+        totalYardage: teeData.TotalYardage,
+        totalMeters: teeData.TotalMeters,
+        ratings: {
+          total: {
+            rating: totalRating.CourseRating,
+            slope: totalRating.SlopeRating,
+            bogey: totalRating.BogeyRating,
+          },
+          front: frontRating
+            ? {
+                rating: frontRating.CourseRating,
+                slope: frontRating.SlopeRating,
+                bogey: frontRating.BogeyRating,
+              }
+            : {
+                rating: 0,
+                slope: 0,
+                bogey: 0,
+              },
+          back: backRating
+            ? {
+                rating: backRating.CourseRating,
+                slope: backRating.SlopeRating,
+                bogey: backRating.BogeyRating,
+              }
+            : {
+                rating: 0,
+                slope: 0,
+                bogey: 0,
+              },
+        },
+      },
+      { owner: group },
+    );
+
+    if (course.tees?.$isLoaded) {
+      course.tees.$jazz.push(newTee);
+    }
+    console.log(
+      `Imported tee ${teeData.TeeSetRatingName} (${teeSetRatingId}) from GHIN for course ${course.name}`,
+    );
+    return newTee;
+  } catch (error) {
+    console.error(`Failed to import tee ${teeSetRatingId} from GHIN:`, error);
+    return null;
+  }
 }
 
 /**
@@ -952,11 +1686,7 @@ async function upsertCourse(
       length: number;
       handicap: number;
     }>;
-    Ratings: {
-      total?: TeeRating;
-      front?: TeeRating;
-      back?: TeeRating;
-    };
+    Ratings: ArangoTeeRating[];
   },
   workerAccount: co.loaded<typeof PlayerAccount>,
   courseCache: Map<string, co.loaded<typeof Course>>,
@@ -1044,6 +1774,11 @@ async function upsertCourse(
     }
   }
 
+  // If tee exists but doesn't have status field, set it to "active"
+  if (existingTee && !existingTee.status) {
+    existingTee.$jazz.set("status", "active");
+  }
+
   // Create tee if it doesn't exist
   if (!existingTee) {
     teeCreated = true;
@@ -1077,18 +1812,15 @@ async function upsertCourse(
       gender = "F";
     }
 
-    // Build ratings object with proper types
-    const ratings = {
-      total: teeData.Ratings.total || { rating: 0, slope: 0, bogey: 0 },
-      front: teeData.Ratings.front || { rating: 0, slope: 0, bogey: 0 },
-      back: teeData.Ratings.back || { rating: 0, slope: 0, bogey: 0 },
-    };
+    // Convert ArangoDB ratings array format to Jazz schema format
+    const ratings = convertArangoRatings(teeData.Ratings);
 
     const newTee = Tee.create(
       {
         id: teeKey,
         name: teeData.name,
         gender,
+        status: "active",
         holes: holesList,
         holesCount: teeData.holes.length,
         totalYardage: teeData.TotalYardage,
@@ -1101,6 +1833,16 @@ async function upsertCourse(
     teesList.$jazz.push(newTee);
     existingTee = newTee as co.loaded<typeof Tee>;
     teeCache.set(teeKey, existingTee);
+  } else {
+    // Tee exists - check if ratings need to be updated (were imported with zeros)
+    const currentSlope = existingTee.ratings?.total?.slope ?? 0;
+    const newRatings = convertArangoRatings(teeData.Ratings);
+    const newSlope = newRatings.total.slope;
+
+    if (currentSlope === 0 && newSlope > 0) {
+      // Update tee with correct ratings from ArangoDB
+      existingTee.$jazz.set("ratings", newRatings);
+    }
   }
 
   return { course: loadedCourse, tee: existingTee, courseCreated, teeCreated };
@@ -1251,9 +1993,6 @@ async function importGame(
     };
   }
 
-  // Check if game already exists (for tracking created vs updated)
-  const gameAlreadyExists = gamesMap.$jazz.has(game._key);
-
   // Track stats
   const stats = {
     courses: { created: 0, updated: 0, skipped: 0 },
@@ -1261,10 +2000,13 @@ async function importGame(
     rounds: { created: 0, updated: 0, skipped: 0 },
   };
 
-  // Always process rounds to upsert courses
-  // Create public group for game
-  const gameGroup = Group.create(workerAccount);
-  gameGroup.makePublic();
+  // For idempotency: ALWAYS use workerGroup as owner for game-related upserts
+  // upsertUnique derives CoValue ID from (unique + owner), so using the same
+  // stable workerGroup ensures we always find/update existing games
+  const gameGroup = workerGroup;
+
+  // Check if game exists in catalog (for tracking created vs updated)
+  const gameExistedInCatalog = gamesMap.$jazz.has(game._key);
 
   // Import rounds
   const roundToGames = ListOfRoundToGames.create([], { owner: gameGroup });
@@ -1336,13 +2078,25 @@ async function importGame(
         continue;
       }
 
-      const player = playersMap[mapKey];
-      if (!player || !player.$isLoaded) {
-        console.warn(
-          `Player is null or not loaded: ${mapKey}, skipping round creation`,
-        );
+      // Get player reference and load if needed
+      let player = playersMap[mapKey];
+      if (!player) {
+        console.warn(`Player is null: ${mapKey}, skipping round creation`);
         stats.rounds.skipped++;
         continue;
+      }
+
+      // If player isn't loaded, try to load it
+      if (!player.$isLoaded) {
+        const loadedPlayer = await Player.load(player.$jazz.id, {});
+        if (!loadedPlayer || !loadedPlayer.$isLoaded) {
+          console.warn(
+            `Player failed to load: ${mapKey}, skipping round creation`,
+          );
+          stats.rounds.skipped++;
+          continue;
+        }
+        player = loadedPlayer;
       }
 
       // Upsert round with embedded course and tee (idempotent)
@@ -1358,22 +2112,32 @@ async function importGame(
         workerGroup,
       );
 
-      // Create RoundToGame edge
-      const roundToGame = RoundToGame.create(
-        {
+      // Upsert RoundToGame edge using composite key (round + game legacy IDs)
+      // NOTE: We intentionally do NOT import courseHandicap from ArangoDB.
+      // The app calculates it dynamically from handicapIndex and tee ratings.
+      // ArangoDB values were often off-by-one due to different rounding.
+      const roundToGame = await RoundToGame.upsertUnique({
+        unique: `${round._key}-${game._key}`,
+        value: {
           round: createdRound,
           handicapIndex: edge.handicap_index,
         },
-        { owner: gameGroup },
-      );
+        owner: gameGroup,
+      });
 
-      if (edge.course_handicap !== undefined) {
-        roundToGame.$jazz.set("courseHandicap", edge.course_handicap);
-      }
-      if (edge.game_handicap !== undefined) {
-        roundToGame.$jazz.set("gameHandicap", edge.game_handicap);
+      if (!roundToGame?.$isLoaded) {
+        throw new Error(`Failed to upsert RoundToGame for round ${round._key}`);
       }
 
+      // Delete any existing courseHandicap/gameHandicap - we calculate dynamically now
+      if (roundToGame.$jazz.has("courseHandicap")) {
+        roundToGame.$jazz.delete("courseHandicap");
+      }
+      if (roundToGame.$jazz.has("gameHandicap")) {
+        roundToGame.$jazz.delete("gameHandicap");
+      }
+
+      // @ts-expect-error - upsertUnique returns MaybeLoaded but we've verified $isLoaded above
       roundToGames.$jazz.push(roundToGame);
     } catch (error) {
       console.error(`Failed to import round ${roundData.round._key}:`, error);
@@ -1571,7 +2335,10 @@ async function importGame(
 
   // Override with instance-specific teams_rotate from v0.3 data if present
   if (game.scope.teams_rotate) {
-    rotateEvery = Number.parseInt(game.scope.teams_rotate, 10);
+    const parsed = Number.parseInt(game.scope.teams_rotate, 10);
+    if (!Number.isNaN(parsed)) {
+      rotateEvery = parsed;
+    }
   }
 
   const teamsConfig = TeamsConfig.create(
@@ -1698,7 +2465,7 @@ async function importGame(
 
   return {
     success: true,
-    gameCreated: !gameAlreadyExists,
+    gameCreated: !gameExistedInCatalog,
     courses: stats.courses,
     tees: stats.tees,
     rounds: stats.rounds,
@@ -1706,18 +2473,30 @@ async function importGame(
 }
 
 /**
+ * Options for game import
+ */
+export interface GameImportOptions {
+  /** If provided, only import this specific game by its legacy ArangoDB _key */
+  legacyId?: string;
+  /** Batch size for processing games (default: 10) */
+  batchSize?: number;
+}
+
+/**
  * Import games from ArangoDB in batches (idempotent)
  *
  * @param workerAccount - Worker account
  * @param arangoConfig - ArangoDB configuration (optional)
- * @param batchSize - Number of games to process per batch (default: 10)
+ * @param options - Import options (legacyId for single game, batchSize)
  * @returns GameImportResult with import statistics
  */
 export async function importGamesFromArango(
   workerAccount: co.loaded<typeof PlayerAccount>,
   arangoConfig?: ArangoConfig,
-  batchSize = 10,
+  options?: GameImportOptions,
 ): Promise<GameImportResult> {
+  const batchSize = options?.batchSize ?? 10;
+  const singleGameId = options?.legacyId;
   const db = createArangoConnection(arangoConfig || defaultConfig);
   const catalog = await loadOrCreateCatalog(workerAccount);
 
@@ -1752,8 +2531,15 @@ export async function importGamesFromArango(
     }
 
     // Re-load after initialization to get the new maps
+    // Load specs with $each: true to ensure each spec is loaded for legacyId matching
     loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { games: {}, players: {}, specs: {}, options: {}, courses: {} },
+      resolve: {
+        games: {},
+        players: {},
+        specs: { $each: true },
+        options: {},
+        courses: {},
+      },
     });
 
     if (
@@ -1775,6 +2561,7 @@ export async function importGamesFromArango(
       throw new Error("Worker account has no root");
     }
     const workerGroup = loadedWorker.root.$jazz.owner as Group;
+    console.log(`workerGroup ID: ${workerGroup.$jazz.id}`);
 
     // Create course cache to avoid repeated Course.load calls
     const courseCache = new Map<string, co.loaded<typeof Course>>();
@@ -1792,7 +2579,67 @@ export async function importGamesFromArango(
     }
     console.log(`Cached ${playerGhinMap.size} player GHIN lookups`);
 
-    // Fetch total count and first batch
+    // Single game import mode
+    if (singleGameId) {
+      console.log(`Importing single game: ${singleGameId}`);
+
+      try {
+        const gameWithRounds = await fetchGameWithRounds(db, singleGameId);
+
+        if (!gameWithRounds) {
+          result.games.failed++;
+          result.errors.push({
+            gameId: singleGameId,
+            error: "Game not found",
+          });
+          return result;
+        }
+
+        const importResult = await importGame(
+          workerAccount,
+          loadedCatalog,
+          gameWithRounds,
+          playerGhinMap,
+          courseCache,
+          teeCache,
+          workerGroup,
+        );
+
+        if (importResult.success) {
+          if (importResult.gameCreated) {
+            result.games.created++;
+          } else {
+            result.games.updated++;
+          }
+          result.courses.created += importResult.courses.created;
+          result.courses.updated += importResult.courses.updated;
+          result.courses.skipped += importResult.courses.skipped;
+          result.tees.created += importResult.tees.created;
+          result.tees.updated += importResult.tees.updated;
+          result.tees.skipped += importResult.tees.skipped;
+          result.rounds.created += importResult.rounds.created;
+          result.rounds.updated += importResult.rounds.updated;
+          result.rounds.skipped += importResult.rounds.skipped;
+        } else {
+          result.games.failed++;
+          result.errors.push({
+            gameId: singleGameId,
+            error: importResult.error || "Unknown error",
+          });
+        }
+      } catch (error) {
+        result.games.failed++;
+        result.errors.push({
+          gameId: singleGameId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      console.log("Single game import complete:", result);
+      return result;
+    }
+
+    // Batch import mode - fetch total count and first batch
     const { games, total } = await fetchAllGames(db, 0, batchSize);
 
     console.log(`Importing ${total} games in batches of ${batchSize}...`);

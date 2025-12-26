@@ -10,7 +10,8 @@
     "clean": "del-cli node_modules",
     "format": "biome format --write .",
     "lint": "biome lint .",
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc --noEmit",
+    "jazz": "bun run src/cli/jazz-inspect.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "1.1.4",

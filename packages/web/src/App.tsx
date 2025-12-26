@@ -41,7 +41,7 @@ import { isWorkerAccount } from "@/lib/worker-auth";
 export function App(): React.JSX.Element {
   const { toast } = useToast();
   const isAuthenticated = useIsAuthenticated();
-  const me = useAccount(PlayerAccount);
+  const me = useAccount(PlayerAccount, { resolve: { root: true } });
   const [userEmail, setUserEmail] = useState<string | undefined>();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("import");
@@ -64,6 +64,12 @@ export function App(): React.JSX.Element {
     rounds: { created: number };
     errors: Array<{ gameId: string; error: string }>;
   } | null>(null);
+
+  // Import options
+  const [importSpecs, setImportSpecs] = useState<boolean>(false);
+  const [importPlayers, setImportPlayers] = useState<boolean>(false);
+  const [importGames, setImportGames] = useState<boolean>(true);
+  const [gameLegacyId, setGameLegacyId] = useState<string>("");
 
   // Fetch user email and admin status from better-auth session
   useEffect(() => {
@@ -102,30 +108,50 @@ export function App(): React.JSX.Element {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
 
       // Step 1: Import specs & players (20-50%)
-      setImportProgress(20);
-      const specsResponse = await fetch(`${apiUrl}/catalog/import`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
+      if (importSpecs || importPlayers) {
+        setImportProgress(20);
+        const specsResponse = await fetch(`${apiUrl}/catalog/import`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            specs: importSpecs,
+            players: importPlayers,
+          }),
+        });
 
-      if (!specsResponse.ok) {
-        throw new Error(`Specs import failed: ${specsResponse.statusText}`);
+        if (!specsResponse.ok) {
+          throw new Error(`Specs import failed: ${specsResponse.statusText}`);
+        }
+
+        const specsResult = await specsResponse.json();
+        setImportProgress(50);
+        setImportResult(specsResult);
+      } else {
+        setImportProgress(50);
       }
 
-      const specsResult = await specsResponse.json();
-      setImportProgress(50);
-      setImportResult(specsResult);
-
       // Step 2: Import games (50-100%)
+      if (!importGames) {
+        setImportProgress(100);
+        toast({
+          title: "Import successful",
+          description: "Imported specs and/or players",
+        });
+        return;
+      }
+
       const gamesResponse = await fetch(`${apiUrl}/catalog/import-games`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
+        body: JSON.stringify(
+          gameLegacyId.trim() ? { legacyId: gameLegacyId.trim() } : {},
+        ),
       });
 
       if (!gamesResponse.ok) {
@@ -149,15 +175,17 @@ export function App(): React.JSX.Element {
       setGamesImportResult(gamesResult);
 
       // Combined toast notification
-      const totalErrors =
-        specsResult.errors.length + (gamesResult.errors?.length || 0);
+      const specsErrors = importResult?.errors?.length || 0;
+      const totalErrors = specsErrors + (gamesResult.errors?.length || 0);
       if (totalErrors > 0) {
         toast({
           variant: "destructive",
           title: "Import completed with errors",
           description: `${totalErrors} errors occurred. See details below.`,
         });
-        console.error("Specs import errors:", specsResult.errors);
+        if (importResult?.errors) {
+          console.error("Specs import errors:", importResult.errors);
+        }
         console.error("Games import errors:", gamesResult.errors);
       } else {
         toast({
@@ -220,53 +248,19 @@ export function App(): React.JSX.Element {
 
       const result = await response.json();
 
-      // Wait for account to be loaded
-      // Note: useAccount without resolve might not load if root ref is broken
-      if (!me) {
-        throw new Error("Not authenticated");
-      }
-
-      // Check loading state
-      if (!me.$isLoaded) {
-        if (me.$jazz.loadingState === "loading") {
-          throw new Error(
-            "Your account is still loading - please try again in a moment",
-          );
-        }
+      // me and me.root are resolved by useAccount with { resolve: { root: true } }
+      if (!me?.$isLoaded || !me.root?.$isLoaded) {
         throw new Error(
-          "Your account failed to load - there may be a broken reference in your account data",
+          "Your account or root is not loaded - please try again in a moment",
         );
       }
 
       const root = me.root;
 
-      if (!root) {
-        throw new Error(
-          `Your account has no root - please contact support. Account ID: ${me.$jazz.id}`,
-        );
-      }
+      const { Game } = await import("spicylib/schema");
 
-      if (!root.$isLoaded) {
-        throw new Error(
-          "Your account root is not loaded - there may be a permission issue",
-        );
-      }
-
-      const { Player, Game } = await import("spicylib/schema");
-
-      // Wait a moment for Jazz to sync the group membership
+      // Wait a moment for Jazz to sync the group membership and root.player update from API
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const player = await Player.load(result.playerId);
-
-      if (!player?.$isLoaded) {
-        throw new Error(
-          "Failed to load player after granting access. Jazz may still be syncing - try again in a moment.",
-        );
-      }
-
-      // Now we know root is loaded, we can use it
-      root.$jazz.set("player", player);
 
       // Initialize games list if it doesn't exist
       const { ListOfGames } = await import("spicylib/schema");
@@ -319,8 +313,6 @@ export function App(): React.JSX.Element {
         title: "Player linked successfully",
         description: `Linked ${result.playerName} and ${gamesLinked} game(s) to your account`,
       });
-
-      setLinkGhinId("");
     } catch (error) {
       toast({
         variant: "destructive",
@@ -560,9 +552,69 @@ export function App(): React.JSX.Element {
                       </p>
                     </div>
 
+                    <div className="space-y-3 rounded-md border p-4">
+                      <Label className="text-sm font-medium">
+                        Import Options
+                      </Label>
+                      <div className="flex flex-wrap gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={importSpecs}
+                            onChange={(e) => setImportSpecs(e.target.checked)}
+                            disabled={isImporting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">Game Specs</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={importPlayers}
+                            onChange={(e) => setImportPlayers(e.target.checked)}
+                            disabled={isImporting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">Players</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={importGames}
+                            onChange={(e) => setImportGames(e.target.checked)}
+                            disabled={isImporting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">Games</span>
+                        </label>
+                      </div>
+                      {importGames && (
+                        <div className="mt-3 space-y-2">
+                          <Label htmlFor="gameLegacyId" className="text-sm">
+                            Single Game Legacy ID (optional)
+                          </Label>
+                          <Input
+                            id="gameLegacyId"
+                            placeholder="Leave blank to import all games"
+                            value={gameLegacyId}
+                            onChange={(e) => setGameLegacyId(e.target.value)}
+                            disabled={isImporting}
+                            className="max-w-xs"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Enter an ArangoDB _key to import only that game
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
                     <Button
                       onClick={handleImportToCatalog}
-                      disabled={!isAdmin || isImporting}
+                      disabled={
+                        !isAdmin ||
+                        isImporting ||
+                        (!importSpecs && !importPlayers && !importGames)
+                      }
                       className="w-full"
                       size="lg"
                     >

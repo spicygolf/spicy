@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { Game } from "spicylib/schema";
 import {
   adjustHandicapsToLow,
+  calculateCourseHandicap,
   calculatePops,
   getEffectiveHandicap,
   removeGrossScore,
@@ -67,6 +68,32 @@ export function useScoreManagement(
 
       // Calculate and set pops only if handicaps are used
       if (useHandicaps) {
+        // Helper to get course handicap (stored or calculated from tee)
+        const getCourseHandicap = (
+          rtg: (typeof game.rounds)[number],
+        ): number => {
+          if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) return 0;
+
+          // Use stored courseHandicap if available
+          if (rtg.courseHandicap !== undefined) {
+            return rtg.courseHandicap;
+          }
+
+          // Calculate from tee data
+          const r = rtg.round;
+          if (r.$jazz.has("tee") && r.tee?.$isLoaded) {
+            const handicapIndex = rtg.handicapIndex || r.handicapIndex;
+            const calculated = calculateCourseHandicap({
+              handicapIndex,
+              tee: r.tee,
+              holesPlayed: "all18",
+            });
+            return calculated ?? 0;
+          }
+
+          return 0;
+        };
+
         let handicapForPops: number;
 
         if (handicapMode === "low") {
@@ -79,7 +106,7 @@ export function useScoreManagement(
 
             playerHandicaps.push({
               playerId: rtg.round.playerId,
-              courseHandicap: rtg.courseHandicap ?? 0,
+              courseHandicap: getCourseHandicap(rtg),
               gameHandicap: rtg.gameHandicap,
             });
           }
@@ -88,7 +115,7 @@ export function useScoreManagement(
           handicapForPops = adjustedHandicaps.get(round.playerId) ?? 0;
         } else {
           // Use full course handicap (or game handicap if set)
-          const courseHandicap = roundToGame.courseHandicap ?? 0;
+          const courseHandicap = getCourseHandicap(roundToGame);
           handicapForPops = getEffectiveHandicap(
             courseHandicap,
             roundToGame.gameHandicap,

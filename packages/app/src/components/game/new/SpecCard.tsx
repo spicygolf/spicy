@@ -35,6 +35,7 @@ export function SpecCard({
     if (!game) return;
     navigation.navigate("Game", {
       gameId: game.$jazz.id,
+      initialView: "settings",
     });
   };
 

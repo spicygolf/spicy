@@ -58,6 +58,7 @@ export function NewGameFavorites({ viewMode }: NewGameFavoritesProps) {
       if (!game) return;
       navigation.navigate("Game", {
         gameId: game.$jazz.id,
+        initialView: "settings",
       });
     },
     [createGame, navigation],

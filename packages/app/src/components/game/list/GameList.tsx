@@ -16,10 +16,16 @@ export function GameList({
     hasMore,
     loadMore,
     isLoading,
+    isInitialLoad,
   } = useGameList(games);
 
-  if (!games?.$isLoaded) {
-    return null;
+  if (!games?.$isLoaded || isInitialLoad) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" />
+        <Text style={styles.loadingText}>Loading games...</Text>
+      </View>
+    );
   }
 
   const renderFooter = () => {
@@ -36,6 +42,17 @@ export function GameList({
     );
   };
 
+  const renderEmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>
+        No games yet? Time to get in the game! 🏌️
+      </Text>
+      <Text style={styles.emptySubtext}>
+        Tap the "New Game" button above to start your first round
+      </Text>
+    </View>
+  );
+
   return (
     <FlatList
       data={paginatedGames}
@@ -45,6 +62,7 @@ export function GameList({
       onEndReached={loadMore}
       onEndReachedThreshold={0.5}
       ListFooterComponent={renderFooter}
+      ListEmptyComponent={renderEmptyState}
     />
   );
 }
@@ -60,5 +78,35 @@ const styles = StyleSheet.create((theme) => ({
   loadMoreText: {
     fontSize: 14,
     color: theme.colors.secondary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.gap(4),
+  },
+  loadingText: {
+    marginTop: theme.gap(2),
+    fontSize: 16,
+    color: theme.colors.secondary,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.gap(4),
+    marginTop: theme.gap(8),
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: theme.colors.primary,
+    textAlign: "center",
+    marginBottom: theme.gap(2),
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: theme.colors.secondary,
+    textAlign: "center",
   },
 }));

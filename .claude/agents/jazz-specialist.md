@@ -398,6 +398,45 @@ When data doesn't load as expected:
 4. Verify ensureLoaded was awaited
 5. Check if user has permissions (authorization)
 
+### Jazz Inspect CLI Tool
+
+Use the Jazz inspect script to directly examine CoValues:
+
+```bash
+# From packages/web directory
+cd packages/web
+
+# Inspect any CoValue by ID
+bun run jazz co_zaYtNqJZsTyi1Sy6615uCqhpsgi
+
+# Inspect with a resolve query to load nested data
+bun run jazz co_zaYtNqJZsTyi1Sy6615uCqhpsgi '{"rounds":{"$each":true}}'
+```
+
+The script connects using the worker credentials from `packages/api/.env` and outputs:
+- Field values and types
+- `$jazz.has()` status for each field
+- Raw object keys
+
+### Field Deletion vs Setting Undefined
+
+**CRITICAL**: To remove an optional field, use `$jazz.delete()`, NOT `$jazz.set(field, undefined)`:
+
+```typescript
+// WRONG - sets key to undefined but key still exists!
+rtg.$jazz.set("courseHandicap", undefined);
+// Result: has("courseHandicap") = true, value = undefined
+
+// CORRECT - actually removes the field
+rtg.$jazz.delete("courseHandicap");
+// Result: has("courseHandicap") = false, value = undefined
+```
+
+This distinction matters for:
+- UI checks like `field !== undefined` 
+- Schema validation
+- Data integrity
+
 ## Remember
 
 You focus on **data modeling** and **Jazz patterns**.

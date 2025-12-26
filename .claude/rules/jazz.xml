@@ -525,6 +525,7 @@
     <description>Common Jazz API patterns for working with data</description>
     <api_patterns>
       <pattern>Set optional fields: `obj.$jazz.set("field", value)`</pattern>
+      <pattern>Delete optional fields: `obj.$jazz.delete("field")` - MUST use delete, not set(undefined)</pattern>
       <pattern>Add to list: `list.$jazz.push(item)`</pattern>
       <pattern>Get owner: `obj.$jazz.owner`</pattern>
       <pattern>Get ID: `obj.$jazz.id`</pattern>
@@ -534,6 +535,32 @@
     </api_patterns>
     <instructions>
       Use these standard Jazz patterns consistently across the codebase.
+    </instructions>
+  </rule>
+
+  <rule severity="CRITICAL" enforcement="BLOCKING">
+    <name>Delete vs Set Undefined for Optional Fields</name>
+    <description>Use $jazz.delete() to remove optional fields, NOT $jazz.set(field, undefined)</description>
+    <rationale>Setting a field to undefined keeps the key on the object with value undefined. Deleting removes the key entirely. UI checks like `field !== undefined` behave differently for each.</rationale>
+    <mustAcknowledge>true</mustAcknowledge>
+    <examples>
+      <example type="wrong">
+        // WRONG: Key still exists with undefined value
+        rtg.$jazz.set("courseHandicap", undefined);
+        // Result: rtg.$jazz.has("courseHandicap") = true, rtg.courseHandicap = undefined
+        // UI check `rtg.courseHandicap !== undefined` returns false BUT field still exists!
+      </example>
+      <example type="correct">
+        // CORRECT: Key is removed entirely
+        rtg.$jazz.delete("courseHandicap");
+        // Result: rtg.$jazz.has("courseHandicap") = false, rtg.courseHandicap = undefined
+        // Field is truly absent from the object
+      </example>
+    </examples>
+    <instructions>
+      - Always use $jazz.delete("field") to remove optional fields
+      - Never use $jazz.set("field", undefined) to "clear" a field
+      - The distinction matters for UI checks, schema validation, and data integrity
     </instructions>
   </rule>
 
@@ -547,6 +574,79 @@
     </debugging_tools>
     <instructions>
       When data isn't loading as expected, check loadingState and $isLoaded to diagnose the issue.
+    </instructions>
+  </rule>
+
+  <rule severity="MEDIUM" enforcement="RECOMMENDED">
+    <name>Jazz Inspect CLI Tool</name>
+    <description>Use the jazz-inspect CLI script to debug Jazz CoValues directly</description>
+    <commands>
+      <command>bun run jazz &lt;coValueId&gt; - Inspect any CoValue by ID</command>
+      <command>bun run jazz &lt;coValueId&gt; '{"rounds":{"$each":true}}' - Inspect with resolve query</command>
+    </commands>
+    <location>packages/web/src/cli/jazz-inspect.ts</location>
+    <usage>
+      Run from packages/web directory. Uses worker credentials from packages/api/.env.
+      Pass a CoValue ID (co_xxx) and optionally a JSON resolve query.
+      Outputs: field values, $jazz.has() status, raw object keys.
+    </usage>
+    <instructions>
+      Use this tool to inspect CoValues when debugging data issues. It connects directly to Jazz cloud using the worker account.
+    </instructions>
+  </rule>
+
+  <rule severity="CRITICAL" enforcement="BLOCKING">
+    <name>CoRecord Map Access: Use Direct Access, Not $jazz.has()</name>
+    <description>For CoRecord maps (co.record()), use map[key] and check null/undefined. Do NOT use $jazz.has(key).</description>
+    <rationale>Maps with resolve: {map: {}} load structure but not all items. Direct access is reliable, $jazz.has() is not.</rationale>
+    <mustAcknowledge>true</mustAcknowledge>
+    <examples>
+      <example type="wrong">
+        if (catalogPlayers.$jazz.has(ghinId)) {
+          const player = catalogPlayers[ghinId];
+        }
+      </example>
+      <example type="correct">
+        const player = catalogPlayers[ghinId];
+        if (player) {
+          // Use player
+        }
+      </example>
+    </examples>
+    <instructions>
+      - $jazz.has("field"): ONLY for optional fields on CoMaps
+      - $jazz.has(key): NEVER for checking CoRecord map key existence
+      - CoRecord maps: const item = map[key]; if (item) {...}
+      - Item may be unloaded reference - OK to store in other CoMaps
+    </instructions>
+  </rule>
+
+  <rule severity="HIGH" enforcement="STRICT">
+    <name>Storing Unloaded References</name>
+    <description>Unloaded CoMap references can be stored in other CoMaps. Cast to co.loaded&lt;typeof T&gt; to satisfy TypeScript.</description>
+    <examples>
+      <example type="correct">
+        const playerRef = catalogPlayers[ghinId]; // Unloaded OK
+        const favPlayer = FavoritePlayer.create({
+          player: playerRef as co.loaded&lt;typeof Player&gt;,
+          addedAt: new Date()
+        }, { owner });
+      </example>
+    </examples>
+    <instructions>
+      - Don't load references just to store them
+      - Cast: as co.loaded&lt;typeof T&gt; for TypeScript
+      - Jazz lazy-loads when accessed
+    </instructions>
+  </rule>
+
+  <rule severity="MEDIUM" enforcement="RECOMMENDED">
+    <name>Map Loading Levels</name>
+    <description>resolve: {map: {}} loads map structure (keys accessible). Does NOT load items. Use resolve: {map: {"co.items": {}}} to load all items (expensive).</description>
+    <instructions>
+      - resolve: {players: {}} - can iterate keys, items may be unloaded
+      - resolve: {players: {"co.items": {}}} - loads all items (avoid for large maps)
+      - Access items directly when needed, load on-demand
     </instructions>
   </rule>
 
