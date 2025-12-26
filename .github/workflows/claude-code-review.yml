@@ -1,13 +1,18 @@
 name: Claude Code Review
 
 on:
-  pull_request:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
     branches: [main]
-    types: [opened, synchronize, reopened]
 
 jobs:
   claude-review:
     runs-on: ubuntu-latest
+    # Only run if CI completed successfully and was triggered by a PR
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
     permissions:
       contents: read
       pull-requests: write
@@ -20,36 +25,41 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Get PR number
+        id: pr
+        run: |
+          # Get the PR number from the workflow run
+          PR_NUMBER=$(gh run view ${{ github.event.workflow_run.id }} --json headBranch -q '.headBranch' | xargs -I {} gh pr list --head {} --json number -q '.[0].number')
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run Claude Code Review
+        if: steps.pr.outputs.number != ''
         id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR NUMBER: ${{ steps.pr.outputs.number }}
 
-            You are reviewing a pull request. Follow these steps:
+            You are reviewing a pull request. CI has already passed (this workflow only runs after CI succeeds).
 
-            1. FIRST: Run `gh pr checks ${{ github.event.pull_request.number }}` to check if CI has passed
-               - If CI is still running, mention this in your review
-               - If CI failed, focus your review on why it failed
-               - If CI passed, proceed with code review knowing quality checks succeeded
+            Review the PR for:
+            - Code quality and best practices
+            - Potential bugs or issues
+            - Performance considerations
+            - Security concerns
+            - Test coverage
+            - Adherence to CLAUDE.md guidelines
 
-            2. Review the PR for:
-               - Code quality and best practices
-               - Potential bugs or issues
-               - Performance considerations
-               - Security concerns
-               - Test coverage
-               - Adherence to CLAUDE.md guidelines
+            IMPORTANT:
+            - Quality checks (bun format, bun lint, bun tsc) already passed in CI
+            - Focus on code logic, architecture, and design decisions
+            - Do NOT mention running quality checks - they've already passed
 
-            3. IMPORTANT:
-               - Quality checks (bun format, bun lint, bun tsc) run automatically in CI
-               - NEVER ask if quality checks were run - check CI status instead
-               - Only mention quality checks if CI failed
-
-            4. Leave your review using `gh pr comment ${{ github.event.pull_request.number }} --body "your review"`
+            Leave your review using `gh pr comment ${{ steps.pr.outputs.number }} --body "your review"`
 
             Be constructive and helpful in your feedback.
 
