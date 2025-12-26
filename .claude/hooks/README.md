@@ -1,76 +1,59 @@
 # Claude Code Hooks
 
-This directory contains hooks that fire automatically at specific points during Claude Code sessions.
+Hooks fire automatically at specific points during Claude Code sessions.
+
+## Requirements
+
+- **bun** - Required for TypeScript hooks and quality checks
+- Scripts must be executable (`chmod +x *.sh`)
 
 ## Available Hooks
 
 ### skill-activation-prompt.sh / .ts
 **Event**: UserPromptSubmit
-**Purpose**: Analyzes user prompts and injects relevant skill context based on keywords.
 
-When a user submits a prompt, this hook:
-1. Reads the skill rules from `skills/skill-rules.json`
-2. Matches prompt keywords against skill triggers
-3. Injects relevant skill documentation into context
+Analyzes prompts and injects relevant skill context:
+1. Reads skill rules from `skills/skill-rules.json`
+2. Matches prompt keywords against triggers
+3. Shows active task state from progress file
+4. Injects skill documentation into context
 
 ### post-tool-use-tracker.sh
-**Event**: PostToolUse
-**Purpose**: Tracks file changes during sessions for context awareness.
+**Event**: PostToolUse (Edit, Write operations)
 
-Records which files are modified during a session, enabling:
-- Progress tracking for long-running tasks
-- Session handoff between agents
-- Change summary generation
+Tracks file changes during sessions for:
+- Progress tracking
+- Session handoff
+- Change summaries
 
 ### quality-check.sh
-**Event**: Stop (or manual invocation)
-**Purpose**: Runs code quality checks before task completion.
+**Event**: Stop
 
-Executes:
-- `bun format` - Code formatting with Biome
-- `bun lint` - Linting with Biome
-- `bun tsc` - TypeScript type checking
+Runs before task completion:
+- `bun format` - Code formatting
+- `bun lint` - Linting
+- `bun tsc` - Type checking
 
-All three must pass before code is considered ready to commit.
+Also reminds about progress file updates and uncommitted changes.
 
 ## Hook Configuration
 
-Hooks are configured in `.claude/settings.json` under the `hooks` key:
+Configured in `.claude/settings.json`:
 
 ```json
 {
   "hooks": {
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": ["bash .claude/hooks/skill-activation-prompt.sh"]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "",
-        "hooks": ["bash .claude/hooks/post-tool-use-tracker.sh"]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": ["bash .claude/hooks/quality-check.sh"]
-      }
-    ]
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "..." }] }],
+    "PostToolUse": [{ "matcher": "Edit|Write", "hooks": [...] }],
+    "Stop": [{ "hooks": [...] }]
   }
 }
 ```
 
-## Writing Custom Hooks
+## Environment Variables
 
-Hooks receive context through environment variables:
-- `CLAUDE_PROMPT` - The user's prompt (UserPromptSubmit)
-- `CLAUDE_TOOL_NAME` - Name of tool used (PostToolUse)
-- `CLAUDE_FILE_PATH` - File path affected (PostToolUse for file operations)
-
-Hooks should:
-1. Be executable (`chmod +x`)
-2. Exit with code 0 on success
-3. Output to stdout for context injection
-4. Output to stderr for logging/debugging
+Hooks receive context via:
+- `CLAUDE_PROJECT_DIR` - Project root
+- `CLAUDE_PROMPT` - User's prompt (UserPromptSubmit)
+- `CLAUDE_TOOL_NAME` - Tool used (PostToolUse)
+- `CLAUDE_FILE_PATH` - Affected file (PostToolUse)

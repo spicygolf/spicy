@@ -1,0 +1,3 @@
+# Session-specific progress files should not be committed
+claude-progress.md
+.session-*.txt

@@ -75,14 +75,14 @@ bun format && bun lint && bun tsc
 | `packages/api` | Backend API (external data only) |
 | `packages/lib` | Shared utilities and logic |
 
-## Skills (Always Active)
+## Skills
 
-| Skill | Purpose |
-|-------|---------|
-| `architecture` | Local-first principles |
-| `orchestration` | Task decomposition, progress tracking |
-| `jazz-patterns` | Data patterns (triggered by keywords) |
-| `typescript-standards` | Coding standards (triggered by keywords) |
+| Skill | Activation | Purpose |
+|-------|------------|---------|
+| `architecture` | Always | Local-first principles |
+| `orchestration` | Always | Task decomposition, progress tracking |
+| `jazz-patterns` | Keywords | Jazz data patterns |
+| `typescript-standards` | Keywords | Coding standards |
 
 ## Specialist Agents
 
