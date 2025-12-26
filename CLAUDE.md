@@ -1,133 +1,96 @@
 # Spicy Golf - Claude Code Configuration
 
-This project uses the **4-Layer Orchestra Architecture** for efficient multi-agent development.
+This project uses **lightweight orchestration for all tasks** - decompose, track progress, commit often.
 
-## Quick Reference
+## Core Workflow
 
-- **Simple tasks (1-2 files)**: Work directly, no orchestration needed
-- **Complex tasks (3+ files)**: Use the orchestrator agent
-- **Rules**: See `.claude/rules/*.xml` for architectural constraints
-- **Agents**: See `.claude/agents/*.md` for specialist definitions
-- **Guide**: See `.claude/ORCHESTRATION-GUIDE.md` for detailed usage
+**Every task, regardless of size:**
 
-## Critical Architectural Principles
+1. **Decompose** - Break into atomic steps
+2. **Track** - Update `.claude/progress/claude-progress.md`
+3. **Execute** - Work on ONE step at a time
+4. **Commit** - Git commit after each step
+5. **Handoff** - Leave clear state for next session
+
+## Session Startup
+
+At the start of every session:
+
+1. Read `.claude/progress/claude-progress.md`
+2. Check `git log --oneline -10`
+3. Run `bun tsc` to verify codebase works
+4. Pick up from last `in_progress` step
+
+## Hooks (Auto-Firing)
+
+| Hook | Purpose |
+|------|---------|
+| `UserPromptSubmit` | Shows active task, reminds about decomposition |
+| `PostToolUse` | Tracks file changes |
+| `Stop` | Runs quality checks, reminds about progress update |
+
+## Critical Principles
 
 ### 1. Local-First with Jazz Tools
-- App MUST work offline (golf courses have poor connectivity)
-- All user data stored in Jazz CoMaps/CoLists
-- API only for external data (course info, weather, etc.)
-- **Rule**: If it can work offline, use Jazz, NOT the API
+- App MUST work offline
+- All user data in Jazz CoMaps/CoLists
+- API only for external data
+- **Rule**: If it can work offline, use Jazz
 
 ### 2. Jazz Patterns are NON-NEGOTIABLE
-These prevent data loss - follow them religiously:
 ```typescript
-// CORRECT: Check field existence
+// CORRECT
 if (!player.$jazz.has("rounds")) {
   player.$jazz.set("rounds", ListOfRounds.create([]));
 }
 
-// WRONG: Will cause data loss!
-if (!player.rounds) {
-  player.$jazz.set("rounds", ListOfRounds.create([]));
-}
+// WRONG - causes data loss!
+if (!player.rounds) { ... }
 ```
 
-See `.claude/rules/jazz.xml` for all Jazz patterns.
+See `.claude/skills/jazz-patterns/README.md`
 
-### 3. Quality Checks Required - MANDATORY BEFORE COMPLETION
-**CRITICAL**: You MUST run all quality checks and fix ALL errors before considering ANY task complete:
-
+### 3. Quality Checks - MANDATORY
 ```bash
 bun format && bun lint && bun tsc
 ```
 
-- `bun format` - Code formatting (auto-fixes)
-- `bun lint` - Linting (must have zero errors)
-- `bun tsc` - Type checking (must have zero errors)
-
-**DO NOT** tell the user you are done until all three commands pass successfully with zero errors. Pre-commit hooks will reject commits that fail these checks, so running them proactively is mandatory, not optional.
-
-**IMPORTANT**: If you encounter pre-existing errors in files you didn't modify, you MUST fix those too. The repository must be in a committable state when you're done. Don't ignore pre-existing errors - they block commits and need to be resolved. This should be rare, but when it happens, fix it.
-
-## Project Structure
-
-```
-spicy/
-├── packages/
-│   ├── app/          # React Native mobile app (primary)
-│   ├── api/          # Backend API (external data only)
-│   └── lib/          # Shared utilities and business logic
-│
-├── .claude/          # Orchestration configuration
-    ├── agents/       # Specialist agent definitions
-    ├── rules/        # XML rules for context management
-    └── ORCHESTRATION-GUIDE.md
-```
-
 ## Tech Stack
 
-- **Mobile**: React Native
-- **Database**: Jazz Tools (local-first sync)
-- **API**: ElysiaJS (Bun runtime)
-- **Language**: TypeScript (strict mode)
-- **Package Manager**: Bun 1.3+
-- **Styling**: React Native Unistyles
-- **Formatting/Linting**: Biome
+| Tool | Purpose |
+|------|---------|
+| React Native | Mobile app |
+| Jazz Tools | Local-first database |
+| ElysiaJS | API (external data only) |
+| TypeScript | Language (strict mode) |
+| Bun | Package manager |
+| Unistyles | Styling |
+| Biome | Format/lint |
 
-## Rules Summary
+## Packages
 
-For full details, see `.claude/rules/*.xml`:
+| Package | Purpose |
+|---------|---------|
+| `packages/app` | React Native mobile app |
+| `packages/api` | Backend API (external data only) |
+| `packages/lib` | Shared utilities and logic |
 
-### architecture.xml
-- Local-first architecture (Jazz Tools)
-- Never commit without permission
-- Monorepo structure (app, api, lib)
-- Minimize code, maximize modularity
-- No unnecessary comments
-- API usage minimization
+## Skills
 
-### code-typescript.xml
-- No `any` or `unknown` types
-- Interfaces over types for objects
-- Named exports only (no default)
-- No enums (use union types)
-- Explicit return types
-- Quality checks required (format, lint, tsc)
-- React Native best practices
-- Unistyles for styling
+| Skill | Activation | Purpose |
+|-------|------------|---------|
+| `architecture` | Always | Local-first principles |
+| `orchestration` | Always | Task decomposition, progress tracking |
+| `jazz-patterns` | Keywords | Jazz data patterns |
+| `typescript-standards` | Keywords | Coding standards |
 
-### jazz.xml
-- Field existence: Use `$jazz.has("field")`
-- ensureLoaded after upsertUnique
-- Load lists level-by-level
-- Create CoMaps with required fields only
-- Avoid useState with Jazz data
-- Modify from authoritative source
-- Performance: Load what you need
+## Specialist Agents
 
-## Getting Started
+For steps requiring deep expertise:
 
-1. **Read the orchestration guide**: `.claude/ORCHESTRATION-GUIDE.md`
-2. **Understand Jazz patterns**: `.claude/rules/jazz.xml`
-3. **Know when to orchestrate**: 3+ files or cross-package tasks
-4. **Run quality checks**: `bun format && bun lint && bun tsc`
-
-## When to Use Orchestration
-
-### Use Orchestrator For:
-- ✅ New features (3+ files)
-- ✅ Cross-package changes
-- ✅ Jazz schema evolution
-- ✅ Complex refactoring
-
-### Work Directly For:
-- ✅ Single file changes
-- ✅ Simple bug fixes
-- ✅ Formatting/style updates
-- ✅ Documentation
-
-The XML format allows better context management for specialized agents.
-
----
-
-**For detailed usage, examples, and patterns, see `.claude/ORCHESTRATION-GUIDE.md`**
+| Agent | Focus |
+|-------|-------|
+| `app-specialist` | React Native UI |
+| `jazz-specialist` | Schema design |
+| `api-specialist` | External endpoints |
+| `lib-specialist` | Shared utilities |

@@ -139,7 +139,8 @@ You must enforce these across ALL specialists:
 - `bun tsc` must pass
 
 ### Git Etiquette
-- never commit code or push to remotes without user permission
+- commit frequently after each step (enables handoff)
+- never push to remotes without user permission
 
 ## Context Management
 
