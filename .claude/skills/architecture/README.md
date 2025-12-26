@@ -17,13 +17,13 @@ Spicy Golf is a local-first application using Jazz Tools for data sync. The app 
 - Design features to work offline first, sync later
 - See jazz-patterns skill for Jazz-specific patterns
 
-## Never Commit to Git Without Permission
+## Git Workflow
 
-**Severity**: CRITICAL | **Enforcement**: BLOCKING
+**Commits**: Commit frequently after each completed step. Commits are local and reversible - they enable handoff and recovery.
 
-Never commit code to git or push commits to a remote without explicitly asking the user first.
+**Pushes**: Never push to a remote without explicitly asking the user first.
 
-**Rationale**: User must review and approve all changes before they are committed.
+**Rationale**: Frequent commits support the orchestration pattern (handoff between sessions). Pushes require permission because they affect the shared repository.
 
 ## Monorepo Structure
 
