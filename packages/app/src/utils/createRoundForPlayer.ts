@@ -7,7 +7,7 @@ import {
   RoundScores,
   RoundToGame,
 } from "spicylib/schema";
-import { calculateCourseHandicap, isSameDay } from "spicylib/utils";
+import { isSameDay } from "spicylib/utils";
 
 /**
  * Gets rounds for a player that were created on a specific date.
@@ -36,10 +36,7 @@ export function getRoundsForDate(player: Player, date: Date): Round[] {
  * @param player - The player to create the round for (must be in game.players)
  * @returns The created round, or null if creation failed
  */
-export async function createRoundForPlayer(
-  game: Game,
-  player: Player,
-): Promise<Round | null> {
+export function createRoundForPlayer(game: Game, player: Player): Round | null {
   if (!game.$isLoaded || !game.rounds?.$isLoaded || !game.players?.$isLoaded) {
     return null;
   }
@@ -75,33 +72,13 @@ export async function createRoundForPlayer(
     player.rounds.$jazz.push(newRound);
   }
 
-  // Calculate course handicap if tee data is available
-  let courseHandicap: number | undefined;
-  if (
-    newRound.$isLoaded &&
-    newRound.$jazz.has("tee") &&
-    newRound.handicapIndex
-  ) {
-    const loadedRound = await newRound.$jazz.ensureLoaded({
-      resolve: { tee: true },
-    });
-
-    if (loadedRound.tee?.$isLoaded && loadedRound.tee.ratings?.total) {
-      const calculated = calculateCourseHandicap({
-        handicapIndex: loadedRound.handicapIndex,
-        tee: loadedRound.tee,
-        holesPlayed: "all18",
-      });
-      courseHandicap = calculated !== null ? calculated : undefined;
-    }
-  }
-
   // Create the RoundToGame edge and add to game
+  // Note: courseHandicap is not set here because the round doesn't have a tee yet.
+  // It will be calculated when the user selects a course/tee.
   const roundToGame = RoundToGame.create(
     {
       round: newRound,
       handicapIndex: newRound.handicapIndex,
-      ...(courseHandicap !== undefined && { courseHandicap }),
     },
     { owner: roundGroup },
   );

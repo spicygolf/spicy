@@ -14,7 +14,10 @@ export interface AddPlayerError {
 export interface AddPlayerOptions {
   /**
    * If true, automatically create a new round for the player if they don't
-   * have any rounds for the game date. Defaults to false.
+   * have any rounds for the game date.
+   *
+   * Note: The core function defaults to false, but useAddPlayerToGame hook
+   * defaults to true for better UX.
    */
   autoCreateRound?: boolean;
 }

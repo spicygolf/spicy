@@ -92,7 +92,9 @@ export function GamePlayersList() {
             playerId: player.$jazz.id,
           });
         }
-        // If roundAutoCreated, stay on current screen (player list)
+        // If roundAutoCreated, do nothing - we're already on the player list.
+        // Note: This differs from PlayerItem/AddPlayerFavorites which call goBack()
+        // because those are nested inside AddPlayerNavigator.
       } else {
         console.error("Failed to add me to game:", result.error);
       }
