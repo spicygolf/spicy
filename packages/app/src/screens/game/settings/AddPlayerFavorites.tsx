@@ -85,8 +85,14 @@ export function AddPlayerFavorites() {
       });
 
       if (result.isOk()) {
-        const newPlayer = result.value;
-        navigate("AddRoundToGame", { playerId: newPlayer.$jazz.id });
+        const { player, roundAutoCreated } = result.value;
+        if (roundAutoCreated) {
+          // Round was auto-created, go back to player list
+          navigate("GameSettingsTabs");
+        } else {
+          // Need to select or create a round
+          navigate("AddRoundToGame", { playerId: player.$jazz.id });
+        }
       } else {
         console.error(result.error);
       }

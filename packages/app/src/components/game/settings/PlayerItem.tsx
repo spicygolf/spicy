@@ -219,8 +219,14 @@ export function PlayerItem({ item }: { item: Golfer }) {
           if (!isPlayerAlreadyAdded) {
             const result = await addPlayerToGame(makePlayer());
             if (result.isOk()) {
-              const player = result.value;
-              navigate("AddRoundToGame", { playerId: player.$jazz.id });
+              const { player, roundAutoCreated } = result.value;
+              if (roundAutoCreated) {
+                // Round was auto-created, go back to player list
+                navigate("GameSettingsTabs");
+              } else {
+                // Need to select or create a round
+                navigate("AddRoundToGame", { playerId: player.$jazz.id });
+              }
             } else {
               const error = result.error;
               // TODO error component

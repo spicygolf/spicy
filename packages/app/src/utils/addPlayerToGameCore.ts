@@ -19,6 +19,12 @@ export interface AddPlayerOptions {
   autoCreateRound?: boolean;
 }
 
+export interface AddPlayerResult {
+  player: Player;
+  /** True if a round was automatically created for the player */
+  roundAutoCreated: boolean;
+}
+
 /**
  * Core function to add a player to a game.
  * Used by both useAddPlayerToGame hook and useCreateGame.
@@ -33,7 +39,7 @@ export async function addPlayerToGameCore(
   playerData: PlayerData,
   workerAccount?: Account,
   options: AddPlayerOptions = {},
-): Promise<Result<Player, AddPlayerError>> {
+): Promise<Result<AddPlayerResult, AddPlayerError>> {
   if (!game.$isLoaded || !game.players?.$isLoaded) {
     return err({
       type: "GAME_NOT_LOADED",
@@ -141,6 +147,7 @@ export async function addPlayerToGameCore(
   const finalPlayer = gamePlayer?.$isLoaded ? gamePlayer : player;
 
   // Auto-create round if requested and player has no rounds for the game date
+  let roundAutoCreated = false;
   if (options.autoCreateRound && game.rounds?.$isLoaded) {
     // Ensure player has rounds loaded for the check
     const playerWithRounds = await finalPlayer.$jazz.ensureLoaded({
@@ -151,8 +158,9 @@ export async function addPlayerToGameCore(
 
     if (roundsForGameDate.length === 0) {
       await createRoundForPlayer(game, playerWithRounds);
+      roundAutoCreated = true;
     }
   }
 
-  return ok(finalPlayer);
+  return ok({ player: finalPlayer, roundAutoCreated });
 }
