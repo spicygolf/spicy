@@ -3,24 +3,21 @@ import type { MaybeLoaded } from "jazz-tools";
 import { useState } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import {
-  ListOfRounds,
-  Round,
-  RoundScores,
-  RoundToGame,
-  type Round as RoundType,
-} from "spicylib/schema";
+import { RoundToGame, type Round as RoundType } from "spicylib/schema";
 import {
   calculateCourseHandicap,
   formatDate,
   formatTime,
-  isSameDay,
 } from "spicylib/utils";
 import { Back } from "@/components/Back";
 import { RoundCourseTeeName } from "@/components/game/settings/RoundCourseTeeName";
 import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Screen, Text } from "@/ui";
+import {
+  createRoundForPlayer,
+  getRoundsForDate,
+} from "@/utils/createRoundForPlayer";
 
 type Props = NativeStackScreenProps<
   GameSettingsStackParamList,
@@ -66,27 +63,19 @@ export function AddRoundToGame({ route, navigation }: Props) {
 
   const gameDate = game?.$isLoaded ? game.start : new Date();
 
-  const roundsForToday = (() => {
-    if (!player?.$isLoaded || !player.rounds?.$isLoaded) return [];
-
-    return player.rounds.filter((round) => {
-      if (!round?.$isLoaded) return false;
-      return isSameDay(round.createdAt, gameDate);
-    });
-  })();
+  const roundsForToday = player?.$isLoaded
+    ? getRoundsForDate(player, gameDate)
+    : [];
 
   if (!player) {
     return null;
   }
 
-  function handleCreateNewRound() {
+  async function handleCreateNewRound() {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded || !game.players?.$isLoaded)
       return;
 
     setIsCreating(true);
-
-    const group = game.rounds.$jazz.owner;
-    const playerGroup = game.players.$jazz.owner;
 
     // Get the player from game.players to ensure we modify the right instance
     const gamePlayer = game.players.find(
@@ -99,30 +88,9 @@ export function AddRoundToGame({ route, navigation }: Props) {
       return;
     }
 
-    const newRound = Round.create(
-      {
-        createdAt: gameDate,
-        playerId: gamePlayer.$jazz.id,
-        handicapIndex: gamePlayer.handicap?.$isLoaded
-          ? gamePlayer.handicap.display || "0.0"
-          : "0.0",
-        scores: RoundScores.create({}, { owner: group }),
-      },
-      { owner: group },
-    );
-
-    // Initialize rounds list if it doesn't exist
-    if (!gamePlayer.$jazz.has("rounds") || !gamePlayer.rounds?.$isLoaded) {
-      const roundsList = ListOfRounds.create([newRound], {
-        owner: playerGroup,
-      });
-      gamePlayer.$jazz.set("rounds", roundsList);
-    } else {
-      gamePlayer.rounds.$jazz.push(newRound);
-    }
-
-    addRoundToGame(newRound);
+    await createRoundForPlayer(game, gamePlayer);
     setIsCreating(false);
+    navigation.goBack();
   }
 
   async function addRoundToGame(round: RoundType) {
