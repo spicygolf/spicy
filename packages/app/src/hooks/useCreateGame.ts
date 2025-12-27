@@ -138,6 +138,7 @@ export function useCreateGame() {
         game,
         playerData,
         worker?.account?.$isLoaded ? worker.account : undefined,
+        { autoCreateRound: true },
       );
 
       if (result.isErr()) {
