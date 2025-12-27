@@ -6,6 +6,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RootNavigator } from "@/navigators/RootNavigator";
 import { JazzAndAuth } from "@/providers/jazz";
 import { NavigationProvider } from "@/providers/navigation";
+import { PostHogProvider } from "@/providers/posthog";
 import { ReactQueryProvider } from "@/providers/react-query";
 
 if (__DEV__) {
@@ -24,15 +25,17 @@ export function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <StrictMode>
-        <SafeAreaProvider>
-          <ReactQueryProvider>
-            <JazzAndAuth>
-              <NavigationProvider>
-                <RootNavigator />
-              </NavigationProvider>
-            </JazzAndAuth>
-          </ReactQueryProvider>
-        </SafeAreaProvider>
+        <PostHogProvider>
+          <SafeAreaProvider>
+            <ReactQueryProvider>
+              <JazzAndAuth>
+                <NavigationProvider>
+                  <RootNavigator />
+                </NavigationProvider>
+              </JazzAndAuth>
+            </ReactQueryProvider>
+          </SafeAreaProvider>
+        </PostHogProvider>
       </StrictMode>
     </GestureHandlerRootView>
   );

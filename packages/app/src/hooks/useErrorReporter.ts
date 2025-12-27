@@ -1,4 +1,5 @@
 import { useAccount } from "jazz-tools/react-native";
+import { usePostHog } from "posthog-react-native";
 import { useCallback } from "react";
 import { Platform } from "react-native";
 import { ErrorEntry, ErrorLog, PlayerAccount } from "spicylib/schema";
@@ -43,6 +44,7 @@ export function useErrorReporter() {
       },
     },
   });
+  const posthog = usePostHog();
 
   const reportError = useCallback(
     async (
@@ -97,14 +99,20 @@ export function useErrorReporter() {
 
             errorLog.$jazz.push(entry);
 
-            // TODO: Send to PostHog when SDK is configured
-            // posthog.capture('$exception', {
-            //   $exception_message: errorMessage,
-            //   $exception_type: errorName,
-            //   $exception_source: source,
-            //   ...context
-            // });
-            // Then update: entry.sentToPostHog = true;
+            // Send to PostHog
+            if (posthog) {
+              posthog.capture("$exception", {
+                $exception_message: errorMessage,
+                $exception_type: errorName,
+                $exception_source: source || "unknown",
+                severity,
+                platform: Platform.OS,
+                app_version: APP_VERSION,
+                jazz_account_id: me.$jazz.id,
+                ...context,
+              });
+              entry.$jazz.set("sentToPostHog", true);
+            }
           }
         } catch (logError) {
           // Don't let error logging cause more errors
@@ -114,7 +122,7 @@ export function useErrorReporter() {
         }
       }
     },
-    [me],
+    [me, posthog],
   );
 
   /**
