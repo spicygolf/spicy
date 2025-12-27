@@ -2,6 +2,7 @@ import type { Account } from "jazz-tools";
 import { Group } from "jazz-tools";
 import { err, ok, type Result } from "neverthrow";
 import { type Game, Handicap, ListOfRounds, Player } from "spicylib/schema";
+import { createRoundForPlayer, getRoundsForDate } from "./createRoundForPlayer";
 
 export type PlayerData = Parameters<typeof Player.create>[0];
 
@@ -10,19 +11,38 @@ export interface AddPlayerError {
   message: string;
 }
 
+export interface AddPlayerOptions {
+  /**
+   * If true, automatically create a new round for the player if they don't
+   * have any rounds for the game date.
+   *
+   * Note: The core function defaults to false, but useAddPlayerToGame hook
+   * defaults to true for better UX.
+   */
+  autoCreateRound?: boolean;
+}
+
+export interface AddPlayerResult {
+  player: Player;
+  /** True if a round was automatically created for the player */
+  roundAutoCreated: boolean;
+}
+
 /**
  * Core function to add a player to a game.
  * Used by both useAddPlayerToGame hook and useCreateGame.
  *
- * @param game - The game to add the player to (must be loaded with players resolved)
+ * @param game - The game to add the player to (must be loaded with players and rounds resolved)
  * @param playerData - The player data to create/upsert
  * @param workerAccount - Optional worker account to give admin access for sync
+ * @param options - Optional configuration for player addition behavior
  */
 export async function addPlayerToGameCore(
   game: Game,
   playerData: PlayerData,
   workerAccount?: Account,
-): Promise<Result<Player, AddPlayerError>> {
+  options: AddPlayerOptions = {},
+): Promise<Result<AddPlayerResult, AddPlayerError>> {
   if (!game.$isLoaded || !game.players?.$isLoaded) {
     return err({
       type: "GAME_NOT_LOADED",
@@ -127,5 +147,23 @@ export async function addPlayerToGameCore(
     (p) => p?.$isLoaded && p.$jazz.id === player.$jazz.id,
   );
 
-  return ok(gamePlayer?.$isLoaded ? gamePlayer : player);
+  const finalPlayer = gamePlayer?.$isLoaded ? gamePlayer : player;
+
+  // Auto-create round if requested and player has no rounds for the game date
+  let roundAutoCreated = false;
+  if (options.autoCreateRound && game.rounds?.$isLoaded) {
+    // Ensure player has rounds loaded for the check
+    const playerWithRounds = await finalPlayer.$jazz.ensureLoaded({
+      resolve: { rounds: true, handicap: true },
+    });
+
+    const roundsForGameDate = getRoundsForDate(playerWithRounds, game.start);
+
+    if (roundsForGameDate.length === 0) {
+      const newRound = await createRoundForPlayer(game, playerWithRounds);
+      roundAutoCreated = newRound !== null;
+    }
+  }
+
+  return ok({ player: finalPlayer, roundAutoCreated });
 }

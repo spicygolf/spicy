@@ -18,7 +18,7 @@ import { Screen, Text } from "@/ui";
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 
 export function AddPlayerFavorites() {
-  const { navigate } = useNavigation<NavigationProp>();
+  const navigation = useNavigation<NavigationProp>();
   const addPlayerToGame = useAddPlayerToGame();
   const { game } = useGame(undefined, {
     resolve: {
@@ -85,13 +85,20 @@ export function AddPlayerFavorites() {
       });
 
       if (result.isOk()) {
-        const newPlayer = result.value;
-        navigate("AddRoundToGame", { playerId: newPlayer.$jazz.id });
+        const { player, roundAutoCreated } = result.value;
+        if (roundAutoCreated) {
+          // Round was auto-created, go back to player list.
+          // Uses goBack() because this screen is nested inside AddPlayerNavigator.
+          navigation.goBack();
+        } else {
+          // Need to select or create a round
+          navigation.navigate("AddRoundToGame", { playerId: player.$jazz.id });
+        }
       } else {
         console.error(result.error);
       }
     },
-    [addPlayerToGame, navigate],
+    [addPlayerToGame, navigation],
   );
 
   const removeFavorite = useCallback(

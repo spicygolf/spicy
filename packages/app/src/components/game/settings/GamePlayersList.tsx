@@ -85,9 +85,16 @@ export function GamePlayersList() {
       const result = await addPlayerToGame(playerData);
 
       if (result.isOk()) {
-        navigation.navigate("AddRoundToGame", {
-          playerId: result.value.$jazz.id,
-        });
+        const { player, roundAutoCreated } = result.value;
+        if (!roundAutoCreated) {
+          // Need to select or create a round
+          navigation.navigate("AddRoundToGame", {
+            playerId: player.$jazz.id,
+          });
+        }
+        // If roundAutoCreated, do nothing - we're already on the player list.
+        // Note: This differs from PlayerItem/AddPlayerFavorites which call goBack()
+        // because those are nested inside AddPlayerNavigator.
       } else {
         console.error("Failed to add me to game:", result.error);
       }

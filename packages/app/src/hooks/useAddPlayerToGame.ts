@@ -1,7 +1,8 @@
 import { err, type Result } from "neverthrow";
-import type { Player } from "spicylib/schema";
 import {
   type AddPlayerError,
+  type AddPlayerOptions,
+  type AddPlayerResult,
   addPlayerToGameCore,
   type PlayerData,
 } from "../utils/addPlayerToGameCore";
@@ -9,7 +10,12 @@ import { useGame } from "./useGame";
 import { useJazzWorker } from "./useJazzWorker";
 
 // Re-export types for consumers
-export type { AddPlayerError, PlayerData } from "../utils/addPlayerToGameCore";
+export type {
+  AddPlayerError,
+  AddPlayerOptions,
+  AddPlayerResult,
+  PlayerData,
+} from "../utils/addPlayerToGameCore";
 
 export interface UseAddPlayerError {
   type: AddPlayerError["type"] | "NO_WORKER_ACCOUNT";
@@ -26,13 +32,15 @@ export function useAddPlayerToGame() {
           rounds: true,
         },
       },
+      rounds: true, // Required for autoCreateRound to work
     },
   });
   const worker = useJazzWorker();
 
   const addPlayerToGame = async (
     p: PlayerData,
-  ): Promise<Result<Player, UseAddPlayerError>> => {
+    options: AddPlayerOptions = { autoCreateRound: true },
+  ): Promise<Result<AddPlayerResult, UseAddPlayerError>> => {
     if (!game?.$isLoaded || !game.players?.$isLoaded) {
       return err({
         type: "GAME_NOT_LOADED",
@@ -47,7 +55,7 @@ export function useAddPlayerToGame() {
       });
     }
 
-    return addPlayerToGameCore(game, p, worker.account);
+    return addPlayerToGameCore(game, p, worker.account, options);
   };
 
   return addPlayerToGame;
