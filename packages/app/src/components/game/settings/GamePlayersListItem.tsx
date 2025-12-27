@@ -97,7 +97,7 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
         {subtitle && (
           <Text
             style={
-              needsCourseAndTee
+              needsCourseAndTee || !hasRounds
                 ? styles.player_tees_highlight
                 : styles.player_tees
             }
