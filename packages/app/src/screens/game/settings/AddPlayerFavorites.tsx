@@ -87,7 +87,8 @@ export function AddPlayerFavorites() {
       if (result.isOk()) {
         const { player, roundAutoCreated } = result.value;
         if (roundAutoCreated) {
-          // Round was auto-created, go back to previous screen
+          // Round was auto-created, go back to player list.
+          // Uses goBack() because this screen is nested inside AddPlayerNavigator.
           navigation.goBack();
         } else {
           // Need to select or create a round

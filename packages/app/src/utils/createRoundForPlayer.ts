@@ -48,45 +48,50 @@ export async function createRoundForPlayer(
     return null;
   }
 
-  const gameDate = game.start;
-  const roundGroup = game.rounds.$jazz.owner as Group;
-  const playerGroup = game.players.$jazz.owner as Group;
+  try {
+    const gameDate = game.start;
+    const roundGroup = game.rounds.$jazz.owner as Group;
+    const playerGroup = game.players.$jazz.owner as Group;
 
-  // Create the new round
-  const newRound = Round.create(
-    {
-      createdAt: gameDate,
-      playerId: player.$jazz.id,
-      handicapIndex: player.handicap?.$isLoaded
-        ? player.handicap.display || "0.0"
-        : "0.0",
-      scores: RoundScores.create({}, { owner: roundGroup }),
-    },
-    { owner: roundGroup },
-  );
+    // Create the new round
+    const newRound = Round.create(
+      {
+        createdAt: gameDate,
+        playerId: player.$jazz.id,
+        handicapIndex: player.handicap?.$isLoaded
+          ? player.handicap.display || "0.0"
+          : "0.0",
+        scores: RoundScores.create({}, { owner: roundGroup }),
+      },
+      { owner: roundGroup },
+    );
 
-  // Add round to player's rounds list
-  if (!player.$jazz.has("rounds") || !player.rounds?.$isLoaded) {
-    const roundsList = ListOfRounds.create([newRound], {
-      owner: playerGroup,
-    });
-    player.$jazz.set("rounds", roundsList);
-  } else {
-    player.rounds.$jazz.push(newRound);
+    // Add round to player's rounds list
+    if (!player.$jazz.has("rounds") || !player.rounds?.$isLoaded) {
+      const roundsList = ListOfRounds.create([newRound], {
+        owner: playerGroup,
+      });
+      player.$jazz.set("rounds", roundsList);
+    } else {
+      player.rounds.$jazz.push(newRound);
+    }
+
+    // Create the RoundToGame edge and add to game
+    // Note: courseHandicap is not set here because the round doesn't have a tee yet.
+    // It will be calculated when the user selects a course/tee.
+    const roundToGame = RoundToGame.create(
+      {
+        round: newRound,
+        handicapIndex: newRound.handicapIndex,
+      },
+      { owner: roundGroup },
+    );
+
+    game.rounds.$jazz.push(roundToGame);
+
+    return newRound;
+  } catch (error) {
+    console.error("Failed to create round for player:", error);
+    return null;
   }
-
-  // Create the RoundToGame edge and add to game
-  // Note: courseHandicap is not set here because the round doesn't have a tee yet.
-  // It will be calculated when the user selects a course/tee.
-  const roundToGame = RoundToGame.create(
-    {
-      round: newRound,
-      handicapIndex: newRound.handicapIndex,
-    },
-    { owner: roundGroup },
-  );
-
-  game.rounds.$jazz.push(roundToGame);
-
-  return newRound;
 }
