@@ -7,9 +7,10 @@ Skills provide domain-specific knowledge that is auto-injected based on prompt k
 | Skill | Priority | Description |
 |-------|----------|-------------|
 | `architecture` | 100 | Local-first principles, monorepo structure (always on) |
+| `orchestration` | 99 | Task decomposition and progress tracking (always on) |
 | `jazz-patterns` | 95 | Jazz Tools patterns - CRITICAL for data integrity |
-| `orchestration` | 85 | Multi-agent coordination for complex tasks |
 | `typescript-standards` | 80 | TypeScript and React Native best practices |
+| `error-handling` | 75 | Error tracking with Jazz CoFeed + PostHog |
 
 ## How Skills Work
 

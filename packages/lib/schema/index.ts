@@ -4,6 +4,7 @@ export * from "./catalog";
 export { MapOfCourses, MapOfGames } from "./catalog";
 export * from "./courses";
 export * from "./customizations";
+export * from "./errors";
 export * from "./favorites";
 export * from "./gameholes";
 export * from "./games";

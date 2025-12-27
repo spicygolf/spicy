@@ -8,6 +8,7 @@ import {
   RoundToGame,
 } from "spicylib/schema";
 import { isSameDay } from "spicylib/utils";
+import { reportError } from "./reportError";
 
 /**
  * Gets rounds for a player that were created on a specific date.
@@ -91,7 +92,13 @@ export async function createRoundForPlayer(
 
     return newRound;
   } catch (error) {
-    console.error("Failed to create round for player:", error);
+    reportError(error as Error, {
+      source: "createRoundForPlayer",
+      context: {
+        gameId: game.$jazz.id,
+        playerId: player.$jazz.id,
+      },
+    });
     return null;
   }
 }

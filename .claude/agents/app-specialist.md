@@ -218,14 +218,56 @@ async function addRoundToPlayer(playerId: string, roundData: RoundData) {
 ```
 
 ### Error Handling Pattern
+
+Use the hybrid error tracking system (Jazz CoFeed + PostHog):
+
 ```typescript
-try {
-  await addRoundToPlayer(playerId, roundData);
-  showToast('Round added successfully');
-} catch (err) {
-  console.error('Failed to add round:', err);
-  showError('Could not add round. Please try again.');
+// In React components with authenticated user - use hook
+import { useErrorReporter } from "@/hooks/useErrorReporter";
+
+function MyComponent() {
+  const { reportError } = useErrorReporter();
+
+  const handleSave = async () => {
+    try {
+      await addRoundToPlayer(playerId, roundData);
+      showToast('Round added successfully');
+    } catch (error) {
+      reportError(error, {
+        source: "MyComponent.handleSave",
+        context: { playerId, roundData },
+      });
+      showError('Could not add round. Please try again.');
+    }
+  };
 }
+
+// In utility functions - use standalone function
+import { reportError } from "@/utils/reportError";
+
+export async function createRound(game: Game, player: Player) {
+  try {
+    // ... logic
+  } catch (error) {
+    reportError(error as Error, {
+      source: "createRound",
+      context: { gameId: game.$jazz.id, playerId: player.$jazz.id },
+    });
+    return null;
+  }
+}
+```
+
+For user-facing errors, use the ErrorDisplay component:
+
+```typescript
+import { ErrorDisplay, InlineError } from "@/components/Error";
+
+// Full error screen
+<ErrorDisplay error={error} onRetry={refetch} />
+
+// Inline form error
+<InlineError message="Invalid email" />
 ```
 
 ## Performance Optimization
