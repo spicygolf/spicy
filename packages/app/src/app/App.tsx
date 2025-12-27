@@ -25,17 +25,17 @@ export function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <StrictMode>
-        <PostHogProvider>
-          <SafeAreaProvider>
-            <ReactQueryProvider>
-              <JazzAndAuth>
-                <NavigationProvider>
+        <SafeAreaProvider>
+          <ReactQueryProvider>
+            <JazzAndAuth>
+              <NavigationProvider>
+                <PostHogProvider>
                   <RootNavigator />
-                </NavigationProvider>
-              </JazzAndAuth>
-            </ReactQueryProvider>
-          </SafeAreaProvider>
-        </PostHogProvider>
+                </PostHogProvider>
+              </NavigationProvider>
+            </JazzAndAuth>
+          </ReactQueryProvider>
+        </SafeAreaProvider>
       </StrictMode>
     </GestureHandlerRootView>
   );
