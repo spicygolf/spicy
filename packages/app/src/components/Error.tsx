@@ -24,7 +24,7 @@ interface ErrorDisplayProps {
  */
 export function ErrorDisplay({
   error,
-  title = "Sorry, the app just took a double bogey.",
+  title = "Sorry, the app just made a double bogey.",
   showDetailsToggle = __DEV__,
   onRetry,
   onDismiss,
