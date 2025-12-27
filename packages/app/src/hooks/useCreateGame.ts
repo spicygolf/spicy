@@ -12,6 +12,7 @@ import {
 } from "spicylib/schema";
 import { addPlayerToGameCore } from "../utils/addPlayerToGameCore";
 import { playerToPlayerData } from "../utils/playerToPlayerData";
+import { reportError } from "../utils/reportError";
 import { useJazzWorker } from "./useJazzWorker";
 
 export function useCreateGame() {
@@ -33,12 +34,18 @@ export function useCreateGame() {
     }
 
     if (!me.root.$jazz.has("games")) {
-      console.error("useCreateGame: Account root doesn't have games field");
+      reportError("Account root doesn't have games field", {
+        source: "useCreateGame",
+        type: "DataError",
+      });
       return null;
     }
 
     if (!me.root.games?.$isLoaded) {
-      console.error("useCreateGame: Account games list not loaded");
+      reportError("Account games list not loaded", {
+        source: "useCreateGame",
+        type: "DataError",
+      });
       return null;
     }
 
@@ -142,7 +149,11 @@ export function useCreateGame() {
       );
 
       if (result.isErr()) {
-        console.error("Failed to add current player to game:", result.error);
+        reportError(result.error.message, {
+          source: "useCreateGame",
+          type: result.error.type,
+          context: { gameId: game.$jazz.id },
+        });
       }
     }
 
