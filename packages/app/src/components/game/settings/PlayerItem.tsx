@@ -21,7 +21,7 @@ import { Text } from "@/ui";
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 
 export function PlayerItem({ item }: { item: Golfer }) {
-  const { navigate } = useNavigation<NavigationProp>();
+  const navigation = useNavigation<NavigationProp>();
   const addPlayerToGame = useAddPlayerToGame();
   const { game } = useGame(undefined, {
     resolve: {
@@ -221,11 +221,13 @@ export function PlayerItem({ item }: { item: Golfer }) {
             if (result.isOk()) {
               const { player, roundAutoCreated } = result.value;
               if (roundAutoCreated) {
-                // Round was auto-created, go back to player list
-                navigate("GameSettingsTabs");
+                // Round was auto-created, go back to previous screen
+                navigation.goBack();
               } else {
                 // Need to select or create a round
-                navigate("AddRoundToGame", { playerId: player.$jazz.id });
+                navigation.navigate("AddRoundToGame", {
+                  playerId: player.$jazz.id,
+                });
               }
             } else {
               const error = result.error;
