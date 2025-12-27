@@ -36,7 +36,10 @@ export function getRoundsForDate(player: Player, date: Date): Round[] {
  * @param player - The player to create the round for (must be in game.players)
  * @returns The created round, or null if creation failed
  */
-export function createRoundForPlayer(game: Game, player: Player): Round | null {
+export async function createRoundForPlayer(
+  game: Game,
+  player: Player,
+): Promise<Round | null> {
   if (!game.$isLoaded || !game.rounds?.$isLoaded || !game.players?.$isLoaded) {
     return null;
   }

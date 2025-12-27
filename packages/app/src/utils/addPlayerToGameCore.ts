@@ -160,8 +160,8 @@ export async function addPlayerToGameCore(
     const roundsForGameDate = getRoundsForDate(playerWithRounds, game.start);
 
     if (roundsForGameDate.length === 0) {
-      await createRoundForPlayer(game, playerWithRounds);
-      roundAutoCreated = true;
+      const newRound = await createRoundForPlayer(game, playerWithRounds);
+      roundAutoCreated = newRound !== null;
     }
   }
 
