@@ -50,7 +50,9 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
       }}
       autocapture={{
         captureTouches: true,
-        captureScreens: true,
+        // Disabled: requires being inside NavigationContainer
+        // Screen tracking happens via session replay instead
+        captureScreens: false,
       }}
     >
       {children}
