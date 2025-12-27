@@ -38,7 +38,6 @@ export function ButtonGroup({
           >
             {button.iconName && (
               <FontAwesome6
-                // @ts-expect-error: rnvi types not yet working properly
                 name={button.iconName}
                 size={18}
                 color={

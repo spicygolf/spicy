@@ -8,21 +8,21 @@ export function Theme() {
   const buttons = [
     {
       label: "light",
-      iconName: "sun",
+      iconName: "sun" as const,
       onPress: () => {
         setTheme(0);
       },
     },
     {
       label: "dark",
-      iconName: "moon",
+      iconName: "moon" as const,
       onPress: () => {
         setTheme(1);
       },
     },
     {
       label: "system",
-      iconName: "computer",
+      iconName: "computer" as const,
       onPress: () => {
         setTheme(2);
       },

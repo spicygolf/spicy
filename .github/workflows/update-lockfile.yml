@@ -34,7 +34,7 @@ jobs:
           bun install
 
           cd packages/app
-          bundle exec pod install --project-directory=ios
+          bun pods
 
           cd ../..
           git add bun.lock packages/app/ios/Podfile.lock
