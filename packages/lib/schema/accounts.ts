@@ -2,6 +2,7 @@ import { co, Group, z } from "jazz-tools";
 import { JAZZ_WORKER_ACCOUNT } from "../config/env";
 import { GameCatalog } from "./catalog";
 import { ListOfGameSpecCustomizations } from "./customizations";
+import { ErrorLog } from "./errors";
 import { Favorites } from "./favorites";
 import { ListOfGames } from "./games";
 import { ListOfGameSpecs, MapOfGameSpecs } from "./gamespecs";
@@ -21,6 +22,9 @@ export const PlayerAccountRoot = co.map({
   customSpecs: co.optional(ListOfGameSpecs), // Full custom specs (complete forks)
   specCustomizations: co.optional(ListOfGameSpecCustomizations), // Lightweight overrides
   favoriteSpecIds: co.optional(co.list(z.string())), // References to catalog specs
+
+  // Error tracking (local-first, syncs to PostHog when online)
+  errorLog: co.optional(ErrorLog),
 });
 
 export const PlayerAccountProfile = co.profile({
