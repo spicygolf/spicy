@@ -97,6 +97,37 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - PostHog (3.36.0)
+  - posthog-react-native-session-replay (1.2.3):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - PostHog (~> 3.21)
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -2394,6 +2425,35 @@ PODS:
     - React-perflogger (= 0.80.0)
     - React-utils (= 0.80.0)
     - SocketRocket
+  - RNCAsyncStorage (2.2.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - RNCClipboard (1.16.3):
     - boost
     - DoubleConversion
@@ -2423,7 +2483,38 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - RNDeviceInfo (15.0.1):
+    - React-Core
   - RNGestureHandler (2.30.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - RNLocalize (3.6.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2741,6 +2832,7 @@ DEPENDENCIES:
   - hermes-engine (from `../../../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - NitroModules (from `../../../node_modules/react-native-nitro-modules`)
   - "op-sqlite (from `../../../node_modules/@op-engineering/op-sqlite`)"
+  - posthog-react-native-session-replay (from `../../../node_modules/posthog-react-native-session-replay`)
   - RCT-Folly (from `../../../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../../../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../../../node_modules/react-native/Libraries/Required`)
@@ -2813,8 +2905,11 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
+  - "RNCAsyncStorage (from `../../../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../../../node_modules/@react-native-clipboard/clipboard`)"
+  - RNDeviceInfo (from `../../../node_modules/react-native-device-info`)
   - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
+  - RNLocalize (from `../../../node_modules/react-native-localize`)
   - RNReanimated (from `../../../node_modules/react-native-reanimated`)
   - RNScreens (from `../../../node_modules/react-native-screens`)
   - RNWorklets (from `../../../node_modules/react-native-worklets`)
@@ -2824,6 +2919,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - PostHog
     - SocketRocket
     - SwiftUIIntrospect
     - uniffi-bindgen-react-native
@@ -2850,6 +2946,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-nitro-modules"
   op-sqlite:
     :path: "../../../node_modules/@op-engineering/op-sqlite"
+  posthog-react-native-session-replay:
+    :path: "../../../node_modules/posthog-react-native-session-replay"
   RCT-Folly:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -2992,10 +3090,16 @@ EXTERNAL SOURCES:
     :path: build/generated/ios
   ReactCommon:
     :path: "../../../node_modules/react-native/ReactCommon"
+  RNCAsyncStorage:
+    :path: "../../../node_modules/@react-native-async-storage/async-storage"
   RNCClipboard:
     :path: "../../../node_modules/@react-native-clipboard/clipboard"
+  RNDeviceInfo:
+    :path: "../../../node_modules/react-native-device-info"
   RNGestureHandler:
     :path: "../../../node_modules/react-native-gesture-handler"
+  RNLocalize:
+    :path: "../../../node_modules/react-native-localize"
   RNReanimated:
     :path: "../../../node_modules/react-native-reanimated"
   RNScreens:
@@ -3018,6 +3122,8 @@ SPEC CHECKSUMS:
   hermes-engine: 7068e976238b29e97b3bafd09a994542af7d5c0b
   NitroModules: cb825ffd89e426b92a0af2dd2a3bd41614fcaa8c
   op-sqlite: 4ba3f47c849511570816506ac4c5c248ed6e2af0
+  PostHog: 8e04df01d59971f1fd85d0273e18ba61076fef72
+  posthog-react-native-session-replay: d4216e80f2bbe8db35117c0ea0b84c2bd04c89b6
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
   RCTDeprecation: ff787f6c860a1b97dd1bc27264b61d23ad1994da
   RCTRequired: 664eb8399ed8a83e26ab65af7c2ad390f7e61696
@@ -3089,8 +3195,11 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: 3267432b637c9b38e86961b287f784ee1b08dde0
   ReactCodegen: d82f538f70f00484d418803f74b5a0ea09cc8689
   ReactCommon: b028d09a66e60ebd83ca59d8cc9a1216360db147
+  RNCAsyncStorage: 1f04c8d56558e533277beda29187f571cf7eecb2
   RNCClipboard: b228d492733d66e0126e18ce66c6d2f90bacc7e5
+  RNDeviceInfo: 36d7f232bfe7c9b5c494cb7793230424ed32c388
   RNGestureHandler: 4089d198e5474209e2b77dfb503578e704dee4e6
+  RNLocalize: 777c6683a9f83cf53186f43c2258ba0e8bbae6de
   RNReanimated: 24070d4e358986264bc0e6ee099d8e76177856fb
   RNScreens: 453b33a58ebc08051ce57c1341bad1b3a0024fa9
   RNWorklets: 1506b231a6a9bbd5fbec895ebb5f7a97836bf60c

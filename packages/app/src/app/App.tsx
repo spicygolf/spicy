@@ -3,9 +3,11 @@ import { StrictMode } from "react";
 import { LogBox, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { RootNavigator } from "@/navigators/RootNavigator";
 import { JazzAndAuth } from "@/providers/jazz";
 import { NavigationProvider } from "@/providers/navigation";
+import { PostHogProvider } from "@/providers/posthog";
 import { ReactQueryProvider } from "@/providers/react-query";
 
 if (__DEV__) {
@@ -24,15 +26,19 @@ export function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <StrictMode>
-        <SafeAreaProvider>
-          <ReactQueryProvider>
-            <JazzAndAuth>
+        <ErrorBoundary>
+          <PostHogProvider>
+            <SafeAreaProvider>
               <NavigationProvider>
-                <RootNavigator />
+                <ReactQueryProvider>
+                  <JazzAndAuth>
+                    <RootNavigator />
+                  </JazzAndAuth>
+                </ReactQueryProvider>
               </NavigationProvider>
-            </JazzAndAuth>
-          </ReactQueryProvider>
-        </SafeAreaProvider>
+            </SafeAreaProvider>
+          </PostHogProvider>
+        </ErrorBoundary>
       </StrictMode>
     </GestureHandlerRootView>
   );

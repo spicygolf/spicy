@@ -3,9 +3,10 @@
   "compilerOptions": {
     "strict": true,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["index.js", "src/**/*.ts", "src/**/*.tsx"]
+  "include": ["index.js", "src/**/*.ts", "src/**/*.tsx", "package.json"]
 }

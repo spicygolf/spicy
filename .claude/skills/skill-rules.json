@@ -70,6 +70,27 @@
       },
       "skillPath": "typescript-standards",
       "priority": 80
+    },
+    {
+      "name": "error-handling",
+      "description": "Error tracking with Jazz CoFeed and PostHog",
+      "triggers": {
+        "keywords": [
+          "error",
+          "exception",
+          "catch",
+          "try",
+          "posthog",
+          "analytics",
+          "tracking",
+          "reporterror",
+          "errordisplay",
+          "errorlog",
+          "console.error"
+        ]
+      },
+      "skillPath": "error-handling",
+      "priority": 75
     }
   ]
 }
