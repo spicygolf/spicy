@@ -1,10 +1,6 @@
+import { POSTHOG_API_KEY, POSTHOG_HOST } from "@env";
 import { PostHogProvider as PHProvider } from "posthog-react-native";
 import type { ReactNode } from "react";
-
-// PostHog configuration (public client-side keys)
-// TODO: Move to .env if needed for different environments
-const POSTHOG_API_KEY = "phc_Vmzq2esdAdfBEnin2kFueQD2xR3YyHRoHSTfKZvOF0G";
-const POSTHOG_HOST = "https://us.i.posthog.com";
 
 interface PostHogProviderProps {
   children: ReactNode;
