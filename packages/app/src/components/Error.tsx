@@ -20,7 +20,6 @@ interface ErrorDisplayProps {
 
 /**
  * Error display component with user-friendly message and optional technical details.
- * Follows local-first principles - display errors immediately, log to CoFeed in background.
  */
 export function ErrorDisplay({
   error,

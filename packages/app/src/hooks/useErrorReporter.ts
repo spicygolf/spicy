@@ -55,9 +55,9 @@ export function useErrorReporter() {
       const errorName =
         type || (typeof error === "object" ? error.name : "Error");
 
-      // Log to console in dev
+      // Log to console in dev (use console.warn to avoid PostHog autocapture duplication)
       if (logToConsole) {
-        console.error(`[${severity.toUpperCase()}] ${source || "App"}:`, error);
+        console.warn(`[${severity.toUpperCase()}] ${source || "App"}:`, error);
       }
 
       // Send to PostHog

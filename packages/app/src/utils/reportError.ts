@@ -21,7 +21,7 @@ export interface ReportErrorOptions {
  * This logs to console.error which PostHog's autocapture will pick up.
  * PostHog autocapture expects an Error object to capture stack traces properly.
  *
- * For full error logging with Jazz CoFeed + PostHog, use the useErrorReporter hook instead.
+ * For error reporting with user context (jazz_account_id), use the useErrorReporter hook instead.
  */
 export function reportError(
   error: Error | string,
