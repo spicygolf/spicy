@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import { LogBox, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { RootNavigator } from "@/navigators/RootNavigator";
 import { JazzAndAuth } from "@/providers/jazz";
 import { NavigationProvider } from "@/providers/navigation";
@@ -25,17 +26,19 @@ export function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <StrictMode>
-        <PostHogProvider>
-          <SafeAreaProvider>
-            <NavigationProvider>
-              <ReactQueryProvider>
-                <JazzAndAuth>
-                  <RootNavigator />
-                </JazzAndAuth>
-              </ReactQueryProvider>
-            </NavigationProvider>
-          </SafeAreaProvider>
-        </PostHogProvider>
+        <ErrorBoundary>
+          <PostHogProvider>
+            <SafeAreaProvider>
+              <NavigationProvider>
+                <ReactQueryProvider>
+                  <JazzAndAuth>
+                    <RootNavigator />
+                  </JazzAndAuth>
+                </ReactQueryProvider>
+              </NavigationProvider>
+            </SafeAreaProvider>
+          </PostHogProvider>
+        </ErrorBoundary>
       </StrictMode>
     </GestureHandlerRootView>
   );
