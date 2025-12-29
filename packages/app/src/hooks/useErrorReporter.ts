@@ -82,7 +82,6 @@ export function useErrorReporter() {
               source,
               severity,
               context: context ? JSON.stringify(context) : undefined,
-              sentToPostHog: false, // Will be updated when PostHog confirms
               platform: Platform.OS,
               appVersion: APP_VERSION,
             },
@@ -91,7 +90,7 @@ export function useErrorReporter() {
 
           errorLog.$jazz.push(entry);
 
-          // Send to PostHog
+          // Send to PostHog (PostHog handles its own retry logic)
           if (posthog) {
             posthog.capture("$exception", {
               $exception_message: errorMessage,
@@ -103,7 +102,6 @@ export function useErrorReporter() {
               jazz_account_id: me.$jazz.id,
               ...context,
             });
-            entry.$jazz.set("sentToPostHog", true);
           }
         } catch (logError) {
           // Don't let error logging cause more errors

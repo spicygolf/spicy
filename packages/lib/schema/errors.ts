@@ -25,9 +25,6 @@ export const ErrorEntry = co.map({
   /** Additional context (JSON stringified) */
   context: z.string().optional(),
 
-  /** Whether error was sent to PostHog */
-  sentToPostHog: z.boolean().optional(),
-
   /** Device/platform info */
   platform: z.string().optional(),
 
