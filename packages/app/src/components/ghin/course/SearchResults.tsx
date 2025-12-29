@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { stateCode } from "spicylib/utils";
+import { ErrorDisplay } from "@/components/Error";
 import { Text } from "@/ui";
 
 interface CourseSearchResultsProps {
@@ -36,7 +37,11 @@ export function GhinCourseSearchResults({
   if (error) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Error: {error.message}</Text>
+        <ErrorDisplay
+          error={error}
+          title="Couldn't search for courses"
+          compact
+        />
       </View>
     );
   }

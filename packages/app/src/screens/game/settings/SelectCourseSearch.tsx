@@ -15,6 +15,7 @@ import {
   TeeHole,
 } from "spicylib/schema";
 import { normalizeGender } from "spicylib/utils";
+import { ErrorDisplay } from "@/components/Error";
 import { GhinCourseSearchInput } from "@/components/ghin/course/SearchInput";
 import { GhinCourseSearchResults } from "@/components/ghin/course/SearchResults";
 import { TeeSelection } from "@/components/ghin/course/TeeSelection";
@@ -304,13 +305,11 @@ export function SelectCourseSearch({ route, navigation }: Props) {
         </>
       ) : courseDetailsQuery.isError ? (
         <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>
-            Error loading course details:{" "}
-            {courseDetailsQuery.error?.message || "Unknown error"}
-          </Text>
-          <TouchableOpacity onPress={() => setSelectedCourseId(null)}>
-            <Text style={styles.retryText}>← Back to search</Text>
-          </TouchableOpacity>
+          <ErrorDisplay
+            error={courseDetailsQuery.error}
+            title="Couldn't load course details"
+            onRetry={() => setSelectedCourseId(null)}
+          />
         </View>
       ) : courseDetailsQuery.data ? (
         <TeeSelection

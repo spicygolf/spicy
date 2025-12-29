@@ -1,6 +1,7 @@
 import type { Golfer } from "@spicygolf/ghin";
 import { useContext, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { ErrorDisplay } from "@/components/Error";
 import { PlayerItem } from "@/components/game/settings/PlayerItem";
 import { GhinPlayerSearchContext } from "@/contexts/GhinPlayerSearchContext";
 import { useGhinSearchPlayerQuery } from "@/hooks/useGhinSearchPlayerQuery";
@@ -44,8 +45,9 @@ export function GhinPlayerSearchResults() {
   }
 
   if (isError) {
-    // TODO: error component
-    return <Text>{error.message}</Text>;
+    return (
+      <ErrorDisplay error={error} title="Couldn't search for players" compact />
+    );
   }
 
   const keyExtractor = (g: Golfer) =>
