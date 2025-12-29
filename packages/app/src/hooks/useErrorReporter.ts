@@ -2,19 +2,8 @@ import { useAccount } from "jazz-tools/react-native";
 import { usePostHog } from "posthog-react-native";
 import { useCallback } from "react";
 import { Platform } from "react-native";
-import { ErrorEntry, type ErrorSeverity, PlayerAccount } from "spicylib/schema";
+import { type ErrorSeverity, PlayerAccount } from "spicylib/schema";
 import { APP_VERSION } from "@/constants/version";
-
-/**
- * Safely stringify an object, handling circular references and non-serializable values.
- */
-function safeStringify(obj: unknown): string {
-  try {
-    return JSON.stringify(obj);
-  } catch {
-    return JSON.stringify({ error: "Failed to stringify context" });
-  }
-}
 
 export type { ErrorSeverity };
 
@@ -25,14 +14,14 @@ export interface ReportErrorOptions {
   source?: string;
   /** Severity level */
   severity?: ErrorSeverity;
-  /** Additional context data (will be JSON stringified) */
+  /** Additional context data */
   context?: Record<string, unknown>;
   /** Whether to also log to console (defaults to __DEV__) */
   logToConsole?: boolean;
 }
 
 /**
- * Hook for reporting errors to Jazz CoFeed (local-first) and PostHog (when online).
+ * Hook for reporting errors to PostHog with user context.
  *
  * Usage:
  * ```tsx
@@ -46,20 +35,11 @@ export interface ReportErrorOptions {
  * ```
  */
 export function useErrorReporter() {
-  const me = useAccount(PlayerAccount, {
-    resolve: {
-      root: {
-        errorLog: true,
-      },
-    },
-  });
+  const me = useAccount(PlayerAccount);
   const posthog = usePostHog();
 
   const reportError = useCallback(
-    async (
-      error: Error | string,
-      options: ReportErrorOptions = {},
-    ): Promise<void> => {
+    (error: Error | string, options: ReportErrorOptions = {}): void => {
       const {
         type,
         source,
@@ -80,46 +60,19 @@ export function useErrorReporter() {
         console.error(`[${severity.toUpperCase()}] ${source || "App"}:`, error);
       }
 
-      // Write to Jazz CoFeed (local-first, syncs when online)
-      // errorLog is initialized in account migration, so it should always exist
-      if (me?.$isLoaded && me.root?.$isLoaded && me.root.errorLog?.$isLoaded) {
-        try {
-          const errorLog = me.root.errorLog;
-          const entry = ErrorEntry.create(
-            {
-              message: errorMessage,
-              type: errorName,
-              stack: errorStack,
-              source,
-              severity,
-              context: context ? safeStringify(context) : undefined,
-              platform: Platform.OS,
-              appVersion: APP_VERSION,
-            },
-            { owner: me },
-          );
-
-          errorLog.$jazz.push(entry);
-
-          // Send to PostHog (PostHog handles its own retry logic)
-          if (posthog) {
-            posthog.capture("$exception", {
-              $exception_message: errorMessage,
-              $exception_type: errorName,
-              $exception_source: source || "unknown",
-              severity,
-              platform: Platform.OS,
-              app_version: APP_VERSION,
-              jazz_account_id: me.$jazz.id,
-              ...context,
-            });
-          }
-        } catch (logError) {
-          // Don't let error logging cause more errors
-          if (__DEV__) {
-            console.error("Failed to log error to Jazz:", logError);
-          }
-        }
+      // Send to PostHog
+      if (posthog) {
+        posthog.capture("$exception", {
+          $exception_message: errorMessage,
+          $exception_type: errorName,
+          $exception_source: source || "unknown",
+          severity,
+          platform: Platform.OS,
+          app_version: APP_VERSION,
+          ...(errorStack && { $exception_stack_trace: errorStack }),
+          ...(me?.$isLoaded && { jazz_account_id: me.$jazz.id }),
+          ...context,
+        });
       }
     },
     [me, posthog],
