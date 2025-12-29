@@ -1,6 +1,5 @@
 import { Platform } from "react-native";
-
-const APP_VERSION = "0.5.0";
+import { APP_VERSION } from "@/constants/version";
 
 export type ErrorSeverity = "error" | "warning" | "info";
 

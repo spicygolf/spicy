@@ -3,9 +3,7 @@ import { usePostHog } from "posthog-react-native";
 import { useCallback } from "react";
 import { Platform } from "react-native";
 import { ErrorEntry, ErrorLog, PlayerAccount } from "spicylib/schema";
-
-// App version from package.json
-const APP_VERSION = "0.5.0";
+import { APP_VERSION } from "@/constants/version";
 
 export type ErrorSeverity = "error" | "warning" | "info";
 
