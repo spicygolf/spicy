@@ -4,7 +4,7 @@ import { APP_VERSION } from "@/constants/version";
 export type ErrorSeverity = "error" | "warning" | "info";
 
 export interface ReportErrorOptions {
-  /** Error type/name (e.g., "NetworkError", "ValidationError") */
+  /** Error type/name override (e.g., "NetworkError", "ValidationError") */
   type?: string;
   /** Component or function where error occurred */
   source?: string;
@@ -18,7 +18,7 @@ export interface ReportErrorOptions {
  * Report an error (standalone function, can be called from anywhere).
  *
  * This logs to console.error which PostHog's autocapture will pick up.
- * The error is formatted with structured metadata for easier debugging.
+ * PostHog autocapture expects an Error object to capture stack traces properly.
  *
  * For full error logging with Jazz CoFeed + PostHog, use the useErrorReporter hook instead.
  */
@@ -26,23 +26,22 @@ export function reportError(
   error: Error | string,
   options: ReportErrorOptions = {},
 ): void {
-  const { type, source, severity = "error", context } = options;
+  const { source, severity = "error", context } = options;
 
-  const errorMessage =
-    typeof error === "string" ? error : error.message || "Unknown error";
-  const errorName = type || (typeof error === "object" ? error.name : "Error");
+  // Ensure we have an Error object for PostHog autocapture to get stack traces
+  const errorObj = typeof error === "string" ? new Error(error) : error;
 
   // Log to console - PostHog autocapture will pick up console.error calls
-  // Format with metadata for structured logging
+  // Pass the actual Error object so PostHog can capture the stack trace
   console.error(
-    JSON.stringify({
-      level: severity,
-      type: errorName,
-      message: errorMessage,
-      source: source || "unknown",
-      platform: Platform.OS,
-      app_version: APP_VERSION,
-      ...context,
-    }),
+    `[${severity.toUpperCase()}] ${source || "unknown"}:`,
+    errorObj,
+    context
+      ? {
+          platform: Platform.OS,
+          app_version: APP_VERSION,
+          ...context,
+        }
+      : { platform: Platform.OS, app_version: APP_VERSION },
   );
 }
