@@ -1,13 +1,10 @@
 # Error Handling Skill
 
-This skill covers error tracking and reporting using the hybrid Jazz + PostHog approach.
+This skill covers error tracking and reporting using PostHog.
 
 ## Architecture
 
-Spicy Golf uses a **two-tier error reporting system**:
-
-1. **Jazz CoFeed** - Local-first error storage (offline-safe, syncs when online)
-2. **PostHog** - Analytics, session replay, and error aggregation
+Spicy Golf uses PostHog for error tracking with session replay and analytics.
 
 ## When to Use What
 
@@ -15,12 +12,13 @@ Spicy Golf uses a **two-tier error reporting system**:
 |----------|-----|
 | React component with logged-in user | `useErrorReporter` hook |
 | Utility function / non-React code | `reportError` function |
+| React component crashes | `ErrorBoundary` (auto-catches) |
 | User-facing error display | `ErrorDisplay` component |
 | Form validation errors | `InlineError` component |
 
 ## useErrorReporter Hook
 
-Use in React components when the user is authenticated. Logs to both Jazz CoFeed and PostHog.
+Use in React components when the user is authenticated. Reports to PostHog with user context.
 
 ```typescript
 import { useErrorReporter } from "@/hooks/useErrorReporter";
@@ -80,6 +78,19 @@ export async function createRound(game: Game, player: Player) {
 }
 ```
 
+## ErrorBoundary
+
+Wraps the entire app to catch unhandled React component errors. Uses `ErrorDisplay` for UI and `reportError` for logging.
+
+```tsx
+// Already set up in App.tsx
+<ErrorBoundary>
+  <PostHogProvider>
+    {/* ... rest of app */}
+  </PostHogProvider>
+</ErrorBoundary>
+```
+
 ## ErrorDisplay Component
 
 User-facing error display with optional technical details for dev/admin.
@@ -101,27 +112,6 @@ import { ErrorDisplay, InlineError } from "@/components/Error";
 <InlineError message="Invalid email address" />
 ```
 
-## Jazz ErrorLog Schema
-
-Errors are stored in `PlayerAccountRoot.errorLog` as a CoFeed:
-
-```typescript
-// packages/lib/schema/errors.ts
-const ErrorEntry = co.map({
-  message: z.string(),
-  type: z.string().optional(),
-  stack: z.string().optional(),
-  source: z.string().optional(),
-  severity: z.enum(["error", "warning", "info"]).optional(),
-  context: z.string().optional(),  // JSON stringified
-  sentToPostHog: z.boolean().optional(),
-  platform: z.string().optional(),
-  appVersion: z.string().optional(),
-});
-
-const ErrorLog = co.feed(ErrorEntry);
-```
-
 ## PostHog Integration
 
 PostHog is configured in `packages/app/src/providers/posthog/index.tsx`:
@@ -135,6 +125,7 @@ PostHog receives:
 - `$exception_message`: Error message
 - `$exception_type`: Error name/type
 - `$exception_source`: Component/function
+- `$exception_stack_trace`: Stack trace (when available)
 - `jazz_account_id`: User's Jazz account ID (from useErrorReporter only)
 - `severity`, `platform`, `app_version`
 - Any custom `context` properties
@@ -171,29 +162,32 @@ PostHog receives:
 
 ## Provider Setup
 
-PostHog is wrapped around the entire app for maximum coverage:
+ErrorBoundary wraps PostHog for maximum coverage:
 
 ```tsx
 // App.tsx
-<PostHogProvider>
-  <SafeAreaProvider>
-    <NavigationProvider>
-      <ReactQueryProvider>
-        <JazzAndAuth>
-          <RootNavigator />
-        </JazzAndAuth>
-      </ReactQueryProvider>
-    </NavigationProvider>
-  </SafeAreaProvider>
-</PostHogProvider>
+<ErrorBoundary>
+  <PostHogProvider>
+    <SafeAreaProvider>
+      <NavigationProvider>
+        <ReactQueryProvider>
+          <JazzAndAuth>
+            <RootNavigator />
+          </JazzAndAuth>
+        </ReactQueryProvider>
+      </NavigationProvider>
+    </SafeAreaProvider>
+  </PostHogProvider>
+</ErrorBoundary>
 ```
 
 ## Files Reference
 
 | File | Purpose |
 |------|---------|
-| `packages/lib/schema/errors.ts` | Jazz ErrorEntry and ErrorLog schema |
+| `packages/lib/schema/errors.ts` | ErrorSeverity type |
 | `packages/app/src/components/Error.tsx` | ErrorDisplay and InlineError components |
-| `packages/app/src/hooks/useErrorReporter.ts` | Hook for Jazz + PostHog logging |
+| `packages/app/src/components/ErrorBoundary.tsx` | Root-level error boundary |
+| `packages/app/src/hooks/useErrorReporter.ts` | Hook for PostHog logging with user context |
 | `packages/app/src/utils/reportError.ts` | Standalone error reporting function |
 | `packages/app/src/providers/posthog/index.tsx` | PostHog provider configuration |
