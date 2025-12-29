@@ -39,10 +39,21 @@ export function ErrorDisplay({
 
   if (compact) {
     return (
-      <View style={styles.compactContainer}>
+      <View
+        style={styles.compactContainer}
+        accessible={true}
+        accessibilityRole="alert"
+        accessibilityLabel={`Error: ${errorMessage}`}
+      >
         <Text style={styles.compactMessage}>{errorMessage}</Text>
         {onRetry && (
-          <TouchableOpacity onPress={onRetry} style={styles.compactRetry}>
+          <TouchableOpacity
+            onPress={onRetry}
+            style={styles.compactRetry}
+            accessibilityRole="button"
+            accessibilityLabel="Retry"
+            accessibilityHint="Double tap to retry the failed action"
+          >
             <Text style={styles.compactRetryText}>Retry</Text>
           </TouchableOpacity>
         )}
@@ -51,7 +62,12 @@ export function ErrorDisplay({
   }
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      accessible={true}
+      accessibilityRole="alert"
+      accessibilityLabel={`${title}. ${errorMessage}`}
+    >
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{errorMessage}</Text>
 
@@ -59,6 +75,10 @@ export function ErrorDisplay({
         <TouchableOpacity
           onPress={() => setShowDetails(!showDetails)}
           style={styles.detailsToggle}
+          accessibilityRole="button"
+          accessibilityLabel={showDetails ? "Hide Details" : "Show Details"}
+          accessibilityHint="Double tap to toggle technical error details"
+          accessibilityState={{ expanded: showDetails }}
         >
           <Text style={styles.detailsToggleText}>
             {showDetails ? "Hide Details" : "Show Details"}
@@ -93,7 +113,12 @@ export function ErrorDisplay({
  */
 export function InlineError({ message }: { message: string }) {
   return (
-    <View style={styles.inlineContainer}>
+    <View
+      style={styles.inlineContainer}
+      accessible={true}
+      accessibilityRole="alert"
+      accessibilityLabel={`Error: ${message}`}
+    >
       <Text style={styles.inlineText}>{message}</Text>
     </View>
   );
