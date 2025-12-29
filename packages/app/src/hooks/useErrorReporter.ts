@@ -5,6 +5,17 @@ import { Platform } from "react-native";
 import { ErrorEntry, PlayerAccount } from "spicylib/schema";
 import { APP_VERSION } from "@/constants/version";
 
+/**
+ * Safely stringify an object, handling circular references and non-serializable values.
+ */
+function safeStringify(obj: unknown): string {
+  try {
+    return JSON.stringify(obj);
+  } catch {
+    return JSON.stringify({ error: "Failed to stringify context" });
+  }
+}
+
 export type ErrorSeverity = "error" | "warning" | "info";
 
 export interface ReportErrorOptions {
@@ -81,7 +92,7 @@ export function useErrorReporter() {
               stack: errorStack,
               source,
               severity,
-              context: context ? JSON.stringify(context) : undefined,
+              context: context ? safeStringify(context) : undefined,
               platform: Platform.OS,
               appVersion: APP_VERSION,
             },
