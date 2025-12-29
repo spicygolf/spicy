@@ -2,7 +2,6 @@ import { co, Group, z } from "jazz-tools";
 import { JAZZ_WORKER_ACCOUNT } from "../config/env";
 import { GameCatalog } from "./catalog";
 import { ListOfGameSpecCustomizations } from "./customizations";
-import { ErrorLog } from "./errors";
 import { Favorites } from "./favorites";
 import { ListOfGames } from "./games";
 import { ListOfGameSpecs, MapOfGameSpecs } from "./gamespecs";
@@ -22,9 +21,6 @@ export const PlayerAccountRoot = co.map({
   customSpecs: co.optional(ListOfGameSpecs), // Full custom specs (complete forks)
   specCustomizations: co.optional(ListOfGameSpecCustomizations), // Lightweight overrides
   favoriteSpecIds: co.optional(co.list(z.string())), // References to catalog specs
-
-  // Error tracking (local-first, syncs to PostHog when online)
-  errorLog: co.optional(ErrorLog),
 });
 
 export const PlayerAccountProfile = co.profile({
@@ -62,7 +58,6 @@ export const PlayerAccount = co
         group.addMember(workerAccount, "admin");
 
         const favorites = Favorites.create({}, { owner: group });
-        const errorLog = ErrorLog.create([], { owner: group });
 
         account.$jazz.set(
           "root",
@@ -82,19 +77,11 @@ export const PlayerAccount = co
               games: ListOfGames.create([], { owner: group }),
               specs: ListOfGameSpecs.create([], { owner: group }),
               favorites,
-              errorLog,
             },
             { owner: group },
           ),
         );
       }
-    }
-
-    // Migration 3: Add errorLog to existing accounts that don't have it
-    if (account.root?.$isLoaded && !account.root.$jazz.has("errorLog")) {
-      const group = account.root.$jazz.owner as Group;
-      const errorLog = ErrorLog.create([], { owner: group });
-      account.root.$jazz.set("errorLog", errorLog);
     }
 
     // Migration 2: Initialize worker account profile with catalog
