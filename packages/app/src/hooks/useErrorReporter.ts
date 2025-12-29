@@ -2,7 +2,7 @@ import { useAccount } from "jazz-tools/react-native";
 import { usePostHog } from "posthog-react-native";
 import { useCallback } from "react";
 import { Platform } from "react-native";
-import { ErrorEntry, PlayerAccount } from "spicylib/schema";
+import { ErrorEntry, type ErrorSeverity, PlayerAccount } from "spicylib/schema";
 import { APP_VERSION } from "@/constants/version";
 
 /**
@@ -16,7 +16,7 @@ function safeStringify(obj: unknown): string {
   }
 }
 
-export type ErrorSeverity = "error" | "warning" | "info";
+export type { ErrorSeverity };
 
 export interface ReportErrorOptions {
   /** Error type/name (e.g., "NetworkError", "ValidationError") */

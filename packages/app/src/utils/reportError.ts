@@ -1,7 +1,8 @@
 import { Platform } from "react-native";
+import type { ErrorSeverity } from "spicylib/schema";
 import { APP_VERSION } from "@/constants/version";
 
-export type ErrorSeverity = "error" | "warning" | "info";
+export type { ErrorSeverity };
 
 export interface ReportErrorOptions {
   /** Error type/name override (e.g., "NetworkError", "ValidationError") */

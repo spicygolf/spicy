@@ -1,5 +1,8 @@
 import { co, z } from "jazz-tools";
 
+/** Error severity levels */
+export type ErrorSeverity = "error" | "warning" | "info";
+
 /**
  * ErrorEntry - A single error event
  * Stored in a CoFeed for append-only history with automatic timestamps
