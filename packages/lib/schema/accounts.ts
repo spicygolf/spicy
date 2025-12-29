@@ -62,6 +62,7 @@ export const PlayerAccount = co
         group.addMember(workerAccount, "admin");
 
         const favorites = Favorites.create({}, { owner: group });
+        const errorLog = ErrorLog.create([], { owner: group });
 
         account.$jazz.set(
           "root",
@@ -81,11 +82,19 @@ export const PlayerAccount = co
               games: ListOfGames.create([], { owner: group }),
               specs: ListOfGameSpecs.create([], { owner: group }),
               favorites,
+              errorLog,
             },
             { owner: group },
           ),
         );
       }
+    }
+
+    // Migration 3: Add errorLog to existing accounts that don't have it
+    if (account.root?.$isLoaded && !account.root.$jazz.has("errorLog")) {
+      const group = account.root.$jazz.owner as Group;
+      const errorLog = ErrorLog.create([], { owner: group });
+      account.root.$jazz.set("errorLog", errorLog);
     }
 
     // Migration 2: Initialize worker account profile with catalog

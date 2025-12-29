@@ -2,7 +2,7 @@ import { useAccount } from "jazz-tools/react-native";
 import { usePostHog } from "posthog-react-native";
 import { useCallback } from "react";
 import { Platform } from "react-native";
-import { ErrorEntry, ErrorLog, PlayerAccount } from "spicylib/schema";
+import { ErrorEntry, PlayerAccount } from "spicylib/schema";
 import { APP_VERSION } from "@/constants/version";
 
 export type ErrorSeverity = "error" | "warning" | "info";
@@ -70,47 +70,40 @@ export function useErrorReporter() {
       }
 
       // Write to Jazz CoFeed (local-first, syncs when online)
-      if (me?.$isLoaded && me.root?.$isLoaded) {
+      // errorLog is initialized in account migration, so it should always exist
+      if (me?.$isLoaded && me.root?.$isLoaded && me.root.errorLog?.$isLoaded) {
         try {
-          // Lazily create errorLog if it doesn't exist
-          if (!me.root.$jazz.has("errorLog")) {
-            const errorLog = ErrorLog.create([], { owner: me });
-            me.root.$jazz.set("errorLog", errorLog);
-          }
-
           const errorLog = me.root.errorLog;
-          if (errorLog?.$isLoaded) {
-            const entry = ErrorEntry.create(
-              {
-                message: errorMessage,
-                type: errorName,
-                stack: errorStack,
-                source,
-                severity,
-                context: context ? JSON.stringify(context) : undefined,
-                sentToPostHog: false, // Will be updated when PostHog confirms
-                platform: Platform.OS,
-                appVersion: APP_VERSION,
-              },
-              { owner: me },
-            );
+          const entry = ErrorEntry.create(
+            {
+              message: errorMessage,
+              type: errorName,
+              stack: errorStack,
+              source,
+              severity,
+              context: context ? JSON.stringify(context) : undefined,
+              sentToPostHog: false, // Will be updated when PostHog confirms
+              platform: Platform.OS,
+              appVersion: APP_VERSION,
+            },
+            { owner: me },
+          );
 
-            errorLog.$jazz.push(entry);
+          errorLog.$jazz.push(entry);
 
-            // Send to PostHog
-            if (posthog) {
-              posthog.capture("$exception", {
-                $exception_message: errorMessage,
-                $exception_type: errorName,
-                $exception_source: source || "unknown",
-                severity,
-                platform: Platform.OS,
-                app_version: APP_VERSION,
-                jazz_account_id: me.$jazz.id,
-                ...context,
-              });
-              entry.$jazz.set("sentToPostHog", true);
-            }
+          // Send to PostHog
+          if (posthog) {
+            posthog.capture("$exception", {
+              $exception_message: errorMessage,
+              $exception_type: errorName,
+              $exception_source: source || "unknown",
+              severity,
+              platform: Platform.OS,
+              app_version: APP_VERSION,
+              jazz_account_id: me.$jazz.id,
+              ...context,
+            });
+            entry.$jazz.set("sentToPostHog", true);
           }
         } catch (logError) {
           // Don't let error logging cause more errors
