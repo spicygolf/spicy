@@ -28,21 +28,67 @@ if (!player.$jazz.has("rounds")) {
 
 ---
 
-## ensureLoaded After upsertUnique
+## Prefer Resolve Queries Over ensureLoaded
 
 **Severity**: CRITICAL | **Enforcement**: BLOCKING
 
-After `upsertUnique`, always `ensureLoaded` before checking optional fields.
+Use resolve queries in `.load()` instead of shallow load + `ensureLoaded`. This is cleaner and more efficient.
 
-**Rationale**: upsertUnique may return partially loaded objects. Checking fields without loading leads to false negatives.
+**Rationale**: `ensureLoaded` is an extra step that can be avoided by specifying what you need upfront.
 
 ```typescript
-// CORRECT
+// WRONG - Two-step loading
+const project = await Project.load(projectId, { resolve: true });
+const loadedProject = await project.$jazz.ensureLoaded({
+  resolve: { tasks: { $each: true } }
+});
+
+// CORRECT - Single-step with resolve query
+const project = await Project.load(projectId, {
+  resolve: { tasks: { $each: true } }
+});
+if (!project.$isLoaded) return;
+// project.tasks is now loaded
+```
+
+### Use Schema-Level Resolve Queries
+
+Define reusable resolve queries at the schema level with `.resolved()`:
+
+```typescript
+// Define resolved schema variants
+const TaskWithDescription = Task.resolved({
+  description: true,
+});
+
+const ProjectWithTasks = Project.resolved({
+  tasks: { $each: TaskWithDescription.resolveQuery }
+});
+
+// .load() uses the resolve query from the schema
+const project = await ProjectWithTasks.load(projectId);
+// Both tasks and descriptions are loaded
+```
+
+### When ensureLoaded IS Appropriate
+
+Use `ensureLoaded` only for:
+1. **After upsertUnique** - when checking optional fields on potentially new objects
+2. **Migrations** - loading nested fields to check existence
+3. **Progressive deepening** - when you have a shallow reference and need more
+
+```typescript
+// APPROPRIATE - After upsertUnique
 player = await Player.upsertUnique({ value, unique, owner });
 const loaded = await player.$jazz.ensureLoaded({ resolve: { rounds: true } });
 if (!loaded.$jazz.has("rounds")) {
   // safe to initialize
 }
+
+// APPROPRIATE - Progressive deepening from existing reference
+const { tracks } = await playlist.$jazz.ensureLoaded({
+  resolve: PlaylistWithTracks.resolveQuery,
+});
 ```
 
 ---
