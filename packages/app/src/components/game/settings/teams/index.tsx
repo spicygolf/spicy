@@ -1,9 +1,11 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
+import { useCoState } from "jazz-tools/react";
 import { useCallback, useMemo, useState } from "react";
 import { View } from "react-native";
 import { DraxProvider } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import {
+  GameHole,
   ListOfRoundToTeams,
   ListOfTeams,
   RoundToTeam,
@@ -19,6 +21,8 @@ import { TeamAssignments } from "./TeamAssignments";
 import type { PlayerRoundItem, RotationChangeOption } from "./types";
 
 export function GameTeamsList() {
+  // Load game with shallow holes - we only need hole IDs for writing
+  // Deep team data is loaded separately for just the first hole
   const { game } = useGame(undefined, {
     resolve: {
       scope: { teamsConfig: true },
@@ -35,21 +39,32 @@ export function GameTeamsList() {
           },
         },
       },
-      holes: {
+      holes: { $each: true }, // Shallow load - just hole objects, not deep team data
+    },
+  });
+
+  // Get first hole ID for deep loading team assignments
+  const firstHoleId =
+    game?.$isLoaded && game.holes?.$isLoaded && game.holes[0]?.$isLoaded
+      ? game.holes[0].$jazz.id
+      : undefined;
+
+  // Load only the first hole deeply for reading team assignments
+  // This avoids loading 100+ objects (18 holes × teams × rounds)
+  const firstHole = useCoState(GameHole, firstHoleId ?? ("" as never), {
+    resolve: {
+      teams: {
         $each: {
-          teams: {
+          rounds: {
             $each: {
-              rounds: {
-                $each: {
-                  roundToGame: true,
-                },
-              },
+              roundToGame: true,
             },
           },
         },
       },
     },
   });
+
   const { theme } = useUnistyles();
 
   const [showRotationChangeModal, setShowRotationChangeModal] = useState(false);
@@ -128,23 +143,17 @@ export function GameTeamsList() {
   }, [game]);
 
   // Derive team assignments directly from Jazz data - no local state needed
+  // Uses firstHole (deeply loaded) instead of game.holes[0] for efficiency
   const teamAssignments = useMemo((): Map<string, number> => {
     const assignments = new Map<string, number>();
 
-    if (!game?.$isLoaded || !game.holes?.$isLoaded) {
+    if (!firstHole?.$isLoaded || !firstHole.teams?.$isLoaded) {
       return assignments;
     }
 
-    const firstHole = game.holes[0];
-    if (!firstHole?.$isLoaded) {
-      return assignments;
-    }
-
-    if (!firstHole.teams?.$isLoaded) {
-      return assignments;
-    }
-
-    for (const team of firstHole.teams) {
+    for (const team of firstHole.teams as Iterable<
+      (typeof firstHole.teams)[number]
+    >) {
       if (!team?.$isLoaded) continue;
 
       if (!team.rounds?.$isLoaded) continue;
@@ -152,7 +161,9 @@ export function GameTeamsList() {
       const teamNumber = Number.parseInt(team.team, 10);
       if (Number.isNaN(teamNumber)) continue;
 
-      for (const roundToTeam of team.rounds) {
+      for (const roundToTeam of team.rounds as Iterable<
+        (typeof team.rounds)[number]
+      >) {
         if (!roundToTeam?.$isLoaded || !roundToTeam.roundToGame?.$isLoaded)
           continue;
         assignments.set(roundToTeam.roundToGame.$jazz.id, teamNumber);
@@ -160,7 +171,7 @@ export function GameTeamsList() {
     }
 
     return assignments;
-  }, [game]);
+  }, [firstHole]);
 
   const saveTeamAssignmentsToGame = useCallback(
     async (assignments: Map<string, number>) => {
@@ -170,12 +181,7 @@ export function GameTeamsList() {
 
       ensureGameHoles(game);
 
-      await game.holes.$jazz.ensureLoaded({ resolve: {} });
-      for (const hole of game.holes as Iterable<(typeof game.holes)[number]>) {
-        if (hole?.$isLoaded) {
-          await hole.$jazz.ensureLoaded({ resolve: {} });
-        }
-      }
+      // holes are already loaded by useGame resolve query - no ensureLoaded needed
 
       for (const hole of game.holes as Iterable<(typeof game.holes)[number]>) {
         if (!hole?.$isLoaded) {

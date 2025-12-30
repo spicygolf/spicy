@@ -131,3 +131,25 @@ export type ListOfRounds = co.loaded<typeof ListOfRounds>;
 
 export const ListOfRoundToGames = co.list(RoundToGame);
 export type ListOfRoundToGames = co.loaded<typeof ListOfRoundToGames>;
+
+/**
+ * Pre-defined resolved types for common loading patterns.
+ * Use these with .load() or ensureLoaded to get type-safe deeply loaded objects.
+ *
+ * Example:
+ *   const round = await RoundWithCourseTee.load(roundId);
+ *   // round.course and round.tee are guaranteed loaded
+ */
+export const RoundWithCourseTee = Round.resolved({
+  course: true,
+  tee: true,
+});
+export type RoundWithCourseTee = co.loaded<typeof RoundWithCourseTee>;
+
+export const RoundWithCourseTeeFacility = Round.resolved({
+  course: { facility: true },
+  tee: true,
+});
+export type RoundWithCourseTeeFacility = co.loaded<
+  typeof RoundWithCourseTeeFacility
+>;

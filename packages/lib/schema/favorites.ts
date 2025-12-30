@@ -40,3 +40,27 @@ export const Favorites = co.map({
   players: co.optional(ListOfFavoritePlayers),
   specs: co.optional(ListOfFavoriteSpecs),
 });
+
+/**
+ * Pre-defined resolved types for common loading patterns.
+ * Use these with .load() or ensureLoaded to get type-safe deeply loaded objects.
+ *
+ * Example:
+ *   const fav = await CourseTeeWithRefs.load(favId);
+ *   // fav.course and fav.tee are guaranteed loaded
+ */
+export const CourseTeeWithRefs = CourseTee.resolved({
+  course: true,
+  tee: true,
+});
+export type CourseTeeWithRefs = co.loaded<typeof CourseTeeWithRefs>;
+
+export const FavoritePlayerWithRef = FavoritePlayer.resolved({
+  player: true,
+});
+export type FavoritePlayerWithRef = co.loaded<typeof FavoritePlayerWithRef>;
+
+export const FavoriteSpecWithRef = FavoriteSpec.resolved({
+  spec: true,
+});
+export type FavoriteSpecWithRef = co.loaded<typeof FavoriteSpecWithRef>;
