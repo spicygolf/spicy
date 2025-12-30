@@ -170,12 +170,7 @@ export function GameTeamsList() {
 
       ensureGameHoles(game);
 
-      await game.holes.$jazz.ensureLoaded({ resolve: {} });
-      for (const hole of game.holes as Iterable<(typeof game.holes)[number]>) {
-        if (hole?.$isLoaded) {
-          await hole.$jazz.ensureLoaded({ resolve: {} });
-        }
-      }
+      // holes are already loaded by useGame resolve query - no ensureLoaded needed
 
       for (const hole of game.holes as Iterable<(typeof game.holes)[number]>) {
         if (!hole?.$isLoaded) {
