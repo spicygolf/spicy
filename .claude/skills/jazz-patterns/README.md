@@ -124,12 +124,16 @@ if (root.$isLoaded) {
 
 **Severity**: CRITICAL | **Enforcement**: BLOCKING
 
-Jazz CoLists must be loaded explicitly at each level. Nested `$each` does NOT load list items.
+When using `ensureLoaded` for progressive deepening, nested `$each` does NOT automatically load list containers at each level.
 
-**Rationale**: Common misconception that `$each` loads the list. It doesn't - you must explicitly load each list level.
+**Important distinction:**
+- **Initial `.load()` or `useCoState` with resolve queries** → DOES load lists at each level correctly
+- **Progressive `ensureLoaded` on already-loaded objects** → does NOT load list containers, only items if container is already loaded
+
+**Rationale**: When progressively loading with `ensureLoaded`, nested `$each` won't load the list containers themselves. You must explicitly load each list level.
 
 ```typescript
-// WRONG - $each won't load teams if they aren't loaded already!
+// WRONG - $each in ensureLoaded won't load teams list if not already loaded!
 await hole.$jazz.ensureLoaded({
   resolve: {
     teams: {
@@ -140,7 +144,7 @@ await hole.$jazz.ensureLoaded({
   }
 });
 
-// CORRECT - Load level by level
+// CORRECT for ensureLoaded - Load level by level
 await hole.teams.$jazz.ensureLoaded({});  // Load teams list
 for (const team of hole.teams) {
   await team.$jazz.ensureLoaded({});  // Load team object
@@ -149,6 +153,18 @@ for (const team of hole.teams) {
     await round.$jazz.ensureLoaded({ resolve: { roundToGame: true } });
   }
 }
+
+// CORRECT - Initial load with resolve query DOES work
+const hole = await GameHole.load(holeId, {
+  resolve: {
+    teams: {
+      $each: {
+        rounds: { $each: { roundToGame: true } }
+      }
+    }
+  }
+});
+// hole.teams and nested data ARE loaded
 ```
 
 ---
