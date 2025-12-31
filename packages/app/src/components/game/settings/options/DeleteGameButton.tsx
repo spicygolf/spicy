@@ -60,13 +60,15 @@ export function DeleteGameButton() {
         onPress={() => setShowModal(true)}
         disabled={!canDelete}
       >
-        <FontAwesome6
-          name="trash-can"
-          iconStyle="solid"
-          size={16}
-          color={theme.colors.error}
-        />
-        <Text style={styles.deleteButtonText}>Delete Game</Text>
+        <View style={styles.deleteButtonLeft}>
+          <FontAwesome6
+            name="trash-can"
+            iconStyle="solid"
+            size={16}
+            color={theme.colors.error}
+          />
+          <Text style={styles.deleteButtonText}>Delete Game</Text>
+        </View>
         <FontAwesome6
           name="chevron-right"
           iconStyle="solid"
@@ -143,14 +145,21 @@ const styles = StyleSheet.create((theme) => ({
   deleteButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: theme.gap(2),
-    paddingHorizontal: theme.gap(2),
-    gap: theme.gap(1.5),
+    justifyContent: "space-between",
+    paddingVertical: theme.gap(1.5),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    backgroundColor: theme.colors.background,
+  },
+  deleteButtonLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(1),
+    flex: 1,
   },
   deleteButtonText: {
-    flex: 1,
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "500",
     color: theme.colors.error,
   },
   modalOverlay: {

@@ -119,10 +119,7 @@ export function GameOptionsList() {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>No game options available</Text>
-        <View style={styles.dangerZone}>
-          <View style={styles.separator} />
-          <DeleteGameButton />
-        </View>
+        <DeleteGameButton />
       </View>
     );
   }
@@ -138,10 +135,7 @@ export function GameOptionsList() {
             onPress={() => handleOptionPress(option)}
           />
         ))}
-        <View style={styles.dangerZone}>
-          <View style={styles.separator} />
-          <DeleteGameButton />
-        </View>
+        <DeleteGameButton />
       </ScrollView>
 
       {selectedOption && (
@@ -204,13 +198,5 @@ const styles = StyleSheet.create((theme) => ({
   emptyText: {
     fontSize: 16,
     color: theme.colors.secondary,
-  },
-  dangerZone: {
-    marginTop: theme.gap(4),
-  },
-  separator: {
-    height: 1,
-    backgroundColor: theme.colors.border,
-    marginBottom: theme.gap(1),
   },
 }));
