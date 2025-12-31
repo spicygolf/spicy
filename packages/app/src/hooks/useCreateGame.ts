@@ -11,7 +11,6 @@ import {
   PlayerAccount,
 } from "spicylib/schema";
 import { addPlayerToGameCore } from "../utils/addPlayerToGameCore";
-import { playerToPlayerData } from "../utils/playerToPlayerData";
 import { reportError } from "../utils/reportError";
 import { useJazzWorker } from "./useJazzWorker";
 
@@ -133,17 +132,16 @@ export function useCreateGame() {
     }
 
     // Auto-add current player to the game
-    // The game was just created synchronously with the players list,
-    // so it should be loaded, but we check defensively
+    // Pass the player REFERENCE directly - don't extract data and recreate
+    // This ensures the same player CoValue is used across all games
     if (
       me.root.player?.$isLoaded &&
       game.$isLoaded &&
       game.players?.$isLoaded
     ) {
-      const playerData = playerToPlayerData(me.root.player);
       const result = await addPlayerToGameCore(
         game,
-        playerData,
+        { player: me.root.player }, // Pass reference, not data
         worker?.account?.$isLoaded ? worker.account : undefined,
         { autoCreateRound: true },
       );

@@ -2,17 +2,18 @@ import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-t
 import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
 import { useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { Alert, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import type { Course, Tee } from "spicylib/schema";
 import {
-  Course,
+  Course as CourseSchema,
   CourseTee,
   Facility,
   Favorites,
   ListOfCourseTees,
   PlayerAccount,
-  Tee,
   TeeHole,
+  Tee as TeeSchema,
 } from "spicylib/schema";
 import { normalizeGender } from "spicylib/utils";
 import { ErrorDisplay } from "@/components/Error";
@@ -20,7 +21,7 @@ import { GhinCourseSearchInput } from "@/components/ghin/course/SearchInput";
 import { GhinCourseSearchResults } from "@/components/ghin/course/SearchResults";
 import { TeeSelection } from "@/components/ghin/course/TeeSelection";
 import { useGhinCourseSearchContext } from "@/contexts/GhinCourseSearchContext";
-import { useGame } from "@/hooks";
+import { useCatalogCourses, useGame } from "@/hooks";
 import { useGhinCourseDetailsQuery } from "@/hooks/useGhinCourseDetailsQuery";
 import { useGhinSearchCourseQuery } from "@/hooks/useGhinSearchCourseQuery";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
@@ -35,7 +36,8 @@ export function SelectCourseSearch({ route, navigation }: Props) {
   const { playerId, roundId } = route.params;
   const { game } = useGame(undefined, {
     resolve: {
-      players: { $each: { gender: true, rounds: { $each: true } } },
+      players: { $each: { gender: true } },
+      rounds: { $each: { round: true } },
     },
   });
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
@@ -50,6 +52,9 @@ export function SelectCourseSearch({ route, navigation }: Props) {
     },
   });
 
+  // Access catalog for course/tee lookup
+  const { findCourseTee } = useCatalogCourses();
+
   // Direct Jazz data access - no useMemo needed since Jazz reactivity is already optimized
   const player =
     game?.$isLoaded && game.players?.$isLoaded
@@ -59,16 +64,15 @@ export function SelectCourseSearch({ route, navigation }: Props) {
         ) || null
       : null;
 
-  const round =
-    roundId &&
-    player?.$isLoaded &&
-    player.$jazz.has("rounds") &&
-    player.rounds?.$isLoaded
-      ? player.rounds.find(
-          (r: MaybeLoaded<(typeof player.rounds)[0]>) =>
-            r?.$isLoaded && r.$jazz.id === roundId,
-        ) || null
-      : null;
+  // Find the round via game.rounds (RoundToGame), not player.rounds
+  // This is necessary because catalog players may not have the new round in their rounds list
+  const round = (() => {
+    if (!roundId || !game?.$isLoaded || !game.rounds?.$isLoaded) return null;
+    const rtg = game.rounds.find(
+      (r) => r?.$isLoaded && r.round?.$isLoaded && r.round.$jazz.id === roundId,
+    );
+    return rtg?.$isLoaded && rtg.round?.$isLoaded ? rtg.round : null;
+  })();
 
   const { state: searchState } = useGhinCourseSearchContext();
   const courseSearchQuery = useGhinSearchCourseQuery(searchState);
@@ -101,120 +105,180 @@ export function SelectCourseSearch({ route, navigation }: Props) {
       return;
     }
 
-    const group = round.$jazz.owner;
+    let course: Course;
+    let tee: Tee;
 
-    const facilityData = courseData.Facility;
-    const facility = facilityData
-      ? Facility.create(
-          {
-            id: facilityData.FacilityId.toString(),
-            status: facilityData.FacilityStatus,
-            name: facilityData.FacilityName,
-            number: facilityData.FacilityNumber?.toString(),
-            geolocation: {
-              formatted_address: facilityData.GeoLocationFormattedAddress || "",
-              latitude: facilityData.GeoLocationLatitude || 0,
-              longitude: facilityData.GeoLocationLongitude || 0,
+    // Check catalog first for existing course/tee references
+    const catalogResult = findCourseTee(
+      courseData.CourseId.toString(),
+      teeData.TeeSetRatingId.toString(),
+    );
+
+    if (catalogResult) {
+      // Use existing references from catalog
+      // This ensures all games reference the same Course/Tee CoValues
+      course = catalogResult.course;
+      tee = catalogResult.tee;
+    } else {
+      // Fall back to creating new course/tee in the round's group (group-local)
+      //
+      // This happens when:
+      // 1. Course doesn't exist in catalog (not yet imported)
+      // 2. User searches GHIN and selects a course we haven't seen before
+      //
+      // Trade-off: Group-local courses won't be shared across games from different
+      // users. If User A creates "Course X" in their game, and User B also creates
+      // "Course X", they'll be different CoValues.
+      //
+      // Future improvement: Add API endpoint to upsert courses to catalog when
+      // created here, so subsequent games can reference the shared catalog version.
+      // This would require worker credentials (catalog is worker-owned).
+      //
+      // For now this is acceptable because:
+      // - Most common courses should already be in catalog from import
+      // - Course data is read-only after creation (no sync issues)
+      // - Can be migrated later when catalog backfill is implemented
+      const group = round.$jazz.owner;
+
+      const facilityData = courseData.Facility;
+      const facility = facilityData
+        ? Facility.create(
+            {
+              id: facilityData.FacilityId.toString(),
+              status: facilityData.FacilityStatus,
+              name: facilityData.FacilityName,
+              number: facilityData.FacilityNumber?.toString(),
+              geolocation: {
+                formatted_address:
+                  facilityData.GeoLocationFormattedAddress || "",
+                latitude: facilityData.GeoLocationLatitude || 0,
+                longitude: facilityData.GeoLocationLongitude || 0,
+              },
             },
+            { owner: group },
+          )
+        : undefined;
+
+      const holes = teeData.Holes.map((h) =>
+        TeeHole.create(
+          {
+            id: h.HoleId.toString(),
+            number: h.Number,
+            par: h.Par,
+            yards: h.Length,
+            meters: Math.round(h.Length * 0.9144),
+            handicap: h.Allocation,
           },
           { owner: group },
-        )
-      : undefined;
+        ),
+      );
 
-    const holes = teeData.Holes.map((h) =>
-      TeeHole.create(
+      const ratings = {
+        total: { rating: 0, slope: 0, bogey: 0 },
+        front: { rating: 0, slope: 0, bogey: 0 },
+        back: { rating: 0, slope: 0, bogey: 0 },
+      };
+
+      teeData.Ratings.forEach((r) => {
+        const ratingKey = r.RatingType.toLowerCase() as
+          | "total"
+          | "front"
+          | "back";
+        if (ratingKey in ratings) {
+          ratings[ratingKey] = {
+            rating: r.CourseRating,
+            slope: r.SlopeRating,
+            bogey: r.BogeyRating,
+          };
+        }
+      });
+
+      const upsertedTee = await TeeSchema.upsertUnique({
+        value: {
+          id: teeData.TeeSetRatingId.toString(),
+          name: teeData.TeeSetRatingName,
+          gender: normalizeGender(teeData.Gender),
+          holes,
+          holesCount: teeData.HolesNumber,
+          totalYardage: teeData.TotalYardage,
+          totalMeters: teeData.TotalMeters,
+          ratings,
+        },
+        unique: teeData.TeeSetRatingId.toString(),
+        owner: group,
+      });
+
+      if (!upsertedTee.$isLoaded) {
+        console.error("Failed to load upserted tee:", {
+          teeSetRatingId: teeData.TeeSetRatingId,
+          teeName: teeData.TeeSetRatingName,
+          courseId: courseData.CourseId,
+          courseName: courseData.CourseName,
+        });
+        Alert.alert(
+          "Tee Selection Failed",
+          `Could not save tee "${teeData.TeeSetRatingName}". Please try again or select a different tee.`,
+          [{ text: "OK" }],
+        );
+        return;
+      }
+
+      tee = await upsertedTee.$jazz.ensureLoaded({
+        resolve: { holes: { $each: true } },
+      });
+
+      const createdCourse = CourseSchema.create(
         {
-          id: h.HoleId.toString(),
-          number: h.Number,
-          par: h.Par,
-          yards: h.Length,
-          meters: Math.round(h.Length * 0.9144),
-          handicap: h.Allocation,
+          id: courseData.CourseId.toString(),
+          status: courseData.CourseStatus,
+          name: courseData.CourseName,
+          number: courseData.CourseNumber?.toString(),
+          city: courseData.CourseCity,
+          state: courseData.CourseState,
+          facility,
+          season: courseData.Season
+            ? {
+                name: courseData.Season.SeasonName || undefined,
+                start_date: courseData.Season.SeasonStartDate || undefined,
+                end_date: courseData.Season.SeasonEndDate || undefined,
+                all_year: courseData.Season.IsAllYear,
+              }
+            : {
+                name: undefined,
+                start_date: undefined,
+                end_date: undefined,
+                all_year: true,
+              },
+          default_tee: {
+            male: undefined,
+            female: undefined,
+          },
+          tees: [],
         },
         { owner: group },
-      ),
-    );
+      );
 
-    const ratings = {
-      total: { rating: 0, slope: 0, bogey: 0 },
-      front: { rating: 0, slope: 0, bogey: 0 },
-      back: { rating: 0, slope: 0, bogey: 0 },
-    };
+      course = await createdCourse.$jazz.ensureLoaded({ resolve: true });
 
-    teeData.Ratings.forEach((r) => {
-      const ratingKey = r.RatingType.toLowerCase() as
-        | "total"
-        | "front"
-        | "back";
-      if (ratingKey in ratings) {
-        ratings[ratingKey] = {
-          rating: r.CourseRating,
-          slope: r.SlopeRating,
-          bogey: r.BogeyRating,
-        };
+      if (!course.$isLoaded) {
+        console.error("Failed to load created course:", {
+          courseId: courseData.CourseId,
+          courseName: courseData.CourseName,
+        });
+        Alert.alert(
+          "Course Selection Failed",
+          `Could not save course "${courseData.CourseName}". Please try again.`,
+          [{ text: "OK" }],
+        );
+        return;
       }
-    });
-
-    const upsertedTee = await Tee.upsertUnique({
-      value: {
-        id: teeData.TeeSetRatingId.toString(),
-        name: teeData.TeeSetRatingName,
-        gender: normalizeGender(teeData.Gender),
-        holes,
-        holesCount: teeData.HolesNumber,
-        totalYardage: teeData.TotalYardage,
-        totalMeters: teeData.TotalMeters,
-        ratings,
-      },
-      unique: teeData.TeeSetRatingId.toString(),
-      owner: group,
-    });
-
-    if (!upsertedTee.$isLoaded) {
-      return;
     }
-
-    const tee = await upsertedTee.$jazz.ensureLoaded({
-      resolve: { holes: { $each: true } },
-    });
-
-    const createdCourse = Course.create(
-      {
-        id: courseData.CourseId.toString(),
-        status: courseData.CourseStatus,
-        name: courseData.CourseName,
-        number: courseData.CourseNumber?.toString(),
-        city: courseData.CourseCity,
-        state: courseData.CourseState,
-        facility,
-        season: courseData.Season
-          ? {
-              name: courseData.Season.SeasonName || undefined,
-              start_date: courseData.Season.SeasonStartDate || undefined,
-              end_date: courseData.Season.SeasonEndDate || undefined,
-              all_year: courseData.Season.IsAllYear,
-            }
-          : {
-              name: undefined,
-              start_date: undefined,
-              end_date: undefined,
-              all_year: true,
-            },
-        default_tee: {
-          male: undefined,
-          female: undefined,
-        },
-        tees: [],
-      },
-      { owner: group },
-    );
-
-    const course = await createdCourse.$jazz.ensureLoaded({ resolve: true });
 
     if (!course.$isLoaded || !round.$isLoaded) {
       return;
     }
 
+    // Set course and tee references on round
     round.$jazz.set("course", course);
     round.$jazz.set("tee", tee);
 

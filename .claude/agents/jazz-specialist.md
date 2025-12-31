@@ -406,17 +406,24 @@ Use the Jazz inspect script to directly examine CoValues:
 # From packages/web directory
 cd packages/web
 
-# Inspect any CoValue by ID
+# Inspect with explicit type (recommended)
+bun run jazz player co_zndRVBmTsDPNdjNiauVfUQaMFLV
+bun run jazz game co_zeGX6eUyGPUbMPdV9csYsnFczib
+
+# Auto-detect type (tries each schema)
 bun run jazz co_zaYtNqJZsTyi1Sy6615uCqhpsgi
 
-# Inspect with a resolve query to load nested data
-bun run jazz co_zaYtNqJZsTyi1Sy6615uCqhpsgi '{"rounds":{"$each":true}}'
+# With resolve query to load nested data
+bun run jazz player co_zndRVBmTsDPNdjNiauVfUQaMFLV '{"rounds":{"$each":true}}'
+bun run jazz game co_zeGX6eUyGPUbMPdV9csYsnFczib '{"players":{"$each":true}}'
 ```
+
+**Supported types:** `player`, `game`, `round`, `roundtogame`, `course`, `tee`, `spec`, `account`
 
 The script connects using the worker credentials from `packages/api/.env` and outputs:
 - Field values and types
-- `$jazz.has()` status for each field
-- Raw object keys
+- Nested CoValue references (loaded or not)
+- Array contents (first 10 items)
 
 ### Field Deletion vs Setting Undefined
 

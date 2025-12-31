@@ -62,27 +62,9 @@ export function AddPlayerFavorites() {
         return;
       }
 
-      const loadedFavorite = await favorite.player.$jazz.ensureLoaded({
-        resolve: {
-          clubs: { $each: true },
-        },
-      });
-
-      const player = loadedFavorite;
-      const result = await addPlayerToGame({
-        name: player.name,
-        short: player.short,
-        gender: player.gender,
-        ghinId: player.ghinId,
-        handicap: player.handicap?.$isLoaded
-          ? {
-              source: player.handicap.source,
-              display: player.handicap.display,
-              value: player.handicap.value,
-              revDate: player.handicap.revDate,
-            }
-          : undefined,
-      });
+      // Pass the player REFERENCE directly - don't extract data and recreate
+      // This ensures the same player CoValue is used across all games
+      const result = await addPlayerToGame(favorite.player);
 
       if (result.isOk()) {
         const { player, roundAutoCreated } = result.value;

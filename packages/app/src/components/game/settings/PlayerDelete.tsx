@@ -37,23 +37,34 @@ export function PlayerDelete({ player }: { player: Player }) {
     //       player, and if so, show a dialog to the user, confirming delete.
     if (!game?.$isLoaded || !game.players?.$isLoaded || !game.rounds?.$isLoaded)
       return;
-    if (!player?.rounds?.$isLoaded) return;
+    if (!player?.$isLoaded) return;
 
-    // Get all round IDs for this player
-    const playerRoundIds = new Set(
-      player.rounds.filter((r) => r?.$isLoaded).map((r) => r.$jazz.id),
+    // Find all RoundToGame entries for this player using round.playerId
+    // (more reliable than player.rounds since catalog players may not have rounds list access)
+    const playerRoundToGames = game.rounds.filter(
+      (rtg) =>
+        rtg?.$isLoaded &&
+        rtg.round?.$isLoaded &&
+        rtg.round.playerId === player.$jazz.id,
     );
 
-    // Get all RoundToGame IDs that reference this player's rounds
+    // Get round IDs and RoundToGame IDs for this player
+    const playerRoundIds = new Set(
+      playerRoundToGames
+        .filter((rtg) => rtg?.$isLoaded && rtg.round?.$isLoaded)
+        .map((rtg) => {
+          if (rtg?.$isLoaded && rtg.round?.$isLoaded) {
+            return rtg.round.$jazz.id;
+          }
+          return "";
+        })
+        .filter((id) => id !== ""),
+    );
+
     const roundToGameIds = new Set(
-      game.rounds
-        .filter(
-          (rtg) =>
-            rtg?.$isLoaded &&
-            rtg.round?.$isLoaded &&
-            playerRoundIds.has(rtg.round.$jazz.id),
-        )
-        .map((rtg) => rtg?.$jazz.id),
+      playerRoundToGames
+        .filter((rtg) => rtg?.$isLoaded)
+        .map((rtg) => rtg.$jazz.id),
     );
 
     // Remove RoundToGame entries that reference this player's rounds

@@ -9,7 +9,6 @@ import { GamePlayersListItem } from "@/components/game/settings/GamePlayersListI
 import { useAddPlayerToGame, useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button } from "@/ui";
-import { playerToPlayerData } from "@/utils/playerToPlayerData";
 import { EmptyPlayersList } from "./EmptyPlayersList";
 
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
@@ -81,8 +80,8 @@ export function GamePlayersList() {
 
     setIsAddingMe(true);
     try {
-      const playerData = playerToPlayerData(me.root.player);
-      const result = await addPlayerToGame(playerData);
+      // Pass player reference directly, not extracted data
+      const result = await addPlayerToGame(me.root.player);
 
       if (result.isOk()) {
         const { player, roundAutoCreated } = result.value;
