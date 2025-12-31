@@ -5,6 +5,7 @@ import type { GameOption } from "spicylib/schema";
 import { useGame, useSaveOptionToGame } from "@/hooks";
 import { Text } from "@/ui";
 import { BoolOptionModal } from "./BoolOptionModal";
+import { DeleteGameButton } from "./DeleteGameButton";
 import { GameOptionRow } from "./GameOptionRow";
 import { MenuOptionModal } from "./MenuOptionModal";
 import { NumOptionModal } from "./NumOptionModal";
@@ -118,6 +119,10 @@ export function GameOptionsList() {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>No game options available</Text>
+        <View style={styles.dangerZone}>
+          <View style={styles.separator} />
+          <DeleteGameButton />
+        </View>
       </View>
     );
   }
@@ -133,6 +138,10 @@ export function GameOptionsList() {
             onPress={() => handleOptionPress(option)}
           />
         ))}
+        <View style={styles.dangerZone}>
+          <View style={styles.separator} />
+          <DeleteGameButton />
+        </View>
       </ScrollView>
 
       {selectedOption && (
@@ -195,5 +204,13 @@ const styles = StyleSheet.create((theme) => ({
   emptyText: {
     fontSize: 16,
     color: theme.colors.secondary,
+  },
+  dangerZone: {
+    marginTop: theme.gap(4),
+  },
+  separator: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginBottom: theme.gap(1),
   },
 }));
