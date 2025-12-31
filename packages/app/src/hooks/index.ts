@@ -5,6 +5,7 @@ export * from "./useCatalogPlayers";
 export * from "./useCreateGame";
 export * from "./useCurrentHole";
 export * from "./useCurrentHoleScores";
+export * from "./useDeleteGame";
 export * from "./useGame";
 export * from "./useGameInitialization";
 export * from "./useGameList";

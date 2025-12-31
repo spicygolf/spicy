@@ -5,6 +5,7 @@ import type { GameOption } from "spicylib/schema";
 import { useGame, useSaveOptionToGame } from "@/hooks";
 import { Text } from "@/ui";
 import { BoolOptionModal } from "./BoolOptionModal";
+import { DeleteGameButton } from "./DeleteGameButton";
 import { GameOptionRow } from "./GameOptionRow";
 import { MenuOptionModal } from "./MenuOptionModal";
 import { NumOptionModal } from "./NumOptionModal";
@@ -118,6 +119,7 @@ export function GameOptionsList() {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>No game options available</Text>
+        <DeleteGameButton />
       </View>
     );
   }
@@ -133,6 +135,7 @@ export function GameOptionsList() {
             onPress={() => handleOptionPress(option)}
           />
         ))}
+        <DeleteGameButton />
       </ScrollView>
 
       {selectedOption && (
