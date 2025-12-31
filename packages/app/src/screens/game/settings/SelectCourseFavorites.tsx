@@ -24,7 +24,8 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
   const { playerId, roundId } = route.params;
   const { game } = useGame(undefined, {
     resolve: {
-      players: { $each: { gender: true, rounds: { $each: true } } },
+      players: { $each: { gender: true } },
+      rounds: { $each: { round: true } },
     },
   });
 
@@ -52,15 +53,14 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     );
   })();
 
+  // Find the round via game.rounds (RoundToGame), not player.rounds
+  // This is necessary because catalog players may not have the new round in their rounds list
   const round = (() => {
-    if (!roundId || !player?.$isLoaded || !player.rounds?.$isLoaded)
-      return null;
-    return (
-      player.rounds.find(
-        (r: MaybeLoaded<(typeof player.rounds)[0]>) =>
-          r?.$isLoaded && r.$jazz.id === roundId,
-      ) || null
+    if (!roundId || !game?.$isLoaded || !game.rounds?.$isLoaded) return null;
+    const rtg = game.rounds.find(
+      (r) => r?.$isLoaded && r.round?.$isLoaded && r.round.$jazz.id === roundId,
     );
+    return rtg?.$isLoaded && rtg.round?.$isLoaded ? rtg.round : null;
   })();
 
   const favoritedTees = (() => {

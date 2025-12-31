@@ -26,6 +26,19 @@ export const Player = co.map({
   legacyId: z.string().optional(),
   handicap: co.optional(Handicap),
   clubs: co.optional(ListOfClubs),
+  /**
+   * Player's historical rounds list.
+   *
+   * @deprecated For game rounds, use `game.rounds` (RoundToGame list) with `round.playerId`
+   * instead. This field is only writable for user-owned players, not catalog players.
+   * Catalog players can't have rounds added here due to permission constraints.
+   *
+   * This field is kept for:
+   * 1. Legacy imported round data
+   * 2. Future use when users own their own player data
+   *
+   * TODO: Consider removing once all round lookups use game.rounds + playerId pattern.
+   */
   rounds: co.optional(ListOfRounds),
 });
 export type Player = co.loaded<typeof Player>;

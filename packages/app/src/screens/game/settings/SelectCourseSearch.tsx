@@ -36,7 +36,8 @@ export function SelectCourseSearch({ route, navigation }: Props) {
   const { playerId, roundId } = route.params;
   const { game } = useGame(undefined, {
     resolve: {
-      players: { $each: { gender: true, rounds: { $each: true } } },
+      players: { $each: { gender: true } },
+      rounds: { $each: { round: true } },
     },
   });
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
@@ -63,16 +64,15 @@ export function SelectCourseSearch({ route, navigation }: Props) {
         ) || null
       : null;
 
-  const round =
-    roundId &&
-    player?.$isLoaded &&
-    player.$jazz.has("rounds") &&
-    player.rounds?.$isLoaded
-      ? player.rounds.find(
-          (r: MaybeLoaded<(typeof player.rounds)[0]>) =>
-            r?.$isLoaded && r.$jazz.id === roundId,
-        ) || null
-      : null;
+  // Find the round via game.rounds (RoundToGame), not player.rounds
+  // This is necessary because catalog players may not have the new round in their rounds list
+  const round = (() => {
+    if (!roundId || !game?.$isLoaded || !game.rounds?.$isLoaded) return null;
+    const rtg = game.rounds.find(
+      (r) => r?.$isLoaded && r.round?.$isLoaded && r.round.$jazz.id === roundId,
+    );
+    return rtg?.$isLoaded && rtg.round?.$isLoaded ? rtg.round : null;
+  })();
 
   const { state: searchState } = useGhinCourseSearchContext();
   const courseSearchQuery = useGhinSearchCourseQuery(searchState);
