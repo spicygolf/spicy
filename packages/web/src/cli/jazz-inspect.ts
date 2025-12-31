@@ -204,15 +204,18 @@ async function inspect(
     }
 
     // Auto-detect: try each schema
+    // Order matters! More specific schemas (with more required fields) should come first
+    // to avoid false positives. E.g., tee has name+gender+holes, player has name+gender,
+    // so tee must be checked first or it would match as player.
     const schemasToTry: SchemaType[] = [
-      "player",
-      "game",
-      "round",
-      "roundtogame",
-      "course",
-      "tee",
-      "spec",
-      "account",
+      "tee", // has name, gender, holes - check before player
+      "course", // has name, city, tees
+      "game", // has start, players
+      "round", // has createdAt, playerId
+      "roundtogame", // has round, handicapIndex
+      "spec", // has name, spec_type
+      "player", // has name, gender (least specific with those fields)
+      "account", // has root or profile
     ];
 
     for (const type of schemasToTry) {
@@ -254,7 +257,8 @@ function checkSchemaMatch(obj: unknown, type: SchemaType): boolean {
 
   switch (type) {
     case "player":
-      return "name" in o && "gender" in o;
+      // Player has name, gender, short - and does NOT have holes (which tee has)
+      return "name" in o && "gender" in o && "short" in o && !("holes" in o);
     case "game":
       return "start" in o && "players" in o;
     case "round":
