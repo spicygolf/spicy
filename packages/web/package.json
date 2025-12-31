@@ -27,7 +27,7 @@
     "jazz-tools": "catalog:shared",
     "lucide-react": "0.562.0",
     "react": "19.1.0",
-    "react-dom": "19.2.3",
+    "react-dom": "19.1.0",
     "spicylib": "workspace:*",
     "tailwind-merge": "3.4.0",
     "tailwindcss-animate": "1.0.7"
