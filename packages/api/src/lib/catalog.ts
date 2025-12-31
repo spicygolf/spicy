@@ -626,10 +626,18 @@ async function importPlayers(
             ? new Date(arangoPlayer.handicap.revDate)
             : undefined;
 
+          // Generate display from index if not present in legacy data
+          let display = arangoPlayer.handicap.display;
+          if (display === undefined && arangoPlayer.handicap.index != null) {
+            const index = arangoPlayer.handicap.index;
+            // Plus handicaps (negative index) need "+" prefix
+            display = index < 0 ? `+${Math.abs(index)}` : index.toString();
+          }
+
           handicap = Handicap.create(
             {
               source: arangoPlayer.handicap.source,
-              display: arangoPlayer.handicap.display,
+              display,
               value: arangoPlayer.handicap.index,
               revDate,
             },
