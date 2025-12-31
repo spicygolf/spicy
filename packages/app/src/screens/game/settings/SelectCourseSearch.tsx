@@ -259,6 +259,19 @@ export function SelectCourseSearch({ route, navigation }: Props) {
       );
 
       course = await createdCourse.$jazz.ensureLoaded({ resolve: true });
+
+      if (!course.$isLoaded) {
+        console.error("Failed to load created course:", {
+          courseId: courseData.CourseId,
+          courseName: courseData.CourseName,
+        });
+        Alert.alert(
+          "Course Selection Failed",
+          `Could not save course "${courseData.CourseName}". Please try again.`,
+          [{ text: "OK" }],
+        );
+        return;
+      }
     }
 
     if (!course.$isLoaded || !round.$isLoaded) {
