@@ -1,5 +1,6 @@
 export * from "./useAddPlayerToGame";
 export * from "./useApi";
+export * from "./useCatalogPlayers";
 export * from "./useCreateGame";
 export * from "./useCurrentHole";
 export * from "./useCurrentHoleScores";
