@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import type { Game, ListOfGames } from "spicylib/schema";
 
 export interface DeleteGameResult {
@@ -31,7 +31,7 @@ export function useDeleteGame(
   games: ListOfGames | null | undefined,
 ): DeleteGameResult {
   // Analyze rounds to determine which have scores
-  const roundAnalysis = useMemo(() => {
+  const roundAnalysis = (() => {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded) {
       return { withScores: 0, empty: 0 };
     }
@@ -73,7 +73,7 @@ export function useDeleteGame(
     }
 
     return { withScores, empty };
-  }, [game]);
+  })();
 
   const deleteGame = useCallback(() => {
     if (!game?.$isLoaded || !games?.$isLoaded) {

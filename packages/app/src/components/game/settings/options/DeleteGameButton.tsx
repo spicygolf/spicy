@@ -13,6 +13,7 @@ import { Text } from "@/ui";
 export function DeleteGameButton() {
   const { theme } = useUnistyles();
   const [showModal, setShowModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigation =
     useNavigation<NativeStackNavigationProp<GamesNavigatorParamList>>();
 
@@ -36,12 +37,17 @@ export function DeleteGameButton() {
     },
   });
 
-  const games = me?.$isLoaded ? me.root?.games : undefined;
+  // Use Jazz pattern: check $jazz.has() before accessing nested properties
+  const games =
+    me?.$isLoaded && me.$jazz.has("root") && me.root?.$isLoaded
+      ? me.root.games
+      : undefined;
 
   const { canDelete, hasRoundsWithScores, roundsWithScoresCount, deleteGame } =
     useDeleteGame(game, games);
 
   const handleDelete = () => {
+    setError(null);
     const success = deleteGame();
     if (success) {
       setShowModal(false);
@@ -50,6 +56,8 @@ export function DeleteGameButton() {
         index: 0,
         routes: [{ name: "GamesList" }],
       });
+    } else {
+      setError("Failed to delete game. Please try again.");
     }
   };
 
@@ -120,6 +128,18 @@ export function DeleteGameButton() {
                   {roundsWithScoresCount !== 1 ? "s" : ""} with scores will be
                   preserved in player history.
                 </Text>
+              </View>
+            )}
+
+            {error && (
+              <View style={styles.errorBox}>
+                <FontAwesome6
+                  name="circle-exclamation"
+                  iconStyle="solid"
+                  size={16}
+                  color={theme.colors.error}
+                />
+                <Text style={styles.errorText}>{error}</Text>
               </View>
             )}
 
@@ -209,6 +229,21 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     fontSize: 14,
     color: theme.colors.primary,
+    lineHeight: 20,
+  },
+  errorBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: theme.gap(1),
+    backgroundColor: `${theme.colors.error}15`,
+    padding: theme.gap(1.5),
+    borderRadius: 8,
+    marginBottom: theme.gap(2),
+  },
+  errorText: {
+    flex: 1,
+    fontSize: 14,
+    color: theme.colors.error,
     lineHeight: 20,
   },
   buttonRow: {
