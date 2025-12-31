@@ -116,13 +116,28 @@ export function SelectCourseSearch({ route, navigation }: Props) {
 
     if (catalogResult) {
       // Use existing references from catalog
+      // This ensures all games reference the same Course/Tee CoValues
       course = catalogResult.course;
       tee = catalogResult.tee;
     } else {
-      // Fall back to creating new (not in catalog)
-      // NOTE: Ideally we'd upsert to catalog here, but that requires API access.
-      // For now, create in round's group. This is the same behavior as before
-      // but explicit about when it happens.
+      // Fall back to creating new course/tee in the round's group (group-local)
+      //
+      // This happens when:
+      // 1. Course doesn't exist in catalog (not yet imported)
+      // 2. User searches GHIN and selects a course we haven't seen before
+      //
+      // Trade-off: Group-local courses won't be shared across games from different
+      // users. If User A creates "Course X" in their game, and User B also creates
+      // "Course X", they'll be different CoValues.
+      //
+      // Future improvement: Add API endpoint to upsert courses to catalog when
+      // created here, so subsequent games can reference the shared catalog version.
+      // This would require worker credentials (catalog is worker-owned).
+      //
+      // For now this is acceptable because:
+      // - Most common courses should already be in catalog from import
+      // - Course data is read-only after creation (no sync issues)
+      // - Can be migrated later when catalog backfill is implemented
       const group = round.$jazz.owner;
 
       const facilityData = courseData.Facility;

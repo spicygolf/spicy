@@ -3,6 +3,7 @@ import { Group } from "jazz-tools";
 import { err, ok, type Result } from "neverthrow";
 import { type Game, Handicap, ListOfRounds, Player } from "spicylib/schema";
 import { createRoundForPlayer, getRoundsForDate } from "./createRoundForPlayer";
+import { reportError } from "./reportError";
 
 export type PlayerData = Parameters<typeof Player.create>[0];
 
@@ -86,8 +87,17 @@ export async function addPlayerToGameCore(
   if (workerAccount?.$isLoaded && group instanceof Group) {
     try {
       group.addMember(workerAccount, "admin");
-    } catch (_e) {
-      // Ignore - might already be a member
+    } catch (e) {
+      // "Already a member" is expected and safe to ignore
+      // Log unexpected errors for debugging
+      const message = e instanceof Error ? e.message : String(e);
+      if (!message.includes("already") && !message.includes("member")) {
+        reportError(e instanceof Error ? e : new Error(message), {
+          source: "addPlayerToGameCore",
+          severity: "warning",
+          context: { action: "addWorkerToGroup" },
+        });
+      }
     }
   }
 

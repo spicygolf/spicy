@@ -20,6 +20,19 @@ export type {
   PlayerData,
 } from "../utils/addPlayerToGameCore";
 
+/**
+ * Type guard to check if the input is a Player CoValue reference.
+ * Players have $jazz and $isLoaded properties from Jazz.
+ */
+function isPlayer(input: Player | PlayerData): input is Player {
+  return (
+    input !== null &&
+    typeof input === "object" &&
+    "$jazz" in input &&
+    "$isLoaded" in input
+  );
+}
+
 export interface UseAddPlayerError {
   type: AddPlayerError["type"] | "NO_WORKER_ACCOUNT";
   message: string;
@@ -96,17 +109,4 @@ export function useAddPlayerToGame() {
   };
 
   return addPlayerToGame;
-}
-
-/**
- * Type guard to check if the input is a Player CoValue reference.
- * Players have $jazz and $isLoaded properties from Jazz.
- */
-function isPlayer(input: Player | PlayerData): input is Player {
-  return (
-    input !== null &&
-    typeof input === "object" &&
-    "$jazz" in input &&
-    "$isLoaded" in input
-  );
 }
