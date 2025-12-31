@@ -81,15 +81,19 @@ export function HandicapAdjustment({ route }: Props) {
     return roundToGame.handicapIndex !== round.handicapIndex;
   }, [roundToGame, round]);
 
-  const calculatedCourseHandicap = useMemo(() => {
+  // Local state for input fields (for typing), synced on blur
+  const [indexInput, setIndexInput] = useState(currentHandicapIndex);
+
+  // Live preview of course handicap based on what user is typing
+  const previewCourseHandicap = useMemo(() => {
     if (!round?.$isLoaded || !round.tee?.$isLoaded) return null;
 
     return calculateCourseHandicap({
-      handicapIndex: currentHandicapIndex,
+      handicapIndex: indexInput,
       tee: round.tee,
       holesPlayed: "all18",
     });
-  }, [round, currentHandicapIndex]);
+  }, [round, indexInput]);
 
   const currentGameHandicap = useMemo(() => {
     if (roundToGame?.$isLoaded && roundToGame.gameHandicap !== undefined) {
@@ -100,13 +104,11 @@ export function HandicapAdjustment({ route }: Props) {
 
   const hasGameHandicapOverride = currentGameHandicap !== null;
 
-  // Local state for input fields (for typing), synced on blur
-  const [indexInput, setIndexInput] = useState(currentHandicapIndex);
   const [gameHandicapInput, setGameHandicapInput] = useState(
     currentGameHandicap !== null
       ? formatCourseHandicap(currentGameHandicap)
-      : calculatedCourseHandicap !== null
-        ? formatCourseHandicap(calculatedCourseHandicap)
+      : previewCourseHandicap !== null
+        ? formatCourseHandicap(previewCourseHandicap)
         : "",
   );
 
@@ -118,10 +120,10 @@ export function HandicapAdjustment({ route }: Props) {
   useMemo(() => {
     if (currentGameHandicap !== null) {
       setGameHandicapInput(formatCourseHandicap(currentGameHandicap));
-    } else if (calculatedCourseHandicap !== null) {
-      setGameHandicapInput(formatCourseHandicap(calculatedCourseHandicap));
+    } else if (previewCourseHandicap !== null) {
+      setGameHandicapInput(formatCourseHandicap(previewCourseHandicap));
     }
-  }, [currentGameHandicap, calculatedCourseHandicap]);
+  }, [currentGameHandicap, previewCourseHandicap]);
 
   function handleIndexBlur() {
     if (!roundToGame?.$isLoaded || !round?.$isLoaded) return;
@@ -139,8 +141,8 @@ export function HandicapAdjustment({ route }: Props) {
     if (!roundToGame?.$isLoaded) return;
 
     const calculatedStr =
-      calculatedCourseHandicap !== null
-        ? formatCourseHandicap(calculatedCourseHandicap)
+      previewCourseHandicap !== null
+        ? formatCourseHandicap(previewCourseHandicap)
         : "";
 
     if (
@@ -241,8 +243,8 @@ export function HandicapAdjustment({ route }: Props) {
           <View style={styles.valueRow}>
             <Text style={styles.valueLabel}>Calculated:</Text>
             <Text style={styles.value}>
-              {calculatedCourseHandicap !== null
-                ? formatCourseHandicap(calculatedCourseHandicap)
+              {previewCourseHandicap !== null
+                ? formatCourseHandicap(previewCourseHandicap)
                 : "N/A"}
             </Text>
           </View>
