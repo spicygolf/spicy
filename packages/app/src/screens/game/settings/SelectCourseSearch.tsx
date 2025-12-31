@@ -2,7 +2,7 @@ import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-t
 import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
 import { useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { Alert, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Course, Tee } from "spicylib/schema";
 import {
@@ -209,6 +209,17 @@ export function SelectCourseSearch({ route, navigation }: Props) {
       });
 
       if (!upsertedTee.$isLoaded) {
+        console.error("Failed to load upserted tee:", {
+          teeSetRatingId: teeData.TeeSetRatingId,
+          teeName: teeData.TeeSetRatingName,
+          courseId: courseData.CourseId,
+          courseName: courseData.CourseName,
+        });
+        Alert.alert(
+          "Tee Selection Failed",
+          `Could not save tee "${teeData.TeeSetRatingName}". Please try again or select a different tee.`,
+          [{ text: "OK" }],
+        );
         return;
       }
 
