@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { calculateCourseHandicap, formatCourseHandicap } from "spicylib/utils";
@@ -15,7 +15,7 @@ type Props = NativeStackScreenProps<
   "HandicapAdjustment"
 >;
 
-export function HandicapAdjustment({ route }: Props) {
+export function HandicapAdjustment({ route, navigation }: Props) {
   const { playerId, roundToGameId } = route.params;
   const { game } = useGame(undefined, {
     resolve: {
@@ -124,6 +124,63 @@ export function HandicapAdjustment({ route }: Props) {
       setGameHandicapInput(formatCourseHandicap(previewCourseHandicap));
     }
   }, [currentGameHandicap, previewCourseHandicap]);
+
+  // Use refs to access current values in the beforeRemove listener
+  const indexInputRef = useRef(indexInput);
+  const gameHandicapInputRef = useRef(gameHandicapInput);
+  indexInputRef.current = indexInput;
+  gameHandicapInputRef.current = gameHandicapInput;
+
+  // Save pending changes when navigating away
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", () => {
+      if (!roundToGame?.$isLoaded || !round?.$isLoaded) return;
+
+      const currentIndexInput = indexInputRef.current;
+      const currentGameHandicapInput = gameHandicapInputRef.current;
+
+      // Save index if changed
+      if (currentIndexInput !== originalHandicapIndex) {
+        roundToGame.$jazz.set("handicapIndex", currentIndexInput);
+      } else if (roundToGame.handicapIndex !== round.handicapIndex) {
+        roundToGame.$jazz.set("handicapIndex", round.handicapIndex);
+      }
+
+      // Save game handicap if changed
+      const calculatedStr =
+        previewCourseHandicap !== null
+          ? formatCourseHandicap(previewCourseHandicap)
+          : "";
+
+      if (
+        currentGameHandicapInput.trim() === "" ||
+        currentGameHandicapInput === calculatedStr
+      ) {
+        if (roundToGame.$jazz.has("gameHandicap")) {
+          roundToGame.$jazz.set("gameHandicap", undefined);
+        }
+      } else {
+        let parsed = Number.parseInt(
+          currentGameHandicapInput.replace("+", ""),
+          10,
+        );
+        if (!Number.isNaN(parsed)) {
+          if (currentGameHandicapInput.startsWith("+")) {
+            parsed = -parsed;
+          }
+          roundToGame.$jazz.set("gameHandicap", parsed);
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, [
+    navigation,
+    roundToGame,
+    round,
+    originalHandicapIndex,
+    previewCourseHandicap,
+  ]);
 
   function handleIndexBlur() {
     if (!roundToGame?.$isLoaded || !round?.$isLoaded) return;
