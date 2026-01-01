@@ -166,6 +166,10 @@ export function HandicapAdjustment({ route, navigation }: Props) {
 
   const hasGameHandicapOverride = currentGameHandicap !== null;
 
+  // Track whether the user has manually edited the game handicap field this session.
+  // This prevents saving stale calculated values when only the index was changed.
+  const [gameHandicapTouched, setGameHandicapTouched] = useState(false);
+
   const [gameHandicapInput, setGameHandicapInput] = useState(
     currentGameHandicap !== null
       ? formatCourseHandicap(currentGameHandicap)
@@ -182,9 +186,11 @@ export function HandicapAdjustment({ route, navigation }: Props) {
   // Use refs to access current values in event listeners without causing re-renders
   const indexInputRef = useRef(indexInput);
   const gameHandicapInputRef = useRef(gameHandicapInput);
+  const gameHandicapTouchedRef = useRef(gameHandicapTouched);
   const previewCourseHandicapRef = useRef(previewCourseHandicap);
   indexInputRef.current = indexInput;
   gameHandicapInputRef.current = gameHandicapInput;
+  gameHandicapTouchedRef.current = gameHandicapTouched;
   previewCourseHandicapRef.current = previewCourseHandicap;
 
   // Sync game handicap input when the stored override changes.
@@ -224,8 +230,16 @@ export function HandicapAdjustment({ route, navigation }: Props) {
   );
 
   const saveGameHandicapOverride = useCallback(
-    (inputValue: string, calculatedHandicap: number | null) => {
+    (
+      inputValue: string,
+      calculatedHandicap: number | null,
+      wasTouched: boolean,
+    ) => {
       if (!roundToGame?.$isLoaded) return;
+
+      // If user didn't touch the game handicap field, don't save anything.
+      // The input might show a stale calculated value from before the index changed.
+      if (!wasTouched) return;
 
       const parsed = parseGameHandicapInput(inputValue);
       const calculatedStr =
@@ -256,6 +270,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
       saveGameHandicapOverride(
         gameHandicapInputRef.current,
         previewCourseHandicapRef.current,
+        gameHandicapTouchedRef.current,
       );
     });
 
@@ -267,7 +282,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
   }
 
   function handleGameHandicapBlur() {
-    saveGameHandicapOverride(gameHandicapInput, previewCourseHandicap);
+    saveGameHandicapOverride(gameHandicapInput, previewCourseHandicap, true);
   }
 
   function handleClearIndexOverride() {
@@ -381,9 +396,10 @@ export function HandicapAdjustment({ route, navigation }: Props) {
               <Input
                 label=""
                 value={gameHandicapInput}
-                onChangeText={(text) =>
-                  setGameHandicapInput(filterGameHandicapInput(text))
-                }
+                onChangeText={(text) => {
+                  setGameHandicapInput(filterGameHandicapInput(text));
+                  setGameHandicapTouched(true);
+                }}
                 onBlur={handleGameHandicapBlur}
                 placeholder="e.g., 10 or +2"
                 keyboardType="numbers-and-punctuation"
