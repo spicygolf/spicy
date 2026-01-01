@@ -24,29 +24,7 @@
       "name": "jazz-patterns",
       "description": "Jazz Tools patterns for local-first data (CRITICAL for data integrity)",
       "triggers": {
-        "keywords": [
-          "jazz",
-          "comap",
-          "colist",
-          "covalue",
-          "schema",
-          "$jazz",
-          "ensureloaded",
-          "usecostate",
-          "upsertunique",
-          "offline",
-          "sync",
-          "local-first",
-          "data model",
-          "player",
-          "game",
-          "round",
-          "score",
-          "usememo",
-          "usestate",
-          "useeffect",
-          "usecallback"
-        ]
+        "always": true
       },
       "skillPath": "jazz-patterns",
       "priority": 95

@@ -2,7 +2,11 @@ import type { MaybeLoaded } from "jazz-tools";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player, Round, RoundToGame } from "spicylib/schema";
-import { calculateCourseHandicap, formatCourseHandicap } from "spicylib/utils";
+import {
+  calculateCourseHandicap,
+  formatCourseHandicap,
+  formatHandicapDisplay,
+} from "spicylib/utils";
 import { Handicap } from "./Handicap";
 
 interface Props {
@@ -68,9 +72,13 @@ export function Handicaps({ player, round, roundToGame, onPress }: Props) {
     ) {
       return roundToGame.handicapIndex;
     }
-    return player?.handicap?.$isLoaded && player.handicap.$isLoaded
-      ? player.handicap.display
-      : undefined;
+    if (player?.handicap?.$isLoaded && player.handicap.$isLoaded) {
+      return formatHandicapDisplay(
+        player.handicap.value,
+        player.handicap.display,
+      );
+    }
+    return undefined;
   })();
 
   if (!player?.$isLoaded) return null;
