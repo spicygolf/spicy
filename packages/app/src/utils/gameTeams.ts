@@ -1,5 +1,10 @@
 import type { MaybeLoaded } from "jazz-tools";
-import type { Game, GameHole, ListOfGameHoles } from "spicylib/schema";
+import type {
+  Game,
+  GameHole,
+  ListOfGameHoles,
+  RoundToGame,
+} from "spicylib/schema";
 import {
   GameHole as GameHoleClass,
   ListOfRoundToTeams,
@@ -301,4 +306,146 @@ export function saveTeamAssignmentsToHole(
   }
 
   hole.$jazz.set("teams", newTeams);
+}
+
+/**
+ * Auto-assigns a single player to their own team (for seamless mode).
+ * Creates a new team with the given team number on all holes.
+ *
+ * This is used when adding a player in seamless mode where each player
+ * gets their own team (1:1 assignment).
+ *
+ * @param game - The game (must have holes loaded)
+ * @param roundToGame - The player's RoundToGame reference
+ * @param teamNumber - The team number to assign (typically playerIndex + 1)
+ */
+export function autoAssignPlayerToTeam(
+  game: Game,
+  roundToGame: RoundToGame,
+  teamNumber: number,
+): boolean {
+  if (!game?.$isLoaded || !game.holes?.$isLoaded) {
+    return false;
+  }
+
+  if (!roundToGame?.$isLoaded) {
+    return false;
+  }
+
+  // Ensure holes exist
+  ensureGameHoles(game);
+
+  // Add player to their team on each hole
+  for (const hole of game.holes) {
+    if (!hole?.$isLoaded) continue;
+
+    // Initialize teams list if needed
+    if (!hole.teams?.$isLoaded) {
+      hole.$jazz.set(
+        "teams",
+        ListOfTeams.create([], { owner: hole.$jazz.owner }),
+      );
+    }
+
+    // Check if this team already exists on this hole
+    let existingTeam: Team | null = null;
+    if (hole.teams?.$isLoaded) {
+      for (const team of hole.teams) {
+        if (team?.$isLoaded && team.team === `${teamNumber}`) {
+          existingTeam = team;
+          break;
+        }
+      }
+    }
+
+    if (existingTeam) {
+      // Add player to existing team
+      if (!existingTeam.rounds?.$isLoaded) {
+        existingTeam.$jazz.set(
+          "rounds",
+          ListOfRoundToTeams.create([], { owner: hole.$jazz.owner }),
+        );
+      }
+      const roundToTeam = RoundToTeam.create(
+        { roundToGame },
+        { owner: hole.$jazz.owner },
+      );
+      if (existingTeam.rounds?.$isLoaded) {
+        existingTeam.rounds.$jazz.push(roundToTeam);
+      }
+    } else {
+      // Create new team for this player
+      const roundToTeams = ListOfRoundToTeams.create([], {
+        owner: hole.$jazz.owner,
+      });
+      const roundToTeam = RoundToTeam.create(
+        { roundToGame },
+        { owner: hole.$jazz.owner },
+      );
+      roundToTeams.$jazz.push(roundToTeam);
+
+      const team = Team.create(
+        {
+          team: `${teamNumber}`,
+          rounds: roundToTeams,
+        },
+        { owner: hole.$jazz.owner },
+      );
+
+      if (hole.teams?.$isLoaded) {
+        hole.teams.$jazz.push(team);
+      }
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Clears all team assignments from all holes in a game.
+ * Used when reverting to seamless mode or resetting teams.
+ */
+export function clearAllTeamAssignments(game: Game): boolean {
+  if (!game?.$isLoaded || !game.holes?.$isLoaded) {
+    return false;
+  }
+
+  for (const hole of game.holes) {
+    if (!hole?.$isLoaded) continue;
+
+    // Create empty teams list
+    hole.$jazz.set(
+      "teams",
+      ListOfTeams.create([], { owner: hole.$jazz.owner }),
+    );
+  }
+
+  return true;
+}
+
+/**
+ * Re-assigns all players in seamless mode (1:1 player to team).
+ * Used when reverting to seamless mode after players are removed.
+ */
+export function reassignAllPlayersSeamless(game: Game): boolean {
+  if (!game?.$isLoaded || !game.holes?.$isLoaded || !game.rounds?.$isLoaded) {
+    return false;
+  }
+
+  // First clear all assignments
+  clearAllTeamAssignments(game);
+
+  // Ensure holes exist
+  ensureGameHoles(game);
+
+  // Assign each player to their own team (1-indexed)
+  let teamNumber = 1;
+  for (const roundToGame of game.rounds) {
+    if (!roundToGame?.$isLoaded) continue;
+
+    autoAssignPlayerToTeam(game, roundToGame, teamNumber);
+    teamNumber++;
+  }
+
+  return true;
 }
