@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { calculateCourseHandicap, formatCourseHandicap } from "spicylib/utils";
@@ -160,77 +160,60 @@ export function HandicapAdjustment({ route, navigation }: Props) {
   gameHandicapInputRef.current = gameHandicapInput;
   previewCourseHandicapRef.current = previewCourseHandicap;
 
-  // Save pending changes when navigating away
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", () => {
+  // Save logic extracted to avoid duplication between blur handlers and beforeRemove
+  const saveIndexOverride = useCallback(
+    (inputValue: string) => {
       if (!roundToGame?.$isLoaded || !round?.$isLoaded) return;
 
-      const currentIndexInput = indexInputRef.current;
-      const currentGameHandicapInput = gameHandicapInputRef.current;
-      const currentPreviewCourseHandicap = previewCourseHandicapRef.current;
-
-      // Save index if changed
-      if (currentIndexInput !== originalHandicapIndex) {
-        roundToGame.$jazz.set("handicapIndex", currentIndexInput);
+      if (inputValue !== originalHandicapIndex) {
+        roundToGame.$jazz.set("handicapIndex", inputValue);
       } else if (roundToGame.handicapIndex !== round.handicapIndex) {
         roundToGame.$jazz.set("handicapIndex", round.handicapIndex);
       }
+    },
+    [roundToGame, round, originalHandicapIndex],
+  );
 
-      // Save game handicap if changed
-      const parsed = parseGameHandicapInput(currentGameHandicapInput);
+  const saveGameHandicapOverride = useCallback(
+    (inputValue: string, calculatedHandicap: number | null) => {
+      if (!roundToGame?.$isLoaded) return;
+
+      const parsed = parseGameHandicapInput(inputValue);
       const calculatedStr =
-        currentPreviewCourseHandicap !== null
-          ? formatCourseHandicap(currentPreviewCourseHandicap)
+        calculatedHandicap !== null
+          ? formatCourseHandicap(calculatedHandicap)
           : "";
 
-      if (
-        currentGameHandicapInput.trim() === "" ||
-        currentGameHandicapInput === calculatedStr
-      ) {
+      if (inputValue.trim() === "" || inputValue === calculatedStr) {
         if (roundToGame.$jazz.has("gameHandicap")) {
           roundToGame.$jazz.set("gameHandicap", undefined);
         }
       } else if (parsed !== null) {
         roundToGame.$jazz.set("gameHandicap", parsed);
       }
+    },
+    [roundToGame],
+  );
+
+  // Save pending changes when navigating away
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", () => {
+      saveIndexOverride(indexInputRef.current);
+      saveGameHandicapOverride(
+        gameHandicapInputRef.current,
+        previewCourseHandicapRef.current,
+      );
     });
 
     return unsubscribe;
-  }, [navigation, roundToGame, round, originalHandicapIndex]);
+  }, [navigation, saveIndexOverride, saveGameHandicapOverride]);
 
   function handleIndexBlur() {
-    if (!roundToGame?.$isLoaded || !round?.$isLoaded) return;
-
-    if (indexInput !== originalHandicapIndex) {
-      // User entered a different value - store override
-      roundToGame.$jazz.set("handicapIndex", indexInput);
-    } else if (roundToGame.handicapIndex !== round.handicapIndex) {
-      // User set it back to original - remove override
-      roundToGame.$jazz.set("handicapIndex", round.handicapIndex);
-    }
+    saveIndexOverride(indexInput);
   }
 
   function handleGameHandicapBlur() {
-    if (!roundToGame?.$isLoaded) return;
-
-    const parsed = parseGameHandicapInput(gameHandicapInput);
-    const calculatedStr =
-      previewCourseHandicap !== null
-        ? formatCourseHandicap(previewCourseHandicap)
-        : "";
-
-    if (
-      gameHandicapInput.trim() === "" ||
-      gameHandicapInput === calculatedStr
-    ) {
-      // User cleared it or set to calculated - remove override
-      if (roundToGame.$jazz.has("gameHandicap")) {
-        roundToGame.$jazz.set("gameHandicap", undefined);
-      }
-    } else if (parsed !== null) {
-      // User entered a different value - store override
-      roundToGame.$jazz.set("gameHandicap", parsed);
-    }
+    saveGameHandicapOverride(gameHandicapInput, previewCourseHandicap);
   }
 
   function handleClearIndexOverride() {
