@@ -14,11 +14,7 @@ import {
 } from "spicylib/schema";
 import { useGame, useTeamsMode } from "@/hooks";
 import { Text } from "@/ui";
-import {
-  clearAllTeamAssignments,
-  ensureGameHoles,
-  reassignAllPlayersSeamless,
-} from "@/utils/gameTeams";
+import { ensureGameHoles, reassignAllPlayersSeamless } from "@/utils/gameTeams";
 import { RotationChangeModal } from "./RotationChangeModal";
 import { RotationFrequencyPicker } from "./RotationFrequencyPicker";
 import { TeamAssignments } from "./TeamAssignments";

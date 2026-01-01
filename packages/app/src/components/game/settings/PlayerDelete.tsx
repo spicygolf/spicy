@@ -1,12 +1,16 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { TouchableOpacity } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
-import type { Player } from "spicylib/schema";
+import type { Game, GameSpec, Player } from "spicylib/schema";
 import { useGame } from "@/hooks";
+import { computeSpecForcesTeams } from "@/hooks/useTeamsMode";
+import { reassignAllPlayersSeamless } from "@/utils/gameTeams";
 
 export function PlayerDelete({ player }: { player: Player }) {
   const { game } = useGame(undefined, {
     resolve: {
+      scope: { teamsConfig: true },
+      specs: { $each: { teamsConfig: true } },
       players: true,
       rounds: {
         $each: {
@@ -112,6 +116,13 @@ export function PlayerDelete({ player }: { player: Player }) {
     if (idx !== undefined && idx !== -1) {
       game.players.$jazz.splice(idx, 1);
     }
+
+    // Check if we should revert to seamless mode
+    // This happens when:
+    // 1. Player count is now <= min_players
+    // 2. User hasn't manually activated teams mode
+    // 3. Spec doesn't force teams mode
+    checkAndRevertToSeamlessMode(game);
   };
 
   return (
@@ -124,4 +135,44 @@ export function PlayerDelete({ player }: { player: Player }) {
       />
     </TouchableOpacity>
   );
+}
+
+/**
+ * Checks if the game should revert to seamless mode after player removal.
+ * If so, reassigns all players to individual teams (1:1).
+ */
+function checkAndRevertToSeamlessMode(game: Game): void {
+  if (!game.$isLoaded) return;
+
+  // Get specs
+  const specs: GameSpec[] = [];
+  if (game.specs?.$isLoaded) {
+    for (const spec of game.specs) {
+      if (spec?.$isLoaded) specs.push(spec);
+    }
+  }
+
+  if (specs.length === 0) return;
+
+  // Check if spec forces teams mode
+  const specForcesTeams = specs.some(computeSpecForcesTeams);
+  if (specForcesTeams) return; // Don't revert if spec forces teams
+
+  // Check if user has manually activated teams mode
+  const userActivated =
+    game.scope?.$isLoaded &&
+    game.scope.teamsConfig?.$isLoaded &&
+    game.scope.teamsConfig.active === true;
+  if (userActivated) return; // Don't revert if user manually activated
+
+  // Get min_players from specs
+  const minPlayers = Math.min(...specs.map((s) => s.min_players));
+
+  // Current player count (after removal)
+  const playerCount = game.players?.$isLoaded ? game.players.length : 0;
+
+  // If we're at or below min_players, revert to seamless mode
+  if (playerCount <= minPlayers) {
+    reassignAllPlayersSeamless(game);
+  }
 }
