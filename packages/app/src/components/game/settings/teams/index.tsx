@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useCoState } from "jazz-tools/react";
 import { useCallback, useMemo, useState } from "react";
-import { View } from "react-native";
+import { Switch, View } from "react-native";
 import { DraxProvider } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import {
@@ -12,9 +12,13 @@ import {
   Team,
   TeamsConfig,
 } from "spicylib/schema";
-import { useGame } from "@/hooks";
+import { useGame, useTeamsMode } from "@/hooks";
 import { Text } from "@/ui";
-import { ensureGameHoles } from "@/utils/gameTeams";
+import {
+  clearAllTeamAssignments,
+  ensureGameHoles,
+  reassignAllPlayersSeamless,
+} from "@/utils/gameTeams";
 import { RotationChangeModal } from "./RotationChangeModal";
 import { RotationFrequencyPicker } from "./RotationFrequencyPicker";
 import { TeamAssignments } from "./TeamAssignments";
@@ -26,6 +30,7 @@ export function GameTeamsList() {
   const { game } = useGame(undefined, {
     resolve: {
       scope: { teamsConfig: true },
+      specs: { $each: { teamsConfig: true } },
       players: {
         $each: {
           name: true,
@@ -66,6 +71,16 @@ export function GameTeamsList() {
   });
 
   const { theme } = useUnistyles();
+
+  // Get specs for useTeamsMode
+  const specs = useMemo(() => {
+    if (!game?.$isLoaded || !game.specs?.$isLoaded) return [];
+    return Array.from(game.specs).filter((s) => s?.$isLoaded);
+  }, [game]);
+
+  // Determine teams mode
+  const { isSeamlessMode, isTeamsMode, canToggle, specForcesTeams } =
+    useTeamsMode(game, specs);
 
   const [showRotationChangeModal, setShowRotationChangeModal] = useState(false);
   const [pendingRotationValue, setPendingRotationValue] = useState<
@@ -353,13 +368,139 @@ export function GameTeamsList() {
     [game, pendingRotationValue, teamCount],
   );
 
-  return (
-    <DraxProvider>
-      <View style={styles.container}>
+  /**
+   * Handle toggling teams mode on/off.
+   * When turning on: set teamsConfig.active = true
+   * When turning off: set teamsConfig.active = false and reassign 1:1
+   */
+  const handleTeamsToggle = useCallback(
+    (value: boolean) => {
+      if (!game?.$isLoaded || !game.scope?.$isLoaded) return;
+
+      // Ensure teamsConfig exists
+      if (!game.scope.$jazz.has("teamsConfig")) {
+        const playerCount = game.players?.$isLoaded ? game.players.length : 2;
+        const config = TeamsConfig.create(
+          {
+            rotateEvery: 0,
+            teamCount: playerCount,
+            active: value,
+          },
+          { owner: game.$jazz.owner },
+        );
+        // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
+        // @ts-ignore - Jazz $jazz.set types are overly strict
+        game.scope.$jazz.set("teamsConfig", config);
+      } else if (game.scope.teamsConfig?.$isLoaded) {
+        // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
+        // @ts-ignore - Jazz $jazz.set types are overly strict
+        game.scope.teamsConfig.$jazz.set("active", value);
+      }
+
+      // When turning off, reassign all players to individual teams (1:1)
+      if (!value && game.rounds?.$isLoaded && game.holes?.$isLoaded) {
+        reassignAllPlayersSeamless(game);
+      }
+    },
+    [game],
+  );
+
+  // Render seamless mode message
+  const renderSeamlessModeContent = () => (
+    <View style={styles.centerContainer}>
+      <View style={styles.emptyIcon}>
+        <FontAwesome6
+          name="user"
+          iconStyle="solid"
+          size={48}
+          color={theme.colors.secondary}
+        />
+      </View>
+      <Text style={styles.emptyTitle}>Individual Play</Text>
+      <Text style={styles.emptyText}>
+        Players compete individually. Toggle teams on above to configure team
+        play.
+      </Text>
+    </View>
+  );
+
+  // Render rotating teams message
+  const renderRotatingTeamsContent = () => (
+    <View style={styles.centerContainer}>
+      <View style={styles.emptyIcon}>
+        <FontAwesome6
+          name="arrows-rotate"
+          iconStyle="solid"
+          size={48}
+          color={theme.colors.secondary}
+        />
+      </View>
+      <Text style={styles.emptyTitle}>Rotating Teams</Text>
+      <Text style={styles.emptyText}>
+        Teams will be chosen during gameplay every {rotateEvery} hole
+        {rotateEvery !== 1 ? "s" : ""}.
+      </Text>
+    </View>
+  );
+
+  // Render teams content based on mode
+  const renderTeamsContent = () => {
+    // If rotateEvery > 0, show rotating teams message
+    if (rotateEvery !== undefined && rotateEvery > 0) {
+      return renderRotatingTeamsContent();
+    }
+
+    // Show team assignments UI
+    return (
+      <>
         <RotationFrequencyPicker
           rotateEvery={rotateEvery}
           onRotationChange={handleRotationChange}
         />
+        <TeamAssignments
+          allPlayerRounds={allPlayerRounds}
+          teamCount={teamCount}
+          teamAssignments={teamAssignments}
+          onDrop={handleDrop}
+          onTossBalls={handleTossBalls}
+        />
+      </>
+    );
+  };
+
+  return (
+    <DraxProvider>
+      <View style={styles.container}>
+        {/* Teams toggle - only shown when spec doesn't force teams */}
+        {canToggle && (
+          <View style={styles.toggleRow}>
+            <Text style={styles.toggleLabel}>Teams</Text>
+            <Switch
+              value={isTeamsMode}
+              onValueChange={handleTeamsToggle}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
+              thumbColor={theme.colors.background}
+            />
+          </View>
+        )}
+
+        {/* Spec forces teams indicator */}
+        {specForcesTeams && (
+          <View style={styles.infoRow}>
+            <FontAwesome6
+              name="circle-info"
+              iconStyle="solid"
+              size={14}
+              color={theme.colors.secondary}
+            />
+            <Text style={styles.infoText}>
+              This game type requires team configuration.
+            </Text>
+          </View>
+        )}
 
         <RotationChangeModal
           visible={showRotationChangeModal}
@@ -372,31 +513,8 @@ export function GameTeamsList() {
           }}
         />
 
-        {rotateEvery === 0 ? (
-          <TeamAssignments
-            allPlayerRounds={allPlayerRounds}
-            teamCount={teamCount}
-            teamAssignments={teamAssignments}
-            onDrop={handleDrop}
-            onTossBalls={handleTossBalls}
-          />
-        ) : (
-          <View style={styles.centerContainer}>
-            <View style={styles.emptyIcon}>
-              <FontAwesome6
-                name="arrows-rotate"
-                iconStyle="solid"
-                size={48}
-                color={theme.colors.secondary}
-              />
-            </View>
-            <Text style={styles.emptyTitle}>Rotating Teams</Text>
-            <Text style={styles.emptyText}>
-              Teams will be chosen during gameplay every {rotateEvery} hole
-              {rotateEvery !== 1 ? "s" : ""}.
-            </Text>
-          </View>
-        )}
+        {/* Main content based on mode */}
+        {isSeamlessMode ? renderSeamlessModeContent() : renderTeamsContent()}
       </View>
     </DraxProvider>
   );
@@ -405,6 +523,31 @@ export function GameTeamsList() {
 const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
+  },
+  toggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: theme.gap(4),
+    paddingVertical: theme.gap(3),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  toggleLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(2),
+    paddingHorizontal: theme.gap(4),
+    paddingVertical: theme.gap(2),
+    backgroundColor: theme.colors.border + "20", // Semi-transparent border color
+  },
+  infoText: {
+    fontSize: 13,
+    color: theme.colors.secondary,
   },
   centerContainer: {
     flex: 1,
