@@ -524,14 +524,15 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: theme.gap(4),
-    paddingVertical: theme.gap(3),
+    paddingVertical: theme.gap(1.5),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
+    backgroundColor: theme.colors.background,
   },
   toggleLabel: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "500",
+    color: theme.colors.primary,
   },
   infoRow: {
     flexDirection: "row",
