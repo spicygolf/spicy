@@ -174,26 +174,33 @@ export function HandicapAdjustment({ route, navigation }: Props) {
         : "",
   );
 
-  // Sync local state when Jazz data changes (e.g., after clearing override)
+  // Sync index input when Jazz data changes (e.g., after clearing override)
   useEffect(() => {
     setIndexInput(currentHandicapIndex);
+  }, [currentHandicapIndex]);
 
-    if (currentGameHandicap !== null) {
-      setGameHandicapInput(formatCourseHandicap(currentGameHandicap));
-    } else if (previewCourseHandicap !== null) {
-      setGameHandicapInput(formatCourseHandicap(previewCourseHandicap));
-    } else {
-      setGameHandicapInput("");
-    }
-  }, [currentHandicapIndex, currentGameHandicap, previewCourseHandicap]);
-
-  // Use refs to access current values in the beforeRemove listener
+  // Use refs to access current values in event listeners without causing re-renders
   const indexInputRef = useRef(indexInput);
   const gameHandicapInputRef = useRef(gameHandicapInput);
   const previewCourseHandicapRef = useRef(previewCourseHandicap);
   indexInputRef.current = indexInput;
   gameHandicapInputRef.current = gameHandicapInput;
   previewCourseHandicapRef.current = previewCourseHandicap;
+
+  // Sync game handicap input when the stored override changes.
+  // Uses ref for previewCourseHandicap to avoid circular dependency where
+  // typing in index field → preview recalculates → effect triggers → overwrites input.
+  useEffect(() => {
+    if (currentGameHandicap !== null) {
+      setGameHandicapInput(formatCourseHandicap(currentGameHandicap));
+    } else if (previewCourseHandicapRef.current !== null) {
+      setGameHandicapInput(
+        formatCourseHandicap(previewCourseHandicapRef.current),
+      );
+    } else {
+      setGameHandicapInput("");
+    }
+  }, [currentGameHandicap]);
 
   // Save logic extracted to avoid duplication between blur handlers and beforeRemove
   const saveIndexOverride = useCallback(
