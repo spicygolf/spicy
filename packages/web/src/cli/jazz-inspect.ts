@@ -7,6 +7,7 @@
  * Usage:
  *   bun run jazz <coValueId> [resolveQuery]
  *   bun run jazz <type> <coValueId> [resolveQuery]
+ *   bun run jazz catalog [specs|players|courses]
  *
  * Types: player, game, round, course, tee, spec, account
  *
@@ -14,6 +15,7 @@
  *   bun run jazz player co_zndRVBmTsDPNdjNiauVfUQaMFLV
  *   bun run jazz game co_zeGX6eUyGPUbMPdV9csYsnFczib '{"players":{"$each":true}}'
  *   bun run jazz co_zaYtNqJZsTyi1Sy6615uCqhpsgi  # Auto-detect type
+ *   bun run jazz catalog specs  # List all game specs in catalog
  */
 
 import { config } from "dotenv";
@@ -163,6 +165,159 @@ function printValue(
   }
 }
 
+async function inspectCatalog(
+  catalogType: "specs" | "players" | "courses",
+): Promise<void> {
+  console.log(`\nInspecting catalog: ${catalogType}\n`);
+
+  const { worker, done } = await startWorker({
+    AccountSchema: PlayerAccount,
+    syncServer: `wss://cloud.jazz.tools/?key=${JAZZ_API_KEY}`,
+    accountID: JAZZ_WORKER_ACCOUNT,
+    accountSecret: JAZZ_WORKER_SECRET,
+  });
+
+  try {
+    const account = await PlayerAccount.load(
+      JAZZ_WORKER_ACCOUNT as ID<typeof PlayerAccount>,
+      {
+        loadAs: worker,
+        resolve: {
+          profile: {
+            catalog: {
+              specs: { $each: { teamsConfig: true, options: true } },
+              players: { $each: { handicap: true } },
+              courses: { $each: { tees: true } },
+            },
+          },
+        },
+      },
+    );
+
+    if (!account?.$isLoaded || !account.profile?.$isLoaded) {
+      console.error("Could not load worker account profile");
+      await done();
+      return;
+    }
+
+    const catalog = account.profile.catalog;
+    if (!catalog?.$isLoaded) {
+      console.error("Catalog not loaded");
+      await done();
+      return;
+    }
+
+    if (catalogType === "specs") {
+      const specs = catalog.specs;
+      if (!specs?.$isLoaded) {
+        console.error("Specs not loaded");
+        await done();
+        return;
+      }
+
+      const keys = Object.keys(specs).filter(
+        (k) => !k.startsWith("$") && k !== "_schema",
+      );
+      console.log(`Found ${keys.length} specs:\n`);
+
+      for (const key of keys) {
+        const spec = specs[key] as GameSpec;
+        if (spec?.$isLoaded) {
+          const teamsConfig = spec.teamsConfig?.$isLoaded
+            ? spec.teamsConfig
+            : null;
+
+          console.log(`--- ${spec.name} (${spec.$jazz.id}) ---`);
+          console.log(`  min_players: ${spec.min_players}`);
+          console.log(`  spec_type: ${spec.spec_type}`);
+          console.log(`  status: ${spec.status}`);
+
+          if (teamsConfig) {
+            console.log(`  teamsConfig:`);
+            console.log(`    rotateEvery: ${teamsConfig.rotateEvery}`);
+            console.log(`    teamCount: ${teamsConfig.teamCount}`);
+            if (teamsConfig.maxPlayersPerTeam !== undefined) {
+              console.log(
+                `    maxPlayersPerTeam: ${teamsConfig.maxPlayersPerTeam}`,
+              );
+            }
+          } else {
+            console.log(`  teamsConfig: none`);
+          }
+
+          // Compute derived alwaysShowTeams
+          const alwaysShowTeams =
+            teamsConfig &&
+            ((teamsConfig.rotateEvery ?? 0) > 0 ||
+              teamsConfig.teamCount < spec.min_players ||
+              (teamsConfig.maxPlayersPerTeam ?? 0) > 1);
+          console.log(
+            `  [derived] alwaysShowTeams: ${alwaysShowTeams ? "true" : "false"}`,
+          );
+
+          console.log("");
+        }
+      }
+    } else if (catalogType === "players") {
+      const players = catalog.players;
+      if (!players?.$isLoaded) {
+        console.error("Players not loaded");
+        await done();
+        return;
+      }
+
+      const keys = Object.keys(players).filter(
+        (k) => !k.startsWith("$") && k !== "_schema",
+      );
+      console.log(`Found ${keys.length} players:\n`);
+
+      for (const key of keys.slice(0, 20)) {
+        const player = players[key] as Player;
+        if (player?.$isLoaded) {
+          const handicap = player.handicap?.$isLoaded
+            ? player.handicap.display
+            : "none";
+          console.log(
+            `  ${player.name} (${player.ghinId || "no GHIN"}) - ${handicap}`,
+          );
+        }
+      }
+      if (keys.length > 20) {
+        console.log(`  ... and ${keys.length - 20} more`);
+      }
+    } else if (catalogType === "courses") {
+      const courses = catalog.courses;
+      if (!courses?.$isLoaded) {
+        console.error("Courses not loaded");
+        await done();
+        return;
+      }
+
+      const keys = Object.keys(courses).filter(
+        (k) => !k.startsWith("$") && k !== "_schema",
+      );
+      console.log(`Found ${keys.length} courses:\n`);
+
+      for (const key of keys.slice(0, 20)) {
+        const course = courses[key] as Course;
+        if (course?.$isLoaded) {
+          const teeCount = course.tees?.$isLoaded ? course.tees.length : 0;
+          console.log(
+            `  ${course.name} (${course.city}, ${course.state}) - ${teeCount} tees`,
+          );
+        }
+      }
+      if (keys.length > 20) {
+        console.log(`  ... and ${keys.length - 20} more`);
+      }
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+
+  await done();
+}
+
 async function inspect(
   schemaType: SchemaType | null,
   coValueId: string,
@@ -279,19 +434,22 @@ function checkSchemaMatch(obj: unknown, type: SchemaType): boolean {
   }
 }
 
-// Parse CLI args
-const args = process.argv.slice(2);
-
-if (args.length === 0) {
+function printHelp(): void {
   console.log(`
 Jazz CoValue Inspector
 
 Usage:
   bun run jazz <coValueId> [resolveQuery]
   bun run jazz <type> <coValueId> [resolveQuery]
+  bun run jazz catalog [specs|players|courses]
 
 Types:
   player, game, round, roundtogame, course, tee, spec, account
+
+Catalog:
+  specs     List all game specs with teamsConfig details
+  players   List players in the catalog
+  courses   List courses in the catalog
 
 Arguments:
   coValueId     Jazz CoValue ID (starts with co_)
@@ -302,13 +460,33 @@ Examples:
   bun run jazz player co_zndRVBmTsDPNdjNiauVfUQaMFLV '{"rounds":{"$each":true}}'
   bun run jazz game co_zeGX6eUyGPUbMPdV9csYsnFczib '{"players":{"$each":true}}'
   bun run jazz co_zaYtNqJZsTyi1Sy6615uCqhpsgi  # Auto-detect type
+  bun run jazz catalog specs  # List all game specs
 `);
+}
+
+// Parse CLI args
+const args = process.argv.slice(2);
+
+if (args.length === 0) {
+  printHelp();
   process.exit(1);
 }
 
 function exitWithError(message: string): never {
   console.error(message);
   process.exit(1);
+}
+
+// Check for catalog command
+if (args[0] === "catalog") {
+  const catalogType = (args[1] || "specs") as "specs" | "players" | "courses";
+  if (!["specs", "players", "courses"].includes(catalogType)) {
+    exitWithError(
+      `Invalid catalog type: ${catalogType}\nValid types: specs, players, courses`,
+    );
+  }
+  await inspectCatalog(catalogType);
+  process.exit(0);
 }
 
 function parseArgs(): {
