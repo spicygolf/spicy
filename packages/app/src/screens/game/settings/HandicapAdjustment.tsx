@@ -186,7 +186,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
 
       if (inputValue.trim() === "" || inputValue === calculatedStr) {
         if (roundToGame.$jazz.has("gameHandicap")) {
-          roundToGame.$jazz.set("gameHandicap", undefined);
+          roundToGame.$jazz.delete("gameHandicap");
         }
       } else if (parsed !== null) {
         roundToGame.$jazz.set("gameHandicap", parsed);
@@ -223,9 +223,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
 
   function handleClearGameHandicap() {
     if (!roundToGame?.$isLoaded) return;
-    if (roundToGame.$jazz.has("gameHandicap")) {
-      roundToGame.$jazz.set("gameHandicap", undefined);
-    }
+    roundToGame.$jazz.delete("gameHandicap");
   }
 
   if (!player?.$isLoaded) {
