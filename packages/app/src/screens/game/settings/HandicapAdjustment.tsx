@@ -16,6 +16,22 @@ type Props = NativeStackScreenProps<
 >;
 
 /**
+ * Filter input to only allow valid handicap index characters: +, -, ., and digits.
+ * Allows decimal numbers like "12.5" or "+2.3".
+ */
+function filterHandicapIndexInput(input: string): string {
+  return input.replace(/[^0-9+\-.]/g, "");
+}
+
+/**
+ * Filter input to only allow valid game handicap characters: +, -, and digits.
+ * Game handicaps are integers only (no decimals).
+ */
+function filterGameHandicapInput(input: string): string {
+  return input.replace(/[^0-9+-]/g, "");
+}
+
+/**
  * Parse a user-entered game handicap string into an integer or `null`.
  *
  * @param input - Raw typed input; may include a leading `+` to indicate a negative handicap override
@@ -265,7 +281,9 @@ export function HandicapAdjustment({ route, navigation }: Props) {
               <Input
                 label=""
                 value={indexInput}
-                onChangeText={setIndexInput}
+                onChangeText={(text) =>
+                  setIndexInput(filterHandicapIndexInput(text))
+                }
                 onBlur={handleIndexBlur}
                 placeholder="e.g., 12.5 or +2.3"
                 keyboardType="numbers-and-punctuation"
@@ -325,7 +343,9 @@ export function HandicapAdjustment({ route, navigation }: Props) {
               <Input
                 label=""
                 value={gameHandicapInput}
-                onChangeText={setGameHandicapInput}
+                onChangeText={(text) =>
+                  setGameHandicapInput(filterGameHandicapInput(text))
+                }
                 onBlur={handleGameHandicapBlur}
                 placeholder="e.g., 10 or +2"
                 keyboardType="numbers-and-punctuation"
