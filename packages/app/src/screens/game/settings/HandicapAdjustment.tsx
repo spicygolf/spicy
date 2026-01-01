@@ -15,6 +15,24 @@ type Props = NativeStackScreenProps<
   "HandicapAdjustment"
 >;
 
+/**
+ * Filter input to only allow valid handicap index characters.
+ * Allows optional leading +/-, digits, and one decimal point.
+ */
+function filterHandicapIndexInput(input: string): string {
+  const match = input.match(/^[+-]?\d*\.?\d*/);
+  return match ? match[0] : "";
+}
+
+/**
+ * Filter input to only allow valid game handicap characters.
+ * Allows optional leading +/-, and digits only (integers).
+ */
+function filterGameHandicapInput(input: string): string {
+  const match = input.match(/^[+-]?\d*/);
+  return match ? match[0] : "";
+}
+
 export function HandicapAdjustment({ route, navigation }: Props) {
   const { playerId, roundToGameId } = route.params;
   const { game } = useGame(undefined, {
@@ -233,7 +251,9 @@ export function HandicapAdjustment({ route, navigation }: Props) {
               <Input
                 label=""
                 value={indexInput}
-                onChangeText={setIndexInput}
+                onChangeText={(text) =>
+                  setIndexInput(filterHandicapIndexInput(text))
+                }
                 onBlur={() => saveIndexOverride(indexInput)}
                 placeholder="e.g., 12.5 or +2.3"
                 keyboardType="numbers-and-punctuation"
@@ -293,7 +313,9 @@ export function HandicapAdjustment({ route, navigation }: Props) {
               <Input
                 label=""
                 value={gameHandicapInput}
-                onChangeText={setGameHandicapInput}
+                onChangeText={(text) =>
+                  setGameHandicapInput(filterGameHandicapInput(text))
+                }
                 onBlur={() =>
                   saveGameHandicapOverride(
                     gameHandicapInput,
