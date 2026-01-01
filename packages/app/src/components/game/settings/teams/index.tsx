@@ -539,7 +539,7 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.gap(2),
     paddingHorizontal: theme.gap(4),
     paddingVertical: theme.gap(2),
-    backgroundColor: theme.colors.border + "20", // Semi-transparent border color
+    backgroundColor: `${theme.colors.border}20`, // Semi-transparent border color
   },
   infoText: {
     fontSize: 13,
