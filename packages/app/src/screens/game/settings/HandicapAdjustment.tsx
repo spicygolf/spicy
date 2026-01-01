@@ -165,6 +165,8 @@ export function HandicapAdjustment({ route, navigation }: Props) {
       setGameHandicapInput(formatCourseHandicap(currentGameHandicap));
     } else if (previewCourseHandicap !== null) {
       setGameHandicapInput(formatCourseHandicap(previewCourseHandicap));
+    } else {
+      setGameHandicapInput("");
     }
   }, [currentGameHandicap, previewCourseHandicap]);
 
@@ -206,6 +208,11 @@ export function HandicapAdjustment({ route, navigation }: Props) {
         }
       } else if (parsed !== null) {
         roundToGame.$jazz.set("gameHandicap", parsed);
+      } else {
+        // Invalid input - clear override to avoid confusion
+        if (roundToGame.$jazz.has("gameHandicap")) {
+          roundToGame.$jazz.delete("gameHandicap");
+        }
       }
     },
     [roundToGame],

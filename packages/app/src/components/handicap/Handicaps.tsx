@@ -68,9 +68,17 @@ export function Handicaps({ player, round, roundToGame, onPress }: Props) {
     ) {
       return roundToGame.handicapIndex;
     }
-    return player?.handicap?.$isLoaded && player.handicap.$isLoaded
-      ? player.handicap.display
-      : undefined;
+    if (player?.handicap?.$isLoaded && player.handicap.$isLoaded) {
+      // Use display if available, otherwise generate from index
+      if (player.handicap.display) {
+        return player.handicap.display;
+      }
+      if (player.handicap.value != null) {
+        const value = player.handicap.value;
+        return value < 0 ? `+${Math.abs(value)}` : value.toString();
+      }
+    }
+    return undefined;
   })();
 
   if (!player?.$isLoaded) return null;
