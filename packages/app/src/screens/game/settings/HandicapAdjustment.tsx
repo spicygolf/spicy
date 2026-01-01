@@ -15,6 +15,12 @@ type Props = NativeStackScreenProps<
   "HandicapAdjustment"
 >;
 
+/**
+ * Parse a user-entered game handicap string into an integer or `null`.
+ *
+ * @param input - Raw typed input; may include a leading `+` to indicate a negative handicap override
+ * @returns The parsed integer handicap, or `null` if the input is empty or cannot be parsed as an integer
+ */
 function parseGameHandicapInput(input: string): number | null {
   const trimmed = input.trim();
   if (trimmed === "") return null;
@@ -28,6 +34,14 @@ function parseGameHandicapInput(input: string): number | null {
   return parsed;
 }
 
+/**
+ * Render the Handicap Adjustment screen for editing a player's round and game handicaps.
+ *
+ * Saves any handicap index or game-handicap overrides to the underlying game data when fields blur
+ * or when navigating away; shows live previews of calculated course handicap based on typed input.
+ *
+ * @returns The Handicap Adjustment screen React element
+ */
 export function HandicapAdjustment({ route, navigation }: Props) {
   const { playerId, roundToGameId } = route.params;
   const { game } = useGame(undefined, {

@@ -554,10 +554,15 @@ export async function mergeGameSpecSources(
 }
 
 /**
- * Import players from ArangoDB (idempotent)
+ * Import player records from ArangoDB into the worker account's catalog, updating existing entries idempotently.
  *
- * Uses GHIN ID as unique identifier via Player.upsertUnique
- * Players are stored as individual docs owned by the worker account
+ * Each Arango player is upserted using the GHIN ID when present or `manual_{legacyId}` otherwise as the unique lookup key.
+ * Players are created as individual docs owned by the worker's group; existing catalog players are reused and the catalog players map is populated.
+ *
+ * @param workerAccount - The worker account that will own created player documents
+ * @param catalog - The target game catalog to populate or update players in
+ * @param arangoConfig - Optional ArangoDB connection configuration; uses the default config when omitted
+ * @returns An object with counts: `created` for new players added to the catalog, `updated` for existing players upserted, and `skipped` for players not imported (e.g., missing name or on error)
  */
 async function importPlayers(
   workerAccount: co.loaded<typeof PlayerAccount>,
