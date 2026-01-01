@@ -17,20 +17,38 @@ type Props = NativeStackScreenProps<
 
 /**
  * Filter input to only allow valid handicap index characters.
- * Allows optional leading +/-, digits, and one decimal point.
+ * Allows optional leading + (for plus handicaps), digits, and one decimal point.
+ * Note: In golf, "+" means plus handicap (better than scratch). There's no
+ * such thing as a negative handicap index in user input - just use the number.
  */
 function filterHandicapIndexInput(input: string): string {
-  const match = input.match(/^[+-]?\d*\.?\d*/);
-  return match ? match[0] : "";
+  // Remove any invalid characters, keeping only +, digits, and decimal point
+  // Only allow + at the start
+  let filtered = input.replace(/[^+\d.]/g, "");
+  // Remove + if not at start
+  if (filtered.indexOf("+") > 0) {
+    filtered = filtered.replace(/\+/g, "");
+  }
+  // Only allow one decimal point
+  const parts = filtered.split(".");
+  if (parts.length > 2) {
+    filtered = `${parts[0]}.${parts.slice(1).join("")}`;
+  }
+  return filtered;
 }
 
 /**
  * Filter input to only allow valid game handicap characters.
- * Allows optional leading +/-, and digits only (integers).
+ * Allows optional leading + (for plus handicaps), and digits only (integers).
  */
 function filterGameHandicapInput(input: string): string {
-  const match = input.match(/^[+-]?\d*/);
-  return match ? match[0] : "";
+  // Remove any invalid characters, keeping only + and digits
+  let filtered = input.replace(/[^+\d]/g, "");
+  // Remove + if not at start
+  if (filtered.indexOf("+") > 0) {
+    filtered = filtered.replace(/\+/g, "");
+  }
+  return filtered;
 }
 
 export function HandicapAdjustment({ route, navigation }: Props) {
@@ -179,8 +197,9 @@ export function HandicapAdjustment({ route, navigation }: Props) {
       // Parse and save override
       const trimmed = inputValue.trim();
       const isPlus = trimmed.startsWith("+");
-      let parsed = Number.parseInt(trimmed.replace(/^[+-]/, ""), 10);
+      let parsed = Number.parseInt(trimmed.replace(/^\+/, ""), 10);
       if (!Number.isNaN(parsed)) {
+        // Plus handicap (e.g., "+5") is stored as negative (-5)
         if (isPlus) parsed = -parsed;
         roundToGame.$jazz.set("gameHandicap", parsed);
       }
