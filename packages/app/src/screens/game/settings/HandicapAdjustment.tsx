@@ -16,38 +16,57 @@ type Props = NativeStackScreenProps<
 >;
 
 /**
- * Filter input to only allow valid handicap index characters: +, -, ., and digits.
- * Allows decimal numbers like "12.5" or "+2.3".
+ * Filter input to only allow valid handicap index format.
+ * Allows optional leading +/-, digits, and one decimal point.
+ * Examples: "12.5", "+2.3", "-1.5", "0.0"
  */
 function filterHandicapIndexInput(input: string): string {
-  return input.replace(/[^0-9+\-.]/g, "");
+  const match = input.match(/^[+-]?\d*\.?\d*/);
+  return match ? match[0] : "";
 }
 
 /**
- * Filter input to only allow valid game handicap characters: +, -, and digits.
- * Game handicaps are integers only (no decimals).
+ * Filter input to only allow valid game handicap format.
+ * Allows optional leading +/-, and digits only (integers).
+ * Examples: "12", "+2", "-1"
  */
 function filterGameHandicapInput(input: string): string {
-  return input.replace(/[^0-9+-]/g, "");
+  const match = input.match(/^[+-]?\d*/);
+  return match ? match[0] : "";
+}
+
+/**
+ * Parse a user-entered handicap index string, validating format.
+ * @returns The parsed string if valid, or `null` if invalid.
+ */
+function parseHandicapIndexInput(input: string): string | null {
+  const trimmed = input.trim();
+  if (trimmed === "") return null;
+
+  // Must match format: optional +/-, digits, optional decimal with digits
+  if (!/^[+-]?\d+\.?\d*$/.test(trimmed)) return null;
+
+  return trimmed;
 }
 
 /**
  * Parse a user-entered game handicap string into an integer or `null`.
  *
- * @param input - Raw typed input; may include a leading `+` to indicate a negative handicap override
- * @returns The parsed integer handicap, or `null` if the input is empty or cannot be parsed as an integer
+ * @param input - Raw typed input; may include a leading `+` to indicate a plus handicap (stored as negative)
+ * @returns The parsed integer handicap, or `null` if the input is empty or invalid
  */
 function parseGameHandicapInput(input: string): number | null {
   const trimmed = input.trim();
   if (trimmed === "") return null;
 
-  let parsed = Number.parseInt(trimmed.replace("+", ""), 10);
+  // Must match format: optional +/-, then digits
+  if (!/^[+-]?\d+$/.test(trimmed)) return null;
+
+  const isPlus = trimmed.startsWith("+");
+  const parsed = Number.parseInt(trimmed.replace(/^[+-]/, ""), 10);
   if (Number.isNaN(parsed)) return null;
 
-  if (trimmed.startsWith("+")) {
-    parsed = -parsed;
-  }
-  return parsed;
+  return isPlus ? -parsed : parsed;
 }
 
 /**
@@ -158,9 +177,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
   // Sync local state when Jazz data changes (e.g., after clearing override)
   useEffect(() => {
     setIndexInput(currentHandicapIndex);
-  }, [currentHandicapIndex]);
 
-  useEffect(() => {
     if (currentGameHandicap !== null) {
       setGameHandicapInput(formatCourseHandicap(currentGameHandicap));
     } else if (previewCourseHandicap !== null) {
@@ -168,7 +185,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
     } else {
       setGameHandicapInput("");
     }
-  }, [currentGameHandicap, previewCourseHandicap]);
+  }, [currentHandicapIndex, currentGameHandicap, previewCourseHandicap]);
 
   // Use refs to access current values in the beforeRemove listener
   const indexInputRef = useRef(indexInput);
@@ -183,11 +200,18 @@ export function HandicapAdjustment({ route, navigation }: Props) {
     (inputValue: string) => {
       if (!roundToGame?.$isLoaded || !round?.$isLoaded) return;
 
-      if (inputValue !== originalHandicapIndex) {
-        roundToGame.$jazz.set("handicapIndex", inputValue);
-      } else if (roundToGame.handicapIndex !== round.handicapIndex) {
-        roundToGame.$jazz.set("handicapIndex", round.handicapIndex);
+      const parsed = parseHandicapIndexInput(inputValue);
+
+      if (parsed !== null && parsed !== originalHandicapIndex) {
+        // Valid input different from original - save override
+        roundToGame.$jazz.set("handicapIndex", parsed);
+      } else if (parsed === originalHandicapIndex) {
+        // User set it back to original - remove override if exists
+        if (roundToGame.handicapIndex !== round.handicapIndex) {
+          roundToGame.$jazz.set("handicapIndex", round.handicapIndex);
+        }
       }
+      // Invalid input (parsed === null) - do nothing, leave existing value
     },
     [roundToGame, round, originalHandicapIndex],
   );

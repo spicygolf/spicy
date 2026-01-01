@@ -103,6 +103,24 @@ export function formatHandicapIndex(handicapIndex: string | null): string {
   return handicapIndex;
 }
 
+/**
+ * Format a handicap value for display.
+ * Uses the display string if provided, otherwise generates from numeric value.
+ * Plus handicaps (negative values) are formatted with a + prefix.
+ *
+ * @param value - Numeric handicap value (negative for plus handicaps)
+ * @param display - Optional pre-formatted display string
+ * @returns Formatted display string, or undefined if no value
+ */
+export function formatHandicapDisplay(
+  value: number | null | undefined,
+  display?: string,
+): string | undefined {
+  if (display) return display;
+  if (value == null) return undefined;
+  return value < 0 ? `+${Math.abs(value)}` : value.toString();
+}
+
 type HolesPlayed = "front9" | "back9" | "all18";
 
 function getRatings(

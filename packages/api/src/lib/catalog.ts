@@ -116,6 +116,7 @@ import {
   TeeHole,
 } from "spicylib/schema";
 import { transformGameSpec } from "spicylib/transform";
+import { formatHandicapDisplay } from "spicylib/utils";
 
 import {
   type ArangoConfig,
@@ -632,12 +633,10 @@ async function importPlayers(
             : undefined;
 
           // Generate display from index if not present in legacy data
-          let display = arangoPlayer.handicap.display;
-          if (display === undefined && arangoPlayer.handicap.index != null) {
-            const index = arangoPlayer.handicap.index;
-            // Plus handicaps (negative index) need "+" prefix
-            display = index < 0 ? `+${Math.abs(index)}` : index.toString();
-          }
+          const display = formatHandicapDisplay(
+            arangoPlayer.handicap.index,
+            arangoPlayer.handicap.display,
+          );
 
           handicap = Handicap.create(
             {
