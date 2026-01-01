@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { calculateCourseHandicap, formatCourseHandicap } from "spicylib/utils";
@@ -15,68 +15,6 @@ type Props = NativeStackScreenProps<
   "HandicapAdjustment"
 >;
 
-/**
- * Filter input to only allow valid handicap index format.
- * Allows optional leading +/-, digits, and one decimal point.
- * Examples: "12.5", "+2.3", "-1.5", "0.0"
- */
-function filterHandicapIndexInput(input: string): string {
-  const match = input.match(/^[+-]?\d*\.?\d*/);
-  return match ? match[0] : "";
-}
-
-/**
- * Filter input to only allow valid game handicap format.
- * Allows optional leading +/-, and digits only (integers).
- * Examples: "12", "+2", "-1"
- */
-function filterGameHandicapInput(input: string): string {
-  const match = input.match(/^[+-]?\d*/);
-  return match ? match[0] : "";
-}
-
-/**
- * Parse a user-entered handicap index string, validating format.
- * @returns The parsed string if valid, or `null` if invalid.
- */
-function parseHandicapIndexInput(input: string): string | null {
-  const trimmed = input.trim();
-  if (trimmed === "") return null;
-
-  // Must match format: optional +/-, digits, optional decimal with digits
-  if (!/^[+-]?\d+\.?\d*$/.test(trimmed)) return null;
-
-  return trimmed;
-}
-
-/**
- * Parse a user-entered game handicap string into an integer or `null`.
- *
- * @param input - Raw typed input; may include a leading `+` to indicate a plus handicap (stored as negative)
- * @returns The parsed integer handicap, or `null` if the input is empty or invalid
- */
-function parseGameHandicapInput(input: string): number | null {
-  const trimmed = input.trim();
-  if (trimmed === "") return null;
-
-  // Must match format: optional +/-, then digits
-  if (!/^[+-]?\d+$/.test(trimmed)) return null;
-
-  const isPlus = trimmed.startsWith("+");
-  const parsed = Number.parseInt(trimmed.replace(/^[+-]/, ""), 10);
-  if (Number.isNaN(parsed)) return null;
-
-  return isPlus ? -parsed : parsed;
-}
-
-/**
- * Render the Handicap Adjustment screen for editing a player's round and game handicaps.
- *
- * Saves any handicap index or game-handicap overrides to the underlying game data when fields blur
- * or when navigating away; shows live previews of calculated course handicap based on typed input.
- *
- * @returns The Handicap Adjustment screen React element
- */
 export function HandicapAdjustment({ route, navigation }: Props) {
   const { playerId, roundToGameId } = route.params;
   const { game } = useGame(undefined, {
@@ -143,13 +81,13 @@ export function HandicapAdjustment({ route, navigation }: Props) {
     return roundToGame.handicapIndex !== round.handicapIndex;
   }, [roundToGame, round]);
 
-  // Local state for input fields (for typing), synced on blur
+  // Local input state
   const [indexInput, setIndexInput] = useState(currentHandicapIndex);
+  const [gameHandicapInput, setGameHandicapInput] = useState("");
 
-  // Live preview of course handicap based on what user is typing
+  // Live preview of course handicap based on current index input
   const previewCourseHandicap = useMemo(() => {
     if (!round?.$isLoaded || !round.tee?.$isLoaded) return null;
-
     return calculateCourseHandicap({
       handicapIndex: indexInput,
       tee: round.tee,
@@ -166,124 +104,83 @@ export function HandicapAdjustment({ route, navigation }: Props) {
 
   const hasGameHandicapOverride = currentGameHandicap !== null;
 
-  // Track whether the user has manually edited the game handicap field this session.
-  // This prevents saving stale calculated values when only the index was changed.
-  const [gameHandicapTouched, setGameHandicapTouched] = useState(false);
-
-  const [gameHandicapInput, setGameHandicapInput] = useState(
-    currentGameHandicap !== null
-      ? formatCourseHandicap(currentGameHandicap)
-      : previewCourseHandicap !== null
-        ? formatCourseHandicap(previewCourseHandicap)
-        : "",
-  );
-
   // Sync index input when Jazz data changes (e.g., after clearing override)
   useEffect(() => {
     setIndexInput(currentHandicapIndex);
   }, [currentHandicapIndex]);
 
-  // Use refs to access current values in event listeners without causing re-renders
-  const indexInputRef = useRef(indexInput);
-  const gameHandicapInputRef = useRef(gameHandicapInput);
-  const gameHandicapTouchedRef = useRef(gameHandicapTouched);
-  const previewCourseHandicapRef = useRef(previewCourseHandicap);
-  indexInputRef.current = indexInput;
-  gameHandicapInputRef.current = gameHandicapInput;
-  gameHandicapTouchedRef.current = gameHandicapTouched;
-  previewCourseHandicapRef.current = previewCourseHandicap;
-
-  // Sync game handicap input when the stored override changes.
-  // Uses ref for previewCourseHandicap to avoid circular dependency where
-  // typing in index field → preview recalculates → effect triggers → overwrites input.
+  // Sync game handicap input: show override if exists, otherwise show calculated preview
   useEffect(() => {
     if (currentGameHandicap !== null) {
       setGameHandicapInput(formatCourseHandicap(currentGameHandicap));
-    } else if (previewCourseHandicapRef.current !== null) {
-      setGameHandicapInput(
-        formatCourseHandicap(previewCourseHandicapRef.current),
-      );
+    } else if (previewCourseHandicap !== null) {
+      setGameHandicapInput(formatCourseHandicap(previewCourseHandicap));
     } else {
       setGameHandicapInput("");
     }
-  }, [currentGameHandicap]);
+  }, [currentGameHandicap, previewCourseHandicap]);
 
-  // Save logic extracted to avoid duplication between blur handlers and beforeRemove
-  const saveIndexOverride = useCallback(
-    (inputValue: string) => {
-      if (!roundToGame?.$isLoaded || !round?.$isLoaded) return;
+  // Refs for beforeRemove listener
+  const indexInputRef = useRef(indexInput);
+  const gameHandicapInputRef = useRef(gameHandicapInput);
+  const previewCourseHandicapRef = useRef(previewCourseHandicap);
+  indexInputRef.current = indexInput;
+  gameHandicapInputRef.current = gameHandicapInput;
+  previewCourseHandicapRef.current = previewCourseHandicap;
 
-      const parsed = parseHandicapIndexInput(inputValue);
+  function saveIndexOverride(inputValue: string) {
+    if (!roundToGame?.$isLoaded || !round?.$isLoaded) return;
 
-      if (parsed !== null && parsed !== originalHandicapIndex) {
-        // Valid input different from original - save override
-        roundToGame.$jazz.set("handicapIndex", parsed);
-      } else if (parsed === originalHandicapIndex) {
-        // User set it back to original - remove override if exists
-        if (roundToGame.handicapIndex !== round.handicapIndex) {
-          roundToGame.$jazz.set("handicapIndex", round.handicapIndex);
-        }
+    const trimmed = inputValue.trim();
+    if (trimmed === "") return;
+
+    if (trimmed !== originalHandicapIndex) {
+      roundToGame.$jazz.set("handicapIndex", trimmed);
+    } else if (roundToGame.handicapIndex !== round.handicapIndex) {
+      roundToGame.$jazz.set("handicapIndex", round.handicapIndex);
+    }
+  }
+
+  function saveGameHandicapOverride(
+    inputValue: string,
+    calculatedHandicap: number | null,
+  ) {
+    if (!roundToGame?.$isLoaded) return;
+
+    const calculatedStr =
+      calculatedHandicap !== null
+        ? formatCourseHandicap(calculatedHandicap)
+        : "";
+
+    if (inputValue.trim() === "" || inputValue === calculatedStr) {
+      // User cleared it or matches calculated - remove override
+      if (roundToGame.$jazz.has("gameHandicap")) {
+        roundToGame.$jazz.delete("gameHandicap");
       }
-      // Invalid input (parsed === null) - do nothing, leave existing value
-    },
-    [roundToGame, round, originalHandicapIndex],
-  );
-
-  const saveGameHandicapOverride = useCallback(
-    (
-      inputValue: string,
-      calculatedHandicap: number | null,
-      wasTouched: boolean,
-    ) => {
-      if (!roundToGame?.$isLoaded) return;
-
-      // If user didn't touch the game handicap field, don't save anything.
-      // The input might show a stale calculated value from before the index changed.
-      if (!wasTouched) return;
-
-      const parsed = parseGameHandicapInput(inputValue);
-      const calculatedStr =
-        calculatedHandicap !== null
-          ? formatCourseHandicap(calculatedHandicap)
-          : "";
-
-      if (inputValue.trim() === "" || inputValue === calculatedStr) {
-        if (roundToGame.$jazz.has("gameHandicap")) {
-          roundToGame.$jazz.delete("gameHandicap");
-        }
-      } else if (parsed !== null) {
+    } else {
+      // Parse and save override
+      const trimmed = inputValue.trim();
+      const isPlus = trimmed.startsWith("+");
+      let parsed = Number.parseInt(trimmed.replace(/^[+-]/, ""), 10);
+      if (!Number.isNaN(parsed)) {
+        if (isPlus) parsed = -parsed;
         roundToGame.$jazz.set("gameHandicap", parsed);
-      } else {
-        // Invalid input - clear override to avoid confusion
-        if (roundToGame.$jazz.has("gameHandicap")) {
-          roundToGame.$jazz.delete("gameHandicap");
-        }
       }
-    },
-    [roundToGame],
-  );
+    }
+  }
 
-  // Save pending changes when navigating away
+  // Save pending changes when navigating away (blur doesn't fire on back press)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Uses refs for current values, functions are stable
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", () => {
       saveIndexOverride(indexInputRef.current);
       saveGameHandicapOverride(
         gameHandicapInputRef.current,
         previewCourseHandicapRef.current,
-        gameHandicapTouchedRef.current,
       );
     });
-
     return unsubscribe;
-  }, [navigation, saveIndexOverride, saveGameHandicapOverride]);
-
-  function handleIndexBlur() {
-    saveIndexOverride(indexInput);
-  }
-
-  function handleGameHandicapBlur() {
-    saveGameHandicapOverride(gameHandicapInput, previewCourseHandicap, true);
-  }
+  }, [navigation]);
 
   function handleClearIndexOverride() {
     if (!roundToGame?.$isLoaded || !round?.$isLoaded) return;
@@ -292,7 +189,9 @@ export function HandicapAdjustment({ route, navigation }: Props) {
 
   function handleClearGameHandicap() {
     if (!roundToGame?.$isLoaded) return;
-    roundToGame.$jazz.delete("gameHandicap");
+    if (roundToGame.$jazz.has("gameHandicap")) {
+      roundToGame.$jazz.delete("gameHandicap");
+    }
   }
 
   if (!player?.$isLoaded) {
@@ -334,10 +233,8 @@ export function HandicapAdjustment({ route, navigation }: Props) {
               <Input
                 label=""
                 value={indexInput}
-                onChangeText={(text) =>
-                  setIndexInput(filterHandicapIndexInput(text))
-                }
-                onBlur={handleIndexBlur}
+                onChangeText={setIndexInput}
+                onBlur={() => saveIndexOverride(indexInput)}
                 placeholder="e.g., 12.5 or +2.3"
                 keyboardType="numbers-and-punctuation"
               />
@@ -396,11 +293,13 @@ export function HandicapAdjustment({ route, navigation }: Props) {
               <Input
                 label=""
                 value={gameHandicapInput}
-                onChangeText={(text) => {
-                  setGameHandicapInput(filterGameHandicapInput(text));
-                  setGameHandicapTouched(true);
-                }}
-                onBlur={handleGameHandicapBlur}
+                onChangeText={setGameHandicapInput}
+                onBlur={() =>
+                  saveGameHandicapOverride(
+                    gameHandicapInput,
+                    previewCourseHandicap,
+                  )
+                }
                 placeholder="e.g., 10 or +2"
                 keyboardType="numbers-and-punctuation"
               />
