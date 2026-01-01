@@ -15,6 +15,19 @@ type Props = NativeStackScreenProps<
   "HandicapAdjustment"
 >;
 
+function parseGameHandicapInput(input: string): number | null {
+  const trimmed = input.trim();
+  if (trimmed === "") return null;
+
+  let parsed = Number.parseInt(trimmed.replace("+", ""), 10);
+  if (Number.isNaN(parsed)) return null;
+
+  if (trimmed.startsWith("+")) {
+    parsed = -parsed;
+  }
+  return parsed;
+}
+
 export function HandicapAdjustment({ route, navigation }: Props) {
   const { playerId, roundToGameId } = route.params;
   const { game } = useGame(undefined, {
@@ -113,11 +126,11 @@ export function HandicapAdjustment({ route, navigation }: Props) {
   );
 
   // Sync local state when Jazz data changes (e.g., after clearing override)
-  useMemo(() => {
+  useEffect(() => {
     setIndexInput(currentHandicapIndex);
   }, [currentHandicapIndex]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (currentGameHandicap !== null) {
       setGameHandicapInput(formatCourseHandicap(currentGameHandicap));
     } else if (previewCourseHandicap !== null) {
@@ -128,8 +141,10 @@ export function HandicapAdjustment({ route, navigation }: Props) {
   // Use refs to access current values in the beforeRemove listener
   const indexInputRef = useRef(indexInput);
   const gameHandicapInputRef = useRef(gameHandicapInput);
+  const previewCourseHandicapRef = useRef(previewCourseHandicap);
   indexInputRef.current = indexInput;
   gameHandicapInputRef.current = gameHandicapInput;
+  previewCourseHandicapRef.current = previewCourseHandicap;
 
   // Save pending changes when navigating away
   useEffect(() => {
@@ -138,6 +153,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
 
       const currentIndexInput = indexInputRef.current;
       const currentGameHandicapInput = gameHandicapInputRef.current;
+      const currentPreviewCourseHandicap = previewCourseHandicapRef.current;
 
       // Save index if changed
       if (currentIndexInput !== originalHandicapIndex) {
@@ -147,9 +163,10 @@ export function HandicapAdjustment({ route, navigation }: Props) {
       }
 
       // Save game handicap if changed
+      const parsed = parseGameHandicapInput(currentGameHandicapInput);
       const calculatedStr =
-        previewCourseHandicap !== null
-          ? formatCourseHandicap(previewCourseHandicap)
+        currentPreviewCourseHandicap !== null
+          ? formatCourseHandicap(currentPreviewCourseHandicap)
           : "";
 
       if (
@@ -159,28 +176,13 @@ export function HandicapAdjustment({ route, navigation }: Props) {
         if (roundToGame.$jazz.has("gameHandicap")) {
           roundToGame.$jazz.set("gameHandicap", undefined);
         }
-      } else {
-        let parsed = Number.parseInt(
-          currentGameHandicapInput.replace("+", ""),
-          10,
-        );
-        if (!Number.isNaN(parsed)) {
-          if (currentGameHandicapInput.startsWith("+")) {
-            parsed = -parsed;
-          }
-          roundToGame.$jazz.set("gameHandicap", parsed);
-        }
+      } else if (parsed !== null) {
+        roundToGame.$jazz.set("gameHandicap", parsed);
       }
     });
 
     return unsubscribe;
-  }, [
-    navigation,
-    roundToGame,
-    round,
-    originalHandicapIndex,
-    previewCourseHandicap,
-  ]);
+  }, [navigation, roundToGame, round, originalHandicapIndex]);
 
   function handleIndexBlur() {
     if (!roundToGame?.$isLoaded || !round?.$isLoaded) return;
@@ -197,6 +199,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
   function handleGameHandicapBlur() {
     if (!roundToGame?.$isLoaded) return;
 
+    const parsed = parseGameHandicapInput(gameHandicapInput);
     const calculatedStr =
       previewCourseHandicap !== null
         ? formatCourseHandicap(previewCourseHandicap)
@@ -210,15 +213,9 @@ export function HandicapAdjustment({ route, navigation }: Props) {
       if (roundToGame.$jazz.has("gameHandicap")) {
         roundToGame.$jazz.set("gameHandicap", undefined);
       }
-    } else {
+    } else if (parsed !== null) {
       // User entered a different value - store override
-      let parsed = Number.parseInt(gameHandicapInput.replace("+", ""), 10);
-      if (!Number.isNaN(parsed)) {
-        if (gameHandicapInput.startsWith("+")) {
-          parsed = -parsed;
-        }
-        roundToGame.$jazz.set("gameHandicap", parsed);
-      }
+      roundToGame.$jazz.set("gameHandicap", parsed);
     }
   }
 
