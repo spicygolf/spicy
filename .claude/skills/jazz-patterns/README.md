@@ -459,6 +459,53 @@ const currentHole = useCoState(GameHole, currentHoleId, {
 
 ---
 
+## Jazz CLI Inspector
+
+Use `bun run jazz` from the project root to inspect Jazz CoValues in the database. This tool uses the worker account credentials to load and display CoValue data with proper schema typing.
+
+### Usage
+
+```bash
+# Inspect a specific CoValue (auto-detect type)
+bun run jazz co_zaYtNqJZsTyi1Sy6615uCqhpsgi
+
+# Specify the schema type explicitly
+bun run jazz player co_zndRVBmTsDPNdjNiauVfUQaMFLV
+bun run jazz game co_zeGX6eUyGPUbMPdV9csYsnFczib
+
+# Include resolve query for nested data
+bun run jazz player co_zndRVBmTsDPNdjNiauVfUQaMFLV '{"rounds":{"$each":true}}'
+bun run jazz game co_zeGX6eUyGPUbMPdV9csYsnFczib '{"players":{"$each":true}}'
+
+# Inspect catalog contents
+bun run jazz catalog specs     # List all game specs with teamsConfig
+bun run jazz catalog players   # List players in catalog
+bun run jazz catalog courses   # List courses in catalog
+```
+
+### Available Types
+
+- `player` - Player records
+- `game` - Game instances
+- `round` - Round records
+- `roundtogame` - Round-to-game relationships
+- `course` - Golf courses
+- `tee` - Tee sets
+- `spec` / `gamespec` - Game specifications
+- `account` - Player accounts
+
+### Catalog Inspection
+
+The `catalog` subcommand inspects the worker account's GameCatalog:
+
+```bash
+bun run jazz catalog specs
+```
+
+Shows all game specs with their teamsConfig details and computed `alwaysShowTeams` values.
+
+---
+
 ## Jazz Documentation
 
 For detailed Jazz Tools API documentation:
