@@ -54,7 +54,7 @@
     "react-native-element-dropdown": "2.12.4",
     "react-native-fast-encoder": "0.3.1",
     "react-native-gesture-handler": "^2.30.0",
-    "react-native-get-random-values": "1.11.0",
+    "react-native-get-random-values": "2.0.0",
     "react-native-localize": "^3.6.0",
     "react-native-mmkv": "3.3.0",
     "react-native-nitro-markdown": "^0.1.2",
