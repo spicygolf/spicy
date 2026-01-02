@@ -1,0 +1,16 @@
+{
+  "name": "outright_winner",
+  "disp": "",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 5,
+  "seq": 2,
+  "scope": "team",
+  "icon": "",
+  "show_in": "none",
+  "based_on": "net",
+  "limit": "",
+  "calculation": "logic",
+  "logic": "{'rankWithTies': [ 1, 1 ]}",
+  "better": "lower"
+}

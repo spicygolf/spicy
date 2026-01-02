@@ -1,0 +1,13 @@
+{
+  "name": "poley",
+  "disp": "Poley",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 1,
+  "seq": 6,
+  "scope": "player",
+  "icon": "album",
+  "show_in": "faves",
+  "based_on": "user",
+  "limit": ""
+}

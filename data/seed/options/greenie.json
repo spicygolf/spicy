@@ -1,0 +1,13 @@
+{
+  "name": "greenie",
+  "disp": "Greenie",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 1,
+  "seq": 4,
+  "scope": "player",
+  "icon": "album",
+  "show_in": "faves",
+  "based_on": "user",
+  "limit": ""
+}

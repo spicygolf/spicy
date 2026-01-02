@@ -1,0 +1,39 @@
+{
+  "name": "five_points",
+  "disp": "Five Points",
+  "version": 1,
+  "status": "prod",
+  "type": "points",
+  "min_players": 4,
+  "max_players": 4,
+  "location_type": "local",
+  "long_description": "### AKA\n* Scotch\n* Umbrella\n### Description\n* A team game within one foursome. 2 players per team.\n### Points (per hole)\n* 1 point for 'prox' - closest to the pin in the fewest amount of shots. Not necessarily a green-in-regulation. Just fewest shots\n* 2 points for low ball - lowest net score of the two-player team\n* 2 points for low team - lowest net total scores of the two-player team\n### Extra Points:\n* birdie - add one point\n* eagle - add two points\n### Multipliers:\n* birdie, and all other hole points - 2x\n* eagle, and all other hole points - 4x\n* pre-press - 2x (team down the most... before the other team hits, good for the rest of the nine) A new pre-press can be added each hole\n* press - 2x (team down the most... can be after the other team hits, but before your team hits)\n* press-back - 2x - if you have been pressed (not pre-pressed), you can double back\n* 4x pre-press - On #10 only, if you are down and want to keep up the 4x, but can't because the pre-press is no longer on at the end of the front nine.\n* 12x - if the teams have pre-pressed all the way to 8x, then the trailing team has the option of taking the bet to 12x after tee shots.\n### General Constraints:\n* 8x max multipliers off of the tee\n* 16x max off of #18 tee\n* $1 per point\n* Governor\n  * After 100 points, each point is discounted by 50%\n",
+  "teams": true,
+  "team_size": 2,
+  "team_change_every": 0,
+  "options": [
+    "stakes",
+    "use_handicaps",
+    "handicap_index_from",
+    "pre_double_rest_of_nine",
+    "max_off_tee",
+    "two_birdies_4x",
+    "eagles_4x",
+    "discount_threshold",
+    "discount_percent"
+  ],
+  "junk": [
+    "low_ball",
+    "low_total",
+    "prox",
+    "birdie",
+    "eagle"
+  ],
+  "multipliers": [
+    "pre_double",
+    "double",
+    "double_back",
+    "birdie_bbq",
+    "eagle_bbq"
+  ]
+}

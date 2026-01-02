@@ -1,0 +1,7 @@
+{
+  "name": "use_handicaps",
+  "disp": "Use handicaps",
+  "type": "game",
+  "valueType": "bool",
+  "defaultValue": "true"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "eagles_4x",
+  "disp": "Eagle = 4x",
+  "type": "game",
+  "valueType": "bool",
+  "defaultValue": "true"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "double_poley",
+  "disp": "2x Poley",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 2,
+  "seq": 6,
+  "scope": "player",
+  "icon": "album",
+  "show_in": "faves",
+  "based_on": "user",
+  "limit": ""
+}

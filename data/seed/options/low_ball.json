@@ -1,0 +1,15 @@
+{
+  "name": "low_ball",
+  "disp": "Low Ball",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 1,
+  "seq": 1,
+  "scope": "team",
+  "icon": "album",
+  "show_in": "score",
+  "based_on": "net",
+  "limit": "one_team_per_group",
+  "calculation": "best_ball",
+  "better": "lower"
+}

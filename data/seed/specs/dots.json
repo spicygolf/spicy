@@ -1,0 +1,29 @@
+{
+  "name": "dots",
+  "disp": "Dots",
+  "version": 1,
+  "status": "test",
+  "type": "points",
+  "min_players": 2,
+  "max_players": null,
+  "location_type": "local",
+  "long_description": "### AKA\n* The dot game\n* Junk\n* Trash\n* Garbage\n### Description\n* Points are awarded for achieving certain \"junk\" while playing the hole.\n* Usually junk is awarded only if the player scores par or better.\n### Examples\n* **Greenie** - closest to the pin on a par 3 hole\n* **Sandie** - par or better after being in a bunker\n* **Birdie** - score one under par on a hole\n* **Eagle** - score two under par on a hole\n* **Poley** - make a putt longer than the length of the flagstick",
+  "teams": null,
+  "team_size": null,
+  "team_change_every": 0,
+  "options": [
+    "stakes",
+    "use_handicaps",
+    "handicap_index_from"
+  ],
+  "junk": [
+    "low_ball",
+    "birdie",
+    "eagle",
+    "greenie",
+    "sandie",
+    "poley",
+    "double_poley"
+  ],
+  "multipliers": []
+}

@@ -1,0 +1,11 @@
+{
+  "name": "double_back",
+  "disp": "2x back",
+  "type": "multiplier",
+  "value": 2,
+  "seq": 3,
+  "icon": "album",
+  "based_on": "user",
+  "scope": "hole",
+  "availability": "{\n        'and': [\n          {'team_second_to_last': [\n            {'getPrevHole': []},\n            {'var': 'team'}\n          ]},\n          {'other_team_multiplied_with': [\n            {'getCurrHole': []},\n            {'var': 'team'},\n            'double'\n          ]}\n        ]\n      }"
+}

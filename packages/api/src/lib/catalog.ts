@@ -125,7 +125,6 @@ import {
   createArangoConnection,
   defaultConfig,
   fetchAllGames,
-  fetchGameSpecs,
   fetchGameWithRounds,
   fetchPlayersWithGames,
   type GameSpecV03,
@@ -133,7 +132,6 @@ import {
   type RoundToGameEdgeV03,
   type RoundV03,
 } from "../utils/arango";
-import { loadAllGameSpecs } from "../utils/json-reader";
 
 export interface ImportResult {
   specs: {
@@ -513,116 +511,35 @@ async function upsertOptions(
 }
 
 /**
- * Consolidate Match Play specs: merge Individual Match Play + Team Match Play → Match Play
+ * Load game specs from seed files (data/seed/)
  *
- * This function takes the options from Team Match Play (e.g., next_ball_breaks_ties)
- * and merges them into Individual Match Play, then renames it to "Match Play".
- * Team Match Play is excluded from the final result.
+ * This is the primary source for game specs and options.
+ * Match Play consolidation is already done during seed export.
  */
-function consolidateMatchPlaySpecs(specs: GameSpecV03[]): GameSpecV03[] {
-  const individualMatchPlay = specs.find(
-    (s) => s.disp === "Individual Match Play",
-  );
-  const teamMatchPlay = specs.find((s) => s.disp === "Team Match Play");
-
-  // If either is missing, just filter out Team Match Play if present
-  if (!individualMatchPlay || !teamMatchPlay) {
-    console.log(
-      "Match Play consolidation: Individual or Team Match Play not found, skipping consolidation",
-    );
-    return specs.filter((s) => s.disp !== "Team Match Play");
-  }
+export async function loadGameSpecsFromSeed(): Promise<GameSpecV03[]> {
+  const { loadSeedSpecsAsV03 } = await import("../utils/seed-loader");
+  const specs = await loadSeedSpecsAsV03();
 
   console.log(
-    "Consolidating Individual Match Play + Team Match Play → Match Play",
+    "Loaded from seed files:",
+    specs.length,
+    specs.map((s) => s.disp),
   );
 
-  // Merge options from Team Match Play into Individual Match Play
-  const individualOptions = individualMatchPlay.options || [];
-  const teamOptions = teamMatchPlay.options || [];
-
-  // Get option names that already exist in individual
-  const existingOptionNames = new Set(individualOptions.map((o) => o.name));
-
-  // Add any options from team that don't exist in individual
-  const mergedOptions = [...individualOptions];
-  for (const opt of teamOptions) {
-    if (!existingOptionNames.has(opt.name)) {
-      console.log(`  Adding option from Team Match Play: ${opt.name}`);
-      mergedOptions.push(opt);
-    }
-  }
-
-  // Create the consolidated Match Play spec
-  const consolidatedMatchPlay: GameSpecV03 = {
-    ...individualMatchPlay,
-    name: "matchplay", // Internal name
-    disp: "Match Play", // Display name
-    // Keep min_players from Individual (2), but update max_players to support teams
-    max_players: Math.max(
-      individualMatchPlay.max_players || 2,
-      teamMatchPlay.max_players || 4,
-    ),
-    options: mergedOptions,
-    // Keep teams: false since this is the base spec;
-    // teams mode is determined by game instance teamsConfig.active
-  };
-
-  console.log(
-    `  Merged spec: min_players=${consolidatedMatchPlay.min_players}, max_players=${consolidatedMatchPlay.max_players}, options=${mergedOptions.map((o) => o.name).join(", ")}`,
-  );
-
-  // Return specs with Team Match Play removed and Individual Match Play replaced
-  return specs
-    .filter(
-      (s) => s.disp !== "Individual Match Play" && s.disp !== "Team Match Play",
-    )
-    .concat(consolidatedMatchPlay);
+  return specs as GameSpecV03[];
 }
 
 /**
- * Merge game specs from both ArangoDB and JSON sources
+ * Merge game specs from seed files and optionally ArangoDB
+ *
+ * @deprecated Use loadGameSpecsFromSeed() directly. ArangoDB is no longer
+ * the source of truth for specs/options - seed files are.
  */
 export async function mergeGameSpecSources(
-  arangoConfig?: ArangoConfig,
+  _arangoConfig?: ArangoConfig,
 ): Promise<GameSpecV03[]> {
-  const [jsonSpecs, arangoSpecs] = await Promise.all([
-    loadAllGameSpecs(),
-    fetchGameSpecs(createArangoConnection(arangoConfig || defaultConfig)).catch(
-      () => {
-        console.warn("Failed to fetch from ArangoDB, using JSON only");
-        return [];
-      },
-    ),
-  ]);
-
-  console.log(
-    "Loaded from JSON:",
-    jsonSpecs.length,
-    jsonSpecs.map((s: GameSpecV03) => s.disp),
-  );
-  console.log(
-    "Loaded from ArangoDB:",
-    arangoSpecs.length,
-    arangoSpecs.map((s: GameSpecV03) => s.disp),
-  );
-
-  const specMap = new Map<string, GameSpecV03>();
-
-  for (const spec of jsonSpecs) {
-    const key = `${spec.disp}-${spec.version}`;
-    specMap.set(key, spec);
-  }
-
-  for (const spec of arangoSpecs) {
-    const key = `${spec.disp}-${spec.version}`;
-    specMap.set(key, spec);
-  }
-
-  const mergedSpecs = Array.from(specMap.values());
-
-  // Consolidate Match Play specs (Individual + Team → Match Play)
-  return consolidateMatchPlaySpecs(mergedSpecs);
+  // Load from seed files only - ArangoDB is no longer used for specs/options
+  return loadGameSpecsFromSeed();
 }
 
 /**

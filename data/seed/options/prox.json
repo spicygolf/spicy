@@ -1,0 +1,13 @@
+{
+  "name": "prox",
+  "disp": "Prox",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 1,
+  "seq": 7,
+  "scope": "player",
+  "icon": "album",
+  "show_in": "faves",
+  "based_on": "user",
+  "limit": "one_per_group"
+}

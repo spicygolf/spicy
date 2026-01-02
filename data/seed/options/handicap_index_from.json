@@ -1,0 +1,17 @@
+{
+  "name": "handicap_index_from",
+  "disp": "Index off of the low handicap or use full handicaps",
+  "type": "game",
+  "valueType": "menu",
+  "defaultValue": "low",
+  "choices": [
+    {
+      "name": "low",
+      "disp": "Low"
+    },
+    {
+      "name": "full",
+      "disp": "Full"
+    }
+  ]
+}

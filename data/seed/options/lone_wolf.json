@@ -1,0 +1,11 @@
+{
+  "name": "lone_wolf",
+  "disp": "Lone 2x",
+  "type": "multiplier",
+  "value": 2,
+  "seq": 1,
+  "icon": "album",
+  "based_on": "user",
+  "scope": "hole",
+  "availability": "{\n        'and': [\n          {'==': [ {'playersOnTeam': ['this']}, 1 ]},\n          {'isWolfPlayer': []}\n        ]\n      }"
+}

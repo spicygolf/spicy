@@ -1,0 +1,11 @@
+{
+  "name": "pre_double",
+  "disp": "Pre 2x",
+  "type": "multiplier",
+  "value": 2,
+  "seq": 1,
+  "icon": "album",
+  "based_on": "user",
+  "scope": "rest_of_nine",
+  "availability": "{\n        'team_down_the_most': [\n          {'getPrevHole': []},\n          {'var': 'team'}\n        ]\n      }"
+}

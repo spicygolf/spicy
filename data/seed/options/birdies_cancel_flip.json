@@ -1,0 +1,7 @@
+{
+  "name": "birdies_cancel_flip",
+  "disp": "Birdies on opposite teams cancels out the score flip",
+  "type": "game",
+  "valueType": "bool",
+  "defaultValue": "true"
+}

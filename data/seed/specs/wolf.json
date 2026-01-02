@@ -1,0 +1,27 @@
+{
+  "name": "wolf",
+  "disp": "Wolf",
+  "version": 1,
+  "status": "dev",
+  "type": "points",
+  "min_players": 3,
+  "max_players": null,
+  "location_type": "local",
+  "long_description": "### Description\n* A game where the teams can change each hole.\n* Partners win the hole by having a lower (net) score vs. the other team.\n* The \"Wolf\" rotates through each player in order.\n* Each wolf watches the other players tee off and chooses one for a partner.\n* The wolf needs to choose a player before the next one tees off, or that player is not available as a partner anymore.\n* Various multipliers can be applied if the wolf does not choose a partner and \"goes Lone Wolf.\"\n* If the wolf goes lone and loses, the wolf loses all points to each player.\n* After all full cycles of wolf are complete, wolf for the remaining holes is chosen by which player is down the most points.",
+  "teams": true,
+  "team_size": null,
+  "team_change_every": 1,
+  "options": [
+    "stakes",
+    "use_handicaps",
+    "handicap_index_from"
+  ],
+  "junk": [
+    "low_ball"
+  ],
+  "multipliers": [
+    "lone_wolf",
+    "pre_lone_wolf",
+    "blind_pre_lone_wolf"
+  ]
+}

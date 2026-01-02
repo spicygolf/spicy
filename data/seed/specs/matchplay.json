@@ -1,0 +1,22 @@
+{
+  "name": "matchplay",
+  "disp": "Match Play",
+  "version": 1,
+  "status": "prod",
+  "type": "match",
+  "min_players": 2,
+  "max_players": 4,
+  "location_type": "any",
+  "long_description": "### Description\n* Hole by hole scoring with lower (net if enabled) scores winning holes, ties, etc.",
+  "teams": false,
+  "options": [
+    "stakes",
+    "use_handicaps",
+    "handicap_index_from",
+    "next_ball_breaks_ties"
+  ],
+  "junk": [
+    "low_ball"
+  ],
+  "multipliers": []
+}

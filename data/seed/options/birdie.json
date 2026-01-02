@@ -1,0 +1,14 @@
+{
+  "name": "birdie",
+  "disp": "Birdie",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 1,
+  "seq": 8,
+  "scope": "player",
+  "icon": "album",
+  "show_in": "score",
+  "based_on": "gross",
+  "limit": "",
+  "score_to_par": "exactly -1"
+}
