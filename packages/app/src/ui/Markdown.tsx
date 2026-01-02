@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { View } from "react-native";
 import {
   type MarkdownNode,
@@ -12,7 +13,10 @@ interface MarkdownProps {
 }
 
 export function Markdown({ children }: MarkdownProps) {
-  const ast = parseMarkdownWithOptions(children, { gfm: true });
+  const ast = useMemo(
+    () => parseMarkdownWithOptions(children, { gfm: true }),
+    [children],
+  );
   return <MarkdownRenderer node={ast} />;
 }
 
@@ -58,8 +62,13 @@ function MarkdownRenderer({ node }: RendererProps) {
       );
 
     case "link":
+      if (!node.href) {
+        return (
+          <Text style={styles.linkText}>{renderChildren(node.children)}</Text>
+        );
+      }
       return (
-        <Link href={{ url: node.href ?? "" }} style={styles.link}>
+        <Link href={{ url: node.href }} style={styles.link}>
           <Text style={styles.linkText}>{renderChildren(node.children)}</Text>
         </Link>
       );

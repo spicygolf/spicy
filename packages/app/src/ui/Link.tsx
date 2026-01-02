@@ -46,16 +46,17 @@ export function Link<ParamList extends ParamListBase>({
   const navigation = useNavigation<NavigationProp<ParamList>>();
   const linkTo = useLinkTo();
 
-  const onPressIn = () => {
+  const onPressIn = async () => {
     // External URL
     if ("url" in href && href.url) {
-      Linking.openURL(href.url);
+      try {
+        await Linking.openURL(href.url);
+      } catch (error) {
+        console.error("Failed to open URL:", error);
+      }
       return;
     }
 
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    }
     if (!href.name && !href.path) {
       console.warn("Link.tsx: href.name or href.path is required");
       return;
