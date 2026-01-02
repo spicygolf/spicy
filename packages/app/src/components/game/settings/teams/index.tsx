@@ -72,8 +72,7 @@ export function GameTeamsList() {
   }, [game]);
 
   // Determine teams mode
-  const { isSeamlessMode, isTeamsMode, canToggle, specForcesTeams } =
-    useTeamsMode(game, specs);
+  const { isSeamlessMode, isTeamsMode, canToggle } = useTeamsMode(game, specs);
 
   const [showRotationChangeModal, setShowRotationChangeModal] = useState(false);
   const [pendingRotationValue, setPendingRotationValue] = useState<
@@ -447,21 +446,6 @@ export function GameTeamsList() {
           </View>
         )}
 
-        {/* Spec forces teams indicator */}
-        {specForcesTeams && (
-          <View style={styles.infoRow}>
-            <FontAwesome6
-              name="circle-info"
-              iconStyle="solid"
-              size={14}
-              color={theme.colors.secondary}
-            />
-            <Text style={styles.infoText}>
-              This game type requires team configuration.
-            </Text>
-          </View>
-        )}
-
         <RotationChangeModal
           visible={showRotationChangeModal}
           currentRotateEvery={rotateEvery}
@@ -497,18 +481,6 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 16,
     fontWeight: "500",
     color: theme.colors.primary,
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.gap(2),
-    paddingHorizontal: theme.gap(4),
-    paddingVertical: theme.gap(2),
-    backgroundColor: `${theme.colors.border}20`, // Semi-transparent border color
-  },
-  infoText: {
-    fontSize: 13,
-    color: theme.colors.secondary,
   },
   centerContainer: {
     flex: 1,
