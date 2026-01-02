@@ -293,3 +293,31 @@ export function removeGrossScore(
   // Also remove pops when unscoring to keep data clean
   removeScoreValue(round, holeNum, "pops", owner, trackHistory);
 }
+
+/**
+ * Check if a round has any scores recorded.
+ * Returns true if at least one hole has a gross score.
+ *
+ * @param round - The round to check (must have scores resolved with $each: true)
+ * @returns true if the round has any scores, false otherwise
+ */
+export function roundHasScores(round: Round | null): boolean {
+  if (!round?.$isLoaded || !round.scores?.$isLoaded) {
+    return false;
+  }
+
+  for (const key of Object.keys(round.scores)) {
+    // Skip Jazz internal properties
+    if (key.startsWith("$") || key === "_refs") continue;
+
+    const holeScores = round.scores[key];
+    if (!holeScores?.$isLoaded) continue;
+
+    // Check if this hole has a gross score
+    if (holeScores.gross !== undefined) {
+      return true;
+    }
+  }
+
+  return false;
+}

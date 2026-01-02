@@ -32,5 +32,16 @@ export const TeamsConfig = co.map({
    * Used by games that rotate a special role among players.
    */
   teamLeadOrder: z.optional(z.array(z.string())),
+
+  /**
+   * Whether teams mode is active for this game instance.
+   * Used on Game.scope.teamsConfig (not on GameSpec.teamsConfig).
+   *
+   * When true, the user has manually enabled teams mode via the toggle.
+   * When false/undefined, teams mode is determined by:
+   * - Player count > min_players (auto-activates)
+   * - Spec forces teams (rotateEvery > 0, teamCount < min_players, or maxPlayersPerTeam > 1)
+   */
+  active: z.optional(z.boolean()),
 });
 export type TeamsConfig = co.loaded<typeof TeamsConfig>;

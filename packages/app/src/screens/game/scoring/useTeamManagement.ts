@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { type Game, ListOfTeams } from "spicylib/schema";
 import {
-  saveTeamAssignmentsToHole,
+  saveTeamAssignmentsToAllRelevantHoles,
   shouldShowTeamChooser,
 } from "@/utils/gameTeams";
 
@@ -90,36 +90,17 @@ export function useTeamManagement(
     (assignments: Map<string, number>) => {
       if (!game?.holes?.$isLoaded || rotateEvery === undefined) return;
 
-      if (rotateEvery > 0) {
-        const rotationPeriodStart =
-          Math.floor(currentHoleIndex / rotateEvery) * rotateEvery;
-        const rotationPeriodEnd = Math.min(
-          rotationPeriodStart + rotateEvery,
-          holesList.length,
-        );
-
-        for (let i = rotationPeriodStart; i < rotationPeriodEnd; i++) {
-          saveTeamAssignmentsToHole(
-            game,
-            game.holes,
-            i,
-            assignments,
-            teamCount,
-          );
-        }
-      } else {
-        saveTeamAssignmentsToHole(
-          game,
-          game.holes,
-          currentHoleIndex,
-          assignments,
-          teamCount,
-        );
-      }
+      saveTeamAssignmentsToAllRelevantHoles(
+        game,
+        assignments,
+        teamCount,
+        currentHoleIndex,
+        rotateEvery,
+      );
 
       // showChooser will update automatically via Jazz reactivity when teams are assigned
     },
-    [game, currentHoleIndex, teamCount, rotateEvery, holesList.length],
+    [game, currentHoleIndex, teamCount, rotateEvery],
   );
 
   return {

@@ -513,6 +513,74 @@ async function upsertOptions(
 }
 
 /**
+ * Consolidate Match Play specs: merge Individual Match Play + Team Match Play → Match Play
+ *
+ * This function takes the options from Team Match Play (e.g., next_ball_breaks_ties)
+ * and merges them into Individual Match Play, then renames it to "Match Play".
+ * Team Match Play is excluded from the final result.
+ */
+function consolidateMatchPlaySpecs(specs: GameSpecV03[]): GameSpecV03[] {
+  const individualMatchPlay = specs.find(
+    (s) => s.disp === "Individual Match Play",
+  );
+  const teamMatchPlay = specs.find((s) => s.disp === "Team Match Play");
+
+  // If either is missing, just filter out Team Match Play if present
+  if (!individualMatchPlay || !teamMatchPlay) {
+    console.log(
+      "Match Play consolidation: Individual or Team Match Play not found, skipping consolidation",
+    );
+    return specs.filter((s) => s.disp !== "Team Match Play");
+  }
+
+  console.log(
+    "Consolidating Individual Match Play + Team Match Play → Match Play",
+  );
+
+  // Merge options from Team Match Play into Individual Match Play
+  const individualOptions = individualMatchPlay.options || [];
+  const teamOptions = teamMatchPlay.options || [];
+
+  // Get option names that already exist in individual
+  const existingOptionNames = new Set(individualOptions.map((o) => o.name));
+
+  // Add any options from team that don't exist in individual
+  const mergedOptions = [...individualOptions];
+  for (const opt of teamOptions) {
+    if (!existingOptionNames.has(opt.name)) {
+      console.log(`  Adding option from Team Match Play: ${opt.name}`);
+      mergedOptions.push(opt);
+    }
+  }
+
+  // Create the consolidated Match Play spec
+  const consolidatedMatchPlay: GameSpecV03 = {
+    ...individualMatchPlay,
+    name: "matchplay", // Internal name
+    disp: "Match Play", // Display name
+    // Keep min_players from Individual (2), but update max_players to support teams
+    max_players: Math.max(
+      individualMatchPlay.max_players || 2,
+      teamMatchPlay.max_players || 4,
+    ),
+    options: mergedOptions,
+    // Keep teams: false since this is the base spec;
+    // teams mode is determined by game instance teamsConfig.active
+  };
+
+  console.log(
+    `  Merged spec: min_players=${consolidatedMatchPlay.min_players}, max_players=${consolidatedMatchPlay.max_players}, options=${mergedOptions.map((o) => o.name).join(", ")}`,
+  );
+
+  // Return specs with Team Match Play removed and Individual Match Play replaced
+  return specs
+    .filter(
+      (s) => s.disp !== "Individual Match Play" && s.disp !== "Team Match Play",
+    )
+    .concat(consolidatedMatchPlay);
+}
+
+/**
  * Merge game specs from both ArangoDB and JSON sources
  */
 export async function mergeGameSpecSources(
@@ -551,7 +619,10 @@ export async function mergeGameSpecSources(
     specMap.set(key, spec);
   }
 
-  return Array.from(specMap.values());
+  const mergedSpecs = Array.from(specMap.values());
+
+  // Consolidate Match Play specs (Individual + Team → Match Play)
+  return consolidateMatchPlaySpecs(mergedSpecs);
 }
 
 /**

@@ -1,5 +1,5 @@
 import { err, type Result } from "neverthrow";
-import type { Player } from "spicylib/schema";
+import type { Game, Player } from "spicylib/schema";
 import {
   type AddPlayerError,
   type AddPlayerInput,
@@ -8,8 +8,10 @@ import {
   addPlayerToGameCore,
   type PlayerData,
 } from "../utils/addPlayerToGameCore";
+import { autoAssignPlayerToTeam } from "../utils/gameTeams";
 import { useGame } from "./useGame";
 import { useJazzWorker } from "./useJazzWorker";
+import { computeSpecForcesTeams } from "./useTeamsMode";
 
 // Re-export types for consumers
 export type {
@@ -45,6 +47,9 @@ export interface UseAddPlayerError {
  * - A Player reference (from catalog, favorites, or me.root.player) - PREFERRED
  * - PlayerData to create a new player - only for truly new players
  *
+ * In seamless mode (players <= min_players and spec doesn't force teams),
+ * automatically assigns the player to their own team (1:1 assignment).
+ *
  * @example
  * // Using existing player reference (preferred)
  * const catalogPlayer = findByGhinId("1234567");
@@ -64,6 +69,8 @@ export interface UseAddPlayerError {
 export function useAddPlayerToGame() {
   const { game } = useGame(undefined, {
     resolve: {
+      scope: { teamsConfig: true },
+      specs: { $each: { teamsConfig: true } },
       players: {
         $each: {
           name: true,
@@ -71,7 +78,10 @@ export function useAddPlayerToGame() {
           rounds: true,
         },
       },
-      rounds: true, // Required for autoCreateRound to work
+      rounds: {
+        $each: true,
+      },
+      holes: { $each: { teams: { $each: { rounds: true } } } },
     },
   });
   const worker = useJazzWorker();
@@ -105,8 +115,89 @@ export function useAddPlayerToGame() {
       ? { player: playerOrData }
       : { playerData: playerOrData };
 
-    return addPlayerToGameCore(game, input, worker.account, options);
+    // Add the player to the game
+    const result = await addPlayerToGameCore(
+      game,
+      input,
+      worker.account,
+      options,
+    );
+
+    if (result.isErr()) {
+      return result;
+    }
+
+    // Check if we should auto-assign team (seamless mode)
+    const shouldAutoAssign = computeShouldAutoAssignTeam(game);
+
+    if (shouldAutoAssign && game.rounds?.$isLoaded) {
+      // Find the RoundToGame for this player
+      const playerId = result.value.player.$jazz.id;
+      let roundToGame = null;
+
+      for (const rtg of game.rounds) {
+        if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+        if (rtg.round.playerId === playerId) {
+          roundToGame = rtg;
+          break;
+        }
+      }
+
+      if (roundToGame) {
+        // Assign to team number = current player count (after adding)
+        const teamNumber = game.players.length;
+        autoAssignPlayerToTeam(game, roundToGame, teamNumber);
+      }
+    }
+
+    return result;
   };
 
   return addPlayerToGame;
+}
+
+/**
+ * Determines if a new player should be auto-assigned to a team.
+ *
+ * Auto-assign when:
+ * - Spec doesn't force teams mode (not rotating, not true team game)
+ * - User hasn't manually activated teams mode
+ * - Player count will be <= min_players after adding
+ *
+ * Note: This is computed BEFORE adding the player, so we check
+ * if current players < min_players (will be <= after adding).
+ */
+function computeShouldAutoAssignTeam(game: Game): boolean {
+  if (!game.$isLoaded) return false;
+
+  // Get specs from game
+  const specs = [];
+  if (game.specs?.$isLoaded) {
+    for (const spec of game.specs) {
+      if (spec?.$isLoaded) specs.push(spec);
+    }
+  }
+
+  if (specs.length === 0) return false;
+
+  // Check if any spec forces teams mode
+  const specForcesTeams = specs.some(computeSpecForcesTeams);
+  if (specForcesTeams) return false;
+
+  // Check if user has manually activated teams mode
+  const userActivated =
+    game.scope?.$isLoaded &&
+    game.scope.teamsConfig?.$isLoaded &&
+    game.scope.teamsConfig.active === true;
+  if (userActivated) return false;
+
+  // Get min_players from specs
+  const minPlayers = Math.min(...specs.map((s) => s.min_players));
+
+  // Current player count (before adding)
+  const currentPlayerCount = game.players?.$isLoaded ? game.players.length : 0;
+
+  // Auto-assign if adding this player keeps us at or below min_players
+  // We check < because we're about to add one more
+  return currentPlayerCount < minPlayers;
 }

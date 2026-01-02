@@ -20,3 +20,4 @@ export * from "./usePlayer";
 export * from "./useRound";
 export * from "./useSaveOptionToGame";
 export * from "./useScoreManagement";
+export * from "./useTeamsMode";
