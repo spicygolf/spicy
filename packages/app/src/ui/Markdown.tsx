@@ -102,6 +102,33 @@ function MarkdownRenderer({ node }: RendererProps) {
         </View>
       );
 
+    case "table":
+      return <View style={styles.table}>{renderChildren(node.children)}</View>;
+
+    case "table_head":
+      return (
+        <View style={styles.tableHead}>{renderChildren(node.children)}</View>
+      );
+
+    case "table_body":
+      return <View>{renderChildren(node.children)}</View>;
+
+    case "table_row":
+      return (
+        <View style={styles.tableRow}>{renderChildren(node.children)}</View>
+      );
+
+    case "table_cell":
+      return (
+        <View
+          style={[styles.tableCell, node.isHeader && styles.tableHeaderCell]}
+        >
+          <Text style={node.isHeader ? styles.tableHeaderText : undefined}>
+            {renderChildren(node.children)}
+          </Text>
+        </View>
+      );
+
     default:
       if (node.children) {
         return <>{renderChildren(node.children)}</>;
@@ -223,5 +250,32 @@ const styles = StyleSheet.create((theme) => ({
   },
   listItemContent: {
     flex: 1,
+  },
+  table: {
+    marginBottom: theme.gap(1),
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  tableHead: {
+    backgroundColor: theme.colors.border,
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  tableCell: {
+    flex: 1,
+    padding: theme.gap(0.5),
+    borderRightWidth: 1,
+    borderRightColor: theme.colors.border,
+  },
+  tableHeaderCell: {
+    backgroundColor: theme.colors.border,
+  },
+  tableHeaderText: {
+    fontWeight: "bold",
   },
 }));
