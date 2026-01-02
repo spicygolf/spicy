@@ -15,7 +15,17 @@
       "name": "orchestration",
       "description": "Lightweight task decomposition and progress tracking (always on)",
       "triggers": {
-        "always": true
+        "always": true,
+        "keywords": [
+          "debug",
+          "log",
+          "console",
+          "metro",
+          "error",
+          "crash",
+          "not working",
+          "doesn't work"
+        ]
       },
       "skillPath": "orchestration",
       "priority": 99
