@@ -136,10 +136,6 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     paddingVertical: theme.gap(1),
   },
-  description: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
   playButton: {
     backgroundColor: theme.colors.action,
     paddingVertical: theme.gap(1.5),

@@ -22,13 +22,26 @@ export function Markdown({ children }: MarkdownProps) {
 
 interface RendererProps {
   node: MarkdownNode;
+  listContext?: {
+    ordered: boolean;
+    start: number;
+  };
+  listIndex?: number;
 }
 
-function MarkdownRenderer({ node }: RendererProps) {
-  const renderChildren = (children: MarkdownNode[] | undefined) =>
+function MarkdownRenderer({ node, listContext, listIndex }: RendererProps) {
+  const renderChildren = (
+    children: MarkdownNode[] | undefined,
+    childListContext?: RendererProps["listContext"],
+  ) =>
     children?.map((child, i) => (
-      // biome-ignore lint/suspicious/noArrayIndexKey: AST nodes don't have stable IDs
-      <MarkdownRenderer key={i} node={child} />
+      <MarkdownRenderer
+        // biome-ignore lint/suspicious/noArrayIndexKey: AST nodes don't have stable IDs
+        key={i}
+        node={child}
+        listContext={childListContext}
+        listIndex={childListContext ? i : undefined}
+      />
     ));
 
   switch (node.type) {
@@ -88,18 +101,32 @@ function MarkdownRenderer({ node }: RendererProps) {
         <View style={styles.blockquote}>{renderChildren(node.children)}</View>
       );
 
-    case "list":
-      return <View style={styles.list}>{renderChildren(node.children)}</View>;
+    case "list": {
+      const context = {
+        ordered: node.ordered ?? false,
+        start: node.start ?? 1,
+      };
+      return (
+        <View style={styles.list}>
+          {renderChildren(node.children, context)}
+        </View>
+      );
+    }
 
-    case "list_item":
+    case "list_item": {
+      const marker =
+        listContext?.ordered && listIndex !== undefined
+          ? `${listContext.start + listIndex}.`
+          : "•";
       return (
         <View style={styles.listItem}>
-          <Text style={styles.listBullet}>•</Text>
+          <Text style={styles.listBullet}>{marker}</Text>
           <View style={styles.listItemContent}>
             {renderChildren(node.children)}
           </View>
         </View>
       );
+    }
 
     case "task_list_item":
       return (
@@ -254,7 +281,7 @@ const styles = StyleSheet.create((theme) => ({
     marginBottom: theme.gap(0.5),
   },
   listBullet: {
-    width: 16,
+    minWidth: 20,
     color: theme.colors.primary,
   },
   listItemContent: {
