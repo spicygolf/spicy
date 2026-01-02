@@ -52,24 +52,15 @@ export function PlayerDelete({ player }: { player: Player }) {
         rtg.round.playerId === player.$jazz.id,
     );
 
-    // Get round IDs and RoundToGame IDs for this player
-    const playerRoundIds = new Set(
-      playerRoundToGames
-        .filter((rtg) => rtg?.$isLoaded && rtg.round?.$isLoaded)
-        .map((rtg) => {
-          if (rtg?.$isLoaded && rtg.round?.$isLoaded) {
-            return rtg.round.$jazz.id;
-          }
-          return "";
-        })
-        .filter((id) => id !== ""),
-    );
+    // Collect RoundToGame IDs for team cleanup
+    const roundToGameIds = new Set<string>();
+    const playerRoundIds = new Set<string>();
 
-    const roundToGameIds = new Set(
-      playerRoundToGames
-        .filter((rtg) => rtg?.$isLoaded)
-        .map((rtg) => rtg.$jazz.id),
-    );
+    for (const rtg of playerRoundToGames) {
+      if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+      roundToGameIds.add(rtg.$jazz.id);
+      playerRoundIds.add(rtg.round.$jazz.id);
+    }
 
     // Remove RoundToGame entries that reference this player's rounds
     const roundsToKeep = game.rounds.filter((rtg) => {
@@ -79,6 +70,11 @@ export function PlayerDelete({ player }: { player: Player }) {
 
     // Clear and repopulate the rounds list
     game.rounds.$jazz.splice(0, game.rounds.length, ...roundsToKeep);
+
+    // Note: Rounds without scores are now orphaned (no longer referenced by this game).
+    // Jazz doesn't support explicit deletion of CoValues, but orphaned data without
+    // scores is harmless. Rounds WITH scores are preserved since they may be
+    // referenced by other games.
 
     // Remove team assignments for this player from all holes
     if (game.holes?.$isLoaded) {
