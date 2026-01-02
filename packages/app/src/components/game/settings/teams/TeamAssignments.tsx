@@ -78,6 +78,7 @@ export function TeamAssignments({
       </View>
 
       <DraxScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={true}
       >
@@ -193,8 +194,12 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 16,
     fontWeight: "bold",
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContainer: {
-    paddingBottom: theme.gap(4),
+    flexGrow: 1,
+    paddingBottom: theme.gap(20),
   },
   teamSection: {
     marginBottom: theme.gap(3),
