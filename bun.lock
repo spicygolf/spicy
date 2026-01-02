@@ -68,6 +68,7 @@
         "react-native-get-random-values": "1.11.0",
         "react-native-localize": "^3.6.0",
         "react-native-mmkv": "3.3.0",
+        "react-native-nitro-markdown": "^0.1.2",
         "react-native-nitro-modules": "0.32.0",
         "react-native-pager-view": "8.0.0",
         "react-native-reanimated": "4.2.1",
@@ -2180,6 +2181,8 @@
     "react-native-localize": ["react-native-localize@3.6.0", "", { "peerDependencies": { "@expo/config-plugins": "*", "react": "*", "react-native": "*", "react-native-macos": "*" }, "optionalPeers": ["@expo/config-plugins", "react-native-macos"] }, "sha512-CByn67b9dPDBA7qvAx18PpXhuLqBbdTpedobGOUcjqiGuSAEXZzwas9ziMYSShAR2AvX2Cl7ePErCpj9V39Ctw=="],
 
     "react-native-mmkv": ["react-native-mmkv@3.3.0", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-2iPjIJ+IAODXN35wm53EN6nv+hR/0NXLLiLWOdPA/0gXDB2dYVrr6MqvoiFpxhLhdj0B8fkf5ARNVavJaSvuuQ=="],
+
+    "react-native-nitro-markdown": ["react-native-nitro-markdown@0.1.2", "", { "peerDependencies": { "react": "*", "react-native": ">=0.75.0", "react-native-nitro-modules": ">=0.31.0" } }, "sha512-y2DLiXWS0XYA9kR7BnI9dwOOkxu7rSwFyXBksZK7FO2d5OmGL9m5Ovv6TfLVyK4QjCwJIxkrSko/3Afry68fJw=="],
 
     "react-native-nitro-modules": ["react-native-nitro-modules@0.32.0", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-nLDsmi/H9/cLcYxArYxcTDL641JiWnAH3u2LmsFETgyqSEHvukswDTdmX6AHBRIAwXu/iUDppZyjsaRpTG6WMg=="],
 

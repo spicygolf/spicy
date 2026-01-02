@@ -161,9 +161,10 @@ function main(): void {
       console.log(`- ${skill.name} (${skill.description})`);
     }
 
-    // Inject full content for keyword-triggered skills (not always-on)
+    // Inject full content for keyword-triggered skills
+    // Include always-on skills if they also have keywords that matched
     const keywordTriggeredSkills = activatedSkills.filter(
-      (s) => !s.triggers.always && s.triggers.keywords,
+      (s) => s.triggers.keywords && matchesKeywords(input, s.triggers.keywords),
     );
 
     for (const skill of keywordTriggeredSkills) {

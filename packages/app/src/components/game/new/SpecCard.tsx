@@ -6,7 +6,7 @@ import type { GameSpec } from "spicylib/schema";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
 import { useCreateGame } from "@/hooks";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
-import { Text } from "@/ui";
+import { Markdown, Text } from "@/ui";
 
 interface SpecCardProps {
   spec: GameSpec;
@@ -83,10 +83,10 @@ export function SpecCard({
             contentInsetAdjustmentBehavior="automatic"
             style={styles.scrollView}
           >
-            <Text style={styles.description}>
+            <Markdown>
               {spec.long_description ||
                 `${spec.short}\n\nType: ${spec.spec_type}\nMin Players: ${spec.min_players}\nTeams: ${spec.teams ? "Yes" : "No"}`}
-            </Text>
+            </Markdown>
           </ScrollView>
           <TouchableOpacity style={styles.playButton} onPress={handlePlayGame}>
             <Text style={styles.playButtonText}>Play Game</Text>
@@ -135,10 +135,6 @@ const styles = StyleSheet.create((theme) => ({
   scrollView: {
     flex: 1,
     paddingVertical: theme.gap(1),
-  },
-  description: {
-    fontSize: 14,
-    lineHeight: 20,
   },
   playButton: {
     backgroundColor: theme.colors.action,
