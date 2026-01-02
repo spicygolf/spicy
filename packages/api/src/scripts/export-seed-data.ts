@@ -21,6 +21,11 @@ const SPECS_PATH = join(SEED_PATH, "specs");
 const OPTIONS_PATH = join(SEED_PATH, "options");
 
 /**
+ * Track legacy keys for consolidated specs
+ */
+const LEGACY_KEY_MAP = new Map<string, string[]>();
+
+/**
  * Consolidate Match Play specs before export
  */
 function consolidateMatchPlaySpecs(specs: GameSpecV03[]): GameSpecV03[] {
@@ -50,8 +55,17 @@ function consolidateMatchPlaySpecs(specs: GameSpecV03[]): GameSpecV03[] {
     }
   }
 
+  // Track legacy keys - games referencing either individual or team match play
+  // should resolve to the consolidated matchplay spec
+  const legacyKeys: string[] = [];
+  if (individualMatchPlay._key) legacyKeys.push(individualMatchPlay._key);
+  if (teamMatchPlay._key) legacyKeys.push(teamMatchPlay._key);
+  LEGACY_KEY_MAP.set("matchplay", legacyKeys);
+  console.log(`  Legacy keys for matchplay: ${legacyKeys.join(", ")}`);
+
   const consolidatedMatchPlay: GameSpecV03 = {
     ...individualMatchPlay,
+    _key: "matchplay", // New canonical key
     name: "matchplay",
     disp: "Match Play",
     max_players: Math.max(
@@ -66,6 +80,13 @@ function consolidateMatchPlaySpecs(specs: GameSpecV03[]): GameSpecV03[] {
       (s) => s.disp !== "Individual Match Play" && s.disp !== "Team Match Play",
     )
     .concat(consolidatedMatchPlay);
+}
+
+/**
+ * Get legacy keys for a spec (for consolidated specs)
+ */
+function getLegacyKeys(specName: string): string[] | undefined {
+  return LEGACY_KEY_MAP.get(specName);
 }
 
 /**
@@ -170,6 +191,8 @@ function extractOptions(specs: GameSpecV03[]): Map<string, OptionData> {
  * Create a clean spec for export (remove internal fields, reference options by name)
  */
 interface ExportedSpec {
+  _key: string; // ArangoDB _key for legacyId matching during game import
+  legacy_keys?: string[]; // Additional legacy keys that should map to this spec
   name: string;
   disp: string;
   version: number;
@@ -189,8 +212,12 @@ interface ExportedSpec {
   multipliers: string[];
 }
 
-function createExportedSpec(spec: GameSpecV03): ExportedSpec {
-  return {
+function createExportedSpec(
+  spec: GameSpecV03,
+  legacyKeys?: string[],
+): ExportedSpec {
+  const exported: ExportedSpec = {
+    _key: spec._key || spec.name, // Use _key if available, fallback to name
     name: spec.name,
     disp: spec.disp,
     version: spec.version,
@@ -208,6 +235,13 @@ function createExportedSpec(spec: GameSpecV03): ExportedSpec {
     junk: (spec.junk || []).map((j) => j.name),
     multipliers: (spec.multipliers || []).map((m) => m.name),
   };
+
+  // Add legacy keys for consolidated specs (e.g., Match Play)
+  if (legacyKeys && legacyKeys.length > 0) {
+    exported.legacy_keys = legacyKeys;
+  }
+
+  return exported;
 }
 
 async function main() {
@@ -250,7 +284,8 @@ async function main() {
   // Write specs to individual files
   console.log("\nWriting specs to seed files...");
   for (const spec of specs) {
-    const exportedSpec = createExportedSpec(spec);
+    const legacyKeys = getLegacyKeys(spec.name);
+    const exportedSpec = createExportedSpec(spec, legacyKeys);
     // Clean up undefined values
     const cleanSpec = JSON.parse(JSON.stringify(exportedSpec));
     const filename = `${spec.name}.json`;

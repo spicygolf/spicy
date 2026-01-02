@@ -6,7 +6,8 @@
     "wolf",
     "five_points",
     "vegas",
-    "matchplay"
+    "matchplay",
+    "nassau"
   ],
   "options": [
     "stakes",
@@ -45,8 +46,10 @@
     "two_birdies_add",
     "eagle_add",
     "two_eagles_add",
-    "next_ball_breaks_ties"
+    "next_ball_breaks_ties",
+    "auto_press",
+    "auto_press_trigger"
   ],
-  "exportedAt": "2026-01-02T15:41:34.889Z",
+  "exportedAt": "2026-01-02T15:59:20.561Z",
   "version": "1.0.0"
 }

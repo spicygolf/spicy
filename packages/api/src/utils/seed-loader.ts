@@ -63,6 +63,8 @@ export type SeedOption = SeedGameOption | SeedJunkOption | SeedMultiplierOption;
  * Seed data spec format (references options by name)
  */
 export interface SeedSpec {
+  _key: string; // ArangoDB _key for legacyId matching during game import
+  legacy_keys?: string[]; // Additional legacy keys (for consolidated specs like Match Play)
   name: string;
   disp: string;
   version: number;
@@ -174,6 +176,7 @@ export async function loadSeedIndex(): Promise<SeedIndex | null> {
 export async function loadSeedSpecsAsV03(): Promise<
   Array<{
     _key?: string;
+    legacy_keys?: string[]; // Additional legacy keys (for consolidated specs like Match Play)
     name: string;
     disp: string;
     version: number;
@@ -292,6 +295,8 @@ export async function loadSeedSpecsAsV03(): Promise<
       .filter(Boolean);
 
     return {
+      _key: spec._key, // ArangoDB _key for legacyId matching during game import
+      legacy_keys: spec.legacy_keys, // Additional legacy keys (for consolidated specs like Match Play)
       name: spec.name,
       disp: spec.disp,
       version: spec.version,

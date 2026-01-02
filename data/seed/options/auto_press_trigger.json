@@ -1,0 +1,7 @@
+{
+  "name": "auto_press_trigger",
+  "disp": "Automatic Press Trigger",
+  "type": "game",
+  "valueType": "num",
+  "defaultValue": "2"
+}

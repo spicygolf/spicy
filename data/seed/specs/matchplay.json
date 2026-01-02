@@ -1,4 +1,5 @@
 {
+  "_key": "matchplay",
   "name": "matchplay",
   "disp": "Match Play",
   "version": 1,
@@ -18,5 +19,9 @@
   "junk": [
     "low_ball"
   ],
-  "multipliers": []
+  "multipliers": [],
+  "legacy_keys": [
+    "72068149",
+    "72068183"
+  ]
 }
