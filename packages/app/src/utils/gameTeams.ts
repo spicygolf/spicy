@@ -247,6 +247,51 @@ export function getTeamAssignmentsFromHole(
 }
 
 /**
+ * Saves team assignments to holes based on rotation settings.
+ *
+ * - rotateEvery === 0: Save to ALL holes (fixed teams for whole game)
+ * - rotateEvery > 0: Save to current rotation period only
+ *
+ * @param game - The game with holes and rounds loaded
+ * @param assignments - Map of roundToGame ID -> team number
+ * @param teamCount - Number of teams
+ * @param currentHoleIndex - Current hole index (used for rotation period calculation)
+ * @param rotateEvery - Rotation frequency (0 = never rotate)
+ */
+export function saveTeamAssignmentsToAllRelevantHoles(
+  game: Game,
+  assignments: Map<string, number>,
+  teamCount: number,
+  currentHoleIndex: number,
+  rotateEvery: number,
+): void {
+  if (!game?.holes?.$isLoaded || !game.rounds?.$isLoaded) {
+    return;
+  }
+
+  const totalHoles = game.holes.length;
+
+  if (rotateEvery > 0) {
+    // Rotating teams: save to current rotation period only
+    const rotationPeriodStart =
+      Math.floor(currentHoleIndex / rotateEvery) * rotateEvery;
+    const rotationPeriodEnd = Math.min(
+      rotationPeriodStart + rotateEvery,
+      totalHoles,
+    );
+
+    for (let i = rotationPeriodStart; i < rotationPeriodEnd; i++) {
+      saveTeamAssignmentsToHole(game, game.holes, i, assignments, teamCount);
+    }
+  } else {
+    // No rotation (rotateEvery === 0): save to ALL holes
+    for (let i = 0; i < totalHoles; i++) {
+      saveTeamAssignmentsToHole(game, game.holes, i, assignments, teamCount);
+    }
+  }
+}
+
+/**
  * Saves team assignments to a specific hole.
  */
 export function saveTeamAssignmentsToHole(

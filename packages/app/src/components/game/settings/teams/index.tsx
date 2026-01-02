@@ -4,17 +4,14 @@ import { useCallback, useMemo, useState } from "react";
 import { Switch, View } from "react-native";
 import { DraxProvider } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import {
-  GameHole,
-  ListOfRoundToTeams,
-  ListOfTeams,
-  RoundToTeam,
-  Team,
-  TeamsConfig,
-} from "spicylib/schema";
+import { GameHole, ListOfTeams, TeamsConfig } from "spicylib/schema";
 import { useGame, useTeamsMode } from "@/hooks";
 import { Text } from "@/ui";
-import { ensureGameHoles, reassignAllPlayersSeamless } from "@/utils/gameTeams";
+import {
+  ensureGameHoles,
+  reassignAllPlayersSeamless,
+  saveTeamAssignmentsToAllRelevantHoles,
+} from "@/utils/gameTeams";
 import { RotationChangeModal } from "./RotationChangeModal";
 import { RotationFrequencyPicker } from "./RotationFrequencyPicker";
 import { TeamAssignments } from "./TeamAssignments";
@@ -185,59 +182,26 @@ export function GameTeamsList() {
   }, [firstHole]);
 
   const saveTeamAssignmentsToGame = useCallback(
-    async (assignments: Map<string, number>) => {
+    (assignments: Map<string, number>) => {
       if (!game?.$isLoaded || !game.holes?.$isLoaded) {
         return;
       }
 
       ensureGameHoles(game);
 
-      // holes are already loaded by useGame resolve query - no ensureLoaded needed
-
-      for (const hole of game.holes as Iterable<(typeof game.holes)[number]>) {
-        if (!hole?.$isLoaded) {
-          continue;
-        }
-
-        const newTeams = ListOfTeams.create([], { owner: hole.$jazz.owner });
-
-        for (let i = 1; i <= teamCount; i++) {
-          const teamPlayers = allPlayerRounds.filter(
-            (p) => assignments.get(p.id) === i,
-          );
-
-          if (teamPlayers.length === 0) continue;
-
-          const roundToTeams = ListOfRoundToTeams.create([], {
-            owner: hole.$jazz.owner,
-          });
-
-          for (const player of teamPlayers) {
-            const roundToTeam = RoundToTeam.create(
-              { roundToGame: player.roundToGame },
-              { owner: hole.$jazz.owner },
-            );
-            roundToTeams.$jazz.push(roundToTeam);
-          }
-
-          const team = Team.create(
-            {
-              team: `${i}`,
-              rounds: roundToTeams,
-            },
-            { owner: hole.$jazz.owner },
-          );
-
-          newTeams.$jazz.push(team);
-        }
-
-        hole.$jazz.set("teams", newTeams);
-      }
+      // Settings screen always saves to ALL holes (rotateEvery: 0)
+      saveTeamAssignmentsToAllRelevantHoles(
+        game,
+        assignments,
+        teamCount,
+        0, // currentHoleIndex doesn't matter when rotateEvery is 0
+        0, // rotateEvery: 0 means save to all holes
+      );
     },
-    [game, allPlayerRounds, teamCount],
+    [game, teamCount],
   );
 
-  const handleTossBalls = useCallback(async () => {
+  const handleTossBalls = useCallback(() => {
     const shuffled = [...allPlayerRounds].sort(() => Math.random() - 0.5);
     const newAssignments = new Map<string, number>();
 
@@ -246,18 +210,18 @@ export function GameTeamsList() {
       newAssignments.set(player.id, teamNumber);
     });
 
-    await saveTeamAssignmentsToGame(newAssignments);
+    saveTeamAssignmentsToGame(newAssignments);
   }, [allPlayerRounds, teamCount, saveTeamAssignmentsToGame]);
 
   const handleDrop = useCallback(
-    async (playerId: string, targetTeam: number) => {
+    (playerId: string, targetTeam: number) => {
       const newAssignments = new Map(teamAssignments);
       if (targetTeam === 0) {
         newAssignments.delete(playerId);
       } else {
         newAssignments.set(playerId, targetTeam);
       }
-      await saveTeamAssignmentsToGame(newAssignments);
+      saveTeamAssignmentsToGame(newAssignments);
     },
     [teamAssignments, saveTeamAssignmentsToGame],
   );
