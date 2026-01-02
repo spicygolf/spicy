@@ -2300,10 +2300,17 @@ async function importGame(
   const specsMap = loadedCatalog.specs as MapOfGameSpecs | undefined;
   let gameSpec: GameSpec | null = null;
   if (gamespecKey && specsMap) {
+    // Normalize legacy Match Play keys to consolidated "matchplay" spec
+    // Old keys: "72068149" (individual), "72068183" (team) -> "matchplay"
+    const normalizedKey =
+      gamespecKey === "72068149" || gamespecKey === "72068183"
+        ? "matchplay"
+        : gamespecKey;
+
     // Find spec by matching legacyId (ArangoDB _key)
     for (const key of Object.keys(specsMap)) {
       const spec = specsMap[key];
-      if (spec?.$isLoaded && spec.legacyId === gamespecKey) {
+      if (spec?.$isLoaded && spec.legacyId === normalizedKey) {
         gameSpec = spec as GameSpec;
         // @ts-expect-error - MaybeLoaded types in migration code, spec is verified loaded
         specs.$jazz.push(spec);
