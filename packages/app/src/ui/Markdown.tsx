@@ -1,10 +1,10 @@
-// biome-ignore lint/style/noRestrictedImports: RNText needed for onPress support
-import { Linking, Text as RNText, View } from "react-native";
+import { View } from "react-native";
 import {
   type MarkdownNode,
   parseMarkdownWithOptions,
 } from "react-native-nitro-markdown";
 import { StyleSheet } from "react-native-unistyles";
+import { Link } from "./Link";
 import { Text } from "./Text";
 
 interface MarkdownProps {
@@ -59,12 +59,9 @@ function MarkdownRenderer({ node }: RendererProps) {
 
     case "link":
       return (
-        <RNText
-          style={styles.link}
-          onPress={() => node.href && Linking.openURL(node.href)}
-        >
-          {renderChildren(node.children)}
-        </RNText>
+        <Link href={{ url: node.href ?? "" }} style={styles.link}>
+          <Text style={styles.linkText}>{renderChildren(node.children)}</Text>
+        </Link>
       );
 
     case "code_inline":
@@ -184,7 +181,8 @@ const styles = StyleSheet.create((theme) => ({
   strikethrough: {
     textDecorationLine: "line-through",
   },
-  link: {
+  link: {},
+  linkText: {
     color: theme.colors.action,
     textDecorationLine: "underline",
   },
