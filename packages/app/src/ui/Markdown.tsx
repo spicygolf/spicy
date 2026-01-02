@@ -86,6 +86,12 @@ function MarkdownRenderer({ node, listContext, listIndex }: RendererProps) {
         </Link>
       );
 
+    case "soft_break":
+      return <Text> </Text>;
+
+    case "line_break":
+      return <Text>{"\n"}</Text>;
+
     case "code_inline":
       return <Text style={styles.codeInline}>{node.content}</Text>;
 
