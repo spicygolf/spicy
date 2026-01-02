@@ -127,9 +127,9 @@ function MarkdownRenderer({ node, listContext, listIndex }: RendererProps) {
       return (
         <View style={styles.listItem}>
           <Text style={styles.listBullet}>{marker}</Text>
-          <View style={styles.listItemContent}>
+          <Text style={styles.listItemContent}>
             {renderChildren(node.children)}
-          </View>
+          </Text>
         </View>
       );
     }
@@ -138,9 +138,9 @@ function MarkdownRenderer({ node, listContext, listIndex }: RendererProps) {
       return (
         <View style={styles.listItem}>
           <Text style={styles.listBullet}>{node.checked ? "☑" : "☐"}</Text>
-          <View style={styles.listItemContent}>
+          <Text style={styles.listItemContent}>
             {renderChildren(node.children)}
-          </View>
+          </Text>
         </View>
       );
 
