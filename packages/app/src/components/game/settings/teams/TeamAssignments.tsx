@@ -199,7 +199,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: theme.gap(20),
   },
   teamSection: {
     marginBottom: theme.gap(3),

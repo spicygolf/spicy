@@ -91,6 +91,7 @@ export function useTeamManagement(
       if (!game?.holes?.$isLoaded || rotateEvery === undefined) return;
 
       if (rotateEvery > 0) {
+        // Rotating teams: save to current rotation period only
         const rotationPeriodStart =
           Math.floor(currentHoleIndex / rotateEvery) * rotateEvery;
         const rotationPeriodEnd = Math.min(
@@ -108,13 +109,16 @@ export function useTeamManagement(
           );
         }
       } else {
-        saveTeamAssignmentsToHole(
-          game,
-          game.holes,
-          currentHoleIndex,
-          assignments,
-          teamCount,
-        );
+        // No rotation (rotateEvery === 0): save to ALL holes
+        for (let i = 0; i < holesList.length; i++) {
+          saveTeamAssignmentsToHole(
+            game,
+            game.holes,
+            i,
+            assignments,
+            teamCount,
+          );
+        }
       }
 
       // showChooser will update automatically via Jazz reactivity when teams are assigned
