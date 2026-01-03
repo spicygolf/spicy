@@ -10,7 +10,7 @@
     "android:bundle": "cd android && ./gradlew bundleRelease && open app/build/outputs/bundle/release/",
     "android:apk": "cd android && ./gradlew assembleRelease && mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/spicygolf-${npm_package_version}.apk ",
     "ios": "react-native run-ios",
-    "start": "react-native start",
+    "start": "react-native start --port 8082",
     "test": "jest",
     "type-check": "tsc",
     "postversion": "react-native-version",

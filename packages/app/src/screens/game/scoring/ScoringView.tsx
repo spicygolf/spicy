@@ -166,6 +166,7 @@ function getMultiplierOptions(game: Game): MultiplierOption[] {
 
 /**
  * Check if a team has a specific multiplier active on this hole
+ * Presence of the option means it's active (value check not needed)
  */
 function hasTeamMultiplier(team: Team, multiplierName: string): boolean {
   if (!team.options?.$isLoaded) return false;
@@ -174,8 +175,7 @@ function hasTeamMultiplier(team: Team, multiplierName: string): boolean {
     if (
       opt?.$isLoaded &&
       opt.optionName === multiplierName &&
-      !opt.playerId && // Team-level (no player)
-      opt.value === "true"
+      !opt.playerId // Team-level (no player)
     ) {
       return true;
     }
@@ -213,7 +213,7 @@ function toggleTeamMultiplier(team: Team, multiplierName: string): void {
   } else {
     const newOption = TeamOption.create({
       optionName: multiplierName,
-      value: "true",
+      value: "true", // Value required by schema, presence indicates active
     });
     options.$jazz.push(newOption);
   }
