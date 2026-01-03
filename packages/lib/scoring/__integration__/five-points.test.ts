@@ -231,21 +231,20 @@ describe("Five Points Integration Tests", () => {
       expect(hole1.teams["2"].total).toBe(10);
     });
 
-    it("should award low_ball junk to both teams on tie", () => {
+    it("should NOT award low_ball junk on tie (one_team_per_group)", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Both teams tie with lowBall=5, so both get low_ball junk
+      // Both teams tie with lowBall=5, so NEITHER gets low_ball junk
+      // This matches v0.3 behavior: one_team_per_group means no award on tie
       const team1LowBall = hole1.teams["1"].junk.find(
         (j) => j.name === "low_ball",
       );
       const team2LowBall = hole1.teams["2"].junk.find(
         (j) => j.name === "low_ball",
       );
-      expect(team1LowBall).toBeDefined();
-      expect(team2LowBall).toBeDefined();
-      expect(team1LowBall?.value).toBe(2); // Five Points override
-      expect(team2LowBall?.value).toBe(2);
+      expect(team1LowBall).toBeUndefined();
+      expect(team2LowBall).toBeUndefined();
     });
 
     it("should award low_total junk to winning team only", () => {
@@ -268,10 +267,10 @@ describe("Five Points Integration Tests", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Team 1: low_ball (2) = 2 points
-      // Team 2: low_ball (2) + low_total (2) = 4 points
-      expect(hole1.teams["1"].points).toBe(2);
-      expect(hole1.teams["2"].points).toBe(4);
+      // Team 1: no junk (low_ball tied, so not awarded) = 0 points
+      // Team 2: low_total (2) = 2 points (low_ball tied, so not awarded)
+      expect(hole1.teams["1"].points).toBe(0);
+      expect(hole1.teams["2"].points).toBe(2);
     });
   });
 
@@ -279,10 +278,10 @@ describe("Five Points Integration Tests", () => {
     it("should track running totals across holes", () => {
       if (!scoreboard) return;
 
-      // After hole 1: Team 1 has 2 pts (low_ball tie), Team 2 has 4 pts (low_ball + low_total)
+      // After hole 1: Team 1 has 0 pts (low_ball tied), Team 2 has 2 pts (low_total only)
       const hole1 = scoreboard.holes["1"];
-      expect(hole1.teams["1"].runningTotal).toBe(2);
-      expect(hole1.teams["2"].runningTotal).toBe(4);
+      expect(hole1.teams["1"].runningTotal).toBe(0);
+      expect(hole1.teams["2"].runningTotal).toBe(2);
 
       // Running diff should reflect the net advantage (Team 2 is +2 over Team 1)
       expect(hole1.teams["2"].runningDiff).toBe(2);

@@ -532,7 +532,13 @@ function evaluateCalculationJunk(
   );
   if (!isWinner) return false;
 
-  // For one_team_per_group limit with ties, still award (points will be split)
+  // For one_team_per_group limit: if there's a tie, NO team gets the junk
+  // This matches v0.3 behavior: countOfBest <= lenOfScores check (score.js line 680)
+  const limit = junk.limit ?? "";
+  if (limit === "one_team_per_group" && bestTeams.length > 1) {
+    return false;
+  }
+
   return true;
 }
 
