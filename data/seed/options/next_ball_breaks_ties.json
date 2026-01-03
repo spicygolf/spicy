@@ -3,5 +3,6 @@
   "disp": "Next ball breaks ties",
   "type": "game",
   "valueType": "bool",
-  "defaultValue": "false"
+  "defaultValue": "false",
+  "teamOnly": true
 }

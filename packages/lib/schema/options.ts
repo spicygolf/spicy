@@ -26,6 +26,8 @@ export const GameOption = co.map({
   defaultValue: z.string(),
   value: z.optional(z.string()),
   seq: z.optional(z.number()),
+  /** If true, option only shown when teams mode is active */
+  teamOnly: z.optional(z.boolean()),
 });
 export type GameOption = co.loaded<typeof GameOption>;
 

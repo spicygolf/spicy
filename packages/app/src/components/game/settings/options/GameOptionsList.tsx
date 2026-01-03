@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
-import { useGame, useSaveOptionToGame } from "@/hooks";
+import { useGame, useSaveOptionToGame, useTeamsMode } from "@/hooks";
 import { Text } from "@/ui";
 import { BoolOptionModal } from "./BoolOptionModal";
 import { DeleteGameButton } from "./DeleteGameButton";
@@ -21,6 +21,7 @@ export function GameOptionsList() {
               choices: { $each: true },
             },
           },
+          teamsConfig: true,
         },
       },
       options: {
@@ -28,8 +29,12 @@ export function GameOptionsList() {
           choices: { $each: true },
         },
       },
+      scope: { teamsConfig: true },
+      players: { $each: true },
     },
   });
+
+  const { isTeamsMode } = useTeamsMode(game);
 
   const [selectedOption, setSelectedOption] = useState<GameOption | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -50,7 +55,12 @@ export function GameOptionsList() {
     for (const key in spec.options) {
       const option = spec.options[key];
       if (option?.$isLoaded && option.type === "game") {
-        options.push(option as GameOption);
+        const gameOpt = option as GameOption;
+        // Filter out teamOnly options when teams mode is not active
+        if (gameOpt.teamOnly && !isTeamsMode) {
+          continue;
+        }
+        options.push(gameOpt);
       }
     }
 
@@ -59,7 +69,7 @@ export function GameOptionsList() {
       const seqB = b.seq ?? 999;
       return seqA - seqB;
     });
-  }, [game]);
+  }, [game, isTeamsMode]);
 
   // Helper to get current value (check game.options first, then fall back to spec)
   const getCurrentValue = useCallback(
