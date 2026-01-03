@@ -310,10 +310,12 @@ describe("Five Points Integration Tests", () => {
       // Should have 2 teams
       expect(Object.keys(scoreboard.cumulative.teams).length).toBe(2);
 
-      // Combined points should equal combined junk for Five Points
-      // (no match play points, only junk)
+      // Points total may differ from junk total when multipliers are applied
+      // (multipliers can double/triple points on certain holes)
       for (const cumulative of Object.values(scoreboard.cumulative.teams)) {
-        expect(cumulative.pointsTotal).toBe(cumulative.junkTotal);
+        expect(cumulative.pointsTotal).toBeGreaterThanOrEqual(
+          cumulative.junkTotal,
+        );
       }
     });
 
@@ -351,6 +353,123 @@ describe("Five Points Integration Tests", () => {
         // At least one player should be ranked 1
         expect(ranks).toContain(1);
       }
+    });
+  });
+
+  describe("Multiplier Detection", () => {
+    // This game has multipliers stored in team options:
+    // Hole 2: Team 1 has "double", Team 2 has "double_back"
+    // Hole 3: Team 1 has "double"
+    // Hole 4: Team 1 has "double", Team 2 has "double_back"
+    // Hole 7: Team 1 has "double"
+
+    it("should detect multipliers on hole 2", () => {
+      if (!game) return;
+
+      const hole2 = game.holes?.find((h) => h?.hole === "2");
+      expect(hole2?.$isLoaded).toBe(true);
+
+      const team1 = hole2?.teams?.find((t) => t?.team === "1");
+      const team2 = hole2?.teams?.find((t) => t?.team === "2");
+
+      // Team 1 should have "double"
+      const team1Double = team1?.options?.find(
+        (opt) => opt?.optionName === "double",
+      );
+      expect(team1Double).toBeDefined();
+      expect(team1Double?.firstHole).toBe("2");
+
+      // Team 2 should have "double_back"
+      const team2DoubleBack = team2?.options?.find(
+        (opt) => opt?.optionName === "double_back",
+      );
+      expect(team2DoubleBack).toBeDefined();
+      expect(team2DoubleBack?.firstHole).toBe("2");
+    });
+
+    it("should detect multipliers on hole 4", () => {
+      if (!game) return;
+
+      const hole4 = game.holes?.find((h) => h?.hole === "4");
+      expect(hole4?.$isLoaded).toBe(true);
+
+      const team1 = hole4?.teams?.find((t) => t?.team === "1");
+      const team2 = hole4?.teams?.find((t) => t?.team === "2");
+
+      // Team 1 should have "double"
+      const team1Double = team1?.options?.find(
+        (opt) => opt?.optionName === "double",
+      );
+      expect(team1Double).toBeDefined();
+
+      // Team 2 should have "double_back"
+      const team2DoubleBack = team2?.options?.find(
+        (opt) => opt?.optionName === "double_back",
+      );
+      expect(team2DoubleBack).toBeDefined();
+    });
+
+    it("should have multipliers stored alongside junk in team options", () => {
+      if (!game) return;
+
+      // Hole 4 team 2 should have both prox (junk) and double_back (multiplier)
+      const hole4 = game.holes?.find((h) => h?.hole === "4");
+      const team2 = hole4?.teams?.find((t) => t?.team === "2");
+
+      const optionNames = team2?.options?.map((opt) => opt?.optionName) ?? [];
+      expect(optionNames).toContain("prox");
+      expect(optionNames).toContain("double_back");
+    });
+
+    it("should detect back nine multipliers", () => {
+      if (!game) return;
+
+      // Hole 11: Team has "double"
+      const hole11 = game.holes?.find((h) => h?.hole === "11");
+      const hole11Teams = hole11?.teams ?? [];
+      const hole11Doubles = hole11Teams.flatMap(
+        (t) => t?.options?.filter((opt) => opt?.optionName === "double") ?? [],
+      );
+      expect(hole11Doubles.length).toBeGreaterThan(0);
+
+      // Hole 12: Team has "double"
+      const hole12 = game.holes?.find((h) => h?.hole === "12");
+      const hole12Teams = hole12?.teams ?? [];
+      const hole12Doubles = hole12Teams.flatMap(
+        (t) => t?.options?.filter((opt) => opt?.optionName === "double") ?? [],
+      );
+      expect(hole12Doubles.length).toBeGreaterThan(0);
+    });
+
+    it("should detect pre_double multipliers on holes 16-18", () => {
+      if (!game) return;
+
+      // Hole 16: has both pre_double and double
+      const hole16 = game.holes?.find((h) => h?.hole === "16");
+      const hole16Teams = hole16?.teams ?? [];
+      const hole16PreDoubles = hole16Teams.flatMap(
+        (t) =>
+          t?.options?.filter((opt) => opt?.optionName === "pre_double") ?? [],
+      );
+      expect(hole16PreDoubles.length).toBeGreaterThan(0);
+
+      // Hole 17: has pre_double
+      const hole17 = game.holes?.find((h) => h?.hole === "17");
+      const hole17Teams = hole17?.teams ?? [];
+      const hole17PreDoubles = hole17Teams.flatMap(
+        (t) =>
+          t?.options?.filter((opt) => opt?.optionName === "pre_double") ?? [],
+      );
+      expect(hole17PreDoubles.length).toBeGreaterThan(0);
+
+      // Hole 18: both teams have pre_double
+      const hole18 = game.holes?.find((h) => h?.hole === "18");
+      const hole18Teams = hole18?.teams ?? [];
+      const hole18PreDoubles = hole18Teams.flatMap(
+        (t) =>
+          t?.options?.filter((opt) => opt?.optionName === "pre_double") ?? [],
+      );
+      expect(hole18PreDoubles.length).toBe(2); // Both teams
     });
   });
 });

@@ -2310,32 +2310,61 @@ async function importGame(
         { owner: gameGroup },
       );
 
-      // Add junk as team options with player attribution
-      if (teamData.junk && teamData.junk.length > 0) {
+      // Collect team options from junk and multipliers
+      const hasJunk = teamData.junk && teamData.junk.length > 0;
+      const teamMultipliers = holeData.multipliers?.filter(
+        (m) => m.team === teamData.team,
+      );
+      const hasMultipliers = teamMultipliers && teamMultipliers.length > 0;
+
+      if (hasJunk || hasMultipliers) {
         const teamOptions = ListOfTeamOptions.create([], {
           owner: gameGroup,
         });
 
-        for (const junkItem of teamData.junk) {
-          // Look up player's GHIN ID from cache
-          const ghinId = playerGhinMap.get(junkItem.player);
-          const mapKey = ghinId || `manual_${junkItem.player}`;
+        // Add junk as team options with player attribution
+        if (hasJunk && teamData.junk) {
+          for (const junkItem of teamData.junk) {
+            // Look up player's GHIN ID from cache
+            const ghinId = playerGhinMap.get(junkItem.player);
+            const mapKey = ghinId || `manual_${junkItem.player}`;
 
-          const player = playersMap[mapKey];
+            const player = playersMap[mapKey];
 
-          const teamOption = TeamOption.create(
-            {
-              optionName: junkItem.name,
-              value: junkItem.value,
-            },
-            { owner: gameGroup },
-          );
+            const teamOption = TeamOption.create(
+              {
+                optionName: junkItem.name,
+                value: junkItem.value,
+              },
+              { owner: gameGroup },
+            );
 
-          if (player) {
-            teamOption.$jazz.set("playerId", player.$jazz.id);
+            if (player) {
+              teamOption.$jazz.set("playerId", player.$jazz.id);
+            }
+
+            teamOptions.$jazz.push(teamOption);
           }
+        }
 
-          teamOptions.$jazz.push(teamOption);
+        // Add multipliers as team options (no player attribution - team-level)
+        if (hasMultipliers && teamMultipliers) {
+          for (const mult of teamMultipliers) {
+            const teamOption = TeamOption.create(
+              {
+                optionName: mult.name,
+                value: String(mult.value),
+              },
+              { owner: gameGroup },
+            );
+
+            // Store first_hole for multi-hole multipliers like pre_double
+            if (mult.first_hole) {
+              teamOption.$jazz.set("firstHole", mult.first_hole);
+            }
+
+            teamOptions.$jazz.push(teamOption);
+          }
         }
 
         team.$jazz.set("options", teamOptions);

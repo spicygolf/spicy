@@ -179,33 +179,65 @@ function teamHasJunk(
 }
 
 /**
- * Evaluate user-activated multipliers (press, double)
+ * Evaluate user-activated multipliers (press, double, pre_double)
  *
- * These are stored in the hole options and are activated by the user.
+ * User multipliers are stored in gameHole.teams[].options[] as TeamOption.
+ * This is the same location as junk for consistency.
+ *
+ * For multi-hole multipliers (e.g., pre_double), check if:
+ * 1. The multiplier was activated on THIS hole, OR
+ * 2. The multiplier was activated on a PREVIOUS hole with firstHole set
+ *    and this hole is within the same nine
  */
 function evaluateUserMultiplier(
   mult: MultiplierOption,
   holeResult: HoleResult,
   ctx: ScoringContext,
 ): void {
-  const scope = mult.scope ?? "hole";
-
-  // Check if the multiplier is activated for this hole
-  // User multipliers are stored in GameHole.options
   const gameHole = ctx.gameHoles.find((h) => h.hole === holeResult.hole);
-  if (!gameHole?.options?.$isLoaded) return;
+  if (!gameHole?.teams?.$isLoaded) return;
 
-  const holeOption = gameHole.options[mult.name];
-  if (!holeOption?.$isLoaded || holeOption.type !== "multiplier") return;
+  const currentHoleNum = Number.parseInt(holeResult.hole, 10);
 
-  // Check if activated (value indicates activation)
-  // For now, we assume any multiplier option in hole options is activated
-  // TODO: Add more sophisticated activation checking
+  // Check each team for this multiplier
+  for (const team of gameHole.teams) {
+    if (!team?.$isLoaded || !team.options?.$isLoaded) continue;
 
-  if (scope === "team" || scope === "hole") {
-    // Apply to all teams
-    for (const teamResult of Object.values(holeResult.teams)) {
-      // Check availability
+    const teamId = team.team;
+    const teamResult = holeResult.teams[teamId];
+    if (!teamResult) continue;
+
+    // Check if this team has the multiplier on this hole
+    let hasMultiplier = false;
+    let multiplierValue = mult.value ?? 2;
+
+    for (const opt of team.options) {
+      if (!opt?.$isLoaded) continue;
+      if (opt.optionName === mult.name) {
+        hasMultiplier = true;
+        // Use the value from the option if present
+        if (opt.value) {
+          const parsed = Number.parseInt(opt.value, 10);
+          if (!Number.isNaN(parsed)) {
+            multiplierValue = parsed;
+          }
+        }
+        break;
+      }
+    }
+
+    // If not found on this hole, check for multi-hole multipliers from earlier holes
+    if (!hasMultiplier && mult.scope === "rest_of_nine") {
+      hasMultiplier = checkMultiHoleMultiplier(
+        mult.name,
+        teamId,
+        currentHoleNum,
+        ctx,
+      );
+    }
+
+    if (hasMultiplier) {
+      // Check availability condition if present
       if (
         mult.availability &&
         !evaluateAvailability(mult.availability, teamResult, holeResult, ctx)
@@ -215,10 +247,46 @@ function evaluateUserMultiplier(
 
       teamResult.multipliers.push({
         name: mult.name,
-        value: mult.value ?? 2,
+        value: multiplierValue,
       });
     }
   }
+}
+
+/**
+ * Check if a multi-hole multiplier (like pre_double) applies to this hole
+ * by looking at earlier holes in the same nine
+ */
+function checkMultiHoleMultiplier(
+  multName: string,
+  teamId: string,
+  currentHoleNum: number,
+  ctx: ScoringContext,
+): boolean {
+  // Determine the start of this nine (1 for front, 10 for back)
+  const nineStart = currentHoleNum <= 9 ? 1 : 10;
+
+  // Check all previous holes in this nine
+  for (let holeNum = nineStart; holeNum < currentHoleNum; holeNum++) {
+    const gameHole = ctx.gameHoles.find((h) => h.hole === String(holeNum));
+    if (!gameHole?.teams?.$isLoaded) continue;
+
+    for (const team of gameHole.teams) {
+      if (!team?.$isLoaded || team.team !== teamId) continue;
+      if (!team.options?.$isLoaded) continue;
+
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) continue;
+        if (opt.optionName === multName && opt.firstHole) {
+          // This is a multi-hole multiplier that started on this earlier hole
+          // It applies to this hole since we're still in the same nine
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
 }
 
 // =============================================================================
