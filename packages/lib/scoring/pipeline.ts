@@ -101,7 +101,7 @@ export function buildContext(game: Game): ScoringContext {
       teams: {},
     },
     meta: {
-      gameId: game.name ?? "unknown",
+      gameId: game.$jazz.id ?? "unknown",
       holesPlayed: [],
       hasTeams:
         teamsPerHole.size > 0 &&

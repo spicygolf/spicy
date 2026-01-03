@@ -81,7 +81,8 @@ function evaluateMultiplierOption(
   ctx: ScoringContext,
 ): void {
   const subType = mult.sub_type;
-  const _scope = mult.scope ?? "hole";
+  // Note: scope can be "hole" | "round" | "match" - currently only hole-level evaluation
+  // const scope = mult.scope ?? "hole";
 
   // Automatic multipliers (triggered by junk)
   if (subType === "automatic" || subType === "bbq") {

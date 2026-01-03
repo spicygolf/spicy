@@ -92,7 +92,7 @@ function createEmptyScoreboard(ctx: ScoringContext): Scoreboard {
       teams: teamCumulatives,
     },
     meta: {
-      gameId: ctx.game.name ?? "unknown",
+      gameId: ctx.game.$jazz.id ?? "unknown",
       holesPlayed,
       hasTeams: allTeamIds.size > 0,
       pointsPerHole: 0, // Calculated from junk options

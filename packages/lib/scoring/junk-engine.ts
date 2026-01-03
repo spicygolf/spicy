@@ -214,8 +214,12 @@ export function parseScoreToParCondition(
   const parts = condition.trim().split(/\s+/);
   if (parts.length !== 2) return null;
 
-  const operator = parts[0] as ScoreToParCondition["operator"];
-  const value = Number.parseInt(parts[1], 10);
+  const operatorPart = parts[0];
+  const valuePart = parts[1];
+  if (operatorPart === undefined || valuePart === undefined) return null;
+
+  const operator = operatorPart as ScoreToParCondition["operator"];
+  const value = Number.parseInt(valuePart, 10);
 
   if (!["exactly", "at_most", "at_least"].includes(operator)) return null;
   if (Number.isNaN(value)) return null;
@@ -369,7 +373,10 @@ function evaluateCalculationJunk(
     better === "lower" ? a.score - b.score : b.score - a.score,
   );
 
-  const bestScore = sortedScores[0].score;
+  const bestTeam = sortedScores[0];
+  if (bestTeam === undefined) return false;
+
+  const bestScore = bestTeam.score;
 
   // Check if this team has the best score
   const teamScore =
@@ -379,7 +386,6 @@ function evaluateCalculationJunk(
 
   // Check limit - if one_team_per_group, only award if outright winner
   if (limit === "one_team_per_group") {
-    const _tiedTeams = teamScores.filter((t) => t.score === bestScore);
     // Still award but split value will be handled by points calculation
     return true;
   }

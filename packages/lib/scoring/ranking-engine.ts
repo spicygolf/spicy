@@ -57,24 +57,31 @@ export function rankWithTies<T>(
   let i = 0;
 
   while (i < sorted.length) {
-    const currentScore = scoreGetter(sorted[i]);
+    const currentItem = sorted[i];
+    if (currentItem === undefined) break;
+
+    const currentScore = scoreGetter(currentItem);
 
     // Count ties at this score
     let tieCount = 1;
-    while (
-      i + tieCount < sorted.length &&
-      scoreGetter(sorted[i + tieCount]) === currentScore
-    ) {
+    while (i + tieCount < sorted.length) {
+      const nextItem = sorted[i + tieCount];
+      if (nextItem === undefined || scoreGetter(nextItem) !== currentScore) {
+        break;
+      }
       tieCount++;
     }
 
     // Assign same rank to all tied items
     for (let j = 0; j < tieCount; j++) {
-      results.push({
-        item: sorted[i + j],
-        rank: currentRank,
-        tieCount,
-      });
+      const tiedItem = sorted[i + j];
+      if (tiedItem !== undefined) {
+        results.push({
+          item: tiedItem,
+          rank: currentRank,
+          tieCount,
+        });
+      }
     }
 
     // Skip ranks for ties (1st, 1st -> next is 3rd)
