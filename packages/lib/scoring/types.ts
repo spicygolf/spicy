@@ -65,6 +65,16 @@ export interface JunkAward {
 }
 
 /**
+ * Warning generated during scoring (v0.3 parity)
+ */
+export interface ScoringWarning {
+  /** Type of warning */
+  type: "incomplete_junk" | "missing_scores" | "other";
+  /** Human-readable message */
+  message: string;
+}
+
+/**
  * Multiplier applied to a player or team
  */
 export interface MultiplierAward {
@@ -128,6 +138,18 @@ export interface TeamHoleResult {
   multipliers: MultiplierAward[];
   /** Points earned on this hole */
   points: number;
+
+  // v0.3 parity fields
+  /** Net points vs opponent (for 2-team games) */
+  holeNetTotal?: number;
+  /** Running total points through this hole */
+  runningTotal?: number;
+  /** Running difference from opponent (for 2-team games) */
+  runningDiff?: number;
+  /** Match play holes up/down or final result like "3 & 2" */
+  matchDiff?: number | string;
+  /** Whether match is decided (for match play games) */
+  matchOver?: boolean;
 }
 
 /**
@@ -142,6 +164,18 @@ export interface HoleResult {
   players: Record<string, PlayerHoleResult>;
   /** Team results keyed by team ID (empty if no teams) */
   teams: Record<string, TeamHoleResult>;
+
+  // v0.3 parity fields
+  /** Total possible points from junk with limits (one_per_group, one_team_per_group) */
+  possiblePoints?: number;
+  /** Number of players with scores entered on this hole */
+  scoresEntered?: number;
+  /** Number of junk items marked by users */
+  markedJunk?: number;
+  /** Number of required junk items (one_per_group scope=player) */
+  requiredJunk?: number;
+  /** Warnings for incomplete scoring (e.g., "Mark all possible points") */
+  warnings?: ScoringWarning[];
 }
 
 /**
@@ -184,6 +218,12 @@ export interface TeamCumulative {
   rank: number;
   /** Tie count at current rank */
   tieCount: number;
+
+  // v0.3 parity fields
+  /** Final match diff for match play (e.g., "3 & 2") */
+  matchDiff?: number | string;
+  /** Whether match is decided */
+  matchOver?: boolean;
 }
 
 /**
