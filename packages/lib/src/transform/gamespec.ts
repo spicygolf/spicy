@@ -43,6 +43,7 @@ export function transformGameSpec(v03Spec: GameSpecV03): TransformedGameSpec {
       valueType: inferValueType(opt),
       choices: opt.choices,
       defaultValue: String(opt.default ?? ""),
+      teamOnly: opt.teamOnly,
     }));
     allOptions.push(...gameOptions);
   }

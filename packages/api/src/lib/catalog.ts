@@ -163,6 +163,7 @@ type GameOptionData = {
   defaultValue: string;
   seq?: number;
   choices?: Array<{ name: string; disp: string }>;
+  teamOnly?: boolean;
 };
 
 type JunkOptionData = {
@@ -394,6 +395,9 @@ async function upsertOptions(
       // Set optional fields
       if (opt.seq !== undefined && typeof opt.seq === "number") {
         newOption.$jazz.set("seq", opt.seq);
+      }
+      if (opt.teamOnly === true) {
+        newOption.$jazz.set("teamOnly", true);
       }
 
       // Add choices if present (for menu type options)
@@ -1303,6 +1307,7 @@ export async function importGameSpecsToCatalog(
                 valueType: opt.valueType,
                 defaultValue: opt.defaultValue,
                 choices: opt.choices,
+                teamOnly: opt.teamOnly,
               });
             } else if (opt.type === "junk") {
               // For junk and multiplier options, we still need the full v0.3 data
