@@ -19,6 +19,7 @@ import type {
   PlayerHoleResult,
   ScoreToParCondition,
   ScoringContext,
+  ScoringWarning,
   TeamHoleResult,
 } from "./types";
 
@@ -29,9 +30,16 @@ import type {
 /**
  * Evaluate all junk options for a hole and award to players/teams
  *
+ * Also calculates v0.3 parity fields:
+ * - possiblePoints: total points available from limited junk
+ * - scoresEntered: count of players with scores
+ * - markedJunk: count of user-marked junk items
+ * - requiredJunk: count of required one_per_group junk items
+ * - warnings: array of incomplete scoring warnings
+ *
  * @param holeResult - Current hole results with scores and rankings
  * @param ctx - Full scoring context with options
- * @returns Updated hole result with junk awards
+ * @returns Updated hole result with junk awards and metadata
  */
 export function evaluateJunkForHole(
   holeResult: HoleResult,
@@ -46,6 +54,15 @@ export function evaluateJunkForHole(
   for (const junk of junkOptions) {
     evaluateJunkOption(junk, result, ctx);
   }
+
+  // Calculate v0.3 parity fields
+  result.scoresEntered = calculateScoresEntered(result);
+  const { possiblePoints, markedJunk, requiredJunk } =
+    calculatePossiblePointsAndJunkCounts(result, junkOptions);
+  result.possiblePoints = possiblePoints;
+  result.markedJunk = markedJunk;
+  result.requiredJunk = requiredJunk;
+  result.warnings = calculateWarnings(result, ctx);
 
   return result;
 }
@@ -437,4 +454,118 @@ function checkUserJunk(junkName: string, evalCtx: EvaluationContext): boolean {
   // Check if junk is marked (value of "1" or "true")
   const junkValue = holeScores[junkName];
   return junkValue === "1" || junkValue === "true";
+}
+
+// =============================================================================
+// v0.3 Parity: Possible Points, Scores Entered, Warnings
+// =============================================================================
+
+/**
+ * Count the number of players with scores entered on this hole (v0.3 parity)
+ *
+ * @param holeResult - The hole result with player data
+ * @returns Number of players with gross > 0
+ */
+function calculateScoresEntered(holeResult: HoleResult): number {
+  return Object.values(holeResult.players).filter((p) => p.gross > 0).length;
+}
+
+/**
+ * Calculate possible points and junk counts for a hole (v0.3 parity)
+ *
+ * Possible points come from:
+ * 1. Limited junk (one_per_group, one_team_per_group) - these are possible on every hole
+ * 2. Player junk that was actually awarded (no limit) - already counted in awards
+ *
+ * This matches v0.3 score.js lines 67-79 and 88-94.
+ *
+ * @param holeResult - The hole result with awarded junk
+ * @param junkOptions - All junk options for evaluation
+ * @returns Object with possiblePoints, markedJunk count, and requiredJunk count
+ */
+function calculatePossiblePointsAndJunkCounts(
+  holeResult: HoleResult,
+  junkOptions: JunkOption[],
+): { possiblePoints: number; markedJunk: number; requiredJunk: number } {
+  let possiblePoints = 0;
+  let markedJunk = 0;
+  let requiredJunk = 0;
+
+  for (const junk of junkOptions) {
+    const limit = junk.limit ?? "";
+    const scope = junk.scope ?? "player";
+    const value = junk.value ?? 0;
+
+    // Limited junk contributes to possible points
+    if (limit === "one_team_per_group" || limit === "one_per_group") {
+      possiblePoints += value;
+    }
+
+    // Count required and marked junk for player-scoped one_per_group
+    if (scope === "player" && limit === "one_per_group") {
+      requiredJunk++;
+
+      // Count how many players have this junk marked
+      for (const player of Object.values(holeResult.players)) {
+        if (player.junk.some((j) => j.name === junk.name)) {
+          markedJunk++;
+        }
+      }
+    }
+  }
+
+  // Also add player junk that was actually awarded (no limit) to possiblePoints
+  // These don't have a limit, so they add to possible based on what was achieved
+  for (const player of Object.values(holeResult.players)) {
+    for (const award of player.junk) {
+      const junkOpt = junkOptions.find((j) => j.name === award.name);
+      if (junkOpt && !junkOpt.limit) {
+        possiblePoints += award.value;
+      }
+    }
+  }
+
+  // Also add team junk that was awarded (no limit)
+  for (const team of Object.values(holeResult.teams)) {
+    for (const award of team.junk) {
+      const junkOpt = junkOptions.find((j) => j.name === award.name);
+      if (junkOpt && !junkOpt.limit) {
+        possiblePoints += award.value;
+      }
+    }
+  }
+
+  return { possiblePoints, markedJunk, requiredJunk };
+}
+
+/**
+ * Generate warnings for incomplete scoring (v0.3 parity)
+ *
+ * Matches v0.3 score.js lines 260-275: "Mark all possible points" warning
+ * when all scores are entered but required junk isn't fully marked.
+ *
+ * @param holeResult - The hole result with scores and junk data
+ * @param ctx - Scoring context
+ * @returns Array of warnings
+ */
+function calculateWarnings(
+  holeResult: HoleResult,
+  _ctx: ScoringContext,
+): ScoringWarning[] {
+  const warnings: ScoringWarning[] = [];
+
+  const totalPlayers = Object.keys(holeResult.players).length;
+  const scoresEntered = holeResult.scoresEntered ?? 0;
+  const markedJunk = holeResult.markedJunk ?? 0;
+  const requiredJunk = holeResult.requiredJunk ?? 0;
+
+  // If all scores entered but not all required junk is marked
+  if (markedJunk < requiredJunk && scoresEntered === totalPlayers) {
+    warnings.push({
+      type: "incomplete_junk",
+      message: "Mark all possible points",
+    });
+  }
+
+  return warnings;
 }
