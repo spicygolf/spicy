@@ -165,11 +165,24 @@ function getMultiplierOptions(game: Game): MultiplierOption[] {
 }
 
 /**
- * Check if a team has a specific multiplier active on this hole
- * Presence of the option means it's active (value check not needed)
+ * Result of checking team multiplier status
  */
-function hasTeamMultiplier(team: Team, multiplierName: string): boolean {
-  if (!team.options?.$isLoaded) return false;
+interface MultiplierStatus {
+  /** Whether the multiplier is active */
+  active: boolean;
+  /** The hole number where this multiplier was first activated (e.g., "17") */
+  firstHole?: string;
+}
+
+/**
+ * Check if a team has a specific multiplier active on this hole
+ * Returns both whether it's active and which hole it was first activated on
+ */
+function getTeamMultiplierStatus(
+  team: Team,
+  multiplierName: string,
+): MultiplierStatus {
+  if (!team.options?.$isLoaded) return { active: false };
 
   for (const opt of team.options) {
     if (
@@ -177,16 +190,24 @@ function hasTeamMultiplier(team: Team, multiplierName: string): boolean {
       opt.optionName === multiplierName &&
       !opt.playerId // Team-level (no player)
     ) {
-      return true;
+      return {
+        active: true,
+        firstHole: opt.firstHole,
+      };
     }
   }
-  return false;
+  return { active: false };
 }
 
 /**
  * Toggle a multiplier for a team
+ * @param currentHoleNumber - The current hole number (e.g., "17") to store as firstHole
  */
-function toggleTeamMultiplier(team: Team, multiplierName: string): void {
+function toggleTeamMultiplier(
+  team: Team,
+  multiplierName: string,
+  currentHoleNumber: string,
+): void {
   if (!team.$jazz.has("options")) {
     team.$jazz.set("options", ListOfTeamOptions.create([]));
   }
@@ -214,6 +235,7 @@ function toggleTeamMultiplier(team: Team, multiplierName: string): void {
     const newOption = TeamOption.create({
       optionName: multiplierName,
       value: "true", // Value required by schema, presence indicates active
+      firstHole: currentHoleNumber, // Track which hole activated this multiplier
     });
     options.$jazz.push(newOption);
   }
@@ -317,21 +339,34 @@ export function ScoringView({
             return null;
           }
 
+          // Current hole number for tracking firstHole on new multipliers
+          const currentHoleNumber = String(currentHoleIndex + 1);
+
           // Build multiplier buttons with selected state for this team
-          const multiplierButtons = multiplierOptions.map((mult) => ({
-            name: mult.name,
-            displayName: mult.disp,
-            icon: mult.icon,
-            type: "multiplier" as const,
-            selected: hasTeamMultiplier(team, mult.name),
-          }));
+          const multiplierButtons = multiplierOptions.map((mult) => {
+            const status = getTeamMultiplierStatus(team, mult.name);
+            // Inherited if active and firstHole is set but different from current hole
+            const isInherited =
+              status.active &&
+              status.firstHole !== undefined &&
+              status.firstHole !== currentHoleNumber;
+
+            return {
+              name: mult.name,
+              displayName: mult.disp,
+              icon: mult.icon,
+              type: "multiplier" as const,
+              selected: status.active,
+              inherited: isInherited,
+            };
+          });
 
           return (
             <TeamGroup
               onChangeTeams={onChangeTeams}
               multiplierOptions={multiplierButtons}
               onMultiplierToggle={(multName) =>
-                toggleTeamMultiplier(team, multName)
+                toggleTeamMultiplier(team, multName, currentHoleNumber)
               }
             >
               {team.rounds.map((roundToTeam) => {

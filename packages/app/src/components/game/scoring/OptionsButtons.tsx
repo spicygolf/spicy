@@ -20,6 +20,11 @@ export interface OptionButton {
   icon?: string;
   type: "junk" | "multiplier";
   selected: boolean;
+  /**
+   * If true, this option was activated on a previous hole and is still in effect.
+   * Inherited options are shown as selected but dimmed and disabled.
+   */
+  inherited?: boolean;
 }
 
 interface OptionsButtonsProps {
@@ -45,6 +50,7 @@ export function OptionsButtons({
         const _isJunk = option.type === "junk";
         const isMultiplier = option.type === "multiplier";
         const isSelected = option.selected;
+        const isInherited = option.inherited ?? false;
 
         // Color based on type and selection state
         const buttonColor = isSelected
@@ -60,17 +66,20 @@ export function OptionsButtons({
             : "#3498DB"
           : theme.colors.border;
 
+        // Inherited options are disabled (can't toggle off a multiplier from a previous hole)
+        const isDisabled = readonly || isInherited;
+
         return (
           <TouchableOpacity
             key={option.name}
             style={[
               styles.optionButton,
               { backgroundColor: buttonColor, borderColor: borderColor },
-              readonly && styles.optionButtonDisabled,
+              isDisabled && styles.optionButtonDisabled,
             ]}
             onPress={() => onOptionPress(option.name)}
-            disabled={readonly}
-            accessibilityLabel={`${option.displayName} ${isSelected ? "selected" : ""}`}
+            disabled={isDisabled}
+            accessibilityLabel={`${option.displayName} ${isSelected ? "selected" : ""} ${isInherited ? "from previous hole" : ""}`}
           >
             {option.icon && (
               <FontAwesome6
