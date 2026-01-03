@@ -40,11 +40,15 @@ export function TeamGroup({
     multiplierOptions.length > 0 ||
     teamJunkOptions.some((j) => j.selected);
 
+  const hasTeamJunk = teamJunkOptions.some((j) => j.selected);
+  const hasMultipliers = multiplierOptions.length > 0;
+
   return (
     <View style={styles.container}>
       {/* Header - show if we have a team name, change teams button, multipliers, or active team junk */}
       {hasHeaderContent && (
         <View style={styles.header}>
+          {/* Left side: team icon and change teams button */}
           <View style={styles.headerLeft}>
             {teamName && <Text style={styles.teamName}>{teamName}</Text>}
             {onChangeTeams && (
@@ -61,21 +65,21 @@ export function TeamGroup({
                 />
               </TouchableOpacity>
             )}
-
-            {/* Team junk (low_ball, low_team) - only show when selected */}
-            {teamJunkOptions.some((j) => j.selected) && (
-              <View style={styles.teamJunkSection}>
-                <OptionsButtons
-                  options={teamJunkOptions.filter((j) => j.selected)}
-                  onOptionPress={handleTeamJunkPress}
-                  readonly={true}
-                />
-              </View>
-            )}
           </View>
 
-          {/* Multipliers on the right side of header */}
-          {multiplierOptions.length > 0 && (
+          {/* Middle: Team junk (low_ball, low_total) - only show when achieved */}
+          {hasTeamJunk && (
+            <View style={styles.teamJunkSection}>
+              <OptionsButtons
+                options={teamJunkOptions.filter((j) => j.selected)}
+                onOptionPress={handleTeamJunkPress}
+                readonly={true}
+              />
+            </View>
+          )}
+
+          {/* Right: Multipliers */}
+          {hasMultipliers && (
             <View style={styles.multiplierSection}>
               <OptionsButtons
                 options={multiplierOptions}
@@ -105,18 +109,18 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: theme.gap(1.5),
+    paddingHorizontal: theme.gap(1),
     paddingVertical: theme.gap(0.5),
     backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
     minHeight: 40,
+    gap: theme.gap(0.5),
   },
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
-    flexWrap: "wrap",
-    flex: 1,
+    flexShrink: 0,
   },
   teamName: {
     fontSize: 14,
@@ -127,7 +131,7 @@ const styles = StyleSheet.create((theme) => ({
     padding: theme.gap(0.5),
   },
   teamJunkSection: {
-    marginLeft: theme.gap(1),
+    flexShrink: 1,
   },
   multiplierSection: {
     flexShrink: 0,

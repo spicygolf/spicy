@@ -47,7 +47,7 @@ export const JunkOption = co.map({
     z.literal(["player", "team", "hole", "rest_of_nine", "game"]),
   ),
   icon: z.optional(z.string()),
-  show_in: z.optional(z.literal(["score", "faves", "none"])),
+  show_in: z.optional(z.literal(["score", "team", "faves", "none"])),
   based_on: z.optional(z.literal(["gross", "net", "user"])),
   limit: z.optional(z.string()),
   calculation: z.optional(z.string()),

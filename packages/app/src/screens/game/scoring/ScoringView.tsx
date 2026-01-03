@@ -110,7 +110,7 @@ function getCalculatedPlayerJunkOptions(game: Game): JunkOption[] {
 /**
  * Get calculated (automatic) team junk options from game spec
  * These are team-scoped junk options with calculation: "best_ball", "sum", etc.
- * Examples: low_ball, low_team
+ * Examples: low_ball, low_total
  */
 function getCalculatedTeamJunkOptions(game: Game): JunkOption[] {
   const junkOptions: JunkOption[] = [];
@@ -128,7 +128,9 @@ function getCalculatedTeamJunkOptions(game: Game): JunkOption[] {
       opt.type === "junk" &&
       opt.scope === "team" &&
       opt.calculation && // Has a calculation method (best_ball, sum, etc.)
-      (opt.show_in === "score" || opt.show_in === "faves")
+      (opt.show_in === "score" ||
+        opt.show_in === "team" ||
+        opt.show_in === "faves")
     ) {
       junkOptions.push(opt);
     }

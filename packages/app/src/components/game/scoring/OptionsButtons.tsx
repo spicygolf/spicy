@@ -81,8 +81,10 @@ export function OptionsButtons({
               : "#3498DB"
           : theme.colors.border;
 
-        // Calculated junk and inherited options are disabled (can't toggle automatic junk)
+        // Calculated junk and inherited options can't be toggled
         const isDisabled = readonly || isInherited || isCalculated;
+        // Only dim inherited options (from previous hole), not calculated junk
+        const shouldDim = isInherited;
 
         return (
           <TouchableOpacity
@@ -90,7 +92,7 @@ export function OptionsButtons({
             style={[
               styles.optionButton,
               { backgroundColor: buttonColor, borderColor: borderColor },
-              isDisabled && styles.optionButtonDisabled,
+              shouldDim && styles.optionButtonDisabled,
             ]}
             onPress={() => onOptionPress(option.name)}
             disabled={isDisabled}
