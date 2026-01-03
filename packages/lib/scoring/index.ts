@@ -61,6 +61,7 @@ export {
   rankTeams,
   rankTeamsCumulative,
 } from "./stages";
+export type { VegasScoreResult } from "./team-scoring";
 // Team scoring (generic team calculation methods)
 export {
   calculateAggregate,
@@ -68,7 +69,9 @@ export {
   calculateAverage,
   calculateBestBall,
   calculateTeamScore,
+  calculateVegasScore,
   calculateWorstBall,
+  countTeamJunk,
 } from "./team-scoring";
 
 // Core types

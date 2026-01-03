@@ -140,6 +140,120 @@ export function calculateAverage(
 }
 
 // =============================================================================
+// Vegas Scoring (v0.3 parity)
+// =============================================================================
+
+/**
+ * Vegas scoring result
+ */
+export interface VegasScoreResult {
+  /** The concatenated digit score (e.g., 45 for scores of 4 and 5) */
+  vegasScore: number;
+  /** Whether digits were flipped due to opponent birdie */
+  flipped: boolean;
+  /** Sorted digits used in calculation */
+  digits: number[];
+}
+
+/**
+ * Calculate Vegas team score (v0.3 parity)
+ *
+ * Vegas scoring concatenates team digits to form a score:
+ * - Scores of 4 and 5 = 45 (lower digits first, so 4*10 + 5 = 45)
+ * - If opponent has birdie, flip to 54 (higher digits first)
+ * - birdies_cancel_flip option: if your team also has birdie, don't flip
+ *
+ * Matches v0.3 score.js vegasTeamScore function.
+ *
+ * @param playerIds - Player IDs on the team
+ * @param playerResults - Player results for this hole
+ * @param opponentHasBirdie - Whether opponent team has a birdie
+ * @param opponentHasEagle - Whether opponent team has an eagle
+ * @param teamHasBirdie - Whether this team has a birdie (for cancel logic)
+ * @param teamHasEagle - Whether this team has an eagle (for cancel logic)
+ * @param birdiesCancelFlip - Whether birdies cancel the flip
+ * @param scoreField - Which score to use ("gross" typically for Vegas)
+ * @returns Vegas score result
+ */
+export function calculateVegasScore(
+  playerIds: string[],
+  playerResults: Record<string, PlayerHoleResult>,
+  opponentHasBirdie: boolean,
+  opponentHasEagle: boolean,
+  teamHasBirdie: boolean,
+  teamHasEagle: boolean,
+  birdiesCancelFlip: boolean,
+  scoreField: "net" | "gross" = "gross",
+): VegasScoreResult {
+  // Get all scores and sort ascending (lower first = better)
+  const digits = extractScores(playerIds, playerResults, scoreField).sort(
+    (a, b) => a - b,
+  );
+
+  if (digits.length < 2) {
+    return { vegasScore: 0, flipped: false, digits };
+  }
+
+  // Determine if we should flip (opponent birdie/eagle causes flip)
+  let shouldFlip = false;
+
+  if (opponentHasBirdie) {
+    // Flip unless birdies_cancel and we also have birdie/eagle
+    if (!birdiesCancelFlip || !(teamHasBirdie || teamHasEagle)) {
+      shouldFlip = true;
+    }
+  }
+
+  if (opponentHasEagle) {
+    // Flip unless birdies_cancel and we also have eagle
+    if (!birdiesCancelFlip || !teamHasEagle) {
+      shouldFlip = true;
+    }
+  }
+
+  // If flipping, sort descending (higher first = worse)
+  if (shouldFlip) {
+    digits.sort((a, b) => b - a);
+  }
+
+  // Concatenate digits: first digit * 10 + second digit
+  // For 2 players: 4, 5 -> 45
+  // For more players, this extends: 3, 4, 5 -> 345
+  let vegasScore = 0;
+  for (let i = 0; i < digits.length; i++) {
+    const digit = digits[i];
+    if (digit !== undefined) {
+      vegasScore = vegasScore * 10 + digit;
+    }
+  }
+
+  return { vegasScore, flipped: shouldFlip, digits };
+}
+
+/**
+ * Count junk of a specific type for a team (helper for Vegas)
+ *
+ * @param playerIds - Player IDs on the team
+ * @param playerResults - Player results for this hole
+ * @param junkName - Name of junk to count (e.g., "birdie", "eagle")
+ * @returns Count of matching junk
+ */
+export function countTeamJunk(
+  playerIds: string[],
+  playerResults: Record<string, PlayerHoleResult>,
+  junkName: string,
+): number {
+  let count = 0;
+  for (const playerId of playerIds) {
+    const result = playerResults[playerId];
+    if (result) {
+      count += result.junk.filter((j) => j.name === junkName).length;
+    }
+  }
+  return count;
+}
+
+// =============================================================================
 // Helper Functions
 // =============================================================================
 
