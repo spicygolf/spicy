@@ -9,7 +9,7 @@
     "android": "react-native run-android",
     "android:bundle": "cd android && ./gradlew bundleRelease && open app/build/outputs/bundle/release/",
     "android:apk": "cd android && ./gradlew assembleRelease && mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/spicygolf-${npm_package_version}.apk ",
-    "ios": "react-native run-ios  --simulator=\"iPhone 14\"",
+    "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
     "type-check": "tsc",

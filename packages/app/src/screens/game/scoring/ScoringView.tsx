@@ -1,6 +1,12 @@
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Game, GameHole, JunkOption, Team } from "spicylib/schema";
+import type {
+  Game,
+  GameHole,
+  JunkOption,
+  MultiplierOption,
+  Team,
+} from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
 import {
   adjustHandicapsToLow,
@@ -130,6 +136,89 @@ function togglePlayerJunk(
   }
 }
 
+/**
+ * Get team-scoped multiplier options from game spec
+ * These are multiplier options with based_on: "user"
+ */
+function getMultiplierOptions(game: Game): MultiplierOption[] {
+  const multiplierOptions: MultiplierOption[] = [];
+
+  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
+  if (!spec?.$isLoaded) return multiplierOptions;
+
+  const options = spec.options;
+  if (!options?.$isLoaded) return multiplierOptions;
+
+  for (const key of Object.keys(options)) {
+    const opt = options[key];
+    if (
+      opt?.$isLoaded &&
+      opt.type === "multiplier" &&
+      opt.based_on === "user"
+    ) {
+      multiplierOptions.push(opt);
+    }
+  }
+
+  multiplierOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
+  return multiplierOptions;
+}
+
+/**
+ * Check if a team has a specific multiplier active on this hole
+ */
+function hasTeamMultiplier(team: Team, multiplierName: string): boolean {
+  if (!team.options?.$isLoaded) return false;
+
+  for (const opt of team.options) {
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === multiplierName &&
+      !opt.playerId && // Team-level (no player)
+      opt.value === "true"
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Toggle a multiplier for a team
+ */
+function toggleTeamMultiplier(team: Team, multiplierName: string): void {
+  if (!team.$jazz.has("options")) {
+    team.$jazz.set("options", ListOfTeamOptions.create([]));
+  }
+
+  const options = team.options;
+  if (!options?.$isLoaded) return;
+
+  // Find existing team-level option
+  let existingIndex = -1;
+  for (let i = 0; i < options.length; i++) {
+    const opt = options[i];
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === multiplierName &&
+      !opt.playerId // Team-level
+    ) {
+      existingIndex = i;
+      break;
+    }
+  }
+
+  if (existingIndex >= 0) {
+    options.$jazz.splice(existingIndex, 1);
+  } else {
+    const newOption = TeamOption.create({
+      optionName: multiplierName,
+      value: "true",
+    });
+    options.$jazz.push(newOption);
+  }
+}
+
 export function ScoringView({
   game,
   holeInfo,
@@ -141,8 +230,11 @@ export function ScoringView({
   onUnscore,
   onChangeTeams,
 }: ScoringViewProps) {
-  // Get user-markable junk options for this game
+  // Get user-markable junk options for this game (player-scoped)
   const userJunkOptions = getUserJunkOptions(game);
+
+  // Get multiplier options for this game (team-scoped)
+  const multiplierOptions = getMultiplierOptions(game);
 
   // Check if handicaps are used in this game
   const useHandicapsValue = useOptionValue(
@@ -225,8 +317,23 @@ export function ScoringView({
             return null;
           }
 
+          // Build multiplier buttons with selected state for this team
+          const multiplierButtons = multiplierOptions.map((mult) => ({
+            name: mult.name,
+            displayName: mult.disp,
+            icon: mult.icon,
+            type: "multiplier" as const,
+            selected: hasTeamMultiplier(team, mult.name),
+          }));
+
           return (
-            <TeamGroup onChangeTeams={onChangeTeams}>
+            <TeamGroup
+              onChangeTeams={onChangeTeams}
+              multiplierOptions={multiplierButtons}
+              onMultiplierToggle={(multName) =>
+                toggleTeamMultiplier(team, multName)
+              }
+            >
               {team.rounds.map((roundToTeam) => {
                 if (!roundToTeam?.$isLoaded) return null;
 
