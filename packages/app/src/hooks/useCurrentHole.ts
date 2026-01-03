@@ -36,6 +36,7 @@ export function useCurrentHole(
   const resolveQuery = options.resolve || {
     teams: {
       $each: {
+        options: { $each: true }, // Load team options (junk, multipliers)
         rounds: {
           $each: {
             roundToGame: true,

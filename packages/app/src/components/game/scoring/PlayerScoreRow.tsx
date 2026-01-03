@@ -2,7 +2,7 @@ import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
 import { Text } from "@/ui";
-import { OptionsButtons } from "./OptionsButtons";
+import { type OptionButton, OptionsButtons } from "./OptionsButtons";
 import { ScoreInput } from "./ScoreInput";
 
 interface PlayerScoreRowProps {
@@ -11,8 +11,10 @@ interface PlayerScoreRowProps {
   net: number | null;
   par: number;
   pops: number;
+  junkOptions?: OptionButton[];
   onScoreChange: (newGross: number) => void;
   onUnscore: () => void;
+  onJunkToggle?: (junkName: string) => void;
   readonly?: boolean;
 }
 
@@ -22,8 +24,10 @@ export function PlayerScoreRow({
   net,
   par,
   pops,
+  junkOptions = [],
   onScoreChange,
   onUnscore,
+  onJunkToggle,
   readonly = false,
 }: PlayerScoreRowProps) {
   const netPar = par - pops;
@@ -57,10 +61,8 @@ export function PlayerScoreRow({
     // If score exists, do nothing
   };
 
-  // Placeholder for options - will be implemented when options/junk system is added
-  const options: never[] = [];
-  const handleOptionPress = (_optionName: string): void => {
-    // TODO: Implement option toggle when options/junk system is ready
+  const handleOptionPress = (optionName: string): void => {
+    onJunkToggle?.(optionName);
   };
 
   return (
@@ -84,9 +86,9 @@ export function PlayerScoreRow({
       />
 
       {/* Options (Junk/Multipliers) */}
-      {options.length > 0 && (
+      {junkOptions.length > 0 && (
         <OptionsButtons
-          options={options}
+          options={junkOptions}
           onOptionPress={handleOptionPress}
           readonly={readonly}
         />

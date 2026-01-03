@@ -3,7 +3,7 @@ import { TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";
 
-interface OptionButton {
+export interface OptionButton {
   name: string;
   displayName: string;
   icon?: string;

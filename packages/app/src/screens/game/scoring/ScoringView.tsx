@@ -1,6 +1,7 @@
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Game, GameHole } from "spicylib/schema";
+import type { Game, GameHole, JunkOption, Team } from "spicylib/schema";
+import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
@@ -29,6 +30,106 @@ export interface ScoringViewProps {
   onChangeTeams: () => void;
 }
 
+/**
+ * Get user-markable junk options from game spec
+ * These are junk options with based_on: "user" and show_in: "score" or "faves"
+ */
+function getUserJunkOptions(game: Game): JunkOption[] {
+  const junkOptions: JunkOption[] = [];
+
+  // Get options from game spec
+  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
+  if (!spec?.$isLoaded) return junkOptions;
+
+  const options = spec.options;
+  if (!options?.$isLoaded) return junkOptions;
+
+  for (const key of Object.keys(options)) {
+    const opt = options[key];
+    if (
+      opt?.$isLoaded &&
+      opt.type === "junk" &&
+      opt.based_on === "user" &&
+      (opt.show_in === "score" || opt.show_in === "faves")
+    ) {
+      junkOptions.push(opt);
+    }
+  }
+
+  // Sort by seq
+  junkOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
+
+  return junkOptions;
+}
+
+/**
+ * Check if a player has a specific junk option on this hole
+ */
+function hasPlayerJunk(
+  team: Team,
+  playerId: string,
+  junkName: string,
+): boolean {
+  if (!team.options?.$isLoaded) return false;
+
+  for (const opt of team.options) {
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === junkName &&
+      opt.playerId === playerId &&
+      opt.value === "true"
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Toggle a junk option for a player on a team
+ * Creates the options list if it doesn't exist, then adds or removes the junk
+ */
+function togglePlayerJunk(
+  team: Team,
+  playerId: string,
+  junkName: string,
+): void {
+  // Ensure options list exists using Jazz pattern
+  if (!team.$jazz.has("options")) {
+    team.$jazz.set("options", ListOfTeamOptions.create([]));
+  }
+
+  const options = team.options;
+  if (!options?.$isLoaded) return;
+
+  // Find existing option for this player and junk
+  let existingIndex = -1;
+  for (let i = 0; i < options.length; i++) {
+    const opt = options[i];
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === junkName &&
+      opt.playerId === playerId
+    ) {
+      existingIndex = i;
+      break;
+    }
+  }
+
+  if (existingIndex >= 0) {
+    // Remove existing option (toggle off)
+    options.$jazz.splice(existingIndex, 1);
+  } else {
+    // Add new option (toggle on)
+    const newOption = TeamOption.create({
+      optionName: junkName,
+      value: "true",
+      playerId,
+    });
+    options.$jazz.push(newOption);
+  }
+}
+
 export function ScoringView({
   game,
   holeInfo,
@@ -40,6 +141,9 @@ export function ScoringView({
   onUnscore,
   onChangeTeams,
 }: ScoringViewProps) {
+  // Get user-markable junk options for this game
+  const userJunkOptions = getUserJunkOptions(game);
+
   // Check if handicaps are used in this game
   const useHandicapsValue = useOptionValue(
     game,
@@ -178,6 +282,15 @@ export function ScoringView({
                   net = gross;
                 }
 
+                // Build junk options with selected state for this player
+                const junkButtons = userJunkOptions.map((junk) => ({
+                  name: junk.name,
+                  displayName: junk.disp,
+                  icon: junk.icon,
+                  type: "junk" as const,
+                  selected: hasPlayerJunk(team, round.playerId, junk.name),
+                }));
+
                 return (
                   <PlayerScoreRow
                     key={rtg.$jazz.id}
@@ -186,10 +299,14 @@ export function ScoringView({
                     net={net}
                     par={holeInfo.par}
                     pops={calculatedPops}
+                    junkOptions={junkButtons}
                     onScoreChange={(newGross) =>
                       onScoreChange(rtg.$jazz.id, newGross)
                     }
                     onUnscore={() => onUnscore(rtg.$jazz.id)}
+                    onJunkToggle={(junkName) =>
+                      togglePlayerJunk(team, round.playerId, junkName)
+                    }
                     readonly={false}
                   />
                 );
