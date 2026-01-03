@@ -263,14 +263,33 @@ describe("Five Points Integration Tests", () => {
       expect(team1LowTotal).toBeUndefined();
     });
 
+    it("should award prox to a player on team 2 on hole 1", () => {
+      if (!scoreboard) return;
+
+      const hole1 = scoreboard.holes["1"];
+      // Prox is player-scoped junk, find the player on team 2 who has it
+      const team2PlayerIds = hole1.teams["2"].playerIds;
+      let proxFound = false;
+      for (const playerId of team2PlayerIds) {
+        const playerResult = hole1.players[playerId];
+        const prox = playerResult?.junk.find((j) => j.name === "prox");
+        if (prox) {
+          expect(prox.value).toBe(1);
+          proxFound = true;
+          break;
+        }
+      }
+      expect(proxFound).toBe(true);
+    });
+
     it("should calculate correct points for each team", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
       // Team 1: no junk (low_ball tied, so not awarded) = 0 points
-      // Team 2: low_total (2) = 2 points (low_ball tied, so not awarded)
+      // Team 2: low_total (2) + prox (1) = 3 points (low_ball tied, so not awarded)
       expect(hole1.teams["1"].points).toBe(0);
-      expect(hole1.teams["2"].points).toBe(2);
+      expect(hole1.teams["2"].points).toBe(3);
     });
   });
 
@@ -278,14 +297,14 @@ describe("Five Points Integration Tests", () => {
     it("should track running totals across holes", () => {
       if (!scoreboard) return;
 
-      // After hole 1: Team 1 has 0 pts (low_ball tied), Team 2 has 2 pts (low_total only)
+      // After hole 1: Team 1 has 0 pts, Team 2 has 3 pts (low_total=2 + prox=1)
       const hole1 = scoreboard.holes["1"];
       expect(hole1.teams["1"].runningTotal).toBe(0);
-      expect(hole1.teams["2"].runningTotal).toBe(2);
+      expect(hole1.teams["2"].runningTotal).toBe(3);
 
-      // Running diff should reflect the net advantage (Team 2 is +2 over Team 1)
-      expect(hole1.teams["2"].runningDiff).toBe(2);
-      expect(hole1.teams["1"].runningDiff).toBe(-2);
+      // Running diff should reflect the net advantage (Team 2 is +3 over Team 1)
+      expect(hole1.teams["2"].runningDiff).toBe(3);
+      expect(hole1.teams["1"].runningDiff).toBe(-3);
     });
   });
 

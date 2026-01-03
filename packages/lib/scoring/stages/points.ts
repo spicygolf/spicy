@@ -34,14 +34,30 @@ export function calculatePoints(ctx: ScoringContext): ScoringContext {
 
     // Calculate team points
     for (const teamResult of Object.values(holeResult.teams)) {
-      // Sum junk values
-      const junkPoints = teamResult.junk.reduce((sum, j) => sum + j.value, 0);
+      // Sum team junk values (low_ball, low_total, etc.)
+      const teamJunkPoints = teamResult.junk.reduce(
+        (sum, j) => sum + j.value,
+        0,
+      );
+
+      // Sum player junk values for players on this team (prox, birdie, etc.)
+      // Player junk contributes to team points in team games
+      let playerJunkPoints = 0;
+      for (const playerId of teamResult.playerIds) {
+        const playerResult = holeResult.players[playerId];
+        if (playerResult) {
+          playerJunkPoints += playerResult.junk.reduce(
+            (sum, j) => sum + j.value,
+            0,
+          );
+        }
+      }
 
       // Calculate multiplier
       const multiplier = calculateTotalMultiplier(teamResult.multipliers);
 
-      // Final points
-      teamResult.points = junkPoints * multiplier;
+      // Final points = (team junk + player junk) * multiplier
+      teamResult.points = (teamJunkPoints + playerJunkPoints) * multiplier;
     }
 
     // Calculate player points (for individual games or player-specific tracking)
