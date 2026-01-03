@@ -1,59 +1,55 @@
 /**
  * Ranking Engine
  *
- * Handles ranking with proper tie handling for golf scoring.
- * In golf, lower scores are better, and ties skip subsequent ranks.
+ * Generic ranking algorithm with proper tie handling.
+ * Works for any game - no game-specific code.
  *
- * Example: scores [3, 3, 4, 5] produce ranks [1, 1, 3, 4]
- * (Two players tie for 1st, next player is 3rd, not 2nd)
+ * Golf ranking convention:
+ * - Lower scores are better (direction: "lower")
+ * - Ties share the same rank
+ * - Next rank skips (1, 1, 3 not 1, 1, 2)
  */
 
-import type { RankDirection } from "./types";
+import type { RankDirection, RankedItem } from "./types";
 
 /**
- * Result of ranking an item
- */
-export interface RankedItem<T> {
-  /** The original item */
-  item: T;
-  /** Rank (1 = best) */
-  rank: number;
-  /** Number of items tied at this rank */
-  tieCount: number;
-}
-
-/**
- * Rank items with tie handling
+ * Rank items with proper tie handling.
  *
- * @param items - Items to rank
- * @param scoreGetter - Function to extract score from item
- * @param better - Direction: "lower" for golf (par/strokes), "higher" for points
- * @returns Array of ranked items sorted by rank (best first)
+ * @param items - Array of items to rank
+ * @param scoreGetter - Function to extract score from an item
+ * @param direction - "lower" (golf: lower is better) or "higher" (points: higher is better)
+ * @returns Array of ranked items with rank and tieCount
  *
  * @example
- * // Golf scores (lower is better)
+ * // Golf scores: lower is better
  * const scores = [
- *   { id: 'alice', score: 4 },
- *   { id: 'bob', score: 3 },
- *   { id: 'carol', score: 3 },
- *   { id: 'dave', score: 5 },
+ *   { id: 'a', score: 4 },
+ *   { id: 'b', score: 3 },
+ *   { id: 'c', score: 3 },
+ *   { id: 'd', score: 5 },
  * ];
  * const ranked = rankWithTies(scores, s => s.score, 'lower');
- * // Result: bob=1st, carol=1st (tie), alice=3rd, dave=4th
+ * // Result:
+ * // [
+ * //   { item: { id: 'b', score: 3 }, rank: 1, tieCount: 2 },
+ * //   { item: { id: 'c', score: 3 }, rank: 1, tieCount: 2 },
+ * //   { item: { id: 'a', score: 4 }, rank: 3, tieCount: 1 },
+ * //   { item: { id: 'd', score: 5 }, rank: 4, tieCount: 1 },
+ * // ]
  */
 export function rankWithTies<T>(
   items: T[],
   scoreGetter: (item: T) => number,
-  better: RankDirection = "lower",
+  direction: RankDirection = "lower",
 ): RankedItem<T>[] {
   if (items.length === 0) {
     return [];
   }
 
-  // Sort by score (best first)
+  // Sort by score
   const sorted = [...items].sort((a, b) => {
     const diff = scoreGetter(a) - scoreGetter(b);
-    return better === "lower" ? diff : -diff;
+    return direction === "lower" ? diff : -diff;
   });
 
   const results: RankedItem<T>[] = [];
@@ -63,7 +59,7 @@ export function rankWithTies<T>(
   while (i < sorted.length) {
     const currentScore = scoreGetter(sorted[i]);
 
-    // Count items tied at this score
+    // Count ties at this score
     let tieCount = 1;
     while (
       i + tieCount < sorted.length &&
@@ -90,37 +86,71 @@ export function rankWithTies<T>(
 }
 
 /**
- * Check if there's a tie at a specific rank
+ * Check if a rank/tieCount matches a condition.
+ * Used by junk options with logic like "{'rankWithTies': [1, 1]}" for outright winner.
  *
- * @param rankedItems - Result from rankWithTies
- * @param rank - Rank to check (1-indexed)
- * @returns true if multiple items share this rank
+ * @param actualRank - The player/team's actual rank
+ * @param actualTieCount - The actual number of items tied at this rank
+ * @param targetRank - The required rank (e.g., 1 for first place)
+ * @param targetTieCount - The required tie count (e.g., 1 for outright, 2 for two-way tie)
+ * @returns true if the condition matches
+ *
+ * @example
+ * // Outright winner: rank 1 with no ties
+ * matchesRankCondition(1, 1, 1, 1) // true
+ * matchesRankCondition(1, 2, 1, 1) // false (two-way tie)
+ *
+ * // Two-way tie for first
+ * matchesRankCondition(1, 2, 1, 2) // true
+ *
+ * // All three tied
+ * matchesRankCondition(1, 3, 1, 3) // true
  */
-export function hasTieAtRank<T>(
-  rankedItems: RankedItem<T>[],
-  rank: number,
+export function matchesRankCondition(
+  actualRank: number,
+  actualTieCount: number,
+  targetRank: number,
+  targetTieCount: number,
 ): boolean {
-  const atRank = rankedItems.filter((r) => r.rank === rank);
-  return atRank.length > 1;
+  return actualRank === targetRank && actualTieCount === targetTieCount;
 }
 
 /**
- * Get items at a specific rank
+ * Get the rank of a specific item from ranked results.
  *
- * @param rankedItems - Result from rankWithTies
- * @param rank - Rank to get (1-indexed)
- * @returns Items at that rank (may be multiple if tied)
+ * @param rankedItems - Array of ranked items
+ * @param item - The item to find
+ * @param idGetter - Function to get unique ID from item
+ * @returns The rank info or undefined if not found
  */
-export function getAtRank<T>(rankedItems: RankedItem<T>[], rank: number): T[] {
-  return rankedItems.filter((r) => r.rank === rank).map((r) => r.item);
+export function getRankInfo<T>(
+  rankedItems: RankedItem<T>[],
+  item: T,
+  idGetter: (item: T) => string,
+): { rank: number; tieCount: number } | undefined {
+  const id = idGetter(item);
+  const found = rankedItems.find((r) => idGetter(r.item) === id);
+  if (!found) return undefined;
+  return { rank: found.rank, tieCount: found.tieCount };
 }
 
 /**
- * Get the winner (items at rank 1)
+ * Create a lookup map from ranked items for O(1) access.
  *
- * @param rankedItems - Result from rankWithTies
- * @returns Array of winners (may be multiple if tied for first)
+ * @param rankedItems - Array of ranked items
+ * @param idGetter - Function to get unique ID from item
+ * @returns Map from ID to rank info
  */
-export function getWinners<T>(rankedItems: RankedItem<T>[]): T[] {
-  return getAtRank(rankedItems, 1);
+export function createRankLookup<T>(
+  rankedItems: RankedItem<T>[],
+  idGetter: (item: T) => string,
+): Map<string, { rank: number; tieCount: number }> {
+  const lookup = new Map<string, { rank: number; tieCount: number }>();
+  for (const ranked of rankedItems) {
+    lookup.set(idGetter(ranked.item), {
+      rank: ranked.rank,
+      tieCount: ranked.tieCount,
+    });
+  }
+  return lookup;
 }

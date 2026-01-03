@@ -6,11 +6,14 @@
  */
 
 import type {
+  HoleInfo,
   HoleResult,
   PlayerCumulative,
+  PlayerHoleResult,
   Scoreboard,
   ScoringContext,
   TeamCumulative,
+  TeamHoleResult,
 } from "../types";
 
 /**
@@ -35,13 +38,15 @@ function createEmptyScoreboard(ctx: ScoringContext): Scoreboard {
   const holes: Record<string, HoleResult> = {};
   const playerCumulatives: Record<string, PlayerCumulative> = {};
   const teamCumulatives: Record<string, TeamCumulative> = {};
+  const holesPlayed: string[] = [];
 
   // Initialize hole results
-  for (const gameHole of ctx.holes) {
+  for (const gameHole of ctx.gameHoles) {
     const holeNum = gameHole.hole;
-    const holeInfo = ctx.holeInfo.get(holeNum);
+    const holeInfo = ctx.holeInfoMap.get(holeNum);
 
-    holes[holeNum] = createEmptyHoleResult(holeNum, holeInfo?.par ?? 0, ctx);
+    holes[holeNum] = createEmptyHoleResult(holeNum, holeInfo, ctx);
+    holesPlayed.push(holeNum);
   }
 
   // Initialize player cumulatives from playerHandicaps (already extracted)
@@ -52,6 +57,8 @@ function createEmptyScoreboard(ctx: ScoringContext): Scoreboard {
       popsTotal: 0,
       netTotal: 0,
       pointsTotal: 0,
+      junkTotal: 0,
+      holesPlayed: 0,
       rank: 0,
       tieCount: 0,
     };
@@ -72,6 +79,7 @@ function createEmptyScoreboard(ctx: ScoringContext): Scoreboard {
       teamId,
       scoreTotal: 0,
       pointsTotal: 0,
+      junkTotal: 0,
       rank: 0,
       tieCount: 0,
     };
@@ -83,6 +91,12 @@ function createEmptyScoreboard(ctx: ScoringContext): Scoreboard {
       players: playerCumulatives,
       teams: teamCumulatives,
     },
+    meta: {
+      gameId: ctx.game.name ?? "unknown",
+      holesPlayed,
+      hasTeams: allTeamIds.size > 0,
+      pointsPerHole: 0, // Calculated from junk options
+    },
   };
 }
 
@@ -91,11 +105,18 @@ function createEmptyScoreboard(ctx: ScoringContext): Scoreboard {
  */
 function createEmptyHoleResult(
   holeNum: string,
-  par: number,
+  holeInfo: HoleInfo | undefined,
   ctx: ScoringContext,
 ): HoleResult {
-  const players: Record<string, HoleResult["players"][string]> = {};
-  const teams: Record<string, HoleResult["teams"][string]> = {};
+  const players: Record<string, PlayerHoleResult> = {};
+  const teams: Record<string, TeamHoleResult> = {};
+
+  const defaultHoleInfo: HoleInfo = {
+    hole: holeNum,
+    par: holeInfo?.par ?? 4,
+    allocation: holeInfo?.allocation ?? Number.parseInt(holeNum, 10),
+    yards: holeInfo?.yards ?? 0,
+  };
 
   // Initialize player results from playerHandicaps (already extracted)
   for (const [playerId] of ctx.playerHandicaps) {
@@ -104,6 +125,8 @@ function createEmptyHoleResult(
       gross: 0,
       pops: 0,
       net: 0,
+      scoreToPar: 0,
+      netToPar: 0,
       rank: 0,
       tieCount: 0,
       junk: [],
@@ -135,18 +158,20 @@ function createEmptyHoleResult(
     teams[team.team] = {
       teamId: team.team,
       score: 0,
+      lowBall: 0,
+      total: 0,
+      playerIds,
       rank: 0,
       tieCount: 0,
       junk: [],
       multipliers: [],
       points: 0,
-      playerIds,
     };
   }
 
   return {
-    holeNum,
-    par,
+    hole: holeNum,
+    holeInfo: defaultHoleInfo,
     players,
     teams,
   };

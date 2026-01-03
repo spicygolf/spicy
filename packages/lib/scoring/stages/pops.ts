@@ -18,17 +18,17 @@ import type { ScoringContext } from "../types";
  * @returns Updated context with pops calculated
  */
 export function calculatePops(ctx: ScoringContext): ScoringContext {
-  const { scoreboard, playerHandicaps, holeInfo, holes } = ctx;
+  const { scoreboard, playerHandicaps, holeInfoMap, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
   const newScoreboard = structuredClone(scoreboard);
 
-  for (const gameHole of holes) {
+  for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;
     const holeResult = newScoreboard.holes[holeNum];
-    const hole = holeInfo.get(holeNum);
+    const holeInfo = holeInfoMap.get(holeNum);
 
-    if (!holeResult || !hole) continue;
+    if (!holeResult || !holeInfo) continue;
 
     for (const [playerId, playerResult] of Object.entries(holeResult.players)) {
       const handicapInfo = playerHandicaps.get(playerId);
@@ -38,7 +38,7 @@ export function calculatePops(ctx: ScoringContext): ScoringContext {
       // Calculate pops using existing utility
       const pops = calculatePopsForHole(
         handicapInfo.effectiveHandicap,
-        hole.handicapAllocation,
+        holeInfo.allocation,
       );
 
       playerResult.pops = pops;

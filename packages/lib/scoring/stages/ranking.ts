@@ -18,12 +18,12 @@ import type { ScoringContext } from "../types";
  * @returns Updated context with player rankings
  */
 export function rankPlayers(ctx: ScoringContext): ScoringContext {
-  const { scoreboard, holes } = ctx;
+  const { scoreboard, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
   const newScoreboard = structuredClone(scoreboard);
 
-  for (const gameHole of holes) {
+  for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;
     const holeResult = newScoreboard.holes[holeNum];
 
@@ -65,12 +65,12 @@ export function rankPlayers(ctx: ScoringContext): ScoringContext {
  * @returns Updated context with team rankings
  */
 export function rankTeams(ctx: ScoringContext): ScoringContext {
-  const { scoreboard, holes } = ctx;
+  const { scoreboard, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
   const newScoreboard = structuredClone(scoreboard);
 
-  for (const gameHole of holes) {
+  for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;
     const holeResult = newScoreboard.holes[holeNum];
 

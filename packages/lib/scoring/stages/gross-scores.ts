@@ -2,6 +2,7 @@
  * Gross Scores Stage
  *
  * Extracts gross scores from rounds and populates the scoreboard.
+ * Also calculates score-to-par values.
  */
 
 import { getGrossScore } from "../../utils/scores";
@@ -17,16 +18,18 @@ import type { ScoringContext } from "../types";
  * @returns Updated context with gross scores populated
  */
 export function calculateGrossScores(ctx: ScoringContext): ScoringContext {
-  const { scoreboard, rounds, holes } = ctx;
+  const { scoreboard, rounds, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
   const newScoreboard = structuredClone(scoreboard);
 
-  for (const gameHole of holes) {
+  for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;
     const holeResult = newScoreboard.holes[holeNum];
 
     if (!holeResult) continue;
+
+    const par = holeResult.holeInfo.par;
 
     for (const rtg of rounds) {
       // Check if RoundToGame is loaded
@@ -44,6 +47,7 @@ export function calculateGrossScores(ctx: ScoringContext): ScoringContext {
 
       if (gross !== null) {
         holeResult.players[playerId].gross = gross;
+        holeResult.players[playerId].scoreToPar = gross - par;
       }
     }
   }

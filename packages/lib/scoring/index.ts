@@ -1,13 +1,30 @@
 /**
  * Spicy Golf Scoring Engine
  *
- * Functional pipeline for calculating golf game scores.
+ * Data-driven functional pipeline for calculating golf game scores.
+ * All game rules come from GameSpec and Option data - NO game-specific code.
  *
  * @example
  * import { score } from '@spicy/lib/scoring';
  * const scoreboard = score(game);
  */
 
+// Junk engine (data-driven junk evaluation)
+export {
+  evaluateJunkForHole,
+  getJunkOptions,
+  parseLogicCondition,
+  parseScoreToParCondition,
+} from "./junk-engine";
+// Multiplier engine (data-driven multiplier evaluation)
+export {
+  calculateTotalMultiplier,
+  evaluateAvailability,
+  evaluateMultipliersForHole,
+  getMultiplierOptions,
+} from "./multiplier-engine";
+// Main pipeline
+export { buildContext, score } from "./pipeline";
 // Points engine
 export {
   calculatePoints,
@@ -15,46 +32,60 @@ export {
   pointsFromTable,
   splitPoints,
 } from "./points-engine";
-
 // Ranking engine
+export { rankWithTies } from "./ranking-engine";
+// Pipeline stages (for testing/debugging)
 export {
-  getAtRank,
-  getWinners,
-  hasTieAtRank,
-  type RankedItem,
-  rankWithTies,
-} from "./ranking-engine";
+  assignTeams,
+  calculateCumulatives,
+  calculateGrossScores,
+  calculateNetScores,
+  calculatePoints as calculatePointsStage,
+  calculatePops,
+  calculateTeamScores,
+  evaluateJunk,
+  evaluateMultipliers,
+  initializeScoreboard,
+  rankPlayers,
+  rankPlayersCumulative,
+  rankTeams,
+  rankTeamsCumulative,
+} from "./stages";
+// Team scoring (generic team calculation methods)
+export {
+  calculateAggregate,
+  calculateAllTeamScores,
+  calculateAverage,
+  calculateBestBall,
+  calculateTeamScore,
+  calculateWorstBall,
+} from "./team-scoring";
 
 // Core types
 export type {
   AppliedMultiplier,
   AwardedJunk,
+  EvaluationContext,
   FivePointsTeamScore,
   HoleInfo,
   HoleResult,
+  JunkAward,
+  MultiplierAward,
   PlayerCumulative,
   PlayerHandicapInfo,
   PlayerHoleResult,
+  PlayerInfo,
   PointsTable,
   PointsTableEntry,
   RankDirection,
+  RankedItem,
+  RankLogicCondition,
   Scoreboard,
+  ScoreToParCondition,
   ScoringContext,
   ScoringStage,
   TeamCumulative,
   TeamHoleResult,
+  TeamScoreResult,
+  TeamScoringMethod,
 } from "./types";
-
-// Pipeline stages (will be added as implemented)
-// export { initializeScoreboard } from "./stages/initialize";
-// export { calculateGrossScores } from "./stages/gross-scores";
-// export { calculatePops } from "./stages/pops";
-// export { calculateNetScores } from "./stages/net-scores";
-// export { assignTeams } from "./stages/teams";
-// export { rankPlayers, rankTeams } from "./stages/ranking";
-
-// Games (will be added as implemented)
-// export { fivePoints } from "./games/five-points";
-
-// Main pipeline (will be added as implemented)
-// export { score } from "./pipeline";
