@@ -43,6 +43,7 @@ const GAME_RESOLVE = {
     $each: {
       teams: {
         $each: {
+          options: { $each: true }, // Load team options (prox, etc.)
           rounds: {
             $each: {
               roundToGame: {

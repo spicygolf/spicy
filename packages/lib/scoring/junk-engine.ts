@@ -543,23 +543,39 @@ function evaluateCalculationJunk(
 /**
  * Check if user has marked this junk for the player on this hole
  *
- * User-entered junk (sandie, greenie, prox) is stored in the round scores
- * as a key matching the junk name.
+ * User-entered junk (sandie, greenie, prox) is stored in two possible locations:
+ * 1. Team options: gameHole.teams[].options[] as TeamOption with optionName and playerId
+ * 2. Round scores: round.scores[holeNum][junkName] (legacy format)
  */
 function checkUserJunk(junkName: string, evalCtx: EvaluationContext): boolean {
-  // User junk would be stored in round.scores[holeNum][junkName]
-  // For now, we check if the player has a junk value in their result
-  // This will be populated by the scores loading stage
+  const playerId = evalCtx.player.playerId;
+  const holeNum = evalCtx.holeNum;
 
-  // Find the round for this player
+  // First check team options (primary location for imported data)
+  const gameHole = evalCtx.ctx.gameHoles.find((h) => h.hole === holeNum);
+  if (gameHole?.teams?.$isLoaded) {
+    for (const team of gameHole.teams) {
+      if (!team?.$isLoaded || !team.options?.$isLoaded) continue;
+
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) continue;
+        // Check if this option matches the junk name and player
+        if (opt.optionName === junkName && opt.playerId === playerId) {
+          return true;
+        }
+      }
+    }
+  }
+
+  // Fall back to round scores (legacy format)
   const round = evalCtx.ctx.rounds.find((rtg) => {
     const r = rtg.round;
-    return r?.$isLoaded && r.playerId === evalCtx.player.playerId;
+    return r?.$isLoaded && r.playerId === playerId;
   })?.round;
 
   if (!round?.$isLoaded || !round.scores?.$isLoaded) return false;
 
-  const holeScores = round.scores[evalCtx.holeNum];
+  const holeScores = round.scores[holeNum];
   if (!holeScores?.$isLoaded) return false;
 
   // Check if junk is marked (value of "1" or "true")
