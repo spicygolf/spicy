@@ -61,7 +61,17 @@ export interface SeedMultiplierOption {
 export type SeedOption = SeedGameOption | SeedJunkOption | SeedMultiplierOption;
 
 /**
- * Seed data spec format (references options by name)
+ * Option reference: either a name (string) or an object with name + overrides
+ * When an object, any fields besides "name" override the base option values.
+ *
+ * Examples:
+ *   "birdie"                        - use birdie option as-is
+ *   { "name": "low_ball", "value": 2 } - use low_ball but override value to 2
+ */
+export type OptionRef = string | { name: string; [key: string]: unknown };
+
+/**
+ * Seed data spec format (references options by name, with optional overrides)
  */
 export interface SeedSpec {
   _key: string; // ArangoDB _key for legacyId matching during game import
@@ -78,9 +88,9 @@ export interface SeedSpec {
   teams?: boolean;
   team_size?: number;
   team_change_every?: number;
-  options: string[]; // Option names
-  junk: string[]; // Junk option names
-  multipliers: string[]; // Multiplier option names
+  options: OptionRef[]; // Game option names or objects with overrides
+  junk: OptionRef[]; // Junk option names or objects with overrides
+  multipliers: OptionRef[]; // Multiplier option names or objects with overrides
 }
 
 /**
@@ -170,9 +180,24 @@ export async function loadSeedIndex(): Promise<SeedIndex | null> {
 }
 
 /**
+ * Parse an option reference and return the name and any overrides
+ */
+function parseOptionRef(ref: OptionRef): {
+  name: string;
+  overrides: Record<string, unknown>;
+} {
+  if (typeof ref === "string") {
+    return { name: ref, overrides: {} };
+  }
+  const { name, ...overrides } = ref;
+  return { name, overrides };
+}
+
+/**
  * Convert seed spec to GameSpecV03 format for compatibility with existing import code
  *
  * This bridges the gap between the new seed format and the existing catalog import code.
+ * Supports per-spec overrides: { "name": "low_ball", "value": 2 } merges onto base option.
  */
 export async function loadSeedSpecsAsV03(): Promise<
   Array<{
@@ -234,9 +259,10 @@ export async function loadSeedSpecsAsV03(): Promise<
   ]);
 
   return specs.map((spec) => {
-    // Resolve option references to full option data
+    // Resolve option references to full option data, merging any per-spec overrides
     const gameOptions = spec.options
-      .map((name) => {
+      .map((ref) => {
+        const { name, overrides } = parseOptionRef(ref);
         const opt = optionsMap.get(name);
         if (!opt || opt.type !== "game") return null;
         return {
@@ -251,12 +277,14 @@ export async function loadSeedSpecsAsV03(): Promise<
                 : opt.defaultValue,
           choices: opt.choices,
           teamOnly: opt.teamOnly,
+          ...overrides, // Apply per-spec overrides
         };
       })
       .filter(Boolean);
 
     const junkOptions = spec.junk
-      .map((name) => {
+      .map((ref) => {
+        const { name, overrides } = parseOptionRef(ref);
         const opt = optionsMap.get(name);
         if (!opt || opt.type !== "junk") return null;
         return {
@@ -274,12 +302,14 @@ export async function loadSeedSpecsAsV03(): Promise<
           logic: opt.logic,
           better: opt.better,
           score_to_par: opt.score_to_par,
+          ...overrides, // Apply per-spec overrides
         };
       })
       .filter(Boolean);
 
     const multiplierOptions = spec.multipliers
-      .map((name) => {
+      .map((ref) => {
+        const { name, overrides } = parseOptionRef(ref);
         const opt = optionsMap.get(name);
         if (!opt || opt.type !== "multiplier") return null;
         return {
@@ -293,6 +323,7 @@ export async function loadSeedSpecsAsV03(): Promise<
           scope: opt.scope,
           availability: opt.availability,
           override: opt.override,
+          ...overrides, // Apply per-spec overrides
         };
       })
       .filter(Boolean);

@@ -24,9 +24,9 @@
     "discount_percent"
   ],
   "junk": [
-    "low_ball",
-    "low_total",
-    "prox",
+    { "name": "low_ball", "value": 2 },
+    { "name": "low_total", "value": 2 },
+    { "name": "prox", "value": 1 },
     "birdie",
     "eagle"
   ],
