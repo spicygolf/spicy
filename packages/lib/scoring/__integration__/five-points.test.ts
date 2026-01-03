@@ -10,6 +10,8 @@
  * - JAZZ_WORKER_SECRET
  */
 
+// biome-ignore-all lint/complexity/useLiteralKeys: option keys have underscores
+
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { resolve } from "node:path";
 import { config } from "dotenv";
