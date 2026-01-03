@@ -111,6 +111,10 @@ function getCalculatedPlayerJunkOptions(game: Game): JunkOption[] {
  * Get calculated (automatic) team junk options from game spec
  * These are team-scoped junk options with calculation: "best_ball", "sum", etc.
  * Examples: low_ball, low_total
+ *
+ * Note: We don't filter by show_in here because the scoring engine awards
+ * these based on calculation, and they should be shown if earned.
+ * The show_in field may not be set on older data.
  */
 function getCalculatedTeamJunkOptions(game: Game): JunkOption[] {
   const junkOptions: JunkOption[] = [];
@@ -128,9 +132,7 @@ function getCalculatedTeamJunkOptions(game: Game): JunkOption[] {
       opt.type === "junk" &&
       opt.scope === "team" &&
       opt.calculation && // Has a calculation method (best_ball, sum, etc.)
-      (opt.show_in === "score" ||
-        opt.show_in === "team" ||
-        opt.show_in === "faves")
+      opt.show_in !== "none" // Only exclude if explicitly hidden
     ) {
       junkOptions.push(opt);
     }
@@ -537,7 +539,7 @@ export function ScoringView({
               };
             });
 
-          // Build calculated team junk buttons (low_ball, low_team)
+          // Build calculated team junk buttons (low_ball, low_total)
           // Only show if the team has actually earned this junk (hide unachieved)
           const teamJunkButtons: OptionButton[] = calculatedTeamJunkOptions
             .filter((junk) =>
