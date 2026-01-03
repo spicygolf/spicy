@@ -47,31 +47,31 @@ describe("parseLogicCondition", () => {
   it("parses rankWithTies for outright winner", () => {
     const logic = "{'rankWithTies': [1, 1]}";
     const result = parseLogicCondition(logic);
-    expect(result).toEqual({ type: "rankWithTies", rank: 1, tieCount: 1 });
+    expect(result).toEqual({ rank: 1, tieCount: 1 });
   });
 
   it("parses rankWithTies for two-way tie for first", () => {
     const logic = "{'rankWithTies': [1, 2]}";
     const result = parseLogicCondition(logic);
-    expect(result).toEqual({ type: "rankWithTies", rank: 1, tieCount: 2 });
+    expect(result).toEqual({ rank: 1, tieCount: 2 });
   });
 
   it("parses rankWithTies for three-way tie", () => {
     const logic = "{'rankWithTies': [1, 3]}";
     const result = parseLogicCondition(logic);
-    expect(result).toEqual({ type: "rankWithTies", rank: 1, tieCount: 3 });
+    expect(result).toEqual({ rank: 1, tieCount: 3 });
   });
 
   it("parses rankWithTies for second place", () => {
     const logic = "{'rankWithTies': [2, 1]}";
     const result = parseLogicCondition(logic);
-    expect(result).toEqual({ type: "rankWithTies", rank: 2, tieCount: 1 });
+    expect(result).toEqual({ rank: 2, tieCount: 1 });
   });
 
   it("handles double quotes in JSON", () => {
     const logic = '{"rankWithTies": [1, 1]}';
     const result = parseLogicCondition(logic);
-    expect(result).toEqual({ type: "rankWithTies", rank: 1, tieCount: 1 });
+    expect(result).toEqual({ rank: 1, tieCount: 1 });
   });
 
   it("returns null for invalid JSON", () => {
