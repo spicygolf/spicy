@@ -16,7 +16,11 @@ import type {
   RoundToGame,
   Team,
 } from "../schema";
-import { calculateCourseHandicap } from "../utils/handicap";
+import {
+  adjustHandicapsToLow,
+  calculateCourseHandicap,
+  type PlayerHandicap,
+} from "../utils/handicap";
 import {
   assignTeams,
   calculateCumulatives,
@@ -82,8 +86,8 @@ export function buildContext(game: Game): ScoringContext {
   // Extract rounds
   const rounds = extractRounds(game);
 
-  // Build player handicaps lookup
-  const playerHandicaps = buildPlayerHandicaps(rounds);
+  // Build player handicaps lookup (uses options for handicap mode)
+  const playerHandicaps = buildPlayerHandicaps(rounds, options);
 
   // Build hole info lookup
   const holeInfoMap = buildHoleInfo(rounds, gameHoles);
@@ -235,8 +239,21 @@ function extractRounds(game: Game): RoundToGame[] {
 
 function buildPlayerHandicaps(
   rounds: RoundToGame[],
+  options: MapOfOptions,
 ): Map<string, PlayerHandicapInfo> {
   const handicaps = new Map<string, PlayerHandicapInfo>();
+
+  // Check handicap mode from options (default is "low")
+  // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
+  const handicapIndexFromOption = options["handicap_index_from"];
+  const handicapMode =
+    handicapIndexFromOption?.$isLoaded &&
+    handicapIndexFromOption.value === "full"
+      ? "full"
+      : "low";
+
+  // First pass: collect all player handicaps
+  const playerHandicaps: PlayerHandicap[] = [];
 
   for (const rtg of rounds) {
     if (!rtg?.$isLoaded) continue;
@@ -265,14 +282,31 @@ function buildPlayerHandicaps(
     }
 
     const gameHandicap = rtg.gameHandicap;
-    const effectiveHandicap = gameHandicap ?? courseHandicap;
 
-    handicaps.set(playerId, {
+    playerHandicaps.push({
       playerId,
-      roundToGameId: playerId, // Use playerId as identifier since RoundToGame doesn't have id
-      effectiveHandicap,
       courseHandicap,
       gameHandicap,
+    });
+  }
+
+  // Apply low handicap adjustment if needed
+  const adjustedHandicaps =
+    handicapMode === "low" ? adjustHandicapsToLow(playerHandicaps) : null;
+
+  // Second pass: build final handicap info with adjusted values
+  for (const ph of playerHandicaps) {
+    const effectiveHandicap =
+      handicapMode === "low"
+        ? (adjustedHandicaps?.get(ph.playerId) ?? 0)
+        : (ph.gameHandicap ?? ph.courseHandicap);
+
+    handicaps.set(ph.playerId, {
+      playerId: ph.playerId,
+      roundToGameId: ph.playerId, // Use playerId as identifier since RoundToGame doesn't have id
+      effectiveHandicap,
+      courseHandicap: ph.courseHandicap,
+      gameHandicap: ph.gameHandicap,
     });
   }
 

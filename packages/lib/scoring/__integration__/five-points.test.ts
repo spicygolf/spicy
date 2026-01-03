@@ -180,10 +180,11 @@ describe("Five Points Integration Tests", () => {
 
   describe("Hole 1 Scoring", () => {
     // Hole 1: Par 4, #3 handicap allocation
-    // All 4 players have course handicap >= 3, so all get 1 pop
-    // Gross scores: 7, 6, 6, 5 -> Net scores: 6, 5, 5, 4
-    // Team 1: fUQaMFLV (7-1=6), USscwvLV (6-1=5) -> lowBall=5, total=11
-    // Team 2: NmEAVViw (6-1=5), Z6hnA7pT (5-1=4) -> lowBall=4, total=9 (wins)
+    // Game uses "low" handicap mode - pops relative to lowest handicap (CH=4)
+    // Adjusted handicaps: 0, 2, 6, 10 (from CH: 4, 6, 10, 14)
+    // On hole 1 (hdcp 3): players with adjusted >= 3 get 1 pop
+    // Team 1: fUQaMFLV (7, adj=2, 0 pops), USscwvLV (6, adj=6, 1 pop) -> lowBall=5, total=12
+    // Team 2: NmEAVViw (6, adj=10, 1 pop), Z6hnA7pT (5, adj=0, 0 pops) -> lowBall=5, total=10 (wins)
 
     it("should calculate correct gross scores", () => {
       if (!scoreboard) return;
@@ -198,72 +199,78 @@ describe("Five Points Integration Tests", () => {
       expect(scores).toContain(7);
     });
 
-    it("should calculate pops based on handicap allocation", () => {
+    it("should calculate pops using low handicap mode", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Hole 1 has allocation 3, all players have CH >= 3, so all get 1 pop
       expect(hole1.holeInfo.allocation).toBe(3);
-      for (const result of Object.values(hole1.players)) {
-        expect(result.pops).toBe(1);
-      }
+
+      // In low mode, only players with adjusted handicap >= 3 get pops
+      // Adjusted: 0 (CH4), 2 (CH6), 6 (CH10), 10 (CH14)
+      const popsValues = Object.values(hole1.players).map((p) => p.pops);
+      expect(popsValues.filter((p) => p === 0).length).toBe(2); // 2 players get 0 pops
+      expect(popsValues.filter((p) => p === 1).length).toBe(2); // 2 players get 1 pop
     });
 
     it("should calculate team low ball scores (net)", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Team 2 has net low ball of 4, Team 1 has net low ball of 5
-      expect(hole1.teams["2"].lowBall).toBe(4);
+      // Both teams tie with lowBall of 5
       expect(hole1.teams["1"].lowBall).toBe(5);
+      expect(hole1.teams["2"].lowBall).toBe(5);
     });
 
     it("should calculate team total scores (net)", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Team 2: 4+5=9, Team 1: 5+6=11
-      expect(hole1.teams["2"].total).toBe(9);
-      expect(hole1.teams["1"].total).toBe(11);
+      // Team 1: 7+5=12, Team 2: 5+5=10
+      expect(hole1.teams["1"].total).toBe(12);
+      expect(hole1.teams["2"].total).toBe(10);
     });
 
-    it("should award low_ball junk to winning team", () => {
+    it("should award low_ball junk to both teams on tie", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Team 2 wins low ball with net 4 (Team 1 has net 5)
-      const team2Junk = hole1.teams["2"].junk;
-      const lowBallJunk = team2Junk.find((j) => j.name === "low_ball");
-      expect(lowBallJunk).toBeDefined();
-      expect(lowBallJunk?.value).toBe(2); // Five Points override
+      // Both teams tie with lowBall=5, so both get low_ball junk
+      const team1LowBall = hole1.teams["1"].junk.find(
+        (j) => j.name === "low_ball",
+      );
+      const team2LowBall = hole1.teams["2"].junk.find(
+        (j) => j.name === "low_ball",
+      );
+      expect(team1LowBall).toBeDefined();
+      expect(team2LowBall).toBeDefined();
+      expect(team1LowBall?.value).toBe(2); // Five Points override
+      expect(team2LowBall?.value).toBe(2);
     });
 
-    it("should award low_total junk to winning team", () => {
+    it("should award low_total junk to winning team only", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Team 2 wins low total with net 9 (Team 1 has net 11)
-      const team2Junk = hole1.teams["2"].junk;
-      const lowTotalJunk = team2Junk.find((j) => j.name === "low_total");
-      expect(lowTotalJunk).toBeDefined();
-      expect(lowTotalJunk?.value).toBe(2); // Five Points override
+      // Team 2 wins low total with 10 (Team 1 has 12)
+      const team2LowTotal = hole1.teams["2"].junk.find(
+        (j) => j.name === "low_total",
+      );
+      const team1LowTotal = hole1.teams["1"].junk.find(
+        (j) => j.name === "low_total",
+      );
+      expect(team2LowTotal).toBeDefined();
+      expect(team2LowTotal?.value).toBe(2); // Five Points override
+      expect(team1LowTotal).toBeUndefined();
     });
 
-    it("should not award junk to losing team", () => {
+    it("should calculate correct points for each team", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Team 1 should have no junk on hole 1
-      expect(hole1.teams["1"].junk.length).toBe(0);
-    });
-
-    it("should calculate correct points for winning team", () => {
-      if (!scoreboard) return;
-
-      const hole1 = scoreboard.holes["1"];
+      // Team 1: low_ball (2) = 2 points
       // Team 2: low_ball (2) + low_total (2) = 4 points
+      expect(hole1.teams["1"].points).toBe(2);
       expect(hole1.teams["2"].points).toBe(4);
-      expect(hole1.teams["1"].points).toBe(0);
     });
   });
 
@@ -271,14 +278,14 @@ describe("Five Points Integration Tests", () => {
     it("should track running totals across holes", () => {
       if (!scoreboard) return;
 
-      // After hole 1, Team 2 should be up 4 points
+      // After hole 1: Team 1 has 2 pts (low_ball tie), Team 2 has 4 pts (low_ball + low_total)
       const hole1 = scoreboard.holes["1"];
+      expect(hole1.teams["1"].runningTotal).toBe(2);
       expect(hole1.teams["2"].runningTotal).toBe(4);
-      expect(hole1.teams["1"].runningTotal).toBe(0);
 
-      // Running diff should reflect the net advantage
-      expect(hole1.teams["2"].runningDiff).toBe(4);
-      expect(hole1.teams["1"].runningDiff).toBe(-4);
+      // Running diff should reflect the net advantage (Team 2 is +2 over Team 1)
+      expect(hole1.teams["2"].runningDiff).toBe(2);
+      expect(hole1.teams["1"].runningDiff).toBe(-2);
     });
   });
 
