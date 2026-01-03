@@ -26,6 +26,13 @@ export {
   evaluateMultipliersForHole,
   getMultiplierOptions,
 } from "./multiplier-engine";
+// Option utilities (per-hole option value resolution)
+export {
+  getJunkOptionsForHole,
+  getOptionForHole,
+  getOptionValueForHole,
+  isOptionOnHole,
+} from "./option-utils";
 // Main pipeline
 export { buildContext, score } from "./pipeline";
 // Points engine
@@ -87,6 +94,7 @@ export type {
   ScoreToParCondition,
   ScoringContext,
   ScoringStage,
+  ScoringWarning,
   TeamCumulative,
   TeamHoleResult,
   TeamScoreResult,
