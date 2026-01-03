@@ -374,6 +374,215 @@ describe("Five Points Integration Tests", () => {
     });
   });
 
+  describe("Multiplier Application", () => {
+    // Tests that multipliers are applied correctly to points
+    // Key rule: ALL multipliers on a hole combine into a single holeMultiplier
+    // that applies to ALL teams' points equally
+
+    it("should apply hole-wide 4x multiplier on hole 2 (double + double_back)", () => {
+      if (!scoreboard) return;
+
+      const hole2 = scoreboard.holes["2"];
+      expect(hole2).toBeDefined();
+
+      // Hole 2: T1 has double:2, T2 has double_back:2
+      // Combined holeMultiplier = 2 × 2 = 4
+      expect(hole2.holeMultiplier).toBe(4);
+
+      // T2 won with low_ball:2 + low_total:2 + prox:1 = 5 junk points
+      // With 4x multiplier: 5 × 4 = 20 points
+      expect(hole2.teams["2"].points).toBe(20);
+
+      // T1 got 0 junk, so 0 × 4 = 0 points
+      expect(hole2.teams["1"].points).toBe(0);
+    });
+
+    it("should apply hole-wide 4x multiplier on hole 4 (double + double_back)", () => {
+      if (!scoreboard) return;
+
+      const hole4 = scoreboard.holes["4"];
+      expect(hole4).toBeDefined();
+
+      // Same 4x multiplier situation
+      expect(hole4.holeMultiplier).toBe(4);
+
+      // T2 won with low_ball:2 + low_total:2 + prox:1 = 5 junk points
+      // With 4x multiplier: 5 × 4 = 20 points
+      expect(hole4.teams["2"].points).toBe(20);
+      expect(hole4.teams["1"].points).toBe(0);
+    });
+
+    it("should apply 2x multiplier on hole 3 (double only)", () => {
+      if (!scoreboard) return;
+
+      const hole3 = scoreboard.holes["3"];
+      expect(hole3).toBeDefined();
+
+      // Only T1 has double:2, so holeMultiplier = 2
+      expect(hole3.holeMultiplier).toBe(2);
+
+      // T1 won with low_ball:2 + low_total:2 + prox:1 = 5 junk points
+      // With 2x multiplier: 5 × 2 = 10 points
+      expect(hole3.teams["1"].points).toBe(10);
+      expect(hole3.teams["2"].points).toBe(0);
+    });
+
+    it("should apply 4x multiplier on hole 16 (pre_double + double)", () => {
+      if (!scoreboard) return;
+
+      const hole16 = scoreboard.holes["16"];
+      expect(hole16).toBeDefined();
+
+      // T1 has pre_double:2 + double:2 = 4x
+      expect(hole16.holeMultiplier).toBe(4);
+
+      // T1: low_ball:2 + birdie:1 + prox:1 = 4 junk, × 4 = 16 points
+      expect(hole16.teams["1"].points).toBe(16);
+
+      // T2: low_total:2 = 2 junk, × 4 = 8 points
+      expect(hole16.teams["2"].points).toBe(8);
+    });
+
+    it("should apply 2x multiplier on hole 17 (pre_double only)", () => {
+      if (!scoreboard) return;
+
+      const hole17 = scoreboard.holes["17"];
+      expect(hole17).toBeDefined();
+
+      // T1 has pre_double:2 = 2x
+      expect(hole17.holeMultiplier).toBe(2);
+
+      // T1: low_ball:2 + birdie:1 + prox:1 = 4 junk, × 2 = 8 points
+      expect(hole17.teams["1"].points).toBe(8);
+
+      // T2: low_total:2 = 2 junk, × 2 = 4 points
+      expect(hole17.teams["2"].points).toBe(4);
+    });
+
+    it("should apply 4x multiplier on hole 18 (both teams pre_double)", () => {
+      if (!scoreboard) return;
+
+      const hole18 = scoreboard.holes["18"];
+      expect(hole18).toBeDefined();
+
+      // Both teams have pre_double:2, so 2 × 2 = 4x
+      expect(hole18.holeMultiplier).toBe(4);
+
+      // T2: low_ball:2 + low_total:2 + prox:1 = 5 junk, × 4 = 20 points
+      expect(hole18.teams["2"].points).toBe(20);
+
+      // T1: 0 junk, × 4 = 0 points
+      expect(hole18.teams["1"].points).toBe(0);
+    });
+
+    it("should have no multiplier (1x) on holes without presses", () => {
+      if (!scoreboard) return;
+
+      // Hole 1 has no multipliers
+      const hole1 = scoreboard.holes["1"];
+      expect(hole1.holeMultiplier).toBe(1);
+
+      // Hole 5 has no multipliers
+      const hole5 = scoreboard.holes["5"];
+      expect(hole5.holeMultiplier).toBe(1);
+    });
+  });
+
+  describe("Birdie Junk", () => {
+    // Birdie: score_to_par "exactly -1" based on net score
+
+    it("should award birdie on hole 5 to player with net birdie", () => {
+      if (!scoreboard) return;
+
+      const hole5 = scoreboard.holes["5"];
+      expect(hole5).toBeDefined();
+
+      // Find player with birdie junk
+      const playersWithBirdie = Object.values(hole5.players).filter((p) =>
+        p.junk.some((j) => j.name === "birdie"),
+      );
+
+      expect(playersWithBirdie.length).toBeGreaterThan(0);
+
+      // Verify the birdie is for a player who shot net -1 (par - net = -1)
+      for (const player of playersWithBirdie) {
+        expect(player.netToPar).toBe(-1);
+      }
+    });
+
+    it("should award birdie value of 1 point", () => {
+      if (!scoreboard) return;
+
+      // Find any hole with a birdie
+      for (const holeNum of scoreboard.meta.holesPlayed) {
+        const hole = scoreboard.holes[holeNum];
+        for (const player of Object.values(hole.players)) {
+          const birdie = player.junk.find((j) => j.name === "birdie");
+          if (birdie) {
+            expect(birdie.value).toBe(1);
+            return; // Found one, test passes
+          }
+        }
+      }
+      // If no birdies found, that's okay - just testing the value when present
+    });
+
+    it("should contribute birdie points to team total", () => {
+      if (!scoreboard) return;
+
+      const hole16 = scoreboard.holes["16"];
+      // T1 has a birdie on hole 16, which contributes to their points
+      // T1 junk: low_ball:2 + birdie:1 + prox:1 = 4, × 4x = 16
+      const team1Junk = hole16.teams["1"].junk;
+      const team1PlayerIds = hole16.teams["1"].playerIds;
+
+      // Team junk
+      const teamJunkTotal = team1Junk.reduce((sum, j) => sum + j.value, 0);
+
+      // Player junk (birdie, prox)
+      let playerJunkTotal = 0;
+      for (const playerId of team1PlayerIds) {
+        const player = hole16.players[playerId];
+        playerJunkTotal += player.junk.reduce((sum, j) => sum + j.value, 0);
+      }
+
+      // Total junk × multiplier = points
+      const totalJunk = teamJunkTotal + playerJunkTotal;
+      const multiplier = hole16.holeMultiplier ?? 1;
+      expect(hole16.teams["1"].points).toBe(totalJunk * multiplier);
+    });
+  });
+
+  describe("Running Totals with Multipliers", () => {
+    it("should accumulate running totals correctly through multiplied holes", () => {
+      if (!scoreboard) return;
+
+      // Check running totals match sum of previous points
+      let team1RunningTotal = 0;
+      let team2RunningTotal = 0;
+
+      for (let i = 1; i <= 18; i++) {
+        const hole = scoreboard.holes[String(i)];
+        team1RunningTotal += hole.teams["1"].points;
+        team2RunningTotal += hole.teams["2"].points;
+
+        expect(hole.teams["1"].runningTotal).toBe(team1RunningTotal);
+        expect(hole.teams["2"].runningTotal).toBe(team2RunningTotal);
+      }
+    });
+
+    it("should have correct final totals", () => {
+      if (!scoreboard) return;
+
+      const hole18 = scoreboard.holes["18"];
+
+      // Based on the verified scoring data:
+      // T1 final: 66, T2 final: 87
+      expect(hole18.teams["1"].runningTotal).toBe(66);
+      expect(hole18.teams["2"].runningTotal).toBe(87);
+    });
+  });
+
   describe("Multiplier Detection", () => {
     // This game has multipliers stored in team options:
     // Hole 2: Team 1 has "double", Team 2 has "double_back"
