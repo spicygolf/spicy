@@ -47,7 +47,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
           round: {
             playerId: true,
             handicapIndex: true,
-            scores: true,
+            scores: { $each: true }, // Load nested HoleScores for each hole
             tee: { ratings: true },
           },
         },

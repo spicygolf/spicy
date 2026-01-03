@@ -37,12 +37,15 @@ interface OptionsButtonsProps {
   options: OptionButton[];
   onOptionPress: (optionName: string) => void;
   readonly?: boolean;
+  /** If true, display buttons in a vertical column instead of horizontal row */
+  vertical?: boolean;
 }
 
 export function OptionsButtons({
   options,
   onOptionPress,
   readonly = false,
+  vertical = false,
 }: OptionsButtonsProps) {
   const { theme } = useUnistyles();
 
@@ -51,7 +54,7 @@ export function OptionsButtons({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, vertical && styles.containerVertical]}>
       {options.map((option) => {
         const _isJunk = option.type === "junk";
         const isMultiplier = option.type === "multiplier";
@@ -124,6 +127,11 @@ const styles = StyleSheet.create((theme) => ({
     flexWrap: "wrap",
     gap: theme.gap(1),
     paddingVertical: theme.gap(1),
+  },
+  containerVertical: {
+    flexDirection: "column",
+    flexWrap: "nowrap",
+    alignItems: "flex-end",
   },
   optionButton: {
     flexDirection: "row",

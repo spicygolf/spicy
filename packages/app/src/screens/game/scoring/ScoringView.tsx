@@ -8,7 +8,8 @@ import type {
   Team,
 } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
-import type { Scoreboard } from "spicylib/scoring";
+import type { Scoreboard, TeamHoleResult } from "spicylib/scoring";
+import { evaluateAvailability } from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
@@ -270,6 +271,53 @@ function getMultiplierOptions(game: Game): MultiplierOption[] {
 }
 
 /**
+ * Check if a multiplier is available for a team based on its availability condition.
+ * Uses the scoring engine's evaluateAvailability function to evaluate JSON Logic.
+ *
+ * If the multiplier has no availability condition, it's always available.
+ * If the scoreboard is not available, we can't evaluate so we return true (show it).
+ */
+function isMultiplierAvailable(
+  mult: MultiplierOption,
+  scoreboard: Scoreboard | null,
+  holeNum: string,
+  teamId: string,
+): boolean {
+  // If no availability condition, always available
+  if (!mult.availability) return true;
+
+  // If no scoreboard, can't evaluate - show the multiplier
+  if (!scoreboard) return true;
+
+  const holeResult = scoreboard.holes[holeNum];
+  if (!holeResult) return true;
+
+  const teamResult = holeResult.teams[teamId];
+  if (!teamResult) return true;
+
+  // Build a minimal context for evaluation
+  // The evaluateAvailability function needs: ctx, holeNum, holeResult, team, teams
+  try {
+    // Create a minimal mock context - the logic engine only needs certain fields
+    const mockCtx = {
+      scoreboard,
+      gameHoles: [],
+      options: {},
+    } as never; // Cast to never since we're passing a partial context
+
+    return evaluateAvailability(
+      mult.availability,
+      teamResult as TeamHoleResult,
+      holeResult,
+      mockCtx,
+    );
+  } catch {
+    // If evaluation fails, show the multiplier
+    return true;
+  }
+}
+
+/**
  * Result of checking team multiplier status
  */
 interface MultiplierStatus {
@@ -453,10 +501,23 @@ export function ScoringView({
 
           // Current hole number for tracking firstHole on new multipliers
           const currentHoleNumber = String(currentHoleIndex + 1);
+          const teamId = team.team ?? "";
 
-          // Build multiplier buttons with selected state for this team
-          const multiplierButtons: OptionButton[] = multiplierOptions.map(
-            (mult) => {
+          // Build multiplier buttons - only include available multipliers or already active ones
+          const multiplierButtons: OptionButton[] = multiplierOptions
+            .filter((mult) => {
+              const status = getTeamMultiplierStatus(team, mult.name);
+              // Always show if already active (selected or inherited)
+              if (status.active) return true;
+              // Otherwise, check availability condition
+              return isMultiplierAvailable(
+                mult,
+                scoreboard,
+                currentHoleNumber,
+                teamId,
+              );
+            })
+            .map((mult) => {
               const status = getTeamMultiplierStatus(team, mult.name);
               // Inherited if active and firstHole is set but different from current hole
               const isInherited =
@@ -472,30 +533,27 @@ export function ScoringView({
                 selected: status.active,
                 inherited: isInherited,
               };
-            },
-          );
+            });
 
           // Build calculated team junk buttons (low_ball, low_team)
-          // These are shown as selected when the team has earned them, but not toggleable
-          const teamJunkButtons: OptionButton[] = calculatedTeamJunkOptions.map(
-            (junk) => {
-              const hasJunk = hasCalculatedTeamJunk(
+          // Only show if the team has actually earned this junk (hide unachieved)
+          const teamJunkButtons: OptionButton[] = calculatedTeamJunkOptions
+            .filter((junk) =>
+              hasCalculatedTeamJunk(
                 scoreboard,
                 currentHoleNumber,
-                team.team ?? "",
+                teamId,
                 junk.name,
-              );
-
-              return {
-                name: junk.name,
-                displayName: junk.disp,
-                icon: junk.icon,
-                type: "junk" as const,
-                selected: hasJunk,
-                calculated: true, // Mark as calculated/automatic
-              };
-            },
-          );
+              ),
+            )
+            .map((junk) => ({
+              name: junk.name,
+              displayName: junk.disp,
+              icon: junk.icon,
+              type: "junk" as const,
+              selected: true, // Always selected since we filter to only achieved
+              calculated: true, // Mark as calculated/automatic
+            }));
 
           return (
             <TeamGroup
@@ -574,24 +632,25 @@ export function ScoringView({
                 );
 
                 // Build calculated junk options (birdie, eagle) from scoreboard
+                // Only include junk that was actually achieved (hide unachieved)
                 const calculatedJunkButtons: OptionButton[] =
-                  calculatedPlayerJunkOptions.map((junk) => {
-                    const hasJunk = hasCalculatedPlayerJunk(
-                      scoreboard,
-                      holeNum,
-                      round.playerId,
-                      junk.name,
-                    );
-
-                    return {
+                  calculatedPlayerJunkOptions
+                    .filter((junk) =>
+                      hasCalculatedPlayerJunk(
+                        scoreboard,
+                        holeNum,
+                        round.playerId,
+                        junk.name,
+                      ),
+                    )
+                    .map((junk) => ({
                       name: junk.name,
                       displayName: junk.disp,
                       icon: junk.icon,
                       type: "junk" as const,
-                      selected: hasJunk,
+                      selected: true, // Always selected since we filter to only achieved
                       calculated: true, // Automatic, not toggleable
-                    };
-                  });
+                    }));
 
                 // Combine: calculated junk first (birdie, eagle), then user junk (prox)
                 const junkButtons = [
