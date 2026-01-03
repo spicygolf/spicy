@@ -177,9 +177,11 @@ describe("Five Points Integration Tests", () => {
   });
 
   describe("Hole 1 Scoring", () => {
-    // Hole 1: Par 4, #3 handicap hole
-    // Team 1: Player A (7), Player B (6) -> lowBall=6, total=13
-    // Team 2: Player C (6), Player D (5) -> lowBall=5, total=11 (wins)
+    // Hole 1: Par 4, #3 handicap allocation
+    // All 4 players have course handicap >= 3, so all get 1 pop
+    // Gross scores: 7, 6, 6, 5 -> Net scores: 6, 5, 5, 4
+    // Team 1: fUQaMFLV (7-1=6), USscwvLV (6-1=5) -> lowBall=5, total=11
+    // Team 2: NmEAVViw (6-1=5), Z6hnA7pT (5-1=4) -> lowBall=4, total=9 (wins)
 
     it("should calculate correct gross scores", () => {
       if (!scoreboard) return;
@@ -194,29 +196,40 @@ describe("Five Points Integration Tests", () => {
       expect(scores).toContain(7);
     });
 
-    it("should calculate team low ball scores", () => {
+    it("should calculate pops based on handicap allocation", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Team 2 has low ball of 5, Team 1 has low ball of 6
-      expect(hole1.teams["2"].lowBall).toBe(5);
-      expect(hole1.teams["1"].lowBall).toBe(6);
+      // Hole 1 has allocation 3, all players have CH >= 3, so all get 1 pop
+      expect(hole1.holeInfo.allocation).toBe(3);
+      for (const result of Object.values(hole1.players)) {
+        expect(result.pops).toBe(1);
+      }
     });
 
-    it("should calculate team total scores", () => {
+    it("should calculate team low ball scores (net)", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Team 2: 5+6=11, Team 1: 6+7=13
-      expect(hole1.teams["2"].total).toBe(11);
-      expect(hole1.teams["1"].total).toBe(13);
+      // Team 2 has net low ball of 4, Team 1 has net low ball of 5
+      expect(hole1.teams["2"].lowBall).toBe(4);
+      expect(hole1.teams["1"].lowBall).toBe(5);
+    });
+
+    it("should calculate team total scores (net)", () => {
+      if (!scoreboard) return;
+
+      const hole1 = scoreboard.holes["1"];
+      // Team 2: 4+5=9, Team 1: 5+6=11
+      expect(hole1.teams["2"].total).toBe(9);
+      expect(hole1.teams["1"].total).toBe(11);
     });
 
     it("should award low_ball junk to winning team", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Team 2 wins low ball with 5 (Team 1 has 6)
+      // Team 2 wins low ball with net 4 (Team 1 has net 5)
       const team2Junk = hole1.teams["2"].junk;
       const lowBallJunk = team2Junk.find((j) => j.name === "low_ball");
       expect(lowBallJunk).toBeDefined();
@@ -227,7 +240,7 @@ describe("Five Points Integration Tests", () => {
       if (!scoreboard) return;
 
       const hole1 = scoreboard.holes["1"];
-      // Team 2 wins low total with 11 (Team 1 has 13)
+      // Team 2 wins low total with net 9 (Team 1 has net 11)
       const team2Junk = hole1.teams["2"].junk;
       const lowTotalJunk = team2Junk.find((j) => j.name === "low_total");
       expect(lowTotalJunk).toBeDefined();

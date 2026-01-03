@@ -16,6 +16,7 @@ import type {
   RoundToGame,
   Team,
 } from "../schema";
+import { calculateCourseHandicap } from "../utils/handicap";
 import {
   assignTeams,
   calculateCumulatives,
@@ -246,7 +247,23 @@ function buildPlayerHandicaps(
     const playerId = round.playerId;
     if (!playerId) continue;
 
-    const courseHandicap = rtg.courseHandicap ?? 0;
+    // Get courseHandicap: prefer stored value, else calculate from tee data
+    let courseHandicap = rtg.courseHandicap;
+    if (courseHandicap === undefined) {
+      // Calculate from tee data if available (same logic as app)
+      const tee = round.tee;
+      if (tee?.$isLoaded && rtg.handicapIndex !== undefined) {
+        const calculated = calculateCourseHandicap({
+          handicapIndex: String(rtg.handicapIndex),
+          tee,
+          holesPlayed: "all18", // TODO: Get from game.scope.holes
+        });
+        courseHandicap = calculated ?? 0;
+      } else {
+        courseHandicap = 0;
+      }
+    }
+
     const gameHandicap = rtg.gameHandicap;
     const effectiveHandicap = gameHandicap ?? courseHandicap;
 
