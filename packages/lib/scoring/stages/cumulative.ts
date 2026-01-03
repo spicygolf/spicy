@@ -81,6 +81,9 @@ export function calculateCumulatives(ctx: ScoringContext): ScoringContext {
   // Calculate running totals per hole for teams (v0.3 parity)
   calculateRunningTotals(newScoreboard, ctx);
 
+  // Calculate match play status for 2-team match play games (v0.3 parity)
+  calculateMatchPlay(newScoreboard, ctx);
+
   // Rank players by net total (lower is better for golf)
   const playersWithTotals = Object.entries(newScoreboard.cumulative.players)
     .filter(([_, p]) => p.holesPlayed > 0)
@@ -220,6 +223,119 @@ function calculateRunningTotals(
         team1.runningDiff = lowerIsBetter ? -diff1 : diff1;
         team2.runningDiff = lowerIsBetter ? -diff2 : diff2;
       }
+    }
+  }
+}
+
+/**
+ * Calculate match play status for 2-team games (v0.3 parity)
+ *
+ * Determines when a match is mathematically decided:
+ * - matchDiff: holes up/down or final result like "3 & 2"
+ * - matchOver: true when match is decided
+ *
+ * A match is over when one team's lead exceeds the remaining holes.
+ * Matches v0.3 score.js lines 330-365.
+ */
+function calculateMatchPlay(
+  scoreboard: {
+    holes: Record<
+      string,
+      {
+        teams: Record<string, TeamHoleResult>;
+        scoresEntered?: number;
+        players: Record<string, { gross: number }>;
+      }
+    >;
+    meta: { holesPlayed: string[] };
+    cumulative: {
+      teams: Record<
+        string,
+        { matchDiff?: number | string; matchOver?: boolean }
+      >;
+    };
+  },
+  ctx: ScoringContext,
+): void {
+  // Check if this is a match play game
+  // Match play is determined by spec_type or a game option
+  const specType = ctx.gameSpec?.spec_type;
+  const isMatchPlayOption = getOptionValueForHole("match_play", "1", ctx);
+  const isMatchPlay = specType === "skins" || isMatchPlayOption === true;
+
+  if (!isMatchPlay) return;
+
+  const holes = scoreboard.meta.holesPlayed;
+  const teamIds = Object.keys(Object.values(scoreboard.holes)[0]?.teams ?? {});
+
+  if (teamIds.length !== 2) return;
+
+  let isMatchOver = false;
+  let matchResult: string | number = 0;
+  let allHolesScoredSoFar = true;
+
+  // Iterate through holes in order
+  for (let i = 0; i < holes.length; i++) {
+    const holeNum = holes[i];
+    if (!holeNum) continue;
+
+    const holeResult = scoreboard.holes[holeNum];
+    if (!holeResult) continue;
+
+    const teams = Object.values(holeResult.teams);
+    if (teams.length !== 2) continue;
+
+    const team1 = teams[0];
+    const team2 = teams[1];
+    if (!team1 || !team2) continue;
+
+    // Check if all scores entered for this hole
+    const totalPlayers = Object.keys(holeResult.players).length;
+    const scoresEntered = holeResult.scoresEntered ?? 0;
+    if (scoresEntered < totalPlayers) {
+      allHolesScoredSoFar = false;
+    }
+
+    // If match is already over, propagate the result
+    if (isMatchOver) {
+      team1.matchDiff = matchResult;
+      team2.matchDiff = matchResult;
+      team1.matchOver = true;
+      team2.matchOver = true;
+      continue;
+    }
+
+    // Calculate current difference (using runningTotal which was already calculated)
+    const diff = (team1.runningTotal ?? 0) - (team2.runningTotal ?? 0);
+    const holesRemaining = holes.length - i - 1;
+
+    // Check if match is decided
+    if (Math.abs(diff) > holesRemaining && allHolesScoredSoFar) {
+      isMatchOver = true;
+
+      if (holesRemaining > 0) {
+        matchResult = `${Math.abs(diff)} & ${holesRemaining}`;
+      } else {
+        matchResult = Math.abs(diff);
+      }
+
+      team1.matchOver = true;
+      team2.matchOver = true;
+      team1.matchDiff = matchResult;
+      team2.matchDiff = matchResult;
+    } else {
+      // Match still in progress - show holes up/down
+      team1.matchDiff = diff;
+      team2.matchDiff = -diff;
+    }
+  }
+
+  // Update cumulative with final match status
+  for (const teamId of teamIds) {
+    const teamCumulative = scoreboard.cumulative.teams[teamId];
+    if (teamCumulative) {
+      teamCumulative.matchOver = isMatchOver;
+      teamCumulative.matchDiff = matchResult;
     }
   }
 }
