@@ -13,6 +13,7 @@
 
 import type { JunkOption } from "../schema";
 import { evaluateLogic, isSimpleRankCheck } from "./logic-engine";
+import { getOptionValueForHole } from "./option-utils";
 import type {
   EvaluationContext,
   HoleResult,
@@ -214,7 +215,7 @@ function shouldAwardTeamJunk(
   // Calculation-based team junk (low_ball, low_total)
   // These are typically awarded to the team with the best calculated score
   if (calculation === "best_ball" || calculation === "sum") {
-    return evaluateCalculationJunk(junk, teamResult, holeResult);
+    return evaluateCalculationJunk(junk, teamResult, holeResult, evalCtx.ctx);
   }
 
   return false;
@@ -363,65 +364,175 @@ function evaluateTeamLogic(
 // =============================================================================
 
 /**
- * Evaluate calculation-based team junk (low_ball, low_total)
+ * Get sorted player scores for a team (v0.3 parity)
+ *
+ * For best_ball, returns scores sorted low to high.
+ * For sum, returns a single-element array with the sum.
+ *
+ * @param team - Team result with player IDs
+ * @param holeResult - Hole result with all player data
+ * @param calculation - "best_ball" or "sum"
+ * @param better - "lower" or "higher" (affects sort order)
+ * @returns Array of scores for tie-breaking comparison
+ */
+function getTeamScoreArray(
+  team: TeamHoleResult,
+  holeResult: HoleResult,
+  calculation: string,
+  better: string,
+): number[] {
+  if (calculation === "sum") {
+    // For sum, return single value
+    return team.total > 0 ? [team.total] : [];
+  }
+
+  // For best_ball, get all player net scores and sort
+  const scores: number[] = [];
+  for (const playerId of team.playerIds) {
+    const playerResult = holeResult.players[playerId];
+    if (playerResult && playerResult.net > 0) {
+      scores.push(playerResult.net);
+    }
+  }
+
+  // Sort based on "better" direction
+  if (better === "lower") {
+    scores.sort((a, b) => a - b); // Ascending: best (lowest) first
+  } else {
+    scores.sort((a, b) => b - a); // Descending: best (highest) first
+  }
+
+  return scores;
+}
+
+/**
+ * Compare two team score arrays for tie-breaking (v0.3 parity)
+ *
+ * When next_ball_breaks_ties is true, compares 1st ball, then 2nd ball, etc.
+ * Returns: -1 if team1 is better, 1 if team2 is better, 0 if tied
+ *
+ * @param scores1 - First team's sorted scores
+ * @param scores2 - Second team's sorted scores
+ * @param better - "lower" or "higher"
+ * @param maxDepth - How many balls to compare (1 = first ball only)
+ * @returns Comparison result: -1, 0, or 1
+ */
+function compareTeamScores(
+  scores1: number[],
+  scores2: number[],
+  better: string,
+  maxDepth: number,
+): number {
+  const len = Math.min(scores1.length, scores2.length, maxDepth);
+
+  for (let i = 0; i < len; i++) {
+    const s1 = scores1[i];
+    const s2 = scores2[i];
+
+    if (s1 === undefined || s2 === undefined) {
+      return 0; // Invalid scores, treat as tie
+    }
+
+    if (s1 === s2) {
+      continue; // Tied at this level, check next ball
+    }
+
+    if (better === "lower") {
+      return s1 < s2 ? -1 : 1;
+    }
+    return s1 > s2 ? -1 : 1;
+  }
+
+  return 0; // All compared scores are equal = tie
+}
+
+/**
+ * Evaluate calculation-based team junk (low_ball, low_total) (v0.3 parity)
  *
  * These are awarded to the team with the best score for the calculation type.
  * The "limit" field determines how awards are handled (e.g., one_team_per_group).
+ *
+ * Supports next_ball_breaks_ties option:
+ * - When true: if teams tie on 1st ball, compare 2nd ball, then 3rd, etc.
+ * - When false (default): only compare 1st ball
+ *
+ * Matches v0.3 score.js lines 620-680.
  */
 function evaluateCalculationJunk(
   junk: JunkOption,
   teamResult: TeamHoleResult,
   holeResult: HoleResult,
+  ctx: ScoringContext,
 ): boolean {
-  const calculation = junk.calculation;
+  const calculation = junk.calculation ?? "best_ball";
   const better = junk.better ?? "lower";
-  const limit = junk.limit;
 
-  // Get all team scores for this calculation
-  const teamScores: Array<{ teamId: string; score: number }> = [];
+  // Check next_ball_breaks_ties option
+  const nextBallBreaksTies =
+    getOptionValueForHole("next_ball_breaks_ties", holeResult.hole, ctx) ===
+    true;
+
+  // Build score arrays for all teams
+  const teamScoreArrays: Array<{
+    teamId: string;
+    scores: number[];
+  }> = [];
 
   for (const [teamId, team] of Object.entries(holeResult.teams)) {
     // Skip teams with no valid scores
     if (team.playerIds.length === 0) continue;
 
-    let score: number;
-    if (calculation === "best_ball") {
-      score = team.lowBall;
-    } else if (calculation === "sum") {
-      score = team.total;
-    } else {
-      continue;
-    }
-
-    if (score > 0) {
-      teamScores.push({ teamId, score });
+    const scores = getTeamScoreArray(team, holeResult, calculation, better);
+    if (scores.length > 0) {
+      teamScoreArrays.push({ teamId, scores });
     }
   }
 
-  if (teamScores.length === 0) return false;
+  if (teamScoreArrays.length === 0) return false;
 
-  // Find the best score
-  const sortedScores = [...teamScores].sort((a, b) =>
-    better === "lower" ? a.score - b.score : b.score - a.score,
+  // Determine max depth for tie-breaking
+  const maxDepth = nextBallBreaksTies
+    ? Math.max(...teamScoreArrays.map((t) => t.scores.length))
+    : 1;
+
+  // Find the best team(s) using progressive tie-breaking
+  const firstTeam = teamScoreArrays[0];
+  if (firstTeam === undefined) return false;
+
+  let bestTeams: Array<{ teamId: string; scores: number[] }> = [firstTeam];
+
+  for (let i = 1; i < teamScoreArrays.length; i++) {
+    const current = teamScoreArrays[i];
+    if (current === undefined) continue;
+
+    const bestTeam = bestTeams[0];
+    if (bestTeam === undefined) continue;
+
+    const comparison = compareTeamScores(
+      current.scores,
+      bestTeam.scores,
+      better,
+      maxDepth,
+    );
+
+    if (comparison < 0) {
+      // Current team is better
+      bestTeams = [current];
+    } else if (comparison === 0) {
+      // Tie - add to best teams
+      bestTeams.push(current);
+    }
+    // comparison > 0 means current is worse, do nothing
+  }
+
+  // Check if this team is among the best
+  const isWinner = bestTeams.some(
+    (t): t is { teamId: string; scores: number[] } =>
+      t !== undefined && t.teamId === teamResult.teamId,
   );
+  if (!isWinner) return false;
 
-  const bestTeam = sortedScores[0];
-  if (bestTeam === undefined) return false;
-
-  const bestScore = bestTeam.score;
-
-  // Check if this team has the best score
-  const teamScore =
-    calculation === "best_ball" ? teamResult.lowBall : teamResult.total;
-
-  if (teamScore !== bestScore) return false;
-
-  // Check limit - if one_team_per_group, only award if outright winner
-  if (limit === "one_team_per_group") {
-    // Still award but split value will be handled by points calculation
-    return true;
-  }
-
+  // For one_team_per_group limit with ties, still award (points will be split)
   return true;
 }
 
