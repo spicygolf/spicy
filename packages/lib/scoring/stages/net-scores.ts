@@ -4,6 +4,7 @@
  * Calculates net scores (gross - pops) for each player on each hole.
  */
 
+import { deepClone } from "../../utils/clone";
 import type { ScoringContext } from "../types";
 
 /**
@@ -20,7 +21,7 @@ export function calculateNetScores(ctx: ScoringContext): ScoringContext {
   const { scoreboard, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;

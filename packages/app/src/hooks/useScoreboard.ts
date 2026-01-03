@@ -1,7 +1,17 @@
 import { useMemo } from "react";
 import type { Game } from "spicylib/schema";
-import type { Scoreboard } from "spicylib/scoring";
-import { score } from "spicylib/scoring";
+import type { Scoreboard, ScoringContext } from "spicylib/scoring";
+import { scoreWithContext } from "spicylib/scoring";
+
+/**
+ * Result from the useScoreboard hook
+ */
+export interface ScoreboardResult {
+  /** The calculated scoreboard with all hole results */
+  scoreboard: Scoreboard;
+  /** The full scoring context (needed for availability checks) */
+  context: ScoringContext;
+}
 
 /**
  * Hook to calculate the scoreboard for a game using the scoring engine.
@@ -14,17 +24,17 @@ import { score } from "spicylib/scoring";
  * The scoreboard is memoized and only recalculated when game data changes.
  *
  * @param game - The fully loaded game object
- * @returns The calculated scoreboard, or null if scoring fails
+ * @returns The calculated scoreboard and context, or null if scoring fails
  *
  * @example
- * const scoreboard = useScoreboard(game);
- * if (scoreboard) {
- *   const holeResult = scoreboard.holes["1"];
+ * const result = useScoreboard(game);
+ * if (result) {
+ *   const holeResult = result.scoreboard.holes["1"];
  *   const playerJunk = holeResult.players[playerId].junk;
  *   const teamJunk = holeResult.teams[teamId].junk;
  * }
  */
-export function useScoreboard(game: Game | null): Scoreboard | null {
+export function useScoreboard(game: Game | null): ScoreboardResult | null {
   return useMemo(() => {
     if (!game?.$isLoaded) {
       return null;
@@ -72,8 +82,10 @@ export function useScoreboard(game: Game | null): Scoreboard | null {
     // It will just return empty results for holes without scores
 
     try {
-      const scoreboard = score(game);
-      return scoreboard;
+      // Score the game and get both scoreboard and context
+      // The context is needed for evaluating multiplier availability
+      const { scoreboard, context } = scoreWithContext(game);
+      return { scoreboard, context };
     } catch (error) {
       // Log error but don't crash - scoring may fail if data is partially loaded
       console.warn("[useScoreboard] Scoring engine error:", error);

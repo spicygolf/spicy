@@ -5,6 +5,7 @@
  * This must run after net scores are calculated but before junk evaluation.
  */
 
+import { deepClone } from "../../utils/clone";
 import { calculateAllTeamScores } from "../team-scoring";
 import type { ScoringContext } from "../types";
 
@@ -21,7 +22,7 @@ export function calculateTeamScores(ctx: ScoringContext): ScoringContext {
   const { scoreboard, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;

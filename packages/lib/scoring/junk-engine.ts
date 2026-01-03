@@ -12,6 +12,7 @@
  */
 
 import type { JunkOption } from "../schema";
+import { deepClone } from "../utils/clone";
 import { evaluateLogic, isSimpleRankCheck } from "./logic-engine";
 import { getOptionValueForHole } from "./option-utils";
 import type {
@@ -47,7 +48,7 @@ export function evaluateJunkForHole(
   ctx: ScoringContext,
 ): HoleResult {
   // Deep clone to maintain immutability
-  const result = structuredClone(holeResult);
+  const result = deepClone(holeResult);
 
   // Get all junk options
   const junkOptions = getJunkOptions(ctx);

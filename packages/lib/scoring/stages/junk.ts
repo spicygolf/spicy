@@ -5,6 +5,7 @@
  * Uses the junk-engine for data-driven evaluation.
  */
 
+import { deepClone } from "../../utils/clone";
 import { evaluateJunkForHole } from "../junk-engine";
 import type { ScoringContext } from "../types";
 
@@ -25,7 +26,7 @@ export function evaluateJunk(ctx: ScoringContext): ScoringContext {
   const { scoreboard, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;

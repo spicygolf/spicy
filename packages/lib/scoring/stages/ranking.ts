@@ -5,6 +5,7 @@
  * Uses the RankingEngine for proper tie handling.
  */
 
+import { deepClone } from "../../utils/clone";
 import { rankWithTies } from "../ranking-engine";
 import type { ScoringContext } from "../types";
 
@@ -21,7 +22,7 @@ export function rankPlayers(ctx: ScoringContext): ScoringContext {
   const { scoreboard, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;
@@ -68,7 +69,7 @@ export function rankTeams(ctx: ScoringContext): ScoringContext {
   const { scoreboard, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;
@@ -112,7 +113,7 @@ export function rankPlayersCumulative(ctx: ScoringContext): ScoringContext {
   const { scoreboard } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   // Get players with cumulative scores
   const playersWithTotals = Object.entries(newScoreboard.cumulative.players)
@@ -151,7 +152,7 @@ export function rankTeamsCumulative(ctx: ScoringContext): ScoringContext {
   const { scoreboard } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   // Get teams with cumulative scores
   const teamsWithTotals = Object.entries(newScoreboard.cumulative.teams)

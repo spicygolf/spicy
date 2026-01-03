@@ -34,7 +34,7 @@ export {
   isOptionOnHole,
 } from "./option-utils";
 // Main pipeline
-export { buildContext, score } from "./pipeline";
+export { buildContext, score, scoreWithContext } from "./pipeline";
 // Points engine
 export {
   calculatePoints,

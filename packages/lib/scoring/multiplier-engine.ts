@@ -11,6 +11,7 @@
  */
 
 import type { MultiplierOption } from "../schema";
+import { deepClone } from "../utils/clone";
 import { evaluateLogic } from "./logic-engine";
 import type {
   HoleResult,
@@ -35,7 +36,7 @@ export function evaluateMultipliersForHole(
   ctx: ScoringContext,
 ): HoleResult {
   // Deep clone to maintain immutability
-  const result = structuredClone(holeResult);
+  const result = deepClone(holeResult);
 
   // Get all multiplier options
   const multiplierOptions = getMultiplierOptions(ctx);

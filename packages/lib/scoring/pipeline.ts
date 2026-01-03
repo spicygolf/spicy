@@ -68,6 +68,24 @@ export function score(game: Game): Scoreboard {
 }
 
 /**
+ * Score a game and return both the scoreboard and full context
+ *
+ * Use this when you need access to the full scoring context for
+ * additional operations like evaluating multiplier availability.
+ *
+ * @param game - The game to score (must be fully loaded)
+ * @returns Object with scoreboard and full scoring context
+ */
+export function scoreWithContext(game: Game): {
+  scoreboard: Scoreboard;
+  context: ScoringContext;
+} {
+  const ctx = buildContext(game);
+  const final = runPipeline(ctx);
+  return { scoreboard: final.scoreboard, context: final };
+}
+
+/**
  * Build the initial scoring context from a game
  *
  * Extracts and pre-computes all needed data from the Jazz game object.

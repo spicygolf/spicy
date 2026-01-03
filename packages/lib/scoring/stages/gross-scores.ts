@@ -5,6 +5,7 @@
  * Also calculates score-to-par values.
  */
 
+import { deepClone } from "../../utils/clone";
 import { getGrossScore } from "../../utils/scores";
 import type { ScoringContext } from "../types";
 
@@ -21,7 +22,7 @@ export function calculateGrossScores(ctx: ScoringContext): ScoringContext {
   const { scoreboard, rounds, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;

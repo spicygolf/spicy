@@ -5,6 +5,7 @@
  * Uses the multiplier-engine for data-driven evaluation.
  */
 
+import { deepClone } from "../../utils/clone";
 import { evaluateMultipliersForHole } from "../multiplier-engine";
 import type { ScoringContext } from "../types";
 
@@ -25,7 +26,7 @@ export function evaluateMultipliers(ctx: ScoringContext): ScoringContext {
   const { scoreboard, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;

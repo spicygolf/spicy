@@ -5,6 +5,7 @@
  * Uses the existing calculatePops utility from scores.ts.
  */
 
+import { deepClone } from "../../utils/clone";
 import { calculatePops as calculatePopsForHole } from "../../utils/scores";
 import type { ScoringContext } from "../types";
 
@@ -21,7 +22,7 @@ export function calculatePops(ctx: ScoringContext): ScoringContext {
   const { scoreboard, playerHandicaps, holeInfoMap, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;

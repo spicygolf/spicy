@@ -8,7 +8,11 @@ import type {
   Team,
 } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
-import type { Scoreboard, TeamHoleResult } from "spicylib/scoring";
+import type {
+  Scoreboard,
+  ScoringContext,
+  TeamHoleResult,
+} from "spicylib/scoring";
 import { evaluateAvailability } from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
@@ -275,18 +279,21 @@ function getMultiplierOptions(game: Game): MultiplierOption[] {
  * Uses the scoring engine's evaluateAvailability function to evaluate JSON Logic.
  *
  * If the multiplier has no availability condition, it's always available.
- * If the scoreboard is not available, we can't evaluate so we return true (show it).
+ * If the context is not available, we can't evaluate so we return true (show it).
  */
 function isMultiplierAvailable(
   mult: MultiplierOption,
-  scoreboard: Scoreboard | null,
+  ctx: ScoringContext | null,
   holeNum: string,
   teamId: string,
 ): boolean {
   // If no availability condition, always available
   if (!mult.availability) return true;
 
-  // If no scoreboard, can't evaluate - show the multiplier
+  // If no context, can't evaluate - show the multiplier
+  if (!ctx) return true;
+
+  const scoreboard = ctx.scoreboard;
   if (!scoreboard) return true;
 
   const holeResult = scoreboard.holes[holeNum];
@@ -295,21 +302,12 @@ function isMultiplierAvailable(
   const teamResult = holeResult.teams[teamId];
   if (!teamResult) return true;
 
-  // Build a minimal context for evaluation
-  // The evaluateAvailability function needs: ctx, holeNum, holeResult, team, teams
   try {
-    // Create a minimal mock context - the logic engine only needs certain fields
-    const mockCtx = {
-      scoreboard,
-      gameHoles: [],
-      options: {},
-    } as never; // Cast to never since we're passing a partial context
-
     return evaluateAvailability(
       mult.availability,
       teamResult as TeamHoleResult,
       holeResult,
-      mockCtx,
+      ctx,
     );
   } catch {
     // If evaluation fails, show the multiplier
@@ -405,8 +403,10 @@ export function ScoringView({
   onUnscore,
   onChangeTeams,
 }: ScoringViewProps) {
-  // Get the scoreboard from the scoring engine (memoized)
-  const scoreboard = useScoreboard(game);
+  // Get the scoreboard and context from the scoring engine (memoized)
+  const scoreResult = useScoreboard(game);
+  const scoreboard = scoreResult?.scoreboard ?? null;
+  const scoringContext = scoreResult?.context ?? null;
 
   // Get user-markable junk options for this game (player-scoped)
   const userJunkOptions = getUserJunkOptions(game);
@@ -512,7 +512,7 @@ export function ScoringView({
               // Otherwise, check availability condition
               return isMultiplierAvailable(
                 mult,
-                scoreboard,
+                scoringContext,
                 currentHoleNumber,
                 teamId,
               );

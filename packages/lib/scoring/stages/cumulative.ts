@@ -8,6 +8,7 @@
  * - holeNetTotal: net points vs opponent per hole (2-team games)
  */
 
+import { deepClone } from "../../utils/clone";
 import { getOptionValueForHole } from "../option-utils";
 import { rankWithTies } from "../ranking-engine";
 import type { ScoringContext, TeamHoleResult } from "../types";
@@ -25,7 +26,7 @@ export function calculateCumulatives(ctx: ScoringContext): ScoringContext {
   const { scoreboard } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   // Calculate player cumulatives
   for (const playerCumulative of Object.values(

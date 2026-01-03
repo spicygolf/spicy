@@ -5,6 +5,7 @@
  * This is a data-driven stage - points come from junk option values.
  */
 
+import { deepClone } from "../../utils/clone";
 import { calculateTotalMultiplier } from "../multiplier-engine";
 import type { ScoringContext } from "../types";
 
@@ -24,7 +25,7 @@ export function calculatePoints(ctx: ScoringContext): ScoringContext {
   const { scoreboard, gameHoles } = ctx;
 
   // Deep clone scoreboard to maintain immutability
-  const newScoreboard = structuredClone(scoreboard);
+  const newScoreboard = deepClone(scoreboard);
 
   for (const gameHole of gameHoles) {
     const holeNum = gameHole.hole;

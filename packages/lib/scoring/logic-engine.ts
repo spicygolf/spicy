@@ -86,28 +86,46 @@ function countJunk(teamRef: TeamHoleResult | null, junkName: string): number {
 
 /**
  * Check if team is down the most (losing by the most points)
- * Uses cumulative points from the scoreboard
+ *
+ * Uses the runningTotal from the HOLE passed to it (typically getPrevHole).
+ * If no hole is passed (e.g., hole 1 has no previous hole), returns true for all teams.
+ *
+ * @param holeResult - The hole to check rankings from (usually previous hole)
+ * @param team - The team to check
+ * @param logicCtx - Logic context
+ * @param betterPoints - "higher" or "lower" points is better
  */
 function isTeamDownTheMost(
+  holeResult: HoleResult | null,
   team: TeamHoleResult | null,
-  logicCtx: LogicContext,
+  _logicCtx: LogicContext,
   betterPoints: string,
 ): boolean {
-  if (!team) return true; // Default to true if no team
+  // If no hole (e.g., hole 1 has no previous), all teams can press
+  if (!holeResult) return true;
+  if (!team) return true;
 
-  const cumulativeTeams = logicCtx.ctx.scoreboard?.cumulative?.teams;
-  if (!cumulativeTeams) return true;
-
-  const teams = Object.values(cumulativeTeams);
+  const teams = Object.values(holeResult.teams);
   if (teams.length < 2) return true;
 
-  // Sort by points total
-  // If higher points is better, team "down the most" has lowest total
-  // If lower points is better, team "down the most" has highest total
-  const sorted = [...teams].sort((a, b) => {
-    const diff = a.pointsTotal - b.pointsTotal;
+  // Get team scores using runningTotal from that hole
+  const teamScores = teams.map((t) => ({
+    teamId: t.teamId,
+    runningTotal: t.runningTotal ?? 0,
+  }));
+
+  // Sort by runningTotal
+  // If higher points is better (default), "down the most" = lowest runningTotal
+  // If lower points is better, "down the most" = highest runningTotal
+  const sorted = [...teamScores].sort((a, b) => {
+    const diff = a.runningTotal - b.runningTotal;
     return betterPoints === "lower" ? -diff : diff;
   });
+
+  // Check if all teams are tied (all have same runningTotal)
+  const firstTotal = sorted[0]?.runningTotal ?? 0;
+  const allTied = sorted.every((t) => t.runningTotal === firstTotal);
+  if (allTied) return true; // All teams can press when tied
 
   // First team in sorted order is "down the most"
   return sorted[0]?.teamId === team.teamId;
@@ -115,23 +133,36 @@ function isTeamDownTheMost(
 
 /**
  * Check if team is second to last
- * Uses cumulative points from the scoreboard
+ *
+ * Uses the runningTotal from the HOLE passed to it (typically getPrevHole).
+ * If no hole is passed, returns false (can't be second to last with no data).
+ *
+ * @param holeResult - The hole to check rankings from (usually previous hole)
+ * @param team - The team to check
+ * @param logicCtx - Logic context
+ * @param betterPoints - "higher" or "lower" points is better
  */
 function isTeamSecondToLast(
+  holeResult: HoleResult | null,
   team: TeamHoleResult | null,
-  logicCtx: LogicContext,
+  _logicCtx: LogicContext,
   betterPoints: string,
 ): boolean {
+  if (!holeResult) return false;
   if (!team) return false;
 
-  const cumulativeTeams = logicCtx.ctx.scoreboard?.cumulative?.teams;
-  if (!cumulativeTeams) return false;
-
-  const teams = Object.values(cumulativeTeams);
+  const teams = Object.values(holeResult.teams);
   if (teams.length < 2) return false;
 
-  const sorted = [...teams].sort((a, b) => {
-    const diff = a.pointsTotal - b.pointsTotal;
+  // Get team scores using runningTotal from that hole
+  const teamScores = teams.map((t) => ({
+    teamId: t.teamId,
+    runningTotal: t.runningTotal ?? 0,
+  }));
+
+  // Sort by runningTotal
+  const sorted = [...teamScores].sort((a, b) => {
+    const diff = a.runningTotal - b.runningTotal;
     return betterPoints === "lower" ? -diff : diff;
   });
 
@@ -391,12 +422,54 @@ function resolveOperatorResult(
 
   // team_down_the_most
   if ("__team_down_the_most" in obj) {
-    return isTeamDownTheMost(logicCtx.team ?? null, logicCtx, betterPoints);
+    const { prevHole, team } = obj.__team_down_the_most as {
+      prevHole: unknown;
+      team: unknown;
+    };
+    // Resolve the prevHole placeholder if needed
+    const resolvedHole = resolveOperatorResult(
+      prevHole,
+      logicCtx,
+      betterPoints,
+    ) as HoleResult | null;
+    // Resolve the team placeholder if needed
+    const resolvedTeam = resolveOperatorResult(
+      team,
+      logicCtx,
+      betterPoints,
+    ) as TeamHoleResult | null;
+    return isTeamDownTheMost(
+      resolvedHole,
+      resolvedTeam ?? logicCtx.team ?? null,
+      logicCtx,
+      betterPoints,
+    );
   }
 
   // team_second_to_last
   if ("__team_second_to_last" in obj) {
-    return isTeamSecondToLast(logicCtx.team ?? null, logicCtx, betterPoints);
+    const { prevHole, team } = obj.__team_second_to_last as {
+      prevHole: unknown;
+      team: unknown;
+    };
+    // Resolve the prevHole placeholder if needed
+    const resolvedHole = resolveOperatorResult(
+      prevHole,
+      logicCtx,
+      betterPoints,
+    ) as HoleResult | null;
+    // Resolve the team placeholder if needed
+    const resolvedTeam = resolveOperatorResult(
+      team,
+      logicCtx,
+      betterPoints,
+    ) as TeamHoleResult | null;
+    return isTeamSecondToLast(
+      resolvedHole,
+      resolvedTeam ?? logicCtx.team ?? null,
+      logicCtx,
+      betterPoints,
+    );
   }
 
   // other_team_multiplied_with
