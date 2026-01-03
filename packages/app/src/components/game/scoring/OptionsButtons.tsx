@@ -25,6 +25,12 @@ export interface OptionButton {
    * Inherited options are shown as selected but dimmed and disabled.
    */
   inherited?: boolean;
+  /**
+   * If true, this is a calculated/automatic junk (e.g., birdie, eagle, low_ball).
+   * Calculated junk is shown as selected but cannot be toggled by the user.
+   * based_on: "gross", "net", or "logic" (not "user")
+   */
+  calculated?: boolean;
 }
 
 interface OptionsButtonsProps {
@@ -51,23 +57,29 @@ export function OptionsButtons({
         const isMultiplier = option.type === "multiplier";
         const isSelected = option.selected;
         const isInherited = option.inherited ?? false;
+        const isCalculated = option.calculated ?? false;
 
         // Color based on type and selection state
+        // Calculated junk uses a distinct green color to indicate automatic
         const buttonColor = isSelected
-          ? isMultiplier
-            ? "#E74C3C" // Red for multipliers
-            : "#3498DB" // Blue for junk
+          ? isCalculated
+            ? "#27AE60" // Green for calculated/automatic junk
+            : isMultiplier
+              ? "#E74C3C" // Red for multipliers
+              : "#3498DB" // Blue for user-toggleable junk
           : theme.colors.background;
 
         const textColor = isSelected ? "#FFFFFF" : theme.colors.primary;
         const borderColor = isSelected
-          ? isMultiplier
-            ? "#E74C3C"
-            : "#3498DB"
+          ? isCalculated
+            ? "#27AE60"
+            : isMultiplier
+              ? "#E74C3C"
+              : "#3498DB"
           : theme.colors.border;
 
-        // Inherited options are disabled (can't toggle off a multiplier from a previous hole)
-        const isDisabled = readonly || isInherited;
+        // Calculated junk and inherited options are disabled (can't toggle automatic junk)
+        const isDisabled = readonly || isInherited || isCalculated;
 
         return (
           <TouchableOpacity
@@ -79,7 +91,7 @@ export function OptionsButtons({
             ]}
             onPress={() => onOptionPress(option.name)}
             disabled={isDisabled}
-            accessibilityLabel={`${option.displayName} ${isSelected ? "selected" : ""} ${isInherited ? "from previous hole" : ""}`}
+            accessibilityLabel={`${option.displayName} ${isSelected ? "selected" : ""} ${isCalculated ? "automatic" : ""} ${isInherited ? "from previous hole" : ""}`}
           >
             {option.icon && (
               <FontAwesome6

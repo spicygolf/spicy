@@ -8,6 +8,7 @@ import type {
   Team,
 } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
+import type { Scoreboard } from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
@@ -21,8 +22,10 @@ import {
   PlayerScoreRow,
   TeamGroup,
 } from "@/components/game/scoring";
+import type { OptionButton } from "@/components/game/scoring/OptionsButtons";
 import type { HoleInfo } from "@/hooks";
 import { useOptionValue } from "@/hooks/useOptionValue";
+import { useScoreboard } from "@/hooks/useScoreboard";
 
 export interface ScoringViewProps {
   game: Game;
@@ -66,6 +69,108 @@ function getUserJunkOptions(game: Game): JunkOption[] {
   junkOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
 
   return junkOptions;
+}
+
+/**
+ * Get calculated (automatic) junk options from game spec
+ * These are player-scoped junk options with based_on: "gross", "net", or logic-based
+ * Examples: birdie, eagle (based on score_to_par)
+ */
+function getCalculatedPlayerJunkOptions(game: Game): JunkOption[] {
+  const junkOptions: JunkOption[] = [];
+
+  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
+  if (!spec?.$isLoaded) return junkOptions;
+
+  const options = spec.options;
+  if (!options?.$isLoaded) return junkOptions;
+
+  for (const key of Object.keys(options)) {
+    const opt = options[key];
+    if (
+      opt?.$isLoaded &&
+      opt.type === "junk" &&
+      opt.scope === "player" &&
+      opt.based_on !== "user" && // Not user-marked
+      (opt.show_in === "score" || opt.show_in === "faves")
+    ) {
+      junkOptions.push(opt);
+    }
+  }
+
+  junkOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
+  return junkOptions;
+}
+
+/**
+ * Get calculated (automatic) team junk options from game spec
+ * These are team-scoped junk options with calculation: "best_ball", "sum", etc.
+ * Examples: low_ball, low_team
+ */
+function getCalculatedTeamJunkOptions(game: Game): JunkOption[] {
+  const junkOptions: JunkOption[] = [];
+
+  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
+  if (!spec?.$isLoaded) return junkOptions;
+
+  const options = spec.options;
+  if (!options?.$isLoaded) return junkOptions;
+
+  for (const key of Object.keys(options)) {
+    const opt = options[key];
+    if (
+      opt?.$isLoaded &&
+      opt.type === "junk" &&
+      opt.scope === "team" &&
+      opt.calculation && // Has a calculation method (best_ball, sum, etc.)
+      (opt.show_in === "score" || opt.show_in === "faves")
+    ) {
+      junkOptions.push(opt);
+    }
+  }
+
+  junkOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
+  return junkOptions;
+}
+
+/**
+ * Check if a player has calculated junk from the scoreboard
+ */
+function hasCalculatedPlayerJunk(
+  scoreboard: Scoreboard | null,
+  holeNum: string,
+  playerId: string,
+  junkName: string,
+): boolean {
+  if (!scoreboard) return false;
+
+  const holeResult = scoreboard.holes[holeNum];
+  if (!holeResult) return false;
+
+  const playerResult = holeResult.players[playerId];
+  if (!playerResult) return false;
+
+  return playerResult.junk.some((j) => j.name === junkName);
+}
+
+/**
+ * Check if a team has calculated junk from the scoreboard
+ */
+function hasCalculatedTeamJunk(
+  scoreboard: Scoreboard | null,
+  holeNum: string,
+  teamId: string,
+  junkName: string,
+): boolean {
+  if (!scoreboard) return false;
+
+  const holeResult = scoreboard.holes[holeNum];
+  if (!holeResult) return false;
+
+  const teamResult = holeResult.teams[teamId];
+  if (!teamResult) return false;
+
+  return teamResult.junk.some((j) => j.name === junkName);
 }
 
 /**
@@ -252,8 +357,15 @@ export function ScoringView({
   onUnscore,
   onChangeTeams,
 }: ScoringViewProps) {
+  // Get the scoreboard from the scoring engine (memoized)
+  const scoreboard = useScoreboard(game);
+
   // Get user-markable junk options for this game (player-scoped)
   const userJunkOptions = getUserJunkOptions(game);
+
+  // Get calculated junk options (automatic based on scores)
+  const calculatedPlayerJunkOptions = getCalculatedPlayerJunkOptions(game);
+  const calculatedTeamJunkOptions = getCalculatedTeamJunkOptions(game);
 
   // Get multiplier options for this game (team-scoped)
   const multiplierOptions = getMultiplierOptions(game);
@@ -343,28 +455,53 @@ export function ScoringView({
           const currentHoleNumber = String(currentHoleIndex + 1);
 
           // Build multiplier buttons with selected state for this team
-          const multiplierButtons = multiplierOptions.map((mult) => {
-            const status = getTeamMultiplierStatus(team, mult.name);
-            // Inherited if active and firstHole is set but different from current hole
-            const isInherited =
-              status.active &&
-              status.firstHole !== undefined &&
-              status.firstHole !== currentHoleNumber;
+          const multiplierButtons: OptionButton[] = multiplierOptions.map(
+            (mult) => {
+              const status = getTeamMultiplierStatus(team, mult.name);
+              // Inherited if active and firstHole is set but different from current hole
+              const isInherited =
+                status.active &&
+                status.firstHole !== undefined &&
+                status.firstHole !== currentHoleNumber;
 
-            return {
-              name: mult.name,
-              displayName: mult.disp,
-              icon: mult.icon,
-              type: "multiplier" as const,
-              selected: status.active,
-              inherited: isInherited,
-            };
-          });
+              return {
+                name: mult.name,
+                displayName: mult.disp,
+                icon: mult.icon,
+                type: "multiplier" as const,
+                selected: status.active,
+                inherited: isInherited,
+              };
+            },
+          );
+
+          // Build calculated team junk buttons (low_ball, low_team)
+          // These are shown as selected when the team has earned them, but not toggleable
+          const teamJunkButtons: OptionButton[] = calculatedTeamJunkOptions.map(
+            (junk) => {
+              const hasJunk = hasCalculatedTeamJunk(
+                scoreboard,
+                currentHoleNumber,
+                team.team ?? "",
+                junk.name,
+              );
+
+              return {
+                name: junk.name,
+                displayName: junk.disp,
+                icon: junk.icon,
+                type: "junk" as const,
+                selected: hasJunk,
+                calculated: true, // Mark as calculated/automatic
+              };
+            },
+          );
 
           return (
             <TeamGroup
               onChangeTeams={onChangeTeams}
               multiplierOptions={multiplierButtons}
+              teamJunkOptions={teamJunkButtons}
               onMultiplierToggle={(multName) =>
                 toggleTeamMultiplier(team, multName, currentHoleNumber)
               }
@@ -424,14 +561,43 @@ export function ScoringView({
                   net = gross;
                 }
 
-                // Build junk options with selected state for this player
-                const junkButtons = userJunkOptions.map((junk) => ({
-                  name: junk.name,
-                  displayName: junk.disp,
-                  icon: junk.icon,
-                  type: "junk" as const,
-                  selected: hasPlayerJunk(team, round.playerId, junk.name),
-                }));
+                // Build user-markable junk options with selected state for this player
+                const userJunkButtons: OptionButton[] = userJunkOptions.map(
+                  (junk) => ({
+                    name: junk.name,
+                    displayName: junk.disp,
+                    icon: junk.icon,
+                    type: "junk" as const,
+                    selected: hasPlayerJunk(team, round.playerId, junk.name),
+                    calculated: false, // User-toggleable
+                  }),
+                );
+
+                // Build calculated junk options (birdie, eagle) from scoreboard
+                const calculatedJunkButtons: OptionButton[] =
+                  calculatedPlayerJunkOptions.map((junk) => {
+                    const hasJunk = hasCalculatedPlayerJunk(
+                      scoreboard,
+                      holeNum,
+                      round.playerId,
+                      junk.name,
+                    );
+
+                    return {
+                      name: junk.name,
+                      displayName: junk.disp,
+                      icon: junk.icon,
+                      type: "junk" as const,
+                      selected: hasJunk,
+                      calculated: true, // Automatic, not toggleable
+                    };
+                  });
+
+                // Combine: calculated junk first (birdie, eagle), then user junk (prox)
+                const junkButtons = [
+                  ...calculatedJunkButtons,
+                  ...userJunkButtons,
+                ];
 
                 return (
                   <PlayerScoreRow

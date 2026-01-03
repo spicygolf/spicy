@@ -9,6 +9,7 @@ interface TeamGroupProps {
   teamName?: string;
   onChangeTeams?: () => void;
   multiplierOptions?: OptionButton[];
+  teamJunkOptions?: OptionButton[];
   onMultiplierToggle?: (multiplierName: string) => void;
   children: React.ReactNode;
 }
@@ -17,6 +18,7 @@ export function TeamGroup({
   teamName,
   onChangeTeams,
   multiplierOptions = [],
+  teamJunkOptions = [],
   onMultiplierToggle,
   children,
 }: TeamGroupProps) {
@@ -26,10 +28,22 @@ export function TeamGroup({
     onMultiplierToggle?.(optionName);
   };
 
+  // Team junk options are read-only (calculated, not toggleable)
+  const handleTeamJunkPress = (_optionName: string): void => {
+    // No-op: calculated junk cannot be toggled
+  };
+
+  // Check if we should show header
+  const hasHeaderContent =
+    teamName ||
+    onChangeTeams ||
+    multiplierOptions.length > 0 ||
+    teamJunkOptions.some((j) => j.selected);
+
   return (
     <View style={styles.container}>
-      {/* Header - show if we have a team name, change teams button, or multipliers */}
-      {(teamName || onChangeTeams || multiplierOptions.length > 0) && (
+      {/* Header - show if we have a team name, change teams button, multipliers, or active team junk */}
+      {hasHeaderContent && (
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             {teamName && <Text style={styles.teamName}>{teamName}</Text>}
@@ -46,6 +60,17 @@ export function TeamGroup({
                   color={theme.colors.action}
                 />
               </TouchableOpacity>
+            )}
+
+            {/* Team junk (low_ball, low_team) - only show when selected */}
+            {teamJunkOptions.some((j) => j.selected) && (
+              <View style={styles.teamJunkSection}>
+                <OptionsButtons
+                  options={teamJunkOptions.filter((j) => j.selected)}
+                  onOptionPress={handleTeamJunkPress}
+                  readonly={true}
+                />
+              </View>
             )}
           </View>
 
@@ -90,6 +115,8 @@ const styles = StyleSheet.create((theme) => ({
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
+    flex: 1,
   },
   teamName: {
     fontSize: 14,
@@ -98,6 +125,9 @@ const styles = StyleSheet.create((theme) => ({
   },
   changeTeamsButton: {
     padding: theme.gap(0.5),
+  },
+  teamJunkSection: {
+    marginLeft: theme.gap(1),
   },
   multiplierSection: {
     flexShrink: 0,
