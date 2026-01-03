@@ -319,16 +319,131 @@ export async function upsertGameSpec(
     }
   }
 
-  // Populate spec.options with references to catalog options
+  // Populate spec.options with references to catalog options OR create new options with overrides
   if (transformed.options && transformed.options.length > 0 && catalogOptions) {
     const specOptionsMap: Record<string, unknown> = {};
 
     for (const opt of transformed.options) {
-      // Reference the option from catalog.options
       const catalogOption = catalogOptions[opt.name];
-      if (catalogOption) {
-        specOptionsMap[opt.name] = catalogOption;
+      if (!catalogOption) continue;
+
+      // For junk options, check if the spec has an overridden value
+      if (opt.type === "junk" && "value" in opt) {
+        // Load the catalog option to compare values
+        // The catalogOption from MapOfOptions can be in unloaded state
+        if (!catalogOption.$isLoaded) {
+          // Skip unloaded options - they should have been loaded earlier
+          specOptionsMap[opt.name] = catalogOption;
+          continue;
+        }
+        const loadedCatalogOpt = catalogOption;
+
+        // If values differ, create a new JunkOption with the spec's overridden value
+        if (
+          loadedCatalogOpt.$isLoaded &&
+          loadedCatalogOpt.type === "junk" &&
+          loadedCatalogOpt.value !== opt.value
+        ) {
+          // Find the full junk data from specData to get all fields
+          const junkData = specData.junk?.find((j) => j.name === opt.name);
+          if (junkData) {
+            const newJunkOption = JunkOption.create(
+              {
+                name: loadedCatalogOpt.name,
+                disp: loadedCatalogOpt.disp,
+                type: "junk",
+                version: loadedCatalogOpt.version,
+                value: opt.value, // Use the spec's overridden value
+              },
+              { owner: specs.$jazz.owner },
+            );
+
+            // Copy other fields from catalog option
+            if (loadedCatalogOpt.sub_type)
+              newJunkOption.$jazz.set("sub_type", loadedCatalogOpt.sub_type);
+            if (loadedCatalogOpt.seq !== undefined)
+              newJunkOption.$jazz.set("seq", loadedCatalogOpt.seq);
+            if (loadedCatalogOpt.scope)
+              newJunkOption.$jazz.set("scope", loadedCatalogOpt.scope);
+            if (loadedCatalogOpt.icon)
+              newJunkOption.$jazz.set("icon", loadedCatalogOpt.icon);
+            if (loadedCatalogOpt.show_in)
+              newJunkOption.$jazz.set("show_in", loadedCatalogOpt.show_in);
+            if (loadedCatalogOpt.based_on)
+              newJunkOption.$jazz.set("based_on", loadedCatalogOpt.based_on);
+            if (loadedCatalogOpt.limit)
+              newJunkOption.$jazz.set("limit", loadedCatalogOpt.limit);
+            if (loadedCatalogOpt.calculation)
+              newJunkOption.$jazz.set(
+                "calculation",
+                loadedCatalogOpt.calculation,
+              );
+            if (loadedCatalogOpt.logic)
+              newJunkOption.$jazz.set("logic", loadedCatalogOpt.logic);
+            if (loadedCatalogOpt.better)
+              newJunkOption.$jazz.set("better", loadedCatalogOpt.better);
+            if (loadedCatalogOpt.score_to_par)
+              newJunkOption.$jazz.set(
+                "score_to_par",
+                loadedCatalogOpt.score_to_par,
+              );
+
+            specOptionsMap[opt.name] = newJunkOption;
+            continue;
+          }
+        }
       }
+
+      // For multiplier options, check if the spec has an overridden value
+      if (opt.type === "multiplier" && "value" in opt) {
+        if (!catalogOption.$isLoaded) {
+          specOptionsMap[opt.name] = catalogOption;
+          continue;
+        }
+        const loadedCatalogOpt = catalogOption;
+
+        if (
+          loadedCatalogOpt.$isLoaded &&
+          loadedCatalogOpt.type === "multiplier" &&
+          loadedCatalogOpt.value !== opt.value
+        ) {
+          const newMultOption = MultiplierOption.create(
+            {
+              name: loadedCatalogOpt.name,
+              disp: loadedCatalogOpt.disp,
+              type: "multiplier",
+              version: loadedCatalogOpt.version,
+              value: opt.value, // Use the spec's overridden value
+            },
+            { owner: specs.$jazz.owner },
+          );
+
+          // Copy other fields from catalog option
+          if (loadedCatalogOpt.sub_type)
+            newMultOption.$jazz.set("sub_type", loadedCatalogOpt.sub_type);
+          if (loadedCatalogOpt.seq !== undefined)
+            newMultOption.$jazz.set("seq", loadedCatalogOpt.seq);
+          if (loadedCatalogOpt.icon)
+            newMultOption.$jazz.set("icon", loadedCatalogOpt.icon);
+          if (loadedCatalogOpt.based_on)
+            newMultOption.$jazz.set("based_on", loadedCatalogOpt.based_on);
+          if (loadedCatalogOpt.scope)
+            newMultOption.$jazz.set("scope", loadedCatalogOpt.scope);
+          if (loadedCatalogOpt.availability)
+            newMultOption.$jazz.set(
+              "availability",
+              loadedCatalogOpt.availability,
+            );
+          if (loadedCatalogOpt.override !== undefined)
+            newMultOption.$jazz.set("override", loadedCatalogOpt.override);
+
+          specOptionsMap[opt.name] = newMultOption;
+          continue;
+        }
+      }
+
+      // Default: reference the catalog option directly (no override needed)
+      specOptionsMap[opt.name] = catalogOption;
     }
 
     newSpec.$jazz.set("options", specOptionsMap as MapOfOptions);
