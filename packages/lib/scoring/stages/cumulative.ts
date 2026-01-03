@@ -2,10 +2,15 @@
  * Cumulative Stage
  *
  * Calculates cumulative totals for players and teams across all holes.
+ * Also calculates v0.3 parity fields:
+ * - runningTotal: cumulative team points per hole
+ * - runningDiff: difference from opponent (2-team games)
+ * - holeNetTotal: net points vs opponent per hole (2-team games)
  */
 
+import { getOptionValueForHole } from "../option-utils";
 import { rankWithTies } from "../ranking-engine";
-import type { ScoringContext } from "../types";
+import type { ScoringContext, TeamHoleResult } from "../types";
 
 /**
  * Calculate cumulative totals for all players and teams
@@ -73,6 +78,9 @@ export function calculateCumulatives(ctx: ScoringContext): ScoringContext {
     teamCumulative.junkTotal = junkTotal;
   }
 
+  // Calculate running totals per hole for teams (v0.3 parity)
+  calculateRunningTotals(newScoreboard, ctx);
+
   // Rank players by net total (lower is better for golf)
   const playersWithTotals = Object.entries(newScoreboard.cumulative.players)
     .filter(([_, p]) => p.holesPlayed > 0)
@@ -117,4 +125,101 @@ export function calculateCumulatives(ctx: ScoringContext): ScoringContext {
     ...ctx,
     scoreboard: newScoreboard,
   };
+}
+
+// =============================================================================
+// v0.3 Parity: Running Totals, Net Points, Match Play
+// =============================================================================
+
+/**
+ * Calculate running totals for teams across all holes (v0.3 parity)
+ *
+ * For each hole:
+ * - runningTotal: cumulative points up to and including this hole
+ * - holeNetTotal: net points vs opponent (2-team games only)
+ * - runningDiff: cumulative difference from opponent (2-team games only)
+ *
+ * Matches v0.3 score.js lines 280-340.
+ */
+function calculateRunningTotals(
+  scoreboard: {
+    holes: Record<string, { teams: Record<string, TeamHoleResult> }>;
+    meta: { holesPlayed: string[] };
+  },
+  ctx: ScoringContext,
+): void {
+  const holes = scoreboard.meta.holesPlayed;
+  const teamIds = Object.keys(Object.values(scoreboard.holes)[0]?.teams ?? {});
+  const isTwoTeamGame = teamIds.length === 2;
+
+  // Get betterPoints from game spec (determines if lower or higher points is better)
+  // Default to "higher" for points games
+  const betterPoints =
+    (getOptionValueForHole("better_points", "1", ctx) as string) ?? "higher";
+  const lowerIsBetter = betterPoints === "lower";
+
+  // Track running totals per team
+  const runningTotals: Record<string, number> = {};
+  for (const teamId of teamIds) {
+    runningTotals[teamId] = 0;
+  }
+
+  // Iterate through holes in order
+  for (const holeNum of holes) {
+    const holeResult = scoreboard.holes[holeNum];
+    if (!holeResult) continue;
+
+    const teams = Object.values(holeResult.teams);
+
+    // Check if all scores are entered for this hole
+    const allScoresEntered =
+      teams.length > 0 &&
+      teams.every((t) => t.playerIds.length > 0 && t.points !== undefined);
+
+    // Calculate holeNetTotal for 2-team games
+    if (isTwoTeamGame && teams.length === 2) {
+      const team1 = teams[0];
+      const team2 = teams[1];
+
+      if (team1 && team2) {
+        // holeNetTotal = my_points - opponent_points
+        // Flip sign if lower points is better
+        if (lowerIsBetter) {
+          team1.holeNetTotal = team2.points - team1.points;
+          team2.holeNetTotal = team1.points - team2.points;
+        } else {
+          team1.holeNetTotal = team1.points - team2.points;
+          team2.holeNetTotal = team2.points - team1.points;
+        }
+      }
+    }
+
+    // Update running totals (only if all scores entered)
+    for (const team of teams) {
+      const prevTotal = runningTotals[team.teamId] ?? 0;
+
+      if (allScoresEntered) {
+        runningTotals[team.teamId] = prevTotal + team.points;
+      }
+
+      team.runningTotal = runningTotals[team.teamId];
+    }
+
+    // Calculate runningDiff for 2-team games
+    if (isTwoTeamGame && teams.length === 2) {
+      const team1 = teams[0];
+      const team2 = teams[1];
+
+      if (team1 && team2) {
+        const diff1 =
+          (runningTotals[team1.teamId] ?? 0) -
+          (runningTotals[team2.teamId] ?? 0);
+        const diff2 = -diff1;
+
+        // Flip sign if lower points is better
+        team1.runningDiff = lowerIsBetter ? -diff1 : diff1;
+        team2.runningDiff = lowerIsBetter ? -diff2 : diff2;
+      }
+    }
+  }
 }
