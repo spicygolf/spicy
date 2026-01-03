@@ -72,27 +72,34 @@ export function PlayerScoreRow({
         <Text style={styles.playerName}>{player.name}</Text>
       </View>
 
-      {/* Score Input */}
-      <ScoreInput
-        gross={gross}
-        net={net}
-        par={par}
-        netPar={netPar}
-        onIncrement={handleIncrement}
-        onDecrement={handleDecrement}
-        onScoreTap={handleScoreTap}
-        onUnscore={onUnscore}
-        readonly={readonly}
-      />
+      {/* Score and Junk Row */}
+      <View style={styles.scoreRow}>
+        {/* Score Input - Left Side */}
+        <View style={styles.scoreSection}>
+          <ScoreInput
+            gross={gross}
+            net={net}
+            par={par}
+            netPar={netPar}
+            onIncrement={handleIncrement}
+            onDecrement={handleDecrement}
+            onScoreTap={handleScoreTap}
+            onUnscore={onUnscore}
+            readonly={readonly}
+          />
+        </View>
 
-      {/* Options (Junk/Multipliers) */}
-      {junkOptions.length > 0 && (
-        <OptionsButtons
-          options={junkOptions}
-          onOptionPress={handleOptionPress}
-          readonly={readonly}
-        />
-      )}
+        {/* Options (Junk/Multipliers) - Right Side */}
+        {junkOptions.length > 0 && (
+          <View style={styles.junkSection}>
+            <OptionsButtons
+              options={junkOptions}
+              onOptionPress={handleOptionPress}
+              readonly={readonly}
+            />
+          </View>
+        )}
+      </View>
     </View>
   );
 }
@@ -111,5 +118,17 @@ const styles = StyleSheet.create((theme) => ({
   playerName: {
     fontSize: 16,
     fontWeight: "600",
+  },
+  scoreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  scoreSection: {
+    flex: 1,
+  },
+  junkSection: {
+    flexShrink: 0,
+    marginLeft: theme.gap(1),
   },
 }));

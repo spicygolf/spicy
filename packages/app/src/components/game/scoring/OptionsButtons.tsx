@@ -3,6 +3,17 @@ import { TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";
 
+/**
+ * Map legacy/custom icon names to FontAwesome6 icons
+ */
+function mapIconName(icon: string): string {
+  const iconMap: Record<string, string> = {
+    album: "bullseye", // prox (closest to pin)
+    // Add more mappings as needed
+  };
+  return iconMap[icon] ?? icon;
+}
+
 export interface OptionButton {
   name: string;
   displayName: string;
@@ -63,7 +74,7 @@ export function OptionsButtons({
           >
             {option.icon && (
               <FontAwesome6
-                name={option.icon as never}
+                name={mapIconName(option.icon) as never}
                 iconStyle="solid"
                 size={16}
                 color={textColor}
