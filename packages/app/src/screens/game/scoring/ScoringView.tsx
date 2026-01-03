@@ -412,6 +412,29 @@ export function ScoringView({
   const scoreboard = scoreResult?.scoreboard ?? null;
   const scoringContext = scoreResult?.context ?? null;
 
+  // Debug: log running totals and multipliers for all holes
+  if (scoreboard) {
+    const holeNums = Object.keys(scoreboard.holes).sort(
+      (a, b) => Number(a) - Number(b),
+    );
+    console.log("[DEBUG TOTALS] Hole-by-hole breakdown:");
+    for (const h of holeNums) {
+      const hole = scoreboard.holes[h];
+      if (!hole) continue;
+      const teamDetails = Object.entries(hole.teams)
+        .map(([tid, t]) => {
+          const junkStr =
+            t.junk.map((j) => `${j.name}:${j.value}`).join(",") || "none";
+          const multStr =
+            t.multipliers.map((m) => `${m.name}:${m.value}`).join(",") ||
+            "none";
+          return `T${tid}:junk=[${junkStr}] mults=[${multStr}] pts=${t.points}`;
+        })
+        .join(" | ");
+      console.log(`[DEBUG TOTALS] H${h}: ${teamDetails}`);
+    }
+  }
+
   // Get user-markable junk options for this game (player-scoped)
   const userJunkOptions = getUserJunkOptions(game);
 

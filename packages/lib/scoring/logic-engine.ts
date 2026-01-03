@@ -125,6 +125,7 @@ function isTeamDownTheMost(
   // Check if all teams are tied (all have same runningTotal)
   const firstTotal = sorted[0]?.runningTotal ?? 0;
   const allTied = sorted.every((t) => t.runningTotal === firstTotal);
+
   if (allTied) return true; // All teams can press when tied
 
   // First team in sorted order is "down the most"

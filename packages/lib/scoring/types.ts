@@ -176,6 +176,8 @@ export interface HoleResult {
   requiredJunk?: number;
   /** Warnings for incomplete scoring (e.g., "Mark all possible points") */
   warnings?: ScoringWarning[];
+  /** Combined multiplier for the entire hole (all team multipliers multiplied together) */
+  holeMultiplier?: number;
 }
 
 /**
