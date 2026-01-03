@@ -369,7 +369,6 @@ export function ScoringExplorer(): React.JSX.Element {
           const logicCondition = parseLogicCondition(junk.logic);
           if (
             logicCondition &&
-            logicCondition.type === "rankWithTies" &&
             player.rank === logicCondition.rank &&
             player.tieCount === logicCondition.tieCount
           ) {

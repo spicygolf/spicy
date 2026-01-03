@@ -11,6 +11,7 @@
  */
 
 import type { MultiplierOption } from "../schema";
+import { evaluateLogic } from "./logic-engine";
 import type {
   HoleResult,
   MultiplierAward,
@@ -228,102 +229,34 @@ function evaluateUserMultiplier(
  * Evaluate an availability condition
  *
  * Availability is a JSON Logic expression that determines when a multiplier
- * can be activated. Common patterns:
+ * can be activated. Uses the full json-logic engine for complex expressions.
  *
+ * Common patterns:
  * - team_down_the_most: Team that is losing the most
- * - winning_all_points: Team that won all points on the hole
+ * - team_second_to_last: Team that is second to last
+ * - playersOnTeam: Check team size (for wolf game)
+ * - other_team_multiplied_with: Check opponent's multipliers
  */
 export function evaluateAvailability(
   availability: string,
   teamResult: TeamHoleResult,
   holeResult: HoleResult,
   ctx: ScoringContext,
+  possiblePoints?: number,
 ): boolean {
-  try {
-    // Parse the availability expression
-    const expr = parseAvailabilityExpression(availability);
-    if (!expr) return true; // No valid expression = always available
+  if (!availability) return true;
 
-    // Evaluate based on expression type
-    if (expr.type === "team_down_the_most") {
-      return isTeamDownTheMost(teamResult.teamId, ctx);
-    }
+  const teams = Object.values(holeResult.teams);
 
-    if (expr.type === "winning_all_points") {
-      return isWinningAllPoints(teamResult, holeResult);
-    }
-
-    // Default: available
-    return true;
-  } catch {
-    return true;
-  }
-}
-
-/**
- * Parse an availability expression
- */
-interface AvailabilityExpression {
-  type: string;
-  params?: unknown;
-}
-
-function parseAvailabilityExpression(
-  availability: string,
-): AvailabilityExpression | null {
-  try {
-    // Convert single quotes to double quotes for JSON parsing
-    const jsonStr = availability.replace(/'/g, '"');
-    const parsed = JSON.parse(jsonStr);
-
-    // Check for team_down_the_most
-    if (parsed.team_down_the_most) {
-      return { type: "team_down_the_most", params: parsed.team_down_the_most };
-    }
-
-    // Check for === comparison (winning all points)
-    if (parsed["==="] && Array.isArray(parsed["==="])) {
-      const [left, right] = parsed["==="];
-      if (left?.var === "team.points" && right?.var === "possiblePoints") {
-        return { type: "winning_all_points" };
-      }
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Check if a team is down the most (lowest cumulative points)
- */
-function isTeamDownTheMost(teamId: string, ctx: ScoringContext): boolean {
-  const teams = Object.values(ctx.scoreboard.cumulative.teams);
-  if (teams.length === 0) return false;
-
-  // Find the team with the lowest points
-  const lowestPoints = Math.min(...teams.map((t) => t.pointsTotal));
-  const lowestTeam = teams.find((t) => t.pointsTotal === lowestPoints);
-
-  return lowestTeam?.teamId === teamId;
-}
-
-/**
- * Check if a team is winning all points on a hole
- */
-function isWinningAllPoints(
-  teamResult: TeamHoleResult,
-  holeResult: HoleResult,
-): boolean {
-  // Calculate total points on the hole
-  const totalPoints = Object.values(holeResult.teams).reduce(
-    (sum, t) => sum + t.points,
-    0,
-  );
-
-  // Team is winning all points if their points equal total points
-  return teamResult.points > 0 && teamResult.points === totalPoints;
+  return evaluateLogic(availability, {
+    ctx,
+    holeNum: holeResult.hole,
+    holeResult,
+    team: teamResult,
+    teams,
+    possiblePoints,
+    option: { name: "multiplier_availability" },
+  });
 }
 
 // =============================================================================

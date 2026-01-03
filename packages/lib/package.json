@@ -20,11 +20,13 @@
     "test": "bun test"
   },
   "devDependencies": {
+    "@types/json-logic-js": "^2.0.8",
     "bun-types": "latest",
     "del-cli": "7.0.0"
   },
   "dependencies": {
     "date-fns-tz": "catalog:shared",
-    "jazz-tools": "catalog:shared"
+    "jazz-tools": "catalog:shared",
+    "json-logic-js": "^2.0.5"
   }
 }

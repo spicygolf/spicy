@@ -12,11 +12,11 @@
  */
 
 import type { JunkOption } from "../schema";
+import { evaluateLogic, isSimpleRankCheck } from "./logic-engine";
 import type {
   EvaluationContext,
   HoleResult,
   PlayerHoleResult,
-  RankLogicCondition,
   ScoreToParCondition,
   ScoringContext,
   TeamHoleResult,
@@ -166,7 +166,7 @@ function shouldAwardJunk(
 
   // Logic-based junk (ranking conditions)
   if (junk.logic) {
-    return evaluateLogic(junk.logic, evalCtx);
+    return evaluatePlayerLogic(junk.logic, evalCtx);
   }
 
   return false;
@@ -179,13 +179,19 @@ function shouldAwardTeamJunk(
   junk: JunkOption,
   teamResult: TeamHoleResult,
   holeResult: HoleResult,
-  _evalCtx: EvaluationContext,
+  evalCtx: EvaluationContext,
 ): boolean {
   const calculation = junk.calculation;
 
   // Logic-based team junk (outright_winner, all_tie, etc.)
   if (calculation === "logic" && junk.logic) {
-    return evaluateTeamLogic(junk.logic, teamResult, holeResult);
+    return evaluateTeamLogic(
+      junk.logic,
+      junk,
+      teamResult,
+      holeResult,
+      evalCtx.ctx,
+    );
   }
 
   // Calculation-based team junk (low_ball, low_total)
@@ -262,68 +268,77 @@ function evaluateScoreToPar(
 // =============================================================================
 
 /**
- * Parse a logic condition string
+ * Parse a simple logic condition string (for backward compatibility)
+ * For complex expressions, use evaluateLogic from logic-engine.ts
  *
  * @example
- * "{'rankWithTies': [1, 1]}" -> { type: "rankWithTies", rank: 1, tieCount: 1 }
+ * "{'rankWithTies': [1, 1]}" -> { rank: 1, tieCount: 1 }
  */
-export function parseLogicCondition(logic: string): RankLogicCondition | null {
-  try {
-    // Convert single quotes to double quotes for JSON parsing
-    const jsonStr = logic.replace(/'/g, '"');
-    const parsed = JSON.parse(jsonStr);
-
-    if (parsed.rankWithTies && Array.isArray(parsed.rankWithTies)) {
-      const [rank, tieCount] = parsed.rankWithTies;
-      return {
-        type: "rankWithTies",
-        rank: Number(rank),
-        tieCount: Number(tieCount),
-      };
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
+export function parseLogicCondition(
+  logic: string,
+): { rank: number; tieCount: number } | null {
+  return isSimpleRankCheck(logic);
 }
 
 /**
  * Evaluate a logic condition for player-scoped junk
+ * Uses json-logic for complex expressions, optimized path for simple rankWithTies
  */
-function evaluateLogic(logic: string, evalCtx: EvaluationContext): boolean {
-  const condition = parseLogicCondition(logic);
-  if (!condition) return false;
-
-  if (condition.type === "rankWithTies") {
+function evaluatePlayerLogic(
+  logic: string,
+  evalCtx: EvaluationContext,
+): boolean {
+  // Try simple rank check first (optimization)
+  const simpleCheck = isSimpleRankCheck(logic);
+  if (simpleCheck) {
     return (
-      evalCtx.player.rank === condition.rank &&
-      evalCtx.player.tieCount === condition.tieCount
+      evalCtx.player.rank === simpleCheck.rank &&
+      evalCtx.player.tieCount === simpleCheck.tieCount
     );
   }
 
-  return false;
+  // Fall back to full json-logic evaluation
+  return evaluateLogic(logic, {
+    ctx: evalCtx.ctx,
+    holeNum: evalCtx.holeNum,
+    option: { name: "player_junk" },
+  });
 }
 
 /**
  * Evaluate a logic condition for team-scoped junk
+ * Uses json-logic for complex expressions like countJunk, team comparisons
  */
 function evaluateTeamLogic(
   logic: string,
+  junk: JunkOption,
   teamResult: TeamHoleResult,
-  _holeResult: HoleResult,
+  holeResult: HoleResult,
+  ctx: ScoringContext,
 ): boolean {
-  const condition = parseLogicCondition(logic);
-  if (!condition) return false;
-
-  if (condition.type === "rankWithTies") {
+  // Try simple rank check first (optimization)
+  const simpleCheck = isSimpleRankCheck(logic);
+  if (simpleCheck) {
     return (
-      teamResult.rank === condition.rank &&
-      teamResult.tieCount === condition.tieCount
+      teamResult.rank === simpleCheck.rank &&
+      teamResult.tieCount === simpleCheck.tieCount
     );
   }
 
-  return false;
+  // Full json-logic evaluation with team context
+  const teams = Object.values(holeResult.teams);
+  return evaluateLogic(logic, {
+    ctx,
+    holeNum: holeResult.hole,
+    holeResult,
+    team: teamResult,
+    teams,
+    option: {
+      name: junk.name,
+      based_on: junk.based_on,
+      better: junk.better,
+    },
+  });
 }
 
 // =============================================================================
