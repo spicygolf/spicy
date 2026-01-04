@@ -106,6 +106,7 @@ const styles = StyleSheet.create((theme) => ({
   teamJunkSection: {
     flexShrink: 1,
     flexGrow: 1,
+    alignItems: "flex-end",
   },
   multiplierSection: {
     flexShrink: 0,
