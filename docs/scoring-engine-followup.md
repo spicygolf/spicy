@@ -318,29 +318,29 @@ All feedback from CodeRabbit and reviewers on PR #322. Address all items.
 
 ## Task Checklist
 
-### Phase 1: PR Feedback (Quick Wins)
-- [ ] 4.7 Fix Jazz pattern violation in GameOptionsList
-- [ ] 4.9 Remove dead playerInfoMap code
-- [ ] 4.12 Standardize null vs empty string in seed data
-- [ ] 4.13 Fix defaultValue type in discount_percent.json
-- [ ] 4.14 Fix accessibility label whitespace
-- [ ] 4.16 Update api-0.3 README
-- [ ] 4.17 Fix silent test skipping
-- [ ] 4.18 Use targeted biome-ignore comments
-- [ ] 4.19 Fix unistyles keyword typo
+### Phase 1: PR Feedback (Quick Wins) ✅ COMPLETE
+- [x] 4.7 Fix Jazz pattern violation in GameOptionsList
+- [x] 4.9 Remove dead playerInfoMap code
+- [x] 4.12 Standardize null vs empty string in seed data
+- [x] 4.13 Fix defaultValue type in discount_percent.json
+- [x] 4.14 Fix accessibility label whitespace
+- [x] 4.16 Update api-0.3 README
+- [x] 4.17 Fix silent test skipping
+- [x] 4.18 Use targeted biome-ignore comments
+- [x] 4.19 Fix unistyles keyword typo
 
-### Phase 2: PR Feedback (Medium Effort)
-- [ ] 4.3 Fix empty type assertions in pipeline.ts
-- [ ] 4.10 Fix type assertion ordering in junk-engine
-- [ ] 4.11 Convert seed data to valid JSON
-- [ ] 4.15 Fix icon type casting
+### Phase 2: PR Feedback (Medium Effort) ✅ COMPLETE
+- [x] 4.3 Fix empty type assertions in pipeline.ts
+- [x] 4.10 Fix type assertion ordering in junk-engine
+- [x] 4.11 Convert seed data to valid JSON
+- [x] 4.15 Fix icon type casting
 
-### Phase 3: PR Feedback (Significant Work)
-- [ ] 4.1 Complete Wolf game implementation (or mark as incomplete)
-- [ ] 4.2 Add seed data validation script
-- [ ] 4.4 Fix countJunk to include player junk
-- [ ] 4.5 Centralize ranking logic
-- [ ] 4.6 Add comprehensive test coverage
+### Phase 3: PR Feedback (Significant Work) ✅ COMPLETE
+- [x] 4.1 Complete Wolf game implementation (or mark as incomplete)
+- [x] 4.2 Add seed data validation script
+- [x] 4.4 Fix countJunk to include player junk
+- [x] 4.5 Centralize ranking logic
+- [x] 4.6 Add comprehensive test coverage
 
 ### Phase 4: Scoring UI Redesign
 - [ ] Extract utility functions from ScoringView

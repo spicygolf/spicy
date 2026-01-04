@@ -4,6 +4,8 @@ import { TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";
 
+export type ScoreInputSize = "sm" | "md" | "lg";
+
 interface ScoreInputProps {
   gross: number | null;
   net: number | null;
@@ -14,6 +16,59 @@ interface ScoreInputProps {
   onScoreTap?: () => void;
   onUnscore?: () => void;
   readonly?: boolean;
+  size?: ScoreInputSize;
+}
+
+// Base dimensions at scale 1.0 (md)
+const BASE = {
+  button: 36,
+  buttonBorder: 1.5,
+  outerShape: 56,
+  innerShape: 48,
+  shapeBorder: 2,
+  outerRadius: 28, // circle
+  innerRadius: 24, // circle
+  outerSquareRadius: 8,
+  innerSquareRadius: 6,
+  scoreFont: 32,
+  grossNetFont: 22,
+  separatorFont: 24,
+  labelFont: 11,
+  iconSize: 16,
+  minWidth: 80,
+  minHeight: 56,
+  labelHeight: 18,
+};
+
+// Scale factors for each size
+const SCALE_FACTORS: Record<ScoreInputSize, number> = {
+  sm: 0.75,
+  md: 1.0,
+  lg: 1.25,
+};
+
+function getScaledDimensions(size: ScoreInputSize) {
+  const scale = SCALE_FACTORS[size];
+  return {
+    button: Math.round(BASE.button * scale),
+    buttonBorder: BASE.buttonBorder * scale,
+    buttonRadius: Math.round((BASE.button * scale) / 2),
+    outerShape: Math.round(BASE.outerShape * scale),
+    innerShape: Math.round(BASE.innerShape * scale),
+    shapeBorder: Math.round(BASE.shapeBorder * scale),
+    outerRadius: Math.round(BASE.outerRadius * scale),
+    innerRadius: Math.round(BASE.innerRadius * scale),
+    outerSquareRadius: Math.round(BASE.outerSquareRadius * scale),
+    innerSquareRadius: Math.round(BASE.innerSquareRadius * scale),
+    scoreFont: Math.round(BASE.scoreFont * scale),
+    grossNetFont: Math.round(BASE.grossNetFont * scale),
+    separatorFont: Math.round(BASE.separatorFont * scale),
+    labelFont: Math.round(BASE.labelFont * scale),
+    iconSize: Math.round(BASE.iconSize * scale),
+    minWidth: Math.round(BASE.minWidth * scale),
+    minHeight: Math.round(BASE.minHeight * scale),
+    labelHeight: Math.round(BASE.labelHeight * scale),
+  };
 }
 
 export function ScoreInput({
@@ -26,8 +81,10 @@ export function ScoreInput({
   onScoreTap,
   onUnscore,
   readonly = false,
+  size = "md",
 }: ScoreInputProps) {
   const { theme } = useUnistyles();
+  const dim = getScaledDimensions(size);
 
   // Determine if score has been modified
   const hasScore = gross !== null;
@@ -69,12 +126,122 @@ export function ScoreInput({
   // Determine decoration type based on score-to-par
   const decoration = getScoreDecoration(scoreToPar);
 
+  // Dynamic styles based on size
+  const dynamicStyles = {
+    button: {
+      width: dim.button,
+      height: dim.button,
+      borderRadius: dim.buttonRadius,
+      borderWidth: dim.buttonBorder,
+    },
+    scoreContainer: {
+      minWidth: dim.minWidth,
+    },
+    scoreContentWrapper: {
+      minHeight: dim.minHeight,
+    },
+    outerCircle: {
+      width: dim.outerShape,
+      height: dim.outerShape,
+      borderWidth: dim.shapeBorder,
+      borderRadius: dim.outerRadius,
+    },
+    innerCircle: {
+      width: dim.innerShape,
+      height: dim.innerShape,
+      borderWidth: dim.shapeBorder,
+      borderRadius: dim.innerRadius,
+    },
+    outerSquare: {
+      width: dim.outerShape,
+      height: dim.outerShape,
+      borderWidth: dim.shapeBorder,
+      borderRadius: dim.outerSquareRadius,
+    },
+    innerSquare: {
+      width: dim.innerShape,
+      height: dim.innerShape,
+      borderWidth: dim.shapeBorder,
+      borderRadius: dim.innerSquareRadius,
+    },
+    scoreText: {
+      fontSize: dim.scoreFont,
+    },
+    grossText: {
+      fontSize: dim.grossNetFont,
+    },
+    separatorText: {
+      fontSize: dim.separatorFont,
+    },
+    netText: {
+      fontSize: dim.grossNetFont,
+    },
+    labelContainer: {
+      height: dim.labelHeight,
+    },
+    labelText: {
+      fontSize: dim.labelFont,
+    },
+  };
+
+  const renderScoreNumber = (): React.ReactElement => {
+    if (showNet) {
+      return (
+        <View style={styles.scoreRow}>
+          <Text
+            style={[
+              styles.grossText,
+              dynamicStyles.grossText,
+              isUnmodified && styles.scoreTextUnmodified,
+            ]}
+          >
+            {displayGross}
+          </Text>
+          <Text
+            style={[
+              styles.separator,
+              dynamicStyles.separatorText,
+              isUnmodified && styles.scoreTextUnmodified,
+            ]}
+          >
+            /
+          </Text>
+          <Text
+            style={[
+              styles.netText,
+              dynamicStyles.netText,
+              isUnmodified && styles.scoreTextUnmodified,
+            ]}
+          >
+            {displayNet}
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <Text
+        style={[
+          styles.scoreText,
+          dynamicStyles.scoreText,
+          isUnmodified && styles.scoreTextUnmodified,
+        ]}
+      >
+        {displayGross}
+      </Text>
+    );
+  };
+
   return (
     <View>
       <View style={styles.container}>
         {/* Decrement Button */}
         <TouchableOpacity
-          style={[styles.button, readonly && styles.buttonDisabled]}
+          style={[
+            styles.button,
+            dynamicStyles.button,
+            readonly && styles.buttonDisabled,
+          ]}
           onPress={handleDecrement}
           disabled={readonly || (gross !== null && gross <= 1)}
           accessibilityLabel="Decrease score"
@@ -82,7 +249,7 @@ export function ScoreInput({
           <FontAwesome6
             name="minus"
             iconStyle="solid"
-            size={16}
+            size={dim.iconSize}
             color={
               readonly || (gross !== null && gross <= 1)
                 ? theme.colors.border
@@ -93,7 +260,7 @@ export function ScoreInput({
 
         {/* Score Display - Tappable */}
         <TouchableOpacity
-          style={styles.scoreContainer}
+          style={[styles.scoreContainer, dynamicStyles.scoreContainer]}
           onPress={handleScoreTap}
           onLongPress={handleLongPress}
           disabled={readonly}
@@ -101,7 +268,12 @@ export function ScoreInput({
           accessibilityLabel={`Score: ${displayGross}${showNet ? ` net ${displayNet}` : ""}`}
         >
           {/* Fixed height container to prevent vertical shifting */}
-          <View style={styles.scoreContentWrapper}>
+          <View
+            style={[
+              styles.scoreContentWrapper,
+              dynamicStyles.scoreContentWrapper,
+            ]}
+          >
             {/* Score number wrapper with decorations - always present */}
             <View style={styles.scoreNumberWrapper}>
               {/* Always render circle structure for par/birdie/eagle/albatross */}
@@ -111,6 +283,7 @@ export function ScoreInput({
                 <View
                   style={[
                     styles.outerCircle,
+                    dynamicStyles.outerCircle,
                     {
                       borderColor:
                         decoration === "double-circle" ? color : "transparent",
@@ -120,6 +293,7 @@ export function ScoreInput({
                   <View
                     style={[
                       styles.innerCircle,
+                      dynamicStyles.innerCircle,
                       {
                         borderColor:
                           decoration === "single-circle" ||
@@ -129,12 +303,7 @@ export function ScoreInput({
                       },
                     ]}
                   >
-                    {renderScoreNumber(
-                      displayGross,
-                      displayNet,
-                      showNet,
-                      isUnmodified,
-                    )}
+                    {renderScoreNumber()}
                   </View>
                 </View>
               )}
@@ -144,19 +313,21 @@ export function ScoreInput({
                 <View
                   style={[
                     styles.outerSquare,
+                    dynamicStyles.outerSquare,
                     {
                       borderColor:
                         decoration === "double-square" ? color : "transparent",
                     },
                   ]}
                 >
-                  <View style={[styles.innerSquare, { borderColor: color }]}>
-                    {renderScoreNumber(
-                      displayGross,
-                      displayNet,
-                      showNet,
-                      isUnmodified,
-                    )}
+                  <View
+                    style={[
+                      styles.innerSquare,
+                      dynamicStyles.innerSquare,
+                      { borderColor: color },
+                    ]}
+                  >
+                    {renderScoreNumber()}
                   </View>
                 </View>
               )}
@@ -166,7 +337,11 @@ export function ScoreInput({
 
         {/* Increment Button */}
         <TouchableOpacity
-          style={[styles.button, readonly && styles.buttonDisabled]}
+          style={[
+            styles.button,
+            dynamicStyles.button,
+            readonly && styles.buttonDisabled,
+          ]}
           onPress={handleIncrement}
           disabled={readonly || (gross !== null && gross >= 12)}
           accessibilityLabel="Increase score"
@@ -174,7 +349,7 @@ export function ScoreInput({
           <FontAwesome6
             name="plus"
             iconStyle="solid"
-            size={16}
+            size={dim.iconSize}
             color={
               readonly || (gross !== null && gross >= 12)
                 ? theme.colors.border
@@ -183,49 +358,14 @@ export function ScoreInput({
           />
         </TouchableOpacity>
       </View>
-      <View style={styles.labelContainer}>
+      <View style={[styles.labelContainer, dynamicStyles.labelContainer]}>
         {hasScore && (
-          <Text style={[styles.scoreLabel, { color }]}>{label}</Text>
+          <Text style={[styles.scoreLabel, dynamicStyles.labelText, { color }]}>
+            {label}
+          </Text>
         )}
       </View>
     </View>
-  );
-}
-
-function renderScoreNumber(
-  displayGross: number,
-  displayNet: number,
-  showNet: boolean,
-  isUnmodified: boolean,
-): React.ReactElement {
-  if (showNet) {
-    return (
-      <View style={styles.scoreRow}>
-        <Text
-          style={[styles.grossText, isUnmodified && styles.scoreTextUnmodified]}
-        >
-          {displayGross}
-        </Text>
-        <Text
-          style={[styles.separator, isUnmodified && styles.scoreTextUnmodified]}
-        >
-          /
-        </Text>
-        <Text
-          style={[styles.netText, isUnmodified && styles.scoreTextUnmodified]}
-        >
-          {displayNet}
-        </Text>
-      </View>
-    );
-  }
-
-  return (
-    <Text
-      style={[styles.scoreText, isUnmodified && styles.scoreTextUnmodified]}
-    >
-      {displayGross}
-    </Text>
   );
 }
 
@@ -261,6 +401,7 @@ function getScoreToParInfo(scoreToPar: number): {
   return { label: `+${scoreToPar}`, color: "#34495E" }; // Dark Gray
 }
 
+// Static styles that don't change with size
 const styles = StyleSheet.create((theme) => ({
   container: {
     flexDirection: "row",
@@ -268,11 +409,7 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
   },
   button: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
     backgroundColor: theme.colors.background,
-    borderWidth: 1.5,
     borderColor: theme.colors.action,
     alignItems: "center",
     justifyContent: "center",
@@ -284,15 +421,11 @@ const styles = StyleSheet.create((theme) => ({
   scoreContainer: {
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 80,
   },
-  // Fixed height wrapper to prevent vertical shifting
   scoreContentWrapper: {
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 56, // 32px score + 18px label + 6px spacing
   },
-  // Wrapper for score number that aligns with button centers (36px)
   scoreNumberWrapper: {
     alignItems: "center",
     justifyContent: "center",
@@ -302,7 +435,6 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "baseline",
   },
   scoreText: {
-    fontSize: 32,
     fontWeight: "bold",
   },
   scoreTextUnmodified: {
@@ -310,65 +442,41 @@ const styles = StyleSheet.create((theme) => ({
     opacity: 0.6,
   },
   grossText: {
-    fontSize: 22,
     fontWeight: "bold",
     color: theme.colors.primary,
   },
   separator: {
-    fontSize: 24,
     fontWeight: "600",
     color: theme.colors.secondary,
     marginHorizontal: theme.gap(0.5),
   },
   netText: {
-    fontSize: 22,
     fontWeight: "bold",
     color: theme.colors.secondary,
   },
-  // Fixed container for label to prevent layout shift
   labelContainer: {
-    height: 18,
     alignItems: "center",
     justifyContent: "flex-start",
     marginTop: theme.gap(0.5),
   },
   scoreLabel: {
-    fontSize: 11,
     fontWeight: "600",
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  // Double circle (eagle, albatross, and birdie with transparent outer)
   outerCircle: {
-    width: 56,
-    height: 56,
-    borderWidth: 2,
-    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
   },
   innerCircle: {
-    width: 48,
-    height: 48,
-    borderWidth: 2,
-    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
   },
-  // Double square (double bogey, triple bogey+, and bogey with transparent outer)
   outerSquare: {
-    width: 56,
-    height: 56,
-    borderWidth: 2,
-    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },
   innerSquare: {
-    width: 48,
-    height: 48,
-    borderWidth: 2,
-    borderRadius: 6,
     alignItems: "center",
     justifyContent: "center",
   },
