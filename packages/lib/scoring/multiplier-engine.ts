@@ -100,6 +100,30 @@ function evaluateMultiplierOption(
 }
 
 /**
+ * Calculate team's pre-multiplier junk points
+ *
+ * This calculates the sum of junk values for a team BEFORE multipliers are applied.
+ * Used to check availability conditions like "team.points === possiblePoints" for BBQ multipliers.
+ */
+function calculateTeamJunkPoints(
+  teamResult: TeamHoleResult,
+  holeResult: HoleResult,
+): number {
+  // Sum team junk
+  let points = teamResult.junk.reduce((sum, j) => sum + j.value, 0);
+
+  // Sum player junk for players on this team
+  for (const playerId of teamResult.playerIds) {
+    const playerResult = holeResult.players[playerId];
+    if (playerResult?.junk) {
+      points += playerResult.junk.reduce((sum, j) => sum + j.value, 0);
+    }
+  }
+
+  return points;
+}
+
+/**
  * Evaluate automatic/BBQ multipliers
  *
  * These are triggered when a specific junk is awarded.
@@ -123,11 +147,26 @@ function evaluateAutomaticMultiplier(
 
       if (hasJunk) {
         // Check availability condition if present
-        if (
-          mult.availability &&
-          !evaluateAvailability(mult.availability, teamResult, holeResult, ctx)
-        ) {
-          continue;
+        // Calculate team's pre-multiplier junk points for availability check
+        // This is needed because team.points is not set until the points stage
+        if (mult.availability) {
+          // Create a copy of teamResult with calculated points for availability check
+          const teamWithPoints = {
+            ...teamResult,
+            points: calculateTeamJunkPoints(teamResult, holeResult),
+          };
+
+          if (
+            !evaluateAvailability(
+              mult.availability,
+              teamWithPoints,
+              holeResult,
+              ctx,
+              holeResult.possiblePoints,
+            )
+          ) {
+            continue;
+          }
         }
 
         teamResult.multipliers.push({
