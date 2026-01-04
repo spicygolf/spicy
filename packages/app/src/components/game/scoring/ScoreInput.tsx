@@ -447,9 +447,8 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.primary,
   },
   separator: {
-    fontWeight: "600",
+    fontWeight: "300",
     color: theme.colors.secondary,
-    marginHorizontal: theme.gap(0.5),
   },
   netText: {
     fontWeight: "bold",
