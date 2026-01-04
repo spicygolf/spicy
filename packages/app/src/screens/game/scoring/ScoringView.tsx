@@ -590,24 +590,16 @@ export function ScoringView({
           // Get team result from scoreboard for this hole
           const teamHoleResult =
             scoreboard?.holes?.[currentHoleNumber]?.teams?.[teamId];
-          const holeResult = scoreboard?.holes?.[currentHoleNumber];
 
-          // Calculate junk total (team junk + player junk for players on this team)
-          const teamJunkTotal =
-            teamHoleResult?.junk.reduce((sum, j) => sum + j.value, 0) ?? 0;
-          let playerJunkTotal = 0;
-          if (teamHoleResult?.playerIds && holeResult?.players) {
-            for (const playerId of teamHoleResult.playerIds) {
-              const playerResult = holeResult.players[playerId];
-              if (playerResult?.junk) {
-                playerJunkTotal += playerResult.junk.reduce(
-                  (sum, j) => sum + j.value,
-                  0,
-                );
-              }
-            }
-          }
-          const junkTotal = teamJunkTotal + playerJunkTotal;
+          // For 2-team games, derive display junk from holeNetTotal
+          // holeNetTotal = (myJunk - oppJunk) × multiplier
+          // So displayJunk = holeNetTotal / multiplier (clamped to 0 for losing team)
+          const holeNetTotal = teamHoleResult?.holeNetTotal ?? 0;
+          const displayJunk =
+            overallMultiplier > 0
+              ? Math.max(0, Math.round(holeNetTotal / overallMultiplier))
+              : 0;
+          const displayPoints = Math.max(0, holeNetTotal);
 
           // Build earned multipliers from scoreboard (automatic multipliers like birdie_bbq)
           // These are multipliers that were automatically awarded based on junk conditions
@@ -652,9 +644,9 @@ export function ScoringView({
               onMultiplierToggle={(multName) =>
                 toggleTeamMultiplier(team, multName, currentHoleNumber)
               }
-              junkTotal={junkTotal}
+              junkTotal={displayJunk}
               holeMultiplier={overallMultiplier}
-              holePoints={teamHoleResult?.points ?? 0}
+              holePoints={displayPoints}
               runningDiff={teamHoleResult?.runningDiff ?? 0}
             >
               {team.rounds.map((roundToTeam) => {

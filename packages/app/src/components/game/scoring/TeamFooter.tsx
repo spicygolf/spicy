@@ -100,8 +100,6 @@ export function TeamFooter({
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
     backgroundColor: theme.colors.background,
     paddingHorizontal: theme.gap(1),
     paddingVertical: theme.gap(0.75),

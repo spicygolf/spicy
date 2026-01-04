@@ -154,7 +154,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   }
 
   return (
-    <Screen>
+    <Screen style={styles.screenNoPadding}>
       <View style={styles.container}>
         {/* Content: Either Team Chooser or Scoring UI */}
         <ErrorBoundary>
@@ -201,6 +201,9 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
 }
 
 const styles = StyleSheet.create((theme) => ({
+  screenNoPadding: {
+    padding: 0,
+  },
   container: {
     flex: 1,
   },

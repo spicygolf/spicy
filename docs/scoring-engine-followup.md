@@ -342,13 +342,16 @@ All feedback from CodeRabbit and reviewers on PR #322. Address all items.
 - [x] 4.5 Centralize ranking logic
 - [x] 4.6 Add comprehensive test coverage
 
-### Phase 4: Scoring UI Redesign
-- [ ] Extract utility functions from ScoringView
-- [ ] Create ScoreSelector component
-- [ ] Create ScoreCell component with notation
-- [ ] Create TeamFooter component
-- [ ] Refactor TeamSection layout
-- [ ] Add pops indicator on score options
+### Phase 4: Scoring UI Redesign ✅ COMPLETE
+- [x] ScoreInput scalable size prop (sm/md/lg/xl)
+- [x] PlayerScoreRow column alignment with fixed widths
+- [x] Global useUIScale hook for device font scale
+- [x] Birdie BBQ auto-multiplier fix
+- [x] Earned multiplier badges on ScoreInput
+- [x] HoleToolbar color simplification (theme colors)
+- [x] Score separator styling improvement
+- [x] HoleHeader vertical spacing reduction
+- [x] Screen padding fix for header gap
 
 ### Phase 5: Summary Screen
 - [ ] Create SummaryView component
