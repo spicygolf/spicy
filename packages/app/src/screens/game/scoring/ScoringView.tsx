@@ -208,11 +208,14 @@ function hasPlayerJunk(
 /**
  * Toggle a junk option for a player on a team
  * Creates the options list if it doesn't exist, then adds or removes the junk
+ *
+ * @param limit - If "one_per_group", only one player in the team can have this junk
  */
 function togglePlayerJunk(
   team: Team,
   playerId: string,
   junkName: string,
+  limit?: string,
 ): void {
   // Ensure options list exists using Jazz pattern
   if (!team.$jazz.has("options")) {
@@ -240,6 +243,18 @@ function togglePlayerJunk(
     // Remove existing option (toggle off)
     options.$jazz.splice(existingIndex, 1);
   } else {
+    // If limit is "one_per_group", remove this junk from all other players first
+    if (limit === "one_per_group") {
+      // Find and remove all existing options for this junk (from other players)
+      // Iterate backwards to safely splice while iterating
+      for (let i = options.length - 1; i >= 0; i--) {
+        const opt = options[i];
+        if (opt?.$isLoaded && opt.optionName === junkName) {
+          options.$jazz.splice(i, 1);
+        }
+      }
+    }
+
     // Add new option (toggle on)
     const newOption = TeamOption.create({
       optionName: junkName,
@@ -678,9 +693,17 @@ export function ScoringView({
                       onScoreChange(rtg.$jazz.id, newGross)
                     }
                     onUnscore={() => onUnscore(rtg.$jazz.id)}
-                    onJunkToggle={(junkName) =>
-                      togglePlayerJunk(team, round.playerId, junkName)
-                    }
+                    onJunkToggle={(junkName) => {
+                      const junkOption = userJunkOptions.find(
+                        (j) => j.name === junkName,
+                      );
+                      togglePlayerJunk(
+                        team,
+                        round.playerId,
+                        junkName,
+                        junkOption?.limit ?? undefined,
+                      );
+                    }}
                     readonly={false}
                   />
                 );
