@@ -273,8 +273,8 @@ export interface ScoringContext {
   /** Primary game spec (first in specs list) */
   gameSpec: GameSpec;
 
-  /** Merged options from game and spec */
-  options: MapOfOptions;
+  /** Merged options from game and spec (undefined if no options available) */
+  options: MapOfOptions | undefined;
 
   /** Game holes with teams */
   gameHoles: GameHole[];
@@ -291,9 +291,6 @@ export interface ScoringContext {
 
   /** Player handicap info keyed by player ID */
   playerHandicaps: Map<string, PlayerHandicapInfo>;
-
-  /** Player info keyed by player ID */
-  playerInfoMap: Map<string, PlayerInfo>;
 
   /** Teams per hole: holeNum -> teams for that hole */
   teamsPerHole: Map<string, Team[]>;
