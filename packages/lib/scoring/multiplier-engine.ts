@@ -152,15 +152,14 @@ function evaluateAutomaticMultiplier(
         // Calculate team's pre-multiplier junk points for availability check
         // This is needed because team.points is not set until the points stage
         if (mult.availability) {
-          // Create a copy of teamResult with calculated points for availability check
+          // Create a deep copy of teamResult with calculated points for availability check
+          // Using deepClone ensures nested objects (junk, multipliers) are safely copied
           const teamJunkPoints = calculateTeamJunkPoints(
             teamResult,
             holeResult,
           );
-          const teamWithPoints = {
-            ...teamResult,
-            points: teamJunkPoints,
-          };
+          const teamWithPoints = deepClone(teamResult);
+          teamWithPoints.points = teamJunkPoints;
 
           if (
             !evaluateAvailability(

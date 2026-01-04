@@ -321,7 +321,9 @@ export async function upsertGameSpec(
       }
 
       // Update existing teamsConfig or create new one
-      if (spec.teamsConfig?.$isLoaded) {
+      // Use $jazz.has() to check if property exists (proper Jazz pattern)
+      // Also check $isLoaded for TypeScript type narrowing
+      if (spec.$jazz.has("teamsConfig") && spec.teamsConfig?.$isLoaded) {
         spec.teamsConfig.$jazz.set("teamCount", teamCount);
         spec.teamsConfig.$jazz.set("rotateEvery", rotateEvery);
         if (specData.team_size && specData.team_size > 0) {
