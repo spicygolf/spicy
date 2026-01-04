@@ -70,18 +70,39 @@ function getTeam(
 }
 
 /**
- * Count junk awards on a team
+ * Count junk awards on a team (including player-scoped junk like birdie/eagle)
+ *
+ * For team-scoped junk (low_ball, low_total), counts from team.junk
+ * For player-scoped junk (birdie, eagle), counts from each player on the team
+ *
+ * @param teamRef - The team to count junk for
+ * @param junkName - The junk option name to count
+ * @param holeResult - The hole result containing player data
  */
-function countJunk(teamRef: TeamHoleResult | null, junkName: string): number {
+function countJunk(
+  teamRef: TeamHoleResult | null,
+  junkName: string,
+  holeResult?: HoleResult,
+): number {
   if (!teamRef) return 0;
 
-  // Count junk on team
+  // Count junk on team (team-scoped junk like low_ball)
   const teamJunkCount = teamRef.junk.filter((j) => j.name === junkName).length;
 
-  // Also count junk on individual players of the team
-  // (player junk is attributed to the team for counting purposes)
-  // This would need holeResult context - for now just return team junk
-  return teamJunkCount;
+  // Count junk on individual players of the team (player-scoped junk like birdie, eagle)
+  let playerJunkCount = 0;
+  if (holeResult) {
+    for (const playerId of teamRef.playerIds) {
+      const playerResult = holeResult.players[playerId];
+      if (playerResult) {
+        playerJunkCount += playerResult.junk.filter(
+          (j) => j.name === junkName,
+        ).length;
+      }
+    }
+  }
+
+  return teamJunkCount + playerJunkCount;
 }
 
 /**
@@ -426,7 +447,7 @@ function resolveOperatorResult(
       junkName: string;
     };
     const team = getTeam(teamRef, logicCtx);
-    return countJunk(team, junkName);
+    return countJunk(team, junkName, logicCtx.holeResult);
   }
 
   // rankWithTies
