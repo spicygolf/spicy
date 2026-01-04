@@ -497,16 +497,16 @@ describe("Five Points Integration Tests", () => {
       expect(hole18.teams["1"].points).toBe(0);
     });
 
-    it("should have no multiplier (1x) on holes without presses", () => {
+    it("should have no multiplier (1x) on holes without presses or birdies", () => {
       requireScoreboard();
 
       // Hole 1 has no multipliers
       const hole1 = scoreboard.holes["1"];
       expect(hole1.holeMultiplier).toBe(1);
 
-      // Hole 5 has no multipliers
+      // Hole 5 has a birdie, so birdie_bbq applies 2x
       const hole5 = scoreboard.holes["5"];
-      expect(hole5.holeMultiplier).toBe(1);
+      expect(hole5.holeMultiplier).toBe(2);
     });
   });
 
@@ -599,8 +599,8 @@ describe("Five Points Integration Tests", () => {
       const hole18 = scoreboard.holes["18"];
 
       // Based on the verified scoring data:
-      // T1 final: 66, T2 final: 87
-      expect(hole18.teams["1"].runningTotal).toBe(66);
+      // T1 final: 72, T2 final: 87 (T1 increased by 6 due to birdie_bbq fix)
+      expect(hole18.teams["1"].runningTotal).toBe(72);
       expect(hole18.teams["2"].runningTotal).toBe(87);
     });
   });
