@@ -65,7 +65,7 @@ export function HoleToolbar({
         <TouchableOpacity
           style={[
             styles.iconButton,
-            (!onToggleExplain || !explainMode) && styles.iconButtonDisabled,
+            (!onToggleExplain || !explainMode) && styles.iconButtonInactive,
           ]}
           onPress={onToggleExplain}
           disabled={!onToggleExplain}
@@ -115,7 +115,7 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "center",
   },
-  iconButtonDisabled: {
+  iconButtonInactive: {
     opacity: 0.3,
   },
   multiplierBadge: {
