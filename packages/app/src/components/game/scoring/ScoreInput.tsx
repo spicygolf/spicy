@@ -52,7 +52,7 @@ function getScaledDimensions(size: ScoreInputSize) {
   const scale = SCALE_FACTORS[size];
   return {
     button: Math.round(BASE.button * scale),
-    buttonBorder: BASE.buttonBorder * scale,
+    buttonBorder: Math.round(BASE.buttonBorder * scale * 10) / 10,
     buttonRadius: Math.round((BASE.button * scale) / 2),
     outerShape: Math.round(BASE.outerShape * scale),
     innerShape: Math.round(BASE.innerShape * scale),
