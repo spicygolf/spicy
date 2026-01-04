@@ -32,8 +32,8 @@ jobs:
       - name: Run Unit Tests
         run: bun run test
         env:
-          JAZZ_API_KEY: ${{ secrets.JAZZ_API_KEY }}
-          JAZZ_WORKER_ACCOUNT: ${{ secrets.JAZZ_WORKER_ACCOUNT }}
+          JAZZ_API_KEY: ${{ vars.JAZZ_API_KEY }}
+          JAZZ_WORKER_ACCOUNT: ${{ vars.JAZZ_WORKER_ACCOUNT }}
           JAZZ_WORKER_SECRET: ${{ secrets.JAZZ_WORKER_SECRET }}
 
   claude-review:
