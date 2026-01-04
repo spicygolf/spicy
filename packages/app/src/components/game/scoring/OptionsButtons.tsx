@@ -57,13 +57,16 @@ const BASE = {
   buttonFontSize: 13,
   buttonIconSize: 16,
   buttonBorderRadius: 6,
-  // Badge (calculated/awarded) - smaller, more compact
-  badgePaddingH: 8,
-  badgePaddingV: 4,
-  badgeMinHeight: 24,
-  badgeFontSize: 11,
-  badgeIconSize: 12,
-  badgeBorderRadius: 12, // pill shape
+  // Badge (calculated/awarded) - slightly smaller, pill shape
+  badgePaddingH: 10,
+  badgePaddingV: 5,
+  badgeMinHeight: 26,
+  badgeFontSize: 12,
+  badgeIconSize: 13,
+  badgeBorderRadius: 14, // more rounded pill shape
+  // Points circle (unread count style)
+  pointsCircleSize: 18,
+  pointsFontSize: 10,
 };
 
 export function OptionsButtons({
@@ -93,6 +96,8 @@ export function OptionsButtons({
     badgeFontSize: Math.round(BASE.badgeFontSize * scale),
     badgeIconSize: Math.round(BASE.badgeIconSize * scale),
     badgeBorderRadius: Math.round(BASE.badgeBorderRadius * scale),
+    pointsCircleSize: Math.round(BASE.pointsCircleSize * scale),
+    pointsFontSize: Math.round(BASE.pointsFontSize * scale),
   };
 
   return (
@@ -107,27 +112,30 @@ export function OptionsButtons({
         const isBadge = isCalculated;
 
         // Colors based on type and state
-        // Badges: muted background, subtle appearance
-        // Buttons: blue for junk, red for multipliers
+        // Badges: filled blue (awarded)
+        // Buttons: blue outline/filled for junk, red for multipliers
         let buttonColor: string;
         let textColor: string;
         let borderColor: string;
 
+        const BLUE = "#3498DB";
+        const RED = "#E74C3C";
+
         if (isBadge) {
-          // Awarded badge - muted appearance
-          buttonColor = theme.colors.background;
-          textColor = "#3498DB"; // Blue text
-          borderColor = "#3498DB";
+          // Awarded badge - filled blue
+          buttonColor = BLUE;
+          textColor = "#FFFFFF";
+          borderColor = BLUE;
         } else if (isMultiplier) {
           // Multiplier button
-          buttonColor = isSelected ? "#E74C3C" : theme.colors.background;
-          textColor = isSelected ? "#FFFFFF" : "#E74C3C";
-          borderColor = "#E74C3C";
+          buttonColor = isSelected ? RED : theme.colors.background;
+          textColor = isSelected ? "#FFFFFF" : RED;
+          borderColor = RED;
         } else {
           // User-toggleable junk button
-          buttonColor = isSelected ? "#3498DB" : theme.colors.background;
-          textColor = isSelected ? "#FFFFFF" : "#3498DB";
-          borderColor = "#3498DB";
+          buttonColor = isSelected ? BLUE : theme.colors.background;
+          textColor = isSelected ? "#FFFFFF" : BLUE;
+          borderColor = BLUE;
         }
 
         // Calculated junk and inherited options can't be toggled
@@ -191,14 +199,32 @@ export function OptionsButtons({
             )}
             <Text style={[styles.optionText, { color: textColor, fontSize }]}>
               {option.displayName}
-              {showPoints && option.points !== undefined && (
-                <Text style={{ color: textColor, fontSize: fontSize * 0.9 }}>
-                  {" "}
-                  {option.points > 0 ? "+" : ""}
+            </Text>
+            {showPoints && option.points !== undefined && (
+              <View
+                style={[
+                  styles.pointsCircle,
+                  {
+                    width: dim.pointsCircleSize,
+                    height: dim.pointsCircleSize,
+                    borderRadius: dim.pointsCircleSize / 2,
+                    backgroundColor: "#FFFFFF",
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.pointsText,
+                    {
+                      fontSize: dim.pointsFontSize,
+                      color: borderColor,
+                    },
+                  ]}
+                >
                   {option.points}
                 </Text>
-              )}
-            </Text>
+              </View>
+            )}
           </TouchableOpacity>
         );
       })}
@@ -230,5 +256,13 @@ const styles = StyleSheet.create((theme) => ({
   },
   optionText: {
     fontWeight: "500",
+  },
+  pointsCircle: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: theme.gap(0.5),
+  },
+  pointsText: {
+    fontWeight: "700",
   },
 }));
