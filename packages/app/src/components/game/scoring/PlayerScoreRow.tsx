@@ -19,12 +19,12 @@ interface PlayerScoreRowProps {
   readonly?: boolean;
 }
 
-// Base column widths at scale 1.0 (lg)
-const BASE_COLUMN_WIDTHS = {
-  name: 130,
-  score: 110,
-  junk: 100,
-};
+// Column width percentages (must sum to 100)
+const COLUMN_PERCENTAGES = {
+  name: "40%",
+  score: "30%",
+  junk: "30%",
+} as const;
 
 export function PlayerScoreRow({
   player,
@@ -38,15 +38,8 @@ export function PlayerScoreRow({
   onJunkToggle,
   readonly = false,
 }: PlayerScoreRowProps) {
-  const { size, scaled } = useUIScale();
+  const { size } = useUIScale();
   const netPar = par - pops;
-
-  // Scale column widths based on UI scale
-  const columnWidths = {
-    name: scaled(BASE_COLUMN_WIDTHS.name),
-    score: scaled(BASE_COLUMN_WIDTHS.score),
-    junk: scaled(BASE_COLUMN_WIDTHS.junk),
-  };
 
   const handleIncrement = (): void => {
     if (gross === null) {
@@ -85,15 +78,15 @@ export function PlayerScoreRow({
     <View style={styles.container}>
       {/* Score and Junk Row */}
       <View style={styles.scoreRow}>
-        {/* Player Name - Left column, scaled width */}
-        <View style={[styles.nameColumn, { width: columnWidths.name }]}>
+        {/* Player Name - Left column */}
+        <View style={styles.nameColumn}>
           <Text style={styles.playerName} numberOfLines={1}>
             {player.name}
           </Text>
         </View>
 
-        {/* Score Input - Center column, scaled width */}
-        <View style={[styles.scoreColumn, { width: columnWidths.score }]}>
+        {/* Score Input - Center column */}
+        <View style={styles.scoreColumn}>
           <ScoreInput
             gross={gross}
             net={net}
@@ -108,8 +101,8 @@ export function PlayerScoreRow({
           />
         </View>
 
-        {/* Options (Junk/Multipliers) - Right column, scaled min width */}
-        <View style={[styles.junkColumn, { minWidth: columnWidths.junk }]}>
+        {/* Options (Junk/Multipliers) - Right column */}
+        <View style={styles.junkColumn}>
           {junkOptions.length > 0 && (
             <ScrollView
               style={styles.junkScroll}
@@ -144,6 +137,7 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
   },
   nameColumn: {
+    width: COLUMN_PERCENTAGES.name,
     justifyContent: "center",
   },
   playerName: {
@@ -151,10 +145,11 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "600",
   },
   scoreColumn: {
+    width: COLUMN_PERCENTAGES.score,
     alignItems: "center",
   },
   junkColumn: {
-    flex: 1,
+    width: COLUMN_PERCENTAGES.junk,
     alignItems: "flex-end",
   },
   junkScroll: {
