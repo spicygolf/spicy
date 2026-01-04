@@ -1,6 +1,7 @@
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
+import { useUIScale } from "@/hooks";
 import { Text } from "@/ui";
 import { type OptionButton, OptionsButtons } from "./OptionsButtons";
 import { ScoreInput } from "./ScoreInput";
@@ -18,6 +19,13 @@ interface PlayerScoreRowProps {
   readonly?: boolean;
 }
 
+// Base column widths at scale 1.0 (lg)
+const BASE_COLUMN_WIDTHS = {
+  name: 130,
+  score: 110,
+  junk: 100,
+};
+
 export function PlayerScoreRow({
   player,
   gross,
@@ -30,7 +38,15 @@ export function PlayerScoreRow({
   onJunkToggle,
   readonly = false,
 }: PlayerScoreRowProps) {
+  const { size, scaled } = useUIScale();
   const netPar = par - pops;
+
+  // Scale column widths based on UI scale
+  const columnWidths = {
+    name: scaled(BASE_COLUMN_WIDTHS.name),
+    score: scaled(BASE_COLUMN_WIDTHS.score),
+    junk: scaled(BASE_COLUMN_WIDTHS.junk),
+  };
 
   const handleIncrement = (): void => {
     if (gross === null) {
@@ -69,15 +85,15 @@ export function PlayerScoreRow({
     <View style={styles.container}>
       {/* Score and Junk Row */}
       <View style={styles.scoreRow}>
-        {/* Player Name - Left column, fixed width */}
-        <View style={styles.nameColumn}>
+        {/* Player Name - Left column, scaled width */}
+        <View style={[styles.nameColumn, { width: columnWidths.name }]}>
           <Text style={styles.playerName} numberOfLines={1}>
             {player.name}
           </Text>
         </View>
 
-        {/* Score Input - Center column, fixed width */}
-        <View style={styles.scoreColumn}>
+        {/* Score Input - Center column, scaled width */}
+        <View style={[styles.scoreColumn, { width: columnWidths.score }]}>
           <ScoreInput
             gross={gross}
             net={net}
@@ -88,12 +104,12 @@ export function PlayerScoreRow({
             onScoreTap={handleScoreTap}
             onUnscore={onUnscore}
             readonly={readonly}
-            size="sm"
+            size={size}
           />
         </View>
 
-        {/* Options (Junk/Multipliers) - Right column, fixed width */}
-        <View style={styles.junkColumn}>
+        {/* Options (Junk/Multipliers) - Right column, scaled min width */}
+        <View style={[styles.junkColumn, { minWidth: columnWidths.junk }]}>
           {junkOptions.length > 0 && (
             <ScrollView
               style={styles.junkScroll}
@@ -115,13 +131,6 @@ export function PlayerScoreRow({
   );
 }
 
-// Column widths for consistent alignment across rows
-const COLUMN_WIDTHS = {
-  name: 110, // Fits ~12 chars like "Brad Anderson"
-  score: 120, // ScoreInput at sm size (~27px buttons + 60px center)
-  junk: 100, // Fits button width (~90px) + padding
-};
-
 const styles = StyleSheet.create((theme) => ({
   container: {
     backgroundColor: theme.colors.background,
@@ -135,7 +144,6 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
   },
   nameColumn: {
-    width: COLUMN_WIDTHS.name,
     justifyContent: "center",
   },
   playerName: {
@@ -143,12 +151,10 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "600",
   },
   scoreColumn: {
-    width: COLUMN_WIDTHS.score,
     alignItems: "center",
   },
   junkColumn: {
     flex: 1,
-    minWidth: COLUMN_WIDTHS.junk,
     alignItems: "flex-end",
   },
   junkScroll: {

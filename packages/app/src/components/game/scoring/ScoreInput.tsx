@@ -19,7 +19,7 @@ interface ScoreInputProps {
   size?: ScoreInputSize;
 }
 
-// Base dimensions at scale 1.0 (md)
+// Base dimensions at scale 1.0
 const BASE = {
   button: 36,
   buttonBorder: 1.5,
