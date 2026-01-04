@@ -609,9 +609,45 @@ export function ScoringView({
           }
           const junkTotal = teamJunkTotal + playerJunkTotal;
 
+          // Build earned multipliers from scoreboard (automatic multipliers like birdie_bbq)
+          // These are multipliers that were automatically awarded based on junk conditions
+          // Exclude user-activated multipliers (already in multiplierButtons)
+          const userMultiplierNames = new Set(
+            multiplierButtons.map((m) => m.name),
+          );
+          // Get spec options for looking up display names of automatic multipliers
+          const spec = game?.specs?.$isLoaded ? game.specs[0] : null;
+          const specOptions = spec?.$isLoaded ? spec.options : null;
+          const earnedMultiplierButtons: OptionButton[] = (
+            teamHoleResult?.multipliers ?? []
+          )
+            .filter((m) => !userMultiplierNames.has(m.name))
+            .map((m) => {
+              // Look up the option definition from the spec for display name and icon
+              const optDefRaw = specOptions?.$isLoaded
+                ? specOptions[m.name]
+                : null;
+              const optDef = optDefRaw?.$isLoaded ? optDefRaw : null;
+              // Icon is only on multiplier/junk options, not game options
+              const icon =
+                optDef?.type === "multiplier" || optDef?.type === "junk"
+                  ? optDef.icon
+                  : undefined;
+              return {
+                name: m.name,
+                displayName: optDef?.disp ?? m.name,
+                icon,
+                type: "multiplier" as const,
+                selected: true,
+                earned: true, // Mark as earned/automatic
+                points: m.value, // Use points field to show multiplier value (e.g., 2 for 2x)
+              };
+            });
+
           return (
             <TeamGroup
               multiplierOptions={multiplierButtons}
+              earnedMultipliers={earnedMultiplierButtons}
               teamJunkOptions={teamJunkButtons}
               onMultiplierToggle={(multName) =>
                 toggleTeamMultiplier(team, multName, currentHoleNumber)

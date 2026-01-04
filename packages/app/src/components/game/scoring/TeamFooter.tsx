@@ -8,6 +8,8 @@ interface TeamFooterProps {
   teamJunkOptions?: OptionButton[];
   /** Multiplier press buttons (user-toggleable) */
   multiplierOptions?: OptionButton[];
+  /** Earned/automatic multipliers (read-only, like birdie_bbq) */
+  earnedMultipliers?: OptionButton[];
   /** Handler for multiplier toggle */
   onMultiplierToggle?: (multiplierName: string) => void;
   /** Total junk points before multiplier */
@@ -23,6 +25,7 @@ interface TeamFooterProps {
 export function TeamFooter({
   teamJunkOptions = [],
   multiplierOptions = [],
+  earnedMultipliers = [],
   onMultiplierToggle,
   junkTotal = 0,
   holeMultiplier = 1,
@@ -31,6 +34,7 @@ export function TeamFooter({
 }: TeamFooterProps) {
   const hasTeamJunk = teamJunkOptions.some((j) => j.selected);
   const hasMultipliers = multiplierOptions.length > 0;
+  const hasEarnedMultipliers = earnedMultipliers.length > 0;
 
   const handleMultiplierPress = (optionName: string): void => {
     onMultiplierToggle?.(optionName);
@@ -38,29 +42,37 @@ export function TeamFooter({
 
   return (
     <View style={styles.container}>
-      {/* Top row: Multiplier buttons (left) and Team junk badges (right) */}
-      {(hasMultipliers || hasTeamJunk) && (
-        <View style={styles.topRow}>
-          {/* Left: Multiplier press buttons */}
-          {hasMultipliers && (
-            <View style={styles.multiplierSection}>
+      {/* Options row: 50/50 split - Left (multipliers) / Right (junk) */}
+      {(hasMultipliers || hasEarnedMultipliers || hasTeamJunk) && (
+        <View style={styles.optionsRow}>
+          {/* Left half: Multiplier press buttons + earned multipliers */}
+          <View style={styles.leftSection}>
+            {hasMultipliers && (
               <OptionsButtons
                 options={multiplierOptions}
                 onOptionPress={handleMultiplierPress}
               />
-            </View>
-          )}
+            )}
+            {hasEarnedMultipliers && (
+              <OptionsButtons
+                options={earnedMultipliers}
+                onOptionPress={() => {}} // Read-only
+                readonly={true}
+              />
+            )}
+          </View>
 
-          {/* Right: Team junk badges */}
-          {hasTeamJunk && (
-            <View style={styles.teamJunkSection}>
+          {/* Right half: Team junk badges */}
+          <View style={styles.rightSection}>
+            {hasTeamJunk && (
               <OptionsButtons
                 options={teamJunkOptions.filter((j) => j.selected)}
                 onOptionPress={() => {}} // Read-only
                 readonly={true}
+                alignRight={true}
               />
-            </View>
-          )}
+            )}
+          </View>
         </View>
       )}
 
@@ -95,19 +107,18 @@ const styles = StyleSheet.create((theme) => ({
     paddingVertical: theme.gap(0.75),
     gap: theme.gap(0.75),
   },
-  topRow: {
+  optionsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     gap: theme.gap(1),
   },
-  teamJunkSection: {
-    flexShrink: 1,
-    flexGrow: 1,
-    alignItems: "flex-end",
+  leftSection: {
+    flex: 1,
+    gap: theme.gap(0.5),
+    alignItems: "flex-start",
   },
-  multiplierSection: {
-    flexShrink: 0,
+  rightSection: {
+    flex: 1,
+    alignItems: "flex-end",
   },
   bottomRow: {
     flexDirection: "row",

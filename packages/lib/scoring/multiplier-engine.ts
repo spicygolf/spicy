@@ -83,18 +83,20 @@ function evaluateMultiplierOption(
   ctx: ScoringContext,
 ): void {
   const subType = mult.sub_type;
+  const basedOn = mult.based_on;
   // Note: scope can be "hole" | "round" | "match" - currently only hole-level evaluation
   // const scope = mult.scope ?? "hole";
 
-  // Automatic multipliers (triggered by junk)
-  if (subType === "automatic" || subType === "bbq") {
-    evaluateAutomaticMultiplier(mult, holeResult, ctx);
+  // User-activated multipliers (press, double)
+  if (subType === "press" || basedOn === "user") {
+    evaluateUserMultiplier(mult, holeResult, ctx);
     return;
   }
 
-  // User-activated multipliers (press, double)
-  if (subType === "press" || mult.based_on === "user") {
-    evaluateUserMultiplier(mult, holeResult, ctx);
+  // Automatic multipliers (triggered by junk)
+  // These have sub_type "automatic" or "bbq", OR have a based_on that references another junk
+  if (subType === "automatic" || subType === "bbq" || basedOn) {
+    evaluateAutomaticMultiplier(mult, holeResult, ctx);
     return;
   }
 }
@@ -151,9 +153,13 @@ function evaluateAutomaticMultiplier(
         // This is needed because team.points is not set until the points stage
         if (mult.availability) {
           // Create a copy of teamResult with calculated points for availability check
+          const teamJunkPoints = calculateTeamJunkPoints(
+            teamResult,
+            holeResult,
+          );
           const teamWithPoints = {
             ...teamResult,
-            points: calculateTeamJunkPoints(teamResult, holeResult),
+            points: teamJunkPoints,
           };
 
           if (

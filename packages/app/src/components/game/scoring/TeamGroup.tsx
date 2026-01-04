@@ -11,6 +11,8 @@ interface TeamGroupProps {
   teamJunkOptions?: OptionButton[];
   /** Multiplier press buttons (user-toggleable) */
   multiplierOptions?: OptionButton[];
+  /** Earned/automatic multipliers (read-only, like birdie_bbq) */
+  earnedMultipliers?: OptionButton[];
   /** Handler for multiplier toggle */
   onMultiplierToggle?: (multiplierName: string) => void;
   /** Total junk points before multiplier */
@@ -28,6 +30,7 @@ export function TeamGroup({
   teamName,
   teamJunkOptions = [],
   multiplierOptions = [],
+  earnedMultipliers = [],
   onMultiplierToggle,
   junkTotal,
   holeMultiplier,
@@ -51,6 +54,7 @@ export function TeamGroup({
       <TeamFooter
         teamJunkOptions={teamJunkOptions}
         multiplierOptions={multiplierOptions}
+        earnedMultipliers={earnedMultipliers}
         onMultiplierToggle={onMultiplierToggle}
         junkTotal={junkTotal}
         holeMultiplier={holeMultiplier}

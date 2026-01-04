@@ -38,6 +38,11 @@ export interface OptionButton {
    * based_on: "gross", "net", or "logic" (not "user")
    */
   calculated?: boolean;
+  /**
+   * If true, this is an earned/automatic multiplier (e.g., birdie_bbq).
+   * Earned multipliers are displayed as badges and cannot be toggled.
+   */
+  earned?: boolean;
 }
 
 interface OptionsButtonsProps {
@@ -46,6 +51,8 @@ interface OptionsButtonsProps {
   readonly?: boolean;
   /** If true, display buttons in a vertical column instead of horizontal row */
   vertical?: boolean;
+  /** If true, align buttons to the right (justify-content: flex-end) */
+  alignRight?: boolean;
 }
 
 // Base dimensions at scale 1.0 (lg)
@@ -74,6 +81,7 @@ export function OptionsButtons({
   onOptionPress,
   readonly = false,
   vertical = false,
+  alignRight = false,
 }: OptionsButtonsProps) {
   const { theme } = useUnistyles();
   const { scale } = useUIScale();
@@ -101,46 +109,58 @@ export function OptionsButtons({
   };
 
   return (
-    <View style={[styles.container, vertical && styles.containerVertical]}>
+    <View
+      style={[
+        styles.container,
+        vertical && styles.containerVertical,
+        alignRight && styles.containerAlignRight,
+      ]}
+    >
       {options.map((option) => {
         const isMultiplier = option.type === "multiplier";
         const isSelected = option.selected;
         const isInherited = option.inherited ?? false;
         const isCalculated = option.calculated ?? false;
+        const isEarned = option.earned ?? false;
 
-        // Calculated junk renders as a badge (smaller, muted)
-        const isBadge = isCalculated;
+        // Calculated junk and earned multipliers render as badges (smaller, pill shape)
+        const isBadge = isCalculated || isEarned;
 
         // Colors based on type and state
-        // Badges: filled blue (awarded)
+        // Badges: filled blue (junk) or orange (earned multiplier)
         // Buttons: blue outline/filled for junk, red for multipliers
         let buttonColor: string;
         let textColor: string;
         let borderColor: string;
 
-        const BLUE = "#3498DB";
-        const RED = "#E74C3C";
+        const junkColor = theme.colors.junk;
+        const multiplierColor = theme.colors.multiplier;
 
-        if (isBadge) {
-          // Awarded badge - filled blue
-          buttonColor = BLUE;
+        if (isEarned) {
+          // Earned multiplier badge - filled red (same as user multipliers when active)
+          buttonColor = multiplierColor;
           textColor = "#FFFFFF";
-          borderColor = BLUE;
+          borderColor = multiplierColor;
+        } else if (isBadge) {
+          // Calculated junk badge - filled blue
+          buttonColor = junkColor;
+          textColor = "#FFFFFF";
+          borderColor = junkColor;
         } else if (isMultiplier) {
-          // Multiplier button
-          buttonColor = isSelected ? RED : theme.colors.background;
-          textColor = isSelected ? "#FFFFFF" : RED;
-          borderColor = RED;
+          // User multiplier button
+          buttonColor = isSelected ? multiplierColor : theme.colors.background;
+          textColor = isSelected ? "#FFFFFF" : multiplierColor;
+          borderColor = multiplierColor;
         } else {
           // User-toggleable junk button
-          buttonColor = isSelected ? BLUE : theme.colors.background;
-          textColor = isSelected ? "#FFFFFF" : BLUE;
-          borderColor = BLUE;
+          buttonColor = isSelected ? junkColor : theme.colors.background;
+          textColor = isSelected ? "#FFFFFF" : junkColor;
+          borderColor = junkColor;
         }
 
-        // Calculated junk and inherited options can't be toggled
-        const isDisabled = readonly || isInherited || isCalculated;
-        // Only dim inherited options (from previous hole), not calculated junk
+        // Calculated junk, earned multipliers, and inherited options can't be toggled
+        const isDisabled = readonly || isInherited || isCalculated || isEarned;
+        // Only dim inherited options (from previous hole), not calculated junk or earned multipliers
         const shouldDim = isInherited;
 
         // Show points on badges (always) and on buttons when selected
@@ -236,12 +256,16 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "flex-start",
     gap: theme.gap(0.5),
   },
   containerVertical: {
     flexDirection: "column",
     flexWrap: "nowrap",
     alignItems: "flex-end",
+  },
+  containerAlignRight: {
+    justifyContent: "flex-end",
   },
   optionButton: {
     flexDirection: "row",

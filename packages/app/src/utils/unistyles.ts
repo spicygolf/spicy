@@ -17,6 +17,9 @@ const light = {
       active: "#34C759",
       inactive: "#999999",
     },
+    // Option button colors (junk, multipliers)
+    junk: "#3498DB", // Blue for junk
+    multiplier: "#E74C3C", // Red for multipliers
   },
   // functions, external imports, etc.
   gap: (v: number) => v * 8,
@@ -37,6 +40,9 @@ const dark = {
       active: "#34C759",
       inactive: "#666666",
     },
+    // Option button colors (junk, multipliers)
+    junk: "#3498DB", // Blue for junk
+    multiplier: "#E74C3C", // Red for multipliers
   },
   gap: (v: number) => v * 8,
 };
