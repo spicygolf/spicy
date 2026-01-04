@@ -9,5 +9,5 @@
   "icon": "album",
   "show_in": "faves",
   "based_on": "user",
-  "limit": ""
+  "limit": null
 }

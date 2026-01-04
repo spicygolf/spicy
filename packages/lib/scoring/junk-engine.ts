@@ -243,10 +243,14 @@ export function parseScoreToParCondition(
   const valuePart = parts[1];
   if (operatorPart === undefined || valuePart === undefined) return null;
 
+  // Validate operator before type assertion
+  const validOperators = ["exactly", "at_most", "at_least"] as const;
+  if (!validOperators.includes(operatorPart as (typeof validOperators)[number]))
+    return null;
+
   const operator = operatorPart as ScoreToParCondition["operator"];
   const value = Number.parseInt(valuePart, 10);
 
-  if (!["exactly", "at_most", "at_least"].includes(operator)) return null;
   if (Number.isNaN(value)) return null;
 
   return { operator, value };

@@ -57,7 +57,7 @@ export function GameOptionsList() {
       if (option?.$isLoaded && option.type === "game") {
         const gameOpt = option as GameOption;
         // Filter out teamOnly options when teams mode is not active
-        if (gameOpt.teamOnly && !isTeamsMode) {
+        if (gameOpt.$jazz.has("teamOnly") && gameOpt.teamOnly && !isTeamsMode) {
           continue;
         }
         options.push(gameOpt);

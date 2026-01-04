@@ -10,8 +10,6 @@
  * - JAZZ_WORKER_SECRET
  */
 
-// biome-ignore-all lint/complexity/useLiteralKeys: option keys have underscores
-
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { resolve } from "node:path";
 import { config } from "dotenv";
@@ -79,10 +77,35 @@ let worker: Awaited<ReturnType<typeof startWorker>> | null = null;
 let game: Game | null = null;
 let scoreboard: Scoreboard | null = null;
 
+// Check if Jazz credentials are available
+const hasCredentials = Boolean(
+  JAZZ_API_KEY && JAZZ_WORKER_ACCOUNT && JAZZ_WORKER_SECRET,
+);
+
+/**
+ * Helper to skip tests when Jazz credentials are missing.
+ * Throws an error to make the skip visible in test output.
+ */
+function requireGame(): asserts game is Game {
+  if (!hasCredentials) {
+    throw new Error("Test skipped: Missing Jazz credentials in .env");
+  }
+  if (!game) {
+    throw new Error("Test skipped: Game failed to load");
+  }
+}
+
+function requireScoreboard(): asserts scoreboard is Scoreboard {
+  requireGame();
+  if (!scoreboard) {
+    throw new Error("Test skipped: Scoreboard failed to generate");
+  }
+}
+
 describe("Five Points Integration Tests", () => {
   beforeAll(async () => {
     // Skip if credentials not available
-    if (!JAZZ_API_KEY || !JAZZ_WORKER_ACCOUNT || !JAZZ_WORKER_SECRET) {
+    if (!hasCredentials) {
       console.warn("Skipping integration tests: Missing Jazz credentials");
       return;
     }
@@ -117,17 +140,14 @@ describe("Five Points Integration Tests", () => {
 
   describe("Game Loading", () => {
     it("should load the game successfully", () => {
-      if (!game) {
-        console.warn("Skipping: No game loaded");
-        return;
-      }
+      requireGame();
 
       expect(game.$isLoaded).toBe(true);
       expect(game.name).toBe("Five Points");
     });
 
     it("should have 4 players", () => {
-      if (!game) return;
+      requireGame();
 
       const rounds = game.rounds;
       expect(rounds?.$isLoaded).toBe(true);
@@ -135,23 +155,25 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should have spec options with correct overrides", () => {
-      if (!game) return;
+      requireGame();
 
       const spec = game.specs?.[0];
       expect(spec?.$isLoaded).toBe(true);
       expect(spec?.options?.$isLoaded).toBe(true);
 
       // Five Points overrides low_ball and low_total to value 2 (base is 1)
+      // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
       const lowBall = spec?.options?.["low_ball"];
       expect(lowBall?.$isLoaded).toBe(true);
       expect(lowBall?.value).toBe(2);
 
+      // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
       const lowTotal = spec?.options?.["low_total"];
       expect(lowTotal?.$isLoaded).toBe(true);
       expect(lowTotal?.value).toBe(2);
 
       // prox should be value 1
-      const prox = spec?.options?.["prox"];
+      const prox = spec?.options?.prox;
       expect(prox?.$isLoaded).toBe(true);
       expect(prox?.value).toBe(1);
     });
@@ -159,20 +181,20 @@ describe("Five Points Integration Tests", () => {
 
   describe("Scoreboard Generation", () => {
     it("should generate a scoreboard", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       expect(scoreboard).toBeDefined();
       expect(scoreboard.meta.gameId).toBe(FIVE_POINTS_GAME_ID);
     });
 
     it("should have teams configured", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       expect(scoreboard.meta.hasTeams).toBe(true);
     });
 
     it("should have results for 18 holes", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const holesPlayed = scoreboard.meta.holesPlayed;
       expect(holesPlayed.length).toBe(18);
@@ -188,7 +210,7 @@ describe("Five Points Integration Tests", () => {
     // Team 2: NmEAVViw (6, adj=10, 1 pop), Z6hnA7pT (5, adj=0, 0 pops) -> lowBall=5, total=10 (wins)
 
     it("should calculate correct gross scores", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole1 = scoreboard.holes["1"];
       expect(hole1).toBeDefined();
@@ -201,7 +223,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should calculate pops using low handicap mode", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole1 = scoreboard.holes["1"];
       expect(hole1.holeInfo.allocation).toBe(3);
@@ -214,7 +236,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should calculate team low ball scores (net)", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole1 = scoreboard.holes["1"];
       // Both teams tie with lowBall of 5
@@ -223,7 +245,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should calculate team total scores (net)", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole1 = scoreboard.holes["1"];
       // Team 1: 7+5=12, Team 2: 5+5=10
@@ -232,7 +254,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should NOT award low_ball junk on tie (one_team_per_group)", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole1 = scoreboard.holes["1"];
       // Both teams tie with lowBall=5, so NEITHER gets low_ball junk
@@ -248,7 +270,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should award low_total junk to winning team only", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole1 = scoreboard.holes["1"];
       // Team 2 wins low total with 10 (Team 1 has 12)
@@ -264,7 +286,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should award prox to a player on team 2 on hole 1", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole1 = scoreboard.holes["1"];
       // Prox is player-scoped junk, find the player on team 2 who has it
@@ -283,7 +305,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should calculate correct points for each team", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole1 = scoreboard.holes["1"];
       // Team 1: no junk (low_ball tied, so not awarded) = 0 points
@@ -295,7 +317,7 @@ describe("Five Points Integration Tests", () => {
 
   describe("Running Totals", () => {
     it("should track running totals across holes", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       // After hole 1: Team 1 has 0 pts, Team 2 has 3 pts (low_total=2 + prox=1)
       const hole1 = scoreboard.holes["1"];
@@ -310,7 +332,7 @@ describe("Five Points Integration Tests", () => {
 
   describe("Cumulative Totals", () => {
     it("should calculate player cumulative totals", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       // All 4 players should have cumulative stats
       expect(Object.keys(scoreboard.cumulative.players).length).toBe(4);
@@ -323,7 +345,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should calculate team cumulative totals", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       // Should have 2 teams
       expect(Object.keys(scoreboard.cumulative.teams).length).toBe(2);
@@ -338,7 +360,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should have balanced points between teams", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const team1 = scoreboard.cumulative.teams["1"];
       const team2 = scoreboard.cumulative.teams["2"];
@@ -352,7 +374,7 @@ describe("Five Points Integration Tests", () => {
 
   describe("Score Validation", () => {
     it("should have par info for each hole", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       for (const holeNum of scoreboard.meta.holesPlayed) {
         const hole = scoreboard.holes[holeNum];
@@ -362,7 +384,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should rank players correctly on each hole", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       for (const holeNum of scoreboard.meta.holesPlayed) {
         const hole = scoreboard.holes[holeNum];
@@ -380,7 +402,7 @@ describe("Five Points Integration Tests", () => {
     // that applies to ALL teams' points equally
 
     it("should apply hole-wide 4x multiplier on hole 2 (double + double_back)", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole2 = scoreboard.holes["2"];
       expect(hole2).toBeDefined();
@@ -398,7 +420,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should apply hole-wide 4x multiplier on hole 4 (double + double_back)", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole4 = scoreboard.holes["4"];
       expect(hole4).toBeDefined();
@@ -413,7 +435,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should apply 2x multiplier on hole 3 (double only)", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole3 = scoreboard.holes["3"];
       expect(hole3).toBeDefined();
@@ -428,7 +450,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should apply 4x multiplier on hole 16 (pre_double + double)", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole16 = scoreboard.holes["16"];
       expect(hole16).toBeDefined();
@@ -444,7 +466,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should apply 2x multiplier on hole 17 (pre_double only)", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole17 = scoreboard.holes["17"];
       expect(hole17).toBeDefined();
@@ -460,7 +482,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should apply 4x multiplier on hole 18 (both teams pre_double)", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole18 = scoreboard.holes["18"];
       expect(hole18).toBeDefined();
@@ -476,7 +498,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should have no multiplier (1x) on holes without presses", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       // Hole 1 has no multipliers
       const hole1 = scoreboard.holes["1"];
@@ -492,7 +514,7 @@ describe("Five Points Integration Tests", () => {
     // Birdie: score_to_par "exactly -1" based on net score
 
     it("should award birdie on hole 5 to player with net birdie", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole5 = scoreboard.holes["5"];
       expect(hole5).toBeDefined();
@@ -511,7 +533,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should award birdie value of 1 point", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       // Find any hole with a birdie
       for (const holeNum of scoreboard.meta.holesPlayed) {
@@ -528,7 +550,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should contribute birdie points to team total", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole16 = scoreboard.holes["16"];
       // T1 has a birdie on hole 16, which contributes to their points
@@ -555,7 +577,7 @@ describe("Five Points Integration Tests", () => {
 
   describe("Running Totals with Multipliers", () => {
     it("should accumulate running totals correctly through multiplied holes", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       // Check running totals match sum of previous points
       let team1RunningTotal = 0;
@@ -572,7 +594,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should have correct final totals", () => {
-      if (!scoreboard) return;
+      requireScoreboard();
 
       const hole18 = scoreboard.holes["18"];
 
@@ -591,7 +613,7 @@ describe("Five Points Integration Tests", () => {
     // Hole 7: Team 1 has "double"
 
     it("should detect multipliers on hole 2", () => {
-      if (!game) return;
+      requireGame();
 
       const hole2 = game.holes?.find((h) => h?.hole === "2");
       expect(hole2?.$isLoaded).toBe(true);
@@ -615,7 +637,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should detect multipliers on hole 4", () => {
-      if (!game) return;
+      requireGame();
 
       const hole4 = game.holes?.find((h) => h?.hole === "4");
       expect(hole4?.$isLoaded).toBe(true);
@@ -637,7 +659,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should have multipliers stored alongside junk in team options", () => {
-      if (!game) return;
+      requireGame();
 
       // Hole 4 team 2 should have both prox (junk) and double_back (multiplier)
       const hole4 = game.holes?.find((h) => h?.hole === "4");
@@ -649,7 +671,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should detect back nine multipliers", () => {
-      if (!game) return;
+      requireGame();
 
       // Hole 11: Team has "double"
       const hole11 = game.holes?.find((h) => h?.hole === "11");
@@ -669,7 +691,7 @@ describe("Five Points Integration Tests", () => {
     });
 
     it("should detect pre_double multipliers on holes 16-18", () => {
-      if (!game) return;
+      requireGame();
 
       // Hole 16: has both pre_double and double
       const hole16 = game.holes?.find((h) => h?.hole === "16");

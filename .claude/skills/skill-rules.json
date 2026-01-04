@@ -53,7 +53,7 @@
           "usestate",
           "useeffect",
           "style",
-          "unistyle",
+          "unistyles",
           "package.json",
           "dependency",
           "dependencies",

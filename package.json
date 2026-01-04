@@ -21,7 +21,8 @@
     "tsc": "bun run --filter './packages/*' tsc",
     "test": "bun test ./packages/app/ ./packages/api/ ./packages/lib/",
     "precommit": "bun format && bun lint && bun tsc",
-    "prepare": "husky"
+    "prepare": "husky",
+    "validate:seed": "bun run --filter spicylib validate:seed"
   },
   "trustedDependencies": [
     "@apollo/protobufjs",

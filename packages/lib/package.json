@@ -17,7 +17,8 @@
     "format": "biome format .",
     "format:fix": "biome format --write .",
     "tsc": "sh -c 'tsc --noEmit'",
-    "test": "bun test"
+    "test": "bun test",
+    "validate:seed": "bun run scoring/validate-seed-logic.ts"
   },
   "devDependencies": {
     "@types/json-logic-js": "2.0.8",

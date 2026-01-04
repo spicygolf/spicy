@@ -9,8 +9,8 @@
   "icon": "album",
   "show_in": "score",
   "based_on": "gross",
-  "limit": "",
+  "limit": null,
   "calculation": "logic",
-  "logic": "{\n        'and': [\n          {\n            '==': [\n              {'countJunk': [{'team': ['this']}, 'birdie']},\n              2\n            ]\n          },\n          {\n            '==': [\n              {'countJunk': [{'team': ['other']}, 'birdie']},\n              0\n            ]\n          },\n          {\n            '==': [\n              {'countJunk': [{'team': ['other']}, 'eagle']},\n              0\n            ]\n          }\n        ]\n      }",
+  "logic": "{\"and\": [{\"==\": [{\"countJunk\": [{\"team\": [\"this\"]}, \"birdie\"]}, 2]}, {\"==\": [{\"countJunk\": [{\"team\": [\"other\"]}, \"birdie\"]}, 0]}, {\"==\": [{\"countJunk\": [{\"team\": [\"other\"]}, \"eagle\"]}, 0]}]}",
   "better": "lower"
 }

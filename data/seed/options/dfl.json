@@ -1,16 +1,16 @@
 {
   "name": "dfl",
-  "disp": "",
+  "disp": null,
   "type": "junk",
   "sub_type": "dot",
   "value": 1,
   "seq": 6,
   "scope": "team",
-  "icon": "",
+  "icon": null,
   "show_in": "none",
   "based_on": "net",
-  "limit": "",
+  "limit": null,
   "calculation": "logic",
-  "logic": "{'rankWithTies': [ 3, 1 ]}",
+  "logic": "{\"rankWithTies\": [ 3, 1 ]}",
   "better": "lower"
 }

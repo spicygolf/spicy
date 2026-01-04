@@ -4,7 +4,9 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";
 
 /**
- * Map legacy/custom icon names to FontAwesome6 icons
+ * Map legacy/custom icon names to FontAwesome6 icons.
+ * Icons not in the map are passed through - they may be valid FA6 names
+ * stored in the database.
  */
 function mapIconName(icon: string): string {
   const iconMap: Record<string, string> = {
@@ -96,11 +98,19 @@ export function OptionsButtons({
             ]}
             onPress={() => onOptionPress(option.name)}
             disabled={isDisabled}
-            accessibilityLabel={`${option.displayName} ${isSelected ? "selected" : ""} ${isCalculated ? "automatic" : ""} ${isInherited ? "from previous hole" : ""}`}
+            accessibilityLabel={[
+              option.displayName,
+              isSelected && "selected",
+              isCalculated && "automatic",
+              isInherited && "from previous hole",
+            ]
+              .filter(Boolean)
+              .join(" ")}
           >
             {option.icon && (
               <FontAwesome6
-                name={mapIconName(option.icon) as never}
+                // Icon names come from database/seed data, cast needed for dynamic names
+                name={mapIconName(option.icon) as "bullseye"}
                 iconStyle="solid"
                 size={16}
                 color={textColor}

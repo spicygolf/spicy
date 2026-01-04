@@ -1,16 +1,16 @@
 {
   "name": "2_tie_last",
-  "disp": "",
+  "disp": null,
   "type": "junk",
   "sub_type": "dot",
   "value": 2,
   "seq": 5,
   "scope": "team",
-  "icon": "",
+  "icon": null,
   "show_in": "none",
   "based_on": "net",
-  "limit": "",
+  "limit": null,
   "calculation": "logic",
-  "logic": "{'rankWithTies': [ 2, 2 ]}",
+  "logic": "{\"rankWithTies\": [ 2, 2 ]}",
   "better": "lower"
 }

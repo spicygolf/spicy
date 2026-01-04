@@ -139,7 +139,6 @@ export function buildContext(game: Game): ScoringContext {
     options,
     gameHoles,
     rounds,
-    playerInfoMap: new Map(), // Will be populated as needed
     holeInfoMap,
     playerHandicaps,
     teamsPerHole,
@@ -210,7 +209,10 @@ function extractGameSpec(game: Game): GameSpec {
   return spec;
 }
 
-function extractOptions(game: Game, gameSpec: GameSpec): MapOfOptions {
+function extractOptions(
+  game: Game,
+  gameSpec: GameSpec,
+): MapOfOptions | undefined {
   // Prefer game-level options (customized), fall back to spec options
   if (game.options?.$isLoaded) {
     return game.options;
@@ -220,8 +222,8 @@ function extractOptions(game: Game, gameSpec: GameSpec): MapOfOptions {
     return gameSpec.options;
   }
 
-  // Return empty options object
-  return {} as MapOfOptions;
+  // No options available
+  return undefined;
 }
 
 function extractHoles(game: Game): GameHole[] {
@@ -257,13 +259,13 @@ function extractRounds(game: Game): RoundToGame[] {
 
 function buildPlayerHandicaps(
   rounds: RoundToGame[],
-  options: MapOfOptions,
+  options: MapOfOptions | undefined,
 ): Map<string, PlayerHandicapInfo> {
   const handicaps = new Map<string, PlayerHandicapInfo>();
 
   // Check handicap mode from options (default is "low")
   // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
-  const handicapIndexFromOption = options["handicap_index_from"];
+  const handicapIndexFromOption = options?.["handicap_index_from"];
   const handicapMode =
     handicapIndexFromOption?.$isLoaded &&
     handicapIndexFromOption.value === "full"

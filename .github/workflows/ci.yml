@@ -30,7 +30,14 @@ jobs:
         run: bun tsc
 
       - name: Run Unit Tests
-        run: bun run test
+        run: bun test ./packages/app/__tests__/ ./packages/api/src/ ./packages/lib/utils/ ./packages/lib/scoring/__tests__/
+
+      - name: Run Integration Tests
+        run: bun test ./packages/lib/scoring/__integration__/
+        env:
+          JAZZ_API_KEY: ${{ vars.JAZZ_API_KEY }}
+          JAZZ_WORKER_ACCOUNT: ${{ vars.JAZZ_WORKER_ACCOUNT }}
+          JAZZ_WORKER_SECRET: ${{ secrets.JAZZ_WORKER_SECRET }}
 
   claude-review:
     name: Claude Code Review

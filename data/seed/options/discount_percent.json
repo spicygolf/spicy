@@ -3,5 +3,5 @@
   "disp": "Discount on Losses - Percentage",
   "type": "game",
   "valueType": "pct",
-  "defaultValue": "50"
+  "defaultValue": 50
 }
