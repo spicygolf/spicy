@@ -1,12 +1,14 @@
 # Scoring Engine Follow-Up Work
 
-This document tracks remaining work for the scoring engine feature after PR #322.
+This document tracks remaining work for the scoring engine feature after PR #322.  That PR got to be massive and it needs to be merged so we can work on smaller pieces going forward.
 
 ---
 
 ## 1. Scoring Screen UI Redesign
 
 The current ScoringView is monolithic and messy. We need to decompose it into smaller, reusable components with a cleaner layout. The app-0.3 screenshots show the **elements** we need - we can improve on the layout.
+
+Ask user for actual screenshots from 0.3
 
 ### Current Problems
 
@@ -20,18 +22,6 @@ The current ScoringView is monolithic and messy. We need to decompose it into sm
 
 These are the UI elements that must be present, though layout can be improved:
 
-1. **Score Entry with Quick Select**
-   - Row of score options: 3, [4], 5, [6], [7], 8 (par-based range)
-   - Boxed scores indicate strokes received (pops) on this hole
-   - Current score highlighted (e.g., blue background for selected)
-
-2. **Score-to-Par Visual Indicators**
-   - Circle around birdie scores (1 under par)
-   - Double circle around eagle scores (2+ under par)
-   - No special indicator for par
-   - Square around bogey scores (1 over par)
-   - Double square around double bogey+ (2+ over par)
-
 3. **Junk Buttons**
    - User-markable junk (Prox): Blue outline, toggleable
    - Calculated junk (Birdie, Low Ball, Low Total): Blue filled when awarded
@@ -40,13 +30,13 @@ These are the UI elements that must be present, though layout can be improved:
 4. **Multiplier Buttons**
    - Red background when active
    - Red outline when available but not selected
-   - Labels: "Pre 2x", "2x", "2x back"
-
+   - disabled/grayed out when inherited/started on a previous hole.  We have disabled now, but 0.3 has grayed too.  Not sure which yet.  Probably disabled, but still red, looks okay...
+ 
 5. **Team Footer**
    - Shows hole calculation: "Hole: 2 x 4 = +8" (junk × multiplier = points)
-   - Shows running total: "Total: -17"
+   - Shows running total: "Total: 17"
 
-### Proposed Component Structure
+### Proposed Component Structure, after we settle on an overall design, this might change
 
 ```
 ScoringView/
@@ -78,6 +68,8 @@ ScoringView/
 ## 2. Summary Screen
 
 A summary view accessible after hole 18 (or via nav from any hole). Shows final results.
+
+Ask user for actual screenshots from 0.3
 
 ### Layout (from app-0.3)
 
@@ -123,6 +115,8 @@ A summary view accessible after hole 18 (or via nav from any hole). Shows final 
 
 Full hole-by-hole breakdown with three view modes: gross, net, points.
 
+Ask user for actual screenshots from 0.3
+
 ### Layout (from app-0.3)
 
 ```
@@ -167,11 +161,11 @@ Full hole-by-hole breakdown with three view modes: gross, net, points.
 
 | Score to Par | Notation |
 |--------------|----------|
-| Eagle (-2)   | Double circle: ((3)) |
+| Eagle (-2) or lower   | Double circle: ((3)) |
 | Birdie (-1)  | Single circle: (3) |
 | Par (0)      | Plain: 4 |
 | Bogey (+1)   | Single square: [5] |
-| Double+ (+2) | Double square: [[6]] |
+| Double+ (+2) or higher | Double square: [[6]] |
 
 ### Dot Indicators
 
