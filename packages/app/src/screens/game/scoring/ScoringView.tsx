@@ -1,19 +1,7 @@
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type {
-  Game,
-  GameHole,
-  JunkOption,
-  MultiplierOption,
-  Team,
-} from "spicylib/schema";
+import type { Game, GameHole, Team } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
-import type {
-  Scoreboard,
-  ScoringContext,
-  TeamHoleResult,
-} from "spicylib/scoring";
-import { evaluateAvailability } from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
@@ -24,6 +12,7 @@ import {
 } from "spicylib/utils";
 import {
   HoleHeader,
+  HoleToolbar,
   PlayerScoreRow,
   TeamGroup,
 } from "@/components/game/scoring";
@@ -31,6 +20,17 @@ import type { OptionButton } from "@/components/game/scoring/OptionsButtons";
 import type { HoleInfo } from "@/hooks";
 import { useOptionValue } from "@/hooks/useOptionValue";
 import { useScoreboard } from "@/hooks/useScoreboard";
+import {
+  getCalculatedPlayerJunkOptions,
+  getCalculatedTeamJunkOptions,
+  getMultiplierOptions,
+  getTeamMultiplierStatus,
+  getUserJunkOptions,
+  hasCalculatedPlayerJunk,
+  hasCalculatedTeamJunk,
+  hasPlayerJunk,
+  isMultiplierAvailable,
+} from "./scoringUtils";
 
 export interface ScoringViewProps {
   game: Game;
@@ -45,178 +45,23 @@ export interface ScoringViewProps {
 }
 
 /**
- * Get user-markable junk options from game spec
- * These are junk options with based_on: "user" and show_in: "score" or "faves"
- */
-function getUserJunkOptions(game: Game): JunkOption[] {
-  const junkOptions: JunkOption[] = [];
-
-  // Get options from game spec
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return junkOptions;
-
-  const options = spec.options;
-  if (!options?.$isLoaded) return junkOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
-    if (
-      opt?.$isLoaded &&
-      opt.type === "junk" &&
-      opt.based_on === "user" &&
-      (opt.show_in === "score" || opt.show_in === "faves")
-    ) {
-      junkOptions.push(opt);
-    }
-  }
-
-  // Sort by seq
-  junkOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
-
-  return junkOptions;
-}
-
-/**
- * Get calculated (automatic) junk options from game spec
- * These are player-scoped junk options with based_on: "gross", "net", or logic-based
- * Examples: birdie, eagle (based on score_to_par)
- */
-function getCalculatedPlayerJunkOptions(game: Game): JunkOption[] {
-  const junkOptions: JunkOption[] = [];
-
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return junkOptions;
-
-  const options = spec.options;
-  if (!options?.$isLoaded) return junkOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
-    if (
-      opt?.$isLoaded &&
-      opt.type === "junk" &&
-      opt.scope === "player" &&
-      opt.based_on !== "user" && // Not user-marked
-      (opt.show_in === "score" || opt.show_in === "faves")
-    ) {
-      junkOptions.push(opt);
-    }
-  }
-
-  junkOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
-  return junkOptions;
-}
-
-/**
- * Get calculated (automatic) team junk options from game spec
- * These are team-scoped junk options with calculation: "best_ball", "sum", etc.
- * Examples: low_ball, low_total
- *
- * Note: We don't filter by show_in here because the scoring engine awards
- * these based on calculation, and they should be shown if earned.
- * The show_in field may not be set on older data.
- */
-function getCalculatedTeamJunkOptions(game: Game): JunkOption[] {
-  const junkOptions: JunkOption[] = [];
-
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return junkOptions;
-
-  const options = spec.options;
-  if (!options?.$isLoaded) return junkOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
-    if (
-      opt?.$isLoaded &&
-      opt.type === "junk" &&
-      opt.scope === "team" &&
-      opt.calculation && // Has a calculation method (best_ball, sum, etc.)
-      opt.show_in !== "none" // Only exclude if explicitly hidden
-    ) {
-      junkOptions.push(opt);
-    }
-  }
-
-  junkOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
-  return junkOptions;
-}
-
-/**
- * Check if a player has calculated junk from the scoreboard
- */
-function hasCalculatedPlayerJunk(
-  scoreboard: Scoreboard | null,
-  holeNum: string,
-  playerId: string,
-  junkName: string,
-): boolean {
-  if (!scoreboard) return false;
-
-  const holeResult = scoreboard.holes[holeNum];
-  if (!holeResult) return false;
-
-  const playerResult = holeResult.players[playerId];
-  if (!playerResult) return false;
-
-  return playerResult.junk.some((j) => j.name === junkName);
-}
-
-/**
- * Check if a team has calculated junk from the scoreboard
- */
-function hasCalculatedTeamJunk(
-  scoreboard: Scoreboard | null,
-  holeNum: string,
-  teamId: string,
-  junkName: string,
-): boolean {
-  if (!scoreboard) return false;
-
-  const holeResult = scoreboard.holes[holeNum];
-  if (!holeResult) return false;
-
-  const teamResult = holeResult.teams[teamId];
-  if (!teamResult) return false;
-
-  return teamResult.junk.some((j) => j.name === junkName);
-}
-
-/**
- * Check if a player has a specific junk option on this hole
- */
-function hasPlayerJunk(
-  team: Team,
-  playerId: string,
-  junkName: string,
-): boolean {
-  if (!team.options?.$isLoaded) return false;
-
-  for (const opt of team.options) {
-    if (
-      opt?.$isLoaded &&
-      opt.optionName === junkName &&
-      opt.playerId === playerId &&
-      opt.value === "true"
-    ) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
  * Toggle a junk option for a player on a team
  * Creates the options list if it doesn't exist, then adds or removes the junk
+ *
+ * @param limit - If "one_per_group", only one player in the team can have this junk
  */
 function togglePlayerJunk(
   team: Team,
   playerId: string,
   junkName: string,
+  limit?: string,
 ): void {
+  // Get the team's owner group to ensure new options are accessible
+  const owner = team.$jazz.owner;
+
   // Ensure options list exists using Jazz pattern
   if (!team.$jazz.has("options")) {
-    team.$jazz.set("options", ListOfTeamOptions.create([]));
+    team.$jazz.set("options", ListOfTeamOptions.create([], { owner }));
   }
 
   const options = team.options;
@@ -240,118 +85,29 @@ function togglePlayerJunk(
     // Remove existing option (toggle off)
     options.$jazz.splice(existingIndex, 1);
   } else {
+    // If limit is "one_per_group", remove this junk from all other players first
+    if (limit === "one_per_group") {
+      // Find and remove all existing options for this junk (from other players)
+      // Iterate backwards to safely splice while iterating
+      for (let i = options.length - 1; i >= 0; i--) {
+        const opt = options[i];
+        if (opt?.$isLoaded && opt.optionName === junkName) {
+          options.$jazz.splice(i, 1);
+        }
+      }
+    }
+
     // Add new option (toggle on)
-    const newOption = TeamOption.create({
-      optionName: junkName,
-      value: "true",
-      playerId,
-    });
+    const newOption = TeamOption.create(
+      {
+        optionName: junkName,
+        value: "true",
+        playerId,
+      },
+      { owner },
+    );
     options.$jazz.push(newOption);
   }
-}
-
-/**
- * Get team-scoped multiplier options from game spec
- * These are multiplier options with based_on: "user"
- */
-function getMultiplierOptions(game: Game): MultiplierOption[] {
-  const multiplierOptions: MultiplierOption[] = [];
-
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return multiplierOptions;
-
-  const options = spec.options;
-  if (!options?.$isLoaded) return multiplierOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
-    if (
-      opt?.$isLoaded &&
-      opt.type === "multiplier" &&
-      opt.based_on === "user"
-    ) {
-      multiplierOptions.push(opt);
-    }
-  }
-
-  multiplierOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
-  return multiplierOptions;
-}
-
-/**
- * Check if a multiplier is available for a team based on its availability condition.
- * Uses the scoring engine's evaluateAvailability function to evaluate JSON Logic.
- *
- * If the multiplier has no availability condition, it's always available.
- * If the context is not available, we can't evaluate so we return true (show it).
- */
-function isMultiplierAvailable(
-  mult: MultiplierOption,
-  ctx: ScoringContext | null,
-  holeNum: string,
-  teamId: string,
-): boolean {
-  // If no availability condition, always available
-  if (!mult.availability) return true;
-
-  // If no context, can't evaluate - show the multiplier
-  if (!ctx) return true;
-
-  const scoreboard = ctx.scoreboard;
-  if (!scoreboard) return true;
-
-  const holeResult = scoreboard.holes[holeNum];
-  if (!holeResult) return true;
-
-  const teamResult = holeResult.teams[teamId];
-  if (!teamResult) return true;
-
-  try {
-    return evaluateAvailability(
-      mult.availability,
-      teamResult as TeamHoleResult,
-      holeResult,
-      ctx,
-    );
-  } catch {
-    // If evaluation fails, show the multiplier
-    return true;
-  }
-}
-
-/**
- * Result of checking team multiplier status
- */
-interface MultiplierStatus {
-  /** Whether the multiplier is active */
-  active: boolean;
-  /** The hole number where this multiplier was first activated (e.g., "17") */
-  firstHole?: string;
-}
-
-/**
- * Check if a team has a specific multiplier active on this hole
- * Returns both whether it's active and which hole it was first activated on
- */
-function getTeamMultiplierStatus(
-  team: Team,
-  multiplierName: string,
-): MultiplierStatus {
-  if (!team.options?.$isLoaded) return { active: false };
-
-  for (const opt of team.options) {
-    if (
-      opt?.$isLoaded &&
-      opt.optionName === multiplierName &&
-      !opt.playerId // Team-level (no player)
-    ) {
-      return {
-        active: true,
-        firstHole: opt.firstHole,
-      };
-    }
-  }
-  return { active: false };
 }
 
 /**
@@ -363,8 +119,11 @@ function toggleTeamMultiplier(
   multiplierName: string,
   currentHoleNumber: string,
 ): void {
+  // Get the team's owner group to ensure new options are accessible
+  const owner = team.$jazz.owner;
+
   if (!team.$jazz.has("options")) {
-    team.$jazz.set("options", ListOfTeamOptions.create([]));
+    team.$jazz.set("options", ListOfTeamOptions.create([], { owner }));
   }
 
   const options = team.options;
@@ -387,11 +146,14 @@ function toggleTeamMultiplier(
   if (existingIndex >= 0) {
     options.$jazz.splice(existingIndex, 1);
   } else {
-    const newOption = TeamOption.create({
-      optionName: multiplierName,
-      value: "true", // Value required by schema, presence indicates active
-      firstHole: currentHoleNumber, // Track which hole activated this multiplier
-    });
+    const newOption = TeamOption.create(
+      {
+        optionName: multiplierName,
+        value: "true", // Value required by schema, presence indicates active
+        firstHole: currentHoleNumber, // Track which hole activated this multiplier
+      },
+      { owner },
+    );
     options.$jazz.push(newOption);
   }
 }
@@ -491,9 +253,20 @@ export function ScoringView({
     }
   }
 
+  // Get the current hole number for scoreboard lookup
+  const currentHoleNumber = String(currentHoleIndex + 1);
+
+  // Get overall multiplier from scoreboard (all teams' multipliers combined)
+  const overallMultiplier =
+    scoreboard?.holes?.[currentHoleNumber]?.holeMultiplier ?? 1;
+
   return (
     <>
       <HoleHeader hole={holeInfo} onPrevious={onPrevHole} onNext={onNextHole} />
+      <HoleToolbar
+        onChangeTeams={onChangeTeams}
+        overallMultiplier={overallMultiplier}
+      />
       <FlatList
         style={styles.content}
         data={currentHole?.teams?.$isLoaded ? [...currentHole.teams] : []}
@@ -503,8 +276,6 @@ export function ScoringView({
             return null;
           }
 
-          // Current hole number for tracking firstHole on new multipliers
-          const currentHoleNumber = String(currentHoleIndex + 1);
           const teamId = team.team ?? "";
 
           // Build multiplier buttons - only include available multipliers or already active ones
@@ -556,17 +327,71 @@ export function ScoringView({
               icon: junk.icon,
               type: "junk" as const,
               selected: true, // Always selected since we filter to only achieved
+              points: junk.value,
               calculated: true, // Mark as calculated/automatic
             }));
 
+          // Get team result from scoreboard for this hole
+          const teamHoleResult =
+            scoreboard?.holes?.[currentHoleNumber]?.teams?.[teamId];
+
+          // For 2-team games, derive display junk from holeNetTotal
+          // holeNetTotal = (myJunk - oppJunk) × multiplier
+          // So displayJunk = holeNetTotal / multiplier (clamped to 0 for losing team)
+          const holeNetTotal = teamHoleResult?.holeNetTotal ?? 0;
+          const displayJunk =
+            overallMultiplier > 0
+              ? Math.max(0, Math.round(holeNetTotal / overallMultiplier))
+              : 0;
+          const displayPoints = Math.max(0, holeNetTotal);
+
+          // Build earned multipliers from scoreboard (automatic multipliers like birdie_bbq)
+          // These are multipliers that were automatically awarded based on junk conditions
+          // Exclude user-activated multipliers (already in multiplierButtons)
+          const userMultiplierNames = new Set(
+            multiplierButtons.map((m) => m.name),
+          );
+          // Get spec options for looking up display names of automatic multipliers
+          const spec = game?.specs?.$isLoaded ? game.specs[0] : null;
+          const specOptions = spec?.$isLoaded ? spec.options : null;
+          const earnedMultiplierButtons: OptionButton[] = (
+            teamHoleResult?.multipliers ?? []
+          )
+            .filter((m) => !userMultiplierNames.has(m.name))
+            .map((m) => {
+              // Look up the option definition from the spec for display name and icon
+              const optDefRaw = specOptions?.$isLoaded
+                ? specOptions[m.name]
+                : null;
+              const optDef = optDefRaw?.$isLoaded ? optDefRaw : null;
+              // Icon is only on multiplier/junk options, not game options
+              const icon =
+                optDef?.type === "multiplier" || optDef?.type === "junk"
+                  ? optDef.icon
+                  : undefined;
+              return {
+                name: m.name,
+                displayName: optDef?.disp ?? m.name,
+                icon,
+                type: "multiplier" as const,
+                selected: true,
+                earned: true, // Mark as earned/automatic
+                points: m.value, // Use points field to show multiplier value (e.g., 2 for 2x)
+              };
+            });
+
           return (
             <TeamGroup
-              onChangeTeams={onChangeTeams}
               multiplierOptions={multiplierButtons}
+              earnedMultipliers={earnedMultiplierButtons}
               teamJunkOptions={teamJunkButtons}
               onMultiplierToggle={(multName) =>
                 toggleTeamMultiplier(team, multName, currentHoleNumber)
               }
+              junkTotal={displayJunk}
+              holeMultiplier={overallMultiplier}
+              holePoints={displayPoints}
+              runningDiff={teamHoleResult?.runningDiff ?? 0}
             >
               {team.rounds.map((roundToTeam) => {
                 if (!roundToTeam?.$isLoaded) return null;
@@ -631,6 +456,7 @@ export function ScoringView({
                     icon: junk.icon,
                     type: "junk" as const,
                     selected: hasPlayerJunk(team, round.playerId, junk.name),
+                    points: junk.value,
                     calculated: false, // User-toggleable
                   }),
                 );
@@ -653,13 +479,14 @@ export function ScoringView({
                       icon: junk.icon,
                       type: "junk" as const,
                       selected: true, // Always selected since we filter to only achieved
+                      points: junk.value,
                       calculated: true, // Automatic, not toggleable
                     }));
 
-                // Combine: calculated junk first (birdie, eagle), then user junk (prox)
+                // Combine: user junk first (prox), then calculated/awarded (birdie, eagle)
                 const junkButtons = [
-                  ...calculatedJunkButtons,
                   ...userJunkButtons,
+                  ...calculatedJunkButtons,
                 ];
 
                 return (
@@ -675,9 +502,17 @@ export function ScoringView({
                       onScoreChange(rtg.$jazz.id, newGross)
                     }
                     onUnscore={() => onUnscore(rtg.$jazz.id)}
-                    onJunkToggle={(junkName) =>
-                      togglePlayerJunk(team, round.playerId, junkName)
-                    }
+                    onJunkToggle={(junkName) => {
+                      const junkOption = userJunkOptions.find(
+                        (j) => j.name === junkName,
+                      );
+                      togglePlayerJunk(
+                        team,
+                        round.playerId,
+                        junkName,
+                        junkOption?.limit ?? undefined,
+                      );
+                    }}
                     readonly={false}
                   />
                 );

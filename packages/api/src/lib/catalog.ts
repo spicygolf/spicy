@@ -232,6 +232,9 @@ export async function loadOrCreateCatalog(
 
 /**
  * Upsert a game spec into the catalog (idempotent)
+ *
+ * If the spec already exists, updates it in place to preserve CoValue ID.
+ * This is critical for maintaining references from existing games.
  */
 export async function upsertGameSpec(
   catalog: GameCatalog,
@@ -239,7 +242,7 @@ export async function upsertGameSpec(
   catalogOptions?: MapOfOptions,
 ): Promise<{ created: boolean; updated: boolean }> {
   const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { specs: {}, options: {} },
+    resolve: { specs: { $each: { teamsConfig: true } }, options: {} },
   });
 
   if (!loadedCatalog.specs) {
@@ -249,32 +252,52 @@ export async function upsertGameSpec(
   const specs: MapOfGameSpecs = loadedCatalog.specs;
   const key = `${specData.disp}-${specData.version}`;
   const exists = specs.$jazz.has(key);
-
   const transformed = transformGameSpec(specData);
 
-  const newSpec = GameSpec.create(
-    {
-      name: transformed.name,
-      short: transformed.short,
-      version: transformed.version,
-      status: transformed.status,
-      spec_type: transformed.spec_type,
-      min_players: transformed.min_players || 1,
-      location_type: transformed.location_type || "local",
-    },
-    { owner: specs.$jazz.owner },
-  );
+  // Get or create the spec
+  let spec: GameSpec;
+  if (exists) {
+    // Update existing spec in place to preserve CoValue ID
+    const existingSpec = specs[key];
+    if (!existingSpec?.$isLoaded) {
+      throw new Error(`Existing spec ${key} failed to load`);
+    }
+    spec = existingSpec;
+
+    // Update fields on existing spec
+    spec.$jazz.set("name", transformed.name);
+    spec.$jazz.set("short", transformed.short);
+    spec.$jazz.set("version", transformed.version);
+    spec.$jazz.set("status", transformed.status);
+    spec.$jazz.set("spec_type", transformed.spec_type);
+    spec.$jazz.set("min_players", transformed.min_players || 1);
+    spec.$jazz.set("location_type", transformed.location_type || "local");
+  } else {
+    // Create new spec
+    spec = GameSpec.create(
+      {
+        name: transformed.name,
+        short: transformed.short,
+        version: transformed.version,
+        status: transformed.status,
+        spec_type: transformed.spec_type,
+        min_players: transformed.min_players || 1,
+        location_type: transformed.location_type || "local",
+      },
+      { owner: specs.$jazz.owner },
+    );
+  }
 
   // Set legacyId from ArangoDB _key for matching during game import
   if (specData._key) {
-    newSpec.$jazz.set("legacyId", specData._key);
+    spec.$jazz.set("legacyId", specData._key);
   }
 
   if (transformed.long_description) {
-    newSpec.$jazz.set("long_description", transformed.long_description);
+    spec.$jazz.set("long_description", transformed.long_description);
   }
 
-  // Create TeamsConfig from v0.3 team fields
+  // Create or update TeamsConfig from v0.3 team fields
   if (
     specData.teams !== undefined ||
     specData.team_change_every !== undefined
@@ -286,40 +309,40 @@ export async function upsertGameSpec(
       console.warn(
         `GameSpec ${specData.name} has invalid min_players: ${specData.min_players}, skipping TeamsConfig`,
       );
-      // Don't create TeamsConfig for invalid specs
-      // Fall through to not set teamsConfig on this spec
     } else {
       // Calculate teamCount based on v0.3 data
       let teamCount: number;
       if (specData.teams === false) {
-        // Individual game - one team per player
         teamCount = specData.min_players;
       } else if (specData.team_size && specData.team_size > 0) {
-        // Team game - calculate number of teams from min_players / team_size
         teamCount = Math.ceil(specData.min_players / specData.team_size);
       } else {
-        // Default to min_players (individual)
         teamCount = specData.min_players;
       }
 
-      const teamsConfig = TeamsConfig.create(
-        {
-          teamCount,
-          rotateEvery,
-        },
-        { owner: specs.$jazz.owner },
-      );
-
-      // Set maxPlayersPerTeam if team_size is defined
-      if (specData.team_size && specData.team_size > 0) {
-        teamsConfig.$jazz.set("maxPlayersPerTeam", specData.team_size);
+      // Update existing teamsConfig or create new one
+      // Use $jazz.has() to check if property exists (proper Jazz pattern)
+      // Also check $isLoaded for TypeScript type narrowing
+      if (spec.$jazz.has("teamsConfig") && spec.teamsConfig?.$isLoaded) {
+        spec.teamsConfig.$jazz.set("teamCount", teamCount);
+        spec.teamsConfig.$jazz.set("rotateEvery", rotateEvery);
+        if (specData.team_size && specData.team_size > 0) {
+          spec.teamsConfig.$jazz.set("maxPlayersPerTeam", specData.team_size);
+        }
+      } else {
+        const teamsConfig = TeamsConfig.create(
+          { teamCount, rotateEvery },
+          { owner: specs.$jazz.owner },
+        );
+        if (specData.team_size && specData.team_size > 0) {
+          teamsConfig.$jazz.set("maxPlayersPerTeam", specData.team_size);
+        }
+        spec.$jazz.set("teamsConfig", teamsConfig);
       }
-
-      newSpec.$jazz.set("teamsConfig", teamsConfig);
     }
   }
 
-  // Populate spec.options with references to catalog options OR create new options with overrides
+  // Build spec.options with references to catalog options OR create new options with overrides
   if (transformed.options && transformed.options.length > 0 && catalogOptions) {
     const specOptionsMap: Record<string, unknown> = {};
 
@@ -329,10 +352,7 @@ export async function upsertGameSpec(
 
       // For junk options, check if the spec has an overridden value
       if (opt.type === "junk" && "value" in opt) {
-        // Load the catalog option to compare values
-        // The catalogOption from MapOfOptions can be in unloaded state
         if (!catalogOption.$isLoaded) {
-          // Skip unloaded options - they should have been loaded earlier
           specOptionsMap[opt.name] = catalogOption;
           continue;
         }
@@ -344,7 +364,6 @@ export async function upsertGameSpec(
           loadedCatalogOpt.type === "junk" &&
           loadedCatalogOpt.value !== opt.value
         ) {
-          // Find the full junk data from specData to get all fields
           const junkData = specData.junk?.find((j) => j.name === opt.name);
           if (junkData) {
             const newJunkOption = JunkOption.create(
@@ -353,12 +372,11 @@ export async function upsertGameSpec(
                 disp: loadedCatalogOpt.disp,
                 type: "junk",
                 version: loadedCatalogOpt.version,
-                value: opt.value, // Use the spec's overridden value
+                value: opt.value,
               },
               { owner: specs.$jazz.owner },
             );
 
-            // Copy other fields from catalog option
             if (loadedCatalogOpt.sub_type)
               newJunkOption.$jazz.set("sub_type", loadedCatalogOpt.sub_type);
             if (loadedCatalogOpt.seq !== undefined)
@@ -413,12 +431,11 @@ export async function upsertGameSpec(
               disp: loadedCatalogOpt.disp,
               type: "multiplier",
               version: loadedCatalogOpt.version,
-              value: opt.value, // Use the spec's overridden value
+              value: opt.value,
             },
             { owner: specs.$jazz.owner },
           );
 
-          // Copy other fields from catalog option
           if (loadedCatalogOpt.sub_type)
             newMultOption.$jazz.set("sub_type", loadedCatalogOpt.sub_type);
           if (loadedCatalogOpt.seq !== undefined)
@@ -446,10 +463,13 @@ export async function upsertGameSpec(
       specOptionsMap[opt.name] = catalogOption;
     }
 
-    newSpec.$jazz.set("options", specOptionsMap as MapOfOptions);
+    spec.$jazz.set("options", specOptionsMap as MapOfOptions);
   }
 
-  specs.$jazz.set(key, newSpec);
+  // Only add to map if new (existing specs are already in the map)
+  if (!exists) {
+    specs.$jazz.set(key, spec);
+  }
 
   return { created: !exists, updated: exists };
 }

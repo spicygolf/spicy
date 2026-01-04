@@ -1,6 +1,7 @@
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
+import { useUIScale } from "@/hooks";
 import { Text } from "@/ui";
 import { type OptionButton, OptionsButtons } from "./OptionsButtons";
 import { ScoreInput } from "./ScoreInput";
@@ -18,6 +19,13 @@ interface PlayerScoreRowProps {
   readonly?: boolean;
 }
 
+// Column width percentages (must sum to 100)
+const COLUMN_PERCENTAGES = {
+  name: "40%",
+  score: "30%",
+  junk: "30%",
+} as const;
+
 export function PlayerScoreRow({
   player,
   gross,
@@ -30,6 +38,7 @@ export function PlayerScoreRow({
   onJunkToggle,
   readonly = false,
 }: PlayerScoreRowProps) {
+  const { size } = useUIScale();
   const netPar = par - pops;
 
   const handleIncrement = (): void => {
@@ -67,15 +76,17 @@ export function PlayerScoreRow({
 
   return (
     <View style={styles.container}>
-      {/* Player Name */}
-      <View style={styles.playerHeader}>
-        <Text style={styles.playerName}>{player.name}</Text>
-      </View>
-
       {/* Score and Junk Row */}
       <View style={styles.scoreRow}>
-        {/* Score Input - Left Side */}
-        <View style={styles.scoreSection}>
+        {/* Player Name - Left column */}
+        <View style={styles.nameColumn}>
+          <Text style={styles.playerName} numberOfLines={1}>
+            {player.name}
+          </Text>
+        </View>
+
+        {/* Score Input - Center column */}
+        <View style={styles.scoreColumn}>
           <ScoreInput
             gross={gross}
             net={net}
@@ -86,25 +97,21 @@ export function PlayerScoreRow({
             onScoreTap={handleScoreTap}
             onUnscore={onUnscore}
             readonly={readonly}
+            size={size}
           />
         </View>
 
-        {/* Options (Junk/Multipliers) - Right Side, Vertical ScrollView */}
-        {junkOptions.length > 0 && (
-          <ScrollView
-            style={styles.junkSection}
-            contentContainerStyle={styles.junkSectionContent}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled
-          >
+        {/* Options (Junk/Multipliers) - Right column */}
+        <View style={styles.junkColumn}>
+          {junkOptions.length > 0 && (
             <OptionsButtons
               options={junkOptions}
               onOptionPress={handleOptionPress}
               readonly={readonly}
               vertical
             />
-          </ScrollView>
-        )}
+          )}
+        </View>
       </View>
     </View>
   );
@@ -118,27 +125,24 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: theme.gap(1.5),
     paddingVertical: theme.gap(1),
   },
-  playerHeader: {
-    marginBottom: theme.gap(0.5),
+  scoreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  nameColumn: {
+    width: COLUMN_PERCENTAGES.name,
+    justifyContent: "center",
   },
   playerName: {
     fontSize: 16,
     fontWeight: "600",
   },
-  scoreRow: {
-    flexDirection: "row",
+  scoreColumn: {
+    width: COLUMN_PERCENTAGES.score,
     alignItems: "center",
-    justifyContent: "space-between",
   },
-  scoreSection: {
-    flex: 1,
-  },
-  junkSection: {
-    flexShrink: 0,
-    marginLeft: theme.gap(1),
-    maxHeight: 80, // Limit height for scroll
-  },
-  junkSectionContent: {
+  junkColumn: {
+    width: COLUMN_PERCENTAGES.junk,
     alignItems: "flex-end",
   },
 }));

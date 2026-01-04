@@ -83,20 +83,46 @@ function evaluateMultiplierOption(
   ctx: ScoringContext,
 ): void {
   const subType = mult.sub_type;
+  const basedOn = mult.based_on;
   // Note: scope can be "hole" | "round" | "match" - currently only hole-level evaluation
   // const scope = mult.scope ?? "hole";
 
-  // Automatic multipliers (triggered by junk)
-  if (subType === "automatic" || subType === "bbq") {
-    evaluateAutomaticMultiplier(mult, holeResult, ctx);
-    return;
-  }
-
   // User-activated multipliers (press, double)
-  if (subType === "press" || mult.based_on === "user") {
+  if (subType === "press" || basedOn === "user") {
     evaluateUserMultiplier(mult, holeResult, ctx);
     return;
   }
+
+  // Automatic multipliers (triggered by junk)
+  // These have sub_type "automatic" or "bbq", OR have a based_on that references another junk
+  if (subType === "automatic" || subType === "bbq" || basedOn) {
+    evaluateAutomaticMultiplier(mult, holeResult, ctx);
+    return;
+  }
+}
+
+/**
+ * Calculate team's pre-multiplier junk points
+ *
+ * This calculates the sum of junk values for a team BEFORE multipliers are applied.
+ * Used to check availability conditions like "team.points === possiblePoints" for BBQ multipliers.
+ */
+function calculateTeamJunkPoints(
+  teamResult: TeamHoleResult,
+  holeResult: HoleResult,
+): number {
+  // Sum team junk
+  let points = teamResult.junk.reduce((sum, j) => sum + j.value, 0);
+
+  // Sum player junk for players on this team
+  for (const playerId of teamResult.playerIds) {
+    const playerResult = holeResult.players[playerId];
+    if (playerResult?.junk) {
+      points += playerResult.junk.reduce((sum, j) => sum + j.value, 0);
+    }
+  }
+
+  return points;
 }
 
 /**
@@ -123,11 +149,29 @@ function evaluateAutomaticMultiplier(
 
       if (hasJunk) {
         // Check availability condition if present
-        if (
-          mult.availability &&
-          !evaluateAvailability(mult.availability, teamResult, holeResult, ctx)
-        ) {
-          continue;
+        // Calculate team's pre-multiplier junk points for availability check
+        // This is needed because team.points is not set until the points stage
+        if (mult.availability) {
+          // Create a deep copy of teamResult with calculated points for availability check
+          // Using deepClone ensures nested objects (junk, multipliers) are safely copied
+          const teamJunkPoints = calculateTeamJunkPoints(
+            teamResult,
+            holeResult,
+          );
+          const teamWithPoints = deepClone(teamResult);
+          teamWithPoints.points = teamJunkPoints;
+
+          if (
+            !evaluateAvailability(
+              mult.availability,
+              teamWithPoints,
+              holeResult,
+              ctx,
+              holeResult.possiblePoints,
+            )
+          ) {
+            continue;
+          }
         }
 
         teamResult.multipliers.push({

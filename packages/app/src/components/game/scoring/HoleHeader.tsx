@@ -83,12 +83,9 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: theme.gap(0.25),
-    paddingVertical: theme.gap(0.5),
   },
   navButton: {
-    padding: theme.gap(0.5),
-    minWidth: 36,
-    minHeight: 36,
+    minWidth: 44,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -101,7 +98,6 @@ const styles = StyleSheet.create((theme) => ({
   holeNumber: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: theme.gap(0.25),
   },
   holeDetails: {
     flexDirection: "row",
