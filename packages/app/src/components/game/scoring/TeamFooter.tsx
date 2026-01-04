@@ -70,19 +70,14 @@ export function TeamFooter({
         <View style={styles.holeMathSection}>
           <Text style={styles.holeMathLabel}>Hole:</Text>
           <Text style={styles.holeMathText}>
-            {junkTotal} × {holeMultiplier} ={" "}
-            {holePoints > 0 ? "+" : holePoints < 0 ? "" : ""}
-            {holePoints}
+            {junkTotal} × {holeMultiplier} = {holePoints}
           </Text>
         </View>
 
         {/* Right: Running total */}
         <View style={styles.runningTotalSection}>
           <Text style={styles.runningTotalLabel}>Total:</Text>
-          <Text style={styles.runningTotalValue}>
-            {runningTotal > 0 ? "+" : runningTotal < 0 ? "" : ""}
-            {runningTotal}
-          </Text>
+          <Text style={styles.runningTotalValue}>{runningTotal}</Text>
         </View>
       </View>
     </View>
