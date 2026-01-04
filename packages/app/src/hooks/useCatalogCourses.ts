@@ -30,8 +30,11 @@ export function useCatalogCourses() {
 
   const coursesMap = (() => {
     if (isLoading) return null;
-    if (!workerAccount.profile.catalog.courses?.$isLoaded) return null;
-    return workerAccount.profile.catalog.courses;
+    const catalog = workerAccount.profile.catalog;
+    // Use $jazz.has() to check if property exists before accessing
+    if (!catalog.$jazz.has("courses")) return null;
+    if (!catalog.courses?.$isLoaded) return null;
+    return catalog.courses;
   })();
 
   /**

@@ -25,8 +25,11 @@ export function useCatalogPlayers() {
 
   const playersMap = (() => {
     if (isLoading) return null;
-    if (!workerAccount.profile.catalog.players?.$isLoaded) return null;
-    return workerAccount.profile.catalog.players;
+    const catalog = workerAccount.profile.catalog;
+    // Use $jazz.has() to check if property exists before accessing
+    if (!catalog.$jazz.has("players")) return null;
+    if (!catalog.players?.$isLoaded) return null;
+    return catalog.players;
   })();
 
   /**
