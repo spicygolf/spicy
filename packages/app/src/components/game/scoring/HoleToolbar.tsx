@@ -47,13 +47,15 @@ export function HoleToolbar({
       {/* Center: Overall multiplier display */}
       <View style={styles.centerSection}>
         {isActive && (
-          <View
-            style={[
-              styles.multiplierBadge,
-              { backgroundColor: theme.colors.multiplier },
-            ]}
-          >
-            <Text style={styles.multiplierText}>{multiplierText}</Text>
+          <View style={styles.multiplierBadge}>
+            <Text
+              style={[
+                styles.multiplierText,
+                { color: theme.colors.multiplier },
+              ]}
+            >
+              {multiplierText}
+            </Text>
           </View>
         )}
       </View>
@@ -120,10 +122,11 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: theme.gap(1.5),
     paddingVertical: theme.gap(0.5),
     borderRadius: 16,
+    borderWidth: 2,
+    borderColor: theme.colors.border,
   },
   multiplierText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#FFFFFF",
   },
 }));
