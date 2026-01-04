@@ -20,6 +20,19 @@ const light = {
     // Option button colors (junk, multipliers)
     junk: "#3498DB", // Blue for junk
     multiplier: "#E74C3C", // Red for multipliers
+    // Score-to-par colors
+    score: {
+      albatross: "#FFD700", // Gold
+      eagle: "#FF6B35", // Orange
+      birdie: "#4ECDC4", // Teal
+      par: "#95A5A6", // Gray
+      bogey: "#E74C3C", // Red
+      doubleBogey: "#C0392B", // Dark Red
+      tripleBogey: "#8E44AD", // Purple
+      worse: "#34495E", // Dark Gray
+    },
+    // Common contrast colors
+    white: "#FFFFFF",
   },
   // functions, external imports, etc.
   gap: (v: number) => v * 8,
@@ -43,6 +56,19 @@ const dark = {
     // Option button colors (junk, multipliers)
     junk: "#3498DB", // Blue for junk
     multiplier: "#E74C3C", // Red for multipliers
+    // Score-to-par colors
+    score: {
+      albatross: "#FFD700", // Gold
+      eagle: "#FF6B35", // Orange
+      birdie: "#4ECDC4", // Teal
+      par: "#95A5A6", // Gray
+      bogey: "#E74C3C", // Red
+      doubleBogey: "#C0392B", // Dark Red
+      tripleBogey: "#8E44AD", // Purple
+      worse: "#34495E", // Dark Gray
+    },
+    // Common contrast colors
+    white: "#FFFFFF",
   },
   gap: (v: number) => v * 8,
 };

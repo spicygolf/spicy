@@ -93,7 +93,7 @@ export function ScoreInput({
 
   // Calculate score-to-par and get display info
   const scoreToPar = gross !== null ? gross - par : 0;
-  const { label, color } = getScoreToParInfo(scoreToPar);
+  const { label, color } = getScoreToParInfo(scoreToPar, theme.colors.score);
 
   // Display values - show net par as default when unscored
   // If unscored: show gross that would result in net par (par + pops)
@@ -388,18 +388,33 @@ function getScoreDecoration(
   return null;
 }
 
-function getScoreToParInfo(scoreToPar: number): {
+function getScoreToParInfo(
+  scoreToPar: number,
+  scoreColors: {
+    albatross: string;
+    eagle: string;
+    birdie: string;
+    par: string;
+    bogey: string;
+    doubleBogey: string;
+    tripleBogey: string;
+    worse: string;
+  },
+): {
   label: string;
   color: string;
 } {
-  if (scoreToPar <= -3) return { label: "Albatross", color: "#FFD700" }; // Gold
-  if (scoreToPar === -2) return { label: "Eagle", color: "#FF6B35" }; // Orange
-  if (scoreToPar === -1) return { label: "Birdie", color: "#4ECDC4" }; // Teal
-  if (scoreToPar === 0) return { label: "Par", color: "#95A5A6" }; // Gray
-  if (scoreToPar === 1) return { label: "Bogey", color: "#E74C3C" }; // Red
-  if (scoreToPar === 2) return { label: "Double Bogey", color: "#C0392B" }; // Dark Red
-  if (scoreToPar === 3) return { label: "Triple Bogey", color: "#8E44AD" }; // Purple
-  return { label: `+${scoreToPar}`, color: "#34495E" }; // Dark Gray
+  if (scoreToPar <= -3)
+    return { label: "Albatross", color: scoreColors.albatross };
+  if (scoreToPar === -2) return { label: "Eagle", color: scoreColors.eagle };
+  if (scoreToPar === -1) return { label: "Birdie", color: scoreColors.birdie };
+  if (scoreToPar === 0) return { label: "Par", color: scoreColors.par };
+  if (scoreToPar === 1) return { label: "Bogey", color: scoreColors.bogey };
+  if (scoreToPar === 2)
+    return { label: "Double Bogey", color: scoreColors.doubleBogey };
+  if (scoreToPar === 3)
+    return { label: "Triple Bogey", color: scoreColors.tripleBogey };
+  return { label: `+${scoreToPar}`, color: scoreColors.worse };
 }
 
 // Static styles that don't change with size

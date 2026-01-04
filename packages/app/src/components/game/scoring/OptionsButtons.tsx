@@ -139,22 +139,22 @@ export function OptionsButtons({
         if (isEarned) {
           // Earned multiplier badge - filled red (same as user multipliers when active)
           buttonColor = multiplierColor;
-          textColor = "#FFFFFF";
+          textColor = theme.colors.white;
           borderColor = multiplierColor;
         } else if (isBadge) {
           // Calculated junk badge - filled blue
           buttonColor = junkColor;
-          textColor = "#FFFFFF";
+          textColor = theme.colors.white;
           borderColor = junkColor;
         } else if (isMultiplier) {
           // User multiplier button
           buttonColor = isSelected ? multiplierColor : theme.colors.background;
-          textColor = isSelected ? "#FFFFFF" : multiplierColor;
+          textColor = isSelected ? theme.colors.white : multiplierColor;
           borderColor = multiplierColor;
         } else {
           // User-toggleable junk button
           buttonColor = isSelected ? junkColor : theme.colors.background;
-          textColor = isSelected ? "#FFFFFF" : junkColor;
+          textColor = isSelected ? theme.colors.white : junkColor;
           borderColor = junkColor;
         }
 
@@ -228,7 +228,7 @@ export function OptionsButtons({
                     width: dim.pointsCircleSize,
                     height: dim.pointsCircleSize,
                     borderRadius: dim.pointsCircleSize / 2,
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: theme.colors.white,
                   },
                 ]}
               >
