@@ -27,21 +27,10 @@ export function TeamFooter({
   junkTotal = 0,
   holeMultiplier = 1,
   holePoints = 0,
-  runningTotal,
+  runningTotal = 0,
 }: TeamFooterProps) {
   const hasTeamJunk = teamJunkOptions.some((j) => j.selected);
   const hasMultipliers = multiplierOptions.length > 0;
-  const hasHoleMath = junkTotal > 0 || holePoints > 0;
-
-  // Don't render if there's nothing to show
-  if (
-    !hasTeamJunk &&
-    !hasMultipliers &&
-    !hasHoleMath &&
-    runningTotal === undefined
-  ) {
-    return null;
-  }
 
   const handleMultiplierPress = (optionName: string): void => {
     onMultiplierToggle?.(optionName);
@@ -49,10 +38,20 @@ export function TeamFooter({
 
   return (
     <View style={styles.container}>
-      {/* Top row: Team junk badges and multiplier buttons */}
-      {(hasTeamJunk || hasMultipliers) && (
+      {/* Top row: Multiplier buttons (left) and Team junk badges (right) */}
+      {(hasMultipliers || hasTeamJunk) && (
         <View style={styles.topRow}>
-          {/* Left: Team junk badges */}
+          {/* Left: Multiplier press buttons */}
+          {hasMultipliers && (
+            <View style={styles.multiplierSection}>
+              <OptionsButtons
+                options={multiplierOptions}
+                onOptionPress={handleMultiplierPress}
+              />
+            </View>
+          )}
+
+          {/* Right: Team junk badges */}
           {hasTeamJunk && (
             <View style={styles.teamJunkSection}>
               <OptionsButtons
@@ -62,40 +61,29 @@ export function TeamFooter({
               />
             </View>
           )}
-
-          {/* Right: Multiplier press buttons */}
-          {hasMultipliers && (
-            <View style={styles.multiplierSection}>
-              <OptionsButtons
-                options={multiplierOptions}
-                onOptionPress={handleMultiplierPress}
-              />
-            </View>
-          )}
         </View>
       )}
 
-      {/* Bottom row: Hole math and running total */}
-      {(hasHoleMath || runningTotal !== undefined) && (
-        <View style={styles.bottomRow}>
-          {/* Left: Hole math (junk × multiplier = points) */}
-          {hasHoleMath && (
-            <View style={styles.holeMathSection}>
-              <Text style={styles.holeMathText}>
-                {junkTotal} × {holeMultiplier}x = {holePoints}
-              </Text>
-            </View>
-          )}
-
-          {/* Right: Running total */}
-          {runningTotal !== undefined && (
-            <View style={styles.runningTotalSection}>
-              <Text style={styles.runningTotalLabel}>Total:</Text>
-              <Text style={styles.runningTotalValue}>{runningTotal}</Text>
-            </View>
-          )}
+      {/* Bottom row: Hole math and running total (always shown) */}
+      <View style={styles.bottomRow}>
+        {/* Left: Hole math (junk × multiplier = points) */}
+        <View style={styles.holeMathSection}>
+          <Text style={styles.holeMathLabel}>Hole:</Text>
+          <Text style={styles.holeMathText}>
+            {junkTotal} × {holeMultiplier}x = {holePoints >= 0 ? "+" : ""}
+            {holePoints}
+          </Text>
         </View>
-      )}
+
+        {/* Right: Running total */}
+        <View style={styles.runningTotalSection}>
+          <Text style={styles.runningTotalLabel}>Total:</Text>
+          <Text style={styles.runningTotalValue}>
+            {runningTotal >= 0 ? "+" : ""}
+            {runningTotal}
+          </Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -129,12 +117,19 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.gap(1),
   },
   holeMathSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(0.5),
     flexShrink: 1,
+  },
+  holeMathLabel: {
+    fontSize: 13,
+    color: theme.colors.secondary,
+    fontWeight: "600",
   },
   holeMathText: {
     fontSize: 13,
     color: theme.colors.secondary,
-    fontFamily: "monospace",
   },
   runningTotalSection: {
     flexDirection: "row",
