@@ -145,26 +145,48 @@ export function rankPlayersCumulative(ctx: ScoringContext): ScoringContext {
 /**
  * Rank teams cumulatively across all holes
  *
+ * NOTE: This function is NOT used in the main pipeline.
+ * The cumulative ranking is done inside calculateCumulatives() in cumulative.ts.
+ * This function exists for standalone use cases.
+ *
+ * For points games (most games), higher points = better rank.
+ * The ranking metric and direction depend on game type:
+ * - Points games: rank by pointsTotal, higher is better
+ * - Stroke games: rank by scoreTotal, lower is better
+ *
  * @param ctx - Scoring context with hole results
  * @returns Updated context with cumulative team rankings
  */
 export function rankTeamsCumulative(ctx: ScoringContext): ScoringContext {
-  const { scoreboard } = ctx;
+  const { scoreboard, gameSpec } = ctx;
 
   // Deep clone scoreboard to maintain immutability
   const newScoreboard = deepClone(scoreboard);
 
-  // Get teams with cumulative scores
+  // Determine ranking metric and direction based on game type
+  // Points games: higher points = better
+  // Skins games: higher points = better (winning skins)
+  // The spec_type field indicates the game scoring mechanism
+  const isPointsGame =
+    gameSpec?.spec_type === "points" || gameSpec?.spec_type === "skins";
+
+  // Get teams with cumulative totals
   const teamsWithTotals = Object.entries(newScoreboard.cumulative.teams)
-    .filter(([_, t]) => t.scoreTotal > 0)
-    .map(([teamId, t]) => ({ teamId, scoreTotal: t.scoreTotal }));
+    .filter(([_, t]) => (isPointsGame ? t.pointsTotal !== 0 : t.scoreTotal > 0))
+    .map(([teamId, t]) => ({
+      teamId,
+      value: isPointsGame ? t.pointsTotal : t.scoreTotal,
+    }));
 
   if (teamsWithTotals.length === 0) {
     return { ...ctx, scoreboard: newScoreboard };
   }
 
-  // Rank by score total (lower is better for strokes, but points games may differ)
-  const ranked = rankWithTies(teamsWithTotals, (t) => t.scoreTotal, "lower");
+  // Rank by the appropriate metric
+  // Points/match/skins: higher is better
+  // Stroke play: lower is better
+  const direction = isPointsGame ? "higher" : "lower";
+  const ranked = rankWithTies(teamsWithTotals, (t) => t.value, direction);
 
   // Update cumulative results with rankings
   for (const { item, rank, tieCount } of ranked) {

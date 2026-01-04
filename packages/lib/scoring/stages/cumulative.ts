@@ -106,8 +106,11 @@ export function calculateCumulatives(ctx: ScoringContext): ScoringContext {
   }
 
   // Rank teams by points total (higher is better for points games)
+  // NOTE: This is the canonical team ranking location used by the pipeline.
+  // The ranking in ranking.ts:rankTeamsCumulative is for standalone use.
+  // For most games (points/match/skins), higher points = better ranking.
   const teamsWithTotals = Object.entries(newScoreboard.cumulative.teams)
-    .filter(([_, t]) => t.pointsTotal > 0)
+    .filter(([_, t]) => t.pointsTotal !== 0)
     .map(([teamId, t]) => ({ teamId, pointsTotal: t.pointsTotal }));
 
   if (teamsWithTotals.length > 0) {
