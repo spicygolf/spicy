@@ -659,10 +659,10 @@ export function ScoringView({
                       calculated: true, // Automatic, not toggleable
                     }));
 
-                // Combine: calculated junk first (birdie, eagle), then user junk (prox)
+                // Combine: user junk first (prox), then calculated/awarded (birdie, eagle)
                 const junkButtons = [
-                  ...calculatedJunkButtons,
                   ...userJunkButtons,
+                  ...calculatedJunkButtons,
                 ];
 
                 return (
