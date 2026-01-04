@@ -1,16 +1,16 @@
 {
   "name": "all_diff_2",
-  "disp": "",
+  "disp": null,
   "type": "junk",
   "sub_type": "dot",
   "value": 3,
   "seq": 4,
   "scope": "team",
-  "icon": "",
+  "icon": null,
   "show_in": "none",
   "based_on": "net",
-  "limit": "",
+  "limit": null,
   "calculation": "logic",
-  "logic": "{'rankWithTies': [ 2, 1 ]}",
+  "logic": "{\"rankWithTies\": [ 2, 1 ]}",
   "better": "lower"
 }

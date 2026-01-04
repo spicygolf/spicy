@@ -9,6 +9,6 @@
   "icon": "album",
   "show_in": "score",
   "based_on": "gross",
-  "limit": "",
+  "limit": null,
   "score_to_par": "exactly -2"
 }
