@@ -7,10 +7,20 @@ import { StyleSheet } from "react-native-unistyles";
 type Props = {
   children?: React.ReactNode;
   style?: StyleProp<TextStyle>;
+  numberOfLines?: number;
+  ellipsizeMode?: "head" | "middle" | "tail" | "clip";
 };
 
-export function Text({ children, style }: Props) {
-  return <RNText style={[styles.text, style]}>{children}</RNText>;
+export function Text({ children, style, numberOfLines, ellipsizeMode }: Props) {
+  return (
+    <RNText
+      style={[styles.text, style]}
+      numberOfLines={numberOfLines}
+      ellipsizeMode={ellipsizeMode}
+    >
+      {children}
+    </RNText>
+  );
 }
 
 const styles = StyleSheet.create((theme) => ({

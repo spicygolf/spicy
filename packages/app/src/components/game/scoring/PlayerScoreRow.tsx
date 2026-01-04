@@ -67,15 +67,17 @@ export function PlayerScoreRow({
 
   return (
     <View style={styles.container}>
-      {/* Player Name */}
-      <View style={styles.playerHeader}>
-        <Text style={styles.playerName}>{player.name}</Text>
-      </View>
-
       {/* Score and Junk Row */}
       <View style={styles.scoreRow}>
-        {/* Score Input - Left Side */}
-        <View style={styles.scoreSection}>
+        {/* Player Name - Left column, fixed width */}
+        <View style={styles.nameColumn}>
+          <Text style={styles.playerName} numberOfLines={1}>
+            {player.name}
+          </Text>
+        </View>
+
+        {/* Score Input - Center column, fixed width */}
+        <View style={styles.scoreColumn}>
           <ScoreInput
             gross={gross}
             net={net}
@@ -86,29 +88,39 @@ export function PlayerScoreRow({
             onScoreTap={handleScoreTap}
             onUnscore={onUnscore}
             readonly={readonly}
+            size="sm"
           />
         </View>
 
-        {/* Options (Junk/Multipliers) - Right Side, Vertical ScrollView */}
-        {junkOptions.length > 0 && (
-          <ScrollView
-            style={styles.junkSection}
-            contentContainerStyle={styles.junkSectionContent}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled
-          >
-            <OptionsButtons
-              options={junkOptions}
-              onOptionPress={handleOptionPress}
-              readonly={readonly}
-              vertical
-            />
-          </ScrollView>
-        )}
+        {/* Options (Junk/Multipliers) - Right column, fixed width */}
+        <View style={styles.junkColumn}>
+          {junkOptions.length > 0 && (
+            <ScrollView
+              style={styles.junkScroll}
+              contentContainerStyle={styles.junkScrollContent}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled
+            >
+              <OptionsButtons
+                options={junkOptions}
+                onOptionPress={handleOptionPress}
+                readonly={readonly}
+                vertical
+              />
+            </ScrollView>
+          )}
+        </View>
       </View>
     </View>
   );
 }
+
+// Column widths for consistent alignment across rows
+const COLUMN_WIDTHS = {
+  name: 110, // Fits ~12 chars like "Brad Anderson"
+  score: 120, // ScoreInput at sm size (~27px buttons + 60px center)
+  junk: 100, // Fits button width (~90px) + padding
+};
 
 const styles = StyleSheet.create((theme) => ({
   container: {
@@ -118,27 +130,31 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: theme.gap(1.5),
     paddingVertical: theme.gap(1),
   },
-  playerHeader: {
-    marginBottom: theme.gap(0.5),
+  scoreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  nameColumn: {
+    width: COLUMN_WIDTHS.name,
+    justifyContent: "center",
   },
   playerName: {
     fontSize: 16,
     fontWeight: "600",
   },
-  scoreRow: {
-    flexDirection: "row",
+  scoreColumn: {
+    width: COLUMN_WIDTHS.score,
     alignItems: "center",
-    justifyContent: "space-between",
   },
-  scoreSection: {
+  junkColumn: {
     flex: 1,
+    minWidth: COLUMN_WIDTHS.junk,
+    alignItems: "flex-end",
   },
-  junkSection: {
-    flexShrink: 0,
-    marginLeft: theme.gap(1),
-    maxHeight: 80, // Limit height for scroll
+  junkScroll: {
+    maxHeight: 80,
   },
-  junkSectionContent: {
+  junkScrollContent: {
     alignItems: "flex-end",
   },
 }));

@@ -4,7 +4,7 @@ import { TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";
 
-export type ScoreInputSize = "sm" | "md" | "lg";
+export type ScoreInputSize = "sm" | "md" | "lg" | "xl";
 
 interface ScoreInputProps {
   gross: number | null;
@@ -42,9 +42,10 @@ const BASE = {
 
 // Scale factors for each size
 const SCALE_FACTORS: Record<ScoreInputSize, number> = {
-  sm: 0.75,
-  md: 1.0,
-  lg: 1.25,
+  sm: 0.6,
+  md: 0.75,
+  lg: 1,
+  xl: 1.25,
 };
 
 function getScaledDimensions(size: ScoreInputSize) {
