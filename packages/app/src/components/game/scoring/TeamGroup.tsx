@@ -19,8 +19,8 @@ interface TeamGroupProps {
   holeMultiplier?: number;
   /** Total points for this hole (junkTotal × holeMultiplier) */
   holePoints?: number;
-  /** Running total points through this hole */
-  runningTotal?: number;
+  /** Running difference vs opponent (positive = winning, negative = losing) */
+  runningDiff?: number;
   children: React.ReactNode;
 }
 
@@ -32,7 +32,7 @@ export function TeamGroup({
   junkTotal,
   holeMultiplier,
   holePoints,
-  runningTotal,
+  runningDiff,
   children,
 }: TeamGroupProps) {
   return (
@@ -47,7 +47,7 @@ export function TeamGroup({
       {/* Team members */}
       {children}
 
-      {/* Footer - team junk, multipliers, hole math, running total */}
+      {/* Footer - team junk, multipliers, hole math, running diff */}
       <TeamFooter
         teamJunkOptions={teamJunkOptions}
         multiplierOptions={multiplierOptions}
@@ -55,7 +55,7 @@ export function TeamGroup({
         junkTotal={junkTotal}
         holeMultiplier={holeMultiplier}
         holePoints={holePoints}
-        runningTotal={runningTotal}
+        runningDiff={runningDiff}
       />
     </View>
   );

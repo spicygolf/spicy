@@ -619,7 +619,7 @@ export function ScoringView({
               junkTotal={junkTotal}
               holeMultiplier={overallMultiplier}
               holePoints={teamHoleResult?.points ?? 0}
-              runningTotal={teamHoleResult?.runningTotal}
+              runningDiff={teamHoleResult?.runningDiff ?? 0}
             >
               {team.rounds.map((roundToTeam) => {
                 if (!roundToTeam?.$isLoaded) return null;

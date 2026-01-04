@@ -16,8 +16,8 @@ interface TeamFooterProps {
   holeMultiplier?: number;
   /** Total points for this hole (junkTotal × holeMultiplier) */
   holePoints?: number;
-  /** Running total points through this hole */
-  runningTotal?: number;
+  /** Running difference vs opponent (positive = winning, negative = losing) */
+  runningDiff?: number;
 }
 
 export function TeamFooter({
@@ -27,7 +27,7 @@ export function TeamFooter({
   junkTotal = 0,
   holeMultiplier = 1,
   holePoints = 0,
-  runningTotal = 0,
+  runningDiff = 0,
 }: TeamFooterProps) {
   const hasTeamJunk = teamJunkOptions.some((j) => j.selected);
   const hasMultipliers = multiplierOptions.length > 0;
@@ -74,10 +74,12 @@ export function TeamFooter({
           </Text>
         </View>
 
-        {/* Right: Running total */}
-        <View style={styles.runningTotalSection}>
-          <Text style={styles.runningTotalLabel}>Total:</Text>
-          <Text style={styles.runningTotalValue}>{runningTotal}</Text>
+        {/* Right: Running differential */}
+        <View style={styles.runningDiffSection}>
+          <Text style={styles.runningDiffValue}>
+            {runningDiff > 0 ? "+" : ""}
+            {runningDiff}
+          </Text>
         </View>
       </View>
     </View>
@@ -128,19 +130,11 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 13,
     color: theme.colors.secondary,
   },
-  runningTotalSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.gap(0.5),
+  runningDiffSection: {
     flexShrink: 0,
   },
-  runningTotalLabel: {
-    fontSize: 13,
-    color: theme.colors.secondary,
-    fontWeight: "600",
-  },
-  runningTotalValue: {
-    fontSize: 16,
+  runningDiffValue: {
+    fontSize: 18,
     color: theme.colors.primary,
     fontWeight: "bold",
   },
