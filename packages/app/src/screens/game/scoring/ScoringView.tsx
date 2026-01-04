@@ -590,10 +590,24 @@ export function ScoringView({
           // Get team result from scoreboard for this hole
           const teamHoleResult =
             scoreboard?.holes?.[currentHoleNumber]?.teams?.[teamId];
+          const holeResult = scoreboard?.holes?.[currentHoleNumber];
 
-          // Calculate junk total (sum of all junk values)
-          const junkTotal =
+          // Calculate junk total (team junk + player junk for players on this team)
+          const teamJunkTotal =
             teamHoleResult?.junk.reduce((sum, j) => sum + j.value, 0) ?? 0;
+          let playerJunkTotal = 0;
+          if (teamHoleResult?.playerIds && holeResult?.players) {
+            for (const playerId of teamHoleResult.playerIds) {
+              const playerResult = holeResult.players[playerId];
+              if (playerResult?.junk) {
+                playerJunkTotal += playerResult.junk.reduce(
+                  (sum, j) => sum + j.value,
+                  0,
+                );
+              }
+            }
+          }
+          const junkTotal = teamJunkTotal + playerJunkTotal;
 
           return (
             <TeamGroup
