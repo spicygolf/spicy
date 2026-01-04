@@ -4,6 +4,7 @@
   "disp": "Wolf",
   "version": 1,
   "status": "dev",
+  "_incomplete": "Wolf game requires isWolfPlayer() logic engine operator which is not yet implemented. See packages/lib/scoring/logic-engine.ts for details.",
   "type": "points",
   "min_players": 3,
   "max_players": null,
@@ -12,17 +13,7 @@
   "teams": true,
   "team_size": null,
   "team_change_every": 1,
-  "options": [
-    "stakes",
-    "use_handicaps",
-    "handicap_index_from"
-  ],
-  "junk": [
-    "low_ball"
-  ],
-  "multipliers": [
-    "lone_wolf",
-    "pre_lone_wolf",
-    "blind_pre_lone_wolf"
-  ]
+  "options": ["stakes", "use_handicaps", "handicap_index_from"],
+  "junk": ["low_ball"],
+  "multipliers": ["lone_wolf", "pre_lone_wolf", "blind_pre_lone_wolf"]
 }

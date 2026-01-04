@@ -234,11 +234,28 @@ function playersOnTeam(teamRef: string, logicCtx: LogicContext): number {
 
 /**
  * Check if current context is for the wolf player
- * (Wolf game specific - player who tees off first)
+ * (Wolf game specific - player who tees off first and chooses partner)
+ *
+ * INCOMPLETE IMPLEMENTATION: Wolf game requires additional data infrastructure:
+ * 1. wolf_order: Array of player IDs defining the rotation order
+ * 2. Current player context in LogicContext
+ * 3. Logic to determine which player is Wolf on the current hole
+ *    (based on hole number modulo player count, with special rules
+ *    for remaining holes where "down the most" player becomes Wolf)
+ *
+ * The Wolf game spec has status: "dev" and should not be used in production
+ * until this is fully implemented.
+ *
+ * See: data/seed/specs/wolf.json, packages/app-0.3/src/common/utils/ScoringWrapper.js
  */
 function isWolfPlayer(_logicCtx: LogicContext): boolean {
-  // TODO: Implement wolf player detection
-  // Would need to know tee order and current player
+  // Wolf game is not fully implemented - see docstring above
+  // Returning false means lone_wolf multipliers won't be available
+  // This is safer than returning true which would incorrectly enable them
+  console.warn(
+    "isWolfPlayer() called but Wolf game is not fully implemented. " +
+      "Lone wolf multipliers will not be available.",
+  );
   return false;
 }
 
