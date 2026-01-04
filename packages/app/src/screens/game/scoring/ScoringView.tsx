@@ -24,6 +24,7 @@ import {
 } from "spicylib/utils";
 import {
   HoleHeader,
+  HoleToolbar,
   PlayerScoreRow,
   TeamGroup,
 } from "@/components/game/scoring";
@@ -506,9 +507,20 @@ export function ScoringView({
     }
   }
 
+  // Get the current hole number for scoreboard lookup
+  const currentHoleNumber = String(currentHoleIndex + 1);
+
+  // Get overall multiplier from scoreboard (all teams' multipliers combined)
+  const overallMultiplier =
+    scoreboard?.holes?.[currentHoleNumber]?.holeMultiplier ?? 1;
+
   return (
     <>
       <HoleHeader hole={holeInfo} onPrevious={onPrevHole} onNext={onNextHole} />
+      <HoleToolbar
+        onChangeTeams={onChangeTeams}
+        overallMultiplier={overallMultiplier}
+      />
       <FlatList
         style={styles.content}
         data={currentHole?.teams?.$isLoaded ? [...currentHole.teams] : []}
@@ -575,14 +587,25 @@ export function ScoringView({
               calculated: true, // Mark as calculated/automatic
             }));
 
+          // Get team result from scoreboard for this hole
+          const teamHoleResult =
+            scoreboard?.holes?.[currentHoleNumber]?.teams?.[teamId];
+
+          // Calculate junk total (sum of all junk values)
+          const junkTotal =
+            teamHoleResult?.junk.reduce((sum, j) => sum + j.value, 0) ?? 0;
+
           return (
             <TeamGroup
-              onChangeTeams={onChangeTeams}
               multiplierOptions={multiplierButtons}
               teamJunkOptions={teamJunkButtons}
               onMultiplierToggle={(multName) =>
                 toggleTeamMultiplier(team, multName, currentHoleNumber)
               }
+              junkTotal={junkTotal}
+              holeMultiplier={overallMultiplier}
+              holePoints={teamHoleResult?.points ?? 0}
+              runningTotal={teamHoleResult?.runningTotal}
             >
               {team.rounds.map((roundToTeam) => {
                 if (!roundToTeam?.$isLoaded) return null;

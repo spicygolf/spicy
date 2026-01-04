@@ -1,97 +1,62 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type React from "react";
-import { TouchableOpacity, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
 import { Text } from "@/ui";
-import { type OptionButton, OptionsButtons } from "./OptionsButtons";
+import type { OptionButton } from "./OptionsButtons";
+import { TeamFooter } from "./TeamFooter";
 
 interface TeamGroupProps {
   teamName?: string;
-  onChangeTeams?: () => void;
-  multiplierOptions?: OptionButton[];
+  /** Team junk badges (read-only calculated junk like low_ball, low_total) */
   teamJunkOptions?: OptionButton[];
+  /** Multiplier press buttons (user-toggleable) */
+  multiplierOptions?: OptionButton[];
+  /** Handler for multiplier toggle */
   onMultiplierToggle?: (multiplierName: string) => void;
+  /** Total junk points before multiplier */
+  junkTotal?: number;
+  /** Overall hole multiplier (1x, 2x, 4x, etc.) */
+  holeMultiplier?: number;
+  /** Total points for this hole (junkTotal × holeMultiplier) */
+  holePoints?: number;
+  /** Running total points through this hole */
+  runningTotal?: number;
   children: React.ReactNode;
 }
 
 export function TeamGroup({
   teamName,
-  onChangeTeams,
-  multiplierOptions = [],
   teamJunkOptions = [],
+  multiplierOptions = [],
   onMultiplierToggle,
+  junkTotal,
+  holeMultiplier,
+  holePoints,
+  runningTotal,
   children,
 }: TeamGroupProps) {
-  const { theme } = useUnistyles();
-
-  const handleMultiplierPress = (optionName: string): void => {
-    onMultiplierToggle?.(optionName);
-  };
-
-  // Team junk options are read-only (calculated, not toggleable)
-  const handleTeamJunkPress = (_optionName: string): void => {
-    // No-op: calculated junk cannot be toggled
-  };
-
-  // Check if we should show header
-  const hasHeaderContent =
-    teamName ||
-    onChangeTeams ||
-    multiplierOptions.length > 0 ||
-    teamJunkOptions.some((j) => j.selected);
-
-  const hasTeamJunk = teamJunkOptions.some((j) => j.selected);
-  const hasMultipliers = multiplierOptions.length > 0;
-
   return (
     <View style={styles.container}>
-      {/* Header - show if we have a team name, change teams button, multipliers, or active team junk */}
-      {hasHeaderContent && (
+      {/* Header - show only if we have a team name (for visual separation) */}
+      {teamName && (
         <View style={styles.header}>
-          {/* Left side: team icon and change teams button */}
-          <View style={styles.headerLeft}>
-            {teamName && <Text style={styles.teamName}>{teamName}</Text>}
-            {onChangeTeams && (
-              <TouchableOpacity
-                style={styles.changeTeamsButton}
-                onPress={onChangeTeams}
-                accessibilityLabel="Change teams"
-              >
-                <FontAwesome6
-                  name="people-group"
-                  iconStyle="solid"
-                  size={18}
-                  color={theme.colors.action}
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* Middle: Team junk (low_ball, low_total) - only show when achieved */}
-          {hasTeamJunk && (
-            <View style={styles.teamJunkSection}>
-              <OptionsButtons
-                options={teamJunkOptions.filter((j) => j.selected)}
-                onOptionPress={handleTeamJunkPress}
-                readonly={true}
-              />
-            </View>
-          )}
-
-          {/* Right: Multipliers */}
-          {hasMultipliers && (
-            <View style={styles.multiplierSection}>
-              <OptionsButtons
-                options={multiplierOptions}
-                onOptionPress={handleMultiplierPress}
-              />
-            </View>
-          )}
+          <Text style={styles.teamName}>{teamName}</Text>
         </View>
       )}
 
       {/* Team members */}
       {children}
+
+      {/* Footer - team junk, multipliers, hole math, running total */}
+      <TeamFooter
+        teamJunkOptions={teamJunkOptions}
+        multiplierOptions={multiplierOptions}
+        onMultiplierToggle={onMultiplierToggle}
+        junkTotal={junkTotal}
+        holeMultiplier={holeMultiplier}
+        holePoints={holePoints}
+        runningTotal={runningTotal}
+      />
     </View>
   );
 }
@@ -106,34 +71,18 @@ const styles = StyleSheet.create((theme) => ({
     overflow: "hidden",
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     paddingHorizontal: theme.gap(1),
     paddingVertical: theme.gap(0.5),
     backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
     minHeight: 40,
-    gap: theme.gap(0.5),
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexShrink: 0,
+    justifyContent: "center",
   },
   teamName: {
     fontSize: 14,
     fontWeight: "600",
     color: theme.colors.secondary,
-  },
-  changeTeamsButton: {
-    padding: theme.gap(0.5),
-  },
-  teamJunkSection: {
-    flexShrink: 1,
-  },
-  multiplierSection: {
-    flexShrink: 0,
+    textAlign: "center",
   },
 }));
