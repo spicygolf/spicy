@@ -1,0 +1,14 @@
+{
+  "name": "eagle",
+  "disp": "Eagle",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 2,
+  "seq": 9,
+  "scope": "player",
+  "icon": "album",
+  "show_in": "score",
+  "based_on": "gross",
+  "limit": "",
+  "score_to_par": "exactly -2"
+}

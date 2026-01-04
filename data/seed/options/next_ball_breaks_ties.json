@@ -1,0 +1,8 @@
+{
+  "name": "next_ball_breaks_ties",
+  "disp": "Next ball breaks ties",
+  "type": "game",
+  "valueType": "bool",
+  "defaultValue": "false",
+  "teamOnly": true
+}

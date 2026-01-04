@@ -53,7 +53,14 @@
           "usestate",
           "useeffect",
           "style",
-          "unistyle"
+          "unistyle",
+          "package.json",
+          "dependency",
+          "dependencies",
+          "bun add",
+          "bun install",
+          "npm",
+          "yarn"
         ]
       },
       "skillPath": "typescript-standards",

@@ -1,0 +1,7 @@
+{
+  "name": "max_off_tee",
+  "disp": "Maximum multiplier off tee.",
+  "type": "game",
+  "valueType": "num",
+  "defaultValue": "8"
+}

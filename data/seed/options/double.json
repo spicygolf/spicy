@@ -1,0 +1,11 @@
+{
+  "name": "double",
+  "disp": "2x",
+  "type": "multiplier",
+  "value": 2,
+  "seq": 2,
+  "icon": "album",
+  "based_on": "user",
+  "scope": "hole",
+  "availability": "{\n        'team_down_the_most': [\n          {'getPrevHole': []},\n          {'var': 'team'}\n        ]\n      }"
+}

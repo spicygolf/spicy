@@ -1,0 +1,16 @@
+{
+  "name": "eagle_add",
+  "disp": "Eagle +10",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 10,
+  "seq": 3,
+  "scope": "team",
+  "icon": "album",
+  "show_in": "score",
+  "based_on": "gross",
+  "limit": "",
+  "calculation": "logic",
+  "logic": "{\n        'and': [\n          {\n            '==': [\n              {'countJunk': [{'team': ['this']}, 'eagle']},\n              1\n            ]\n          },\n          {\n            '==': [\n              {'countJunk': [{'team': ['other']}, 'eagle']},\n              0\n            ]\n          }\n        ]\n      }",
+  "better": "lower"
+}

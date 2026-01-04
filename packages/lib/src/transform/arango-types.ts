@@ -40,6 +40,7 @@ export interface GameSpecV03 {
     type: string;
     default?: unknown;
     choices?: Array<{ name: string; disp: string }>;
+    teamOnly?: boolean;
   }>;
   default_options?: unknown[];
   todos?: string[];

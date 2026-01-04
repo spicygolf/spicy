@@ -13,10 +13,11 @@ bun i
 Current efforts are:
 - ~~switch to using `bun` instead of `yarn` for all development~~
 - ~~switch from `js` to `ts` for all packages~~
-- modernize the mobile app to work offline and use [Jazz](https://jazz.tools) as a local-first data store
-- style the mobile app using our own components, styled with `react-native-unistyles` v3+
-- add proper support for the new [GHIN API](https://app.swaggerhub.com/apis-docs/GHIN/Admin/1.0)
+- ~~modernize the mobile app to work offline and use [Jazz](https://jazz.tools) as a local-first data store~~
+- ~~style the mobile app using our own components, styled with `react-native-unistyles` v3+~~
+- ~~add proper support for the new [GHIN API](https://app.swaggerhub.com/apis-docs/GHIN/Admin/1.0)~~
 - ~~move mobile auth from Firebase to BetterAuth~~
+- rework the scoring engine to something sane
 - get revenue-ready for the app store releases
 
 ## Components

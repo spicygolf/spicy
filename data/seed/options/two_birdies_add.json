@@ -1,0 +1,16 @@
+{
+  "name": "two_birdies_add",
+  "disp": "2 Birdies +10",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 10,
+  "seq": 2,
+  "scope": "team",
+  "icon": "album",
+  "show_in": "score",
+  "based_on": "gross",
+  "limit": "",
+  "calculation": "logic",
+  "logic": "{\n        'and': [\n          {\n            '==': [\n              {'countJunk': [{'team': ['this']}, 'birdie']},\n              2\n            ]\n          },\n          {\n            '==': [\n              {'countJunk': [{'team': ['other']}, 'birdie']},\n              0\n            ]\n          },\n          {\n            '==': [\n              {'countJunk': [{'team': ['other']}, 'eagle']},\n              0\n            ]\n          }\n        ]\n      }",
+  "better": "lower"
+}

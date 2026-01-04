@@ -1,0 +1,7 @@
+{
+  "name": "two_birdies_4x",
+  "disp": "Two birdies on one team = 4x",
+  "type": "game",
+  "valueType": "bool",
+  "defaultValue": "true"
+}

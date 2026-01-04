@@ -3,24 +3,49 @@ import { TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";
 
-interface OptionButton {
+/**
+ * Map legacy/custom icon names to FontAwesome6 icons
+ */
+function mapIconName(icon: string): string {
+  const iconMap: Record<string, string> = {
+    album: "bullseye", // prox (closest to pin)
+    // Add more mappings as needed
+  };
+  return iconMap[icon] ?? icon;
+}
+
+export interface OptionButton {
   name: string;
   displayName: string;
   icon?: string;
   type: "junk" | "multiplier";
   selected: boolean;
+  /**
+   * If true, this option was activated on a previous hole and is still in effect.
+   * Inherited options are shown as selected but dimmed and disabled.
+   */
+  inherited?: boolean;
+  /**
+   * If true, this is a calculated/automatic junk (e.g., birdie, eagle, low_ball).
+   * Calculated junk is shown as selected but cannot be toggled by the user.
+   * based_on: "gross", "net", or "logic" (not "user")
+   */
+  calculated?: boolean;
 }
 
 interface OptionsButtonsProps {
   options: OptionButton[];
   onOptionPress: (optionName: string) => void;
   readonly?: boolean;
+  /** If true, display buttons in a vertical column instead of horizontal row */
+  vertical?: boolean;
 }
 
 export function OptionsButtons({
   options,
   onOptionPress,
   readonly = false,
+  vertical = false,
 }: OptionsButtonsProps) {
   const { theme } = useUnistyles();
 
@@ -29,25 +54,37 @@ export function OptionsButtons({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, vertical && styles.containerVertical]}>
       {options.map((option) => {
         const _isJunk = option.type === "junk";
         const isMultiplier = option.type === "multiplier";
         const isSelected = option.selected;
+        const isInherited = option.inherited ?? false;
+        const isCalculated = option.calculated ?? false;
 
         // Color based on type and selection state
+        // Calculated junk uses a distinct green color to indicate automatic
         const buttonColor = isSelected
-          ? isMultiplier
-            ? "#E74C3C" // Red for multipliers
-            : "#3498DB" // Blue for junk
+          ? isCalculated
+            ? "#27AE60" // Green for calculated/automatic junk
+            : isMultiplier
+              ? "#E74C3C" // Red for multipliers
+              : "#3498DB" // Blue for user-toggleable junk
           : theme.colors.background;
 
         const textColor = isSelected ? "#FFFFFF" : theme.colors.primary;
         const borderColor = isSelected
-          ? isMultiplier
-            ? "#E74C3C"
-            : "#3498DB"
+          ? isCalculated
+            ? "#27AE60"
+            : isMultiplier
+              ? "#E74C3C"
+              : "#3498DB"
           : theme.colors.border;
+
+        // Calculated junk and inherited options can't be toggled
+        const isDisabled = readonly || isInherited || isCalculated;
+        // Only dim inherited options (from previous hole), not calculated junk
+        const shouldDim = isInherited;
 
         return (
           <TouchableOpacity
@@ -55,15 +92,15 @@ export function OptionsButtons({
             style={[
               styles.optionButton,
               { backgroundColor: buttonColor, borderColor: borderColor },
-              readonly && styles.optionButtonDisabled,
+              shouldDim && styles.optionButtonDisabled,
             ]}
             onPress={() => onOptionPress(option.name)}
-            disabled={readonly}
-            accessibilityLabel={`${option.displayName} ${isSelected ? "selected" : ""}`}
+            disabled={isDisabled}
+            accessibilityLabel={`${option.displayName} ${isSelected ? "selected" : ""} ${isCalculated ? "automatic" : ""} ${isInherited ? "from previous hole" : ""}`}
           >
             {option.icon && (
               <FontAwesome6
-                name={option.icon as never}
+                name={mapIconName(option.icon) as never}
                 iconStyle="solid"
                 size={16}
                 color={textColor}
@@ -92,6 +129,11 @@ const styles = StyleSheet.create((theme) => ({
     flexWrap: "wrap",
     gap: theme.gap(1),
     paddingVertical: theme.gap(1),
+  },
+  containerVertical: {
+    flexDirection: "column",
+    flexWrap: "nowrap",
+    alignItems: "flex-end",
   },
   optionButton: {
     flexDirection: "row",

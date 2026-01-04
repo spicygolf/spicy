@@ -6,6 +6,7 @@
     "./types": "./types/index.ts",
     "./utils": "./utils/index.ts",
     "./schema": "./schema/index.ts",
+    "./scoring": "./scoring/index.ts",
     "./transform": "./src/transform/index.ts",
     "./config/env": "./config/env.ts"
   },
@@ -19,11 +20,13 @@
     "test": "bun test"
   },
   "devDependencies": {
+    "@types/json-logic-js": "2.0.8",
     "bun-types": "latest",
     "del-cli": "7.0.0"
   },
   "dependencies": {
     "date-fns-tz": "catalog:shared",
-    "jazz-tools": "catalog:shared"
+    "jazz-tools": "catalog:shared",
+    "json-logic-js": "2.0.5"
   }
 }

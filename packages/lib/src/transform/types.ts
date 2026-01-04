@@ -12,6 +12,7 @@ export interface TransformedGameOption {
   valueType: "bool" | "num" | "menu" | "text";
   choices?: Array<{ name: string; disp: string }>;
   defaultValue: string;
+  teamOnly?: boolean;
 }
 
 export interface TransformedJunkOption {

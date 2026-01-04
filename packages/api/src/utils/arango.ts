@@ -39,6 +39,7 @@ export async function testConnection(db: Database): Promise<boolean> {
 
 export interface GameSpecV03 {
   _key?: string;
+  legacy_keys?: string[]; // Additional legacy keys (for consolidated specs like Match Play)
   name: string;
   disp: string;
   version: number;

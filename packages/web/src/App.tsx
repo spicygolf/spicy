@@ -2,6 +2,7 @@ import type { co } from "jazz-tools";
 import { useAccount, useIsAuthenticated } from "jazz-tools/react";
 import {
   BookOpen,
+  Calculator,
   Download,
   LogOut,
   RefreshCw,
@@ -15,6 +16,7 @@ import { PlayerAccount } from "spicylib/schema";
 import { CatalogBrowser } from "@/components/CatalogBrowser";
 import { LoginForm } from "@/components/LoginForm";
 import { PlayerBrowser } from "@/components/PlayerBrowser";
+import { ScoringExplorer } from "@/components/ScoringExplorer";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -515,6 +517,10 @@ export function App(): React.JSX.Element {
               <BookOpen className="mr-2 h-4 w-4" />
               Browse
             </TabsTrigger>
+            <TabsTrigger value="scoring">
+              <Calculator className="mr-2 h-4 w-4" />
+              Scoring
+            </TabsTrigger>
             <TabsTrigger value="migration">
               <Download className="mr-2 h-4 w-4" />
               Migration
@@ -970,6 +976,10 @@ export function App(): React.JSX.Element {
                 </Tabs>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="scoring" className="space-y-4">
+            <ScoringExplorer />
           </TabsContent>
 
           <TabsContent value="migration" className="space-y-4">

@@ -61,7 +61,7 @@ export class ErrorBoundary extends Component<
         <View style={styles.container}>
           <ErrorDisplay
             error={this.state.error || "An unexpected error occurred"}
-            title="Oops! The app hit a rough patch."
+            title="Oops! The app hit into the deep rough."
             onRetry={this.handleRetry}
           />
         </View>

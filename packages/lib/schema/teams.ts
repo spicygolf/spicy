@@ -41,6 +41,12 @@ export const TeamOption = co.map({
    * Used for junk attribution (e.g., which player got the birdie)
    */
   playerId: z.string().optional(),
+
+  /**
+   * First hole where this option was activated (optional).
+   * Used for multi-hole multipliers like pre_double that apply for rest of nine.
+   */
+  firstHole: z.string().optional(),
 });
 export type TeamOption = co.loaded<typeof TeamOption>;
 

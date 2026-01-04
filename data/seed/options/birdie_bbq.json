@@ -1,0 +1,11 @@
+{
+  "name": "birdie_bbq",
+  "disp": "Birdie BBQ",
+  "type": "multiplier",
+  "value": 2,
+  "seq": 4,
+  "icon": "album",
+  "based_on": "birdie",
+  "scope": "hole",
+  "availability": "{ '===': [ {'var': 'team.points'}, {'var': 'possiblePoints'} ] }"
+}

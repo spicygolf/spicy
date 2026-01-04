@@ -1,0 +1,11 @@
+{
+  "name": "eagle_bbq",
+  "disp": "Eagle BBQ",
+  "type": "multiplier",
+  "value": 4,
+  "seq": 5,
+  "icon": "album",
+  "based_on": "eagle",
+  "scope": "hole",
+  "availability": "{ '===': [ {'var': 'team.points'}, {'var': 'possiblePoints'} ] }"
+}

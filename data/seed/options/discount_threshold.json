@@ -1,0 +1,7 @@
+{
+  "name": "discount_threshold",
+  "disp": "Discount on Losses - Threshold",
+  "type": "game",
+  "valueType": "num",
+  "defaultValue": "100"
+}

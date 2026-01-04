@@ -36,6 +36,7 @@ export function useCurrentHole(
   const resolveQuery = options.resolve || {
     teams: {
       $each: {
+        options: { $each: true }, // Load team options (junk, multipliers)
         rounds: {
           $each: {
             roundToGame: true,
@@ -62,6 +63,10 @@ export function useCurrentHole(
             >) {
               if (!team?.$isLoaded) return null;
               if (!team.rounds?.$isLoaded) return null;
+              // Also wait for options to load (for junk/multipliers)
+              if (team.$jazz.has("options") && !team.options?.$isLoaded) {
+                return null;
+              }
             }
 
             return hole;

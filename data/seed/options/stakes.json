@@ -1,0 +1,7 @@
+{
+  "name": "stakes",
+  "disp": "Stakes per point",
+  "type": "game",
+  "valueType": "num",
+  "defaultValue": "1"
+}

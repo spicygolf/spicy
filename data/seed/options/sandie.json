@@ -1,0 +1,13 @@
+{
+  "name": "sandie",
+  "disp": "Sandie",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 1,
+  "seq": 5,
+  "scope": "player",
+  "icon": "album",
+  "show_in": "faves",
+  "based_on": "user",
+  "limit": ""
+}

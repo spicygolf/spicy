@@ -1,0 +1,15 @@
+{
+  "name": "low_total",
+  "disp": "Low Total",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 2,
+  "seq": 2,
+  "scope": "team",
+  "icon": "album",
+  "show_in": "team",
+  "based_on": "net",
+  "limit": "one_team_per_group",
+  "calculation": "sum",
+  "better": "lower"
+}

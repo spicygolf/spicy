@@ -1,0 +1,7 @@
+{
+  "name": "pre_double_rest_of_nine",
+  "disp": "Pre-double is for rest of nine",
+  "type": "game",
+  "valueType": "bool",
+  "defaultValue": "true"
+}

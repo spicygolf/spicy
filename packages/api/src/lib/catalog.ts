@@ -125,7 +125,6 @@ import {
   createArangoConnection,
   defaultConfig,
   fetchAllGames,
-  fetchGameSpecs,
   fetchGameWithRounds,
   fetchPlayersWithGames,
   type GameSpecV03,
@@ -133,7 +132,6 @@ import {
   type RoundToGameEdgeV03,
   type RoundV03,
 } from "../utils/arango";
-import { loadAllGameSpecs } from "../utils/json-reader";
 
 export interface ImportResult {
   specs: {
@@ -165,6 +163,7 @@ type GameOptionData = {
   defaultValue: string;
   seq?: number;
   choices?: Array<{ name: string; disp: string }>;
+  teamOnly?: boolean;
 };
 
 type JunkOptionData = {
@@ -320,16 +319,131 @@ export async function upsertGameSpec(
     }
   }
 
-  // Populate spec.options with references to catalog options
+  // Populate spec.options with references to catalog options OR create new options with overrides
   if (transformed.options && transformed.options.length > 0 && catalogOptions) {
     const specOptionsMap: Record<string, unknown> = {};
 
     for (const opt of transformed.options) {
-      // Reference the option from catalog.options
       const catalogOption = catalogOptions[opt.name];
-      if (catalogOption) {
-        specOptionsMap[opt.name] = catalogOption;
+      if (!catalogOption) continue;
+
+      // For junk options, check if the spec has an overridden value
+      if (opt.type === "junk" && "value" in opt) {
+        // Load the catalog option to compare values
+        // The catalogOption from MapOfOptions can be in unloaded state
+        if (!catalogOption.$isLoaded) {
+          // Skip unloaded options - they should have been loaded earlier
+          specOptionsMap[opt.name] = catalogOption;
+          continue;
+        }
+        const loadedCatalogOpt = catalogOption;
+
+        // If values differ, create a new JunkOption with the spec's overridden value
+        if (
+          loadedCatalogOpt.$isLoaded &&
+          loadedCatalogOpt.type === "junk" &&
+          loadedCatalogOpt.value !== opt.value
+        ) {
+          // Find the full junk data from specData to get all fields
+          const junkData = specData.junk?.find((j) => j.name === opt.name);
+          if (junkData) {
+            const newJunkOption = JunkOption.create(
+              {
+                name: loadedCatalogOpt.name,
+                disp: loadedCatalogOpt.disp,
+                type: "junk",
+                version: loadedCatalogOpt.version,
+                value: opt.value, // Use the spec's overridden value
+              },
+              { owner: specs.$jazz.owner },
+            );
+
+            // Copy other fields from catalog option
+            if (loadedCatalogOpt.sub_type)
+              newJunkOption.$jazz.set("sub_type", loadedCatalogOpt.sub_type);
+            if (loadedCatalogOpt.seq !== undefined)
+              newJunkOption.$jazz.set("seq", loadedCatalogOpt.seq);
+            if (loadedCatalogOpt.scope)
+              newJunkOption.$jazz.set("scope", loadedCatalogOpt.scope);
+            if (loadedCatalogOpt.icon)
+              newJunkOption.$jazz.set("icon", loadedCatalogOpt.icon);
+            if (loadedCatalogOpt.show_in)
+              newJunkOption.$jazz.set("show_in", loadedCatalogOpt.show_in);
+            if (loadedCatalogOpt.based_on)
+              newJunkOption.$jazz.set("based_on", loadedCatalogOpt.based_on);
+            if (loadedCatalogOpt.limit)
+              newJunkOption.$jazz.set("limit", loadedCatalogOpt.limit);
+            if (loadedCatalogOpt.calculation)
+              newJunkOption.$jazz.set(
+                "calculation",
+                loadedCatalogOpt.calculation,
+              );
+            if (loadedCatalogOpt.logic)
+              newJunkOption.$jazz.set("logic", loadedCatalogOpt.logic);
+            if (loadedCatalogOpt.better)
+              newJunkOption.$jazz.set("better", loadedCatalogOpt.better);
+            if (loadedCatalogOpt.score_to_par)
+              newJunkOption.$jazz.set(
+                "score_to_par",
+                loadedCatalogOpt.score_to_par,
+              );
+
+            specOptionsMap[opt.name] = newJunkOption;
+            continue;
+          }
+        }
       }
+
+      // For multiplier options, check if the spec has an overridden value
+      if (opt.type === "multiplier" && "value" in opt) {
+        if (!catalogOption.$isLoaded) {
+          specOptionsMap[opt.name] = catalogOption;
+          continue;
+        }
+        const loadedCatalogOpt = catalogOption;
+
+        if (
+          loadedCatalogOpt.$isLoaded &&
+          loadedCatalogOpt.type === "multiplier" &&
+          loadedCatalogOpt.value !== opt.value
+        ) {
+          const newMultOption = MultiplierOption.create(
+            {
+              name: loadedCatalogOpt.name,
+              disp: loadedCatalogOpt.disp,
+              type: "multiplier",
+              version: loadedCatalogOpt.version,
+              value: opt.value, // Use the spec's overridden value
+            },
+            { owner: specs.$jazz.owner },
+          );
+
+          // Copy other fields from catalog option
+          if (loadedCatalogOpt.sub_type)
+            newMultOption.$jazz.set("sub_type", loadedCatalogOpt.sub_type);
+          if (loadedCatalogOpt.seq !== undefined)
+            newMultOption.$jazz.set("seq", loadedCatalogOpt.seq);
+          if (loadedCatalogOpt.icon)
+            newMultOption.$jazz.set("icon", loadedCatalogOpt.icon);
+          if (loadedCatalogOpt.based_on)
+            newMultOption.$jazz.set("based_on", loadedCatalogOpt.based_on);
+          if (loadedCatalogOpt.scope)
+            newMultOption.$jazz.set("scope", loadedCatalogOpt.scope);
+          if (loadedCatalogOpt.availability)
+            newMultOption.$jazz.set(
+              "availability",
+              loadedCatalogOpt.availability,
+            );
+          if (loadedCatalogOpt.override !== undefined)
+            newMultOption.$jazz.set("override", loadedCatalogOpt.override);
+
+          specOptionsMap[opt.name] = newMultOption;
+          continue;
+        }
+      }
+
+      // Default: reference the catalog option directly (no override needed)
+      specOptionsMap[opt.name] = catalogOption;
     }
 
     newSpec.$jazz.set("options", specOptionsMap as MapOfOptions);
@@ -396,6 +510,9 @@ async function upsertOptions(
       // Set optional fields
       if (opt.seq !== undefined && typeof opt.seq === "number") {
         newOption.$jazz.set("seq", opt.seq);
+      }
+      if (opt.teamOnly === true) {
+        newOption.$jazz.set("teamOnly", true);
       }
 
       // Add choices if present (for menu type options)
@@ -513,116 +630,35 @@ async function upsertOptions(
 }
 
 /**
- * Consolidate Match Play specs: merge Individual Match Play + Team Match Play → Match Play
+ * Load game specs from seed files (data/seed/)
  *
- * This function takes the options from Team Match Play (e.g., next_ball_breaks_ties)
- * and merges them into Individual Match Play, then renames it to "Match Play".
- * Team Match Play is excluded from the final result.
+ * This is the primary source for game specs and options.
+ * Match Play consolidation is already done during seed export.
  */
-function consolidateMatchPlaySpecs(specs: GameSpecV03[]): GameSpecV03[] {
-  const individualMatchPlay = specs.find(
-    (s) => s.disp === "Individual Match Play",
-  );
-  const teamMatchPlay = specs.find((s) => s.disp === "Team Match Play");
-
-  // If either is missing, just filter out Team Match Play if present
-  if (!individualMatchPlay || !teamMatchPlay) {
-    console.log(
-      "Match Play consolidation: Individual or Team Match Play not found, skipping consolidation",
-    );
-    return specs.filter((s) => s.disp !== "Team Match Play");
-  }
+export async function loadGameSpecsFromSeed(): Promise<GameSpecV03[]> {
+  const { loadSeedSpecsAsV03 } = await import("../utils/seed-loader");
+  const specs = await loadSeedSpecsAsV03();
 
   console.log(
-    "Consolidating Individual Match Play + Team Match Play → Match Play",
+    "Loaded from seed files:",
+    specs.length,
+    specs.map((s) => s.disp),
   );
 
-  // Merge options from Team Match Play into Individual Match Play
-  const individualOptions = individualMatchPlay.options || [];
-  const teamOptions = teamMatchPlay.options || [];
-
-  // Get option names that already exist in individual
-  const existingOptionNames = new Set(individualOptions.map((o) => o.name));
-
-  // Add any options from team that don't exist in individual
-  const mergedOptions = [...individualOptions];
-  for (const opt of teamOptions) {
-    if (!existingOptionNames.has(opt.name)) {
-      console.log(`  Adding option from Team Match Play: ${opt.name}`);
-      mergedOptions.push(opt);
-    }
-  }
-
-  // Create the consolidated Match Play spec
-  const consolidatedMatchPlay: GameSpecV03 = {
-    ...individualMatchPlay,
-    name: "matchplay", // Internal name
-    disp: "Match Play", // Display name
-    // Keep min_players from Individual (2), but update max_players to support teams
-    max_players: Math.max(
-      individualMatchPlay.max_players || 2,
-      teamMatchPlay.max_players || 4,
-    ),
-    options: mergedOptions,
-    // Keep teams: false since this is the base spec;
-    // teams mode is determined by game instance teamsConfig.active
-  };
-
-  console.log(
-    `  Merged spec: min_players=${consolidatedMatchPlay.min_players}, max_players=${consolidatedMatchPlay.max_players}, options=${mergedOptions.map((o) => o.name).join(", ")}`,
-  );
-
-  // Return specs with Team Match Play removed and Individual Match Play replaced
-  return specs
-    .filter(
-      (s) => s.disp !== "Individual Match Play" && s.disp !== "Team Match Play",
-    )
-    .concat(consolidatedMatchPlay);
+  return specs as GameSpecV03[];
 }
 
 /**
- * Merge game specs from both ArangoDB and JSON sources
+ * Merge game specs from seed files and optionally ArangoDB
+ *
+ * @deprecated Use loadGameSpecsFromSeed() directly. ArangoDB is no longer
+ * the source of truth for specs/options - seed files are.
  */
 export async function mergeGameSpecSources(
-  arangoConfig?: ArangoConfig,
+  _arangoConfig?: ArangoConfig,
 ): Promise<GameSpecV03[]> {
-  const [jsonSpecs, arangoSpecs] = await Promise.all([
-    loadAllGameSpecs(),
-    fetchGameSpecs(createArangoConnection(arangoConfig || defaultConfig)).catch(
-      () => {
-        console.warn("Failed to fetch from ArangoDB, using JSON only");
-        return [];
-      },
-    ),
-  ]);
-
-  console.log(
-    "Loaded from JSON:",
-    jsonSpecs.length,
-    jsonSpecs.map((s: GameSpecV03) => s.disp),
-  );
-  console.log(
-    "Loaded from ArangoDB:",
-    arangoSpecs.length,
-    arangoSpecs.map((s: GameSpecV03) => s.disp),
-  );
-
-  const specMap = new Map<string, GameSpecV03>();
-
-  for (const spec of jsonSpecs) {
-    const key = `${spec.disp}-${spec.version}`;
-    specMap.set(key, spec);
-  }
-
-  for (const spec of arangoSpecs) {
-    const key = `${spec.disp}-${spec.version}`;
-    specMap.set(key, spec);
-  }
-
-  const mergedSpecs = Array.from(specMap.values());
-
-  // Consolidate Match Play specs (Individual + Team → Match Play)
-  return consolidateMatchPlaySpecs(mergedSpecs);
+  // Load from seed files only - ArangoDB is no longer used for specs/options
+  return loadGameSpecsFromSeed();
 }
 
 /**
@@ -1386,6 +1422,7 @@ export async function importGameSpecsToCatalog(
                 valueType: opt.valueType,
                 defaultValue: opt.defaultValue,
                 choices: opt.choices,
+                teamOnly: opt.teamOnly,
               });
             } else if (opt.type === "junk") {
               // For junk and multiplier options, we still need the full v0.3 data
@@ -2273,32 +2310,61 @@ async function importGame(
         { owner: gameGroup },
       );
 
-      // Add junk as team options with player attribution
-      if (teamData.junk && teamData.junk.length > 0) {
+      // Collect team options from junk and multipliers
+      const hasJunk = teamData.junk && teamData.junk.length > 0;
+      const teamMultipliers = holeData.multipliers?.filter(
+        (m) => m.team === teamData.team,
+      );
+      const hasMultipliers = teamMultipliers && teamMultipliers.length > 0;
+
+      if (hasJunk || hasMultipliers) {
         const teamOptions = ListOfTeamOptions.create([], {
           owner: gameGroup,
         });
 
-        for (const junkItem of teamData.junk) {
-          // Look up player's GHIN ID from cache
-          const ghinId = playerGhinMap.get(junkItem.player);
-          const mapKey = ghinId || `manual_${junkItem.player}`;
+        // Add junk as team options with player attribution
+        if (hasJunk && teamData.junk) {
+          for (const junkItem of teamData.junk) {
+            // Look up player's GHIN ID from cache
+            const ghinId = playerGhinMap.get(junkItem.player);
+            const mapKey = ghinId || `manual_${junkItem.player}`;
 
-          const player = playersMap[mapKey];
+            const player = playersMap[mapKey];
 
-          const teamOption = TeamOption.create(
-            {
-              optionName: junkItem.name,
-              value: junkItem.value,
-            },
-            { owner: gameGroup },
-          );
+            const teamOption = TeamOption.create(
+              {
+                optionName: junkItem.name,
+                value: junkItem.value,
+              },
+              { owner: gameGroup },
+            );
 
-          if (player) {
-            teamOption.$jazz.set("playerId", player.$jazz.id);
+            if (player) {
+              teamOption.$jazz.set("playerId", player.$jazz.id);
+            }
+
+            teamOptions.$jazz.push(teamOption);
           }
+        }
 
-          teamOptions.$jazz.push(teamOption);
+        // Add multipliers as team options (no player attribution - team-level)
+        if (hasMultipliers && teamMultipliers) {
+          for (const mult of teamMultipliers) {
+            const teamOption = TeamOption.create(
+              {
+                optionName: mult.name,
+                value: String(mult.value),
+              },
+              { owner: gameGroup },
+            );
+
+            // Store first_hole for multi-hole multipliers like pre_double
+            if (mult.first_hole) {
+              teamOption.$jazz.set("firstHole", mult.first_hole);
+            }
+
+            teamOptions.$jazz.push(teamOption);
+          }
         }
 
         team.$jazz.set("options", teamOptions);
@@ -2383,10 +2449,17 @@ async function importGame(
   const specsMap = loadedCatalog.specs as MapOfGameSpecs | undefined;
   let gameSpec: GameSpec | null = null;
   if (gamespecKey && specsMap) {
+    // Normalize legacy Match Play keys to consolidated "matchplay" spec
+    // Old keys: "72068149" (individual), "72068183" (team) -> "matchplay"
+    const normalizedKey =
+      gamespecKey === "72068149" || gamespecKey === "72068183"
+        ? "matchplay"
+        : gamespecKey;
+
     // Find spec by matching legacyId (ArangoDB _key)
     for (const key of Object.keys(specsMap)) {
       const spec = specsMap[key];
-      if (spec?.$isLoaded && spec.legacyId === gamespecKey) {
+      if (spec?.$isLoaded && spec.legacyId === normalizedKey) {
         gameSpec = spec as GameSpec;
         // @ts-expect-error - MaybeLoaded types in migration code, spec is verified loaded
         specs.$jazz.push(spec);

@@ -1,0 +1,36 @@
+{
+  "_key": "117463059",
+  "name": "vegas",
+  "disp": "Vegas",
+  "version": 1,
+  "status": "prod",
+  "type": "points",
+  "min_players": 4,
+  "max_players": 4,
+  "location_type": "local",
+  "long_description": "### Description\n* Team game where both members' score digits are combined for a team score.\n### Points\n* The team score is produced by taking the lowest score\nas the first digit, and the other score as the second digit.  Combining them gives a team score. This is the normal case.\n* If there is a birdie (or lower) by one team, the digits on the **other** team's score reverse, using the highest score as the first digit, and the lower one as the second digit.\n* Both teams post their score, and the difference is how many points are awarded on that hole to the winning team.\n### Other Cases\n* An eagle by one team adds 10 points to what would have been the birdie scoring rules above.\n* If there is an eagle, or two birdies by one team, then 10 points is awarded to the winning team.\n* If two birdies occur, but are on different teams, there is an option to allow or cancel the reverse digit scoring rule.\n### Examples\n| Team 1 | Team 2 | Notes |\n| ------ | ------ | ----- |\n| 4, 4 tied | 4, 4 tied | |\n| 4, 4 +4 | 4, 8 -4 | |\n| 4, 5 +10 | 5, 5 -10 | |\n| 2, 4 +30 | 4, 5 -30 | 2 is birdie, reverses Team 2 digits |\n| 2, 2 +52 | 4, 6 -52 | 2 are birdies, reverses Team 2 digits and adds 10 |\n| 2, 2 +4 | 2, 6 -4 | a birdie on each team cancels out reverse & +10 |\n",
+  "teams": true,
+  "team_size": 2,
+  "options": [
+    "stakes",
+    "use_handicaps",
+    "handicap_index_from",
+    "pre_double_rest_of_nine",
+    "max_off_tee",
+    "birdies_cancel_flip",
+    "discount_threshold",
+    "discount_percent"
+  ],
+  "junk": [
+    "birdie",
+    "eagle",
+    "two_birdies_add",
+    "eagle_add",
+    "two_eagles_add"
+  ],
+  "multipliers": [
+    "pre_double",
+    "double",
+    "double_back"
+  ]
+}

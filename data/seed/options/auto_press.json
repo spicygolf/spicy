@@ -1,0 +1,7 @@
+{
+  "name": "auto_press",
+  "disp": "Automatic Press",
+  "type": "game",
+  "valueType": "bool",
+  "defaultValue": "true"
+}

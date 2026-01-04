@@ -1,0 +1,16 @@
+{
+  "name": "two_eagles_add",
+  "disp": "2 Eagles +20",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 20,
+  "seq": 4,
+  "scope": "team",
+  "icon": "album",
+  "show_in": "score",
+  "based_on": "gross",
+  "limit": "",
+  "calculation": "logic",
+  "logic": "{\n        'and': [\n          {\n            '==': [\n              {'countJunk': [{'team': ['this']}, 'eagle']},\n              2\n            ]\n          },\n          {\n            '==': [\n              {'countJunk': [{'team': ['other']}, 'eagle']},\n              0\n            ]\n          }\n        ]\n      }",
+  "better": "lower"
+}

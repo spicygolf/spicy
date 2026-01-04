@@ -1,0 +1,11 @@
+{
+  "name": "blind_pre_lone_wolf",
+  "disp": "Blind Pre Lone 4x",
+  "type": "multiplier",
+  "value": 4,
+  "seq": 3,
+  "icon": "album",
+  "based_on": "user",
+  "scope": "hole",
+  "availability": "{\n        'and': [\n          {'==': [ {'playersOnTeam': ['this']}, 1 ]},\n          {'isWolfPlayer': []}\n        ]\n      }"
+}
