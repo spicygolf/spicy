@@ -20,7 +20,7 @@ Node, Hapi, Apollo GraphQL Server API layer for Spicy Golf mobile app and websit
  * Add `.env` to the project root folder.  Ask someone for a copy.
  * Start up the API
 
-        bun run start:dev
+        bun dev
 
 ## Production Setup
 
