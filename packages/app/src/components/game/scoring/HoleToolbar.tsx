@@ -22,14 +22,7 @@ export function HoleToolbar({
 
   // Format multiplier display (1x, 2x, 4x, 8x)
   const multiplierText = `${overallMultiplier}x`;
-
-  // Determine multiplier color based on value
-  const getMultiplierColor = (): string => {
-    if (overallMultiplier >= 8) return "#E74C3C"; // Red for 8x+
-    if (overallMultiplier >= 4) return "#E67E22"; // Orange for 4x-7x
-    if (overallMultiplier >= 2) return "#F39C12"; // Yellow for 2x-3x
-    return theme.colors.secondary; // Gray for 1x
-  };
+  const isActive = overallMultiplier > 1;
 
   return (
     <View style={styles.container}>
@@ -53,13 +46,14 @@ export function HoleToolbar({
 
       {/* Center: Overall multiplier display */}
       <View style={styles.centerSection}>
-        {overallMultiplier > 1 && (
-          <View style={styles.multiplierBadge}>
-            <Text
-              style={[styles.multiplierText, { color: getMultiplierColor() }]}
-            >
-              {multiplierText}
-            </Text>
+        {isActive && (
+          <View
+            style={[
+              styles.multiplierBadge,
+              { backgroundColor: theme.colors.multiplier },
+            ]}
+          >
+            <Text style={styles.multiplierText}>{multiplierText}</Text>
           </View>
         )}
       </View>
@@ -126,12 +120,10 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: theme.gap(1.5),
     paddingVertical: theme.gap(0.5),
     borderRadius: 16,
-    backgroundColor: theme.colors.background,
-    borderWidth: 2,
-    borderColor: theme.colors.border,
   },
   multiplierText: {
     fontSize: 18,
     fontWeight: "bold",
+    color: "#FFFFFF",
   },
 }));
