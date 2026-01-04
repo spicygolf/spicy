@@ -84,12 +84,19 @@ interface ValidationResult {
 }
 
 /**
- * Convert single-quoted JSON to double-quoted and parse
+ * Parse a logic expression string as JSON.
+ * Tries standard double-quoted JSON first, falls back to single-quote conversion.
  */
 function parseLogicExpression(expression: string): unknown {
-  // Handle both single-quoted (legacy) and double-quoted JSON
-  const jsonStr = expression.replace(/'/g, '"');
-  return JSON.parse(jsonStr);
+  // First try parsing as standard double-quoted JSON
+  try {
+    return JSON.parse(expression);
+  } catch {
+    // Fall back to converting single-quoted JSON format (legacy)
+    // Note: This assumes string values don't contain apostrophes
+    const jsonStr = expression.replace(/'/g, '"');
+    return JSON.parse(jsonStr);
+  }
 }
 
 /**
