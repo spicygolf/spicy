@@ -35,7 +35,8 @@ export function useGamespecs() {
     if (!workerAccount.profile.catalog.specs?.$isLoaded) return null;
 
     const specsMap = workerAccount.profile.catalog.specs;
-    return Object.values(specsMap).filter(
+    const specValues = Object.values(specsMap);
+    return specValues.filter(
       (spec): spec is GameSpec => spec?.$isLoaded === true,
     );
   })();
