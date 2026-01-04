@@ -1,4 +1,4 @@
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
 import { useUIScale } from "@/hooks";
@@ -104,19 +104,12 @@ export function PlayerScoreRow({
         {/* Options (Junk/Multipliers) - Right column */}
         <View style={styles.junkColumn}>
           {junkOptions.length > 0 && (
-            <ScrollView
-              style={styles.junkScroll}
-              contentContainerStyle={styles.junkScrollContent}
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled
-            >
-              <OptionsButtons
-                options={junkOptions}
-                onOptionPress={handleOptionPress}
-                readonly={readonly}
-                vertical
-              />
-            </ScrollView>
+            <OptionsButtons
+              options={junkOptions}
+              onOptionPress={handleOptionPress}
+              readonly={readonly}
+              vertical
+            />
           )}
         </View>
       </View>
@@ -150,12 +143,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   junkColumn: {
     width: COLUMN_PERCENTAGES.junk,
-    alignItems: "flex-end",
-  },
-  junkScroll: {
-    maxHeight: 80,
-  },
-  junkScrollContent: {
     alignItems: "flex-end",
   },
 }));

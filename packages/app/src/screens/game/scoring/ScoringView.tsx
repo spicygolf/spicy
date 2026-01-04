@@ -556,6 +556,7 @@ export function ScoringView({
               icon: junk.icon,
               type: "junk" as const,
               selected: true, // Always selected since we filter to only achieved
+              points: junk.value,
               calculated: true, // Mark as calculated/automatic
             }));
 
@@ -631,6 +632,7 @@ export function ScoringView({
                     icon: junk.icon,
                     type: "junk" as const,
                     selected: hasPlayerJunk(team, round.playerId, junk.name),
+                    points: junk.value,
                     calculated: false, // User-toggleable
                   }),
                 );
@@ -653,6 +655,7 @@ export function ScoringView({
                       icon: junk.icon,
                       type: "junk" as const,
                       selected: true, // Always selected since we filter to only achieved
+                      points: junk.value,
                       calculated: true, // Automatic, not toggleable
                     }));
 
