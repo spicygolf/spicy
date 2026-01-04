@@ -218,9 +218,12 @@ function togglePlayerJunk(
   junkName: string,
   limit?: string,
 ): void {
+  // Get the team's owner group to ensure new options are accessible
+  const owner = team.$jazz.owner;
+
   // Ensure options list exists using Jazz pattern
   if (!team.$jazz.has("options")) {
-    team.$jazz.set("options", ListOfTeamOptions.create([]));
+    team.$jazz.set("options", ListOfTeamOptions.create([], { owner }));
   }
 
   const options = team.options;
@@ -257,11 +260,14 @@ function togglePlayerJunk(
     }
 
     // Add new option (toggle on)
-    const newOption = TeamOption.create({
-      optionName: junkName,
-      value: "true",
-      playerId,
-    });
+    const newOption = TeamOption.create(
+      {
+        optionName: junkName,
+        value: "true",
+        playerId,
+      },
+      { owner },
+    );
     options.$jazz.push(newOption);
   }
 }
@@ -379,8 +385,11 @@ function toggleTeamMultiplier(
   multiplierName: string,
   currentHoleNumber: string,
 ): void {
+  // Get the team's owner group to ensure new options are accessible
+  const owner = team.$jazz.owner;
+
   if (!team.$jazz.has("options")) {
-    team.$jazz.set("options", ListOfTeamOptions.create([]));
+    team.$jazz.set("options", ListOfTeamOptions.create([], { owner }));
   }
 
   const options = team.options;
@@ -403,11 +412,14 @@ function toggleTeamMultiplier(
   if (existingIndex >= 0) {
     options.$jazz.splice(existingIndex, 1);
   } else {
-    const newOption = TeamOption.create({
-      optionName: multiplierName,
-      value: "true", // Value required by schema, presence indicates active
-      firstHole: currentHoleNumber, // Track which hole activated this multiplier
-    });
+    const newOption = TeamOption.create(
+      {
+        optionName: multiplierName,
+        value: "true", // Value required by schema, presence indicates active
+        firstHole: currentHoleNumber, // Track which hole activated this multiplier
+      },
+      { owner },
+    );
     options.$jazz.push(newOption);
   }
 }
