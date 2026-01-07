@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView, useWindowDimensions, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
 import type { Scoreboard } from "spicylib/scoring";
@@ -408,6 +408,7 @@ function getScoreDecoration(
 
 export function GameLeaderboard() {
   const [viewMode, setViewMode] = useState<ViewMode>("gross");
+  const { width: screenWidth } = useWindowDimensions();
 
   const { game } = useGame(undefined, {
     resolve: {
@@ -472,7 +473,7 @@ export function GameLeaderboard() {
       {/* Leaderboard Table */}
       <ScrollView style={styles.tableContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View>
+          <View style={{ minWidth: screenWidth }}>
             {/* Header Row - Player Names (vertical text) */}
             <View style={styles.headerRow}>
               <View style={styles.holeColumn}>
@@ -598,7 +599,9 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
   },
   playerColumn: {
-    width: 64,
+    flex: 1,
+    minWidth: 54,
+    maxWidth: 80,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -607,16 +610,17 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.secondary,
   },
   verticalTextContainer: {
-    alignItems: "flex-start",
+    alignItems: "center",
     justifyContent: "flex-end",
     height: 58,
-    width: 64,
+    width: "100%",
     paddingBottom: 2,
   },
   verticalTextWrapper: {
     transform: [{ rotate: "-55deg" }],
-    transformOrigin: "left bottom",
+    transformOrigin: "center bottom",
     width: 70,
+    alignItems: "center",
   },
   verticalFirstName: {
     fontSize: 11,
