@@ -620,6 +620,7 @@ const styles = StyleSheet.create((theme) => ({
     transform: [{ rotate: "-55deg" }],
     transformOrigin: "left bottom",
     marginLeft: 32,
+    width: 80,
   },
   verticalFirstName: {
     fontSize: 11,
