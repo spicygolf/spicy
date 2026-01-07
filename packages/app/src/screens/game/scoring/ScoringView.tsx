@@ -2,6 +2,7 @@ import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole, Team } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
+import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
@@ -19,7 +20,6 @@ import {
 import type { OptionButton } from "@/components/game/scoring/OptionsButtons";
 import type { HoleInfo } from "@/hooks";
 import { useOptionValue } from "@/hooks/useOptionValue";
-import { useScoreboard } from "@/hooks/useScoreboard";
 import {
   getCalculatedPlayerJunkOptions,
   getCalculatedTeamJunkOptions,
@@ -37,6 +37,8 @@ export interface ScoringViewProps {
   holeInfo: HoleInfo;
   currentHole: GameHole | null;
   currentHoleIndex: number;
+  scoreboard: Scoreboard | null;
+  scoringContext: ScoringContext | null;
   onPrevHole: () => void;
   onNextHole: () => void;
   onScoreChange: (roundToGameId: string, newGross: number) => void;
@@ -163,17 +165,14 @@ export function ScoringView({
   holeInfo,
   currentHole,
   currentHoleIndex,
+  scoreboard,
+  scoringContext,
   onPrevHole,
   onNextHole,
   onScoreChange,
   onUnscore,
   onChangeTeams,
 }: ScoringViewProps) {
-  // Get the scoreboard and context from the scoring engine (memoized)
-  const scoreResult = useScoreboard(game);
-  const scoreboard = scoreResult?.scoreboard ?? null;
-  const scoringContext = scoreResult?.context ?? null;
-
   // Get user-markable junk options for this game (player-scoped)
   const userJunkOptions = getUserJunkOptions(game);
 

@@ -189,6 +189,8 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               holeInfo={holeInfo}
               currentHole={currentHole}
               currentHoleIndex={currentHoleIndex}
+              scoreboard={scoreboard}
+              scoringContext={scoreResult?.context ?? null}
               onPrevHole={handlePrevHole}
               onNextHole={handleNextHole}
               onScoreChange={handleScoreChange}
