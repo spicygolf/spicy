@@ -208,6 +208,7 @@ export function SummaryView({
               onPress={() => {
                 // TODO: Navigate to handicap posting screen
               }}
+              disabled={true}
             />
           </View>
         </View>
