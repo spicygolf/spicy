@@ -247,6 +247,7 @@ All feedback from CodeRabbit and reviewers on PR #322. Address all items.
 - **Files**: Multiple scoring stages use `structuredClone()` per stage (now `deepClone`)
 - **Concern**: Could impact performance with large scoreboards (18 holes x 4+ players)
 - **Action**: Profile with realistic data; consider structural sharing (Immer.js) if needed
+- **Related**: See Phase 7 for comprehensive performance optimization
 
 #### 4.9 playerInfoMap Dead Code
 - **File**: `packages/lib/scoring/pipeline.ts` (line 142)
@@ -366,3 +367,57 @@ All feedback from CodeRabbit and reviewers on PR #322. Address all items.
 - [ ] Add score notation (circles/squares)
 - [ ] Add junk dot indicators
 - [ ] Add Out/In/Total rows
+
+### Phase 7: Scoring Engine Performance Optimization
+- [ ] Profile scoring engine to identify bottlenecks
+- [ ] Optimize useScoreboard hook memoization (see 7.1)
+- [ ] Consider Immer.js for structural sharing (see 4.8)
+- [ ] Add performance benchmarks for regression testing
+
+---
+
+## 7. Scoring Engine Performance
+
+### Observed Behavior
+
+During hole navigation in the scoring screen:
+- **First hole load**: 4-5 seconds (initial Jazz data + first scoring run)
+- **Second navigation** (to hole 2 or Summary): 5-6 seconds
+- **Subsequent navigations**: Fast (< 100ms)
+
+This suggests the scoring engine runs multiple times during progressive Jazz data loading.
+
+### 7.1 useScoreboard Hook Memoization Issue
+
+**File**: `packages/app/src/hooks/useScoreboard.ts`
+
+**Problem**: The `useMemo` dependency is `[game]`. With Jazz's progressive loading, the `game` object reference changes as nested data loads. This causes `useMemo` to recompute the entire scoreboard on each reference change.
+
+**Potential Solutions**:
+
+1. **Stable dependency key**: Create a hash/fingerprint of the scores data only, not the entire game object. Only recompute when actual scores change.
+
+2. **Debounce/throttle**: Delay scoring computation until Jazz data settles (e.g., 100ms after last update).
+
+3. **Incremental updates**: Instead of recomputing everything, update only the holes that changed.
+
+4. **Loading state gate**: Don't run scoring until a "fully loaded" flag is set.
+
+### 7.2 Deep Clone Overhead (see 4.8)
+
+Each scoring pipeline stage calls `deepClone()` on the scoreboard. For 18 holes × 4 players × multiple stages, this adds up.
+
+**Potential Solutions**:
+
+1. **Immer.js**: Use structural sharing - only clone paths that change.
+
+2. **Mutate in place**: For internal pipeline stages, consider mutation with a final clone for output.
+
+3. **Lazy cloning**: Only clone when a stage actually modifies data.
+
+### 7.3 Profiling Tasks
+
+- [ ] Add `console.time`/`console.timeEnd` to `scoreWithContext()`
+- [ ] Measure individual pipeline stages
+- [ ] Count how many times `useScoreboard` runs per hole navigation
+- [ ] Profile Jazz data loading separately from scoring computation
