@@ -325,7 +325,7 @@ function ScoreCell({
   popsCount: number;
   isSummaryRow: boolean;
   viewMode: ViewMode;
-}) {
+}): React.JSX.Element {
   const { theme } = useUnistyles();
 
   if (value === null) {
