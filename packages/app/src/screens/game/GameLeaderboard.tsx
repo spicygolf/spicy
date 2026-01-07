@@ -619,7 +619,7 @@ const styles = StyleSheet.create((theme) => ({
   verticalTextWrapper: {
     transform: [{ rotate: "-55deg" }],
     transformOrigin: "left bottom",
-    marginLeft: 20,
+    marginLeft: 32,
   },
   verticalFirstName: {
     fontSize: 11,
