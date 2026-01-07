@@ -567,7 +567,8 @@ const styles = StyleSheet.create((theme) => ({
   },
   toggleContainer: {
     paddingHorizontal: theme.gap(2),
-    paddingVertical: theme.gap(0.75),
+    paddingTop: theme.gap(0.75),
+    paddingBottom: theme.gap(0.25),
   },
   tableContainer: {
     flex: 1,
@@ -610,17 +611,15 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.secondary,
   },
   verticalTextContainer: {
-    alignItems: "center",
     justifyContent: "flex-end",
-    height: 70,
+    height: 60,
     width: "100%",
-    paddingBottom: 12,
+    overflow: "visible",
   },
   verticalTextWrapper: {
     transform: [{ rotate: "-55deg" }],
-    transformOrigin: "center bottom",
-    width: 70,
-    alignItems: "center",
+    transformOrigin: "left bottom",
+    marginLeft: 20,
   },
   verticalFirstName: {
     fontSize: 11,
