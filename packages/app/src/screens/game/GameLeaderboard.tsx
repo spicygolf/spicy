@@ -9,6 +9,47 @@ import { ButtonGroup, Screen, Text } from "@/ui";
 
 type ViewMode = "gross" | "net" | "points";
 
+/**
+ * Find which team a player belongs to on a given hole
+ */
+function findPlayerTeam(
+  scoreboard: Scoreboard,
+  playerId: string,
+  hole: string,
+): string | null {
+  const holeResult = scoreboard.holes[hole];
+  if (!holeResult) return null;
+
+  for (const [teamId, teamResult] of Object.entries(holeResult.teams)) {
+    if (teamResult.playerIds.includes(playerId)) {
+      return teamId;
+    }
+  }
+  return null;
+}
+
+/**
+ * Get team points for a player on a hole (for 2-team games like Five Points)
+ * Returns the team's holeNetTotal which is the +/- vs opponent
+ */
+function getTeamPointsForPlayer(
+  scoreboard: Scoreboard,
+  playerId: string,
+  hole: string,
+): number | null {
+  const teamId = findPlayerTeam(scoreboard, playerId, hole);
+  if (!teamId) return null;
+
+  const holeResult = scoreboard.holes[hole];
+  if (!holeResult) return null;
+
+  const teamResult = holeResult.teams[teamId];
+  if (!teamResult) return null;
+
+  // holeNetTotal is the +/- points vs opponent for this hole
+  return teamResult.holeNetTotal ?? teamResult.points;
+}
+
 interface PlayerColumn {
   playerId: string;
   firstName: string;
@@ -146,7 +187,12 @@ function getScoreValue(
     case "net":
       return playerResult.net;
     case "points":
-      return playerResult.points;
+      // For team games, show the team's hole net total (vs opponent)
+      // Fall back to individual player points if no team data
+      return (
+        getTeamPointsForPlayer(scoreboard, playerId, hole) ??
+        playerResult.points
+      );
   }
 }
 
@@ -164,7 +210,7 @@ function getSummaryValue(
   const cumulative = scoreboard.cumulative.players[playerId];
   if (!cumulative) return null;
 
-  // For points, calculate from individual holes
+  // For points, calculate from team hole net totals
   if (viewMode === "points") {
     let total = 0;
     const holes = Object.keys(scoreboard.holes);
@@ -181,9 +227,16 @@ function getSummaryValue(
             : true;
 
       if (inRange) {
-        const playerResult = scoreboard.holes[hole]?.players[playerId];
-        if (playerResult) {
-          total += playerResult.points;
+        // Use team points (same as getScoreValue for points mode)
+        const teamPoints = getTeamPointsForPlayer(scoreboard, playerId, hole);
+        if (teamPoints !== null) {
+          total += teamPoints;
+        } else {
+          // Fall back to individual player points
+          const playerResult = scoreboard.holes[hole]?.players[playerId];
+          if (playerResult) {
+            total += playerResult.points;
+          }
         }
       }
     }
@@ -504,7 +557,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   toggleContainer: {
     paddingHorizontal: theme.gap(2),
-    paddingVertical: theme.gap(1),
+    paddingVertical: theme.gap(0.75),
   },
   tableContainer: {
     flex: 1,
@@ -520,88 +573,72 @@ const styles = StyleSheet.create((theme) => ({
   },
   headerRow: {
     flexDirection: "row",
-    paddingBottom: theme.gap(0.5),
+    paddingBottom: theme.gap(0.25),
   },
   dataRow: {
     flexDirection: "row",
-    minHeight: 32,
+    minHeight: 26,
     alignItems: "center",
   },
   summaryRow: {
     backgroundColor: theme.colors.border,
   },
   holeColumn: {
-    width: 44,
+    width: 40,
     paddingLeft: theme.gap(1),
     justifyContent: "center",
   },
   playerColumn: {
-    width: 70,
+    width: 64,
     alignItems: "center",
     justifyContent: "center",
   },
   headerLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: theme.colors.secondary,
   },
   verticalTextContainer: {
     alignItems: "flex-start",
     justifyContent: "flex-end",
-    height: 70,
-    width: 70,
-    paddingBottom: 4,
+    height: 58,
+    width: 64,
+    paddingBottom: 2,
   },
   verticalTextWrapper: {
     transform: [{ rotate: "-55deg" }],
     transformOrigin: "left bottom",
-    width: 80,
+    width: 70,
   },
   verticalFirstName: {
-    fontSize: 12,
+    fontSize: 11,
     color: theme.colors.primary,
-    lineHeight: 14,
+    lineHeight: 13,
   },
   verticalLastName: {
-    fontSize: 12,
+    fontSize: 11,
     color: theme.colors.primary,
-    lineHeight: 14,
+    lineHeight: 13,
   },
   holeText: {
-    fontSize: 14,
+    fontSize: 13,
     color: theme.colors.primary,
   },
   summaryText: {
     fontWeight: "bold",
   },
   scoreCell: {
-    width: 50,
-    height: 30,
+    width: 44,
+    height: 24,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
   },
   scoreCellText: {
-    fontSize: 14,
+    fontSize: 13,
     color: theme.colors.primary,
   },
   // Circle decorations (birdie/eagle)
   outerCircle: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  innerCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  singleCircle: {
     width: 22,
     height: 22,
     borderRadius: 11,
@@ -609,26 +646,42 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "center",
   },
+  innerCircle: {
+    width: 17,
+    height: 17,
+    borderRadius: 8.5,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  singleCircle: {
+    width: 19,
+    height: 19,
+    borderRadius: 9.5,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   // Square decorations (bogey/double) - not used in screenshots but keeping for completeness
   outerSquare: {
-    width: 26,
-    height: 26,
+    width: 22,
+    height: 22,
     borderRadius: 3,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   innerSquare: {
-    width: 20,
-    height: 20,
+    width: 17,
+    height: 17,
     borderRadius: 2,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   singleSquare: {
-    width: 22,
-    height: 22,
+    width: 19,
+    height: 19,
     borderRadius: 3,
     borderWidth: 1,
     alignItems: "center",
@@ -637,11 +690,11 @@ const styles = StyleSheet.create((theme) => ({
   // Junk dot - positioned in top right corner of cell
   junkDot: {
     position: "absolute",
-    top: 2,
-    right: 4,
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
+    top: 1,
+    right: 2,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
     backgroundColor: theme.colors.primary,
   },
 }));
