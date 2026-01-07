@@ -270,22 +270,23 @@ function getSummaryValue(
 }
 
 /**
- * Check if player gets pops (handicap strokes) on a hole
+ * Get number of pops (handicap strokes) for a player on a hole
+ * Returns 0, 1, 2, or 3 depending on handicap differential
  */
-function hasPops(
+function getPopsCount(
   scoreboard: Scoreboard | null,
   playerId: string,
   hole: string,
-): boolean {
-  if (!scoreboard) return false;
+): number {
+  if (!scoreboard) return 0;
 
   const holeResult = scoreboard.holes[hole];
-  if (!holeResult) return false;
+  if (!holeResult) return 0;
 
   const playerResult = holeResult.players[playerId];
-  if (!playerResult) return false;
+  if (!playerResult) return 0;
 
-  return playerResult.pops > 0;
+  return playerResult.pops;
 }
 
 /**
@@ -315,13 +316,13 @@ function getScoreToPar(
 function ScoreCell({
   value,
   scoreToPar,
-  hasPopsDot,
+  popsCount,
   isSummaryRow,
   viewMode,
 }: {
   value: number | null;
   scoreToPar: number | null;
-  hasPopsDot: boolean;
+  popsCount: number;
   isSummaryRow: boolean;
   viewMode: ViewMode;
 }) {
@@ -348,10 +349,18 @@ function ScoreCell({
   // Use primary color for decoration borders (matches screenshots)
   const borderColor = theme.colors.primary;
 
+  // Render pops dots (1, 2, or 3 strokes)
+  const popsDots = [];
+  for (let i = 0; i < Math.min(popsCount, 3); i++) {
+    popsDots.push(
+      <View key={i} style={[styles.popsDot, { top: 1 + i * 5 }]} />,
+    );
+  }
+
   return (
     <View style={styles.scoreCell}>
-      {/* Pops dot - indicates handicap stroke on this hole */}
-      {hasPopsDot && <View style={styles.popsDot} />}
+      {/* Pops dots - indicate handicap strokes on this hole */}
+      {popsDots}
 
       {/* Score with decoration */}
       {decoration === "double-circle" ? (
@@ -526,16 +535,16 @@ export function GameLeaderboard() {
                         viewMode,
                       );
 
-                  const popsDot =
-                    !row.isSummaryRow &&
-                    hasPops(scoreboard, player.playerId, row.hole);
+                  const popsCount = row.isSummaryRow
+                    ? 0
+                    : getPopsCount(scoreboard, player.playerId, row.hole);
 
                   return (
                     <View key={player.playerId} style={styles.playerColumn}>
                       <ScoreCell
                         value={value}
                         scoreToPar={scoreToPar}
-                        hasPopsDot={popsDot}
+                        popsCount={popsCount}
                         isSummaryRow={row.isSummaryRow}
                         viewMode={viewMode}
                       />
@@ -688,9 +697,9 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
   },
   // Pops dot - indicates player receives handicap stroke on this hole
+  // Multiple dots stack vertically (top is set dynamically: 1, 6, 11)
   popsDot: {
     position: "absolute",
-    top: 1,
     right: 2,
     width: 4,
     height: 4,
