@@ -1,2 +1,1 @@
-# Run formatting, linting, and type checking on all packages
-bun run precommit
+./scripts/code-quality.sh

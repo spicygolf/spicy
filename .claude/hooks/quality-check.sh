@@ -53,42 +53,18 @@ echo ""
 echo "🔍 QUALITY CHECKS"
 echo ""
 
-FAILURES=0
-
-echo "Format check..."
-if bun format >/dev/null 2>&1; then
-    echo "   ✅ Format: passed"
-else
-    echo "   ❌ Format: failed"
-    FAILURES=$((FAILURES + 1))
-fi
-
-echo "Lint check..."
-if bun lint >/dev/null 2>&1; then
-    echo "   ✅ Lint: passed"
-else
-    echo "   ❌ Lint: failed"
-    FAILURES=$((FAILURES + 1))
-fi
-
-echo "Type check..."
-if bun tsc >/dev/null 2>&1; then
-    echo "   ✅ TypeScript: passed"
-else
-    echo "   ❌ TypeScript: failed"
-    FAILURES=$((FAILURES + 1))
-fi
-
-echo ""
-echo "═══════════════════════════════════════"
-
-if [ $FAILURES -eq 0 ]; then
+if ./scripts/code-quality.sh; then
+    echo ""
+    echo "═══════════════════════════════════════"
     echo "  ✅ All checks passed"
+    echo "═══════════════════════════════════════"
+    echo ""
+    exit 0
 else
-    echo "  ❌ $FAILURES check(s) failed"
+    echo ""
+    echo "═══════════════════════════════════════"
+    echo "  ❌ Quality checks failed"
+    echo "═══════════════════════════════════════"
+    echo ""
+    exit 1
 fi
-
-echo "═══════════════════════════════════════"
-echo ""
-
-exit $FAILURES

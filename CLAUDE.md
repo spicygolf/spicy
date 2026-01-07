@@ -52,7 +52,7 @@ See `.claude/skills/jazz-patterns/README.md`
 
 ### 3. Quality Checks - MANDATORY
 ```bash
-bun format && bun lint && bun tsc
+./scripts/code-quality.sh
 ```
 
 ## Tech Stack
