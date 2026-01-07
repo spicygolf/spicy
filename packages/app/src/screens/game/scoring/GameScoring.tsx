@@ -10,8 +10,10 @@ import {
   useHoleNavigation,
   useScoreManagement,
 } from "@/hooks";
+import { useScoreboard } from "@/hooks/useScoreboard";
 import { Button, Screen, Text } from "@/ui";
 import { ScoringView } from "./ScoringView";
+import { SummaryView } from "./SummaryView";
 import { TeamChooserView } from "./TeamChooserView";
 import { useTeamManagement } from "./useTeamManagement";
 
@@ -65,9 +67,14 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
     currentHoleNumber,
     holeInfo,
     holesList,
+    showSummary,
     handlePrevHole,
     handleNextHole,
   } = useHoleNavigation(game);
+
+  // Get scoreboard for summary view
+  const scoreResult = useScoreboard(game);
+  const scoreboard = scoreResult?.scoreboard ?? null;
 
   // Hook 1b: Load current hole's teams with selector to prevent re-renders
   const currentHole = useCurrentHole(currentHoleId, { currentHoleIndex });
@@ -156,9 +163,17 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   return (
     <Screen style={styles.screenNoPadding}>
       <View style={styles.container}>
-        {/* Content: Either Team Chooser or Scoring UI */}
+        {/* Content: Summary, Team Chooser, or Scoring UI */}
         <ErrorBoundary>
-          {showChooser ? (
+          {showSummary ? (
+            <SummaryView
+              game={game}
+              scoreboard={scoreboard}
+              totalHoles={holesList.length}
+              onPrevHole={handlePrevHole}
+              onNextHole={handleNextHole}
+            />
+          ) : showChooser ? (
             <TeamChooserView
               game={game}
               holeInfo={holeInfo}
@@ -174,6 +189,8 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               holeInfo={holeInfo}
               currentHole={currentHole}
               currentHoleIndex={currentHoleIndex}
+              scoreboard={scoreboard}
+              scoringContext={scoreResult?.context ?? null}
               onPrevHole={handlePrevHole}
               onNextHole={handleNextHole}
               onScoreChange={handleScoreChange}
