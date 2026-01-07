@@ -20,6 +20,8 @@ export interface UseHoleNavigationReturn {
   currentHoleNumber: string;
   holeInfo: HoleInfo | null;
   holesList: string[];
+  /** Whether the current view is the Summary (after last hole) */
+  showSummary: boolean;
   handlePrevHole: () => void;
   handleNextHole: () => void;
 }
@@ -34,6 +36,10 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
       .map((h) => (h?.$isLoaded ? h.hole : null))
       .filter(Boolean) as string[];
   }
+
+  // Summary is shown when currentHoleIndex equals the number of holes
+  // (i.e., one past the last hole index)
+  const showSummary = currentHoleIndex === holesList.length;
 
   // Direct access to Jazz data - Jazz reactivity handles updates
   let currentHole: GameHole | null = null;
@@ -84,19 +90,23 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
     }
   }
 
+  // Navigation includes Summary as the last "hole" (index = holesList.length)
+  // Total positions = holesList.length + 1 (holes + Summary)
+  const totalPositions = holesList.length + 1;
+
   const handlePrevHole = useCallback(() => {
     setCurrentHoleIndex((prev) => {
-      if (prev === 0) return holesList.length - 1;
+      if (prev === 0) return totalPositions - 1;
       return prev - 1;
     });
-  }, [holesList.length]);
+  }, [totalPositions]);
 
   const handleNextHole = useCallback(() => {
     setCurrentHoleIndex((prev) => {
-      if (prev === holesList.length - 1) return 0;
+      if (prev === totalPositions - 1) return 0;
       return prev + 1;
     });
-  }, [holesList.length]);
+  }, [totalPositions]);
 
   return {
     currentHoleIndex,
@@ -105,6 +115,7 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
     currentHoleNumber,
     holeInfo,
     holesList,
+    showSummary,
     handlePrevHole,
     handleNextHole,
   };

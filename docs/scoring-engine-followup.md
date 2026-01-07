@@ -355,7 +355,7 @@ All feedback from CodeRabbit and reviewers on PR #322. Address all items.
 
 ### Phase 5: Summary Screen
 - [ ] Create SummaryView component
-- [ ] Add to hole navigation as "hole 19"
+- [ ] Add to hole navigation as "hole 19" or after last hole, before first hole if not 18 total.
 - [ ] Connect to scoreboard cumulative data
 - [ ] Add handicap posting button (placeholder)
 
