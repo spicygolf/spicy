@@ -271,7 +271,8 @@ export function ScoringView({
         data={currentHole?.teams?.$isLoaded ? [...currentHole.teams] : []}
         keyExtractor={(team) => team?.$jazz.id ?? "unknown"}
         renderItem={({ item: team }) => {
-          if (!team?.$isLoaded || !team.rounds?.$isLoaded) {
+          if (!team?.$isLoaded) return null;
+          if (!team.$jazz.has("rounds") || !team.rounds?.$isLoaded) {
             return null;
           }
 

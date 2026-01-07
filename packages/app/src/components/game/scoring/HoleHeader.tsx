@@ -110,9 +110,4 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 12,
     color: theme.colors.border,
   },
-  detailVarious: {
-    fontSize: 12,
-    color: theme.colors.secondary,
-    fontStyle: "italic",
-  },
 }));
