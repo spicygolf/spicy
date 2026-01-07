@@ -60,6 +60,37 @@ function getCoursePar(game: Game): number {
 }
 
 /**
+ * Get the final team points for each player from the last hole's runningDiff
+ * For 2-team games, this is the net difference vs opponent
+ */
+function getPlayerTeamPoints(scoreboard: Scoreboard): Map<string, number> {
+  const playerPoints = new Map<string, number>();
+  const holesPlayed = scoreboard.meta.holesPlayed;
+
+  if (holesPlayed.length === 0) {
+    return playerPoints;
+  }
+
+  // Get the last hole to find final runningDiff
+  const lastHoleNum = holesPlayed[holesPlayed.length - 1];
+  const lastHole = scoreboard.holes[lastHoleNum];
+
+  if (!lastHole) {
+    return playerPoints;
+  }
+
+  // For each team, assign the team's runningDiff to all players on that team
+  for (const teamResult of Object.values(lastHole.teams)) {
+    const teamPoints = teamResult.runningDiff ?? 0;
+    for (const playerId of teamResult.playerIds) {
+      playerPoints.set(playerId, teamPoints);
+    }
+  }
+
+  return playerPoints;
+}
+
+/**
  * Build player summary data from scoreboard and game
  */
 function buildPlayerSummaries(
@@ -71,6 +102,9 @@ function buildPlayerSummaries(
     return [];
   }
 
+  // Get team-based points for each player (from last hole's runningDiff)
+  const teamPoints = getPlayerTeamPoints(scoreboard);
+
   const summaries: PlayerSummary[] = [];
 
   for (const player of game.players) {
@@ -81,12 +115,15 @@ function buildPlayerSummaries(
 
     if (!cumulative) continue;
 
+    // Use team points if available (2-team games), otherwise fall back to player points
+    const points = teamPoints.get(playerId) ?? cumulative.pointsTotal;
+
     summaries.push({
       playerId,
       name: player.name,
       gross: cumulative.grossTotal,
       toPar: cumulative.grossTotal - coursePar,
-      points: cumulative.pointsTotal,
+      points,
       holesPlayed: cumulative.holesPlayed,
     });
   }
