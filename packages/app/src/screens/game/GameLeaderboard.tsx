@@ -270,9 +270,9 @@ function getSummaryValue(
 }
 
 /**
- * Check if player has junk on a hole
+ * Check if player gets pops (handicap strokes) on a hole
  */
-function hasJunk(
+function hasPops(
   scoreboard: Scoreboard | null,
   playerId: string,
   hole: string,
@@ -285,7 +285,7 @@ function hasJunk(
   const playerResult = holeResult.players[playerId];
   if (!playerResult) return false;
 
-  return playerResult.junk.length > 0;
+  return playerResult.pops > 0;
 }
 
 /**
@@ -315,13 +315,13 @@ function getScoreToPar(
 function ScoreCell({
   value,
   scoreToPar,
-  hasJunkDot,
+  hasPopsDot,
   isSummaryRow,
   viewMode,
 }: {
   value: number | null;
   scoreToPar: number | null;
-  hasJunkDot: boolean;
+  hasPopsDot: boolean;
   isSummaryRow: boolean;
   viewMode: ViewMode;
 }) {
@@ -350,8 +350,8 @@ function ScoreCell({
 
   return (
     <View style={styles.scoreCell}>
-      {/* Junk dot indicator - positioned in top right */}
-      {hasJunkDot && <View style={styles.junkDot} />}
+      {/* Pops dot - indicates handicap stroke on this hole */}
+      {hasPopsDot && <View style={styles.popsDot} />}
 
       {/* Score with decoration */}
       {decoration === "double-circle" ? (
@@ -526,16 +526,16 @@ export function GameLeaderboard() {
                         viewMode,
                       );
 
-                  const junkDot =
+                  const popsDot =
                     !row.isSummaryRow &&
-                    hasJunk(scoreboard, player.playerId, row.hole);
+                    hasPops(scoreboard, player.playerId, row.hole);
 
                   return (
                     <View key={player.playerId} style={styles.playerColumn}>
                       <ScoreCell
                         value={value}
                         scoreToPar={scoreToPar}
-                        hasJunkDot={junkDot}
+                        hasPopsDot={popsDot}
                         isSummaryRow={row.isSummaryRow}
                         viewMode={viewMode}
                       />
@@ -687,8 +687,8 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "center",
   },
-  // Junk dot - positioned in top right corner of cell
-  junkDot: {
+  // Pops dot - indicates player receives handicap stroke on this hole
+  popsDot: {
     position: "absolute",
     top: 1,
     right: 2,
