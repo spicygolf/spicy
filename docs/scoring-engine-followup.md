@@ -360,13 +360,13 @@ All feedback from CodeRabbit and reviewers on PR #322. Address all items.
 - [x] Connect to scoreboard cumulative data
 - [x] Add handicap posting button (placeholder)
 
-### Phase 6: Leaderboard Screen (Separate PR)
-- [ ] Create LeaderboardView component
-- [ ] Create LeaderboardTable with scroll
-- [ ] Implement gross/net/points toggle
-- [ ] Add score notation (circles/squares)
-- [ ] Add junk dot indicators
-- [ ] Add Out/In/Total rows
+### Phase 6: Leaderboard Screen ✅ COMPLETE
+- [x] Create LeaderboardView component
+- [x] Create LeaderboardTable with scroll
+- [x] Implement gross/net/points toggle
+- [x] Add score notation (circles/squares)
+- [x] Add pops dot indicators (handicap strokes, not junk)
+- [x] Add Out/In/Total rows
 
 ### Phase 7: Scoring Engine Performance Optimization
 - [ ] Profile scoring engine to identify bottlenecks
