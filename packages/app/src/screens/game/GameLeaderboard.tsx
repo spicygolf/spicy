@@ -292,44 +292,38 @@ function ScoreCell({
       ? getScoreDecoration(scoreToPar)
       : null;
 
-  const decorationColor =
-    scoreToPar !== null ? getDecorationColor(scoreToPar, theme) : undefined;
+  // Use primary color for decoration borders (matches screenshots)
+  const borderColor = theme.colors.primary;
 
   return (
     <View style={styles.scoreCell}>
-      <View style={styles.scoreCellContent}>
-        {/* Score with decoration */}
-        {decoration === "double-circle" ? (
-          <View style={[styles.outerCircle, { borderColor: decorationColor }]}>
-            <View
-              style={[styles.innerCircle, { borderColor: decorationColor }]}
-            >
-              <Text style={styles.scoreCellText}>{displayValue}</Text>
-            </View>
-          </View>
-        ) : decoration === "single-circle" ? (
-          <View style={[styles.singleCircle, { borderColor: decorationColor }]}>
-            <Text style={styles.scoreCellText}>{displayValue}</Text>
-          </View>
-        ) : decoration === "double-square" ? (
-          <View style={[styles.outerSquare, { borderColor: decorationColor }]}>
-            <View
-              style={[styles.innerSquare, { borderColor: decorationColor }]}
-            >
-              <Text style={styles.scoreCellText}>{displayValue}</Text>
-            </View>
-          </View>
-        ) : decoration === "single-square" ? (
-          <View style={[styles.singleSquare, { borderColor: decorationColor }]}>
-            <Text style={styles.scoreCellText}>{displayValue}</Text>
-          </View>
-        ) : (
-          <Text style={styles.scoreCellText}>{displayValue}</Text>
-        )}
+      {/* Junk dot indicator - positioned in top right */}
+      {hasJunkDot && <View style={styles.junkDot} />}
 
-        {/* Junk dot indicator */}
-        {hasJunkDot && <View style={styles.junkDot} />}
-      </View>
+      {/* Score with decoration */}
+      {decoration === "double-circle" ? (
+        <View style={[styles.outerCircle, { borderColor }]}>
+          <View style={[styles.innerCircle, { borderColor }]}>
+            <Text style={styles.scoreCellText}>{displayValue}</Text>
+          </View>
+        </View>
+      ) : decoration === "single-circle" ? (
+        <View style={[styles.singleCircle, { borderColor }]}>
+          <Text style={styles.scoreCellText}>{displayValue}</Text>
+        </View>
+      ) : decoration === "double-square" ? (
+        <View style={[styles.outerSquare, { borderColor }]}>
+          <View style={[styles.innerSquare, { borderColor }]}>
+            <Text style={styles.scoreCellText}>{displayValue}</Text>
+          </View>
+        </View>
+      ) : decoration === "single-square" ? (
+        <View style={[styles.singleSquare, { borderColor }]}>
+          <Text style={styles.scoreCellText}>{displayValue}</Text>
+        </View>
+      ) : (
+        <Text style={styles.scoreCellText}>{displayValue}</Text>
+      )}
     </View>
   );
 }
@@ -348,17 +342,6 @@ function getScoreDecoration(
   if (scoreToPar === 1) return "single-square"; // Bogey
   if (scoreToPar >= 2) return "double-square"; // Double bogey or worse
   return null;
-}
-
-function getDecorationColor(
-  scoreToPar: number,
-  theme: ReturnType<typeof useUnistyles>["theme"],
-): string {
-  if (scoreToPar <= -2) return theme.colors.score.eagle;
-  if (scoreToPar === -1) return theme.colors.score.birdie;
-  if (scoreToPar === 1) return theme.colors.score.bogey;
-  if (scoreToPar >= 2) return theme.colors.score.doubleBogey;
-  return theme.colors.primary;
 }
 
 export function GameLeaderboard() {
@@ -436,8 +419,14 @@ export function GameLeaderboard() {
               {playerColumns.map((player) => (
                 <View key={player.playerId} style={styles.playerColumn}>
                   <View style={styles.verticalTextContainer}>
-                    <Text style={styles.verticalText}>{player.firstName}</Text>
-                    <Text style={styles.verticalText}>{player.lastName}</Text>
+                    <View style={styles.verticalTextWrapper}>
+                      <Text style={styles.verticalFirstName}>
+                        {player.firstName}
+                      </Text>
+                      <Text style={styles.verticalLastName}>
+                        {player.lastName}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               ))}
@@ -460,19 +449,20 @@ export function GameLeaderboard() {
                   </Text>
                 </View>
                 {playerColumns.map((player) => {
-                  const value = row.isSummaryRow
-                    ? getSummaryValue(
-                        scoreboard,
-                        player.playerId,
-                        row.summaryType!,
-                        viewMode,
-                      )
-                    : getScoreValue(
-                        scoreboard,
-                        player.playerId,
-                        row.hole,
-                        viewMode,
-                      );
+                  const value =
+                    row.isSummaryRow && row.summaryType
+                      ? getSummaryValue(
+                          scoreboard,
+                          player.playerId,
+                          row.summaryType,
+                          viewMode,
+                        )
+                      : getScoreValue(
+                          scoreboard,
+                          player.playerId,
+                          row.hole,
+                          viewMode,
+                        );
 
                   const scoreToPar = row.isSummaryRow
                     ? null
@@ -530,20 +520,18 @@ const styles = StyleSheet.create((theme) => ({
   },
   headerRow: {
     flexDirection: "row",
-    paddingBottom: theme.gap(1),
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
+    paddingBottom: theme.gap(0.5),
   },
   dataRow: {
     flexDirection: "row",
-    minHeight: 36,
+    minHeight: 32,
     alignItems: "center",
   },
   summaryRow: {
     backgroundColor: theme.colors.border,
   },
   holeColumn: {
-    width: 50,
+    width: 44,
     paddingLeft: theme.gap(1),
     justifyContent: "center",
   },
@@ -557,16 +545,26 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.secondary,
   },
   verticalTextContainer: {
-    alignItems: "center",
-    height: 60,
+    alignItems: "flex-start",
     justifyContent: "flex-end",
+    height: 70,
+    width: 70,
+    paddingBottom: 4,
   },
-  verticalText: {
-    fontSize: 11,
+  verticalTextWrapper: {
+    transform: [{ rotate: "-55deg" }],
+    transformOrigin: "left bottom",
+    width: 80,
+  },
+  verticalFirstName: {
+    fontSize: 12,
     color: theme.colors.primary,
-    transform: [{ rotate: "-60deg" }],
-    width: 60,
-    textAlign: "left",
+    lineHeight: 14,
+  },
+  verticalLastName: {
+    fontSize: 12,
+    color: theme.colors.primary,
+    lineHeight: 14,
   },
   holeText: {
     fontSize: 14,
@@ -576,15 +574,11 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "bold",
   },
   scoreCell: {
-    minWidth: 50,
-    minHeight: 30,
+    width: 50,
+    height: 30,
     alignItems: "center",
     justifyContent: "center",
-  },
-  scoreCellContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
+    position: "relative",
   },
   scoreCellText: {
     fontSize: 14,
@@ -592,61 +586,62 @@ const styles = StyleSheet.create((theme) => ({
   },
   // Circle decorations (birdie/eagle)
   outerCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1.5,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   innerCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   singleCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 1.5,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  // Square decorations (bogey/double)
+  // Square decorations (bogey/double) - not used in screenshots but keeping for completeness
   outerSquare: {
-    width: 28,
-    height: 28,
-    borderRadius: 4,
-    borderWidth: 1.5,
+    width: 26,
+    height: 26,
+    borderRadius: 3,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   innerSquare: {
-    width: 22,
-    height: 22,
-    borderRadius: 3,
-    borderWidth: 1.5,
+    width: 20,
+    height: 20,
+    borderRadius: 2,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   singleSquare: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
-    borderWidth: 1.5,
+    width: 22,
+    height: 22,
+    borderRadius: 3,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  // Junk dot
+  // Junk dot - positioned in top right corner of cell
   junkDot: {
+    position: "absolute",
+    top: 2,
+    right: 4,
     width: 5,
     height: 5,
     borderRadius: 2.5,
     backgroundColor: theme.colors.primary,
-    marginLeft: 1,
-    marginTop: -10,
   },
 }));
