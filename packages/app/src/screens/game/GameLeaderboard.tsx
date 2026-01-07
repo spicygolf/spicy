@@ -612,9 +612,9 @@ const styles = StyleSheet.create((theme) => ({
   verticalTextContainer: {
     alignItems: "center",
     justifyContent: "flex-end",
-    height: 58,
+    height: 70,
     width: "100%",
-    paddingBottom: 2,
+    paddingBottom: 12,
   },
   verticalTextWrapper: {
     transform: [{ rotate: "-55deg" }],
