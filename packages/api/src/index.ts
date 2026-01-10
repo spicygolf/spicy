@@ -4,14 +4,12 @@ import type {
   CourseSearchRequest,
   GolfersSearchRequest,
 } from "@spicygolf/ghin";
-import type { Context } from "elysia";
 import { Elysia } from "elysia";
 import type { co } from "jazz-tools";
 import { PlayerAccount } from "spicylib/schema";
 import { getCountries } from "./countries";
 import { getCourseDetails, searchCourses } from "./courses";
 import { getJazzWorker, setupWorker } from "./jazz_worker";
-import { auth } from "./lib/auth";
 import { importGameSpecsToCatalog, importGamesFromArango } from "./lib/catalog";
 import { linkPlayerToUser } from "./lib/link";
 import { playerSearch } from "./players";
@@ -32,30 +30,6 @@ const {
 
 // Guard against concurrent game imports
 let gamesImportInProgress = false;
-
-const betterAuth = new Elysia({ name: "better-auth" })
-  .all(`${api}/auth/*`, (context: Context) => {
-    if (["POST", "GET"].includes(context.request.method)) {
-      return auth.handler(context.request);
-    }
-    context.status(405);
-  })
-  .macro({
-    auth: {
-      async resolve({ status, request: { headers } }) {
-        const session = await auth.api.getSession({
-          headers,
-        });
-
-        if (!session) return status(401);
-
-        return {
-          user: session.user,
-          session: session.session,
-        };
-      },
-    },
-  });
 
 /**
  * Jazz authentication plugin
@@ -113,11 +87,9 @@ const app = new Elysia()
       credentials: true,
     }),
   )
-  .use(betterAuth)
   .use(jazzAuth)
   .get("/", () => "Spicy Golf API")
   .get(`/${api}`, () => "Spicy Golf API")
-  .get(`/${api}/user`, ({ user }) => user, { auth: true })
   // GHIN proxy endpoints - protected by Jazz auth + rate limiting
   .post(
     `/${api}/ghin/players/search`,
