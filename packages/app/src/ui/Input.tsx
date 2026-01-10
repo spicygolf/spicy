@@ -7,7 +7,6 @@ import type {
 } from "react-hook-form";
 import { useController } from "react-hook-form";
 import type { TextInputProps } from "react-native";
-// biome-ignore lint/style/noRestrictedImports: This component is a wrapper around the React Native component.
 import { TextInput, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";

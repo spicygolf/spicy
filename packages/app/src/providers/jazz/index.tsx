@@ -1,4 +1,3 @@
-import { AuthProvider } from "jazz-tools/better-auth/auth/react";
 import { JazzReactNativeProvider } from "jazz-tools/react-native";
 import { RNCrypto } from "jazz-tools/react-native-core/crypto/RNCrypto";
 import type React from "react";
@@ -7,8 +6,8 @@ import { ActivityIndicator, View } from "react-native";
 import { setJazzWorkerAccount } from "spicylib/config/env";
 import { PlayerAccount } from "spicylib/schema";
 import { useJazzCredentials } from "@/hooks/useJazzCredentials";
-import { betterAuthClient } from "@/lib/auth-client";
 import { Text } from "@/ui";
+import { PassphraseAuthUI } from "./PassphraseAuthUI";
 
 export function JazzAndAuth({ children }: { children: React.ReactNode }) {
   const { data: credentials, isLoading, error } = useJazzCredentials();
@@ -63,10 +62,7 @@ export function JazzAndAuth({ children }: { children: React.ReactNode }) {
       CryptoProvider={RNCrypto}
       AccountSchema={PlayerAccount}
     >
-      {/* @ts-ignore - betterAuthClient types incompatible with AuthProvider */}
-      <AuthProvider betterAuthClient={betterAuthClient}>
-        {children}
-      </AuthProvider>
+      <PassphraseAuthUI>{children}</PassphraseAuthUI>
     </JazzReactNativeProvider>
   );
 }
