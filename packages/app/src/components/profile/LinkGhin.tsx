@@ -167,24 +167,15 @@ export function LinkGhin() {
   };
 
   const handleUnlink = () => {
+    // TODO: Implement proper unlink that doesn't modify the shared catalog player.
+    // Currently root.player points directly to the catalog player, so deleting
+    // ghinId would affect all users. Need to either:
+    // 1. Make player field optional in schema
+    // 2. Create a user-owned copy of the player on link
+    // For now, just show a message that unlinking isn't supported yet.
     Alert.alert(
-      "Unlink Player",
-      "Are you sure you want to unlink your GHIN player? Your games will remain in your account.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Unlink",
-          style: "destructive",
-          onPress: async () => {
-            if (linkedPlayer?.$isLoaded && linkedPlayer.ghinId) {
-              // Clear the ghinId to unlink from GHIN
-              // The player object stays but is no longer linked to a catalog player
-              linkedPlayer.$jazz.delete("ghinId");
-              Alert.alert("Unlinked", "Your GHIN link has been removed.");
-            }
-          },
-        },
-      ],
+      "Cannot Unlink",
+      "Unlinking is not yet supported. Contact support if you need to change your linked GHIN account.",
     );
   };
 
