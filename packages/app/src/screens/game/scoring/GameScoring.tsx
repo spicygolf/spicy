@@ -33,7 +33,15 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
         },
       },
       options: { $each: true }, // Game-level option overrides
-      holes: true, // Load holes list shallowly - individual holes loaded by useCurrentHole
+      holes: {
+        $each: {
+          teams: {
+            $each: {
+              options: { $each: true }, // Needed for inherited multiplier checking (pre_double)
+            },
+          },
+        },
+      },
       players: {
         $each: {
           name: true,

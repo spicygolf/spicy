@@ -36,7 +36,15 @@ export function GameLeaderboard() {
         },
       },
       options: { $each: true },
-      holes: { $each: true },
+      holes: {
+        $each: {
+          teams: {
+            $each: {
+              options: { $each: true }, // Needed for inherited multiplier checking
+            },
+          },
+        },
+      },
     },
   });
 

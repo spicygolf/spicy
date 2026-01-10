@@ -246,7 +246,7 @@ function evaluateUserMultiplier(
 
   // Check each team for this multiplier
   for (const team of gameHole.teams) {
-    if (!team?.$isLoaded || !team.options?.$isLoaded) continue;
+    if (!team?.$isLoaded) continue;
 
     const teamId = team.team;
     const teamResult = holeResult.teams[teamId];
@@ -256,18 +256,21 @@ function evaluateUserMultiplier(
     let hasMultiplier = false;
     let multiplierValue = mult.value ?? 2;
 
-    for (const opt of team.options) {
-      if (!opt?.$isLoaded) continue;
-      if (opt.optionName === mult.name) {
-        hasMultiplier = true;
-        // Use the value from the option if present
-        if (opt.value) {
-          const parsed = Number.parseInt(opt.value, 10);
-          if (!Number.isNaN(parsed)) {
-            multiplierValue = parsed;
+    // Only check current hole options if they exist
+    if (team.options?.$isLoaded) {
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) continue;
+        if (opt.optionName === mult.name) {
+          hasMultiplier = true;
+          // Use the value from the option if present
+          if (opt.value) {
+            const parsed = Number.parseInt(opt.value, 10);
+            if (!Number.isNaN(parsed)) {
+              multiplierValue = parsed;
+            }
           }
+          break;
         }
-        break;
       }
     }
 
