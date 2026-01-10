@@ -5,7 +5,13 @@
  * These do not mutate data - they only read and compute.
  */
 
-import type { Game, JunkOption, MultiplierOption, Team } from "spicylib/schema";
+import type {
+  Game,
+  GameHole,
+  JunkOption,
+  MultiplierOption,
+  Team,
+} from "spicylib/schema";
 import type {
   Scoreboard,
   ScoringContext,
@@ -275,5 +281,61 @@ export function getTeamMultiplierStatus(
       };
     }
   }
+  return { active: false };
+}
+
+/**
+ * Check for inherited "rest_of_nine" multipliers from previous holes
+ *
+ * For multipliers with scope "rest_of_nine", we need to look backwards through
+ * previous holes on the same nine to see if the multiplier was activated earlier.
+ *
+ * @param mult - The multiplier option to check
+ * @param teamId - The team ID to check
+ * @param currentHoleNumber - Current hole number as string (e.g., "2")
+ * @param gameHoles - All game holes (from scoring context)
+ * @returns MultiplierStatus with active=true if inherited, plus the original firstHole
+ */
+export function getInheritedMultiplierStatus(
+  mult: MultiplierOption,
+  teamId: string,
+  currentHoleNumber: string,
+  gameHoles: GameHole[],
+): MultiplierStatus {
+  // Only check for rest_of_nine scoped multipliers
+  if (mult.scope !== "rest_of_nine") {
+    return { active: false };
+  }
+
+  const currentHoleNum = Number.parseInt(currentHoleNumber, 10);
+  if (Number.isNaN(currentHoleNum)) {
+    return { active: false };
+  }
+
+  // Determine the start of this nine (1 for front, 10 for back)
+  const nineStart = currentHoleNum <= 9 ? 1 : 10;
+
+  // Check all previous holes in this nine
+  for (let holeNum = nineStart; holeNum < currentHoleNum; holeNum++) {
+    const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
+    if (!gameHole?.teams?.$isLoaded) continue;
+
+    for (const team of gameHole.teams) {
+      if (!team?.$isLoaded || team.team !== teamId) continue;
+      if (!team.options?.$isLoaded) continue;
+
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) continue;
+        if (opt.optionName === mult.name && opt.firstHole) {
+          // Found a multi-hole multiplier that started on this earlier hole
+          return {
+            active: true,
+            firstHole: opt.firstHole,
+          };
+        }
+      }
+    }
+  }
+
   return { active: false };
 }

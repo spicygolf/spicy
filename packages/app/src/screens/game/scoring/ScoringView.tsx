@@ -23,6 +23,7 @@ import { useOptionValue } from "@/hooks/useOptionValue";
 import {
   getCalculatedPlayerJunkOptions,
   getCalculatedTeamJunkOptions,
+  getInheritedMultiplierStatus,
   getMultiplierOptions,
   getTeamMultiplierStatus,
   getUserJunkOptions,
@@ -296,11 +297,24 @@ export function ScoringView({
           const teamId = team.team ?? "";
 
           // Build multiplier buttons - only include available multipliers or already active ones
+          // Also check for inherited "rest_of_nine" multipliers from previous holes
+          const gameHoles = scoringContext?.gameHoles ?? [];
+
           const multiplierButtons: OptionButton[] = multiplierOptions
             .filter((mult) => {
+              // Check if active on current hole
               const status = getTeamMultiplierStatus(team, mult.name);
-              // Always show if already active (selected or inherited)
               if (status.active) return true;
+
+              // Check if inherited from previous holes (rest_of_nine scope)
+              const inherited = getInheritedMultiplierStatus(
+                mult,
+                teamId,
+                currentHoleNumber,
+                gameHoles,
+              );
+              if (inherited.active) return true;
+
               // Otherwise, check availability condition
               return isMultiplierAvailable(
                 mult,
@@ -311,18 +325,28 @@ export function ScoringView({
             })
             .map((mult) => {
               const status = getTeamMultiplierStatus(team, mult.name);
-              // Inherited if active and firstHole is set but different from current hole
-              const isInherited =
-                status.active &&
-                status.firstHole !== undefined &&
-                status.firstHole !== currentHoleNumber;
+              const inherited = getInheritedMultiplierStatus(
+                mult,
+                teamId,
+                currentHoleNumber,
+                gameHoles,
+              );
+
+              // Active if on current hole OR inherited from previous hole
+              const isActive = status.active || inherited.active;
+
+              // Inherited if active via inheritance (not on this hole directly)
+              const isInherited = !status.active && inherited.active;
+
+              // Get firstHole from whichever source has it
+              const firstHole = status.firstHole ?? inherited.firstHole;
 
               return {
                 name: mult.name,
                 displayName: mult.disp,
                 icon: mult.icon,
                 type: "multiplier" as const,
-                selected: status.active,
+                selected: isActive,
                 inherited: isInherited,
               };
             });
