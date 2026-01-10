@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 import { startWorker } from "jazz-tools/worker";
 import { Game, PlayerAccount } from "spicylib/schema";
 
-config({ path: resolve(import.meta.dir, "../../../api/.env") });
+config({ path: resolve(import.meta.dir, "../packages/api/.env") });
 
 const JAZZ_API_KEY = process.env.JAZZ_API_KEY;
 const JAZZ_WORKER_ACCOUNT = process.env.JAZZ_WORKER_ACCOUNT;
