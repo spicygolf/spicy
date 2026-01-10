@@ -1,0 +1,12 @@
+{
+  "name": "twelve",
+  "disp": "12x",
+  "type": "multiplier",
+  "value": 1.5,
+  "seq": 6,
+  "icon": "album",
+  "based_on": "user",
+  "scope": "hole",
+  "override": true,
+  "availability": "{\n  \"and\": [\n    {\"team_down_the_most\": [{\"getPrevHole\": []}, {\"var\": \"team\"}]},\n    {\"existingPreMultiplierTotal\": [{\"getCurrHole\": []}, 8]}\n  ]\n}"
+}
