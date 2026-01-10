@@ -373,6 +373,7 @@ All feedback from CodeRabbit and reviewers on PR #322. Address all items.
 - [ ] Optimize useScoreboard hook memoization (see 7.1)
 - [ ] Consider Immer.js for structural sharing (see 4.8)
 - [ ] Add performance benchmarks for regression testing
+- [ ] Memoize leaderboard cell computations (see 7.4)
 
 ---
 
@@ -422,11 +423,26 @@ Each scoring pipeline stage calls `deepClone()` on the scoreboard. For 18 holes 
 - [ ] Count how many times `useScoreboard` runs per hole navigation
 - [ ] Profile Jazz data loading separately from scoring computation
 
-7.4 Feedback from PR #326
+### 7.4 Leaderboard Cell Memoization
 
-The getSummaryValue function iterates through all holes for each player on each render. For large games, consider memoization:
+**File**: `packages/app/src/components/game/leaderboard/LeaderboardTable.tsx`
 
+**Problem**: The leaderboard table calls `getSummaryValue`, `getScoreValue`, `getScoreToPar`, and `getPopsCount` for every cell on every render. For a 4-player game with 21 rows (18 holes + Out/In/Total), this results in 84+ function calls per render.
+
+`getSummaryValue` is particularly expensive as it iterates through all holes for each player.
+
+**Potential Solutions**:
+
+1. **Memoize in component**: Use `useMemo` for cell computations:
+```typescript
 const summaryValue = useMemo(() => 
   getSummaryValue(scoreboard, playerId, summaryType, viewMode),
   [scoreboard, playerId, summaryType, viewMode]
 );
+```
+
+2. **Pre-compute all values**: Calculate all cell values once when scoreboard/viewMode changes, store in a lookup map.
+
+3. **Virtualized list**: For very large games, use a virtualized FlatList to only render visible rows.
+
+**Priority**: Low - Current implementation is acceptable for typical 4-player games. Optimize if performance issues are observed with larger games.

@@ -239,6 +239,7 @@ export function getSummaryValue(
 
   // For gross/net, calculate from holes
   let total = 0;
+  let hasAnyScore = false;
   const holes = Object.keys(scoreboard.holes);
 
   for (const hole of holes) {
@@ -256,11 +257,12 @@ export function getSummaryValue(
       const playerResult = scoreboard.holes[hole]?.players[playerId];
       if (playerResult) {
         total += viewMode === "gross" ? playerResult.gross : playerResult.net;
+        hasAnyScore = true;
       }
     }
   }
 
-  return total || null;
+  return hasAnyScore ? total : null;
 }
 
 /**
