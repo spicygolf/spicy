@@ -67,7 +67,7 @@ export function getPlayerColumns(game: Game): PlayerColumn[] {
   for (const player of game.players) {
     if (!player?.$isLoaded) continue;
 
-    const nameParts = player.name.split(" ");
+    const nameParts = (player.name || "").trim().split(/\s+/);
     const firstName = nameParts[0] || "";
     const lastName = nameParts.slice(1).join(" ") || "";
 

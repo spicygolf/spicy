@@ -29,8 +29,12 @@ export function LeaderboardTable({
   const { width: screenWidth } = useWindowDimensions();
 
   return (
-    <ScrollView style={styles.tableContainer}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    <ScrollView style={styles.tableContainer} nestedScrollEnabled>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        nestedScrollEnabled
+      >
         <View style={{ minWidth: screenWidth }}>
           {/* Header Row - Player Names (vertical text) */}
           <View style={styles.headerRow}>

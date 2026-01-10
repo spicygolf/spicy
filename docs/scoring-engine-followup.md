@@ -421,3 +421,12 @@ Each scoring pipeline stage calls `deepClone()` on the scoreboard. For 18 holes 
 - [ ] Measure individual pipeline stages
 - [ ] Count how many times `useScoreboard` runs per hole navigation
 - [ ] Profile Jazz data loading separately from scoring computation
+
+7.4 Feedback from PR #326
+
+The getSummaryValue function iterates through all holes for each player on each render. For large games, consider memoization:
+
+const summaryValue = useMemo(() => 
+  getSummaryValue(scoreboard, playerId, summaryType, viewMode),
+  [scoreboard, playerId, summaryType, viewMode]
+);

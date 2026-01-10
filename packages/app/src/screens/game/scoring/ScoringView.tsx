@@ -97,13 +97,14 @@ function togglePlayerJunk(
       // Clear from all teams on this hole, not just the current team
       for (const t of allTeams) {
         if (!t?.$isLoaded) continue;
+        if (!t.$jazz.has("options")) continue;
         const teamOptions = t.options;
         if (!teamOptions?.$isLoaded) continue;
 
         // Iterate backwards to safely splice while iterating
         for (let i = teamOptions.length - 1; i >= 0; i--) {
           const opt = teamOptions[i];
-          if (opt?.$isLoaded && opt.optionName === junkName) {
+          if (opt?.$isLoaded && opt.optionName === junkName && opt.playerId) {
             teamOptions.$jazz.splice(i, 1);
           }
         }
