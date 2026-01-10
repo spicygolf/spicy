@@ -36,7 +36,7 @@ import {
   exportUserSpecs,
   migrateUserSpecs,
 } from "@/lib/user-migration";
-import { checkIsAdmin, isWorkerAccount } from "@/lib/worker-auth";
+import { checkIsAdmin, isWorkerAccount, jazzFetch } from "@/lib/worker-auth";
 
 export function App(): React.JSX.Element {
   const { toast } = useToast();
@@ -102,12 +102,11 @@ export function App(): React.JSX.Element {
       // Step 1: Import specs & players (20-50%)
       if (importSpecs || importPlayers) {
         setImportProgress(20);
-        const specsResponse = await fetch(`${apiUrl}/catalog/import`, {
+        const specsResponse = await jazzFetch(`${apiUrl}/catalog/import`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
           body: JSON.stringify({
             specs: importSpecs,
             players: importPlayers,
@@ -135,12 +134,11 @@ export function App(): React.JSX.Element {
         return;
       }
 
-      const gamesResponse = await fetch(`${apiUrl}/catalog/import-games`, {
+      const gamesResponse = await jazzFetch(`${apiUrl}/catalog/import-games`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify(
           gameLegacyId.trim() ? { legacyId: gameLegacyId.trim() } : {},
         ),
@@ -222,12 +220,11 @@ export function App(): React.JSX.Element {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
 
-      const response = await fetch(`${apiUrl}/player/link`, {
+      const response = await jazzFetch(`${apiUrl}/player/link`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({ ghinId: linkGhinId }),
       });
 

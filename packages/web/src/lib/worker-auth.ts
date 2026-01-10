@@ -36,20 +36,31 @@ export function isWorkerAccount(currentAccountId?: string): boolean {
 }
 
 /**
+ * Make an authenticated fetch request using Jazz auth token
+ */
+export async function jazzFetch(
+  url: string,
+  options: RequestInit = {},
+): Promise<Response> {
+  const { generateAuthToken } = await import("jazz-tools");
+  const token = generateAuthToken();
+
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      Authorization: `Jazz ${token}`,
+    },
+  });
+}
+
+/**
  * Check if account is an admin via API call
  * This keeps admin list server-side for security
  */
 export async function checkIsAdmin(apiUrl: string): Promise<boolean> {
   try {
-    // Import dynamically to avoid issues if jazz-tools isn't loaded yet
-    const { generateAuthToken } = await import("jazz-tools");
-    const token = generateAuthToken();
-
-    const response = await fetch(`${apiUrl}/auth/is-admin`, {
-      headers: {
-        Authorization: `Jazz ${token}`,
-      },
-    });
+    const response = await jazzFetch(`${apiUrl}/auth/is-admin`);
     if (!response.ok) {
       return false;
     }
