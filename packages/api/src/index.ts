@@ -15,7 +15,13 @@ import { auth } from "./lib/auth";
 import { importGameSpecsToCatalog, importGamesFromArango } from "./lib/catalog";
 import { linkPlayerToUser } from "./lib/link";
 import { playerSearch } from "./players";
-import { requireAdmin } from "./utils/auth";
+import { requireAdminAccount } from "./utils/auth";
+import { authenticateJazzRequest } from "./utils/jazz-auth";
+import {
+  checkRateLimit,
+  getRateLimitHeaders,
+  type RateLimitResult,
+} from "./utils/rate-limit";
 
 const {
   API_SCHEME: scheme,
@@ -51,6 +57,53 @@ const betterAuth = new Elysia({ name: "better-auth" })
     },
   });
 
+/**
+ * Jazz authentication plugin
+ *
+ * Provides stateless authentication using Jazz tokens.
+ * Use { jazzAuth: true } on routes to require authentication.
+ * Use { jazzAuth: 'optional' } to allow unauthenticated requests.
+ */
+const jazzAuth = new Elysia({ name: "jazz-auth" }).macro({
+  jazzAuth: {
+    async resolve({ status, request }) {
+      const result = await authenticateJazzRequest(request);
+
+      if (result.error) {
+        return status(result.error.status);
+      }
+
+      return {
+        jazzAccount: result.account,
+        jazzAccountId: result.accountId,
+      };
+    },
+  },
+});
+
+/**
+ * Helper to apply rate limiting and return appropriate response
+ */
+function applyRateLimit(
+  accountId: string,
+  endpoint: string,
+  set: { headers: Record<string, string | number>; status?: number | string },
+): RateLimitResult & { blocked: boolean } {
+  const result = checkRateLimit(accountId, endpoint);
+  const headers = getRateLimitHeaders(result);
+
+  // Add rate limit headers to response
+  for (const [key, value] of Object.entries(headers)) {
+    set.headers[key] = value;
+  }
+
+  if (!result.allowed) {
+    set.status = 429;
+  }
+
+  return { ...result, blocked: !result.allowed };
+}
+
 const app = new Elysia()
   .use(
     cors({
@@ -61,49 +114,100 @@ const app = new Elysia()
     }),
   )
   .use(betterAuth)
+  .use(jazzAuth)
   .get("/", () => "Spicy Golf API")
   .get(`/${api}`, () => "Spicy Golf API")
   .get(`/${api}/user`, ({ user }) => user, { auth: true })
+  // GHIN proxy endpoints - protected by Jazz auth + rate limiting
   .post(
     `/${api}/ghin/players/search`,
-    ({ body }) => playerSearch(body as GolfersSearchRequest),
-    {
-      // auth: true,
+    ({ body, jazzAccountId, set }) => {
+      const rateLimit = applyRateLimit(
+        jazzAccountId as string,
+        "ghin/players/search",
+        set,
+      );
+      if (rateLimit.blocked) {
+        return {
+          error: "Rate limit exceeded",
+          retryAfter: rateLimit.retryAfter,
+        };
+      }
+      return playerSearch(body as GolfersSearchRequest);
     },
+    { jazzAuth: true },
   )
-  .get(`/${api}/ghin/countries`, () => getCountries(), {
-    // auth: true,
-  })
+  .get(
+    `/${api}/ghin/countries`,
+    ({ jazzAccountId, set }) => {
+      const rateLimit = applyRateLimit(
+        jazzAccountId as string,
+        "ghin/countries",
+        set,
+      );
+      if (rateLimit.blocked) {
+        return {
+          error: "Rate limit exceeded",
+          retryAfter: rateLimit.retryAfter,
+        };
+      }
+      return getCountries();
+    },
+    { jazzAuth: true },
+  )
   .post(
     `/${api}/ghin/courses/search`,
-    ({ body }) => searchCourses(body as CourseSearchRequest),
-    {
-      // auth: true,
+    ({ body, jazzAccountId, set }) => {
+      const rateLimit = applyRateLimit(
+        jazzAccountId as string,
+        "ghin/courses/search",
+        set,
+      );
+      if (rateLimit.blocked) {
+        return {
+          error: "Rate limit exceeded",
+          retryAfter: rateLimit.retryAfter,
+        };
+      }
+      return searchCourses(body as CourseSearchRequest);
     },
+    { jazzAuth: true },
   )
   .post(
     `/${api}/ghin/courses/details`,
-    ({ body }) => getCourseDetails(body as CourseDetailsRequest),
-    {
-      // auth: true,
+    ({ body, jazzAccountId, set }) => {
+      const rateLimit = applyRateLimit(
+        jazzAccountId as string,
+        "ghin/courses/details",
+        set,
+      );
+      if (rateLimit.blocked) {
+        return {
+          error: "Rate limit exceeded",
+          retryAfter: rateLimit.retryAfter,
+        };
+      }
+      return getCourseDetails(body as CourseDetailsRequest);
     },
+    { jazzAuth: true },
   )
   .get(`/${api}/jazz/credentials`, () => ({
     apiKey: process.env.JAZZ_API_KEY,
     workerAccount: process.env.JAZZ_WORKER_ACCOUNT,
   }))
+  // Admin endpoints - protected by Jazz auth + admin check
   .post(
     `/${api}/catalog/import`,
-    async ({ user, body }) => {
+    async ({ jazzAccountId, body }) => {
       try {
-        requireAdmin(user?.email);
+        requireAdminAccount(jazzAccountId);
 
         const options = body as { specs?: boolean; players?: boolean } | null;
         const importSpecs = options?.specs ?? true;
         const importPlayers = options?.players ?? true;
 
         console.log(
-          `Catalog import started by ${user.email} (specs: ${importSpecs}, players: ${importPlayers})`,
+          `Catalog import started by ${jazzAccountId} (specs: ${importSpecs}, players: ${importPlayers})`,
         );
         const { account } = await getJazzWorker();
 
@@ -120,13 +224,13 @@ const app = new Elysia()
         throw error;
       }
     },
-    { auth: true },
+    { jazzAuth: true },
   )
   .post(
     `/${api}/catalog/import-games`,
-    async ({ body, user }) => {
+    async ({ body, jazzAccountId }) => {
       try {
-        requireAdmin(user?.email);
+        requireAdminAccount(jazzAccountId);
 
         const { legacyId } = body as { legacyId?: string };
 
@@ -142,8 +246,8 @@ const app = new Elysia()
 
         console.log(
           legacyId
-            ? `Single game import started by: ${user.email} for legacyId: ${legacyId}`
-            : `Batch games import started by: ${user.email}`,
+            ? `Single game import started by: ${jazzAccountId} for legacyId: ${legacyId}`
+            : `Batch games import started by: ${jazzAccountId}`,
         );
 
         try {
@@ -168,15 +272,12 @@ const app = new Elysia()
         throw error;
       }
     },
-    { auth: true },
+    { jazzAuth: true },
   )
   .post(
     `/${api}/player/link`,
-    async ({ body, user }) => {
+    async ({ body, jazzAccountId }) => {
       try {
-        // Jazz plugin adds accountID to user object
-        const jazzAccountId = (user as { accountID?: string })?.accountID;
-
         if (!jazzAccountId) {
           throw new Error("User not authenticated or no Jazz account");
         }
@@ -187,7 +288,7 @@ const app = new Elysia()
         }
 
         console.log(
-          `Linking player with GHIN ${ghinId} to user ${user?.email} (${jazzAccountId})`,
+          `Linking player with GHIN ${ghinId} to account ${jazzAccountId}`,
         );
 
         // Load the user's Jazz account
@@ -204,7 +305,7 @@ const app = new Elysia()
           userAccount,
           ghinId,
           workerAccount as co.loaded<typeof PlayerAccount>,
-          user?.email || "unknown",
+          jazzAccountId,
         );
 
         return result;
@@ -213,22 +314,22 @@ const app = new Elysia()
         throw error;
       }
     },
-    {
-      auth: true,
-    },
+    { jazzAuth: true },
   )
   .post(
     `/${api}/catalog/import-course-by-id`,
-    async ({ body, user }) => {
+    async ({ body, jazzAccountId }) => {
       try {
-        // Temporary endpoint - no admin check needed
+        // Requires Jazz auth but not admin (any authenticated user can import courses)
 
         const { courseId } = body as { courseId: string | number };
         if (!courseId) {
           throw new Error("courseId required");
         }
 
-        console.log(`Importing course ${courseId} from GHIN by ${user.email}`);
+        console.log(
+          `Importing course ${courseId} from GHIN by ${jazzAccountId}`,
+        );
 
         const { account: workerAccount } = await getJazzWorker();
         const { loadOrCreateCatalog } = await import("./lib/catalog");
@@ -311,7 +412,7 @@ const app = new Elysia()
         throw error;
       }
     },
-    { auth: true },
+    { jazzAuth: true },
   )
   .listen({
     port: port || 3040,
