@@ -7,7 +7,7 @@
 
 import { useAccount } from "jazz-tools/react-native";
 import { useState } from "react";
-import { ActivityIndicator, Alert, TouchableOpacity, View } from "react-native";
+import { Alert, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Game, ListOfGames, PlayerAccount } from "spicylib/schema";
 import { apiPost } from "@/lib/api-client";
@@ -26,11 +26,19 @@ interface LinkPlayerResult {
   message: string;
 }
 
+interface ImportProgress {
+  phase: "linking" | "importing";
+  current: number;
+  total: number;
+  playerName?: string;
+}
+
 export function LinkGhin() {
   const { theme } = useUnistyles();
   const me = useAccount(PlayerAccount, { resolve: { root: { player: true } } });
   const [ghinId, setGhinId] = useState("");
   const [isLinking, setIsLinking] = useState(false);
+  const [progress, setProgress] = useState<ImportProgress | null>(null);
 
   // Check if linked to a GHIN/catalog player (not just the default player created on signup)
   const linkedPlayer =
@@ -51,12 +59,25 @@ export function LinkGhin() {
     }
 
     setIsLinking(true);
+    setProgress({ phase: "linking", current: 0, total: 0 });
 
     try {
       // Call the API to link the player
       const result = await apiPost<LinkPlayerResult>("/player/link", {
         ghinId: ghinId.trim(),
       });
+
+      const gameIds = result.gameIds || [];
+      const hasGames = gameIds.length > 0;
+
+      if (hasGames) {
+        setProgress({
+          phase: "importing",
+          current: 0,
+          total: gameIds.length,
+          playerName: result.playerName,
+        });
+      }
 
       // Wait for Jazz to sync the group membership
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -72,40 +93,50 @@ export function LinkGhin() {
       }
 
       // Load and add games to root.games
-      const gameIds = result.gameIds || [];
       let gamesLinked = 0;
 
-      const loadedRoot = await root.$jazz.ensureLoaded({
-        resolve: { games: true },
-      });
+      if (hasGames) {
+        const loadedRoot = await root.$jazz.ensureLoaded({
+          resolve: { games: true },
+        });
 
-      if (loadedRoot.games?.$isLoaded) {
-        // Get existing game IDs to avoid duplicates
-        const existingGameIds = new Set<string>();
-        const gamesList = loadedRoot.games;
-        for (let i = 0; i < gamesList.length; i++) {
-          const existingGame = gamesList[i];
-          if (existingGame?.$jazz?.id) {
-            existingGameIds.add(existingGame.$jazz.id);
+        if (loadedRoot.games?.$isLoaded) {
+          // Get existing game IDs to avoid duplicates
+          const existingGameIds = new Set<string>();
+          const gamesList = loadedRoot.games;
+          for (let i = 0; i < gamesList.length; i++) {
+            const existingGame = gamesList[i];
+            if (existingGame?.$jazz?.id) {
+              existingGameIds.add(existingGame.$jazz.id);
+            }
           }
-        }
 
-        for (const gameId of gameIds) {
-          if (existingGameIds.has(gameId)) {
-            continue;
-          }
-          const game = await Game.load(gameId);
-          if (game?.$isLoaded) {
-            loadedRoot.games.$jazz.push(game);
-            gamesLinked++;
+          for (let i = 0; i < gameIds.length; i++) {
+            const gameId = gameIds[i];
+            setProgress({
+              phase: "importing",
+              current: i + 1,
+              total: gameIds.length,
+              playerName: result.playerName,
+            });
+
+            if (existingGameIds.has(gameId)) {
+              continue;
+            }
+            const game = await Game.load(gameId);
+            if (game?.$isLoaded) {
+              loadedRoot.games.$jazz.push(game);
+              gamesLinked++;
+            }
           }
         }
       }
 
-      Alert.alert(
-        "Success",
-        `Linked to ${result.playerName}!\n\n${gamesLinked} game(s) added to your account.`,
-      );
+      const message = hasGames
+        ? `Linked to ${result.playerName}!\n\n${gamesLinked} game(s) imported from the previous version of Spicy Golf.`
+        : `Linked to ${result.playerName}!`;
+
+      Alert.alert("Success", message);
       setGhinId("");
     } catch (error) {
       console.error("Link failed:", error);
@@ -115,6 +146,7 @@ export function LinkGhin() {
       );
     } finally {
       setIsLinking(false);
+      setProgress(null);
     }
   };
 
@@ -137,6 +169,37 @@ export function LinkGhin() {
           },
         },
       ],
+    );
+  };
+
+  const renderProgress = () => {
+    if (!progress) return null;
+
+    if (progress.phase === "linking") {
+      return (
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>Linking your account...</Text>
+        </View>
+      );
+    }
+
+    const percentage = Math.round((progress.current / progress.total) * 100);
+
+    return (
+      <View style={styles.progressContainer}>
+        <Text style={styles.progressTitle}>
+          Importing games from Spicy Golf v0.3
+        </Text>
+        <Text style={styles.progressText}>
+          We found {progress.total} game(s) from your previous account.
+        </Text>
+        <View style={styles.progressBarContainer}>
+          <View style={[styles.progressBar, { width: `${percentage}%` }]} />
+        </View>
+        <Text style={styles.progressCount}>
+          {progress.current} of {progress.total} games
+        </Text>
+      </View>
     );
   };
 
@@ -167,35 +230,32 @@ export function LinkGhin() {
         </View>
       ) : (
         <View style={styles.linkContainer}>
-          <Text style={styles.description}>
-            Enter your GHIN ID to link your account.
-          </Text>
-
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              value={ghinId}
-              onChangeText={setGhinId}
-              placeholder="Enter your GHIN ID"
-              keyboardType="number-pad"
-              editable={!isLinking}
-            />
-          </View>
-
-          <Button
-            label={isLinking ? "Linking..." : "Link Player"}
-            onPress={handleLink}
-            disabled={isLinking || !ghinId.trim()}
-          />
-
-          {isLinking && (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color={theme.colors.primary} />
-              <Text style={styles.loadingText}>
-                Linking player and importing games...
+          {!isLinking && (
+            <>
+              <Text style={styles.description}>
+                Enter your GHIN ID to link your account.
               </Text>
-            </View>
+
+              <View style={styles.inputRow}>
+                <TextInput
+                  style={styles.input}
+                  value={ghinId}
+                  onChangeText={setGhinId}
+                  placeholder="Enter your GHIN ID"
+                  keyboardType="number-pad"
+                  editable={!isLinking}
+                />
+              </View>
+
+              <Button
+                label="Link Player"
+                onPress={handleLink}
+                disabled={!ghinId.trim()}
+              />
+            </>
           )}
+
+          {renderProgress()}
         </View>
       )}
     </View>
@@ -224,15 +284,33 @@ const styles = StyleSheet.create((theme) => ({
   input: {
     flex: 1,
   },
-  loadingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+  progressContainer: {
     gap: 8,
-    marginTop: 8,
+    paddingVertical: 8,
   },
-  loadingText: {
+  progressTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  progressText: {
     fontSize: 12,
     color: theme.colors.secondary,
+  },
+  progressBarContainer: {
+    height: 8,
+    backgroundColor: theme.colors.border,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  progressBar: {
+    height: "100%",
+    backgroundColor: theme.colors.action,
+    borderRadius: 4,
+  },
+  progressCount: {
+    fontSize: 12,
+    color: theme.colors.secondary,
+    textAlign: "center",
   },
   linkedContainer: {
     flexDirection: "row",
