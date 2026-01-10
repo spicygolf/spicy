@@ -335,9 +335,14 @@ export function ScoringView({
 
             // 2. If active on THIS hole, show clickable selected button
             if (status.active) {
+              // For dynamic multipliers (value_from), append the value to the display name
+              const displayName = mult.value_from
+                ? `${mult.disp} ${multiplierValue}x`
+                : mult.disp;
+
               multiplierButtons.push({
                 name: mult.name,
-                displayName: mult.disp,
+                displayName,
                 icon: mult.icon,
                 type: "multiplier" as const,
                 selected: true,
@@ -354,9 +359,14 @@ export function ScoringView({
               );
 
               if (isAvailable) {
+                // For dynamic multipliers (value_from), append the value to the display name
+                const displayName = mult.value_from
+                  ? `${mult.disp} ${multiplierValue}x`
+                  : mult.disp;
+
                 multiplierButtons.push({
                   name: mult.name,
-                  displayName: mult.disp,
+                  displayName,
                   icon: mult.icon,
                   type: "multiplier" as const,
                   selected: false,
