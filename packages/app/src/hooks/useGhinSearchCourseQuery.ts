@@ -3,12 +3,10 @@ import type {
   CourseSearchResponse,
 } from "@spicygolf/ghin";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { getMillisecondsUntilTargetTime } from "spicylib/utils";
-import { useApi } from "@/hooks/useApi";
+import { apiPost } from "@/lib/api-client";
 
 async function searchCourses(
-  api: string,
   search: CourseSearchRequest,
 ): Promise<CourseSearchResponse> {
   // Filter out empty string values to avoid validation errors
@@ -16,19 +14,10 @@ async function searchCourses(
     Object.entries(search).filter(([_, value]) => value !== ""),
   ) as CourseSearchRequest;
 
-  const response = await axios.post(
-    `${api}/ghin/courses/search`,
-    cleanedSearch,
-    {
-      headers: { "Content-Type": "application/json" },
-    },
-  );
-
-  return response.data;
+  return apiPost<CourseSearchResponse>("/ghin/courses/search", cleanedSearch);
 }
 
 export function useGhinSearchCourseQuery(search: CourseSearchRequest) {
-  const api = useApi();
   // Cache until 4 AM EST
   const staleTime = getMillisecondsUntilTargetTime(
     4,
@@ -40,7 +29,7 @@ export function useGhinSearchCourseQuery(search: CourseSearchRequest) {
 
   return useQuery({
     queryKey: ["ghin-course-search", search],
-    queryFn: () => searchCourses(api, search),
+    queryFn: () => searchCourses(search),
     // Require at least 2 characters in course name before searching
     // State is now optional, but country is still required
     enabled:
