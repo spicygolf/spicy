@@ -32,10 +32,12 @@ export function LinkGhin() {
   const [ghinId, setGhinId] = useState("");
   const [isLinking, setIsLinking] = useState(false);
 
-  // Check if already linked
-  const isLinked =
-    me?.$isLoaded && me.root?.$isLoaded && me.root.player?.$isLoaded;
-  const linkedPlayer = isLinked ? me.root.player : null;
+  // Check if linked to a GHIN/catalog player (not just the default player created on signup)
+  const linkedPlayer =
+    me?.$isLoaded && me.root?.$isLoaded && me.root.player?.$isLoaded
+      ? me.root.player
+      : null;
+  const isLinked = linkedPlayer?.ghinId != null;
 
   const handleLink = async () => {
     if (!ghinId.trim()) {

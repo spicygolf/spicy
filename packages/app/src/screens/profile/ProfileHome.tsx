@@ -23,9 +23,12 @@ export function ProfileHome() {
   const currentTheme =
     themeSetting.charAt(0).toUpperCase() + themeSetting.slice(1);
 
-  // Get linked player name for subtitle
+  // Get linked player name for subtitle (only if linked to GHIN/catalog player)
   const linkedPlayerName =
-    me?.$isLoaded && me.root?.$isLoaded && me.root.player?.$isLoaded
+    me?.$isLoaded &&
+    me.root?.$isLoaded &&
+    me.root.player?.$isLoaded &&
+    me.root.player.ghinId
       ? me.root.player.name
       : undefined;
 
