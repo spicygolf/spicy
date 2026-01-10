@@ -1,4 +1,5 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
+import Ionicons from "@react-native-vector-icons/ionicons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StyleSheet } from "react-native-unistyles";
 import { GamesNavigator } from "@/navigators/GamesNavigator";
@@ -26,12 +27,7 @@ export function AppNavigator() {
           title: "Games",
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <FontAwesome6
-              size={28}
-              name="pencil"
-              color={color}
-              iconStyle="solid"
-            />
+            <Ionicons size={28} name="golf" color={color} />
           ),
         }}
       />
