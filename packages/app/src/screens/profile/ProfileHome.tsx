@@ -2,7 +2,7 @@ import type { NavigationProp } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { useAccount } from "jazz-tools/react-native";
 import { View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, UnistylesRuntime } from "react-native-unistyles";
 import { PlayerAccount } from "spicylib/schema";
 import { Logout } from "@/components/profile/Logout";
 import { ProfileRow } from "@/components/profile/ProfileRow";
@@ -12,6 +12,10 @@ import { Screen, Text } from "@/ui";
 export function ProfileHome() {
   const navigation = useNavigation<NavigationProp<ProfileNavigatorParamList>>();
   const me = useAccount(PlayerAccount, { resolve: { root: { player: true } } });
+
+  // Get current theme name (capitalize first letter)
+  const themeName = UnistylesRuntime.themeName ?? "system";
+  const currentTheme = themeName.charAt(0).toUpperCase() + themeName.slice(1);
 
   // Get linked player name for subtitle
   const linkedPlayerName =
@@ -27,6 +31,7 @@ export function ProfileHome() {
         <View style={styles.section}>
           <ProfileRow
             title="Theme"
+            subtitle={currentTheme}
             onPress={() => navigation.navigate("ThemeScreen")}
           />
           <ProfileRow
