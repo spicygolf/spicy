@@ -6,6 +6,7 @@ import { Favorites } from "./favorites";
 import { ListOfGames } from "./games";
 import { ListOfGameSpecs, MapOfGameSpecs } from "./gamespecs";
 import { Player } from "./players";
+import { Settings } from "./settings";
 
 const RESET = false; // for DEV
 const RESET_WORKER = false; // Catalog is now properly initialized
@@ -16,6 +17,7 @@ export const PlayerAccountRoot = co.map({
   games: ListOfGames,
   specs: ListOfGameSpecs,
   favorites: co.optional(Favorites),
+  settings: co.optional(Settings),
 
   // Game catalog customization features
   customSpecs: co.optional(ListOfGameSpecs), // Full custom specs (complete forks)

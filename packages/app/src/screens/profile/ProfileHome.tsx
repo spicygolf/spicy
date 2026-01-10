@@ -2,7 +2,7 @@ import type { NavigationProp } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { useAccount } from "jazz-tools/react-native";
 import { View } from "react-native";
-import { StyleSheet, UnistylesRuntime } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import { PlayerAccount } from "spicylib/schema";
 import { Logout } from "@/components/profile/Logout";
 import { ProfileRow } from "@/components/profile/ProfileRow";
@@ -11,11 +11,17 @@ import { Screen, Text } from "@/ui";
 
 export function ProfileHome() {
   const navigation = useNavigation<NavigationProp<ProfileNavigatorParamList>>();
-  const me = useAccount(PlayerAccount, { resolve: { root: { player: true } } });
+  const me = useAccount(PlayerAccount, {
+    resolve: { root: { player: true, settings: true } },
+  });
 
-  // Get current theme name (capitalize first letter)
-  const themeName = UnistylesRuntime.themeName ?? "system";
-  const currentTheme = themeName.charAt(0).toUpperCase() + themeName.slice(1);
+  // Get theme setting from Jazz (capitalize first letter)
+  const themeSetting =
+    me?.$isLoaded && me.root?.$isLoaded && me.root.settings?.$isLoaded
+      ? (me.root.settings.theme ?? "system")
+      : "system";
+  const currentTheme =
+    themeSetting.charAt(0).toUpperCase() + themeSetting.slice(1);
 
   // Get linked player name for subtitle
   const linkedPlayerName =
