@@ -286,7 +286,7 @@ export function ScoringView({
       <FlatList
         style={styles.content}
         data={allTeams}
-        keyExtractor={(team) => team?.$jazz.id ?? "unknown"}
+        keyExtractor={(team, index) => team?.$jazz.id ?? String(index)}
         renderItem={({ item: team }) => {
           if (!team?.$isLoaded) return null;
           if (!team.$jazz.has("rounds") || !team.rounds?.$isLoaded) {
