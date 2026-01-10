@@ -17,7 +17,7 @@ import {
   ScrollView,
   View,
 } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import { Text, TextInput } from "@/ui";
 
 interface PassphraseAuthUIProps {
@@ -26,7 +26,6 @@ interface PassphraseAuthUIProps {
 
 export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
   const auth = usePassphraseAuth({ wordlist });
-  const { theme } = useUnistyles();
 
   const [step, setStep] = useState<"initial" | "create" | "login">("initial");
   const [loginPassphrase, setLoginPassphrase] = useState("");

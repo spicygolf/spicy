@@ -47,9 +47,11 @@ describe("isAdminAccount", () => {
 
   test("handles whitespace in admin ID list", () => {
     process.env.ADMIN_ACCOUNT_IDS = "co_z111, co_z222 , co_z333";
-    // Note: current implementation doesn't trim, so this tests actual behavior
+    // Implementation trims whitespace around IDs
     expect(isAdminAccount("co_z111")).toBe(true);
-    // These may fail if whitespace isn't trimmed - adjust based on implementation
+    expect(isAdminAccount("co_z222")).toBe(true);
+    expect(isAdminAccount("co_z333")).toBe(true);
+    expect(isAdminAccount("co_z444")).toBe(false);
   });
 
   test("returns false for null/undefined accountId", () => {
