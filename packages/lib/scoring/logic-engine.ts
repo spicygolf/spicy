@@ -328,6 +328,49 @@ function existingPreMultiplierTotal(
   return currentMultiplier < threshold;
 }
 
+/**
+ * Calculate the total pre_double multiplier value from the front nine for a team.
+ *
+ * Used for the "Re Pre" option on hole 10 - allows carrying over accumulated
+ * pre_double multipliers from the front nine to the back nine.
+ *
+ * @param teamId - The team ID to check
+ * @param logicCtx - The logic context containing game holes
+ * @returns The total pre_double value (e.g., 4 if two 2x pre_doubles), or 0 if none
+ */
+function getFrontNinePreDoubleTotal(
+  teamId: string,
+  logicCtx: LogicContext,
+): number {
+  const gameHoles = logicCtx.ctx.gameHoles;
+  if (!gameHoles) return 0;
+
+  let total = 1; // Start at 1x (no multiplier)
+
+  // Check holes 1-9 for pre_double options
+  for (let holeNum = 1; holeNum <= 9; holeNum++) {
+    const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
+    if (!gameHole?.teams?.$isLoaded) continue;
+
+    for (const team of gameHole.teams) {
+      if (!team?.$isLoaded || team.team !== teamId) continue;
+      if (!team.options?.$isLoaded) continue;
+
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) continue;
+        // Look for pre_double options with firstHole set (activated on this hole)
+        if (opt.optionName === "pre_double" && opt.firstHole) {
+          // Each pre_double is worth 2x, multiply into total
+          total *= 2;
+        }
+      }
+    }
+  }
+
+  // Return the total (will be 1 if no pre_doubles, 2 for one, 4 for two, etc.)
+  return total;
+}
+
 // =============================================================================
 // Logic Engine
 // =============================================================================
@@ -433,6 +476,12 @@ function registerOperators(): void {
       return { __existingPreMultiplierTotal: { hole, threshold } };
     },
   );
+
+  // frontNinePreDoubleTotal: get total pre_double multiplier from front nine
+  // Used for "Re Pre" option on hole 10 to carry over front nine multipliers
+  jsonLogic.add_operation("frontNinePreDoubleTotal", (team: unknown) => {
+    return { __frontNinePreDoubleTotal: { team } };
+  });
 
   operatorsRegistered = true;
 }
@@ -580,6 +629,15 @@ function resolveOperatorResult(
       threshold: number;
     };
     return existingPreMultiplierTotal(logicCtx.holeResult ?? null, threshold);
+  }
+
+  // frontNinePreDoubleTotal
+  if ("__frontNinePreDoubleTotal" in obj) {
+    const { team } = obj.__frontNinePreDoubleTotal as {
+      team: TeamHoleResult | null;
+    };
+    const teamId = team?.teamId ?? logicCtx.team?.teamId ?? "";
+    return getFrontNinePreDoubleTotal(teamId, logicCtx);
   }
 
   return result;

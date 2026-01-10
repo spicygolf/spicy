@@ -76,6 +76,9 @@ export const MultiplierOption = co.map({
   ),
   availability: z.optional(z.string()),
   override: z.optional(z.boolean()),
+  // Dynamic value source - logic operator name to calculate value at runtime
+  // e.g., "frontNinePreDoubleTotal" for Re Pre multiplier
+  value_from: z.optional(z.string()),
 });
 export type MultiplierOption = co.loaded<typeof MultiplierOption>;
 

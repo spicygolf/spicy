@@ -69,6 +69,7 @@ const KNOWN_OPERATORS = new Set([
   "parOrBetter",
   "holePar",
   "existingPreMultiplierTotal",
+  "frontNinePreDoubleTotal",
 ]);
 
 interface ValidationError {

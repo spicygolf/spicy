@@ -20,6 +20,76 @@ import type {
   TeamHoleResult,
 } from "./types";
 
+/**
+ * Calculate dynamic multiplier value based on value_from field.
+ *
+ * Supported value_from operators:
+ * - "frontNinePreDoubleTotal": Returns total pre_double multiplier from front nine
+ *
+ * @param mult - The multiplier option with value_from field
+ * @param teamId - The team ID to calculate for
+ * @param ctx - The scoring context
+ * @returns The calculated value, or the default mult.value if not calculable
+ */
+function calculateDynamicValue(
+  mult: MultiplierOption,
+  teamId: string,
+  ctx: ScoringContext,
+): number {
+  if (!mult.value_from) {
+    return mult.value ?? 2;
+  }
+
+  if (mult.value_from === "frontNinePreDoubleTotal") {
+    return getFrontNinePreDoubleTotal(teamId, ctx);
+  }
+
+  // Unknown value_from, use default
+  return mult.value ?? 2;
+}
+
+/**
+ * Calculate the total pre_double multiplier value from the front nine for a team.
+ *
+ * Used for the "Re Pre" option on hole 10 - allows carrying over accumulated
+ * pre_double multipliers from the front nine to the back nine.
+ *
+ * @param teamId - The team ID to check
+ * @param ctx - The scoring context containing game holes
+ * @returns The total pre_double value (e.g., 4 if two 2x pre_doubles), or 1 if none
+ */
+function getFrontNinePreDoubleTotal(
+  teamId: string,
+  ctx: ScoringContext,
+): number {
+  const gameHoles = ctx.gameHoles;
+  if (!gameHoles) return 1;
+
+  let total = 1; // Start at 1x (no multiplier)
+
+  // Check holes 1-9 for pre_double options
+  for (let holeNum = 1; holeNum <= 9; holeNum++) {
+    const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
+    if (!gameHole?.teams?.$isLoaded) continue;
+
+    for (const team of gameHole.teams) {
+      if (!team?.$isLoaded || team.team !== teamId) continue;
+      if (!team.options?.$isLoaded) continue;
+
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) continue;
+        // Look for pre_double options with firstHole set (activated on this hole)
+        if (opt.optionName === "pre_double" && opt.firstHole) {
+          // Each pre_double is worth 2x, multiply into total
+          total *= 2;
+        }
+      }
+    }
+  }
+
+  return total;
+}
+
 // =============================================================================
 // Public API
 // =============================================================================
@@ -254,7 +324,10 @@ function evaluateUserMultiplier(
 
     // Check if this team has the multiplier on this hole
     let hasMultiplier = false;
-    let multiplierValue = mult.value ?? 2;
+    // Use dynamic value calculation if value_from is set, otherwise use static value
+    let multiplierValue = mult.value_from
+      ? calculateDynamicValue(mult, teamId, ctx)
+      : (mult.value ?? 2);
 
     // Only check current hole options if they exist
     if (team.options?.$isLoaded) {
@@ -262,7 +335,7 @@ function evaluateUserMultiplier(
         if (!opt?.$isLoaded) continue;
         if (opt.optionName === mult.name) {
           hasMultiplier = true;
-          // Use the value from the option if present
+          // Use the value from the option if present (overrides dynamic calculation)
           if (opt.value) {
             const parsed = Number.parseInt(opt.value, 10);
             if (!Number.isNaN(parsed)) {

@@ -1,0 +1,12 @@
+{
+  "name": "re_pre",
+  "disp": "Re Pre",
+  "type": "multiplier",
+  "value": 2,
+  "seq": 3,
+  "icon": "album",
+  "based_on": "user",
+  "scope": "rest_of_nine",
+  "value_from": "frontNinePreDoubleTotal",
+  "availability": "{\n  \"and\": [\n    {\"==\": [{\"var\": \"holeNum\"}, \"10\"]},\n    {\">\": [{\"frontNinePreDoubleTotal\": [{\"var\": \"team\"}]}, 2]},\n    {\"team_down_the_most\": [{\"getPrevHole\": []}, {\"var\": \"team\"}]}\n  ]\n}"
+}

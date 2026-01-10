@@ -32,6 +32,7 @@
   ],
   "multipliers": [
     "pre_double",
+    "re_pre",
     "double",
     "double_back",
     "birdie_bbq",
