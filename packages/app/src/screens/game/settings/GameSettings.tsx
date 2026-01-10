@@ -7,6 +7,7 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { GamePlayersList } from "@/components/game/settings/GamePlayersList";
 import { GameOptionsList } from "@/components/game/settings/options/GameOptionsList";
 import { GameTeamsList } from "@/components/game/settings/teams";
+import { type SettingsTab, useGameContext } from "@/contexts/GameContext";
 import { GhinCourseSearchProvider } from "@/contexts/GhinCourseSearchContext";
 import { AddPlayerNavigator } from "@/navigators/AddPlayerNavigator";
 import { SelectCourseNavigator } from "@/navigators/SelectCourseNavigator";
@@ -56,6 +57,7 @@ function OptionsTab() {
 
 function GameSettingsTabs() {
   const { theme } = useUnistyles();
+  const { settingsTab, setSettingsTab } = useGameContext();
   const Tabs = createMaterialTopTabNavigator<GameSettingsTabParamList>();
 
   const tabScreenOptions: MaterialTopTabNavigationOptions = {
@@ -74,8 +76,16 @@ function GameSettingsTabs() {
 
   return (
     <Tabs.Navigator
-      initialRouteName="PlayersTab"
+      initialRouteName={settingsTab}
       screenOptions={tabScreenOptions}
+      screenListeners={{
+        state: (e) => {
+          const route = e.data.state?.routes[e.data.state.index];
+          if (route?.name) {
+            setSettingsTab(route.name as SettingsTab);
+          }
+        },
+      }}
     >
       <Tabs.Screen
         name="PlayersTab"

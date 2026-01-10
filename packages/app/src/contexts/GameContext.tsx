@@ -1,6 +1,7 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
 
 export type LeaderboardViewMode = "gross" | "net" | "points";
+export type SettingsTab = "PlayersTab" | "TeamsTab" | "OptionsTab";
 
 type GameContextType = {
   gameId: string | null;
@@ -9,6 +10,8 @@ type GameContextType = {
   setCurrentHoleIndex: (index: number) => void;
   leaderboardViewMode: LeaderboardViewMode;
   setLeaderboardViewMode: (mode: LeaderboardViewMode) => void;
+  settingsTab: SettingsTab;
+  setSettingsTab: (tab: SettingsTab) => void;
 };
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -22,6 +25,7 @@ export function GameProvider({ children }: GameProviderProps) {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [leaderboardViewMode, setLeaderboardViewMode] =
     useState<LeaderboardViewMode>("gross");
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>("PlayersTab");
 
   return (
     <GameContext.Provider
@@ -32,6 +36,8 @@ export function GameProvider({ children }: GameProviderProps) {
         setCurrentHoleIndex,
         leaderboardViewMode,
         setLeaderboardViewMode,
+        settingsTab,
+        setSettingsTab,
       }}
     >
       {children}
