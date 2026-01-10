@@ -329,31 +329,31 @@ function existingPreMultiplierTotal(
 }
 
 /**
- * Calculate the total pre_double multiplier value from the front nine for a team.
+ * Calculate the total pre_double multiplier value from the front nine for the whole game.
  *
  * Used for the "Re Pre" option on hole 10 - allows carrying over accumulated
  * pre_double multipliers from the front nine to the back nine.
  *
- * @param teamId - The team ID to check
+ * @param _teamId - Unused (kept for API compatibility with json-logic operator)
  * @param logicCtx - The logic context containing game holes
- * @returns The total pre_double value (e.g., 4 if two 2x pre_doubles), or 0 if none
+ * @returns The total pre_double value (e.g., 4 if two 2x pre_doubles), or 1 if none
  */
 function getFrontNinePreDoubleTotal(
-  teamId: string,
+  _teamId: string,
   logicCtx: LogicContext,
 ): number {
   const gameHoles = logicCtx.ctx.gameHoles;
-  if (!gameHoles) return 0;
+  if (!gameHoles) return 1;
 
   let total = 1; // Start at 1x (no multiplier)
 
-  // Check holes 1-9 for pre_double options
+  // Check holes 1-9 for pre_double options across ALL teams
   for (let holeNum = 1; holeNum <= 9; holeNum++) {
     const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
     if (!gameHole?.teams?.$isLoaded) continue;
 
     for (const team of gameHole.teams) {
-      if (!team?.$isLoaded || team.team !== teamId) continue;
+      if (!team?.$isLoaded) continue;
       if (!team.options?.$isLoaded) continue;
 
       for (const opt of team.options) {
@@ -367,7 +367,6 @@ function getFrontNinePreDoubleTotal(
     }
   }
 
-  // Return the total (will be 1 if no pre_doubles, 2 for one, 4 for two, etc.)
   return total;
 }
 
@@ -377,6 +376,10 @@ function getFrontNinePreDoubleTotal(
 
 // Track if operators have been registered
 let operatorsRegistered = false;
+
+// Current logic context for operators that need it during evaluation
+// This is set before json-logic.apply() and cleared after
+let currentLogicCtx: LogicContext | null = null;
 
 /**
  * Register custom json-logic operators
@@ -479,8 +482,14 @@ function registerOperators(): void {
 
   // frontNinePreDoubleTotal: get total pre_double multiplier from front nine
   // Used for "Re Pre" option on hole 10 to carry over front nine multipliers
-  jsonLogic.add_operation("frontNinePreDoubleTotal", (team: unknown) => {
-    return { __frontNinePreDoubleTotal: { team } };
+  // This operator returns the actual value (not a placeholder) so it can be used in comparisons
+  jsonLogic.add_operation("frontNinePreDoubleTotal", (_team: unknown) => {
+    if (!currentLogicCtx) {
+      console.warn("[frontNinePreDoubleTotal] No currentLogicCtx available");
+      return 1;
+    }
+    const teamId = currentLogicCtx.team?.teamId ?? "";
+    return getFrontNinePreDoubleTotal(teamId, currentLogicCtx);
   });
 
   operatorsRegistered = true;
@@ -631,14 +640,7 @@ function resolveOperatorResult(
     return existingPreMultiplierTotal(logicCtx.holeResult ?? null, threshold);
   }
 
-  // frontNinePreDoubleTotal
-  if ("__frontNinePreDoubleTotal" in obj) {
-    const { team } = obj.__frontNinePreDoubleTotal as {
-      team: TeamHoleResult | null;
-    };
-    const teamId = team?.teamId ?? logicCtx.team?.teamId ?? "";
-    return getFrontNinePreDoubleTotal(teamId, logicCtx);
-  }
+  // frontNinePreDoubleTotal - now returns value directly, no placeholder resolution needed
 
   return result;
 }
@@ -680,10 +682,17 @@ export function evaluateLogic(
       teams: logicCtx.teams,
       possiblePoints: logicCtx.possiblePoints ?? 0,
       junk: logicCtx.option,
+      holeNum: logicCtx.holeNum,
     };
+
+    // Set context for operators that need it during evaluation
+    currentLogicCtx = logicCtx;
 
     // Apply json-logic
     const result = jsonLogic.apply(parsed, data);
+
+    // Clear context
+    currentLogicCtx = null;
 
     // Resolve any custom operator placeholders
     const resolved = resolveOperatorResult(result, logicCtx, betterPoints);

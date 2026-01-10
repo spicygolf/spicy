@@ -21,21 +21,16 @@ export function Credentials() {
       const kvStoreContext = KvStoreContext.getInstance();
       const store = kvStoreContext.getStorage();
       const jlis = await store.get("jazz-logged-in-secret");
-      console.log("[Credentials] jazz-logged-in-secret raw:", jlis);
       if (jlis) {
         try {
           const parsed = JSON.parse(jlis);
-          console.log("[Credentials] parsed keys:", Object.keys(parsed));
-          console.log("[Credentials] accountSecret:", parsed.accountSecret);
           // accountSecret format: "signer_secret/sealer_secret"
           const parts = parsed.accountSecret?.split("/") ?? [];
           if (parts.length === 2) {
             setSealerSecret(parts[1]);
-          } else {
-            console.log("[Credentials] accountSecret split parts:", parts);
           }
-        } catch (e) {
-          console.log("[Credentials] parse error:", e);
+        } catch {
+          // Ignore parse errors
         }
       }
     };

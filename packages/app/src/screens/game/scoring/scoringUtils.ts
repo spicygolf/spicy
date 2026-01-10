@@ -205,7 +205,63 @@ export function getMultiplierOptions(game: Game): MultiplierOption[] {
   }
 
   multiplierOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
+
+  // Debug: log multiplier options
   return multiplierOptions;
+}
+
+/**
+ * Get the dynamic value for a multiplier based on its value_from field.
+ *
+ * @param mult - The multiplier option
+ * @param gameHoles - All game holes for counting pre_doubles
+ * @returns The calculated value, or mult.value if not dynamic
+ */
+export function getMultiplierValue(
+  mult: MultiplierOption,
+  gameHoles: GameHole[],
+): number {
+  // If no value_from, use static value
+  if (!mult.value_from) {
+    return mult.value ?? 2;
+  }
+
+  if (mult.value_from === "frontNinePreDoubleTotal") {
+    return getFrontNinePreDoubleTotal(gameHoles);
+  }
+
+  // Unknown value_from, use default
+  return mult.value ?? 2;
+}
+
+/**
+ * Calculate the total pre_double multiplier value from the front nine for the whole game.
+ * Used for the "Re Pre" option on hole 10.
+ */
+function getFrontNinePreDoubleTotal(gameHoles: GameHole[]): number {
+  let total = 1; // Start at 1x (no multiplier)
+
+  // Check holes 1-9 for pre_double options across ALL teams
+  for (let holeNum = 1; holeNum <= 9; holeNum++) {
+    const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
+    if (!gameHole?.teams?.$isLoaded) continue;
+
+    for (const team of gameHole.teams) {
+      if (!team?.$isLoaded) continue;
+      if (!team.options?.$isLoaded) continue;
+
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) continue;
+        // Look for pre_double options with firstHole set (activated on this hole)
+        if (opt.optionName === "pre_double" && opt.firstHole) {
+          // Each pre_double is worth 2x, multiply into total
+          total *= 2;
+        }
+      }
+    }
+  }
+
+  return total;
 }
 
 /**
@@ -243,8 +299,9 @@ export function isMultiplierAvailable(
       holeResult,
       ctx,
     );
-  } catch {
+  } catch (e) {
     // If evaluation fails, show the multiplier
+    console.warn("[isMultiplierAvailable] evaluation error:", e);
     return true;
   }
 }

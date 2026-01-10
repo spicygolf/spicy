@@ -49,17 +49,17 @@ function calculateDynamicValue(
 }
 
 /**
- * Calculate the total pre_double multiplier value from the front nine for a team.
+ * Calculate the total pre_double multiplier value from the front nine for the whole game.
  *
  * Used for the "Re Pre" option on hole 10 - allows carrying over accumulated
  * pre_double multipliers from the front nine to the back nine.
  *
- * @param teamId - The team ID to check
+ * @param _teamId - Unused (kept for API compatibility)
  * @param ctx - The scoring context containing game holes
  * @returns The total pre_double value (e.g., 4 if two 2x pre_doubles), or 1 if none
  */
 function getFrontNinePreDoubleTotal(
-  teamId: string,
+  _teamId: string,
   ctx: ScoringContext,
 ): number {
   const gameHoles = ctx.gameHoles;
@@ -67,13 +67,13 @@ function getFrontNinePreDoubleTotal(
 
   let total = 1; // Start at 1x (no multiplier)
 
-  // Check holes 1-9 for pre_double options
+  // Check holes 1-9 for pre_double options across ALL teams
   for (let holeNum = 1; holeNum <= 9; holeNum++) {
     const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
     if (!gameHole?.teams?.$isLoaded) continue;
 
     for (const team of gameHole.teams) {
-      if (!team?.$isLoaded || team.team !== teamId) continue;
+      if (!team?.$isLoaded) continue;
       if (!team.options?.$isLoaded) continue;
 
       for (const opt of team.options) {
@@ -432,12 +432,13 @@ export function evaluateAvailability(
   holeResult: HoleResult,
   ctx: ScoringContext,
   possiblePoints?: number,
+  debug?: boolean,
 ): boolean {
   if (!availability) return true;
 
   const teams = Object.values(holeResult.teams);
 
-  return evaluateLogic(availability, {
+  const logicCtx = {
     ctx,
     holeNum: holeResult.hole,
     holeResult,
@@ -445,7 +446,18 @@ export function evaluateAvailability(
     teams,
     possiblePoints,
     option: { name: "multiplier_availability" },
-  });
+  };
+
+  const result = evaluateLogic(availability, logicCtx);
+
+  if (debug) {
+    console.log("[evaluateAvailability] availability:", availability);
+    console.log("[evaluateAvailability] holeNum:", holeResult.hole);
+    console.log("[evaluateAvailability] teamId:", teamResult.teamId);
+    console.log("[evaluateAvailability] result:", result);
+  }
+
+  return result;
 }
 
 // =============================================================================

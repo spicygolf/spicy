@@ -25,6 +25,7 @@ import {
   getCalculatedTeamJunkOptions,
   getInheritedMultiplierStatus,
   getMultiplierOptions,
+  getMultiplierValue,
   getTeamMultiplierStatus,
   getUserJunkOptions,
   hasCalculatedPlayerJunk,
@@ -341,6 +342,9 @@ export function ScoringView({
               // Get firstHole from whichever source has it
               const firstHole = status.firstHole ?? inherited.firstHole;
 
+              // Calculate dynamic value for multipliers with value_from
+              const multiplierValue = getMultiplierValue(mult, gameHoles);
+
               return {
                 name: mult.name,
                 displayName: mult.disp,
@@ -348,6 +352,7 @@ export function ScoringView({
                 type: "multiplier" as const,
                 selected: isActive,
                 inherited: isInherited,
+                points: multiplierValue,
               };
             });
 
