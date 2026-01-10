@@ -8,7 +8,7 @@ The current GHIN player linking is first-come-first-served: anyone who knows a G
 
 ## Current Implementation
 
-```
+```text
 User enters GHIN ID → API links player → Account now "owns" that GHIN player
 ```
 
@@ -29,7 +29,7 @@ No verification that the user actually owns the GHIN account.
 
 ## Proposed Solutions
 
-### Option 1: Email Verification (Recommended)
+### Option 1: Email Verification (Long-term)
 
 Use the email associated with the GHIN account to verify ownership.
 

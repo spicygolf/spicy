@@ -45,7 +45,7 @@ export function LinkGhin() {
     me?.$isLoaded && me.root?.$isLoaded && me.root.player?.$isLoaded
       ? me.root.player
       : null;
-  const isLinked = linkedPlayer?.ghinId != null;
+  const isLinked = linkedPlayer?.$jazz.has("ghinId") ?? false;
 
   const handleLink = async () => {
     if (!ghinId.trim()) {
@@ -234,7 +234,7 @@ export function LinkGhin() {
           <View style={styles.linkedInfo}>
             <Text style={styles.linkedLabel}>Linked to:</Text>
             <Text style={styles.linkedName}>{linkedPlayer.name}</Text>
-            {linkedPlayer.ghinId && (
+            {linkedPlayer.$jazz.has("ghinId") && (
               <Text style={styles.linkedGhin}>GHIN: {linkedPlayer.ghinId}</Text>
             )}
             {linkedPlayer.handicap?.$isLoaded &&
