@@ -4,6 +4,8 @@
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    // Node types needed for: process.env (useApi.ts), Buffer polyfill (polyfills.ts)
+    "types": ["node"],
     "paths": {
       "@/*": ["./src/*"]
     }

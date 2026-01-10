@@ -2,23 +2,15 @@ import type { Golfer, GolfersSearchRequest } from "@spicygolf/ghin";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { getMillisecondsUntilTargetTime } from "spicylib/utils";
-import { useApi } from "@/hooks";
+import { apiPost } from "@/lib/api-client";
 
 // Function to search players via API
-async function searchPlayer(
-  api: string,
-  search: GolfersSearchRequest,
-): Promise<Golfer[]> {
+async function searchPlayer(search: GolfersSearchRequest): Promise<Golfer[]> {
   try {
-    const response = await axios.post(`${api}/ghin/players/search`, search, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      // withCredentials: true, // Include cookies for authentication
-    });
+    const data = await apiPost<Golfer[]>("/ghin/players/search", search);
 
     // Transform the response to convert ISO date strings back to Date objects
-    const golfers: Golfer[] = response.data.map((golfer: Golfer) => ({
+    const golfers: Golfer[] = data.map((golfer: Golfer) => ({
       ...golfer,
       rev_date: golfer.rev_date ? new Date(golfer.rev_date) : null,
       low_hi_date: golfer.low_hi_date ? new Date(golfer.low_hi_date) : null,
@@ -34,8 +26,6 @@ async function searchPlayer(
 }
 
 export function useGhinSearchPlayerQuery(search: GolfersSearchRequest) {
-  const api = useApi();
-
   const searchParams = {
     ...search,
     last_name: `${search.last_name}%`,
@@ -55,7 +45,7 @@ export function useGhinSearchPlayerQuery(search: GolfersSearchRequest) {
 
   return useQuery({
     queryKey: ["ghin-player-search", searchParams],
-    queryFn: () => searchPlayer(api, searchParams),
+    queryFn: () => searchPlayer(searchParams),
     // Enable when we have at least a name to search
     // TODO: put rules in place here, like at least 3 letters of last name
     //       one of last, country, state... whatever rules are in GHIN API

@@ -2,13 +2,12 @@
  * Jazz React App Context
  *
  * Provides Jazz authentication and data sync for the web app.
- * Uses better-auth for authentication with Jazz integration.
+ * Uses passphrase auth for development (passkey auth coming when Jazz PR merges).
  */
-import { AuthProvider } from "jazz-tools/better-auth/auth/react";
 import { JazzReactProvider } from "jazz-tools/react";
 import type { ReactNode } from "react";
 import { PlayerAccount } from "spicylib/schema";
-import { betterAuthClient } from "./auth-client";
+import { PassphraseAuthUI } from "@/components/PassphraseAuthUI";
 
 export function JazzProvider({ children }: { children: ReactNode }) {
   const peer =
@@ -17,10 +16,7 @@ export function JazzProvider({ children }: { children: ReactNode }) {
 
   return (
     <JazzReactProvider sync={{ peer }} AccountSchema={PlayerAccount}>
-      {/* @ts-ignore - betterAuthClient types incompatible with AuthProvider */}
-      <AuthProvider betterAuthClient={betterAuthClient}>
-        {children}
-      </AuthProvider>
+      <PassphraseAuthUI>{children}</PassphraseAuthUI>
     </JazzReactProvider>
   );
 }

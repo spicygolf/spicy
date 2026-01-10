@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { useApi } from "./useApi";
+import { apiGet } from "@/lib/api-client";
 
 interface State {
   name: string;
@@ -15,23 +14,20 @@ interface Country {
   states: State[];
 }
 
-async function fetchCountries(apiUrl: string): Promise<Country[]> {
-  const response = await axios.get(`${apiUrl}/ghin/countries`);
-  return response.data || [];
+async function fetchCountries(): Promise<Country[]> {
+  return apiGet<Country[]>("/ghin/countries");
 }
 
 const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function useGetCountriesAndStates() {
-  const api = useApi();
-
   const {
     data: countries,
     error,
     isLoading,
   } = useQuery({
     queryKey: ["ghin-countries"],
-    queryFn: () => fetchCountries(api),
+    queryFn: () => fetchCountries(),
     staleTime: ONE_MONTH_MS,
     gcTime: Number.POSITIVE_INFINITY,
     refetchOnMount: false,

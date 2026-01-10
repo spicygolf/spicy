@@ -4,7 +4,7 @@
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true,
-    "root": "."
+    "root": ".",
   },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
@@ -18,55 +18,55 @@
           "options": {
             "paths": {
               "../../*": {
-                "message": "Imports from more than one level up are not allowed. Try importing using the @/* alias."
+                "message": "Imports from more than one level up are not allowed. Try importing using the @/* alias.",
               },
               "app/*": {
-                "message": "Please use '@/*' alias instead."
+                "message": "Please use '@/*' alias instead.",
               },
               "components/*": {
-                "message": "Please use '@/*' alias instead."
+                "message": "Please use '@/*' alias instead.",
               },
               "hooks/*": {
-                "message": "Please use '@/*' alias instead."
+                "message": "Please use '@/*' alias instead.",
               },
               "navigators/*": {
-                "message": "Please use '@/*' alias instead."
+                "message": "Please use '@/*' alias instead.",
               },
               "providers/*": {
-                "message": "Please use '@/*' alias instead."
+                "message": "Please use '@/*' alias instead.",
               },
               "schema/*": {
-                "message": "Please use '@/*' alias instead."
+                "message": "Please use '@/*' alias instead.",
               },
               "screens/*": {
-                "message": "Please use '@/*' alias instead."
+                "message": "Please use '@/*' alias instead.",
               },
               "ui/*": {
-                "message": "Please use '@/*' alias instead."
+                "message": "Please use '@/*' alias instead.",
               },
               "utils/*": {
-                "message": "Please use '@/*' alias instead."
+                "message": "Please use '@/*' alias instead.",
               },
               "react-native": {
-                "importNames": ["TextInput", "Text"],
-                "message": "Please use '@/ui' instead of 'react-native'"
-              }
-            }
-          }
+                "importNames": ["Text", "TextInput"],
+                "message": "Please use '@/ui' instead of 'react-native'",
+              },
+            },
+          },
         },
-        "useNodejsImportProtocol": "off"
+        "useNodejsImportProtocol": "off",
       },
       "nursery": {},
       "correctness": {
         "noNestedComponentDefinitions": "error",
-        "noReactPropAssignments": "error"
-      }
-    }
+        "noReactPropAssignments": "error",
+      },
+    },
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
-    "indentWidth": 2
+    "indentWidth": 2,
   },
   "files": {
     "ignoreUnknown": true,
@@ -76,7 +76,7 @@
       "**/*.js",
       "**/*.jsx",
       "**/*.json",
-      "**/*.jsonc"
-    ]
-  }
+      "**/*.jsonc",
+    ],
+  },
 }

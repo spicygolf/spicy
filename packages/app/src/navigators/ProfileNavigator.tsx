@@ -1,10 +1,16 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useUnistyles } from "react-native-unistyles";
+import { AccountScreen } from "@/screens/profile/AccountScreen";
 import { DeveloperToolsScreen } from "@/screens/profile/DeveloperToolsScreen";
+import { GhinLinkScreen } from "@/screens/profile/GhinLinkScreen";
 import { ProfileHome } from "@/screens/profile/ProfileHome";
+import { ThemeScreen } from "@/screens/profile/ThemeScreen";
 
 export type ProfileNavigatorParamList = {
   ProfileHome: undefined;
+  ThemeScreen: undefined;
+  GhinLinkScreen: undefined;
+  AccountScreen: undefined;
   DeveloperToolsScreen: undefined;
 };
 
@@ -29,6 +35,27 @@ export function ProfileNavigator() {
         options={{
           title: "Profile",
           headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="ThemeScreen"
+        component={ThemeScreen}
+        options={{
+          title: "Theme",
+        }}
+      />
+      <Stack.Screen
+        name="GhinLinkScreen"
+        component={GhinLinkScreen}
+        options={{
+          title: "GHIN Link",
+        }}
+      />
+      <Stack.Screen
+        name="AccountScreen"
+        component={AccountScreen}
+        options={{
+          title: "Account",
         }}
       />
       <Stack.Screen

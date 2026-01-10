@@ -1,5 +1,5 @@
 import type { co } from "jazz-tools";
-import { useAccount, useIsAuthenticated } from "jazz-tools/react";
+import { useAccount, useLogOut } from "jazz-tools/react";
 import {
   BookOpen,
   Calculator,
@@ -11,10 +11,9 @@ import {
   Upload,
   User,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PlayerAccount } from "spicylib/schema";
 import { CatalogBrowser } from "@/components/CatalogBrowser";
-import { LoginForm } from "@/components/LoginForm";
 import { PlayerBrowser } from "@/components/PlayerBrowser";
 import { ScoringExplorer } from "@/components/ScoringExplorer";
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,6 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
-import { betterAuthClient } from "@/lib/auth-client";
 import {
   deleteUserSpecs,
   downloadExportAsJson,
@@ -42,10 +40,10 @@ import { isWorkerAccount } from "@/lib/worker-auth";
 
 export function App(): React.JSX.Element {
   const { toast } = useToast();
-  const isAuthenticated = useIsAuthenticated();
-  const me = useAccount(PlayerAccount, { resolve: { root: true } });
-  const [userEmail, setUserEmail] = useState<string | undefined>();
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const logOut = useLogOut();
+  const me = useAccount(PlayerAccount, {
+    resolve: { root: true, profile: true },
+  });
   const [activeTab, setActiveTab] = useState<string>("import");
   const [isImporting, setIsImporting] = useState<boolean>(false);
   const [importProgress, setImportProgress] = useState<number>(0);
@@ -72,24 +70,6 @@ export function App(): React.JSX.Element {
   const [importPlayers, setImportPlayers] = useState<boolean>(false);
   const [importGames, setImportGames] = useState<boolean>(true);
   const [gameLegacyId, setGameLegacyId] = useState<string>("");
-
-  // Fetch user email and admin status from better-auth session
-  useEffect(() => {
-    if (isAuthenticated) {
-      betterAuthClient
-        .getSession()
-        .then((session) => {
-          if (session.data?.user?.email) {
-            setUserEmail(session.data.user.email);
-          }
-          // isAdmin is set server-side via customSession plugin
-          setIsAdmin(session.data?.session?.isAdmin ?? false);
-        })
-        .catch((error) => {
-          console.error("Failed to get session:", error);
-        });
-    }
-  }, [isAuthenticated]);
 
   const handleImportToCatalog = async (): Promise<void> => {
     if (!me) {
@@ -453,32 +433,14 @@ export function App(): React.JSX.Element {
   };
 
   const handleLogout = (): void => {
-    betterAuthClient.signOut().catch((error) => {
-      console.error("Sign out error:", error);
-    });
+    logOut();
   };
 
   const isWorker = me ? isWorkerAccount(me.$jazz.id) : false;
-  // Note: isAdmin is set server-side via better-auth customSession plugin
-
-  // Show auth UI if not logged in
-  if (!isAuthenticated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Spicy Golf Developer Dashboard</CardTitle>
-            <CardDescription>
-              Log in to manage game catalog and specs
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <LoginForm />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Admin check: worker account is admin
+  const isAdmin = isWorker;
+  const userName =
+    me?.$isLoaded && me.profile?.$isLoaded ? me.profile.name : "User";
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -494,7 +456,7 @@ export function App(): React.JSX.Element {
             <div className="flex items-center gap-2 text-sm">
               <User className="h-4 w-4" />
               <span>
-                Logged in as {userEmail || "User"}
+                Logged in as {userName}
                 {isWorker && (
                   <strong className="text-green-600"> (Worker Account)</strong>
                 )}

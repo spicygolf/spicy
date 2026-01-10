@@ -7,7 +7,9 @@ import { storage } from "@/providers/jazz/mmkv-store";
 const CREDENTIALS_KEY = "spicy-jazz-credentials";
 
 interface JazzCredentials {
-  apiKey: string;
+  // Jazz cloud connection key (public, used in WebSocket URL)
+  cloudKey: string;
+  // Worker account ID (public, used to load shared catalog)
   workerAccount: string;
 }
 
