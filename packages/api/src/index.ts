@@ -36,7 +36,6 @@ let gamesImportInProgress = false;
  *
  * Provides stateless authentication using Jazz tokens.
  * Use { jazzAuth: true } on routes to require authentication.
- * Use { jazzAuth: 'optional' } to allow unauthenticated requests.
  */
 const jazzAuth = new Elysia({ name: "jazz-auth" }).macro({
   jazzAuth: {
@@ -164,7 +163,10 @@ const app = new Elysia()
     { jazzAuth: true },
   )
   .get(`/${api}/jazz/credentials`, () => ({
-    apiKey: process.env.JAZZ_API_KEY,
+    // Jazz cloud connection key (public, used in frontend WebSocket URL)
+    // This is NOT a secret - Jazz docs show it as NEXT_PUBLIC_JAZZ_API_KEY
+    cloudKey: process.env.JAZZ_API_KEY,
+    // Worker account ID (public, used to load shared catalog data)
     workerAccount: process.env.JAZZ_WORKER_ACCOUNT,
   }))
   // Admin endpoints - protected by Jazz auth + admin check

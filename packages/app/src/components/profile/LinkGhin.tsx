@@ -79,17 +79,32 @@ export function LinkGhin() {
         });
       }
 
-      // Wait for Jazz to sync the group membership
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       const root = me.root;
 
-      // Initialize games list if it doesn't exist
-      if (!root.$jazz.has("games")) {
-        root.$jazz.set(
-          "games",
-          ListOfGames.create([], { owner: root.$jazz.owner }),
-        );
+      // Initialize games list if it doesn't exist (with retry for group sync)
+      const maxRetries = 5;
+      const retryDelay = 500; // ms
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          if (!root.$jazz.has("games")) {
+            root.$jazz.set(
+              "games",
+              ListOfGames.create([], { owner: root.$jazz.owner }),
+            );
+          }
+          break; // Success, exit retry loop
+        } catch {
+          if (attempt === maxRetries - 1) {
+            throw new Error(
+              "Failed to initialize games list. Please try again.",
+            );
+          }
+          // Wait with exponential backoff before retrying
+          await new Promise((resolve) =>
+            setTimeout(resolve, retryDelay * 2 ** attempt),
+          );
+        }
       }
 
       // Load and add games to root.games

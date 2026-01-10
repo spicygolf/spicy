@@ -34,6 +34,7 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmSaved, setConfirmSaved] = useState(false);
 
   if (auth.state === "signedIn") {
     return <>{children}</>;
@@ -52,6 +53,7 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
   const handleReroll = () => {
     const newPassphrase = auth.generateRandomPassphrase();
     setCurrentPassphrase(newPassphrase);
+    setConfirmSaved(false); // Reset confirmation when passphrase changes
   };
 
   const handleBack = () => {
@@ -174,6 +176,19 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
                 </div>
               </div>
 
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="confirm-saved"
+                  checked={confirmSaved}
+                  onChange={(e) => setConfirmSaved(e.target.checked)}
+                  className="mt-1"
+                />
+                <Label htmlFor="confirm-saved" className="cursor-pointer">
+                  I have securely saved my recovery passphrase
+                </Label>
+              </div>
+
               {error && <p className="text-sm text-red-600">{error}</p>}
 
               <div className="flex gap-2 pt-4">
@@ -183,7 +198,7 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
                 <Button
                   className="flex-1"
                   onClick={handleRegister}
-                  disabled={isLoading}
+                  disabled={isLoading || !confirmSaved}
                 >
                   {isLoading ? "Creating..." : "Create Account"}
                 </Button>

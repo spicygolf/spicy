@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   Alert,
   Button,
+  Pressable,
   ScrollView,
   View,
 } from "react-native";
@@ -34,6 +35,7 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
     auth.generateRandomPassphrase(),
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [confirmSaved, setConfirmSaved] = useState(false);
 
   if (auth.state === "signedIn") {
     return <>{children}</>;
@@ -50,6 +52,7 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
   const handleReroll = () => {
     const newPassphrase = auth.generateRandomPassphrase();
     setCurrentPassphrase(newPassphrase);
+    setConfirmSaved(false); // Reset confirmation when passphrase changes
   };
 
   const handleCopyPassphrase = () => {
@@ -148,13 +151,34 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
               <Button title="Copy" onPress={handleCopyPassphrase} />
             </View>
 
+            <Pressable
+              style={styles.checkboxRow}
+              onPress={() => setConfirmSaved(!confirmSaved)}
+            >
+              <View
+                style={[
+                  styles.checkbox,
+                  confirmSaved && styles.checkboxChecked,
+                ]}
+              >
+                {confirmSaved && <Text style={styles.checkmark}>✓</Text>}
+              </View>
+              <Text style={styles.checkboxLabel}>
+                I have securely saved my recovery passphrase
+              </Text>
+            </Pressable>
+
             <View style={styles.buttonRow}>
               <Button title="Back" onPress={handleBack} />
               <View style={styles.buttonSpacer} />
               {isLoading ? (
                 <ActivityIndicator />
               ) : (
-                <Button title="Create Account" onPress={handleRegister} />
+                <Button
+                  title="Create Account"
+                  onPress={handleRegister}
+                  disabled={!confirmSaved}
+                />
               )}
             </View>
           </View>
@@ -267,5 +291,36 @@ const styles = StyleSheet.create((theme) => ({
   },
   buttonSpacer: {
     width: 16,
+  },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    marginTop: 8,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    borderRadius: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.background,
+  },
+  checkboxChecked: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  checkmark: {
+    color: theme.colors.background,
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  checkboxLabel: {
+    flex: 1,
+    fontSize: 14,
+    color: theme.colors.primary,
+    lineHeight: 22,
   },
 }));
