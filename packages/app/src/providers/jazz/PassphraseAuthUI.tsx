@@ -14,11 +14,10 @@ import {
   Alert,
   Button,
   ScrollView,
-  TextInput,
   View,
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { Text } from "@/ui";
+import { Text, TextInput } from "@/ui";
 
 interface PassphraseAuthUIProps {
   children: React.ReactNode;

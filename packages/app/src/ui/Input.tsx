@@ -1,3 +1,10 @@
+/**
+ * Form Input component with label and validation support
+ *
+ * Use this for form-controlled inputs with labels and react-hook-form.
+ * For simple styled text inputs, use TextInput from @/ui instead.
+ */
+
 import { useState } from "react";
 import type {
   Control,
@@ -6,12 +13,12 @@ import type {
   RegisterOptions,
 } from "react-hook-form";
 import { useController } from "react-hook-form";
-import type { TextInputProps } from "react-native";
-import { TextInput, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Text } from "@/ui";
+import type { TextInputProps as RNTextInputProps } from "react-native";
+import { View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { Text, TextInput } from "@/ui";
 
-interface InputProps<F extends FieldValues> extends TextInputProps {
+interface InputProps<F extends FieldValues> extends RNTextInputProps {
   name: Path<F>;
   label: string;
   control?: Control<F>;
@@ -23,7 +30,7 @@ interface InputProps<F extends FieldValues> extends TextInputProps {
 
 // Standalone props for when not using react-hook-form
 interface StandaloneInputProps
-  extends Omit<TextInputProps, "value" | "onChangeText"> {
+  extends Omit<RNTextInputProps, "value" | "onChangeText"> {
   label: string;
   value?: string;
   onChangeText?: (text: string) => void;
@@ -48,18 +55,15 @@ function FormControlledInput<F extends FieldValues>({
     fieldState: { error },
   } = useController({ name, control, rules });
 
-  const { theme } = useUnistyles();
-
   return (
     <View>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.inputContainer}>
         <TextInput
-          style={[styles.input, error && styles.inputError]}
           value={field.value || ""}
           onChangeText={field.onChange}
           onBlur={field.onBlur}
-          placeholderTextColor={theme.colors.secondary}
+          hasError={!!error}
           {...rest}
         />
         {error?.message ? (
@@ -79,7 +83,6 @@ function StandaloneInput({
   ...rest
 }: StandaloneInputProps) {
   const [internalValue, setInternalValue] = useState(value || "");
-  const { theme } = useUnistyles();
 
   const handleChangeText = (text: string) => {
     setInternalValue(text);
@@ -91,10 +94,9 @@ function StandaloneInput({
       <Text style={styles.label}>{label}</Text>
       <View style={styles.inputContainer}>
         <TextInput
-          style={[styles.input, error && styles.inputError]}
           value={value !== undefined ? value : internalValue}
           onChangeText={handleChangeText}
-          placeholderTextColor={theme.colors.secondary}
+          hasError={!!error}
           {...rest}
         />
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -123,18 +125,8 @@ const styles = StyleSheet.create((theme) => ({
   inputContainer: {
     marginBottom: 10,
   },
-  input: {
-    borderRadius: theme.gap(0.75),
-    borderWidth: 0.75,
-    borderColor: theme.colors.secondary,
-    padding: theme.gap(1),
-    color: theme.colors.primary,
-  },
-  inputError: {
-    borderColor: "#dc3545",
-  },
   errorText: {
-    color: "#dc3545",
+    color: theme.colors.error,
     fontSize: 12,
     marginTop: 3,
   },

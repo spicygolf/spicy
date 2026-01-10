@@ -48,7 +48,7 @@
                 "message": "Please use '@/*' alias instead.",
               },
               "react-native": {
-                "importNames": ["Text"],
+                "importNames": ["Text", "TextInput"],
                 "message": "Please use '@/ui' instead of 'react-native'",
               },
             },

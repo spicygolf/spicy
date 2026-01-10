@@ -6,3 +6,4 @@ export * from "./Markdown";
 export * from "./Picker";
 export * from "./Screen";
 export * from "./Text";
+export * from "./TextInput";
