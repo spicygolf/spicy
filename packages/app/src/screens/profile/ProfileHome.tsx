@@ -3,6 +3,7 @@ import { StyleSheet } from "react-native-unistyles";
 import { Credentials } from "@/components/profile/Credentials";
 import { DeveloperTools } from "@/components/profile/DeveloperTools";
 import { Logout } from "@/components/profile/Logout";
+import { RecoveryPhrase } from "@/components/profile/RecoveryPhrase";
 import { Theme } from "@/components/profile/Theme";
 import { Screen } from "@/ui";
 
@@ -12,6 +13,7 @@ export function ProfileHome() {
       <View style={styles.container}>
         <Theme />
         <Credentials />
+        <RecoveryPhrase />
         <DeveloperTools />
         <Logout />
       </View>
