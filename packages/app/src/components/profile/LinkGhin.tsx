@@ -203,19 +203,15 @@ export function LinkGhin() {
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
+    gap: theme.gap(1),
   },
   title: {
     fontWeight: "bold",
     fontSize: 16,
-    marginBottom: 8,
   },
   description: {
     fontSize: 12,
     color: theme.colors.secondary,
-    marginBottom: 12,
   },
   linkContainer: {
     gap: 12,

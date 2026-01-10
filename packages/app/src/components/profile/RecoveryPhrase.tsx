@@ -104,19 +104,15 @@ export function RecoveryPhrase() {
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
+    gap: theme.gap(1),
   },
   title: {
     fontWeight: "bold",
     fontSize: 16,
-    marginBottom: 4,
   },
   description: {
     fontSize: 12,
     color: theme.colors.secondary,
-    marginBottom: 12,
   },
   passphraseContainer: {
     marginBottom: 8,
