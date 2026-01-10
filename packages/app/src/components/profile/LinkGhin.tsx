@@ -132,9 +132,25 @@ export function LinkGhin() {
         }
       }
 
-      const message = hasGames
-        ? `Linked to ${result.playerName}!\n\n${gamesLinked} game(s) imported from the previous version of Spicy Golf.`
-        : `Linked to ${result.playerName}!`;
+      // Build success message with games and favorites info
+      const parts: string[] = [];
+
+      if (gamesLinked > 0) {
+        parts.push(`${gamesLinked} game(s)`);
+      }
+
+      if (result.favorites?.players > 0) {
+        parts.push(`${result.favorites.players} favorite player(s)`);
+      }
+
+      if (result.favorites?.courseTees > 0) {
+        parts.push(`${result.favorites.courseTees} favorite course/tee(s)`);
+      }
+
+      const message =
+        parts.length > 0
+          ? `Linked to ${result.playerName}!\n\nImported from Spicy Golf v0.3:\n• ${parts.join("\n• ")}`
+          : `Linked to ${result.playerName}!`;
 
       Alert.alert("Success", message);
       setGhinId("");
