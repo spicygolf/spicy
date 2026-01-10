@@ -115,10 +115,7 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
               <CardDescription>Web Admin &amp; Tools</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button
-                className="w-full"
-                onClick={handleCreateAccount}
-              >
+              <Button className="w-full" onClick={handleCreateAccount}>
                 Create Account
               </Button>
               <Button
@@ -164,11 +161,7 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
                   rows={4}
                 />
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleReroll}
-                  >
+                  <Button variant="outline" size="sm" onClick={handleReroll}>
                     Generate New
                   </Button>
                   <Button
@@ -181,9 +174,7 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
                 </div>
               </div>
 
-              {error && (
-                <p className="text-sm text-red-600">{error}</p>
-              )}
+              {error && <p className="text-sm text-red-600">{error}</p>}
 
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" onClick={handleBack}>
@@ -205,9 +196,7 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
           <>
             <CardHeader>
               <CardTitle>Log In</CardTitle>
-              <CardDescription>
-                Enter your recovery passphrase
-              </CardDescription>
+              <CardDescription>Enter your recovery passphrase</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -222,9 +211,7 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
                 />
               </div>
 
-              {error && (
-                <p className="text-sm text-red-600">{error}</p>
-              )}
+              {error && <p className="text-sm text-red-600">{error}</p>}
 
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" onClick={handleBack}>
