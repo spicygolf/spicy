@@ -2,16 +2,12 @@ import { ScrollView, useWindowDimensions, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
 import type { Scoreboard } from "spicylib/scoring";
+import { useGameContext } from "@/contexts/GameContext";
 import { useGame } from "@/hooks";
 import { useScoreboard } from "@/hooks/useScoreboard";
 import { ButtonGroup, Screen, Text } from "@/ui";
 
 type ViewMode = "gross" | "net" | "points";
-
-interface GameLeaderboardProps {
-  viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
-}
 
 /**
  * Find which team a player belongs to on a given hole
@@ -410,10 +406,9 @@ function getScoreDecoration(
   return null;
 }
 
-export function GameLeaderboard({
-  viewMode,
-  onViewModeChange,
-}: GameLeaderboardProps) {
+export function GameLeaderboard() {
+  const { leaderboardViewMode: viewMode, setLeaderboardViewMode } =
+    useGameContext();
   const { width: screenWidth } = useWindowDimensions();
 
   const { game } = useGame(undefined, {
@@ -468,9 +463,12 @@ export function GameLeaderboard({
       <View style={styles.toggleContainer}>
         <ButtonGroup
           buttons={[
-            { label: "gross", onPress: () => onViewModeChange("gross") },
-            { label: "net", onPress: () => onViewModeChange("net") },
-            { label: "points", onPress: () => onViewModeChange("points") },
+            { label: "gross", onPress: () => setLeaderboardViewMode("gross") },
+            { label: "net", onPress: () => setLeaderboardViewMode("net") },
+            {
+              label: "points",
+              onPress: () => setLeaderboardViewMode("points"),
+            },
           ]}
           selectedIndex={viewMode === "gross" ? 0 : viewMode === "net" ? 1 : 2}
         />

@@ -1,8 +1,14 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
 
+export type LeaderboardViewMode = "gross" | "net" | "points";
+
 type GameContextType = {
   gameId: string | null;
   setGameId: (gameId: string | null) => void;
+  currentHoleIndex: number;
+  setCurrentHoleIndex: (index: number) => void;
+  leaderboardViewMode: LeaderboardViewMode;
+  setLeaderboardViewMode: (mode: LeaderboardViewMode) => void;
 };
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -13,9 +19,21 @@ type GameProviderProps = {
 
 export function GameProvider({ children }: GameProviderProps) {
   const [gameId, setGameId] = useState<string | null>(null);
+  const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
+  const [leaderboardViewMode, setLeaderboardViewMode] =
+    useState<LeaderboardViewMode>("gross");
 
   return (
-    <GameContext.Provider value={{ gameId, setGameId }}>
+    <GameContext.Provider
+      value={{
+        gameId,
+        setGameId,
+        currentHoleIndex,
+        setCurrentHoleIndex,
+        leaderboardViewMode,
+        setLeaderboardViewMode,
+      }}
+    >
       {children}
     </GameContext.Provider>
   );

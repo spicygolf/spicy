@@ -18,7 +18,6 @@ type GameNavigatorProps = NativeStackScreenProps<
 >;
 
 type GameView = "leaderboard" | "scoring" | "settings";
-type LeaderboardViewMode = "gross" | "net" | "points";
 
 async function getFacilityName(game: Game): Promise<string | undefined> {
   if (!game.rounds?.$isLoaded || game.rounds.length === 0) {
@@ -67,8 +66,6 @@ export function GameNavigator({ route }: GameNavigatorProps) {
   const { setGameId } = useGameContext();
   const initialView = route.params.initialView || "scoring";
   const [currentView, setCurrentView] = useState<GameView>(initialView);
-  const [leaderboardViewMode, setLeaderboardViewMode] =
-    useState<LeaderboardViewMode>("gross");
 
   // Extract gameId from route params
   const gameId = route.params.gameId;
@@ -121,12 +118,7 @@ export function GameNavigator({ route }: GameNavigatorProps) {
         facilityName={facilityName}
       />
       <View style={styles.content}>
-        {currentView === "leaderboard" && (
-          <GameLeaderboard
-            viewMode={leaderboardViewMode}
-            onViewModeChange={setLeaderboardViewMode}
-          />
-        )}
+        {currentView === "leaderboard" && <GameLeaderboard />}
         {currentView === "scoring" && (
           <GameScoring
             onNavigateToSettings={() => setCurrentView("settings")}
