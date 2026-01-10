@@ -27,6 +27,7 @@ export function ProfileNavigator() {
         },
         headerTintColor: theme.colors.primary,
         headerShadowVisible: false,
+        headerBackButtonDisplayMode: "minimal",
       }}
     >
       <Stack.Screen

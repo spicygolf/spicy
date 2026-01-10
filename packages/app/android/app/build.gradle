@@ -132,7 +132,7 @@ dependencies {
     implementation("com.facebook.react:react-android")
 
     // Splash screen (Android 12+ API with backport)
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("androidx.core:core-splashscreen:1.2.0")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
