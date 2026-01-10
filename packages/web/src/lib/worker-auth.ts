@@ -1,7 +1,7 @@
 /**
  * Worker Account Authentication
  *
- * Utilities for checking the JAZZ_WORKER_ACCOUNT
+ * Utilities for checking the JAZZ_WORKER_ACCOUNT.
  * This account owns the shared GameCatalog.
  * Note: The web client only needs the account ID to READ the public catalog.
  * Catalog modifications happen server-side via the API with proper authentication.
@@ -33,4 +33,23 @@ export function isWorkerAccount(currentAccountId?: string): boolean {
   }
 
   return currentAccountId === workerAccountId;
+}
+
+/**
+ * Check if account is an admin via API call
+ * This keeps admin list server-side for security
+ */
+export async function checkIsAdmin(apiUrl: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${apiUrl}/auth/is-admin`, {
+      credentials: "include",
+    });
+    if (!response.ok) {
+      return false;
+    }
+    const data = await response.json();
+    return data.isAdmin === true;
+  } catch {
+    return false;
+  }
 }

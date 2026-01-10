@@ -11,7 +11,7 @@ import {
   Upload,
   User,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlayerAccount } from "spicylib/schema";
 import { CatalogBrowser } from "@/components/CatalogBrowser";
 import { PlayerBrowser } from "@/components/PlayerBrowser";
@@ -36,7 +36,7 @@ import {
   exportUserSpecs,
   migrateUserSpecs,
 } from "@/lib/user-migration";
-import { isWorkerAccount } from "@/lib/worker-auth";
+import { checkIsAdmin, isWorkerAccount } from "@/lib/worker-auth";
 
 export function App(): React.JSX.Element {
   const { toast } = useToast();
@@ -70,6 +70,16 @@ export function App(): React.JSX.Element {
   const [importPlayers, setImportPlayers] = useState<boolean>(false);
   const [importGames, setImportGames] = useState<boolean>(true);
   const [gameLegacyId, setGameLegacyId] = useState<string>("");
+
+  // Admin status (checked via API for security)
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+  useEffect(() => {
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
+    if (me?.$isLoaded) {
+      checkIsAdmin(apiUrl).then(setIsAdmin);
+    }
+  }, [me?.$isLoaded]);
 
   const handleImportToCatalog = async (): Promise<void> => {
     if (!me) {
@@ -437,8 +447,7 @@ export function App(): React.JSX.Element {
   };
 
   const isWorker = me ? isWorkerAccount(me.$jazz.id) : false;
-  // Admin check: worker account is admin
-  const isAdmin = isWorker;
+  // isAdmin is set via useEffect + API call above
   const userName =
     me?.$isLoaded && me.profile?.$isLoaded ? me.profile.name : "User";
 
