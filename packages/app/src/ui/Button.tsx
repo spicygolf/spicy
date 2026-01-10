@@ -15,16 +15,14 @@ export function Button({ label, onPress, disabled }: ButtonProps) {
       onPress={onPress}
       disabled={disabled}
     >
-      <Text style={[styles.text, disabled && styles.disabledText]}>
-        {label}
-      </Text>
+      <Text style={styles.text}>{label}</Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    padding: 10,
+    padding: 12,
     backgroundColor: theme.colors.action,
     borderRadius: 10,
     alignItems: "center",
@@ -37,8 +35,5 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 16,
     fontWeight: "bold",
     color: theme.colors.actionText,
-  },
-  disabledText: {
-    color: theme.colors.secondary,
   },
 }));

@@ -8,8 +8,8 @@ export function GhinLinkScreen() {
     <Screen>
       <View style={styles.container}>
         <Text style={styles.description}>
-          Link your account to your GHIN player record to access your handicap
-          and imported games.
+          Link your Spicy Golf account to your GHIN account to access your
+          handicap and post scores.
         </Text>
         <LinkGhin />
       </View>

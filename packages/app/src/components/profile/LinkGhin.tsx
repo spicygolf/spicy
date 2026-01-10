@@ -168,8 +168,7 @@ export function LinkGhin() {
       ) : (
         <View style={styles.linkContainer}>
           <Text style={styles.description}>
-            Link your account to your GHIN player to access your imported games
-            and handicap data.
+            Enter your GHIN ID to link your account.
           </Text>
 
           <View style={styles.inputRow}>
