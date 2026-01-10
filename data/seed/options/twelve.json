@@ -2,7 +2,7 @@
   "name": "twelve",
   "disp": "12x",
   "type": "multiplier",
-  "value": 1.5,
+  "value": 12,
   "seq": 6,
   "icon": "album",
   "based_on": "user",
