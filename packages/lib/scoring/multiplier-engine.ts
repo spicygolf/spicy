@@ -299,10 +299,11 @@ function teamHasJunk(
  * User multipliers are stored in gameHole.teams[].options[] as TeamOption.
  * This is the same location as junk for consistency.
  *
- * For multi-hole multipliers (e.g., pre_double), check if:
- * 1. The multiplier was activated on THIS hole, OR
- * 2. The multiplier was activated on a PREVIOUS hole with firstHole set
- *    and this hole is within the same nine
+ * For multi-hole multipliers (e.g., pre_double), we need to count ALL instances:
+ * 1. Multipliers activated on THIS hole
+ * 2. Multipliers activated on PREVIOUS holes with firstHole set (rest_of_nine scope)
+ *
+ * Each instance adds a separate multiplier entry so they stack multiplicatively.
  */
 function evaluateUserMultiplier(
   mult: MultiplierOption,
@@ -322,73 +323,77 @@ function evaluateUserMultiplier(
     const teamResult = holeResult.teams[teamId];
     if (!teamResult) continue;
 
-    // Check if this team has the multiplier on this hole
-    let hasMultiplier = false;
     // Use dynamic value calculation if value_from is set, otherwise use static value
-    let multiplierValue = mult.value_from
+    const multiplierValue = mult.value_from
       ? calculateDynamicValue(mult, teamId, ctx)
       : (mult.value ?? 2);
 
-    // Only check current hole options if they exist
-    if (team.options?.$isLoaded) {
-      for (const opt of team.options) {
-        if (!opt?.$isLoaded) continue;
-        if (opt.optionName === mult.name) {
-          hasMultiplier = true;
-          // Use the value from the option if present (overrides dynamic calculation)
-          if (opt.value) {
-            const parsed = Number.parseInt(opt.value, 10);
-            if (!Number.isNaN(parsed)) {
-              multiplierValue = parsed;
-            }
-          }
-          break;
-        }
-      }
-    }
-
-    // If not found on this hole, check for multi-hole multipliers from earlier holes
-    if (!hasMultiplier && mult.scope === "rest_of_nine") {
-      hasMultiplier = checkMultiHoleMultiplier(
+    // For rest_of_nine multipliers, count ALL instances from this hole and previous holes
+    if (mult.scope === "rest_of_nine") {
+      const instances = countMultiHoleMultiplierInstances(
         mult.name,
         teamId,
         currentHoleNum,
         ctx,
       );
-    }
 
-    if (hasMultiplier) {
-      // Check availability condition if present
-      if (
-        mult.availability &&
-        !evaluateAvailability(mult.availability, teamResult, holeResult, ctx)
-      ) {
-        continue;
+      // Add one multiplier entry for each instance
+      for (let i = 0; i < instances; i++) {
+        teamResult.multipliers.push({
+          name: mult.name,
+          value: multiplierValue,
+        });
+      }
+    } else {
+      // For non-rest_of_nine multipliers (e.g., "double" with scope "hole"),
+      // just check if it's on this hole
+      let hasMultiplier = false;
+
+      if (team.options?.$isLoaded) {
+        for (const opt of team.options) {
+          if (!opt?.$isLoaded) continue;
+          if (opt.optionName === mult.name) {
+            hasMultiplier = true;
+            break;
+          }
+        }
       }
 
-      teamResult.multipliers.push({
-        name: mult.name,
-        value: multiplierValue,
-      });
+      if (hasMultiplier) {
+        // Check availability condition if present
+        if (
+          mult.availability &&
+          !evaluateAvailability(mult.availability, teamResult, holeResult, ctx)
+        ) {
+          continue;
+        }
+
+        teamResult.multipliers.push({
+          name: mult.name,
+          value: multiplierValue,
+        });
+      }
     }
   }
 }
 
 /**
- * Check if a multi-hole multiplier (like pre_double) applies to this hole
- * by looking at earlier holes in the same nine
+ * Count all instances of a multi-hole multiplier for a team on the current hole.
+ * This includes instances activated on the current hole AND all previous holes in the nine.
  */
-function checkMultiHoleMultiplier(
+function countMultiHoleMultiplierInstances(
   multName: string,
   teamId: string,
   currentHoleNum: number,
   ctx: ScoringContext,
-): boolean {
+): number {
+  let count = 0;
+
   // Determine the start of this nine (1 for front, 10 for back)
   const nineStart = currentHoleNum <= 9 ? 1 : 10;
 
-  // Check all previous holes in this nine
-  for (let holeNum = nineStart; holeNum < currentHoleNum; holeNum++) {
+  // Check all holes from the start of the nine through current hole
+  for (let holeNum = nineStart; holeNum <= currentHoleNum; holeNum++) {
     const gameHole = ctx.gameHoles.find((h) => h.hole === String(holeNum));
     if (!gameHole?.teams?.$isLoaded) continue;
 
@@ -398,16 +403,16 @@ function checkMultiHoleMultiplier(
 
       for (const opt of team.options) {
         if (!opt?.$isLoaded) continue;
+        // Count options that match the multiplier name and have firstHole set
+        // (firstHole indicates it was activated on that hole)
         if (opt.optionName === multName && opt.firstHole) {
-          // This is a multi-hole multiplier that started on this earlier hole
-          // It applies to this hole since we're still in the same nine
-          return true;
+          count++;
         }
       }
     }
   }
 
-  return false;
+  return count;
 }
 
 // =============================================================================

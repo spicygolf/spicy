@@ -21,9 +21,9 @@ import type { OptionButton } from "@/components/game/scoring/OptionsButtons";
 import type { HoleInfo } from "@/hooks";
 import { useOptionValue } from "@/hooks/useOptionValue";
 import {
+  getAllInheritedMultipliers,
   getCalculatedPlayerJunkOptions,
   getCalculatedTeamJunkOptions,
-  getInheritedMultiplierStatus,
   getMultiplierOptions,
   getMultiplierValue,
   getTeamMultiplierStatus,
@@ -297,64 +297,75 @@ export function ScoringView({
 
           const teamId = team.team ?? "";
 
-          // Build multiplier buttons - only include available multipliers or already active ones
-          // Also check for inherited "rest_of_nine" multipliers from previous holes
+          // Build multiplier buttons
+          // For stackable multipliers (rest_of_nine scope like pre_double):
+          // 1. Show disabled filled button for each inherited instance from previous holes
+          // 2. Show clickable button if active on this hole (can toggle off)
+          // 3. Show clickable button if availability allows adding a new one
           const gameHoles = scoringContext?.gameHoles ?? [];
 
-          const multiplierButtons: OptionButton[] = multiplierOptions
-            .filter((mult) => {
-              // Check if active on current hole
-              const status = getTeamMultiplierStatus(team, mult.name);
-              if (status.active) return true;
+          const multiplierButtons: OptionButton[] = [];
 
-              // Check if inherited from previous holes (rest_of_nine scope)
-              const inherited = getInheritedMultiplierStatus(
-                mult,
-                teamId,
-                currentHoleNumber,
-                gameHoles,
-              );
-              if (inherited.active) return true;
+          for (const mult of multiplierOptions) {
+            const status = getTeamMultiplierStatus(
+              team,
+              mult.name,
+              currentHoleNumber,
+            );
+            const inheritedInstances = getAllInheritedMultipliers(
+              mult,
+              teamId,
+              currentHoleNumber,
+              gameHoles,
+            );
+            const multiplierValue = getMultiplierValue(mult, gameHoles);
 
-              // Otherwise, check availability condition
-              return isMultiplierAvailable(
+            // 1. Add disabled filled buttons for inherited instances
+            for (const inherited of inheritedInstances) {
+              multiplierButtons.push({
+                name: `${mult.name}_inherited_${inherited.firstHole}`,
+                displayName: mult.disp,
+                icon: mult.icon,
+                type: "multiplier" as const,
+                selected: true,
+                inherited: true, // This makes it disabled
+                points: inherited.value,
+              });
+            }
+
+            // 2. If active on THIS hole, show clickable selected button
+            if (status.active) {
+              multiplierButtons.push({
+                name: mult.name,
+                displayName: mult.disp,
+                icon: mult.icon,
+                type: "multiplier" as const,
+                selected: true,
+                inherited: false,
+                points: multiplierValue,
+              });
+            } else {
+              // 3. If availability allows, show clickable unselected button
+              const isAvailable = isMultiplierAvailable(
                 mult,
                 scoringContext,
                 currentHoleNumber,
                 teamId,
               );
-            })
-            .map((mult) => {
-              const status = getTeamMultiplierStatus(team, mult.name);
-              const inherited = getInheritedMultiplierStatus(
-                mult,
-                teamId,
-                currentHoleNumber,
-                gameHoles,
-              );
 
-              // Active if on current hole OR inherited from previous hole
-              const isActive = status.active || inherited.active;
-
-              // Inherited if active via inheritance (not on this hole directly)
-              const isInherited = !status.active && inherited.active;
-
-              // Get firstHole from whichever source has it
-              const firstHole = status.firstHole ?? inherited.firstHole;
-
-              // Calculate dynamic value for multipliers with value_from
-              const multiplierValue = getMultiplierValue(mult, gameHoles);
-
-              return {
-                name: mult.name,
-                displayName: mult.disp,
-                icon: mult.icon,
-                type: "multiplier" as const,
-                selected: isActive,
-                inherited: isInherited,
-                points: multiplierValue,
-              };
-            });
+              if (isAvailable) {
+                multiplierButtons.push({
+                  name: mult.name,
+                  displayName: mult.disp,
+                  icon: mult.icon,
+                  type: "multiplier" as const,
+                  selected: false,
+                  inherited: false,
+                  points: multiplierValue,
+                });
+              }
+            }
+          }
 
           // Build calculated team junk buttons (low_ball, low_total)
           // Only show if the team has actually earned this junk (hide unachieved)
@@ -394,8 +405,14 @@ export function ScoringView({
           // Build earned multipliers from scoreboard (automatic multipliers like birdie_bbq)
           // These are multipliers that were automatically awarded based on junk conditions
           // Exclude user-activated multipliers (already in multiplierButtons)
+          // Note: inherited buttons have names like "pre_double_inherited_1", so we need to
+          // extract the base multiplier name for filtering
           const userMultiplierNames = new Set(
-            multiplierButtons.map((m) => m.name),
+            multiplierButtons.map((m) => {
+              // Extract base name from inherited buttons (e.g., "pre_double_inherited_1" -> "pre_double")
+              const inheritedMatch = m.name.match(/^(.+)_inherited_\d+$/);
+              return inheritedMatch ? inheritedMatch[1] : m.name;
+            }),
           );
           // Get spec options for looking up display names of automatic multipliers
           const spec = game?.specs?.$isLoaded ? game.specs[0] : null;

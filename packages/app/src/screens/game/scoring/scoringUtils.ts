@@ -317,12 +317,18 @@ export interface MultiplierStatus {
 }
 
 /**
- * Check if a team has a specific multiplier active on this hole
- * Returns both whether it's active and which hole it was first activated on
+ * Check if a team has a specific multiplier activated on THIS hole
+ * Returns active: true only if the multiplier was first activated on the current hole
+ * (not inherited from a previous hole)
+ *
+ * @param team - The team to check
+ * @param multiplierName - The multiplier option name
+ * @param currentHoleNumber - The current hole number (e.g., "2")
  */
 export function getTeamMultiplierStatus(
   team: Team,
   multiplierName: string,
+  currentHoleNumber: string,
 ): MultiplierStatus {
   if (!team.options?.$isLoaded) return { active: false };
 
@@ -332,13 +338,83 @@ export function getTeamMultiplierStatus(
       opt.optionName === multiplierName &&
       !opt.playerId // Team-level (no player)
     ) {
+      // Only consider "active" if it was first activated on THIS hole
+      const isActiveOnThisHole = opt.firstHole === currentHoleNumber;
       return {
-        active: true,
+        active: isActiveOnThisHole,
         firstHole: opt.firstHole,
       };
     }
   }
   return { active: false };
+}
+
+/**
+ * Inherited multiplier instance info
+ */
+export interface InheritedMultiplier {
+  /** The hole number where this multiplier was activated */
+  firstHole: string;
+  /** The multiplier value (e.g., 2 for 2x) */
+  value: number;
+}
+
+/**
+ * Get ALL inherited "rest_of_nine" multipliers from previous holes for a team.
+ *
+ * Unlike getInheritedMultiplierStatus which returns on first match, this function
+ * returns ALL instances. This is needed for stackable multipliers like pre_double
+ * where a team can have multiple active from different holes.
+ *
+ * @param mult - The multiplier option to check
+ * @param teamId - The team ID to check
+ * @param currentHoleNumber - Current hole number as string (e.g., "3")
+ * @param gameHoles - All game holes (from scoring context)
+ * @returns Array of inherited multiplier instances
+ */
+export function getAllInheritedMultipliers(
+  mult: MultiplierOption,
+  teamId: string,
+  currentHoleNumber: string,
+  gameHoles: GameHole[],
+): InheritedMultiplier[] {
+  const inherited: InheritedMultiplier[] = [];
+
+  // Only check for rest_of_nine scoped multipliers
+  if (mult.scope !== "rest_of_nine") {
+    return inherited;
+  }
+
+  const currentHoleNum = Number.parseInt(currentHoleNumber, 10);
+  if (Number.isNaN(currentHoleNum)) {
+    return inherited;
+  }
+
+  // Determine the start of this nine (1 for front, 10 for back)
+  const nineStart = currentHoleNum <= 9 ? 1 : 10;
+
+  // Check all previous holes in this nine
+  for (let holeNum = nineStart; holeNum < currentHoleNum; holeNum++) {
+    const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
+    if (!gameHole?.teams?.$isLoaded) continue;
+
+    for (const team of gameHole.teams) {
+      if (!team?.$isLoaded || team.team !== teamId) continue;
+      if (!team.options?.$isLoaded) continue;
+
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) continue;
+        if (opt.optionName === mult.name && opt.firstHole) {
+          inherited.push({
+            firstHole: opt.firstHole,
+            value: mult.value ?? 2,
+          });
+        }
+      }
+    }
+  }
+
+  return inherited;
 }
 
 /**
