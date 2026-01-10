@@ -176,11 +176,11 @@ export function LinkGhin() {
           text: "Unlink",
           style: "destructive",
           onPress: async () => {
-            if (me?.$isLoaded && me.root?.$isLoaded) {
-              // Clear the player reference by deleting it
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              delete (me.root as any).player;
-              Alert.alert("Unlinked", "Your player has been unlinked.");
+            if (linkedPlayer?.$isLoaded && linkedPlayer.ghinId) {
+              // Clear the ghinId to unlink from GHIN
+              // The player object stays but is no longer linked to a catalog player
+              linkedPlayer.$jazz.delete("ghinId");
+              Alert.alert("Unlinked", "Your GHIN link has been removed.");
             }
           },
         },
