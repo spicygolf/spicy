@@ -41,15 +41,22 @@ export function isWorkerAccount(currentAccountId?: string): boolean {
  */
 export async function checkIsAdmin(apiUrl: string): Promise<boolean> {
   try {
+    // Import dynamically to avoid issues if jazz-tools isn't loaded yet
+    const { generateAuthToken } = await import("jazz-tools");
+    const token = generateAuthToken();
+
     const response = await fetch(`${apiUrl}/auth/is-admin`, {
-      credentials: "include",
+      headers: {
+        Authorization: `Jazz ${token}`,
+      },
     });
     if (!response.ok) {
       return false;
     }
     const data = await response.json();
     return data.isAdmin === true;
-  } catch {
+  } catch (e) {
+    console.warn("[checkIsAdmin] Error:", e);
     return false;
   }
 }

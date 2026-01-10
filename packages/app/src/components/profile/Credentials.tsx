@@ -1,11 +1,6 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { wordlist } from "@scure/bip39/wordlists/english.js";
-import {
-  KvStoreContext,
-  useAccount,
-  usePassphraseAuth,
-} from "jazz-tools/react-native";
+import { KvStoreContext, useAccount } from "jazz-tools/react-native";
 import { useEffect, useState } from "react";
 // biome-ignore lint/style/noRestrictedImports: This component is a wrapper around the React Native component.
 import { TextInput, TouchableOpacity, View } from "react-native";
@@ -19,7 +14,6 @@ const CopyIcon = () => {
 };
 
 export function Credentials() {
-  const passphraseAuth = usePassphraseAuth({ wordlist });
   const [sealerSecret, setSealerSecret] = useState<string>("");
 
   useEffect(() => {
@@ -27,16 +21,21 @@ export function Credentials() {
       const kvStoreContext = KvStoreContext.getInstance();
       const store = kvStoreContext.getStorage();
       const jlis = await store.get("jazz-logged-in-secret");
+      console.log("[Credentials] jazz-logged-in-secret raw:", jlis);
       if (jlis) {
         try {
           const parsed = JSON.parse(jlis);
+          console.log("[Credentials] parsed keys:", Object.keys(parsed));
+          console.log("[Credentials] accountSecret:", parsed.accountSecret);
           // accountSecret format: "signer_secret/sealer_secret"
           const parts = parsed.accountSecret?.split("/") ?? [];
           if (parts.length === 2) {
             setSealerSecret(parts[1]);
+          } else {
+            console.log("[Credentials] accountSecret split parts:", parts);
           }
-        } catch {
-          // ignore parse errors
+        } catch (e) {
+          console.log("[Credentials] parse error:", e);
         }
       }
     };
@@ -81,21 +80,6 @@ export function Credentials() {
         <TouchableOpacity
           style={styles.copy}
           onPress={() => Clipboard.setString(me.$jazz.id)}
-        >
-          <CopyIcon />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Passphrase</Text>
-        <TextInput
-          style={[styles.value, styles.secret]}
-          value={passphraseAuth.passphrase ?? ""}
-          multiline
-          editable={false}
-        />
-        <TouchableOpacity
-          style={styles.copy}
-          onPress={() => Clipboard.setString(passphraseAuth.passphrase ?? "")}
         >
           <CopyIcon />
         </TouchableOpacity>
