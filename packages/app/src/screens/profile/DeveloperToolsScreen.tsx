@@ -13,11 +13,16 @@ export function DeveloperToolsScreen() {
   return (
     <Screen>
       <View style={styles.container}>
-        <Text style={styles.title}>Developer Tools</Text>
+        <Text style={styles.description}>
+          Tools for development and testing. These may change or be removed in
+          production builds.
+        </Text>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Game Specs</Text>
-
+          <Text style={styles.sectionDescription}>
+            Add or update the default game specifications from the catalog.
+          </Text>
           <Button label="Add/Update Default Specs" onPress={handleAddSpecs} />
         </View>
       </View>
@@ -27,23 +32,24 @@ export function DeveloperToolsScreen() {
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    flex: 1,
-    padding: theme.gap(2),
+    gap: theme.gap(2),
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: theme.gap(3),
+  description: {
+    fontSize: 14,
+    color: theme.colors.secondary,
   },
   section: {
-    marginBottom: theme.gap(3),
+    gap: theme.gap(1.5),
+    paddingTop: theme.gap(1),
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: theme.gap(2),
   },
-  spacer: {
-    height: theme.gap(1.5),
+  sectionDescription: {
+    fontSize: 12,
+    color: theme.colors.secondary,
   },
 }));
