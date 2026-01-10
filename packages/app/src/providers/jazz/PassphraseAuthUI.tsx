@@ -6,6 +6,7 @@
  * once Jazz passkey PR is merged.
  */
 
+import Clipboard from "@react-native-clipboard/clipboard";
 import { wordlist } from "@scure/bip39/wordlists/english.js";
 import { usePassphraseAuth } from "jazz-tools/react-core";
 import { useState } from "react";
@@ -50,6 +51,11 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
   const handleReroll = () => {
     const newPassphrase = auth.generateRandomPassphrase();
     setCurrentPassphrase(newPassphrase);
+  };
+
+  const handleCopyPassphrase = () => {
+    Clipboard.setString(currentPassphrase);
+    Alert.alert("Copied", "Passphrase copied to clipboard. Store it safely!");
   };
 
   const handleBack = () => {
@@ -137,8 +143,10 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
               selectTextOnFocus
             />
 
-            <View style={styles.buttonGroup}>
+            <View style={styles.buttonRow}>
               <Button title="Generate New" onPress={handleReroll} />
+              <View style={styles.buttonSpacer} />
+              <Button title="Copy" onPress={handleCopyPassphrase} />
             </View>
 
             <View style={styles.buttonRow}>
