@@ -1,4 +1,11 @@
-import { createContext, type ReactNode, useContext, useState } from "react";
+import {
+  createContext,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+  useContext,
+  useState,
+} from "react";
 
 export type LeaderboardViewMode = "gross" | "net" | "points";
 export type SettingsTab = "PlayersTab" | "TeamsTab" | "OptionsTab";
@@ -7,7 +14,7 @@ type GameContextType = {
   gameId: string | null;
   setGameId: (gameId: string | null) => void;
   currentHoleIndex: number;
-  setCurrentHoleIndex: (index: number) => void;
+  setCurrentHoleIndex: Dispatch<SetStateAction<number>>;
   leaderboardViewMode: LeaderboardViewMode;
   setLeaderboardViewMode: (mode: LeaderboardViewMode) => void;
   settingsTab: SettingsTab;

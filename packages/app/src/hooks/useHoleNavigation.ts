@@ -96,20 +96,12 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
   const totalPositions = holesList.length + 1;
 
   const handlePrevHole = useCallback(() => {
-    if (currentHoleIndex === 0) {
-      setCurrentHoleIndex(totalPositions - 1);
-    } else {
-      setCurrentHoleIndex(currentHoleIndex - 1);
-    }
-  }, [currentHoleIndex, totalPositions, setCurrentHoleIndex]);
+    setCurrentHoleIndex((prev) => (prev === 0 ? totalPositions - 1 : prev - 1));
+  }, [totalPositions, setCurrentHoleIndex]);
 
   const handleNextHole = useCallback(() => {
-    if (currentHoleIndex === totalPositions - 1) {
-      setCurrentHoleIndex(0);
-    } else {
-      setCurrentHoleIndex(currentHoleIndex + 1);
-    }
-  }, [currentHoleIndex, totalPositions, setCurrentHoleIndex]);
+    setCurrentHoleIndex((prev) => (prev === totalPositions - 1 ? 0 : prev + 1));
+  }, [totalPositions, setCurrentHoleIndex]);
 
   return {
     currentHoleIndex,
