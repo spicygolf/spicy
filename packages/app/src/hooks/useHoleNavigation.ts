@@ -1,10 +1,11 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import type { Game, GameHole } from "spicylib/schema";
 import {
   DEFAULT_HANDICAP_ALLOCATION,
   DEFAULT_PAR,
   DEFAULT_YARDS,
 } from "@/constants/golf";
+import { useGameContext } from "@/contexts/GameContext";
 
 export interface HoleInfo {
   number: string;
@@ -27,7 +28,7 @@ export interface UseHoleNavigationReturn {
 }
 
 export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
-  const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
+  const { currentHoleIndex, setCurrentHoleIndex } = useGameContext();
 
   // Jazz provides reactive updates - no useMemo needed (jazz.xml)
   let holesList: string[] = [];
@@ -95,18 +96,12 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
   const totalPositions = holesList.length + 1;
 
   const handlePrevHole = useCallback(() => {
-    setCurrentHoleIndex((prev) => {
-      if (prev === 0) return totalPositions - 1;
-      return prev - 1;
-    });
-  }, [totalPositions]);
+    setCurrentHoleIndex((prev) => (prev === 0 ? totalPositions - 1 : prev - 1));
+  }, [totalPositions, setCurrentHoleIndex]);
 
   const handleNextHole = useCallback(() => {
-    setCurrentHoleIndex((prev) => {
-      if (prev === totalPositions - 1) return 0;
-      return prev + 1;
-    });
-  }, [totalPositions]);
+    setCurrentHoleIndex((prev) => (prev === totalPositions - 1 ? 0 : prev + 1));
+  }, [totalPositions, setCurrentHoleIndex]);
 
   return {
     currentHoleIndex,

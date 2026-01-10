@@ -50,10 +50,15 @@ export interface ScoringViewProps {
  * Toggle a junk option for a player on a team
  * Creates the options list if it doesn't exist, then adds or removes the junk
  *
- * @param limit - If "one_per_group", only one player in the team can have this junk
+ * @param team - The team the player belongs to
+ * @param allTeams - All teams on the current hole (needed for one_per_group limit)
+ * @param playerId - The player toggling the junk
+ * @param junkName - Name of the junk option
+ * @param limit - If "one_per_group", only one player across ALL teams can have this junk
  */
 function togglePlayerJunk(
   team: Team,
+  allTeams: Team[],
   playerId: string,
   junkName: string,
   limit?: string,
@@ -87,14 +92,21 @@ function togglePlayerJunk(
     // Remove existing option (toggle off)
     options.$jazz.splice(existingIndex, 1);
   } else {
-    // If limit is "one_per_group", remove this junk from all other players first
+    // If limit is "one_per_group", remove this junk from ALL teams first
     if (limit === "one_per_group") {
-      // Find and remove all existing options for this junk (from other players)
-      // Iterate backwards to safely splice while iterating
-      for (let i = options.length - 1; i >= 0; i--) {
-        const opt = options[i];
-        if (opt?.$isLoaded && opt.optionName === junkName) {
-          options.$jazz.splice(i, 1);
+      // Clear from all teams on this hole, not just the current team
+      for (const t of allTeams) {
+        if (!t?.$isLoaded) continue;
+        if (!t.$jazz.has("options")) continue;
+        const teamOptions = t.options;
+        if (!teamOptions?.$isLoaded) continue;
+
+        // Iterate backwards to safely splice while iterating
+        for (let i = teamOptions.length - 1; i >= 0; i--) {
+          const opt = teamOptions[i];
+          if (opt?.$isLoaded && opt.optionName === junkName && opt.playerId) {
+            teamOptions.$jazz.splice(i, 1);
+          }
         }
       }
     }
@@ -259,6 +271,11 @@ export function ScoringView({
   const overallMultiplier =
     scoreboard?.holes?.[currentHoleNumber]?.holeMultiplier ?? 1;
 
+  // Get all teams for the current hole (needed for one_per_group junk limit)
+  const allTeams: Team[] = currentHole?.teams?.$isLoaded
+    ? ([...currentHole.teams].filter((t) => t?.$isLoaded) as Team[])
+    : [];
+
   return (
     <>
       <HoleHeader hole={holeInfo} onPrevious={onPrevHole} onNext={onNextHole} />
@@ -268,8 +285,8 @@ export function ScoringView({
       />
       <FlatList
         style={styles.content}
-        data={currentHole?.teams?.$isLoaded ? [...currentHole.teams] : []}
-        keyExtractor={(team) => team?.$jazz.id ?? "unknown"}
+        data={allTeams}
+        keyExtractor={(team, index) => team?.$jazz.id ?? String(index)}
         renderItem={({ item: team }) => {
           if (!team?.$isLoaded) return null;
           if (!team.$jazz.has("rounds") || !team.rounds?.$isLoaded) {
@@ -508,6 +525,7 @@ export function ScoringView({
                       );
                       togglePlayerJunk(
                         team,
+                        allTeams,
                         round.playerId,
                         junkName,
                         junkOption?.limit ?? undefined,

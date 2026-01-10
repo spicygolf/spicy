@@ -3,3 +3,4 @@ node_modules
 zz_*
 .env
 .vscode/mcp.json
+.claude/settings.local.json

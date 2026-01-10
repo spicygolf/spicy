@@ -1,8 +1,24 @@
-import { createContext, type ReactNode, useContext, useState } from "react";
+import {
+  createContext,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+  useContext,
+  useState,
+} from "react";
+
+export type LeaderboardViewMode = "gross" | "net" | "points";
+export type SettingsTab = "PlayersTab" | "TeamsTab" | "OptionsTab";
 
 type GameContextType = {
   gameId: string | null;
   setGameId: (gameId: string | null) => void;
+  currentHoleIndex: number;
+  setCurrentHoleIndex: Dispatch<SetStateAction<number>>;
+  leaderboardViewMode: LeaderboardViewMode;
+  setLeaderboardViewMode: (mode: LeaderboardViewMode) => void;
+  settingsTab: SettingsTab;
+  setSettingsTab: (tab: SettingsTab) => void;
 };
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -13,9 +29,24 @@ type GameProviderProps = {
 
 export function GameProvider({ children }: GameProviderProps) {
   const [gameId, setGameId] = useState<string | null>(null);
+  const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
+  const [leaderboardViewMode, setLeaderboardViewMode] =
+    useState<LeaderboardViewMode>("gross");
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>("PlayersTab");
 
   return (
-    <GameContext.Provider value={{ gameId, setGameId }}>
+    <GameContext.Provider
+      value={{
+        gameId,
+        setGameId,
+        currentHoleIndex,
+        setCurrentHoleIndex,
+        leaderboardViewMode,
+        setLeaderboardViewMode,
+        settingsTab,
+        setSettingsTab,
+      }}
+    >
       {children}
     </GameContext.Provider>
   );

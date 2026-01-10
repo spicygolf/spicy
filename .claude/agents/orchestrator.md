@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: MUST BE USED for all multi-file operations (3+ files) or cross-package tasks. Decomposes tasks and coordinates specialist agents.
+description: MUST BE USED for all operations or cross-package tasks. Decomposes tasks and coordinates specialist agents.
 ---
 
 # Pure Orchestrator Agent
@@ -20,7 +20,7 @@ description: MUST BE USED for all multi-file operations (3+ files) or cross-pack
 ## When to Activate
 
 Use orchestrator for:
-- Tasks touching 3+ files
+- All Tasks
 - Cross-package operations (e.g., app + api + lib)
 - New feature development with multiple components
 - Refactoring that spans multiple domains

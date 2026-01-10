@@ -24,10 +24,14 @@ interface PlayerSummary {
 
 /**
  * Format a number with +/- prefix for display
+ * For "To Par", uses golf convention: "E" for even par
  */
-function formatWithSign(value: number): string {
+function formatWithSign(value: number, useEvenPar = false): string {
   if (value > 0) {
     return `+${value}`;
+  }
+  if (value === 0 && useEvenPar) {
+    return "E";
   }
   return String(value);
 }
@@ -189,7 +193,7 @@ export function SummaryView({
                 </View>
                 <View style={styles.numberColumn}>
                   <Text style={styles.scoreText}>
-                    {formatWithSign(player.toPar)}
+                    {formatWithSign(player.toPar, true)}
                   </Text>
                 </View>
                 <View style={styles.numberColumn}>

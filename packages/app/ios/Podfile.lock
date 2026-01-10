@@ -1954,6 +1954,7 @@ PODS:
     - SocketRocket
     - Yoga
   - react-native-vector-icons-fontawesome6 (12.3.0)
+  - react-native-vector-icons-ionicons (12.3.0)
   - React-NativeModulesApple (0.80.0):
     - boost
     - DoubleConversion
@@ -2878,6 +2879,7 @@ DEPENDENCIES:
   - react-native-pager-view (from `../../../node_modules/react-native-pager-view`)
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
   - "react-native-vector-icons-fontawesome6 (from `../../../node_modules/@react-native-vector-icons/fontawesome6`)"
+  - "react-native-vector-icons-ionicons (from `../../../node_modules/@react-native-vector-icons/ionicons`)"
   - React-NativeModulesApple (from `../../../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../../../node_modules/react-native/ReactCommon/oscompat`)
   - React-perflogger (from `../../../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -3034,6 +3036,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-safe-area-context"
   react-native-vector-icons-fontawesome6:
     :path: "../../../node_modules/@react-native-vector-icons/fontawesome6"
+  react-native-vector-icons-ionicons:
+    :path: "../../../node_modules/@react-native-vector-icons/ionicons"
   React-NativeModulesApple:
     :path: "../../../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios"
   React-oscompat:
@@ -3171,6 +3175,7 @@ SPEC CHECKSUMS:
   react-native-pager-view: 4a0aa5d5ce136364d706221642ff6d4a457bc073
   react-native-safe-area-context: 01f6d357d42395422eed7c3bfe715614728f2989
   react-native-vector-icons-fontawesome6: 1a73ea16a698f70851ad47e94521a99499e8e974
+  react-native-vector-icons-ionicons: ad07e944a092a5cf71b8b569d8f5ce2bf674c415
   React-NativeModulesApple: e16d5c133019987285f001fbf1461a861e40426f
   React-oscompat: 7c0a341cc31e350da71ddf2e46de0a845d1d1626
   React-perflogger: c91e01612298b74f70d846ae3666d2b078c547e0
