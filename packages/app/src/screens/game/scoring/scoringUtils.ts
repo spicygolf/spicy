@@ -459,7 +459,7 @@ export function getAllInheritedMultipliers(
         if (opt.optionName === mult.name && opt.firstHole === String(holeNum)) {
           inherited.push({
             firstHole: opt.firstHole,
-            value: mult.value ?? 2,
+            value: getMultiplierValue(mult, gameHoles),
           });
         }
       }

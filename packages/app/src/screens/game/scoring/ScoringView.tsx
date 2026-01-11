@@ -200,10 +200,15 @@ function setCustomMultiplier(
   const options = team.options;
   if (!options?.$isLoaded) return;
 
-  // Remove any existing custom multiplier first
+  // Remove any existing custom multiplier for this hole first
   for (let i = options.length - 1; i >= 0; i--) {
     const opt = options[i];
-    if (opt?.$isLoaded && opt.optionName === multiplierName && !opt.playerId) {
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === multiplierName &&
+      opt.firstHole === currentHoleNumber &&
+      !opt.playerId
+    ) {
       options.$jazz.splice(i, 1);
     }
   }
