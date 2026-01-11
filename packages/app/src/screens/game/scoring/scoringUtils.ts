@@ -482,7 +482,9 @@ export function getAllInheritedMultipliers(
 
       for (const opt of team.options) {
         if (!opt?.$isLoaded) continue;
-        if (opt.optionName === mult.name && opt.firstHole) {
+        // Only count options where firstHole matches the hole we're examining
+        // This handles old imported data that duplicated options across holes
+        if (opt.optionName === mult.name && opt.firstHole === String(holeNum)) {
           inherited.push({
             firstHole: opt.firstHole,
             value: mult.value ?? 2,
@@ -537,7 +539,9 @@ export function getInheritedMultiplierStatus(
 
       for (const opt of team.options) {
         if (!opt?.$isLoaded) continue;
-        if (opt.optionName === mult.name && opt.firstHole) {
+        // Only match options where firstHole matches the hole we're examining
+        // This handles old imported data that duplicated options across holes
+        if (opt.optionName === mult.name && opt.firstHole === String(holeNum)) {
           // Found a multi-hole multiplier that started on this earlier hole
           return {
             active: true,
