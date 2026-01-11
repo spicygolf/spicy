@@ -26,7 +26,8 @@ import type {
  *
  * Supported value_from operators:
  * - "frontNinePreDoubleTotal": Returns total pre_double multiplier from front nine
- * - "user_input": Value comes from TeamOption.value (user-entered custom multiplier)
+ *
+ * If mult.input_value is true, value comes from TeamOption.value (user-entered)
  *
  * @param mult - The multiplier option with value_from field
  * @param teamId - The team ID to calculate for
@@ -48,7 +49,7 @@ function calculateDynamicValue(
     return getFrontNinePreDoubleTotal(ctx);
   }
 
-  if (mult.value_from === "user_input" && holeNum) {
+  if (mult.input_value && holeNum) {
     return getUserInputMultiplierValue(mult.name, teamId, holeNum, ctx);
   }
 
@@ -59,7 +60,7 @@ function calculateDynamicValue(
 /**
  * Get user-entered multiplier value from TeamOption.value
  *
- * For custom multipliers where value_from is "user_input", the actual value
+ * For custom multipliers where input_value is true, the actual value
  * is stored in the TeamOption.value field as a string number.
  *
  * @param multName - The multiplier option name (e.g., "custom")

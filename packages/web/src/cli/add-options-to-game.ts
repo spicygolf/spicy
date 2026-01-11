@@ -57,13 +57,13 @@ const CUSTOM_OPTION = {
   disp: "Custom",
   type: "multiplier" as const,
   version: "0.5",
-  value: 0, // Will be set by user input via value_from
+  value: 0, // Will be set by user input via input_value
   seq: 7,
   icon: "sliders",
   based_on: "user",
   scope: "none" as const, // Not shown on team buttons - activated from hole toolbar
   override: true,
-  value_from: "user_input", // Value comes from user input stored in TeamOption.value
+  input_value: true, // Value comes from user input stored in TeamOption.value
   availability: JSON.stringify({
     team_down_the_most: [{ getPrevHole: [] }, { var: "team" }],
   }),
@@ -90,6 +90,7 @@ interface MultiplierOptionDef {
   availability?: string;
   override?: boolean;
   value_from?: string;
+  input_value?: boolean;
 }
 
 async function addMultiplierOption(
@@ -134,6 +135,9 @@ async function addMultiplierOption(
   }
   if (optionDef.value_from) {
     newOption.$jazz.set("value_from", optionDef.value_from);
+  }
+  if (optionDef.input_value !== undefined) {
+    newOption.$jazz.set("input_value", optionDef.input_value);
   }
 
   optionsMap.$jazz.set(optionDef.name, newOption);

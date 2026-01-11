@@ -78,8 +78,10 @@ export const MultiplierOption = co.map({
   override: z.optional(z.boolean()),
   // Dynamic value source - logic operator name to calculate value at runtime
   // e.g., "frontNinePreDoubleTotal" for Re Pre multiplier
-  // e.g., "user_input" for custom multiplier (value from TeamOption.value)
   value_from: z.optional(z.string()),
+  // If true, the multiplier value comes from user input (stored in TeamOption.value)
+  // Used for custom multipliers where user specifies the multiplier amount
+  input_value: z.optional(z.boolean()),
 });
 export type MultiplierOption = co.loaded<typeof MultiplierOption>;
 

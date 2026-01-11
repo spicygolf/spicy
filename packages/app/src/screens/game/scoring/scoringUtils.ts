@@ -364,7 +364,7 @@ export interface CustomMultiplierState {
 /**
  * Get the custom multiplier state for the current hole.
  *
- * Custom multipliers have scope "none" and value_from "user_input".
+ * Custom multipliers have scope "none" and input_value true.
  * The value is stored in TeamOption.value as a string number.
  *
  * @param multiplierOptions - All multiplier options from the game spec
@@ -377,9 +377,9 @@ export function getCustomMultiplierState(
   allTeams: Team[],
   currentHoleNumber: string,
 ): CustomMultiplierState {
-  // Find the custom multiplier option (scope: "none", value_from: "user_input")
+  // Find the custom multiplier option (scope: "none", input_value: true)
   const customMult = multiplierOptions.find(
-    (m) => m.scope === "none" && m.value_from === "user_input",
+    (m) => m.scope === "none" && m.input_value === true,
   );
 
   if (!customMult) {
@@ -423,7 +423,7 @@ export function getCustomMultiplierOption(
 ): MultiplierOption | null {
   return (
     multiplierOptions.find(
-      (m) => m.scope === "none" && m.value_from === "user_input",
+      (m) => m.scope === "none" && m.input_value === true,
     ) ?? null
   );
 }
