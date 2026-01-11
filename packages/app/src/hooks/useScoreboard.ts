@@ -1,7 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import type { Game } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import { scoreWithContext } from "spicylib/scoring";
+
+// Track hook invocations for performance debugging
+let hookInvocationCount = 0;
 
 /**
  * Result from the useScoreboard hook
@@ -14,6 +17,95 @@ export interface ScoreboardResult {
 }
 
 /**
+ * Create a fingerprint of the scoring-relevant data in a game.
+ * This fingerprint changes only when data that affects scoring changes,
+ * not when the Jazz object reference changes due to progressive loading.
+ *
+ * Returns null if the game isn't ready for scoring yet.
+ */
+function createScoringFingerprint(game: Game | null): string | null {
+  if (!game?.$isLoaded) return null;
+  if (!game.specs?.$isLoaded || game.specs.length === 0) return null;
+
+  const spec = game.specs[0];
+  if (!spec?.$isLoaded || !spec.options?.$isLoaded) return null;
+  if (!game.holes?.$isLoaded || game.holes.length === 0) return null;
+  if (!game.rounds?.$isLoaded || game.rounds.length === 0) return null;
+
+  const parts: string[] = [];
+
+  // 1. Game ID (base identity)
+  parts.push(`game:${game.$jazz.id}`);
+
+  // 2. Hole count
+  parts.push(`holes:${game.holes.length}`);
+
+  // 3. All scores from all rounds (this is the primary data that changes)
+  for (const rtg of game.rounds) {
+    if (!rtg?.$isLoaded) continue;
+    const round = rtg.round;
+    if (!round?.$isLoaded) continue;
+
+    const playerId = round.playerId;
+    const handicapIndex = rtg.handicapIndex ?? round.handicapIndex ?? 0;
+    const courseHandicap = rtg.courseHandicap ?? 0;
+    const gameHandicap = rtg.gameHandicap;
+
+    parts.push(
+      `p:${playerId}:hi${handicapIndex}:ch${courseHandicap}:gh${gameHandicap ?? ""}`,
+    );
+
+    // Add all scores for this player
+    if (round.scores?.$isLoaded) {
+      for (const key of Object.keys(round.scores)) {
+        if (key.startsWith("$") || key === "_refs") continue;
+        const holeScores = round.scores[key];
+        if (holeScores?.$isLoaded) {
+          const gross = holeScores.gross ?? "";
+          parts.push(`s:${playerId}:${key}:${gross}`);
+        }
+      }
+    }
+  }
+
+  // 4. Team options per hole (junk, multipliers)
+  for (const hole of game.holes) {
+    if (!hole?.$isLoaded) continue;
+    const holeNum = hole.hole;
+
+    if (hole.teams?.$isLoaded) {
+      for (const team of hole.teams) {
+        if (!team?.$isLoaded) continue;
+        const teamId = team.team ?? "";
+
+        if (team.options?.$isLoaded) {
+          for (const opt of team.options) {
+            if (!opt?.$isLoaded) continue;
+            // Include option name, value, playerId (for player junk), and firstHole (for multipliers)
+            parts.push(
+              `to:${holeNum}:${teamId}:${opt.optionName}:${opt.value ?? ""}:${opt.playerId ?? ""}:${opt.firstHole ?? ""}`,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // 5. Game-level option overrides (if any)
+  if (game.options?.$isLoaded) {
+    for (const key of Object.keys(game.options)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      const opt = game.options[key];
+      if (opt?.$isLoaded && opt.value !== undefined) {
+        parts.push(`go:${key}:${opt.value}`);
+      }
+    }
+  }
+
+  return parts.join("|");
+}
+
+/**
  * Hook to calculate the scoreboard for a game using the scoring engine.
  *
  * The scoring engine calculates:
@@ -21,7 +113,9 @@ export interface ScoreboardResult {
  * - Team junk (low_ball, low_team) based on calculation rules
  * - Points, rankings, and cumulative totals
  *
- * The scoreboard is memoized and only recalculated when game data changes.
+ * The scoreboard is memoized based on a fingerprint of scoring-relevant data,
+ * not the game object reference. This prevents unnecessary recomputations
+ * during Jazz's progressive loading.
  *
  * @param game - The fully loaded game object
  * @returns The calculated scoreboard and context, or null if scoring fails
@@ -35,61 +129,54 @@ export interface ScoreboardResult {
  * }
  */
 export function useScoreboard(game: Game | null): ScoreboardResult | null {
+  const memoRunCount = useRef(0);
+  const lastFingerprint = useRef<string | null>(null);
+  const cachedResult = useRef<ScoreboardResult | null>(null);
+
+  // Create fingerprint from scoring-relevant data
+  const fingerprint = createScoringFingerprint(game);
+
   return useMemo(() => {
-    if (!game?.$isLoaded) {
+    hookInvocationCount++;
+    memoRunCount.current++;
+
+    // If fingerprint is null, game isn't ready
+    if (fingerprint === null) {
+      console.log(
+        `[useScoreboard] #${hookInvocationCount} - Game not ready for scoring`,
+      );
       return null;
     }
 
-    // Check if we have the minimum required data for scoring
-    if (!game.specs?.$isLoaded || game.specs.length === 0) {
-      return null;
+    // If fingerprint hasn't changed, return cached result
+    if (fingerprint === lastFingerprint.current && cachedResult.current) {
+      console.log(
+        `[useScoreboard] #${hookInvocationCount} - Fingerprint unchanged, using cache`,
+      );
+      return cachedResult.current;
     }
 
-    const spec = game.specs[0];
-    if (!spec?.$isLoaded || !spec.options?.$isLoaded) {
-      return null;
-    }
-
-    if (!game.holes?.$isLoaded || game.holes.length === 0) {
-      return null;
-    }
-
-    if (!game.rounds?.$isLoaded || game.rounds.length === 0) {
-      return null;
-    }
-
-    // Check that at least one round has scores
-    let hasAnyScores = false;
-    for (const rtg of game.rounds) {
-      if (!rtg?.$isLoaded) continue;
-      const round = rtg.round;
-      if (!round?.$isLoaded) continue;
-      if (round.scores?.$isLoaded) {
-        // Check if any hole has a score
-        for (const key of Object.keys(round.scores)) {
-          if (key.startsWith("$") || key === "_refs") continue;
-          const holeScores = round.scores[key];
-          if (holeScores?.$isLoaded && holeScores.gross) {
-            hasAnyScores = true;
-            break;
-          }
-        }
-      }
-      if (hasAnyScores) break;
-    }
-
-    // Even without scores, we can still run the scoring engine
-    // It will just return empty results for holes without scores
+    console.log(
+      `[useScoreboard] #${hookInvocationCount} - Fingerprint changed, recomputing scoreboard`,
+    );
 
     try {
-      // Score the game and get both scoreboard and context
-      // The context is needed for evaluating multiplier availability
-      const { scoreboard, context } = scoreWithContext(game);
-      return { scoreboard, context };
+      const startTime = performance.now();
+      const { scoreboard, context } = scoreWithContext(game!);
+      const elapsed = performance.now() - startTime;
+
+      console.log(
+        `[useScoreboard] #${hookInvocationCount} - Scoring completed in ${elapsed.toFixed(1)}ms`,
+      );
+
+      // Update cache
+      lastFingerprint.current = fingerprint;
+      cachedResult.current = { scoreboard, context };
+
+      return cachedResult.current;
     } catch (error) {
-      // Log error but don't crash - scoring may fail if data is partially loaded
       console.warn("[useScoreboard] Scoring engine error:", error);
       return null;
     }
-  }, [game]);
+  }, [fingerprint, game]);
 }
