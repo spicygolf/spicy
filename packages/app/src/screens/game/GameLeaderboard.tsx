@@ -1,17 +1,61 @@
 import { useMemo } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import type { Game } from "spicylib/schema";
 import {
   getHoleRows,
   getPlayerColumns,
+  type HoleData,
   LeaderboardTable,
+  type PlayerColumn,
 } from "@/components/game/leaderboard";
 import { useGameContext } from "@/contexts/GameContext";
 import { useGame } from "@/hooks";
 import { useScoreboard } from "@/hooks/useScoreboard";
 import { ButtonGroup, Screen, Text } from "@/ui";
 
-export function GameLeaderboard() {
+/**
+ * Create a fingerprint for player columns data.
+ * Only changes when player names actually change.
+ */
+function createPlayerColumnsFingerprint(game: Game | null): string | null {
+  if (!game?.$isLoaded || !game.players?.$isLoaded) return null;
+
+  const parts: string[] = [];
+  for (const player of game.players) {
+    if (!player?.$isLoaded) continue;
+    parts.push(`${player.$jazz.id}:${player.name ?? ""}`);
+  }
+  return parts.join("|");
+}
+
+/**
+ * Create a fingerprint for hole rows data.
+ * Only changes when tee hole data actually changes.
+ */
+function createHoleRowsFingerprint(game: Game | null): string | null {
+  if (!game?.$isLoaded || !game.rounds?.$isLoaded || game.rounds.length === 0) {
+    return null;
+  }
+
+  const firstRtg = game.rounds[0];
+  if (!firstRtg?.$isLoaded) return null;
+
+  const round = firstRtg.round;
+  if (!round?.$isLoaded) return null;
+
+  const tee = round.tee;
+  if (!tee?.$isLoaded || !tee.holes?.$isLoaded) return null;
+
+  const parts: string[] = [];
+  for (const hole of tee.holes) {
+    if (!hole?.$isLoaded) continue;
+    parts.push(`${hole.number ?? ""}:${hole.par ?? ""}`);
+  }
+  return parts.join("|");
+}
+
+export function GameLeaderboard(): React.ReactElement | null {
   const { leaderboardViewMode: viewMode, setLeaderboardViewMode } =
     useGameContext();
 
@@ -52,19 +96,22 @@ export function GameLeaderboard() {
   const scoreResult = useScoreboard(game);
   const scoreboard = scoreResult?.scoreboard ?? null;
 
-  // Memoize player columns - only recalculate when players change
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional optimization - we only want to recompute when players changes, not on every game reference change from Jazz progressive loading
-  const playerColumns = useMemo(() => {
-    if (!game) return [];
-    return getPlayerColumns(game);
-  }, [game?.players]);
+  // Create fingerprints for derived data - these only change when actual data changes,
+  // not when Jazz object references change during progressive loading
+  const playerColumnsFingerprint = createPlayerColumnsFingerprint(game);
+  const holeRowsFingerprint = createHoleRowsFingerprint(game);
 
-  // Memoize hole rows - only recalculate when rounds/tee data changes
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional optimization - we only want to recompute when rounds changes, not on every game reference change from Jazz progressive loading
-  const holeRows = useMemo(() => {
-    if (!game) return [];
+  // Memoize player columns based on fingerprint
+  const playerColumns = useMemo((): PlayerColumn[] => {
+    if (!game || playerColumnsFingerprint === null) return [];
+    return getPlayerColumns(game);
+  }, [playerColumnsFingerprint, game]);
+
+  // Memoize hole rows based on fingerprint
+  const holeRows = useMemo((): HoleData[] => {
+    if (!game || holeRowsFingerprint === null) return [];
     return getHoleRows(game);
-  }, [game?.rounds]);
+  }, [holeRowsFingerprint, game]);
 
   if (!game) {
     return null;

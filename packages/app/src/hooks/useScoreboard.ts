@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import type { Game } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import { scoreWithContext } from "spicylib/scoring";
@@ -126,31 +126,19 @@ function createScoringFingerprint(game: Game | null): string | null {
  * }
  */
 export function useScoreboard(game: Game | null): ScoreboardResult | null {
-  const lastFingerprint = useRef<string | null>(null);
-  const cachedResult = useRef<ScoreboardResult | null>(null);
-
   // Create fingerprint from scoring-relevant data
   const fingerprint = createScoringFingerprint(game);
 
+  // useMemo already handles memoization - when fingerprint is the same,
+  // it returns the cached result. No need for additional useRef caching.
   return useMemo(() => {
-    // If fingerprint is null, game isn't ready
-    if (fingerprint === null) {
+    // If fingerprint is null or game isn't loaded, we're not ready
+    if (fingerprint === null || !game?.$isLoaded) {
       return null;
     }
 
-    // If fingerprint hasn't changed, return cached result
-    if (fingerprint === lastFingerprint.current && cachedResult.current) {
-      return cachedResult.current;
-    }
-
     try {
-      const { scoreboard, context } = scoreWithContext(game!);
-
-      // Update cache
-      lastFingerprint.current = fingerprint;
-      cachedResult.current = { scoreboard, context };
-
-      return cachedResult.current;
+      return scoreWithContext(game);
     } catch (error) {
       console.warn("[useScoreboard] Scoring engine error:", error);
       return null;
