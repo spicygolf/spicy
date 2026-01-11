@@ -102,13 +102,33 @@ function createScoringFingerprint(game: Game | null): string | null {
       }
 
       // team.rounds must be loaded to extract playerIds for team scoring
-      if (!team.rounds?.$isLoaded) return null; // Not ready - team rounds not loaded
+      if (!team.rounds?.$isLoaded) {
+        console.log(
+          `[FP] Blocking: hole ${holeNum} team ${teamId} rounds not loaded`,
+        );
+        return null;
+      }
       for (const rtt of team.rounds) {
-        if (!rtt?.$isLoaded) return null;
+        if (!rtt?.$isLoaded) {
+          console.log(
+            `[FP] Blocking: hole ${holeNum} team ${teamId} rtt not loaded`,
+          );
+          return null;
+        }
         const rtg = rtt.roundToGame;
-        if (!rtg?.$isLoaded) return null;
+        if (!rtg?.$isLoaded) {
+          console.log(
+            `[FP] Blocking: hole ${holeNum} team ${teamId} rtg not loaded`,
+          );
+          return null;
+        }
         const round = rtg.round;
-        if (!round?.$isLoaded) return null;
+        if (!round?.$isLoaded) {
+          console.log(
+            `[FP] Blocking: hole ${holeNum} team ${teamId} round not loaded`,
+          );
+          return null;
+        }
         // Include player assignment in fingerprint
         parts.push(`tr:${holeNum}:${teamId}:${round.playerId ?? ""}`);
       }
