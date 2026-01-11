@@ -1,9 +1,8 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { KvStoreContext, useAccount } from "jazz-tools/react-native";
-import { useEffect, useState } from "react";
+import { useAccount } from "jazz-tools/react-native";
 // biome-ignore lint/style/noRestrictedImports: This component is a wrapper around the React Native component.
-import { TextInput, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { PlayerAccount } from "spicylib/schema";
 import { Text } from "@/ui";
@@ -14,17 +13,6 @@ const CopyIcon = () => {
 };
 
 export function Credentials() {
-  const [secret, setSecret] = useState<string>("");
-  useEffect(() => {
-    const getSecret = async () => {
-      const kvStoreContext = KvStoreContext.getInstance();
-      const store = kvStoreContext.getStorage();
-      const jlis = await store.get("jazz-logged-in-secret");
-      setSecret(jlis ?? "");
-    };
-    getSecret();
-  }, []);
-
   const me = useAccount(PlayerAccount, {
     resolve: {
       root: {
@@ -67,21 +55,6 @@ export function Credentials() {
           <CopyIcon />
         </TouchableOpacity>
       </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Secret</Text>
-        <TextInput
-          style={[styles.value, styles.secret]}
-          value={secret}
-          multiline
-          editable={false}
-        />
-        <TouchableOpacity
-          style={styles.copy}
-          onPress={() => Clipboard.setString(secret)}
-        >
-          <CopyIcon />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -113,8 +86,5 @@ const styles = StyleSheet.create((theme) => ({
   copy: {
     width: "10%",
     alignItems: "center",
-  },
-  secret: {
-    color: theme.colors.secondary,
   },
 }));

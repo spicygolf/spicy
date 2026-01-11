@@ -5,13 +5,22 @@
  * These do not mutate data - they only read and compute.
  */
 
-import type { Game, JunkOption, MultiplierOption, Team } from "spicylib/schema";
+import type {
+  Game,
+  GameHole,
+  JunkOption,
+  MultiplierOption,
+  Team,
+} from "spicylib/schema";
 import type {
   Scoreboard,
   ScoringContext,
   TeamHoleResult,
 } from "spicylib/scoring";
-import { evaluateAvailability } from "spicylib/scoring";
+import {
+  evaluateAvailability,
+  getFrontNinePreDoubleTotalFromHoles,
+} from "spicylib/scoring";
 
 /**
  * Get user-markable junk options from game spec
@@ -199,7 +208,32 @@ export function getMultiplierOptions(game: Game): MultiplierOption[] {
   }
 
   multiplierOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
+
   return multiplierOptions;
+}
+
+/**
+ * Get the dynamic value for a multiplier based on its value_from field.
+ *
+ * @param mult - The multiplier option
+ * @param gameHoles - All game holes for counting pre_doubles
+ * @returns The calculated value, or mult.value if not dynamic
+ */
+export function getMultiplierValue(
+  mult: MultiplierOption,
+  gameHoles: GameHole[],
+): number {
+  // If no value_from, use static value
+  if (!mult.value_from) {
+    return mult.value ?? 2;
+  }
+
+  if (mult.value_from === "frontNinePreDoubleTotal") {
+    return getFrontNinePreDoubleTotalFromHoles(gameHoles);
+  }
+
+  // Unknown value_from, use default
+  return mult.value ?? 2;
 }
 
 /**
@@ -254,12 +288,18 @@ export interface MultiplierStatus {
 }
 
 /**
- * Check if a team has a specific multiplier active on this hole
- * Returns both whether it's active and which hole it was first activated on
+ * Check if a team has a specific multiplier activated on THIS hole
+ * Returns active: true only if the multiplier was first activated on the current hole
+ * (not inherited from a previous hole)
+ *
+ * @param team - The team to check
+ * @param multiplierName - The multiplier option name
+ * @param currentHoleNumber - The current hole number (e.g., "2")
  */
 export function getTeamMultiplierStatus(
   team: Team,
   multiplierName: string,
+  currentHoleNumber: string,
 ): MultiplierStatus {
   if (!team.options?.$isLoaded) return { active: false };
 
@@ -269,11 +309,220 @@ export function getTeamMultiplierStatus(
       opt.optionName === multiplierName &&
       !opt.playerId // Team-level (no player)
     ) {
+      // Only consider "active" if it was first activated on THIS hole
+      const isActiveOnThisHole = opt.firstHole === currentHoleNumber;
       return {
-        active: true,
+        active: isActiveOnThisHole,
         firstHole: opt.firstHole,
       };
     }
   }
+  return { active: false };
+}
+
+/**
+ * Custom multiplier state for the hole toolbar
+ */
+export interface CustomMultiplierState {
+  /** Whether a custom multiplier is active on this hole */
+  isActive: boolean;
+  /** The custom multiplier value (if active) */
+  value: number;
+  /** The team ID that owns the custom multiplier (if active) */
+  ownerTeamId: string | null;
+}
+
+/**
+ * Get the custom multiplier state for the current hole.
+ *
+ * Custom multipliers have scope "none" and input_value true.
+ * The value is stored in TeamOption.value as a string number.
+ *
+ * @param multiplierOptions - All multiplier options from the game spec
+ * @param allTeams - All teams on the current hole
+ * @param currentHoleNumber - Current hole number as string (e.g., "3")
+ * @returns CustomMultiplierState with active status, value, and owner
+ */
+export function getCustomMultiplierState(
+  multiplierOptions: MultiplierOption[],
+  allTeams: Team[],
+  currentHoleNumber: string,
+): CustomMultiplierState {
+  // Find the custom multiplier option (scope: "none", input_value: true)
+  const customMult = multiplierOptions.find(
+    (m) => m.scope === "none" && m.input_value === true,
+  );
+
+  if (!customMult) {
+    return { isActive: false, value: 0, ownerTeamId: null };
+  }
+
+  // Check each team for the custom multiplier
+  for (const team of allTeams) {
+    if (!team?.$isLoaded) continue;
+    if (!team.options?.$isLoaded) continue;
+
+    for (const opt of team.options) {
+      if (!opt?.$isLoaded) continue;
+      if (
+        opt.optionName === customMult.name &&
+        opt.firstHole === currentHoleNumber
+      ) {
+        // Found it - parse the value
+        const parsed = Number.parseInt(opt.value, 10);
+        const value = Number.isNaN(parsed) ? 0 : parsed;
+        return {
+          isActive: true,
+          value,
+          ownerTeamId: team.team ?? null,
+        };
+      }
+    }
+  }
+
+  return { isActive: false, value: 0, ownerTeamId: null };
+}
+
+/**
+ * Get the custom multiplier option from the game spec (if it exists)
+ *
+ * @param multiplierOptions - All multiplier options from the game spec
+ * @returns The custom multiplier option, or null if not found
+ */
+export function getCustomMultiplierOption(
+  multiplierOptions: MultiplierOption[],
+): MultiplierOption | null {
+  return (
+    multiplierOptions.find(
+      (m) => m.scope === "none" && m.input_value === true,
+    ) ?? null
+  );
+}
+
+/**
+ * Inherited multiplier instance info
+ */
+export interface InheritedMultiplier {
+  /** The hole number where this multiplier was activated */
+  firstHole: string;
+  /** The multiplier value (e.g., 2 for 2x) */
+  value: number;
+}
+
+/**
+ * Get ALL inherited "rest_of_nine" multipliers from previous holes for a team.
+ *
+ * Unlike getInheritedMultiplierStatus which returns on first match, this function
+ * returns ALL instances. This is needed for stackable multipliers like pre_double
+ * where a team can have multiple active from different holes.
+ *
+ * @param mult - The multiplier option to check
+ * @param teamId - The team ID to check
+ * @param currentHoleNumber - Current hole number as string (e.g., "3")
+ * @param gameHoles - All game holes (from scoring context)
+ * @returns Array of inherited multiplier instances
+ */
+export function getAllInheritedMultipliers(
+  mult: MultiplierOption,
+  teamId: string,
+  currentHoleNumber: string,
+  gameHoles: GameHole[],
+): InheritedMultiplier[] {
+  const inherited: InheritedMultiplier[] = [];
+
+  // Only check for rest_of_nine scoped multipliers
+  if (mult.scope !== "rest_of_nine") {
+    return inherited;
+  }
+
+  const currentHoleNum = Number.parseInt(currentHoleNumber, 10);
+  if (Number.isNaN(currentHoleNum)) {
+    return inherited;
+  }
+
+  // Determine the start of this nine (1 for front, 10 for back)
+  const nineStart = currentHoleNum <= 9 ? 1 : 10;
+
+  // Check all previous holes in this nine
+  for (let holeNum = nineStart; holeNum < currentHoleNum; holeNum++) {
+    const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
+    if (!gameHole?.teams?.$isLoaded) continue;
+
+    for (const team of gameHole.teams) {
+      if (!team?.$isLoaded || team.team !== teamId) continue;
+      if (!team.options?.$isLoaded) continue;
+
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) continue;
+        // Only count options where firstHole matches the hole we're examining
+        // This handles old imported data that duplicated options across holes
+        if (opt.optionName === mult.name && opt.firstHole === String(holeNum)) {
+          inherited.push({
+            firstHole: opt.firstHole,
+            value: getMultiplierValue(mult, gameHoles),
+          });
+        }
+      }
+    }
+  }
+
+  return inherited;
+}
+
+/**
+ * Check for inherited "rest_of_nine" multipliers from previous holes
+ *
+ * For multipliers with scope "rest_of_nine", we need to look backwards through
+ * previous holes on the same nine to see if the multiplier was activated earlier.
+ *
+ * @param mult - The multiplier option to check
+ * @param teamId - The team ID to check
+ * @param currentHoleNumber - Current hole number as string (e.g., "2")
+ * @param gameHoles - All game holes (from scoring context)
+ * @returns MultiplierStatus with active=true if inherited, plus the original firstHole
+ */
+export function getInheritedMultiplierStatus(
+  mult: MultiplierOption,
+  teamId: string,
+  currentHoleNumber: string,
+  gameHoles: GameHole[],
+): MultiplierStatus {
+  // Only check for rest_of_nine scoped multipliers
+  if (mult.scope !== "rest_of_nine") {
+    return { active: false };
+  }
+
+  const currentHoleNum = Number.parseInt(currentHoleNumber, 10);
+  if (Number.isNaN(currentHoleNum)) {
+    return { active: false };
+  }
+
+  // Determine the start of this nine (1 for front, 10 for back)
+  const nineStart = currentHoleNum <= 9 ? 1 : 10;
+
+  // Check all previous holes in this nine
+  for (let holeNum = nineStart; holeNum < currentHoleNum; holeNum++) {
+    const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
+    if (!gameHole?.teams?.$isLoaded) continue;
+
+    for (const team of gameHole.teams) {
+      if (!team?.$isLoaded || team.team !== teamId) continue;
+      if (!team.options?.$isLoaded) continue;
+
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) continue;
+        // Only match options where firstHole matches the hole we're examining
+        // This handles old imported data that duplicated options across holes
+        if (opt.optionName === mult.name && opt.firstHole === String(holeNum)) {
+          // Found a multi-hole multiplier that started on this earlier hole
+          return {
+            active: true,
+            firstHole: opt.firstHole,
+          };
+        }
+      }
+    }
+  }
+
   return { active: false };
 }

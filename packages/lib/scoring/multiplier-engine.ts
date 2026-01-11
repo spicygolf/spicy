@@ -13,12 +13,89 @@
 import type { MultiplierOption } from "../schema";
 import { deepClone } from "../utils/clone";
 import { evaluateLogic } from "./logic-engine";
+import { getFrontNinePreDoubleTotal } from "./option-utils";
 import type {
   HoleResult,
   MultiplierAward,
   ScoringContext,
   TeamHoleResult,
 } from "./types";
+
+/**
+ * Calculate dynamic multiplier value based on value_from field.
+ *
+ * Supported value_from operators:
+ * - "frontNinePreDoubleTotal": Returns total pre_double multiplier from front nine
+ *
+ * If mult.input_value is true, value comes from TeamOption.value (user-entered)
+ *
+ * @param mult - The multiplier option with value_from field
+ * @param teamId - The team ID to calculate for
+ * @param ctx - The scoring context
+ * @param holeNum - Current hole number (needed for user_input lookup)
+ * @returns The calculated value, or the default mult.value if not calculable
+ */
+function calculateDynamicValue(
+  mult: MultiplierOption,
+  teamId: string,
+  ctx: ScoringContext,
+  holeNum?: string,
+): number {
+  // Check input_value first - value comes from user input stored in TeamOption.value
+  if (mult.input_value && holeNum) {
+    return getUserInputMultiplierValue(mult.name, teamId, holeNum, ctx);
+  }
+
+  // Check value_from for dynamic calculations
+  if (mult.value_from === "frontNinePreDoubleTotal") {
+    return getFrontNinePreDoubleTotal(ctx);
+  }
+
+  // No dynamic value, use static value
+  return mult.value ?? 2;
+}
+
+/**
+ * Get user-entered multiplier value from TeamOption.value
+ *
+ * For custom multipliers where input_value is true, the actual value
+ * is stored in the TeamOption.value field as a string number.
+ *
+ * @param multName - The multiplier option name (e.g., "custom")
+ * @param teamId - The team ID to look up
+ * @param holeNum - The hole number where the multiplier was activated
+ * @param ctx - The scoring context
+ * @returns The user-entered value, or 1 if not found
+ */
+function getUserInputMultiplierValue(
+  multName: string,
+  teamId: string,
+  holeNum: string,
+  ctx: ScoringContext,
+): number {
+  const gameHole = ctx.gameHoles.find((h) => h.hole === holeNum);
+  if (!gameHole?.teams?.$isLoaded) return 1;
+
+  for (const team of gameHole.teams) {
+    if (!team?.$isLoaded || team.team !== teamId) continue;
+    if (!team.options?.$isLoaded) continue;
+
+    for (const opt of team.options) {
+      if (!opt?.$isLoaded) continue;
+      if (opt.optionName === multName && opt.firstHole === holeNum) {
+        // Value is stored as string in TeamOption.value
+        const parsed = Number.parseInt(opt.value, 10);
+        return Number.isNaN(parsed) ? 1 : parsed;
+      }
+    }
+  }
+
+  // Option not found - this is normal when the custom multiplier isn't activated
+  // Returning 1 means no multiplication effect
+  return 1;
+}
+
+// getFrontNinePreDoubleTotal is imported from option-utils.ts
 
 // =============================================================================
 // Public API
@@ -177,6 +254,8 @@ function evaluateAutomaticMultiplier(
         teamResult.multipliers.push({
           name: mult.name,
           value: mult.value ?? 2,
+          override: mult.override,
+          earned: true, // Automatic multiplier triggered by junk
         });
       }
     }
@@ -193,6 +272,8 @@ function evaluateAutomaticMultiplier(
         playerResult.multipliers.push({
           name: mult.name,
           value: mult.value ?? 2,
+          override: mult.override,
+          earned: true, // Automatic multiplier triggered by junk
         });
       }
     }
@@ -229,10 +310,11 @@ function teamHasJunk(
  * User multipliers are stored in gameHole.teams[].options[] as TeamOption.
  * This is the same location as junk for consistency.
  *
- * For multi-hole multipliers (e.g., pre_double), check if:
- * 1. The multiplier was activated on THIS hole, OR
- * 2. The multiplier was activated on a PREVIOUS hole with firstHole set
- *    and this hole is within the same nine
+ * For multi-hole multipliers (e.g., pre_double), we need to count ALL instances:
+ * 1. Multipliers activated on THIS hole
+ * 2. Multipliers activated on PREVIOUS holes with firstHole set (rest_of_nine scope)
+ *
+ * Each instance adds a separate multiplier entry so they stack multiplicatively.
  */
 function evaluateUserMultiplier(
   mult: MultiplierOption,
@@ -246,73 +328,86 @@ function evaluateUserMultiplier(
 
   // Check each team for this multiplier
   for (const team of gameHole.teams) {
-    if (!team?.$isLoaded || !team.options?.$isLoaded) continue;
+    if (!team?.$isLoaded) continue;
 
     const teamId = team.team;
     const teamResult = holeResult.teams[teamId];
     if (!teamResult) continue;
 
-    // Check if this team has the multiplier on this hole
-    let hasMultiplier = false;
-    let multiplierValue = mult.value ?? 2;
+    // Use dynamic value calculation if value_from or input_value is set
+    const currentHoleStr = String(currentHoleNum);
+    const multiplierValue =
+      mult.value_from || mult.input_value
+        ? calculateDynamicValue(mult, teamId, ctx, currentHoleStr)
+        : (mult.value ?? 2);
 
-    for (const opt of team.options) {
-      if (!opt?.$isLoaded) continue;
-      if (opt.optionName === mult.name) {
-        hasMultiplier = true;
-        // Use the value from the option if present
-        if (opt.value) {
-          const parsed = Number.parseInt(opt.value, 10);
-          if (!Number.isNaN(parsed)) {
-            multiplierValue = parsed;
-          }
-        }
-        break;
-      }
-    }
-
-    // If not found on this hole, check for multi-hole multipliers from earlier holes
-    if (!hasMultiplier && mult.scope === "rest_of_nine") {
-      hasMultiplier = checkMultiHoleMultiplier(
+    // For rest_of_nine multipliers, count ALL instances from this hole and previous holes
+    if (mult.scope === "rest_of_nine") {
+      const instances = countMultiHoleMultiplierInstances(
         mult.name,
         teamId,
         currentHoleNum,
         ctx,
       );
-    }
 
-    if (hasMultiplier) {
-      // Check availability condition if present
-      if (
-        mult.availability &&
-        !evaluateAvailability(mult.availability, teamResult, holeResult, ctx)
-      ) {
-        continue;
+      // Add one multiplier entry for each instance
+      for (let i = 0; i < instances; i++) {
+        teamResult.multipliers.push({
+          name: mult.name,
+          value: multiplierValue,
+          override: mult.override,
+        });
+      }
+    } else {
+      // For non-rest_of_nine multipliers (e.g., "double", "twelve", "custom" with scope "hole" or "none"),
+      // check if it's on this specific hole by matching firstHole
+      let hasMultiplier = false;
+
+      if (team.options?.$isLoaded) {
+        for (const opt of team.options) {
+          if (!opt?.$isLoaded) continue;
+          // Must match option name AND be activated on this specific hole
+          if (
+            opt.optionName === mult.name &&
+            opt.firstHole === currentHoleStr
+          ) {
+            hasMultiplier = true;
+            break;
+          }
+        }
       }
 
-      teamResult.multipliers.push({
-        name: mult.name,
-        value: multiplierValue,
-      });
+      if (hasMultiplier) {
+        // For user-selected multipliers, we trust the UI already checked availability
+        // before showing the button. Don't re-check here since holeMultiplier isn't
+        // calculated yet during this evaluation phase.
+        teamResult.multipliers.push({
+          name: mult.name,
+          value: multiplierValue,
+          override: mult.override,
+        });
+      }
     }
   }
 }
 
 /**
- * Check if a multi-hole multiplier (like pre_double) applies to this hole
- * by looking at earlier holes in the same nine
+ * Count all instances of a multi-hole multiplier for a team on the current hole.
+ * This includes instances activated on the current hole AND all previous holes in the nine.
  */
-function checkMultiHoleMultiplier(
+function countMultiHoleMultiplierInstances(
   multName: string,
   teamId: string,
   currentHoleNum: number,
   ctx: ScoringContext,
-): boolean {
+): number {
+  let count = 0;
+
   // Determine the start of this nine (1 for front, 10 for back)
   const nineStart = currentHoleNum <= 9 ? 1 : 10;
 
-  // Check all previous holes in this nine
-  for (let holeNum = nineStart; holeNum < currentHoleNum; holeNum++) {
+  // Check all holes from the start of the nine through current hole
+  for (let holeNum = nineStart; holeNum <= currentHoleNum; holeNum++) {
     const gameHole = ctx.gameHoles.find((h) => h.hole === String(holeNum));
     if (!gameHole?.teams?.$isLoaded) continue;
 
@@ -322,16 +417,18 @@ function checkMultiHoleMultiplier(
 
       for (const opt of team.options) {
         if (!opt?.$isLoaded) continue;
-        if (opt.optionName === multName && opt.firstHole) {
-          // This is a multi-hole multiplier that started on this earlier hole
-          // It applies to this hole since we're still in the same nine
-          return true;
+        // Count options where firstHole matches the hole we're examining
+        // This handles both:
+        // - New schema: option only exists on first_hole
+        // - Old imported data: option exists on every hole but firstHole identifies the activation hole
+        if (opt.optionName === multName && opt.firstHole === String(holeNum)) {
+          count++;
         }
       }
     }
   }
 
-  return false;
+  return count;
 }
 
 // =============================================================================
@@ -356,12 +453,13 @@ export function evaluateAvailability(
   holeResult: HoleResult,
   ctx: ScoringContext,
   possiblePoints?: number,
+  debug?: boolean,
 ): boolean {
   if (!availability) return true;
 
   const teams = Object.values(holeResult.teams);
 
-  return evaluateLogic(availability, {
+  const logicCtx = {
     ctx,
     holeNum: holeResult.hole,
     holeResult,
@@ -369,7 +467,18 @@ export function evaluateAvailability(
     teams,
     possiblePoints,
     option: { name: "multiplier_availability" },
-  });
+  };
+
+  const result = evaluateLogic(availability, logicCtx);
+
+  if (debug) {
+    console.log("[evaluateAvailability] availability:", availability);
+    console.log("[evaluateAvailability] holeNum:", holeResult.hole);
+    console.log("[evaluateAvailability] teamId:", teamResult.teamId);
+    console.log("[evaluateAvailability] result:", result);
+  }
+
+  return result;
 }
 
 // =============================================================================
@@ -381,10 +490,42 @@ export function evaluateAvailability(
  *
  * Multiple multipliers stack multiplicatively.
  * Example: 2x * 2x = 4x
+ *
+ * If any multiplier has override=true, it replaces the NON-OVERRIDE multipliers.
+ * Earned/automatic multipliers (without override flag) still stack on top.
+ * Example: 100x override + 2x earned birdie_bbq = 200x
  */
 export function calculateTotalMultiplier(
   multipliers: MultiplierAward[],
 ): number {
   if (multipliers.length === 0) return 1;
-  return multipliers.reduce((product, m) => product * m.value, 1);
+
+  // Separate multipliers into categories:
+  // - Override: replaces user-activated multipliers (e.g., custom, twelve)
+  // - Earned: automatic multipliers triggered by junk (e.g., birdie_bbq) - always stack
+  // - User-activated: press multipliers without override (e.g., pre_double, double)
+  const overrideMultipliers = multipliers.filter((m) => m.override);
+  const earnedMultipliers = multipliers.filter((m) => m.earned && !m.override);
+  const userActivatedMultipliers = multipliers.filter(
+    (m) => !m.earned && !m.override,
+  );
+
+  let total = 1;
+
+  const firstOverride = overrideMultipliers[0];
+  if (firstOverride) {
+    // Override replaces user-activated multipliers
+    total = firstOverride.value;
+  } else {
+    // No override - stack all user-activated multipliers normally
+    total = userActivatedMultipliers.reduce(
+      (product, m) => product * m.value,
+      1,
+    );
+  }
+
+  // Earned/automatic multipliers ALWAYS stack on top (whether override or not)
+  total = earnedMultipliers.reduce((product, m) => product * m.value, total);
+
+  return total;
 }

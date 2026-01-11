@@ -13,7 +13,7 @@ import { getJazzWorker, setupWorker } from "./jazz_worker";
 import { importGameSpecsToCatalog, importGamesFromArango } from "./lib/catalog";
 import { linkPlayerToUser } from "./lib/link";
 import { playerSearch } from "./players";
-import { requireAdminAccount } from "./utils/auth";
+import { isAdminAccount, requireAdminAccount } from "./utils/auth";
 import { authenticateJazzRequest } from "./utils/jazz-auth";
 import {
   checkRateLimit,
@@ -169,6 +169,14 @@ const app = new Elysia()
     // Worker account ID (public, used to load shared catalog data)
     workerAccount: process.env.JAZZ_WORKER_ACCOUNT,
   }))
+  // Auth check endpoint - returns whether current user is admin
+  .get(
+    `/${api}/auth/is-admin`,
+    ({ jazzAccountId }) => ({
+      isAdmin: isAdminAccount(jazzAccountId),
+    }),
+    { jazzAuth: true },
+  )
   // Admin endpoints - protected by Jazz auth + admin check
   .post(
     `/${api}/catalog/import`,

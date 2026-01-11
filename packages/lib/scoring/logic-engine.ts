@@ -10,6 +10,7 @@
  */
 
 import jsonLogic from "json-logic-js";
+import { getFrontNinePreDoubleTotal } from "./option-utils";
 import type { HoleResult, ScoringContext, TeamHoleResult } from "./types";
 
 // =============================================================================
@@ -303,30 +304,31 @@ function getHolePar(logicCtx: LogicContext): number {
 /**
  * Check if existing pre-multiplier total meets threshold
  *
- * This checks if adding another instance of a multiplier would exceed the
- * maximum allowed total. Used to enforce limits like "no more than 8x total".
+ * This checks if the existing pre-multiplier total has reached or exceeded
+ * a threshold. Used to enable options like 12x only when already at 8x.
  *
- * The threshold represents the maximum allowed multiplier total. This function
- * returns true if the existing total is LESS than the threshold (i.e., there's
- * room to add another multiplier instance).
+ * The threshold represents the minimum required multiplier total. This function
+ * returns true if the existing total is AT LEAST the threshold.
  *
  * @param holeResult - The hole to check (typically current hole)
- * @param threshold - The maximum allowed multiplier total (e.g., 8 for max 8x)
- * @returns true if existing total < threshold (room for more), false otherwise
+ * @param threshold - The minimum required multiplier total (e.g., 8 for 12x availability)
+ * @returns true if existing total >= threshold, false otherwise
  */
 function existingPreMultiplierTotal(
   holeResult: HoleResult | null,
   threshold: number,
 ): boolean {
-  if (!holeResult) return true; // No data, allow multiplier
+  if (!holeResult) return false; // No data, multiplier hasn't reached threshold
 
   // Get the current hole multiplier (all multipliers combined)
   const currentMultiplier = holeResult.holeMultiplier ?? 1;
 
-  // Return true if current multiplier is less than threshold
-  // This means there's room to add another multiplier
-  return currentMultiplier < threshold;
+  // Return true if current multiplier is at or above threshold
+  // Matches legacy behavior: tot >= threshold
+  return currentMultiplier >= threshold;
 }
+
+// getFrontNinePreDoubleTotal is imported from option-utils.ts
 
 // =============================================================================
 // Logic Engine
@@ -334,6 +336,10 @@ function existingPreMultiplierTotal(
 
 // Track if operators have been registered
 let operatorsRegistered = false;
+
+// Current logic context for operators that need it during evaluation
+// This is set before json-logic.apply() and cleared after
+let currentLogicCtx: LogicContext | null = null;
 
 /**
  * Register custom json-logic operators
@@ -433,6 +439,16 @@ function registerOperators(): void {
       return { __existingPreMultiplierTotal: { hole, threshold } };
     },
   );
+
+  // frontNinePreDoubleTotal: get total pre_double multiplier from front nine
+  // Used for "Re Pre" option on hole 10 to carry over front nine multipliers
+  // This operator returns the actual value (not a placeholder) so it can be used in comparisons
+  jsonLogic.add_operation("frontNinePreDoubleTotal", (_team: unknown) => {
+    if (!currentLogicCtx) {
+      return 1;
+    }
+    return getFrontNinePreDoubleTotal(currentLogicCtx.ctx);
+  });
 
   operatorsRegistered = true;
 }
@@ -582,6 +598,8 @@ function resolveOperatorResult(
     return existingPreMultiplierTotal(logicCtx.holeResult ?? null, threshold);
   }
 
+  // frontNinePreDoubleTotal - now returns value directly, no placeholder resolution needed
+
   return result;
 }
 
@@ -622,10 +640,17 @@ export function evaluateLogic(
       teams: logicCtx.teams,
       possiblePoints: logicCtx.possiblePoints ?? 0,
       junk: logicCtx.option,
+      holeNum: logicCtx.holeNum,
     };
+
+    // Set context for operators that need it during evaluation
+    currentLogicCtx = logicCtx;
 
     // Apply json-logic
     const result = jsonLogic.apply(parsed, data);
+
+    // Clear context
+    currentLogicCtx = null;
 
     // Resolve any custom operator placeholders
     const resolved = resolveOperatorResult(result, logicCtx, betterPoints);

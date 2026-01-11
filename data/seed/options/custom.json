@@ -1,0 +1,12 @@
+{
+  "name": "custom",
+  "disp": "Custom",
+  "type": "multiplier",
+  "seq": 7,
+  "icon": "album",
+  "based_on": "user",
+  "scope": "hole",
+  "input_value": true,
+  "override": true,
+  "availability": "{\n  \"team_down_the_most\": [{\"getPrevHole\": []}, {\"var\": \"team\"}]\n}"
+}
