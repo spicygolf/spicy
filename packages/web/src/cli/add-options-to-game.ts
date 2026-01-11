@@ -1,0 +1,209 @@
+#!/usr/bin/env bun
+/**
+ * Add Options to Game and GameSpec
+ *
+ * Adds new multiplier options (twelve, custom) to a game's spec options map.
+ *
+ * Usage:
+ *   bun run src/cli/add-options-to-game.ts <gameId>
+ *
+ * Example:
+ *   bun run src/cli/add-options-to-game.ts co_zJkF8xhjVFRNemoSdXZnZrUtHM2
+ */
+
+import { config } from "dotenv";
+import { resolve } from "node:path";
+import type { Account, ID } from "jazz-tools";
+import { startWorker } from "jazz-tools/worker";
+import { Game, MultiplierOption, MapOfOptions } from "spicylib/schema";
+
+// Load environment from API package
+config({ path: resolve(import.meta.dir, "../../../api/.env") });
+
+const JAZZ_API_KEY = process.env.JAZZ_API_KEY;
+const JAZZ_WORKER_ACCOUNT = process.env.JAZZ_WORKER_ACCOUNT;
+const JAZZ_WORKER_SECRET = process.env.JAZZ_WORKER_SECRET;
+
+if (!JAZZ_API_KEY || !JAZZ_WORKER_ACCOUNT || !JAZZ_WORKER_SECRET) {
+  console.error("Missing Jazz credentials in packages/api/.env");
+  console.error(
+    "Required: JAZZ_API_KEY, JAZZ_WORKER_ACCOUNT, JAZZ_WORKER_SECRET",
+  );
+  process.exit(1);
+}
+
+// New multiplier options to add
+const TWELVE_OPTION = {
+  name: "twelve",
+  disp: "12x",
+  type: "multiplier" as const,
+  version: "0.5",
+  value: 12,
+  seq: 6,
+  icon: "album",
+  based_on: "user",
+  scope: "hole" as const,
+  override: true,
+  availability: JSON.stringify({
+    and: [
+      { team_down_the_most: [{ getPrevHole: [] }, { var: "team" }] },
+      { existingPreMultiplierTotal: [{ getCurrHole: [] }, 8] },
+    ],
+  }),
+};
+
+const CUSTOM_OPTION = {
+  name: "custom",
+  disp: "Custom",
+  type: "multiplier" as const,
+  version: "0.5",
+  value: 0, // Will be set by user input
+  seq: 7,
+  icon: "album",
+  based_on: "user",
+  scope: "hole" as const,
+  override: true,
+  availability: JSON.stringify({
+    team_down_the_most: [{ getPrevHole: [] }, { var: "team" }],
+  }),
+};
+
+async function addMultiplierOption(
+  optionsMap: MapOfOptions,
+  optionDef: typeof TWELVE_OPTION | typeof CUSTOM_OPTION,
+) {
+  const existing = optionsMap[optionDef.name];
+  if (existing?.$isLoaded) {
+    console.log(`  Option "${optionDef.name}" already exists, skipping`);
+    return false;
+  }
+
+  const newOption = MultiplierOption.create(
+    {
+      name: optionDef.name,
+      disp: optionDef.disp,
+      type: "multiplier",
+      version: optionDef.version,
+      value: optionDef.value,
+    },
+    { owner: optionsMap.$jazz.owner },
+  );
+
+  // Set optional fields
+  if (optionDef.seq !== undefined) {
+    newOption.$jazz.set("seq", optionDef.seq);
+  }
+  if (optionDef.icon) {
+    newOption.$jazz.set("icon", optionDef.icon);
+  }
+  if (optionDef.based_on) {
+    newOption.$jazz.set("based_on", optionDef.based_on);
+  }
+  if (optionDef.scope) {
+    newOption.$jazz.set("scope", optionDef.scope);
+  }
+  if (optionDef.availability) {
+    newOption.$jazz.set("availability", optionDef.availability);
+  }
+  if (optionDef.override !== undefined) {
+    newOption.$jazz.set("override", optionDef.override);
+  }
+
+  optionsMap.$jazz.set(optionDef.name, newOption);
+  console.log(`  Added option "${optionDef.name}"`);
+  return true;
+}
+
+async function main() {
+  const [gameId] = process.argv.slice(2);
+
+  if (!gameId) {
+    console.log("Usage: bun run src/cli/add-options-to-game.ts <gameId>");
+    console.log("\nExample:");
+    console.log(
+      "  bun run src/cli/add-options-to-game.ts co_zJkF8xhjVFRNemoSdXZnZrUtHM2",
+    );
+    process.exit(1);
+  }
+
+  console.log(`\nAdding twelve and custom multipliers to game`);
+  console.log(`  Game: ${gameId}`);
+
+  // Start worker
+  await startWorker({
+    accountID: JAZZ_WORKER_ACCOUNT as ID<Account>,
+    accountSecret: JAZZ_WORKER_SECRET,
+    syncServer: `wss://cloud.jazz.tools/?key=${JAZZ_API_KEY}`,
+  });
+
+  try {
+    // Load the game with specs and options
+    const game = await Game.load(gameId as ID<Game>, {
+      resolve: {
+        specs: {
+          $each: {
+            options: { $each: true },
+          },
+        },
+      },
+    });
+
+    if (!game?.$isLoaded) {
+      console.error(`Failed to load game: ${gameId}`);
+      process.exit(1);
+    }
+
+    console.log(`\nGame: ${game.name}`);
+
+    const spec = game.specs?.[0];
+    if (!spec?.$isLoaded) {
+      console.error("Game has no spec loaded");
+      process.exit(1);
+    }
+
+    console.log(`Spec: ${spec.name} (${spec.$jazz.id})`);
+
+    // Ensure spec has options map
+    if (!spec.$jazz.has("options") || !spec.options) {
+      console.log("Creating options map on spec...");
+      const optionsMap = MapOfOptions.create({}, { owner: spec.$jazz.owner });
+      spec.$jazz.set("options", optionsMap);
+    }
+
+    const specOptions = spec.options;
+    if (!specOptions?.$isLoaded) {
+      console.error("Failed to access spec options");
+      process.exit(1);
+    }
+
+    console.log(`\nCurrent options: ${Object.keys(specOptions).length}`);
+    console.log(`  ${Object.keys(specOptions).join(", ")}`);
+
+    // Add new multiplier options
+    console.log("\nAdding new multiplier options to spec:");
+    const addedTwelve = await addMultiplierOption(specOptions, TWELVE_OPTION);
+    const addedCustom = await addMultiplierOption(specOptions, CUSTOM_OPTION);
+
+    if (!addedTwelve && !addedCustom) {
+      console.log("\nNo new options added (all already exist)");
+    } else {
+      console.log(`\nUpdated options: ${Object.keys(specOptions).length}`);
+      console.log(`  ${Object.keys(specOptions).join(", ")}`);
+    }
+
+    // Wait for sync
+    console.log("\nSyncing...");
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    console.log("Done.");
+    process.exit(0);
+  } catch (err) {
+    console.error("Error:", err);
+    process.exit(1);
+  }
+}
+
+main().catch((err) => {
+  console.error("Error:", err);
+  process.exit(1);
+});

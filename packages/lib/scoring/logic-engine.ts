@@ -303,29 +303,28 @@ function getHolePar(logicCtx: LogicContext): number {
 /**
  * Check if existing pre-multiplier total meets threshold
  *
- * This checks if adding another instance of a multiplier would exceed the
- * maximum allowed total. Used to enforce limits like "no more than 8x total".
+ * This checks if the existing pre-multiplier total has reached or exceeded
+ * a threshold. Used to enable options like 12x only when already at 8x.
  *
- * The threshold represents the maximum allowed multiplier total. This function
- * returns true if the existing total is LESS than the threshold (i.e., there's
- * room to add another multiplier instance).
+ * The threshold represents the minimum required multiplier total. This function
+ * returns true if the existing total is AT LEAST the threshold.
  *
  * @param holeResult - The hole to check (typically current hole)
- * @param threshold - The maximum allowed multiplier total (e.g., 8 for max 8x)
- * @returns true if existing total < threshold (room for more), false otherwise
+ * @param threshold - The minimum required multiplier total (e.g., 8 for 12x availability)
+ * @returns true if existing total >= threshold, false otherwise
  */
 function existingPreMultiplierTotal(
   holeResult: HoleResult | null,
   threshold: number,
 ): boolean {
-  if (!holeResult) return true; // No data, allow multiplier
+  if (!holeResult) return false; // No data, multiplier hasn't reached threshold
 
   // Get the current hole multiplier (all multipliers combined)
   const currentMultiplier = holeResult.holeMultiplier ?? 1;
 
-  // Return true if current multiplier is less than threshold
-  // This means there's room to add another multiplier
-  return currentMultiplier < threshold;
+  // Return true if current multiplier is at or above threshold
+  // Matches legacy behavior: tot >= threshold
+  return currentMultiplier >= threshold;
 }
 
 /**
