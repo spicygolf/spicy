@@ -186,10 +186,10 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "bold",
   },
   customLabel: {
-    fontSize: 9,
+    fontSize: 7,
     fontWeight: "600",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
     marginTop: -2,
   },
   placeholderText: {
