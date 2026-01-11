@@ -13,6 +13,7 @@
 import type { MultiplierOption } from "../schema";
 import { deepClone } from "../utils/clone";
 import { evaluateLogic } from "./logic-engine";
+import { getFrontNinePreDoubleTotal } from "./option-utils";
 import type {
   HoleResult,
   MultiplierAward,
@@ -44,7 +45,7 @@ function calculateDynamicValue(
   }
 
   if (mult.value_from === "frontNinePreDoubleTotal") {
-    return getFrontNinePreDoubleTotal(teamId, ctx);
+    return getFrontNinePreDoubleTotal(ctx);
   }
 
   if (mult.value_from === "user_input" && holeNum) {
@@ -93,47 +94,7 @@ function getUserInputMultiplierValue(
   return 1;
 }
 
-/**
- * Calculate the total pre_double multiplier value from the front nine for the whole game.
- *
- * Used for the "Re Pre" option on hole 10 - allows carrying over accumulated
- * pre_double multipliers from the front nine to the back nine.
- *
- * @param _teamId - Unused (kept for API compatibility)
- * @param ctx - The scoring context containing game holes
- * @returns The total pre_double value (e.g., 4 if two 2x pre_doubles), or 1 if none
- */
-function getFrontNinePreDoubleTotal(
-  _teamId: string,
-  ctx: ScoringContext,
-): number {
-  const gameHoles = ctx.gameHoles;
-  if (!gameHoles) return 1;
-
-  let total = 1; // Start at 1x (no multiplier)
-
-  // Check holes 1-9 for pre_double options across ALL teams
-  for (let holeNum = 1; holeNum <= 9; holeNum++) {
-    const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
-    if (!gameHole?.teams?.$isLoaded) continue;
-
-    for (const team of gameHole.teams) {
-      if (!team?.$isLoaded) continue;
-      if (!team.options?.$isLoaded) continue;
-
-      for (const opt of team.options) {
-        if (!opt?.$isLoaded) continue;
-        // Look for pre_double options with firstHole set (activated on this hole)
-        if (opt.optionName === "pre_double" && opt.firstHole) {
-          // Each pre_double is worth 2x, multiply into total
-          total *= 2;
-        }
-      }
-    }
-  }
-
-  return total;
-}
+// getFrontNinePreDoubleTotal is imported from option-utils.ts
 
 // =============================================================================
 // Public API
