@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { ScrollView, useWindowDimensions, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Scoreboard } from "spicylib/scoring";
@@ -20,13 +21,49 @@ interface LeaderboardTableProps {
   viewMode: ViewMode;
 }
 
-export function LeaderboardTable({
+export const LeaderboardTable = memo(function LeaderboardTable({
   playerColumns,
   holeRows,
   scoreboard,
   viewMode,
 }: LeaderboardTableProps) {
   const { width: screenWidth } = useWindowDimensions();
+
+  // Pre-compute all cell data once when scoreboard/viewMode changes
+  const cellData = useMemo(() => {
+    const data: Map<
+      string,
+      { value: number | null; scoreToPar: number | null; popsCount: number }
+    > = new Map();
+
+    for (const row of holeRows) {
+      for (const player of playerColumns) {
+        const key = `${row.hole}-${player.playerId}`;
+
+        const value =
+          row.isSummaryRow && row.summaryType
+            ? getSummaryValue(
+                scoreboard,
+                player.playerId,
+                row.summaryType,
+                viewMode,
+              )
+            : getScoreValue(scoreboard, player.playerId, row.hole, viewMode);
+
+        const scoreToPar = row.isSummaryRow
+          ? null
+          : getScoreToPar(scoreboard, player.playerId, row.hole, viewMode);
+
+        const popsCount = row.isSummaryRow
+          ? 0
+          : getPopsCount(scoreboard, player.playerId, row.hole);
+
+        data.set(key, { value, scoreToPar, popsCount });
+      }
+    }
+
+    return data;
+  }, [scoreboard, playerColumns, holeRows, viewMode]);
 
   return (
     <ScrollView style={styles.tableContainer} nestedScrollEnabled>
@@ -74,40 +111,19 @@ export function LeaderboardTable({
                 </Text>
               </View>
               {playerColumns.map((player) => {
-                const value =
-                  row.isSummaryRow && row.summaryType
-                    ? getSummaryValue(
-                        scoreboard,
-                        player.playerId,
-                        row.summaryType,
-                        viewMode,
-                      )
-                    : getScoreValue(
-                        scoreboard,
-                        player.playerId,
-                        row.hole,
-                        viewMode,
-                      );
-
-                const scoreToPar = row.isSummaryRow
-                  ? null
-                  : getScoreToPar(
-                      scoreboard,
-                      player.playerId,
-                      row.hole,
-                      viewMode,
-                    );
-
-                const popsCount = row.isSummaryRow
-                  ? 0
-                  : getPopsCount(scoreboard, player.playerId, row.hole);
+                const key = `${row.hole}-${player.playerId}`;
+                const cell = cellData.get(key) ?? {
+                  value: null,
+                  scoreToPar: null,
+                  popsCount: 0,
+                };
 
                 return (
                   <View key={player.playerId} style={styles.playerColumn}>
                     <ScoreCell
-                      value={value}
-                      scoreToPar={scoreToPar}
-                      popsCount={popsCount}
+                      value={cell.value}
+                      scoreToPar={cell.scoreToPar}
+                      popsCount={cell.popsCount}
                       isSummaryRow={row.isSummaryRow}
                       viewMode={viewMode}
                     />
@@ -120,7 +136,7 @@ export function LeaderboardTable({
       </ScrollView>
     </ScrollView>
   );
-}
+});
 
 const styles = StyleSheet.create((theme) => ({
   tableContainer: {

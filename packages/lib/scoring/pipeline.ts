@@ -151,9 +151,6 @@ export function buildContext(game: Game): ScoringContext {
 // Pipeline Execution
 // =============================================================================
 
-// Track scoring invocations for performance debugging
-let scoringInvocationCount = 0;
-
 /**
  * Run the scoring pipeline
  *
@@ -161,56 +158,38 @@ let scoringInvocationCount = 0;
  * game-specific behavior comes from the data in options.
  */
 function runPipeline(ctx: ScoringContext): ScoringContext {
-  scoringInvocationCount++;
-  const startTime = performance.now();
-
   // All stages run in a fixed order
   // Game-specific logic comes from the option data, not from different stages
-  const stages: [string, ScoringStage][] = [
+  const stages: ScoringStage[] = [
     // Phase 1: Initialize structure
-    ["initializeScoreboard", initializeScoreboard],
+    initializeScoreboard,
 
     // Phase 2: Calculate scores
-    ["calculateGrossScores", calculateGrossScores],
-    ["calculatePops", calculatePops],
-    ["calculateNetScores", calculateNetScores],
+    calculateGrossScores,
+    calculatePops,
+    calculateNetScores,
 
     // Phase 3: Team setup and scoring
-    ["assignTeams", assignTeams],
-    ["calculateTeamScores", calculateTeamScores],
+    assignTeams,
+    calculateTeamScores,
 
     // Phase 4: Rankings
-    ["rankPlayers", rankPlayers],
-    ["rankTeams", rankTeams],
+    rankPlayers,
+    rankTeams,
 
     // Phase 5: Junk and multipliers (data-driven)
-    ["evaluateJunk", evaluateJunk],
-    ["evaluateMultipliers", evaluateMultipliers],
+    evaluateJunk,
+    evaluateMultipliers,
 
     // Phase 6: Points calculation
-    ["calculatePoints", calculatePoints],
+    calculatePoints,
 
     // Phase 7: Cumulatives
-    ["calculateCumulatives", calculateCumulatives],
+    calculateCumulatives,
   ];
 
-  // Run all stages with timing
-  const result = stages.reduce((c, [name, stage]) => {
-    const stageStart = performance.now();
-    const newCtx = stage(c);
-    const stageTime = performance.now() - stageStart;
-    if (stageTime > 5) {
-      console.log(`[Scoring] Stage ${name}: ${stageTime.toFixed(1)}ms`);
-    }
-    return newCtx;
-  }, ctx);
-
-  const totalTime = performance.now() - startTime;
-  console.log(
-    `[Scoring] Pipeline #${scoringInvocationCount} completed in ${totalTime.toFixed(1)}ms (${ctx.gameHoles.length} holes)`,
-  );
-
-  return result;
+  // Run all stages
+  return stages.reduce((c, stage) => stage(c), ctx);
 }
 
 // =============================================================================

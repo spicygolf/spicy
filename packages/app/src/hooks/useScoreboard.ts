@@ -3,9 +3,6 @@ import type { Game } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import { scoreWithContext } from "spicylib/scoring";
 
-// Track hook invocations for performance debugging
-let hookInvocationCount = 0;
-
 /**
  * Result from the useScoreboard hook
  */
@@ -129,7 +126,6 @@ function createScoringFingerprint(game: Game | null): string | null {
  * }
  */
 export function useScoreboard(game: Game | null): ScoreboardResult | null {
-  const memoRunCount = useRef(0);
   const lastFingerprint = useRef<string | null>(null);
   const cachedResult = useRef<ScoreboardResult | null>(null);
 
@@ -137,37 +133,18 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
   const fingerprint = createScoringFingerprint(game);
 
   return useMemo(() => {
-    hookInvocationCount++;
-    memoRunCount.current++;
-
     // If fingerprint is null, game isn't ready
     if (fingerprint === null) {
-      console.log(
-        `[useScoreboard] #${hookInvocationCount} - Game not ready for scoring`,
-      );
       return null;
     }
 
     // If fingerprint hasn't changed, return cached result
     if (fingerprint === lastFingerprint.current && cachedResult.current) {
-      console.log(
-        `[useScoreboard] #${hookInvocationCount} - Fingerprint unchanged, using cache`,
-      );
       return cachedResult.current;
     }
 
-    console.log(
-      `[useScoreboard] #${hookInvocationCount} - Fingerprint changed, recomputing scoreboard`,
-    );
-
     try {
-      const startTime = performance.now();
       const { scoreboard, context } = scoreWithContext(game!);
-      const elapsed = performance.now() - startTime;
-
-      console.log(
-        `[useScoreboard] #${hookInvocationCount} - Scoring completed in ${elapsed.toFixed(1)}ms`,
-      );
 
       // Update cache
       lastFingerprint.current = fingerprint;

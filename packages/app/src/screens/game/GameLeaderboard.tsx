@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
@@ -51,12 +52,23 @@ export function GameLeaderboard() {
   const scoreResult = useScoreboard(game);
   const scoreboard = scoreResult?.scoreboard ?? null;
 
+  // Memoize player columns - only recalculate when players change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional optimization - we only want to recompute when players changes, not on every game reference change from Jazz progressive loading
+  const playerColumns = useMemo(() => {
+    if (!game) return [];
+    return getPlayerColumns(game);
+  }, [game?.players]);
+
+  // Memoize hole rows - only recalculate when rounds/tee data changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional optimization - we only want to recompute when rounds changes, not on every game reference change from Jazz progressive loading
+  const holeRows = useMemo(() => {
+    if (!game) return [];
+    return getHoleRows(game);
+  }, [game?.rounds]);
+
   if (!game) {
     return null;
   }
-
-  const playerColumns = getPlayerColumns(game);
-  const holeRows = getHoleRows(game);
 
   if (playerColumns.length === 0) {
     return (
