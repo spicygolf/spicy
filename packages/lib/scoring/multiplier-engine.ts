@@ -92,10 +92,8 @@ function getUserInputMultiplierValue(
     }
   }
 
-  // Option not found - this could indicate a data loading issue
-  console.warn(
-    `getUserInputMultiplierValue: Option "${multName}" not found for team ${teamId} on hole ${holeNum}, defaulting to 1x`,
-  );
+  // Option not found - this is normal when the custom multiplier isn't activated
+  // Returning 1 means no multiplication effect
   return 1;
 }
 

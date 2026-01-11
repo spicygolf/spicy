@@ -17,7 +17,10 @@ import type {
   ScoringContext,
   TeamHoleResult,
 } from "spicylib/scoring";
-import { evaluateAvailability } from "spicylib/scoring";
+import {
+  evaluateAvailability,
+  getFrontNinePreDoubleTotalFromHoles,
+} from "spicylib/scoring";
 
 /**
  * Get user-markable junk options from game spec
@@ -226,45 +229,11 @@ export function getMultiplierValue(
   }
 
   if (mult.value_from === "frontNinePreDoubleTotal") {
-    return getFrontNinePreDoubleTotal(gameHoles);
+    return getFrontNinePreDoubleTotalFromHoles(gameHoles);
   }
 
   // Unknown value_from, use default
   return mult.value ?? 2;
-}
-
-/**
- * Calculate the total pre_double multiplier value from the front nine for the whole game.
- * Used for the "Re Pre" option on hole 10.
- */
-function getFrontNinePreDoubleTotal(gameHoles: GameHole[]): number {
-  let total = 1; // Start at 1x (no multiplier)
-
-  // Check holes 1-9 for pre_double options across ALL teams
-  for (let holeNum = 1; holeNum <= 9; holeNum++) {
-    const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
-    if (!gameHole?.teams?.$isLoaded) continue;
-
-    for (const team of gameHole.teams) {
-      if (!team?.$isLoaded) continue;
-      if (!team.options?.$isLoaded) continue;
-
-      for (const opt of team.options) {
-        if (!opt?.$isLoaded) continue;
-        // Look for pre_double options where firstHole matches this hole
-        // (to avoid counting duplicates from old imported data)
-        if (
-          opt.optionName === "pre_double" &&
-          opt.firstHole === String(holeNum)
-        ) {
-          // Each pre_double is worth 2x, multiply into total
-          total *= 2;
-        }
-      }
-    }
-  }
-
-  return total;
 }
 
 /**

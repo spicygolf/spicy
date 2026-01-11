@@ -10,6 +10,7 @@
  */
 
 import type {
+  GameHole,
   GameOption,
   JunkOption,
   MultiplierOption,
@@ -175,7 +176,19 @@ function extractOptionValue(
 export function getFrontNinePreDoubleTotal(ctx: ScoringContext): number {
   const gameHoles = ctx.gameHoles;
   if (!gameHoles) return 1;
+  return getFrontNinePreDoubleTotalFromHoles(gameHoles);
+}
 
+/**
+ * Calculate the total pre_double multiplier value from the front nine.
+ * This version takes GameHole[] directly for use in UI contexts without full ScoringContext.
+ *
+ * @param gameHoles - Array of game holes
+ * @returns The total pre_double value (e.g., 4 if two 2x pre_doubles), or 1 if none
+ */
+export function getFrontNinePreDoubleTotalFromHoles(
+  gameHoles: GameHole[],
+): number {
   let total = 1; // Start at 1x (no multiplier)
 
   // Check holes 1-9 for pre_double options across ALL teams

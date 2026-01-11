@@ -398,9 +398,8 @@ export function ScoringView({
   const handleSetCustomMultiplier = (value: number): void => {
     if (!customMultiplierOption) return;
 
-    // Find the team that's down the most (or first team if tied/no data)
-    // For now, use the first team - the availability check would normally filter this
-    // but since we're bypassing team buttons, we just pick the first team
+    // Custom multiplier applies to the whole hole (override), so it doesn't matter
+    // which team "owns" it - just use the first team as a storage location
     const targetTeam = allTeams[0];
     if (!targetTeam) return;
 
