@@ -84,6 +84,8 @@ export interface MultiplierAward {
   value: number;
   /** Player who triggered it (if applicable) */
   playerId?: string;
+  /** If true, this value replaces the total multiplier instead of stacking */
+  override?: boolean;
 }
 
 /**

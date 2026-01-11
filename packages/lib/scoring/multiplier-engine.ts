@@ -247,6 +247,7 @@ function evaluateAutomaticMultiplier(
         teamResult.multipliers.push({
           name: mult.name,
           value: mult.value ?? 2,
+          override: mult.override,
         });
       }
     }
@@ -263,6 +264,7 @@ function evaluateAutomaticMultiplier(
         playerResult.multipliers.push({
           name: mult.name,
           value: mult.value ?? 2,
+          override: mult.override,
         });
       }
     }
@@ -342,6 +344,7 @@ function evaluateUserMultiplier(
         teamResult.multipliers.push({
           name: mult.name,
           value: multiplierValue,
+          override: mult.override,
         });
       }
     } else {
@@ -371,6 +374,7 @@ function evaluateUserMultiplier(
         teamResult.multipliers.push({
           name: mult.name,
           value: multiplierValue,
+          override: mult.override,
         });
       }
     }
@@ -474,10 +478,20 @@ export function evaluateAvailability(
  *
  * Multiple multipliers stack multiplicatively.
  * Example: 2x * 2x = 4x
+ *
+ * If any multiplier has override=true, it replaces the entire total.
+ * The last override multiplier wins if multiple are present.
  */
 export function calculateTotalMultiplier(
   multipliers: MultiplierAward[],
 ): number {
   if (multipliers.length === 0) return 1;
+
+  // Check for override multipliers - they replace the total instead of stacking
+  const overrideMultiplier = multipliers.find((m) => m.override);
+  if (overrideMultiplier) {
+    return overrideMultiplier.value;
+  }
+
   return multipliers.reduce((product, m) => product * m.value, 1);
 }
