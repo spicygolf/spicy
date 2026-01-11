@@ -1,4 +1,3 @@
-// @ts-nocheck - Jazz resolve type inference is complex for deep nested queries
 import { useCoState } from "jazz-tools/react-native";
 import {
   createContext,
@@ -38,7 +37,7 @@ const SCORING_RESOLVE = {
           rounds: {
             $each: {
               roundToGame: {
-                round: { playerId: true }, // Needed for team playerIds
+                round: true, // Needed for team playerIds (playerId is a primitive)
               },
             },
           },
