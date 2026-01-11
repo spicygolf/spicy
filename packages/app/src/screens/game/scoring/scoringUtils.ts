@@ -206,7 +206,6 @@ export function getMultiplierOptions(game: Game): MultiplierOption[] {
 
   multiplierOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
 
-  // Debug: log multiplier options
   return multiplierOptions;
 }
 

@@ -82,7 +82,9 @@ export function CustomMultiplierModal({
                 style={styles.input}
                 keyboardType="number-pad"
                 value={inputValue}
-                onChangeText={setInputValue}
+                onChangeText={(text) =>
+                  setInputValue(text.replace(/[^0-9]/g, ""))
+                }
                 placeholder="Enter multiplier"
                 autoFocus
                 selectTextOnFocus
