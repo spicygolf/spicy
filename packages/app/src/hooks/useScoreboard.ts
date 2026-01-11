@@ -54,6 +54,10 @@ function createScoringFingerprint(game: Game | null): string | null {
       `p:${playerId}:hi${handicapIndex}:ch${courseHandicap}:gh${gameHandicap ?? ""}`,
     );
 
+    // Tee holes must be loaded for pops calculation
+    const tee = round.tee;
+    if (!tee?.$isLoaded || !tee.holes?.$isLoaded) return null; // Not ready - tee/holes not loaded
+
     // Add all scores for this player - scores CoRecord must be loaded
     if (!round.scores?.$isLoaded) return null; // Not ready - scores map not loaded
     for (const key of Object.keys(round.scores)) {
