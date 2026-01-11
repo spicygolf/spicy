@@ -2,8 +2,11 @@
 # Hook: UserPromptSubmit
 # Purpose: Inject relevant skill context based on prompt keywords
 
-# Log to file for debugging
-echo "$(date): Hook fired, CLAUDE_PROMPT=${CLAUDE_PROMPT:0:50}..." >> /tmp/claude-hook-debug.log
+# Read JSON input from stdin (Claude Code passes hook context this way)
+PROMPT_INPUT=$(cat)
+
+# Export for the TypeScript script to parse
+export CLAUDE_PROMPT="$PROMPT_INPUT"
 
 # This hook analyzes the user prompt and injects relevant skill documentation
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
