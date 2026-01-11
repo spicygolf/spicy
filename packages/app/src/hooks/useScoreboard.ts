@@ -87,15 +87,30 @@ function createScoringFingerprint(game: Game | null): string | null {
       // team.options is co.optional - can be undefined (no options set) or a list
       // If undefined, skip (valid - no options for this team)
       // If defined but not loaded, block (need to wait for data)
-      if (team.options === undefined) continue; // No options set - valid
-      if (!team.options.$isLoaded) return null; // Options exist but not loaded yet
+      if (team.options === undefined) {
+        // No options set - valid, continue
+      } else if (!team.options.$isLoaded) {
+        return null; // Options exist but not loaded yet
+      } else {
+        for (const opt of team.options) {
+          if (!opt?.$isLoaded) return null; // Not ready - option not loaded
+          // Include option name, value, playerId (for player junk), and firstHole (for multipliers)
+          parts.push(
+            `to:${holeNum}:${teamId}:${opt.optionName}:${opt.value ?? ""}:${opt.playerId ?? ""}:${opt.firstHole ?? ""}`,
+          );
+        }
+      }
 
-      for (const opt of team.options) {
-        if (!opt?.$isLoaded) return null; // Not ready - option not loaded
-        // Include option name, value, playerId (for player junk), and firstHole (for multipliers)
-        parts.push(
-          `to:${holeNum}:${teamId}:${opt.optionName}:${opt.value ?? ""}:${opt.playerId ?? ""}:${opt.firstHole ?? ""}`,
-        );
+      // team.rounds must be loaded to extract playerIds for team scoring
+      if (!team.rounds?.$isLoaded) return null; // Not ready - team rounds not loaded
+      for (const rtt of team.rounds) {
+        if (!rtt?.$isLoaded) return null;
+        const rtg = rtt.roundToGame;
+        if (!rtg?.$isLoaded) return null;
+        const round = rtg.round;
+        if (!round?.$isLoaded) return null;
+        // Include player assignment in fingerprint
+        parts.push(`tr:${holeNum}:${teamId}:${round.playerId ?? ""}`);
       }
     }
   }
