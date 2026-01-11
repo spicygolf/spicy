@@ -293,6 +293,7 @@ function evaluateAutomaticMultiplier(
           name: mult.name,
           value: mult.value ?? 2,
           override: mult.override,
+          earned: true, // Automatic multiplier triggered by junk
         });
       }
     }
@@ -310,6 +311,7 @@ function evaluateAutomaticMultiplier(
           name: mult.name,
           value: mult.value ?? 2,
           override: mult.override,
+          earned: true, // Automatic multiplier triggered by junk
         });
       }
     }
@@ -533,29 +535,32 @@ export function calculateTotalMultiplier(
 ): number {
   if (multipliers.length === 0) return 1;
 
-  // Separate override and non-override multipliers
+  // Separate multipliers into categories:
+  // - Override: replaces user-activated multipliers (e.g., custom, twelve)
+  // - Earned: automatic multipliers triggered by junk (e.g., birdie_bbq) - always stack
+  // - User-activated: press multipliers without override (e.g., pre_double, double)
   const overrideMultipliers = multipliers.filter((m) => m.override);
-  const nonOverrideMultipliers = multipliers.filter((m) => !m.override);
+  const earnedMultipliers = multipliers.filter((m) => m.earned && !m.override);
+  const userActivatedMultipliers = multipliers.filter(
+    (m) => !m.earned && !m.override,
+  );
 
-  // Start with base value
   let total = 1;
 
   const firstOverride = overrideMultipliers[0];
   if (firstOverride) {
-    // Use the first override multiplier as the base (replaces normal stacking)
+    // Override replaces user-activated multipliers
     total = firstOverride.value;
   } else {
-    // No override - stack all non-override multipliers normally
-    total = nonOverrideMultipliers.reduce((product, m) => product * m.value, 1);
-  }
-
-  // Earned/automatic multipliers (non-override) still stack on top of override
-  if (overrideMultipliers.length > 0 && nonOverrideMultipliers.length > 0) {
-    total = nonOverrideMultipliers.reduce(
+    // No override - stack all user-activated multipliers normally
+    total = userActivatedMultipliers.reduce(
       (product, m) => product * m.value,
-      total,
+      1,
     );
   }
+
+  // Earned/automatic multipliers ALWAYS stack on top (whether override or not)
+  total = earnedMultipliers.reduce((product, m) => product * m.value, total);
 
   return total;
 }

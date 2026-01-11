@@ -86,6 +86,8 @@ export interface MultiplierAward {
   playerId?: string;
   /** If true, this value replaces the total multiplier instead of stacking */
   override?: boolean;
+  /** If true, this is an earned/automatic multiplier (e.g., birdie_bbq) vs user-activated */
+  earned?: boolean;
 }
 
 /**
