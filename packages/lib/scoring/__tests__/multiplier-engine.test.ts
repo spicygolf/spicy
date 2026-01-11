@@ -59,7 +59,7 @@ function createMockGameHole(
               ? {
                   $isLoaded: true,
                   [Symbol.iterator]: function* () {
-                    for (const opt of team.options!) {
+                    for (const opt of team.options ?? []) {
                       yield {
                         $isLoaded: true,
                         optionName: opt.optionName,
@@ -78,19 +78,20 @@ function createMockGameHole(
 }
 
 // Helper to create a minimal scoring context
+// Uses Partial types to create minimal mock data for testing
 function createContext(
   gameHoles: ReturnType<typeof createMockGameHole>[],
   options: Record<string, MultiplierOption>,
 ): ScoringContext {
   return {
-    game: { $isLoaded: true, $jazz: { id: "test-game" } } as any,
-    gameHoles: gameHoles as any,
+    game: { $isLoaded: true, $jazz: { id: "test-game" } },
+    gameHoles,
     rounds: [],
     playerHandicaps: new Map(),
     holeInfoMap: new Map(),
     teamsPerHole: new Map(),
     playerTeamMap: new Map(),
-    options: options as any,
+    options,
     scoreboard: {
       holes: {},
       cumulative: { players: {}, teams: {} },
@@ -101,7 +102,7 @@ function createContext(
         pointsPerHole: 5,
       },
     },
-  };
+  } as ScoringContext;
 }
 
 describe("evaluateMultipliersForHole", () => {
