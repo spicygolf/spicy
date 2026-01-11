@@ -10,8 +10,6 @@ import {
   type PlayerColumn,
 } from "@/components/game/leaderboard";
 import { useGameContext } from "@/contexts/GameContext";
-import { useGame } from "@/hooks";
-import { useScoreboard } from "@/hooks/useScoreboard";
 import { ButtonGroup, Screen, Text } from "@/ui";
 
 /**
@@ -56,45 +54,12 @@ function createHoleRowsFingerprint(game: Game | null): string | null {
 }
 
 export function GameLeaderboard(): React.ReactElement | null {
-  const { leaderboardViewMode: viewMode, setLeaderboardViewMode } =
-    useGameContext();
-
-  const { game } = useGame(undefined, {
-    resolve: {
-      name: true,
-      players: { $each: { name: true, handicap: true } },
-      rounds: {
-        $each: {
-          handicapIndex: true,
-          courseHandicap: true,
-          gameHandicap: true,
-          round: {
-            playerId: true,
-            scores: { $each: true },
-            tee: { holes: true },
-          },
-        },
-      },
-      specs: {
-        $each: {
-          options: { $each: true },
-        },
-      },
-      options: { $each: true },
-      holes: {
-        $each: {
-          teams: {
-            $each: {
-              options: { $each: true }, // Needed for inherited multiplier checking
-            },
-          },
-        },
-      },
-    },
-  });
-
-  const scoreResult = useScoreboard(game);
-  const scoreboard = scoreResult?.scoreboard ?? null;
+  const {
+    leaderboardViewMode: viewMode,
+    setLeaderboardViewMode,
+    scoringGame: game,
+    scoreboard,
+  } = useGameContext();
 
   // Create fingerprints for derived data - these only change when actual data changes,
   // not when Jazz object references change during progressive loading
