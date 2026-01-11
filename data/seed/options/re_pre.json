@@ -8,5 +8,6 @@
   "based_on": "user",
   "scope": "rest_of_nine",
   "value_from": "frontNinePreDoubleTotal",
+  "description": "Carries over accumulated pre_double value from front nine. Only available on hole 10 when: (1) at least 2 pre_doubles were used on front nine (> 2 means 4x or higher, since each pre_double is 2x), and (2) team is down the most after hole 9.",
   "availability": "{\n  \"and\": [\n    {\"==\": [{\"var\": \"holeNum\"}, \"10\"]},\n    {\">\": [{\"frontNinePreDoubleTotal\": [{\"var\": \"team\"}]}, 2]},\n    {\"team_down_the_most\": [{\"getPrevHole\": []}, {\"var\": \"team\"}]}\n  ]\n}"
 }

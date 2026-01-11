@@ -92,6 +92,10 @@ function getUserInputMultiplierValue(
     }
   }
 
+  // Option not found - this could indicate a data loading issue
+  console.warn(
+    `getUserInputMultiplierValue: Option "${multName}" not found for team ${teamId} on hole ${holeNum}, defaulting to 1x`,
+  );
   return 1;
 }
 

@@ -33,7 +33,7 @@ export function CustomMultiplierModal({
 
   const handleSet = (): void => {
     const numValue = Number.parseInt(inputValue, 10);
-    if (Number.isNaN(numValue) || numValue < 1) {
+    if (Number.isNaN(numValue) || numValue < 1 || numValue > 1000) {
       return;
     }
     onSet(numValue);
@@ -72,8 +72,8 @@ export function CustomMultiplierModal({
           </View>
 
           <Text style={styles.description}>
-            Set a custom multiplier that overrides all other multipliers for
-            this hole.
+            Set a custom multiplier (1-1000x) that overrides all other
+            multipliers for this hole.
           </Text>
 
           <View style={styles.inputContainer}>
@@ -84,7 +84,7 @@ export function CustomMultiplierModal({
                 value={inputValue}
                 onChangeText={setInputValue}
                 placeholder="Enter multiplier"
-                autoFocus={!isActive}
+                autoFocus
                 selectTextOnFocus
               />
               <Text style={styles.multiplierSuffix}>x</Text>
