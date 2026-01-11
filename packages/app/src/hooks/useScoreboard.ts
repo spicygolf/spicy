@@ -111,12 +111,12 @@ function createScoringFingerprint(game: Game | null): number | null {
       if (!team?.$isLoaded) return null; // Not ready - team not loaded
       const teamId = team.team ?? "";
 
-      // team.options is co.optional - can be undefined (no options set) or a list
-      // If undefined, skip (valid - no options for this team)
-      // If defined but not loaded, block (need to wait for data)
-      if (team.options === undefined) {
+      // team.options is co.optional - use $jazz.has() to check if field exists
+      // If not set, skip (valid - no options for this team)
+      // If set but not loaded, block (need to wait for data)
+      if (!team.$jazz.has("options")) {
         // No options set - valid, continue
-      } else if (!team.options.$isLoaded) {
+      } else if (!team.options?.$isLoaded) {
         return null; // Options exist but not loaded yet
       } else {
         for (const opt of team.options) {
