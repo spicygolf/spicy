@@ -25,16 +25,19 @@ import type {
  *
  * Supported value_from operators:
  * - "frontNinePreDoubleTotal": Returns total pre_double multiplier from front nine
+ * - "user_input": Value comes from TeamOption.value (user-entered custom multiplier)
  *
  * @param mult - The multiplier option with value_from field
  * @param teamId - The team ID to calculate for
  * @param ctx - The scoring context
+ * @param holeNum - Current hole number (needed for user_input lookup)
  * @returns The calculated value, or the default mult.value if not calculable
  */
 function calculateDynamicValue(
   mult: MultiplierOption,
   teamId: string,
   ctx: ScoringContext,
+  holeNum?: string,
 ): number {
   if (!mult.value_from) {
     return mult.value ?? 2;
@@ -44,8 +47,50 @@ function calculateDynamicValue(
     return getFrontNinePreDoubleTotal(teamId, ctx);
   }
 
+  if (mult.value_from === "user_input" && holeNum) {
+    return getUserInputMultiplierValue(mult.name, teamId, holeNum, ctx);
+  }
+
   // Unknown value_from, use default
   return mult.value ?? 2;
+}
+
+/**
+ * Get user-entered multiplier value from TeamOption.value
+ *
+ * For custom multipliers where value_from is "user_input", the actual value
+ * is stored in the TeamOption.value field as a string number.
+ *
+ * @param multName - The multiplier option name (e.g., "custom")
+ * @param teamId - The team ID to look up
+ * @param holeNum - The hole number where the multiplier was activated
+ * @param ctx - The scoring context
+ * @returns The user-entered value, or 1 if not found
+ */
+function getUserInputMultiplierValue(
+  multName: string,
+  teamId: string,
+  holeNum: string,
+  ctx: ScoringContext,
+): number {
+  const gameHole = ctx.gameHoles.find((h) => h.hole === holeNum);
+  if (!gameHole?.teams?.$isLoaded) return 1;
+
+  for (const team of gameHole.teams) {
+    if (!team?.$isLoaded || team.team !== teamId) continue;
+    if (!team.options?.$isLoaded) continue;
+
+    for (const opt of team.options) {
+      if (!opt?.$isLoaded) continue;
+      if (opt.optionName === multName && opt.firstHole === holeNum) {
+        // Value is stored as string in TeamOption.value
+        const parsed = Number.parseInt(opt.value, 10);
+        return Number.isNaN(parsed) ? 1 : parsed;
+      }
+    }
+  }
+
+  return 1;
 }
 
 /**
@@ -326,8 +371,9 @@ function evaluateUserMultiplier(
     if (!teamResult) continue;
 
     // Use dynamic value calculation if value_from is set, otherwise use static value
+    const currentHoleStr = String(currentHoleNum);
     const multiplierValue = mult.value_from
-      ? calculateDynamicValue(mult, teamId, ctx)
+      ? calculateDynamicValue(mult, teamId, ctx, currentHoleStr)
       : (mult.value ?? 2);
 
     // For rest_of_nine multipliers, count ALL instances from this hole and previous holes
@@ -348,10 +394,9 @@ function evaluateUserMultiplier(
         });
       }
     } else {
-      // For non-rest_of_nine multipliers (e.g., "double", "twelve" with scope "hole"),
+      // For non-rest_of_nine multipliers (e.g., "double", "twelve", "custom" with scope "hole" or "none"),
       // check if it's on this specific hole by matching firstHole
       let hasMultiplier = false;
-      const currentHoleStr = String(currentHoleNum);
 
       if (team.options?.$isLoaded) {
         for (const opt of team.options) {
@@ -479,19 +524,38 @@ export function evaluateAvailability(
  * Multiple multipliers stack multiplicatively.
  * Example: 2x * 2x = 4x
  *
- * If any multiplier has override=true, it replaces the entire total.
- * The last override multiplier wins if multiple are present.
+ * If any multiplier has override=true, it replaces the NON-OVERRIDE multipliers.
+ * Earned/automatic multipliers (without override flag) still stack on top.
+ * Example: 100x override + 2x earned birdie_bbq = 200x
  */
 export function calculateTotalMultiplier(
   multipliers: MultiplierAward[],
 ): number {
   if (multipliers.length === 0) return 1;
 
-  // Check for override multipliers - they replace the total instead of stacking
-  const overrideMultiplier = multipliers.find((m) => m.override);
-  if (overrideMultiplier) {
-    return overrideMultiplier.value;
+  // Separate override and non-override multipliers
+  const overrideMultipliers = multipliers.filter((m) => m.override);
+  const nonOverrideMultipliers = multipliers.filter((m) => !m.override);
+
+  // Start with base value
+  let total = 1;
+
+  const firstOverride = overrideMultipliers[0];
+  if (firstOverride) {
+    // Use the first override multiplier as the base (replaces normal stacking)
+    total = firstOverride.value;
+  } else {
+    // No override - stack all non-override multipliers normally
+    total = nonOverrideMultipliers.reduce((product, m) => product * m.value, 1);
   }
 
-  return multipliers.reduce((product, m) => product * m.value, 1);
+  // Earned/automatic multipliers (non-override) still stack on top of override
+  if (overrideMultipliers.length > 0 && nonOverrideMultipliers.length > 0) {
+    total = nonOverrideMultipliers.reduce(
+      (product, m) => product * m.value,
+      total,
+    );
+  }
+
+  return total;
 }

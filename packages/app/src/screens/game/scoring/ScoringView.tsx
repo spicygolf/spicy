@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole, Team } from "spicylib/schema";
@@ -12,6 +13,7 @@ import {
   getGrossScore,
 } from "spicylib/utils";
 import {
+  CustomMultiplierModal,
   HoleHeader,
   HoleToolbar,
   PlayerScoreRow,
@@ -24,6 +26,8 @@ import {
   getAllInheritedMultipliers,
   getCalculatedPlayerJunkOptions,
   getCalculatedTeamJunkOptions,
+  getCustomMultiplierOption,
+  getCustomMultiplierState,
   getMultiplierOptions,
   getMultiplierValue,
   getTeamMultiplierStatus,
@@ -174,6 +178,72 @@ function toggleTeamMultiplier(
   }
 }
 
+/**
+ * Set a custom multiplier for a team
+ * @param team - The team to set the multiplier on
+ * @param multiplierName - The multiplier option name (e.g., "custom")
+ * @param currentHoleNumber - The current hole number
+ * @param value - The multiplier value to set
+ */
+function setCustomMultiplier(
+  team: Team,
+  multiplierName: string,
+  currentHoleNumber: string,
+  value: number,
+): void {
+  const owner = team.$jazz.owner;
+
+  if (!team.$jazz.has("options")) {
+    team.$jazz.set("options", ListOfTeamOptions.create([], { owner }));
+  }
+
+  const options = team.options;
+  if (!options?.$isLoaded) return;
+
+  // Remove any existing custom multiplier first
+  for (let i = options.length - 1; i >= 0; i--) {
+    const opt = options[i];
+    if (opt?.$isLoaded && opt.optionName === multiplierName && !opt.playerId) {
+      options.$jazz.splice(i, 1);
+    }
+  }
+
+  // Add new custom multiplier with the value
+  const newOption = TeamOption.create(
+    {
+      optionName: multiplierName,
+      value: String(value), // Store the multiplier value as string
+      firstHole: currentHoleNumber,
+    },
+    { owner },
+  );
+  options.$jazz.push(newOption);
+}
+
+/**
+ * Clear a custom multiplier from a team
+ */
+function clearCustomMultiplier(
+  team: Team,
+  multiplierName: string,
+  currentHoleNumber: string,
+): void {
+  if (!team.options?.$isLoaded) return;
+
+  const options = team.options;
+  for (let i = options.length - 1; i >= 0; i--) {
+    const opt = options[i];
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === multiplierName &&
+      opt.firstHole === currentHoleNumber &&
+      !opt.playerId
+    ) {
+      options.$jazz.splice(i, 1);
+    }
+  }
+}
+
 export function ScoringView({
   game,
   holeInfo,
@@ -186,7 +256,11 @@ export function ScoringView({
   onScoreChange,
   onUnscore,
   onChangeTeams,
-}: ScoringViewProps) {
+}: ScoringViewProps): React.ReactElement {
+  // Modal state for custom multiplier
+  const [customMultiplierModalVisible, setCustomMultiplierModalVisible] =
+    useState(false);
+
   // Get user-markable junk options for this game (player-scoped)
   const userJunkOptions = getUserJunkOptions(game);
 
@@ -278,15 +352,29 @@ export function ScoringView({
     ? ([...currentHole.teams].filter((t) => t?.$isLoaded) as Team[])
     : [];
 
-  // Check if ANY team on this hole has an override multiplier active
+  // Get custom multiplier option and state
+  const customMultiplierOption = getCustomMultiplierOption(multiplierOptions);
+  const customMultiplierState = getCustomMultiplierState(
+    multiplierOptions,
+    allTeams,
+    currentHoleNumber,
+  );
+
+  // Filter out scope:"none" multipliers from the regular multiplier options
+  // (they are handled separately via the hole toolbar)
+  const teamMultiplierOptions = multiplierOptions.filter(
+    (m) => m.scope !== "none",
+  );
+
+  // Check if ANY team on this hole has an override multiplier active (excluding custom which is handled separately)
   // If so, we hide all multiplier buttons for ALL teams (only the override owner can toggle it off)
   const gameHolesForOverride = scoringContext?.gameHoles ?? [];
   let holeHasActiveOverride = false;
   let overrideOwnerTeamId: string | null = null;
-  let activeOverrideMult: (typeof multiplierOptions)[0] | null = null;
+  let activeOverrideMult: (typeof teamMultiplierOptions)[0] | null = null;
   let activeOverrideValue = 0;
 
-  for (const mult of multiplierOptions) {
+  for (const mult of teamMultiplierOptions) {
     if (mult.override) {
       for (const team of allTeams) {
         const status = getTeamMultiplierStatus(
@@ -306,12 +394,61 @@ export function ScoringView({
     }
   }
 
+  // Handler for setting custom multiplier
+  const handleSetCustomMultiplier = (value: number): void => {
+    if (!customMultiplierOption) return;
+
+    // Find the team that's down the most (or first team if tied/no data)
+    // For now, use the first team - the availability check would normally filter this
+    // but since we're bypassing team buttons, we just pick the first team
+    const targetTeam = allTeams[0];
+    if (!targetTeam) return;
+
+    setCustomMultiplier(
+      targetTeam,
+      customMultiplierOption.name,
+      currentHoleNumber,
+      value,
+    );
+  };
+
+  // Handler for clearing custom multiplier
+  const handleClearCustomMultiplier = (): void => {
+    if (!customMultiplierOption || !customMultiplierState.ownerTeamId) return;
+
+    const ownerTeam = allTeams.find(
+      (t) => t.team === customMultiplierState.ownerTeamId,
+    );
+    if (!ownerTeam) return;
+
+    clearCustomMultiplier(
+      ownerTeam,
+      customMultiplierOption.name,
+      currentHoleNumber,
+    );
+  };
+
   return (
     <>
       <HoleHeader hole={holeInfo} onPrevious={onPrevHole} onNext={onNextHole} />
       <HoleToolbar
         onChangeTeams={onChangeTeams}
         overallMultiplier={overallMultiplier}
+        isCustomMultiplier={customMultiplierState.isActive}
+        onMultiplierPress={
+          customMultiplierOption
+            ? () => setCustomMultiplierModalVisible(true)
+            : undefined
+        }
+      />
+      <CustomMultiplierModal
+        visible={customMultiplierModalVisible}
+        currentValue={
+          customMultiplierState.isActive ? customMultiplierState.value : null
+        }
+        onSet={handleSetCustomMultiplier}
+        onClear={handleClearCustomMultiplier}
+        onClose={() => setCustomMultiplierModalVisible(false)}
       />
       <FlatList
         style={styles.content}
@@ -332,12 +469,13 @@ export function ScoringView({
           // 3. Show clickable button if availability allows adding a new one
           //
           // Special case: If an override multiplier is active on this hole (ANY team),
-          // hide all multiplier buttons except for the override owner who can toggle it off
+          // hide all multiplier buttons except for the override owner who can toggle it off.
+          // Also hide buttons when custom multiplier is active (it's set via hole toolbar, not team buttons).
           const gameHoles = scoringContext?.gameHoles ?? [];
 
           const multiplierButtons: OptionButton[] = [];
 
-          // If an override multiplier is active on this hole
+          // If an override multiplier (non-custom) is active on this hole
           if (holeHasActiveOverride && activeOverrideMult) {
             // Only show the override button on the team that owns it
             if (teamId === overrideOwnerTeamId) {
@@ -352,9 +490,9 @@ export function ScoringView({
               });
             }
             // Other teams show nothing
-          } else {
-            // Normal case: build all multiplier buttons
-            for (const mult of multiplierOptions) {
+          } else if (!customMultiplierState.isActive) {
+            // Normal case: build all multiplier buttons (but not when custom multiplier is active)
+            for (const mult of teamMultiplierOptions) {
               const status = getTeamMultiplierStatus(
                 team,
                 mult.name,
@@ -467,51 +605,49 @@ export function ScoringView({
           // Note: inherited buttons have names like "pre_double_inherited_1_2", so we need to
           // extract the base multiplier name for filtering
           //
-          // When an override is active, hide ALL earned multiplier badges since the
-          // override replaces everything
-          let earnedMultiplierButtons: OptionButton[] = [];
-
-          if (!holeHasActiveOverride) {
-            const userMultiplierNames = new Set(
-              multiplierButtons.map((m) => {
-                // Extract base name from inherited buttons (e.g., "pre_double_inherited_1_2" -> "pre_double")
-                const inheritedMatch = m.name.match(/^(.+)_inherited_.+$/);
-                return inheritedMatch ? inheritedMatch[1] : m.name;
-              }),
-            );
-            // Also exclude all user-based multipliers from the spec (pre_double, double, etc.)
-            // These should only appear as buttons, not as earned badges
-            for (const mult of multiplierOptions) {
-              userMultiplierNames.add(mult.name);
-            }
-
-            // Get spec options for looking up display names of automatic multipliers
-            const spec = game?.specs?.$isLoaded ? game.specs[0] : null;
-            const specOptions = spec?.$isLoaded ? spec.options : null;
-            earnedMultiplierButtons = (teamHoleResult?.multipliers ?? [])
-              .filter((m) => !userMultiplierNames.has(m.name))
-              .map((m) => {
-                // Look up the option definition from the spec for display name and icon
-                const optDefRaw = specOptions?.$isLoaded
-                  ? specOptions[m.name]
-                  : null;
-                const optDef = optDefRaw?.$isLoaded ? optDefRaw : null;
-                // Icon is only on multiplier/junk options, not game options
-                const icon =
-                  optDef?.type === "multiplier" || optDef?.type === "junk"
-                    ? optDef.icon
-                    : undefined;
-                return {
-                  name: m.name,
-                  displayName: optDef?.disp ?? m.name,
-                  icon,
-                  type: "multiplier" as const,
-                  selected: true,
-                  earned: true, // Mark as earned/automatic
-                  points: m.value, // Use points field to show multiplier value (e.g., 2 for 2x)
-                };
-              });
+          // NOTE: Even when an override is active, we still show earned multiplier badges
+          // (they're informational - the override just replaces the total value, not the display)
+          const userMultiplierNames = new Set(
+            multiplierButtons.map((m) => {
+              // Extract base name from inherited buttons (e.g., "pre_double_inherited_1_2" -> "pre_double")
+              const inheritedMatch = m.name.match(/^(.+)_inherited_.+$/);
+              return inheritedMatch ? inheritedMatch[1] : m.name;
+            }),
+          );
+          // Also exclude all user-based multipliers from the spec (pre_double, double, etc.)
+          // These should only appear as buttons, not as earned badges
+          for (const mult of multiplierOptions) {
+            userMultiplierNames.add(mult.name);
           }
+
+          // Get spec options for looking up display names of automatic multipliers
+          const spec = game?.specs?.$isLoaded ? game.specs[0] : null;
+          const specOptions = spec?.$isLoaded ? spec.options : null;
+          const earnedMultiplierButtons: OptionButton[] = (
+            teamHoleResult?.multipliers ?? []
+          )
+            .filter((m) => !userMultiplierNames.has(m.name))
+            .map((m) => {
+              // Look up the option definition from the spec for display name and icon
+              const optDefRaw = specOptions?.$isLoaded
+                ? specOptions[m.name]
+                : null;
+              const optDef = optDefRaw?.$isLoaded ? optDefRaw : null;
+              // Icon is only on multiplier/junk options, not game options
+              const icon =
+                optDef?.type === "multiplier" || optDef?.type === "junk"
+                  ? optDef.icon
+                  : undefined;
+              return {
+                name: m.name,
+                displayName: optDef?.disp ?? m.name,
+                icon,
+                type: "multiplier" as const,
+                selected: true,
+                earned: true, // Mark as earned/automatic
+                points: m.value, // Use points field to show multiplier value (e.g., 2 for 2x)
+              };
+            });
 
           return (
             <TeamGroup

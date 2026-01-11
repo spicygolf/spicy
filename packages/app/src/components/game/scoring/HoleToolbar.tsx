@@ -7,6 +7,10 @@ interface HoleToolbarProps {
   onChangeTeams?: () => void;
   /** Overall multiplier for the hole (1x, 2x, 4x, 8x, etc.) */
   overallMultiplier?: number;
+  /** Whether a custom multiplier is active (shows "custom" label) */
+  isCustomMultiplier?: boolean;
+  /** Handler for tapping the multiplier badge to open custom multiplier modal */
+  onMultiplierPress?: () => void;
   /** Whether explain mode is enabled (for future use) */
   explainMode?: boolean;
   onToggleExplain?: () => void;
@@ -15,14 +19,37 @@ interface HoleToolbarProps {
 export function HoleToolbar({
   onChangeTeams,
   overallMultiplier = 1,
+  isCustomMultiplier = false,
+  onMultiplierPress,
   explainMode = false,
   onToggleExplain,
-}: HoleToolbarProps) {
+}: HoleToolbarProps): React.ReactElement {
   const { theme } = useUnistyles();
 
   // Format multiplier display (1x, 2x, 4x, 8x)
   const multiplierText = `${overallMultiplier}x`;
   const isActive = overallMultiplier > 1;
+
+  // Badge is tappable if handler provided
+  const isTappable = !!onMultiplierPress;
+
+  const multiplierBadge = (
+    <View
+      style={[
+        styles.multiplierBadge,
+        isCustomMultiplier && styles.multiplierBadgeCustom,
+      ]}
+    >
+      <Text style={[styles.multiplierText, { color: theme.colors.multiplier }]}>
+        {multiplierText}
+      </Text>
+      {isCustomMultiplier && (
+        <Text style={[styles.customLabel, { color: theme.colors.multiplier }]}>
+          custom
+        </Text>
+      )}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -44,20 +71,36 @@ export function HoleToolbar({
         )}
       </View>
 
-      {/* Center: Overall multiplier display */}
+      {/* Center: Overall multiplier display (tappable for custom multiplier) */}
       <View style={styles.centerSection}>
-        {isActive && (
-          <View style={styles.multiplierBadge}>
-            <Text
-              style={[
-                styles.multiplierText,
-                { color: theme.colors.multiplier },
-              ]}
+        {isActive ? (
+          isTappable ? (
+            <TouchableOpacity
+              onPress={onMultiplierPress}
+              accessibilityLabel={
+                isCustomMultiplier
+                  ? "Edit custom multiplier"
+                  : "Set custom multiplier"
+              }
             >
-              {multiplierText}
+              {multiplierBadge}
+            </TouchableOpacity>
+          ) : (
+            multiplierBadge
+          )
+        ) : isTappable ? (
+          <TouchableOpacity
+            onPress={onMultiplierPress}
+            style={styles.multiplierBadgePlaceholder}
+            accessibilityLabel="Set custom multiplier"
+          >
+            <Text
+              style={[styles.placeholderText, { color: theme.colors.border }]}
+            >
+              1x
             </Text>
-          </View>
-        )}
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       {/* Right: Explain mode icon (disabled/placeholder) */}
@@ -124,8 +167,32 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: 16,
     borderWidth: 2,
     borderColor: theme.colors.border,
+    alignItems: "center",
+  },
+  multiplierBadgeCustom: {
+    paddingVertical: theme.gap(0.25),
+  },
+  multiplierBadgePlaceholder: {
+    paddingHorizontal: theme.gap(1.5),
+    paddingVertical: theme.gap(0.5),
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    borderStyle: "dashed",
+    opacity: 0.5,
   },
   multiplierText: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  customLabel: {
+    fontSize: 9,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginTop: -2,
+  },
+  placeholderText: {
     fontSize: 18,
     fontWeight: "bold",
   },

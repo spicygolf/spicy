@@ -57,21 +57,45 @@ const CUSTOM_OPTION = {
   disp: "Custom",
   type: "multiplier" as const,
   version: "0.5",
-  value: 0, // Will be set by user input
+  value: 0, // Will be set by user input via value_from
   seq: 7,
-  icon: "album",
+  icon: "sliders",
   based_on: "user",
-  scope: "hole" as const,
+  scope: "none" as const, // Not shown on team buttons - activated from hole toolbar
   override: true,
+  value_from: "user_input", // Value comes from user input stored in TeamOption.value
   availability: JSON.stringify({
     team_down_the_most: [{ getPrevHole: [] }, { var: "team" }],
   }),
 };
 
+type MultiplierScope =
+  | "player"
+  | "team"
+  | "hole"
+  | "rest_of_nine"
+  | "game"
+  | "none";
+
+interface MultiplierOptionDef {
+  name: string;
+  disp: string;
+  type: "multiplier";
+  version: string;
+  value: number;
+  seq?: number;
+  icon?: string;
+  based_on?: string;
+  scope?: MultiplierScope;
+  availability?: string;
+  override?: boolean;
+  value_from?: string;
+}
+
 async function addMultiplierOption(
   optionsMap: MapOfOptions,
-  optionDef: typeof TWELVE_OPTION | typeof CUSTOM_OPTION,
-) {
+  optionDef: MultiplierOptionDef,
+): Promise<boolean> {
   const existing = optionsMap[optionDef.name];
   if (existing?.$isLoaded) {
     console.log(`  Option "${optionDef.name}" already exists, skipping`);
@@ -107,6 +131,9 @@ async function addMultiplierOption(
   }
   if (optionDef.override !== undefined) {
     newOption.$jazz.set("override", optionDef.override);
+  }
+  if (optionDef.value_from) {
+    newOption.$jazz.set("value_from", optionDef.value_from);
   }
 
   optionsMap.$jazz.set(optionDef.name, newOption);

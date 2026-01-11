@@ -350,6 +350,85 @@ export function getTeamMultiplierStatus(
 }
 
 /**
+ * Custom multiplier state for the hole toolbar
+ */
+export interface CustomMultiplierState {
+  /** Whether a custom multiplier is active on this hole */
+  isActive: boolean;
+  /** The custom multiplier value (if active) */
+  value: number;
+  /** The team ID that owns the custom multiplier (if active) */
+  ownerTeamId: string | null;
+}
+
+/**
+ * Get the custom multiplier state for the current hole.
+ *
+ * Custom multipliers have scope "none" and value_from "user_input".
+ * The value is stored in TeamOption.value as a string number.
+ *
+ * @param multiplierOptions - All multiplier options from the game spec
+ * @param allTeams - All teams on the current hole
+ * @param currentHoleNumber - Current hole number as string (e.g., "3")
+ * @returns CustomMultiplierState with active status, value, and owner
+ */
+export function getCustomMultiplierState(
+  multiplierOptions: MultiplierOption[],
+  allTeams: Team[],
+  currentHoleNumber: string,
+): CustomMultiplierState {
+  // Find the custom multiplier option (scope: "none", value_from: "user_input")
+  const customMult = multiplierOptions.find(
+    (m) => m.scope === "none" && m.value_from === "user_input",
+  );
+
+  if (!customMult) {
+    return { isActive: false, value: 0, ownerTeamId: null };
+  }
+
+  // Check each team for the custom multiplier
+  for (const team of allTeams) {
+    if (!team?.$isLoaded) continue;
+    if (!team.options?.$isLoaded) continue;
+
+    for (const opt of team.options) {
+      if (!opt?.$isLoaded) continue;
+      if (
+        opt.optionName === customMult.name &&
+        opt.firstHole === currentHoleNumber
+      ) {
+        // Found it - parse the value
+        const parsed = Number.parseInt(opt.value, 10);
+        const value = Number.isNaN(parsed) ? 0 : parsed;
+        return {
+          isActive: true,
+          value,
+          ownerTeamId: team.team ?? null,
+        };
+      }
+    }
+  }
+
+  return { isActive: false, value: 0, ownerTeamId: null };
+}
+
+/**
+ * Get the custom multiplier option from the game spec (if it exists)
+ *
+ * @param multiplierOptions - All multiplier options from the game spec
+ * @returns The custom multiplier option, or null if not found
+ */
+export function getCustomMultiplierOption(
+  multiplierOptions: MultiplierOption[],
+): MultiplierOption | null {
+  return (
+    multiplierOptions.find(
+      (m) => m.scope === "none" && m.value_from === "user_input",
+    ) ?? null
+  );
+}
+
+/**
  * Inherited multiplier instance info
  */
 export interface InheritedMultiplier {
