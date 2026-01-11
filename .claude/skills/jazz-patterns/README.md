@@ -318,11 +318,13 @@ if (player) {
 
 ---
 
-## Use Selectors to Control Re-renders
+## Use Selectors and equalityFn to Control Re-renders
 
 **Severity**: HIGH | **Enforcement**: STRICT
 
-Use the `select` option in useCoState to batch updates and prevent re-renders during progressive loading.
+Use the `select` and `equalityFn` options in useCoState to batch updates and prevent re-renders during progressive loading.
+
+### Basic Select Pattern
 
 ```typescript
 // WRONG - Re-renders 24+ times
@@ -341,6 +343,155 @@ const game = useCoState(Game, gameId, {
     }
     return value;
   }
+});
+```
+
+### Select with Derived Data
+
+Extract only the data you need to minimize re-renders:
+
+```typescript
+// Select specific fields to reduce re-render scope
+const projectName = useCoState(Project, projectId, {
+  select: (project) => project.$isLoaded ? project.name : undefined,
+});
+
+// Select computed values
+const taskStats = useCoState(TaskList, listId, {
+  resolve: { $each: true },
+  select: (tasks) => {
+    if (!tasks.$isLoaded) return { total: 0, completed: 0 };
+    return {
+      total: tasks.length,
+      completed: tasks.filter(task => task.completed).length,
+    };
+  },
+  // Custom equality to prevent re-renders when stats haven't changed
+  equalityFn: (a, b) => a.total === b.total && a.completed === b.completed,
+});
+```
+
+### equalityFn for Complex Data
+
+By default, Jazz uses `Object.is` for equality. Use custom `equalityFn` for complex data:
+
+```typescript
+const game = useCoState(Game, gameId, {
+  resolve: { players: { $each: { name: true } } },
+  select: (game) => {
+    if (!game.$isLoaded) return null;
+    return {
+      playerIds: game.players?.map(p => p?.$jazz.id).filter(Boolean) ?? [],
+      playerCount: game.players?.length ?? 0,
+    };
+  },
+  // Only re-render if player IDs actually change
+  equalityFn: (a, b) => {
+    if (!a || !b) return a === b;
+    return a.playerCount === b.playerCount && 
+           a.playerIds.join(',') === b.playerIds.join(',');
+  },
+});
+```
+
+---
+
+## Fingerprint Pattern for Derived Data with useMemo
+
+**Severity**: HIGH | **Enforcement**: STRICT
+
+When you need to derive data from Jazz objects using `useMemo`, create a fingerprint of the actual values - not the Jazz object reference.
+
+**Problem**: Jazz's progressive loading causes object references to change even when underlying data hasn't changed. Using `[game]` or `[game?.players]` as dependencies won't work correctly.
+
+```typescript
+// WRONG - Dependencies don't match actual data access
+// biome-ignore lint/correctness/useExhaustiveDependencies: ... <-- RED FLAG!
+const holeRows = useMemo(() => {
+  if (!game) return [];
+  return getHoleRows(game);  // Accesses game.rounds[0].round.tee.holes
+}, [game?.rounds]);  // Doesn't capture tee.holes!
+
+// WRONG - Jazz reference changes during progressive loading
+const playerColumns = useMemo(() => {
+  if (!game) return [];
+  return getPlayerColumns(game);
+}, [game]);  // Recalculates on every Jazz update
+```
+
+**Solution**: Create a string fingerprint from the actual values used:
+
+```typescript
+// Create fingerprint that captures the actual data being used
+function createPlayerColumnsFingerprint(game: Game | null): string | null {
+  if (!game?.$isLoaded || !game.players?.$isLoaded) return null;
+  
+  const parts: string[] = [];
+  for (const player of game.players) {
+    if (!player?.$isLoaded) continue;
+    parts.push(`${player.$jazz.id}:${player.name ?? ""}`);
+  }
+  return parts.join("|");
+}
+
+function createHoleRowsFingerprint(game: Game | null): string | null {
+  if (!game?.$isLoaded || !game.rounds?.$isLoaded || game.rounds.length === 0) {
+    return null;
+  }
+  
+  const firstRtg = game.rounds[0];
+  if (!firstRtg?.$isLoaded) return null;
+  
+  const round = firstRtg.round;
+  if (!round?.$isLoaded) return null;
+  
+  const tee = round.tee;
+  if (!tee?.$isLoaded || !tee.holes?.$isLoaded) return null;
+  
+  const parts: string[] = [];
+  for (const hole of tee.holes) {
+    if (!hole?.$isLoaded) continue;
+    parts.push(`${hole.number ?? ""}:${hole.par ?? ""}`);
+  }
+  return parts.join("|");
+}
+
+// CORRECT - Use fingerprint as dependency
+const playerColumnsFingerprint = createPlayerColumnsFingerprint(game);
+const holeRowsFingerprint = createHoleRowsFingerprint(game);
+
+const playerColumns = useMemo((): PlayerColumn[] => {
+  if (!game || playerColumnsFingerprint === null) return [];
+  return getPlayerColumns(game);
+}, [playerColumnsFingerprint, game]);
+
+const holeRows = useMemo((): HoleData[] => {
+  if (!game || holeRowsFingerprint === null) return [];
+  return getHoleRows(game);
+}, [holeRowsFingerprint, game]);
+```
+
+**When to use fingerprints:**
+- When you need `useMemo` for expensive computations on Jazz data
+- When the computation accesses nested/deep Jazz fields
+- When biome complains about exhaustive dependencies
+
+**Alternative**: Consider using Jazz's `select` option instead, which handles this automatically:
+
+```typescript
+// Alternative: Let Jazz handle it with select
+const { playerColumns, holeRows } = useGame(undefined, {
+  resolve: { players: { $each: { name: true } }, rounds: { $each: { round: { tee: { holes: true } } } } },
+  select: (game) => {
+    if (!game.$isLoaded) return { playerColumns: [], holeRows: [] };
+    return {
+      playerColumns: getPlayerColumns(game),
+      holeRows: getHoleRows(game),
+    };
+  },
+  equalityFn: (a, b) => 
+    JSON.stringify(a.playerColumns) === JSON.stringify(b.playerColumns) &&
+    JSON.stringify(a.holeRows) === JSON.stringify(b.holeRows),
 });
 ```
 
