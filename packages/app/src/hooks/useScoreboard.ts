@@ -54,9 +54,13 @@ function createScoringFingerprint(game: Game | null): string | null {
       `p:${playerId}:hi${handicapIndex}:ch${courseHandicap}:gh${gameHandicap ?? ""}`,
     );
 
-    // Tee holes must be loaded for pops calculation
+    // Tee holes must be loaded for pops calculation (need par and handicap allocation)
     const tee = round.tee;
     if (!tee?.$isLoaded || !tee.holes?.$isLoaded) return null; // Not ready - tee/holes not loaded
+    // Each tee hole must be loaded for par/handicap data
+    for (const teeHole of tee.holes) {
+      if (!teeHole?.$isLoaded) return null; // Not ready - individual tee hole not loaded
+    }
 
     // Add all scores for this player - scores CoRecord must be loaded
     if (!round.scores?.$isLoaded) return null; // Not ready - scores map not loaded

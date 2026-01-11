@@ -62,7 +62,7 @@ const SCORING_RESOLVE = {
         playerId: true,
         handicapIndex: true,
         scores: { $each: true },
-        tee: { holes: true, ratings: true }, // holes for pops, ratings for course handicap
+        tee: { holes: { $each: true }, ratings: true }, // holes.$each for pops, ratings for course handicap
       },
     },
   },
