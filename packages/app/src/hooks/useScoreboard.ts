@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import type { Game } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import { scoreWithContext } from "spicylib/scoring";
@@ -114,6 +114,12 @@ function createScoringFingerprint(game: Game | null): string | null {
  * not the game object reference. This prevents unnecessary recomputations
  * during Jazz's progressive loading.
  *
+ * IMPORTANT: We use useRef caching ON TOP of useMemo because:
+ * - useMemo depends on [fingerprint, game]
+ * - game reference changes on every Jazz progressive load update
+ * - fingerprint stays stable when actual scoring data hasn't changed
+ * - Without ref caching, scoreWithContext() runs on every game reference change
+ *
  * @param game - The fully loaded game object
  * @returns The calculated scoreboard and context, or null if scoring fails
  *
@@ -126,19 +132,37 @@ function createScoringFingerprint(game: Game | null): string | null {
  * }
  */
 export function useScoreboard(game: Game | null): ScoreboardResult | null {
+  const lastFingerprint = useRef<string | null>(null);
+  const cachedResult = useRef<ScoreboardResult | null>(null);
+
   // Create fingerprint from scoring-relevant data
   const fingerprint = createScoringFingerprint(game);
 
-  // useMemo already handles memoization - when fingerprint is the same,
-  // it returns the cached result. No need for additional useRef caching.
   return useMemo(() => {
-    // If fingerprint is null or game isn't loaded, we're not ready
-    if (fingerprint === null || !game?.$isLoaded) {
+    // If fingerprint is null, game isn't ready
+    if (fingerprint === null) {
+      return null;
+    }
+
+    // If fingerprint hasn't changed, return cached result
+    // This prevents recomputation when game reference changes but data hasn't
+    if (fingerprint === lastFingerprint.current && cachedResult.current) {
+      return cachedResult.current;
+    }
+
+    // At this point fingerprint !== null guarantees game is loaded
+    if (!game?.$isLoaded) {
       return null;
     }
 
     try {
-      return scoreWithContext(game);
+      const result = scoreWithContext(game);
+
+      // Update cache
+      lastFingerprint.current = fingerprint;
+      cachedResult.current = result;
+
+      return result;
     } catch (error) {
       console.warn("[useScoreboard] Scoring engine error:", error);
       return null;

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
@@ -101,16 +101,48 @@ export function GameLeaderboard(): React.ReactElement | null {
   const playerColumnsFingerprint = createPlayerColumnsFingerprint(game);
   const holeRowsFingerprint = createHoleRowsFingerprint(game);
 
-  // Memoize player columns based on fingerprint
+  // Ref caching for player columns - prevents recomputation on game reference changes
+  const lastPlayerColumnsFingerprint = useRef<string | null>(null);
+  const cachedPlayerColumns = useRef<PlayerColumn[]>([]);
+
+  // Ref caching for hole rows - prevents recomputation on game reference changes
+  const lastHoleRowsFingerprint = useRef<string | null>(null);
+  const cachedHoleRows = useRef<HoleData[]>([]);
+
+  // Memoize player columns based on fingerprint with ref caching
   const playerColumns = useMemo((): PlayerColumn[] => {
     if (!game || playerColumnsFingerprint === null) return [];
-    return getPlayerColumns(game);
+
+    // Return cached if fingerprint unchanged
+    if (
+      playerColumnsFingerprint === lastPlayerColumnsFingerprint.current &&
+      cachedPlayerColumns.current.length > 0
+    ) {
+      return cachedPlayerColumns.current;
+    }
+
+    const result = getPlayerColumns(game);
+    lastPlayerColumnsFingerprint.current = playerColumnsFingerprint;
+    cachedPlayerColumns.current = result;
+    return result;
   }, [playerColumnsFingerprint, game]);
 
-  // Memoize hole rows based on fingerprint
+  // Memoize hole rows based on fingerprint with ref caching
   const holeRows = useMemo((): HoleData[] => {
     if (!game || holeRowsFingerprint === null) return [];
-    return getHoleRows(game);
+
+    // Return cached if fingerprint unchanged
+    if (
+      holeRowsFingerprint === lastHoleRowsFingerprint.current &&
+      cachedHoleRows.current.length > 0
+    ) {
+      return cachedHoleRows.current;
+    }
+
+    const result = getHoleRows(game);
+    lastHoleRowsFingerprint.current = holeRowsFingerprint;
+    cachedHoleRows.current = result;
+    return result;
   }, [holeRowsFingerprint, game]);
 
   if (!game) {

@@ -456,19 +456,31 @@ function createHoleRowsFingerprint(game: Game | null): string | null {
   return parts.join("|");
 }
 
-// CORRECT - Use fingerprint as dependency
+// CORRECT - Use fingerprint + useRef caching
+// IMPORTANT: useMemo alone isn't enough because [fingerprint, game] means
+// useMemo re-runs when game reference changes. We need refs to cache
+// across those re-runs when fingerprint is unchanged.
+
 const playerColumnsFingerprint = createPlayerColumnsFingerprint(game);
-const holeRowsFingerprint = createHoleRowsFingerprint(game);
+const lastPlayerColumnsFingerprint = useRef<string | null>(null);
+const cachedPlayerColumns = useRef<PlayerColumn[]>([]);
 
 const playerColumns = useMemo((): PlayerColumn[] => {
   if (!game || playerColumnsFingerprint === null) return [];
-  return getPlayerColumns(game);
+  
+  // Return cached if fingerprint unchanged (game ref changed but data didn't)
+  if (
+    playerColumnsFingerprint === lastPlayerColumnsFingerprint.current &&
+    cachedPlayerColumns.current.length > 0
+  ) {
+    return cachedPlayerColumns.current;
+  }
+  
+  const result = getPlayerColumns(game);
+  lastPlayerColumnsFingerprint.current = playerColumnsFingerprint;
+  cachedPlayerColumns.current = result;
+  return result;
 }, [playerColumnsFingerprint, game]);
-
-const holeRows = useMemo((): HoleData[] => {
-  if (!game || holeRowsFingerprint === null) return [];
-  return getHoleRows(game);
-}, [holeRowsFingerprint, game]);
 ```
 
 **When to use fingerprints:**
