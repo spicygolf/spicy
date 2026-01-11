@@ -273,4 +273,258 @@ describe("evaluateMultipliersForHole", () => {
       expect(result.teams["1"].multipliers[0].name).toBe("pre_double");
     });
   });
+
+  describe("override multipliers", () => {
+    it("should mark override multipliers with override: true", () => {
+      // Create game hole with twelve (12x override) multiplier activated
+      const gameHoles = [
+        createMockGameHole("17", [
+          {
+            teamId: "1",
+            options: [{ optionName: "twelve", value: "true", firstHole: "17" }],
+          },
+          { teamId: "2" },
+        ]),
+      ];
+
+      const options: Record<string, MultiplierOption> = {
+        twelve: {
+          $isLoaded: true,
+          name: "twelve",
+          disp: "12x",
+          type: "multiplier",
+          based_on: "user",
+          scope: "hole",
+          value: 12,
+          override: true,
+        } as MultiplierOption,
+      };
+
+      const ctx = createContext(gameHoles, options);
+      const holeResult = createHoleResult("17", ["1", "2"]);
+
+      const result = evaluateMultipliersForHole(holeResult, ctx);
+
+      // Team 1 should have the override multiplier
+      expect(result.teams["1"].multipliers).toHaveLength(1);
+      expect(result.teams["1"].multipliers[0].name).toBe("twelve");
+      expect(result.teams["1"].multipliers[0].value).toBe(12);
+      expect(result.teams["1"].multipliers[0].override).toBe(true);
+
+      // Team 2 should have no multipliers
+      expect(result.teams["2"].multipliers).toHaveLength(0);
+    });
+
+    it("should allow override and non-override multipliers to coexist", () => {
+      // Team 1 has both pre_double (non-override) and twelve (override)
+      const gameHoles = [
+        createMockGameHole("17", [
+          {
+            teamId: "1",
+            options: [
+              { optionName: "pre_double", value: "true", firstHole: "17" },
+              { optionName: "twelve", value: "true", firstHole: "17" },
+            ],
+          },
+        ]),
+      ];
+
+      const options: Record<string, MultiplierOption> = {
+        pre_double: {
+          $isLoaded: true,
+          name: "pre_double",
+          disp: "Pre 2x",
+          type: "multiplier",
+          based_on: "user",
+          scope: "rest_of_nine",
+          value: 2,
+        } as MultiplierOption,
+        twelve: {
+          $isLoaded: true,
+          name: "twelve",
+          disp: "12x",
+          type: "multiplier",
+          based_on: "user",
+          scope: "hole",
+          value: 12,
+          override: true,
+        } as MultiplierOption,
+      };
+
+      const ctx = createContext(gameHoles, options);
+      const holeResult = createHoleResult("17", ["1"]);
+
+      const result = evaluateMultipliersForHole(holeResult, ctx);
+
+      // Team 1 should have both multipliers
+      expect(result.teams["1"].multipliers).toHaveLength(2);
+
+      const multiplierNames = result.teams["1"].multipliers.map((m) => m.name);
+      expect(multiplierNames).toContain("pre_double");
+      expect(multiplierNames).toContain("twelve");
+    });
+  });
+
+  describe("user input_value multipliers (custom)", () => {
+    it("should use value from TeamOption.value for input_value multipliers", () => {
+      // Custom multiplier with user-entered value of 5
+      const gameHoles = [
+        createMockGameHole("16", [
+          {
+            teamId: "1",
+            options: [{ optionName: "custom", value: "5", firstHole: "16" }],
+          },
+        ]),
+      ];
+
+      const options: Record<string, MultiplierOption> = {
+        custom: {
+          $isLoaded: true,
+          name: "custom",
+          disp: "Custom",
+          type: "multiplier",
+          based_on: "user",
+          scope: "hole",
+          value: 2, // default value, should be overridden by user input
+          input_value: true, // value comes from TeamOption.value
+          override: true,
+        } as MultiplierOption,
+      };
+
+      const ctx = createContext(gameHoles, options);
+      const holeResult = createHoleResult("16", ["1"]);
+
+      const result = evaluateMultipliersForHole(holeResult, ctx);
+
+      // Team 1 should have custom multiplier with value 5 (from user input)
+      expect(result.teams["1"].multipliers).toHaveLength(1);
+      expect(result.teams["1"].multipliers[0].name).toBe("custom");
+      expect(result.teams["1"].multipliers[0].value).toBe(5);
+      expect(result.teams["1"].multipliers[0].override).toBe(true);
+    });
+
+    it("should not apply multiplier when custom option not activated", () => {
+      // No custom option set on team
+      const gameHoles = [createMockGameHole("16", [{ teamId: "1" }])];
+
+      const options: Record<string, MultiplierOption> = {
+        custom: {
+          $isLoaded: true,
+          name: "custom",
+          disp: "Custom",
+          type: "multiplier",
+          based_on: "user",
+          scope: "hole",
+          value: 2,
+          input_value: true,
+          override: true,
+        } as MultiplierOption,
+      };
+
+      const ctx = createContext(gameHoles, options);
+      const holeResult = createHoleResult("16", ["1"]);
+
+      const result = evaluateMultipliersForHole(holeResult, ctx);
+
+      // No multipliers should be applied (custom not activated)
+      expect(result.teams["1"].multipliers).toHaveLength(0);
+    });
+  });
+
+  describe("dynamic value_from multipliers", () => {
+    it("should calculate frontNinePreDoubleTotal for re_pre multiplier", () => {
+      // Front nine has 2 pre_doubles activated (should give 4x total)
+      // Back nine hole 10 has re_pre activated
+      const gameHoles = [
+        createMockGameHole("1", [
+          {
+            teamId: "1",
+            options: [
+              { optionName: "pre_double", value: "true", firstHole: "1" },
+            ],
+          },
+        ]),
+        createMockGameHole("5", [
+          {
+            teamId: "1",
+            options: [
+              { optionName: "pre_double", value: "true", firstHole: "5" },
+            ],
+          },
+        ]),
+        createMockGameHole("10", [
+          {
+            teamId: "1",
+            options: [{ optionName: "re_pre", value: "true", firstHole: "10" }],
+          },
+        ]),
+      ];
+
+      const options: Record<string, MultiplierOption> = {
+        pre_double: {
+          $isLoaded: true,
+          name: "pre_double",
+          disp: "Pre 2x",
+          type: "multiplier",
+          based_on: "user",
+          scope: "rest_of_nine",
+          value: 2,
+        } as MultiplierOption,
+        re_pre: {
+          $isLoaded: true,
+          name: "re_pre",
+          disp: "Re Pre",
+          type: "multiplier",
+          based_on: "user",
+          scope: "rest_of_nine",
+          value: 2, // default, overridden by value_from
+          value_from: "frontNinePreDoubleTotal",
+        } as MultiplierOption,
+      };
+
+      const ctx = createContext(gameHoles, options);
+      const holeResult = createHoleResult("10", ["1"]);
+
+      const result = evaluateMultipliersForHole(holeResult, ctx);
+
+      // Team 1 should have re_pre with value 4 (2 pre_doubles = 2*2 = 4)
+      expect(result.teams["1"].multipliers).toHaveLength(1);
+      expect(result.teams["1"].multipliers[0].name).toBe("re_pre");
+      expect(result.teams["1"].multipliers[0].value).toBe(4);
+    });
+
+    it("should return 1 for frontNinePreDoubleTotal when no pre_doubles used", () => {
+      // No pre_doubles on front nine, re_pre activated on hole 10
+      const gameHoles = [
+        createMockGameHole("10", [
+          {
+            teamId: "1",
+            options: [{ optionName: "re_pre", value: "true", firstHole: "10" }],
+          },
+        ]),
+      ];
+
+      const options: Record<string, MultiplierOption> = {
+        re_pre: {
+          $isLoaded: true,
+          name: "re_pre",
+          disp: "Re Pre",
+          type: "multiplier",
+          based_on: "user",
+          scope: "rest_of_nine",
+          value: 2,
+          value_from: "frontNinePreDoubleTotal",
+        } as MultiplierOption,
+      };
+
+      const ctx = createContext(gameHoles, options);
+      const holeResult = createHoleResult("10", ["1"]);
+
+      const result = evaluateMultipliersForHole(holeResult, ctx);
+
+      // Value should be 1 (no pre_doubles)
+      expect(result.teams["1"].multipliers).toHaveLength(1);
+      expect(result.teams["1"].multipliers[0].value).toBe(1);
+    });
+  });
 });

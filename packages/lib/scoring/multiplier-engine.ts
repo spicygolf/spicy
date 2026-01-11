@@ -41,19 +41,17 @@ function calculateDynamicValue(
   ctx: ScoringContext,
   holeNum?: string,
 ): number {
-  if (!mult.value_from) {
-    return mult.value ?? 2;
-  }
-
-  if (mult.value_from === "frontNinePreDoubleTotal") {
-    return getFrontNinePreDoubleTotal(ctx);
-  }
-
+  // Check input_value first - value comes from user input stored in TeamOption.value
   if (mult.input_value && holeNum) {
     return getUserInputMultiplierValue(mult.name, teamId, holeNum, ctx);
   }
 
-  // Unknown value_from, use default
+  // Check value_from for dynamic calculations
+  if (mult.value_from === "frontNinePreDoubleTotal") {
+    return getFrontNinePreDoubleTotal(ctx);
+  }
+
+  // No dynamic value, use static value
   return mult.value ?? 2;
 }
 
@@ -336,11 +334,12 @@ function evaluateUserMultiplier(
     const teamResult = holeResult.teams[teamId];
     if (!teamResult) continue;
 
-    // Use dynamic value calculation if value_from is set, otherwise use static value
+    // Use dynamic value calculation if value_from or input_value is set
     const currentHoleStr = String(currentHoleNum);
-    const multiplierValue = mult.value_from
-      ? calculateDynamicValue(mult, teamId, ctx, currentHoleStr)
-      : (mult.value ?? 2);
+    const multiplierValue =
+      mult.value_from || mult.input_value
+        ? calculateDynamicValue(mult, teamId, ctx, currentHoleStr)
+        : (mult.value ?? 2);
 
     // For rest_of_nine multipliers, count ALL instances from this hole and previous holes
     if (mult.scope === "rest_of_nine") {
