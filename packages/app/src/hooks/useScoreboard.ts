@@ -38,7 +38,8 @@ function createScoringFingerprint(game: Game | null): string | null {
   parts.push(`holes:${game.holes.length}`);
 
   // 3. All scores from all rounds (this is the primary data that changes)
-  // IMPORTANT: Must return null if ANY round data isn't loaded yet
+  // For rounds/scores, we require the container to be loaded but individual
+  // score entries can be skipped if not loaded (they'll update the fingerprint when they do)
   for (const rtg of game.rounds) {
     if (!rtg?.$isLoaded) return null; // Not ready - rtg not loaded
     const round = rtg.round;
@@ -53,12 +54,13 @@ function createScoringFingerprint(game: Game | null): string | null {
       `p:${playerId}:hi${handicapIndex}:ch${courseHandicap}:gh${gameHandicap ?? ""}`,
     );
 
-    // Add all scores for this player
-    if (!round.scores?.$isLoaded) return null; // Not ready - scores not loaded
+    // Add all scores for this player - scores CoRecord must be loaded
+    if (!round.scores?.$isLoaded) return null; // Not ready - scores map not loaded
     for (const key of Object.keys(round.scores)) {
       if (key.startsWith("$") || key === "_refs") continue;
       const holeScores = round.scores[key];
-      if (!holeScores?.$isLoaded) return null; // Not ready - hole scores not loaded
+      // Individual score entries: skip if not loaded (will update fingerprint when they load)
+      if (!holeScores?.$isLoaded) continue;
       const gross = holeScores.gross ?? "";
       parts.push(`s:${playerId}:${key}:${gross}`);
     }
@@ -78,8 +80,11 @@ function createScoringFingerprint(game: Game | null): string | null {
       if (!team?.$isLoaded) return null; // Not ready - team not loaded
       const teamId = team.team ?? "";
 
-      // Check if options list exists and is loaded
-      if (!team.options?.$isLoaded) return null; // Not ready - options not loaded
+      // team.options is co.optional - can be undefined (no options set) or a list
+      // If undefined, skip (valid - no options for this team)
+      // If defined but not loaded, block (need to wait for data)
+      if (team.options === undefined) continue; // No options set - valid
+      if (!team.options.$isLoaded) return null; // Options exist but not loaded yet
 
       for (const opt of team.options) {
         if (!opt?.$isLoaded) return null; // Not ready - option not loaded
