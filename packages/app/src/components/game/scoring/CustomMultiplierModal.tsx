@@ -1,5 +1,5 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Button, Text, TextInput } from "@/ui";
@@ -23,6 +23,13 @@ export function CustomMultiplierModal({
   const [inputValue, setInputValue] = useState(
     currentValue ? String(currentValue) : "",
   );
+
+  // Sync input state when modal opens or currentValue changes
+  useEffect(() => {
+    if (visible) {
+      setInputValue(currentValue ? String(currentValue) : "");
+    }
+  }, [visible, currentValue]);
 
   const handleSet = (): void => {
     const numValue = Number.parseInt(inputValue, 10);

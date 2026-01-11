@@ -252,8 +252,12 @@ function getFrontNinePreDoubleTotal(gameHoles: GameHole[]): number {
 
       for (const opt of team.options) {
         if (!opt?.$isLoaded) continue;
-        // Look for pre_double options with firstHole set (activated on this hole)
-        if (opt.optionName === "pre_double" && opt.firstHole) {
+        // Look for pre_double options where firstHole matches this hole
+        // (to avoid counting duplicates from old imported data)
+        if (
+          opt.optionName === "pre_double" &&
+          opt.firstHole === String(holeNum)
+        ) {
           // Each pre_double is worth 2x, multiply into total
           total *= 2;
         }

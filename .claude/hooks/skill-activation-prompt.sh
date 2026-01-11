@@ -11,8 +11,10 @@ export CLAUDE_PROMPT="$PROMPT_INPUT"
 # This hook analyzes the user prompt and injects relevant skill documentation
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Export PATH to include bun
-export PATH="/Users/brad/.bun/bin:$PATH"
+# Export PATH to include bun (check common installation locations)
+if [ -d "$HOME/.bun/bin" ]; then
+  export PATH="$HOME/.bun/bin:$PATH"
+fi
 
 # Run the TypeScript version and capture output
 OUTPUT=$("$SCRIPT_DIR/skill-activation-prompt.ts" 2>&1)
