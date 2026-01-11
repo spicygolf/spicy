@@ -111,22 +111,8 @@ export function evaluateMultipliersForHole(
   // Get all multiplier options
   const multiplierOptions = getMultiplierOptions(ctx);
 
-  // DEBUG: Log multiplier options found
-  console.log(
-    `[evaluateMultipliersForHole] hole=${holeResult.hole}, multiplierOptions=${multiplierOptions.map((m) => m.name).join(", ")}`,
-  );
-
   for (const mult of multiplierOptions) {
     evaluateMultiplierOption(mult, result, ctx);
-  }
-
-  // DEBUG: Log resulting multipliers
-  for (const [teamId, team] of Object.entries(result.teams)) {
-    if (team.multipliers.length > 0) {
-      console.log(
-        `[evaluateMultipliersForHole] hole=${holeResult.hole}, team=${teamId}, multipliers=${JSON.stringify(team.multipliers)}`,
-      );
-    }
   }
 
   return result;
@@ -368,11 +354,6 @@ function evaluateUserMultiplier(
       const currentHoleStr = String(currentHoleNum);
 
       if (team.options?.$isLoaded) {
-        // DEBUG: Log all team options
-        console.log(
-          `[evaluateUserMultiplier] hole=${currentHoleStr}, teamId=${teamId}, mult=${mult.name}, teamOptions=${team.options.map((o) => (o?.$isLoaded ? `${o.optionName}(firstHole=${o.firstHole})` : "?")).join(", ")}`,
-        );
-
         for (const opt of team.options) {
           if (!opt?.$isLoaded) continue;
           // Must match option name AND be activated on this specific hole
@@ -381,23 +362,15 @@ function evaluateUserMultiplier(
             opt.firstHole === currentHoleStr
           ) {
             hasMultiplier = true;
-            console.log(
-              `[evaluateUserMultiplier] MATCH: hole=${currentHoleStr}, teamId=${teamId}, mult=${mult.name}`,
-            );
             break;
           }
         }
       }
 
       if (hasMultiplier) {
-        // Check availability condition if present
-        if (
-          mult.availability &&
-          !evaluateAvailability(mult.availability, teamResult, holeResult, ctx)
-        ) {
-          continue;
-        }
-
+        // For user-selected multipliers, we trust the UI already checked availability
+        // before showing the button. Don't re-check here since holeMultiplier isn't
+        // calculated yet during this evaluation phase.
         teamResult.multipliers.push({
           name: mult.name,
           value: multiplierValue,
