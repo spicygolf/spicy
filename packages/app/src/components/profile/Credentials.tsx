@@ -1,7 +1,6 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useAccount } from "jazz-tools/react-native";
-// biome-ignore lint/style/noRestrictedImports: This component is a wrapper around the React Native component.
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { PlayerAccount } from "spicylib/schema";

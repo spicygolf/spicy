@@ -2,15 +2,14 @@ import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ChangeTeamsModal } from "@/components/game/scoring";
+import { useGameContext } from "@/contexts/GameContext";
 import {
   useCurrentHole,
-  useGame,
   useGameInitialization,
   useHoleInitialization,
   useHoleNavigation,
   useScoreManagement,
 } from "@/hooks";
-import { useScoreboard } from "@/hooks/useScoreboard";
 import { Button, Screen, Text } from "@/ui";
 import { ScoringView } from "./ScoringView";
 import { SummaryView } from "./SummaryView";
@@ -22,48 +21,8 @@ interface GameScoringProps {
 }
 
 export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
-  const { game } = useGame(undefined, {
-    resolve: {
-      name: true,
-      start: true,
-      scope: { teamsConfig: true },
-      specs: {
-        $each: {
-          options: { $each: true },
-        },
-      },
-      options: { $each: true }, // Game-level option overrides
-      holes: {
-        $each: {
-          teams: {
-            $each: {
-              options: { $each: true }, // Needed for inherited multiplier checking (pre_double)
-            },
-          },
-        },
-      },
-      players: {
-        $each: {
-          name: true,
-          handicap: true,
-          envs: true,
-        },
-      },
-      rounds: {
-        $each: {
-          handicapIndex: true,
-          courseHandicap: true,
-          gameHandicap: true,
-          round: {
-            playerId: true,
-            handicapIndex: true,
-            scores: { $each: true }, // Load nested HoleScores for each hole
-            tee: { ratings: true },
-          },
-        },
-      },
-    },
-  });
+  // Use shared game and scoreboard from context
+  const { scoringGame: game, scoreboard, scoringContext } = useGameContext();
 
   // One-time game initialization (creates holes if needed)
   useGameInitialization(game);
@@ -79,10 +38,6 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
     handlePrevHole,
     handleNextHole,
   } = useHoleNavigation(game);
-
-  // Get scoreboard for summary view
-  const scoreResult = useScoreboard(game);
-  const scoreboard = scoreResult?.scoreboard ?? null;
 
   // Hook 1b: Load current hole's teams with selector to prevent re-renders
   const currentHole = useCurrentHole(currentHoleId, { currentHoleIndex });
@@ -198,7 +153,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               currentHole={currentHole}
               currentHoleIndex={currentHoleIndex}
               scoreboard={scoreboard}
-              scoringContext={scoreResult?.context ?? null}
+              scoringContext={scoringContext}
               onPrevHole={handlePrevHole}
               onNextHole={handleNextHole}
               onScoreChange={handleScoreChange}
