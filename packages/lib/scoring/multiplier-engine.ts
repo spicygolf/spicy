@@ -348,14 +348,19 @@ function evaluateUserMultiplier(
         });
       }
     } else {
-      // For non-rest_of_nine multipliers (e.g., "double" with scope "hole"),
-      // just check if it's on this hole
+      // For non-rest_of_nine multipliers (e.g., "double", "twelve" with scope "hole"),
+      // check if it's on this specific hole by matching firstHole
       let hasMultiplier = false;
+      const currentHoleStr = String(currentHoleNum);
 
       if (team.options?.$isLoaded) {
         for (const opt of team.options) {
           if (!opt?.$isLoaded) continue;
-          if (opt.optionName === mult.name) {
+          // Must match option name AND be activated on this specific hole
+          if (
+            opt.optionName === mult.name &&
+            opt.firstHole === currentHoleStr
+          ) {
             hasMultiplier = true;
             break;
           }
