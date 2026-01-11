@@ -38,10 +38,11 @@ function createScoringFingerprint(game: Game | null): string | null {
   parts.push(`holes:${game.holes.length}`);
 
   // 3. All scores from all rounds (this is the primary data that changes)
+  // IMPORTANT: Must return null if ANY round data isn't loaded yet
   for (const rtg of game.rounds) {
-    if (!rtg?.$isLoaded) continue;
+    if (!rtg?.$isLoaded) return null; // Not ready - rtg not loaded
     const round = rtg.round;
-    if (!round?.$isLoaded) continue;
+    if (!round?.$isLoaded) return null; // Not ready - round not loaded
 
     const playerId = round.playerId;
     const handicapIndex = rtg.handicapIndex ?? round.handicapIndex ?? 0;
@@ -53,37 +54,39 @@ function createScoringFingerprint(game: Game | null): string | null {
     );
 
     // Add all scores for this player
-    if (round.scores?.$isLoaded) {
-      for (const key of Object.keys(round.scores)) {
-        if (key.startsWith("$") || key === "_refs") continue;
-        const holeScores = round.scores[key];
-        if (holeScores?.$isLoaded) {
-          const gross = holeScores.gross ?? "";
-          parts.push(`s:${playerId}:${key}:${gross}`);
-        }
-      }
+    if (!round.scores?.$isLoaded) return null; // Not ready - scores not loaded
+    for (const key of Object.keys(round.scores)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      const holeScores = round.scores[key];
+      if (!holeScores?.$isLoaded) return null; // Not ready - hole scores not loaded
+      const gross = holeScores.gross ?? "";
+      parts.push(`s:${playerId}:${key}:${gross}`);
     }
   }
 
   // 4. Team options per hole (junk, multipliers)
+  // IMPORTANT: Must return null if ANY hole/team/options data isn't loaded yet,
+  // otherwise we compute scoreboard with incomplete data (missing multipliers)
   for (const hole of game.holes) {
-    if (!hole?.$isLoaded) continue;
+    if (!hole?.$isLoaded) return null; // Not ready - hole not loaded
     const holeNum = hole.hole;
 
-    if (hole.teams?.$isLoaded) {
-      for (const team of hole.teams) {
-        if (!team?.$isLoaded) continue;
-        const teamId = team.team ?? "";
+    // Check if teams list exists and is loaded
+    if (!hole.teams?.$isLoaded) return null; // Not ready - teams not loaded
 
-        if (team.options?.$isLoaded) {
-          for (const opt of team.options) {
-            if (!opt?.$isLoaded) continue;
-            // Include option name, value, playerId (for player junk), and firstHole (for multipliers)
-            parts.push(
-              `to:${holeNum}:${teamId}:${opt.optionName}:${opt.value ?? ""}:${opt.playerId ?? ""}:${opt.firstHole ?? ""}`,
-            );
-          }
-        }
+    for (const team of hole.teams) {
+      if (!team?.$isLoaded) return null; // Not ready - team not loaded
+      const teamId = team.team ?? "";
+
+      // Check if options list exists and is loaded
+      if (!team.options?.$isLoaded) return null; // Not ready - options not loaded
+
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) return null; // Not ready - option not loaded
+        // Include option name, value, playerId (for player junk), and firstHole (for multipliers)
+        parts.push(
+          `to:${holeNum}:${teamId}:${opt.optionName}:${opt.value ?? ""}:${opt.playerId ?? ""}:${opt.firstHole ?? ""}`,
+        );
       }
     }
   }
