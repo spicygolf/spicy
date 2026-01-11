@@ -454,9 +454,11 @@ function countMultiHoleMultiplierInstances(
 
       for (const opt of team.options) {
         if (!opt?.$isLoaded) continue;
-        // Count options that match the multiplier name and have firstHole set
-        // (firstHole indicates it was activated on that hole)
-        if (opt.optionName === multName && opt.firstHole) {
+        // Count options where firstHole matches the hole we're examining
+        // This handles both:
+        // - New schema: option only exists on first_hole
+        // - Old imported data: option exists on every hole but firstHole identifies the activation hole
+        if (opt.optionName === multName && opt.firstHole === String(holeNum)) {
           count++;
         }
       }

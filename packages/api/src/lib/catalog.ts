@@ -2368,8 +2368,17 @@ async function importGame(
         }
 
         // Add multipliers as team options (no player attribution - team-level)
+        // IMPORTANT: For rest_of_nine multipliers (like pre_double), the old schema
+        // stores the multiplier on EVERY hole it applies to. The new schema only
+        // stores it on the first_hole. Skip if this hole isn't the first_hole.
         if (hasMultipliers && teamMultipliers) {
           for (const mult of teamMultipliers) {
+            // Only write the multiplier on its first_hole to avoid duplication
+            // The new scoring engine inherits multipliers from previous holes
+            if (mult.first_hole && mult.first_hole !== holeData.hole) {
+              continue;
+            }
+
             const teamOption = TeamOption.create(
               {
                 optionName: mult.name,
