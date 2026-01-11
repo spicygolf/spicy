@@ -299,9 +299,8 @@ export function isMultiplierAvailable(
       holeResult,
       ctx,
     );
-  } catch (e) {
+  } catch {
     // If evaluation fails, show the multiplier
-    console.warn("[isMultiplierAvailable] evaluation error:", e);
     return true;
   }
 }
