@@ -11,7 +11,7 @@ import {
   Upload,
   User,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlayerAccount } from "spicylib/schema";
 import { CatalogBrowser } from "@/components/CatalogBrowser";
 import { PlayerBrowser } from "@/components/PlayerBrowser";
@@ -36,7 +36,7 @@ import {
   exportUserSpecs,
   migrateUserSpecs,
 } from "@/lib/user-migration";
-import { isWorkerAccount } from "@/lib/worker-auth";
+import { checkIsAdmin, isWorkerAccount, jazzFetch } from "@/lib/worker-auth";
 
 export function App(): React.JSX.Element {
   const { toast } = useToast();
@@ -71,6 +71,16 @@ export function App(): React.JSX.Element {
   const [importGames, setImportGames] = useState<boolean>(true);
   const [gameLegacyId, setGameLegacyId] = useState<string>("");
 
+  // Admin status (checked via API for security)
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+  useEffect(() => {
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
+    if (me?.$isLoaded) {
+      checkIsAdmin(apiUrl).then(setIsAdmin);
+    }
+  }, [me?.$isLoaded]);
+
   const handleImportToCatalog = async (): Promise<void> => {
     if (!me) {
       toast({
@@ -92,12 +102,11 @@ export function App(): React.JSX.Element {
       // Step 1: Import specs & players (20-50%)
       if (importSpecs || importPlayers) {
         setImportProgress(20);
-        const specsResponse = await fetch(`${apiUrl}/catalog/import`, {
+        const specsResponse = await jazzFetch(`${apiUrl}/catalog/import`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
           body: JSON.stringify({
             specs: importSpecs,
             players: importPlayers,
@@ -125,12 +134,11 @@ export function App(): React.JSX.Element {
         return;
       }
 
-      const gamesResponse = await fetch(`${apiUrl}/catalog/import-games`, {
+      const gamesResponse = await jazzFetch(`${apiUrl}/catalog/import-games`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify(
           gameLegacyId.trim() ? { legacyId: gameLegacyId.trim() } : {},
         ),
@@ -212,12 +220,11 @@ export function App(): React.JSX.Element {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
 
-      const response = await fetch(`${apiUrl}/player/link`, {
+      const response = await jazzFetch(`${apiUrl}/player/link`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({ ghinId: linkGhinId }),
       });
 
@@ -437,8 +444,7 @@ export function App(): React.JSX.Element {
   };
 
   const isWorker = me ? isWorkerAccount(me.$jazz.id) : false;
-  // Admin check: worker account is admin
-  const isAdmin = isWorker;
+  // isAdmin is set via useEffect + API call above
   const userName =
     me?.$isLoaded && me.profile?.$isLoaded ? me.profile.name : "User";
 

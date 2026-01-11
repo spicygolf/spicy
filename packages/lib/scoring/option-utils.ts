@@ -10,6 +10,7 @@
  */
 
 import type {
+  GameHole,
   GameOption,
   JunkOption,
   MultiplierOption,
@@ -161,6 +162,60 @@ function extractOptionValue(
     default:
       return undefined;
   }
+}
+
+/**
+ * Calculate the total pre_double multiplier value from the front nine.
+ *
+ * Used for the "Re Pre" option on hole 10 - allows carrying over accumulated
+ * pre_double multipliers from the front nine to the back nine.
+ *
+ * @param ctx - Scoring context containing game holes
+ * @returns The total pre_double value (e.g., 4 if two 2x pre_doubles), or 1 if none
+ */
+export function getFrontNinePreDoubleTotal(ctx: ScoringContext): number {
+  const gameHoles = ctx.gameHoles;
+  if (!gameHoles) return 1;
+  return getFrontNinePreDoubleTotalFromHoles(gameHoles);
+}
+
+/**
+ * Calculate the total pre_double multiplier value from the front nine.
+ * This version takes GameHole[] directly for use in UI contexts without full ScoringContext.
+ *
+ * @param gameHoles - Array of game holes
+ * @returns The total pre_double value (e.g., 4 if two 2x pre_doubles), or 1 if none
+ */
+export function getFrontNinePreDoubleTotalFromHoles(
+  gameHoles: GameHole[],
+): number {
+  let total = 1; // Start at 1x (no multiplier)
+
+  // Check holes 1-9 for pre_double options across ALL teams
+  for (let holeNum = 1; holeNum <= 9; holeNum++) {
+    const gameHole = gameHoles.find((h) => h.hole === String(holeNum));
+    if (!gameHole?.teams?.$isLoaded) continue;
+
+    for (const team of gameHole.teams) {
+      if (!team?.$isLoaded) continue;
+      if (!team.options?.$isLoaded) continue;
+
+      for (const opt of team.options) {
+        if (!opt?.$isLoaded) continue;
+        // Look for pre_double options where firstHole matches this hole
+        // (to avoid counting duplicates from old imported data)
+        if (
+          opt.optionName === "pre_double" &&
+          opt.firstHole === String(holeNum)
+        ) {
+          // Each pre_double is worth 2x, multiply into total
+          total *= 2;
+        }
+      }
+    }
+  }
+
+  return total;
 }
 
 /**

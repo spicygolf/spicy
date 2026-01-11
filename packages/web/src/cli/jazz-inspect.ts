@@ -115,7 +115,16 @@ function printValue(
     for (const key of keys) {
       const val = obj[key];
 
-      if (val && typeof val === "object" && "$jazz" in val) {
+      // Use try-catch to handle Proxy 'has' issues with non-configurable properties
+      const hasJazz = (() => {
+        try {
+          return val && typeof val === "object" && "$jazz" in val;
+        } catch {
+          return false;
+        }
+      })();
+
+      if (hasJazz) {
         // Nested CoValue
         const nestedId = (val as { $jazz: { id: string } }).$jazz.id;
         const nestedLoaded = (val as unknown as { $isLoaded: boolean })
@@ -131,7 +140,14 @@ function printValue(
         const maxItems = 10;
         for (let i = 0; i < Math.min(val.length, maxItems); i++) {
           const item = val[i];
-          if (item && typeof item === "object" && "$jazz" in item) {
+          const itemHasJazz = (() => {
+            try {
+              return item && typeof item === "object" && "$jazz" in item;
+            } catch {
+              return false;
+            }
+          })();
+          if (itemHasJazz) {
             const itemId = (item as { $jazz: { id: string } }).$jazz.id;
             const itemLoaded = (item as { $isLoaded: boolean }).$isLoaded;
             if (itemLoaded) {

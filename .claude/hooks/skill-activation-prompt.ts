@@ -124,8 +124,27 @@ function loadSkillContent(skillPath: string): string | null {
   return readFileSync(fullPath, "utf-8");
 }
 
+interface HookInput {
+  session_id: string;
+  transcript_path: string;
+  cwd: string;
+  permission_mode: string;
+  hook_event_name: string;
+  prompt: string;
+}
+
 function main(): void {
-  const input = process.env.CLAUDE_PROMPT || "";
+  // Parse the JSON input from stdin (passed via CLAUDE_PROMPT env var from shell wrapper)
+  const rawInput = process.env.CLAUDE_PROMPT || "";
+  let input = "";
+
+  try {
+    const parsed = JSON.parse(rawInput) as HookInput;
+    input = parsed.prompt || "";
+  } catch {
+    // Fallback to raw input if not JSON
+    input = rawInput;
+  }
 
   const config = loadSkillRules();
   const activatedSkills = getActivatedSkills(input, config);
@@ -161,13 +180,13 @@ function main(): void {
       console.log(`- ${skill.name} (${skill.description})`);
     }
 
-    // Inject full content for keyword-triggered skills
-    // Include always-on skills if they also have keywords that matched
-    const keywordTriggeredSkills = activatedSkills.filter(
+    // Inject full content for skills that have keywords matching the prompt
+    // This works for both always-on skills and keyword-triggered skills
+    const skillsToInjectContent = activatedSkills.filter(
       (s) => s.triggers.keywords && matchesKeywords(input, s.triggers.keywords),
     );
 
-    for (const skill of keywordTriggeredSkills) {
+    for (const skill of skillsToInjectContent) {
       const content = loadSkillContent(skill.skillPath);
       if (content) {
         console.log(`\n## Skill: ${skill.name}\n`);

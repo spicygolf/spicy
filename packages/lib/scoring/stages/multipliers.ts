@@ -34,11 +34,9 @@ export function evaluateMultipliers(ctx: ScoringContext): ScoringContext {
 
     if (!holeResult) continue;
 
-    // Skip holes with no scores
-    const hasScores = Object.values(holeResult.players).some(
-      (p) => p.gross > 0,
-    );
-    if (!hasScores) continue;
+    // Note: We evaluate multipliers even for holes without scores
+    // because inherited multipliers (like pre_double with rest_of_nine scope)
+    // should still show the hole multiplier badge before scores are entered.
 
     // Evaluate multipliers for this hole
     const updatedHoleResult = evaluateMultipliersForHole(holeResult, ctx);

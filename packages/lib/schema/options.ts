@@ -72,10 +72,16 @@ export const MultiplierOption = co.map({
   icon: z.optional(z.string()),
   based_on: z.optional(z.string()),
   scope: z.optional(
-    z.literal(["player", "team", "hole", "rest_of_nine", "game"]),
+    z.literal(["player", "team", "hole", "rest_of_nine", "game", "none"]),
   ),
   availability: z.optional(z.string()),
   override: z.optional(z.boolean()),
+  // Dynamic value source - logic operator name to calculate value at runtime
+  // e.g., "frontNinePreDoubleTotal" for Re Pre multiplier
+  value_from: z.optional(z.string()),
+  // If true, the multiplier value comes from user input (stored in TeamOption.value)
+  // Used for custom multipliers where user specifies the multiplier amount
+  input_value: z.optional(z.boolean()),
 });
 export type MultiplierOption = co.loaded<typeof MultiplierOption>;
 
