@@ -432,8 +432,8 @@ describe("evaluateMultipliersForHole", () => {
   });
 
   describe("dynamic value_from multipliers", () => {
-    it("should calculate frontNinePreDoubleTotal for re_pre multiplier", () => {
-      // Front nine has 2 pre_doubles activated (should give 4x total)
+    it("should calculate frontNinePreDoubleTotal for re_pre multiplier (3 pre_doubles = 8x)", () => {
+      // Front nine has 3 pre_doubles on holes 1, 2, 3 (should give 8x total: 2*2*2)
       // Back nine hole 10 has re_pre activated
       const gameHoles = [
         createMockGameHole("1", [
@@ -444,11 +444,19 @@ describe("evaluateMultipliersForHole", () => {
             ],
           },
         ]),
-        createMockGameHole("5", [
+        createMockGameHole("2", [
           {
             teamId: "1",
             options: [
-              { optionName: "pre_double", value: "true", firstHole: "5" },
+              { optionName: "pre_double", value: "true", firstHole: "2" },
+            ],
+          },
+        ]),
+        createMockGameHole("3", [
+          {
+            teamId: "1",
+            options: [
+              { optionName: "pre_double", value: "true", firstHole: "3" },
             ],
           },
         ]),
@@ -487,10 +495,10 @@ describe("evaluateMultipliersForHole", () => {
 
       const result = evaluateMultipliersForHole(holeResult, ctx);
 
-      // Team 1 should have re_pre with value 4 (2 pre_doubles = 2*2 = 4)
+      // Team 1 should have re_pre with value 8 (3 pre_doubles = 2*2*2 = 8)
       expect(result.teams["1"].multipliers).toHaveLength(1);
       expect(result.teams["1"].multipliers[0].name).toBe("re_pre");
-      expect(result.teams["1"].multipliers[0].value).toBe(4);
+      expect(result.teams["1"].multipliers[0].value).toBe(8);
     });
 
     it("should return 1 for frontNinePreDoubleTotal when no pre_doubles used", () => {
