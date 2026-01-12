@@ -1,0 +1,54 @@
+#!/bin/bash
+
+set -e
+
+OUTPUT_DIR="${OUTPUT_DIR:-$HOME/output}"
+mkdir -p "$OUTPUT_DIR"
+
+# Start Metro
+echo "Starting Metro Bundler..."
+touch "$OUTPUT_DIR/metro.log"
+cd packages/app
+bun start > "$OUTPUT_DIR/metro.log" 2>&1 &
+METRO_PID=$!
+cd ../..
+
+# Wait for Metro to start
+echo "Waiting for Metro to start..."
+sleep 15
+
+# Build and install app
+echo "Building and installing app to Android Emulator..."
+echo "Build logs will be written to 'android-build.log' in uploaded artifacts"
+touch "$OUTPUT_DIR/android-build.log"
+cd packages/app
+bun android --mode release --active-arch-only > "$OUTPUT_DIR/android-build.log" 2>&1
+cd ../..
+
+# Wait for app to be installed
+echo "Waiting for app to be installed..."
+sleep 15
+
+# Check if Metro is still running
+echo "Checking Metro status..."
+curl -f http://localhost:8081/status || echo "Metro not responding"
+
+# Check if app is installed
+echo "Checking if app is installed..."
+adb shell pm list packages | grep com.spicygolf || echo "App not found"
+
+# Run E2E tests
+export PATH="$PATH":"$HOME/.maestro/bin"
+export MAESTRO_DRIVER_STARTUP_TIMEOUT=300000
+export MAESTRO_CLI_NO_ANALYTICS=1
+export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
+
+echo "Running End-to-End tests on Android..."
+maestro test \
+  tests/e2e/flows/ \
+  --env PLATFORM=android \
+  --format junit \
+  --output "$OUTPUT_DIR/e2e-results.xml"
+
+echo "Listing Output Directory"
+ls -la "$OUTPUT_DIR"

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+set -e
+
+OUTPUT_DIR="${OUTPUT_DIR:-$HOME/output}"
+mkdir -p "$OUTPUT_DIR"
+
+# Start Metro
+echo "Starting Metro Bundler..."
+touch "$OUTPUT_DIR/metro.log"
+cd packages/app
+bun start > "$OUTPUT_DIR/metro.log" 2>&1 &
+METRO_PID=$!
+cd ../..
+
+# Wait for Metro to start
+echo "Waiting for Metro to start..."
+sleep 10
+
+# Build and install app
+echo "Building and installing app to iOS Simulator..."
+echo "Build logs will be written to 'ios-build.log' in uploaded artifacts"
+touch "$OUTPUT_DIR/ios-build.log"
+cd packages/app
+bun ios --mode Release --simulator "${IOS_SIMULATOR_DEVICE:-iPhone 16 Pro}" > "$OUTPUT_DIR/ios-build.log" 2>&1
+cd ../..
+
+# Wait for app to be installed
+echo "Waiting for app to be installed..."
+sleep 10
+
+# Run E2E tests
+export PATH="$PATH":"$HOME/.maestro/bin"
+export MAESTRO_DRIVER_STARTUP_TIMEOUT=300000
+export MAESTRO_CLI_NO_ANALYTICS=1
+export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
+
+echo "Running End-to-End tests on iOS..."
+maestro test \
+  tests/e2e/flows/ \
+  --env PLATFORM=ios \
+  --format junit \
+  --output "$OUTPUT_DIR/e2e-results.xml"
+
+echo "Listing Output Directory"
+ls -la "$OUTPUT_DIR"
