@@ -1,22 +1,18 @@
 /**
  * Test account configuration for E2E tests.
  *
- * This account is used exclusively for automated testing in the dev Jazz environment.
- * Do NOT use this passphrase for any real accounts.
+ * IMPORTANT: The passphrase should be set via environment variable, not hardcoded.
+ * - Local: export TEST_PASSPHRASE="your 24-word passphrase"
+ * - CI: Set E2E_TEST_PASSPHRASE secret in GitHub
+ *
+ * To generate a new 24-word passphrase:
+ *   bun -e "import { generateMnemonic } from '@scure/bip39'; import { wordlist } from '@scure/bip39/wordlists/english.js'; console.log(generateMnemonic(wordlist, 256));"
  */
-export const TEST_ACCOUNT = {
-  /**
-   * BIP39-compatible passphrase for the test account.
-   * This creates a deterministic account that can be reused across test runs.
-   */
-  passphrase:
-    "squeeze sight slam draft melody left online arrow include toddler rate rookie certain remember pond duck dream immune there release laptop collect surface attend",
 
-  /**
-   * Display name for the test user
-   */
-  displayName: "E2E Test User",
-};
+/**
+ * Display name for the test user
+ */
+export const TEST_DISPLAY_NAME = "E2E Test User";
 
 /**
  * Test player data for multi-player scenarios
