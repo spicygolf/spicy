@@ -3,7 +3,6 @@
 
 appId: golf.spicy
 ---
-
 # ===== AUTHENTICATION =====
 # Login with test account passphrase
 
@@ -19,7 +18,7 @@ appId: golf.spicy
 # Enter test passphrase
 - tapOn:
     text: "Enter your passphrase"
-- inputText: "test spicy golf maestro e2e account zebra quantum lunar frost crystal dawn"
+- inputText: "cluster fruit scrap knife march amazing electric sting wife lounge extend conduct"
 
 # Submit login
 - tapOn:
@@ -44,7 +43,6 @@ appId: golf.spicy
 - assertVisible:
     text: "Settings"
     optional: true
-
 # ===== VERIFICATION =====
 # At this point we have:
 # 1. Successfully logged in

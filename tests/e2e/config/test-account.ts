@@ -10,7 +10,7 @@ export const TEST_ACCOUNT = {
    * This creates a deterministic account that can be reused across test runs.
    */
   passphrase:
-    "test spicy golf maestro e2e account zebra quantum lunar frost crystal dawn",
+    "cluster fruit scrap knife march amazing electric sting wife lounge extend conduct",
 
   /**
    * Display name for the test user

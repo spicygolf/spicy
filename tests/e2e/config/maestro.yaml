@@ -6,7 +6,7 @@ appId: golf.spicy
 
 # Environment variables available to all flows
 env:
-  TEST_PASSPHRASE: "test spicy golf maestro e2e account zebra quantum lunar frost crystal dawn"
+  TEST_PASSPHRASE: "cluster fruit scrap knife march amazing electric sting wife lounge extend conduct"
   TEST_DISPLAY_NAME: "E2E Test User"
 
 # Default launch arguments
