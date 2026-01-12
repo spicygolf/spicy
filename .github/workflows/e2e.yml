@@ -31,23 +31,22 @@ jobs:
     runs-on: macos-15
     environment: dev
     env:
-      OUTPUT_DIR: ~/output
       IOS_SIMULATOR_DEVICE: "iPhone 16 Pro"
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Select Xcode 16.2
+      - name: Select Xcode 16.4
         run: |
-          sudo xcode-select -s "/Applications/Xcode_16.2.app/Contents/Developer"
+          sudo xcode-select -s "/Applications/Xcode_16.4.app/Contents/Developer"
           xcodebuild -version
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
 
       - name: Create output directory
-        run: mkdir -p $HOME/output
+        run: mkdir -p /tmp/e2e-output
 
       - name: Install dependencies
         run: bun install
@@ -81,9 +80,7 @@ jobs:
         if: always()
         with:
           name: e2e-ios-output
-          path: |
-            ~/output/*.log
-            ~/output/*.xml
+          path: /tmp/e2e-output/
           retention-days: 5
 
   e2e-android:
@@ -94,7 +91,6 @@ jobs:
     environment: dev
     env:
       EMULATOR_API_LEVEL: 34
-      OUTPUT_DIR: ~/output
 
     steps:
       - name: Checkout code
@@ -177,7 +173,5 @@ jobs:
         if: always()
         with:
           name: e2e-android-output
-          path: |
-            ~/output/*.log
-            ~/output/*.xml
+          path: /tmp/e2e-output/
           retention-days: 5

@@ -2,12 +2,11 @@
 
 set -e
 
-OUTPUT_DIR="${OUTPUT_DIR:-$HOME/output}"
+OUTPUT_DIR="/tmp/e2e-output"
 mkdir -p "$OUTPUT_DIR"
 
 # Start Metro
 echo "Starting Metro Bundler..."
-touch "$OUTPUT_DIR/metro.log"
 cd packages/app
 bun start > "$OUTPUT_DIR/metro.log" 2>&1 &
 METRO_PID=$!
@@ -20,7 +19,6 @@ sleep 10
 # Build and install app
 echo "Building and installing app to iOS Simulator..."
 echo "Build logs will be written to 'ios-build.log' in uploaded artifacts"
-touch "$OUTPUT_DIR/ios-build.log"
 cd packages/app
 bun ios --mode Release --simulator "${IOS_SIMULATOR_DEVICE:-iPhone 16 Pro}" > "$OUTPUT_DIR/ios-build.log" 2>&1
 cd ../..
