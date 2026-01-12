@@ -37,9 +37,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Select Xcode 16.4
+      - name: Select Xcode
         run: |
-          sudo xcode-select -s "/Applications/Xcode_16.4.app/Contents/Developer"
+          # List available Xcode versions and use the latest
+          ls -d /Applications/Xcode*.app 2>/dev/null || true
+          # Use default Xcode (latest available on runner)
           xcodebuild -version
 
       - name: Setup Bun
@@ -114,7 +116,7 @@ jobs:
           sdkmanager --install "ndk;28.2.13676358"
 
       - name: Create output directory
-        run: mkdir -p $HOME/output
+        run: mkdir -p /tmp/e2e-output
 
       - name: Install dependencies
         run: bun install

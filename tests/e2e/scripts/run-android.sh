@@ -5,6 +5,16 @@ set -e
 OUTPUT_DIR="/tmp/e2e-output"
 mkdir -p "$OUTPUT_DIR"
 
+# Cleanup function to kill Metro on exit
+cleanup() {
+  echo "Cleaning up..."
+  if [ -n "$METRO_PID" ] && kill -0 "$METRO_PID" 2>/dev/null; then
+    echo "Stopping Metro (PID: $METRO_PID)"
+    kill "$METRO_PID" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
 # Start Metro
 echo "Starting Metro Bundler..."
 cd packages/app
@@ -14,7 +24,13 @@ cd ../..
 
 # Wait for Metro to start
 echo "Waiting for Metro to start..."
-sleep 15
+for i in {1..30}; do
+  if curl -sf http://localhost:8081/status > /dev/null 2>&1; then
+    echo "Metro is ready!"
+    break
+  fi
+  sleep 1
+done
 
 # Build and install app
 echo "Building and installing app to Android Emulator..."
