@@ -1,0 +1,54 @@
+# Five Points - Basic Game E2E Test
+# Tests login/signup, game creation, and basic navigation
+
+appId: golf.spicy
+---
+# ===== AUTHENTICATION =====
+# Handle both new account creation and existing account login
+
+- launchApp:
+    clearState: true
+
+# Wait for auth screen to load
+- assertVisible: "Spicy Golf"
+
+# Try to log in first (account may already exist)
+- tapOn: "Log In"
+
+# Enter test passphrase from environment variable
+- tapOn:
+    text: "Enter your passphrase"
+- inputText: ${TEST_PASSPHRASE}
+
+# Submit login
+- tapOn:
+    text: "Log In"
+    index: 1
+
+# Check if login succeeded or if we need to create account
+- runFlow:
+    when:
+      notVisible: "New Game"
+    file: ../shared/create_account.yaml
+
+# At this point we should be logged in
+- assertVisible: "New Game"
+
+# ===== CREATE GAME =====
+
+- tapOn: "New Game"
+
+# Switch to Search tab to find Five Points
+- tapOn: "Search"
+
+# Wait for specs to load and tap Five Points
+- assertVisible: "Five Points"
+- tapOn: "Five Points"
+# ===== VERIFICATION =====
+# At this point we have:
+# 1. Successfully logged in (or created account)
+# 2. Created a Five Points game
+# 3. Navigated to the game screen
+
+# The game is created and we're on the settings view
+# Further tests would add players, teams, scores, and verify leaderboard

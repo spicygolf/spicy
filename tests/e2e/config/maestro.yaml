@@ -1,0 +1,16 @@
+# Maestro configuration for Spicy Golf E2E tests
+# https://maestro.mobile.dev/
+
+# Default app ID (iOS and Android)
+appId: golf.spicy
+
+# Environment variables available to all flows
+# These should be set externally (CI secrets or local export)
+# Example: export TEST_PASSPHRASE="your 24-word passphrase"
+env:
+  TEST_DISPLAY_NAME: "E2E Test User"
+
+# Default launch arguments
+launchArguments:
+  # Clear app state before each test for isolation
+  clearState: true

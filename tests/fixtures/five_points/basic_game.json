@@ -1,0 +1,96 @@
+{
+  "name": "Five Points - Basic 2-Hole Game",
+  "description": "Tests basic Five Points scoring with prox, low ball, low total, and a double/double-back scenario",
+  "spec": "five_points",
+
+  "course": {
+    "name": "Test Golf Club",
+    "tee": "Blue",
+    "rating": 71.5,
+    "slope": 128,
+    "holes": [
+      { "hole": 1, "par": 4, "handicap": 5, "yards": 385 },
+      { "hole": 2, "par": 5, "handicap": 11, "yards": 520 }
+    ]
+  },
+
+  "players": [
+    { "id": "p1", "name": "Alice", "short": "Ali", "handicapIndex": 10.5 },
+    { "id": "p2", "name": "Bob", "short": "Bob", "handicapIndex": 15.2 },
+    { "id": "p3", "name": "Carol", "short": "Car", "handicapIndex": 8.0 },
+    { "id": "p4", "name": "Dave", "short": "Dav", "handicapIndex": 12.3 }
+  ],
+
+  "teams": {
+    "1": ["p1", "p2"],
+    "2": ["p3", "p4"]
+  },
+
+  "options": {
+    "low_ball": 2,
+    "low_total": 2,
+    "prox": 1
+  },
+
+  "holes": {
+    "1": {
+      "scores": {
+        "p1": { "gross": 4 },
+        "p2": { "gross": 5 },
+        "p3": { "gross": 5 },
+        "p4": { "gross": 6 }
+      },
+      "junk": {
+        "prox": "p1"
+      },
+      "multipliers": {}
+    },
+    "2": {
+      "scores": {
+        "p1": { "gross": 6 },
+        "p2": { "gross": 7 },
+        "p3": { "gross": 4 },
+        "p4": { "gross": 5 }
+      },
+      "junk": {
+        "prox": "p3",
+        "birdie": ["p3"]
+      },
+      "multipliers": {
+        "1": ["double"],
+        "2": ["double_back"]
+      }
+    }
+  },
+
+  "expected": {
+    "holes": {
+      "1": {
+        "holeMultiplier": 1,
+        "teams": {
+          "1": { "points": 5 },
+          "2": { "points": 0 }
+        },
+        "players": {
+          "p1": { "junk": ["prox"] }
+        }
+      },
+      "2": {
+        "holeMultiplier": 8,
+        "teams": {
+          "1": { "points": 0 },
+          "2": { "points": 48 }
+        },
+        "players": {
+          "p3": { "junk": ["prox", "birdie"] }
+        }
+      }
+    },
+    "cumulative": {
+      "teams": {
+        "1": { "pointsTotal": 5 },
+        "2": { "pointsTotal": 48 }
+      }
+    }
+  }
+}
