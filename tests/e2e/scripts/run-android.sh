@@ -32,11 +32,11 @@ for i in {1..30}; do
   sleep 1
 done
 
-# Build and install app
+# Build and install app (Debug mode - faster, no Hermes bytecode compilation needed)
 echo "Building and installing app to Android Emulator..."
 echo "Build logs will be written to 'android-build.log' in uploaded artifacts"
 cd packages/app
-if ! bun android --mode release --active-arch-only > "$OUTPUT_DIR/android-build.log" 2>&1; then
+if ! bun android --active-arch-only > "$OUTPUT_DIR/android-build.log" 2>&1; then
   echo "=== Android build failed! Last 100 lines of log: ==="
   tail -100 "$OUTPUT_DIR/android-build.log"
   echo "=== End of log ==="

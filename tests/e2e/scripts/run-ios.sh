@@ -32,11 +32,13 @@ for i in {1..30}; do
   sleep 1
 done
 
-# Build and install app
+# Build and install app (Debug mode - faster, uses pre-built binaries)
+# RCT_USE_PREBUILT_RNCORE speeds up builds by using pre-built React Native core
+export RCT_USE_PREBUILT_RNCORE=1
 echo "Building and installing app to iOS Simulator..."
 echo "Build logs will be written to 'ios-build.log' in uploaded artifacts"
 cd packages/app
-if ! bun ios --mode Release --simulator "${IOS_SIMULATOR_DEVICE:-iPhone 16 Pro}" > "$OUTPUT_DIR/ios-build.log" 2>&1; then
+if ! bun ios --simulator "${IOS_SIMULATOR_DEVICE:-iPhone 16 Pro}" > "$OUTPUT_DIR/ios-build.log" 2>&1; then
   echo "=== iOS build failed! Last 100 lines of log: ==="
   tail -100 "$OUTPUT_DIR/ios-build.log"
   echo "=== End of log ==="
