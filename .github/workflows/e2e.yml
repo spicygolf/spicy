@@ -1,7 +1,7 @@
 name: E2E Tests
 
 on:
-  # Manual trigger for now - E2E tests are slow and expensive
+  # Manual trigger
   workflow_dispatch:
     inputs:
       platform:
@@ -14,14 +14,15 @@ on:
           - android
           - both
 
-  # Optionally run on main branch pushes (commented out by default)
-  # push:
-  #   branches: [main]
+  # Run on pull requests
+  pull_request:
+    branches: [main]
 
 jobs:
   e2e-ios:
     name: E2E Tests (iOS)
-    if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both' }}
+    # Run on PRs, or on workflow_dispatch when ios/both is selected
+    if: ${{ github.event_name == 'pull_request' || github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both' }}
     runs-on: macos-latest
     environment: dev
     steps:
@@ -43,15 +44,15 @@ jobs:
         run: |
           # List available simulators and boot one
           xcrun simctl list devices available
-          # Boot iPhone 15 Pro (adjust as needed)
-          xcrun simctl boot "iPhone 15 Pro" || true
+          # Boot iPhone 16 Pro (available on macos-latest runners)
+          xcrun simctl boot "iPhone 16 Pro" || true
           # Wait for simulator to be ready
-          xcrun simctl bootstatus "iPhone 15 Pro" -b
+          xcrun simctl bootstatus "iPhone 16 Pro" -b
 
       - name: Build iOS App
         working-directory: packages/app
         run: |
-          bun run ios --configuration Release --simulator "iPhone 15 Pro"
+          bun run ios --configuration Release --simulator "iPhone 16 Pro"
 
       - name: Run E2E Tests
         run: |
@@ -68,7 +69,8 @@ jobs:
 
   e2e-android:
     name: E2E Tests (Android)
-    if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both' }}
+    # Run on PRs, or on workflow_dispatch when android/both is selected
+    if: ${{ github.event_name == 'pull_request' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both' }}
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -105,13 +107,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           script: |
-            # Build Android app
-            cd packages/app
-            bun run android --mode release
-
-            # Run E2E tests
-            cd ../..
-            maestro test tests/e2e/flows/ --format junit --output e2e-results.xml
+            cd packages/app && bun run android --mode release && cd ../.. && maestro test tests/e2e/flows/ --format junit --output e2e-results.xml
         env:
           TEST_PASSPHRASE: ${{ secrets.E2E_TEST_PASSPHRASE }}
 
