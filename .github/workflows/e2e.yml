@@ -80,7 +80,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-app-build
-          path: ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e/Build/Products/Debug-iphonesimulator/SpicyGolf.app
+          path: ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e/Build/Products/Debug-iphonesimulator/spicygolf.app
           retention-days: 1
 
       - name: Upload Build Logs
@@ -124,7 +124,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ios-app-build
-          path: ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e/Build/Products/Debug-iphonesimulator/SpicyGolf.app
+          path: ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e/Build/Products/Debug-iphonesimulator/spicygolf.app
 
       - name: Start iOS Simulator
         run: |
@@ -277,7 +277,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-pixel8-${{ env.EMULATOR_API_LEVEL }}
+          key: avd-pixel6-${{ env.EMULATOR_API_LEVEL }}
 
       - name: Create AVD and Generate Snapshot for Caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -285,7 +285,7 @@ jobs:
         with:
           api-level: ${{ env.EMULATOR_API_LEVEL }}
           arch: x86_64
-          profile: pixel_8
+          profile: pixel_6
           disk-size: 8G
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
@@ -307,7 +307,7 @@ jobs:
         with:
           api-level: ${{ env.EMULATOR_API_LEVEL }}
           arch: x86_64
-          profile: pixel_8
+          profile: pixel_6
           disk-size: 8G
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics

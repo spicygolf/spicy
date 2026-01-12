@@ -18,8 +18,8 @@ cd packages/app
 DERIVED_DATA_PATH="$HOME/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e"
 
 xcodebuild \
-  -workspace ios/SpicyGolf.xcworkspace \
-  -scheme SpicyGolf \
+  -workspace ios/spicygolf.xcworkspace \
+  -scheme spicygolf \
   -configuration Debug \
   -sdk iphonesimulator \
   -destination "platform=iOS Simulator,name=${IOS_SIMULATOR_DEVICE:-iPhone 16 Pro}" \
@@ -33,4 +33,4 @@ xcodebuild \
   }
 
 echo "iOS build complete!"
-echo "App location: $DERIVED_DATA_PATH/Build/Products/Debug-iphonesimulator/SpicyGolf.app"
+echo "App location: $DERIVED_DATA_PATH/Build/Products/Debug-iphonesimulator/spicygolf.app"

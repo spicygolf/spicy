@@ -6,7 +6,7 @@ OUTPUT_DIR="/tmp/e2e-output"
 mkdir -p "$OUTPUT_DIR"
 
 DERIVED_DATA_PATH="$HOME/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e"
-APP_PATH="$DERIVED_DATA_PATH/Build/Products/Debug-iphonesimulator/SpicyGolf.app"
+APP_PATH="$DERIVED_DATA_PATH/Build/Products/Debug-iphonesimulator/spicygolf.app"
 
 # Cleanup function to kill Metro on exit
 cleanup() {
@@ -48,7 +48,7 @@ xcrun simctl install booted "$APP_PATH"
 
 # Launch the app
 echo "Launching app..."
-xcrun simctl launch booted com.spicygolf.app
+xcrun simctl launch booted golf.spicy.spicygolf
 
 # Wait for app to start
 echo "Waiting for app to start..."
