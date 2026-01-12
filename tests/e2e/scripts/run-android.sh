@@ -36,7 +36,12 @@ done
 echo "Building and installing app to Android Emulator..."
 echo "Build logs will be written to 'android-build.log' in uploaded artifacts"
 cd packages/app
-bun android --mode release --active-arch-only > "$OUTPUT_DIR/android-build.log" 2>&1
+if ! bun android --mode release --active-arch-only > "$OUTPUT_DIR/android-build.log" 2>&1; then
+  echo "=== Android build failed! Last 100 lines of log: ==="
+  tail -100 "$OUTPUT_DIR/android-build.log"
+  echo "=== End of log ==="
+  exit 1
+fi
 cd ../..
 
 # Wait for app to be installed

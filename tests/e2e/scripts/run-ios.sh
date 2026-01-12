@@ -36,7 +36,12 @@ done
 echo "Building and installing app to iOS Simulator..."
 echo "Build logs will be written to 'ios-build.log' in uploaded artifacts"
 cd packages/app
-bun ios --mode Release --simulator "${IOS_SIMULATOR_DEVICE:-iPhone 16 Pro}" > "$OUTPUT_DIR/ios-build.log" 2>&1
+if ! bun ios --mode Release --simulator "${IOS_SIMULATOR_DEVICE:-iPhone 16 Pro}" > "$OUTPUT_DIR/ios-build.log" 2>&1; then
+  echo "=== iOS build failed! Last 100 lines of log: ==="
+  tail -100 "$OUTPUT_DIR/ios-build.log"
+  echo "=== End of log ==="
+  exit 1
+fi
 cd ../..
 
 # Wait for app to be installed
