@@ -140,9 +140,14 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
             <TextInput
               style={styles.passphraseInput}
               value={currentPassphrase}
+              onChangeText={(text) => {
+                setCurrentPassphrase(text);
+                setConfirmSaved(false);
+              }}
+              placeholder="Enter or generate a passphrase"
               multiline
-              editable={false}
-              selectTextOnFocus
+              autoCapitalize="none"
+              autoCorrect={false}
             />
 
             <View style={styles.buttonRow}>

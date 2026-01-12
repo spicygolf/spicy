@@ -1,0 +1,32 @@
+# Shared flow: Create Account with test passphrase
+# Called when login fails because account doesn't exist yet
+
+appId: golf.spicy
+---
+# Go back to initial screen
+- tapOn: "Back"
+
+# Start account creation
+- tapOn: "Create Account"
+
+# Enter display name
+- tapOn:
+    text: "Enter your name"
+- inputText: ${TEST_DISPLAY_NAME}
+
+# Clear the auto-generated passphrase and enter our test passphrase
+- tapOn:
+    text: "Enter or generate a passphrase"
+- clearText
+- inputText: ${TEST_PASSPHRASE}
+
+# Check the confirmation box
+- tapOn: "I have securely saved my recovery passphrase"
+
+# Create the account
+- tapOn:
+    text: "Create Account"
+    index: 1
+
+# Wait for account creation to complete
+- assertVisible: "New Game"
