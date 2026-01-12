@@ -7,8 +7,9 @@ on:
     branches: [main]
 
 jobs:
-  checks:
-    name: Checks (Linting, Formatting, TypeScript)
+  # Quality checks run first - all test jobs depend on this
+  quality:
+    name: Quality Checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -23,8 +24,56 @@ jobs:
       - name: Run code quality checks
         run: ./scripts/code-quality.sh
 
+  # Unit tests - fast, no external dependencies
+  unit-tests:
+    name: Unit Tests
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        run: bun install
+
       - name: Run Unit Tests
         run: bun test ./packages/app/__tests__/ ./packages/api/src/ ./packages/lib/utils/ ./packages/lib/scoring/__tests__/
+
+  # Fixture-based integration tests - fast, no Jazz connection
+  fixture-tests:
+    name: Fixture Tests
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run Fixture-Based Tests
+        run: bun test ./tests/integration/
+
+  # Jazz integration tests - requires Jazz environment
+  jazz-tests:
+    name: Jazz Integration Tests
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        run: bun install
 
       - name: Run Integration Tests
         run: bun test ./packages/lib/scoring/__integration__/
@@ -33,12 +82,10 @@ jobs:
           JAZZ_WORKER_ACCOUNT: ${{ vars.JAZZ_WORKER_ACCOUNT }}
           JAZZ_WORKER_SECRET: ${{ secrets.JAZZ_WORKER_SECRET }}
 
-      - name: Run Fixture-Based Tests
-        run: bun test ./tests/integration/
-
+  # Claude review runs after all tests pass
   claude-review:
     name: Claude Code Review
-    needs: checks
+    needs: [unit-tests, fixture-tests, jazz-tests]
     if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
