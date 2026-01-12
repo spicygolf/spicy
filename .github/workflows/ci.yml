@@ -33,6 +33,9 @@ jobs:
           JAZZ_WORKER_ACCOUNT: ${{ vars.JAZZ_WORKER_ACCOUNT }}
           JAZZ_WORKER_SECRET: ${{ secrets.JAZZ_WORKER_SECRET }}
 
+      - name: Run Fixture-Based Tests
+        run: bun test ./tests/integration/
+
   claude-review:
     name: Claude Code Review
     needs: checks

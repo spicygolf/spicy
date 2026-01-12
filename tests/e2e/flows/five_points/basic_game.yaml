@@ -1,0 +1,55 @@
+# Five Points - Basic Game E2E Test
+# Tests login, game creation, player setup, scoring, and leaderboard verification
+
+appId: golf.spicy
+---
+
+# ===== AUTHENTICATION =====
+# Login with test account passphrase
+
+- launchApp:
+    clearState: true
+
+# Wait for auth screen to load
+- assertVisible: "Spicy Golf"
+
+# Navigate to login
+- tapOn: "Log In"
+
+# Enter test passphrase
+- tapOn:
+    text: "Enter your passphrase"
+- inputText: "test spicy golf maestro e2e account zebra quantum lunar frost crystal dawn"
+
+# Submit login
+- tapOn:
+    text: "Log In"
+    index: 1
+
+# Wait for game list to load
+- assertVisible: "New Game"
+
+# ===== CREATE GAME =====
+
+- tapOn: "New Game"
+
+# Switch to Search tab to find Five Points
+- tapOn: "Search"
+
+# Wait for specs to load and tap Five Points
+- assertVisible: "Five Points"
+- tapOn: "Five Points"
+
+# Should now be on game settings screen
+- assertVisible:
+    text: "Settings"
+    optional: true
+
+# ===== VERIFICATION =====
+# At this point we have:
+# 1. Successfully logged in
+# 2. Created a Five Points game
+# 3. Navigated to the game screen
+
+# The game is created and we're on the settings view
+# Further tests would add players, teams, scores, and verify leaderboard

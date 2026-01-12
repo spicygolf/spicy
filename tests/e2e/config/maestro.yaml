@@ -1,0 +1,15 @@
+# Maestro configuration for Spicy Golf E2E tests
+# https://maestro.mobile.dev/
+
+# Default app ID (iOS and Android)
+appId: golf.spicy
+
+# Environment variables available to all flows
+env:
+  TEST_PASSPHRASE: "test spicy golf maestro e2e account zebra quantum lunar frost crystal dawn"
+  TEST_DISPLAY_NAME: "E2E Test User"
+
+# Default launch arguments
+launchArguments:
+  # Clear app state before each test for isolation
+  clearState: true
