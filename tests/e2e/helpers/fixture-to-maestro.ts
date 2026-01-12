@@ -6,14 +6,14 @@
  */
 
 import type { Fixture, FixtureHoleData } from "../../lib/fixture-types";
-import { TEST_ACCOUNT } from "../config/test-account";
 
 interface MaestroStep {
   [key: string]: unknown;
 }
 
 /**
- * Generate login steps for the test account
+ * Generate login steps for the test account.
+ * Uses ${TEST_PASSPHRASE} env var which must be set externally.
  */
 export function generateLoginSteps(): MaestroStep[] {
   return [
@@ -21,7 +21,7 @@ export function generateLoginSteps(): MaestroStep[] {
     { assertVisible: "Spicy Golf" },
     { tapOn: "Log In" },
     { tapOn: { text: "Enter your passphrase" } },
-    { inputText: TEST_ACCOUNT.passphrase },
+    { inputText: "${TEST_PASSPHRASE}" },
     { tapOn: { text: "Log In", index: 1 } },
     { assertVisible: "New Game" },
   ];
