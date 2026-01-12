@@ -14,15 +14,16 @@ on:
           - android
           - both
 
-  # Run on pull requests
+  # Run on pull requests when labeled
   pull_request:
     branches: [main]
+    types: [opened, synchronize, labeled]
 
 jobs:
   e2e-ios:
     name: E2E Tests (iOS)
-    # Run on PRs, or on workflow_dispatch when ios/both is selected
-    if: ${{ github.event_name == 'pull_request' || github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both' }}
+    # Run on PRs with e2e label, or on workflow_dispatch when ios/both is selected
+    if: ${{ (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e')) || github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both' }}
     runs-on: macos-latest
     environment: dev
     steps:
@@ -52,7 +53,7 @@ jobs:
       - name: Build iOS App
         working-directory: packages/app
         run: |
-          bun run ios --configuration Release --simulator "iPhone 16 Pro"
+          bun run ios --mode Release --simulator "iPhone 16 Pro"
 
       - name: Run E2E Tests
         run: |
@@ -69,8 +70,8 @@ jobs:
 
   e2e-android:
     name: E2E Tests (Android)
-    # Run on PRs, or on workflow_dispatch when android/both is selected
-    if: ${{ github.event_name == 'pull_request' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both' }}
+    # Run on PRs with e2e label, or on workflow_dispatch when android/both is selected
+    if: ${{ (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e')) || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both' }}
     runs-on: ubuntu-latest
     environment: dev
     steps:
