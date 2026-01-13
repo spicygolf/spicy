@@ -9,8 +9,10 @@ appId: golf.spicy
 - launchApp:
     clearState: true
 
-# Wait for auth screen to load
-- assertVisible: "Spicy Golf"
+# Wait for auth screen to load (app may show loading screen briefly during init)
+- extendedWaitUntil:
+    visible: "Spicy Golf"
+    timeout: 30000
 
 # Log in with test passphrase
 - tapOn: "Log In"

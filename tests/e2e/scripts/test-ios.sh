@@ -73,9 +73,16 @@ xcrun simctl install booted "$APP_PATH"
 echo "Launching app..."
 xcrun simctl launch booted golf.spicy
 
-# Wait for app to start
+# Wait for app to start and connect to Metro
 echo "Waiting for app to start..."
-sleep 10
+sleep 5
+
+# Check Metro logs for app connection
+echo "Checking Metro logs for app connection..."
+tail -20 "$OUTPUT_DIR/metro.log"
+
+# Give a bit more time for app to fully initialize
+sleep 5
 
 # Run E2E tests
 export PATH="$PATH":"$HOME/.maestro/bin"

@@ -72,9 +72,13 @@ adb install -r "$APK_PATH"
 echo "Launching app..."
 adb shell monkey -p golf.spicy -c android.intent.category.LAUNCHER 1
 
-# Wait for app to start
+# Wait for app to start and connect to Metro
 echo "Waiting for app to start..."
-sleep 15
+sleep 5
+
+# Check Metro logs for app connection
+echo "Checking Metro logs for app connection..."
+tail -20 "$OUTPUT_DIR/metro.log"
 
 # Check if Metro is still running
 echo "Checking Metro status..."
@@ -83,6 +87,9 @@ curl -f http://localhost:8081/status || echo "Metro not responding"
 # Check if app is installed
 echo "Checking if app is installed..."
 adb shell pm list packages | grep golf.spicy || echo "App not found"
+
+# Give more time for app to fully initialize
+sleep 10
 
 # Run E2E tests
 export PATH="$PATH":"$HOME/.maestro/bin"
