@@ -47,7 +47,7 @@ adb install -r "$APK_PATH"
 
 # Launch the app
 echo "Launching app..."
-adb shell am start -n com.spicygolf.app/.MainActivity
+adb shell monkey -p golf.spicy -c android.intent.category.LAUNCHER 1
 
 # Wait for app to start
 echo "Waiting for app to start..."
@@ -59,7 +59,7 @@ curl -f http://localhost:8081/status || echo "Metro not responding"
 
 # Check if app is installed
 echo "Checking if app is installed..."
-adb shell pm list packages | grep com.spicygolf || echo "App not found"
+adb shell pm list packages | grep golf.spicy || echo "App not found"
 
 # Run E2E tests
 export PATH="$PATH":"$HOME/.maestro/bin"

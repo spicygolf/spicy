@@ -53,25 +53,36 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/app/ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: pods-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock') }}
+          restore-keys: |
+            pods-${{ runner.os }}-
+
       - name: Install CocoaPods
         working-directory: packages/app
         run: bun pods
 
-      - name: Cache iOS Build
+      # Cache the entire DerivedData directory for incremental builds
+      # Key uses only critical build config files, not all source
+      - name: Cache iOS DerivedData
         uses: actions/cache@v4
-        id: ios-build-cache
         with:
           path: |
             ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e
-          key: ios-build-${{ runner.os }}-${{ hashFiles('packages/app/ios/**', 'packages/app/package.json', 'packages/lib/**/*.ts', 'bun.lock') }}
+          key: ios-deriveddata-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock', 'packages/app/ios/spicygolf.xcodeproj/project.pbxproj') }}
           restore-keys: |
-            ios-build-${{ runner.os }}-
+            ios-deriveddata-${{ runner.os }}-
 
       - name: Make scripts executable
         run: chmod +x tests/e2e/scripts/*.sh
 
+      # Always run build - Xcode will do incremental compilation
       - name: Build iOS App
-        if: steps.ios-build-cache.outputs.cache-hit != 'true'
         run: ./tests/e2e/scripts/build-ios.sh
         env:
           IOS_SIMULATOR_DEVICE: ${{ env.IOS_SIMULATOR_DEVICE }}
@@ -194,21 +205,24 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
+      # Cache the entire build directory for incremental builds
+      # Key uses only Gradle config, not all source files
       - name: Cache Android Build
         uses: actions/cache@v4
-        id: android-build-cache
         with:
           path: |
-            packages/app/android/app/build/outputs/apk/debug
-          key: android-build-${{ runner.os }}-${{ hashFiles('packages/app/android/**', 'packages/app/package.json', 'packages/lib/**/*.ts', 'bun.lock') }}
+            packages/app/android/.gradle
+            packages/app/android/app/build
+            packages/app/android/build
+          key: android-build-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle.properties') }}
           restore-keys: |
             android-build-${{ runner.os }}-
 
       - name: Make scripts executable
         run: chmod +x tests/e2e/scripts/*.sh
 
+      # Always run build - Gradle will do incremental compilation
       - name: Build Android App
-        if: steps.android-build-cache.outputs.cache-hit != 'true'
         run: ./tests/e2e/scripts/build-android.sh
 
       - name: Upload Android Build

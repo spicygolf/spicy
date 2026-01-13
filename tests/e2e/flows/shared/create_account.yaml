@@ -17,7 +17,7 @@ appId: golf.spicy
 # Clear the auto-generated passphrase and enter our test passphrase
 - tapOn:
     text: "Enter or generate a passphrase"
-- clearText
+- eraseText
 - inputText: ${TEST_PASSPHRASE}
 
 # Check the confirmation box
