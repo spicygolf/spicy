@@ -24,6 +24,8 @@ xcodebuild \
   -sdk iphonesimulator \
   -destination "generic/platform=iOS Simulator" \
   -derivedDataPath "$DERIVED_DATA_PATH" \
+  ARCHS=arm64 \
+  ONLY_ACTIVE_ARCH=NO \
   build \
   > "$OUTPUT_DIR/ios-build.log" 2>&1 || {
     echo "=== iOS build failed! Last 100 lines of log: ==="

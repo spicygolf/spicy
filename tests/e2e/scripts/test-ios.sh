@@ -48,7 +48,7 @@ xcrun simctl install booted "$APP_PATH"
 
 # Launch the app
 echo "Launching app..."
-xcrun simctl launch booted golf.spicy.spicygolf
+xcrun simctl launch booted golf.spicy
 
 # Wait for app to start
 echo "Waiting for app to start..."

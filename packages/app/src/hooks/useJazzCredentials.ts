@@ -13,6 +13,14 @@ interface JazzCredentials {
   workerAccount: string;
 }
 
+// Fallback credentials for dev/offline mode when API is unavailable
+// These are public keys (not secrets) - Jazz cloud key and worker account ID
+const DEV_FALLBACK_CREDENTIALS: JazzCredentials = {
+  cloudKey:
+    "Y29femp3RHlqamV5Y3BYcGVSejdKTHM5eGh0N2NYfGNvX3pIUjV4WlRUbXdLVnNTYnoxeFU4VzdrYUhxZnxjb196NFJMZ2F3SlBZUkY3UFNuV25zTnFicXJWUFk",
+  workerAccount: "co_zEGutjQVsanzKS2wawLZcZkZPDL",
+};
+
 async function fetchJazzCredentials(api: string): Promise<JazzCredentials> {
   const url = `${api}/jazz/credentials`;
   try {
@@ -34,6 +42,10 @@ function getStoredCredentials(): JazzCredentials | null {
     } catch {
       return null;
     }
+  }
+  // Use dev fallback credentials if nothing is stored (enables offline-first)
+  if (__DEV__) {
+    return DEV_FALLBACK_CREDENTIALS;
   }
   return null;
 }

@@ -62,6 +62,7 @@ jobs:
           key: pods-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock') }}
           restore-keys: |
             pods-${{ runner.os }}-
+          save-always: true
 
       - name: Install CocoaPods
         working-directory: packages/app
@@ -77,6 +78,7 @@ jobs:
           key: ios-deriveddata-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock', 'packages/app/ios/spicygolf.xcodeproj/project.pbxproj') }}
           restore-keys: |
             ios-deriveddata-${{ runner.os }}-
+          save-always: true
 
       - name: Make scripts executable
         run: chmod +x tests/e2e/scripts/*.sh
@@ -204,6 +206,7 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle-wrapper.properties') }}
           restore-keys: |
             gradle-${{ runner.os }}-
+          save-always: true
 
       # Cache the entire build directory for incremental builds
       # Key uses only Gradle config, not all source files
@@ -217,6 +220,7 @@ jobs:
           key: android-build-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle.properties') }}
           restore-keys: |
             android-build-${{ runner.os }}-
+          save-always: true
 
       - name: Make scripts executable
         run: chmod +x tests/e2e/scripts/*.sh
@@ -292,6 +296,7 @@ jobs:
             ~/.android/avd/*
             ~/.android/adb*
           key: avd-pixel6-${{ env.EMULATOR_API_LEVEL }}
+          save-always: true
 
       - name: Create AVD and Generate Snapshot for Caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
