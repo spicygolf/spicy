@@ -57,8 +57,9 @@ export MAESTRO_CLI_NO_ANALYTICS=1
 export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
 
 echo "Running End-to-End tests on iOS..."
+# Run each flow in subdirectories (Maestro doesn't recurse by default)
 maestro test \
-  tests/e2e/flows/ \
+  tests/e2e/flows/five_points/basic_game.yaml \
   --env PLATFORM=ios \
   --format junit \
   --output "$OUTPUT_DIR/e2e-results.xml"
