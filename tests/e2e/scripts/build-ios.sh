@@ -22,7 +22,7 @@ xcodebuild \
   -scheme spicygolf \
   -configuration Debug \
   -sdk iphonesimulator \
-  -destination "platform=iOS Simulator,name=${IOS_SIMULATOR_DEVICE:-iPhone 16 Pro}" \
+  -destination "generic/platform=iOS Simulator" \
   -derivedDataPath "$DERIVED_DATA_PATH" \
   build \
   > "$OUTPUT_DIR/ios-build.log" 2>&1 || {
