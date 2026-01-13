@@ -36,11 +36,34 @@ cd ../..
 echo "Waiting for Metro to start..."
 for i in {1..30}; do
   if curl -sf http://localhost:8081/status > /dev/null 2>&1; then
-    echo "Metro is ready!"
+    echo "Metro server is up!"
     break
   fi
   sleep 1
 done
+
+# Pre-warm Metro by requesting the bundle (this triggers compilation)
+echo "Pre-warming Metro bundle..."
+curl -sf "http://localhost:8081/index.bundle?platform=ios&dev=true&minify=false" > /dev/null 2>&1 &
+BUNDLE_PID=$!
+
+# Wait for bundle to compile (check Metro logs for completion)
+echo "Waiting for bundle compilation..."
+for i in {1..120}; do
+  if grep -q "Done in" "$OUTPUT_DIR/metro.log" 2>/dev/null || grep -q "BUNDLE.*100.0%" "$OUTPUT_DIR/metro.log" 2>/dev/null; then
+    echo "Bundle compilation complete!"
+    break
+  fi
+  sleep 2
+  if [ $i -eq 120 ]; then
+    echo "Warning: Bundle compilation taking longer than expected"
+    echo "Last 20 lines of Metro log:"
+    tail -20 "$OUTPUT_DIR/metro.log"
+  fi
+done
+
+# Kill the background curl if still running
+kill $BUNDLE_PID 2>/dev/null || true
 
 # Install app to simulator
 echo "Installing app to iOS Simulator..."
