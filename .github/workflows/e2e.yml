@@ -52,7 +52,7 @@ jobs:
         run: brew install ccache
 
       - name: Restore ccache
-        uses: actions/cache/restore@v4
+        uses: WarpBuilds/cache/restore@v1
         with:
           path: ~/Library/Caches/ccache
           key: ccache-ios-${{ runner.os }}-${{ github.sha }}
@@ -72,7 +72,7 @@ jobs:
 
       - name: Restore CocoaPods cache
         id: pods-cache
-        uses: actions/cache/restore@v4
+        uses: WarpBuilds/cache/restore@v1
         with:
           path: |
             packages/app/ios/Pods
@@ -87,7 +87,7 @@ jobs:
 
       - name: Save CocoaPods cache
         if: always()
-        uses: actions/cache/save@v4
+        uses: WarpBuilds/cache/save@v1
         with:
           path: |
             packages/app/ios/Pods
@@ -98,7 +98,7 @@ jobs:
       # Key uses only critical build config files, not all source
       - name: Restore iOS DerivedData cache
         id: deriveddata-cache
-        uses: actions/cache/restore@v4
+        uses: WarpBuilds/cache/restore@v1
         with:
           path: |
             ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e
@@ -117,14 +117,14 @@ jobs:
 
       - name: Save ccache
         if: always()
-        uses: actions/cache/save@v4
+        uses: WarpBuilds/cache/save@v1
         with:
           path: ~/Library/Caches/ccache
           key: ccache-ios-${{ runner.os }}-${{ github.sha }}
 
       - name: Save iOS DerivedData cache
         if: always()
-        uses: actions/cache/save@v4
+        uses: WarpBuilds/cache/save@v1
         with:
           path: |
             ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e
@@ -240,7 +240,7 @@ jobs:
 
       - name: Restore Gradle cache
         id: gradle-cache
-        uses: actions/cache/restore@v4
+        uses: WarpBuilds/cache/restore@v1
         with:
           path: |
             ~/.gradle/caches
@@ -253,7 +253,7 @@ jobs:
       # Key uses only Gradle config, not all source files
       - name: Restore Android Build cache
         id: android-build-cache
-        uses: actions/cache/restore@v4
+        uses: WarpBuilds/cache/restore@v1
         with:
           path: |
             packages/app/android/.gradle
@@ -272,7 +272,7 @@ jobs:
 
       - name: Save Gradle cache
         if: always()
-        uses: actions/cache/save@v4
+        uses: WarpBuilds/cache/save@v1
         with:
           path: |
             ~/.gradle/caches
@@ -281,7 +281,7 @@ jobs:
 
       - name: Save Android Build cache
         if: always()
-        uses: actions/cache/save@v4
+        uses: WarpBuilds/cache/save@v1
         with:
           path: |
             packages/app/android/.gradle
@@ -350,7 +350,7 @@ jobs:
 
       - name: Restore AVD cache
         id: avd-cache
-        uses: actions/cache/restore@v4
+        uses: WarpBuilds/cache/restore@v1
         with:
           path: |
             ~/.android/avd/*
@@ -372,7 +372,7 @@ jobs:
 
       - name: Save AVD cache
         if: always()
-        uses: actions/cache/save@v4
+        uses: WarpBuilds/cache/save@v1
         with:
           path: |
             ~/.android/avd/*
