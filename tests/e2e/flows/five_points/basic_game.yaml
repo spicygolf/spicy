@@ -55,8 +55,16 @@ appId: golf.spicy
 
 - tapOn:
     id: "spec-five-points"
+
 # ===== VERIFICATION =====
+# Wait for game settings screen to load
+- extendedWaitUntil:
+    visible: "Add Player"
+    timeout: 15000
+
+# Take final screenshot to confirm game loaded
+- takeScreenshot: game_settings
 # At this point we have:
 # 1. Successfully logged in
 # 2. Created a Five Points game
-# 3. Navigated to the game screen
+# 3. Verified the game settings screen loaded
