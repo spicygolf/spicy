@@ -34,6 +34,7 @@ jobs:
     environment: dev
     env:
       IOS_SIMULATOR_DEVICE: "iPhone 16 Pro"
+      USE_CCACHE: 1
 
     steps:
       - name: Checkout code
@@ -46,6 +47,22 @@ jobs:
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
+
+      - name: Install ccache
+        run: brew install ccache
+
+      - name: Restore ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/Library/Caches/ccache
+          key: ccache-ios-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            ccache-ios-${{ runner.os }}-
+
+      - name: Configure ccache
+        run: |
+          ccache --set-config=max_size=2G
+          ccache --zero-stats
 
       - name: Create output directory
         run: mkdir -p /tmp/e2e-output
@@ -97,6 +114,13 @@ jobs:
         run: ./tests/e2e/scripts/build-ios.sh
         env:
           IOS_SIMULATOR_DEVICE: ${{ env.IOS_SIMULATOR_DEVICE }}
+
+      - name: Save ccache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/Library/Caches/ccache
+          key: ccache-ios-${{ runner.os }}-${{ github.sha }}
 
       - name: Save iOS DerivedData cache
         if: always()
