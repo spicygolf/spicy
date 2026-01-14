@@ -55,9 +55,9 @@ jobs:
         uses: WarpBuilds/cache/restore@v1
         with:
           path: ~/Library/Caches/ccache
-          key: ccache-ios-${{ runner.os }}-${{ github.sha }}
+          key: ccache-ios-${{ runner.os }}
           restore-keys: |
-            ccache-ios-${{ runner.os }}-
+            ccache-ios-
 
       - name: Configure ccache
         run: |
@@ -120,7 +120,7 @@ jobs:
         uses: WarpBuilds/cache/save@v1
         with:
           path: ~/Library/Caches/ccache
-          key: ccache-ios-${{ runner.os }}-${{ github.sha }}
+          key: ccache-ios-${{ runner.os }}
 
       - name: Save iOS DerivedData cache
         if: always()
