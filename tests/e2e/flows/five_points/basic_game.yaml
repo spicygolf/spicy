@@ -6,8 +6,11 @@ appId: golf.spicy
 # ===== AUTHENTICATION =====
 # Log in with the test account passphrase
 
-- launchApp:
-    clearState: true
+- launchApp
+
+# Wait for app to fully launch and initialize
+- waitForAnimationToEnd:
+    timeout: 10000
 
 # Take screenshot to debug what's on screen
 - takeScreenshot: after_launch

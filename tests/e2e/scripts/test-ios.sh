@@ -25,10 +25,10 @@ if [ ! -d "$APP_PATH" ]; then
   exit 1
 fi
 
-# Start Metro
+# Start Metro with client logs (uses tee to /tmp/spicy-metro.log)
 echo "Starting Metro Bundler..."
 cd packages/app
-bun start > "$OUTPUT_DIR/metro.log" 2>&1 &
+bun dev > "$OUTPUT_DIR/metro.log" 2>&1 &
 METRO_PID=$!
 cd ../..
 
@@ -65,24 +65,9 @@ done
 # Kill the background curl if still running
 kill $BUNDLE_PID 2>/dev/null || true
 
-# Install app to simulator
+# Install app to simulator (Maestro will launch it)
 echo "Installing app to iOS Simulator..."
 xcrun simctl install booted "$APP_PATH"
-
-# Launch the app
-echo "Launching app..."
-xcrun simctl launch booted golf.spicy
-
-# Wait for app to start and connect to Metro
-echo "Waiting for app to start..."
-sleep 5
-
-# Check Metro logs for app connection
-echo "Checking Metro logs for app connection..."
-tail -20 "$OUTPUT_DIR/metro.log"
-
-# Give a bit more time for app to fully initialize
-sleep 5
 
 # Run E2E tests
 export PATH="$PATH":"$HOME/.maestro/bin"
@@ -99,6 +84,15 @@ maestro test \
   --format junit \
   --output "$OUTPUT_DIR/e2e-results.xml" \
   --test-output-dir "$OUTPUT_DIR"
+
+# Copy the tee'd metro log (contains client logs) to output
+if [ -f /tmp/spicy-metro.log ]; then
+  cp /tmp/spicy-metro.log "$OUTPUT_DIR/spicy-metro-client.log"
+fi
+
+# Capture simulator system log for crash debugging
+echo "Capturing simulator logs..."
+xcrun simctl spawn booted log show --predicate 'subsystem == "golf.spicy" OR process == "spicygolf"' --last 5m > "$OUTPUT_DIR/simulator.log" 2>&1 || true
 
 echo "Listing Output Directory"
 ls -la "$OUTPUT_DIR"

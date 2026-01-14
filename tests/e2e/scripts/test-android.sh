@@ -24,10 +24,10 @@ if [ ! -f "$APK_PATH" ]; then
   exit 1
 fi
 
-# Start Metro
+# Start Metro with client logs (bun dev tees to /tmp/spicy-metro.log)
 echo "Starting Metro Bundler..."
 cd packages/app
-bun start > "$OUTPUT_DIR/metro.log" 2>&1 &
+bun dev > "$OUTPUT_DIR/metro.log" 2>&1 &
 METRO_PID=$!
 cd ../..
 
@@ -68,32 +68,9 @@ kill $BUNDLE_PID 2>/dev/null || true
 echo "Setting up adb reverse for Metro..."
 adb reverse tcp:8081 tcp:8081
 
-# Install APK to emulator
+# Install APK to emulator (Maestro will launch it)
 echo "Installing app to Android Emulator..."
 adb install -r "$APK_PATH"
-
-# Launch the app
-echo "Launching app..."
-adb shell monkey -p golf.spicy -c android.intent.category.LAUNCHER 1
-
-# Wait for app to start and connect to Metro
-echo "Waiting for app to start..."
-sleep 5
-
-# Check Metro logs for app connection
-echo "Checking Metro logs for app connection..."
-tail -20 "$OUTPUT_DIR/metro.log"
-
-# Check if Metro is still running
-echo "Checking Metro status..."
-curl -f http://localhost:8081/status || echo "Metro not responding"
-
-# Check if app is installed
-echo "Checking if app is installed..."
-adb shell pm list packages | grep golf.spicy || echo "App not found"
-
-# Give more time for app to fully initialize
-sleep 10
 
 # Run E2E tests
 export PATH="$PATH":"$HOME/.maestro/bin"
@@ -110,6 +87,15 @@ maestro test \
   --format junit \
   --output "$OUTPUT_DIR/e2e-results.xml" \
   --test-output-dir "$OUTPUT_DIR"
+
+# Copy the tee'd metro log (contains client logs) to output
+if [ -f /tmp/spicy-metro.log ]; then
+  cp /tmp/spicy-metro.log "$OUTPUT_DIR/spicy-metro-client.log"
+fi
+
+# Capture logcat for crash debugging
+echo "Capturing logcat..."
+adb logcat -d > "$OUTPUT_DIR/logcat.log" 2>&1 || true
 
 echo "Listing Output Directory"
 ls -la "$OUTPUT_DIR"
