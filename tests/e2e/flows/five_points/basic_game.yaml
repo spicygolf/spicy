@@ -6,7 +6,8 @@ appId: golf.spicy
 # ===== AUTHENTICATION =====
 # Log in with the test account passphrase
 
-- launchApp
+- launchApp:
+    clearState: true
 
 # Wait for app to fully launch and initialize
 - waitForAnimationToEnd:
@@ -28,9 +29,7 @@ appId: golf.spicy
 - tapOn:
     text: "(?i)Enter your passphrase"
 - inputText: "${TEST_PASSPHRASE}"
-# Dismiss keyboard by tapping outside the text field
-- tapOn:
-    text: "(?i)Enter your recovery passphrase"
+- hideKeyboard
 - tapOn:
     id: "login-submit-button"
 
@@ -44,14 +43,18 @@ appId: golf.spicy
 - tapOn: "New Game"
 
 # Switch to Search tab to find Five Points
-- tapOn: "Search"
+- tapOn:
+    text: "Search"
+- waitForAnimationToEnd
 
 # Wait for specs to load from API
 - extendedWaitUntil:
-    visible: "Five Points"
+    visible:
+      id: "spec-five-points"
     timeout: 15000
 
-- tapOn: "Five Points"
+- tapOn:
+    id: "spec-five-points"
 # ===== VERIFICATION =====
 # At this point we have:
 # 1. Successfully logged in
