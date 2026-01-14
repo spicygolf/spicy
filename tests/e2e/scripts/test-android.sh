@@ -27,7 +27,7 @@ fi
 # Start Metro with client logs (bun dev tees to /tmp/spicy-metro.log)
 echo "Starting Metro Bundler..."
 cd packages/app
-bun dev > "$OUTPUT_DIR/metro.log" 2>&1 &
+bun dev &
 METRO_PID=$!
 cd ../..
 
@@ -48,8 +48,9 @@ BUNDLE_PID=$!
 
 # Wait for bundle to compile (check Metro logs for completion)
 echo "Waiting for bundle compilation..."
+METRO_LOG="/tmp/spicy-metro.log"
 for i in {1..120}; do
-  if grep -q "Done in" "$OUTPUT_DIR/metro.log" 2>/dev/null || grep -q "BUNDLE.*100.0%" "$OUTPUT_DIR/metro.log" 2>/dev/null; then
+  if grep -q "Done in" "$METRO_LOG" 2>/dev/null || grep -q "BUNDLE  ./index.js$" "$METRO_LOG" 2>/dev/null; then
     echo "Bundle compilation complete!"
     break
   fi
@@ -57,7 +58,7 @@ for i in {1..120}; do
   if [ $i -eq 120 ]; then
     echo "Warning: Bundle compilation taking longer than expected"
     echo "Last 20 lines of Metro log:"
-    tail -20 "$OUTPUT_DIR/metro.log"
+    tail -20 "$METRO_LOG"
   fi
 done
 
@@ -89,10 +90,8 @@ maestro test \
   --output "$OUTPUT_DIR/e2e-results.xml" \
   --test-output-dir "$OUTPUT_DIR"
 
-# Copy the tee'd metro log (contains client logs) to output
-if [ -f /tmp/spicy-metro.log ]; then
-  cp /tmp/spicy-metro.log "$OUTPUT_DIR/spicy-metro-client.log"
-fi
+# Copy metro log to output directory for artifact upload
+cp /tmp/spicy-metro.log "$OUTPUT_DIR/metro.log" 2>/dev/null || true
 
 # Capture logcat for crash debugging
 echo "Capturing logcat..."
