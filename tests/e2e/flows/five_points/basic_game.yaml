@@ -19,9 +19,9 @@ appId: golf.spicy
     timeout: 60000
 
 # Log in with test passphrase
-# iOS Button renders uppercase. Use regex for case-insensitive match.
+# Use testID for reliable element finding across platforms
 - tapOn:
-    text: "(?i)Log In"
+    id: "login-button"
 - tapOn:
     text: "(?i)Enter your passphrase"
 - inputText: "${TEST_PASSPHRASE}"
@@ -29,8 +29,7 @@ appId: golf.spicy
 - tapOn:
     text: "(?i)Enter your recovery passphrase"
 - tapOn:
-    text: "(?i)Log In"
-    index: 1
+    id: "login-submit-button"
 
 # Wait for login to complete
 - extendedWaitUntil:

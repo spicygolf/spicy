@@ -64,6 +64,10 @@ done
 # Kill the background curl if still running
 kill $BUNDLE_PID 2>/dev/null || true
 
+# Set up port forwarding so emulator can reach Metro on host
+echo "Setting up adb reverse for Metro..."
+adb reverse tcp:8081 tcp:8081
+
 # Install APK to emulator
 echo "Installing app to Android Emulator..."
 adb install -r "$APK_PATH"

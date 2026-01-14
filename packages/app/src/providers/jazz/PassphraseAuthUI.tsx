@@ -111,9 +111,13 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
             <Text style={styles.title}>Spicy Golf</Text>
             <Text style={styles.subtitle}>Development Mode</Text>
             <View style={styles.buttonGroup}>
-              <Button title="Create Account" onPress={handleCreateAccount} />
+              <View testID="create-account-button">
+                <Button title="Create Account" onPress={handleCreateAccount} />
+              </View>
               <View style={styles.buttonSpacer} />
-              <Button title="Log In" onPress={handleLogin} />
+              <View testID="login-button">
+                <Button title="Log In" onPress={handleLogin} />
+              </View>
             </View>
           </View>
         )}
@@ -211,7 +215,9 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
               {isLoading ? (
                 <ActivityIndicator />
               ) : (
-                <Button title="Log In" onPress={handleLoginSubmit} />
+                <View testID="login-submit-button">
+                  <Button title="Log In" onPress={handleLoginSubmit} />
+                </View>
               )}
             </View>
           </View>
