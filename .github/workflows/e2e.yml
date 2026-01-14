@@ -33,7 +33,7 @@ jobs:
     runs-on: warp-macos-26-arm64-6x
     environment: dev
     env:
-      IOS_SIMULATOR_DEVICE: "iPhone 16 Pro"
+      IOS_SIMULATOR_DEVICE: "iPhone 17 Pro"
       USE_CCACHE: 1
 
     steps:
@@ -154,7 +154,7 @@ jobs:
     runs-on: warp-macos-26-arm64-6x
     environment: dev
     env:
-      IOS_SIMULATOR_DEVICE: "iPhone 16 Pro"
+      IOS_SIMULATOR_DEVICE: "iPhone 17 Pro"
 
     steps:
       - name: Checkout code

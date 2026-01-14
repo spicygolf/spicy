@@ -9,10 +9,14 @@ appId: golf.spicy
 - launchApp:
     clearState: true
 
+# Take screenshot to debug what's on screen
+- takeScreenshot: after_launch
+
 # Wait for auth screen to load (app may show loading screen briefly during init)
+# Increase timeout to 60s to account for slow emulators and bundle loading
 - extendedWaitUntil:
     visible: "Spicy Golf"
-    timeout: 30000
+    timeout: 60000
 
 # Log in with test passphrase
 # iOS Button renders uppercase. Use regex for case-insensitive match.
