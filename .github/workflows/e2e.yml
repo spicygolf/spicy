@@ -199,8 +199,11 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: e2e-ios-output
-          path: /tmp/e2e-output/
+          name: spicy-ios-output
+          path: |
+            /tmp/e2e-output/*.log
+            /tmp/e2e-output/*.xml
+            /tmp/e2e-output/screenshots/
           retention-days: 5
 
   # ============================================================================
@@ -407,6 +410,9 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: e2e-android-output
-          path: /tmp/e2e-output/
+          name: spicy-android-output
+          path: |
+            /tmp/e2e-output/*.log
+            /tmp/e2e-output/*.xml
+            /tmp/e2e-output/screenshots/
           retention-days: 5

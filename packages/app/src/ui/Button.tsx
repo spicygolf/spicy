@@ -6,14 +6,16 @@ type ButtonProps = {
   label: string;
   onPress: () => void;
   disabled?: boolean;
+  testID?: string;
 };
 
-export function Button({ label, onPress, disabled }: ButtonProps) {
+export function Button({ label, onPress, disabled, testID }: ButtonProps) {
   return (
     <TouchableOpacity
       style={[styles.container, disabled && styles.disabled]}
       onPress={onPress}
       disabled={disabled}
+      testID={testID}
     >
       <Text style={styles.text}>{label}</Text>
     </TouchableOpacity>

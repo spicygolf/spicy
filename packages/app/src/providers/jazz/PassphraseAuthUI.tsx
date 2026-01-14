@@ -13,13 +13,12 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Button,
   Pressable,
   ScrollView,
   View,
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { Text, TextInput } from "@/ui";
+import { Button, Text, TextInput } from "@/ui";
 
 interface PassphraseAuthUIProps {
   children: React.ReactNode;
@@ -111,13 +110,17 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
             <Text style={styles.title}>Spicy Golf</Text>
             <Text style={styles.subtitle}>Development Mode</Text>
             <View style={styles.buttonGroup}>
-              <View testID="create-account-button">
-                <Button title="Create Account" onPress={handleCreateAccount} />
-              </View>
+              <Button
+                label="Create Account"
+                onPress={handleCreateAccount}
+                testID="create-account-button"
+              />
               <View style={styles.buttonSpacer} />
-              <View testID="login-button">
-                <Button title="Log In" onPress={handleLogin} />
-              </View>
+              <Button
+                label="Log In"
+                onPress={handleLogin}
+                testID="login-button"
+              />
             </View>
           </View>
         )}
@@ -155,9 +158,9 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
             />
 
             <View style={styles.buttonRow}>
-              <Button title="Generate New" onPress={handleReroll} />
+              <Button label="Generate New" onPress={handleReroll} />
               <View style={styles.buttonSpacer} />
-              <Button title="Copy" onPress={handleCopyPassphrase} />
+              <Button label="Copy" onPress={handleCopyPassphrase} />
             </View>
 
             <Pressable
@@ -178,13 +181,13 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
             </Pressable>
 
             <View style={styles.buttonRow}>
-              <Button title="Back" onPress={handleBack} />
+              <Button label="Back" onPress={handleBack} />
               <View style={styles.buttonSpacer} />
               {isLoading ? (
                 <ActivityIndicator />
               ) : (
                 <Button
-                  title="Create Account"
+                  label="Create Account"
                   onPress={handleRegister}
                   disabled={!confirmSaved}
                 />
@@ -210,14 +213,16 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
             />
 
             <View style={styles.buttonRow}>
-              <Button title="Back" onPress={handleBack} />
+              <Button label="Back" onPress={handleBack} />
               <View style={styles.buttonSpacer} />
               {isLoading ? (
                 <ActivityIndicator />
               ) : (
-                <View testID="login-submit-button">
-                  <Button title="Log In" onPress={handleLoginSubmit} />
-                </View>
+                <Button
+                  label="Log In"
+                  onPress={handleLoginSubmit}
+                  testID="login-submit-button"
+                />
               )}
             </View>
           </View>

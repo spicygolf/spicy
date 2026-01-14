@@ -105,9 +105,11 @@ echo "Running End-to-End tests on Android..."
 # Run each flow in subdirectories (Maestro doesn't recurse by default)
 maestro test \
   tests/e2e/flows/five_points/basic_game.yaml \
+  --config tests/e2e/.maestro/config.yml \
   --env PLATFORM=android \
   --format junit \
-  --output "$OUTPUT_DIR/e2e-results.xml"
+  --output "$OUTPUT_DIR/e2e-results.xml" \
+  --test-output-dir "$OUTPUT_DIR"
 
 echo "Listing Output Directory"
 ls -la "$OUTPUT_DIR"
