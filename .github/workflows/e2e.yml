@@ -70,6 +70,14 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Create app .env file
+        run: |
+          cat > packages/app/.env << EOF
+          DEV_API_HOST=
+          POSTHOG_API_KEY=${{ secrets.POSTHOG_API_KEY }}
+          POSTHOG_HOST=${{ vars.POSTHOG_HOST }}
+          EOF
+
       - name: Restore CocoaPods cache
         id: pods-cache
         uses: WarpBuilds/cache/restore@v1
@@ -240,6 +248,14 @@ jobs:
 
       - name: Install dependencies
         run: bun install
+
+      - name: Create app .env file
+        run: |
+          cat > packages/app/.env << EOF
+          DEV_API_HOST=
+          POSTHOG_API_KEY=${{ secrets.POSTHOG_API_KEY }}
+          POSTHOG_HOST=${{ vars.POSTHOG_HOST }}
+          EOF
 
       - name: Restore Gradle cache
         id: gradle-cache

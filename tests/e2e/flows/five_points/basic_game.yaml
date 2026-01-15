@@ -16,11 +16,10 @@ appId: golf.spicy
 # Take screenshot to debug what's on screen
 - takeScreenshot: after_launch
 
-# Wait for auth screen to load (app may show loading screen briefly during init)
-# Increase timeout to 60s to account for slow emulators and bundle loading
+# Wait for auth screen to load
 - extendedWaitUntil:
     visible: "Spicy Golf"
-    timeout: 60000
+    timeout: 10000
 
 # Log in with test passphrase
 # Use testID for reliable element finding across platforms
@@ -51,7 +50,7 @@ appId: golf.spicy
 - extendedWaitUntil:
     visible:
       id: "spec-five-points"
-    timeout: 15000
+    timeout: 10000
 
 - tapOn:
     id: "spec-five-points"
@@ -60,7 +59,7 @@ appId: golf.spicy
 # Wait for game settings screen to load
 - extendedWaitUntil:
     visible: "Add Player"
-    timeout: 15000
+    timeout: 10000
 
 # Take final screenshot to confirm game loaded
 - takeScreenshot: game_settings

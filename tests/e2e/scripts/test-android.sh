@@ -41,30 +41,6 @@ for i in {1..30}; do
   sleep 1
 done
 
-# Pre-warm Metro by requesting the bundle (this triggers compilation)
-echo "Pre-warming Metro bundle..."
-curl -sf "http://localhost:8081/index.bundle?platform=android&dev=true&minify=false" > /dev/null 2>&1 &
-BUNDLE_PID=$!
-
-# Wait for bundle to compile (check Metro logs for completion)
-echo "Waiting for bundle compilation..."
-METRO_LOG="/tmp/spicy-metro.log"
-for i in {1..120}; do
-  if grep -q "Done in" "$METRO_LOG" 2>/dev/null || grep -q "BUNDLE  ./index.js$" "$METRO_LOG" 2>/dev/null; then
-    echo "Bundle compilation complete!"
-    break
-  fi
-  sleep 2
-  if [ $i -eq 120 ]; then
-    echo "Warning: Bundle compilation taking longer than expected"
-    echo "Last 20 lines of Metro log:"
-    tail -20 "$METRO_LOG"
-  fi
-done
-
-# Kill the background curl if still running
-kill $BUNDLE_PID 2>/dev/null || true
-
 # Set up port forwarding so emulator can reach Metro on host
 echo "Setting up adb reverse for Metro..."
 adb reverse tcp:8081 tcp:8081
