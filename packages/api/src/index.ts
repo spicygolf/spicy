@@ -162,13 +162,6 @@ const app = new Elysia()
     },
     { jazzAuth: true },
   )
-  .get(`/${api}/jazz/credentials`, () => ({
-    // Jazz cloud connection key (public, used in frontend WebSocket URL)
-    // This is NOT a secret - Jazz docs show it as NEXT_PUBLIC_JAZZ_API_KEY
-    cloudKey: process.env.JAZZ_API_KEY,
-    // Worker account ID (public, used to load shared catalog data)
-    workerAccount: process.env.JAZZ_WORKER_ACCOUNT,
-  }))
   // Auth check endpoint - returns whether current user is admin
   .get(
     `/${api}/auth/is-admin`,
