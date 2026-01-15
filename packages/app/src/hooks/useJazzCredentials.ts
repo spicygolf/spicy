@@ -2,7 +2,7 @@ import { JAZZ_API_KEY, JAZZ_WORKER_ACCOUNT } from "@env";
 import { storage } from "@/providers/jazz/mmkv-store";
 
 export interface JazzCredentials {
-  cloudKey: string;
+  apiKey: string;
   workerAccount: string;
 }
 
@@ -16,7 +16,7 @@ export function clearAllAuthData(): void {
 export function useJazzCredentials() {
   // Read credentials from environment variables (set at build time)
   const credentials: JazzCredentials = {
-    cloudKey: JAZZ_API_KEY,
+    apiKey: JAZZ_API_KEY,
     workerAccount: JAZZ_WORKER_ACCOUNT,
   };
 

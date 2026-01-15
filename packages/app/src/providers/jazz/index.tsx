@@ -18,7 +18,7 @@ export function JazzAndAuth({ children }: { children: React.ReactNode }) {
   }, [credentials?.workerAccount]);
 
   const peer =
-    `wss://cloud.jazz.tools/?key=${credentials.cloudKey}` as `wss://${string}`;
+    `wss://cloud.jazz.tools/?key=${credentials.apiKey}` as `wss://${string}`;
 
   return (
     <JazzReactNativeProvider
