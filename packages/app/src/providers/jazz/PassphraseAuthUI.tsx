@@ -13,13 +13,14 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Button,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   View,
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { Text, TextInput } from "@/ui";
+import { Button, Text, TextInput } from "@/ui";
 
 interface PassphraseAuthUIProps {
   children: React.ReactNode;
@@ -104,124 +105,144 @@ export function PassphraseAuthUI({ children }: PassphraseAuthUIProps) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.card}>
-        {step === "initial" && (
-          <View style={styles.content}>
-            <Text style={styles.title}>Spicy Golf</Text>
-            <Text style={styles.subtitle}>Development Mode</Text>
-            <View style={styles.buttonGroup}>
-              <Button title="Create Account" onPress={handleCreateAccount} />
-              <View style={styles.buttonSpacer} />
-              <Button title="Log In" onPress={handleLogin} />
-            </View>
-          </View>
-        )}
-
-        {step === "create" && (
-          <View style={styles.content}>
-            <Text style={styles.title}>Create Account</Text>
-
-            <Text style={styles.label}>Your Name</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter your name"
-              autoCapitalize="words"
-              autoCorrect={false}
-            />
-
-            <Text style={styles.label}>Recovery Passphrase</Text>
-            <Text style={styles.description}>
-              Save this passphrase securely. You'll need it to log in on other
-              devices or if you get logged out.
-            </Text>
-            <TextInput
-              style={styles.passphraseInput}
-              value={currentPassphrase}
-              onChangeText={(text) => {
-                setCurrentPassphrase(text);
-                setConfirmSaved(false);
-              }}
-              placeholder="Enter or generate a passphrase"
-              multiline
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-
-            <View style={styles.buttonRow}>
-              <Button title="Generate New" onPress={handleReroll} />
-              <View style={styles.buttonSpacer} />
-              <Button title="Copy" onPress={handleCopyPassphrase} />
-            </View>
-
-            <Pressable
-              style={styles.checkboxRow}
-              onPress={() => setConfirmSaved(!confirmSaved)}
-            >
-              <View
-                style={[
-                  styles.checkbox,
-                  confirmSaved && styles.checkboxChecked,
-                ]}
-              >
-                {confirmSaved && <Text style={styles.checkmark}>✓</Text>}
-              </View>
-              <Text style={styles.checkboxLabel}>
-                I have securely saved my recovery passphrase
-              </Text>
-            </Pressable>
-
-            <View style={styles.buttonRow}>
-              <Button title="Back" onPress={handleBack} />
-              <View style={styles.buttonSpacer} />
-              {isLoading ? (
-                <ActivityIndicator />
-              ) : (
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoid}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.card}>
+          {step === "initial" && (
+            <View style={styles.content}>
+              <Text style={styles.title}>Spicy Golf</Text>
+              <Text style={styles.subtitle}>Development Mode</Text>
+              <View style={styles.buttonGroup}>
                 <Button
-                  title="Create Account"
-                  onPress={handleRegister}
-                  disabled={!confirmSaved}
+                  label="Create Account"
+                  onPress={handleCreateAccount}
+                  testID="create-account-button"
                 />
-              )}
+                <View style={styles.buttonSpacer} />
+                <Button
+                  label="Log In"
+                  onPress={handleLogin}
+                  testID="login-button"
+                />
+              </View>
             </View>
-          </View>
-        )}
+          )}
 
-        {step === "login" && (
-          <View style={styles.content}>
-            <Text style={styles.title}>Log In</Text>
-            <Text style={styles.description}>
-              Enter your recovery passphrase to log in.
-            </Text>
-            <TextInput
-              style={styles.passphraseInput}
-              value={loginPassphrase}
-              onChangeText={setLoginPassphrase}
-              placeholder="Enter your passphrase"
-              multiline
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+          {step === "create" && (
+            <View style={styles.content}>
+              <Text style={styles.title}>Create Account</Text>
 
-            <View style={styles.buttonRow}>
-              <Button title="Back" onPress={handleBack} />
-              <View style={styles.buttonSpacer} />
-              {isLoading ? (
-                <ActivityIndicator />
-              ) : (
-                <Button title="Log In" onPress={handleLoginSubmit} />
-              )}
+              <Text style={styles.label}>Your Name</Text>
+              <TextInput
+                style={styles.input}
+                value={name}
+                onChangeText={setName}
+                placeholder="Enter your name"
+                autoCapitalize="words"
+                autoCorrect={false}
+              />
+
+              <Text style={styles.label}>Recovery Passphrase</Text>
+              <Text style={styles.description}>
+                Save this passphrase securely. You'll need it to log in on other
+                devices or if you get logged out.
+              </Text>
+              <TextInput
+                style={styles.passphraseInput}
+                value={currentPassphrase}
+                onChangeText={(text) => {
+                  setCurrentPassphrase(text);
+                  setConfirmSaved(false);
+                }}
+                placeholder="Enter or generate a passphrase"
+                multiline
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
+              <View style={styles.buttonRow}>
+                <Button label="Generate New" onPress={handleReroll} />
+                <View style={styles.buttonSpacer} />
+                <Button label="Copy" onPress={handleCopyPassphrase} />
+              </View>
+
+              <Pressable
+                style={styles.checkboxRow}
+                onPress={() => setConfirmSaved(!confirmSaved)}
+              >
+                <View
+                  style={[
+                    styles.checkbox,
+                    confirmSaved && styles.checkboxChecked,
+                  ]}
+                >
+                  {confirmSaved && <Text style={styles.checkmark}>✓</Text>}
+                </View>
+                <Text style={styles.checkboxLabel}>
+                  I have securely saved my recovery passphrase
+                </Text>
+              </Pressable>
+
+              <View style={styles.buttonRow}>
+                <Button label="Back" onPress={handleBack} />
+                <View style={styles.buttonSpacer} />
+                {isLoading ? (
+                  <ActivityIndicator />
+                ) : (
+                  <Button
+                    label="Create Account"
+                    onPress={handleRegister}
+                    disabled={!confirmSaved}
+                  />
+                )}
+              </View>
             </View>
-          </View>
-        )}
-      </View>
-    </ScrollView>
+          )}
+
+          {step === "login" && (
+            <View style={styles.content}>
+              <Text style={styles.title}>Log In</Text>
+              <Text style={styles.description}>
+                Enter your recovery passphrase to log in.
+              </Text>
+              <TextInput
+                style={styles.passphraseInput}
+                value={loginPassphrase}
+                onChangeText={setLoginPassphrase}
+                placeholder="Enter your passphrase"
+                multiline
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
+              <View style={styles.buttonRow}>
+                <Button label="Back" onPress={handleBack} />
+                <View style={styles.buttonSpacer} />
+                {isLoading ? (
+                  <ActivityIndicator />
+                ) : (
+                  <Button
+                    label="Log In"
+                    onPress={handleLoginSubmit}
+                    testID="login-submit-button"
+                  />
+                )}
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
+  keyboardAvoid: {
+    flex: 1,
+  },
   container: {
     flexGrow: 1,
     justifyContent: "center",

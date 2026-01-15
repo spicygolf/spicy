@@ -1,7 +1,11 @@
 name: E2E Tests
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: true
+
 on:
-  # Manual trigger for now - E2E tests are slow and expensive
+  # Manual trigger
   workflow_dispatch:
     inputs:
       platform:
@@ -14,26 +18,134 @@ on:
           - android
           - both
 
-  # Optionally run on main branch pushes (commented out by default)
-  # push:
-  #   branches: [main]
+  # Run on pull requests when labeled
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, labeled]
 
 jobs:
-  e2e-ios:
-    name: E2E Tests (iOS)
-    if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both' }}
-    runs-on: macos-latest
+  # ============================================================================
+  # iOS Build & Test Job
+  # ============================================================================
+  ios:
+    name: iOS
+    if: ${{ (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e')) || github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both' }}
+    runs-on: warp-macos-26-arm64-6x
     environment: dev
+    env:
+      IOS_SIMULATOR_DEVICE: "iPhone 17 Pro"
+      USE_CCACHE: 1
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Select Xcode
+        run: |
+          ls -d /Applications/Xcode*.app 2>/dev/null || true
+          xcodebuild -version
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
+
+      - name: Install ccache
+        run: brew install ccache
+
+      - name: Restore ccache
+        uses: WarpBuilds/cache/restore@v1
+        with:
+          path: ~/Library/Caches/ccache
+          key: ccache-ios-${{ runner.os }}
+          restore-keys: |
+            ccache-ios-
+
+      - name: Configure ccache
+        run: |
+          ccache --set-config=max_size=2G
+          ccache --zero-stats
+
+      - name: Create output directory
+        run: mkdir -p /tmp/e2e-output
 
       - name: Install dependencies
         run: bun install
 
+      - name: Create app .env file
+        run: |
+          cat > packages/app/.env << EOF
+          DEV_API_HOST=
+          JAZZ_API_KEY=${{ secrets.JAZZ_API_KEY }}
+          JAZZ_WORKER_ACCOUNT=${{ secrets.JAZZ_WORKER_ACCOUNT }}
+          POSTHOG_API_KEY=${{ secrets.POSTHOG_API_KEY }}
+          POSTHOG_HOST=${{ vars.POSTHOG_HOST }}
+          EOF
+
+      - name: Restore CocoaPods cache
+        id: pods-cache
+        uses: WarpBuilds/cache/restore@v1
+        with:
+          path: |
+            packages/app/ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: pods-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock') }}
+          restore-keys: |
+            pods-${{ runner.os }}-
+
+      - name: Install CocoaPods
+        working-directory: packages/app
+        run: bun pods
+
+      - name: Save CocoaPods cache
+        if: always()
+        uses: WarpBuilds/cache/save@v1
+        with:
+          path: |
+            packages/app/ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: pods-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock') }}
+
+      - name: Restore iOS DerivedData cache
+        id: deriveddata-cache
+        uses: WarpBuilds/cache/restore@v1
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e
+          key: ios-deriveddata-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock', 'packages/app/ios/spicygolf.xcodeproj/project.pbxproj') }}
+          restore-keys: |
+            ios-deriveddata-${{ runner.os }}-
+
+      - name: Make scripts executable
+        run: chmod +x tests/e2e/scripts/*.sh
+
+      - name: Build iOS App
+        run: ./tests/e2e/scripts/build-ios.sh
+        env:
+          IOS_SIMULATOR_DEVICE: ${{ env.IOS_SIMULATOR_DEVICE }}
+
+      - name: Save ccache
+        if: always()
+        uses: WarpBuilds/cache/save@v1
+        with:
+          path: ~/Library/Caches/ccache
+          key: ccache-ios-${{ runner.os }}
+
+      - name: Save iOS DerivedData cache
+        if: always()
+        uses: WarpBuilds/cache/save@v1
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e
+          key: ios-deriveddata-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock', 'packages/app/ios/spicygolf.xcodeproj/project.pbxproj') }}
+
+      - name: Upload Build Logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ios-build-logs
+          path: /tmp/e2e-output/ios-build.log
+          retention-days: 5
+
+      # ---- Test Phase ----
       - name: Install Maestro
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
@@ -41,21 +153,13 @@ jobs:
 
       - name: Start iOS Simulator
         run: |
-          # List available simulators and boot one
           xcrun simctl list devices available
-          # Boot iPhone 15 Pro (adjust as needed)
-          xcrun simctl boot "iPhone 15 Pro" || true
-          # Wait for simulator to be ready
-          xcrun simctl bootstatus "iPhone 15 Pro" -b
-
-      - name: Build iOS App
-        working-directory: packages/app
-        run: |
-          bun run ios --configuration Release --simulator "iPhone 15 Pro"
+          xcrun simctl boot "${{ env.IOS_SIMULATOR_DEVICE }}" || true
+          xcrun simctl bootstatus "${{ env.IOS_SIMULATOR_DEVICE }}" -b
 
       - name: Run E2E Tests
-        run: |
-          maestro test tests/e2e/flows/ --format junit --output e2e-results.xml
+        id: test_ios
+        run: ./tests/e2e/scripts/test-ios.sh
         env:
           TEST_PASSPHRASE: ${{ secrets.E2E_TEST_PASSPHRASE }}
 
@@ -63,14 +167,24 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: e2e-results-ios
-          path: e2e-results.xml
+          name: spicy-ios-output
+          path: |
+            /tmp/e2e-output/*.log
+            /tmp/e2e-output/*.xml
+            /tmp/e2e-output/screenshots/
+          retention-days: 5
 
-  e2e-android:
-    name: E2E Tests (Android)
-    if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both' }}
-    runs-on: ubuntu-latest
+  # ============================================================================
+  # Android Build & Test Job
+  # ============================================================================
+  android:
+    name: Android
+    if: ${{ (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e')) || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both' }}
+    runs-on: warp-ubuntu-latest-x64-4x
     environment: dev
+    env:
+      EMULATOR_API_LEVEL: 34
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,9 +198,86 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK 28.2.x
+        run: |
+          sdkmanager --install "ndk;28.2.13676358"
+
+      - name: Create output directory
+        run: mkdir -p /tmp/e2e-output
+
       - name: Install dependencies
         run: bun install
 
+      - name: Create app .env file
+        run: |
+          cat > packages/app/.env << EOF
+          DEV_API_HOST=
+          JAZZ_API_KEY=${{ secrets.JAZZ_API_KEY }}
+          JAZZ_WORKER_ACCOUNT=${{ secrets.JAZZ_WORKER_ACCOUNT }}
+          POSTHOG_API_KEY=${{ secrets.POSTHOG_API_KEY }}
+          POSTHOG_HOST=${{ vars.POSTHOG_HOST }}
+          EOF
+
+      - name: Restore Gradle cache
+        id: gradle-cache
+        uses: WarpBuilds/cache/restore@v1
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Restore Android Build cache
+        id: android-build-cache
+        uses: WarpBuilds/cache/restore@v1
+        with:
+          path: |
+            packages/app/android/.gradle
+            packages/app/android/app/build
+            packages/app/android/build
+          key: android-build-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle.properties') }}
+          restore-keys: |
+            android-build-${{ runner.os }}-
+
+      - name: Make scripts executable
+        run: chmod +x tests/e2e/scripts/*.sh
+
+      - name: Build Android App
+        run: ./tests/e2e/scripts/build-android.sh
+
+      - name: Save Gradle cache
+        if: always()
+        uses: WarpBuilds/cache/save@v1
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle-wrapper.properties') }}
+
+      - name: Save Android Build cache
+        if: always()
+        uses: WarpBuilds/cache/save@v1
+        with:
+          path: |
+            packages/app/android/.gradle
+            packages/app/android/app/build
+            packages/app/android/build
+          key: android-build-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle.properties') }}
+
+      - name: Upload Build Logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: android-build-logs
+          path: /tmp/e2e-output/android-build.log
+          retention-days: 5
+
+      # ---- Test Phase ----
       - name: Install Maestro
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
@@ -98,20 +289,49 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Start Android Emulator
+      - name: Restore AVD cache
+        id: avd-cache
+        uses: WarpBuilds/cache/restore@v1
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-pixel6-${{ env.EMULATOR_API_LEVEL }}
+
+      - name: Create AVD and Generate Snapshot for Caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          api-level: ${{ env.EMULATOR_API_LEVEL }}
           arch: x86_64
           profile: pixel_6
-          script: |
-            # Build Android app
-            cd packages/app
-            bun run android --mode release
+          disk-size: 8G
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
 
-            # Run E2E tests
-            cd ../..
-            maestro test tests/e2e/flows/ --format junit --output e2e-results.xml
+      - name: Save AVD cache
+        if: always()
+        uses: WarpBuilds/cache/save@v1
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-pixel6-${{ env.EMULATOR_API_LEVEL }}
+
+      - name: Run E2E Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        id: test_android
+        with:
+          api-level: ${{ env.EMULATOR_API_LEVEL }}
+          arch: x86_64
+          profile: pixel_6
+          disk-size: 8G
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
+          disable-animations: true
+          script: ./tests/e2e/scripts/test-android.sh
         env:
           TEST_PASSPHRASE: ${{ secrets.E2E_TEST_PASSPHRASE }}
 
@@ -119,5 +339,9 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: e2e-results-android
-          path: e2e-results.xml
+          name: spicy-android-output
+          path: |
+            /tmp/e2e-output/*.log
+            /tmp/e2e-output/*.xml
+            /tmp/e2e-output/screenshots/
+          retention-days: 5

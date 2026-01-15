@@ -14,8 +14,21 @@ interface PostHogProviderProps {
  * - Error tracking (uncaught exceptions, unhandled rejections)
  * - Screen capture and touch tracking
  * - Network telemetry (iOS only)
+ *
+ * If POSTHOG_API_KEY is not set, PostHog is disabled and children are rendered directly.
  */
 export function PostHogProvider({ children }: PostHogProviderProps) {
+  // Skip PostHog if API key is not configured (e.g., in CI/E2E tests)
+  if (!POSTHOG_API_KEY) {
+    if (!__DEV__) {
+      console.warn(
+        "PostHog analytics disabled: POSTHOG_API_KEY not set. " +
+          "This is expected in E2E tests but not in production builds.",
+      );
+    }
+    return <>{children}</>;
+  }
+
   return (
     <PHProvider
       apiKey={POSTHOG_API_KEY}

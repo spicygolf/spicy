@@ -38,6 +38,8 @@ export function SpecListItem({
       )}
       <Pressable
         style={styles.pressable}
+        testID={`spec-${spec.name.toLowerCase().replace(/\s+/g, "-")}`}
+        accessibilityLabel={spec.name}
         onPress={async () => {
           const game = await createGame(spec.name, [spec]);
           if (!game) return;
