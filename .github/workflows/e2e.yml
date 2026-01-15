@@ -25,10 +25,10 @@ on:
 
 jobs:
   # ============================================================================
-  # iOS Build Job
+  # iOS Build & Test Job
   # ============================================================================
-  build-ios:
-    name: Build iOS
+  ios:
+    name: iOS
     if: ${{ (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e')) || github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both' }}
     runs-on: warp-macos-26-arm64-6x
     environment: dev
@@ -104,8 +104,6 @@ jobs:
             ~/Library/Caches/CocoaPods
           key: pods-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock') }}
 
-      # Cache the entire DerivedData directory for incremental builds
-      # Key uses only critical build config files, not all source
       - name: Restore iOS DerivedData cache
         id: deriveddata-cache
         uses: WarpBuilds/cache/restore@v1
@@ -119,7 +117,6 @@ jobs:
       - name: Make scripts executable
         run: chmod +x tests/e2e/scripts/*.sh
 
-      # Always run build - Xcode will do incremental compilation
       - name: Build iOS App
         run: ./tests/e2e/scripts/build-ios.sh
         env:
@@ -140,13 +137,6 @@ jobs:
             ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e
           key: ios-deriveddata-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock', 'packages/app/ios/spicygolf.xcodeproj/project.pbxproj') }}
 
-      - name: Upload iOS Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-app-build
-          path: ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e/Build/Products/Debug-iphonesimulator/spicygolf.app
-          retention-days: 1
-
       - name: Upload Build Logs
         uses: actions/upload-artifact@v4
         if: failure()
@@ -155,49 +145,17 @@ jobs:
           path: /tmp/e2e-output/ios-build.log
           retention-days: 5
 
-  # ============================================================================
-  # iOS Test Job
-  # ============================================================================
-  test-ios:
-    name: Test iOS
-    needs: build-ios
-    runs-on: warp-macos-26-arm64-6x
-    environment: dev
-    env:
-      IOS_SIMULATOR_DEVICE: "iPhone 17 Pro"
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-
-      - name: Create output directory
-        run: mkdir -p /tmp/e2e-output
-
-      - name: Install dependencies
-        run: bun install
-
+      # ---- Test Phase ----
       - name: Install Maestro
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
-
-      - name: Download iOS Build
-        uses: actions/download-artifact@v4
-        with:
-          name: ios-app-build
-          path: ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e/Build/Products/Debug-iphonesimulator/spicygolf.app
 
       - name: Start iOS Simulator
         run: |
           xcrun simctl list devices available
           xcrun simctl boot "${{ env.IOS_SIMULATOR_DEVICE }}" || true
           xcrun simctl bootstatus "${{ env.IOS_SIMULATOR_DEVICE }}" -b
-
-      - name: Make scripts executable
-        run: chmod +x tests/e2e/scripts/*.sh
 
       - name: Run E2E Tests
         id: test_ios
@@ -217,13 +175,15 @@ jobs:
           retention-days: 5
 
   # ============================================================================
-  # Android Build Job
+  # Android Build & Test Job
   # ============================================================================
-  build-android:
-    name: Build Android
+  android:
+    name: Android
     if: ${{ (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e')) || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both' }}
     runs-on: warp-ubuntu-latest-x64-4x
     environment: dev
+    env:
+      EMULATOR_API_LEVEL: 34
 
     steps:
       - name: Checkout code
@@ -272,8 +232,6 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      # Cache the entire build directory for incremental builds
-      # Key uses only Gradle config, not all source files
       - name: Restore Android Build cache
         id: android-build-cache
         uses: WarpBuilds/cache/restore@v1
@@ -289,7 +247,6 @@ jobs:
       - name: Make scripts executable
         run: chmod +x tests/e2e/scripts/*.sh
 
-      # Always run build - Gradle will do incremental compilation
       - name: Build Android App
         run: ./tests/e2e/scripts/build-android.sh
 
@@ -312,13 +269,6 @@ jobs:
             packages/app/android/build
           key: android-build-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle.properties') }}
 
-      - name: Upload Android Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-app-build
-          path: packages/app/android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 1
-
       - name: Upload Build Logs
         uses: actions/upload-artifact@v4
         if: failure()
@@ -327,39 +277,7 @@ jobs:
           path: /tmp/e2e-output/android-build.log
           retention-days: 5
 
-  # ============================================================================
-  # Android Test Job
-  # ============================================================================
-  test-android:
-    name: Test Android
-    needs: build-android
-    runs-on: warp-ubuntu-latest-x64-4x
-    environment: dev
-    env:
-      EMULATOR_API_LEVEL: 34
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Create output directory
-        run: mkdir -p /tmp/e2e-output
-
-      - name: Install dependencies
-        run: bun install
-
+      # ---- Test Phase ----
       - name: Install Maestro
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
@@ -401,15 +319,6 @@ jobs:
             ~/.android/avd/*
             ~/.android/adb*
           key: avd-pixel6-${{ env.EMULATOR_API_LEVEL }}
-
-      - name: Download Android Build
-        uses: actions/download-artifact@v4
-        with:
-          name: android-app-build
-          path: packages/app/android/app/build/outputs/apk/debug
-
-      - name: Make scripts executable
-        run: chmod +x tests/e2e/scripts/*.sh
 
       - name: Run E2E Tests
         uses: reactivecircus/android-emulator-runner@v2
