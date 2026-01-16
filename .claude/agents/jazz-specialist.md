@@ -48,27 +48,7 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    }
    ```
 
-3. **Level-by-Level List Loading**
-   - CoLists must be loaded explicitly at each level
-   - Nested $each does NOT load the list itself
-   ```typescript
-   // WRONG - $each doesn't load teams list
-   await hole.$jazz.ensureLoaded({
-     resolve: {
-       teams: {
-         $each: { players: true }
-       }
-     }
-   });
-   
-   // CORRECT - load each level
-   await hole.teams.$jazz.ensureLoaded({});
-   for (const team of hole.teams) {
-     await team.$jazz.ensureLoaded({ resolve: { players: true } });
-   }
-   ```
-
-4. **Creating CoMaps with Optional Fields**
+3. **Creating CoMaps with Optional Fields**
    - Pass only required fields to `.create()`
    - Set optional fields AFTER creation
    ```typescript
