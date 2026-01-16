@@ -263,7 +263,7 @@ if (catalogPlayers.$jazz.has(ghinId)) {
 
 // CORRECT
 const player = catalogPlayers[ghinId];
-if (player.$isLoaded) {
+if (player?.$isLoaded) {
   // Use player
 }
 ```

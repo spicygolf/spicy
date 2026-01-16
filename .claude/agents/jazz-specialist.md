@@ -139,7 +139,7 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    const game = useCoState(Game, props.gameId, {
      resolve: { course: true }
    });
-   const courseId = game.course.$jazz.id;
+   const courseId = game.course?.$jazz.id;
    // Can pass `courseId` to a child component as needed.
    ```
 
@@ -229,7 +229,7 @@ export const Handicap = co.map({
 // 2. Add to parent entity (if needed)
 export const Player = co.map({
   // ... existing fields
-  handicap = co.optional(Handicap);
+  handicap: co.optional(Handicap);
 });
 
 // 3. Document loading pattern
