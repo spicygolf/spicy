@@ -63,11 +63,7 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    const game = useCoState(Game, gameId, {
      resolve: { rounds: { $each: { round: { course: true } } } },
      select: (g) => {
-       if (!g.$isLoaded || !g.rounds?.$isLoaded) return undefined;
-       for (const rtg of g.rounds) {
-         if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) return undefined;
-       }
-       return g; // Only return when fully loaded
+       return g.$isLoaded ? g : undefined;
      }
    });
    ```
@@ -90,7 +86,7 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    });
    const currentHole = useCoState(GameHole, currentHoleId, {
      resolve: { teams: { $each: { rounds: { $each: true } } } },
-     select: (h) => h.$isLoaded && h.teams?.$isLoaded ? h : null
+     select: (h) => h.$isLoaded ? h : null
    });
    ```
 
