@@ -136,7 +136,7 @@ NEVER store Jazz CoValues (Game, Player, etc.) in React state (useState, useCont
 const [game, setGame] = useState<Game | null>(null);
 
 useEffect(() => {
-  if (game.$isLoaded) {
+  if (game?.$isLoaded) {
     setGame(game); // Triggers re-render on every nested data load
   }
 }, [game]);
