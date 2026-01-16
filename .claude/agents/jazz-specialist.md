@@ -48,25 +48,6 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    }
    ```
 
-3. **Creating CoMaps with Optional Fields**
-   - Pass only required fields to `.create()`
-   - Set optional fields AFTER creation
-   ```typescript
-   // WRONG - causes "right operand of 'in' is not an object"
-   const scope = GameScope.create({
-     holes: "all18",
-     teamsConfig: someTeamsConfig,  // ERROR!
-   }, { owner });
-   
-   // CORRECT
-   const scope = GameScope.create({
-     holes: "all18",
-   }, { owner });
-   if (teamsConfig) {
-     scope.$jazz.set("teamsConfig", teamsConfig);
-   }
-   ```
-
 **CRITICAL - PERFORMANCE PATTERNS:**
 
 1. **NEVER Store Jazz Objects in React State**
