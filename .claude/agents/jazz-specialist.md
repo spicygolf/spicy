@@ -37,9 +37,10 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
 
 2. **ensureLoaded After upsertUnique**
    - upsertUnique returns partially loaded objects
+   - Use a resolve query to 
    - Always ensureLoaded before checking optional fields
    ```typescript
-   player = await Player.upsertUnique({ value, unique, owner });
+   const player = await Player.upsertUnique({ value, unique, owner });
    const loaded = await player.$jazz.ensureLoaded({ 
      resolve: { rounds: true } 
    });
