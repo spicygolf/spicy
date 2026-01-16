@@ -136,7 +136,7 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    const GameComponent = (props: { 
      gameId: string
    }) {
-   const game = useCoState(Game, gameId, {
+   const game = useCoState(Game, props.gameId, {
      resolve: { course: true }
    });
    const courseId = game.course.$jazz.id;
@@ -270,7 +270,7 @@ const { game } = useCoState(Game, gameId, {
 
 // Good: Load minimally
 const Game = (props: { gameId: ID<typeof Game> }) => {
-  const game = useCoState(Game, gameId, {
+  const game = useCoState(Game, props.gameId, {
     resolve: { course: true, players: true }  // Just course name and player list
   });
   const [showPlayerList, setShowPlayerList] = useState(false);
@@ -286,7 +286,7 @@ const Game = (props: { gameId: ID<typeof Game> }) => {
 
 // Then load each player when viewing scores
 const PlayerList = (props: { playerListId: ID<typeof ListOfPlayers> }) => {
-  const playerList = useCoState(ListOfPlayers, playerListId, {
+  const playerList = useCoState(ListOfPlayers, props.playerListId, {
     resolve: {
       $each: true
     }

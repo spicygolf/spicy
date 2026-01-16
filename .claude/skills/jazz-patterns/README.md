@@ -79,7 +79,7 @@ Use `ensureLoaded` only for:
 
 ```typescript
 // APPROPRIATE - After upsertUnique
-player = await Player.upsertUnique({ value, unique, owner });
+const player = await Player.upsertUnique({ value, unique, owner });
 const loaded = await player.$jazz.ensureLoaded({ resolve: { rounds: true } });
 if (!loaded.$jazz.has("rounds")) {
   // safe to initialize
@@ -90,6 +90,8 @@ const { tracks } = await playlist.$jazz.ensureLoaded({
   resolve: PlaylistWithTracks.resolveQuery,
 });
 ```
+
+**NEVER** use `ensureLoaded` to load an existing CoValue instance more deeply, but to instantiate a new CoValue loaded to the correct depth.
 
 ---
 
@@ -110,61 +112,13 @@ if (root) {
 
 // CORRECT
 const root = me.root;
-if (!root?.$isLoaded) {
-  await root.$jazz.ensureLoaded({});
+if (!root.$isLoaded) {
+  // THIS IS NOT RECOVERABLE. Initialize root to the required depth if appropriate, or load a new instance of root with the required depth.
+  console.log('Root is not loaded:', root.$jazz.loadingState);
 }
 if (root.$isLoaded) {
   root.$jazz.set("player", player); // OK: TypeScript knows root is loaded
 }
-```
-
----
-
-## Lazy Loading Lists Level-by-Level
-
-**Severity**: CRITICAL | **Enforcement**: BLOCKING
-
-When using `ensureLoaded` for progressive deepening, nested `$each` does NOT automatically load list containers at each level.
-
-**Important distinction:**
-- **Initial `.load()` or `useCoState` with resolve queries** → DOES load lists at each level correctly
-- **Progressive `ensureLoaded` on already-loaded objects** → does NOT load list containers, only items if container is already loaded
-
-**Rationale**: When progressively loading with `ensureLoaded`, nested `$each` won't load the list containers themselves. You must explicitly load each list level.
-
-```typescript
-// WRONG - $each in ensureLoaded won't load teams list if not already loaded!
-await hole.$jazz.ensureLoaded({
-  resolve: {
-    teams: {
-      $each: {
-        rounds: { $each: { roundToGame: true } }
-      }
-    }
-  }
-});
-
-// CORRECT for ensureLoaded - Load level by level
-await hole.teams.$jazz.ensureLoaded({});  // Load teams list
-for (const team of hole.teams) {
-  await team.$jazz.ensureLoaded({});  // Load team object
-  await team.rounds.$jazz.ensureLoaded({});  // Load rounds list
-  for (const round of team.rounds) {
-    await round.$jazz.ensureLoaded({ resolve: { roundToGame: true } });
-  }
-}
-
-// CORRECT - Initial load with resolve query DOES work
-const hole = await GameHole.load(holeId, {
-  resolve: {
-    teams: {
-      $each: {
-        rounds: { $each: { roundToGame: true } }
-      }
-    }
-  }
-});
-// hole.teams and nested data ARE loaded
 ```
 
 ---
@@ -175,14 +129,14 @@ const hole = await GameHole.load(holeId, {
 
 NEVER store Jazz CoValues (Game, Player, etc.) in React state (useState, useContext). Store IDs instead.
 
-**Rationale**: Jazz objects are reactive and update references as nested data loads. Storing them in React state causes excessive re-renders (20-40+).
+**Rationale**: Jazz objects are reactive and update references as nested data loads. Storing them in React state causes excessive re-renders.
 
 ```typescript
 // WRONG - Causes 24+ re-renders!
 const [game, setGame] = useState<Game | null>(null);
 
 useEffect(() => {
-  if (game?.$isLoaded) {
+  if (game.$isLoaded) {
     setGame(game); // Triggers re-render on every nested data load
   }
 }, [game]);
@@ -194,7 +148,7 @@ const [gameId, setGameId] = useState<string | null>(null);
 const game = useCoState(Game, gameId || "", { resolve: {...} });
 ```
 
-**Performance Impact**: 24+ re-renders -> 1 render (55% faster perceived loading)
+**Performance Impact**: significant depending on the depth of the Jazz object and the number of nested data loads.
 
 ---
 
@@ -214,20 +168,19 @@ const isMeInGame = useMemo(() => {
 
 // CORRECT - compute directly, Jazz reactivity handles updates
 const isMeInGame = (() => {
-  if (!game?.$isLoaded || !game.players?.$isLoaded) return false;
-  return game.players.some(p => p?.$isLoaded && p.$jazz.id === myId);
+  if (!game.$isLoaded) return false;
+  return game.players.some(p => p.$isLoaded && p.$jazz.id === myId);
 })();
 
 // WRONG - useEffect fighting Jazz reactivity
 useEffect(() => {
-  if (game?.$isLoaded) {
-    setPlayerCount(game.players?.length || 0);
+  if (game.$isLoaded) {
+    setPlayerCount(game.players.length || 0);
   }
 }, [game]);
 
 // CORRECT - derive directly from Jazz data
-const playerCount = game?.$isLoaded && game.players?.$isLoaded 
-  ? game.players.length 
+const playerCount = game.$isLoaded ? game.players.length 
   : 0;
 ```
 
@@ -263,17 +216,14 @@ const { game } = useGame(undefined, {
 // CORRECT - Shallow in parent, deep in children
 const { game } = useGame(undefined, {
   resolve: {
-    players: { $each: { rounds: { $each: {} } } },
+    players: { $each: { rounds: { $each: true } } },
   },
 });
 
 // Child component loads its own data
-function RoundDetails({ round }) {
-  useEffect(() => {
-    if (round?.$isLoaded) {
-      round.$jazz.ensureLoaded({ resolve: { course: true, tee: true } });
-    }
-  }, [round]);
+function RoundDetails(props: { roundId: string }) {
+  const round = useCoState(Round, props.roundId, { resolve: { course: true, tee: true } });
+  // ...
 }
 ```
 
@@ -303,15 +253,17 @@ rtg.$jazz.delete("courseHandicap");
 
 **Severity**: CRITICAL | **Enforcement**: BLOCKING
 
-For CoRecord maps (`co.record()`), use direct access `map[key]` and check null/undefined. Do NOT use `$jazz.has(key)`.
+For CoRecord maps (`co.record()`), use direct access `map[key]` and check null/undefined. Do NOT use `$jazz.has(key)` except strictly to check if a key exists.
 
 ```typescript
 // WRONG
-if (catalogPlayers.$jazz.has(ghinId)) { ... }
+if (catalogPlayers.$jazz.has(ghinId)) { 
+  // we only know that catalogPlayers has a key `ghinId`. We do not know if it's loaded/accessible/etc.
+}
 
 // CORRECT
 const player = catalogPlayers[ghinId];
-if (player) {
+if (player.$isLoaded) {
   // Use player
 }
 ```
@@ -371,6 +323,8 @@ const taskStats = useCoState(TaskList, listId, {
 });
 ```
 
+**Performance note**: Avoid any non-trivial computations in the `select` function.
+
 ### equalityFn for Complex Data
 
 By default, Jazz uses `Object.is` for equality. Use custom `equalityFn` for complex data:
@@ -381,8 +335,8 @@ const game = useCoState(Game, gameId, {
   select: (game) => {
     if (!game.$isLoaded) return null;
     return {
-      playerIds: game.players?.map(p => p?.$jazz.id).filter(Boolean) ?? [],
-      playerCount: game.players?.length ?? 0,
+      playerIds: game.players.map(p => p.$jazz.id).filter(Boolean) ?? [],
+      playerCount: game.players.length ?? 0,
     };
   },
   // Only re-render if player IDs actually change
@@ -483,30 +437,6 @@ const playerColumns = useMemo((): PlayerColumn[] => {
 }, [playerColumnsFingerprint, game]);
 ```
 
-**When to use fingerprints:**
-- When you need `useMemo` for expensive computations on Jazz data
-- When the computation accesses nested/deep Jazz fields
-- When biome complains about exhaustive dependencies
-
-**Alternative**: Consider using Jazz's `select` option instead, which handles this automatically:
-
-```typescript
-// Alternative: Let Jazz handle it with select
-const { playerColumns, holeRows } = useGame(undefined, {
-  resolve: { players: { $each: { name: true } }, rounds: { $each: { round: { tee: { holes: true } } } } },
-  select: (game) => {
-    if (!game.$isLoaded) return { playerColumns: [], holeRows: [] };
-    return {
-      playerColumns: getPlayerColumns(game),
-      holeRows: getHoleRows(game),
-    };
-  },
-  equalityFn: (a, b) => 
-    JSON.stringify(a.playerColumns) === JSON.stringify(b.playerColumns) &&
-    JSON.stringify(a.holeRows) === JSON.stringify(b.holeRows),
-});
-```
-
 ---
 
 ## Modify Entities from Authoritative Source
@@ -521,30 +451,8 @@ const { player } = route.params;
 player.rounds.$jazz.push(newRound);
 
 // CORRECT - Get fresh reference
-const gamePlayer = game.players.find(p => p?.$jazz.id === player.$jazz.id);
+const gamePlayer = game.players.find(p => p.$jazz.id === player.$jazz.id);
 gamePlayer.rounds.$jazz.push(newRound);
-```
-
----
-
-## Creating CoMaps with Optional Fields
-
-**Severity**: HIGH | **Enforcement**: STRICT
-
-Pass only required fields to `.create()`. Set optional fields AFTER creation.
-
-```typescript
-// WRONG - Can't pass CoMap instances in create
-const scope = GameScope.create({
-  holes: "all18",
-  teamsConfig: someTeamsConfig,  // ERROR!
-}, { owner: group });
-
-// CORRECT
-const scope = GameScope.create({ holes: "all18" }, { owner: group });
-if (teamsConfig) {
-  scope.$jazz.set("teamsConfig", teamsConfig);
-}
 ```
 
 ---
