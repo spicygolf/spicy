@@ -192,8 +192,8 @@ export const Game = co.map({
   name: z.string(),
   date: z.string(),
   course: co.optional(Course),
-  players: ListOfPlayers;,
-  rounds: co.optional(ListOfRounds);
+  players: ListOfPlayers,
+  rounds: co.optional(ListOfRounds)
 });
 ```
 
