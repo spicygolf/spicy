@@ -66,7 +66,7 @@ jobs:
     name: Jazz Integration Tests
     needs: quality
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.fork != true
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     environment: dev
     steps:
       - name: Checkout code
