@@ -12,6 +12,6 @@ export interface GameSpec {
   type: string;
   max_players?: number;
   min_players?: number;
-  location_type: "local" | "remote";
+  location_type: "local" | "virtual";
   teams: boolean;
 }

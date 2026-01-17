@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
@@ -131,6 +131,14 @@ export function GameOptionsList() {
   const selectedOption = selectedOptionName
     ? (gameOptions.find((opt) => opt.name === selectedOptionName) ?? null)
     : null;
+
+  // Auto-clear modal state if the selected option no longer exists
+  useEffect(() => {
+    if (showModal && selectedOptionName && !selectedOption) {
+      setShowModal(false);
+      setSelectedOptionName(null);
+    }
+  }, [showModal, selectedOptionName, selectedOption]);
 
   if (gameOptions.length === 0) {
     return (
