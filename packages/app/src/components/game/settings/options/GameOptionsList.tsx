@@ -36,7 +36,9 @@ export function GameOptionsList() {
 
   const { isTeamsMode } = useTeamsMode(game);
 
-  const [selectedOption, setSelectedOption] = useState<GameOption | null>(null);
+  const [selectedOptionName, setSelectedOptionName] = useState<string | null>(
+    null,
+  );
   const [showModal, setShowModal] = useState(false);
 
   const saveOptionToGame = useSaveOptionToGame(game);
@@ -105,25 +107,30 @@ export function GameOptionsList() {
   );
 
   const handleOptionPress = useCallback((option: GameOption) => {
-    setSelectedOption(option);
+    setSelectedOptionName(option.name);
     setShowModal(true);
   }, []);
 
   const handleOptionSelect = useCallback(
     (value: string) => {
-      if (!selectedOption) {
+      if (!selectedOptionName) {
         return;
       }
 
-      saveOptionToGame(selectedOption.name, value);
+      saveOptionToGame(selectedOptionName, value);
     },
-    [selectedOption, saveOptionToGame],
+    [selectedOptionName, saveOptionToGame],
   );
 
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
-    setSelectedOption(null);
+    setSelectedOptionName(null);
   }, []);
+
+  // Look up the selected option from gameOptions by name
+  const selectedOption = selectedOptionName
+    ? (gameOptions.find((opt) => opt.name === selectedOptionName) ?? null)
+    : null;
 
   if (gameOptions.length === 0) {
     return (
