@@ -13,6 +13,9 @@
 5. **e1e5c7f** - feat(android): configure app links for passkey auth
 6. **8e5290b** - docs: add well-known files templates for passkey auth
 7. **86338a0** - refactor: remove old PassphraseAuthUI (replaced by AuthUI)
+8. **9e0a0e2** - docs: update progress file for passkey migration
+9. **a1357f8** - fix: pass undefined instead of empty string to useCoState
+10. **d6c4925** - feat: add logout option to ErrorBoundary for stuck users
 
 ## What Was Done
 
@@ -42,10 +45,15 @@
 - Created `.well-known/apple-app-site-association` (needs TEAM_ID)
 - Created `.well-known/assetlinks.json` (needs SHA256 fingerprint)
 - Created README with setup instructions
+- **Verified both files are being served at https://spicy.golf**
+
+### Bug Fixes
+- Fixed `useCoState` in GameContext passing empty string instead of undefined
+- Added "Log Out & Restart" option to ErrorBoundary for stuck users
 
 ## Next Steps (Manual)
 
-1. **Host well-known files** at `https://spicy.golf/.well-known/`:
+1. **Update well-known files** with actual values:
    - Replace `TEAM_ID` in apple-app-site-association
    - Replace `SHA256_FINGERPRINT_HERE` in assetlinks.json
    
@@ -53,6 +61,7 @@
    - Passkey signup/login with FaceID/TouchID
    - Passphrase fallback when passkey fails
    - Dev mode passphrase-only flow
+   - Error boundary logout recovery
 
 3. **Run pod install** after pulling this branch:
    ```bash
