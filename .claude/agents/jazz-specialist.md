@@ -35,58 +35,6 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    }
    ```
 
-2. **ensureLoaded After upsertUnique**
-   - upsertUnique returns partially loaded objects
-   - Always ensureLoaded before checking optional fields
-   ```typescript
-   player = await Player.upsertUnique({ value, unique, owner });
-   const loaded = await player.$jazz.ensureLoaded({ 
-     resolve: { rounds: true } 
-   });
-   if (!loaded.$jazz.has("rounds")) {
-     // Now safe to initialize
-   }
-   ```
-
-3. **Level-by-Level List Loading**
-   - CoLists must be loaded explicitly at each level
-   - Nested $each does NOT load the list itself
-   ```typescript
-   // WRONG - $each doesn't load teams list
-   await hole.$jazz.ensureLoaded({
-     resolve: {
-       teams: {
-         $each: { players: true }
-       }
-     }
-   });
-   
-   // CORRECT - load each level
-   await hole.teams.$jazz.ensureLoaded({});
-   for (const team of hole.teams) {
-     await team.$jazz.ensureLoaded({ resolve: { players: true } });
-   }
-   ```
-
-4. **Creating CoMaps with Optional Fields**
-   - Pass only required fields to `.create()`
-   - Set optional fields AFTER creation
-   ```typescript
-   // WRONG - causes "right operand of 'in' is not an object"
-   const scope = GameScope.create({
-     holes: "all18",
-     teamsConfig: someTeamsConfig,  // ERROR!
-   }, { owner });
-   
-   // CORRECT
-   const scope = GameScope.create({
-     holes: "all18",
-   }, { owner });
-   if (teamsConfig) {
-     scope.$jazz.set("teamsConfig", teamsConfig);
-   }
-   ```
-
 **CRITICAL - PERFORMANCE PATTERNS:**
 
 1. **NEVER Store Jazz Objects in React State**
@@ -115,11 +63,7 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    const game = useCoState(Game, gameId, {
      resolve: { rounds: { $each: { round: { course: true } } } },
      select: (g) => {
-       if (!g.$isLoaded || !g.rounds?.$isLoaded) return undefined;
-       for (const rtg of g.rounds) {
-         if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) return undefined;
-       }
-       return g; // Only return when fully loaded
+       return g.$isLoaded ? g : undefined;
      }
    });
    ```
@@ -142,7 +86,7 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    });
    const currentHole = useCoState(GameHole, currentHoleId, {
      resolve: { teams: { $each: { rounds: { $each: true } } } },
-     select: (h) => h.$isLoaded && h.teams?.$isLoaded ? h : null
+     select: (h) => h.$isLoaded ? h : null
    });
    ```
 
@@ -168,8 +112,8 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    ```
 
 2. **Data Ownership**
-   - Every CoMap needs an owner (Group or Account)
-   - CoLists inherit owner from parent CoMap
+   - Every CoValue needs an owning Group.
+   - By default, nested CoValues will have a new group which extends the parent group (so accesses will cascade).
    - Use consistent ownership patterns
    ```typescript
    const player = Player.create(data, { owner: gameGroup });
@@ -182,16 +126,21 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
 
 4. **Performance Considerations**
    - Don't load expensive nested data upfront
-   - Load on-demand when user needs it
    - Use minimal depth in resolve
+   - Pass IDs to child components
+   - Subscriptions are deduplicated and managed automatically by Jazz.
+   - Load on-demand when user needs it
+   
    ```typescript
    // Initial load - minimal
-   const { game } = useCoState(Game, gameId, {
+   const GameComponent = (props: { 
+     gameId: string
+   }) {
+   const game = useCoState(Game, props.gameId, {
      resolve: { course: true }
    });
-   
-   // On-demand when user views scores
-   await game.rounds.$jazz.ensureLoaded({});
+   const courseId = game.course?.$jazz.id;
+   // Can pass `courseId` to a child component as needed.
    ```
 
 ## Stack Requirements
@@ -201,63 +150,51 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
 - **Language**: TypeScript with Zod for schema validation
 
 ## Schema Patterns
+- Schema definitions are exported as constants from a schema module. Do NOT use classes.
+- Scalar fields are defined using Zod's `z.string()`, `z.number()`, etc.
+- Jazz's Collaborative fields are defined using the `co` exports from Jazz.
+- Optional fields are defined using either `z.optional()` or `co.optional()` depending on whether the field is defined using Zod or Jazz.
 
 ### Basic CoMap Schema
 ```typescript
-import { co, CoMap } from "jazz-tools";
+import { co } from "jazz-tools";
 import { z } from "zod";
 
-export class Player extends CoMap {
-  name = co.string;
-  email = co.string;
-  handicap = co.optional(co.number);
-  rounds = co.optional(ListOfRounds);
-  
-  static {
-    this.defineShape({ name: z.string(), email: z.string() });
-  }
-}
+export const Player = co.map({
+  name: z.string(),
+  email: z.string(),
+  handicap: z.optional(z.number()),
+  rounds: co.optional(ListOfRounds),
+});
 ```
 
 ### CoList Schema
 ```typescript
-import { CoList } from "jazz-tools";
+import { co } from "jazz-tools";
 
-export class ListOfPlayers extends CoList.Of(Player) {}
-export class ListOfRounds extends CoList.Of(Round) {}
+const ListOfPlayers = co.list(Player);
+const ListOfRounds = co.list(Round);
 ```
 
 ### Schema with References
 ```typescript
-export class Round extends CoMap {
-  playerId = co.string;  // String ID to avoid circular dependency
-  score = co.number;
-  date = co.string;
-  courseId = co.optional(co.string);
-  
-  static {
-    this.defineShape({ 
-      playerId: z.string(), 
-      score: z.number(),
-      date: z.string(),
-    });
-  }
-}
+const Round = co.map({
+  playerId: z.string(),  // String ID to avoid circular dependency
+  score: z.number(),
+  date: z.string(),
+  courseId: z.optional(z.string())
+});
 ```
 
 ### Nested Optional Structures
 ```typescript
-export class Game extends CoMap {
-  name = co.string;
-  date = co.string;
-  course = co.optional(Course);
-  players = ListOfPlayers;
-  rounds = co.optional(ListOfRounds);
-  
-  static {
-    this.defineShape({ name: z.string(), date: z.string() });
-  }
-}
+export const Game = co.map({
+  name: z.string(),
+  date: z.string(),
+  course: co.optional(Course),
+  players: ListOfPlayers,
+  rounds: co.optional(ListOfRounds)
+});
 ```
 
 ## What You Receive from Orchestrator
@@ -272,7 +209,7 @@ You receive:
 ## What You Return to Orchestrator
 
 Return ONLY:
-1. **Schema definitions**: CoMap and CoList classes
+1. **Schema definitions**: CoMap and CoList definitions
 2. **Loading patterns**: How to efficiently load data
 3. **Ownership patterns**: Which entities own which data
 4. **Migration path**: How to evolve existing schemas (if applicable)
@@ -283,28 +220,20 @@ Return ONLY:
 ### Adding New Entity
 ```typescript
 // 1. Define the CoMap
-export class Handicap extends CoMap {
-  value = co.number;
-  index = co.number;
-  calculatedDate = co.string;
-  
-  static {
-    this.defineShape({ 
-      value: z.number(), 
-      index: z.number(),
-      calculatedDate: z.string(),
-    });
-  }
-}
+export const Handicap = co.map({
+  value: z.number(),
+  index: z.number(),
+  calculatedDate: z.string(),
+});
 
 // 2. Add to parent entity (if needed)
-export class Player extends CoMap {
+export const Player = co.map({
   // ... existing fields
-  handicap = co.optional(Handicap);
-}
+  handicap: co.optional(Handicap);
+});
 
 // 3. Document loading pattern
-// Load with: player.$jazz.ensureLoaded({ resolve: { handicap: true } })
+// Load with: const playerWithHandicap = await player.$jazz.ensureLoaded({ resolve: { handicap: true } });
 ```
 
 ### Breaking Circular Dependencies
@@ -312,21 +241,21 @@ export class Player extends CoMap {
 // Problem: Team has players, Player has teams (circular!)
 
 // Solution: Use IDs in one direction
-export class TeamMembership extends CoMap {
-  playerId = co.string;  // String ID instead of Player reference
-  role = co.string;
-  joinedDate = co.string;
-}
+export const TeamMembership = co.map({
+  playerId: z.string(),
+  role: z.string(),
+  joinedDate: z.string(),
+});
 
-export class Team extends CoMap {
-  name = co.string;
-  memberships = ListOfMemberships;  // Has player IDs
-}
+export const Team = co.map({
+  name: z.string(),
+  memberships: ListOfMemberships;  // Has player IDs
+});
 
-export class Player extends CoMap {
-  name = co.string;
-  teams = co.optional(ListOfTeams);  // Can reference Team directly
-}
+export const Player = co.map({
+  name: z.string(),
+  teams: co.optional(ListOfTeams);  // Can reference Team directly
+});
 ```
 
 ### Optimizing Loading Performance
@@ -339,29 +268,51 @@ const { game } = useCoState(Game, gameId, {
   }
 });
 
-// Good: Load incrementally
-const { game } = useCoState(Game, gameId, {
-  resolve: { course: true }  // Just course name
-});
+// Good: Load minimally
+const Game = (props: { gameId: ID<typeof Game> }) => {
+  const game = useCoState(Game, props.gameId, {
+    resolve: { course: true, players: true }  // Just course name and player list
+  });
+  const [showPlayerList, setShowPlayerList] = useState(false);
+  if (!game.$isLoaded) return null;
+  return (
+    <div>
+      <button onClick={() => setShowPlayerList(!showPlayerList)}>Toggle Player List</button>
+      {showPlayerList && <PlayerList playerListId={game.players.$jazz.id} />}
+    </div>
+  );
+}
 
-// Then load players when viewing scores
-useEffect(() => {
-  if (showingScores && game?.players) {
-    game.players.$jazz.ensureLoaded({});
-  }
-}, [showingScores, game]);
+
+// Then load each player when viewing scores
+const PlayerList = (props: { playerListId: ID<typeof ListOfPlayers> }) => {
+  const playerList = useCoState(ListOfPlayers, props.playerListId, {
+    resolve: {
+      $each: true
+    }
+  });
+  if (!playerList.$isLoaded) return null;
+  return (
+    <div>
+      {playerList.map(player => (
+        <div key={player.$jazz.id}>{player.name}</div>
+      ))}
+    </div>
+  );
+}
 ```
 
 ## Schema Evolution
 
 When modifying existing schemas:
 
-1. **Adding optional fields**: Safe, just add `co.optional()`
+1. **Adding optional fields**: Safe, just add `co.optional()` or `z.optional()`
 2. **Adding required fields**: Need migration strategy
-3. **Removing fields**: Ensure no code references them
-4. **Changing types**: Requires data migration
+3. **Removing fields**: Ensure no code references them. AVOID.
+4. **Changing types**: Requires data migration. AVOID.
 
 Document migration path for orchestrator:
+
 ```markdown
 Migration required:
 1. Add new optional field
@@ -378,6 +329,7 @@ Before returning to orchestrator:
 3. **Loading patterns documented**: How to efficiently load data
 4. **TypeScript types**: Proper interfaces exported
 5. **Follows Jazz patterns**: All critical rules from jazz.xml
+6. **Proper use of ensureLoaded**: ensureLoaded returns a promise that must be awaited. It MUST *not* be used to load an existing CoValue instance more deeply, but to instantiate a new CoValue loaded to the correct depth.
 
 ## What to Flag
 
@@ -393,9 +345,9 @@ Immediately flag to orchestrator if you encounter:
 When data doesn't load as expected:
 
 1. Check `$isLoaded` - is object loaded?
-2. Check `$jazz.loadingState` - undefined = not tried yet
+2. Check `$jazz.loadingState` - `unavailable` = can't be found, `unauthorised` = can't access, `loading` = loading, `loaded` = loaded
 3. Check `$jazz.has("field")` - does field exist in DB?
-4. Verify ensureLoaded was awaited
+4. Verify ensureLoaded was awaited.
 5. Check if user has permissions (authorization)
 
 ### Jazz Inspect CLI Tool
