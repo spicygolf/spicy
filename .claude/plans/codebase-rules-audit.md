@@ -62,12 +62,14 @@ Common locations:
 
 #### Business Logic in Wrong Package
 
-| File | Lines | Issue |
-|------|-------|-------|
-| `packages/app/src/utils/gameTeams.ts` | 520+ | Team management logic should be in packages/lib |
-| `packages/app/src/utils/addPlayerToGameCore.ts` | 240 | Player addition logic should be in packages/lib |
-| `packages/app/src/utils/createRoundForPlayer.ts` | 80 | Round creation logic should be in packages/lib |
-| `packages/app/src/utils/reportError.ts` | 48 | Error reporting should be in packages/lib |
+| File | Lines | Issue | Status |
+|------|-------|-------|--------|
+| `packages/app/src/utils/gameTeams.ts` | 520+ | Team management logic | DEFERRED - Has app-specific reportError dependency |
+| `packages/app/src/utils/addPlayerToGameCore.ts` | 240 | Player addition logic | DEFERRED - Has app-specific reportError dependency |
+| `packages/app/src/utils/createRoundForPlayer.ts` | 80 | Round creation logic | DEFERRED - Has app-specific reportError dependency |
+| `packages/app/src/utils/reportError.ts` | 48 | Error reporting | N/A - Uses React Native Platform + app constants |
+
+**Note**: These files depend on `reportError` which uses React Native's `Platform` API and app-specific version constants. Moving to lib would require either removing error reporting or creating a dependency injection pattern for logging. This is lower priority than the Jazz pattern fixes.
 
 #### Legacy Code to Remove
 
