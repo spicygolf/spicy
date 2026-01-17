@@ -20,10 +20,10 @@ This audit reviews the codebase against the updated rules from PR #333 (commit 1
 
 | File | Line | Issue | Recommendation |
 |------|------|-------|----------------|
-| `packages/app/src/components/game/settings/options/GameOptionsList.tsx` | 39 | Stores Jazz `GameOption` in useState | Store ID instead: `useState<string \| null>` |
-| `packages/app/src/navigators/GameNavigator.tsx` | 97 | useEffect depends on `[game]` reactive object | Use `[game?.$jazz.id]` instead |
+| `packages/app/src/components/game/settings/options/GameOptionsList.tsx` | 39 | ✅ Fixed - now stores option name string |
+| `packages/app/src/navigators/GameNavigator.tsx` | 97 | ✅ Fixed - uses `[game?.$jazz.id]` |
 | `packages/app/src/contexts/GameContext.tsx` | 30-67 | Deep SCORING_RESOLVE at provider level (100+ objects) | Split into shallow parent + deep child components |
-| `packages/app/src/components/game/settings/teams/index.tsx` | 64 | useMemo depends on `[game]` not `[game?.$jazz.id]` | Change dependency to ID |
+| `packages/app/src/components/game/settings/teams/index.tsx` | 64 | ✅ Fixed - uses `[game?.$jazz.id]` |
 
 ### HIGH: TypeScript Standard Violations
 
@@ -43,8 +43,8 @@ This audit reviews the codebase against the updated rules from PR #333 (commit 1
 
 | File | Line | Status |
 |------|------|--------|
-| `packages/app/src/components/game/GameNav.tsx` | 58 | Fix |
-| `packages/web/vite.config.ts` | 5 | Fix |
+| `packages/app/src/components/game/GameNav.tsx` | 58 | ✅ Fixed |
+| `packages/web/vite.config.ts` | 5 | N/A - Vite requires default export |
 | `packages/app-0.4/src/components/TestGame.tsx` | 96 | Will be deleted |
 | `packages/app-0.4/src/components/GameList.tsx` | 99 | Will be deleted |
 | `packages/app-0.4/src/components/TestRound.tsx` | 55 | Will be deleted |
@@ -74,16 +74,16 @@ Common locations:
 | Directory | Lines | Action |
 |-----------|-------|--------|
 | `packages/app-0.3/` | ~3000 | KEEP - Used for reference/comparison |
-| `packages/app-0.4/` | ~4000 | DELETE - No longer needed |
+| `packages/app-0.4/` | ~4000 | ✅ DELETED |
 
 ### MEDIUM: Code Quality
 
 #### TODOs to Track as Issues
 
-| File | Line | TODO | Issue to Create |
-|------|------|------|-----------------|
-| `packages/lib/schema/players.ts` | 50 | "Consider removing once all round lookups use game.rounds + playerId pattern" | "Remove deprecated rounds field from Player schema" |
-| `packages/app/src/utils/addPlayerToGameCore.ts` | 232 | "Remove after all callers are updated to use AddPlayerInput" | "Remove legacy addPlayerToGame wrapper function" |
+| File | Line | TODO | Issue |
+|------|------|------|-------|
+| `packages/lib/schema/players.ts` | 50 | "Consider removing once all round lookups use game.rounds + playerId pattern" | ✅ [#335](https://github.com/spicygolf/spicy/issues/335) |
+| `packages/app/src/utils/addPlayerToGameCore.ts` | 232 | "Remove after all callers are updated to use AddPlayerInput" | ✅ [#336](https://github.com/spicygolf/spicy/issues/336) |
 
 ---
 
