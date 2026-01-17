@@ -3,12 +3,12 @@ import type { ViewStyle } from "react-native";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-type Props = {
+interface ScreenProps {
   children?: React.ReactNode;
   style?: ViewStyle;
-};
+}
 
-export function Screen({ children, style }: Props) {
+export function Screen({ children, style }: ScreenProps) {
   return <View style={[styles.v, style]}>{children}</View>;
 }
 

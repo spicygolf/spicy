@@ -1,10 +1,10 @@
-export type Game = {
+export interface Game {
   _type: string;
   name: string;
   start: string;
-};
+}
 
-export type GameSpec = {
+export interface GameSpec {
   _type: string;
   name: string;
   version: number;
@@ -14,4 +14,4 @@ export type GameSpec = {
   min_players?: number;
   location_type: "local" | "remote";
   teams: boolean;
-};
+}

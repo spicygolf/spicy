@@ -2,12 +2,12 @@ import { TouchableOpacity } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Text } from "./Text";
 
-type ButtonProps = {
+interface ButtonProps {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   testID?: string;
-};
+}
 
 export function Button({ label, onPress, disabled, testID }: ButtonProps) {
   return (

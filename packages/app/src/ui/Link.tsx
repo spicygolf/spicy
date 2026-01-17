@@ -13,36 +13,36 @@ type HrefName<ParamList extends ParamListBase> = {
   };
 }[keyof ParamList];
 
-type HrefPath = {
+interface HrefPath {
   path: string;
   name?: never;
   url?: never;
   params?: Record<string, unknown>;
-};
+}
 
-type HrefUrl = {
+interface HrefUrl {
   url: string;
   name?: never;
   path?: never;
   params?: never;
-};
+}
 
 export type Href<ParamList extends ParamListBase> =
   | HrefName<ParamList>
   | HrefPath
   | HrefUrl;
 
-type Props<ParamList extends ParamListBase> = {
+interface LinkProps<ParamList extends ParamListBase> {
   href: Href<ParamList>;
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
-};
+}
 
 export function Link<ParamList extends ParamListBase>({
   href,
   children,
   style,
-}: Props<ParamList>) {
+}: LinkProps<ParamList>) {
   const navigation = useNavigation<NavigationProp<ParamList>>();
   const linkTo = useLinkTo();
 

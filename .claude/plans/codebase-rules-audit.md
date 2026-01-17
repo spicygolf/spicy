@@ -22,7 +22,7 @@ This audit reviews the codebase against the updated rules from PR #333 (commit 1
 |------|------|-------|----------------|
 | `packages/app/src/components/game/settings/options/GameOptionsList.tsx` | 39 | ✅ Fixed - now stores option name string |
 | `packages/app/src/navigators/GameNavigator.tsx` | 97 | ✅ Fixed - uses `[game?.$jazz.id]` |
-| `packages/app/src/contexts/GameContext.tsx` | 30-67 | Deep SCORING_RESOLVE at provider level (100+ objects) | Split into shallow parent + deep child components |
+| `packages/app/src/contexts/GameContext.tsx` | 30-67 | Deep SCORING_RESOLVE at provider level | ✅ ACCEPTABLE - Intentional design to avoid "warming up" effect. Data shared by Leaderboard + Scoring screens. useScoreboard uses fingerprint pattern to prevent recomputation. |
 | `packages/app/src/components/game/settings/teams/index.tsx` | 64 | ✅ Fixed - uses `[game?.$jazz.id]` |
 
 ### HIGH: TypeScript Standard Violations
