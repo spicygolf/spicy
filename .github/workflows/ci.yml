@@ -61,10 +61,12 @@ jobs:
         run: bun test ./tests/integration/
 
   # Jazz integration tests - requires Jazz environment
+  # Note: Skipped for fork PRs since they don't have access to environment secrets
   jazz-tests:
     name: Jazz Integration Tests
     needs: quality
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     environment: dev
     steps:
       - name: Checkout code
@@ -87,7 +89,7 @@ jobs:
   claude-review:
     name: Claude Code Review
     needs: [unit-tests, fixture-tests, jazz-tests]
-    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+    if: always() && github.event_name == 'pull_request' && github.actor != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository && needs.unit-tests.result == 'success' && needs.fixture-tests.result == 'success' && (needs.jazz-tests.result == 'success' || needs.jazz-tests.result == 'skipped')
     runs-on: ubuntu-latest
     permissions:
       contents: read
