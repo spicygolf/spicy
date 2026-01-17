@@ -5,7 +5,7 @@ import { TouchableOpacity, View, type ViewStyle } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "./Text";
 
-type ButtonGroupProps = {
+interface ButtonGroupProps {
   buttons: {
     label?: string;
     iconName?: FontAwesome6SolidIconName;
@@ -13,7 +13,7 @@ type ButtonGroupProps = {
   }[];
   selectedIndex?: number;
   containerStyle?: ViewStyle;
-};
+}
 
 export function ButtonGroup({
   buttons,

@@ -67,7 +67,7 @@ const SCORING_RESOLVE = {
   },
 } as const;
 
-type GameContextType = {
+interface GameContextType {
   gameId: string | null;
   setGameId: (gameId: string | null) => void;
   currentHoleIndex: number;
@@ -80,13 +80,13 @@ type GameContextType = {
   scoringGame: Game | null;
   scoreboard: Scoreboard | null;
   scoringContext: ScoringContext | null;
-};
+}
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
-type GameProviderProps = {
+interface GameProviderProps {
   children: ReactNode;
-};
+}
 
 export function GameProvider({ children }: GameProviderProps) {
   const [gameId, setGameId] = useState<string | null>(null);

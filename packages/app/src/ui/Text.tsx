@@ -4,14 +4,19 @@ import type { StyleProp, TextStyle } from "react-native";
 import { Text as RNText } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-type Props = {
+interface TextProps {
   children?: React.ReactNode;
   style?: StyleProp<TextStyle>;
   numberOfLines?: number;
   ellipsizeMode?: "head" | "middle" | "tail" | "clip";
-};
+}
 
-export function Text({ children, style, numberOfLines, ellipsizeMode }: Props) {
+export function Text({
+  children,
+  style,
+  numberOfLines,
+  ellipsizeMode,
+}: TextProps) {
   return (
     <RNText
       style={[styles.text, style]}

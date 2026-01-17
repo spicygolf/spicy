@@ -1,6 +1,6 @@
 import type { ID } from ".";
 
-export type Player = {
+export interface Player {
   _type: string;
   name: string;
   email?: string;
@@ -9,7 +9,7 @@ export type Player = {
   level?: "admin";
   handicap?: HandicapInfo;
   round_id?: ID;
-};
+}
 
 export type AuthorizedRole = "dev" | "test" | "prod";
 
@@ -23,7 +23,7 @@ export type Gender =
   | "Female"
   | "female";
 
-export type HandicapInfo = {
+export interface HandicapInfo {
   source: "ghin" | "manual";
   id?: string;
   firstName?: string;
@@ -33,4 +33,4 @@ export type HandicapInfo = {
   active?: boolean;
   index: string | number;
   revDate: string;
-};
+}

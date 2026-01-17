@@ -154,7 +154,7 @@ export interface ImportResult {
 /**
  * Union type for all option data shapes
  */
-type GameOptionData = {
+interface GameOptionData {
   type: "game";
   name: string;
   disp: string;
@@ -164,9 +164,9 @@ type GameOptionData = {
   seq?: number;
   choices?: Array<{ name: string; disp: string }>;
   teamOnly?: boolean;
-};
+}
 
-type JunkOptionData = {
+interface JunkOptionData {
   type: "junk";
   name: string;
   disp: string;
@@ -183,9 +183,9 @@ type JunkOptionData = {
   logic?: string;
   better?: string;
   score_to_par?: string;
-};
+}
 
-type MultiplierOptionData = {
+interface MultiplierOptionData {
   type: "multiplier";
   name: string;
   disp: string;
@@ -198,7 +198,7 @@ type MultiplierOptionData = {
   scope?: string;
   availability?: string;
   override?: boolean;
-};
+}
 
 type OptionData = GameOptionData | JunkOptionData | MultiplierOptionData;
 

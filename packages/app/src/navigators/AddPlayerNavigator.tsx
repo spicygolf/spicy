@@ -4,7 +4,7 @@ import {
 } from "@react-navigation/material-top-tabs";
 import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import GameNav from "@/components/game/GameNav";
+import { GameNav } from "@/components/game/GameNav";
 import { AddPlayerFavorites } from "@/screens/game/settings/AddPlayerFavorites";
 import { AddPlayerManual } from "@/screens/game/settings/AddPlayerManual";
 import { AddPlayerSearch } from "@/screens/game/settings/AddPlayerSearch";

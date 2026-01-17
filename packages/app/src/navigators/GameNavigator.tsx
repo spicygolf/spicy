@@ -88,6 +88,7 @@ export function GameNavigator({ route }: GameNavigatorProps) {
     undefined,
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Use game.$jazz.id to avoid re-runs on Jazz progressive loading
   useEffect(() => {
     if (!game?.$isLoaded) {
       setFacilityName(undefined);
@@ -95,7 +96,7 @@ export function GameNavigator({ route }: GameNavigatorProps) {
     }
 
     getFacilityName(game).then(setFacilityName);
-  }, [game]);
+  }, [game?.$jazz.id]);
 
   // Update the current game ID in context - use gameId as stable dependency
   useEffect(() => {

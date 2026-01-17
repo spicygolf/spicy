@@ -11,7 +11,7 @@ interface GameNavProps {
   title: string;
 }
 
-const GameNav = (props: GameNavProps) => {
+export function GameNav(props: GameNavProps) {
   const { backTo, showBack, showScore: _, title } = props;
   const navigation = useNavigation();
   const { theme } = useUnistyles();
@@ -53,9 +53,7 @@ const GameNav = (props: GameNavProps) => {
       </View>
     </View>
   );
-};
-
-export default GameNav;
+}
 
 const styles = StyleSheet.create((theme) => ({
   GameNav: {
