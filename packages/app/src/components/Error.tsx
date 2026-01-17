@@ -14,6 +14,8 @@ interface ErrorDisplayProps {
   onRetry?: () => void;
   /** Callback for dismiss/close */
   onDismiss?: () => void;
+  /** Callback for logout (shown when user might be in stuck auth state) */
+  onLogout?: () => void;
   /** Compact mode for inline errors */
   compact?: boolean;
 }
@@ -27,6 +29,7 @@ export function ErrorDisplay({
   showDetailsToggle = __DEV__,
   onRetry,
   onDismiss,
+  onLogout,
   compact = false,
 }: ErrorDisplayProps) {
   const [showDetails, setShowDetails] = useState(false);
@@ -103,6 +106,18 @@ export function ErrorDisplay({
         {onRetry && <Button label="Try Again" onPress={onRetry} />}
         {onDismiss && <Button label="Dismiss" onPress={onDismiss} />}
       </View>
+
+      {onLogout && (
+        <TouchableOpacity
+          onPress={onLogout}
+          style={styles.logoutLink}
+          accessibilityRole="button"
+          accessibilityLabel="Log out and restart"
+          accessibilityHint="Double tap to clear your session and restart the app"
+        >
+          <Text style={styles.logoutText}>Log Out & Restart</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -180,6 +195,16 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "center",
     gap: theme.gap(1),
+  },
+  logoutLink: {
+    alignSelf: "center",
+    marginTop: theme.gap(2),
+    padding: theme.gap(1),
+  },
+  logoutText: {
+    fontSize: 12,
+    color: theme.colors.secondary,
+    textDecorationLine: "underline",
   },
   // Compact styles
   compactContainer: {

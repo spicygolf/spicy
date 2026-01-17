@@ -1,7 +1,10 @@
 import React, { Component, type ReactNode } from "react";
-import { View } from "react-native";
+import { Alert, View } from "react-native";
+import DeviceInfo from "react-native-device-info";
 import { StyleSheet } from "react-native-unistyles";
 import { ErrorDisplay } from "@/components/Error";
+import { clearAllAuthData } from "@/hooks/useJazzCredentials";
+import { storage } from "@/providers/jazz/mmkv-store";
 import { reportError } from "@/utils/reportError";
 
 interface ErrorBoundaryProps {
@@ -51,6 +54,31 @@ export class ErrorBoundary extends Component<
     this.setState({ hasError: false, error: null });
   };
 
+  handleLogoutAndRestart = (): void => {
+    Alert.alert(
+      "Log Out & Restart",
+      "This will clear your session and restart the app. You'll need to log in again.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Log Out",
+          style: "destructive",
+          onPress: () => {
+            // Clear all auth data - this works outside Jazz context
+            clearAllAuthData();
+            // Clear all MMKV storage to ensure clean state
+            storage.clearAll();
+            // Restart the app
+            DeviceInfo.isPinOrFingerprintSet().then(() => {
+              // Force reload by triggering a re-render that will show auth screen
+              this.setState({ hasError: false, error: null });
+            });
+          },
+        },
+      ],
+    );
+  };
+
   render(): ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) {
@@ -63,6 +91,7 @@ export class ErrorBoundary extends Component<
             error={this.state.error || "An unexpected error occurred"}
             title="Oops! The app hit into the deep rough."
             onRetry={this.handleRetry}
+            onLogout={this.handleLogoutAndRestart}
           />
         </View>
       );
