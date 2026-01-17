@@ -66,10 +66,11 @@ export function GameTeamsList() {
   const { theme } = useUnistyles();
 
   // Get specs for useTeamsMode
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Use game.$jazz.id to avoid recomputation on Jazz progressive loading
   const specs = useMemo(() => {
     if (!game?.$isLoaded || !game.specs?.$isLoaded) return [];
     return Array.from(game.specs).filter((s) => s?.$isLoaded);
-  }, [game]);
+  }, [game?.$jazz.id]);
 
   // Determine teams mode
   const { isSeamlessMode, isTeamsMode, canToggle } = useTeamsMode(game, specs);
