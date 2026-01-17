@@ -1,0 +1,22 @@
+{
+  "legacyPlayerId": "65885252",
+  "exportedAt": "2026-01-17T16:13:41.317Z",
+  "favoritePlayers": [],
+  "favoriteCourseTees": [
+    {
+      "courseId": 9164,
+      "teeId": 247502,
+      "addedAt": null
+    },
+    {
+      "courseId": 9209,
+      "teeId": 226747,
+      "addedAt": null
+    },
+    {
+      "courseId": 13995,
+      "teeId": 354198,
+      "addedAt": null
+    }
+  ]
+}

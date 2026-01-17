@@ -845,15 +845,18 @@ async function importPlayers(
 }
 
 /**
- * Import favorites for a player from ArangoDB to Jazz (permanent API function)
+ * Import favorites for a player from JSON files to Jazz
  *
  * This function runs in the USER's context (authenticated endpoint), so it can
  * access and modify the user's account.root.favorites without authorization issues.
  *
+ * Favorites are read from data/favorites/{legacyPlayerId}.json files that were
+ * exported from ArangoDB using scripts/export-favorites.ts
+ *
  * @param playerAccount - The player's loaded PlayerAccount (user's account)
  * @param legacyPlayerId - The player's legacy ArangoDB _key
  * @param catalogId - The worker's catalog ID for looking up players/courses
- * @param arangoConfig - ArangoDB configuration (optional)
+ * @param workerAccount - The worker account for importing courses from GHIN if needed
  * @returns Object with counts of imported favorites
  */
 export async function importFavoritesForPlayer(
@@ -861,7 +864,6 @@ export async function importFavoritesForPlayer(
   legacyPlayerId: string,
   catalogId: string,
   workerAccount: co.loaded<typeof PlayerAccount>,
-  arangoConfig?: ArangoConfig,
 ): Promise<{
   favoritePlayers: number;
   favoriteCourseTees: number;
@@ -882,8 +884,21 @@ export async function importFavoritesForPlayer(
   };
 
   try {
-    console.log(`[importFavoritesForPlayer] Creating ArangoDB connection...`);
-    const db = createArangoConnection(arangoConfig || defaultConfig);
+    // Load favorites from JSON file instead of ArangoDB
+    const { loadPlayerFavorites } = await import("../utils/favorites-file");
+    console.log(`[importFavoritesForPlayer] Loading favorites from file...`);
+    const playerFavoritesData = await loadPlayerFavorites(legacyPlayerId);
+
+    if (!playerFavoritesData) {
+      console.log(
+        `[importFavoritesForPlayer] No favorites file found for player ${legacyPlayerId}`,
+      );
+      return result;
+    }
+
+    console.log(
+      `[importFavoritesForPlayer] Loaded favorites: ${playerFavoritesData.favoritePlayers.length} players, ${playerFavoritesData.favoriteCourseTees.length} course/tees`,
+    );
 
     console.log(`[importFavoritesForPlayer] Loading catalog by ID...`);
     const { GameCatalog } = await import("spicylib/schema");
@@ -940,18 +955,8 @@ export async function importFavoritesForPlayer(
       );
     }
 
-    // Import favorite players
-    const { fetchAllFavoritePlayers } = await import("../utils/arango");
-    console.log(`Fetching all favorite players from ArangoDB...`);
-    const allFavoritePlayers = await fetchAllFavoritePlayers(db);
-    console.log(
-      `Total favorite player edges in DB: ${allFavoritePlayers.length}`,
-    );
-
-    const playerFavorites = allFavoritePlayers.filter(
-      (f) => f.playerKey === legacyPlayerId,
-    );
-
+    // Import favorite players from file data
+    const playerFavorites = playerFavoritesData.favoritePlayers;
     console.log(
       `Found ${playerFavorites.length} favorite players for legacy player ${legacyPlayerId}`,
     );
@@ -998,19 +1003,8 @@ export async function importFavoritesForPlayer(
         `[importFavoritesForPlayer] Favorite players list ready (loaded: ${favoritePlayersList.$isLoaded})`,
       );
 
-      // Look up GHIN IDs for favorite players to find them in catalog
-      const favPlayerGhinMap = new Map<string, string | null>();
-      for (const fav of playerFavorites) {
-        const cursor = await db.query(
-          `
-          LET player = DOCUMENT("players", @key)
-          RETURN player.handicap.id
-        `,
-          { key: fav.favoritePlayerKey },
-        );
-        const ghinId = await cursor.next();
-        favPlayerGhinMap.set(fav.favoritePlayerKey, ghinId || null);
-      }
+      // GHIN IDs are pre-resolved in the exported JSON files
+      // No need to query ArangoDB anymore
 
       // Load all existing favorites with their player references to check for duplicates
       const existingPlayerIds = new Set<string>();
@@ -1039,7 +1033,8 @@ export async function importFavoritesForPlayer(
       );
 
       for (const fav of playerFavorites) {
-        const ghinId = favPlayerGhinMap.get(fav.favoritePlayerKey);
+        // ghinId is pre-resolved in the exported JSON file
+        const ghinId = fav.ghinId;
 
         // Try to find player in catalog - first by GHIN ID, then by manual_{legacyId}
         let player = null;
@@ -1078,14 +1073,13 @@ export async function importFavoritesForPlayer(
         }
 
         // Check by GHIN ID or legacy ID
-        const playerGhinId = ghinId;
         const playerManualKey = `manual_${fav.favoritePlayerKey}`;
         if (
-          (playerGhinId && existingPlayerGhinIds.has(playerGhinId)) ||
+          (ghinId && existingPlayerGhinIds.has(ghinId)) ||
           existingPlayerGhinIds.has(playerManualKey)
         ) {
           console.log(
-            `[importFavoritesForPlayer] Skipping duplicate player (GHIN/Legacy ID): ${playerGhinId || playerManualKey}`,
+            `[importFavoritesForPlayer] Skipping duplicate player (GHIN/Legacy ID): ${ghinId || playerManualKey}`,
           );
           continue;
         }
@@ -1094,8 +1088,8 @@ export async function importFavoritesForPlayer(
         if (playerId) {
           existingPlayerIds.add(playerId);
         }
-        if (playerGhinId) {
-          existingPlayerGhinIds.add(playerGhinId);
+        if (ghinId) {
+          existingPlayerGhinIds.add(ghinId);
         } else {
           existingPlayerGhinIds.add(playerManualKey);
         }
@@ -1117,18 +1111,8 @@ export async function importFavoritesForPlayer(
       }
     }
 
-    // Import favorite course/tees
-    const { fetchAllFavoriteCourseTees } = await import("../utils/arango");
-    console.log(`Fetching all favorite course/tees from ArangoDB...`);
-    const allFavoriteCourseTees = await fetchAllFavoriteCourseTees(db);
-    console.log(
-      `Total favorite course/tee edges in DB: ${allFavoriteCourseTees.length}`,
-    );
-
-    const courseTeesFavorites = allFavoriteCourseTees.filter(
-      (f) => f.playerKey === legacyPlayerId,
-    );
-
+    // Import favorite course/tees from file data
+    const courseTeesFavorites = playerFavoritesData.favoriteCourseTees;
     console.log(
       `Found ${courseTeesFavorites.length} favorite course/tees for legacy player ${legacyPlayerId}`,
     );
