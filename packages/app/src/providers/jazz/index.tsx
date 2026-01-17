@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { setJazzWorkerAccount } from "spicylib/config/env";
 import { PlayerAccount } from "spicylib/schema";
 import { useJazzCredentials } from "@/hooks/useJazzCredentials";
-import { PassphraseAuthUI } from "./PassphraseAuthUI";
+import { AuthUI } from "./AuthUI";
 
 export function JazzAndAuth({ children }: { children: React.ReactNode }) {
   const { data: credentials } = useJazzCredentials();
@@ -26,7 +26,7 @@ export function JazzAndAuth({ children }: { children: React.ReactNode }) {
       CryptoProvider={RNCrypto}
       AccountSchema={PlayerAccount}
     >
-      <PassphraseAuthUI>{children}</PassphraseAuthUI>
+      <AuthUI>{children}</AuthUI>
     </JazzReactNativeProvider>
   );
 }
