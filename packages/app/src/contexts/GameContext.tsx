@@ -96,9 +96,10 @@ export function GameProvider({ children }: GameProviderProps) {
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("PlayersTab");
 
   // Load game with unified scoring resolve - useCoState directly to avoid circular dep with useGame
+  // Pass undefined when no gameId to avoid Jazz subscription error with empty string
   const scoringGame = useCoState(
     Game,
-    gameId ?? "",
+    gameId ?? undefined,
     gameId
       ? {
           resolve: SCORING_RESOLVE,
