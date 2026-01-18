@@ -88,6 +88,13 @@ export function AuthUI({ children }: AuthUIProps) {
       // After successful passkey signup, show recovery phrase
       setStep("save-recovery");
     } catch (error) {
+      // Check if user cancelled the passkey prompt - don't show fallback alert
+      const errorName = (error as Error)?.name;
+      if (errorName === "NotAllowedError" || errorName === "AbortError") {
+        // User cancelled - silently return so they can try again
+        return;
+      }
+
       console.error("Passkey signup error:", error);
       Alert.alert(
         "Passkey Unavailable",
@@ -113,6 +120,13 @@ export function AuthUI({ children }: AuthUIProps) {
     try {
       await passkeyAuth.logIn();
     } catch (error) {
+      // Check if user cancelled the passkey prompt - don't show fallback alert
+      const errorName = (error as Error)?.name;
+      if (errorName === "NotAllowedError" || errorName === "AbortError") {
+        // User cancelled - silently return so they can try again
+        return;
+      }
+
       console.error("Passkey login error:", error);
       Alert.alert(
         "Passkey Unavailable",

@@ -1,5 +1,5 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { useCoState } from "jazz-tools/react";
+import { useCoState } from "jazz-tools/react-native";
 import { useCallback, useMemo, useState } from "react";
 import { Switch, View } from "react-native";
 import { DraxProvider } from "react-native-drax";

@@ -70,8 +70,12 @@ async function exportFavorites(): Promise<void> {
   }
   console.log(`Resolved ${playerGhinMap.size} GHIN ID mappings`);
 
-  // Group by player
+  // Group by player with deduplication
   const playerFavoritesMap = new Map<string, PlayerFavorites>();
+
+  // Track seen entries for deduplication
+  const seenFavoritePlayers = new Map<string, Set<string>>(); // playerKey -> Set<favoritePlayerKey>
+  const seenFavoriteCourseTees = new Map<string, Set<string>>(); // playerKey -> Set<courseId-teeId>
 
   for (const fav of allFavoritePlayers) {
     if (!playerFavoritesMap.has(fav.playerKey)) {
@@ -81,12 +85,19 @@ async function exportFavorites(): Promise<void> {
         favoritePlayers: [],
         favoriteCourseTees: [],
       });
+      seenFavoritePlayers.set(fav.playerKey, new Set());
     }
-    playerFavoritesMap.get(fav.playerKey)!.favoritePlayers.push({
-      favoritePlayerKey: fav.favoritePlayerKey,
-      ghinId: playerGhinMap.get(fav.favoritePlayerKey) ?? null,
-      addedAt: fav.addedAt,
-    });
+
+    // Deduplicate by favoritePlayerKey
+    const seen = seenFavoritePlayers.get(fav.playerKey)!;
+    if (!seen.has(fav.favoritePlayerKey)) {
+      seen.add(fav.favoritePlayerKey);
+      playerFavoritesMap.get(fav.playerKey)!.favoritePlayers.push({
+        favoritePlayerKey: fav.favoritePlayerKey,
+        ghinId: playerGhinMap.get(fav.favoritePlayerKey) ?? null,
+        addedAt: fav.addedAt,
+      });
+    }
   }
 
   for (const fav of allFavoriteCourseTees) {
@@ -97,12 +108,24 @@ async function exportFavorites(): Promise<void> {
         favoritePlayers: [],
         favoriteCourseTees: [],
       });
+      seenFavoriteCourseTees.set(fav.playerKey, new Set());
     }
-    playerFavoritesMap.get(fav.playerKey)!.favoriteCourseTees.push({
-      courseId: fav.courseId,
-      teeId: fav.teeId,
-      addedAt: fav.addedAt,
-    });
+
+    if (!seenFavoriteCourseTees.has(fav.playerKey)) {
+      seenFavoriteCourseTees.set(fav.playerKey, new Set());
+    }
+
+    // Deduplicate by composite key (courseId + teeId)
+    const compositeKey = `${fav.courseId}-${fav.teeId}`;
+    const seen = seenFavoriteCourseTees.get(fav.playerKey)!;
+    if (!seen.has(compositeKey)) {
+      seen.add(compositeKey);
+      playerFavoritesMap.get(fav.playerKey)!.favoriteCourseTees.push({
+        courseId: fav.courseId,
+        teeId: fav.teeId,
+        addedAt: fav.addedAt,
+      });
+    }
   }
 
   // Write to files
