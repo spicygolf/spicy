@@ -444,6 +444,7 @@ function RecoveryPhraseOnboarding({
   const passphrase = passphraseAuth.passphrase;
 
   const handleCopy = () => {
+    if (!passphrase) return;
     Clipboard.setString(passphrase);
     Alert.alert("Copied", "Now save it somewhere safe (not on this device)!");
   };
@@ -500,7 +501,7 @@ function RecoveryPhraseOnboarding({
               style={styles.passphraseBox}
               onPress={() => setIsVisible(!isVisible)}
             >
-              {isVisible ? (
+              {isVisible && passphrase ? (
                 <Text style={styles.passphraseText}>{passphrase}</Text>
               ) : (
                 <Text style={styles.passphraseHidden}>

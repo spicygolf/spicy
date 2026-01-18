@@ -6,7 +6,8 @@
  */
 
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export interface PlayerFavorites {
   legacyPlayerId: string;
@@ -23,7 +24,8 @@ export interface PlayerFavorites {
   }>;
 }
 
-const favoritesDir = join(import.meta.dir, "../../data/favorites");
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const favoritesDir = join(__dirname, "../../data/favorites");
 
 /**
  * Load favorites for a specific player from their JSON file
