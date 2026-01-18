@@ -11,6 +11,10 @@ primary_region = "sjc"  # San Jose - close to GHIN servers
 
 [env]
   NODE_ENV = "production"
+  API_VERSION = "v4"
+  API_SCHEME = "https"
+  API_HOST = "api.spicy.golf"
+  API_PORT = "443"
 
 [http_service]
   internal_port = 3000
