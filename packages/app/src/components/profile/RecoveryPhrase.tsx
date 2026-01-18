@@ -29,9 +29,12 @@ export function RecoveryPhrase() {
     return null;
   }
 
+  // Check if recovery phrase has been marked as saved
+  // Must check if data is loaded first, then check the actual value
+  const isLoaded = me?.$isLoaded && me.root?.$isLoaded;
   const isSaved =
-    me?.$isLoaded &&
-    me.root?.$isLoaded &&
+    isLoaded &&
+    me.root.$jazz.has("settings") &&
     me.root.settings?.$isLoaded &&
     me.root.settings.recoveryPhraseSaved === true;
 

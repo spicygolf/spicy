@@ -21,11 +21,13 @@ export function AppNavigator() {
   });
 
   // Show badge on Profile if recovery phrase hasn't been saved
+  // Must check if data is loaded first, then check the actual value
+  const isLoaded = me?.$isLoaded && me.root?.$isLoaded;
   const showRecoveryBadge =
-    me?.$isLoaded &&
-    me.root?.$isLoaded &&
-    me.root.settings?.$isLoaded &&
-    me.root.settings.recoveryPhraseSaved !== true;
+    isLoaded &&
+    (!me.root.$jazz.has("settings") ||
+      !me.root.settings?.$isLoaded ||
+      me.root.settings.recoveryPhraseSaved !== true);
 
   return (
     <Tabs.Navigator
