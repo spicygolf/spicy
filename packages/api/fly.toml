@@ -2,7 +2,7 @@
 # Docs: https://fly.io/docs/reference/configuration/
 
 app = "spicy-api"
-primary_region = "sjc"  # San Jose - close to GHIN servers
+primary_region = "iad"  # Ashburn, Virginia - closest to Atlanta for early testers
 
 [build]
   dockerfile = "Dockerfile"
