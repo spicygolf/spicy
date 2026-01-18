@@ -1,0 +1,26 @@
+# Fly.io configuration for Spicy Golf API
+# Docs: https://fly.io/docs/reference/configuration/
+
+app = "spicy-api"
+primary_region = "sjc"  # San Jose - close to GHIN servers
+
+[build]
+  dockerfile = "Dockerfile"
+  # Build context is repo root (for monorepo workspace resolution)
+  # Deploy with: fly deploy --config packages/api/fly.toml --dockerfile packages/api/Dockerfile .
+
+[env]
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"      # Stop when idle (cost savings)
+  auto_start_machines = true       # Start on request
+  min_machines_running = 0         # Scale to zero when idle
+  processes = ["app"]
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
