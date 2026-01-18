@@ -39,8 +39,8 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
         sessionReplayConfig: {
           // Mask text inputs for privacy (passwords always masked)
           maskAllTextInputs: true,
-          // Mask images for privacy
-          maskAllImages: true,
+          // Don't mask images - buttons render as images in RN and get masked
+          maskAllImages: false,
           // Capture Android Logcat logs
           captureLog: true,
           // Capture network telemetry (iOS only, no body data)
