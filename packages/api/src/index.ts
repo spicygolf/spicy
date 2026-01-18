@@ -79,8 +79,12 @@ function applyRateLimit(
 }
 
 // Build CORS origin - for HTTPS on port 443, don't include port in URL
+// Default to standard ports if API_PORT is not set
+const resolvedApiPort = apiPort ?? (scheme === "https" ? "443" : "80");
 const corsOrigin =
-  apiPort === "443" ? `${scheme}://${host}` : `${scheme}://${host}:${apiPort}`;
+  resolvedApiPort === "443" || resolvedApiPort === "80"
+    ? `${scheme}://${host}`
+    : `${scheme}://${host}:${resolvedApiPort}`;
 
 const app = new Elysia()
   .use(

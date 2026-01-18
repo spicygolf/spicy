@@ -10,7 +10,7 @@ interface PostHogProviderProps {
  * PostHog analytics and error tracking provider.
  *
  * Features enabled:
- * - Session replay with masked text/images for privacy
+ * - Session replay with masked text inputs (images unmasked for RN button visibility)
  * - Error tracking (uncaught exceptions, unhandled rejections)
  * - Screen capture and touch tracking
  * - Network telemetry (iOS only)
