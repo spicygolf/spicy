@@ -23,7 +23,7 @@ export function GameListItem({ game }: { game: Game | null | undefined }) {
     useNavigation<NativeStackNavigationProp<GamesNavigatorParamList>>();
 
   // Load game details on-demand with shallow subscription
-  const loadedGame = useCoState(Game, game?.$jazz.id || "", {
+  const loadedGame = useCoState(Game, game?.$jazz.id, {
     resolve: {
       players: {
         $each: true,

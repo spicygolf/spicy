@@ -49,7 +49,7 @@ export function GameTeamsList() {
 
   // Load only the first hole deeply for reading team assignments
   // This avoids loading 100+ objects (18 holes × teams × rounds)
-  const firstHole = useCoState(GameHole, firstHoleId ?? ("" as never), {
+  const firstHole = useCoState(GameHole, firstHoleId, {
     resolve: {
       teams: {
         $each: {

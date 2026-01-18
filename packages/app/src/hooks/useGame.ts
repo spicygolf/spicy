@@ -115,7 +115,7 @@ export function useGame(
 
   const game = useCoState(
     Game,
-    effectiveGameId || "",
+    effectiveGameId,
     effectiveGameId
       ? ({
           resolve: resolveQuery,
