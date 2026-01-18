@@ -11,6 +11,7 @@
 import Clipboard from "@react-native-clipboard/clipboard";
 import { wordlist } from "@scure/bip39/wordlists/english.js";
 import { usePassphraseAuth } from "jazz-tools/react-core";
+import { useAccount } from "jazz-tools/react-native";
 import { usePasskeyAuth } from "jazz-tools/react-native-core";
 import { useState } from "react";
 import {
@@ -23,6 +24,7 @@ import {
   View,
 } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { PlayerAccount, Settings } from "spicylib/schema";
 import { Button, Text, TextInput } from "@/ui";
 
 // Check if we're in development mode (simulators/emulators)
@@ -43,7 +45,9 @@ export function AuthUI({ children }: AuthUIProps) {
 
   // UI state
   const [authMode, setAuthMode] = useState<"initial" | "passphrase">("initial");
-  const [step, setStep] = useState<"choose" | "create" | "login">("choose");
+  const [step, setStep] = useState<
+    "choose" | "create" | "login" | "save-recovery"
+  >("choose");
   const [loginPassphrase, setLoginPassphrase] = useState("");
   const [name, setName] = useState("");
   const [currentPassphrase, setCurrentPassphrase] = useState(() =>
@@ -56,8 +60,19 @@ export function AuthUI({ children }: AuthUIProps) {
   const isSignedIn =
     passkeyAuth.state === "signedIn" || passphraseAuth.state === "signedIn";
 
-  if (isSignedIn) {
+  // Show children only if signed in AND not in recovery phrase onboarding
+  if (isSignedIn && step !== "save-recovery") {
     return <>{children}</>;
+  }
+
+  // Show recovery phrase onboarding after passkey signup
+  if (isSignedIn && step === "save-recovery") {
+    return (
+      <RecoveryPhraseOnboarding
+        onComplete={() => setStep("choose")}
+        passphraseAuth={passphraseAuth}
+      />
+    );
   }
 
   // Passkey handlers
@@ -70,6 +85,8 @@ export function AuthUI({ children }: AuthUIProps) {
     setIsLoading(true);
     try {
       await passkeyAuth.signUp(name.trim());
+      // After successful passkey signup, show recovery phrase
+      setStep("save-recovery");
     } catch (error) {
       console.error("Passkey signup error:", error);
       Alert.alert(
@@ -167,6 +184,7 @@ export function AuthUI({ children }: AuthUIProps) {
     setIsLoading(true);
     try {
       await passphraseAuth.registerNewAccount(currentPassphrase, name.trim());
+      // Passphrase users already saved their phrase during creation
     } catch (error) {
       console.error("Registration error:", error);
       Alert.alert("Registration Failed", "Something went wrong. Try again.");
@@ -390,6 +408,134 @@ export function AuthUI({ children }: AuthUIProps) {
   );
 }
 
+/**
+ * Recovery Phrase Onboarding Screen
+ *
+ * Shown after passkey signup to ensure users save their recovery phrase.
+ * This is critical for account recovery if they lose access to their device.
+ */
+function RecoveryPhraseOnboarding({
+  onComplete,
+  passphraseAuth,
+}: {
+  onComplete: () => void;
+  passphraseAuth: ReturnType<typeof usePassphraseAuth>;
+}) {
+  const me = useAccount(PlayerAccount, {
+    resolve: { root: { settings: true } },
+  });
+  const [confirmSaved, setConfirmSaved] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const passphrase = passphraseAuth.passphrase;
+
+  const handleCopy = () => {
+    Clipboard.setString(passphrase);
+    Alert.alert("Copied", "Now save it somewhere safe (not on this device)!");
+  };
+
+  const handleContinue = () => {
+    // Save confirmation to Jazz (syncs across devices)
+    if (me?.$isLoaded && me.root?.$isLoaded) {
+      if (!me.root.$jazz.has("settings")) {
+        me.root.$jazz.set(
+          "settings",
+          Settings.create(
+            { recoveryPhraseSaved: true },
+            { owner: me.root.$jazz.owner },
+          ),
+        );
+      } else if (me.root.settings?.$isLoaded) {
+        me.root.settings.$jazz.set("recoveryPhraseSaved", true);
+      }
+    }
+    onComplete();
+  };
+
+  const handleSkip = () => {
+    // Don't save the flag - they'll see a reminder on Profile tab
+    onComplete();
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoid}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.card}>
+          <View style={styles.content}>
+            <Text style={styles.title}>Save Your Recovery Phrase</Text>
+
+            <Text style={styles.description}>
+              This phrase is the only way to recover your account if you lose
+              access to this device. Save it somewhere safe.
+            </Text>
+
+            <View style={styles.warningBox}>
+              <Text style={styles.warningText}>
+                Do NOT save this on your phone. Use a password manager, write it
+                down, or save it on another device.
+              </Text>
+            </View>
+
+            <Pressable
+              style={styles.passphraseBox}
+              onPress={() => setIsVisible(!isVisible)}
+            >
+              {isVisible ? (
+                <Text style={styles.passphraseText}>{passphrase}</Text>
+              ) : (
+                <Text style={styles.passphraseHidden}>
+                  Tap to reveal your recovery phrase
+                </Text>
+              )}
+            </Pressable>
+
+            {isVisible && (
+              <View style={styles.buttonRow}>
+                <Button label="Copy" onPress={handleCopy} />
+              </View>
+            )}
+
+            <Pressable
+              style={styles.checkboxRow}
+              onPress={() => setConfirmSaved(!confirmSaved)}
+            >
+              <View
+                style={[
+                  styles.checkbox,
+                  confirmSaved && styles.checkboxChecked,
+                ]}
+              >
+                {confirmSaved && <Text style={styles.checkmark}>✓</Text>}
+              </View>
+              <Text style={styles.checkboxLabel}>
+                I have saved my recovery phrase somewhere other than this device
+              </Text>
+            </Pressable>
+
+            <View style={styles.buttonGroup}>
+              <Button
+                label="Continue"
+                onPress={handleContinue}
+                disabled={!confirmSaved}
+              />
+              <View style={styles.buttonSpacer} />
+              <Pressable onPress={handleSkip}>
+                <Text style={styles.linkText}>Skip for now</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
 const styles = StyleSheet.create((theme) => ({
   keyboardAvoid: {
     flex: 1,
@@ -520,5 +666,39 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 14,
     color: theme.colors.primary,
     lineHeight: 22,
+  },
+  warningBox: {
+    backgroundColor: `${theme.colors.error}20`,
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.error,
+  },
+  warningText: {
+    fontSize: 14,
+    color: theme.colors.error,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  passphraseBox: {
+    backgroundColor: theme.colors.background,
+    borderRadius: 8,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    minHeight: 100,
+    justifyContent: "center",
+  },
+  passphraseText: {
+    fontSize: 14,
+    fontFamily: "monospace",
+    color: theme.colors.primary,
+    lineHeight: 22,
+  },
+  passphraseHidden: {
+    fontSize: 14,
+    color: theme.colors.secondary,
+    textAlign: "center",
+    fontStyle: "italic",
   },
 }));
