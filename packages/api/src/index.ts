@@ -24,8 +24,9 @@ import {
 const {
   API_SCHEME: scheme,
   API_HOST: host,
-  API_PORT: port,
+  API_PORT: apiPort, // External port for URL generation (e.g., 443)
   API_VERSION: api,
+  PORT: serverPort, // Internal port for server binding (e.g., 3000 on Fly.io)
 } = process.env;
 
 // Guard against concurrent game imports
@@ -77,10 +78,14 @@ function applyRateLimit(
   return { ...result, blocked: !result.allowed };
 }
 
+// Build CORS origin - for HTTPS on port 443, don't include port in URL
+const corsOrigin =
+  apiPort === "443" ? `${scheme}://${host}` : `${scheme}://${host}:${apiPort}`;
+
 const app = new Elysia()
   .use(
     cors({
-      origin: [`${scheme}://${host}:${port}`, "http://localhost:5173"],
+      origin: [corsOrigin, "http://localhost:5173"],
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "x-jazz-auth"],
       credentials: true,
@@ -390,8 +395,8 @@ const app = new Elysia()
     { jazzAuth: true },
   )
   .listen({
-    port: port || 3040,
-    hostname: host || "localhost",
+    port: serverPort || 3040,
+    hostname: "0.0.0.0", // Bind to all interfaces for container environments
   });
 
 setupWorker();

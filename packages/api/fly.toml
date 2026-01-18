@@ -14,7 +14,9 @@ primary_region = "sjc"  # San Jose - close to GHIN servers
   API_VERSION = "v4"
   API_SCHEME = "https"
   API_HOST = "api.spicy.golf"
+  # Note: Fly.io provides PORT=3000 automatically. API_PORT is for external URL generation only.
   API_PORT = "443"
+  PORT = "3000"
 
 [http_service]
   internal_port = 3000
