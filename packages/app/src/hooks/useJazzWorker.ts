@@ -5,7 +5,7 @@ import { useJazzCredentials } from "./useJazzCredentials";
 export function useJazzWorker(resolve?: object) {
   const { data: credentials } = useJazzCredentials();
 
-  const account = useCoState(PlayerAccount, credentials?.workerAccount || "", {
+  const account = useCoState(PlayerAccount, credentials?.workerAccount, {
     resolve: resolve || {
       profile: true,
     },

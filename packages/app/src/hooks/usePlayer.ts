@@ -51,7 +51,7 @@ export function usePlayer(
 
   const player = useCoState(
     PlayerSchema,
-    playerId || "",
+    playerId,
     playerId
       ? {
           resolve: resolveQuery,

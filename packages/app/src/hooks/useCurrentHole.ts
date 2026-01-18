@@ -50,7 +50,7 @@ export function useCurrentHole(
 
   const currentHole = useCoState(
     GameHoleSchema,
-    holeId || "",
+    holeId,
     holeId
       ? {
           resolve: resolveQuery,

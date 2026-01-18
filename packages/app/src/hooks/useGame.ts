@@ -115,7 +115,7 @@ export function useGame(
 
   const game = useCoState(
     Game,
-    effectiveGameId || "",
+    effectiveGameId,
     effectiveGameId
       ? ({
           resolve: resolveQuery,
@@ -136,9 +136,9 @@ export function useGame(
       : undefined,
   ) as unknown as GameWithRelations;
 
-  // Performance tracking
+  // Performance tracking (dev only)
   useEffect(() => {
-    if (game?.$isLoaded && !loggedLoad.current) {
+    if (__DEV__ && game?.$isLoaded && !loggedLoad.current) {
       loggedLoad.current = true;
       const elapsed = Date.now() - startTime.current;
       console.log("[PERF] useGame LOADED", {

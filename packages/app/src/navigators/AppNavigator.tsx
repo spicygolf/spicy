@@ -1,7 +1,10 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { StyleSheet } from "react-native-unistyles";
+import { useAccount } from "jazz-tools/react-native";
+import { View } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { PlayerAccount } from "spicylib/schema";
 import { GamesNavigator } from "@/navigators/GamesNavigator";
 import { ProfileNavigator } from "@/navigators/ProfileNavigator";
 
@@ -12,6 +15,19 @@ type AppNavigatorParamList = {
 
 export function AppNavigator() {
   const Tabs = createBottomTabNavigator<AppNavigatorParamList>();
+  const { theme } = useUnistyles();
+  const me = useAccount(PlayerAccount, {
+    resolve: { root: { settings: true } },
+  });
+
+  // Show badge on Profile if recovery phrase hasn't been saved
+  // Must check if data is loaded first, then check the actual value
+  const isLoaded = me?.$isLoaded && me.root?.$isLoaded;
+  const showRecoveryBadge =
+    isLoaded &&
+    (!me.root.$jazz.has("settings") ||
+      !me.root.settings?.$isLoaded ||
+      me.root.settings.recoveryPhraseSaved !== true);
 
   return (
     <Tabs.Navigator
@@ -38,12 +54,22 @@ export function AppNavigator() {
           title: "Profile",
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <FontAwesome6
-              size={28}
-              name="user"
-              color={color}
-              iconStyle="solid"
-            />
+            <View>
+              <FontAwesome6
+                size={28}
+                name="user"
+                color={color}
+                iconStyle="solid"
+              />
+              {showRecoveryBadge && (
+                <View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: theme.colors.error },
+                  ]}
+                />
+              )}
+            </View>
           ),
         }}
       />
@@ -57,5 +83,13 @@ const styles = StyleSheet.create((theme) => ({
     borderTopColor: theme.colors.border,
     elevation: 0,
     shadowOpacity: 0,
+  },
+  badge: {
+    position: "absolute",
+    top: -2,
+    right: -6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
 }));

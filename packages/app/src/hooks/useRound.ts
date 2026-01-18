@@ -48,7 +48,7 @@ export function useRound(
 
   const round = useCoState(
     RoundSchema,
-    roundId || "",
+    roundId,
     roundId
       ? {
           resolve: resolveQuery,

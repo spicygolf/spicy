@@ -9,14 +9,19 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { wordlist } from "@scure/bip39/wordlists/english.js";
 import { usePassphraseAuth } from "jazz-tools/react-core";
+import { useAccount } from "jazz-tools/react-native";
 import { useState } from "react";
-import { Alert, TouchableOpacity, View } from "react-native";
+import { Alert, Pressable, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { PlayerAccount, Settings } from "spicylib/schema";
 import { Text, TextInput } from "@/ui";
 
 export function RecoveryPhrase() {
   const { theme } = useUnistyles();
   const auth = usePassphraseAuth({ wordlist });
+  const me = useAccount(PlayerAccount, {
+    resolve: { root: { settings: true } },
+  });
   const [isVisible, setIsVisible] = useState(false);
 
   // Only show if signed in
@@ -24,11 +29,21 @@ export function RecoveryPhrase() {
     return null;
   }
 
+  // Check if recovery phrase has been marked as saved
+  // Must check if data is loaded first, then check the actual value
+  const isLoaded = me?.$isLoaded && me.root?.$isLoaded;
+  const isSaved =
+    isLoaded &&
+    me.root.$jazz.has("settings") &&
+    me.root.settings?.$isLoaded &&
+    me.root.settings.recoveryPhraseSaved === true;
+
   const handleCopy = () => {
+    if (!auth.passphrase) return;
     Clipboard.setString(auth.passphrase);
     Alert.alert(
       "Copied",
-      "Recovery passphrase copied to clipboard. Store it somewhere safe!",
+      "Recovery passphrase copied to clipboard. Store it somewhere safe (not on this device)!",
     );
   };
 
@@ -47,11 +62,55 @@ export function RecoveryPhrase() {
     }
   };
 
+  const handleMarkSaved = () => {
+    if (me?.$isLoaded && me.root?.$isLoaded) {
+      if (!me.root.$jazz.has("settings")) {
+        me.root.$jazz.set(
+          "settings",
+          Settings.create(
+            { recoveryPhraseSaved: true },
+            { owner: me.root.$jazz.owner },
+          ),
+        );
+      } else if (me.root.settings?.$isLoaded) {
+        me.root.settings.$jazz.set("recoveryPhraseSaved", true);
+      }
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Recovery Passphrase</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Recovery Passphrase</Text>
+        {!isSaved && (
+          <View style={[styles.badge, { backgroundColor: theme.colors.error }]}>
+            <Text style={styles.badgeText}>Action needed</Text>
+          </View>
+        )}
+      </View>
+
+      {!isSaved && (
+        <View
+          style={[
+            styles.warningBox,
+            {
+              backgroundColor: `${theme.colors.error}20`,
+              borderColor: theme.colors.error,
+            },
+          ]}
+        >
+          <Text style={[styles.warningBoxText, { color: theme.colors.error }]}>
+            Save your recovery phrase somewhere other than this device (password
+            manager, written down, etc). It's the only way to recover your
+            account.
+          </Text>
+        </View>
+      )}
+
       <Text style={styles.description}>
-        Save this passphrase to recover your account on another device.
+        {isSaved
+          ? "Your recovery phrase is saved. Use it to recover your account on another device."
+          : "Save this passphrase to recover your account on another device."}
       </Text>
 
       <View style={styles.passphraseContainer}>
@@ -95,6 +154,15 @@ export function RecoveryPhrase() {
         </View>
       </View>
 
+      {!isSaved && (
+        <Pressable style={styles.checkboxRow} onPress={handleMarkSaved}>
+          <View style={styles.checkbox} />
+          <Text style={styles.checkboxLabel}>
+            I have saved my recovery phrase somewhere other than this device
+          </Text>
+        </Pressable>
+      )}
+
       <Text style={styles.warning}>
         Never share this passphrase. Anyone with it can access your account.
       </Text>
@@ -106,9 +174,24 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     gap: theme.gap(1),
   },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   title: {
     fontWeight: "bold",
     fontSize: 16,
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "white",
   },
   description: {
     fontSize: 12,
@@ -158,5 +241,34 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 11,
     color: theme.colors.error,
     fontStyle: "italic",
+  },
+  warningBox: {
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+  },
+  warningBoxText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    marginTop: 4,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    borderRadius: 4,
+    backgroundColor: theme.colors.background,
+  },
+  checkboxLabel: {
+    flex: 1,
+    fontSize: 14,
+    color: theme.colors.primary,
+    lineHeight: 22,
   },
 }));

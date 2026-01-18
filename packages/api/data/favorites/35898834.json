@@ -1,0 +1,38 @@
+{
+  "legacyPlayerId": "35898834",
+  "exportedAt": "2026-01-17T16:13:41.317Z",
+  "favoritePlayers": [
+    {
+      "favoritePlayerKey": "65889410",
+      "ghinId": "3465980",
+      "addedAt": null
+    },
+    {
+      "favoritePlayerKey": "34483698",
+      "ghinId": "1152839",
+      "addedAt": null
+    }
+  ],
+  "favoriteCourseTees": [
+    {
+      "courseId": 13995,
+      "teeId": 456830,
+      "addedAt": null
+    },
+    {
+      "courseId": 13995,
+      "teeId": 456830,
+      "addedAt": null
+    },
+    {
+      "courseId": 13995,
+      "teeId": 354198,
+      "addedAt": null
+    },
+    {
+      "courseId": 13995,
+      "teeId": 354199,
+      "addedAt": null
+    }
+  ]
+}
