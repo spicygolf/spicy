@@ -39,6 +39,7 @@ export function RecoveryPhrase() {
     me.root.settings.recoveryPhraseSaved === true;
 
   const handleCopy = () => {
+    if (!auth.passphrase) return;
     Clipboard.setString(auth.passphrase);
     Alert.alert(
       "Copied",

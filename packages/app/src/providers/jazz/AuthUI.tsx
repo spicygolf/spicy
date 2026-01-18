@@ -462,6 +462,12 @@ function RecoveryPhraseOnboarding({
         );
       } else if (me.root.settings?.$isLoaded) {
         me.root.settings.$jazz.set("recoveryPhraseSaved", true);
+      } else {
+        // Settings exist but not loaded yet - flag won't be saved
+        // User will see reminder badge on Profile tab
+        console.warn(
+          "Settings exist but not loaded, recoveryPhraseSaved flag not set",
+        );
       }
     }
     onComplete();
