@@ -3,7 +3,7 @@
 # Simple approach: run Bun directly (no compilation)
 # Image size: ~150MB | Startup: ~175ms (Bun + Firecracker)
 
-FROM oven/bun:1.1-alpine
+FROM oven/bun:1.3-alpine
 
 WORKDIR /app
 
