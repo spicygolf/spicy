@@ -9,16 +9,16 @@ WORKDIR /app
 
 # Copy workspace config for dependency resolution
 COPY package.json bun.lock ./
+COPY patches ./patches
 COPY packages/api/package.json ./packages/api/
 COPY packages/lib/package.json ./packages/lib/
-
-# Create stub package.json for missing workspaces (bun requires all declared workspaces)
-RUN mkdir -p packages/app packages/web && \
-    echo '{"name":"spicy-golf","version":"0.0.0"}' > packages/app/package.json && \
-    echo '{"name":"spicy-web","version":"0.0.0"}' > packages/web/package.json
+COPY packages/app/package.json ./packages/app/
+COPY packages/web/package.json ./packages/web/
 
 # Install production dependencies only
-RUN bun install --frozen-lockfile --production
+# --omit=optional skips better-sqlite3 (optional peer of jazz-tools via better-auth)
+# --ignore-scripts skips husky prepare hook (devDependency not available)
+RUN bun install --frozen-lockfile --production --omit=optional --ignore-scripts
 
 # Copy source code
 COPY packages/api ./packages/api

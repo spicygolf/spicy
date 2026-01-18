@@ -9,11 +9,15 @@ node_modules
 .git
 .gitignore
 
-# Mobile app (not needed for API)
-packages/app
+# Mobile app (not needed for API, but need package.json for workspace resolution)
+packages/app/src
+packages/app/ios
+packages/app/android
+packages/app/node_modules
 
-# Web app (not needed for API)
-packages/web
+# Web app (not needed for API, but need package.json for workspace resolution)
+packages/web/src
+packages/web/node_modules
 
 # Build artifacts
 dist
@@ -43,5 +47,4 @@ coverage
 *.md
 !packages/api/README.md
 .claude
-patches
 scripts
