@@ -29,9 +29,7 @@ export function getApiUrl(): string {
     return `http://${host}:3040/v4`;
   }
 
-  // TODO: Revert to https://api.spicy.golf/v4 after local testing
-  // Temporary: Use local API for testing on device hotspot
-  return "http://10.187.12.52:3040/v4";
+  return "https://api.spicy.golf/v4";
 }
 
 export function useApi(): string {

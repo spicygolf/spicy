@@ -22,9 +22,11 @@ These files are hosted at `https://spicy.golf/.well-known/` for passkey authenti
 If you regenerate the release keystore, update the SHA256 fingerprint:
 
 ```bash
-# Get fingerprint from keystore
-keytool -list -v -keystore ~/dev/admin-spicy/spicy-release.keystore -alias spicy-release -storepass spicygolf2024 | grep SHA256
+# Get fingerprint from keystore (will prompt for password)
+keytool -list -v -keystore ~/dev/admin-spicy/spicy-release.keystore -alias spicy-release | grep SHA256
 ```
+
+> **Note**: Keystore password is stored in your password manager, not in this repo.
 
 ## Verification
 

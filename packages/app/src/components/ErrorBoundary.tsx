@@ -1,6 +1,5 @@
 import React, { Component, type ReactNode } from "react";
 import { Alert, View } from "react-native";
-import DeviceInfo from "react-native-device-info";
 import { StyleSheet } from "react-native-unistyles";
 import { ErrorDisplay } from "@/components/Error";
 import { clearAllAuthData } from "@/hooks/useJazzCredentials";
@@ -68,11 +67,8 @@ export class ErrorBoundary extends Component<
             clearAllAuthData();
             // Clear all MMKV storage to ensure clean state
             storage.clearAll();
-            // Restart the app
-            DeviceInfo.isPinOrFingerprintSet().then(() => {
-              // Force reload by triggering a re-render that will show auth screen
-              this.setState({ hasError: false, error: null });
-            });
+            // Clear error state - this triggers re-render and shows auth screen
+            this.setState({ hasError: false, error: null });
           },
         },
       ],
