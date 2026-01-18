@@ -1,5 +1,5 @@
 import { Database } from "arangojs";
-import longDescriptionsData from "../../../api-0.3/util/arango/schema_updates/20221219.json";
+import longDescriptionsData from "../../data/gamespec-long-descriptions.json";
 
 export interface ArangoConfig {
   url: string;

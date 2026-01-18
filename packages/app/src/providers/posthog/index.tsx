@@ -10,7 +10,7 @@ interface PostHogProviderProps {
  * PostHog analytics and error tracking provider.
  *
  * Features enabled:
- * - Session replay with masked text/images for privacy
+ * - Session replay with masked text inputs (images unmasked for RN button visibility)
  * - Error tracking (uncaught exceptions, unhandled rejections)
  * - Screen capture and touch tracking
  * - Network telemetry (iOS only)
@@ -39,8 +39,8 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
         sessionReplayConfig: {
           // Mask text inputs for privacy (passwords always masked)
           maskAllTextInputs: true,
-          // Mask images for privacy
-          maskAllImages: true,
+          // Don't mask images - buttons render as images in RN and get masked
+          maskAllImages: false,
           // Capture Android Logcat logs
           captureLog: true,
           // Capture network telemetry (iOS only, no body data)

@@ -1,0 +1,34 @@
+{
+  "65384954": {
+    "short_description": "",
+    "long_description": "### AKA\n* Scotch\n* Umbrella\n### Description\n* A team game within one foursome. 2 players per team.\n### Points (per hole)\n* 1 point for 'prox' - closest to the pin in the fewest amount of shots. Not necessarily a green-in-regulation. Just fewest shots\n* 2 points for low ball - lowest net score of the two-player team\n* 2 points for low team - lowest net total scores of the two-player team\n### Extra Points:\n* birdie - add one point\n* eagle - add two points\n### Multipliers:\n* birdie, and all other hole points - 2x\n* eagle, and all other hole points - 4x\n* pre-press - 2x (team down the most... before the other team hits, good for the rest of the nine) A new pre-press can be added each hole\n* press - 2x (team down the most... can be after the other team hits, but before your team hits)\n* press-back - 2x - if you have been pressed (not pre-pressed), you can double back\n* 4x pre-press - On #10 only, if you are down and want to keep up the 4x, but can't because the pre-press is no longer on at the end of the front nine.\n* 12x - if the teams have pre-pressed all the way to 8x, then the trailing team has the option of taking the bet to 12x after tee shots.\n### General Constraints:\n* 8x max multipliers off of the tee\n* 16x max off of #18 tee\n* $1 per point\n* Governor\n  * After 100 points, each point is discounted by 50%\n"
+  },
+  "72068149": {
+    "short_description": "",
+    "long_description": "### Description\n* Hole by hole scoring with lower (net if enabled) scores winning holes, ties, etc."
+  },
+  "72068183": {
+    "short_description": "",
+    "long_description": "### Description\n* Team game for lowest score per hole.\n* Hole by hole scoring with lower (net if enabled) scores\nwinning holes, ties, etc.\n* If the lowest score is tied, the hole may be tied, or the second score per team may be used as a tie-breaker, depending on settings."
+  },
+  "117463059": {
+    "short_description": "",
+    "long_description": "### Description\n* Team game where both members' score digits are combined for a team score.\n### Points\n* The team score is produced by taking the lowest score\nas the first digit, and the other score as the second digit.  Combining them gives a team score. This is the normal case.\n* If there is a birdie (or lower) by one team, the digits on the **other** team's score reverse, using the highest score as the first digit, and the lower one as the second digit.\n* Both teams post their score, and the difference is how many points are awarded on that hole to the winning team.\n### Other Cases\n* An eagle by one team adds 10 points to what would have been the birdie scoring rules above.\n* If there is an eagle, or two birdies by one team, then 10 points is awarded to the winning team.\n* If two birdies occur, but are on different teams, there is an option to allow or cancel the reverse digit scoring rule.\n### Examples\n| Team 1 | Team 2 | Notes |\n| ------ | ------ | ----- |\n| 4, 4 tied | 4, 4 tied | |\n| 4, 4 +4 | 4, 8 -4 | |\n| 4, 5 +10 | 5, 5 -10 | |\n| 2, 4 +30 | 4, 5 -30 | 2 is birdie, reverses Team 2 digits |\n| 2, 2 +52 | 4, 6 -52 | 2 are birdies, reverses Team 2 digits and adds 10 |\n| 2, 2 +4 | 2, 6 -4 | a birdie on each team cancels out reverse & +10 |\n"
+  },
+  "143311594": {
+    "short_description": "",
+    "long_description": "### AKA\n* Points\n### Description\n* A three-person game with nine points awarded on each hole.\n### Points\n* When all three players tie (net), each player is awarded 3 points\n* When one player wins the hole, one scores second lowest, and the last player scores third lowest, points are awarded 5, 3, 1\n* When one player wins the hole, and the two others tie for second, points are awarded 5, 2, 2\n* When two players tie for low, and the third player scores the second lowest, points are awarded 4, 4, 1\n### Examples\n| Player 1 | Player 2 | Player 3 | Points |\n| -------- | -------- | -------- | ------ |\n| 4 | 4 | 4 | 3, 3, 3 |\n| 4 | 5 | 6 | 5, 3, 1 |\n| 4 | 5 | 5 | 5, 2, 2 |\n| 4 | 4 | 5 | 4, 4, 1 |"
+  },
+  "143311643": {
+    "short_description": "",
+    "long_description": "### AKA\n* Points for Degenerates\n### Description\n* A three-person game with ten points awarded on each hole.\n### Points\n* One point for 'prox' - closest to the pin in the fewest amount of shots.  Not necessarily a green-in-regulation.  Just fewest shots.\n* When all three players tie (net), each player is awarded 3 points\n* When one player wins the hole, one scores second lowest, and the last player scores third lowest, points are awarded 5, 3, 1\n* When one player wins the hole, and the two others tie for second, points are awarded 5, 2, 2\n* When two players tie for low, and the third player scores the second lowest, points are awarded 4, 4, 1\n### Examples\n| Player 1 | Player 2 | Player 3 | Points |\n| -------- | -------- | -------- | ------ |\n| 4* | 4 | 4 | 4, 3, 3 |\n| 4* | 5 | 6 | 6, 3, 1 |\n| 4* | 5 | 5 | 6, 2, 2 |\n| 4* | 4 | 5 | 6, 4, 1 |\n| 4 | 5* | 6 | 5, 4, 1 |\n| 4 | 4 | 5* | 4, 4, 2 |"
+  },
+  "143311695": {
+    "short_description": "",
+    "long_description": "### AKA\n* The dot game\n* Junk\n* Trash\n* Garbage\n### Description\n* Points are awarded for achieving certain \"junk\" while playing the hole.\n* Usually junk is awarded only if the player scores par or better.\n### Examples\n* **Greenie** - closest to the pin on a par 3 hole\n* **Sandie** - par or better after being in a bunker\n* **Birdie** - score one under par on a hole\n* **Eagle** - score two under par on a hole\n* **Poley** - make a putt longer than the length of the flagstick"
+  },
+  "143311738": {
+    "short_description": "",
+    "long_description": "### Description\n* A game where the teams can change each hole.\n* Partners win the hole by having a lower (net) score vs. the other team.\n* The \"Wolf\" rotates through each player in order.\n* Each wolf watches the other players tee off and chooses one for a partner.\n* The wolf needs to choose a player before the next one tees off, or that player is not available as a partner anymore.\n* Various multipliers can be applied if the wolf does not choose a partner and \"goes Lone Wolf.\"\n* If the wolf goes lone and loses, the wolf loses all points to each player.\n* After all full cycles of wolf are complete, wolf for the remaining holes is chosen by which player is down the most points."
+  }
+}

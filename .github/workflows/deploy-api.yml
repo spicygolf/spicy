@@ -1,0 +1,43 @@
+# Deploy API to Fly.io
+#
+# Triggers on:
+# - Push to main (when API or lib changes)
+# - Manual dispatch
+#
+# Required secrets:
+# - FLY_API_TOKEN: Fly.io API token (get from `fly tokens create deploy`)
+
+name: Deploy API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/api/**"
+      - "packages/lib/**"
+      - "data/seed/**"
+      - ".github/workflows/deploy-api.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Fly.io
+    runs-on: ubuntu-latest
+    # Only run on main repo, not forks
+    if: github.repository == 'spicygolf/spicy'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Fly.io CLI
+        uses: superfly/flyctl-actions/setup-flyctl@v1.5
+
+      - name: Deploy to Fly.io
+        run: |
+          flyctl deploy \
+            --config packages/api/fly.toml \
+            --dockerfile packages/api/Dockerfile \
+            --dockerignore-from-gitignore=false \
+            .
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

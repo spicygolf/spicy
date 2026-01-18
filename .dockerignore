@@ -1,0 +1,50 @@
+# Docker build context exclusions for API deployment
+# Excludes large/unnecessary files to speed up builds
+
+# Dependencies (reinstalled in container)
+node_modules
+**/node_modules
+
+# Git
+.git
+.gitignore
+
+# Mobile app (not needed for API, but need package.json for workspace resolution)
+packages/app/src
+packages/app/ios
+packages/app/android
+packages/app/node_modules
+
+# Web app (not needed for API, but need package.json for workspace resolution)
+packages/web/src
+packages/web/node_modules
+
+# Build artifacts
+dist
+**/dist
+.turbo
+**/.turbo
+coverage
+**/coverage
+
+# IDE/Editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment files (secrets set via fly secrets)
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+
+# Misc
+*.md
+!packages/api/README.md
+.claude
+scripts
