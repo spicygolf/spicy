@@ -183,7 +183,10 @@ export function AuthUI({ children }: AuthUIProps) {
       style={styles.keyboardAvoid}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.card}>
           {/* Initial screen - choose auth method */}
           {step === "choose" && (

@@ -16,6 +16,7 @@
 8. **9e0a0e2** - docs: update progress file for passkey migration
 9. **a1357f8** - fix: pass undefined instead of empty string to useCoState
 10. **d6c4925** - feat: add logout option to ErrorBoundary for stuck users
+11. **d9fad01** - fix(app): prevent Jazz subscription error with undefined IDs
 
 ## What Was Done
 
@@ -50,6 +51,15 @@
 ### Bug Fixes
 - Fixed `useCoState` in GameContext passing empty string instead of undefined
 - Added "Log Out & Restart" option to ErrorBoundary for stuck users
+- Fixed Jazz subscription errors by removing `|| ""` patterns from useCoState calls in:
+  - GameListItem.tsx
+  - useCurrentHole.ts
+  - useJazzWorker.ts
+  - useGame.ts
+  - usePlayer.ts
+  - usePlayers.ts
+  - useRound.ts
+  - teams/index.tsx
 
 ## Next Steps (Manual)
 
