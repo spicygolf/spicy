@@ -2,6 +2,7 @@ import { memo, useMemo } from "react";
 import { ScrollView, useWindowDimensions, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Scoreboard } from "spicylib/scoring";
+import { IncompleteIndicator } from "@/components/game/scoring";
 import { Text } from "@/ui";
 import {
   getPopsCount,
@@ -119,49 +120,67 @@ export const LeaderboardTable = memo(function LeaderboardTable({
           </View>
 
           {/* Score Rows */}
-          {holeRows.map((row) => (
-            <View
-              key={row.hole}
-              style={[styles.dataRow, row.isSummaryRow && styles.summaryRow]}
-            >
-              <View style={styles.holeColumn}>
-                <Text
-                  style={[
-                    styles.holeText,
-                    row.isSummaryRow && styles.summaryText,
-                  ]}
-                >
-                  {row.hole}
-                </Text>
-              </View>
-              {playerColumns.map((player) => {
-                const key = `${row.hole}-${player.playerId}`;
-                const cell = cellData.get(key) ?? {
-                  value: null,
-                  scoreToPar: null,
-                  popsCount: 0,
-                };
+          {holeRows.map((row) => {
+            // Check if this hole has incomplete scoring warnings
+            const holeWarnings = row.isSummaryRow
+              ? undefined
+              : scoreboard?.holes?.[row.hole]?.warnings;
+            const warningMessage = holeWarnings?.[0]?.message;
 
-                return (
-                  <View
-                    key={player.playerId}
-                    style={[
-                      styles.playerColumn,
-                      shouldStretch && styles.playerColumnStretch,
-                    ]}
-                  >
-                    <ScoreCell
-                      value={cell.value}
-                      scoreToPar={cell.scoreToPar}
-                      popsCount={cell.popsCount}
-                      isSummaryRow={row.isSummaryRow}
-                      viewMode={viewMode}
-                    />
+            return (
+              <View
+                key={row.hole}
+                style={[styles.dataRow, row.isSummaryRow && styles.summaryRow]}
+              >
+                <View style={styles.holeColumn}>
+                  <View style={styles.holeCell}>
+                    <Text
+                      style={[
+                        styles.holeText,
+                        row.isSummaryRow && styles.summaryText,
+                      ]}
+                    >
+                      {row.hole}
+                    </Text>
+                    {warningMessage && (
+                      <View style={styles.holeWarning}>
+                        <IncompleteIndicator
+                          message={warningMessage}
+                          size={8}
+                        />
+                      </View>
+                    )}
                   </View>
-                );
-              })}
-            </View>
-          ))}
+                </View>
+                {playerColumns.map((player) => {
+                  const key = `${row.hole}-${player.playerId}`;
+                  const cell = cellData.get(key) ?? {
+                    value: null,
+                    scoreToPar: null,
+                    popsCount: 0,
+                  };
+
+                  return (
+                    <View
+                      key={player.playerId}
+                      style={[
+                        styles.playerColumn,
+                        shouldStretch && styles.playerColumnStretch,
+                      ]}
+                    >
+                      <ScoreCell
+                        value={cell.value}
+                        scoreToPar={cell.scoreToPar}
+                        popsCount={cell.popsCount}
+                        isSummaryRow={row.isSummaryRow}
+                        viewMode={viewMode}
+                      />
+                    </View>
+                  );
+                })}
+              </View>
+            );
+          })}
         </View>
       </ScrollView>
     </ScrollView>
@@ -189,6 +208,13 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: theme.gap(1),
     justifyContent: "center",
     alignItems: "center",
+  },
+  holeCell: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  holeWarning: {
+    marginLeft: 3,
   },
   playerColumn: {
     flex: 1,
