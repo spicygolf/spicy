@@ -21,6 +21,9 @@ interface LeaderboardTableProps {
   viewMode: ViewMode;
 }
 
+// Threshold for switching to constrained column widths
+const MAX_PLAYERS_FOR_STRETCH = 4;
+
 export const LeaderboardTable = memo(function LeaderboardTable({
   playerColumns,
   holeRows,
@@ -28,6 +31,9 @@ export const LeaderboardTable = memo(function LeaderboardTable({
   viewMode,
 }: LeaderboardTableProps) {
   const { width: screenWidth } = useWindowDimensions();
+
+  // For ≤4 players, let columns stretch to fill screen width
+  const shouldStretch = playerColumns.length <= MAX_PLAYERS_FOR_STRETCH;
 
   // Pre-compute all cell data once when scoreboard/viewMode changes
   const cellData = useMemo(() => {
@@ -71,17 +77,35 @@ export const LeaderboardTable = memo(function LeaderboardTable({
         horizontal
         showsHorizontalScrollIndicator={false}
         nestedScrollEnabled
+        contentContainerStyle={
+          shouldStretch ? { width: screenWidth } : undefined
+        }
       >
-        <View style={{ minWidth: screenWidth }}>
+        <View
+          style={
+            shouldStretch ? { width: screenWidth } : { minWidth: screenWidth }
+          }
+        >
           {/* Header Row - Player Names (vertical text) */}
           <View style={styles.headerRow}>
             <View style={styles.holeColumn}>
               <Text style={styles.headerLabel}>Hole</Text>
             </View>
             {playerColumns.map((player) => (
-              <View key={player.playerId} style={styles.playerColumn}>
+              <View
+                key={player.playerId}
+                style={[
+                  styles.playerColumn,
+                  shouldStretch && styles.playerColumnStretch,
+                ]}
+              >
                 <View style={styles.verticalTextContainer}>
-                  <View style={styles.verticalTextWrapper}>
+                  <View
+                    style={[
+                      styles.verticalTextWrapper,
+                      shouldStretch && styles.verticalTextWrapperStretch,
+                    ]}
+                  >
                     <Text style={styles.verticalFirstName}>
                       {player.firstName}
                     </Text>
@@ -119,7 +143,13 @@ export const LeaderboardTable = memo(function LeaderboardTable({
                 };
 
                 return (
-                  <View key={player.playerId} style={styles.playerColumn}>
+                  <View
+                    key={player.playerId}
+                    style={[
+                      styles.playerColumn,
+                      shouldStretch && styles.playerColumnStretch,
+                    ]}
+                  >
                     <ScoreCell
                       value={cell.value}
                       scoreToPar={cell.scoreToPar}
@@ -155,9 +185,10 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.border,
   },
   holeColumn: {
-    width: 40,
-    paddingLeft: theme.gap(1),
+    minWidth: 48,
+    paddingHorizontal: theme.gap(1),
     justifyContent: "center",
+    alignItems: "center",
   },
   playerColumn: {
     flex: 1,
@@ -165,6 +196,9 @@ const styles = StyleSheet.create((theme) => ({
     maxWidth: 80,
     alignItems: "center",
     justifyContent: "center",
+  },
+  playerColumnStretch: {
+    maxWidth: undefined,
   },
   headerLabel: {
     fontSize: 11,
@@ -182,6 +216,9 @@ const styles = StyleSheet.create((theme) => ({
     marginLeft: 40,
     width: 80,
   },
+  verticalTextWrapperStretch: {
+    marginLeft: 54,
+  },
   verticalFirstName: {
     fontSize: 11,
     color: theme.colors.primary,
@@ -195,6 +232,7 @@ const styles = StyleSheet.create((theme) => ({
   holeText: {
     fontSize: 13,
     color: theme.colors.primary,
+    textAlign: "center",
   },
   summaryText: {
     fontWeight: "bold",
