@@ -184,15 +184,17 @@ const styles = StyleSheet.create((theme) => ({
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: theme.gap(2),
     paddingBottom: theme.gap(1),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
+    gap: theme.gap(2),
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
+    flex: 1,
   },
   modalDescription: {
     fontSize: 14,
