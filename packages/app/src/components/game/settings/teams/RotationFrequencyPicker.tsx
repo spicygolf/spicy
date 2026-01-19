@@ -2,7 +2,7 @@ import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Button, Input, Text } from "@/ui";
+import { Button, Input, ModalCloseButton, Text } from "@/ui";
 import { getRotationLabel, ROTATION_OPTIONS } from "./utils";
 
 interface RotationFrequencyPickerProps {
@@ -88,14 +88,7 @@ export function RotationFrequencyPicker({
           >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Teams Rotate</Text>
-              <Pressable onPress={handleClose}>
-                <FontAwesome6
-                  name="xmark"
-                  iconStyle="solid"
-                  size={20}
-                  color={theme.colors.primary}
-                />
-              </Pressable>
+              <ModalCloseButton onPress={handleClose} />
             </View>
 
             <View style={styles.rotationOptions}>

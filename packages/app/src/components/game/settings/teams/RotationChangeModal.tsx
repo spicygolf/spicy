@@ -2,7 +2,7 @@ import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Button, Text } from "@/ui";
+import { Button, ModalCloseButton, Text } from "@/ui";
 import type { RotationChangeOption } from "./types";
 import { getRotationLabel } from "./utils";
 
@@ -49,14 +49,7 @@ export function RotationChangeModal({
         >
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Rotation Frequency Changed</Text>
-            <Pressable onPress={handleCancel}>
-              <FontAwesome6
-                name="xmark"
-                iconStyle="solid"
-                size={20}
-                color={theme.colors.primary}
-              />
-            </Pressable>
+            <ModalCloseButton onPress={handleCancel} />
           </View>
 
           <Text style={styles.modalDescription}>

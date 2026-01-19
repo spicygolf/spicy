@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Button, Text } from "@/ui";
+import { Button, ModalCloseButton, Text } from "@/ui";
 
 export interface ChangeTeamsModalProps {
   visible: boolean;
@@ -42,14 +42,7 @@ export function ChangeTeamsModal({
         >
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Change Teams</Text>
-            <Pressable onPress={onCancel}>
-              <FontAwesome6
-                name="xmark"
-                iconStyle="solid"
-                size={20}
-                color={theme.colors.primary}
-              />
-            </Pressable>
+            <ModalCloseButton onPress={onCancel} />
           </View>
 
           <Text style={styles.modalDescription}>

@@ -3,6 +3,7 @@ export * from "./ButtonGroup";
 export * from "./Input";
 export * from "./Link";
 export * from "./Markdown";
+export * from "./ModalCloseButton";
 export * from "./Picker";
 export * from "./Screen";
 export * from "./Text";

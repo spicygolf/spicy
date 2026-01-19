@@ -1,8 +1,7 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Button, Text, TextInput } from "@/ui";
+import { Button, ModalCloseButton, Text, TextInput } from "@/ui";
 
 interface CustomMultiplierModalProps {
   visible: boolean;
@@ -61,14 +60,7 @@ export function CustomMultiplierModal({
         >
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Custom Multiplier</Text>
-            <Pressable onPress={onClose}>
-              <FontAwesome6
-                name="xmark"
-                iconStyle="solid"
-                size={20}
-                color={theme.colors.primary}
-              />
-            </Pressable>
+            <ModalCloseButton onPress={onClose} />
           </View>
 
           <Text style={styles.description}>

@@ -1,8 +1,7 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { Modal, Pressable, ScrollView, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
-import { Text } from "@/ui";
+import { ModalCloseButton, Text } from "@/ui";
 
 interface MenuOptionModalProps {
   visible: boolean;
@@ -19,7 +18,6 @@ export function MenuOptionModal({
   onSelect,
   onClose,
 }: MenuOptionModalProps) {
-  const { theme } = useUnistyles();
   const value = currentValue ?? option.defaultValue;
 
   if (!option.choices?.$isLoaded) {
@@ -40,14 +38,7 @@ export function MenuOptionModal({
         >
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>{option.disp}</Text>
-            <Pressable onPress={onClose}>
-              <FontAwesome6
-                name="xmark"
-                iconStyle="solid"
-                size={20}
-                color={theme.colors.primary}
-              />
-            </Pressable>
+            <ModalCloseButton onPress={onClose} />
           </View>
 
           <ScrollView style={styles.scrollView}>

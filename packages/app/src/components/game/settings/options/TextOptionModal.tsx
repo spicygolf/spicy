@@ -1,9 +1,8 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
-import { Button, Input, Text } from "@/ui";
+import { Button, Input, ModalCloseButton, Text } from "@/ui";
 
 interface TextOptionModalProps {
   visible: boolean;
@@ -20,7 +19,6 @@ export function TextOptionModal({
   onSelect,
   onClose,
 }: TextOptionModalProps) {
-  const { theme } = useUnistyles();
   const value = currentValue ?? option.defaultValue;
   const [inputValue, setInputValue] = useState(value);
 
@@ -46,14 +44,7 @@ export function TextOptionModal({
         >
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>{option.disp}</Text>
-            <Pressable onPress={onClose}>
-              <FontAwesome6
-                name="xmark"
-                iconStyle="solid"
-                size={20}
-                color={theme.colors.primary}
-              />
-            </Pressable>
+            <ModalCloseButton onPress={onClose} />
           </View>
 
           <View style={styles.inputContainer}>
