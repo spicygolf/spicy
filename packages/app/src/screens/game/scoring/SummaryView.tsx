@@ -37,21 +37,20 @@ function formatWithSign(value: number, useEvenPar = false): string {
 }
 
 /**
- * Calculate par for only the holes where at least one player has a score.
- * Uses the scoreboard's hole info which already has par values computed.
+ * Calculate par for only the holes where a specific player has scored.
+ * Each player may have scored a different number of holes.
  */
-function getParForScoredHoles(scoreboard: Scoreboard | null): number {
+function getParForPlayer(
+  scoreboard: Scoreboard | null,
+  playerId: string,
+): number {
   if (!scoreboard) return 0;
 
   let totalPar = 0;
 
   for (const holeResult of Object.values(scoreboard.holes)) {
-    // Check if any player has scored on this hole
-    const anyPlayerScored = Object.values(holeResult.players).some(
-      (p) => p.hasScore,
-    );
-
-    if (anyPlayerScored) {
+    const playerResult = holeResult.players[playerId];
+    if (playerResult?.hasScore) {
       totalPar += holeResult.holeInfo.par;
     }
   }
@@ -96,7 +95,6 @@ function getPlayerTeamPoints(scoreboard: Scoreboard): Map<string, number> {
 function buildPlayerSummaries(
   game: Game,
   scoreboard: Scoreboard | null,
-  parForHolesPlayed: number,
 ): PlayerSummary[] {
   if (!scoreboard || !game.players?.$isLoaded) {
     return [];
@@ -118,11 +116,14 @@ function buildPlayerSummaries(
     // Use team points if available (2-team games), otherwise fall back to player points
     const points = teamPoints.get(playerId) ?? cumulative.pointsTotal;
 
+    // Calculate par for only the holes THIS player has scored
+    const parForPlayer = getParForPlayer(scoreboard, playerId);
+
     summaries.push({
       playerId,
       name: player.name,
       gross: cumulative.grossTotal,
-      toPar: cumulative.grossTotal - parForHolesPlayed,
+      toPar: cumulative.grossTotal - parForPlayer,
       points,
       holesPlayed: cumulative.holesPlayed,
     });
@@ -141,12 +142,7 @@ export function SummaryView({
   onPrevHole,
   onNextHole,
 }: SummaryViewProps) {
-  const parForScoredHoles = getParForScoredHoles(scoreboard);
-  const playerSummaries = buildPlayerSummaries(
-    game,
-    scoreboard,
-    parForScoredHoles,
-  );
+  const playerSummaries = buildPlayerSummaries(game, scoreboard);
 
   return (
     <>
