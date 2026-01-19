@@ -92,6 +92,8 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: theme.gap(2),
+    // Maintain consistent height whether or not hole details are shown (e.g., Summary view)
+    minHeight: 48,
   },
   holeNumber: {
     fontSize: 24,
