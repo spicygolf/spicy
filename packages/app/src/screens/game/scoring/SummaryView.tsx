@@ -37,30 +37,45 @@ function formatWithSign(value: number, useEvenPar = false): string {
 }
 
 /**
- * Calculate total course par from the first player's tee data
+ * Calculate par for only the holes that have been played
+ * Returns both the par sum and the number of holes used in the calculation
  */
-function getCoursePar(game: Game): number {
+function getParForHolesPlayed(
+  game: Game,
+  scoreboard: Scoreboard | null,
+): { par: number; holesPlayed: number } {
+  const defaultResult = { par: 0, holesPlayed: 0 };
+
   if (!game.rounds?.$isLoaded || game.rounds.length === 0) {
-    return 72; // Default par
+    return defaultResult;
   }
 
   const firstRtg = game.rounds[0];
-  if (!firstRtg?.$isLoaded) return 72;
+  if (!firstRtg?.$isLoaded) return defaultResult;
 
   const round = firstRtg.round;
-  if (!round?.$isLoaded || !round.$jazz.has("tee")) return 72;
+  if (!round?.$isLoaded || !round.$jazz.has("tee")) return defaultResult;
 
   const tee = round.tee;
-  if (!tee?.$isLoaded || !tee.holes?.$isLoaded) return 72;
+  if (!tee?.$isLoaded || !tee.holes?.$isLoaded) return defaultResult;
+
+  // Get the holes that have been played from the scoreboard
+  const holesPlayedSet = new Set(scoreboard?.meta.holesPlayed ?? []);
 
   let totalPar = 0;
+  let holeCount = 0;
+
   for (const hole of tee.holes) {
-    if (hole?.$isLoaded && hole.par) {
-      totalPar += hole.par;
+    if (hole?.$isLoaded && hole.par && hole.number !== undefined) {
+      const holeNum = String(hole.number);
+      if (holesPlayedSet.has(holeNum)) {
+        totalPar += hole.par;
+        holeCount++;
+      }
     }
   }
 
-  return totalPar || 72;
+  return { par: totalPar, holesPlayed: holeCount };
 }
 
 /**
@@ -100,7 +115,7 @@ function getPlayerTeamPoints(scoreboard: Scoreboard): Map<string, number> {
 function buildPlayerSummaries(
   game: Game,
   scoreboard: Scoreboard | null,
-  coursePar: number,
+  parForHolesPlayed: number,
 ): PlayerSummary[] {
   if (!scoreboard || !game.players?.$isLoaded) {
     return [];
@@ -126,7 +141,7 @@ function buildPlayerSummaries(
       playerId,
       name: player.name,
       gross: cumulative.grossTotal,
-      toPar: cumulative.grossTotal - coursePar,
+      toPar: cumulative.grossTotal - parForHolesPlayed,
       points,
       holesPlayed: cumulative.holesPlayed,
     });
@@ -145,8 +160,12 @@ export function SummaryView({
   onPrevHole,
   onNextHole,
 }: SummaryViewProps) {
-  const coursePar = getCoursePar(game);
-  const playerSummaries = buildPlayerSummaries(game, scoreboard, coursePar);
+  const { par: parForHolesPlayed } = getParForHolesPlayed(game, scoreboard);
+  const playerSummaries = buildPlayerSummaries(
+    game,
+    scoreboard,
+    parForHolesPlayed,
+  );
 
   return (
     <>
