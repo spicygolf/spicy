@@ -348,9 +348,14 @@ export function ScoringView({
   // Get the current hole number for scoreboard lookup
   const currentHoleNumber = String(currentHoleIndex + 1);
 
+  // Get current hole result from scoreboard
+  const currentHoleResult = scoreboard?.holes?.[currentHoleNumber];
+
   // Get overall multiplier from scoreboard (all teams' multipliers combined)
-  const overallMultiplier =
-    scoreboard?.holes?.[currentHoleNumber]?.holeMultiplier ?? 1;
+  const overallMultiplier = currentHoleResult?.holeMultiplier ?? 1;
+
+  // Get warnings for incomplete scoring (e.g., "Mark all possible points")
+  const warnings = currentHoleResult?.warnings;
 
   // Get all teams for the current hole (needed for one_per_group junk limit)
   const allTeams: Team[] = currentHole?.teams?.$isLoaded
@@ -434,7 +439,12 @@ export function ScoringView({
 
   return (
     <>
-      <HoleHeader hole={holeInfo} onPrevious={onPrevHole} onNext={onNextHole} />
+      <HoleHeader
+        hole={holeInfo}
+        onPrevious={onPrevHole}
+        onNext={onNextHole}
+        warnings={warnings}
+      />
       <HoleToolbar
         onChangeTeams={onChangeTeams}
         overallMultiplier={overallMultiplier}
