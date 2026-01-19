@@ -37,45 +37,26 @@ function formatWithSign(value: number, useEvenPar = false): string {
 }
 
 /**
- * Calculate par for only the holes that have been played
- * Returns both the par sum and the number of holes used in the calculation
+ * Calculate par for only the holes where at least one player has a score.
+ * Uses the scoreboard's hole info which already has par values computed.
  */
-function getParForHolesPlayed(
-  game: Game,
-  scoreboard: Scoreboard | null,
-): { par: number; holesPlayed: number } {
-  const defaultResult = { par: 0, holesPlayed: 0 };
-
-  if (!game.rounds?.$isLoaded || game.rounds.length === 0) {
-    return defaultResult;
-  }
-
-  const firstRtg = game.rounds[0];
-  if (!firstRtg?.$isLoaded) return defaultResult;
-
-  const round = firstRtg.round;
-  if (!round?.$isLoaded || !round.$jazz.has("tee")) return defaultResult;
-
-  const tee = round.tee;
-  if (!tee?.$isLoaded || !tee.holes?.$isLoaded) return defaultResult;
-
-  // Get the holes that have been played from the scoreboard
-  const holesPlayedSet = new Set(scoreboard?.meta.holesPlayed ?? []);
+function getParForScoredHoles(scoreboard: Scoreboard | null): number {
+  if (!scoreboard) return 0;
 
   let totalPar = 0;
-  let holeCount = 0;
 
-  for (const hole of tee.holes) {
-    if (hole?.$isLoaded && hole.par && hole.number !== undefined) {
-      const holeNum = String(hole.number);
-      if (holesPlayedSet.has(holeNum)) {
-        totalPar += hole.par;
-        holeCount++;
-      }
+  for (const holeResult of Object.values(scoreboard.holes)) {
+    // Check if any player has scored on this hole
+    const anyPlayerScored = Object.values(holeResult.players).some(
+      (p) => p.hasScore,
+    );
+
+    if (anyPlayerScored) {
+      totalPar += holeResult.holeInfo.par;
     }
   }
 
-  return { par: totalPar, holesPlayed: holeCount };
+  return totalPar;
 }
 
 /**
@@ -160,11 +141,11 @@ export function SummaryView({
   onPrevHole,
   onNextHole,
 }: SummaryViewProps) {
-  const { par: parForHolesPlayed } = getParForHolesPlayed(game, scoreboard);
+  const parForScoredHoles = getParForScoredHoles(scoreboard);
   const playerSummaries = buildPlayerSummaries(
     game,
     scoreboard,
-    parForHolesPlayed,
+    parForScoredHoles,
   );
 
   return (
