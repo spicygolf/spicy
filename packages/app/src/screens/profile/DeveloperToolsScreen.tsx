@@ -1,15 +1,8 @@
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { useAddGameSpecs } from "@/hooks/useAddGameSpecs";
-import { Button, Screen, Text } from "@/ui";
+import { Screen, Text } from "@/ui";
 
 export function DeveloperToolsScreen() {
-  const { addGameSpecs } = useAddGameSpecs();
-
-  const handleAddSpecs = () => {
-    addGameSpecs(false);
-  };
-
   return (
     <Screen>
       <View style={styles.container}>
@@ -18,12 +11,8 @@ export function DeveloperToolsScreen() {
           production builds.
         </Text>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Game Specs</Text>
-          <Text style={styles.sectionDescription}>
-            Add or update the default game specifications from the catalog.
-          </Text>
-          <Button label="Add/Update Default Specs" onPress={handleAddSpecs} />
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>No developer tools available</Text>
         </View>
       </View>
     </Screen>
@@ -38,18 +27,15 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 14,
     color: theme.colors.secondary,
   },
-  section: {
-    gap: theme.gap(1.5),
-    paddingTop: theme.gap(1),
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: theme.gap(4),
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  sectionDescription: {
-    fontSize: 12,
+  emptyText: {
+    fontSize: 14,
     color: theme.colors.secondary,
+    fontStyle: "italic",
   },
 }));
