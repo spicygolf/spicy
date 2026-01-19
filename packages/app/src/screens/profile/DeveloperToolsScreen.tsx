@@ -21,6 +21,7 @@ export function DeveloperToolsScreen() {
 
 const styles = StyleSheet.create((theme) => ({
   container: {
+    flex: 1,
     gap: theme.gap(2),
   },
   description: {
@@ -31,7 +32,6 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: theme.gap(4),
   },
   emptyText: {
     fontSize: 14,
