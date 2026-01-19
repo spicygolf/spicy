@@ -47,6 +47,7 @@ export function calculateGrossScores(ctx: ScoringContext): ScoringContext {
       const gross = getGrossScore(round, holeNum);
 
       if (gross !== null) {
+        holeResult.players[playerId].hasScore = true;
         holeResult.players[playerId].gross = gross;
         holeResult.players[playerId].scoreToPar = gross - par;
       }

@@ -24,6 +24,7 @@ function createMockPlayerResult(
 ): PlayerHoleResult {
   return {
     playerId: "player1",
+    hasScore: true,
     gross: 4,
     pops: 0,
     net: 4,
