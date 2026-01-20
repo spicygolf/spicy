@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole, Team } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
+import { getHoleTeeMultiplierTotal } from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
@@ -351,7 +352,12 @@ export function ScoringView({
   // Get current hole result from scoreboard
   const currentHoleResult = scoreboard?.holes?.[currentHoleNumber];
 
-  // Get overall multiplier from scoreboard (all teams' multipliers combined)
+  // Get tee multiplier (unearned/user-activated multipliers only, excludes birdie_bbq etc.)
+  // This is what shows in the HoleToolbar - what teams committed to "off the tee"
+  const teeMultiplier = getHoleTeeMultiplierTotal(currentHoleResult ?? null);
+
+  // Get overall multiplier from scoreboard (all teams' multipliers combined, including earned)
+  // This is used for calculating display points
   const overallMultiplier = currentHoleResult?.holeMultiplier ?? 1;
 
   // Get warnings for incomplete scoring (e.g., "Mark all possible points")
@@ -447,7 +453,7 @@ export function ScoringView({
       />
       <HoleToolbar
         onChangeTeams={onChangeTeams}
-        overallMultiplier={overallMultiplier}
+        overallMultiplier={teeMultiplier}
         isCustomMultiplier={customMultiplierState.isActive}
         onMultiplierPress={
           customMultiplierOption
