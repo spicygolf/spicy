@@ -30,15 +30,12 @@ export function IncompleteIndicator({
         accessibilityHint={message}
       >
         <View
-          style={[
-            styles.dot,
-            {
-              width: size,
-              height: size,
-              borderRadius: size / 2,
-              backgroundColor: theme.colors.warning,
-            },
-          ]}
+          style={{
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            backgroundColor: theme.colors.warning,
+          }}
         />
       </Pressable>
 
@@ -62,9 +59,6 @@ export function IncompleteIndicator({
 }
 
 const styles = StyleSheet.create((theme) => ({
-  dot: {
-    // Size and color set dynamically
-  },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",

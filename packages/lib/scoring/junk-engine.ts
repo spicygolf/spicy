@@ -711,7 +711,7 @@ function calculateWarnings(
 
   // If all scores entered but some required junk is not marked
   if (unmarkedJunkNames.length > 0 && scoresEntered === totalPlayers) {
-    // Create a descriptive message with the missing junk names
+    // Create a descriptive message with all missing junk names
     const missingItems = unmarkedJunkNames.join(", ");
     warnings.push({
       type: "incomplete_junk",

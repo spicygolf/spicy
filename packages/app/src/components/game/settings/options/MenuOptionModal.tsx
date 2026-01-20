@@ -1,7 +1,7 @@
 import { Modal, Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
-import { ModalCloseButton, Text } from "@/ui";
+import { ModalHeader, Text } from "@/ui";
 
 interface MenuOptionModalProps {
   visible: boolean;
@@ -36,10 +36,7 @@ export function MenuOptionModal({
           style={styles.modalContent}
           onPress={(e) => e.stopPropagation()}
         >
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{option.disp}</Text>
-            <ModalCloseButton onPress={onClose} />
-          </View>
+          <ModalHeader title={option.disp ?? ""} onClose={onClose} />
 
           <ScrollView style={styles.scrollView}>
             <View style={styles.options}>
@@ -92,21 +89,7 @@ const styles = StyleSheet.create((theme) => ({
     maxWidth: 400,
     maxHeight: "80%",
   },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: theme.gap(2),
-    paddingBottom: theme.gap(1),
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    gap: theme.gap(2),
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    flex: 1,
-  },
+
   scrollView: {
     flexGrow: 0,
   },

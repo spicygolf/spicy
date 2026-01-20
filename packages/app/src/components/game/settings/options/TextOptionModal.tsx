@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
-import { Button, Input, ModalCloseButton, Text } from "@/ui";
+import { Button, Input, ModalHeader, Text } from "@/ui";
 
 interface TextOptionModalProps {
   visible: boolean;
@@ -42,10 +42,7 @@ export function TextOptionModal({
           style={styles.modalContent}
           onPress={(e) => e.stopPropagation()}
         >
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{option.disp}</Text>
-            <ModalCloseButton onPress={onClose} />
-          </View>
+          <ModalHeader title={option.disp ?? ""} onClose={onClose} />
 
           <View style={styles.inputContainer}>
             <Input
@@ -79,21 +76,7 @@ const styles = StyleSheet.create((theme) => ({
     width: "100%",
     maxWidth: 400,
   },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: theme.gap(2),
-    paddingBottom: theme.gap(1),
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    gap: theme.gap(2),
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    flex: 1,
-  },
+
   inputContainer: {
     gap: theme.gap(2),
   },

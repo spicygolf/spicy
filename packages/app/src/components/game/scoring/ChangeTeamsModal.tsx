@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Button, ModalCloseButton, Text } from "@/ui";
+import { Button, ModalHeader, Text } from "@/ui";
 
 export interface ChangeTeamsModalProps {
   visible: boolean;
@@ -40,10 +40,7 @@ export function ChangeTeamsModal({
           style={styles.modalContent}
           onPress={(e) => e.stopPropagation()}
         >
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Change Teams</Text>
-            <ModalCloseButton onPress={onCancel} />
-          </View>
+          <ModalHeader title="Change Teams" onClose={onCancel} />
 
           <Text style={styles.modalDescription}>
             Clear team assignments and choose new teams for:
@@ -135,21 +132,7 @@ const styles = StyleSheet.create((theme) => ({
     width: "100%",
     maxWidth: 400,
   },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: theme.gap(2),
-    paddingBottom: theme.gap(1),
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    gap: theme.gap(2),
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    flex: 1,
-  },
+
   modalDescription: {
     fontSize: 14,
     color: theme.colors.secondary,

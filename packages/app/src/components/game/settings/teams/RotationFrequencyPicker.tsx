@@ -2,7 +2,7 @@ import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Button, Input, ModalCloseButton, Text } from "@/ui";
+import { Button, Input, ModalHeader, Text } from "@/ui";
 import { getRotationLabel, ROTATION_OPTIONS } from "./utils";
 
 interface RotationFrequencyPickerProps {
@@ -86,10 +86,7 @@ export function RotationFrequencyPicker({
             style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Teams Rotate</Text>
-              <ModalCloseButton onPress={handleClose} />
-            </View>
+            <ModalHeader title="Teams Rotate" onClose={handleClose} />
 
             <View style={styles.rotationOptions}>
               {ROTATION_OPTIONS.map((option) => {
@@ -198,21 +195,7 @@ const styles = StyleSheet.create((theme) => ({
     maxWidth: 500,
     maxHeight: "80%",
   },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: theme.gap(2),
-    paddingBottom: theme.gap(1),
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    gap: theme.gap(2),
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    flex: 1,
-  },
+
   rotationOptions: {
     flexDirection: "row",
     flexWrap: "wrap",

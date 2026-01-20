@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Button, ModalCloseButton, Text, TextInput } from "@/ui";
+import { Button, ModalHeader, Text, TextInput } from "@/ui";
 
 interface CustomMultiplierModalProps {
   visible: boolean;
@@ -58,10 +58,7 @@ export function CustomMultiplierModal({
           style={styles.modalContent}
           onPress={(e) => e.stopPropagation()}
         >
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Custom Tee Multiplier</Text>
-            <ModalCloseButton onPress={onClose} />
-          </View>
+          <ModalHeader title="Custom Tee Multiplier" onClose={onClose} />
 
           <Text style={styles.description}>
             Set a custom "off the tee" multiplier (1-1000x). This replaces
@@ -122,21 +119,7 @@ const styles = StyleSheet.create((theme) => ({
     width: "100%",
     maxWidth: 320,
   },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: theme.gap(1.5),
-    paddingBottom: theme.gap(1),
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    gap: theme.gap(2),
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    flex: 1,
-  },
+
   description: {
     fontSize: 14,
     color: theme.colors.secondary,
