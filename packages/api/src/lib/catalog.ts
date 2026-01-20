@@ -208,7 +208,7 @@ interface MultiplierOptionData {
   disp: string;
   version: string;
   sub_type?: string;
-  value: number;
+  value?: number;
   seq?: number;
   icon?: string;
   based_on?: string;
@@ -216,6 +216,7 @@ interface MultiplierOptionData {
   availability?: string;
   override?: boolean;
   input_value?: boolean;
+  value_from?: string;
 }
 
 type OptionData = GameOptionData | JunkOptionData | MultiplierOptionData;
@@ -626,7 +627,8 @@ async function upsertOptions(
           disp: opt.disp,
           type: "multiplier",
           version: opt.version,
-          value: opt.value,
+          // Value is optional for input_value multipliers
+          ...(opt.value !== undefined ? { value: opt.value } : {}),
         },
         { owner: optionsMap.$jazz.owner },
       );
@@ -658,6 +660,9 @@ async function upsertOptions(
         typeof opt.input_value === "boolean"
       ) {
         newOption.$jazz.set("input_value", opt.input_value);
+      }
+      if (opt.value_from && typeof opt.value_from === "string") {
+        newOption.$jazz.set("value_from", opt.value_from);
       }
 
       optionsMap.$jazz.set(opt.name, newOption);
