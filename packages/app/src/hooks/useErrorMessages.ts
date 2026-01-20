@@ -138,9 +138,16 @@ export function useErrorMessages(key: string, locale = "en_US"): string {
   useEffect(() => {
     let mounted = true;
 
-    // Check if we need to refresh (don't re-read cache for display,
-    // useState initializer already set the initial value)
     const cached = getCachedMessages(locale);
+
+    // Always update message when key/locale changes (useState initializer
+    // only runs on mount, not when deps change)
+    const currentMessage = getMessageFromCache(key, cached);
+    if (mounted) {
+      setMessage(currentMessage);
+    }
+
+    // Refresh in background if cache is stale
     if (isCacheStale(cached)) {
       fetchMessages(locale).then((fresh) => {
         if (mounted && fresh) {
