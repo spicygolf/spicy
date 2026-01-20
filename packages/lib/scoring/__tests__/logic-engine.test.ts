@@ -468,10 +468,29 @@ describe("evaluateLogic - var operator", () => {
 // evaluateLogic Tests - preDoubleTotal
 // =============================================================================
 
+// Helper to create a holeResult with specific team multipliers
+function createHoleResultWithTeam(
+  teamOverrides: Partial<TeamHoleResult>,
+): HoleResult {
+  const team = createMockTeamResult(teamOverrides);
+  return {
+    hole: "1",
+    teams: { [team.teamId]: team },
+    junk: [],
+    multipliers: [],
+    holeMultiplier: 1,
+    points: 0,
+  };
+}
+
 describe("evaluateLogic - preDoubleTotal", () => {
-  it("returns 1 when team has no pre_double multipliers", () => {
-    const team = createMockTeamResult({ multipliers: [] });
-    const logicCtx = createLogicContext({ team, teams: [team] });
+  it("returns 1 when hole has no pre_double multipliers", () => {
+    const holeResult = createHoleResultWithTeam({ multipliers: [] });
+    const logicCtx = createLogicContext({
+      holeResult,
+      team: Object.values(holeResult.teams)[0],
+      teams: Object.values(holeResult.teams),
+    });
 
     const result = evaluateLogic(
       "{'==': [{'preDoubleTotal': []}, 1]}",
@@ -480,11 +499,15 @@ describe("evaluateLogic - preDoubleTotal", () => {
     expect(result).toBe(true);
   });
 
-  it("returns 2 when team has one pre_double", () => {
-    const team = createMockTeamResult({
+  it("returns 2 when hole has one pre_double", () => {
+    const holeResult = createHoleResultWithTeam({
       multipliers: [{ name: "pre_double", value: 2 }],
     });
-    const logicCtx = createLogicContext({ team, teams: [team] });
+    const logicCtx = createLogicContext({
+      holeResult,
+      team: Object.values(holeResult.teams)[0],
+      teams: Object.values(holeResult.teams),
+    });
 
     const result = evaluateLogic(
       "{'==': [{'preDoubleTotal': []}, 2]}",
@@ -493,14 +516,18 @@ describe("evaluateLogic - preDoubleTotal", () => {
     expect(result).toBe(true);
   });
 
-  it("returns 4 when team has two pre_doubles (2*2)", () => {
-    const team = createMockTeamResult({
+  it("returns 4 when hole has two pre_doubles (2*2)", () => {
+    const holeResult = createHoleResultWithTeam({
       multipliers: [
         { name: "pre_double", value: 2 },
         { name: "pre_double", value: 2 },
       ],
     });
-    const logicCtx = createLogicContext({ team, teams: [team] });
+    const logicCtx = createLogicContext({
+      holeResult,
+      team: Object.values(holeResult.teams)[0],
+      teams: Object.values(holeResult.teams),
+    });
 
     const result = evaluateLogic(
       "{'==': [{'preDoubleTotal': []}, 4]}",
@@ -509,15 +536,19 @@ describe("evaluateLogic - preDoubleTotal", () => {
     expect(result).toBe(true);
   });
 
-  it("returns 8 when team has three pre_doubles (2*2*2)", () => {
-    const team = createMockTeamResult({
+  it("returns 8 when hole has three pre_doubles (2*2*2)", () => {
+    const holeResult = createHoleResultWithTeam({
       multipliers: [
         { name: "pre_double", value: 2 },
         { name: "pre_double", value: 2 },
         { name: "pre_double", value: 2 },
       ],
     });
-    const logicCtx = createLogicContext({ team, teams: [team] });
+    const logicCtx = createLogicContext({
+      holeResult,
+      team: Object.values(holeResult.teams)[0],
+      teams: Object.values(holeResult.teams),
+    });
 
     const result = evaluateLogic(
       "{'>=': [{'preDoubleTotal': []}, 8]}",
@@ -527,18 +558,57 @@ describe("evaluateLogic - preDoubleTotal", () => {
   });
 
   it("excludes non-pre_double multipliers (double, birdie_bbq)", () => {
-    const team = createMockTeamResult({
+    const holeResult = createHoleResultWithTeam({
       multipliers: [
         { name: "pre_double", value: 2 },
         { name: "double", value: 2 },
         { name: "birdie_bbq", value: 2, earned: true },
       ],
     });
-    const logicCtx = createLogicContext({ team, teams: [team] });
+    const logicCtx = createLogicContext({
+      holeResult,
+      team: Object.values(holeResult.teams)[0],
+      teams: Object.values(holeResult.teams),
+    });
 
     // Only pre_double counts, so total is 2 (not 8)
     const result = evaluateLogic(
       "{'==': [{'preDoubleTotal': []}, 2]}",
+      logicCtx,
+    );
+    expect(result).toBe(true);
+  });
+
+  it("combines pre_doubles from multiple teams (8x when Team1 has 1, Team2 has 2)", () => {
+    // Team 1 pressed once, Team 2 pressed twice = 8x total for the hole
+    const team1 = createMockTeamResult({
+      teamId: "1",
+      multipliers: [{ name: "pre_double", value: 2 }],
+    });
+    const team2 = createMockTeamResult({
+      teamId: "2",
+      multipliers: [
+        { name: "pre_double", value: 2 },
+        { name: "pre_double", value: 2 },
+      ],
+    });
+    const holeResult: HoleResult = {
+      hole: "4",
+      teams: { "1": team1, "2": team2 },
+      junk: [],
+      multipliers: [],
+      holeMultiplier: 1,
+      points: 0,
+    };
+    const logicCtx = createLogicContext({
+      holeResult,
+      team: team1,
+      teams: [team1, team2],
+    });
+
+    // All 3 pre_doubles combine: 2 * 2 * 2 = 8
+    const result = evaluateLogic(
+      "{'>=': [{'preDoubleTotal': []}, 8]}",
       logicCtx,
     );
     expect(result).toBe(true);

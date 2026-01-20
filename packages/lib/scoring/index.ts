@@ -20,6 +20,7 @@ export type { LogicContext } from "./logic-engine";
 // Logic engine (json-logic evaluation with custom operators)
 export {
   evaluateLogic,
+  getHolePreDoubleTotal,
   getHoleTeeMultiplierTotal,
   getPreDoubleTotal,
   getTeeMultiplierTotal,

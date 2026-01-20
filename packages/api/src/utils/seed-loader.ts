@@ -49,13 +49,15 @@ export interface SeedMultiplierOption {
   disp: string;
   type: "multiplier";
   sub_type?: string;
-  value: number;
+  value?: number;
   seq?: number;
   icon?: string;
   based_on?: string;
   scope?: string;
   availability?: string;
   override?: boolean;
+  input_value?: boolean;
+  value_from?: string;
 }
 
 export type SeedOption = SeedGameOption | SeedJunkOption | SeedMultiplierOption;
@@ -243,13 +245,15 @@ export async function loadSeedSpecsAsV03(): Promise<
       name: string;
       disp: string;
       sub_type?: string;
-      value: number;
+      value?: number;
       seq?: number;
       icon?: string;
       based_on?: string;
       scope?: string;
       availability?: string;
       override?: boolean;
+      input_value?: boolean;
+      value_from?: string;
     }>;
   }>
 > {
@@ -323,6 +327,8 @@ export async function loadSeedSpecsAsV03(): Promise<
           scope: opt.scope,
           availability: opt.availability,
           override: opt.override,
+          input_value: opt.input_value,
+          value_from: opt.value_from,
           ...overrides, // Apply per-spec overrides
         };
       })

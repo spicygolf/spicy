@@ -352,6 +352,31 @@ export function getPreDoubleTotal(team: TeamHoleResult | null): number {
 }
 
 /**
+ * Get the total of pre_double multipliers for all teams on a hole.
+ *
+ * Pre_double is a hole-wide multiplier - all teams' pre_doubles combine.
+ * When Team A presses on Hole 1 and Team B presses on Hole 2,
+ * both holes are 4x (2 * 2) for everyone.
+ *
+ * @param holeResult - The hole result containing all teams
+ * @returns Product of ALL pre_double multipliers from ALL teams (e.g., 8 if 3 total pre_doubles)
+ */
+export function getHolePreDoubleTotal(holeResult: HoleResult | null): number {
+  if (!holeResult) return 1;
+
+  // Collect all pre_double multipliers from all teams
+  let total = 1;
+  for (const team of Object.values(holeResult.teams)) {
+    for (const mult of team.multipliers) {
+      if (mult.name === "pre_double") {
+        total *= mult.value;
+      }
+    }
+  }
+  return total;
+}
+
+/**
  * Get the total of all user-activated (unearned) multipliers for a team.
  *
  * This includes pre_double, double, and double_back, but excludes
@@ -524,14 +549,15 @@ function registerOperators(): void {
     return getFrontNinePreDoubleTotal(currentLogicCtx.ctx);
   });
 
-  // preDoubleTotal: get total of pre_double multipliers for the current team
+  // preDoubleTotal: get total of pre_double multipliers for the hole
   // Used for 12x availability: 3 pre_doubles = 8x unlocks 12x
   // Returns the actual value so it can be used in comparisons
+  // Note: Uses hole-level total since pre_double is a hole-wide multiplier
   jsonLogic.add_operation("preDoubleTotal", () => {
-    if (!currentLogicCtx?.team) {
+    if (!currentLogicCtx?.holeResult) {
       return 1;
     }
-    return getPreDoubleTotal(currentLogicCtx.team);
+    return getHolePreDoubleTotal(currentLogicCtx.holeResult);
   });
 
   // teeMultiplierTotal: get total of user-activated (unearned) multipliers
