@@ -9,6 +9,7 @@ export * from "./favorites";
 export * from "./gameholes";
 export * from "./games";
 export * from "./gamespecs";
+export * from "./messages";
 export * from "./options";
 export * from "./players";
 export type {

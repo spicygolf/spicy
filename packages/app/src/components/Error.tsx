@@ -22,6 +22,9 @@ interface ErrorDisplayProps {
 
 /**
  * Error display component with user-friendly message and optional technical details.
+ *
+ * For dynamic error titles from the Jazz catalog, use the useErrorMessages hook
+ * from @/hooks/useErrorMessages and pass the result as the `title` prop.
  */
 export function ErrorDisplay({
   error,

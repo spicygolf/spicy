@@ -51,6 +51,7 @@ export function App(): React.JSX.Element {
     specs: { created: number; updated: number; skipped: number };
     options: { created: number; updated: number };
     players: { created: number; updated: number; skipped: number };
+    messages: { created: number; updated: number };
     errors: Array<{ item: string; error: string }>;
   } | null>(null);
 
@@ -69,6 +70,7 @@ export function App(): React.JSX.Element {
   const [importSpecs, setImportSpecs] = useState<boolean>(false);
   const [importPlayers, setImportPlayers] = useState<boolean>(false);
   const [importGames, setImportGames] = useState<boolean>(true);
+  const [importMessages, setImportMessages] = useState<boolean>(false);
   const [gameLegacyId, setGameLegacyId] = useState<string>("");
 
   // Admin status (checked via API for security)
@@ -99,8 +101,8 @@ export function App(): React.JSX.Element {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
 
-      // Step 1: Import specs & players (20-50%)
-      if (importSpecs || importPlayers) {
+      // Step 1: Import specs, players & messages (20-50%)
+      if (importSpecs || importPlayers || importMessages) {
         setImportProgress(20);
         const specsResponse = await jazzFetch(`${apiUrl}/catalog/import`, {
           method: "POST",
@@ -110,6 +112,7 @@ export function App(): React.JSX.Element {
           body: JSON.stringify({
             specs: importSpecs,
             players: importPlayers,
+            messages: importMessages,
           }),
         });
 
@@ -561,6 +564,18 @@ export function App(): React.JSX.Element {
                           />
                           <span className="text-sm">Games</span>
                         </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={importMessages}
+                            onChange={(e) =>
+                              setImportMessages(e.target.checked)
+                            }
+                            disabled={isImporting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">Error Messages</span>
+                        </label>
                       </div>
                       {importGames && (
                         <div className="mt-3 space-y-2">
@@ -587,7 +602,10 @@ export function App(): React.JSX.Element {
                       disabled={
                         !isAdmin ||
                         isImporting ||
-                        (!importSpecs && !importPlayers && !importGames)
+                        (!importSpecs &&
+                          !importPlayers &&
+                          !importGames &&
+                          !importMessages)
                       }
                       className="w-full"
                       size="lg"
@@ -690,6 +708,34 @@ export function App(): React.JSX.Element {
                               </div>
                             </div>
                           </div>
+
+                          {importResult.messages &&
+                            (importResult.messages.created > 0 ||
+                              importResult.messages.updated > 0) && (
+                              <div className="rounded-md border p-3">
+                                <div className="text-sm font-medium text-muted-foreground">
+                                  Error Messages
+                                </div>
+                                <div className="mt-2 space-y-1 text-sm">
+                                  <div className="flex justify-between">
+                                    <span className="text-green-600">
+                                      Created:
+                                    </span>
+                                    <span className="font-medium">
+                                      {importResult.messages.created}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-blue-600">
+                                      Updated:
+                                    </span>
+                                    <span className="font-medium">
+                                      {importResult.messages.updated}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                         </div>
 
                         {importResult.errors.length > 0 && (

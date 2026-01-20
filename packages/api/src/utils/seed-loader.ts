@@ -12,6 +12,7 @@ import { join } from "node:path";
 const SEED_PATH = join(process.cwd(), "../../data/seed");
 const SPECS_PATH = join(SEED_PATH, "specs");
 const OPTIONS_PATH = join(SEED_PATH, "options");
+const MESSAGES_PATH = join(SEED_PATH, "messages");
 
 /**
  * Seed data option types (v0.5 format)
@@ -388,4 +389,48 @@ export async function loadSeedSpecsAsV03(): Promise<
       }>,
     };
   });
+}
+
+/**
+ * Seed message file format
+ */
+export interface SeedMessageFile {
+  locale: string;
+  messages: Array<{ key: string; message: string }>;
+}
+
+/**
+ * Load all error messages from seed files
+ *
+ * Reads all JSON files from data/seed/messages/ directory.
+ * Each file should contain a locale and array of messages.
+ *
+ * @returns Map of locale code to SeedMessageFile
+ */
+export async function loadSeedMessages(): Promise<
+  Map<string, SeedMessageFile>
+> {
+  const messages = new Map<string, SeedMessageFile>();
+
+  try {
+    const files = await readdir(MESSAGES_PATH);
+    const jsonFiles = files.filter((f) => f.endsWith(".json"));
+
+    for (const filename of jsonFiles) {
+      try {
+        const messageFile = await loadJsonFile<SeedMessageFile>(
+          join(MESSAGES_PATH, filename),
+        );
+        messages.set(messageFile.locale, messageFile);
+      } catch (error) {
+        console.warn(`Failed to load messages ${filename}:`, error);
+      }
+    }
+
+    console.log(`Loaded ${messages.size} message locales from seed files`);
+  } catch (error) {
+    console.error("Failed to read messages directory:", error);
+  }
+
+  return messages;
 }

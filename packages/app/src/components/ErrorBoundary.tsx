@@ -6,6 +6,28 @@ import { clearAllAuthData } from "@/hooks/useJazzCredentials";
 import { storage } from "@/providers/jazz/mmkv-store";
 import { reportError } from "@/utils/reportError";
 
+/**
+ * Default error titles shown when the app crashes.
+ * These are hardcoded because ErrorBoundary runs outside Jazz providers.
+ *
+ * For dynamic messages from the catalog, use useErrorMessages hook
+ * in components that have Jazz context available.
+ */
+const ERROR_TITLES = [
+  "Oops! The app hit into the deep rough.",
+  "Sorry, the app just made a double bogey.",
+  "Looks like we shanked that one.",
+  "The app took an unplayable lie.",
+  "We hit it in the water on that one.",
+  "That shot went out of bounds.",
+  "We whiffed on that one.",
+  "Fore! Something went wrong.",
+];
+
+function getRandomErrorTitle(): string {
+  return ERROR_TITLES[Math.floor(Math.random() * ERROR_TITLES.length)];
+}
+
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
@@ -85,7 +107,7 @@ export class ErrorBoundary extends Component<
         <View style={styles.container}>
           <ErrorDisplay
             error={this.state.error || "An unexpected error occurred"}
-            title="Oops! The app hit into the deep rough."
+            title={getRandomErrorTitle()}
             onRetry={this.handleRetry}
             onLogout={this.handleLogoutAndRestart}
           />

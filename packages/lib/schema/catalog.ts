@@ -2,6 +2,7 @@ import { co, z } from "jazz-tools";
 import { Course } from "./courses";
 import { Game } from "./games";
 import { MapOfGameSpecs } from "./gamespecs";
+import { ErrorMessagesByLocale } from "./messages";
 import { MapOfOptions } from "./options";
 import { Player } from "./players";
 
@@ -52,5 +53,6 @@ export const GameCatalog = co.map({
   players: co.optional(MapOfPlayers),
   courses: co.optional(MapOfCourses),
   games: co.optional(MapOfGames),
+  errorMessages: co.optional(ErrorMessagesByLocale),
 });
 export type GameCatalog = co.loaded<typeof GameCatalog>;
