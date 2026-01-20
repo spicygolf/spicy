@@ -30,7 +30,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup Fly.io CLI
-        uses: superfly/flyctl-actions/setup-flyctl@v1.5
+        # Note: This action tags major versions (v1) with latest semver, so v1 gets updates automatically.
+        # Avoid pinning to specific versions like v1.5 - they use '1.5' not 'v1.5' for minor tags.
+        uses: superfly/flyctl-actions/setup-flyctl@v1
 
       - name: Deploy to Fly.io
         run: |
