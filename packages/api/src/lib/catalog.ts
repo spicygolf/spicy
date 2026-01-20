@@ -94,8 +94,6 @@ import {
   Club,
   Course,
   CourseDefaultTee,
-  ErrorMessage,
-  ErrorMessagesByLocale,
   Game,
   type GameCatalog,
   GameHole,
@@ -106,7 +104,6 @@ import {
   HoleScores,
   JunkOption,
   ListOfClubs,
-  ListOfErrorMessages,
   ListOfGameHoles,
   ListOfGameSpecs,
   ListOfPlayers,
@@ -167,10 +164,6 @@ export interface ImportResult {
     created: number;
     updated: number;
     skipped: number;
-  };
-  messages: {
-    created: number;
-    updated: number;
   };
   errors: Array<{ item: string; error: string }>;
 }
@@ -1374,85 +1367,6 @@ export async function importFavoritesForPlayer(
 export interface CatalogImportOptions {
   specs?: boolean;
   players?: boolean;
-  messages?: boolean;
-}
-
-/**
- * Import error messages from seed files into the catalog (idempotent)
- *
- * Messages are organized by locale (e.g., "en_US", "en_GB", "es_ES").
- * Each locale can have multiple messages per key for random selection.
- */
-export async function importErrorMessages(
-  workerAccount: co.loaded<typeof PlayerAccount>,
-  catalog: GameCatalog,
-): Promise<{ created: number; updated: number }> {
-  const { loadSeedMessages } = await import("../utils/seed-loader");
-  const seedMessages = await loadSeedMessages();
-
-  const result = { created: 0, updated: 0 };
-
-  if (seedMessages.size === 0) {
-    console.log("No message seed files found");
-    return result;
-  }
-
-  // Ensure errorMessages map exists on catalog
-  let loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { errorMessages: {} },
-  });
-
-  if (!loadedCatalog.$jazz.has("errorMessages")) {
-    const group = Group.create(workerAccount);
-    group.makePublic();
-    const newMap = ErrorMessagesByLocale.create({}, { owner: group });
-    loadedCatalog.$jazz.set("errorMessages", newMap);
-
-    // Reload to get the new map properly loaded
-    loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { errorMessages: {} },
-    });
-  }
-
-  const errorMessages = loadedCatalog.errorMessages;
-  if (!errorMessages) {
-    throw new Error("Failed to initialize errorMessages");
-  }
-
-  // Import each locale's messages
-  for (const [locale, seedFile] of seedMessages) {
-    const exists = errorMessages.$jazz.has(locale);
-
-    // Create or replace the message list for this locale
-    const group = Group.create(workerAccount);
-    group.makePublic();
-    const messageList = ListOfErrorMessages.create([], { owner: group });
-
-    for (const msg of seedFile.messages) {
-      const errorMessage = ErrorMessage.create(
-        {
-          key: msg.key,
-          message: msg.message,
-        },
-        { owner: group },
-      );
-      messageList.$jazz.push(errorMessage);
-    }
-
-    errorMessages.$jazz.set(locale, messageList);
-
-    if (exists) {
-      result.updated++;
-    } else {
-      result.created++;
-    }
-
-    console.log(
-      `Imported ${seedFile.messages.length} messages for locale ${locale}`,
-    );
-  }
-
-  return result;
 }
 
 /**
@@ -1465,10 +1379,9 @@ export async function importGameSpecsToCatalog(
 ): Promise<ImportResult> {
   const importSpecs = options?.specs ?? true;
   const importPlayersFlag = options?.players ?? true;
-  const importMessagesFlag = options?.messages ?? false;
 
   console.log(
-    `Starting import to catalog for worker: ${workerAccount.$jazz.id} (specs: ${importSpecs}, players: ${importPlayersFlag}, messages: ${importMessagesFlag})`,
+    `Starting import to catalog for worker: ${workerAccount.$jazz.id} (specs: ${importSpecs}, players: ${importPlayersFlag})`,
   );
 
   const catalog = await loadOrCreateCatalog(workerAccount);
@@ -1491,10 +1404,6 @@ export async function importGameSpecsToCatalog(
       created: 0,
       updated: 0,
       skipped: 0,
-    },
-    messages: {
-      created: 0,
-      updated: 0,
     },
     errors: [],
   };
@@ -1682,22 +1591,6 @@ export async function importGameSpecsToCatalog(
     }
   } else {
     console.log("Skipping players import (disabled)");
-  }
-
-  // Import error messages if enabled
-  if (importMessagesFlag) {
-    try {
-      const messagesResult = await importErrorMessages(workerAccount, catalog);
-      result.messages.created = messagesResult.created;
-      result.messages.updated = messagesResult.updated;
-    } catch (error) {
-      result.errors.push({
-        item: "messages",
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-  } else {
-    console.log("Skipping messages import (disabled)");
   }
 
   return result;

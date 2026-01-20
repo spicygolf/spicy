@@ -12,7 +12,9 @@ import { join } from "node:path";
 const SEED_PATH = join(process.cwd(), "../../data/seed");
 const SPECS_PATH = join(SEED_PATH, "specs");
 const OPTIONS_PATH = join(SEED_PATH, "options");
-const MESSAGES_PATH = join(SEED_PATH, "messages");
+
+// Messages are stored in the API package directly (not shared seed data)
+const MESSAGES_PATH = join(process.cwd(), "data/messages");
 
 /**
  * Seed data option types (v0.5 format)

@@ -179,6 +179,32 @@ const app = new Elysia()
     }),
     { jazzAuth: true },
   )
+  // Public endpoint for error messages (no auth required)
+  .get(`/${api}/messages/:locale`, async ({ params }) => {
+    const { loadSeedMessages } = await import("./utils/seed-loader");
+    const messages = await loadSeedMessages();
+
+    const locale = params.locale || "en_US";
+    const messageFile = messages.get(locale);
+
+    if (messageFile) {
+      return messageFile;
+    }
+
+    // Fallback: try language-only (e.g., "en" from "en_GB")
+    const language = locale.split("_")[0];
+    for (const [key, file] of messages) {
+      if (key.startsWith(language)) {
+        return file;
+      }
+    }
+
+    // Ultimate fallback: return en_US or first available
+    return (
+      messages.get("en_US") ||
+      messages.values().next().value || { locale: "en_US", messages: [] }
+    );
+  })
   // Admin endpoints - protected by Jazz auth + admin check
   .post(
     `/${api}/catalog/import`,
