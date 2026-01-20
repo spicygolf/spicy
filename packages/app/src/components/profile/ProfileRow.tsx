@@ -6,22 +6,33 @@
  */
 
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";
 
 interface ProfileRowProps {
   title: string;
   subtitle?: string;
+  showWarning?: boolean;
   onPress: () => void;
 }
 
-export function ProfileRow({ title, subtitle, onPress }: ProfileRowProps) {
+export function ProfileRow({
+  title,
+  subtitle,
+  showWarning,
+  onPress,
+}: ProfileRowProps) {
   const { theme } = useUnistyles();
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <Text style={styles.title}>{title}</Text>
+      {showWarning && (
+        <View
+          style={[styles.warningDot, { backgroundColor: theme.colors.error }]}
+        />
+      )}
       {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
       <FontAwesome6
         name="chevron-right"
@@ -46,6 +57,12 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     fontWeight: "bold",
     fontSize: 16,
+  },
+  warningDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: theme.gap(1),
   },
   subtitle: {
     fontSize: 14,

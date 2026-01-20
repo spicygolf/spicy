@@ -67,7 +67,8 @@ export const MultiplierOption = co.map({
   type: z.literal(["multiplier"]),
   version: z.string(),
   sub_type: z.optional(z.literal(["bbq", "press", "automatic"])),
-  value: z.number(),
+  // Value is optional for input_value multipliers where user provides the value
+  value: z.optional(z.number()),
   seq: z.optional(z.number()),
   icon: z.optional(z.string()),
   based_on: z.optional(z.string()),

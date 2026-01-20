@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole, Team } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
+import { getHoleTeeMultiplierTotal } from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
@@ -348,9 +349,19 @@ export function ScoringView({
   // Get the current hole number for scoreboard lookup
   const currentHoleNumber = String(currentHoleIndex + 1);
 
-  // Get overall multiplier from scoreboard (all teams' multipliers combined)
-  const overallMultiplier =
-    scoreboard?.holes?.[currentHoleNumber]?.holeMultiplier ?? 1;
+  // Get current hole result from scoreboard
+  const currentHoleResult = scoreboard?.holes?.[currentHoleNumber];
+
+  // Get tee multiplier (unearned/user-activated multipliers only, excludes birdie_bbq etc.)
+  // This is what shows in the HoleToolbar - what teams committed to "off the tee"
+  const teeMultiplier = getHoleTeeMultiplierTotal(currentHoleResult ?? null);
+
+  // Get overall multiplier from scoreboard (all teams' multipliers combined, including earned)
+  // This is used for calculating display points
+  const overallMultiplier = currentHoleResult?.holeMultiplier ?? 1;
+
+  // Get warnings for incomplete scoring (e.g., "Mark all possible points")
+  const warnings = currentHoleResult?.warnings;
 
   // Get all teams for the current hole (needed for one_per_group junk limit)
   const allTeams: Team[] = currentHole?.teams?.$isLoaded
@@ -434,10 +445,15 @@ export function ScoringView({
 
   return (
     <>
-      <HoleHeader hole={holeInfo} onPrevious={onPrevHole} onNext={onNextHole} />
+      <HoleHeader
+        hole={holeInfo}
+        onPrevious={onPrevHole}
+        onNext={onNextHole}
+        warnings={warnings}
+      />
       <HoleToolbar
         onChangeTeams={onChangeTeams}
-        overallMultiplier={overallMultiplier}
+        overallMultiplier={teeMultiplier}
         isCustomMultiplier={customMultiplierState.isActive}
         onMultiplierPress={
           customMultiplierOption

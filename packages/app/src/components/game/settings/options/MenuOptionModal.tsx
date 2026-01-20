@@ -1,8 +1,7 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { Modal, Pressable, ScrollView, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
-import { Text } from "@/ui";
+import { ModalHeader, Text } from "@/ui";
 
 interface MenuOptionModalProps {
   visible: boolean;
@@ -19,7 +18,6 @@ export function MenuOptionModal({
   onSelect,
   onClose,
 }: MenuOptionModalProps) {
-  const { theme } = useUnistyles();
   const value = currentValue ?? option.defaultValue;
 
   if (!option.choices?.$isLoaded) {
@@ -38,17 +36,7 @@ export function MenuOptionModal({
           style={styles.modalContent}
           onPress={(e) => e.stopPropagation()}
         >
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{option.disp}</Text>
-            <Pressable onPress={onClose}>
-              <FontAwesome6
-                name="xmark"
-                iconStyle="solid"
-                size={20}
-                color={theme.colors.primary}
-              />
-            </Pressable>
-          </View>
+          <ModalHeader title={option.disp ?? ""} onClose={onClose} />
 
           <ScrollView style={styles.scrollView}>
             <View style={styles.options}>
@@ -101,19 +89,7 @@ const styles = StyleSheet.create((theme) => ({
     maxWidth: 400,
     maxHeight: "80%",
   },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.gap(2),
-    paddingBottom: theme.gap(1),
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+
   scrollView: {
     flexGrow: 0,
   },

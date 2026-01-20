@@ -1,7 +1,9 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import type { ScoringWarning } from "spicylib/scoring";
 import { Text } from "@/ui";
+import { IncompleteIndicator } from "./IncompleteIndicator";
 
 interface HoleInfo {
   number: string;
@@ -15,10 +17,20 @@ interface HoleHeaderProps {
   onPrevious: () => void;
   onNext: () => void;
   facility?: string;
+  /** Warnings for incomplete scoring on this hole */
+  warnings?: ScoringWarning[];
 }
 
-export function HoleHeader({ hole, onPrevious, onNext }: HoleHeaderProps) {
+export function HoleHeader({
+  hole,
+  onPrevious,
+  onNext,
+  warnings,
+}: HoleHeaderProps) {
   const { theme } = useUnistyles();
+
+  // Get the first warning message (typically "Mark all possible points")
+  const warningMessage = warnings?.[0]?.message;
 
   return (
     <View style={styles.container}>
@@ -40,7 +52,14 @@ export function HoleHeader({ hole, onPrevious, onNext }: HoleHeaderProps) {
 
         {/* Hole Info */}
         <View style={styles.holeInfo}>
-          <Text style={styles.holeNumber}>{hole.number}</Text>
+          <View style={styles.holeNumberRow}>
+            <Text style={styles.holeNumber}>{hole.number}</Text>
+            {warningMessage && (
+              <View style={styles.warningIndicator}>
+                <IncompleteIndicator message={warningMessage} />
+              </View>
+            )}
+          </View>
           {hole.par !== undefined &&
             hole.yards !== undefined &&
             hole.handicap !== undefined && (
@@ -92,10 +111,19 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: theme.gap(2),
+    // Maintain consistent height whether or not hole details are shown (e.g., Summary view)
+    minHeight: 48,
+  },
+  holeNumberRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   holeNumber: {
     fontSize: 24,
     fontWeight: "bold",
+  },
+  warningIndicator: {
+    marginLeft: theme.gap(1),
   },
   holeDetails: {
     flexDirection: "row",

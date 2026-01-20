@@ -328,6 +328,105 @@ function existingPreMultiplierTotal(
   return currentMultiplier >= threshold;
 }
 
+/**
+ * Get the total of pre_double multipliers for a team on the current hole.
+ *
+ * This counts only pre_double multipliers (rest_of_nine scope presses),
+ * NOT other multipliers like double, double_back, or earned multipliers.
+ *
+ * Used for 12x availability: 3 pre_doubles = 2*2*2 = 8, which unlocks 12x.
+ *
+ * @param team - The team to check
+ * @returns Product of pre_double multipliers (e.g., 8 if 3 pre_doubles)
+ */
+export function getPreDoubleTotal(team: TeamHoleResult | null): number {
+  if (!team) return 1;
+
+  let total = 1;
+  for (const mult of team.multipliers) {
+    if (mult.name === "pre_double") {
+      total *= mult.value;
+    }
+  }
+  return total;
+}
+
+/**
+ * Get the total of pre_double multipliers for all teams on a hole.
+ *
+ * Pre_double is a hole-wide multiplier - all teams' pre_doubles combine.
+ * When Team A presses on Hole 1 and Team B presses on Hole 2,
+ * both holes are 4x (2 * 2) for everyone.
+ *
+ * @param holeResult - The hole result containing all teams
+ * @returns Product of ALL pre_double multipliers from ALL teams (e.g., 8 if 3 total pre_doubles)
+ */
+export function getHolePreDoubleTotal(holeResult: HoleResult | null): number {
+  if (!holeResult) return 1;
+
+  // Collect all pre_double multipliers from all teams
+  let total = 1;
+  for (const team of Object.values(holeResult.teams)) {
+    for (const mult of team.multipliers) {
+      if (mult.name === "pre_double") {
+        total *= mult.value;
+      }
+    }
+  }
+  return total;
+}
+
+/**
+ * Get the total of all user-activated (unearned) multipliers for a team.
+ *
+ * This includes pre_double, double, and double_back, but excludes
+ * earned/automatic multipliers like birdie_bbq and eagle_bbq.
+ *
+ * Used for HoleToolbar display to show "off the tee" multiplier commitment.
+ *
+ * @param team - The team to check
+ * @returns Product of unearned multipliers
+ */
+export function getTeeMultiplierTotal(team: TeamHoleResult | null): number {
+  if (!team) return 1;
+
+  let total = 1;
+  for (const mult of team.multipliers) {
+    // Include only user-activated multipliers (not earned)
+    // earned = true means it was triggered automatically (birdie_bbq, eagle_bbq)
+    if (!mult.earned) {
+      total *= mult.value;
+    }
+  }
+  return total;
+}
+
+/**
+ * Get the total of all user-activated (unearned) multipliers for a hole.
+ *
+ * Combines tee multipliers from all teams on the hole.
+ * Used for HoleToolbar display to show "off the tee" multiplier commitment.
+ *
+ * @param holeResult - The hole result containing all teams
+ * @returns Product of all unearned multipliers from all teams
+ */
+export function getHoleTeeMultiplierTotal(
+  holeResult: HoleResult | null,
+): number {
+  if (!holeResult) return 1;
+
+  let total = 1;
+  for (const team of Object.values(holeResult.teams)) {
+    for (const mult of team.multipliers) {
+      // Include only user-activated multipliers (not earned)
+      if (!mult.earned) {
+        total *= mult.value;
+      }
+    }
+  }
+  return total;
+}
+
 // getFrontNinePreDoubleTotal is imported from option-utils.ts
 
 // =============================================================================
@@ -448,6 +547,27 @@ function registerOperators(): void {
       return 1;
     }
     return getFrontNinePreDoubleTotal(currentLogicCtx.ctx);
+  });
+
+  // preDoubleTotal: get total of pre_double multipliers for the hole
+  // Used for 12x availability: 3 pre_doubles = 8x unlocks 12x
+  // Returns the actual value so it can be used in comparisons
+  // Note: Uses hole-level total since pre_double is a hole-wide multiplier
+  jsonLogic.add_operation("preDoubleTotal", () => {
+    if (!currentLogicCtx?.holeResult) {
+      return 1;
+    }
+    return getHolePreDoubleTotal(currentLogicCtx.holeResult);
+  });
+
+  // teeMultiplierTotal: get total of user-activated (unearned) multipliers
+  // Includes pre_double, double, double_back but NOT birdie_bbq, eagle_bbq
+  // Used for HoleToolbar display
+  jsonLogic.add_operation("teeMultiplierTotal", () => {
+    if (!currentLogicCtx?.team) {
+      return 1;
+    }
+    return getTeeMultiplierTotal(currentLogicCtx.team);
   });
 
   operatorsRegistered = true;

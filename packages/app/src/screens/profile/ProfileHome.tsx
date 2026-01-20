@@ -32,6 +32,14 @@ export function ProfileHome() {
       ? me.root.player.name
       : undefined;
 
+  // Show warning on Account row if recovery phrase hasn't been saved
+  const isLoaded = me?.$isLoaded && me.root?.$isLoaded;
+  const showAccountWarning =
+    isLoaded &&
+    (!me.root.$jazz.has("settings") ||
+      !me.root.settings?.$isLoaded ||
+      me.root.settings.recoveryPhraseSaved !== true);
+
   return (
     <Screen>
       <View style={styles.container}>
@@ -50,6 +58,7 @@ export function ProfileHome() {
           />
           <ProfileRow
             title="Account"
+            showWarning={showAccountWarning}
             onPress={() => navigation.navigate("AccountScreen")}
           />
           <ProfileRow

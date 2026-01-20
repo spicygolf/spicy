@@ -18,7 +18,14 @@ export {
 } from "./junk-engine";
 export type { LogicContext } from "./logic-engine";
 // Logic engine (json-logic evaluation with custom operators)
-export { evaluateLogic, isSimpleRankCheck } from "./logic-engine";
+export {
+  evaluateLogic,
+  getHolePreDoubleTotal,
+  getHoleTeeMultiplierTotal,
+  getPreDoubleTotal,
+  getTeeMultiplierTotal,
+  isSimpleRankCheck,
+} from "./logic-engine";
 // Multiplier engine (data-driven multiplier evaluation)
 export {
   calculateTotalMultiplier,

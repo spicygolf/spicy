@@ -37,30 +37,25 @@ function formatWithSign(value: number, useEvenPar = false): string {
 }
 
 /**
- * Calculate total course par from the first player's tee data
+ * Calculate par for only the holes where a specific player has scored.
+ * Each player may have scored a different number of holes.
  */
-function getCoursePar(game: Game): number {
-  if (!game.rounds?.$isLoaded || game.rounds.length === 0) {
-    return 72; // Default par
-  }
-
-  const firstRtg = game.rounds[0];
-  if (!firstRtg?.$isLoaded) return 72;
-
-  const round = firstRtg.round;
-  if (!round?.$isLoaded || !round.$jazz.has("tee")) return 72;
-
-  const tee = round.tee;
-  if (!tee?.$isLoaded || !tee.holes?.$isLoaded) return 72;
+function getParForPlayer(
+  scoreboard: Scoreboard | null,
+  playerId: string,
+): number {
+  if (!scoreboard) return 0;
 
   let totalPar = 0;
-  for (const hole of tee.holes) {
-    if (hole?.$isLoaded && hole.par) {
-      totalPar += hole.par;
+
+  for (const holeResult of Object.values(scoreboard.holes)) {
+    const playerResult = holeResult.players[playerId];
+    if (playerResult?.hasScore) {
+      totalPar += holeResult.holeInfo.par;
     }
   }
 
-  return totalPar || 72;
+  return totalPar;
 }
 
 /**
@@ -100,7 +95,6 @@ function getPlayerTeamPoints(scoreboard: Scoreboard): Map<string, number> {
 function buildPlayerSummaries(
   game: Game,
   scoreboard: Scoreboard | null,
-  coursePar: number,
 ): PlayerSummary[] {
   if (!scoreboard || !game.players?.$isLoaded) {
     return [];
@@ -122,11 +116,14 @@ function buildPlayerSummaries(
     // Use team points if available (2-team games), otherwise fall back to player points
     const points = teamPoints.get(playerId) ?? cumulative.pointsTotal;
 
+    // Calculate par for only the holes THIS player has scored
+    const parForPlayer = getParForPlayer(scoreboard, playerId);
+
     summaries.push({
       playerId,
       name: player.name,
       gross: cumulative.grossTotal,
-      toPar: cumulative.grossTotal - coursePar,
+      toPar: cumulative.grossTotal - parForPlayer,
       points,
       holesPlayed: cumulative.holesPlayed,
     });
@@ -145,8 +142,7 @@ export function SummaryView({
   onPrevHole,
   onNextHole,
 }: SummaryViewProps) {
-  const coursePar = getCoursePar(game);
-  const playerSummaries = buildPlayerSummaries(game, scoreboard, coursePar);
+  const playerSummaries = buildPlayerSummaries(game, scoreboard);
 
   return (
     <>

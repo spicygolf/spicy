@@ -175,6 +175,9 @@ export function getScoreValue(
   const playerResult = holeResult.players[playerId];
   if (!playerResult) return null;
 
+  // Return null if no score has been entered for this hole
+  if (!playerResult.hasScore) return null;
+
   switch (viewMode) {
     case "gross":
       return playerResult.gross;

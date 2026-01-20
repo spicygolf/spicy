@@ -141,16 +141,14 @@ export function RecoveryPhrase() {
             <Text style={styles.actionText}>{isVisible ? "Hide" : "Show"}</Text>
           </TouchableOpacity>
 
-          {isVisible && (
-            <TouchableOpacity style={styles.actionButton} onPress={handleCopy}>
-              <FontAwesome6
-                name="copy"
-                size={16}
-                color={theme.colors.secondary}
-              />
-              <Text style={styles.actionText}>Copy</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity style={styles.actionButton} onPress={handleCopy}>
+            <FontAwesome6
+              name="copy"
+              size={16}
+              color={theme.colors.secondary}
+            />
+            <Text style={styles.actionText}>Copy</Text>
+          </TouchableOpacity>
         </View>
       </View>
 

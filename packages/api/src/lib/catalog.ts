@@ -12,9 +12,17 @@ import { type co, Group } from "jazz-tools";
  */
 const VALID_JUNK_SUB_TYPES = ["dot", "skin", "carryover"] as const;
 const VALID_MULTIPLIER_SUB_TYPES = ["bbq", "press", "automatic"] as const;
-const VALID_SCOPES = [
+const VALID_JUNK_SCOPES = [
   "player",
   "team",
+  "hole",
+  "rest_of_nine",
+  "game",
+] as const;
+const VALID_MULTIPLIER_SCOPES = [
+  "player",
+  "team",
+  "none",
   "hole",
   "rest_of_nine",
   "game",
@@ -41,12 +49,21 @@ function isValidMultiplierSubType(
   );
 }
 
-function isValidScope(
+function isValidJunkScope(
   value: unknown,
 ): value is "player" | "team" | "hole" | "rest_of_nine" | "game" {
   return (
     typeof value === "string" &&
-    (VALID_SCOPES as readonly string[]).includes(value)
+    (VALID_JUNK_SCOPES as readonly string[]).includes(value)
+  );
+}
+
+function isValidMultiplierScope(
+  value: unknown,
+): value is "player" | "team" | "none" | "hole" | "rest_of_nine" | "game" {
+  return (
+    typeof value === "string" &&
+    (VALID_MULTIPLIER_SCOPES as readonly string[]).includes(value)
   );
 }
 
@@ -191,13 +208,15 @@ interface MultiplierOptionData {
   disp: string;
   version: string;
   sub_type?: string;
-  value: number;
+  value?: number;
   seq?: number;
   icon?: string;
   based_on?: string;
   scope?: string;
   availability?: string;
   override?: boolean;
+  input_value?: boolean;
+  value_from?: string;
 }
 
 type OptionData = GameOptionData | JunkOptionData | MultiplierOptionData;
@@ -453,6 +472,13 @@ export async function upsertGameSpec(
             );
           if (loadedCatalogOpt.override !== undefined)
             newMultOption.$jazz.set("override", loadedCatalogOpt.override);
+          if (loadedCatalogOpt.input_value !== undefined)
+            newMultOption.$jazz.set(
+              "input_value",
+              loadedCatalogOpt.input_value,
+            );
+          if (loadedCatalogOpt.value_from)
+            newMultOption.$jazz.set("value_from", loadedCatalogOpt.value_from);
 
           specOptionsMap[opt.name] = newMultOption;
           continue;
@@ -572,7 +598,7 @@ async function upsertOptions(
       if (opt.seq !== undefined && typeof opt.seq === "number") {
         newOption.$jazz.set("seq", opt.seq);
       }
-      if (opt.scope && isValidScope(opt.scope)) {
+      if (opt.scope && isValidJunkScope(opt.scope)) {
         newOption.$jazz.set("scope", opt.scope);
       }
       if (opt.icon && typeof opt.icon === "string") {
@@ -602,13 +628,14 @@ async function upsertOptions(
 
       optionsMap.$jazz.set(opt.name, newOption);
     } else if (opt.type === "multiplier") {
+      // Always create new option - Jazz doesn't reliably persist updates to existing CoValues
       const newOption = MultiplierOption.create(
         {
           name: opt.name,
           disp: opt.disp,
           type: "multiplier",
           version: opt.version,
-          value: opt.value,
+          ...(opt.value !== undefined ? { value: opt.value } : {}),
         },
         { owner: optionsMap.$jazz.owner },
       );
@@ -626,7 +653,7 @@ async function upsertOptions(
       if (opt.based_on && typeof opt.based_on === "string") {
         newOption.$jazz.set("based_on", opt.based_on);
       }
-      if (opt.scope && isValidScope(opt.scope)) {
+      if (opt.scope && isValidMultiplierScope(opt.scope)) {
         newOption.$jazz.set("scope", opt.scope);
       }
       if (opt.availability && typeof opt.availability === "string") {
@@ -634,6 +661,15 @@ async function upsertOptions(
       }
       if (opt.override !== undefined && typeof opt.override === "boolean") {
         newOption.$jazz.set("override", opt.override);
+      }
+      if (
+        opt.input_value !== undefined &&
+        typeof opt.input_value === "boolean"
+      ) {
+        newOption.$jazz.set("input_value", opt.input_value);
+      }
+      if (opt.value_from && typeof opt.value_from === "string") {
+        newOption.$jazz.set("value_from", opt.value_from);
       }
 
       optionsMap.$jazz.set(opt.name, newOption);
@@ -1470,6 +1506,8 @@ export async function importGameSpecsToCatalog(
                   scope: multData.scope as string | undefined,
                   availability: multData.availability as string | undefined,
                   override: multData.override as boolean | undefined,
+                  input_value: multData.input_value as boolean | undefined,
+                  value_from: multData.value_from as string | undefined,
                 });
               }
             }

@@ -24,6 +24,7 @@ export const Player = co.map({
   gender: z.literal(["M", "F"]),
   ghinId: z.string().optional(),
   legacyId: z.string().optional(),
+  level: z.literal(["admin"]).optional(),
   handicap: co.optional(Handicap),
   clubs: co.optional(ListOfClubs),
   /**

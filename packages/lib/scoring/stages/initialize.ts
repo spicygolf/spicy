@@ -122,6 +122,7 @@ function createEmptyHoleResult(
   for (const [playerId] of ctx.playerHandicaps) {
     players[playerId] = {
       playerId,
+      hasScore: false,
       gross: 0,
       pops: 0,
       net: 0,

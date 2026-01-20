@@ -121,6 +121,8 @@ const styles = StyleSheet.create((theme) => ({
   scoreCellText: {
     fontSize: 13,
     color: theme.colors.primary,
+    textAlignVertical: "center",
+    includeFontPadding: false,
   },
   // Circle decorations (birdie/eagle)
   outerCircle: {

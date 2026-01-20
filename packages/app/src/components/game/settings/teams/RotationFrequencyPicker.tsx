@@ -2,7 +2,7 @@ import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Button, Input, Text } from "@/ui";
+import { Button, Input, ModalHeader, Text } from "@/ui";
 import { getRotationLabel, ROTATION_OPTIONS } from "./utils";
 
 interface RotationFrequencyPickerProps {
@@ -86,17 +86,7 @@ export function RotationFrequencyPicker({
             style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Teams Rotate</Text>
-              <Pressable onPress={handleClose}>
-                <FontAwesome6
-                  name="xmark"
-                  iconStyle="solid"
-                  size={20}
-                  color={theme.colors.primary}
-                />
-              </Pressable>
-            </View>
+            <ModalHeader title="Teams Rotate" onClose={handleClose} />
 
             <View style={styles.rotationOptions}>
               {ROTATION_OPTIONS.map((option) => {
@@ -205,19 +195,7 @@ const styles = StyleSheet.create((theme) => ({
     maxWidth: 500,
     maxHeight: "80%",
   },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.gap(2),
-    paddingBottom: theme.gap(1),
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+
   rotationOptions: {
     flexDirection: "row",
     flexWrap: "wrap",

@@ -12,6 +12,7 @@ import type { PlayerHoleResult } from "../types";
 function createPlayerResult(playerId: string, net: number): PlayerHoleResult {
   return {
     playerId,
+    hasScore: true,
     gross: net + 1, // Assume 1 pop
     pops: 1,
     net,

@@ -247,6 +247,8 @@ export function HandicapAdjustment({ route, navigation }: Props) {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
       >
         <Text style={styles.playerName}>{player.name}</Text>
 

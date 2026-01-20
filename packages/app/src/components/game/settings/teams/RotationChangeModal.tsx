@@ -2,7 +2,7 @@ import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Button, Text } from "@/ui";
+import { Button, ModalHeader, Text } from "@/ui";
 import type { RotationChangeOption } from "./types";
 import { getRotationLabel } from "./utils";
 
@@ -47,17 +47,10 @@ export function RotationChangeModal({
           style={styles.modalContent}
           onPress={(e) => e.stopPropagation()}
         >
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Rotation Frequency Changed</Text>
-            <Pressable onPress={handleCancel}>
-              <FontAwesome6
-                name="xmark"
-                iconStyle="solid"
-                size={20}
-                color={theme.colors.primary}
-              />
-            </Pressable>
-          </View>
+          <ModalHeader
+            title="Rotation Frequency Changed"
+            onClose={handleCancel}
+          />
 
           <Text style={styles.modalDescription}>
             You changed rotation from{" "}
@@ -188,19 +181,7 @@ const styles = StyleSheet.create((theme) => ({
     maxWidth: 500,
     maxHeight: "80%",
   },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.gap(2),
-    paddingBottom: theme.gap(1),
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+
   modalDescription: {
     fontSize: 14,
     color: theme.colors.secondary,

@@ -1,8 +1,7 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Button, Text, TextInput } from "@/ui";
+import { Button, ModalHeader, Text, TextInput } from "@/ui";
 
 interface CustomMultiplierModalProps {
   visible: boolean;
@@ -59,21 +58,12 @@ export function CustomMultiplierModal({
           style={styles.modalContent}
           onPress={(e) => e.stopPropagation()}
         >
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Custom Multiplier</Text>
-            <Pressable onPress={onClose}>
-              <FontAwesome6
-                name="xmark"
-                iconStyle="solid"
-                size={20}
-                color={theme.colors.primary}
-              />
-            </Pressable>
-          </View>
+          <ModalHeader title="Custom Tee Multiplier" onClose={onClose} />
 
           <Text style={styles.description}>
-            Set a custom multiplier (1-1000x) that overrides all other
-            multipliers for this hole.
+            Set a custom "off the tee" multiplier (1-1000x). This replaces
+            pre-presses and doubles, but earned multipliers (birdie BBQ, etc.)
+            still stack on top.
           </Text>
 
           <View style={styles.inputContainer}>
@@ -129,19 +119,7 @@ const styles = StyleSheet.create((theme) => ({
     width: "100%",
     maxWidth: 320,
   },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.gap(1.5),
-    paddingBottom: theme.gap(1),
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+
   description: {
     fontSize: 14,
     color: theme.colors.secondary,
@@ -161,12 +139,12 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: 8,
     paddingHorizontal: theme.gap(1.5),
     paddingVertical: theme.gap(1),
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
   },
   multiplierSuffix: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
     color: theme.colors.multiplier,
   },

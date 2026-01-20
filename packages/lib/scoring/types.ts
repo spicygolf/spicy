@@ -96,6 +96,8 @@ export interface MultiplierAward {
 export interface PlayerHoleResult {
   /** Player ID */
   playerId: string;
+  /** Whether a score has been entered for this hole */
+  hasScore: boolean;
   /** Gross score */
   gross: number;
   /** Pops (strokes received, can be negative for plus handicaps) */
