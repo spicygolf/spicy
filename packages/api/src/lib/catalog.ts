@@ -1532,6 +1532,7 @@ export async function importGameSpecsToCatalog(
                   availability: multData.availability as string | undefined,
                   override: multData.override as boolean | undefined,
                   input_value: multData.input_value as boolean | undefined,
+                  value_from: multData.value_from as string | undefined,
                 });
               }
             }

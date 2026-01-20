@@ -376,13 +376,15 @@ export async function loadSeedSpecsAsV03(): Promise<
         name: string;
         disp: string;
         sub_type?: string;
-        value: number;
+        value?: number;
         seq?: number;
         icon?: string;
         based_on?: string;
         scope?: string;
         availability?: string;
         override?: boolean;
+        input_value?: boolean;
+        value_from?: string;
       }>,
     };
   });
