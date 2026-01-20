@@ -59,13 +59,14 @@ export function CustomMultiplierModal({
           onPress={(e) => e.stopPropagation()}
         >
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Custom Multiplier</Text>
+            <Text style={styles.modalTitle}>Custom Tee Multiplier</Text>
             <ModalCloseButton onPress={onClose} />
           </View>
 
           <Text style={styles.description}>
-            Set a custom multiplier (1-1000x) that overrides all other
-            multipliers for this hole.
+            Set a custom "off the tee" multiplier (1-1000x). This replaces
+            pre-presses and doubles, but earned multipliers (birdie BBQ, etc.)
+            still stack on top.
           </Text>
 
           <View style={styles.inputContainer}>
@@ -155,12 +156,12 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: 8,
     paddingHorizontal: theme.gap(1.5),
     paddingVertical: theme.gap(1),
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
   },
   multiplierSuffix: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
     color: theme.colors.multiplier,
   },
