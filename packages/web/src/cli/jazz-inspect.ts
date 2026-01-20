@@ -8,6 +8,7 @@
  *   bun run jazz <coValueId> [resolveQuery]
  *   bun run jazz <type> <coValueId> [resolveQuery]
  *   bun run jazz catalog [specs|players|courses]
+ *   bun run jazz options <specId> [optionName]
  *
  * Types: player, game, round, course, tee, spec, account
  *
@@ -16,6 +17,8 @@
  *   bun run jazz game co_zeGX6eUyGPUbMPdV9csYsnFczib '{"players":{"$each":true}}'
  *   bun run jazz co_zaYtNqJZsTyi1Sy6615uCqhpsgi  # Auto-detect type
  *   bun run jazz catalog specs  # List all game specs in catalog
+ *   bun run jazz options co_zg5ZpS9hkN4P2pFNumajafW41FN  # List all options in a spec
+ *   bun run jazz options co_zg5ZpS9hkN4P2pFNumajafW41FN custom  # Inspect specific option
  */
 
 import { config } from "dotenv";
@@ -25,7 +28,10 @@ import { startWorker } from "jazz-tools/worker";
 import {
   Course,
   Game,
+  GameOption,
   GameSpec,
+  JunkOption,
+  MultiplierOption,
   Player,
   PlayerAccount,
   Round,
@@ -334,6 +340,118 @@ async function inspectCatalog(
   await done();
 }
 
+async function inspectOptions(
+  specId: string,
+  optionName?: string,
+): Promise<void> {
+  console.log(`\nInspecting options for spec: ${specId}`);
+  if (optionName) {
+    console.log(`Option: ${optionName}`);
+  }
+  console.log("");
+
+  const { worker, done } = await startWorker({
+    AccountSchema: PlayerAccount,
+    syncServer: `wss://cloud.jazz.tools/?key=${JAZZ_API_KEY}`,
+    accountID: JAZZ_WORKER_ACCOUNT,
+    accountSecret: JAZZ_WORKER_SECRET,
+  });
+
+  try {
+    const spec = await GameSpec.load(specId as ID<GameSpec>, {
+      loadAs: worker,
+      resolve: { options: { $each: true } },
+    });
+
+    if (!spec?.$isLoaded) {
+      console.error("Could not load spec");
+      await done();
+      return;
+    }
+
+    console.log(`Spec: ${spec.name} (${spec.short})\n`);
+
+    const options = spec.options;
+    if (!options?.$isLoaded) {
+      console.error("Options not loaded");
+      await done();
+      return;
+    }
+
+    const keys = Object.keys(options).filter(
+      (k) => !k.startsWith("$") && k !== "_schema",
+    );
+
+    if (optionName) {
+      // Show specific option
+      const opt = options[optionName];
+      if (!opt?.$isLoaded) {
+        console.error(`Option "${optionName}" not found or not loaded`);
+        console.log(`\nAvailable options: ${keys.join(", ")}`);
+        await done();
+        return;
+      }
+
+      console.log(`--- ${opt.name} ---`);
+      console.log(`  disp: ${opt.disp}`);
+      console.log(`  type: ${opt.type}`);
+      console.log(`  version: ${opt.version}`);
+
+      if (opt.type === "junk") {
+        const junk = opt as JunkOption;
+        console.log(`  value: ${junk.value}`);
+        console.log(`  sub_type: ${junk.sub_type}`);
+        console.log(`  seq: ${junk.seq}`);
+        console.log(`  scope: ${junk.scope}`);
+        console.log(`  icon: ${junk.icon}`);
+        console.log(`  based_on: ${junk.based_on}`);
+        console.log(`  show_in: ${junk.show_in}`);
+        console.log(`  limit: ${junk.limit}`);
+        console.log(`  score_to_par: ${junk.score_to_par}`);
+      } else if (opt.type === "multiplier") {
+        const mult = opt as MultiplierOption;
+        console.log(`  value: ${mult.value}`);
+        console.log(`  sub_type: ${mult.sub_type}`);
+        console.log(`  seq: ${mult.seq}`);
+        console.log(`  scope: ${mult.scope}`);
+        console.log(`  icon: ${mult.icon}`);
+        console.log(`  based_on: ${mult.based_on}`);
+        console.log(`  availability: ${mult.availability}`);
+        console.log(`  override: ${mult.override}`);
+        console.log(`  input_value: ${mult.input_value}`);
+        console.log(`  value_from: ${mult.value_from}`);
+      } else if (opt.type === "game") {
+        const gameOpt = opt as GameOption;
+        console.log(`  valueType: ${gameOpt.valueType}`);
+        console.log(`  defaultValue: ${gameOpt.defaultValue}`);
+        console.log(`  value: ${gameOpt.value}`);
+      }
+    } else {
+      // List all options
+      console.log(`Found ${keys.length} options:\n`);
+
+      for (const key of keys.sort()) {
+        const opt = options[key];
+        if (opt?.$isLoaded) {
+          const typeInfo =
+            opt.type === "multiplier"
+              ? `mult, value=${(opt as MultiplierOption).value}, scope=${(opt as MultiplierOption).scope}`
+              : opt.type === "junk"
+                ? `junk, value=${(opt as JunkOption).value}, scope=${(opt as JunkOption).scope}`
+                : `game`;
+          console.log(`  ${key}: ${opt.disp} (${typeInfo})`);
+        } else {
+          console.log(`  ${key}: (not loaded)`);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+
+  await done();
+}
+
 async function inspect(
   schemaType: SchemaType | null,
   coValueId: string,
@@ -458,6 +576,7 @@ Usage:
   bun run jazz <coValueId> [resolveQuery]
   bun run jazz <type> <coValueId> [resolveQuery]
   bun run jazz catalog [specs|players|courses]
+  bun run jazz options <specId> [optionName]
 
 Types:
   player, game, round, roundtogame, course, tee, spec, account
@@ -466,6 +585,11 @@ Catalog:
   specs     List all game specs with teamsConfig details
   players   List players in the catalog
   courses   List courses in the catalog
+
+Options:
+  List or inspect options within a GameSpec
+  bun run jazz options <specId>              List all options in the spec
+  bun run jazz options <specId> <name>       Inspect a specific option
 
 Arguments:
   coValueId     Jazz CoValue ID (starts with co_)
@@ -477,6 +601,8 @@ Examples:
   bun run jazz game co_zeGX6eUyGPUbMPdV9csYsnFczib '{"players":{"$each":true}}'
   bun run jazz co_zaYtNqJZsTyi1Sy6615uCqhpsgi  # Auto-detect type
   bun run jazz catalog specs  # List all game specs
+  bun run jazz options co_zg5ZpS9hkN4P2pFNumajafW41FN  # List all options
+  bun run jazz options co_zg5ZpS9hkN4P2pFNumajafW41FN custom  # Inspect 'custom' option
 `);
 }
 
@@ -502,6 +628,17 @@ if (args[0] === "catalog") {
     );
   }
   await inspectCatalog(catalogType);
+  process.exit(0);
+}
+
+// Check for options command
+if (args[0] === "options") {
+  const specId = args[1];
+  if (!specId || !specId.startsWith("co_")) {
+    exitWithError("Usage: bun run jazz options <specId> [optionName]");
+  }
+  const optionName = args[2];
+  await inspectOptions(specId, optionName);
   process.exit(0);
 }
 

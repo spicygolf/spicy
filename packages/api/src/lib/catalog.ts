@@ -12,9 +12,17 @@ import { type co, Group } from "jazz-tools";
  */
 const VALID_JUNK_SUB_TYPES = ["dot", "skin", "carryover"] as const;
 const VALID_MULTIPLIER_SUB_TYPES = ["bbq", "press", "automatic"] as const;
-const VALID_SCOPES = [
+const VALID_JUNK_SCOPES = [
   "player",
   "team",
+  "hole",
+  "rest_of_nine",
+  "game",
+] as const;
+const VALID_MULTIPLIER_SCOPES = [
+  "player",
+  "team",
+  "none",
   "hole",
   "rest_of_nine",
   "game",
@@ -41,12 +49,21 @@ function isValidMultiplierSubType(
   );
 }
 
-function isValidScope(
+function isValidJunkScope(
   value: unknown,
 ): value is "player" | "team" | "hole" | "rest_of_nine" | "game" {
   return (
     typeof value === "string" &&
-    (VALID_SCOPES as readonly string[]).includes(value)
+    (VALID_JUNK_SCOPES as readonly string[]).includes(value)
+  );
+}
+
+function isValidMultiplierScope(
+  value: unknown,
+): value is "player" | "team" | "none" | "hole" | "rest_of_nine" | "game" {
+  return (
+    typeof value === "string" &&
+    (VALID_MULTIPLIER_SCOPES as readonly string[]).includes(value)
   );
 }
 
@@ -198,6 +215,7 @@ interface MultiplierOptionData {
   scope?: string;
   availability?: string;
   override?: boolean;
+  input_value?: boolean;
 }
 
 type OptionData = GameOptionData | JunkOptionData | MultiplierOptionData;
@@ -572,7 +590,7 @@ async function upsertOptions(
       if (opt.seq !== undefined && typeof opt.seq === "number") {
         newOption.$jazz.set("seq", opt.seq);
       }
-      if (opt.scope && isValidScope(opt.scope)) {
+      if (opt.scope && isValidJunkScope(opt.scope)) {
         newOption.$jazz.set("scope", opt.scope);
       }
       if (opt.icon && typeof opt.icon === "string") {
@@ -626,7 +644,7 @@ async function upsertOptions(
       if (opt.based_on && typeof opt.based_on === "string") {
         newOption.$jazz.set("based_on", opt.based_on);
       }
-      if (opt.scope && isValidScope(opt.scope)) {
+      if (opt.scope && isValidMultiplierScope(opt.scope)) {
         newOption.$jazz.set("scope", opt.scope);
       }
       if (opt.availability && typeof opt.availability === "string") {
@@ -634,6 +652,12 @@ async function upsertOptions(
       }
       if (opt.override !== undefined && typeof opt.override === "boolean") {
         newOption.$jazz.set("override", opt.override);
+      }
+      if (
+        opt.input_value !== undefined &&
+        typeof opt.input_value === "boolean"
+      ) {
+        newOption.$jazz.set("input_value", opt.input_value);
       }
 
       optionsMap.$jazz.set(opt.name, newOption);
@@ -1470,6 +1494,7 @@ export async function importGameSpecsToCatalog(
                   scope: multData.scope as string | undefined,
                   availability: multData.availability as string | undefined,
                   override: multData.override as boolean | undefined,
+                  input_value: multData.input_value as boolean | undefined,
                 });
               }
             }
