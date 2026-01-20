@@ -1,0 +1,37 @@
+{
+  "locale": "en_US",
+  "messages": [
+    {
+      "key": "error_boundary_title",
+      "message": "Oops! The app hit into the deep rough."
+    },
+    {
+      "key": "error_boundary_title",
+      "message": "Sorry, the app just made a double bogey."
+    },
+    {
+      "key": "error_boundary_title",
+      "message": "Argh, the dreaded hosel rocket."
+    },
+    {
+      "key": "error_boundary_title",
+      "message": "The app took an unplayable lie."
+    },
+    {
+      "key": "error_boundary_title",
+      "message": "We hit it in the water on that one."
+    },
+    {
+      "key": "error_boundary_title",
+      "message": "The app just pumped its tee shot way OB."
+    },
+    {
+      "key": "error_boundary_title",
+      "message": "We just bladed one across the green."
+    },
+    {
+      "key": "error_boundary_title",
+      "message": "Ugh, the app just three-jacked."
+    }
+  ]
+}

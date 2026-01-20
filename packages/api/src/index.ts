@@ -32,6 +32,23 @@ const {
 // Guard against concurrent game imports
 let gamesImportInProgress = false;
 
+// Server-side cache for error messages (avoid disk I/O on every request)
+import type { SeedMessageFile } from "./utils/seed-loader";
+
+let messagesCache: Map<string, SeedMessageFile> | null = null;
+let messagesCacheTime = 0;
+const MESSAGES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+async function getMessagesWithCache(): Promise<Map<string, SeedMessageFile>> {
+  if (messagesCache && Date.now() - messagesCacheTime < MESSAGES_CACHE_TTL) {
+    return messagesCache;
+  }
+  const { loadSeedMessages } = await import("./utils/seed-loader");
+  messagesCache = await loadSeedMessages();
+  messagesCacheTime = Date.now();
+  return messagesCache;
+}
+
 /**
  * Jazz authentication plugin
  *
@@ -179,6 +196,38 @@ const app = new Elysia()
     }),
     { jazzAuth: true },
   )
+  // Public endpoint for error messages (no auth required)
+  // Server-side cache to avoid disk I/O on every request
+  .get(`/${api}/messages/:locale`, async ({ params }) => {
+    const messages = await getMessagesWithCache();
+
+    const locale = params.locale || "en_US";
+    const messageFile = messages.get(locale);
+
+    if (messageFile) {
+      return messageFile;
+    }
+
+    // Fallback: try canonical {language}_US variant first
+    const language = locale.split("_")[0];
+    const canonicalFallback = messages.get(`${language}_US`);
+    if (canonicalFallback) {
+      return canonicalFallback;
+    }
+
+    // Then try any matching language
+    for (const [key, file] of messages) {
+      if (key.startsWith(language)) {
+        return file;
+      }
+    }
+
+    // Ultimate fallback: return en_US or first available
+    return (
+      messages.get("en_US") ||
+      messages.values().next().value || { locale: "en_US", messages: [] }
+    );
+  })
   // Admin endpoints - protected by Jazz auth + admin check
   .post(
     `/${api}/catalog/import`,

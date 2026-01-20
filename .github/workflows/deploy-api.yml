@@ -39,7 +39,6 @@ jobs:
           flyctl deploy \
             --config packages/api/fly.toml \
             --dockerfile packages/api/Dockerfile \
-            --dockerignore-from-gitignore=false \
             .
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

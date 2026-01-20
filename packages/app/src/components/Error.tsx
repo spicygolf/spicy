@@ -22,6 +22,10 @@ interface ErrorDisplayProps {
 
 /**
  * Error display component with user-friendly message and optional technical details.
+ *
+ * For dynamic error titles, use the useErrorMessages hook from
+ * @/hooks/useErrorMessages and pass the result as the `title` prop.
+ * Messages are fetched from the API and cached locally via MMKV.
  */
 export function ErrorDisplay({
   error,

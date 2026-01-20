@@ -1,9 +1,10 @@
 import { jazzConfig } from "jazz-tools";
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import { LogBox, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { prefetchErrorMessages } from "@/hooks/useErrorMessages";
 import { RootNavigator } from "@/navigators/RootNavigator";
 import { JazzAndAuth } from "@/providers/jazz";
 import { NavigationProvider } from "@/providers/navigation";
@@ -23,6 +24,11 @@ if (__DEV__) {
 }
 
 export function App() {
+  // Prefetch error messages on startup (fire-and-forget)
+  useEffect(() => {
+    prefetchErrorMessages();
+  }, []);
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <StrictMode>

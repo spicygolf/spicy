@@ -28,10 +28,10 @@ import { startWorker } from "jazz-tools/worker";
 import {
   Course,
   Game,
-  GameOption,
+  type GameOption,
   GameSpec,
-  JunkOption,
-  MultiplierOption,
+  type JunkOption,
+  type MultiplierOption,
   Player,
   PlayerAccount,
   Round,

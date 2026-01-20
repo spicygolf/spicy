@@ -2,6 +2,7 @@ import React, { Component, type ReactNode } from "react";
 import { Alert, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ErrorDisplay } from "@/components/Error";
+import { getErrorTitle } from "@/hooks/useErrorMessages";
 import { clearAllAuthData } from "@/hooks/useJazzCredentials";
 import { storage } from "@/providers/jazz/mmkv-store";
 import { reportError } from "@/utils/reportError";
@@ -85,7 +86,7 @@ export class ErrorBoundary extends Component<
         <View style={styles.container}>
           <ErrorDisplay
             error={this.state.error || "An unexpected error occurred"}
-            title="Oops! The app hit into the deep rough."
+            title={getErrorTitle()}
             onRetry={this.handleRetry}
             onLogout={this.handleLogoutAndRestart}
           />
