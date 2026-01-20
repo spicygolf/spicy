@@ -621,83 +621,51 @@ async function upsertOptions(
 
       optionsMap.$jazz.set(opt.name, newOption);
     } else if (opt.type === "multiplier") {
-      // For multiplier options, update in-place if exists to preserve references
-      let multOption: co.loaded<typeof MultiplierOption>;
+      // Always create new option - Jazz doesn't reliably persist updates to existing CoValues
+      const newOption = MultiplierOption.create(
+        {
+          name: opt.name,
+          disp: opt.disp,
+          type: "multiplier",
+          version: opt.version,
+          ...(opt.value !== undefined ? { value: opt.value } : {}),
+        },
+        { owner: optionsMap.$jazz.owner },
+      );
 
-      if (exists) {
-        // Update existing option in-place so specs keep their references
-        const existing = optionsMap[opt.name];
-        if (existing?.$isLoaded && existing.type === "multiplier") {
-          multOption = existing as co.loaded<typeof MultiplierOption>;
-          // Update core fields
-          multOption.$jazz.set("disp", opt.disp);
-          multOption.$jazz.set("version", opt.version);
-          if (opt.value !== undefined) {
-            multOption.$jazz.set("value", opt.value);
-          }
-        } else {
-          // Type mismatch - create new
-          multOption = MultiplierOption.create(
-            {
-              name: opt.name,
-              disp: opt.disp,
-              type: "multiplier",
-              version: opt.version,
-              ...(opt.value !== undefined ? { value: opt.value } : {}),
-            },
-            { owner: optionsMap.$jazz.owner },
-          );
-        }
-      } else {
-        // Create new option
-        multOption = MultiplierOption.create(
-          {
-            name: opt.name,
-            disp: opt.disp,
-            type: "multiplier",
-            version: opt.version,
-            ...(opt.value !== undefined ? { value: opt.value } : {}),
-          },
-          { owner: optionsMap.$jazz.owner },
-        );
-      }
-
-      // Set optional fields with validation (always, to ensure updates)
+      // Set optional fields with validation
       if (opt.sub_type && isValidMultiplierSubType(opt.sub_type)) {
-        multOption.$jazz.set("sub_type", opt.sub_type);
+        newOption.$jazz.set("sub_type", opt.sub_type);
       }
       if (opt.seq !== undefined && typeof opt.seq === "number") {
-        multOption.$jazz.set("seq", opt.seq);
+        newOption.$jazz.set("seq", opt.seq);
       }
       if (opt.icon && typeof opt.icon === "string") {
-        multOption.$jazz.set("icon", opt.icon);
+        newOption.$jazz.set("icon", opt.icon);
       }
       if (opt.based_on && typeof opt.based_on === "string") {
-        multOption.$jazz.set("based_on", opt.based_on);
+        newOption.$jazz.set("based_on", opt.based_on);
       }
       if (opt.scope && isValidMultiplierScope(opt.scope)) {
-        multOption.$jazz.set("scope", opt.scope);
+        newOption.$jazz.set("scope", opt.scope);
       }
       if (opt.availability && typeof opt.availability === "string") {
-        multOption.$jazz.set("availability", opt.availability);
+        newOption.$jazz.set("availability", opt.availability);
       }
       if (opt.override !== undefined && typeof opt.override === "boolean") {
-        multOption.$jazz.set("override", opt.override);
+        newOption.$jazz.set("override", opt.override);
       }
       if (
         opt.input_value !== undefined &&
         typeof opt.input_value === "boolean"
       ) {
-        multOption.$jazz.set("input_value", opt.input_value);
+        newOption.$jazz.set("input_value", opt.input_value);
       }
       if (opt.value_from && typeof opt.value_from === "string") {
-        multOption.$jazz.set("value_from", opt.value_from);
+        newOption.$jazz.set("value_from", opt.value_from);
       }
 
-      // Only set in map if new (existing is already there)
-      if (!exists) {
-        optionsMap.$jazz.set(opt.name, multOption);
-      }
+      optionsMap.$jazz.set(opt.name, newOption);
     }
 
     if (exists) {
