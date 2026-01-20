@@ -404,7 +404,7 @@ export interface SeedMessageFile {
 /**
  * Load all error messages from seed files
  *
- * Reads all JSON files from data/seed/messages/ directory.
+ * Reads all JSON files from packages/api/data/messages/ directory.
  * Each file should contain a locale and array of messages.
  *
  * @returns Map of locale code to SeedMessageFile

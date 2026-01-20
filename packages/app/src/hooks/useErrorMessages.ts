@@ -23,9 +23,11 @@ interface CachedMessages {
 }
 
 /**
- * Select a random item from an array
+ * Select a random item from an array.
+ * Returns undefined for empty arrays.
  */
-function randomChoice<T>(items: T[]): T {
+function randomChoice<T>(items: T[]): T | undefined {
+  if (items.length === 0) return undefined;
   return items[Math.floor(Math.random() * items.length)];
 }
 
@@ -98,14 +100,16 @@ function getMessageFromCache(
       .filter((m) => m.key === key)
       .map((m) => m.message);
     if (matching.length > 0) {
-      return randomChoice(matching);
+      // Safe: we just checked length > 0
+      return randomChoice(matching) as string;
     }
   }
 
   // Fall back to defaults
   const defaults = DEFAULT_ERROR_MESSAGES[key];
   if (defaults && defaults.length > 0) {
-    return randomChoice(defaults);
+    // Safe: we just checked length > 0
+    return randomChoice(defaults) as string;
   }
 
   return key;
