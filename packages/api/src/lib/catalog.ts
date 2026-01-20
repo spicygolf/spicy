@@ -472,6 +472,13 @@ export async function upsertGameSpec(
             );
           if (loadedCatalogOpt.override !== undefined)
             newMultOption.$jazz.set("override", loadedCatalogOpt.override);
+          if (loadedCatalogOpt.input_value !== undefined)
+            newMultOption.$jazz.set(
+              "input_value",
+              loadedCatalogOpt.input_value,
+            );
+          if (loadedCatalogOpt.value_from)
+            newMultOption.$jazz.set("value_from", loadedCatalogOpt.value_from);
 
           specOptionsMap[opt.name] = newMultOption;
           continue;

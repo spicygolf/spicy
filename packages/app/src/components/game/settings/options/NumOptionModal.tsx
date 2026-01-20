@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
-import { Button, Input, ModalHeader, Text } from "@/ui";
+import { Button, Input, ModalHeader } from "@/ui";
 
 interface NumOptionModalProps {
   visible: boolean;

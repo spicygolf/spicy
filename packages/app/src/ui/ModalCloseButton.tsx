@@ -14,6 +14,9 @@ export function ModalCloseButton({ onPress }: ModalCloseButtonProps) {
       onPress={onPress}
       style={styles.button}
       hitSlop={{ top: 12, right: 12, bottom: 12, left: 12 }}
+      accessibilityRole="button"
+      accessibilityLabel="Close"
+      accessibilityHint="Closes the modal"
     >
       <FontAwesome6
         name="xmark"
