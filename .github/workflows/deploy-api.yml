@@ -23,6 +23,7 @@ jobs:
   deploy:
     name: Deploy to Fly.io
     runs-on: ubuntu-latest
+    environment: prod
     # Only run on main repo, not forks
     if: github.repository == 'spicygolf/spicy'
 
