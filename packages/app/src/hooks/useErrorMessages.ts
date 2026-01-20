@@ -129,6 +129,7 @@ function getMessageFromCache(
  */
 export function useErrorMessages(key: string, locale = "en_US"): string {
   // Start with cached value (even if stale) or default
+  // useState initializer runs once, so we read cache here
   const [message, setMessage] = useState<string>(() => {
     const cached = getCachedMessages(locale);
     return getMessageFromCache(key, cached);
@@ -137,20 +138,13 @@ export function useErrorMessages(key: string, locale = "en_US"): string {
   useEffect(() => {
     let mounted = true;
 
+    // Check if we need to refresh (don't re-read cache for display,
+    // useState initializer already set the initial value)
     const cached = getCachedMessages(locale);
-
-    // Always use cached data immediately (stale-while-revalidate)
-    if (cached) {
-      const msg = getMessageFromCache(key, cached);
-      if (mounted) setMessage(msg);
-    }
-
-    // Only fetch if cache is stale or missing
     if (isCacheStale(cached)) {
       fetchMessages(locale).then((fresh) => {
         if (mounted && fresh) {
-          const msg = getMessageFromCache(key, fresh);
-          setMessage(msg);
+          setMessage(getMessageFromCache(key, fresh));
         }
       });
     }
@@ -195,7 +189,12 @@ export function getErrorTitle(locale = "en_US"): string {
 /**
  * Pre-fetch and cache messages for a locale.
  * Call this at app startup to ensure messages are available.
+ * Errors are silently ignored to prevent app startup crashes.
  */
 export async function prefetchErrorMessages(locale = "en_US"): Promise<void> {
-  await fetchMessages(locale);
+  try {
+    await fetchMessages(locale);
+  } catch {
+    // Silently ignore - we have hardcoded defaults as fallback
+  }
 }
