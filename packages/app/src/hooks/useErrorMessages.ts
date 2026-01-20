@@ -30,22 +30,26 @@ function randomChoice<T>(items: T[]): T {
 }
 
 /**
- * Get cached messages from MMKV
+ * Get cached messages from MMKV (returns even if stale for stale-while-revalidate)
  */
 function getCachedMessages(locale: string): CachedMessages | null {
   try {
     const cached = storage.getString(`${MMKV_KEY_PREFIX}${locale}`);
     if (cached) {
-      const parsed = JSON.parse(cached) as CachedMessages;
-      // Check if cache is still valid
-      if (Date.now() - parsed.fetchedAt < CACHE_EXPIRY_MS) {
-        return parsed;
-      }
+      return JSON.parse(cached) as CachedMessages;
     }
   } catch (e) {
     // Ignore parse errors
   }
   return null;
+}
+
+/**
+ * Check if cached messages need refresh (older than expiry time)
+ */
+function isCacheStale(cached: CachedMessages | null): boolean {
+  if (!cached) return true;
+  return Date.now() - cached.fetchedAt >= CACHE_EXPIRY_MS;
 }
 
 /**
@@ -110,17 +114,17 @@ function getMessageFromCache(
 /**
  * Hook to get error messages with API fetch + MMKV caching.
  *
- * Messages are fetched from the API and cached locally in MMKV.
- * Falls back to hardcoded defaults when:
- * - Cache is empty and API is unavailable
- * - Message key not found
+ * Uses stale-while-revalidate pattern:
+ * - Always returns cached data immediately (even if stale)
+ * - Refreshes in background when cache is stale
+ * - Falls back to hardcoded defaults only when no cache exists
  *
  * @param key - Message identifier (e.g., "error_boundary_title")
  * @param locale - Locale code (e.g., "en_US", "en_GB", "es_ES")
  * @returns A random message string for the given key
  */
 export function useErrorMessages(key: string, locale = "en_US"): string {
-  // Start with cached value or default
+  // Start with cached value (even if stale) or default
   const [message, setMessage] = useState<string>(() => {
     const cached = getCachedMessages(locale);
     return getMessageFromCache(key, cached);
@@ -129,21 +133,23 @@ export function useErrorMessages(key: string, locale = "en_US"): string {
   useEffect(() => {
     let mounted = true;
 
-    // Check cache first
     const cached = getCachedMessages(locale);
+
+    // Always use cached data immediately (stale-while-revalidate)
     if (cached) {
-      // Cache hit - use it but still fetch in background to refresh
       const msg = getMessageFromCache(key, cached);
       if (mounted) setMessage(msg);
     }
 
-    // Fetch from API (always, to keep cache fresh)
-    fetchMessages(locale).then((fresh) => {
-      if (mounted && fresh) {
-        const msg = getMessageFromCache(key, fresh);
-        setMessage(msg);
-      }
-    });
+    // Only fetch if cache is stale or missing
+    if (isCacheStale(cached)) {
+      fetchMessages(locale).then((fresh) => {
+        if (mounted && fresh) {
+          const msg = getMessageFromCache(key, fresh);
+          setMessage(msg);
+        }
+      });
+    }
 
     return () => {
       mounted = false;
