@@ -22,13 +22,22 @@ export function GameListItem({ game }: { game: Game | null | undefined }) {
   const navigation =
     useNavigation<NativeStackNavigationProp<GamesNavigatorParamList>>();
 
-  // Load game details on-demand with shallow subscription
+  // Load game details with full resolve - includes course/tee for display
   const loadedGame = useCoState(Game, game?.$jazz.id, {
     resolve: {
       players: {
         $each: true,
       },
-      rounds: true,
+      rounds: {
+        $each: {
+          round: {
+            course: {
+              facility: true,
+            },
+            tee: true,
+          },
+        },
+      },
     },
   });
 
