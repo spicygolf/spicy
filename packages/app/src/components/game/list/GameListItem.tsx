@@ -6,7 +6,7 @@ import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Game } from "spicylib/schema";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
-import { Text } from "@/ui";
+import { Skeleton, SkeletonGroup, Text } from "@/ui";
 import { GameCourseTeeDisplay } from "./GameCourseTeeDisplay";
 
 function formatPlayerName(name: string | null | undefined): string {
@@ -18,21 +18,55 @@ function formatPlayerName(name: string | null | undefined): string {
   return `${firstInitial}. ${lastName}`;
 }
 
+/**
+ * Skeleton placeholder for a game list item while loading.
+ * Matches the layout: Game Name, Date/Time, Course•Tee, Players
+ */
+function GameListItemSkeleton() {
+  return (
+    <View style={styles.container}>
+      <View style={styles.game}>
+        <SkeletonGroup>
+          <Skeleton width={160} height={20} />
+          <Skeleton width={180} height={14} />
+          <Skeleton width={90} height={13} />
+          <Skeleton width="70%" height={12} />
+        </SkeletonGroup>
+      </View>
+      <View style={styles.actions}>
+        <Skeleton width={18} height={18} borderRadius={4} />
+      </View>
+    </View>
+  );
+}
+
 export function GameListItem({ game }: { game: Game | null | undefined }) {
   const navigation =
     useNavigation<NativeStackNavigationProp<GamesNavigatorParamList>>();
 
-  // Load game details on-demand with shallow subscription
+  // Load game details with full resolve - includes course/tee for display
   const loadedGame = useCoState(Game, game?.$jazz.id, {
     resolve: {
       players: {
         $each: true,
       },
-      rounds: true,
+      rounds: {
+        $each: {
+          round: {
+            course: {
+              facility: true,
+            },
+            tee: true,
+          },
+        },
+      },
     },
   });
 
-  if (!game?.$isLoaded || !loadedGame?.$isLoaded) return null;
+  // Show skeleton while loading
+  if (!game?.$isLoaded || !loadedGame?.$isLoaded) {
+    return <GameListItemSkeleton />;
+  }
 
   // Generate player names directly from Jazz data - no useState/useEffect needed
   const playerNames = loadedGame.players?.$isLoaded

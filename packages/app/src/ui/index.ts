@@ -7,5 +7,6 @@ export * from "./ModalCloseButton";
 export * from "./ModalHeader";
 export * from "./Picker";
 export * from "./Screen";
+export * from "./Skeleton";
 export * from "./Text";
 export * from "./TextInput";
