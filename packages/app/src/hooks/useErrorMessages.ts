@@ -40,7 +40,7 @@ function getCachedMessages(locale: string): CachedMessages | null {
     if (cached) {
       return JSON.parse(cached) as CachedMessages;
     }
-  } catch (e) {
+  } catch {
     // Ignore parse errors
   }
   return null;
@@ -60,7 +60,7 @@ function isCacheStale(cached: CachedMessages | null): boolean {
 function cacheMessages(data: CachedMessages): void {
   try {
     storage.set(`${MMKV_KEY_PREFIX}${data.locale}`, JSON.stringify(data));
-  } catch (e) {
+  } catch {
     // Ignore storage errors
   }
 }
@@ -82,7 +82,7 @@ async function fetchMessages(locale: string): Promise<CachedMessages | null> {
       cacheMessages(cached);
       return cached;
     }
-  } catch (e) {
+  } catch {
     // Network error - fall back to cache or defaults
   }
   return null;
