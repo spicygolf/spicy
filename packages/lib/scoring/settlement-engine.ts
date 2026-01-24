@@ -122,10 +122,18 @@ export function calculatePoolPayouts(
       const placesPaid = Math.min(pool.placesPaid ?? 3, ranked.length);
       const pcts = getPayoutPcts(placesPaid, pool.payoutPcts);
 
+      // Calculate payouts with remainder tracking to avoid drift
+      let totalPaid = 0;
       for (let i = 0; i < placesPaid; i++) {
         const player = ranked[i];
         const pct = pcts[i];
         if (!player || pct === undefined) continue;
+
+        // For last payout, give remainder to avoid rounding drift
+        const isLast = i === placesPaid - 1;
+        const amount = isLast
+          ? poolAmount - totalPaid
+          : Math.round((poolAmount * pct) / 100);
 
         payouts.push({
           playerId: player.playerId,
@@ -133,8 +141,9 @@ export function calculatePoolPayouts(
           poolName: pool.name,
           place: i + 1,
           metricValue: player.value,
-          amount: Math.round((poolAmount * pct) / 100),
+          amount,
         });
+        totalPaid += amount;
       }
       break;
     }
@@ -146,15 +155,27 @@ export function calculatePoolPayouts(
 
       const amountPerUnit = poolAmount / totalUnits;
 
-      for (const player of ranked) {
-        if (!player || player.value <= 0) continue;
+      // Calculate payouts with remainder tracking
+      let totalPaid = 0;
+      const eligiblePlayers = ranked.filter((p) => p && p.value > 0);
+      for (let i = 0; i < eligiblePlayers.length; i++) {
+        const player = eligiblePlayers[i];
+        if (!player) continue;
+
+        // For last payout, give remainder to avoid rounding drift
+        const isLast = i === eligiblePlayers.length - 1;
+        const amount = isLast
+          ? poolAmount - totalPaid
+          : Math.round(player.value * amountPerUnit);
+
         payouts.push({
           playerId: player.playerId,
           playerName: player.playerName,
           poolName: pool.name,
           metricValue: player.value,
-          amount: Math.round(player.value * amountPerUnit),
+          amount,
         });
+        totalPaid += amount;
       }
       break;
     }
@@ -188,10 +209,21 @@ export function calculateAllPayouts(
 ): Payout[] {
   const allPayouts: Payout[] = [];
 
-  for (const pool of pools) {
-    const poolAmount = Math.round((potTotal * pool.pct) / 100);
+  // Calculate pool amounts with remainder tracking to match potTotal exactly
+  let totalAllocated = 0;
+  for (let i = 0; i < pools.length; i++) {
+    const pool = pools[i];
+    if (!pool) continue;
+
+    // For last pool, give remainder to avoid rounding drift
+    const isLast = i === pools.length - 1;
+    const poolAmount = isLast
+      ? potTotal - totalAllocated
+      : Math.round((potTotal * pool.pct) / 100);
+
     const poolPayouts = calculatePoolPayouts(pool, playerMetrics, poolAmount);
     allPayouts.push(...poolPayouts);
+    totalAllocated += poolAmount;
   }
 
   return allPayouts;
@@ -206,6 +238,7 @@ export function calculateNetPositions(
   potTotal: number,
 ): Record<string, number> {
   const playerCount = playerMetrics.length;
+  if (playerCount === 0) return {};
   const buyIn = potTotal / playerCount;
 
   const netPositions: Record<string, number> = {};
@@ -302,6 +335,9 @@ export function calculateSettlement(
   playerMetrics: PlayerMetrics[],
   potTotal: number,
 ): SettlementResult {
+  if (playerMetrics.length === 0) {
+    return { potTotal, buyIn: 0, payouts: [], netPositions: {}, debts: [] };
+  }
   const buyIn = potTotal / playerMetrics.length;
 
   // Calculate all payouts

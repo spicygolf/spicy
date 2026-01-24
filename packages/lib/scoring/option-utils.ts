@@ -285,6 +285,9 @@ export function getMetaOption(
   const options = source.options;
   if (!options?.$isLoaded) return undefined;
 
+  // Check if option exists before accessing (Jazz CoMap pattern)
+  // In tests, $jazz may not exist on mock objects
+  if (options.$jazz?.has && !options.$jazz.has(optionName)) return undefined;
   const option = options[optionName];
   if (!option?.$isLoaded || option.type !== "meta") return undefined;
 
@@ -370,20 +373,46 @@ export function getGameOptions(
 function getOptionsFromGame(game: Game | undefined | null) {
   if (!game?.$isLoaded) return undefined;
 
-  // Game-level overrides
-  if (game.options?.$isLoaded) {
-    return game.options;
+  // Helper to check if field exists (Jazz CoMap pattern)
+  // In tests, $jazz may not exist on mock objects
+  const hasField = (obj: unknown, field: string) => {
+    const o = obj as { $jazz?: { has?: (f: string) => boolean } };
+    return o.$jazz?.has ? o.$jazz.has(field) : field in (o as object);
+  };
+
+  // Game-level overrides (only if the field exists AND has options)
+  if (hasField(game, "options") && game.options?.$isLoaded) {
+    // Check if options map has any actual options (not just empty)
+    const hasOptions = Object.keys(game.options).some(
+      (k) => !k.startsWith("$") && k !== "_refs",
+    );
+    if (hasOptions) {
+      return game.options;
+    }
   }
 
   // Spec reference (live)
-  if (game.specRef?.$isLoaded && game.specRef.options?.$isLoaded) {
+  if (
+    hasField(game, "specRef") &&
+    game.specRef?.$isLoaded &&
+    hasField(game.specRef, "options") &&
+    game.specRef.options?.$isLoaded
+  ) {
     return game.specRef.options;
   }
 
   // Legacy game.specs[0]
-  if (game.specs?.$isLoaded && game.specs.length > 0) {
+  if (
+    hasField(game, "specs") &&
+    game.specs?.$isLoaded &&
+    game.specs.length > 0
+  ) {
     const spec = game.specs[0];
-    if (spec?.$isLoaded && spec.options?.$isLoaded) {
+    if (
+      spec?.$isLoaded &&
+      hasField(spec, "options") &&
+      spec.options?.$isLoaded
+    ) {
       return spec.options;
     }
   }

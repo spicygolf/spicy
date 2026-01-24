@@ -220,7 +220,8 @@ function extractOptions(
   // Priority order:
   // 1. Game-level option overrides (user customizations for this game)
   // 2. Spec reference options (live spec from catalog)
-  // 3. Primary game spec options (from game.specs[0], backwards compat)
+  // 3. Legacy game.specs[0] options (backwards compat)
+  // 4. Primary game spec options (final fallback)
 
   if (game.options?.$isLoaded) {
     return game.options;
@@ -231,7 +232,15 @@ function extractOptions(
     return game.specRef.options;
   }
 
-  // Fall back to game.specs[0] (old architecture)
+  // Fall back to game.specs[0] (old architecture), even if specRef is present
+  if (game.specs?.$isLoaded && game.specs.length > 0) {
+    const legacySpec = game.specs[0];
+    if (legacySpec?.$isLoaded && legacySpec.options?.$isLoaded) {
+      return legacySpec.options;
+    }
+  }
+
+  // Final fallback to gameSpec options (if different from above)
   if (gameSpec.options?.$isLoaded) {
     return gameSpec.options;
   }

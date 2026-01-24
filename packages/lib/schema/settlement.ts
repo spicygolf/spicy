@@ -37,7 +37,7 @@ export const PayoutPool = co.map({
    * - "per_unit": Split equally per unit (e.g., per skin won)
    * - "winner_take_all": Single winner takes all
    */
-  splitType: z.literal(["places", "per_unit", "winner_take_all"]),
+  splitType: z.enum(["places", "per_unit", "winner_take_all"]),
 
   /** Number of places paid (for splitType: "places") */
   placesPaid: z.optional(z.number()),

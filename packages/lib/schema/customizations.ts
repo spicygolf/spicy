@@ -61,7 +61,7 @@ export function getEffectiveSpecMetadata(
   if (!customization) {
     return {
       name: catalogSpec.name,
-      short: catalogSpec.short ?? catalogSpec.name,
+      short: catalogSpec.short || catalogSpec.name,
       long_description: catalogSpec.long_description,
     };
   }

@@ -809,7 +809,7 @@ export function App() {
 ### 3.2 Reorganize Components
 
 **New Directory Structure:**
-```
+```text
 packages/web/src/
 ├── player/           # Player-facing UI
 │   ├── PlayerApp.tsx
@@ -954,7 +954,7 @@ function getDisplayName(spec: GameSpec, userId: string): string {
 - `packages/lib/scoring/__tests__/settlement-engine.test.ts` - NEW
 
 ### Config
-- `packages/app/src/providers/posthog/index.tsx` - Disable in __DEV__
+- `packages/app/src/providers/posthog/index.tsx` - Disable in `__DEV__`
 
 ## Verification Plan
 

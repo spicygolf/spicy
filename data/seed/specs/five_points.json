@@ -70,13 +70,13 @@
       "name": "min_players",
       "disp": "Minimum Players",
       "valueType": "num",
-      "value": "4"
+      "value": 4
     },
     {
       "name": "max_players",
       "disp": "Maximum Players",
       "valueType": "num",
-      "value": "4"
+      "value": 4
     },
     {
       "name": "status",
