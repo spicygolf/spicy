@@ -3,15 +3,32 @@
  *
  * Allows users to link their account to their GHIN player record.
  * This grants access to their imported games and player data.
+ *
+ * Flow:
+ * 1. User enters GHIN ID and taps "Look Up"
+ * 2. Shows preview of what data is available (games, favorites)
+ * 3. User selects what to import and confirms
+ * 4. Imports selected data
  */
 
 import { useAccount } from "jazz-tools/react-native";
 import { useState } from "react";
-import { Alert, TouchableOpacity, View } from "react-native";
+import { Alert, Switch, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Game, ListOfGames, PlayerAccount } from "spicylib/schema";
 import { apiPost } from "@/lib/api-client";
 import { Button, Text, TextInput } from "@/ui";
+
+interface PlayerLookupResult {
+  found: boolean;
+  playerId?: string;
+  playerName?: string;
+  ghinId?: string;
+  legacyId?: string;
+  gameCount: number;
+  favoritePlayersCount: number;
+  favoriteCoursesCount: number;
+}
 
 interface LinkPlayerResult {
   success: boolean;
@@ -27,7 +44,7 @@ interface LinkPlayerResult {
 }
 
 interface ImportProgress {
-  phase: "linking" | "importing";
+  phase: "looking" | "linking" | "importing";
   current: number;
   total: number;
   playerName?: string;
@@ -40,6 +57,14 @@ export function LinkGhin() {
   const [isLinking, setIsLinking] = useState(false);
   const [progress, setProgress] = useState<ImportProgress | null>(null);
 
+  // Lookup/preview state
+  const [lookupResult, setLookupResult] = useState<PlayerLookupResult | null>(
+    null,
+  );
+  const [importGames, setImportGames] = useState(true);
+  const [importFavoritePlayers, setImportFavoritePlayers] = useState(true);
+  const [importFavoriteCourses, setImportFavoriteCourses] = useState(true);
+
   // Check if linked to a GHIN/catalog player (not just the default player created on signup)
   const linkedPlayer =
     me?.$isLoaded && me.root?.$isLoaded && me.root.player?.$isLoaded
@@ -47,9 +72,51 @@ export function LinkGhin() {
       : null;
   const isLinked = linkedPlayer?.$jazz.has("ghinId") ?? false;
 
-  const handleLink = async () => {
+  const handleLookup = async () => {
     if (!ghinId.trim()) {
       Alert.alert("Error", "Please enter your GHIN ID");
+      return;
+    }
+
+    setIsLinking(true);
+    setProgress({ phase: "looking", current: 0, total: 0 });
+    setLookupResult(null);
+
+    try {
+      const result = await apiPost<PlayerLookupResult>("/player/lookup", {
+        ghinId: ghinId.trim(),
+      });
+
+      if (!result.found) {
+        Alert.alert(
+          "Not Found",
+          `No player found with GHIN ID ${ghinId}. Make sure the player data has been imported.`,
+        );
+        return;
+      }
+
+      // Show preview
+      setLookupResult(result);
+
+      // Reset import options based on what's available
+      setImportGames(result.gameCount > 0);
+      setImportFavoritePlayers(result.favoritePlayersCount > 0);
+      setImportFavoriteCourses(result.favoriteCoursesCount > 0);
+    } catch (error) {
+      console.error("Lookup failed:", error);
+      Alert.alert(
+        "Lookup Failed",
+        error instanceof Error ? error.message : "Unknown error occurred",
+      );
+    } finally {
+      setIsLinking(false);
+      setProgress(null);
+    }
+  };
+
+  const handleLink = async () => {
+    if (!lookupResult?.found) {
+      Alert.alert("Error", "Please look up your GHIN ID first");
       return;
     }
 
@@ -194,8 +261,21 @@ export function LinkGhin() {
     );
   };
 
+  const handleCancel = () => {
+    setLookupResult(null);
+    setGhinId("");
+  };
+
   const renderProgress = () => {
     if (!progress) return null;
+
+    if (progress.phase === "looking") {
+      return (
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>Looking up your account...</Text>
+        </View>
+      );
+    }
 
     if (progress.phase === "linking") {
       return (
@@ -221,6 +301,91 @@ export function LinkGhin() {
         <Text style={styles.progressCount}>
           {progress.current} of {progress.total} games
         </Text>
+      </View>
+    );
+  };
+
+  const renderPreview = () => {
+    if (!lookupResult?.found) return null;
+
+    const hasData =
+      lookupResult.gameCount > 0 ||
+      lookupResult.favoritePlayersCount > 0 ||
+      lookupResult.favoriteCoursesCount > 0;
+
+    return (
+      <View style={styles.previewContainer}>
+        <Text style={styles.previewTitle}>
+          Welcome back, {lookupResult.playerName}!
+        </Text>
+
+        {hasData ? (
+          <>
+            <Text style={styles.previewSubtitle}>
+              We found your data from Spicy Golf v0.3:
+            </Text>
+
+            {lookupResult.gameCount > 0 && (
+              <View style={styles.optionRow}>
+                <Switch
+                  value={importGames}
+                  onValueChange={setImportGames}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.action,
+                  }}
+                />
+                <Text style={styles.optionLabel}>
+                  Import {lookupResult.gameCount} game
+                  {lookupResult.gameCount !== 1 ? "s" : ""}
+                </Text>
+              </View>
+            )}
+
+            {lookupResult.favoritePlayersCount > 0 && (
+              <View style={styles.optionRow}>
+                <Switch
+                  value={importFavoritePlayers}
+                  onValueChange={setImportFavoritePlayers}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.action,
+                  }}
+                />
+                <Text style={styles.optionLabel}>
+                  Import {lookupResult.favoritePlayersCount} favorite player
+                  {lookupResult.favoritePlayersCount !== 1 ? "s" : ""}
+                </Text>
+              </View>
+            )}
+
+            {lookupResult.favoriteCoursesCount > 0 && (
+              <View style={styles.optionRow}>
+                <Switch
+                  value={importFavoriteCourses}
+                  onValueChange={setImportFavoriteCourses}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.action,
+                  }}
+                />
+                <Text style={styles.optionLabel}>
+                  Import {lookupResult.favoriteCoursesCount} favorite course
+                  {lookupResult.favoriteCoursesCount !== 1 ? "s" : ""}
+                </Text>
+              </View>
+            )}
+          </>
+        ) : (
+          <Text style={styles.previewSubtitle}>
+            No historical data found, but we can still link your account.
+          </Text>
+        )}
+
+        <View style={styles.buttonRow}>
+          <Button label="Cancel" onPress={handleCancel} variant="secondary" />
+          <Button label="Link & Import" onPress={handleLink} />
+        </View>
       </View>
     );
   };
@@ -252,10 +417,15 @@ export function LinkGhin() {
         </View>
       ) : (
         <View style={styles.linkContainer}>
-          {!isLinking && (
+          {isLinking ? (
+            renderProgress()
+          ) : lookupResult ? (
+            renderPreview()
+          ) : (
             <>
               <Text style={styles.description}>
-                Enter your GHIN ID to link your account.
+                Enter your GHIN ID to link your account and import your
+                historical data from Spicy Golf v0.3.
               </Text>
 
               <View style={styles.inputRow}>
@@ -265,19 +435,16 @@ export function LinkGhin() {
                   onChangeText={setGhinId}
                   placeholder="Enter your GHIN ID"
                   keyboardType="number-pad"
-                  editable={!isLinking}
                 />
               </View>
 
               <Button
-                label="Link Player"
-                onPress={handleLink}
+                label="Look Up"
+                onPress={handleLookup}
                 disabled={!ghinId.trim()}
               />
             </>
           )}
-
-          {renderProgress()}
         </View>
       )}
     </View>
@@ -368,5 +535,31 @@ const styles = StyleSheet.create((theme) => ({
   unlinkText: {
     fontSize: 14,
     fontWeight: "500",
+  },
+  previewContainer: {
+    gap: 16,
+    paddingVertical: 8,
+  },
+  previewTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  previewSubtitle: {
+    fontSize: 14,
+    color: theme.colors.secondary,
+  },
+  optionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  optionLabel: {
+    fontSize: 14,
+    flex: 1,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 8,
   },
 }));

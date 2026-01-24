@@ -7,7 +7,26 @@
 
 import type { co, Group } from "jazz-tools";
 import { Game, Player, type PlayerAccount } from "spicylib/schema";
+import { loadPlayerFavorites } from "../utils/favorites-file";
+import { getGamesForPlayer } from "../utils/games-file";
 import { importFavoritesForPlayer, loadOrCreateCatalog } from "./catalog";
+
+/**
+ * Result of looking up a player (preview, no modifications)
+ */
+export interface PlayerLookupResult {
+  found: boolean;
+  playerId?: string;
+  playerName?: string;
+  ghinId?: string;
+  legacyId?: string;
+  /** Number of games found for this player */
+  gameCount: number;
+  /** Number of favorite players available */
+  favoritePlayersCount: number;
+  /** Number of favorite course/tees available */
+  favoriteCoursesCount: number;
+}
 
 /**
  * Result of linking a player to a user account
@@ -23,6 +42,101 @@ export interface LinkPlayerResult {
     errors: string[];
   };
   message: string;
+}
+
+/**
+ * Look up a player by GHIN ID and return preview data
+ *
+ * This is a read-only operation that does not modify any data.
+ * Use this to show the user what data is available before they confirm import.
+ *
+ * @param ghinId - The GHIN ID to look up
+ * @param workerAccount - The worker account that owns the catalog
+ * @returns PlayerLookupResult with preview of available data
+ */
+export async function lookupPlayer(
+  ghinId: string,
+  workerAccount: co.loaded<typeof PlayerAccount>,
+): Promise<PlayerLookupResult> {
+  console.log(`Looking up player with GHIN ${ghinId} (preview only)`);
+
+  // Load the catalog
+  const catalog = await loadOrCreateCatalog(workerAccount);
+
+  // Ensure players map is loaded
+  const loadedCatalog = await catalog.$jazz.ensureLoaded({
+    resolve: { players: {} },
+  });
+
+  if (!loadedCatalog.players) {
+    return {
+      found: false,
+      gameCount: 0,
+      favoritePlayersCount: 0,
+      favoriteCoursesCount: 0,
+    };
+  }
+
+  const catalogPlayers = loadedCatalog.players;
+  const playerRef = catalogPlayers[ghinId];
+
+  if (!playerRef) {
+    return {
+      found: false,
+      gameCount: 0,
+      favoritePlayersCount: 0,
+      favoriteCoursesCount: 0,
+    };
+  }
+
+  // Load player to get details
+  const playerId = playerRef.$jazz.id;
+  const loadedPlayer = await Player.load(playerId, {});
+
+  if (!loadedPlayer?.$isLoaded) {
+    return {
+      found: false,
+      gameCount: 0,
+      favoritePlayersCount: 0,
+      favoriteCoursesCount: 0,
+    };
+  }
+
+  const playerName = loadedPlayer.name;
+  const legacyPlayerId = loadedPlayer.legacyId;
+
+  // Count games from file index (fast, no need to load each game)
+  let gameCount = 0;
+  if (legacyPlayerId) {
+    const gameIds = await getGamesForPlayer(legacyPlayerId);
+    gameCount = gameIds.length;
+  }
+
+  // Count favorites from file (fast, no need to process)
+  let favoritePlayersCount = 0;
+  let favoriteCoursesCount = 0;
+  if (legacyPlayerId) {
+    const favorites = await loadPlayerFavorites(legacyPlayerId);
+    if (favorites) {
+      favoritePlayersCount = favorites.favoritePlayers.length;
+      favoriteCoursesCount = favorites.favoriteCourseTees.length;
+    }
+  }
+
+  console.log(
+    `Found player ${playerName}: ${gameCount} games, ${favoritePlayersCount} favorite players, ${favoriteCoursesCount} favorite courses`,
+  );
+
+  return {
+    found: true,
+    playerId,
+    playerName,
+    ghinId,
+    legacyId: legacyPlayerId,
+    gameCount,
+    favoritePlayersCount,
+    favoriteCoursesCount,
+  };
 }
 
 /**

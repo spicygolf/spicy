@@ -15,7 +15,7 @@ import {
   importGamesFromFiles,
   resetCatalog,
 } from "./lib/catalog";
-import { linkPlayerToUser } from "./lib/link";
+import { linkPlayerToUser, lookupPlayer } from "./lib/link";
 import { playerSearch } from "./players";
 import { isAdminAccount, requireAdminAccount } from "./utils/auth";
 import { authenticateJazzRequest } from "./utils/jazz-auth";
@@ -342,6 +342,34 @@ const app = new Elysia()
       }
     },
     { jazzAuth: true },
+  )
+  .post(
+    `/${api}/player/lookup`,
+    async ({ body }) => {
+      try {
+        const { ghinId } = body as { ghinId: string };
+        if (!ghinId) {
+          throw new Error("GHIN ID required");
+        }
+
+        console.log(`Looking up player with GHIN ${ghinId}`);
+
+        // Get the worker account to access catalog
+        const { account: workerAccount } = await getJazzWorker();
+
+        // Delegate to the lookup function
+        const result = await lookupPlayer(
+          ghinId,
+          workerAccount as co.loaded<typeof PlayerAccount>,
+        );
+
+        return result;
+      } catch (error) {
+        console.error("Player lookup failed:", error);
+        throw error;
+      }
+    },
+    // No jazzAuth required - this is a read-only preview
   )
   .post(
     `/${api}/player/link`,
