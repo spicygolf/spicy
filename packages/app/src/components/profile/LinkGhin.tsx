@@ -2,13 +2,11 @@
  * Link GHIN Component
  *
  * Allows users to link their account to their GHIN player record.
- * This grants access to their imported games and player data.
  *
  * Flow:
- * 1. User enters GHIN ID and taps "Look Up"
- * 2. Shows preview of what data is available (games, favorites)
- * 3. User selects what to import and confirms
- * 4. Imports selected data
+ * 1. User enters GHIN ID and taps "Link"
+ * 2. If historical data exists, show import options as a bonus
+ * 3. If no historical data, link directly
  */
 
 import { useAccount } from "jazz-tools/react-native";
@@ -44,7 +42,7 @@ interface LinkPlayerResult {
 }
 
 interface ImportProgress {
-  phase: "looking" | "linking" | "importing";
+  phase: "linking" | "importing";
   current: number;
   total: number;
   playerName?: string;
@@ -72,54 +70,69 @@ export function LinkGhin() {
       : null;
   const isLinked = linkedPlayer?.$jazz.has("ghinId") ?? false;
 
-  const handleLookup = async () => {
+  const handleLinkWithLookup = async () => {
     if (!ghinId.trim()) {
       Alert.alert("Error", "Please enter your GHIN ID");
       return;
     }
 
+    if (!me?.$isLoaded || !me.root?.$isLoaded) {
+      Alert.alert("Error", "Account not loaded. Please try again.");
+      return;
+    }
+
     setIsLinking(true);
-    setProgress({ phase: "looking", current: 0, total: 0 });
+    setProgress({ phase: "linking", current: 0, total: 0 });
     setLookupResult(null);
 
     try {
-      const result = await apiPost<PlayerLookupResult>("/player/lookup", {
+      // First, check if there's historical data
+      const lookupData = await apiPost<PlayerLookupResult>("/player/lookup", {
         ghinId: ghinId.trim(),
       });
 
-      if (!result.found) {
+      if (!lookupData.found) {
         Alert.alert(
           "Not Found",
           `No player found with GHIN ID ${ghinId}. Make sure the player data has been imported.`,
         );
+        setIsLinking(false);
+        setProgress(null);
         return;
       }
 
-      // Show preview
-      setLookupResult(result);
+      // Check if there's any historical data to import
+      const hasHistoricalData =
+        lookupData.gameCount > 0 ||
+        lookupData.favoritePlayersCount > 0 ||
+        lookupData.favoriteCoursesCount > 0;
 
-      // Reset import options based on what's available
-      setImportGames(result.gameCount > 0);
-      setImportFavoritePlayers(result.favoritePlayersCount > 0);
-      setImportFavoriteCourses(result.favoriteCoursesCount > 0);
+      if (hasHistoricalData) {
+        // Show import options as a bonus
+        setLookupResult(lookupData);
+        setImportGames(lookupData.gameCount > 0);
+        setImportFavoritePlayers(lookupData.favoritePlayersCount > 0);
+        setImportFavoriteCourses(lookupData.favoriteCoursesCount > 0);
+        setIsLinking(false);
+        setProgress(null);
+        return;
+      }
+
+      // No historical data - proceed directly to link
+      await performLink();
     } catch (error) {
-      console.error("Lookup failed:", error);
+      console.error("Link failed:", error);
       Alert.alert(
-        "Lookup Failed",
+        "Link Failed",
         error instanceof Error ? error.message : "Unknown error occurred",
       );
-    } finally {
       setIsLinking(false);
       setProgress(null);
     }
   };
 
-  const handleLink = async () => {
-    if (!lookupResult?.found) {
-      Alert.alert("Error", "Please look up your GHIN ID first");
-      return;
-    }
-
+  // Core link function - called directly or after showing import options
+  const performLink = async () => {
     if (!me?.$isLoaded || !me.root?.$isLoaded) {
       Alert.alert("Error", "Account not loaded. Please try again.");
       return;
@@ -269,14 +282,6 @@ export function LinkGhin() {
   const renderProgress = () => {
     if (!progress) return null;
 
-    if (progress.phase === "looking") {
-      return (
-        <View style={styles.progressContainer}>
-          <Text style={styles.progressText}>Looking up your account...</Text>
-        </View>
-      );
-    }
-
     if (progress.phase === "linking") {
       return (
         <View style={styles.progressContainer}>
@@ -384,7 +389,7 @@ export function LinkGhin() {
 
         <View style={styles.buttonRow}>
           <Button label="Cancel" onPress={handleCancel} variant="secondary" />
-          <Button label="Link & Import" onPress={handleLink} />
+          <Button label="Link & Import" onPress={performLink} />
         </View>
       </View>
     );
@@ -424,8 +429,7 @@ export function LinkGhin() {
           ) : (
             <>
               <Text style={styles.description}>
-                Enter your GHIN ID to link your account and import your
-                historical data from Spicy Golf v0.3.
+                Enter your GHIN ID to link your account.
               </Text>
 
               <View style={styles.inputRow}>
@@ -439,8 +443,8 @@ export function LinkGhin() {
               </View>
 
               <Button
-                label="Look Up"
-                onPress={handleLookup}
+                label="Link"
+                onPress={handleLinkWithLookup}
                 disabled={!ghinId.trim()}
               />
             </>

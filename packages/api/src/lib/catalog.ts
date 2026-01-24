@@ -138,19 +138,14 @@ import { transformGameSpec } from "spicylib/transform";
 import { formatHandicapDisplay } from "spicylib/utils";
 
 import {
-  type ArangoConfig,
   type ArangoTeeRating,
   convertArangoRatings,
-  createArangoConnection,
-  defaultConfig,
-  fetchAllGames,
-  fetchGameWithRounds,
-  fetchPlayersWithGames,
   type GameSpecV03,
   type GameWithRoundsV03,
   type RoundToGameEdgeV03,
   type RoundV03,
 } from "../utils/arango";
+import { loadPlayers } from "../utils/players-file";
 
 export interface ImportResult {
   specs: {
@@ -970,41 +965,34 @@ export async function loadGameSpecsFromSeed(): Promise<GameSpecV03[]> {
 }
 
 /**
- * Merge game specs from seed files and optionally ArangoDB
+ * Load game specs from seed files
  *
- * @deprecated Use loadGameSpecsFromSeed() directly. ArangoDB is no longer
- * the source of truth for specs/options - seed files are.
+ * @deprecated Use loadGameSpecsFromSeed() directly.
  */
-export async function mergeGameSpecSources(
-  _arangoConfig?: ArangoConfig,
-): Promise<GameSpecV03[]> {
-  // Load from seed files only - ArangoDB is no longer used for specs/options
+export async function mergeGameSpecSources(): Promise<GameSpecV03[]> {
   return loadGameSpecsFromSeed();
 }
 
 /**
- * Import player records from ArangoDB into the worker account's catalog, updating existing entries idempotently.
+ * Import player records from JSON file into the worker account's catalog, updating existing entries idempotently.
  *
- * Each Arango player is upserted using the GHIN ID when present or `manual_{legacyId}` otherwise as the unique lookup key.
+ * Each player is upserted using the GHIN ID when present or `manual_{legacyId}` otherwise as the unique lookup key.
  * Players are created as individual docs owned by the worker's group; existing catalog players are reused and the catalog players map is populated.
  *
  * @param workerAccount - The worker account that will own created player documents
  * @param catalog - The target game catalog to populate or update players in
- * @param arangoConfig - Optional ArangoDB connection configuration; uses the default config when omitted
  * @returns An object with counts: `created` for new players added to the catalog, `updated` for existing players upserted, and `skipped` for players not imported (e.g., missing name or on error)
  */
 async function importPlayers(
   workerAccount: co.loaded<typeof PlayerAccount>,
   catalog: GameCatalog,
-  arangoConfig?: ArangoConfig,
 ): Promise<{ created: number; updated: number; skipped: number }> {
   const result = { created: 0, updated: 0, skipped: 0 };
 
   try {
-    const db = createArangoConnection(arangoConfig || defaultConfig);
-    const arangoPlayers = await fetchPlayersWithGames(db);
+    const exportedPlayers = await loadPlayers();
 
-    console.log(`Importing ${arangoPlayers.length} players from ArangoDB...`);
+    console.log(`Importing ${exportedPlayers.length} players from file...`);
 
     // Ensure catalog.players map exists
     const loadedCatalog = await catalog.$jazz.ensureLoaded({
@@ -1034,43 +1022,49 @@ async function importPlayers(
 
     const group = loadedWorker.root.$jazz.owner;
 
-    for (const arangoPlayer of arangoPlayers) {
+    for (const exportedPlayer of exportedPlayers) {
       try {
         // Skip if missing name
-        if (!arangoPlayer.name) {
+        if (!exportedPlayer.name) {
           console.warn(
-            `Skipping player (missing name): ${JSON.stringify({ _key: arangoPlayer._key })}`,
+            `Skipping player (missing name): ${JSON.stringify({ _key: exportedPlayer._key })}`,
           );
           result.skipped++;
           continue;
         }
 
         // Determine lookup key: ghinId for GHIN players, manual_{_key} for manual players
-        const ghinId = arangoPlayer.handicap?.id;
-        const legacyId = arangoPlayer._key;
+        const ghinId = exportedPlayer.handicap?.id;
+        const legacyId = exportedPlayer._key;
         const mapKey = ghinId || `manual_${legacyId}`;
 
-        // Default gender to "M" if missing, with smart detection for female names
-        const gender: "M" | "F" = arangoPlayer.gender || "M";
+        // Default gender to "M" if missing
+        const gender: "M" | "F" = exportedPlayer.gender || "M";
 
         // Create handicap if available
         let handicap: Handicap | undefined;
-        if (arangoPlayer.handicap) {
-          const revDate = arangoPlayer.handicap.revDate
-            ? new Date(arangoPlayer.handicap.revDate)
+        if (exportedPlayer.handicap) {
+          const revDate = exportedPlayer.handicap.revDate
+            ? new Date(exportedPlayer.handicap.revDate)
             : undefined;
+
+          // Handle index as number or string (legacy data may have string)
+          const indexValue =
+            typeof exportedPlayer.handicap.index === "string"
+              ? Number.parseFloat(exportedPlayer.handicap.index)
+              : exportedPlayer.handicap.index;
 
           // Generate display from index if not present in legacy data
           const display = formatHandicapDisplay(
-            arangoPlayer.handicap.index,
-            arangoPlayer.handicap.display,
+            indexValue,
+            exportedPlayer.handicap.display,
           );
 
           handicap = Handicap.create(
             {
-              source: arangoPlayer.handicap.source,
+              source: exportedPlayer.handicap.source || "manual",
               display,
-              value: arangoPlayer.handicap.index,
+              value: indexValue,
               revDate,
             },
             { owner: group },
@@ -1079,9 +1073,9 @@ async function importPlayers(
 
         // Create clubs list if available
         let clubs: ListOfClubs | undefined;
-        if (arangoPlayer.clubs && arangoPlayer.clubs.length > 0) {
+        if (exportedPlayer.clubs && exportedPlayer.clubs.length > 0) {
           const clubsList = ListOfClubs.create([], { owner: group });
-          for (const clubData of arangoPlayer.clubs) {
+          for (const clubData of exportedPlayer.clubs) {
             const club = Club.create(
               {
                 name: clubData.name,
@@ -1097,8 +1091,8 @@ async function importPlayers(
         // Upsert player using mapKey (ghinId or manual_{legacyId})
         const player = await Player.upsertUnique({
           value: {
-            name: arangoPlayer.name,
-            short: arangoPlayer.short || arangoPlayer.name,
+            name: exportedPlayer.name,
+            short: exportedPlayer.short || exportedPlayer.name,
             gender,
             ghinId,
             legacyId,
@@ -1110,7 +1104,7 @@ async function importPlayers(
         });
 
         if (!player?.$isLoaded) {
-          throw new Error(`Failed to upsert player: ${arangoPlayer.name}`);
+          throw new Error(`Failed to upsert player: ${exportedPlayer.name}`);
         }
 
         // Check if player existed in map before (for counting)
@@ -1122,13 +1116,11 @@ async function importPlayers(
         // Count as created or updated based on previous existence
         if (existedBefore) {
           result.updated++;
-          // console.log(`Updated player: ${arangoPlayer.name} (${ghinId})`);
         } else {
           result.created++;
-          // console.log(`Created player: ${arangoPlayer.name} (${ghinId})`);
         }
       } catch (error) {
-        console.error(`Failed to import player ${arangoPlayer.name}:`, error);
+        console.error(`Failed to import player ${exportedPlayer.name}:`, error);
         result.skipped++;
       }
     }
@@ -1139,7 +1131,7 @@ async function importPlayers(
       `Player import complete: ${result.updated} upserted, ${result.skipped} skipped`,
     );
   } catch (error) {
-    console.error("Failed to fetch players from ArangoDB:", error);
+    console.error("Failed to load players from file:", error);
   }
 
   return result;
@@ -1639,7 +1631,7 @@ export interface CatalogImportOptions {
  */
 export async function importGameSpecsToCatalog(
   workerAccount: co.loaded<typeof PlayerAccount>,
-  arangoConfig?: ArangoConfig,
+  _deprecated?: unknown,
   options?: CatalogImportOptions,
 ): Promise<ImportResult> {
   const importSpecs = options?.specs ?? true;
@@ -1652,7 +1644,7 @@ export async function importGameSpecsToCatalog(
   const catalog = await loadOrCreateCatalog(workerAccount);
   console.log("Catalog loaded/created:", catalog.$jazz.id);
 
-  const allSpecs = await mergeGameSpecSources(arangoConfig);
+  const allSpecs = await mergeGameSpecSources();
   console.log("Total specs to import:", allSpecs.length);
 
   const result: ImportResult = {
@@ -1846,11 +1838,7 @@ export async function importGameSpecsToCatalog(
   if (importPlayersFlag) {
     console.log("Importing players...");
     try {
-      const playersResult = await importPlayers(
-        workerAccount,
-        catalog,
-        arangoConfig,
-      );
+      const playersResult = await importPlayers(workerAccount, catalog);
       result.players = playersResult;
     } catch (error) {
       result.errors.push({
@@ -2959,259 +2947,7 @@ export interface GameImportOptions {
 }
 
 /**
- * Import games from ArangoDB in batches (idempotent)
- *
- * @param workerAccount - Worker account
- * @param arangoConfig - ArangoDB configuration (optional)
- * @param options - Import options (legacyId for single game, batchSize)
- * @returns GameImportResult with import statistics
- */
-export async function importGamesFromArango(
-  workerAccount: co.loaded<typeof PlayerAccount>,
-  arangoConfig?: ArangoConfig,
-  options?: GameImportOptions,
-): Promise<GameImportResult> {
-  const batchSize = options?.batchSize ?? 10;
-  const singleGameId = options?.legacyId;
-  const db = createArangoConnection(arangoConfig || defaultConfig);
-  const catalog = await loadOrCreateCatalog(workerAccount);
-
-  const result: GameImportResult = {
-    games: { created: 0, updated: 0, skipped: 0, failed: 0 },
-    courses: { created: 0, updated: 0, skipped: 0 },
-    tees: { created: 0, updated: 0, skipped: 0 },
-    rounds: { created: 0, updated: 0, skipped: 0 },
-    errors: [],
-  };
-
-  try {
-    // Load catalog ONCE with all required maps - avoid repeated ensureLoaded calls
-    console.log("Loading catalog maps...");
-    let loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { games: {}, players: {}, specs: {}, options: {}, courses: {} },
-    });
-
-    // Initialize maps if needed (one-time setup)
-    if (!loadedCatalog.$jazz.has("games")) {
-      const group = Group.create(workerAccount);
-      group.makePublic();
-      loadedCatalog.$jazz.set("games", MapOfGames.create({}, { owner: group }));
-    }
-    if (!loadedCatalog.$jazz.has("courses")) {
-      const group = Group.create(workerAccount);
-      group.makePublic();
-      loadedCatalog.$jazz.set(
-        "courses",
-        MapOfCourses.create({}, { owner: group }),
-      );
-    }
-
-    // Re-load after initialization to get the new maps
-    // Load specs with $each: true to ensure each spec is loaded for legacyId matching
-    loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: {
-        games: {},
-        players: {},
-        specs: { $each: true },
-        options: {},
-        courses: {},
-      },
-    });
-
-    if (
-      !loadedCatalog.games ||
-      !loadedCatalog.players ||
-      !loadedCatalog.courses
-    ) {
-      throw new Error("Failed to load catalog maps");
-    }
-
-    console.log("Catalog maps loaded");
-
-    // Get the worker's root group for stable upsertUnique operations
-    // This ensures the same legacyId always refers to the same CoValue across imports
-    const loadedWorker = await workerAccount.$jazz.ensureLoaded({
-      resolve: { root: true },
-    });
-    if (!loadedWorker.root) {
-      throw new Error("Worker account has no root");
-    }
-    const workerGroup = loadedWorker.root.$jazz.owner as Group;
-    console.log(`workerGroup ID: ${workerGroup.$jazz.id}`);
-
-    // Create course cache to avoid repeated Course.load calls
-    const courseCache = new Map<string, co.loaded<typeof Course>>();
-    const teeCache = new Map<string, co.loaded<typeof Tee>>();
-
-    // Pre-fetch all player GHIN IDs to avoid N+1 queries
-    console.log("Pre-fetching player GHIN IDs...");
-    const playerGhinCursor = await db.query(`
-      FOR player IN players
-        RETURN { key: player._key, ghinId: player.handicap.id }
-    `);
-    const playerGhinMap = new Map<string, string | null>();
-    for await (const player of playerGhinCursor) {
-      playerGhinMap.set(player.key, player.ghinId || null);
-    }
-    console.log(`Cached ${playerGhinMap.size} player GHIN lookups`);
-
-    // Single game import mode
-    if (singleGameId) {
-      console.log(`Importing single game: ${singleGameId}`);
-
-      try {
-        const gameWithRounds = await fetchGameWithRounds(db, singleGameId);
-
-        if (!gameWithRounds) {
-          result.games.failed++;
-          result.errors.push({
-            gameId: singleGameId,
-            error: "Game not found",
-          });
-          return result;
-        }
-
-        const importResult = await importGame(
-          workerAccount,
-          loadedCatalog,
-          gameWithRounds,
-          playerGhinMap,
-          courseCache,
-          teeCache,
-          workerGroup,
-        );
-
-        if (importResult.success) {
-          if (importResult.gameCreated) {
-            result.games.created++;
-          } else {
-            result.games.updated++;
-          }
-          result.courses.created += importResult.courses.created;
-          result.courses.updated += importResult.courses.updated;
-          result.courses.skipped += importResult.courses.skipped;
-          result.tees.created += importResult.tees.created;
-          result.tees.updated += importResult.tees.updated;
-          result.tees.skipped += importResult.tees.skipped;
-          result.rounds.created += importResult.rounds.created;
-          result.rounds.updated += importResult.rounds.updated;
-          result.rounds.skipped += importResult.rounds.skipped;
-        } else {
-          result.games.failed++;
-          result.errors.push({
-            gameId: singleGameId,
-            error: importResult.error || "Unknown error",
-          });
-        }
-      } catch (error) {
-        result.games.failed++;
-        result.errors.push({
-          gameId: singleGameId,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-
-      console.log("Single game import complete:", result);
-      return result;
-    }
-
-    // Batch import mode - fetch total count and first batch
-    const { games, total } = await fetchAllGames(db, 0, batchSize);
-
-    console.log(`Importing ${total} games in batches of ${batchSize}...`);
-
-    // Process all batches
-    let offset = 0;
-    let currentBatch = games;
-
-    while (currentBatch.length > 0) {
-      console.log(
-        `Processing batch: ${offset + 1}-${offset + currentBatch.length} of ${total}`,
-      );
-
-      // Process each game in the batch
-      for (const gameListItem of currentBatch) {
-        try {
-          // Fetch full game with rounds
-          const gameWithRounds = await fetchGameWithRounds(
-            db,
-            gameListItem._key,
-          );
-
-          if (!gameWithRounds) {
-            result.games.failed++;
-            result.errors.push({
-              gameId: gameListItem._key,
-              error: "Game not found",
-            });
-            continue;
-          }
-
-          // Import the game
-          const importResult = await importGame(
-            workerAccount,
-            loadedCatalog,
-            gameWithRounds,
-            playerGhinMap,
-            courseCache,
-            teeCache,
-            workerGroup,
-          );
-
-          if (importResult.success) {
-            // Track game created vs updated
-            if (importResult.gameCreated) {
-              result.games.created++;
-            } else {
-              result.games.updated++;
-            }
-            // Aggregate course, tee, and round stats
-            result.courses.created += importResult.courses.created;
-            result.courses.updated += importResult.courses.updated;
-            result.courses.skipped += importResult.courses.skipped;
-            result.tees.created += importResult.tees.created;
-            result.tees.updated += importResult.tees.updated;
-            result.tees.skipped += importResult.tees.skipped;
-            result.rounds.created += importResult.rounds.created;
-            result.rounds.updated += importResult.rounds.updated;
-            result.rounds.skipped += importResult.rounds.skipped;
-          } else {
-            result.games.failed++;
-            result.errors.push({
-              gameId: gameListItem._key,
-              error: importResult.error || "Unknown error",
-            });
-          }
-        } catch (error) {
-          result.games.failed++;
-          result.errors.push({
-            gameId: gameListItem._key,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
-
-      // Fetch next batch
-      offset += batchSize;
-      if (offset < total) {
-        const nextBatch = await fetchAllGames(db, offset, batchSize);
-        currentBatch = nextBatch.games;
-      } else {
-        currentBatch = [];
-      }
-    }
-
-    console.log("Game import complete:", result);
-  } catch (error) {
-    console.error("Failed to import games:", error);
-    throw error;
-  }
-
-  return result;
-}
-
-/**
- * Import games from JSON files (replaces ArangoDB dependency)
+ * Import games from JSON files
  *
  * Games are loaded from data/games/{legacyId}.json files that were
  * exported using scripts/export-games.ts
