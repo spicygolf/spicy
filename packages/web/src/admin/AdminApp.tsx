@@ -72,9 +72,9 @@ export function AdminApp(): React.JSX.Element {
   } | null>(null);
 
   // Unified selection for import/reset
-  const [selectedSpecs, setSelectedSpecs] = useState<boolean>(true);
-  const [selectedOptions, setSelectedOptions] = useState<boolean>(true);
-  const [selectedGames, setSelectedGames] = useState<boolean>(true);
+  const [selectedSpecs, setSelectedSpecs] = useState<boolean>(false);
+  const [selectedOptions, setSelectedOptions] = useState<boolean>(false);
+  const [selectedGames, setSelectedGames] = useState<boolean>(false);
   const [selectedPlayers, setSelectedPlayers] = useState<boolean>(false);
   const [selectedCourses, setSelectedCourses] = useState<boolean>(false);
   const [gameLegacyId, setGameLegacyId] = useState<string>("");
