@@ -1,6 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { useCoState } from "jazz-tools/react";
 import { ArrowLeft } from "lucide-react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   PlayerAccount,
   type GameCatalog,
@@ -206,8 +208,10 @@ function SpecDetailContent({
             <CardTitle>Description</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
-              {longDescription}
+            <div className="prose prose-sm max-w-none dark:prose-invert">
+              <Markdown remarkPlugins={[remarkGfm]}>
+                {String(longDescription)}
+              </Markdown>
             </div>
           </CardContent>
         </Card>
