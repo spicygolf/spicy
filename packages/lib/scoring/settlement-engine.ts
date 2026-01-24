@@ -97,11 +97,19 @@ export function calculatePoolPayouts(
 
   // Get metric values for this pool
   const ranked = playerMetrics
-    .map((pm) => ({
-      playerId: pm.playerId,
-      playerName: pm.playerName,
-      value: pm.metrics[pool.metric] ?? 0,
-    }))
+    .map((pm) => {
+      const metricValue = pm.metrics[pool.metric];
+      if (metricValue === undefined) {
+        console.warn(
+          `Settlement: Metric "${pool.metric}" not found for player ${pm.playerName || pm.playerId}`,
+        );
+      }
+      return {
+        playerId: pm.playerId,
+        playerName: pm.playerName,
+        value: metricValue ?? 0,
+      };
+    })
     .filter((p) => p.value !== 0 || pool.splitType === "places") // Filter out zeros for per_unit
     .sort((a, b) => b.value - a.value); // Higher is better
 

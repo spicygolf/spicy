@@ -2,6 +2,7 @@
   "name": "places_paid",
   "disp": "Places Paid",
   "type": "game",
+  "version": "1",
   "valueType": "menu",
   "defaultValue": "3",
   "choices": [

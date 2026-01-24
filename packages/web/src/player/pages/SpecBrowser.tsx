@@ -43,6 +43,7 @@ export function SpecBrowser(): React.JSX.Element {
     const specList: GameSpec[] = [];
     for (const key of Object.keys(specs)) {
       if (key.startsWith("$") || key === "_refs") continue;
+      if (!specs.$jazz.has(key)) continue;
       const spec = specs[key];
       if (spec?.$isLoaded) {
         specList.push(spec);

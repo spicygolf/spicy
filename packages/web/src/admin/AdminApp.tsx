@@ -437,9 +437,10 @@ export function AdminApp(): React.JSX.Element {
       return;
     }
 
+    // TODO: Implement actual save to profile once PlayerProfile schema supports ghinNumber
     toast({
-      title: "GHIN number saved",
-      description: `Your GHIN number ${ghinNumber} has been saved to your profile`,
+      title: "Not yet implemented",
+      description: `GHIN number save is not yet implemented. Use "Link Player" instead.`,
     });
   };
 

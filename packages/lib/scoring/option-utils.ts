@@ -239,6 +239,7 @@ export function getJunkOptionsForHole(
 
   for (const key of Object.keys(options)) {
     if (key.startsWith("$") || key === "_refs") continue;
+    if (!options.$jazz.has(key)) continue;
 
     const opt = options[key];
     if (opt?.$isLoaded && opt.type === "junk") {
