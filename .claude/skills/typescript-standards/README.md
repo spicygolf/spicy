@@ -162,3 +162,30 @@ function calculateScore(strokes: number, par: number) {
   return strokes - par;
 }
 ```
+
+## Markdown Code Blocks
+
+**Severity**: LOW | **Enforcement**: RECOMMENDED
+
+Always specify a language identifier on fenced code blocks in markdown files.
+
+```markdown
+<!-- GOOD -->
+```typescript
+const x = 1;
+```
+
+<!-- GOOD for plain text/directory trees -->
+```text
+packages/
+├── app/
+└── lib/
+```
+
+<!-- BAD - no language specified -->
+```
+const x = 1;
+```
+```
+
+This helps with syntax highlighting and satisfies markdownlint (MD040).
