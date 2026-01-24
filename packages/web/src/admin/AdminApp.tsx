@@ -87,6 +87,13 @@ export function AdminApp(): React.JSX.Element {
     coursesCleared: number;
   } | null>(null);
 
+  // Reset options
+  const [resetSpecs, setResetSpecs] = useState<boolean>(true);
+  const [resetOptions, setResetOptions] = useState<boolean>(true);
+  const [resetGames, setResetGames] = useState<boolean>(true);
+  const [resetPlayers, setResetPlayers] = useState<boolean>(false);
+  const [resetCourses, setResetCourses] = useState<boolean>(false);
+
   // Admin status (checked via API for security)
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
@@ -222,8 +229,15 @@ export function AdminApp(): React.JSX.Element {
       return;
     }
 
+    const itemsToReset: string[] = [];
+    if (resetSpecs) itemsToReset.push("specs");
+    if (resetOptions) itemsToReset.push("options");
+    if (resetGames) itemsToReset.push("games");
+    if (resetPlayers) itemsToReset.push("players");
+    if (resetCourses) itemsToReset.push("courses");
+
     const confirmed = window.confirm(
-      "Are you sure you want to reset the catalog? This will delete all specs and options. Games, players, and courses will be preserved.",
+      `Are you sure you want to reset the catalog? This will delete: ${itemsToReset.join(", ")}.`,
     );
 
     if (!confirmed) {
@@ -242,11 +256,11 @@ export function AdminApp(): React.JSX.Element {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          clearSpecs: true,
-          clearOptions: true,
-          clearGames: false,
-          clearPlayers: false,
-          clearCourses: false,
+          clearSpecs: resetSpecs,
+          clearOptions: resetOptions,
+          clearGames: resetGames,
+          clearPlayers: resetPlayers,
+          clearCourses: resetCourses,
         }),
       });
 
@@ -257,9 +271,24 @@ export function AdminApp(): React.JSX.Element {
       const result = await response.json();
       setResetResult(result);
 
+      const clearedItems: string[] = [];
+      if (result.specsCleared > 0)
+        clearedItems.push(`${result.specsCleared} specs`);
+      if (result.optionsCleared > 0)
+        clearedItems.push(`${result.optionsCleared} options`);
+      if (result.gamesCleared > 0)
+        clearedItems.push(`${result.gamesCleared} games`);
+      if (result.playersCleared > 0)
+        clearedItems.push(`${result.playersCleared} players`);
+      if (result.coursesCleared > 0)
+        clearedItems.push(`${result.coursesCleared} courses`);
+
       toast({
         title: "Catalog reset complete",
-        description: `Cleared ${result.specsCleared} specs and ${result.optionsCleared} options`,
+        description:
+          clearedItems.length > 0
+            ? `Cleared ${clearedItems.join(", ")}`
+            : "Nothing to clear",
       });
     } catch (error) {
       toast({
@@ -662,27 +691,10 @@ export function AdminApp(): React.JSX.Element {
                             className="max-w-xs"
                           />
                           <p className="text-xs text-muted-foreground">
-                            Enter an ArangoDB _key to import only that game
+                            Enter a legacy ID to import only that game
                           </p>
                         </div>
                       )}
-                    </div>
-
-                    <div className="flex gap-4">
-                      <Button
-                        onClick={handleResetCatalog}
-                        disabled={!isAdmin || isResetting || isImporting}
-                        variant="destructive"
-                        size="lg"
-                      >
-                        {isResetting ? (
-                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="mr-2 h-4 w-4" />
-                        )}
-                        Reset Catalog
-                      </Button>
-
                       <Button
                         onClick={handleImportToCatalog}
                         disabled={
@@ -690,23 +702,116 @@ export function AdminApp(): React.JSX.Element {
                           isImporting ||
                           (!importSpecs && !importPlayers && !importGames)
                         }
-                        className="flex-1"
-                        size="lg"
+                        size="sm"
                       >
                         {isImporting ? (
                           <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                         ) : (
                           <Upload className="mr-2 h-4 w-4" />
                         )}
-                        Import from ArangoDB
+                        Import from Files
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3 rounded-md border border-red-200 bg-red-50 p-4">
+                      <Label className="text-sm font-medium text-red-900">
+                        Reset Options (Destructive)
+                      </Label>
+                      <div className="flex flex-wrap gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={resetSpecs}
+                            onChange={(e) => setResetSpecs(e.target.checked)}
+                            disabled={isResetting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">Specs</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={resetOptions}
+                            onChange={(e) => setResetOptions(e.target.checked)}
+                            disabled={isResetting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">Options</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={resetGames}
+                            onChange={(e) => setResetGames(e.target.checked)}
+                            disabled={isResetting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">Games</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={resetPlayers}
+                            onChange={(e) => setResetPlayers(e.target.checked)}
+                            disabled={isResetting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">Players</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={resetCourses}
+                            onChange={(e) => setResetCourses(e.target.checked)}
+                            disabled={isResetting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">Courses</span>
+                        </label>
+                      </div>
+                      <Button
+                        onClick={handleResetCatalog}
+                        disabled={
+                          !isAdmin ||
+                          isResetting ||
+                          isImporting ||
+                          (!resetSpecs &&
+                            !resetOptions &&
+                            !resetGames &&
+                            !resetPlayers &&
+                            !resetCourses)
+                        }
+                        variant="destructive"
+                        size="sm"
+                      >
+                        {isResetting ? (
+                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="mr-2 h-4 w-4" />
+                        )}
+                        Reset Selected
                       </Button>
                     </div>
 
                     {resetResult && (
                       <div className="rounded-md border border-green-200 bg-green-50 p-4">
                         <p className="text-sm text-green-800">
-                          Reset complete: {resetResult.specsCleared} specs,{" "}
-                          {resetResult.optionsCleared} options cleared
+                          Reset complete:{" "}
+                          {[
+                            resetResult.specsCleared > 0 &&
+                              `${resetResult.specsCleared} specs`,
+                            resetResult.optionsCleared > 0 &&
+                              `${resetResult.optionsCleared} options`,
+                            resetResult.gamesCleared > 0 &&
+                              `${resetResult.gamesCleared} games`,
+                            resetResult.playersCleared > 0 &&
+                              `${resetResult.playersCleared} players`,
+                            resetResult.coursesCleared > 0 &&
+                              `${resetResult.coursesCleared} courses`,
+                          ]
+                            .filter(Boolean)
+                            .join(", ") || "nothing"}{" "}
+                          cleared
                         </p>
                       </div>
                     )}
