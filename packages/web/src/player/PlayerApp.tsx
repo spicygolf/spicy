@@ -1,7 +1,8 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAccount } from "jazz-tools/react";
-import { BookOpen, User } from "lucide-react";
+import { ArrowRight, BookOpen, User } from "lucide-react";
 import { PlayerAccount } from "spicylib/schema";
+import { Button } from "../components/ui/button";
 
 export function PlayerApp(): React.JSX.Element {
   const location = useLocation();
@@ -41,12 +42,12 @@ export function PlayerApp(): React.JSX.Element {
                 {me.profile?.name || "Player"}
               </span>
             )}
-            <Link
-              to="/admin"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              Admin
-            </Link>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/admin">
+                Admin
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
       </header>
