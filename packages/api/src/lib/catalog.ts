@@ -268,6 +268,145 @@ export async function loadOrCreateCatalog(
 }
 
 /**
+ * Reset the catalog by clearing specs, options, and optionally games.
+ *
+ * This is a destructive operation - use for dev/testing when you need
+ * a fresh start with the new schema.
+ *
+ * @param workerAccount - The worker account that owns the catalog
+ * @param options - What to clear (defaults to specs and options only)
+ * @returns Counts of what was cleared
+ */
+export async function resetCatalog(
+  workerAccount: co.loaded<typeof PlayerAccount>,
+  options?: {
+    clearSpecs?: boolean;
+    clearOptions?: boolean;
+    clearGames?: boolean;
+    clearPlayers?: boolean;
+    clearCourses?: boolean;
+  },
+): Promise<{
+  specsCleared: number;
+  optionsCleared: number;
+  gamesCleared: number;
+  playersCleared: number;
+  coursesCleared: number;
+}> {
+  const clearSpecs = options?.clearSpecs ?? true;
+  const clearOptions = options?.clearOptions ?? true;
+  const clearGames = options?.clearGames ?? false;
+  const clearPlayers = options?.clearPlayers ?? false;
+  const clearCourses = options?.clearCourses ?? false;
+
+  const catalog = await loadOrCreateCatalog(workerAccount);
+  const loadedCatalog = await catalog.$jazz.ensureLoaded({
+    resolve: {
+      specs: {},
+      options: {},
+      games: {},
+      players: {},
+      courses: {},
+    },
+  });
+
+  const result = {
+    specsCleared: 0,
+    optionsCleared: 0,
+    gamesCleared: 0,
+    playersCleared: 0,
+    coursesCleared: 0,
+  };
+
+  // Clear specs
+  if (clearSpecs && loadedCatalog.specs) {
+    const specs = loadedCatalog.specs;
+    const keysToDelete: string[] = [];
+    for (const key of Object.keys(specs)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      if (specs.$jazz.has(key)) {
+        keysToDelete.push(key);
+      }
+    }
+    for (const key of keysToDelete) {
+      specs.$jazz.delete(key);
+      result.specsCleared++;
+    }
+    console.log(`Cleared ${result.specsCleared} specs from catalog`);
+  }
+
+  // Clear options
+  if (clearOptions && loadedCatalog.options) {
+    const opts = loadedCatalog.options;
+    const keysToDelete: string[] = [];
+    for (const key of Object.keys(opts)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      if (opts.$jazz.has(key)) {
+        keysToDelete.push(key);
+      }
+    }
+    for (const key of keysToDelete) {
+      opts.$jazz.delete(key);
+      result.optionsCleared++;
+    }
+    console.log(`Cleared ${result.optionsCleared} options from catalog`);
+  }
+
+  // Clear games
+  if (clearGames && loadedCatalog.games) {
+    const games = loadedCatalog.games;
+    const keysToDelete: string[] = [];
+    for (const key of Object.keys(games)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      if (games.$jazz.has(key)) {
+        keysToDelete.push(key);
+      }
+    }
+    for (const key of keysToDelete) {
+      games.$jazz.delete(key);
+      result.gamesCleared++;
+    }
+    console.log(`Cleared ${result.gamesCleared} games from catalog`);
+  }
+
+  // Clear players
+  if (clearPlayers && loadedCatalog.players) {
+    const players = loadedCatalog.players;
+    const keysToDelete: string[] = [];
+    for (const key of Object.keys(players)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      if (players.$jazz.has(key)) {
+        keysToDelete.push(key);
+      }
+    }
+    for (const key of keysToDelete) {
+      players.$jazz.delete(key);
+      result.playersCleared++;
+    }
+    console.log(`Cleared ${result.playersCleared} players from catalog`);
+  }
+
+  // Clear courses
+  if (clearCourses && loadedCatalog.courses) {
+    const courses = loadedCatalog.courses;
+    const keysToDelete: string[] = [];
+    for (const key of Object.keys(courses)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      if (courses.$jazz.has(key)) {
+        keysToDelete.push(key);
+      }
+    }
+    for (const key of keysToDelete) {
+      courses.$jazz.delete(key);
+      result.coursesCleared++;
+    }
+    console.log(`Cleared ${result.coursesCleared} courses from catalog`);
+  }
+
+  return result;
+}
+
+/**
  * Upsert a game spec into the catalog (idempotent)
  *
  * If the spec already exists, updates it in place to preserve CoValue ID.

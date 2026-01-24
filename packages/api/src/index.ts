@@ -10,7 +10,11 @@ import { PlayerAccount } from "spicylib/schema";
 import { getCountries } from "./countries";
 import { getCourseDetails, searchCourses } from "./courses";
 import { getJazzWorker, setupWorker } from "./jazz_worker";
-import { importGameSpecsToCatalog, importGamesFromArango } from "./lib/catalog";
+import {
+  importGameSpecsToCatalog,
+  importGamesFromArango,
+  resetCatalog,
+} from "./lib/catalog";
 import { linkPlayerToUser } from "./lib/link";
 import { playerSearch } from "./players";
 import { isAdminAccount, requireAdminAccount } from "./utils/auth";
@@ -229,6 +233,39 @@ const app = new Elysia()
     );
   })
   // Admin endpoints - protected by Jazz auth + admin check
+  .post(
+    `/${api}/catalog/reset`,
+    async ({ jazzAccountId, body }) => {
+      try {
+        requireAdminAccount(jazzAccountId);
+
+        const options = body as {
+          clearSpecs?: boolean;
+          clearOptions?: boolean;
+          clearGames?: boolean;
+          clearPlayers?: boolean;
+          clearCourses?: boolean;
+        } | null;
+
+        console.log(
+          `Catalog reset started by ${jazzAccountId}`,
+          JSON.stringify(options),
+        );
+        const { account } = await getJazzWorker();
+
+        const result = await resetCatalog(
+          account as co.loaded<typeof PlayerAccount>,
+          options ?? undefined,
+        );
+        console.log("Reset result:", JSON.stringify(result));
+        return result;
+      } catch (error) {
+        console.error("Reset failed:", error);
+        throw error;
+      }
+    },
+    { jazzAuth: true },
+  )
   .post(
     `/${api}/catalog/import`,
     async ({ jazzAccountId, body }) => {
