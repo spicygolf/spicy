@@ -2868,6 +2868,18 @@ async function importGame(
     throw new Error(`Failed to upsert game: ${game._key}`);
   }
 
+  // IMPORTANT: upsertUnique only sets fields on CREATE, not on UPDATE.
+  // If the game already existed (from a previous import with old schema),
+  // we need to explicitly update the fields to ensure new schema is applied.
+  createdGame.$jazz.set("start", new Date(game.start));
+  createdGame.$jazz.set("name", game.name);
+  createdGame.$jazz.set("scope", scope);
+  createdGame.$jazz.set("specs", specs);
+  createdGame.$jazz.set("holes", gameHoles);
+  createdGame.$jazz.set("players", players);
+  createdGame.$jazz.set("rounds", roundToGames);
+  createdGame.$jazz.set("legacyId", game._key);
+
   // Import game-level option overrides from v0.3 data
   // v0.3 game options have two types:
   // 1. Game-level: {name, disp, type, value} - applies to entire game
