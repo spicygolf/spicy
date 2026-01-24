@@ -1,0 +1,102 @@
+{
+  "_key": "the_big_game",
+  "name": "the_big_game",
+  "disp": "The Big Game",
+  "version": 1,
+  "status": "dev",
+  "type": "points",
+  "min_players": 2,
+  "max_players": 20,
+  "location_type": "local",
+  "long_description": "### AKA\n* Chicago\n* Quota Game\n### Description\nA quota/Stableford scoring game with gross skins.\n\n### Stableford Points (Net)\n* Double Eagle (albatross): 6 points\n* Eagle: 4 points\n* Birdie: 3 points\n* Par: 2 points\n* Bogey: 1 point\n* Double bogey or worse: 0 points\n\n### Quota System\nEach player's quota = par - handicap strokes received.\n* Front/Back split: If quota is odd, add +1 to the easier nine (by rating)\n* Performance = Stableford points - quota (e.g., 18 points vs 14 quota = +4)\n\n### Skins (Gross)\n* Gross birdie or better wins the skin\n* Eagles override birdies on the same hole\n* One winner per hole (no carryovers)\n\n### Settlement\n* 75% of pot: Stableford (split into front/back/overall thirds)\n* 25% of pot: Gross skins\n* Each Stableford third pays 1st/2nd/3rd by quota performance\n",
+  "teams": false,
+  "team_size": 1,
+  "team_change_every": 0,
+  "options": [
+    "stakes",
+    "use_handicaps",
+    "handicap_index_from"
+  ],
+  "junk": [
+    "stableford_double_eagle",
+    "stableford_eagle",
+    "stableford_birdie",
+    "stableford_par",
+    "stableford_bogey",
+    "gross_skin",
+    "gross_eagle_skin"
+  ],
+  "multipliers": [],
+  "meta": [
+    {
+      "name": "short",
+      "disp": "Short Name",
+      "valueType": "text",
+      "value": "BigGame"
+    },
+    {
+      "name": "aliases",
+      "disp": "Also Known As",
+      "valueType": "text_array",
+      "value": ["Chicago", "Quota"],
+      "searchable": true
+    },
+    {
+      "name": "spec_type",
+      "disp": "Scoring Format",
+      "valueType": "menu",
+      "value": "quota",
+      "choices": [
+        { "name": "points", "disp": "Points" },
+        { "name": "skins", "disp": "Skins" },
+        { "name": "stableford", "disp": "Stableford" },
+        { "name": "quota", "disp": "Quota" }
+      ]
+    },
+    {
+      "name": "min_players",
+      "disp": "Minimum Players",
+      "valueType": "num",
+      "value": "2"
+    },
+    {
+      "name": "max_players",
+      "disp": "Maximum Players",
+      "valueType": "num",
+      "value": "20"
+    },
+    {
+      "name": "status",
+      "disp": "Status",
+      "valueType": "menu",
+      "value": "dev",
+      "choices": [
+        { "name": "prod", "disp": "Production" },
+        { "name": "dev", "disp": "Development" },
+        { "name": "test", "disp": "Test" }
+      ]
+    },
+    {
+      "name": "location_type",
+      "disp": "Location Type",
+      "valueType": "menu",
+      "value": "local",
+      "choices": [
+        { "name": "local", "disp": "Local (Same Foursome)" },
+        { "name": "virtual", "disp": "Virtual (Remote Players)" }
+      ]
+    },
+    {
+      "name": "stableford_percentage",
+      "disp": "Stableford Pool %",
+      "valueType": "num",
+      "value": "75"
+    },
+    {
+      "name": "skins_percentage",
+      "disp": "Skins Pool %",
+      "valueType": "num",
+      "value": "25"
+    }
+  ]
+}

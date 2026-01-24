@@ -1,0 +1,16 @@
+{
+  "name": "gross_eagle_skin",
+  "disp": "Eagle Skin (Overrides Birdie)",
+  "type": "junk",
+  "sub_type": "skin",
+  "value": 1,
+  "seq": 9,
+  "scope": "player",
+  "icon": "trophy",
+  "show_in": "score",
+  "based_on": "gross",
+  "limit": "one_per_hole",
+  "better": "lower",
+  "score_to_par": "at_most -2",
+  "logic": "{\"rankWithTies\": [1, 1]}"
+}

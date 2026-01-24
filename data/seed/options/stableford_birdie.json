@@ -1,0 +1,14 @@
+{
+  "name": "stableford_birdie",
+  "disp": "Birdie (3 pts)",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 3,
+  "seq": 3,
+  "scope": "player",
+  "icon": "star",
+  "show_in": "score",
+  "based_on": "net",
+  "limit": null,
+  "score_to_par": "exactly -1"
+}
