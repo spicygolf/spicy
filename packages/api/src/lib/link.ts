@@ -65,7 +65,7 @@ export async function lookupPlayer(
 
   // Ensure players map is loaded
   const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { players: {} },
+    resolve: { players: true },
   });
 
   if (!loadedCatalog.players) {
@@ -170,7 +170,7 @@ export async function linkPlayerToUser(
 
   // Ensure players map is loaded
   const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { players: {} },
+    resolve: { players: true },
   });
 
   if (!loadedCatalog.players) {
@@ -232,7 +232,7 @@ export async function linkPlayerToUser(
   if (playerGameLegacyIds.length > 0) {
     // Ensure catalog.games is loaded
     const catalogWithGames = await loadedCatalog.$jazz.ensureLoaded({
-      resolve: { games: {} },
+      resolve: { games: true },
     });
 
     if (catalogWithGames.games) {

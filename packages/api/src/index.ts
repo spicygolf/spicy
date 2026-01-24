@@ -438,7 +438,7 @@ const app = new Elysia()
 
         // Load catalog courses map
         const loadedCatalog = await catalog.$jazz.ensureLoaded({
-          resolve: { courses: {} },
+          resolve: { courses: true },
         });
 
         if (!loadedCatalog.courses) {

@@ -296,11 +296,11 @@ export async function resetCatalog(
   const catalog = await loadOrCreateCatalog(workerAccount);
   const loadedCatalog = await catalog.$jazz.ensureLoaded({
     resolve: {
-      specs: {},
-      options: {},
-      games: {},
-      players: {},
-      courses: {},
+      specs: true,
+      options: true,
+      games: true,
+      players: true,
+      courses: true,
     },
   });
 
@@ -415,8 +415,9 @@ export async function upsertGameSpec(
   specData: GameSpecV03,
   catalogOptions?: MapOfOptions,
 ): Promise<{ created: boolean; updated: boolean }> {
+  // GameSpec IS the options map directly - resolve specs with $each to load options
   const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { specs: { $each: { options: {} } }, options: {} },
+    resolve: { specs: { $each: true }, options: true },
   });
 
   if (!loadedCatalog.specs) {
@@ -729,7 +730,7 @@ async function upsertOptions(
   options: OptionData[],
 ): Promise<{ created: number; updated: number }> {
   let loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { options: {} },
+    resolve: { options: true },
   });
 
   // Initialize options map if it doesn't exist
@@ -741,7 +742,7 @@ async function upsertOptions(
 
     // Reload catalog to ensure the new map is properly loaded
     loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { options: {} },
+      resolve: { options: true },
     });
   }
 
@@ -1004,7 +1005,7 @@ async function importPlayers(
 
     // Ensure catalog.players map exists
     const loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { players: {} },
+      resolve: { players: true },
     });
 
     if (!loadedCatalog.$jazz.has("players")) {
@@ -1204,7 +1205,7 @@ export async function importFavoritesForPlayer(
     console.log(`[importFavoritesForPlayer] Loading catalog by ID...`);
     const { GameCatalog } = await import("spicylib/schema");
     const catalog = await GameCatalog.load(catalogId, {
-      resolve: { players: {}, courses: {} },
+      resolve: { players: true, courses: true },
     });
 
     if (!catalog?.$isLoaded) {
@@ -1234,7 +1235,7 @@ export async function importFavoritesForPlayer(
         `[importFavoritesForPlayer] Loading existing favorites object...`,
       );
       const loadedRoot = await root.$jazz.ensureLoaded({
-        resolve: { favorites: { players: {}, courseTees: {} } },
+        resolve: { favorites: { players: true, courseTees: true } },
       });
       if (loadedRoot.favorites?.$isLoaded) {
         favorites = loadedRoot.favorites;
@@ -1265,7 +1266,7 @@ export async function importFavoritesForPlayer(
     if (playerFavorites.length > 0) {
       // Load catalog players map
       const loadedCatalog = await catalog.$jazz.ensureLoaded({
-        resolve: { players: {} },
+        resolve: { players: true },
       });
 
       if (!loadedCatalog.players) {
@@ -1421,7 +1422,7 @@ export async function importFavoritesForPlayer(
     if (courseTeesFavorites.length > 0) {
       // Load catalog courses
       const loadedCatalog = await catalog.$jazz.ensureLoaded({
-        resolve: { courses: {} },
+        resolve: { courses: true },
       });
 
       if (!loadedCatalog.courses) {
@@ -1453,7 +1454,7 @@ export async function importFavoritesForPlayer(
       // Ensure all existing course/tee items are loaded with their course and tee references
       if (courseTeesList?.$isLoaded && courseTeesList.length > 0) {
         await courseTeesList.$jazz.ensureLoaded({
-          resolve: { $each: { course: {}, tee: {} } },
+          resolve: { $each: { course: true, tee: true } },
         });
       }
 
@@ -1825,7 +1826,7 @@ export async function importGameSpecsToCatalog(
 
     // Third pass: Import specs with references to catalog options
     const loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { options: {} },
+      resolve: { options: true },
     });
 
     console.log(
@@ -1961,7 +1962,7 @@ async function importTeeFromGhin(
 
     // Ensure the course tees list is loaded
     if (!course.tees?.$isLoaded) {
-      await course.$jazz.ensureLoaded({ resolve: { tees: {} } });
+      await course.$jazz.ensureLoaded({ resolve: { tees: true } });
     }
 
     if (!course.tees) {
@@ -3063,11 +3064,11 @@ export async function importGamesFromFiles(
     console.log("Loading catalog maps (fresh load)...");
     const freshCatalog = await GameCatalog.load(catalog.$jazz.id, {
       resolve: {
-        games: {},
+        games: true,
         players: { $each: true },
         specs: { $each: true },
-        options: {},
-        courses: {},
+        options: true,
+        courses: true,
       },
     });
 
@@ -3093,11 +3094,11 @@ export async function importGamesFromFiles(
     // Reload to get the initialized maps
     const loadedCatalog = await GameCatalog.load(catalog.$jazz.id, {
       resolve: {
-        games: {},
+        games: true,
         players: { $each: true },
         specs: { $each: true },
-        options: {},
-        courses: {},
+        options: true,
+        courses: true,
       },
     });
 
