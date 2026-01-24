@@ -1,5 +1,6 @@
 import { err, type Result } from "neverthrow";
 import type { Game, Player } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 import {
   type AddPlayerError,
   type AddPlayerInput,
@@ -192,7 +193,9 @@ function computeShouldAutoAssignTeam(game: Game): boolean {
   if (userActivated) return false;
 
   // Get min_players from specs
-  const minPlayers = Math.min(...specs.map((s) => s.min_players ?? 2));
+  const minPlayers = Math.min(
+    ...specs.map((s) => (getSpecField(s, "min_players") as number) ?? 2),
+  );
 
   // Current player count (before adding)
   const currentPlayerCount = game.players?.$isLoaded ? game.players.length : 0;

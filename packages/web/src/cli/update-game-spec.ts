@@ -17,6 +17,7 @@ import { config } from "dotenv";
 import type { Account, ID } from "jazz-tools";
 import { startWorker } from "jazz-tools/worker";
 import { Game, GameSpec } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 
 // Load environment from API package
 config({ path: resolve(import.meta.dir, "../../../api/.env") });
@@ -70,9 +71,12 @@ async function main() {
     }
 
     console.log(`\nCurrent game: ${game.name}`);
-    const currentSpec = game.specs?.[0];
+    const currentSpec = game.specRef;
+    const currentSpecName = currentSpec?.$isLoaded
+      ? getSpecField(currentSpec, "name")
+      : "(none)";
     console.log(`  Current spec ID: ${currentSpec?.$jazz?.id || "(none)"}`);
-    console.log(`  Current spec name: ${currentSpec?.name || "(none)"}`);
+    console.log(`  Current spec name: ${currentSpecName}`);
 
     // Load the new spec
     const newSpec = await GameSpec.load(newSpecId as ID<GameSpec>, {
@@ -84,7 +88,9 @@ async function main() {
       process.exit(1);
     }
 
-    console.log(`  New spec: ${newSpec.name} v${newSpec.version}`);
+    const newSpecName = getSpecField(newSpec, "name");
+    const newSpecVersion = getSpecField(newSpec, "version");
+    console.log(`  New spec: ${newSpecName} v${newSpecVersion}`);
 
     // Update the first element of specs list
     if (game.specs?.$isLoaded && game.specs.length > 0) {

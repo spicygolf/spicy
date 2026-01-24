@@ -9,7 +9,7 @@
  */
 
 import { deepClone } from "../../utils/clone";
-import { getOptionValueForHole } from "../option-utils";
+import { getOptionValueForHole, getSpecField } from "../option-utils";
 import { rankWithTies } from "../ranking-engine";
 import type { ScoringContext, TeamHoleResult } from "../types";
 
@@ -263,7 +263,7 @@ function calculateMatchPlay(
 ): void {
   // Check if this is a match play game
   // Match play is determined by spec_type or a game option
-  const specType = ctx.gameSpec?.spec_type;
+  const specType = getSpecField(ctx.gameSpec, "spec_type");
   const isMatchPlayOption = getOptionValueForHole("match_play", "1", ctx);
   const isMatchPlay = specType === "skins" || isMatchPlayOption === true;
 

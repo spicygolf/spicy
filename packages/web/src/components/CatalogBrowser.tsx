@@ -9,6 +9,7 @@ import type {
   PlayerAccountProfile,
 } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -196,31 +197,47 @@ export function CatalogBrowser({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {specs.map((spec) => (
-                    <TableRow key={spec.$jazz.id}>
-                      <TableCell className="font-medium">{spec.name}</TableCell>
-                      <TableCell>{spec.short}</TableCell>
-                      <TableCell>{spec.version}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{spec.spec_type}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            spec.status === "prod"
-                              ? "default"
-                              : spec.status === "dev"
-                                ? "secondary"
-                                : "outline"
-                          }
-                        >
-                          {spec.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{spec.min_players || "N/A"}</TableCell>
-                      <TableCell>{spec.location_type || "N/A"}</TableCell>
-                    </TableRow>
-                  ))}
+                  {specs.map((spec) => {
+                    const name = getSpecField(spec, "name") as string;
+                    const short = getSpecField(spec, "short") as string;
+                    const version = getSpecField(spec, "version") as number;
+                    const specType = getSpecField(spec, "spec_type") as string;
+                    const status = getSpecField(spec, "status") as string;
+                    const minPlayers = getSpecField(
+                      spec,
+                      "min_players",
+                    ) as number;
+                    const locationType = getSpecField(
+                      spec,
+                      "location_type",
+                    ) as string;
+
+                    return (
+                      <TableRow key={spec.$jazz.id}>
+                        <TableCell className="font-medium">{name}</TableCell>
+                        <TableCell>{short}</TableCell>
+                        <TableCell>{version}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{specType}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              status === "prod"
+                                ? "default"
+                                : status === "dev"
+                                  ? "secondary"
+                                  : "outline"
+                            }
+                          >
+                            {status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{minPlayers || "N/A"}</TableCell>
+                        <TableCell>{locationType || "N/A"}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

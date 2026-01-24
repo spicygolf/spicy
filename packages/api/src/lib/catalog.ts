@@ -133,6 +133,7 @@ import {
   Tee,
   TeeHole,
 } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 import { transformGameSpec } from "spicylib/transform";
 import {
   type ArangoTeeRating,
@@ -402,6 +403,10 @@ export async function resetCatalog(
 /**
  * Upsert a game spec into the catalog (idempotent)
  *
+ * GameSpec is essentially a unified options map. All metadata (name, version,
+ * legacyId, short, status, spec_type, min_players, etc.) is stored as MetaOption
+ * entries in the options map.
+ *
  * If the spec already exists, updates it in place to preserve CoValue ID.
  * This is critical for maintaining references from existing games.
  */
@@ -411,7 +416,7 @@ export async function upsertGameSpec(
   catalogOptions?: MapOfOptions,
 ): Promise<{ created: boolean; updated: boolean }> {
   const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { specs: { $each: { teamsConfig: true } }, options: {} },
+    resolve: { specs: { $each: { options: {} } }, options: {} },
   });
 
   if (!loadedCatalog.specs) {
@@ -423,151 +428,153 @@ export async function upsertGameSpec(
   const exists = specs.$jazz.has(key);
   const transformed = transformGameSpec(specData);
 
-  // Get or create the spec
+  // Get or create the spec - only set the bare minimum required fields
   let spec: GameSpec;
   if (exists) {
-    // Update existing spec in place to preserve CoValue ID
     const existingSpec = specs[key];
     if (!existingSpec?.$isLoaded) {
       throw new Error(`Existing spec ${key} failed to load`);
     }
     spec = existingSpec;
-
-    // Update fields on existing spec
-    spec.$jazz.set("name", transformed.name);
-    spec.$jazz.set("short", transformed.short);
-    spec.$jazz.set("version", transformed.version);
-    spec.$jazz.set("status", transformed.status);
-    spec.$jazz.set("spec_type", transformed.spec_type);
-    spec.$jazz.set("min_players", transformed.min_players || 1);
-    spec.$jazz.set("location_type", transformed.location_type || "local");
   } else {
-    // Create new spec
-    spec = GameSpec.create(
-      {
-        name: transformed.name,
-        short: transformed.short,
-        version: transformed.version,
-        status: transformed.status,
-        spec_type: transformed.spec_type,
-        min_players: transformed.min_players || 1,
-        location_type: transformed.location_type || "local",
-      },
+    // Create new spec with empty shell - all data goes in options map
+    spec = GameSpec.create({}, { owner: specs.$jazz.owner });
+  }
+
+  // Build the unified options map with ALL data (meta + game + junk + multiplier options)
+  const specOptionsMap: Record<string, unknown> = {};
+
+  // Helper to create a meta option
+  const createMetaOption = (
+    name: string,
+    disp: string,
+    valueType: "bool" | "num" | "menu" | "text" | "text_array",
+    value?: string | number | string[],
+    extras?: {
+      choices?: Array<{ name: string; disp: string }>;
+      seq?: number;
+      searchable?: boolean;
+      required?: boolean;
+    },
+  ) => {
+    const metaOption = MetaOption.create(
+      { name, disp, type: "meta", valueType },
       { owner: specs.$jazz.owner },
+    );
+
+    // Set value based on type
+    if (valueType === "text_array" && Array.isArray(value)) {
+      metaOption.$jazz.set(
+        "valueArray",
+        StringList.create([...value], { owner: specs.$jazz.owner }),
+      );
+    } else if (value !== undefined) {
+      metaOption.$jazz.set("value", String(value));
+    }
+
+    // Set optional fields
+    if (extras?.choices) {
+      metaOption.$jazz.set(
+        "choices",
+        ChoicesList.create(
+          extras.choices.map((c) =>
+            ChoiceMap.create(c, { owner: specs.$jazz.owner }),
+          ),
+          { owner: specs.$jazz.owner },
+        ),
+      );
+    }
+    if (extras?.seq !== undefined) metaOption.$jazz.set("seq", extras.seq);
+    if (extras?.searchable !== undefined)
+      metaOption.$jazz.set("searchable", extras.searchable);
+    if (extras?.required !== undefined)
+      metaOption.$jazz.set("required", extras.required);
+
+    return metaOption;
+  };
+
+  // Add core identity as meta options
+  specOptionsMap.name = createMetaOption(
+    "name",
+    "Name",
+    "text",
+    transformed.name,
+    { required: true },
+  );
+  specOptionsMap.version = createMetaOption(
+    "version",
+    "Version",
+    "num",
+    transformed.version,
+  );
+  if (specData._key) {
+    specOptionsMap.legacyId = createMetaOption(
+      "legacyId",
+      "Legacy ID",
+      "text",
+      specData._key,
     );
   }
 
-  // Set legacyId from ArangoDB _key for matching during game import
-  if (specData._key) {
-    spec.$jazz.set("legacyId", specData._key);
-  }
-
+  // Add long_description if present
   if (transformed.long_description) {
-    spec.$jazz.set("long_description", transformed.long_description);
+    specOptionsMap.long_description = createMetaOption(
+      "long_description",
+      "Description",
+      "text",
+      transformed.long_description,
+    );
   }
 
-  // Create or update TeamsConfig from v0.3 team fields
+  // Add team config as meta options if present
   if (
     specData.teams !== undefined ||
     specData.team_change_every !== undefined
   ) {
-    const rotateEvery = specData.team_change_every ?? 0;
+    specOptionsMap.teams = createMetaOption(
+      "teams",
+      "Team Game",
+      "bool",
+      specData.teams ? "true" : "false",
+    );
 
-    // Validate min_players before calculating teamCount
-    if (!specData.min_players || specData.min_players < 1) {
-      console.warn(
-        `GameSpec ${specData.name} has invalid min_players: ${specData.min_players}, skipping TeamsConfig`,
+    if (specData.team_size && specData.team_size > 0) {
+      specOptionsMap.team_size = createMetaOption(
+        "team_size",
+        "Team Size",
+        "num",
+        specData.team_size,
       );
-    } else {
-      // Calculate teamCount based on v0.3 data
-      let teamCount: number;
-      if (specData.teams === false) {
-        teamCount = specData.min_players;
-      } else if (specData.team_size && specData.team_size > 0) {
-        teamCount = Math.ceil(specData.min_players / specData.team_size);
-      } else {
-        teamCount = specData.min_players;
-      }
+    }
 
-      // Update existing teamsConfig or create new one
-      // Use $jazz.has() to check if property exists (proper Jazz pattern)
-      // Also check $isLoaded for TypeScript type narrowing
-      if (spec.$jazz.has("teamsConfig") && spec.teamsConfig?.$isLoaded) {
-        spec.teamsConfig.$jazz.set("teamCount", teamCount);
-        spec.teamsConfig.$jazz.set("rotateEvery", rotateEvery);
-        if (specData.team_size && specData.team_size > 0) {
-          spec.teamsConfig.$jazz.set("maxPlayersPerTeam", specData.team_size);
-        }
-      } else {
-        const teamsConfig = TeamsConfig.create(
-          { teamCount, rotateEvery },
-          { owner: specs.$jazz.owner },
-        );
-        if (specData.team_size && specData.team_size > 0) {
-          teamsConfig.$jazz.set("maxPlayersPerTeam", specData.team_size);
-        }
-        spec.$jazz.set("teamsConfig", teamsConfig);
-      }
+    if (specData.team_change_every !== undefined) {
+      specOptionsMap.team_change_every = createMetaOption(
+        "team_change_every",
+        "Rotate Teams Every N Holes",
+        "num",
+        specData.team_change_every,
+      );
     }
   }
 
-  // Build spec.options with references to catalog options OR create new options with overrides
+  // Process all transformed options (meta, game, junk, multiplier)
   if (transformed.options && transformed.options.length > 0) {
-    const specOptionsMap: Record<string, unknown> = {};
-
     for (const opt of transformed.options) {
-      // For meta options, always create a NEW option for this spec
-      // Meta options (short, aliases, status, etc.) are spec-specific, not shared from catalog
+      // Meta options are created fresh for each spec (spec-specific metadata)
       if (opt.type === "meta") {
         const metaOpt = opt as MetaOptionData;
-        const newMetaOption = MetaOption.create(
+        specOptionsMap[opt.name] = createMetaOption(
+          metaOpt.name,
+          metaOpt.disp,
+          metaOpt.valueType,
+          metaOpt.value as string | number | string[] | undefined,
           {
-            name: metaOpt.name,
-            disp: metaOpt.disp,
-            type: "meta",
-            valueType: metaOpt.valueType,
+            choices: metaOpt.choices,
+            seq: metaOpt.seq,
+            searchable: metaOpt.searchable,
+            required: metaOpt.required,
           },
-          { owner: specs.$jazz.owner },
         );
-
-        // Set the value based on valueType
-        if (
-          metaOpt.valueType === "text_array" &&
-          Array.isArray(metaOpt.value)
-        ) {
-          newMetaOption.$jazz.set(
-            "valueArray",
-            StringList.create([...metaOpt.value], {
-              owner: specs.$jazz.owner,
-            }),
-          );
-        } else if (metaOpt.value !== undefined) {
-          newMetaOption.$jazz.set("value", String(metaOpt.value));
-        }
-
-        // Set optional fields
-        if (metaOpt.choices) {
-          newMetaOption.$jazz.set(
-            "choices",
-            ChoicesList.create(
-              metaOpt.choices.map((c) =>
-                ChoiceMap.create(c, { owner: specs.$jazz.owner }),
-              ),
-              { owner: specs.$jazz.owner },
-            ),
-          );
-        }
-        if (metaOpt.seq !== undefined) {
-          newMetaOption.$jazz.set("seq", metaOpt.seq);
-        }
-        if (metaOpt.searchable !== undefined) {
-          newMetaOption.$jazz.set("searchable", metaOpt.searchable);
-        }
-        if (metaOpt.required !== undefined) {
-          newMetaOption.$jazz.set("required", metaOpt.required);
-        }
-
-        specOptionsMap[opt.name] = newMetaOption;
         continue;
       }
 
@@ -695,9 +702,10 @@ export async function upsertGameSpec(
       // Default: reference the catalog option directly (no override needed)
       specOptionsMap[opt.name] = catalogOption;
     }
-
-    spec.$jazz.set("options", specOptionsMap as MapOfOptions);
   }
+
+  // Set the unified options map on the spec
+  spec.$jazz.set("options", specOptionsMap as MapOfOptions);
 
   // Only add to map if new (existing specs are already in the map)
   if (!exists) {
@@ -2807,30 +2815,44 @@ async function importGame(
     // Find spec by matching legacyId (ArangoDB _key)
     for (const key of Object.keys(specsMap)) {
       const spec = specsMap[key];
-      if (spec?.$isLoaded && spec.legacyId === normalizedKey) {
-        gameSpec = spec as GameSpec;
-        break;
+      if (spec?.$isLoaded) {
+        const specLegacyId = getSpecField(spec, "legacyId");
+        if (specLegacyId === normalizedKey) {
+          gameSpec = spec as GameSpec;
+          break;
+        }
       }
     }
   }
 
   // Build scope with teamsConfig
-  // Start with gamespec's teamsConfig as template, then apply instance-specific overrides
+  // Start with gamespec's team options as template, then apply instance-specific overrides
   let teamCount: number;
   let rotateEvery: number;
   let maxPlayersPerTeam: number | undefined;
 
-  if (
-    gameSpec?.$isLoaded &&
-    gameSpec.$jazz.has("teamsConfig") &&
-    gameSpec.teamsConfig?.$isLoaded
-  ) {
-    // Use gamespec's teamsConfig as defaults
-    teamCount = gameSpec.teamsConfig.teamCount;
-    rotateEvery = gameSpec.teamsConfig.rotateEvery;
-    maxPlayersPerTeam = gameSpec.teamsConfig.maxPlayersPerTeam;
+  if (gameSpec?.$isLoaded) {
+    // Read team config from spec options
+    const specTeams = getSpecField(gameSpec, "teams");
+    const specTeamSize = getSpecField(gameSpec, "team_size") as
+      | number
+      | undefined;
+    const specRotateEvery = getSpecField(gameSpec, "team_change_every") as
+      | number
+      | undefined;
+    const specMinPlayers = getSpecField(gameSpec, "min_players") as
+      | number
+      | undefined;
+
+    if (specTeams && specTeamSize && specTeamSize > 0 && specMinPlayers) {
+      teamCount = Math.ceil(specMinPlayers / specTeamSize);
+      maxPlayersPerTeam = specTeamSize;
+    } else {
+      teamCount = players.length;
+    }
+    rotateEvery = specRotateEvery ?? 0;
   } else {
-    // Fallback if no gamespec teamsConfig
+    // Fallback if no gamespec
     teamCount = players.length;
     rotateEvery = 0;
   }
@@ -2868,8 +2890,9 @@ async function importGame(
   scope.$jazz.set("teamsConfig", teamsConfig);
 
   // Debug: log what we're creating/updating
+  const specName = gameSpec ? getSpecField(gameSpec, "name") : "none";
   console.log(
-    `${existingGame ? "Updating" : "Creating"} game ${game._key}: rounds=${roundToGames.length}, players=${players.length}, specRef=${gameSpec?.name || "none"}, holes=${gameHoles.length}`,
+    `${existingGame ? "Updating" : "Creating"} game ${game._key}: rounds=${roundToGames.length}, players=${players.length}, specRef=${specName}, holes=${gameHoles.length}`,
   );
 
   // Create new game or update existing one

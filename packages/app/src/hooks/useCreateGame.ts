@@ -76,24 +76,28 @@ export function useCreateGame() {
       { owner: group },
     );
 
-    // If the first spec has a teamsConfig, create a copy for the game scope
+    // If the first spec has team config options, create a TeamsConfig for the game scope
     const firstSpec = specs[0];
 
-    if (firstSpec?.$isLoaded && firstSpec.$jazz.has("teamsConfig")) {
-      // Ensure teamsConfig is loaded before reading its values
-      const loadedSpec = await firstSpec.$jazz.ensureLoaded({
-        resolve: { teamsConfig: true },
-      });
+    if (firstSpec?.$isLoaded && firstSpec.options?.$isLoaded) {
+      const { getSpecField } = await import("spicylib/scoring");
+      const teams = getSpecField(firstSpec, "teams") as boolean;
+      const teamChangeEvery = getSpecField(
+        firstSpec,
+        "team_change_every",
+      ) as number;
+      const teamSize = getSpecField(firstSpec, "team_size") as number;
+      const minPlayers =
+        (getSpecField(firstSpec, "min_players") as number) ?? 2;
 
-      if (loadedSpec.teamsConfig?.$isLoaded) {
-        // Create a new TeamsConfig instance for this game with the spec's values
+      // Only create teamsConfig if spec has teams enabled or team-related options
+      if (teams || teamChangeEvery || teamSize) {
         const { TeamsConfig } = await import("spicylib/schema");
         const teamsConfig = TeamsConfig.create(
           {
-            rotateEvery: loadedSpec.teamsConfig.rotateEvery,
-            teamCount: loadedSpec.teamsConfig.teamCount,
-            maxPlayersPerTeam: loadedSpec.teamsConfig.maxPlayersPerTeam,
-            teamLeadOrder: loadedSpec.teamsConfig.teamLeadOrder,
+            rotateEvery: teamChangeEvery ?? 0,
+            teamCount: minPlayers, // Default to one team per player
+            maxPlayersPerTeam: teamSize ?? 0,
           },
           { owner: group },
         );

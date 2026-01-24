@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Animated, ScrollView, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameSpec } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
 import { useCreateGame } from "@/hooks";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
@@ -30,8 +31,16 @@ export function SpecCard({
   const navigation = useNavigation<NavigationProp<GamesNavigatorParamList>>();
   const { createGame } = useCreateGame();
 
+  // Read spec metadata from options
+  const name = (getSpecField(spec, "name") as string) || "";
+  const short = (getSpecField(spec, "short") as string) || "";
+  const longDescription = getSpecField(spec, "long_description") as string;
+  const specType = getSpecField(spec, "spec_type") as string;
+  const minPlayers = getSpecField(spec, "min_players") as number;
+  const teams = getSpecField(spec, "teams") as boolean;
+
   const handlePlayGame = async () => {
-    const game = await createGame(spec.name, [spec]);
+    const game = await createGame(name, [spec]);
     if (!game) return;
     navigation.navigate("Game", {
       gameId: game.$jazz.id,
@@ -75,17 +84,17 @@ export function SpecCard({
                   size={20}
                 />
               )}
-              <Text style={styles.title}>{spec.name}</Text>
+              <Text style={styles.title}>{name}</Text>
             </View>
           </View>
-          <Text style={styles.subtitle}>{spec.short || ""}</Text>
+          <Text style={styles.subtitle}>{short}</Text>
           <ScrollView
             contentInsetAdjustmentBehavior="automatic"
             style={styles.scrollView}
           >
             <Markdown>
-              {spec.long_description ||
-                `${spec.short}\n\nType: ${spec.spec_type}\nMin Players: ${spec.min_players}\nTeams: ${spec.teams ? "Yes" : "No"}`}
+              {longDescription ||
+                `${short}\n\nType: ${specType}\nMin Players: ${minPlayers}\nTeams: ${teams ? "Yes" : "No"}`}
             </Markdown>
           </ScrollView>
           <TouchableOpacity style={styles.playButton} onPress={handlePlayGame}>

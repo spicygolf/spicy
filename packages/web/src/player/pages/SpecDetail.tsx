@@ -102,17 +102,16 @@ interface SpecDetailContentProps {
 function SpecDetailContent({
   spec,
 }: SpecDetailContentProps): React.JSX.Element {
-  // Get metadata from meta options
+  // Get metadata from options map
+  const name = getSpecField(spec, "name") as string;
   const short = getSpecField(spec, "short");
   const aliases = getMetaOption(spec, "aliases");
-  const specType = getSpecField(spec, "spec_type") ?? spec.spec_type;
-  const minPlayers = getSpecField(spec, "min_players") ?? spec.min_players;
+  const specType = getSpecField(spec, "spec_type");
+  const minPlayers = getSpecField(spec, "min_players");
   const maxPlayers = getSpecField(spec, "max_players");
-  const status = getSpecField(spec, "status") ?? spec.status;
-  const locationType =
-    getSpecField(spec, "location_type") ?? spec.location_type;
-  const longDescription =
-    getSpecField(spec, "long_description") ?? spec.long_description;
+  const status = getSpecField(spec, "status");
+  const locationType = getSpecField(spec, "location_type");
+  const longDescription = getSpecField(spec, "long_description");
 
   // Collect options by type
   const gameOptions: Option[] = [];
@@ -173,7 +172,7 @@ function SpecDetailContent({
       <div className="space-y-2">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold">{spec.name}</h1>
+            <h1 className="text-3xl font-bold">{name}</h1>
             {short && (
               <p className="text-lg text-muted-foreground font-mono">{short}</p>
             )}

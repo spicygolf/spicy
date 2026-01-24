@@ -71,8 +71,13 @@ export function SpecBrowser(): React.JSX.Element {
       }
     }
 
+    const getName = (spec: GameSpec) =>
+      (getSpecField(spec, "name") as string) || "";
+
     if (!search.trim()) {
-      return specList.sort((a, b) => a.spec.name.localeCompare(b.spec.name));
+      return specList.sort((a, b) =>
+        getName(a.spec).localeCompare(getName(b.spec)),
+      );
     }
 
     const searchLower = search.toLowerCase();
@@ -80,7 +85,7 @@ export function SpecBrowser(): React.JSX.Element {
     return specList
       .filter(({ spec }) => {
         // Search by display name
-        const name = spec.name.toLowerCase();
+        const name = getName(spec).toLowerCase();
         if (name.includes(searchLower)) return true;
 
         // Search by short name (meta option)
@@ -107,7 +112,7 @@ export function SpecBrowser(): React.JSX.Element {
 
         return false;
       })
-      .sort((a, b) => a.spec.name.localeCompare(b.spec.name));
+      .sort((a, b) => getName(a.spec).localeCompare(getName(b.spec)));
   }, [specs, search]);
 
   // Loading state
@@ -167,12 +172,13 @@ interface SpecCardProps {
 }
 
 function SpecCard({ specKey, spec }: SpecCardProps): React.JSX.Element {
+  const name = getSpecField(spec, "name") as string;
   const short = getSpecField(spec, "short");
   const aliases = getMetaOption(spec, "aliases");
-  const specType = getSpecField(spec, "spec_type") ?? spec.spec_type;
-  const minPlayers = getSpecField(spec, "min_players") ?? spec.min_players;
+  const specType = getSpecField(spec, "spec_type");
+  const minPlayers = getSpecField(spec, "min_players");
   const maxPlayers = getSpecField(spec, "max_players");
-  const status = getSpecField(spec, "status") ?? spec.status;
+  const status = getSpecField(spec, "status");
 
   // Format player count
   const playerCount =
@@ -188,7 +194,7 @@ function SpecCard({ specKey, spec }: SpecCardProps): React.JSX.Element {
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
             <div>
-              <CardTitle className="text-lg">{spec.name}</CardTitle>
+              <CardTitle className="text-lg">{name}</CardTitle>
               {short && (
                 <p className="text-sm text-muted-foreground font-mono">
                   {short}

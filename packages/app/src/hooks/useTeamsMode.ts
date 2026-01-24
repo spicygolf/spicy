@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { Game, GameSpec } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 
 export interface TeamsModeResult {
   /**
@@ -49,25 +50,22 @@ export interface TeamsModeResult {
 }
 
 /**
- * Determines whether a spec forces teams mode based on its teamsConfig.
+ * Determines whether a spec forces teams mode based on its options.
  *
  * A spec forces teams when:
- * - rotateEvery > 0 (rotating teams like Wolf)
- * - teamCount < min_players (true team game like Five Points with 2 teams for 4 players)
- * - maxPlayersPerTeam > 1 (team size constraint like Vegas)
+ * - team_change_every > 0 (rotating teams like Wolf)
+ * - teams is true (spec explicitly requires teams)
+ * - team_size > 1 (team size constraint like Vegas)
  */
 export function computeSpecForcesTeams(spec: GameSpec): boolean {
   if (!spec?.$isLoaded) return false;
 
-  const tc = spec.teamsConfig;
-  if (!tc?.$isLoaded) return false;
+  const teamChangeEvery =
+    (getSpecField(spec, "team_change_every") as number) ?? 0;
+  const teams = (getSpecField(spec, "teams") as boolean) ?? false;
+  const teamSize = (getSpecField(spec, "team_size") as number) ?? 0;
 
-  const rotateEvery = tc.rotateEvery ?? 0;
-  const minPlayers = spec.min_players ?? 2;
-  const teamCount = tc.teamCount ?? minPlayers;
-  const maxPlayersPerTeam = tc.maxPlayersPerTeam ?? 0;
-
-  return rotateEvery > 0 || teamCount < minPlayers || maxPlayersPerTeam > 1;
+  return teamChangeEvery > 0 || teams || teamSize > 1;
 }
 
 /**
@@ -123,7 +121,11 @@ export function useTeamsMode(
     // Calculate min_players from specs
     const minPlayers =
       gameSpecs.length > 0
-        ? Math.min(...gameSpecs.map((s) => s.min_players ?? 2))
+        ? Math.min(
+            ...gameSpecs.map(
+              (s) => (getSpecField(s, "min_players") as number) ?? 2,
+            ),
+          )
         : 2;
 
     // Count players

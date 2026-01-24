@@ -39,6 +39,7 @@ import {
   RoundToGame,
   Tee,
 } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 
 // Load environment from API package
 config({ path: resolve(import.meta.dir, "../../../api/.env") });
@@ -246,35 +247,33 @@ async function inspectCatalog(
       for (const key of keys) {
         const spec = specs[key] as GameSpec;
         if (spec?.$isLoaded) {
-          const teamsConfig = spec.teamsConfig?.$isLoaded
-            ? spec.teamsConfig
-            : null;
+          const name = getSpecField(spec, "name") as string;
+          const minPlayers = getSpecField(spec, "min_players") as number;
+          const specType = getSpecField(spec, "spec_type") as string;
+          const status = getSpecField(spec, "status") as string;
+          const teams = getSpecField(spec, "teams") as boolean;
+          const teamSize = getSpecField(spec, "team_size") as number;
+          const teamChangeEvery = getSpecField(
+            spec,
+            "team_change_every",
+          ) as number;
 
-          console.log(`--- ${spec.name} (${spec.$jazz.id}) ---`);
-          console.log(`  min_players: ${spec.min_players}`);
-          console.log(`  spec_type: ${spec.spec_type}`);
-          console.log(`  status: ${spec.status}`);
+          console.log(`--- ${name} (${spec.$jazz.id}) ---`);
+          console.log(`  min_players: ${minPlayers}`);
+          console.log(`  spec_type: ${specType}`);
+          console.log(`  status: ${status}`);
 
-          if (teamsConfig) {
-            console.log(`  teamsConfig:`);
-            console.log(`    rotateEvery: ${teamsConfig.rotateEvery}`);
-            console.log(`    teamCount: ${teamsConfig.teamCount}`);
-            if (teamsConfig.maxPlayersPerTeam !== undefined) {
-              console.log(
-                `    maxPlayersPerTeam: ${teamsConfig.maxPlayersPerTeam}`,
-              );
-            }
+          if (teams) {
+            console.log(`  teams: true`);
+            console.log(`    team_size: ${teamSize}`);
+            console.log(`    team_change_every: ${teamChangeEvery}`);
           } else {
-            console.log(`  teamsConfig: none`);
+            console.log(`  teams: false`);
           }
 
           // Compute derived alwaysShowTeams
-          const minPlayers = spec.min_players ?? 2;
           const alwaysShowTeams =
-            teamsConfig &&
-            ((teamsConfig.rotateEvery ?? 0) > 0 ||
-              teamsConfig.teamCount < minPlayers ||
-              (teamsConfig.maxPlayersPerTeam ?? 0) > 1);
+            teams && ((teamChangeEvery ?? 0) > 0 || (teamSize ?? 0) > 1);
           console.log(
             `  [derived] alwaysShowTeams: ${alwaysShowTeams ? "true" : "false"}`,
           );
@@ -371,7 +370,9 @@ async function inspectOptions(
       return;
     }
 
-    console.log(`Spec: ${spec.name} (${spec.short})\n`);
+    const specName = getSpecField(spec, "name") as string;
+    const specShort = getSpecField(spec, "short") as string;
+    console.log(`Spec: ${specName} (${specShort})\n`);
 
     const options = spec.options;
     if (!options?.$isLoaded) {

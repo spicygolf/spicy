@@ -2,6 +2,7 @@ import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { TouchableOpacity } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 import type { Game, GameSpec, Player } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 import { useGame } from "@/hooks";
 import { computeSpecForcesTeams } from "@/hooks/useTeamsMode";
 import { reassignAllPlayersSeamless } from "@/utils/gameTeams";
@@ -162,7 +163,9 @@ function checkAndRevertToSeamlessMode(game: Game): void {
   if (userActivated) return; // Don't revert if user manually activated
 
   // Get min_players from specs
-  const minPlayers = Math.min(...specs.map((s) => s.min_players ?? 2));
+  const minPlayers = Math.min(
+    ...specs.map((s) => (getSpecField(s, "min_players") as number) ?? 2),
+  );
 
   // Current player count (after removal)
   const playerCount = game.players?.$isLoaded ? game.players.length : 0;

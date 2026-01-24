@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameSpec } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
 import { useCreateGame } from "@/hooks";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
@@ -25,6 +26,11 @@ export function SpecListItem({
   const { createGame } = useCreateGame();
   if (!spec?.$isLoaded) return null;
 
+  // Read spec metadata from options
+  const name = (getSpecField(spec, "name") as string) || "";
+  const short = (getSpecField(spec, "short") as string) || "";
+  const specType = getSpecField(spec, "spec_type") as string;
+
   return (
     <View style={styles.row}>
       {showFavoriteButton && (
@@ -38,10 +44,10 @@ export function SpecListItem({
       )}
       <Pressable
         style={styles.pressable}
-        testID={`spec-${spec.name.toLowerCase().replace(/\s+/g, "-")}`}
-        accessibilityLabel={spec.name}
+        testID={`spec-${name.toLowerCase().replace(/\s+/g, "-")}`}
+        accessibilityLabel={name}
         onPress={async () => {
-          const game = await createGame(spec.name, [spec]);
+          const game = await createGame(name, [spec]);
           if (!game) return;
           navigation.navigate("Game", {
             gameId: game.$jazz.id,
@@ -50,9 +56,9 @@ export function SpecListItem({
         }}
       >
         <View style={styles.specContainer}>
-          <Text style={styles.specName}>{spec.name}</Text>
+          <Text style={styles.specName}>{name}</Text>
           <Text style={styles.specSub}>
-            {spec.spec_type} - {spec.short}
+            {specType} - {short}
           </Text>
         </View>
       </Pressable>

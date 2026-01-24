@@ -17,6 +17,7 @@ import { config } from "dotenv";
 import type { Account, ID } from "jazz-tools";
 import { startWorker } from "jazz-tools/worker";
 import { Game, MapOfOptions, MultiplierOption } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 
 // Load environment from API package
 config({ path: resolve(import.meta.dir, "../../../api/.env") });
@@ -187,13 +188,14 @@ async function main() {
 
     console.log(`\nGame: ${game.name}`);
 
-    const spec = game.specs?.[0];
+    const spec = game.specRef;
     if (!spec?.$isLoaded) {
       console.error("Game has no spec loaded");
       process.exit(1);
     }
 
-    console.log(`Spec: ${spec.name} (${spec.$jazz.id})`);
+    const specName = getSpecField(spec, "name");
+    console.log(`Spec: ${specName} (${spec.$jazz.id})`);
 
     // Ensure spec has options map
     if (!spec.$jazz.has("options") || !spec.options) {

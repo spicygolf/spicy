@@ -314,43 +314,20 @@ export function getMetaOption(
 }
 
 /**
- * Get a spec field value, preferring meta option over deprecated top-level field.
+ * Get a spec field from the options map.
  *
- * This provides backwards compatibility during migration from top-level fields
- * to meta options. Once migration is complete, this can be simplified to just
- * call getMetaOption.
+ * GameSpec stores ALL data in the options map. This helper reads a value by name.
  *
  * @param spec - GameSpec to read from
- * @param fieldName - Field name (e.g., "short", "status", "min_players")
- * @returns The field value from meta option or deprecated top-level field
+ * @param fieldName - Field name (e.g., "name", "short", "status", "min_players")
+ * @returns The field value from the options map
  */
 export function getSpecField(
   spec: GameSpec | undefined | null,
   fieldName: string,
 ): string | number | boolean | string[] | undefined {
   if (!spec?.$isLoaded) return undefined;
-
-  // First try meta option (new architecture)
-  const metaValue = getMetaOption(spec, fieldName);
-  if (metaValue !== undefined) return metaValue;
-
-  // Fall back to deprecated top-level fields (backwards compat)
-  switch (fieldName) {
-    case "short":
-      return spec.short;
-    case "long_description":
-      return spec.long_description;
-    case "status":
-      return spec.status;
-    case "spec_type":
-      return spec.spec_type;
-    case "min_players":
-      return spec.min_players;
-    case "location_type":
-      return spec.location_type;
-    default:
-      return undefined;
-  }
+  return getMetaOption(spec, fieldName);
 }
 
 /**
