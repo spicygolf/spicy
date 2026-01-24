@@ -77,6 +77,7 @@ export function AdminApp(): React.JSX.Element {
   const [selectedGames, setSelectedGames] = useState<boolean>(false);
   const [selectedPlayers, setSelectedPlayers] = useState<boolean>(false);
   const [selectedCourses, setSelectedCourses] = useState<boolean>(false);
+  const [selectedMyGames, setSelectedMyGames] = useState<boolean>(false);
   const [gameLegacyId, setGameLegacyId] = useState<string>("");
 
   // Reset state
@@ -87,6 +88,7 @@ export function AdminApp(): React.JSX.Element {
     gamesCleared: number;
     playersCleared: number;
     coursesCleared: number;
+    myGamesCleared: number;
   } | null>(null);
 
   // Admin status (checked via API for security)
@@ -225,14 +227,15 @@ export function AdminApp(): React.JSX.Element {
     }
 
     const itemsToReset: string[] = [];
-    if (selectedSpecs) itemsToReset.push("specs");
-    if (selectedOptions) itemsToReset.push("options");
-    if (selectedGames) itemsToReset.push("games");
-    if (selectedPlayers) itemsToReset.push("players");
-    if (selectedCourses) itemsToReset.push("courses");
+    if (selectedSpecs) itemsToReset.push("catalog specs");
+    if (selectedOptions) itemsToReset.push("catalog options");
+    if (selectedGames) itemsToReset.push("catalog games");
+    if (selectedPlayers) itemsToReset.push("catalog players");
+    if (selectedCourses) itemsToReset.push("catalog courses");
+    if (selectedMyGames) itemsToReset.push("MY games");
 
     const confirmed = window.confirm(
-      `Are you sure you want to reset the catalog? This will delete: ${itemsToReset.join(", ")}.`,
+      `Are you sure you want to reset? This will delete: ${itemsToReset.join(", ")}.`,
     );
 
     if (!confirmed) {
@@ -243,27 +246,71 @@ export function AdminApp(): React.JSX.Element {
     setResetResult(null);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
+      let myGamesCleared = 0;
 
-      const response = await jazzFetch(`${apiUrl}/catalog/reset`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          clearSpecs: selectedSpecs,
-          clearOptions: selectedOptions,
-          clearGames: selectedGames,
-          clearPlayers: selectedPlayers,
-          clearCourses: selectedCourses,
-        }),
-      });
+      // Clear user's games list if selected
+      if (selectedMyGames && me?.$isLoaded && me.root?.$isLoaded) {
+        const root = me.root;
+        const loadedRoot = await root.$jazz.ensureLoaded({
+          resolve: { games: true },
+        });
 
-      if (!response.ok) {
-        throw new Error(`Reset failed: ${response.statusText}`);
+        if (loadedRoot.games?.$isLoaded) {
+          const gamesList = loadedRoot.games;
+          const count = gamesList.length;
+
+          // Clear all games from the list
+          while (gamesList.length > 0) {
+            gamesList.$jazz.splice(0, 1);
+          }
+
+          myGamesCleared = count;
+          console.log(`Cleared ${count} games from user's root.games`);
+        }
       }
 
-      const result = await response.json();
+      // Call catalog reset API if any catalog items selected
+      let result = {
+        specsCleared: 0,
+        optionsCleared: 0,
+        gamesCleared: 0,
+        playersCleared: 0,
+        coursesCleared: 0,
+        myGamesCleared,
+      };
+
+      if (
+        selectedSpecs ||
+        selectedOptions ||
+        selectedGames ||
+        selectedPlayers ||
+        selectedCourses
+      ) {
+        const apiUrl =
+          import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
+
+        const response = await jazzFetch(`${apiUrl}/catalog/reset`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            clearSpecs: selectedSpecs,
+            clearOptions: selectedOptions,
+            clearGames: selectedGames,
+            clearPlayers: selectedPlayers,
+            clearCourses: selectedCourses,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Reset failed: ${response.statusText}`);
+        }
+
+        const apiResult = await response.json();
+        result = { ...result, ...apiResult };
+      }
+
       setResetResult(result);
 
       const clearedItems: string[] = [];
@@ -272,14 +319,16 @@ export function AdminApp(): React.JSX.Element {
       if (result.optionsCleared > 0)
         clearedItems.push(`${result.optionsCleared} options`);
       if (result.gamesCleared > 0)
-        clearedItems.push(`${result.gamesCleared} games`);
+        clearedItems.push(`${result.gamesCleared} catalog games`);
       if (result.playersCleared > 0)
         clearedItems.push(`${result.playersCleared} players`);
       if (result.coursesCleared > 0)
         clearedItems.push(`${result.coursesCleared} courses`);
+      if (result.myGamesCleared > 0)
+        clearedItems.push(`${result.myGamesCleared} of my games`);
 
       toast({
-        title: "Catalog reset complete",
+        title: "Reset complete",
         description:
           clearedItems.length > 0
             ? `Cleared ${clearedItems.join(", ")}`
@@ -671,7 +720,19 @@ export function AdminApp(): React.JSX.Element {
                             disabled={isImporting || isResetting}
                             className="h-4 w-4 rounded border-gray-300"
                           />
-                          <span className="text-sm">Games</span>
+                          <span className="text-sm">Catalog Games</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedMyGames}
+                            onChange={(e) =>
+                              setSelectedMyGames(e.target.checked)
+                            }
+                            disabled={isResetting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">My Games</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -741,12 +802,12 @@ export function AdminApp(): React.JSX.Element {
                         <Button
                           onClick={handleResetCatalog}
                           disabled={
-                            !isAdmin ||
                             isResetting ||
                             isImporting ||
                             (!selectedSpecs &&
                               !selectedOptions &&
                               !selectedGames &&
+                              !selectedMyGames &&
                               !selectedPlayers &&
                               !selectedCourses)
                           }
@@ -773,7 +834,9 @@ export function AdminApp(): React.JSX.Element {
                             resetResult.optionsCleared > 0 &&
                               `${resetResult.optionsCleared} options`,
                             resetResult.gamesCleared > 0 &&
-                              `${resetResult.gamesCleared} games`,
+                              `${resetResult.gamesCleared} catalog games`,
+                            resetResult.myGamesCleared > 0 &&
+                              `${resetResult.myGamesCleared} of my games`,
                             resetResult.playersCleared > 0 &&
                               `${resetResult.playersCleared} players`,
                             resetResult.coursesCleared > 0 &&
