@@ -19,6 +19,7 @@ export type {
 export * from "./rounds";
 export * from "./scores";
 export * from "./settings";
+export * from "./settlement";
 export * from "./teams";
 export { ListOfTeamOptions, TeamOption } from "./teams";
 export * from "./teamsconfig";
