@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useCoState } from "jazz-tools/react";
 import { Search } from "lucide-react";
 import {
@@ -60,24 +61,24 @@ export function SpecBrowser(): React.JSX.Element {
   const filteredSpecs = useMemo(() => {
     if (!specs?.$isLoaded) return [];
 
-    const specList: GameSpec[] = [];
+    const specList: { key: string; spec: GameSpec }[] = [];
     for (const key of Object.keys(specs)) {
       if (key.startsWith("$") || key === "_refs") continue;
       if (!specs.$jazz.has(key)) continue;
       const spec = specs[key];
       if (spec?.$isLoaded) {
-        specList.push(spec);
+        specList.push({ key, spec });
       }
     }
 
     if (!search.trim()) {
-      return specList.sort((a, b) => a.name.localeCompare(b.name));
+      return specList.sort((a, b) => a.spec.name.localeCompare(b.spec.name));
     }
 
     const searchLower = search.toLowerCase();
 
     return specList
-      .filter((spec) => {
+      .filter(({ spec }) => {
         // Search by display name
         const name = spec.name.toLowerCase();
         if (name.includes(searchLower)) return true;
@@ -106,7 +107,7 @@ export function SpecBrowser(): React.JSX.Element {
 
         return false;
       })
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) => a.spec.name.localeCompare(b.spec.name));
   }, [specs, search]);
 
   // Loading state
@@ -151,8 +152,8 @@ export function SpecBrowser(): React.JSX.Element {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredSpecs.map((spec) => (
-            <SpecCard key={spec.$jazz.id} spec={spec} />
+          {filteredSpecs.map(({ key, spec }) => (
+            <SpecCard key={spec.$jazz.id} specKey={key} spec={spec} />
           ))}
         </div>
       )}
@@ -161,10 +162,11 @@ export function SpecBrowser(): React.JSX.Element {
 }
 
 interface SpecCardProps {
+  specKey: string;
   spec: GameSpec;
 }
 
-function SpecCard({ spec }: SpecCardProps): React.JSX.Element {
+function SpecCard({ specKey, spec }: SpecCardProps): React.JSX.Element {
   const short = getSpecField(spec, "short");
   const aliases = getMetaOption(spec, "aliases");
   const specType = getSpecField(spec, "spec_type") ?? spec.spec_type;
@@ -181,33 +183,39 @@ function SpecCard({ spec }: SpecCardProps): React.JSX.Element {
         : `${minPlayers}+ players`;
 
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="text-lg">{spec.name}</CardTitle>
-            {short && (
-              <p className="text-sm text-muted-foreground font-mono">{short}</p>
+    <Link to={`/spec/${encodeURIComponent(specKey)}`}>
+      <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-lg">{spec.name}</CardTitle>
+              {short && (
+                <p className="text-sm text-muted-foreground font-mono">
+                  {short}
+                </p>
+              )}
+            </div>
+            {status === "dev" && (
+              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                Dev
+              </span>
             )}
           </div>
-          {status === "dev" && (
-            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-              Dev
-            </span>
+          {Array.isArray(aliases) && aliases.length > 0 && (
+            <CardDescription>
+              Also known as: {aliases.join(", ")}
+            </CardDescription>
           )}
-        </div>
-        {Array.isArray(aliases) && aliases.length > 0 && (
-          <CardDescription>Also known as: {aliases.join(", ")}</CardDescription>
-        )}
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-2 text-sm">
-          <span className="bg-muted px-2 py-1 rounded capitalize">
-            {specType}
-          </span>
-          <span className="bg-muted px-2 py-1 rounded">{playerCount}</span>
-        </div>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <span className="bg-muted px-2 py-1 rounded capitalize">
+              {specType}
+            </span>
+            <span className="bg-muted px-2 py-1 rounded">{playerCount}</span>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }

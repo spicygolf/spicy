@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AdminApp } from "./admin/AdminApp";
 import { PlayerApp } from "./player/PlayerApp";
 import { SpecBrowser } from "./player/pages/SpecBrowser";
+import { SpecDetail } from "./player/pages/SpecDetail";
 
 /**
  * Simple 404 Not Found component
@@ -34,6 +35,7 @@ export function App(): React.JSX.Element {
         {/* Player-facing routes */}
         <Route path="/" element={<PlayerApp />}>
           <Route index element={<SpecBrowser />} />
+          <Route path="spec/:specKey" element={<SpecDetail />} />
         </Route>
 
         {/* Admin routes */}
