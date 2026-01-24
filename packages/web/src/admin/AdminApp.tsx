@@ -75,6 +75,16 @@ export function AdminApp(): React.JSX.Element {
   const [importGames, setImportGames] = useState<boolean>(true);
   const [gameLegacyId, setGameLegacyId] = useState<string>("");
 
+  // Reset state
+  const [isResetting, setIsResetting] = useState<boolean>(false);
+  const [resetResult, setResetResult] = useState<{
+    specsCleared: number;
+    optionsCleared: number;
+    gamesCleared: number;
+    playersCleared: number;
+    coursesCleared: number;
+  } | null>(null);
+
   // Admin status (checked via API for security)
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
@@ -197,6 +207,67 @@ export function AdminApp(): React.JSX.Element {
       setImportProgress(0);
     } finally {
       setIsImporting(false);
+    }
+  };
+
+  const handleResetCatalog = async (): Promise<void> => {
+    if (!me) {
+      toast({
+        variant: "destructive",
+        title: "Authentication required",
+        description: "Please log in to reset catalog",
+      });
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to reset the catalog? This will delete all specs and options. Games, players, and courses will be preserved.",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setIsResetting(true);
+    setResetResult(null);
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
+
+      const response = await jazzFetch(`${apiUrl}/catalog/reset`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clearSpecs: true,
+          clearOptions: true,
+          clearGames: false,
+          clearPlayers: false,
+          clearCourses: false,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Reset failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      setResetResult(result);
+
+      toast({
+        title: "Catalog reset complete",
+        description: `Cleared ${result.specsCleared} specs and ${result.optionsCleared} options`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Reset failed",
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      });
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -587,23 +658,48 @@ export function AdminApp(): React.JSX.Element {
                       )}
                     </div>
 
-                    <Button
-                      onClick={handleImportToCatalog}
-                      disabled={
-                        !isAdmin ||
-                        isImporting ||
-                        (!importSpecs && !importPlayers && !importGames)
-                      }
-                      className="w-full"
-                      size="lg"
-                    >
-                      {isImporting ? (
-                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Upload className="mr-2 h-4 w-4" />
-                      )}
-                      Import from ArangoDB
-                    </Button>
+                    <div className="flex gap-4">
+                      <Button
+                        onClick={handleResetCatalog}
+                        disabled={!isAdmin || isResetting || isImporting}
+                        variant="destructive"
+                        size="lg"
+                      >
+                        {isResetting ? (
+                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="mr-2 h-4 w-4" />
+                        )}
+                        Reset Catalog
+                      </Button>
+
+                      <Button
+                        onClick={handleImportToCatalog}
+                        disabled={
+                          !isAdmin ||
+                          isImporting ||
+                          (!importSpecs && !importPlayers && !importGames)
+                        }
+                        className="flex-1"
+                        size="lg"
+                      >
+                        {isImporting ? (
+                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Upload className="mr-2 h-4 w-4" />
+                        )}
+                        Import from ArangoDB
+                      </Button>
+                    </div>
+
+                    {resetResult && (
+                      <div className="rounded-md border border-green-200 bg-green-50 p-4">
+                        <p className="text-sm text-green-800">
+                          Reset complete: {resetResult.specsCleared} specs,{" "}
+                          {resetResult.optionsCleared} options cleared
+                        </p>
+                      </div>
+                    )}
 
                     {importProgress > 0 && (
                       <div className="space-y-2">

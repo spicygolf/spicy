@@ -110,7 +110,7 @@ const corsOrigin =
 const app = new Elysia()
   .use(
     cors({
-      origin: [corsOrigin, "http://localhost:5173"],
+      origin: [corsOrigin, "http://localhost:5173", "http://localhost:5000"],
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "x-jazz-auth"],
       credentials: true,
