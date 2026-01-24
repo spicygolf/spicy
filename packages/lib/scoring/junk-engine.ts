@@ -128,7 +128,8 @@ function evaluatePlayerJunk(
       holeNum: holeResult.hole,
     };
 
-    if (shouldAwardJunk(junk, evalCtx)) {
+    const shouldAward = shouldAwardJunk(junk, evalCtx);
+    if (shouldAward) {
       playerResult.junk.push({
         name: junk.name,
         value: junk.value ?? 0,

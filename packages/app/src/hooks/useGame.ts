@@ -90,7 +90,7 @@ export function useGame(
     name: true,
     start: true,
     scope: { teamsConfig: true },
-    spec: { $each: true }, // Working copy of options (primary for scoring/display)
+    spec: { $each: { $each: true } }, // Working copy of options (MapOfOptions -> Option fields)
     holes: true,
     players: { $each: { name: true, handicap: true, envs: true } },
     rounds: {

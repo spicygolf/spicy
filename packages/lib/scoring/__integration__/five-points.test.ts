@@ -30,9 +30,9 @@ const JAZZ_WORKER_SECRET = process.env.JAZZ_WORKER_SECRET;
 const FIVE_POINTS_GAME_ID = "co_zf8FwoJKa1jSov3tnUx71ybXLB2";
 
 // Deep resolve query to load all nested data
-// Note: game.spec is the working copy of options (MapOfOptions)
+// Note: game.spec is MapOfOptions (co.record), so $each iterates entries, inner $each loads Option fields
 const GAME_RESOLVE = {
-  spec: { $each: true }, // Working copy of options for scoring
+  spec: { $each: { $each: true } }, // Working copy of options for scoring
   holes: {
     $each: {
       teams: {

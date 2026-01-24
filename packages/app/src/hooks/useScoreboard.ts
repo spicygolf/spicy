@@ -45,10 +45,16 @@ export interface ScoreboardResult {
  */
 function createScoringFingerprint(game: Game | null): number | null {
   if (!game?.$isLoaded) return null;
-  if (!game.spec?.$isLoaded) return null;
 
-  // game.spec is the working copy of options
-  const spec = game.spec;
+  // Need either game.spec (working copy) or game.specRef (catalog spec) for options
+  // game.spec is preferred, but specRef works as fallback
+  const spec = game.spec?.$isLoaded
+    ? game.spec
+    : game.specRef?.$isLoaded
+      ? game.specRef
+      : null;
+  if (!spec) return null;
+
   if (!game.holes?.$isLoaded || game.holes.length === 0) return null;
   if (!game.rounds?.$isLoaded || game.rounds.length === 0) return null;
 
