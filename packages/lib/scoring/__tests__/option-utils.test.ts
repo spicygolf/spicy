@@ -300,50 +300,36 @@ describe("getSpecField", () => {
     });
   });
 
-  describe("top-level field fallback (backwards compat)", () => {
-    it("falls back to short field", () => {
-      const spec = createMockSpec({}, { short: "5pts" });
+  describe("options-only schema (no top-level fallbacks)", () => {
+    it("returns undefined when option not in options map", () => {
+      // No fallback to top-level fields - options-only schema
+      const spec = createMockSpec({});
 
       const result = getSpecField(spec as GameSpec, "short");
-      expect(result).toBe("5pts");
+      expect(result).toBeUndefined();
     });
 
-    it("falls back to long_description field", () => {
-      const spec = createMockSpec(
-        {},
-        { long_description: "A fun game for everyone" },
+    it("returns value from options map for all field types", () => {
+      const spec = createMockSpec({
+        short: createTextMetaOption("short", "5pts"),
+        long_description: createTextMetaOption(
+          "long_description",
+          "A fun game for everyone",
+        ),
+        status: createTextMetaOption("status", "prod"),
+        spec_type: createTextMetaOption("spec_type", "points"),
+        min_players: createNumMetaOption("min_players", 2),
+        location_type: createTextMetaOption("location_type", "course"),
+      });
+
+      expect(getSpecField(spec as GameSpec, "short")).toBe("5pts");
+      expect(getSpecField(spec as GameSpec, "long_description")).toBe(
+        "A fun game for everyone",
       );
-
-      const result = getSpecField(spec as GameSpec, "long_description");
-      expect(result).toBe("A fun game for everyone");
-    });
-
-    it("falls back to status field", () => {
-      const spec = createMockSpec({}, { status: "prod" });
-
-      const result = getSpecField(spec as GameSpec, "status");
-      expect(result).toBe("prod");
-    });
-
-    it("falls back to spec_type field", () => {
-      const spec = createMockSpec({}, { spec_type: "points" });
-
-      const result = getSpecField(spec as GameSpec, "spec_type");
-      expect(result).toBe("points");
-    });
-
-    it("falls back to min_players field", () => {
-      const spec = createMockSpec({}, { min_players: 2 });
-
-      const result = getSpecField(spec as GameSpec, "min_players");
-      expect(result).toBe(2);
-    });
-
-    it("falls back to location_type field", () => {
-      const spec = createMockSpec({}, { location_type: "course" });
-
-      const result = getSpecField(spec as GameSpec, "location_type");
-      expect(result).toBe("course");
+      expect(getSpecField(spec as GameSpec, "status")).toBe("prod");
+      expect(getSpecField(spec as GameSpec, "spec_type")).toBe("points");
+      expect(getSpecField(spec as GameSpec, "min_players")).toBe(2);
+      expect(getSpecField(spec as GameSpec, "location_type")).toBe("course");
     });
   });
 
