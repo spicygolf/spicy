@@ -76,8 +76,7 @@ export function AdminApp(): React.JSX.Element {
   const [selectedSpecs, setSelectedSpecs] = useState<boolean>(false);
   const [selectedOptions, setSelectedOptions] = useState<boolean>(false);
   const [selectedGames, setSelectedGames] = useState<boolean>(false);
-  const [selectedPlayers, setSelectedPlayers] = useState<boolean>(false);
-  const [selectedCourses, setSelectedCourses] = useState<boolean>(false);
+
   const [selectedMyGames, setSelectedMyGames] = useState<boolean>(false);
   const [gameLegacyId, setGameLegacyId] = useState<string>("");
 
@@ -121,7 +120,9 @@ export function AdminApp(): React.JSX.Element {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
 
       // Step 1: Import specs & players (20-50%)
-      if (selectedSpecs || selectedPlayers) {
+      // When games is selected, automatically include players (games reference players)
+      const shouldImportPlayers = selectedGames;
+      if (selectedSpecs || shouldImportPlayers) {
         setImportProgress(20);
         const specsResponse = await jazzFetch(`${apiUrl}/catalog/import`, {
           method: "POST",
@@ -130,7 +131,7 @@ export function AdminApp(): React.JSX.Element {
           },
           body: JSON.stringify({
             specs: selectedSpecs,
-            players: selectedPlayers,
+            players: shouldImportPlayers,
           }),
         });
 
@@ -227,12 +228,14 @@ export function AdminApp(): React.JSX.Element {
       return;
     }
 
+    // When games is selected, automatically include players and courses
+    const shouldResetPlayers = selectedGames;
+    const shouldResetCourses = selectedGames;
+
     const itemsToReset: string[] = [];
     if (selectedSpecs) itemsToReset.push("catalog specs");
     if (selectedOptions) itemsToReset.push("catalog options");
-    if (selectedGames) itemsToReset.push("catalog games");
-    if (selectedPlayers) itemsToReset.push("catalog players");
-    if (selectedCourses) itemsToReset.push("catalog courses");
+    if (selectedGames) itemsToReset.push("catalog games (+ players, courses)");
     if (selectedMyGames) itemsToReset.push("MY games");
 
     const confirmed = window.confirm(
@@ -284,8 +287,8 @@ export function AdminApp(): React.JSX.Element {
         selectedSpecs ||
         selectedOptions ||
         selectedGames ||
-        selectedPlayers ||
-        selectedCourses
+        shouldResetPlayers ||
+        shouldResetCourses
       ) {
         const apiUrl =
           import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
@@ -299,8 +302,8 @@ export function AdminApp(): React.JSX.Element {
             clearSpecs: selectedSpecs,
             clearOptions: selectedOptions,
             clearGames: selectedGames,
-            clearPlayers: selectedPlayers,
-            clearCourses: selectedCourses,
+            clearPlayers: shouldResetPlayers,
+            clearCourses: shouldResetCourses,
           }),
         });
 
@@ -781,6 +784,9 @@ export function AdminApp(): React.JSX.Element {
                             className="h-4 w-4 rounded border-gray-300"
                           />
                           <span className="text-sm">Catalog Games</span>
+                          <span className="text-xs text-muted-foreground">
+                            (includes players, courses)
+                          </span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -794,31 +800,13 @@ export function AdminApp(): React.JSX.Element {
                           />
                           <span className="text-sm">My Games</span>
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedPlayers}
-                            onChange={(e) =>
-                              setSelectedPlayers(e.target.checked)
-                            }
-                            disabled={isImporting || isResetting}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                          <span className="text-sm">Players</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedCourses}
-                            onChange={(e) =>
-                              setSelectedCourses(e.target.checked)
-                            }
-                            disabled={isImporting || isResetting}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                          <span className="text-sm">Courses</span>
-                        </label>
                       </div>
+                      {selectedGames && (
+                        <p className="text-xs text-muted-foreground">
+                          When Catalog Games is selected, players and courses
+                          are automatically included in the import/reset.
+                        </p>
+                      )}
 
                       {selectedGames && (
                         <div className="space-y-2">
@@ -846,9 +834,7 @@ export function AdminApp(): React.JSX.Element {
                             !isAdmin ||
                             isImporting ||
                             isResetting ||
-                            (!selectedSpecs &&
-                              !selectedGames &&
-                              !selectedPlayers)
+                            (!selectedSpecs && !selectedGames)
                           }
                           size="sm"
                         >
@@ -867,9 +853,7 @@ export function AdminApp(): React.JSX.Element {
                             (!selectedSpecs &&
                               !selectedOptions &&
                               !selectedGames &&
-                              !selectedMyGames &&
-                              !selectedPlayers &&
-                              !selectedCourses)
+                              !selectedMyGames)
                           }
                           variant="destructive"
                           size="sm"

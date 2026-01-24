@@ -105,7 +105,6 @@ import {
   JunkOption,
   ListOfClubs,
   ListOfGameHoles,
-  ListOfGameSpecs,
   ListOfPlayers,
   ListOfRounds,
   ListOfRoundToGames,
@@ -2398,7 +2397,6 @@ async function importGame(
   playerGhinMap: Map<string, string | null>,
   courseCache: Map<string, co.loaded<typeof Course>>,
   teeCache: Map<string, co.loaded<typeof Tee>>,
-  workerGroup: Group,
 ): Promise<{
   success: boolean;
   error?: string;
@@ -2433,13 +2431,42 @@ async function importGame(
     rounds: { created: 0, updated: 0, skipped: 0 },
   };
 
-  // For idempotency: ALWAYS use workerGroup as owner for game-related upserts
-  // upsertUnique derives CoValue ID from (unique + owner), so using the same
-  // stable workerGroup ensures we always find/update existing games
-  const gameGroup = workerGroup;
-
-  // Check if game exists in catalog (for tracking created vs updated)
+  // Check if game already exists in the catalog index
   const gameExistedInCatalog = gamesMap.$jazz.has(game._key);
+  let existingGame: Game | null = null;
+  let gameGroup: Group;
+
+  if (gameExistedInCatalog) {
+    // Game exists - load it and use its group
+    const gameRef = gamesMap[game._key];
+    if (gameRef) {
+      const loadedGame = await Game.load(gameRef.$jazz.id, {});
+      if (loadedGame?.$isLoaded) {
+        existingGame = loadedGame;
+        gameGroup = loadedGame.$jazz.owner as Group;
+        console.log(
+          `Game ${game._key} already exists, using existing group for updates`,
+        );
+      } else {
+        // Failed to load existing game - create new group
+        console.warn(
+          `Game ${game._key} exists in index but failed to load, creating new`,
+        );
+        gameGroup = Group.create(workerAccount);
+        gameGroup.makePublic();
+      }
+    } else {
+      // Reference is null - create new group
+      gameGroup = Group.create(workerAccount);
+      gameGroup.makePublic();
+    }
+  } else {
+    // Game doesn't exist - create a new per-game group
+    // Worker is automatically an admin since they created it
+    gameGroup = Group.create(workerAccount);
+    gameGroup.makePublic();
+    console.log(`Creating new game ${game._key} with dedicated group`);
+  }
 
   // Import rounds
   const roundToGames = ListOfRoundToGames.create([], { owner: gameGroup });
@@ -2542,7 +2569,7 @@ async function importGame(
         player,
         course,
         tee,
-        workerGroup,
+        gameGroup,
       );
 
       // Upsert RoundToGame edge using composite key (round + game legacy IDs)
@@ -2766,8 +2793,7 @@ async function importGame(
     }
   }
 
-  // Build specs list (try to find gamespec in catalog by legacyId)
-  const specs = ListOfGameSpecs.create([], { owner: gameGroup });
+  // Find the game spec in catalog by legacyId for specRef
   const specsMap = loadedCatalog.specs as MapOfGameSpecs | undefined;
   let gameSpec: GameSpec | null = null;
   if (gamespecKey && specsMap) {
@@ -2783,8 +2809,6 @@ async function importGame(
       const spec = specsMap[key];
       if (spec?.$isLoaded && spec.legacyId === normalizedKey) {
         gameSpec = spec as GameSpec;
-        // @ts-expect-error - MaybeLoaded types in migration code, spec is verified loaded
-        specs.$jazz.push(spec);
         break;
       }
     }
@@ -2843,42 +2867,52 @@ async function importGame(
   // Set optional CoMap field after creation
   scope.$jazz.set("teamsConfig", teamsConfig);
 
-  // Debug: log what we're about to upsert
+  // Debug: log what we're creating/updating
   console.log(
-    `Upserting game ${game._key}: rounds=${roundToGames.length}, players=${players.length}, specs=${specs.length}, holes=${gameHoles.length}`,
+    `${existingGame ? "Updating" : "Creating"} game ${game._key}: rounds=${roundToGames.length}, players=${players.length}, specRef=${gameSpec?.name || "none"}, holes=${gameHoles.length}`,
   );
 
-  // Upsert the game using legacyId as unique key (idempotent)
-  const createdGame = await Game.upsertUnique({
-    unique: game._key,
-    value: {
-      start: new Date(game.start),
-      name: game.name,
-      scope,
-      specs,
-      holes: gameHoles,
-      players,
-      rounds: roundToGames,
-      legacyId: game._key,
-    },
-    owner: gameGroup,
-  });
+  // Create new game or update existing one
+  let finalGame: Game;
 
-  if (!createdGame || !createdGame.$isLoaded) {
-    throw new Error(`Failed to upsert game: ${game._key}`);
+  if (existingGame) {
+    // Update existing game with new data
+    existingGame.$jazz.set("start", new Date(game.start));
+    existingGame.$jazz.set("name", game.name);
+    existingGame.$jazz.set("scope", scope);
+    existingGame.$jazz.set("holes", gameHoles);
+    existingGame.$jazz.set("players", players);
+    existingGame.$jazz.set("rounds", roundToGames);
+    existingGame.$jazz.set("legacyId", game._key);
+    // Set specRef (the new way) and clear deprecated specs array
+    if (gameSpec) {
+      existingGame.$jazz.set("specRef", gameSpec);
+    }
+    if (existingGame.$jazz.has("specs")) {
+      existingGame.$jazz.delete("specs");
+    }
+    finalGame = existingGame;
+  } else {
+    // Create new game with per-game group
+    const newGame = Game.create(
+      {
+        start: new Date(game.start),
+        name: game.name,
+        scope,
+        holes: gameHoles,
+        players,
+        rounds: roundToGames,
+        legacyId: game._key,
+      },
+      { owner: gameGroup },
+    );
+    // Set specRef after creation (optional field)
+    if (gameSpec) {
+      // @ts-expect-error - MaybeLoaded types in migration code, gameSpec is verified loaded above
+      newGame.$jazz.set("specRef", gameSpec);
+    }
+    finalGame = newGame;
   }
-
-  // IMPORTANT: upsertUnique only sets fields on CREATE, not on UPDATE.
-  // If the game already existed (from a previous import with old schema),
-  // we need to explicitly update the fields to ensure new schema is applied.
-  createdGame.$jazz.set("start", new Date(game.start));
-  createdGame.$jazz.set("name", game.name);
-  createdGame.$jazz.set("scope", scope);
-  createdGame.$jazz.set("specs", specs);
-  createdGame.$jazz.set("holes", gameHoles);
-  createdGame.$jazz.set("players", players);
-  createdGame.$jazz.set("rounds", roundToGames);
-  createdGame.$jazz.set("legacyId", game._key);
 
   // Import game-level option overrides from v0.3 data
   // v0.3 game options have two types:
@@ -2943,14 +2977,14 @@ async function importGame(
 
     // Set game.options if we created any options
     if (Object.keys(gameOptionsMap).length > 0) {
-      createdGame.$jazz.set("options", gameOptionsMap);
+      finalGame.$jazz.set("options", gameOptionsMap);
     }
   }
 
-  // Add to catalog map for enumeration (idempotent - same key overwrites)
-  gamesMap.$jazz.set(game._key, createdGame);
+  // Add to catalog index for legacyId lookup (idempotent - same key overwrites)
+  gamesMap.$jazz.set(game._key, finalGame);
   console.log(
-    `Set game ${game._key} in catalog, game.id=${createdGame.$jazz.id}`,
+    `Set game ${game._key} in catalog index, game.id=${finalGame.$jazz.id}`,
   );
 
   return {
@@ -3056,15 +3090,6 @@ export async function importGamesFromFiles(
 
     console.log("Catalog maps loaded");
 
-    // Get the worker's root group for stable upsertUnique operations
-    const loadedWorker = await workerAccount.$jazz.ensureLoaded({
-      resolve: { root: true },
-    });
-    if (!loadedWorker.root) {
-      throw new Error("Worker account has no root");
-    }
-    const workerGroup = loadedWorker.root.$jazz.owner as Group;
-
     // Create caches
     const courseCache = new Map<string, co.loaded<typeof Course>>();
     const teeCache = new Map<string, co.loaded<typeof Tee>>();
@@ -3121,7 +3146,6 @@ export async function importGamesFromFiles(
           playerGhinMap,
           courseCache,
           teeCache,
-          workerGroup,
         );
 
         if (importResult.success) {
@@ -3199,7 +3223,6 @@ export async function importGamesFromFiles(
             playerGhinMap,
             courseCache,
             teeCache,
-            workerGroup,
           );
 
           if (importResult.success) {
