@@ -2,7 +2,7 @@
  * Five Points Integration Tests
  *
  * Tests the scoring pipeline against a real Five Points game from Jazz.
- * Game ID: co_zEEke11BQDqGfoPUeQztziP2wf7
+ * Game is looked up by legacyId from the catalog.games map.
  *
  * This test requires Jazz credentials in packages/api/.env:
  * - JAZZ_API_KEY
@@ -26,8 +26,8 @@ const JAZZ_API_KEY = process.env.JAZZ_API_KEY;
 const JAZZ_WORKER_ACCOUNT = process.env.JAZZ_WORKER_ACCOUNT;
 const JAZZ_WORKER_SECRET = process.env.JAZZ_WORKER_SECRET;
 
-// The Five Points game we're testing
-const FIVE_POINTS_GAME_ID = "co_zf8FwoJKa1jSov3tnUx71ybXLB2";
+// The Five Points game we're testing - looked up by legacyId from catalog.games
+const FIVE_POINTS_GAME_LEGACY_ID = "250568952";
 
 // Deep resolve query to load all nested data
 // Note: game.spec is MapOfOptions (co.record), so $each iterates entries, inner $each loads Option fields
@@ -70,6 +70,7 @@ const GAME_RESOLVE = {
 // Worker instance for all tests
 let worker: Awaited<ReturnType<typeof startWorker>> | null = null;
 let game: Game | null = null;
+let gameId: string | null = null;
 let scoreboard: Scoreboard | null = null;
 
 // Check if Jazz credentials are available
@@ -113,14 +114,43 @@ describe("Five Points Integration Tests", () => {
       accountSecret: JAZZ_WORKER_SECRET,
     });
 
-    // Load the game with all nested data
-    game = await Game.load(FIVE_POINTS_GAME_ID as ID<typeof Game>, {
+    // Load the game from catalog.games by legacyId
+    const workerAccount = await PlayerAccount.load(
+      JAZZ_WORKER_ACCOUNT as ID<typeof PlayerAccount>,
+      {
+        loadAs: worker.worker,
+        resolve: {
+          profile: {
+            catalog: {
+              games: { $each: true },
+            },
+          },
+        },
+      },
+    );
+
+    if (!workerAccount?.profile?.catalog?.games?.$isLoaded) {
+      throw new Error("Failed to load catalog.games");
+    }
+
+    const catalogGame =
+      workerAccount.profile.catalog.games[FIVE_POINTS_GAME_LEGACY_ID];
+    if (!catalogGame?.$isLoaded) {
+      throw new Error(
+        `Game with legacyId ${FIVE_POINTS_GAME_LEGACY_ID} not found in catalog`,
+      );
+    }
+
+    gameId = catalogGame.$jazz.id;
+
+    // Now load the game with full resolve query for scoring
+    game = await Game.load(gameId as ID<typeof Game>, {
       loadAs: worker.worker,
       resolve: GAME_RESOLVE,
     });
 
     if (!game?.$isLoaded) {
-      throw new Error(`Failed to load game ${FIVE_POINTS_GAME_ID}`);
+      throw new Error(`Failed to load game ${gameId}`);
     }
 
     // Run the scoring pipeline
@@ -152,24 +182,25 @@ describe("Five Points Integration Tests", () => {
     it("should have spec options with correct overrides", () => {
       requireGame();
 
-      // game.spec is the working copy of options
+      // game.spec is the working copy of options (MapOfOptions is a co.record)
       const spec = game.spec;
       expect(spec?.$isLoaded).toBe(true);
 
       // Five Points overrides low_ball and low_total to value 2 (base is 1)
+      // Options are now plain objects (not CoMaps), so no $isLoaded check needed
       // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
       const lowBall = spec?.["low_ball"];
-      expect(lowBall?.$isLoaded).toBe(true);
+      expect(lowBall).toBeDefined();
       expect(lowBall?.value).toBe(2);
 
       // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
       const lowTotal = spec?.["low_total"];
-      expect(lowTotal?.$isLoaded).toBe(true);
+      expect(lowTotal).toBeDefined();
       expect(lowTotal?.value).toBe(2);
 
       // prox should be value 1
       const prox = spec?.prox;
-      expect(prox?.$isLoaded).toBe(true);
+      expect(prox).toBeDefined();
       expect(prox?.value).toBe(1);
     });
   });
@@ -179,7 +210,7 @@ describe("Five Points Integration Tests", () => {
       requireScoreboard();
 
       expect(scoreboard).toBeDefined();
-      expect(scoreboard.meta.gameId).toBe(FIVE_POINTS_GAME_ID);
+      expect(scoreboard.meta.gameId).toBe(gameId);
     });
 
     it("should have teams configured", () => {
