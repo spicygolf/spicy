@@ -63,6 +63,7 @@ export function AdminApp(): React.JSX.Element {
   const [ghinNumber, setGhinNumber] = useState<string>("");
   const [isMigrating, setIsMigrating] = useState<boolean>(false);
   const [isLinkingPlayer, setIsLinkingPlayer] = useState<boolean>(false);
+  const [isUnlinkingPlayer, setIsUnlinkingPlayer] = useState<boolean>(false);
   const [linkGhinId, setLinkGhinId] = useState<string>("");
   const [gamesImportResult, setGamesImportResult] = useState<{
     games: { total: number; imported: number; failed: number };
@@ -461,6 +462,65 @@ export function AdminApp(): React.JSX.Element {
       });
     } finally {
       setIsLinkingPlayer(false);
+    }
+  };
+
+  const handleUnlinkPlayer = async (): Promise<void> => {
+    if (!me) {
+      toast({
+        variant: "destructive",
+        title: "Authentication required",
+        description: "Please log in to unlink player",
+      });
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to unlink your player? You will need to re-link using your GHIN ID.",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setIsUnlinkingPlayer(true);
+
+    try {
+      if (!me.$isLoaded || !me.root?.$isLoaded) {
+        throw new Error("Account not fully loaded");
+      }
+
+      const root = me.root;
+
+      // Create a new blank player to replace the linked one
+      const { Player } = await import("spicylib/schema");
+      const blankPlayer = Player.create(
+        {
+          name: "Unlinked",
+          short: "?",
+          gender: "M",
+          handicap: undefined,
+        },
+        { owner: root.$jazz.owner },
+      );
+
+      root.$jazz.set("player", blankPlayer);
+      console.log("Reset root.player to blank player");
+
+      toast({
+        title: "Player unlinked",
+        description:
+          "Your player has been unlinked. You can now re-link using your GHIN ID.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Unlink failed",
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      });
+    } finally {
+      setIsUnlinkingPlayer(false);
     }
   };
 
@@ -1115,19 +1175,36 @@ export function AdminApp(): React.JSX.Element {
                   />
                 </div>
 
-                <Button
-                  onClick={handleLinkPlayer}
-                  disabled={isLinkingPlayer || !linkGhinId.trim()}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isLinkingPlayer ? (
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <User className="mr-2 h-4 w-4" />
-                  )}
-                  Link Player
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleLinkPlayer}
+                    disabled={
+                      isLinkingPlayer || isUnlinkingPlayer || !linkGhinId.trim()
+                    }
+                    className="flex-1"
+                    size="lg"
+                  >
+                    {isLinkingPlayer ? (
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <User className="mr-2 h-4 w-4" />
+                    )}
+                    Link Player
+                  </Button>
+                  <Button
+                    onClick={handleUnlinkPlayer}
+                    disabled={isLinkingPlayer || isUnlinkingPlayer}
+                    variant="destructive"
+                    size="lg"
+                  >
+                    {isUnlinkingPlayer ? (
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="mr-2 h-4 w-4" />
+                    )}
+                    Unlink
+                  </Button>
+                </div>
 
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">How it works:</h3>
