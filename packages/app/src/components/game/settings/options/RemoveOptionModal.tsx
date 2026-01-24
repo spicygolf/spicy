@@ -24,13 +24,14 @@ export function RemoveOptionModal({
   if (!option) return null;
 
   const isJunk = option.type === "junk";
-  const typeLabel = isJunk ? "Junk" : "Multiplier";
 
   const valueDisplay = isJunk
-    ? `${(option as JunkOption).value} ${(option as JunkOption).value === 1 ? "point" : "points"}`
+    ? `${(option as JunkOption).value} ${(option as JunkOption).value === 1 ? "pt" : "pts"}`
     : (option as MultiplierOption).value
-      ? `${(option as MultiplierOption).value}x multiplier`
-      : "variable multiplier";
+      ? `${(option as MultiplierOption).value}x`
+      : "variable";
+
+  const scopeDisplay = option.scope || "–";
 
   return (
     <Modal
@@ -44,47 +45,47 @@ export function RemoveOptionModal({
           style={styles.modalContent}
           onPress={(e) => e.stopPropagation()}
         >
+          {/* Header */}
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{option.disp}</Text>
-            <Pressable onPress={onClose}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.modalTitle}>{option.disp}</Text>
+              <Text style={styles.modalSubtitle}>
+                {isJunk ? "Junk" : "Multiplier"} · {valueDisplay} ·{" "}
+                {scopeDisplay}
+              </Text>
+            </View>
+            <Pressable onPress={onClose} hitSlop={8}>
               <FontAwesome6
                 name="xmark"
                 iconStyle="solid"
-                size={20}
-                color={theme.colors.primary}
+                size={18}
+                color={theme.colors.secondary}
               />
             </Pressable>
           </View>
 
-          <View style={styles.infoSection}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Type:</Text>
-              <Text style={styles.infoValue}>{typeLabel}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Value:</Text>
-              <Text style={styles.infoValue}>{valueDisplay}</Text>
-            </View>
-            {option.scope && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Scope:</Text>
-                <Text style={styles.infoValue}>{option.scope}</Text>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.buttonRow}>
-            <Pressable style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelButtonText}>Keep</Text>
+          {/* Actions */}
+          <View style={styles.actionsContainer}>
+            <Pressable style={styles.actionRow} onPress={onClose}>
+              <FontAwesome6
+                name="circle-check"
+                iconStyle="solid"
+                size={16}
+                color={theme.colors.action}
+              />
+              <Text style={styles.actionText}>Keep in game</Text>
             </Pressable>
-            <Pressable style={styles.removeButton} onPress={onRemove}>
+
+            <Pressable style={styles.actionRow} onPress={onRemove}>
               <FontAwesome6
                 name="trash-can"
                 iconStyle="solid"
-                size={14}
-                color="#fff"
+                size={16}
+                color={theme.colors.error}
               />
-              <Text style={styles.removeButtonText}>Remove from Game</Text>
+              <Text style={[styles.actionText, styles.removeText]}>
+                Remove from game
+              </Text>
             </Pressable>
           </View>
         </Pressable>
@@ -99,78 +100,52 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.modalOverlay,
     justifyContent: "center",
     alignItems: "center",
-    padding: theme.gap(2),
+    padding: theme.gap(3),
   },
   modalContent: {
     backgroundColor: theme.colors.background,
     borderRadius: 12,
-    padding: theme.gap(2),
     width: "100%",
-    maxWidth: 350,
+    maxWidth: 300,
+    overflow: "hidden",
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.gap(1.5),
-    paddingBottom: theme.gap(1),
+    alignItems: "flex-start",
+    padding: theme.gap(1.5),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
   },
+  headerLeft: {
+    flex: 1,
+    marginRight: theme.gap(1),
+  },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "600",
     color: theme.colors.primary,
   },
-  infoSection: {
-    marginBottom: theme.gap(2),
+  modalSubtitle: {
+    fontSize: 12,
+    color: theme.colors.secondary,
+    marginTop: 2,
   },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  actionsContainer: {
     paddingVertical: theme.gap(0.5),
   },
-  infoLabel: {
-    fontSize: 14,
-    color: theme.colors.secondary,
-  },
-  infoValue: {
-    fontSize: 14,
-    color: theme.colors.primary,
-    fontWeight: "500",
-  },
-  buttonRow: {
+  actionRow: {
     flexDirection: "row",
+    alignItems: "center",
     gap: theme.gap(1),
-  },
-  cancelButton: {
-    flex: 1,
     paddingVertical: theme.gap(1.25),
     paddingHorizontal: theme.gap(1.5),
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: 8,
-    alignItems: "center",
   },
-  cancelButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
+  actionText: {
+    fontSize: 15,
     color: theme.colors.primary,
   },
-  removeButton: {
-    flex: 1,
-    flexDirection: "row",
-    gap: theme.gap(0.75),
-    paddingVertical: theme.gap(1.25),
-    paddingHorizontal: theme.gap(1.5),
-    backgroundColor: theme.colors.error,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  removeButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#fff",
+  removeText: {
+    color: theme.colors.error,
   },
 }));
