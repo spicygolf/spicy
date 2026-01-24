@@ -12,7 +12,7 @@ import { getCourseDetails, searchCourses } from "./courses";
 import { getJazzWorker, setupWorker } from "./jazz_worker";
 import {
   importGameSpecsToCatalog,
-  importGamesFromArango,
+  importGamesFromFiles,
   resetCatalog,
 } from "./lib/catalog";
 import { linkPlayerToUser } from "./lib/link";
@@ -323,10 +323,9 @@ const app = new Elysia()
         try {
           const { account } = await getJazzWorker();
 
-          console.log("Calling importGamesFromArango...");
-          const result = await importGamesFromArango(
+          console.log("Calling importGamesFromFiles...");
+          const result = await importGamesFromFiles(
             account as co.loaded<typeof PlayerAccount>,
-            undefined,
             legacyId ? { legacyId } : undefined,
           );
           console.log("Games import result:", JSON.stringify(result));

@@ -3209,3 +3209,257 @@ export async function importGamesFromArango(
 
   return result;
 }
+
+/**
+ * Import games from JSON files (replaces ArangoDB dependency)
+ *
+ * Games are loaded from data/games/{legacyId}.json files that were
+ * exported using scripts/export-games.ts
+ */
+export async function importGamesFromFiles(
+  workerAccount: co.loaded<typeof PlayerAccount>,
+  options?: GameImportOptions,
+): Promise<GameImportResult> {
+  const { loadGamesIndex, loadGame } = await import("../utils/games-file");
+
+  const batchSize = options?.batchSize ?? 10;
+  const singleGameId = options?.legacyId;
+  const catalog = await loadOrCreateCatalog(workerAccount);
+
+  const result: GameImportResult = {
+    games: { created: 0, updated: 0, skipped: 0, failed: 0 },
+    courses: { created: 0, updated: 0, skipped: 0 },
+    tees: { created: 0, updated: 0, skipped: 0 },
+    rounds: { created: 0, updated: 0, skipped: 0 },
+    errors: [],
+  };
+
+  try {
+    // Load catalog ONCE with all required maps
+    console.log("Loading catalog maps...");
+    let loadedCatalog = await catalog.$jazz.ensureLoaded({
+      resolve: { games: {}, players: {}, specs: {}, options: {}, courses: {} },
+    });
+
+    // Initialize maps if needed
+    if (!loadedCatalog.$jazz.has("games")) {
+      const group = Group.create(workerAccount);
+      group.makePublic();
+      loadedCatalog.$jazz.set("games", MapOfGames.create({}, { owner: group }));
+    }
+    if (!loadedCatalog.$jazz.has("courses")) {
+      const group = Group.create(workerAccount);
+      group.makePublic();
+      loadedCatalog.$jazz.set(
+        "courses",
+        MapOfCourses.create({}, { owner: group }),
+      );
+    }
+
+    // Re-load after initialization
+    loadedCatalog = await catalog.$jazz.ensureLoaded({
+      resolve: {
+        games: {},
+        players: {},
+        specs: { $each: true },
+        options: {},
+        courses: {},
+      },
+    });
+
+    if (
+      !loadedCatalog.games ||
+      !loadedCatalog.players ||
+      !loadedCatalog.courses
+    ) {
+      throw new Error("Failed to load catalog maps");
+    }
+
+    console.log("Catalog maps loaded");
+
+    // Get the worker's root group for stable upsertUnique operations
+    const loadedWorker = await workerAccount.$jazz.ensureLoaded({
+      resolve: { root: true },
+    });
+    if (!loadedWorker.root) {
+      throw new Error("Worker account has no root");
+    }
+    const workerGroup = loadedWorker.root.$jazz.owner as Group;
+
+    // Create caches
+    const courseCache = new Map<string, co.loaded<typeof Course>>();
+    const teeCache = new Map<string, co.loaded<typeof Tee>>();
+
+    // Build player GHIN lookup from catalog players (no ArangoDB query needed)
+    console.log("Building player GHIN lookup from catalog...");
+    const playerGhinMap = new Map<string, string | null>();
+    const playersMap = loadedCatalog.players;
+    if (playersMap) {
+      for (const key of Object.keys(playersMap)) {
+        if (key.startsWith("$") || key === "_refs") continue;
+        const player = playersMap[key];
+        if (player?.$isLoaded) {
+          // Map legacy ID to GHIN ID
+          if (player.legacyId) {
+            playerGhinMap.set(player.legacyId, player.ghinId || null);
+          }
+          // Also map GHIN ID to itself for direct lookups
+          if (player.ghinId) {
+            playerGhinMap.set(player.ghinId, player.ghinId);
+          }
+        }
+      }
+    }
+    console.log(`Cached ${playerGhinMap.size} player GHIN lookups`);
+
+    // Single game import mode
+    if (singleGameId) {
+      console.log(`Importing single game from file: ${singleGameId}`);
+
+      try {
+        const exportedGame = await loadGame(singleGameId);
+
+        if (!exportedGame) {
+          result.games.failed++;
+          result.errors.push({
+            gameId: singleGameId,
+            error: "Game file not found",
+          });
+          return result;
+        }
+
+        // Convert ExportedGame to GameWithRoundsV03 format
+        const gameWithRounds: GameWithRoundsV03 = {
+          game: exportedGame.game,
+          rounds: exportedGame.rounds,
+          gamespecKey: exportedGame.gamespecKey,
+        };
+
+        const importResult = await importGame(
+          workerAccount,
+          loadedCatalog,
+          gameWithRounds,
+          playerGhinMap,
+          courseCache,
+          teeCache,
+          workerGroup,
+        );
+
+        if (importResult.success) {
+          if (importResult.gameCreated) {
+            result.games.created++;
+          } else {
+            result.games.updated++;
+          }
+          result.courses.created += importResult.courses.created;
+          result.courses.updated += importResult.courses.updated;
+          result.courses.skipped += importResult.courses.skipped;
+          result.tees.created += importResult.tees.created;
+          result.tees.updated += importResult.tees.updated;
+          result.tees.skipped += importResult.tees.skipped;
+          result.rounds.created += importResult.rounds.created;
+          result.rounds.updated += importResult.rounds.updated;
+          result.rounds.skipped += importResult.rounds.skipped;
+        } else {
+          result.games.failed++;
+          result.errors.push({
+            gameId: singleGameId,
+            error: importResult.error || "Unknown error",
+          });
+        }
+      } catch (error) {
+        result.games.failed++;
+        result.errors.push({
+          gameId: singleGameId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      console.log("Single game import complete:", result);
+      return result;
+    }
+
+    // Batch import mode - load index and process all games
+    const index = await loadGamesIndex();
+    const total = index.totalGames;
+    console.log(
+      `Importing ${total} games from files in batches of ${batchSize}...`,
+    );
+
+    // Process games in batches
+    for (let i = 0; i < index.games.length; i += batchSize) {
+      const batch = index.games.slice(i, i + batchSize);
+      console.log(
+        `Processing batch: ${i + 1}-${Math.min(i + batchSize, total)} of ${total}`,
+      );
+
+      for (const gameListItem of batch) {
+        try {
+          const exportedGame = await loadGame(gameListItem.legacyId);
+
+          if (!exportedGame) {
+            result.games.failed++;
+            result.errors.push({
+              gameId: gameListItem.legacyId,
+              error: "Game file not found",
+            });
+            continue;
+          }
+
+          // Convert ExportedGame to GameWithRoundsV03 format
+          const gameWithRounds: GameWithRoundsV03 = {
+            game: exportedGame.game,
+            rounds: exportedGame.rounds,
+            gamespecKey: exportedGame.gamespecKey,
+          };
+
+          const importResult = await importGame(
+            workerAccount,
+            loadedCatalog,
+            gameWithRounds,
+            playerGhinMap,
+            courseCache,
+            teeCache,
+            workerGroup,
+          );
+
+          if (importResult.success) {
+            if (importResult.gameCreated) {
+              result.games.created++;
+            } else {
+              result.games.updated++;
+            }
+            result.courses.created += importResult.courses.created;
+            result.courses.updated += importResult.courses.updated;
+            result.courses.skipped += importResult.courses.skipped;
+            result.tees.created += importResult.tees.created;
+            result.tees.updated += importResult.tees.updated;
+            result.tees.skipped += importResult.tees.skipped;
+            result.rounds.created += importResult.rounds.created;
+            result.rounds.updated += importResult.rounds.updated;
+            result.rounds.skipped += importResult.rounds.skipped;
+          } else {
+            result.games.failed++;
+            result.errors.push({
+              gameId: gameListItem.legacyId,
+              error: importResult.error || "Unknown error",
+            });
+          }
+        } catch (error) {
+          result.games.failed++;
+          result.errors.push({
+            gameId: gameListItem.legacyId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+    }
+
+    console.log("Game import from files complete:", result);
+  } catch (error) {
+    console.error("Failed to import games from files:", error);
+    throw error;
+  }
+
+  return result;
+}
