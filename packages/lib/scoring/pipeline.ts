@@ -197,27 +197,47 @@ function runPipeline(ctx: ScoringContext): ScoringContext {
 // =============================================================================
 
 function extractGameSpec(game: Game): GameSpec {
-  if (!game.specs?.$isLoaded || game.specs.length === 0) {
-    throw new Error("Game must have at least one game spec");
+  // New architecture: use specRef (the live catalog spec)
+  if (game.specRef?.$isLoaded) {
+    return game.specRef;
   }
 
-  const spec = game.specs[0];
-  if (!spec?.$isLoaded) {
-    throw new Error("Game spec must be loaded");
+  // Old architecture: use game.specs[0]
+  if (game.specs?.$isLoaded && game.specs.length > 0) {
+    const spec = game.specs[0];
+    if (spec?.$isLoaded) {
+      return spec;
+    }
   }
 
-  return spec;
+  throw new Error("Game must have a game spec (specRef or specs[0])");
 }
 
 function extractOptions(
   game: Game,
   gameSpec: GameSpec,
 ): MapOfOptions | undefined {
-  // Prefer game-level options (customized), fall back to spec options
+  // Priority order:
+  // 1. Game-level option overrides (user customizations for this game)
+  // 2. Spec snapshot options (copied at game creation for historical consistency)
+  // 3. Spec reference options (live spec, may have changed - backwards compat)
+  // 4. Primary game spec options (from game.specs[0], backwards compat)
+
   if (game.options?.$isLoaded) {
     return game.options;
   }
 
+  // Check specSnapshot first (new architecture - historical options)
+  if (game.specSnapshot?.$isLoaded && game.specSnapshot.options?.$isLoaded) {
+    return game.specSnapshot.options;
+  }
+
+  // Fall back to specRef (new architecture - live spec reference)
+  if (game.specRef?.$isLoaded && game.specRef.options?.$isLoaded) {
+    return game.specRef.options;
+  }
+
+  // Fall back to game.specs[0] (old architecture)
   if (gameSpec.options?.$isLoaded) {
     return gameSpec.options;
   }

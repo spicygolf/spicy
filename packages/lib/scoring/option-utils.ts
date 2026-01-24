@@ -10,11 +10,15 @@
  */
 
 import type {
+  Game,
   GameHole,
   GameOption,
+  GameSpec,
   JunkOption,
+  MetaOption,
   MultiplierOption,
   Option,
+  SpecSnapshot,
 } from "../schema";
 import type { ScoringContext } from "./types";
 
@@ -251,4 +255,144 @@ export function getJunkOptionsForHole(
 
   // Sort by seq for consistent evaluation order
   return junkOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
+}
+
+// =============================================================================
+// Meta Option Helpers
+// =============================================================================
+
+/**
+ * Get a meta option value from a GameSpec or SpecSnapshot.
+ *
+ * Meta options store spec-level metadata like short name, aliases, status, etc.
+ * This replaces direct access to deprecated top-level GameSpec fields.
+ *
+ * @param source - GameSpec or SpecSnapshot to read from
+ * @param optionName - Name of the meta option (e.g., "short", "aliases", "status")
+ * @returns The meta option value, or undefined if not found
+ *
+ * @example
+ * const shortName = getMetaOption(spec, "short"); // "5pts"
+ * const aliases = getMetaOption(spec, "aliases"); // ["Scotch", "Umbrella"]
+ * const status = getMetaOption(spec, "status"); // "prod"
+ */
+export function getMetaOption(
+  source: GameSpec | SpecSnapshot | undefined | null,
+  optionName: string,
+): string | number | boolean | string[] | undefined {
+  if (!source?.$isLoaded) return undefined;
+
+  const options = source.options;
+  if (!options?.$isLoaded) return undefined;
+
+  const option = options[optionName];
+  if (!option?.$isLoaded || option.type !== "meta") return undefined;
+
+  const metaOpt = option as MetaOption;
+
+  // For text_array type, return the array value
+  if (metaOpt.valueType === "text_array") {
+    if (!metaOpt.valueArray?.$isLoaded) return undefined;
+    return [...metaOpt.valueArray];
+  }
+
+  // For other types, parse the string value
+  const rawValue = metaOpt.value;
+  if (rawValue === undefined) return undefined;
+
+  switch (metaOpt.valueType) {
+    case "bool":
+      return rawValue === "true";
+    case "num":
+      return Number.parseFloat(rawValue);
+    default:
+      return rawValue;
+  }
+}
+
+/**
+ * Get a spec field value, preferring meta option over deprecated top-level field.
+ *
+ * This provides backwards compatibility during migration from top-level fields
+ * to meta options. Once migration is complete, this can be simplified to just
+ * call getMetaOption.
+ *
+ * @param spec - GameSpec to read from
+ * @param fieldName - Field name (e.g., "short", "status", "min_players")
+ * @returns The field value from meta option or deprecated top-level field
+ */
+export function getSpecField(
+  spec: GameSpec | undefined | null,
+  fieldName: string,
+): string | number | boolean | string[] | undefined {
+  if (!spec?.$isLoaded) return undefined;
+
+  // First try meta option (new architecture)
+  const metaValue = getMetaOption(spec, fieldName);
+  if (metaValue !== undefined) return metaValue;
+
+  // Fall back to deprecated top-level fields (backwards compat)
+  switch (fieldName) {
+    case "short":
+      return spec.short;
+    case "long_description":
+      return spec.long_description;
+    case "status":
+      return spec.status;
+    case "spec_type":
+      return spec.spec_type;
+    case "min_players":
+      return spec.min_players;
+    case "location_type":
+      return spec.location_type;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Get the effective options source for a game.
+ *
+ * Resolution order:
+ * 1. Game-level option overrides
+ * 2. Spec snapshot options (historical)
+ * 3. Spec reference options (live)
+ * 4. Legacy game.specs[0] options
+ *
+ * @param game - Game to get options from
+ * @returns The options map or undefined
+ */
+export function getGameOptions(
+  game: Game | undefined | null,
+): ReturnType<typeof getOptionsFromGame> {
+  return getOptionsFromGame(game);
+}
+
+function getOptionsFromGame(game: Game | undefined | null) {
+  if (!game?.$isLoaded) return undefined;
+
+  // Game-level overrides
+  if (game.options?.$isLoaded) {
+    return game.options;
+  }
+
+  // Spec snapshot (historical)
+  if (game.specSnapshot?.$isLoaded && game.specSnapshot.options?.$isLoaded) {
+    return game.specSnapshot.options;
+  }
+
+  // Spec reference (live)
+  if (game.specRef?.$isLoaded && game.specRef.options?.$isLoaded) {
+    return game.specRef.options;
+  }
+
+  // Legacy game.specs[0]
+  if (game.specs?.$isLoaded && game.specs.length > 0) {
+    const spec = game.specs[0];
+    if (spec?.$isLoaded && spec.options?.$isLoaded) {
+      return spec.options;
+    }
+  }
+
+  return undefined;
 }

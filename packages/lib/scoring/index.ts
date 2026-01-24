@@ -36,9 +36,12 @@ export {
 // Option utilities (per-hole option value resolution)
 export {
   getFrontNinePreDoubleTotalFromHoles,
+  getGameOptions,
   getJunkOptionsForHole,
+  getMetaOption,
   getOptionForHole,
   getOptionValueForHole,
+  getSpecField,
   isOptionOnHole,
 } from "./option-utils";
 // Main pipeline
