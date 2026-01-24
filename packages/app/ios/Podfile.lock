@@ -1,6 +1,6 @@
 PODS:
   - boost (1.84.0)
-  - CojsonCoreRn (0.19.10):
+  - CojsonCoreRn (0.19.22):
     - boost
     - DoubleConversion
     - fast_float
@@ -1863,6 +1863,35 @@ PODS:
     - SocketRocket
     - SwiftUIIntrospect (~> 1.0)
     - Yoga
+  - react-native-passkey (3.3.2):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - react-native-safe-area-context (5.6.2):
     - boost
     - DoubleConversion
@@ -2877,6 +2906,7 @@ DEPENDENCIES:
   - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
   - react-native-nitro-markdown (from `../../../node_modules/react-native-nitro-markdown`)
   - react-native-pager-view (from `../../../node_modules/react-native-pager-view`)
+  - react-native-passkey (from `../../../node_modules/react-native-passkey`)
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
   - "react-native-vector-icons-fontawesome6 (from `../../../node_modules/@react-native-vector-icons/fontawesome6`)"
   - "react-native-vector-icons-ionicons (from `../../../node_modules/@react-native-vector-icons/ionicons`)"
@@ -3032,6 +3062,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-nitro-markdown"
   react-native-pager-view:
     :path: "../../../node_modules/react-native-pager-view"
+  react-native-passkey:
+    :path: "../../../node_modules/react-native-passkey"
   react-native-safe-area-context:
     :path: "../../../node_modules/react-native-safe-area-context"
   react-native-vector-icons-fontawesome6:
@@ -3123,7 +3155,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
-  CojsonCoreRn: ce1aef505d87c801ddd0e03f3aaff58ad4644721
+  CojsonCoreRn: 29f08e3fd0930d3004fe64ddff1723b864c1a5fe
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: 778b815a6fb3fa1599f581ffb9a5e85fad313c1d
@@ -3173,6 +3205,7 @@ SPEC CHECKSUMS:
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
   react-native-nitro-markdown: ce66224788af234921c880ad48b1ddfebf97e6be
   react-native-pager-view: 4a0aa5d5ce136364d706221642ff6d4a457bc073
+  react-native-passkey: 69fa4f6e92fbef8ca6adb2a7d9bc62b929518095
   react-native-safe-area-context: 01f6d357d42395422eed7c3bfe715614728f2989
   react-native-vector-icons-fontawesome6: 1a73ea16a698f70851ad47e94521a99499e8e974
   react-native-vector-icons-ionicons: ad07e944a092a5cf71b8b569d8f5ce2bf674c415
