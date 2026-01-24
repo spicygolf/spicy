@@ -1,7 +1,12 @@
 import { useState, useMemo } from "react";
-import { useAccount } from "jazz-tools/react";
+import { useCoState } from "jazz-tools/react";
 import { Search } from "lucide-react";
-import { PlayerAccount, type GameSpec } from "spicylib/schema";
+import {
+  PlayerAccount,
+  type GameCatalog,
+  type GameSpec,
+  type PlayerAccountProfile,
+} from "spicylib/schema";
 import { getMetaOption, getSpecField } from "spicylib/scoring";
 import { Input } from "../../components/ui/input";
 import {
@@ -23,7 +28,9 @@ import {
 export function SpecBrowser(): React.JSX.Element {
   const [search, setSearch] = useState("");
 
-  const me = useAccount(PlayerAccount, {
+  const workerAccountId = import.meta.env.VITE_JAZZ_WORKER_ACCOUNT || "";
+
+  const workerAccount = useCoState(PlayerAccount, workerAccountId, {
     resolve: {
       profile: {
         catalog: {
@@ -31,9 +38,22 @@ export function SpecBrowser(): React.JSX.Element {
         },
       },
     },
+    select: (account) => {
+      if (!account?.$isLoaded) return undefined;
+      if (!account.profile?.$isLoaded) return undefined;
+
+      const profile = account.profile as PlayerAccountProfile;
+      const catalog = profile.catalog;
+      if (!catalog?.$isLoaded) return undefined;
+      if (!catalog.specs?.$isLoaded) return undefined;
+
+      return account;
+    },
   });
 
-  const catalog = me?.$isLoaded ? me.profile?.catalog : undefined;
+  const catalog = workerAccount
+    ? ((workerAccount.profile as PlayerAccountProfile).catalog as GameCatalog)
+    : undefined;
   const specs = catalog?.specs;
 
   // Filter specs based on search query
@@ -90,7 +110,7 @@ export function SpecBrowser(): React.JSX.Element {
   }, [specs, search]);
 
   // Loading state
-  if (!me?.$isLoaded) {
+  if (!workerAccount) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-muted-foreground">Loading...</p>

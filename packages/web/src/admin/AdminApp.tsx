@@ -1,6 +1,7 @@
 import type { co } from "jazz-tools";
 import { useAccount, useLogOut } from "jazz-tools/react";
 import {
+  ArrowLeft,
   BookOpen,
   Calculator,
   Download,
@@ -12,6 +13,7 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { PlayerAccount } from "spicylib/schema";
 import { CatalogBrowser } from "../components/CatalogBrowser";
 import { PlayerBrowser } from "../components/PlayerBrowser";
@@ -544,10 +546,18 @@ export function AdminApp(): React.JSX.Element {
                 )}
               </span>
             </div>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Log Out
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Exit Admin
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Log Out
+              </Button>
+            </div>
           </div>
         </div>
 
