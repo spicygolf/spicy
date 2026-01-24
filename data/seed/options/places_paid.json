@@ -1,0 +1,13 @@
+{
+  "name": "places_paid",
+  "disp": "Places Paid",
+  "type": "game",
+  "valueType": "menu",
+  "defaultValue": "3",
+  "choices": [
+    { "name": "2", "disp": "2 (60/40)" },
+    { "name": "3", "disp": "3 (50/30/20)" },
+    { "name": "4", "disp": "4 (45/27/18/10)" },
+    { "name": "5", "disp": "5 (40/25/17/11/7)" }
+  ]
+}

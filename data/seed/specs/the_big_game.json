@@ -12,11 +12,7 @@
   "teams": false,
   "team_size": 1,
   "team_change_every": 0,
-  "options": [
-    "stakes",
-    "use_handicaps",
-    "handicap_index_from"
-  ],
+  "options": ["buy_in", "places_paid", "use_handicaps", "handicap_index_from"],
   "junk": [
     "stableford_double_eagle",
     "stableford_eagle",
@@ -87,16 +83,10 @@
       ]
     },
     {
-      "name": "stableford_percentage",
-      "disp": "Stableford Pool %",
-      "valueType": "num",
-      "value": "75"
-    },
-    {
-      "name": "skins_percentage",
-      "disp": "Skins Pool %",
-      "valueType": "num",
-      "value": "25"
+      "name": "payout_pools",
+      "disp": "Payout Pools",
+      "valueType": "text",
+      "value": "[{\"name\":\"front\",\"disp\":\"Front Nine\",\"pct\":25,\"metric\":\"quota_front\",\"splitType\":\"places\"},{\"name\":\"back\",\"disp\":\"Back Nine\",\"pct\":25,\"metric\":\"quota_back\",\"splitType\":\"places\"},{\"name\":\"overall\",\"disp\":\"Overall\",\"pct\":25,\"metric\":\"quota_overall\",\"splitType\":\"places\"},{\"name\":\"skins\",\"disp\":\"Skins\",\"pct\":25,\"metric\":\"skins_won\",\"splitType\":\"per_unit\"}]"
     }
   ]
 }
