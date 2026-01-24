@@ -63,12 +63,11 @@ export function computeSpecForcesTeams(spec: GameSpec): boolean {
   if (!tc?.$isLoaded) return false;
 
   const rotateEvery = tc.rotateEvery ?? 0;
-  const teamCount = tc.teamCount ?? spec.min_players;
+  const minPlayers = spec.min_players ?? 2;
+  const teamCount = tc.teamCount ?? minPlayers;
   const maxPlayersPerTeam = tc.maxPlayersPerTeam ?? 0;
 
-  return (
-    rotateEvery > 0 || teamCount < spec.min_players || maxPlayersPerTeam > 1
-  );
+  return rotateEvery > 0 || teamCount < minPlayers || maxPlayersPerTeam > 1;
 }
 
 /**
@@ -124,7 +123,7 @@ export function useTeamsMode(
     // Calculate min_players from specs
     const minPlayers =
       gameSpecs.length > 0
-        ? Math.min(...gameSpecs.map((s) => s.min_players))
+        ? Math.min(...gameSpecs.map((s) => s.min_players ?? 2))
         : 2;
 
     // Count players

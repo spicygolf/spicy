@@ -162,7 +162,7 @@ function checkAndRevertToSeamlessMode(game: Game): void {
   if (userActivated) return; // Don't revert if user manually activated
 
   // Get min_players from specs
-  const minPlayers = Math.min(...specs.map((s) => s.min_players));
+  const minPlayers = Math.min(...specs.map((s) => s.min_players ?? 2));
 
   // Current player count (after removal)
   const playerCount = game.players?.$isLoaded ? game.players.length : 0;

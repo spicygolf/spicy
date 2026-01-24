@@ -32,6 +32,10 @@
     {
       "key": "error_boundary_title",
       "message": "Ugh, the app just three-jacked."
+    },
+    {
+      "key": "error_boundary_title",
+      "message": "The app just waited 10 minutes for the green to clear from 260 out, and topped it 20 feet."
     }
   ]
 }

@@ -192,7 +192,7 @@ function computeShouldAutoAssignTeam(game: Game): boolean {
   if (userActivated) return false;
 
   // Get min_players from specs
-  const minPlayers = Math.min(...specs.map((s) => s.min_players));
+  const minPlayers = Math.min(...specs.map((s) => s.min_players ?? 2));
 
   // Current player count (before adding)
   const currentPlayerCount = game.players?.$isLoaded ? game.players.length : 0;

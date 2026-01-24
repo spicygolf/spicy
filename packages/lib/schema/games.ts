@@ -1,6 +1,6 @@
 import { co, z } from "jazz-tools";
 import { ListOfGameHoles } from "./gameholes";
-import { ListOfGameSpecs } from "./gamespecs";
+import { GameSpec, ListOfGameSpecs } from "./gamespecs";
 import { MapOfOptions } from "./options";
 import { ListOfPlayers } from "./players";
 import { ListOfRoundToGames } from "./rounds";
@@ -24,26 +24,56 @@ export const GameScope = co.map({
 });
 export type GameScope = co.loaded<typeof GameScope>;
 
+/**
+ * Snapshot of a GameSpec's configuration at game creation time.
+ * This preserves historical scoring rules even if the catalog spec changes.
+ */
+export const SpecSnapshot = co.map({
+  /** Spec name at time of game creation */
+  name: z.string(),
+  /** Spec version at time of game creation */
+  version: z.number(),
+  /**
+   * Deep copy of all options from the spec at game creation.
+   * This is the authoritative source for scoring this game.
+   */
+  options: co.optional(MapOfOptions),
+});
+export type SpecSnapshot = co.loaded<typeof SpecSnapshot>;
+
 export const Game = co.map({
   start: z.date(),
   name: z.string(),
   scope: GameScope,
-  specs: ListOfGameSpecs,
+
+  /**
+   * Reference to the original spec in the catalog.
+   * Used for display/linking purposes only - NOT for scoring.
+   * The spec may have been updated since this game was created.
+   */
+  specRef: co.optional(GameSpec),
+
+  /**
+   * Snapshot of spec configuration at game creation time.
+   * This is the authoritative source for scoring rules.
+   * Contains deep copies of all options from the original spec.
+   */
+  specSnapshot: co.optional(SpecSnapshot),
+
+  /**
+   * @deprecated Use specRef and specSnapshot instead.
+   * Kept for backwards compatibility with existing games.
+   */
+  specs: co.optional(ListOfGameSpecs),
+
   holes: ListOfGameHoles,
   players: ListOfPlayers,
   rounds: ListOfRoundToGames,
 
   /**
-   * Options for this specific game instance.
-   * Copied from GameSpec.options when the game is created, then customized as needed.
-   *
-   * This is a snapshot/copy approach (not references):
-   * - When creating game: copy all options from gamespec
-   * - Users can modify values for this specific game
-   * - Games are self-contained and don't break when catalog changes
-   * - Historical games maintain their original scoring logic
-   *
-   * Example: Game starts with "stakes: 1" from gamespec, user changes to "stakes: 5"
+   * Game-level option overrides.
+   * Values here override the specSnapshot defaults.
+   * Used when users customize options for a specific game.
    */
   options: co.optional(MapOfOptions),
 

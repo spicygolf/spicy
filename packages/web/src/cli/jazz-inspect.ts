@@ -268,10 +268,11 @@ async function inspectCatalog(
           }
 
           // Compute derived alwaysShowTeams
+          const minPlayers = spec.min_players ?? 2;
           const alwaysShowTeams =
             teamsConfig &&
             ((teamsConfig.rotateEvery ?? 0) > 0 ||
-              teamsConfig.teamCount < spec.min_players ||
+              teamsConfig.teamCount < minPlayers ||
               (teamsConfig.maxPlayersPerTeam ?? 0) > 1);
           console.log(
             `  [derived] alwaysShowTeams: ${alwaysShowTeams ? "true" : "false"}`,
@@ -395,9 +396,19 @@ async function inspectOptions(
       console.log(`--- ${opt.name} ---`);
       console.log(`  disp: ${opt.disp}`);
       console.log(`  type: ${opt.type}`);
-      console.log(`  version: ${opt.version}`);
+      if (opt.type !== "meta" && "version" in opt) {
+        console.log(`  version: ${opt.version}`);
+      }
 
-      if (opt.type === "junk") {
+      if (opt.type === "meta") {
+        console.log(`  valueType: ${opt.valueType}`);
+        console.log(`  value: ${opt.value}`);
+        if (opt.valueArray?.$isLoaded) {
+          console.log(`  valueArray: [${[...opt.valueArray].join(", ")}]`);
+        }
+        console.log(`  searchable: ${opt.searchable}`);
+        console.log(`  required: ${opt.required}`);
+      } else if (opt.type === "junk") {
         const junk = opt as JunkOption;
         console.log(`  value: ${junk.value}`);
         console.log(`  sub_type: ${junk.sub_type}`);

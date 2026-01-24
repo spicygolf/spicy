@@ -87,13 +87,43 @@ export const MultiplierOption = co.map({
 export type MultiplierOption = co.loaded<typeof MultiplierOption>;
 
 /**
+ * List of string values for text_array meta options (e.g., aliases)
+ */
+export const StringList = co.list(z.string());
+export type StringList = co.loaded<typeof StringList>;
+
+/**
+ * Meta option - spec-level metadata that doesn't affect scoring
+ * Examples: short name, aliases, description, min/max players
+ *
+ * Replaces top-level GameSpec fields to enable unified options model
+ */
+export const MetaOption = co.map({
+  name: z.string(),
+  disp: z.string(),
+  type: z.literal(["meta"]),
+  valueType: z.literal(["bool", "num", "menu", "text", "text_array"]),
+  // Value storage - use appropriate field based on valueType
+  value: z.optional(z.string()), // For bool, num, menu, text (stored as string)
+  valueArray: co.optional(StringList), // For text_array (e.g., aliases)
+  choices: co.optional(ChoicesList), // For menu type
+  seq: z.optional(z.number()),
+  /** If true, this option is searchable (e.g., aliases) */
+  searchable: z.optional(z.boolean()),
+  /** If true, this option is required */
+  required: z.optional(z.boolean()),
+});
+export type MetaOption = co.loaded<typeof MetaOption>;
+
+/**
  * Unified Option type using discriminated union
- * Single collection holds all three option types with type safety
+ * Single collection holds all four option types with type safety
  */
 export const Option = co.discriminatedUnion("type", [
   GameOption,
   JunkOption,
   MultiplierOption,
+  MetaOption,
 ]);
 export type Option = co.loaded<typeof Option>;
 
