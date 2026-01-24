@@ -2925,13 +2925,6 @@ async function importGame(
     if (gameSpec) {
       existingGame.$jazz.set("specRef", gameSpec);
     }
-    // Clear deprecated fields
-    if (existingGame.$jazz.has("specs")) {
-      existingGame.$jazz.delete("specs");
-    }
-    if (existingGame.$jazz.has("options")) {
-      existingGame.$jazz.delete("options");
-    }
     finalGame = existingGame;
   } else {
     // Create new game with per-game group

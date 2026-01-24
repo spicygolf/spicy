@@ -197,48 +197,9 @@ function runPipeline(ctx: ScoringContext): ScoringContext {
 // =============================================================================
 
 function extractGameSpec(game: Game): GameSpec {
-  // New architecture: use game.spec (working copy with user modifications)
+  // Primary: game.spec (working copy with user modifications)
   if (game.spec?.$isLoaded) {
     return game.spec;
-  }
-
-  // Legacy: use game.specs[0]
-  if (game.specs?.$isLoaded && game.specs.length > 0) {
-    const spec = game.specs[0];
-    if (spec?.$isLoaded) {
-      return spec;
-    }
-  }
-
-  // Fallback: use specRef (catalog spec)
-  if (game.specRef?.$isLoaded) {
-    return game.specRef;
-  }
-
-  throw new Error("Game must have a game spec (spec, specs[0], or specRef)");
-}
-
-function extractOptions(
-  game: Game,
-  gameSpec: GameSpec,
-): MapOfOptions | undefined {
-  // Priority order:
-  // 1. Game's working spec copy (game.spec) - user modifications are here
-  // 2. Legacy game.specs[0] (backwards compat)
-  // 3. Spec reference (catalog spec - fallback if spec not populated)
-  // 4. Primary game spec (final fallback)
-
-  // New architecture: game.spec is the working copy with user modifications
-  if (game.spec?.$isLoaded) {
-    return game.spec;
-  }
-
-  // Legacy: game.specs[0]
-  if (game.specs?.$isLoaded && game.specs.length > 0) {
-    const legacySpec = game.specs[0];
-    if (legacySpec?.$isLoaded) {
-      return legacySpec;
-    }
   }
 
   // Fallback: specRef (catalog spec)
@@ -246,12 +207,28 @@ function extractOptions(
     return game.specRef;
   }
 
-  // Final fallback to gameSpec (if different from above)
+  throw new Error("Game must have a game spec (spec or specRef)");
+}
+
+function extractOptions(
+  game: Game,
+  gameSpec: GameSpec,
+): MapOfOptions | undefined {
+  // Primary: game.spec (working copy with user modifications)
+  if (game.spec?.$isLoaded) {
+    return game.spec;
+  }
+
+  // Fallback: specRef (catalog spec)
+  if (game.specRef?.$isLoaded) {
+    return game.specRef;
+  }
+
+  // Final fallback to gameSpec parameter
   if (gameSpec?.$isLoaded) {
     return gameSpec;
   }
 
-  // No options available
   return undefined;
 }
 

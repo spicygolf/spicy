@@ -333,12 +333,8 @@ export function getSpecField(
 /**
  * Get the effective options source for a game.
  *
- * Resolution order:
- * 1. Game's working spec copy (game.spec) - primary source
- * 2. Legacy game.specs[0] options - backwards compatibility
- * 3. Spec reference (game.specRef) - fallback if spec not copied yet
- *
- * Note: game.options is deprecated - user changes go into game.spec directly.
+ * Returns game.spec (the working copy of options).
+ * Falls back to specRef if spec not populated (shouldn't happen in normal use).
  *
  * @param game - Game to get options from
  * @returns The options map or undefined
@@ -352,38 +348,13 @@ export function getGameOptions(
 function getOptionsFromGame(game: Game | undefined | null) {
   if (!game?.$isLoaded) return undefined;
 
-  // Helper to check if field exists (Jazz CoMap pattern)
-  // In tests, $jazz may not exist on mock objects
-  const hasField = (obj: unknown, field: string) => {
-    const o = obj as { $jazz?: { has?: (f: string) => boolean } };
-    return o.$jazz?.has ? o.$jazz.has(field) : field in (o as object);
-  };
-
-  // 1. Game's working spec copy (primary source)
-  if (hasField(game, "spec") && game.spec?.$isLoaded) {
-    // Check if spec map has any actual options (not just empty)
-    const hasOptions = Object.keys(game.spec).some(
-      (k) => !k.startsWith("$") && k !== "_refs",
-    );
-    if (hasOptions) {
-      return game.spec;
-    }
+  // Primary source: game.spec (working copy with user modifications)
+  if (game.spec?.$isLoaded) {
+    return game.spec;
   }
 
-  // 2. Legacy game.specs[0] - backwards compatibility
-  if (
-    hasField(game, "specs") &&
-    game.specs?.$isLoaded &&
-    game.specs.length > 0
-  ) {
-    const spec = game.specs[0];
-    if (spec?.$isLoaded) {
-      return spec;
-    }
-  }
-
-  // 3. Spec reference (fallback if spec not populated yet)
-  if (hasField(game, "specRef") && game.specRef?.$isLoaded) {
+  // Fallback: specRef (catalog spec - shouldn't be needed in normal use)
+  if (game.specRef?.$isLoaded) {
     return game.specRef;
   }
 

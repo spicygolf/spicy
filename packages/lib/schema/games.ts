@@ -1,6 +1,6 @@
 import { co, z } from "jazz-tools";
 import { ListOfGameHoles } from "./gameholes";
-import { GameSpec, ListOfGameSpecs } from "./gamespecs";
+import { GameSpec } from "./gamespecs";
 import { MapOfOptions } from "./options";
 import { ListOfPlayers } from "./players";
 import { ListOfRoundToGames } from "./rounds";
@@ -47,21 +47,9 @@ export const Game = co.map({
    */
   specRef: co.optional(GameSpec),
 
-  /**
-   * @deprecated Use spec instead.
-   * Kept for backwards compatibility with existing games.
-   */
-  specs: co.optional(ListOfGameSpecs),
-
   holes: ListOfGameHoles,
   players: ListOfPlayers,
   rounds: ListOfRoundToGames,
-
-  /**
-   * @deprecated User modifications now go directly into spec.
-   * Kept for backwards compatibility with existing games.
-   */
-  options: co.optional(MapOfOptions),
 
   /**
    * Legacy ID from ArangoDB v0.3 import (_key field).

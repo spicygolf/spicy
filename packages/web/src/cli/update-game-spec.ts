@@ -102,16 +102,6 @@ async function main() {
     game.$jazz.set("specRef", newSpec);
     console.log(`Set game.spec and game.specRef`);
 
-    // Clear deprecated fields if present
-    if (game.$jazz.has("specs")) {
-      game.$jazz.delete("specs");
-      console.log(`Cleared deprecated game.specs`);
-    }
-    if (game.$jazz.has("options")) {
-      game.$jazz.delete("options");
-      console.log(`Cleared deprecated game.options`);
-    }
-
     console.log(`\nSpec reference updated successfully!`);
 
     // Wait for sync

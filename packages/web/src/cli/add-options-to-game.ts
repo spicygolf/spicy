@@ -170,12 +170,11 @@ async function main() {
   });
 
   try {
-    // Load the game with specs - GameSpec IS the options map, so resolve with $each
+    // Load the game with spec - game.spec is the working copy of options
     const game = await Game.load(gameId as ID<Game>, {
       resolve: {
-        specs: {
-          $each: { $each: true },
-        },
+        spec: { $each: true },
+        specRef: { $each: true },
       },
     });
 
