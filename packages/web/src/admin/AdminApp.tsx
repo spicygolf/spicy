@@ -619,8 +619,8 @@ export function AdminApp(): React.JSX.Element {
               <CardHeader>
                 <CardTitle>Import v0.3 Data</CardTitle>
                 <CardDescription>
-                  Import game specifications, options, and players from ArangoDB
-                  and JSON files (worker account only)
+                  Import game specifications, options, players, and games from
+                  JSON data files (worker account only)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1053,9 +1053,9 @@ export function AdminApp(): React.JSX.Element {
                   <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
                     <li>
                       Imports game specs, options, players, games, rounds, and
-                      courses from ArangoDB
+                      courses from JSON data files
                     </li>
-                    <li>ArangoDB data takes precedence on conflicts</li>
+                    <li>File data takes precedence on conflicts</li>
                     <li>Idempotent: safe to run multiple times</li>
                   </ul>
                 </div>
