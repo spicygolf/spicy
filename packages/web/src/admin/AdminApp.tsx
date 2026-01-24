@@ -71,10 +71,12 @@ export function AdminApp(): React.JSX.Element {
     errors: Array<{ gameId: string; error: string }>;
   } | null>(null);
 
-  // Import options
-  const [importSpecs, setImportSpecs] = useState<boolean>(false);
-  const [importPlayers, setImportPlayers] = useState<boolean>(false);
-  const [importGames, setImportGames] = useState<boolean>(true);
+  // Unified selection for import/reset
+  const [selectedSpecs, setSelectedSpecs] = useState<boolean>(true);
+  const [selectedOptions, setSelectedOptions] = useState<boolean>(true);
+  const [selectedGames, setSelectedGames] = useState<boolean>(true);
+  const [selectedPlayers, setSelectedPlayers] = useState<boolean>(false);
+  const [selectedCourses, setSelectedCourses] = useState<boolean>(false);
   const [gameLegacyId, setGameLegacyId] = useState<string>("");
 
   // Reset state
@@ -86,13 +88,6 @@ export function AdminApp(): React.JSX.Element {
     playersCleared: number;
     coursesCleared: number;
   } | null>(null);
-
-  // Reset options
-  const [resetSpecs, setResetSpecs] = useState<boolean>(true);
-  const [resetOptions, setResetOptions] = useState<boolean>(true);
-  const [resetGames, setResetGames] = useState<boolean>(true);
-  const [resetPlayers, setResetPlayers] = useState<boolean>(false);
-  const [resetCourses, setResetCourses] = useState<boolean>(false);
 
   // Admin status (checked via API for security)
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -123,7 +118,7 @@ export function AdminApp(): React.JSX.Element {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3040/v4";
 
       // Step 1: Import specs & players (20-50%)
-      if (importSpecs || importPlayers) {
+      if (selectedSpecs || selectedPlayers) {
         setImportProgress(20);
         const specsResponse = await jazzFetch(`${apiUrl}/catalog/import`, {
           method: "POST",
@@ -131,8 +126,8 @@ export function AdminApp(): React.JSX.Element {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            specs: importSpecs,
-            players: importPlayers,
+            specs: selectedSpecs,
+            players: selectedPlayers,
           }),
         });
 
@@ -148,7 +143,7 @@ export function AdminApp(): React.JSX.Element {
       }
 
       // Step 2: Import games (50-100%)
-      if (!importGames) {
+      if (!selectedGames) {
         setImportProgress(100);
         toast({
           title: "Import successful",
@@ -230,11 +225,11 @@ export function AdminApp(): React.JSX.Element {
     }
 
     const itemsToReset: string[] = [];
-    if (resetSpecs) itemsToReset.push("specs");
-    if (resetOptions) itemsToReset.push("options");
-    if (resetGames) itemsToReset.push("games");
-    if (resetPlayers) itemsToReset.push("players");
-    if (resetCourses) itemsToReset.push("courses");
+    if (selectedSpecs) itemsToReset.push("specs");
+    if (selectedOptions) itemsToReset.push("options");
+    if (selectedGames) itemsToReset.push("games");
+    if (selectedPlayers) itemsToReset.push("players");
+    if (selectedCourses) itemsToReset.push("courses");
 
     const confirmed = window.confirm(
       `Are you sure you want to reset the catalog? This will delete: ${itemsToReset.join(", ")}.`,
@@ -256,11 +251,11 @@ export function AdminApp(): React.JSX.Element {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          clearSpecs: resetSpecs,
-          clearOptions: resetOptions,
-          clearGames: resetGames,
-          clearPlayers: resetPlayers,
-          clearCourses: resetCourses,
+          clearSpecs: selectedSpecs,
+          clearOptions: selectedOptions,
+          clearGames: selectedGames,
+          clearPlayers: selectedPlayers,
+          clearCourses: selectedCourses,
         }),
       });
 
@@ -641,27 +636,51 @@ export function AdminApp(): React.JSX.Element {
                       </p>
                     </div>
 
-                    <div className="space-y-3 rounded-md border p-4">
+                    <div className="space-y-4 rounded-md border p-4">
                       <Label className="text-sm font-medium">
-                        Import Options
+                        Select Data Types
                       </Label>
                       <div className="flex flex-wrap gap-4">
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={importSpecs}
-                            onChange={(e) => setImportSpecs(e.target.checked)}
-                            disabled={isImporting}
+                            checked={selectedSpecs}
+                            onChange={(e) => setSelectedSpecs(e.target.checked)}
+                            disabled={isImporting || isResetting}
                             className="h-4 w-4 rounded border-gray-300"
                           />
-                          <span className="text-sm">Game Specs</span>
+                          <span className="text-sm">Specs</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={importPlayers}
-                            onChange={(e) => setImportPlayers(e.target.checked)}
-                            disabled={isImporting}
+                            checked={selectedOptions}
+                            onChange={(e) =>
+                              setSelectedOptions(e.target.checked)
+                            }
+                            disabled={isImporting || isResetting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">Options</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedGames}
+                            onChange={(e) => setSelectedGames(e.target.checked)}
+                            disabled={isImporting || isResetting}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">Games</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedPlayers}
+                            onChange={(e) =>
+                              setSelectedPlayers(e.target.checked)
+                            }
+                            disabled={isImporting || isResetting}
                             className="h-4 w-4 rounded border-gray-300"
                           />
                           <span className="text-sm">Players</span>
@@ -669,16 +688,19 @@ export function AdminApp(): React.JSX.Element {
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={importGames}
-                            onChange={(e) => setImportGames(e.target.checked)}
-                            disabled={isImporting}
+                            checked={selectedCourses}
+                            onChange={(e) =>
+                              setSelectedCourses(e.target.checked)
+                            }
+                            disabled={isImporting || isResetting}
                             className="h-4 w-4 rounded border-gray-300"
                           />
-                          <span className="text-sm">Games</span>
+                          <span className="text-sm">Courses</span>
                         </label>
                       </div>
-                      {importGames && (
-                        <div className="mt-3 space-y-2">
+
+                      {selectedGames && (
+                        <div className="space-y-2">
                           <Label htmlFor="gameLegacyId" className="text-sm">
                             Single Game Legacy ID (optional)
                           </Label>
@@ -695,102 +717,50 @@ export function AdminApp(): React.JSX.Element {
                           </p>
                         </div>
                       )}
-                      <Button
-                        onClick={handleImportToCatalog}
-                        disabled={
-                          !isAdmin ||
-                          isImporting ||
-                          (!importSpecs && !importPlayers && !importGames)
-                        }
-                        size="sm"
-                      >
-                        {isImporting ? (
-                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Upload className="mr-2 h-4 w-4" />
-                        )}
-                        Import from Files
-                      </Button>
-                    </div>
 
-                    <div className="space-y-3 rounded-md border border-red-200 bg-red-50 p-4">
-                      <Label className="text-sm font-medium text-red-900">
-                        Reset Options (Destructive)
-                      </Label>
-                      <div className="flex flex-wrap gap-4">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={resetSpecs}
-                            onChange={(e) => setResetSpecs(e.target.checked)}
-                            disabled={isResetting}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                          <span className="text-sm">Specs</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={resetOptions}
-                            onChange={(e) => setResetOptions(e.target.checked)}
-                            disabled={isResetting}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                          <span className="text-sm">Options</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={resetGames}
-                            onChange={(e) => setResetGames(e.target.checked)}
-                            disabled={isResetting}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                          <span className="text-sm">Games</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={resetPlayers}
-                            onChange={(e) => setResetPlayers(e.target.checked)}
-                            disabled={isResetting}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                          <span className="text-sm">Players</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={resetCourses}
-                            onChange={(e) => setResetCourses(e.target.checked)}
-                            disabled={isResetting}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                          <span className="text-sm">Courses</span>
-                        </label>
+                      <div className="flex gap-3 pt-2">
+                        <Button
+                          onClick={handleImportToCatalog}
+                          disabled={
+                            !isAdmin ||
+                            isImporting ||
+                            isResetting ||
+                            (!selectedSpecs &&
+                              !selectedGames &&
+                              !selectedPlayers)
+                          }
+                          size="sm"
+                        >
+                          {isImporting ? (
+                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Upload className="mr-2 h-4 w-4" />
+                          )}
+                          Import Selected
+                        </Button>
+                        <Button
+                          onClick={handleResetCatalog}
+                          disabled={
+                            !isAdmin ||
+                            isResetting ||
+                            isImporting ||
+                            (!selectedSpecs &&
+                              !selectedOptions &&
+                              !selectedGames &&
+                              !selectedPlayers &&
+                              !selectedCourses)
+                          }
+                          variant="destructive"
+                          size="sm"
+                        >
+                          {isResetting ? (
+                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="mr-2 h-4 w-4" />
+                          )}
+                          Reset Selected
+                        </Button>
                       </div>
-                      <Button
-                        onClick={handleResetCatalog}
-                        disabled={
-                          !isAdmin ||
-                          isResetting ||
-                          isImporting ||
-                          (!resetSpecs &&
-                            !resetOptions &&
-                            !resetGames &&
-                            !resetPlayers &&
-                            !resetCourses)
-                        }
-                        variant="destructive"
-                        size="sm"
-                      >
-                        {isResetting ? (
-                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="mr-2 h-4 w-4" />
-                        )}
-                        Reset Selected
-                      </Button>
                     </div>
 
                     {resetResult && (
