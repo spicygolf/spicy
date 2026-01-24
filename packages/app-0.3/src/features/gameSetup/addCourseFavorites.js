@@ -1,14 +1,20 @@
-import { getRatings } from 'common/utils/game';
+import { getRatings } from "common/utils/game";
 import {
   query,
   useGetFavoriteTeesForPlayerQuery,
-} from 'features/courses/useGetFavoriteTeesForPlayerQuery';
-import { GameContext } from 'features/game/gameContext';
-import Tee from 'features/gameSetup/Tee';
-import React, { useContext } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+} from "features/courses/useGetFavoriteTeesForPlayerQuery";
+import { GameContext } from "features/game/gameContext";
+import Tee from "features/gameSetup/Tee";
+import { useContext } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-const AddCourseFavorites = props => {
+const AddCourseFavorites = (_props) => {
   const { game, currentPlayerKey } = useContext(GameContext);
 
   const _renderFavoritesTee = ({ item }) => {
@@ -27,7 +33,7 @@ const AddCourseFavorites = props => {
       pkey: currentPlayerKey,
       gametime: game.start,
     },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
   });
 
   if (loading) {
@@ -37,15 +43,17 @@ const AddCourseFavorites = props => {
     return <Text>Error! {error.message}</Text>;
   }
 
-  const tees = data && data.getFavoriteTeesForPlayer ? data.getFavoriteTeesForPlayer : [];
+  const tees = data?.getFavoriteTeesForPlayer
+    ? data.getFavoriteTeesForPlayer
+    : [];
   //console.log('tees', tees, currentPlayerKey);
 
-  const newTees = tees.map(tee => ({
+  const newTees = tees.map((tee) => ({
     ...tee,
     fave: {
       faved: true,
-      from: { type: 'player', value: currentPlayerKey },
-      to: { type: 'tee', value: tee.tee_id },
+      from: { type: "player", value: currentPlayerKey },
+      to: { type: "tee", value: tee.tee_id },
       refetchQueries: [
         {
           query,
@@ -65,8 +73,8 @@ const AddCourseFavorites = props => {
         <FlatList
           data={newTees}
           renderItem={_renderFavoritesTee}
-          keyExtractor={item => item.tee_id.toString()}
-          keyboardShouldPersistTaps={'handled'}
+          keyExtractor={(item) => item.tee_id.toString()}
+          keyboardShouldPersistTaps={"handled"}
         />
       </View>
     </View>

@@ -1,4 +1,4 @@
-import { gql, useMutation } from '@apollo/client';
+import { gql, useMutation } from "@apollo/client";
 
 const UPDATE_GAME_OPTIONS_MUTATION = gql`
   mutation UpdateGameOptions($gkey: String!, $options: [GameOptionInput]!) {

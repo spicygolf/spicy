@@ -1,11 +1,10 @@
-import { createStackNavigator } from '@react-navigation/stack';
-import Forgot from 'features/account/forgot';
-import Login from 'features/account/login';
-import Register from 'features/account/register';
-import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { createStackNavigator } from "@react-navigation/stack";
+import Forgot from "features/account/forgot";
+import Login from "features/account/login";
+import Register from "features/account/register";
+import { SafeAreaView, StyleSheet } from "react-native";
 
-const AccountStack = (props) => {
+const AccountStack = (_props) => {
   const Stack = createStackNavigator();
 
   return (
@@ -23,7 +22,7 @@ export default AccountStack;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#b30000',
+    backgroundColor: "#b30000",
     flex: 1,
   },
 });

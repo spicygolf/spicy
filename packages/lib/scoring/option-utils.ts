@@ -9,10 +9,15 @@
  * - This helper merges both: check GameHole.options first, then fall back to game/spec options
  */
 
+import type { Group } from "jazz-tools";
 import type {
+  Game,
   GameHole,
   GameOption,
+  GameSpec,
   JunkOption,
+  MapOfOptions,
+  MetaOption,
   MultiplierOption,
   Option,
 } from "../schema";
@@ -45,7 +50,7 @@ export function getOptionValueForHole(
   const gameHole = ctx.gameHoles.find((h) => h.hole === holeNum);
   if (gameHole?.options?.$isLoaded) {
     const holeOption = gameHole.options[optionName];
-    if (holeOption?.$isLoaded) {
+    if (holeOption) {
       const value = extractOptionValue(holeOption);
       if (value !== undefined) {
         return value;
@@ -55,7 +60,7 @@ export function getOptionValueForHole(
 
   // 2. Fall back to game/spec options
   const option = ctx.options?.[optionName];
-  if (option?.$isLoaded) {
+  if (option) {
     return extractOptionValue(option);
   }
 
@@ -79,14 +84,14 @@ export function getOptionForHole(
   const gameHole = ctx.gameHoles.find((h) => h.hole === holeNum);
   if (gameHole?.options?.$isLoaded) {
     const holeOption = gameHole.options[optionName];
-    if (holeOption?.$isLoaded) {
+    if (holeOption) {
       return holeOption;
     }
   }
 
   // 2. Fall back to game/spec options
   const option = ctx.options?.[optionName];
-  if (option?.$isLoaded) {
+  if (option) {
     return option;
   }
 
@@ -236,9 +241,10 @@ export function getJunkOptionsForHole(
 
   for (const key of Object.keys(options)) {
     if (key.startsWith("$") || key === "_refs") continue;
+    if (!options.$jazz.has(key)) continue;
 
     const opt = options[key];
-    if (opt?.$isLoaded && opt.type === "junk") {
+    if (opt && opt.type === "junk") {
       // Check if there's a per-hole override
       const holeOption = getOptionForHole(key, holeNum, ctx);
       if (holeOption && holeOption.type === "junk") {
@@ -251,4 +257,145 @@ export function getJunkOptionsForHole(
 
   // Sort by seq for consistent evaluation order
   return junkOptions.sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
+}
+
+// =============================================================================
+// Meta Option Helpers
+// =============================================================================
+
+/**
+ * Get a meta option value from a GameSpec.
+ *
+ * Meta options store spec-level metadata like short name, aliases, status, etc.
+ * This replaces direct access to deprecated top-level GameSpec fields.
+ *
+ * @param source - GameSpec to read from
+ * @param optionName - Name of the meta option (e.g., "short", "aliases", "status")
+ * @returns The meta option value, or undefined if not found
+ *
+ * @example
+ * const shortName = getMetaOption(spec, "short"); // "5pts"
+ * const aliases = getMetaOption(spec, "aliases"); // ["Scotch", "Umbrella"]
+ * const status = getMetaOption(spec, "status"); // "prod"
+ */
+export function getMetaOption(
+  spec: GameSpec | undefined | null,
+  optionName: string,
+): string | number | boolean | string[] | undefined {
+  if (!spec?.$isLoaded) return undefined;
+
+  // GameSpec IS the options map directly (no wrapper)
+  // Check if option exists before accessing (Jazz CoMap pattern)
+  // In tests, $jazz may not exist on mock objects
+  if (spec.$jazz?.has && !spec.$jazz.has(optionName)) return undefined;
+  const option = spec[optionName];
+  if (!option || option.type !== "meta") return undefined;
+
+  const metaOpt = option as MetaOption;
+
+  // For text_array type, return the array value
+  if (metaOpt.valueType === "text_array") {
+    if (!metaOpt.valueArray) return undefined;
+    return [...metaOpt.valueArray];
+  }
+
+  // For other types, parse the string value
+  const rawValue = metaOpt.value;
+  if (rawValue === undefined) return undefined;
+
+  switch (metaOpt.valueType) {
+    case "bool":
+      return rawValue === "true";
+    case "num":
+      return Number.parseFloat(rawValue);
+    default:
+      return rawValue;
+  }
+}
+
+/**
+ * Get a spec field from the options map.
+ *
+ * GameSpec stores ALL data in the options map. This helper reads a value by name.
+ *
+ * @param spec - GameSpec to read from
+ * @param fieldName - Field name (e.g., "name", "short", "status", "min_players")
+ * @returns The field value from the options map
+ */
+export function getSpecField(
+  spec: GameSpec | undefined | null,
+  fieldName: string,
+): string | number | boolean | string[] | undefined {
+  if (!spec?.$isLoaded) return undefined;
+  return getMetaOption(spec, fieldName);
+}
+
+/**
+ * Get the effective options source for a game.
+ *
+ * Returns game.spec (the working copy of options).
+ * Falls back to specRef if spec not populated (shouldn't happen in normal use).
+ *
+ * @param game - Game to get options from
+ * @returns The options map or undefined
+ */
+export function getGameOptions(
+  game: Game | undefined | null,
+): ReturnType<typeof getOptionsFromGame> {
+  return getOptionsFromGame(game);
+}
+
+function getOptionsFromGame(game: Game | undefined | null) {
+  if (!game?.$isLoaded) return undefined;
+
+  // Primary source: game.spec (working copy with user modifications)
+  if (game.spec?.$isLoaded) {
+    return game.spec;
+  }
+
+  // Fallback: specRef (catalog spec - shouldn't be needed in normal use)
+  if (game.specRef?.$isLoaded) {
+    return game.specRef;
+  }
+
+  return undefined;
+}
+
+/**
+ * Copy all options from a source spec to a new MapOfOptions.
+ *
+ * This creates a deep copy of options so the game has its own independent
+ * working copy that can be modified without affecting the catalog spec.
+ *
+ * Options are plain JSON objects (not CoMaps), so copying is simple:
+ * just structuredClone each option into the new MapOfOptions.
+ *
+ * @param sourceSpec - The spec to copy options from (typically game.specRef)
+ * @param owner - The Jazz Group that will own the new MapOfOptions
+ * @returns A new MapOfOptions with copies of all options
+ */
+export async function copySpecOptions(
+  sourceSpec: GameSpec | MapOfOptions,
+  owner: Group,
+): Promise<MapOfOptions> {
+  // Import schema types dynamically to avoid circular dependency
+  const { MapOfOptions } = await import("../schema");
+
+  const newSpec = MapOfOptions.create({}, { owner });
+
+  if (!sourceSpec?.$isLoaded) return newSpec;
+
+  // Iterate over all options in source spec and deep-copy each one
+  for (const key of Object.keys(sourceSpec)) {
+    if (key.startsWith("$") || key === "_refs") continue;
+    if (!sourceSpec.$jazz.has(key)) continue;
+
+    const option = sourceSpec[key];
+    if (!option) continue;
+
+    // Options are plain JSON objects, so structuredClone creates a deep copy
+    newSpec.$jazz.set(key, structuredClone(option));
+  }
+
+  return newSpec;
 }

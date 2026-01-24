@@ -1,15 +1,15 @@
-import { useNavigation } from '@react-navigation/native';
-import { blue } from 'common/colors';
-import HandicapBadge from 'common/components/handicapBadge';
-import { get_round_for_player } from 'common/utils/rounds';
-import { GameContext } from 'features/game/gameContext';
-import RemovePlayer from 'features/gameSetup/removePlayer';
-import TeeSelector from 'features/gameSetup/teeSelector';
-import React, { useContext } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
-import { Card, Icon, ListItem } from 'react-native-elements';
+import { useNavigation } from "@react-navigation/native";
+import { blue } from "common/colors";
+import HandicapBadge from "common/components/handicapBadge";
+import { get_round_for_player } from "common/utils/rounds";
+import { GameContext } from "features/game/gameContext";
+import RemovePlayer from "features/gameSetup/removePlayer";
+import TeeSelector from "features/gameSetup/teeSelector";
+import { useContext } from "react";
+import { FlatList, StyleSheet, View } from "react-native";
+import { Card, Icon, ListItem } from "react-native-elements";
 
-const Players = (props) => {
+const Players = (_props) => {
   const navigation = useNavigation();
   const { game, readonly } = useContext(GameContext);
 
@@ -25,7 +25,7 @@ const Players = (props) => {
     // check to see if round exists... if not, don't go here
     const round = get_round_for_player(rounds, player._key);
     if (round) {
-      navigation.navigate('EditPlayer', { player: player });
+      navigation.navigate("EditPlayer", { player: player });
     }
   };
 
@@ -49,8 +49,8 @@ const Players = (props) => {
 
   const _renderPlayer = ({ item, index }) => {
     //console.log('renderPlayer item', item);
-    if (item && item.name && item._key) {
-      const name = item.name || '';
+    if (item?.name && item._key) {
+      const name = item.name || "";
       const pkey = item._key;
 
       let rkey, tees, ch, gh, hi;
@@ -85,7 +85,11 @@ const Players = (props) => {
             <ListItem.Title>{name}</ListItem.Title>
             <ListItem.Subtitle>{subtitle}</ListItem.Subtitle>
           </ListItem.Content>
-          <HandicapBadge game_handicap={gh} course_handicap={ch} handicap_index={hi} />
+          <HandicapBadge
+            game_handicap={gh}
+            course_handicap={ch}
+            handicap_index={hi}
+          />
           {removePlayerContent}
         </ListItem>
       );
@@ -100,7 +104,7 @@ const Players = (props) => {
       color={blue}
       size={40}
       title="Add Player"
-      onPress={() => navigation.navigate('AddPlayer')}
+      onPress={() => navigation.navigate("AddPlayer")}
       testID="add_player_button"
     />
   ) : null;
@@ -114,7 +118,7 @@ const Players = (props) => {
           data={players}
           renderItem={_renderPlayer}
           keyExtractor={(item) => {
-            if (item && item._key) {
+            if (item?._key) {
               return item._key;
             }
             return Math.random().toString();
@@ -137,10 +141,10 @@ const styles = StyleSheet.create({
     flex: 6,
   },
   title: {
-    alignItems: 'center',
-    color: '#555',
+    alignItems: "center",
+    color: "#555",
     fontSize: 18,
-    fontWeight: 'bold',
-    justifyContent: 'center',
+    fontWeight: "bold",
+    justifyContent: "center",
   },
 });

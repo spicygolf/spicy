@@ -1,10 +1,7 @@
-'use strict';
+import { db } from "../db/db";
+import { Doc } from "./doc";
 
-import { Doc } from './doc';
-import { aql } from 'arangojs';
-import { db } from '../db/db';
-
-const collection = db.collection('associations');
+const collection = db.collection("associations");
 
 class Association extends Doc {
   constructor() {

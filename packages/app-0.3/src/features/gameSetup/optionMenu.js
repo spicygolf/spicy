@@ -1,9 +1,9 @@
-import { green } from 'common/colors';
-import { find } from 'lodash';
-import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Icon } from 'react-native-elements';
-import SelectDropdown from 'react-native-select-dropdown';
+import { green } from "common/colors";
+import { find } from "lodash";
+import { useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { Icon } from "react-native-elements";
+import SelectDropdown from "react-native-select-dropdown";
 
 const OptionMenu = (props) => {
   const { option, setOption, readonly, index = 0 } = props;
@@ -21,21 +21,21 @@ const OptionMenu = (props) => {
       defaultValueByIndex={index}
       onSelect={(_selectedDisp, i) => {
         setValue(option.choices[i].name);
-        let newOption = {
+        const newOption = {
           name: option.name,
           values: option.values.map((v, idx) => ({
             value: idx === i ? option.choices[i].name : v.value,
             holes: v.holes,
           })),
         };
-        console.log('newOption', newOption);
+        console.log("newOption", newOption);
         setOption(newOption);
       }}
       renderDropdownIcon={(isOpened) => {
         return (
           <Icon
             type="material-community"
-            name={isOpened ? 'chevron-up' : 'chevron-down'}
+            name={isOpened ? "chevron-up" : "chevron-down"}
             color="#444"
             size={18}
           />
@@ -50,7 +50,7 @@ const OptionMenu = (props) => {
       rowTextForSelection={(item) => {
         // text represented for each item in dropdown
         // if data array is an array of objects then return item.property to represent item in dropdown
-        console.log('rowTextForSelection', item);
+        console.log("rowTextForSelection", item);
         return item;
       }}
       buttonStyle={styles.buttonStyle}
@@ -64,12 +64,12 @@ export default OptionMenu;
 
 const styles = StyleSheet.create({
   buttonStyle: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#fff',
+    alignSelf: "flex-end",
+    backgroundColor: "#fff",
     borderColor: green,
     borderWidth: 1,
     height: 40,
-    width: '80%',
+    width: "80%",
   },
   container: {
     // width: '100%',

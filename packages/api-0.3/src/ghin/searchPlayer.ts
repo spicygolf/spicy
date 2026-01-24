@@ -1,4 +1,4 @@
-import { ghinRequest, Pagination } from './ghin';
+import { ghinRequest, type Pagination } from "./ghin";
 
 type SearchPlayerRequest = {
   q: SearchPlayerQuery;
@@ -34,13 +34,15 @@ type SearchPlayerResponse = {
   hi_display?: string;
 };
 
-export const searchPlayer = async ({q, p}: SearchPlayerRequest): Promise<object[] | null> => {
-
-  console.log('searchPlayer', q, p);
+export const searchPlayer = async ({
+  q,
+  p,
+}: SearchPlayerRequest): Promise<object[] | null> => {
+  console.log("searchPlayer", q, p);
   return [];
-  
+
   // don't search unless we have at least three characters
-  if (q?.last_name?.length < 3 ) {
+  if (q?.last_name?.length < 3) {
     return [];
   }
 
@@ -55,8 +57,8 @@ export const searchPlayer = async ({q, p}: SearchPlayerRequest): Promise<object[
   };
 
   const resp = await ghinRequest({
-    method: 'get',
-    url: '/golfers/search.json',
+    method: "get",
+    url: "/golfers/search.json",
     params,
     data: {},
     attempts: 0,
@@ -68,7 +70,7 @@ export const searchPlayer = async ({q, p}: SearchPlayerRequest): Promise<object[
     firstName: g.first_name,
     lastName: g.last_name,
     playerName: `${g.first_name} ${g.last_name}`,
-    active: g.status === 'Active',
+    active: g.status === "Active",
     index: g.hi_display,
   }));
 };

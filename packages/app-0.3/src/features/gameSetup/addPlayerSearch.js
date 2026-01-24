@@ -1,12 +1,12 @@
-import { useNavigation } from '@react-navigation/native';
-import SpicySearchPlayer from 'common/components/spicy/player/search';
-import { GameContext } from 'features/game/gameContext';
-import React, { useContext, useState } from 'react';
-import { Text } from 'react-native';
+import { useNavigation } from "@react-navigation/native";
+import SpicySearchPlayer from "common/components/spicy/player/search";
+import { GameContext } from "features/game/gameContext";
+import { useContext, useState } from "react";
+import { Text } from "react-native";
 
-const AddPlayerSearch = (props) => {
+const AddPlayerSearch = (_props) => {
   const defaultNewPlayer = {
-    search: '',
+    search: "",
   };
 
   const [newPlayer, setNewPlayer] = useState(defaultNewPlayer);
@@ -16,8 +16,8 @@ const AddPlayerSearch = (props) => {
 
   let content = null;
 
-  if (newPlayer && newPlayer.name) {
-    console.log('newPlayer', newPlayer);
+  if (newPlayer?.name) {
+    console.log("newPlayer", newPlayer);
     content = <Text>new player: {newPlayer.name}</Text>;
   } else {
     content = (
@@ -31,7 +31,7 @@ const AddPlayerSearch = (props) => {
             name: item.name,
             handicap: item.handicap,
           };
-          navigation.navigate('LinkRoundList', { game, player });
+          navigation.navigate("LinkRoundList", { game, player });
         }}
       />
     );

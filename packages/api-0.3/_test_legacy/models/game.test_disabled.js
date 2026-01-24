@@ -1,13 +1,13 @@
-import { Game } from '../../src/models/game';
+import { Game } from "../../src/models/game";
 
-describe('Game model tests', () => {
+describe("Game model tests", () => {
   let g;
   beforeAll(() => {
     g = new Game();
   });
 
   // _getPops
-  test('calculates pops/strokes given a hole handicap and a player handicap', () => {
+  test("calculates pops/strokes given a hole handicap and a player handicap", () => {
     // strings
     expect(g._getPops("0", "1")).toBe(0);
     expect(g._getPops("1", "1")).toBe(1);
@@ -37,5 +37,4 @@ describe('Game model tests', () => {
     // half pops
     // TODO: implement me
   });
-
 });

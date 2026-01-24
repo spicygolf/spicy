@@ -1,3 +1,17 @@
+/**
+ * ArangoDB Connection Utilities
+ *
+ * FOR EXPORT SCRIPTS ONLY - NOT USED AT RUNTIME
+ *
+ * This file is used only by the one-time migration scripts in scripts/:
+ * - export-games.ts
+ * - export-players.ts
+ * - export-favorites.ts
+ *
+ * The API server does NOT use ArangoDB at runtime - all data is loaded
+ * from JSON files exported by these scripts.
+ */
+
 import { Database } from "arangojs";
 import longDescriptionsData from "../../data/gamespec-long-descriptions.json";
 
@@ -73,6 +87,17 @@ export interface GameSpecV03 {
     type: string;
     default?: unknown;
     choices?: Array<{ name: string; disp: string }>;
+  }>;
+  /** Embedded meta options for unified format (new architecture) */
+  meta?: Array<{
+    name: string;
+    disp: string;
+    valueType: "bool" | "num" | "menu" | "text" | "text_array";
+    value?: string | string[];
+    choices?: Array<{ name: string; disp: string }>;
+    seq?: number;
+    searchable?: boolean;
+    required?: boolean;
   }>;
   default_options?: unknown[];
   todos?: string[];

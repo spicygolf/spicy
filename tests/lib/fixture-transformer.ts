@@ -10,14 +10,12 @@ import {
   createMockGame,
   createMockGameSpec,
   createMockMapOfOptions,
-  createMockOption,
-  resetMockIds,
   type MockGame,
   type MockGameSpec,
   type MockMapOfOptions,
-  type MockOption,
+  resetMockIds,
 } from "./mock-jazz";
-import { loadSpec, type LoadedOption, type LoadedSpec } from "./spec-loader";
+import { type LoadedOption, type LoadedSpec, loadSpec } from "./spec-loader";
 
 // =============================================================================
 // Types
@@ -48,10 +46,7 @@ export interface TransformedFixture {
  *
  * Formula: Course Handicap = Handicap Index × (Slope Rating / 113)
  */
-function calculateCourseHandicap(
-  handicapIndex: number,
-  slope: number,
-): number {
+function calculateCourseHandicap(handicapIndex: number, slope: number): number {
   return Math.round(handicapIndex * (slope / 113));
 }
 

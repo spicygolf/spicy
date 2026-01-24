@@ -2,7 +2,7 @@
  * Five Points Integration Tests
  *
  * Tests the scoring pipeline against a real Five Points game from Jazz.
- * Game ID: co_zEEke11BQDqGfoPUeQztziP2wf7
+ * Game is looked up by legacyId from the catalog.games map.
  *
  * This test requires Jazz credentials in packages/api/.env:
  * - JAZZ_API_KEY
@@ -26,17 +26,13 @@ const JAZZ_API_KEY = process.env.JAZZ_API_KEY;
 const JAZZ_WORKER_ACCOUNT = process.env.JAZZ_WORKER_ACCOUNT;
 const JAZZ_WORKER_SECRET = process.env.JAZZ_WORKER_SECRET;
 
-// The Five Points game we're testing
-const FIVE_POINTS_GAME_ID = "co_zEEke11BQDqGfoPUeQztziP2wf7";
+// The Five Points game we're testing - looked up by legacyId from catalog.games
+const FIVE_POINTS_GAME_LEGACY_ID = "250568952";
 
 // Deep resolve query to load all nested data
+// Note: game.spec is MapOfOptions (co.record), so $each iterates entries, inner $each loads Option fields
 const GAME_RESOLVE = {
-  specs: {
-    $each: {
-      options: { $each: true },
-      teamsConfig: true,
-    },
-  },
+  spec: { $each: { $each: true } }, // Working copy of options for scoring
   holes: {
     $each: {
       teams: {
@@ -69,12 +65,12 @@ const GAME_RESOLVE = {
     },
   },
   players: { $each: { handicap: true } },
-  options: true,
 } as const;
 
 // Worker instance for all tests
 let worker: Awaited<ReturnType<typeof startWorker>> | null = null;
 let game: Game | null = null;
+let gameId: string | null = null;
 let scoreboard: Scoreboard | null = null;
 
 // Check if Jazz credentials are available
@@ -118,14 +114,43 @@ describe("Five Points Integration Tests", () => {
       accountSecret: JAZZ_WORKER_SECRET,
     });
 
-    // Load the game with all nested data
-    game = await Game.load(FIVE_POINTS_GAME_ID as ID<typeof Game>, {
+    // Load the game from catalog.games by legacyId
+    const workerAccount = await PlayerAccount.load(
+      JAZZ_WORKER_ACCOUNT as ID<typeof PlayerAccount>,
+      {
+        loadAs: worker.worker,
+        resolve: {
+          profile: {
+            catalog: {
+              games: { $each: true },
+            },
+          },
+        },
+      },
+    );
+
+    if (!workerAccount?.profile?.catalog?.games?.$isLoaded) {
+      throw new Error("Failed to load catalog.games");
+    }
+
+    const catalogGame =
+      workerAccount.profile.catalog.games[FIVE_POINTS_GAME_LEGACY_ID];
+    if (!catalogGame?.$isLoaded) {
+      throw new Error(
+        `Game with legacyId ${FIVE_POINTS_GAME_LEGACY_ID} not found in catalog`,
+      );
+    }
+
+    gameId = catalogGame.$jazz.id;
+
+    // Now load the game with full resolve query for scoring
+    game = await Game.load(gameId as ID<typeof Game>, {
       loadAs: worker.worker,
       resolve: GAME_RESOLVE,
     });
 
     if (!game?.$isLoaded) {
-      throw new Error(`Failed to load game ${FIVE_POINTS_GAME_ID}`);
+      throw new Error(`Failed to load game ${gameId}`);
     }
 
     // Run the scoring pipeline
@@ -157,24 +182,25 @@ describe("Five Points Integration Tests", () => {
     it("should have spec options with correct overrides", () => {
       requireGame();
 
-      const spec = game.specs?.[0];
+      // game.spec is the working copy of options (MapOfOptions is a co.record)
+      const spec = game.spec;
       expect(spec?.$isLoaded).toBe(true);
-      expect(spec?.options?.$isLoaded).toBe(true);
 
       // Five Points overrides low_ball and low_total to value 2 (base is 1)
+      // Options are now plain objects (not CoMaps), so no $isLoaded check needed
       // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
-      const lowBall = spec?.options?.["low_ball"];
-      expect(lowBall?.$isLoaded).toBe(true);
+      const lowBall = spec?.["low_ball"];
+      expect(lowBall).toBeDefined();
       expect(lowBall?.value).toBe(2);
 
       // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
-      const lowTotal = spec?.options?.["low_total"];
-      expect(lowTotal?.$isLoaded).toBe(true);
+      const lowTotal = spec?.["low_total"];
+      expect(lowTotal).toBeDefined();
       expect(lowTotal?.value).toBe(2);
 
       // prox should be value 1
-      const prox = spec?.options?.prox;
-      expect(prox?.$isLoaded).toBe(true);
+      const prox = spec?.prox;
+      expect(prox).toBeDefined();
       expect(prox?.value).toBe(1);
     });
   });
@@ -184,7 +210,7 @@ describe("Five Points Integration Tests", () => {
       requireScoreboard();
 
       expect(scoreboard).toBeDefined();
-      expect(scoreboard.meta.gameId).toBe(FIVE_POINTS_GAME_ID);
+      expect(scoreboard.meta.gameId).toBe(gameId);
     });
 
     it("should have teams configured", () => {
@@ -690,35 +716,40 @@ describe("Five Points Integration Tests", () => {
       expect(hole12Doubles.length).toBeGreaterThan(0);
     });
 
-    it("should detect pre_double multipliers on holes 16-18", () => {
+    it("should detect pre_double multipliers stored on first_hole only", () => {
       requireGame();
 
-      // Hole 16: has both pre_double and double
-      const hole16 = game.holes?.find((h) => h?.hole === "16");
-      const hole16Teams = hole16?.teams ?? [];
-      const hole16PreDoubles = hole16Teams.flatMap(
-        (t) =>
-          t?.options?.filter((opt) => opt?.optionName === "pre_double") ?? [],
-      );
-      expect(hole16PreDoubles.length).toBeGreaterThan(0);
+      // Find all pre_double multipliers and their firstHole values
+      // New schema: multipliers are only stored on their first_hole, not every hole
+      const preDoubles: Array<{
+        hole: string;
+        team: string;
+        firstHole: string | undefined;
+      }> = [];
+      for (const hole of game.holes ?? []) {
+        if (!hole?.$isLoaded) continue;
+        for (const team of hole.teams ?? []) {
+          if (!team?.$isLoaded) continue;
+          for (const opt of team.options ?? []) {
+            if (opt?.optionName === "pre_double") {
+              preDoubles.push({
+                hole: hole.hole,
+                team: team.team,
+                firstHole: opt.firstHole,
+              });
+            }
+          }
+        }
+      }
 
-      // Hole 17: has pre_double
-      const hole17 = game.holes?.find((h) => h?.hole === "17");
-      const hole17Teams = hole17?.teams ?? [];
-      const hole17PreDoubles = hole17Teams.flatMap(
-        (t) =>
-          t?.options?.filter((opt) => opt?.optionName === "pre_double") ?? [],
-      );
-      expect(hole17PreDoubles.length).toBeGreaterThan(0);
+      // Game should have pre_double multipliers
+      expect(preDoubles.length).toBeGreaterThan(0);
 
-      // Hole 18: both teams have pre_double
-      const hole18 = game.holes?.find((h) => h?.hole === "18");
-      const hole18Teams = hole18?.teams ?? [];
-      const hole18PreDoubles = hole18Teams.flatMap(
-        (t) =>
-          t?.options?.filter((opt) => opt?.optionName === "pre_double") ?? [],
-      );
-      expect(hole18PreDoubles.length).toBe(2); // Both teams
+      // Multipliers should only be stored on their first_hole
+      // (the scoring engine inherits them to subsequent holes)
+      for (const pd of preDoubles) {
+        expect(pd.hole).toBe(pd.firstHole);
+      }
     });
   });
 });

@@ -1,12 +1,18 @@
-import { useQuery } from '@apollo/client';
-import { useNavigation } from '@react-navigation/native';
-import { getCoursesPlayersTxt } from 'common/utils/game';
-import { format } from 'date-fns';
-import { GAMES_FOR_PLAYER_FEED } from 'features/feed/graphql';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import React, { useContext } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
-import { ListItem } from 'react-native-elements';
+import { useQuery } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import { getCoursesPlayersTxt } from "common/utils/game";
+import { format } from "date-fns";
+import { GAMES_FOR_PLAYER_FEED } from "features/feed/graphql";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { useContext } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { ListItem } from "react-native-elements";
 
 const Games = (props) => {
   const navigation = useNavigation();
@@ -26,20 +32,20 @@ const Games = (props) => {
   const buildSubtitle = (game) => {
     const { coursesTxt, playersTxt } = getCoursesPlayersTxt(game);
 
-    const startTime = format(new Date(game.start), 'PPp');
+    const startTime = format(new Date(game.start), "PPp");
 
     return (
       <View>
         <Text style={styles.subtitle}>{`${coursesTxt} - ${playersTxt}`}</Text>
-        <Text style={styles.subtitle}>{startTime || ''}</Text>
+        <Text style={styles.subtitle}>{startTime || ""}</Text>
       </View>
     );
   };
 
   const gamePressed = (item) => {
     console.log(item);
-    navigation.navigate('GamesStack', {
-      screen: 'Game',
+    navigation.navigate("GamesStack", {
+      screen: "Game",
       params: {
         currentGameKey: item._key,
         readonly: true,
@@ -51,7 +57,7 @@ const Games = (props) => {
     if (!item) {
       return null;
     }
-    const name = item.name || '';
+    const name = item.name || "";
     const subtitle = buildSubtitle(item);
 
     return (
@@ -75,7 +81,7 @@ const Games = (props) => {
     return null;
   }
 
-  if (data && data.gamesForPlayerFeed) {
+  if (data?.gamesForPlayerFeed) {
     return (
       <FlatList
         data={data.gamesForPlayerFeed}
@@ -92,10 +98,10 @@ export default Games;
 
 const styles = StyleSheet.create({
   subtitle: {
-    color: '#666',
+    color: "#666",
     fontSize: 12,
   },
   title: {
-    color: '#111',
+    color: "#111",
   },
 });

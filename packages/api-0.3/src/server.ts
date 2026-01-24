@@ -1,17 +1,15 @@
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import express from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import http from 'http';
-import { json } from 'body-parser';
-import cors from 'cors';
-import { GraphQLError } from 'graphql';
-import { Server as WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
-import { PubSub } from 'graphql-subscriptions';
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { json } from "body-parser";
+import cors from "cors";
+import express from "express";
+import { PubSub } from "graphql-subscriptions";
+import { useServer } from "graphql-ws/lib/use/ws";
+import http from "http";
+import { Server as WebSocketServer } from "ws";
 
-import { schema } from './graphql/schema';
+import { schema } from "./graphql/schema";
 
 export const pubsub = new PubSub();
 
@@ -34,7 +32,6 @@ const StartServer = async () => {
   // Below, we tell Apollo Server to "drain" this httpServer,
   // enabling our servers to shut down gracefully.
   const httpServer = http.createServer(app);
-
 
   // Apollo server
   const server = new ApolloServer({
@@ -74,25 +71,29 @@ const StartServer = async () => {
   );
 
   // start express
-  await new Promise<void>((resolve) => httpServer.listen({
-    host,
-    port: parseInt(port || '3010', 10),
-  }, resolve));
+  await new Promise<void>((resolve) =>
+    httpServer.listen(
+      {
+        host,
+        port: parseInt(port || "3010", 10),
+      },
+      resolve,
+    ),
+  );
 
   console.log("🚀 Spicy Golf API 🚀");
   console.log(`Server        ready at: http://${host}:${port}${graphqlPath}`);
-  console.log(`Subscriptions ready at: http://${host}:${port}${subscriptionPath}`);
-
+  console.log(
+    `Subscriptions ready at: http://${host}:${port}${subscriptionPath}`,
+  );
 };
 
-process.on('unhandledRejection', (err) => {
+process.on("unhandledRejection", (err) => {
   console.log(err);
   process.exit(1);
 });
 
 StartServer().catch((error) => console.log(error));
-
-
 
 const context = async ({ req }) => {
   // TEMPORARILY DISABLED FOR DEVELOPMENT
@@ -121,11 +122,11 @@ const context = async ({ req }) => {
   // return user;
 };
 
-const useAuthentication = (query: string) => {
+const _useAuthentication = (query: string) => {
   const no_auth_queries = [
-    'queryIntrospectionQuery', // TODO: remove me after dev work
-    'querylogin',
-    'queryregister',
+    "queryIntrospectionQuery", // TODO: remove me after dev work
+    "querylogin",
+    "queryregister",
   ];
 
   let ret = true;

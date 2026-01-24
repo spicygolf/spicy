@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const GAMES_FOR_PLAYER_FEED = gql`
   query GamesForPlayerFeed(

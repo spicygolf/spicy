@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * Jazz CoValue Inspector CLI
  *
@@ -21,8 +22,8 @@
  *   bun run jazz options co_zg5ZpS9hkN4P2pFNumajafW41FN custom  # Inspect specific option
  */
 
-import { config } from "dotenv";
 import { resolve } from "node:path";
+import { config } from "dotenv";
 import type { ID } from "jazz-tools";
 import { startWorker } from "jazz-tools/worker";
 import {
@@ -38,6 +39,7 @@ import {
   RoundToGame,
   Tee,
 } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 
 // Load environment from API package
 config({ path: resolve(import.meta.dir, "../../../api/.env") });
@@ -245,34 +247,33 @@ async function inspectCatalog(
       for (const key of keys) {
         const spec = specs[key] as GameSpec;
         if (spec?.$isLoaded) {
-          const teamsConfig = spec.teamsConfig?.$isLoaded
-            ? spec.teamsConfig
-            : null;
+          const name = getSpecField(spec, "name") as string;
+          const minPlayers = getSpecField(spec, "min_players") as number;
+          const specType = getSpecField(spec, "spec_type") as string;
+          const status = getSpecField(spec, "status") as string;
+          const teams = getSpecField(spec, "teams") as boolean;
+          const teamSize = getSpecField(spec, "team_size") as number;
+          const teamChangeEvery = getSpecField(
+            spec,
+            "team_change_every",
+          ) as number;
 
-          console.log(`--- ${spec.name} (${spec.$jazz.id}) ---`);
-          console.log(`  min_players: ${spec.min_players}`);
-          console.log(`  spec_type: ${spec.spec_type}`);
-          console.log(`  status: ${spec.status}`);
+          console.log(`--- ${name} (${spec.$jazz.id}) ---`);
+          console.log(`  min_players: ${minPlayers}`);
+          console.log(`  spec_type: ${specType}`);
+          console.log(`  status: ${status}`);
 
-          if (teamsConfig) {
-            console.log(`  teamsConfig:`);
-            console.log(`    rotateEvery: ${teamsConfig.rotateEvery}`);
-            console.log(`    teamCount: ${teamsConfig.teamCount}`);
-            if (teamsConfig.maxPlayersPerTeam !== undefined) {
-              console.log(
-                `    maxPlayersPerTeam: ${teamsConfig.maxPlayersPerTeam}`,
-              );
-            }
+          if (teams) {
+            console.log(`  teams: true`);
+            console.log(`    team_size: ${teamSize}`);
+            console.log(`    team_change_every: ${teamChangeEvery}`);
           } else {
-            console.log(`  teamsConfig: none`);
+            console.log(`  teams: false`);
           }
 
           // Compute derived alwaysShowTeams
           const alwaysShowTeams =
-            teamsConfig &&
-            ((teamsConfig.rotateEvery ?? 0) > 0 ||
-              teamsConfig.teamCount < spec.min_players ||
-              (teamsConfig.maxPlayersPerTeam ?? 0) > 1);
+            teams && ((teamChangeEvery ?? 0) > 0 || (teamSize ?? 0) > 1);
           console.log(
             `  [derived] alwaysShowTeams: ${alwaysShowTeams ? "true" : "false"}`,
           );
@@ -358,9 +359,10 @@ async function inspectOptions(
   });
 
   try {
+    // GameSpec IS the options map - resolve with $each to load all options
     const spec = await GameSpec.load(specId as ID<GameSpec>, {
       loadAs: worker,
-      resolve: { options: { $each: true } },
+      resolve: { $each: true },
     });
 
     if (!spec?.$isLoaded) {
@@ -369,24 +371,20 @@ async function inspectOptions(
       return;
     }
 
-    console.log(`Spec: ${spec.name} (${spec.short})\n`);
+    const specName = getSpecField(spec, "name") as string;
+    const specShort = getSpecField(spec, "short") as string;
+    console.log(`Spec: ${specName} (${specShort})\n`);
 
-    const options = spec.options;
-    if (!options?.$isLoaded) {
-      console.error("Options not loaded");
-      await done();
-      return;
-    }
-
-    const keys = Object.keys(options).filter(
+    // GameSpec IS the options map directly
+    const keys = Object.keys(spec).filter(
       (k) => !k.startsWith("$") && k !== "_schema",
     );
 
     if (optionName) {
-      // Show specific option
-      const opt = options[optionName];
-      if (!opt?.$isLoaded) {
-        console.error(`Option "${optionName}" not found or not loaded`);
+      // Show specific option - spec IS the options map, options are plain objects
+      const opt = spec[optionName];
+      if (!opt) {
+        console.error(`Option "${optionName}" not found`);
         console.log(`\nAvailable options: ${keys.join(", ")}`);
         await done();
         return;
@@ -395,9 +393,19 @@ async function inspectOptions(
       console.log(`--- ${opt.name} ---`);
       console.log(`  disp: ${opt.disp}`);
       console.log(`  type: ${opt.type}`);
-      console.log(`  version: ${opt.version}`);
+      if (opt.type !== "meta" && "version" in opt) {
+        console.log(`  version: ${opt.version}`);
+      }
 
-      if (opt.type === "junk") {
+      if (opt.type === "meta") {
+        console.log(`  valueType: ${opt.valueType}`);
+        console.log(`  value: ${opt.value}`);
+        if (opt.valueArray) {
+          console.log(`  valueArray: [${opt.valueArray.join(", ")}]`);
+        }
+        console.log(`  searchable: ${opt.searchable}`);
+        console.log(`  required: ${opt.required}`);
+      } else if (opt.type === "junk") {
         const junk = opt as JunkOption;
         console.log(`  value: ${junk.value}`);
         console.log(`  sub_type: ${junk.sub_type}`);
@@ -427,12 +435,12 @@ async function inspectOptions(
         console.log(`  value: ${gameOpt.value}`);
       }
     } else {
-      // List all options
+      // List all options - spec IS the options map, options are plain objects
       console.log(`Found ${keys.length} options:\n`);
 
       for (const key of keys.sort()) {
-        const opt = options[key];
-        if (opt?.$isLoaded) {
+        const opt = spec[key];
+        if (opt) {
           const typeInfo =
             opt.type === "multiplier"
               ? `mult, value=${(opt as MultiplierOption).value}, scope=${(opt as MultiplierOption).scope}`
@@ -440,8 +448,6 @@ async function inspectOptions(
                 ? `junk, value=${(opt as JunkOption).value}, scope=${(opt as JunkOption).scope}`
                 : `game`;
           console.log(`  ${key}: ${opt.disp} (${typeInfo})`);
-        } else {
-          console.log(`  ${key}: (not loaded)`);
         }
       }
     }

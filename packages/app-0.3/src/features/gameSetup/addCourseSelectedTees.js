@@ -1,13 +1,14 @@
-import { addFavesToTee } from 'common/utils/tees';
-import { GameContext } from 'features/game/gameContext';
-import { AddCourseContext } from 'features/gameSetup/addCourseContext';
-import TeeList from 'features/gameSetup/TeeList';
-import { orderBy } from 'lodash';
-import React, { useContext } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { addFavesToTee } from "common/utils/tees";
+import { GameContext } from "features/game/gameContext";
+import { AddCourseContext } from "features/gameSetup/addCourseContext";
+import TeeList from "features/gameSetup/TeeList";
+import { orderBy } from "lodash";
+import { useContext } from "react";
+import { StyleSheet, Text, View } from "react-native";
+
 // import { useGetFavoriteTeesForPlayerQuery } from 'features/courses/useGetFavoriteTeesForPlayerQuery';
 
-const AddCourseSelectedTees = (props) => {
+const AddCourseSelectedTees = (_props) => {
   const { game, currentPlayerKey } = useContext(GameContext);
   const { tees } = useContext(AddCourseContext);
 
@@ -43,7 +44,7 @@ const AddCourseSelectedTees = (props) => {
       currentPlayerKey,
     }),
   );
-  selected = orderBy(tees, ['gender', 'order'], ['desc', 'desc']);
+  selected = orderBy(tees, ["gender", "order"], ["desc", "desc"]);
 
   return (
     <View>
@@ -60,6 +61,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginVertical: 3,
     fontSize: 10,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
 });

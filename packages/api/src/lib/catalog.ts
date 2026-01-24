@@ -89,23 +89,21 @@ function isValidBetter(value: unknown): value is "lower" | "higher" {
 }
 
 import {
-  ChoiceMap,
-  ChoicesList,
+  type Choice,
   Club,
   Course,
   CourseDefaultTee,
   Game,
-  type GameCatalog,
+  GameCatalog,
   GameHole,
-  GameOption,
+  type GameOption,
   GameScope,
   GameSpec,
   Handicap,
   HoleScores,
-  JunkOption,
+  type JunkOption,
   ListOfClubs,
   ListOfGameHoles,
-  ListOfGameSpecs,
   ListOfPlayers,
   ListOfRounds,
   ListOfRoundToGames,
@@ -119,7 +117,8 @@ import {
   MapOfGames,
   MapOfOptions,
   MapOfPlayers,
-  MultiplierOption,
+  type MetaOption,
+  type MultiplierOption,
   Player,
   type PlayerAccount,
   Round,
@@ -132,23 +131,18 @@ import {
   Tee,
   TeeHole,
 } from "spicylib/schema";
+import { copySpecOptions, getSpecField } from "spicylib/scoring";
 import { transformGameSpec } from "spicylib/transform";
-import { formatHandicapDisplay } from "spicylib/utils";
-
 import {
-  type ArangoConfig,
   type ArangoTeeRating,
   convertArangoRatings,
-  createArangoConnection,
-  defaultConfig,
-  fetchAllGames,
-  fetchGameWithRounds,
-  fetchPlayersWithGames,
   type GameSpecV03,
   type GameWithRoundsV03,
   type RoundToGameEdgeV03,
   type RoundV03,
-} from "../utils/arango";
+} from "spicylib/transform/legacy-types";
+import { formatHandicapDisplay } from "spicylib/utils";
+import { loadPlayers } from "../utils/players-file";
 
 export interface ImportResult {
   specs: {
@@ -219,7 +213,23 @@ interface MultiplierOptionData {
   value_from?: string;
 }
 
-type OptionData = GameOptionData | JunkOptionData | MultiplierOptionData;
+interface MetaOptionData {
+  type: "meta";
+  name: string;
+  disp: string;
+  valueType: "bool" | "num" | "menu" | "text" | "text_array";
+  value?: string | string[];
+  choices?: Array<{ name: string; disp: string }>;
+  seq?: number;
+  searchable?: boolean;
+  required?: boolean;
+}
+
+type OptionData =
+  | GameOptionData
+  | JunkOptionData
+  | MultiplierOptionData
+  | MetaOptionData;
 
 /**
  * Load the GameCatalog for the worker account
@@ -250,7 +260,150 @@ export async function loadOrCreateCatalog(
 }
 
 /**
+ * Reset the catalog by clearing specs, options, and optionally games.
+ *
+ * This is a destructive operation - use for dev/testing when you need
+ * a fresh start with the new schema.
+ *
+ * @param workerAccount - The worker account that owns the catalog
+ * @param options - What to clear (defaults to specs and options only)
+ * @returns Counts of what was cleared
+ */
+export async function resetCatalog(
+  workerAccount: co.loaded<typeof PlayerAccount>,
+  options?: {
+    clearSpecs?: boolean;
+    clearOptions?: boolean;
+    clearGames?: boolean;
+    clearPlayers?: boolean;
+    clearCourses?: boolean;
+  },
+): Promise<{
+  specsCleared: number;
+  optionsCleared: number;
+  gamesCleared: number;
+  playersCleared: number;
+  coursesCleared: number;
+}> {
+  const clearSpecs = options?.clearSpecs ?? true;
+  const clearOptions = options?.clearOptions ?? true;
+  const clearGames = options?.clearGames ?? false;
+  const clearPlayers = options?.clearPlayers ?? false;
+  const clearCourses = options?.clearCourses ?? false;
+
+  const catalog = await loadOrCreateCatalog(workerAccount);
+  const loadedCatalog = await catalog.$jazz.ensureLoaded({
+    resolve: {
+      specs: true,
+      options: true,
+      games: true,
+      players: true,
+      courses: true,
+    },
+  });
+
+  const result = {
+    specsCleared: 0,
+    optionsCleared: 0,
+    gamesCleared: 0,
+    playersCleared: 0,
+    coursesCleared: 0,
+  };
+
+  // Clear specs
+  if (clearSpecs && loadedCatalog.specs) {
+    const specs = loadedCatalog.specs;
+    const keysToDelete: string[] = [];
+    for (const key of Object.keys(specs)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      if (specs.$jazz.has(key)) {
+        keysToDelete.push(key);
+      }
+    }
+    for (const key of keysToDelete) {
+      specs.$jazz.delete(key);
+      result.specsCleared++;
+    }
+    console.log(`Cleared ${result.specsCleared} specs from catalog`);
+  }
+
+  // Clear options
+  if (clearOptions && loadedCatalog.options) {
+    const opts = loadedCatalog.options;
+    const keysToDelete: string[] = [];
+    for (const key of Object.keys(opts)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      if (opts.$jazz.has(key)) {
+        keysToDelete.push(key);
+      }
+    }
+    for (const key of keysToDelete) {
+      opts.$jazz.delete(key);
+      result.optionsCleared++;
+    }
+    console.log(`Cleared ${result.optionsCleared} options from catalog`);
+  }
+
+  // Clear games
+  if (clearGames && loadedCatalog.games) {
+    const games = loadedCatalog.games;
+    const keysToDelete: string[] = [];
+    for (const key of Object.keys(games)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      if (games.$jazz.has(key)) {
+        keysToDelete.push(key);
+      }
+    }
+    for (const key of keysToDelete) {
+      games.$jazz.delete(key);
+      result.gamesCleared++;
+    }
+    console.log(`Cleared ${result.gamesCleared} games from catalog`);
+  }
+
+  // Clear players
+  if (clearPlayers && loadedCatalog.players) {
+    const players = loadedCatalog.players;
+    const keysToDelete: string[] = [];
+    for (const key of Object.keys(players)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      if (players.$jazz.has(key)) {
+        keysToDelete.push(key);
+      }
+    }
+    for (const key of keysToDelete) {
+      players.$jazz.delete(key);
+      result.playersCleared++;
+    }
+    console.log(`Cleared ${result.playersCleared} players from catalog`);
+  }
+
+  // Clear courses
+  if (clearCourses && loadedCatalog.courses) {
+    const courses = loadedCatalog.courses;
+    const keysToDelete: string[] = [];
+    for (const key of Object.keys(courses)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      if (courses.$jazz.has(key)) {
+        keysToDelete.push(key);
+      }
+    }
+    for (const key of keysToDelete) {
+      courses.$jazz.delete(key);
+      result.coursesCleared++;
+    }
+    console.log(`Cleared ${result.coursesCleared} courses from catalog`);
+  }
+
+  return result;
+}
+
+/**
  * Upsert a game spec into the catalog (idempotent)
+ *
+ * GameSpec is essentially a unified options map. All metadata (name, version,
+ * legacyId, short, status, spec_type, min_players, etc.) is stored as MetaOption
+ * entries in the options map.
  *
  * If the spec already exists, updates it in place to preserve CoValue ID.
  * This is critical for maintaining references from existing games.
@@ -260,8 +413,9 @@ export async function upsertGameSpec(
   specData: GameSpecV03,
   catalogOptions?: MapOfOptions,
 ): Promise<{ created: boolean; updated: boolean }> {
+  // GameSpec IS the options map directly - resolve specs with $each to load options
   const loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { specs: { $each: { teamsConfig: true } }, options: {} },
+    resolve: { specs: { $each: true }, options: true },
   });
 
   if (!loadedCatalog.specs) {
@@ -273,159 +427,275 @@ export async function upsertGameSpec(
   const exists = specs.$jazz.has(key);
   const transformed = transformGameSpec(specData);
 
-  // Get or create the spec
+  // Get or create the spec - GameSpec IS the options map directly
   let spec: GameSpec;
+  const isUpdate = exists;
   if (exists) {
-    // Update existing spec in place to preserve CoValue ID
     const existingSpec = specs[key];
     if (!existingSpec?.$isLoaded) {
       throw new Error(`Existing spec ${key} failed to load`);
     }
     spec = existingSpec;
-
-    // Update fields on existing spec
-    spec.$jazz.set("name", transformed.name);
-    spec.$jazz.set("short", transformed.short);
-    spec.$jazz.set("version", transformed.version);
-    spec.$jazz.set("status", transformed.status);
-    spec.$jazz.set("spec_type", transformed.spec_type);
-    spec.$jazz.set("min_players", transformed.min_players || 1);
-    spec.$jazz.set("location_type", transformed.location_type || "local");
   } else {
-    // Create new spec
-    spec = GameSpec.create(
-      {
-        name: transformed.name,
-        short: transformed.short,
-        version: transformed.version,
-        status: transformed.status,
-        spec_type: transformed.spec_type,
-        min_players: transformed.min_players || 1,
-        location_type: transformed.location_type || "local",
-      },
-      { owner: specs.$jazz.owner },
+    // Create new spec - GameSpec IS MapOfOptions, so create empty record
+    spec = GameSpec.create({}, { owner: specs.$jazz.owner });
+  }
+
+  // Build options to add to spec (GameSpec IS the options map)
+
+  // Helper to create a meta option (plain JSON object)
+  const createMetaOption = (
+    name: string,
+    disp: string,
+    valueType: "bool" | "num" | "menu" | "text" | "text_array",
+    value?: string | number | string[],
+    extras?: {
+      choices?: Array<{ name: string; disp: string }>;
+      seq?: number;
+      searchable?: boolean;
+      required?: boolean;
+    },
+  ): MetaOption => {
+    const metaOption: MetaOption = {
+      name,
+      disp,
+      type: "meta",
+      valueType,
+    };
+
+    // Set value based on type
+    if (valueType === "text_array" && Array.isArray(value)) {
+      metaOption.valueArray = [...value];
+    } else if (value !== undefined) {
+      metaOption.value = String(value);
+    }
+
+    // Set optional fields
+    if (extras?.choices) {
+      metaOption.choices = extras.choices.map((c) => ({
+        name: c.name,
+        disp: c.disp,
+      }));
+    }
+    if (extras?.seq !== undefined) metaOption.seq = extras.seq;
+    if (extras?.searchable !== undefined)
+      metaOption.searchable = extras.searchable;
+    if (extras?.required !== undefined) metaOption.required = extras.required;
+
+    return metaOption;
+  };
+
+  // Add core identity as meta options - set directly on spec (which IS the options map)
+  spec.$jazz.set(
+    "name",
+    createMetaOption("name", "Name", "text", transformed.name, {
+      required: true,
+    }),
+  );
+  spec.$jazz.set(
+    "version",
+    createMetaOption("version", "Version", "num", transformed.version),
+  );
+  if (specData._key) {
+    spec.$jazz.set(
+      "legacyId",
+      createMetaOption("legacyId", "Legacy ID", "text", specData._key),
     );
   }
 
-  // Set legacyId from ArangoDB _key for matching during game import
-  if (specData._key) {
-    spec.$jazz.set("legacyId", specData._key);
+  // Add short name (defaults to full name if not specified)
+  spec.$jazz.set(
+    "short",
+    createMetaOption("short", "Short Name", "text", transformed.short),
+  );
+
+  // Add min_players (required)
+  spec.$jazz.set(
+    "min_players",
+    createMetaOption(
+      "min_players",
+      "Minimum Players",
+      "num",
+      transformed.min_players,
+    ),
+  );
+
+  // Add max_players if present
+  if (specData.max_players !== undefined) {
+    spec.$jazz.set(
+      "max_players",
+      createMetaOption(
+        "max_players",
+        "Maximum Players",
+        "num",
+        specData.max_players,
+      ),
+    );
   }
 
+  // Add status (prod/dev/test)
+  spec.$jazz.set(
+    "status",
+    createMetaOption("status", "Status", "menu", transformed.status, {
+      choices: [
+        { name: "prod", disp: "Production" },
+        { name: "dev", disp: "Development" },
+        { name: "test", disp: "Test" },
+      ],
+    }),
+  );
+
+  // Add spec_type (points/skins/stableford/quota)
+  spec.$jazz.set(
+    "spec_type",
+    createMetaOption("spec_type", "Game Type", "menu", transformed.spec_type, {
+      choices: [
+        { name: "points", disp: "Points" },
+        { name: "skins", disp: "Skins" },
+        { name: "stableford", disp: "Stableford" },
+        { name: "quota", disp: "Quota" },
+      ],
+    }),
+  );
+
+  // Add location_type if present
+  if (transformed.location_type) {
+    spec.$jazz.set(
+      "location_type",
+      createMetaOption(
+        "location_type",
+        "Location Type",
+        "menu",
+        transformed.location_type,
+        {
+          choices: [
+            { name: "golf", disp: "Golf Course" },
+            { name: "any", disp: "Any Location" },
+          ],
+        },
+      ),
+    );
+  }
+
+  // Add long_description if present
   if (transformed.long_description) {
-    spec.$jazz.set("long_description", transformed.long_description);
+    spec.$jazz.set(
+      "long_description",
+      createMetaOption(
+        "long_description",
+        "Description",
+        "text",
+        transformed.long_description,
+      ),
+    );
   }
 
-  // Create or update TeamsConfig from v0.3 team fields
+  // Add team config as meta options if present
   if (
     specData.teams !== undefined ||
     specData.team_change_every !== undefined
   ) {
-    const rotateEvery = specData.team_change_every ?? 0;
+    spec.$jazz.set(
+      "teams",
+      createMetaOption(
+        "teams",
+        "Team Game",
+        "bool",
+        specData.teams ? "true" : "false",
+      ),
+    );
 
-    // Validate min_players before calculating teamCount
-    if (!specData.min_players || specData.min_players < 1) {
-      console.warn(
-        `GameSpec ${specData.name} has invalid min_players: ${specData.min_players}, skipping TeamsConfig`,
+    if (specData.team_size && specData.team_size > 0) {
+      spec.$jazz.set(
+        "team_size",
+        createMetaOption("team_size", "Team Size", "num", specData.team_size),
       );
-    } else {
-      // Calculate teamCount based on v0.3 data
-      let teamCount: number;
-      if (specData.teams === false) {
-        teamCount = specData.min_players;
-      } else if (specData.team_size && specData.team_size > 0) {
-        teamCount = Math.ceil(specData.min_players / specData.team_size);
-      } else {
-        teamCount = specData.min_players;
-      }
+    }
 
-      // Update existing teamsConfig or create new one
-      // Use $jazz.has() to check if property exists (proper Jazz pattern)
-      // Also check $isLoaded for TypeScript type narrowing
-      if (spec.$jazz.has("teamsConfig") && spec.teamsConfig?.$isLoaded) {
-        spec.teamsConfig.$jazz.set("teamCount", teamCount);
-        spec.teamsConfig.$jazz.set("rotateEvery", rotateEvery);
-        if (specData.team_size && specData.team_size > 0) {
-          spec.teamsConfig.$jazz.set("maxPlayersPerTeam", specData.team_size);
-        }
-      } else {
-        const teamsConfig = TeamsConfig.create(
-          { teamCount, rotateEvery },
-          { owner: specs.$jazz.owner },
-        );
-        if (specData.team_size && specData.team_size > 0) {
-          teamsConfig.$jazz.set("maxPlayersPerTeam", specData.team_size);
-        }
-        spec.$jazz.set("teamsConfig", teamsConfig);
-      }
+    if (specData.team_change_every !== undefined) {
+      spec.$jazz.set(
+        "team_change_every",
+        createMetaOption(
+          "team_change_every",
+          "Rotate Teams Every N Holes",
+          "num",
+          specData.team_change_every,
+        ),
+      );
     }
   }
 
-  // Build spec.options with references to catalog options OR create new options with overrides
-  if (transformed.options && transformed.options.length > 0 && catalogOptions) {
-    const specOptionsMap: Record<string, unknown> = {};
-
+  // Process all transformed options (meta, game, junk, multiplier)
+  if (transformed.options && transformed.options.length > 0) {
     for (const opt of transformed.options) {
+      // Meta options are created fresh for each spec (spec-specific metadata)
+      if (opt.type === "meta") {
+        const metaOpt = opt as MetaOptionData;
+        spec.$jazz.set(
+          opt.name,
+          createMetaOption(
+            metaOpt.name,
+            metaOpt.disp,
+            metaOpt.valueType,
+            metaOpt.value as string | number | string[] | undefined,
+            {
+              choices: metaOpt.choices,
+              seq: metaOpt.seq,
+              searchable: metaOpt.searchable,
+              required: metaOpt.required,
+            },
+          ),
+        );
+        continue;
+      }
+
+      // For game/junk/multiplier options, look up from catalog
+      if (!catalogOptions) continue;
       const catalogOption = catalogOptions[opt.name];
       if (!catalogOption) continue;
 
       // For junk options, check if the spec has an overridden value
       if (opt.type === "junk" && "value" in opt) {
-        if (!catalogOption.$isLoaded) {
-          specOptionsMap[opt.name] = catalogOption;
+        // Options are plain JSON, so just check if catalogOption exists
+        if (catalogOption.type !== "junk") {
+          spec.$jazz.set(opt.name, catalogOption);
           continue;
         }
-        const loadedCatalogOpt = catalogOption;
 
         // If values differ, create a new JunkOption with the spec's overridden value
-        if (
-          loadedCatalogOpt.$isLoaded &&
-          loadedCatalogOpt.type === "junk" &&
-          loadedCatalogOpt.value !== opt.value
-        ) {
+        if (catalogOption.value !== opt.value) {
           const junkData = specData.junk?.find((j) => j.name === opt.name);
           if (junkData) {
-            const newJunkOption = JunkOption.create(
-              {
-                name: loadedCatalogOpt.name,
-                disp: loadedCatalogOpt.disp,
-                type: "junk",
-                version: loadedCatalogOpt.version,
-                value: opt.value,
-              },
-              { owner: specs.$jazz.owner },
-            );
+            const newJunkOption: JunkOption = {
+              name: catalogOption.name,
+              disp: catalogOption.disp,
+              type: "junk",
+              version: catalogOption.version,
+              value: opt.value,
+              ...(catalogOption.sub_type && {
+                sub_type: catalogOption.sub_type,
+              }),
+              ...(catalogOption.seq !== undefined && {
+                seq: catalogOption.seq,
+              }),
+              ...(catalogOption.scope && { scope: catalogOption.scope }),
+              ...(catalogOption.icon && { icon: catalogOption.icon }),
+              ...(catalogOption.show_in && { show_in: catalogOption.show_in }),
+              ...(catalogOption.based_on && {
+                based_on: catalogOption.based_on,
+              }),
+              ...(catalogOption.limit && { limit: catalogOption.limit }),
+              ...(catalogOption.calculation && {
+                calculation: catalogOption.calculation,
+              }),
+              ...(catalogOption.logic && { logic: catalogOption.logic }),
+              ...(catalogOption.better && { better: catalogOption.better }),
+              ...(catalogOption.score_to_par && {
+                score_to_par: catalogOption.score_to_par,
+              }),
+            };
 
-            if (loadedCatalogOpt.sub_type)
-              newJunkOption.$jazz.set("sub_type", loadedCatalogOpt.sub_type);
-            if (loadedCatalogOpt.seq !== undefined)
-              newJunkOption.$jazz.set("seq", loadedCatalogOpt.seq);
-            if (loadedCatalogOpt.scope)
-              newJunkOption.$jazz.set("scope", loadedCatalogOpt.scope);
-            if (loadedCatalogOpt.icon)
-              newJunkOption.$jazz.set("icon", loadedCatalogOpt.icon);
-            if (loadedCatalogOpt.show_in)
-              newJunkOption.$jazz.set("show_in", loadedCatalogOpt.show_in);
-            if (loadedCatalogOpt.based_on)
-              newJunkOption.$jazz.set("based_on", loadedCatalogOpt.based_on);
-            if (loadedCatalogOpt.limit)
-              newJunkOption.$jazz.set("limit", loadedCatalogOpt.limit);
-            if (loadedCatalogOpt.calculation)
-              newJunkOption.$jazz.set(
-                "calculation",
-                loadedCatalogOpt.calculation,
-              );
-            if (loadedCatalogOpt.logic)
-              newJunkOption.$jazz.set("logic", loadedCatalogOpt.logic);
-            if (loadedCatalogOpt.better)
-              newJunkOption.$jazz.set("better", loadedCatalogOpt.better);
-            if (loadedCatalogOpt.score_to_par)
-              newJunkOption.$jazz.set(
-                "score_to_par",
-                loadedCatalogOpt.score_to_par,
-              );
-
-            specOptionsMap[opt.name] = newJunkOption;
+            spec.$jazz.set(opt.name, newJunkOption);
             continue;
           }
         }
@@ -433,67 +703,50 @@ export async function upsertGameSpec(
 
       // For multiplier options, check if the spec has an overridden value
       if (opt.type === "multiplier" && "value" in opt) {
-        if (!catalogOption.$isLoaded) {
-          specOptionsMap[opt.name] = catalogOption;
+        // Options are plain JSON, so just check type
+        if (catalogOption.type !== "multiplier") {
+          spec.$jazz.set(opt.name, catalogOption);
           continue;
         }
-        const loadedCatalogOpt = catalogOption;
 
-        if (
-          loadedCatalogOpt.$isLoaded &&
-          loadedCatalogOpt.type === "multiplier" &&
-          loadedCatalogOpt.value !== opt.value
-        ) {
-          const newMultOption = MultiplierOption.create(
-            {
-              name: loadedCatalogOpt.name,
-              disp: loadedCatalogOpt.disp,
-              type: "multiplier",
-              version: loadedCatalogOpt.version,
-              value: opt.value,
-            },
-            { owner: specs.$jazz.owner },
-          );
+        if (catalogOption.value !== opt.value) {
+          const newMultOption: MultiplierOption = {
+            name: catalogOption.name,
+            disp: catalogOption.disp,
+            type: "multiplier",
+            version: catalogOption.version,
+            value: opt.value,
+            ...(catalogOption.sub_type && { sub_type: catalogOption.sub_type }),
+            ...(catalogOption.seq !== undefined && { seq: catalogOption.seq }),
+            ...(catalogOption.icon && { icon: catalogOption.icon }),
+            ...(catalogOption.based_on && { based_on: catalogOption.based_on }),
+            ...(catalogOption.scope && { scope: catalogOption.scope }),
+            ...(catalogOption.availability && {
+              availability: catalogOption.availability,
+            }),
+            ...(catalogOption.override !== undefined && {
+              override: catalogOption.override,
+            }),
+            ...(catalogOption.input_value !== undefined && {
+              input_value: catalogOption.input_value,
+            }),
+            ...(catalogOption.value_from && {
+              value_from: catalogOption.value_from,
+            }),
+          };
 
-          if (loadedCatalogOpt.sub_type)
-            newMultOption.$jazz.set("sub_type", loadedCatalogOpt.sub_type);
-          if (loadedCatalogOpt.seq !== undefined)
-            newMultOption.$jazz.set("seq", loadedCatalogOpt.seq);
-          if (loadedCatalogOpt.icon)
-            newMultOption.$jazz.set("icon", loadedCatalogOpt.icon);
-          if (loadedCatalogOpt.based_on)
-            newMultOption.$jazz.set("based_on", loadedCatalogOpt.based_on);
-          if (loadedCatalogOpt.scope)
-            newMultOption.$jazz.set("scope", loadedCatalogOpt.scope);
-          if (loadedCatalogOpt.availability)
-            newMultOption.$jazz.set(
-              "availability",
-              loadedCatalogOpt.availability,
-            );
-          if (loadedCatalogOpt.override !== undefined)
-            newMultOption.$jazz.set("override", loadedCatalogOpt.override);
-          if (loadedCatalogOpt.input_value !== undefined)
-            newMultOption.$jazz.set(
-              "input_value",
-              loadedCatalogOpt.input_value,
-            );
-          if (loadedCatalogOpt.value_from)
-            newMultOption.$jazz.set("value_from", loadedCatalogOpt.value_from);
-
-          specOptionsMap[opt.name] = newMultOption;
+          spec.$jazz.set(opt.name, newMultOption);
           continue;
         }
       }
 
       // Default: reference the catalog option directly (no override needed)
-      specOptionsMap[opt.name] = catalogOption;
+      spec.$jazz.set(opt.name, catalogOption);
     }
-
-    spec.$jazz.set("options", specOptionsMap as MapOfOptions);
   }
 
   // Only add to map if new (existing specs are already in the map)
-  if (!exists) {
+  if (!isUpdate) {
     specs.$jazz.set(key, spec);
   }
 
@@ -512,7 +765,7 @@ async function upsertOptions(
   options: OptionData[],
 ): Promise<{ created: number; updated: number }> {
   let loadedCatalog = await catalog.$jazz.ensureLoaded({
-    resolve: { options: {} },
+    resolve: { options: true },
   });
 
   // Initialize options map if it doesn't exist
@@ -524,7 +777,7 @@ async function upsertOptions(
 
     // Reload catalog to ensure the new map is properly loaded
     loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { options: {} },
+      resolve: { options: true },
     });
   }
 
@@ -540,137 +793,107 @@ async function upsertOptions(
     const exists = optionsMap.$jazz.has(opt.name);
 
     // Create the appropriate option type based on discriminator
+    // Options are plain JSON objects, so just create object literals
     if (opt.type === "game") {
-      const newOption = GameOption.create(
-        {
-          name: opt.name,
-          disp: opt.disp,
-          type: "game",
-          version: opt.version,
-          valueType: opt.valueType,
-          defaultValue: opt.defaultValue,
-        },
-        { owner: optionsMap.$jazz.owner },
-      );
-
-      // Set optional fields
-      if (opt.seq !== undefined && typeof opt.seq === "number") {
-        newOption.$jazz.set("seq", opt.seq);
-      }
-      if (opt.teamOnly === true) {
-        newOption.$jazz.set("teamOnly", true);
-      }
-
-      // Add choices if present (for menu type options)
-      if (opt.choices && opt.choices.length > 0) {
-        const choicesList = ChoicesList.create([], {
-          owner: newOption.$jazz.owner,
-        });
-
-        for (const choice of opt.choices) {
-          const choiceItem = ChoiceMap.create(
-            { name: choice.name, disp: choice.disp },
-            { owner: newOption.$jazz.owner },
-          );
-          choicesList.$jazz.push(choiceItem);
-        }
-
-        newOption.$jazz.set("choices", choicesList);
-      }
+      const newOption: GameOption = {
+        name: opt.name,
+        disp: opt.disp,
+        type: "game",
+        version: opt.version,
+        valueType: opt.valueType,
+        defaultValue: opt.defaultValue,
+        ...(opt.seq !== undefined &&
+          typeof opt.seq === "number" && { seq: opt.seq }),
+        ...(opt.teamOnly === true && { teamOnly: true }),
+        ...(opt.choices &&
+          opt.choices.length > 0 && {
+            choices: opt.choices.map((c) => ({ name: c.name, disp: c.disp })),
+          }),
+      };
 
       optionsMap.$jazz.set(opt.name, newOption);
     } else if (opt.type === "junk") {
-      const newOption = JunkOption.create(
-        {
-          name: opt.name,
-          disp: opt.disp,
-          type: "junk",
-          version: opt.version,
-          value: opt.value,
-        },
-        { owner: optionsMap.$jazz.owner },
-      );
-
-      // Set optional fields with validation
-      if (opt.sub_type && isValidJunkSubType(opt.sub_type)) {
-        newOption.$jazz.set("sub_type", opt.sub_type);
-      }
-      if (opt.seq !== undefined && typeof opt.seq === "number") {
-        newOption.$jazz.set("seq", opt.seq);
-      }
-      if (opt.scope && isValidJunkScope(opt.scope)) {
-        newOption.$jazz.set("scope", opt.scope);
-      }
-      if (opt.icon && typeof opt.icon === "string") {
-        newOption.$jazz.set("icon", opt.icon);
-      }
-      if (opt.show_in && isValidShowIn(opt.show_in)) {
-        newOption.$jazz.set("show_in", opt.show_in);
-      }
-      if (opt.based_on && isValidBasedOn(opt.based_on)) {
-        newOption.$jazz.set("based_on", opt.based_on);
-      }
-      if (opt.limit && typeof opt.limit === "string") {
-        newOption.$jazz.set("limit", opt.limit);
-      }
-      if (opt.calculation && typeof opt.calculation === "string") {
-        newOption.$jazz.set("calculation", opt.calculation);
-      }
-      if (opt.logic && typeof opt.logic === "string") {
-        newOption.$jazz.set("logic", opt.logic);
-      }
-      if (opt.better && isValidBetter(opt.better)) {
-        newOption.$jazz.set("better", opt.better);
-      }
-      if (opt.score_to_par && typeof opt.score_to_par === "string") {
-        newOption.$jazz.set("score_to_par", opt.score_to_par);
-      }
+      const newOption: JunkOption = {
+        name: opt.name,
+        disp: opt.disp,
+        type: "junk",
+        version: opt.version,
+        value: opt.value,
+        ...(opt.sub_type &&
+          isValidJunkSubType(opt.sub_type) && { sub_type: opt.sub_type }),
+        ...(opt.seq !== undefined &&
+          typeof opt.seq === "number" && { seq: opt.seq }),
+        ...(opt.scope && isValidJunkScope(opt.scope) && { scope: opt.scope }),
+        ...(opt.icon && typeof opt.icon === "string" && { icon: opt.icon }),
+        ...(opt.show_in &&
+          isValidShowIn(opt.show_in) && { show_in: opt.show_in }),
+        ...(opt.based_on &&
+          isValidBasedOn(opt.based_on) && { based_on: opt.based_on }),
+        ...(opt.limit && typeof opt.limit === "string" && { limit: opt.limit }),
+        ...(opt.calculation &&
+          typeof opt.calculation === "string" && {
+            calculation: opt.calculation,
+          }),
+        ...(opt.logic && typeof opt.logic === "string" && { logic: opt.logic }),
+        ...(opt.better && isValidBetter(opt.better) && { better: opt.better }),
+        ...(opt.score_to_par &&
+          typeof opt.score_to_par === "string" && {
+            score_to_par: opt.score_to_par,
+          }),
+      };
 
       optionsMap.$jazz.set(opt.name, newOption);
     } else if (opt.type === "multiplier") {
-      // Always create new option - Jazz doesn't reliably persist updates to existing CoValues
-      const newOption = MultiplierOption.create(
-        {
-          name: opt.name,
-          disp: opt.disp,
-          type: "multiplier",
-          version: opt.version,
-          ...(opt.value !== undefined ? { value: opt.value } : {}),
-        },
-        { owner: optionsMap.$jazz.owner },
-      );
+      const newOption: MultiplierOption = {
+        name: opt.name,
+        disp: opt.disp,
+        type: "multiplier",
+        version: opt.version,
+        ...(opt.value !== undefined && { value: opt.value }),
+        ...(opt.sub_type &&
+          isValidMultiplierSubType(opt.sub_type) && { sub_type: opt.sub_type }),
+        ...(opt.seq !== undefined &&
+          typeof opt.seq === "number" && { seq: opt.seq }),
+        ...(opt.icon && typeof opt.icon === "string" && { icon: opt.icon }),
+        ...(opt.based_on &&
+          typeof opt.based_on === "string" && { based_on: opt.based_on }),
+        ...(opt.scope &&
+          isValidMultiplierScope(opt.scope) && { scope: opt.scope }),
+        ...(opt.availability &&
+          typeof opt.availability === "string" && {
+            availability: opt.availability,
+          }),
+        ...(opt.override !== undefined &&
+          typeof opt.override === "boolean" && { override: opt.override }),
+        ...(opt.input_value !== undefined &&
+          typeof opt.input_value === "boolean" && {
+            input_value: opt.input_value,
+          }),
+        ...(opt.value_from &&
+          typeof opt.value_from === "string" && { value_from: opt.value_from }),
+      };
 
-      // Set optional fields with validation
-      if (opt.sub_type && isValidMultiplierSubType(opt.sub_type)) {
-        newOption.$jazz.set("sub_type", opt.sub_type);
-      }
-      if (opt.seq !== undefined && typeof opt.seq === "number") {
-        newOption.$jazz.set("seq", opt.seq);
-      }
-      if (opt.icon && typeof opt.icon === "string") {
-        newOption.$jazz.set("icon", opt.icon);
-      }
-      if (opt.based_on && typeof opt.based_on === "string") {
-        newOption.$jazz.set("based_on", opt.based_on);
-      }
-      if (opt.scope && isValidMultiplierScope(opt.scope)) {
-        newOption.$jazz.set("scope", opt.scope);
-      }
-      if (opt.availability && typeof opt.availability === "string") {
-        newOption.$jazz.set("availability", opt.availability);
-      }
-      if (opt.override !== undefined && typeof opt.override === "boolean") {
-        newOption.$jazz.set("override", opt.override);
-      }
-      if (
-        opt.input_value !== undefined &&
-        typeof opt.input_value === "boolean"
-      ) {
-        newOption.$jazz.set("input_value", opt.input_value);
-      }
-      if (opt.value_from && typeof opt.value_from === "string") {
-        newOption.$jazz.set("value_from", opt.value_from);
-      }
+      optionsMap.$jazz.set(opt.name, newOption);
+    } else if (opt.type === "meta") {
+      const newOption: MetaOption = {
+        name: opt.name,
+        disp: opt.disp,
+        type: "meta",
+        valueType: opt.valueType,
+        ...(opt.valueType === "text_array" &&
+          Array.isArray(opt.value) && { valueArray: [...opt.value] }),
+        ...(opt.valueType !== "text_array" &&
+          opt.value !== undefined &&
+          typeof opt.value === "string" && { value: opt.value }),
+        ...(opt.seq !== undefined &&
+          typeof opt.seq === "number" && { seq: opt.seq }),
+        ...(opt.searchable === true && { searchable: true }),
+        ...(opt.required === true && { required: true }),
+        ...(opt.choices &&
+          opt.choices.length > 0 && {
+            choices: opt.choices.map((c) => ({ name: c.name, disp: c.disp })),
+          }),
+      };
 
       optionsMap.$jazz.set(opt.name, newOption);
     }
@@ -705,45 +928,38 @@ export async function loadGameSpecsFromSeed(): Promise<GameSpecV03[]> {
 }
 
 /**
- * Merge game specs from seed files and optionally ArangoDB
+ * Load game specs from seed files
  *
- * @deprecated Use loadGameSpecsFromSeed() directly. ArangoDB is no longer
- * the source of truth for specs/options - seed files are.
+ * @deprecated Use loadGameSpecsFromSeed() directly.
  */
-export async function mergeGameSpecSources(
-  _arangoConfig?: ArangoConfig,
-): Promise<GameSpecV03[]> {
-  // Load from seed files only - ArangoDB is no longer used for specs/options
+export async function mergeGameSpecSources(): Promise<GameSpecV03[]> {
   return loadGameSpecsFromSeed();
 }
 
 /**
- * Import player records from ArangoDB into the worker account's catalog, updating existing entries idempotently.
+ * Import player records from JSON file into the worker account's catalog, updating existing entries idempotently.
  *
- * Each Arango player is upserted using the GHIN ID when present or `manual_{legacyId}` otherwise as the unique lookup key.
+ * Each player is upserted using the GHIN ID when present or `manual_{legacyId}` otherwise as the unique lookup key.
  * Players are created as individual docs owned by the worker's group; existing catalog players are reused and the catalog players map is populated.
  *
  * @param workerAccount - The worker account that will own created player documents
  * @param catalog - The target game catalog to populate or update players in
- * @param arangoConfig - Optional ArangoDB connection configuration; uses the default config when omitted
  * @returns An object with counts: `created` for new players added to the catalog, `updated` for existing players upserted, and `skipped` for players not imported (e.g., missing name or on error)
  */
 async function importPlayers(
   workerAccount: co.loaded<typeof PlayerAccount>,
   catalog: GameCatalog,
-  arangoConfig?: ArangoConfig,
 ): Promise<{ created: number; updated: number; skipped: number }> {
   const result = { created: 0, updated: 0, skipped: 0 };
 
   try {
-    const db = createArangoConnection(arangoConfig || defaultConfig);
-    const arangoPlayers = await fetchPlayersWithGames(db);
+    const exportedPlayers = await loadPlayers();
 
-    console.log(`Importing ${arangoPlayers.length} players from ArangoDB...`);
+    console.log(`Importing ${exportedPlayers.length} players from file...`);
 
     // Ensure catalog.players map exists
     const loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { players: {} },
+      resolve: { players: true },
     });
 
     if (!loadedCatalog.$jazz.has("players")) {
@@ -769,43 +985,49 @@ async function importPlayers(
 
     const group = loadedWorker.root.$jazz.owner;
 
-    for (const arangoPlayer of arangoPlayers) {
+    for (const exportedPlayer of exportedPlayers) {
       try {
         // Skip if missing name
-        if (!arangoPlayer.name) {
+        if (!exportedPlayer.name) {
           console.warn(
-            `Skipping player (missing name): ${JSON.stringify({ _key: arangoPlayer._key })}`,
+            `Skipping player (missing name): ${JSON.stringify({ _key: exportedPlayer._key })}`,
           );
           result.skipped++;
           continue;
         }
 
         // Determine lookup key: ghinId for GHIN players, manual_{_key} for manual players
-        const ghinId = arangoPlayer.handicap?.id;
-        const legacyId = arangoPlayer._key;
+        const ghinId = exportedPlayer.handicap?.id;
+        const legacyId = exportedPlayer._key;
         const mapKey = ghinId || `manual_${legacyId}`;
 
-        // Default gender to "M" if missing, with smart detection for female names
-        const gender: "M" | "F" = arangoPlayer.gender || "M";
+        // Default gender to "M" if missing
+        const gender: "M" | "F" = exportedPlayer.gender || "M";
 
         // Create handicap if available
         let handicap: Handicap | undefined;
-        if (arangoPlayer.handicap) {
-          const revDate = arangoPlayer.handicap.revDate
-            ? new Date(arangoPlayer.handicap.revDate)
+        if (exportedPlayer.handicap) {
+          const revDate = exportedPlayer.handicap.revDate
+            ? new Date(exportedPlayer.handicap.revDate)
             : undefined;
+
+          // Handle index as number or string (legacy data may have string)
+          const indexValue =
+            typeof exportedPlayer.handicap.index === "string"
+              ? Number.parseFloat(exportedPlayer.handicap.index)
+              : exportedPlayer.handicap.index;
 
           // Generate display from index if not present in legacy data
           const display = formatHandicapDisplay(
-            arangoPlayer.handicap.index,
-            arangoPlayer.handicap.display,
+            indexValue,
+            exportedPlayer.handicap.display,
           );
 
           handicap = Handicap.create(
             {
-              source: arangoPlayer.handicap.source,
+              source: exportedPlayer.handicap.source || "manual",
               display,
-              value: arangoPlayer.handicap.index,
+              value: indexValue,
               revDate,
             },
             { owner: group },
@@ -814,9 +1036,9 @@ async function importPlayers(
 
         // Create clubs list if available
         let clubs: ListOfClubs | undefined;
-        if (arangoPlayer.clubs && arangoPlayer.clubs.length > 0) {
+        if (exportedPlayer.clubs && exportedPlayer.clubs.length > 0) {
           const clubsList = ListOfClubs.create([], { owner: group });
-          for (const clubData of arangoPlayer.clubs) {
+          for (const clubData of exportedPlayer.clubs) {
             const club = Club.create(
               {
                 name: clubData.name,
@@ -832,8 +1054,8 @@ async function importPlayers(
         // Upsert player using mapKey (ghinId or manual_{legacyId})
         const player = await Player.upsertUnique({
           value: {
-            name: arangoPlayer.name,
-            short: arangoPlayer.short || arangoPlayer.name,
+            name: exportedPlayer.name,
+            short: exportedPlayer.short || exportedPlayer.name,
             gender,
             ghinId,
             legacyId,
@@ -845,7 +1067,7 @@ async function importPlayers(
         });
 
         if (!player?.$isLoaded) {
-          throw new Error(`Failed to upsert player: ${arangoPlayer.name}`);
+          throw new Error(`Failed to upsert player: ${exportedPlayer.name}`);
         }
 
         // Check if player existed in map before (for counting)
@@ -857,13 +1079,11 @@ async function importPlayers(
         // Count as created or updated based on previous existence
         if (existedBefore) {
           result.updated++;
-          // console.log(`Updated player: ${arangoPlayer.name} (${ghinId})`);
         } else {
           result.created++;
-          // console.log(`Created player: ${arangoPlayer.name} (${ghinId})`);
         }
       } catch (error) {
-        console.error(`Failed to import player ${arangoPlayer.name}:`, error);
+        console.error(`Failed to import player ${exportedPlayer.name}:`, error);
         result.skipped++;
       }
     }
@@ -874,7 +1094,7 @@ async function importPlayers(
       `Player import complete: ${result.updated} upserted, ${result.skipped} skipped`,
     );
   } catch (error) {
-    console.error("Failed to fetch players from ArangoDB:", error);
+    console.error("Failed to load players from file:", error);
   }
 
   return result;
@@ -939,7 +1159,7 @@ export async function importFavoritesForPlayer(
     console.log(`[importFavoritesForPlayer] Loading catalog by ID...`);
     const { GameCatalog } = await import("spicylib/schema");
     const catalog = await GameCatalog.load(catalogId, {
-      resolve: { players: {}, courses: {} },
+      resolve: { players: true, courses: true },
     });
 
     if (!catalog?.$isLoaded) {
@@ -969,7 +1189,7 @@ export async function importFavoritesForPlayer(
         `[importFavoritesForPlayer] Loading existing favorites object...`,
       );
       const loadedRoot = await root.$jazz.ensureLoaded({
-        resolve: { favorites: { players: {}, courseTees: {} } },
+        resolve: { favorites: { players: true, courseTees: true } },
       });
       if (loadedRoot.favorites?.$isLoaded) {
         favorites = loadedRoot.favorites;
@@ -1000,7 +1220,7 @@ export async function importFavoritesForPlayer(
     if (playerFavorites.length > 0) {
       // Load catalog players map
       const loadedCatalog = await catalog.$jazz.ensureLoaded({
-        resolve: { players: {} },
+        resolve: { players: true },
       });
 
       if (!loadedCatalog.players) {
@@ -1156,7 +1376,7 @@ export async function importFavoritesForPlayer(
     if (courseTeesFavorites.length > 0) {
       // Load catalog courses
       const loadedCatalog = await catalog.$jazz.ensureLoaded({
-        resolve: { courses: {} },
+        resolve: { courses: true },
       });
 
       if (!loadedCatalog.courses) {
@@ -1188,7 +1408,7 @@ export async function importFavoritesForPlayer(
       // Ensure all existing course/tee items are loaded with their course and tee references
       if (courseTeesList?.$isLoaded && courseTeesList.length > 0) {
         await courseTeesList.$jazz.ensureLoaded({
-          resolve: { $each: { course: {}, tee: {} } },
+          resolve: { $each: { course: true, tee: true } },
         });
       }
 
@@ -1230,8 +1450,12 @@ export async function importFavoritesForPlayer(
           `[DEBUG] Looking for course ${courseKey}, tee ${fav.teeId}`,
         );
 
-        // Access course directly from map
-        let courseRef = catalogCourses[courseKey];
+        // Check if course exists in catalog using proper Jazz pattern
+        let courseRef: (typeof catalogCourses)[string] | null = null;
+
+        if (catalogCourses.$jazz.has(courseKey)) {
+          courseRef = catalogCourses[courseKey];
+        }
 
         if (!courseRef) {
           console.log(
@@ -1253,27 +1477,38 @@ export async function importFavoritesForPlayer(
           }
         }
 
-        // Load course to access its tees list and find the matching tee
-        const course = courseRef.$isLoaded
-          ? courseRef
-          : await Course.load(courseRef.$jazz.id, { resolve: { tees: {} } });
+        // Load course with tees resolved - always use Course.load to ensure tees are loaded
+        // Even if courseRef.$isLoaded is true, the tees property may not be resolved
+        const course = await Course.load(courseRef.$jazz.id, {
+          resolve: { tees: { $each: true } },
+        });
 
         if (!course?.$isLoaded) {
+          console.log(`[DEBUG] Course ${courseKey} failed to load`);
           result.errors.push(`Favorite course failed to load: ${courseKey}`);
           continue;
         }
 
         // Ensure tees list is loaded
         if (!course.tees?.$isLoaded) {
+          console.log(
+            `[DEBUG] Course ${courseKey} tees not loaded after Course.load. course.tees exists: ${!!course.tees}, $isLoaded: ${course.tees?.$isLoaded}`,
+          );
           result.errors.push(`Course tees not loaded: ${courseKey}`);
           continue;
         }
 
+        console.log(
+          `[DEBUG] Course ${courseKey} loaded with ${course.tees.length} tees`,
+        );
+
         // Find the tee by teeId - the tee might not be loaded but we can check the reference
+        // Note: fav.teeId is a number from JSON, t.id is a string in Jazz schema
+        const teeIdString = String(fav.teeId);
         let teeRef = null;
         for (let i = 0; i < course.tees.length; i++) {
           const t = course.tees[i];
-          if (t?.$isLoaded && t.id === fav.teeId) {
+          if (t?.$isLoaded && t.id === teeIdString) {
             teeRef = t;
             break;
           }
@@ -1374,7 +1609,7 @@ export interface CatalogImportOptions {
  */
 export async function importGameSpecsToCatalog(
   workerAccount: co.loaded<typeof PlayerAccount>,
-  arangoConfig?: ArangoConfig,
+  _deprecated?: unknown,
   options?: CatalogImportOptions,
 ): Promise<ImportResult> {
   const importSpecs = options?.specs ?? true;
@@ -1387,7 +1622,7 @@ export async function importGameSpecsToCatalog(
   const catalog = await loadOrCreateCatalog(workerAccount);
   console.log("Catalog loaded/created:", catalog.$jazz.id);
 
-  const allSpecs = await mergeGameSpecSources(arangoConfig);
+  const allSpecs = await mergeGameSpecSources();
   console.log("Total specs to import:", allSpecs.length);
 
   const result: ImportResult = {
@@ -1514,6 +1749,10 @@ export async function importGameSpecsToCatalog(
           }
         }
       }
+
+      // NOTE: Meta options are NOT collected into the catalog-level allOptions.
+      // Meta options (short, aliases, status, spec_type, etc.) are spec-specific
+      // and are created fresh for each spec in upsertGameSpec().
     } catch (error) {
       result.errors.push({
         item: `spec:${spec.disp || spec.name || spec._key || "unknown"}`,
@@ -1541,7 +1780,7 @@ export async function importGameSpecsToCatalog(
 
     // Third pass: Import specs with references to catalog options
     const loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { options: {} },
+      resolve: { options: true },
     });
 
     console.log(
@@ -1577,11 +1816,7 @@ export async function importGameSpecsToCatalog(
   if (importPlayersFlag) {
     console.log("Importing players...");
     try {
-      const playersResult = await importPlayers(
-        workerAccount,
-        catalog,
-        arangoConfig,
-      );
+      const playersResult = await importPlayers(workerAccount, catalog);
       result.players = playersResult;
     } catch (error) {
       result.errors.push({
@@ -1681,7 +1916,7 @@ async function importTeeFromGhin(
 
     // Ensure the course tees list is loaded
     if (!course.tees?.$isLoaded) {
-      await course.$jazz.ensureLoaded({ resolve: { tees: {} } });
+      await course.$jazz.ensureLoaded({ resolve: { tees: true } });
     }
 
     if (!course.tees) {
@@ -2127,7 +2362,6 @@ async function importGame(
   playerGhinMap: Map<string, string | null>,
   courseCache: Map<string, co.loaded<typeof Course>>,
   teeCache: Map<string, co.loaded<typeof Tee>>,
-  workerGroup: Group,
 ): Promise<{
   success: boolean;
   error?: string;
@@ -2135,6 +2369,7 @@ async function importGame(
   courses: { created: number; updated: number; skipped: number };
   tees: { created: number; updated: number; skipped: number };
   rounds: { created: number; updated: number; skipped: number };
+  roundErrors: Array<{ roundId: string; error: string }>;
 }> {
   const { game, rounds: roundsData, gamespecKey } = gameData;
 
@@ -2152,6 +2387,7 @@ async function importGame(
       courses: { created: 0, updated: 0, skipped: 0 },
       tees: { created: 0, updated: 0, skipped: 0 },
       rounds: { created: 0, updated: 0, skipped: 0 },
+      roundErrors: [],
     };
   }
 
@@ -2161,14 +2397,44 @@ async function importGame(
     tees: { created: 0, updated: 0, skipped: 0 },
     rounds: { created: 0, updated: 0, skipped: 0 },
   };
+  const roundErrors: Array<{ roundId: string; error: string }> = [];
 
-  // For idempotency: ALWAYS use workerGroup as owner for game-related upserts
-  // upsertUnique derives CoValue ID from (unique + owner), so using the same
-  // stable workerGroup ensures we always find/update existing games
-  const gameGroup = workerGroup;
-
-  // Check if game exists in catalog (for tracking created vs updated)
+  // Check if game already exists in the catalog index
   const gameExistedInCatalog = gamesMap.$jazz.has(game._key);
+  let existingGame: Game | null = null;
+  let gameGroup: Group;
+
+  if (gameExistedInCatalog) {
+    // Game exists - load it and use its group
+    const gameRef = gamesMap[game._key];
+    if (gameRef) {
+      const loadedGame = await Game.load(gameRef.$jazz.id, {});
+      if (loadedGame?.$isLoaded) {
+        existingGame = loadedGame;
+        gameGroup = loadedGame.$jazz.owner as Group;
+        console.log(
+          `Game ${game._key} already exists, using existing group for updates`,
+        );
+      } else {
+        // Failed to load existing game - create new group
+        console.warn(
+          `Game ${game._key} exists in index but failed to load, creating new`,
+        );
+        gameGroup = Group.create(workerAccount);
+        gameGroup.makePublic();
+      }
+    } else {
+      // Reference is null - create new group
+      gameGroup = Group.create(workerAccount);
+      gameGroup.makePublic();
+    }
+  } else {
+    // Game doesn't exist - create a new per-game group
+    // Worker is automatically an admin since they created it
+    gameGroup = Group.create(workerAccount);
+    gameGroup.makePublic();
+    console.log(`Creating new game ${game._key} with dedicated group`);
+  }
 
   // Import rounds
   const roundToGames = ListOfRoundToGames.create([], { owner: gameGroup });
@@ -2271,7 +2537,7 @@ async function importGame(
         player,
         course,
         tee,
-        workerGroup,
+        gameGroup,
       );
 
       // Upsert RoundToGame edge using composite key (round + game legacy IDs)
@@ -2302,7 +2568,9 @@ async function importGame(
       // @ts-expect-error - upsertUnique returns MaybeLoaded but we've verified $isLoaded above
       roundToGames.$jazz.push(roundToGame);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`Failed to import round ${roundData.round._key}:`, error);
+      roundErrors.push({ roundId: roundData.round._key, error: errorMsg });
     }
   }
 
@@ -2452,9 +2720,8 @@ async function importGame(
             // Find option in catalog - use $jazz.has to check existence
             if (catalogOptions.$jazz.has(option.name)) {
               const catalogOption = catalogOptions[option.name];
-              if (catalogOption?.$isLoaded) {
-                // Option is loaded, we can reference it
-                // @ts-expect-error - MaybeLoaded nested types in migration code
+              if (catalogOption) {
+                // Options are plain JSON, just copy them
                 holeOptions.$jazz.set(option.name, catalogOption);
               }
             }
@@ -2495,8 +2762,7 @@ async function importGame(
     }
   }
 
-  // Build specs list (try to find gamespec in catalog by legacyId)
-  const specs = ListOfGameSpecs.create([], { owner: gameGroup });
+  // Find the game spec in catalog by legacyId for specRef
   const specsMap = loadedCatalog.specs as MapOfGameSpecs | undefined;
   let gameSpec: GameSpec | null = null;
   if (gamespecKey && specsMap) {
@@ -2510,32 +2776,44 @@ async function importGame(
     // Find spec by matching legacyId (ArangoDB _key)
     for (const key of Object.keys(specsMap)) {
       const spec = specsMap[key];
-      if (spec?.$isLoaded && spec.legacyId === normalizedKey) {
-        gameSpec = spec as GameSpec;
-        // @ts-expect-error - MaybeLoaded types in migration code, spec is verified loaded
-        specs.$jazz.push(spec);
-        break;
+      if (spec?.$isLoaded) {
+        const specLegacyId = getSpecField(spec, "legacyId");
+        if (specLegacyId === normalizedKey) {
+          gameSpec = spec as GameSpec;
+          break;
+        }
       }
     }
   }
 
   // Build scope with teamsConfig
-  // Start with gamespec's teamsConfig as template, then apply instance-specific overrides
+  // Start with gamespec's team options as template, then apply instance-specific overrides
   let teamCount: number;
   let rotateEvery: number;
   let maxPlayersPerTeam: number | undefined;
 
-  if (
-    gameSpec?.$isLoaded &&
-    gameSpec.$jazz.has("teamsConfig") &&
-    gameSpec.teamsConfig?.$isLoaded
-  ) {
-    // Use gamespec's teamsConfig as defaults
-    teamCount = gameSpec.teamsConfig.teamCount;
-    rotateEvery = gameSpec.teamsConfig.rotateEvery;
-    maxPlayersPerTeam = gameSpec.teamsConfig.maxPlayersPerTeam;
+  if (gameSpec?.$isLoaded) {
+    // Read team config from spec options
+    const specTeams = getSpecField(gameSpec, "teams");
+    const specTeamSize = getSpecField(gameSpec, "team_size") as
+      | number
+      | undefined;
+    const specRotateEvery = getSpecField(gameSpec, "team_change_every") as
+      | number
+      | undefined;
+    const specMinPlayers = getSpecField(gameSpec, "min_players") as
+      | number
+      | undefined;
+
+    if (specTeams && specTeamSize && specTeamSize > 0 && specMinPlayers) {
+      teamCount = Math.ceil(specMinPlayers / specTeamSize);
+      maxPlayersPerTeam = specTeamSize;
+    } else {
+      teamCount = players.length;
+    }
+    rotateEvery = specRotateEvery ?? 0;
   } else {
-    // Fallback if no gamespec teamsConfig
+    // Fallback if no gamespec
     teamCount = players.length;
     rotateEvery = 0;
   }
@@ -2572,102 +2850,98 @@ async function importGame(
   // Set optional CoMap field after creation
   scope.$jazz.set("teamsConfig", teamsConfig);
 
-  // Debug: log what we're about to upsert
+  // Debug: log what we're creating/updating
+  const specName = gameSpec ? getSpecField(gameSpec, "name") : "none";
   console.log(
-    `Upserting game ${game._key}: rounds=${roundToGames.length}, players=${players.length}, specs=${specs.length}, holes=${gameHoles.length}`,
+    `${existingGame ? "Updating" : "Creating"} game ${game._key}: rounds=${roundToGames.length}, players=${players.length}, specRef=${specName}, holes=${gameHoles.length}`,
   );
 
-  // Upsert the game using legacyId as unique key (idempotent)
-  const createdGame = await Game.upsertUnique({
-    unique: game._key,
-    value: {
-      start: new Date(game.start),
-      name: game.name,
-      scope,
-      specs,
-      holes: gameHoles,
-      players,
-      rounds: roundToGames,
-      legacyId: game._key,
-    },
-    owner: gameGroup,
-  });
-
-  if (!createdGame || !createdGame.$isLoaded) {
-    throw new Error(`Failed to upsert game: ${game._key}`);
+  // Copy spec options to create the game's working copy
+  // spec = working copy (user modifications go here)
+  // specRef = reference to catalog spec (for reset/diff)
+  let gameSpecCopy: MapOfOptions | undefined;
+  if (gameSpec?.$isLoaded) {
+    gameSpecCopy = await copySpecOptions(gameSpec, gameGroup);
   }
 
-  // Import game-level option overrides from v0.3 data
+  // Create new game or update existing one
+  let finalGame: Game;
+
+  if (existingGame) {
+    // Update existing game with new data
+    existingGame.$jazz.set("start", new Date(game.start));
+    existingGame.$jazz.set("name", game.name);
+    existingGame.$jazz.set("scope", scope);
+    existingGame.$jazz.set("holes", gameHoles);
+    existingGame.$jazz.set("players", players);
+    existingGame.$jazz.set("rounds", roundToGames);
+    existingGame.$jazz.set("legacyId", game._key);
+    // Set spec (working copy) and specRef (catalog reference)
+    if (gameSpecCopy) {
+      existingGame.$jazz.set("spec", gameSpecCopy);
+    }
+    if (gameSpec) {
+      existingGame.$jazz.set("specRef", gameSpec);
+    }
+    finalGame = existingGame;
+  } else {
+    // Create new game with per-game group
+    const newGame = Game.create(
+      {
+        start: new Date(game.start),
+        name: game.name,
+        scope,
+        holes: gameHoles,
+        players,
+        rounds: roundToGames,
+        legacyId: game._key,
+      },
+      { owner: gameGroup },
+    );
+    // Set spec (working copy) and specRef (catalog reference) after creation
+    if (gameSpecCopy) {
+      newGame.$jazz.set("spec", gameSpecCopy);
+    }
+    if (gameSpec) {
+      newGame.$jazz.set("specRef", gameSpec);
+    }
+    finalGame = newGame;
+  }
+
+  // Apply v0.3 game-level option overrides to game.spec
   // v0.3 game options have two types:
   // 1. Game-level: {name, disp, type, value} - applies to entire game
   // 2. Hole-level: {name, values: [{value, holes}]} - applies to specific holes
-  const catalogOptions = loadedCatalog.options;
-  if (game.options && game.options.length > 0 && catalogOptions?.$isLoaded) {
-    const gameOptionsMap = MapOfOptions.create({}, { owner: gameGroup });
-
+  if (game.options && game.options.length > 0 && gameSpecCopy) {
     for (const option of game.options) {
       // Skip hole-level options (they have a values array, handled elsewhere)
       if ("values" in option && option.values && Array.isArray(option.values)) {
         continue;
       }
 
-      // Game-level option - copy from catalog and set value override
+      // Game-level option - apply override to game.spec
       if (
         "value" in option &&
         option.name &&
         option.value &&
-        catalogOptions.$jazz.has(option.name)
+        gameSpecCopy.$jazz.has(option.name)
       ) {
-        const catalogOption = catalogOptions[option.name];
-        if (catalogOption?.$isLoaded && catalogOption.type === "game") {
-          const gameOption = catalogOption as GameOption;
-
-          // Create new option for this game
-          const newOption = GameOption.create(
-            {
-              name: gameOption.name,
-              disp: gameOption.disp,
-              type: "game",
-              version: gameOption.version,
-              valueType: gameOption.valueType,
-              defaultValue: gameOption.defaultValue,
-            },
-            { owner: gameGroup },
-          );
-
-          // Copy choices if they exist
-          if (
-            gameOption.$jazz.has("choices") &&
-            gameOption.choices?.$isLoaded
-          ) {
-            // @ts-expect-error - MaybeLoaded types in migration code
-            newOption.$jazz.set("choices", gameOption.choices);
-          }
-
-          // Copy seq if it exists
-          if (gameOption.$jazz.has("seq") && gameOption.seq !== undefined) {
-            newOption.$jazz.set("seq", gameOption.seq);
-          }
-
-          // Set the value from v0.3 data
-          newOption.$jazz.set("value", option.value);
-
-          // Add to game options map
-          gameOptionsMap.$jazz.set(option.name, newOption);
+        const specOption = gameSpecCopy[option.name];
+        if (specOption && specOption.type === "game") {
+          // Options are plain JSON, so update by creating a new object with the value override
+          gameSpecCopy.$jazz.set(option.name, {
+            ...specOption,
+            value: option.value,
+          });
         }
       }
     }
-
-    // Set game.options if we created any options
-    if (Object.keys(gameOptionsMap).length > 0) {
-      createdGame.$jazz.set("options", gameOptionsMap);
-    }
   }
 
-  // Add to catalog map for enumeration (idempotent - same key overwrites)
-  gamesMap.$jazz.set(game._key, createdGame);
+  // Add to catalog index for legacyId lookup (idempotent - same key overwrites)
+  gamesMap.$jazz.set(game._key, finalGame);
   console.log(
-    `Set game ${game._key} in catalog, game.id=${createdGame.$jazz.id}`,
+    `Set game ${game._key} in catalog index, game.id=${finalGame.$jazz.id}`,
   );
 
   return {
@@ -2676,6 +2950,7 @@ async function importGame(
     courses: stats.courses,
     tees: stats.tees,
     rounds: stats.rounds,
+    roundErrors,
   };
 }
 
@@ -2690,21 +2965,19 @@ export interface GameImportOptions {
 }
 
 /**
- * Import games from ArangoDB in batches (idempotent)
+ * Import games from JSON files
  *
- * @param workerAccount - Worker account
- * @param arangoConfig - ArangoDB configuration (optional)
- * @param options - Import options (legacyId for single game, batchSize)
- * @returns GameImportResult with import statistics
+ * Games are loaded from data/games/{legacyId}.json files that were
+ * exported using scripts/export-games.ts
  */
-export async function importGamesFromArango(
+export async function importGamesFromFiles(
   workerAccount: co.loaded<typeof PlayerAccount>,
-  arangoConfig?: ArangoConfig,
   options?: GameImportOptions,
 ): Promise<GameImportResult> {
+  const { loadGamesIndex, loadGame } = await import("../utils/games-file");
+
   const batchSize = options?.batchSize ?? 10;
   const singleGameId = options?.legacyId;
-  const db = createArangoConnection(arangoConfig || defaultConfig);
   const catalog = await loadOrCreateCatalog(workerAccount);
 
   const result: GameImportResult = {
@@ -2716,38 +2989,54 @@ export async function importGamesFromArango(
   };
 
   try {
-    // Load catalog ONCE with all required maps - avoid repeated ensureLoaded calls
-    console.log("Loading catalog maps...");
-    let loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { games: {}, players: {}, specs: {}, options: {}, courses: {} },
+    // IMPORTANT: Use GameCatalog.load() to get fresh data from Jazz sync server.
+    // This is critical when games import runs immediately after players import -
+    // ensureLoaded() may return stale data from the local cache, causing players
+    // to not be found and rounds to be skipped.
+    console.log("Loading catalog maps (fresh load)...");
+    const freshCatalog = await GameCatalog.load(catalog.$jazz.id, {
+      resolve: {
+        games: true,
+        players: { $each: true },
+        specs: { $each: true },
+        options: true,
+        courses: true,
+      },
     });
 
-    // Initialize maps if needed (one-time setup)
-    if (!loadedCatalog.$jazz.has("games")) {
-      const group = Group.create(workerAccount);
-      group.makePublic();
-      loadedCatalog.$jazz.set("games", MapOfGames.create({}, { owner: group }));
+    if (!freshCatalog?.$isLoaded) {
+      throw new Error("Failed to load catalog");
     }
-    if (!loadedCatalog.$jazz.has("courses")) {
+
+    // Initialize maps if needed using the fresh catalog
+    if (!freshCatalog.$jazz.has("games")) {
       const group = Group.create(workerAccount);
       group.makePublic();
-      loadedCatalog.$jazz.set(
+      freshCatalog.$jazz.set("games", MapOfGames.create({}, { owner: group }));
+    }
+    if (!freshCatalog.$jazz.has("courses")) {
+      const group = Group.create(workerAccount);
+      group.makePublic();
+      freshCatalog.$jazz.set(
         "courses",
         MapOfCourses.create({}, { owner: group }),
       );
     }
 
-    // Re-load after initialization to get the new maps
-    // Load specs with $each: true to ensure each spec is loaded for legacyId matching
-    loadedCatalog = await catalog.$jazz.ensureLoaded({
+    // Reload to get the initialized maps
+    const loadedCatalog = await GameCatalog.load(catalog.$jazz.id, {
       resolve: {
-        games: {},
-        players: {},
+        games: true,
+        players: { $each: true },
         specs: { $each: true },
-        options: {},
-        courses: {},
+        options: true,
+        courses: true,
       },
     });
+
+    if (!loadedCatalog?.$isLoaded) {
+      throw new Error("Failed to reload catalog after initialization");
+    }
 
     if (
       !loadedCatalog.games ||
@@ -2759,48 +3048,54 @@ export async function importGamesFromArango(
 
     console.log("Catalog maps loaded");
 
-    // Get the worker's root group for stable upsertUnique operations
-    // This ensures the same legacyId always refers to the same CoValue across imports
-    const loadedWorker = await workerAccount.$jazz.ensureLoaded({
-      resolve: { root: true },
-    });
-    if (!loadedWorker.root) {
-      throw new Error("Worker account has no root");
-    }
-    const workerGroup = loadedWorker.root.$jazz.owner as Group;
-    console.log(`workerGroup ID: ${workerGroup.$jazz.id}`);
-
-    // Create course cache to avoid repeated Course.load calls
+    // Create caches
     const courseCache = new Map<string, co.loaded<typeof Course>>();
     const teeCache = new Map<string, co.loaded<typeof Tee>>();
 
-    // Pre-fetch all player GHIN IDs to avoid N+1 queries
-    console.log("Pre-fetching player GHIN IDs...");
-    const playerGhinCursor = await db.query(`
-      FOR player IN players
-        RETURN { key: player._key, ghinId: player.handicap.id }
-    `);
+    // Build player GHIN lookup from catalog players (no ArangoDB query needed)
+    console.log("Building player GHIN lookup from catalog...");
     const playerGhinMap = new Map<string, string | null>();
-    for await (const player of playerGhinCursor) {
-      playerGhinMap.set(player.key, player.ghinId || null);
+    const playersMap = loadedCatalog.players;
+    if (playersMap) {
+      for (const key of Object.keys(playersMap)) {
+        if (key.startsWith("$") || key === "_refs") continue;
+        const player = playersMap[key];
+        if (player?.$isLoaded) {
+          // Map legacy ID to GHIN ID
+          if (player.legacyId) {
+            playerGhinMap.set(player.legacyId, player.ghinId || null);
+          }
+          // Also map GHIN ID to itself for direct lookups
+          if (player.ghinId) {
+            playerGhinMap.set(player.ghinId, player.ghinId);
+          }
+        }
+      }
     }
     console.log(`Cached ${playerGhinMap.size} player GHIN lookups`);
 
     // Single game import mode
     if (singleGameId) {
-      console.log(`Importing single game: ${singleGameId}`);
+      console.log(`Importing single game from file: ${singleGameId}`);
 
       try {
-        const gameWithRounds = await fetchGameWithRounds(db, singleGameId);
+        const exportedGame = await loadGame(singleGameId);
 
-        if (!gameWithRounds) {
+        if (!exportedGame) {
           result.games.failed++;
           result.errors.push({
             gameId: singleGameId,
-            error: "Game not found",
+            error: "Game file not found",
           });
           return result;
         }
+
+        // Convert ExportedGame to GameWithRoundsV03 format
+        const gameWithRounds: GameWithRoundsV03 = {
+          game: exportedGame.game,
+          rounds: exportedGame.rounds,
+          gamespecKey: exportedGame.gamespecKey,
+        };
 
         const importResult = await importGame(
           workerAccount,
@@ -2809,7 +3104,6 @@ export async function importGamesFromArango(
           playerGhinMap,
           courseCache,
           teeCache,
-          workerGroup,
         );
 
         if (importResult.success) {
@@ -2827,6 +3121,13 @@ export async function importGamesFromArango(
           result.rounds.created += importResult.rounds.created;
           result.rounds.updated += importResult.rounds.updated;
           result.rounds.skipped += importResult.rounds.skipped;
+          // Add any round-level errors to the result
+          for (const roundError of importResult.roundErrors) {
+            result.errors.push({
+              gameId: singleGameId,
+              error: `Round ${roundError.roundId}: ${roundError.error}`,
+            });
+          }
         } else {
           result.games.failed++;
           result.errors.push({
@@ -2846,39 +3147,45 @@ export async function importGamesFromArango(
       return result;
     }
 
-    // Batch import mode - fetch total count and first batch
-    const { games, total } = await fetchAllGames(db, 0, batchSize);
+    // Batch import mode - load index and process all games
+    const index = await loadGamesIndex();
+    const total = index.totalGames;
+    console.log(
+      `Importing ${total} games from files in batches of ${batchSize}...`,
+    );
 
-    console.log(`Importing ${total} games in batches of ${batchSize}...`);
-
-    // Process all batches
-    let offset = 0;
-    let currentBatch = games;
-
-    while (currentBatch.length > 0) {
+    // Process games in batches
+    for (let i = 0; i < index.games.length; i += batchSize) {
+      const batch = index.games.slice(i, i + batchSize);
       console.log(
-        `Processing batch: ${offset + 1}-${offset + currentBatch.length} of ${total}`,
+        `Processing batch: ${i + 1}-${Math.min(i + batchSize, total)} of ${total}`,
       );
 
-      // Process each game in the batch
-      for (const gameListItem of currentBatch) {
+      for (let j = 0; j < batch.length; j++) {
+        const gameListItem = batch[j];
+        const gameNum = i + j + 1;
         try {
-          // Fetch full game with rounds
-          const gameWithRounds = await fetchGameWithRounds(
-            db,
-            gameListItem._key,
-          );
+          const exportedGame = await loadGame(gameListItem.legacyId);
 
-          if (!gameWithRounds) {
+          if (!exportedGame) {
+            console.log(
+              `[${gameNum}/${total}] ${gameListItem.legacyId}: FAILED (file not found)`,
+            );
             result.games.failed++;
             result.errors.push({
-              gameId: gameListItem._key,
-              error: "Game not found",
+              gameId: gameListItem.legacyId,
+              error: "Game file not found",
             });
             continue;
           }
 
-          // Import the game
+          // Convert ExportedGame to GameWithRoundsV03 format
+          const gameWithRounds: GameWithRoundsV03 = {
+            game: exportedGame.game,
+            rounds: exportedGame.rounds,
+            gamespecKey: exportedGame.gamespecKey,
+          };
+
           const importResult = await importGame(
             workerAccount,
             loadedCatalog,
@@ -2886,17 +3193,20 @@ export async function importGamesFromArango(
             playerGhinMap,
             courseCache,
             teeCache,
-            workerGroup,
           );
 
           if (importResult.success) {
-            // Track game created vs updated
             if (importResult.gameCreated) {
               result.games.created++;
+              console.log(
+                `[${gameNum}/${total}] ${gameListItem.legacyId}: created`,
+              );
             } else {
               result.games.updated++;
+              console.log(
+                `[${gameNum}/${total}] ${gameListItem.legacyId}: updated`,
+              );
             }
-            // Aggregate course, tee, and round stats
             result.courses.created += importResult.courses.created;
             result.courses.updated += importResult.courses.updated;
             result.courses.skipped += importResult.courses.skipped;
@@ -2906,35 +3216,41 @@ export async function importGamesFromArango(
             result.rounds.created += importResult.rounds.created;
             result.rounds.updated += importResult.rounds.updated;
             result.rounds.skipped += importResult.rounds.skipped;
+            // Add any round-level errors to the result
+            for (const roundError of importResult.roundErrors) {
+              result.errors.push({
+                gameId: gameListItem.legacyId,
+                error: `Round ${roundError.roundId}: ${roundError.error}`,
+              });
+            }
           } else {
             result.games.failed++;
+            console.log(
+              `[${gameNum}/${total}] ${gameListItem.legacyId}: FAILED - ${importResult.error || "Unknown error"}`,
+            );
             result.errors.push({
-              gameId: gameListItem._key,
+              gameId: gameListItem.legacyId,
               error: importResult.error || "Unknown error",
             });
           }
         } catch (error) {
           result.games.failed++;
+          const errorMsg =
+            error instanceof Error ? error.message : String(error);
+          console.log(
+            `[${gameNum}/${total}] ${gameListItem.legacyId}: ERROR - ${errorMsg}`,
+          );
           result.errors.push({
-            gameId: gameListItem._key,
-            error: error instanceof Error ? error.message : String(error),
+            gameId: gameListItem.legacyId,
+            error: errorMsg,
           });
         }
       }
-
-      // Fetch next batch
-      offset += batchSize;
-      if (offset < total) {
-        const nextBatch = await fetchAllGames(db, offset, batchSize);
-        currentBatch = nextBatch.games;
-      } else {
-        currentBatch = [];
-      }
     }
 
-    console.log("Game import complete:", result);
+    console.log("Game import from files complete:", result);
   } catch (error) {
-    console.error("Failed to import games:", error);
+    console.error("Failed to import games from files:", error);
     throw error;
   }
 

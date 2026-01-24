@@ -1,14 +1,14 @@
-import { GameContext } from 'features/game/gameContext';
-import GameNav from 'features/games/gamenav';
-import PostScore from 'features/gameSummary/postScore';
-import { orderBy } from 'lodash';
-import React, { useContext, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Button } from 'react-native-elements';
+import { GameContext } from "features/game/gameContext";
+import PostScore from "features/gameSummary/postScore";
+import GameNav from "features/games/gamenav";
+import { orderBy } from "lodash";
+import { useContext, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { Button } from "react-native-elements";
 
-const PostScores = (props) => {
+const PostScores = (_props) => {
   const { game, scores } = useContext(GameContext);
-  const sorted_players = orderBy(scores.players, ['gross'], ['asc']);
+  const sorted_players = orderBy(scores.players, ["gross"], ["asc"]);
 
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
 
@@ -70,8 +70,8 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 15,
     paddingTop: 15,
   },

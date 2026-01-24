@@ -1,22 +1,19 @@
-import { ApolloProvider } from '@apollo/client';
-import auth from '@react-native-firebase/auth';
-import { NavigationContainer } from '@react-navigation/native';
-import configureClient from 'app/client/configureClient';
-import AccountStack from 'app/components/accountstack';
-import AppStack from 'app/components/AppStack';
-import Splash from 'features/splash/splash';
-import React, { useEffect, useState } from 'react';
-import { LogBox } from 'react-native';
-import RNBootSplash from 'react-native-bootsplash';
-import { Provider as PaperProvider } from 'react-native-paper';
-import { clearCache } from './src/common/utils/account';
+import { ApolloProvider } from "@apollo/client";
+import { NavigationContainer } from "@react-navigation/native";
+import configureClient from "app/client/configureClient";
+import AppStack from "app/components/AppStack";
+import Splash from "features/splash/splash";
+import { useEffect, useState } from "react";
+import { LogBox } from "react-native";
+import RNBootSplash from "react-native-bootsplash";
+import { Provider as PaperProvider } from "react-native-paper";
 
 const App = () => {
   const [client, setClient] = useState(undefined);
 
   const user = {};
-  const email = 'brad@sankatygroup.com';
-  const fbToken = '123456789';
+  const email = "brad@sankatygroup.com";
+  const fbToken = "123456789";
 
   // const [initializing, setInitializing] = useState(true);
   // const [user, setUser] = useState();
@@ -60,14 +57,14 @@ const App = () => {
 
   useEffect(() => {
     LogBox.ignoreLogs([
-      'VirtualizedLists should never be nested',
-      'Non-serializable values were found in the navigation state',
-      'Require cycle',
-      'VirtualizedLists should never be nested',
-      'Warning: Overlay: Support for defaultProps',
-      'Warning: TextElement: Support for defaultProps',
-      'TypeError: _reactNative.AppState.removeEventListener',
-      'Possible unhandled Promise rejection',
+      "VirtualizedLists should never be nested",
+      "Non-serializable values were found in the navigation state",
+      "Require cycle",
+      "VirtualizedLists should never be nested",
+      "Warning: Overlay: Support for defaultProps",
+      "Warning: TextElement: Support for defaultProps",
+      "TypeError: _reactNative.AppState.removeEventListener",
+      "Possible unhandled Promise rejection",
       //        'Cannot update a component from inside',
       //        'Cache data may be lost',
       //        'Remote debugger is in',

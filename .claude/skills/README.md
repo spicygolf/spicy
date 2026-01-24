@@ -11,6 +11,7 @@ Skills provide domain-specific knowledge that is auto-injected based on prompt k
 | `jazz-patterns` | 95 | Jazz Tools patterns - CRITICAL for data integrity |
 | `typescript-standards` | 80 | TypeScript and React Native best practices |
 | `error-handling` | 75 | Error tracking with Jazz CoFeed + PostHog |
+| `documentation` | 70 | Markdown, docstrings, and code documentation |
 
 ## How Skills Work
 

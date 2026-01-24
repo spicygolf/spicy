@@ -1,15 +1,15 @@
-import GhinSearchCourse from 'common/components/ghin/course/search';
-import { AddCourseContext } from 'features/gameSetup/addCourseContext';
-import AddCourseSearchTee from 'features/gameSetup/addCourseSearchTee';
-import React, { useContext, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import GhinSearchCourse from "common/components/ghin/course/search";
+import { AddCourseContext } from "features/gameSetup/addCourseContext";
+import AddCourseSearchTee from "features/gameSetup/addCourseSearchTee";
+import { useContext, useState } from "react";
+import { StyleSheet, View } from "react-native";
 
-const AddCourseSearchCourse = (props) => {
+const AddCourseSearchCourse = (_props) => {
   const { course, setCourse } = useContext(AddCourseContext);
   const defaultCourseSearch = {
-    name: '',
-    country: '',
-    state: '',
+    name: "",
+    country: "",
+    state: "",
   };
   const [courseSearch, setCourseSearch] = useState(defaultCourseSearch);
 
@@ -38,8 +38,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   title: {
-    color: '#555',
+    color: "#555",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

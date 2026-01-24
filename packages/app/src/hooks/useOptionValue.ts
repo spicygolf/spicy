@@ -10,8 +10,7 @@ import type {
 /**
  * Get an option value from the game, checking in this order:
  * 1. GameHole.options (most specific - hole-level overrides)
- * 2. Game.options (game instance overrides)
- * 3. GameSpec.options (defaults from spec)
+ * 2. Game.spec (the game's working copy of options)
  *
  * @param game - The game instance
  * @param currentHole - The current hole (optional, for hole-level overrides)
@@ -38,9 +37,10 @@ export function useOptionValue(
   optionType: Option["type"],
 ): string | number | undefined {
   // 1. Check hole-level override (most specific)
+  // Options are plain JSON objects, no $isLoaded check needed on the option itself
   if (currentHole?.options?.$isLoaded) {
     const holeOption = currentHole.options[optionName];
-    if (holeOption?.$isLoaded && holeOption.type === optionType) {
+    if (holeOption && holeOption.type === optionType) {
       if (optionType === "game") {
         const gameOption = holeOption as GameOption;
         return gameOption.value ?? gameOption.defaultValue;
@@ -54,39 +54,19 @@ export function useOptionValue(
     }
   }
 
-  // 2. Check game instance options (game-level override)
-  if (game?.$isLoaded && game.$jazz.has("options") && game.options?.$isLoaded) {
-    const gameOption = game.options[optionName];
-    if (gameOption?.$isLoaded && gameOption.type === optionType) {
+  // 2. Check game.spec (the working copy of options)
+  if (game?.$isLoaded && game.spec?.$isLoaded) {
+    const specOption = game.spec[optionName];
+    if (specOption && specOption.type === optionType) {
       if (optionType === "game") {
-        const opt = gameOption as GameOption;
+        const opt = specOption as GameOption;
         return opt.value ?? opt.defaultValue;
       }
       if (optionType === "junk") {
-        return (gameOption as JunkOption).value;
+        return (specOption as JunkOption).value;
       }
       if (optionType === "multiplier") {
-        return (gameOption as MultiplierOption).value;
-      }
-    }
-  }
-
-  // 3. Fall back to gamespec options (defaults)
-  if (game?.specs?.$isLoaded && game.specs.length > 0) {
-    const spec = game.specs[0];
-    if (spec?.$isLoaded && spec.options?.$isLoaded) {
-      const specOption = spec.options[optionName];
-      if (specOption?.$isLoaded && specOption.type === optionType) {
-        if (optionType === "game") {
-          const gameOption = specOption as GameOption;
-          return gameOption.value ?? gameOption.defaultValue;
-        }
-        if (optionType === "junk") {
-          return (specOption as JunkOption).value;
-        }
-        if (optionType === "multiplier") {
-          return (specOption as MultiplierOption).value;
-        }
+        return (specOption as MultiplierOption).value;
       }
     }
   }

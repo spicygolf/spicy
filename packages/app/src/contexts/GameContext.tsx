@@ -23,12 +23,8 @@ const SCORING_RESOLVE = {
   name: true,
   start: true,
   scope: { teamsConfig: true },
-  specs: {
-    $each: {
-      options: { $each: true },
-    },
-  },
-  options: { $each: true }, // Game-level option overrides
+  spec: { $each: { $each: true } }, // Working copy of options for scoring (preferred)
+  specRef: { $each: { $each: true } }, // Catalog spec reference (fallback for legacy games)
   holes: {
     $each: {
       teams: {

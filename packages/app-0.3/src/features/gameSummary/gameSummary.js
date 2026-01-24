@@ -1,18 +1,18 @@
-import { useNavigation } from '@react-navigation/native';
-import { getHoles } from 'common/utils/game';
-import { GameContext } from 'features/game/gameContext';
-import { orderBy } from 'lodash';
-import React, { useContext } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { Button, Card } from 'react-native-elements';
+import { useNavigation } from "@react-navigation/native";
+import { getHoles } from "common/utils/game";
+import { GameContext } from "features/game/gameContext";
+import { orderBy } from "lodash";
+import { useContext } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import { Button, Card } from "react-native-elements";
 
-const GameSummary = (props) => {
+const GameSummary = (_props) => {
   const { game, scores } = useContext(GameContext);
   const navigation = useNavigation();
 
   //const teamGame = getGamespecKVs(game, 'teams').includes(true);
   const totalHoles = getHoles(game).length;
-  const sorted_players = orderBy(scores.players, ['gross'], ['asc']);
+  const sorted_players = orderBy(scores.players, ["gross"], ["asc"]);
 
   const format = (v) => {
     if (v > 0) {
@@ -22,7 +22,7 @@ const GameSummary = (props) => {
   };
 
   const renderPlayer = ({ item }) => {
-    let thru = '';
+    let thru = "";
     if (item.holesScored < totalHoles) {
       thru = `thru ${item.holesScored}`;
     }
@@ -82,7 +82,7 @@ const GameSummary = (props) => {
           titleStyle={styles.post_button_title}
           type="solid"
           onPress={() => {
-            navigation.navigate('PostScores');
+            navigation.navigate("PostScores");
           }}
         />
       </View>
@@ -94,28 +94,28 @@ export default GameSummary;
 
 const styles = StyleSheet.create({
   gross: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
   },
   grossToPar: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
   },
   headerTxt: {
-    color: '#666',
+    color: "#666",
     fontSize: 12,
     paddingBottom: 5,
   },
   number: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
     paddingRight: 6,
   },
   player: {
     flex: 3,
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
   },
   points: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
   },
   post_button: {
@@ -125,13 +125,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: 3,
   },
   thru: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   thruTxt: {
     fontSize: 11,

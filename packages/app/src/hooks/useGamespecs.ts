@@ -1,6 +1,6 @@
 import { Group } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { GameSpec, PlayerAccount } from "spicylib/schema";
+import { GameSpec, type MetaOption, PlayerAccount } from "spicylib/schema";
 import { useJazzWorker } from "./useJazzWorker";
 
 export function useGamespecs() {
@@ -58,7 +58,36 @@ export function useGamespecs() {
     const group = Group.create();
     group.addMember(me, "admin");
 
-    const gameSpec = GameSpec.create(spec, { owner: group });
+    // GameSpec IS the options map directly - create it empty and add meta options
+    const gameSpec = GameSpec.create({}, { owner: group });
+
+    // Helper to create and add a meta option (plain JSON object)
+    const addMetaOption = (
+      optName: string,
+      value: string | number | boolean,
+      valueType: "text" | "num" | "bool" | "menu",
+    ) => {
+      const opt: MetaOption = {
+        type: "meta",
+        name: optName,
+        disp: optName, // Display name same as option name for now
+        valueType,
+        value: String(value),
+      };
+      gameSpec.$jazz.set(optName, opt);
+    };
+
+    addMetaOption("name", spec.name, "text");
+    addMetaOption("short", spec.short, "text");
+    if (spec.long_description) {
+      addMetaOption("long_description", spec.long_description, "text");
+    }
+    addMetaOption("version", spec.version, "num");
+    addMetaOption("status", spec.status, "menu");
+    addMetaOption("spec_type", spec.spec_type, "menu");
+    addMetaOption("min_players", spec.min_players, "num");
+    addMetaOption("location_type", spec.location_type, "menu");
+
     me.root.specs.$jazz.push(gameSpec);
 
     return gameSpec;

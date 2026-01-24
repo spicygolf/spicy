@@ -1,13 +1,19 @@
-import auth from '@react-native-firebase/auth';
-import { useNavigation } from '@react-navigation/native';
-import { registerPlayer, validateName } from 'common/utils/account';
-import BackToLogin from 'features/account/backToLogin';
-import { RegisterContext } from 'features/account/registerContext';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, Card, Input } from 'react-native-elements';
+import auth from "@react-native-firebase/auth";
+import { useNavigation } from "@react-navigation/native";
+import { registerPlayer, validateName } from "common/utils/account";
+import BackToLogin from "features/account/backToLogin";
+import { RegisterContext } from "features/account/registerContext";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { Button, Card, Input } from "react-native-elements";
 
-const RegisterPlayer = (props) => {
+const RegisterPlayer = (_props) => {
   const { registration, setRegistration } = useContext(RegisterContext);
   const navigation = useNavigation();
   const nameRef = useRef(null);
@@ -17,8 +23,8 @@ const RegisterPlayer = (props) => {
 
   const validate = useCallback(
     (type, text) => {
-      const nTest = type === 'name' ? text : registration.name;
-      const sTest = type === 'short' ? text : registration.short;
+      const nTest = type === "name" ? text : registration.name;
+      const sTest = type === "short" ? text : registration.short;
 
       setNameValid(validateName(nTest));
       setShortValid(validateName(sTest));
@@ -27,8 +33,8 @@ const RegisterPlayer = (props) => {
   );
 
   const changes = registration.handicap
-    ? 'Make changes to GHIN® information (if any)'
-    : '';
+    ? "Make changes to GHIN® information (if any)"
+    : "";
 
   const register = async () => {
     //console.log('registration', JSON.stringify(registration, null, ' '));
@@ -40,7 +46,7 @@ const RegisterPlayer = (props) => {
         registration.password,
       );
 
-      if (res && res.user) {
+      if (res?.user) {
         //console.log('res.user', res.user);
         res.user.sendEmailVerification();
         // spicy golf registration
@@ -54,16 +60,16 @@ const RegisterPlayer = (props) => {
 
         // TODO: trap errors here, add retry or something, not sure...
       } else {
-        console.log('register error', res);
+        console.log("register error", res);
       }
     } catch (e) {
       //console.log('register error', e);
       let message = e.message;
-      const split = e.message.split(']');
-      if (split && split[1]) {
+      const split = e.message.split("]");
+      if (split?.[1]) {
         message = split[1].trim();
       }
-      navigation.navigate('RegisterError', {
+      navigation.navigate("RegisterError", {
         e: {
           error: 500,
           message: message,
@@ -73,7 +79,7 @@ const RegisterPlayer = (props) => {
   };
 
   useEffect(() => {
-    if (nameRef && nameRef.current) {
+    if (nameRef?.current) {
       nameRef.current.focus();
       validate();
     }
@@ -95,13 +101,13 @@ const RegisterPlayer = (props) => {
                   labelStyle={styles.label}
                   containerStyle={styles.field_input}
                   inputStyle={styles.field_input_txt}
-                  errorMessage={nameValid ? '' : 'Please enter your full name'}
+                  errorMessage={nameValid ? "" : "Please enter your full name"}
                   onChangeText={(text) => {
                     setRegistration({
                       ...registration,
                       name: text,
                     });
-                    validate('name', text);
+                    validate("name", text);
                   }}
                   autoCapitalize="words"
                   value={registration.name}
@@ -114,13 +120,15 @@ const RegisterPlayer = (props) => {
                   labelStyle={styles.label}
                   containerStyle={styles.field_input}
                   inputStyle={styles.field_input_txt}
-                  errorMessage={shortValid ? '' : 'Please enter your short/nickname'}
+                  errorMessage={
+                    shortValid ? "" : "Please enter your short/nickname"
+                  }
                   onChangeText={(text) => {
                     setRegistration({
                       ...registration,
                       short: text,
                     });
-                    validate('short', text);
+                    validate("short", text);
                   }}
                   autoCapitalize="words"
                   value={registration.short}
@@ -135,7 +143,7 @@ const RegisterPlayer = (props) => {
               type="solid"
               onPress={() => {
                 // clear out `handicap` from registration
-                let newReg = registration;
+                const newReg = registration;
                 delete registration.handicap;
                 setRegistration(newReg);
                 // go back
@@ -147,7 +155,7 @@ const RegisterPlayer = (props) => {
             <Button
               style={styles.next}
               title="Register"
-              type={nameValid && shortValid ? 'solid' : 'outline'}
+              type={nameValid && shortValid ? "solid" : "outline"}
               disabled={!(nameValid && shortValid)}
               onPress={() => {
                 register();
@@ -166,15 +174,15 @@ export default RegisterPlayer;
 
 const styles = StyleSheet.create({
   button_row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     padding: 15,
   },
   changes: {
     paddingBottom: 20,
   },
   container: {
-    backgroundColor: '#b30000',
+    backgroundColor: "#b30000",
     flex: 1,
   },
   field: {
@@ -182,14 +190,14 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   field_input: {
-    color: '#000',
+    color: "#000",
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
   label: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
-    fontWeight: 'normal',
+    fontWeight: "normal",
   },
   next: {
     width: 150,

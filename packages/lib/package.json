@@ -8,6 +8,7 @@
     "./schema": "./schema/index.ts",
     "./scoring": "./scoring/index.ts",
     "./transform": "./src/transform/index.ts",
+    "./transform/legacy-types": "./src/transform/legacy-types.ts",
     "./config/env": "./config/env.ts"
   },
   "scripts": {

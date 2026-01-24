@@ -29,17 +29,15 @@ import {
 export function getUserJunkOptions(game: Game): JunkOption[] {
   const junkOptions: JunkOption[] = [];
 
-  // Get options from game spec
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return junkOptions;
+  // Get options from game.spec (working copy)
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (!spec) return junkOptions;
 
-  const options = spec.options;
-  if (!options?.$isLoaded) return junkOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
+  // Options are plain JSON objects, no $isLoaded check needed
+  for (const key of Object.keys(spec)) {
+    const opt = spec[key];
     if (
-      opt?.$isLoaded &&
+      opt &&
       opt.type === "junk" &&
       opt.based_on === "user" &&
       (opt.show_in === "score" || opt.show_in === "faves")
@@ -62,16 +60,15 @@ export function getUserJunkOptions(game: Game): JunkOption[] {
 export function getCalculatedPlayerJunkOptions(game: Game): JunkOption[] {
   const junkOptions: JunkOption[] = [];
 
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return junkOptions;
+  // Get options from game.spec (working copy)
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (!spec) return junkOptions;
 
-  const options = spec.options;
-  if (!options?.$isLoaded) return junkOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
+  // Options are plain JSON objects, no $isLoaded check needed
+  for (const key of Object.keys(spec)) {
+    const opt = spec[key];
     if (
-      opt?.$isLoaded &&
+      opt &&
       opt.type === "junk" &&
       opt.scope === "player" &&
       opt.based_on !== "user" && // Not user-marked
@@ -97,16 +94,15 @@ export function getCalculatedPlayerJunkOptions(game: Game): JunkOption[] {
 export function getCalculatedTeamJunkOptions(game: Game): JunkOption[] {
   const junkOptions: JunkOption[] = [];
 
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return junkOptions;
+  // Get options from game.spec (working copy)
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (!spec) return junkOptions;
 
-  const options = spec.options;
-  if (!options?.$isLoaded) return junkOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
+  // Options are plain JSON objects, no $isLoaded check needed
+  for (const key of Object.keys(spec)) {
+    const opt = spec[key];
     if (
-      opt?.$isLoaded &&
+      opt &&
       opt.type === "junk" &&
       opt.scope === "team" &&
       opt.calculation && // Has a calculation method (best_ball, sum, etc.)
@@ -190,19 +186,14 @@ export function hasPlayerJunk(
 export function getMultiplierOptions(game: Game): MultiplierOption[] {
   const multiplierOptions: MultiplierOption[] = [];
 
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return multiplierOptions;
+  // Get options from game.spec (working copy)
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (!spec) return multiplierOptions;
 
-  const options = spec.options;
-  if (!options?.$isLoaded) return multiplierOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
-    if (
-      opt?.$isLoaded &&
-      opt.type === "multiplier" &&
-      opt.based_on === "user"
-    ) {
+  // Options are plain JSON objects, no $isLoaded check needed
+  for (const key of Object.keys(spec)) {
+    const opt = spec[key];
+    if (opt && opt.type === "multiplier" && opt.based_on === "user") {
       multiplierOptions.push(opt);
     }
   }

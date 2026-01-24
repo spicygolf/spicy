@@ -1,26 +1,26 @@
 {
   "game": {
     "players": [
-      {"name": "Brad Anderson"},
-      {"name": "David Griffin"},
-      {"name": "Joe Vance"},
-      {"name": "Eric Kilfeather"}
+      { "name": "Brad Anderson" },
+      { "name": "David Griffin" },
+      { "name": "Joe Vance" },
+      { "name": "Eric Kilfeather" }
     ],
     "teams": [
-      {"num": 1, "players": ["Brad Anderson", "David Griffin"]},
-      {"num": 2, "players": ["Joe Vance", "Eric Kilfeather"]}
+      { "num": 1, "players": ["Brad Anderson", "David Griffin"] },
+      { "num": 2, "players": ["Joe Vance", "Eric Kilfeather"] }
     ],
     "team-events": [
-      {"hole": "8", "team": 2, "values": [ {"k": "double", "v": true }] },
-      {"hole": "10", "team": 2, "values":  [ {"k": "double", "v": true }] },
-      {"hole": "13", "team": 2, "values":  [ {"k": "double", "v": true }] },
-      {"hole": "14", "team": 2, "values":  [ {"k": "double", "v": true }] },
-      {"hole": "16", "team": 1, "values":  [ {"k": "pre-double", "v": true }] },
-      {"hole": "16", "team": 1, "values":  [ {"k": "double", "v": true }] },
-      {"hole": "17", "team": 2, "values":  [ {"k": "double", "v": true }] },
-      {"hole": "18", "team": 2, "values":  [ {"k": "pre-double", "v": true }] },
-      {"hole": "18", "team": 2, "values":  [ {"k": "double", "v": true }] },
-      {"hole": "18", "team": 1, "values":  [ {"k": "re-double", "v": true }] }
+      { "hole": "8", "team": 2, "values": [{ "k": "double", "v": true }] },
+      { "hole": "10", "team": 2, "values": [{ "k": "double", "v": true }] },
+      { "hole": "13", "team": 2, "values": [{ "k": "double", "v": true }] },
+      { "hole": "14", "team": 2, "values": [{ "k": "double", "v": true }] },
+      { "hole": "16", "team": 1, "values": [{ "k": "pre-double", "v": true }] },
+      { "hole": "16", "team": 1, "values": [{ "k": "double", "v": true }] },
+      { "hole": "17", "team": 2, "values": [{ "k": "double", "v": true }] },
+      { "hole": "18", "team": 2, "values": [{ "k": "pre-double", "v": true }] },
+      { "hole": "18", "team": 2, "values": [{ "k": "double", "v": true }] },
+      { "hole": "18", "team": 1, "values": [{ "k": "re-double", "v": true }] }
     ]
   },
   "scores": [
@@ -28,100 +28,163 @@
       "player": "Brad Anderson",
       "hdcp-course": 8,
       "scores": [
-        { "hole": "1", "values": [
-          {"k": "gross", "v": 4},
-          {"k": "prox", "v": true, "ts": "2018-04-01"},
-          {"k": "wtf", "v": true, "ts": "2018-04-01"}
-        ] },
-        { "hole": "2", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "3", "values": [ {"k": "gross", "v": 4}, {"k": "prox", "v": true} ] },
-        { "hole": "4", "values": [ {"k": "gross", "v": 5}, {"k": "prox", "v": true} ] },
-        { "hole": "5", "values": [ {"k": "gross", "v": 4}, {"k": "prox", "v": true} ] },
-        { "hole": "6", "values": [ {"k": "gross", "v": 2}, {"k": "prox", "v": true} ] },
-        { "hole": "7", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "8", "values": [ {"k": "gross", "v": 3} ] },
-        { "hole": "9", "values": [ {"k": "gross", "v": 5}, {"k": "prox", "v": true} ] },
-        { "hole": "10", "values": [ {"k": "gross", "v": 6}, {"k": "prox", "v": true} ] },
-        { "hole": "11", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "12", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "13", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "14", "values": [ {"k": "gross", "v": 7} ] },
-        { "hole": "15", "values": [ {"k": "gross", "v": 4} ] },
-        { "hole": "16", "values": [ {"k": "gross", "v": 5}, {"k": "prox", "v": true} ] },
-        { "hole": "17", "values": [ {"k": "gross", "v": 4} ] },
-        { "hole": "18", "values": [ {"k": "gross", "v": 5}, {"k": "prox", "v": true} ] }
+        {
+          "hole": "1",
+          "values": [
+            { "k": "gross", "v": 4 },
+            { "k": "prox", "v": true, "ts": "2018-04-01" },
+            { "k": "wtf", "v": true, "ts": "2018-04-01" }
+          ]
+        },
+        { "hole": "2", "values": [{ "k": "gross", "v": 5 }] },
+        {
+          "hole": "3",
+          "values": [{ "k": "gross", "v": 4 }, { "k": "prox", "v": true }]
+        },
+        {
+          "hole": "4",
+          "values": [{ "k": "gross", "v": 5 }, { "k": "prox", "v": true }]
+        },
+        {
+          "hole": "5",
+          "values": [{ "k": "gross", "v": 4 }, { "k": "prox", "v": true }]
+        },
+        {
+          "hole": "6",
+          "values": [{ "k": "gross", "v": 2 }, { "k": "prox", "v": true }]
+        },
+        { "hole": "7", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "8", "values": [{ "k": "gross", "v": 3 }] },
+        {
+          "hole": "9",
+          "values": [{ "k": "gross", "v": 5 }, { "k": "prox", "v": true }]
+        },
+        {
+          "hole": "10",
+          "values": [{ "k": "gross", "v": 6 }, { "k": "prox", "v": true }]
+        },
+        { "hole": "11", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "12", "values": [{ "k": "gross", "v": 5 }] },
+        { "hole": "13", "values": [{ "k": "gross", "v": 5 }] },
+        { "hole": "14", "values": [{ "k": "gross", "v": 7 }] },
+        { "hole": "15", "values": [{ "k": "gross", "v": 4 }] },
+        {
+          "hole": "16",
+          "values": [{ "k": "gross", "v": 5 }, { "k": "prox", "v": true }]
+        },
+        { "hole": "17", "values": [{ "k": "gross", "v": 4 }] },
+        {
+          "hole": "18",
+          "values": [{ "k": "gross", "v": 5 }, { "k": "prox", "v": true }]
+        }
       ]
     },
     {
       "player": "David Griffin",
       "hdcp-course": 15,
       "scores": [
-        { "hole": "1", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "2", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "3", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "4", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "5", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "6", "values": [ {"k": "gross", "v": 3} ] },
-        { "hole": "7", "values": [ {"k": "gross", "v": 7} ] },
-        { "hole": "8", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "9", "values": [ {"k": "gross", "v": 7} ] },
-        { "hole": "10", "values": [ {"k": "gross", "v": 7} ] },
-        { "hole": "11", "values": [ {"k": "gross", "v": 4}, {"k": "prox", "v": true} ] },
-        { "hole": "12", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "13", "values": [ {"k": "gross", "v": 4} ] },
-        { "hole": "14", "values": [ {"k": "gross", "v": 7} ] },
-        { "hole": "15", "values": [ {"k": "gross", "v": 4} ] },
-        { "hole": "16", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "17", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "18", "values": [ {"k": "gross", "v": 5} ] }
+        { "hole": "1", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "2", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "3", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "4", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "5", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "6", "values": [{ "k": "gross", "v": 3 }] },
+        { "hole": "7", "values": [{ "k": "gross", "v": 7 }] },
+        { "hole": "8", "values": [{ "k": "gross", "v": 5 }] },
+        { "hole": "9", "values": [{ "k": "gross", "v": 7 }] },
+        { "hole": "10", "values": [{ "k": "gross", "v": 7 }] },
+        {
+          "hole": "11",
+          "values": [{ "k": "gross", "v": 4 }, { "k": "prox", "v": true }]
+        },
+        { "hole": "12", "values": [{ "k": "gross", "v": 5 }] },
+        { "hole": "13", "values": [{ "k": "gross", "v": 4 }] },
+        { "hole": "14", "values": [{ "k": "gross", "v": 7 }] },
+        { "hole": "15", "values": [{ "k": "gross", "v": 4 }] },
+        { "hole": "16", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "17", "values": [{ "k": "gross", "v": 5 }] },
+        { "hole": "18", "values": [{ "k": "gross", "v": 5 }] }
       ]
     },
     {
       "player": "Joe Vance",
       "hdcp-course": 11,
       "scores": [
-        { "hole": "1", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "2", "values": [ {"k": "gross", "v": 5}, {"k": "prox", "v": true} ] },
-        { "hole": "3", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "4", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "5", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "6", "values": [ {"k": "gross", "v": 3} ] },
-        { "hole": "7", "values": [ {"k": "gross", "v": 6}, {"k": "prox", "v": true} ] },
-        { "hole": "8", "values": [ {"k": "gross", "v": 3} ] },
-        { "hole": "9", "values": [ {"k": "gross", "v": 7} ] },
-        { "hole": "10", "values": [ {"k": "gross", "v": 7} ] },
-        { "hole": "11", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "12", "values": [ {"k": "gross", "v": 4} ] },
-        { "hole": "13", "values": [ {"k": "gross", "v": 5}, {"k": "prox", "v": true} ] },
-        { "hole": "14", "values": [ {"k": "gross", "v": 5}, {"k": "prox", "v": true} ] },
-        { "hole": "15", "values": [ {"k": "gross", "v": 4} ] },
-        { "hole": "16", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "17", "values": [ {"k": "gross", "v": 5}, {"k": "x", "v": true} ] },
-        { "hole": "18", "values": [ {"k": "gross", "v": 5} ] }
+        { "hole": "1", "values": [{ "k": "gross", "v": 6 }] },
+        {
+          "hole": "2",
+          "values": [{ "k": "gross", "v": 5 }, { "k": "prox", "v": true }]
+        },
+        { "hole": "3", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "4", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "5", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "6", "values": [{ "k": "gross", "v": 3 }] },
+        {
+          "hole": "7",
+          "values": [{ "k": "gross", "v": 6 }, { "k": "prox", "v": true }]
+        },
+        { "hole": "8", "values": [{ "k": "gross", "v": 3 }] },
+        { "hole": "9", "values": [{ "k": "gross", "v": 7 }] },
+        { "hole": "10", "values": [{ "k": "gross", "v": 7 }] },
+        { "hole": "11", "values": [{ "k": "gross", "v": 5 }] },
+        { "hole": "12", "values": [{ "k": "gross", "v": 4 }] },
+        {
+          "hole": "13",
+          "values": [{ "k": "gross", "v": 5 }, { "k": "prox", "v": true }]
+        },
+        {
+          "hole": "14",
+          "values": [{ "k": "gross", "v": 5 }, { "k": "prox", "v": true }]
+        },
+        { "hole": "15", "values": [{ "k": "gross", "v": 4 }] },
+        { "hole": "16", "values": [{ "k": "gross", "v": 6 }] },
+        {
+          "hole": "17",
+          "values": [{ "k": "gross", "v": 5 }, { "k": "x", "v": true }]
+        },
+        { "hole": "18", "values": [{ "k": "gross", "v": 5 }] }
       ]
     },
     {
       "player": "Eric Kilfeather",
       "hdcp-course": 9,
       "scores": [
-        { "hole": "1", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "2", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "3", "values": [ {"k": "gross", "v": 4} ] },
-        { "hole": "4", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "5", "values": [ {"k": "gross", "v": 3} ] },
-        { "hole": "6", "values": [ {"k": "gross", "v": 3} ] },
-        { "hole": "7", "values": [ {"k": "gross", "v": 7} ] },
-        { "hole": "8", "values": [ {"k": "gross", "v": 3}, {"k": "prox", "v": true} ] },
-        { "hole": "9", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "10", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "11", "values": [ {"k": "gross", "v": 6}, {"k": "x", "v": true} ] },
-        { "hole": "12", "values": [ {"k": "gross", "v": 4}, {"k": "prox", "v": true} ] },
-        { "hole": "13", "values": [ {"k": "gross", "v": 5} ] },
-        { "hole": "14", "values": [ {"k": "gross", "v": 7} ] },
-        { "hole": "15", "values": [ {"k": "gross", "v": 4}, {"k": "prox", "v": true} ] },
-        { "hole": "16", "values": [ {"k": "gross", "v": 6} ] },
-        { "hole": "17", "values": [ {"k": "gross", "v": 3}, {"k": "prox", "v": true} ] },
-        { "hole": "18", "values": [ {"k": "gross", "v": 7}, {"k": "x", "v": true} ] }
+        { "hole": "1", "values": [{ "k": "gross", "v": 5 }] },
+        { "hole": "2", "values": [{ "k": "gross", "v": 5 }] },
+        { "hole": "3", "values": [{ "k": "gross", "v": 4 }] },
+        { "hole": "4", "values": [{ "k": "gross", "v": 5 }] },
+        { "hole": "5", "values": [{ "k": "gross", "v": 3 }] },
+        { "hole": "6", "values": [{ "k": "gross", "v": 3 }] },
+        { "hole": "7", "values": [{ "k": "gross", "v": 7 }] },
+        {
+          "hole": "8",
+          "values": [{ "k": "gross", "v": 3 }, { "k": "prox", "v": true }]
+        },
+        { "hole": "9", "values": [{ "k": "gross", "v": 6 }] },
+        { "hole": "10", "values": [{ "k": "gross", "v": 5 }] },
+        {
+          "hole": "11",
+          "values": [{ "k": "gross", "v": 6 }, { "k": "x", "v": true }]
+        },
+        {
+          "hole": "12",
+          "values": [{ "k": "gross", "v": 4 }, { "k": "prox", "v": true }]
+        },
+        { "hole": "13", "values": [{ "k": "gross", "v": 5 }] },
+        { "hole": "14", "values": [{ "k": "gross", "v": 7 }] },
+        {
+          "hole": "15",
+          "values": [{ "k": "gross", "v": 4 }, { "k": "prox", "v": true }]
+        },
+        { "hole": "16", "values": [{ "k": "gross", "v": 6 }] },
+        {
+          "hole": "17",
+          "values": [{ "k": "gross", "v": 3 }, { "k": "prox", "v": true }]
+        },
+        {
+          "hole": "18",
+          "values": [{ "k": "gross", "v": 7 }, { "k": "x", "v": true }]
+        }
       ]
     }
   ]

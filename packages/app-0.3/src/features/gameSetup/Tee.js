@@ -1,15 +1,15 @@
-import { useNavigation } from '@react-navigation/native';
-import FavoriteIcon from 'common/components/favoriteIcon';
-import { course_handicap } from 'common/utils/handicap';
-import { GameContext } from 'features/game/gameContext';
-import { query as getGameQuery } from 'features/game/hooks/useGetGameQuery';
-import { AddCourseContext } from 'features/gameSetup/addCourseContext';
-import { useAddTeeToRoundMutation } from 'features/rounds/hooks/useAddTeeToRoundMutation';
-import { useRemoveTeeFromRoundMutation } from 'features/rounds/hooks/useRemoveTeeFromRoundMutation';
-import { find } from 'lodash-es';
-import React, { useContext } from 'react';
-import { StyleSheet } from 'react-native';
-import { Icon, ListItem } from 'react-native-elements';
+import { useNavigation } from "@react-navigation/native";
+import FavoriteIcon from "common/components/favoriteIcon";
+import { course_handicap } from "common/utils/handicap";
+import { GameContext } from "features/game/gameContext";
+import { query as getGameQuery } from "features/game/hooks/useGetGameQuery";
+import { AddCourseContext } from "features/gameSetup/addCourseContext";
+import { useAddTeeToRoundMutation } from "features/rounds/hooks/useAddTeeToRoundMutation";
+import { useRemoveTeeFromRoundMutation } from "features/rounds/hooks/useRemoveTeeFromRoundMutation";
+import { find } from "lodash-es";
+import { useContext } from "react";
+import { StyleSheet } from "react-native";
+import { Icon, ListItem } from "react-native-elements";
 
 const Tee = (props) => {
   const { tee, title, subtitle, showRemove, allowAddToRound } = props;
@@ -42,7 +42,7 @@ const Tee = (props) => {
     });
 
     // after all that, go back to GameSetup
-    navigation.navigate('GameSetup');
+    navigation.navigate("GameSetup");
   };
 
   const add = async (roundKey) => {
@@ -71,7 +71,7 @@ const Tee = (props) => {
     });
 
     if (error) {
-      console.log('error adding tee to round', error);
+      console.log("error adding tee to round", error);
     }
   };
 
@@ -93,7 +93,7 @@ const Tee = (props) => {
     });
 
     if (error) {
-      console.log('error removing tee from round', error);
+      console.log("error removing tee from round", error);
     }
   };
 
@@ -101,11 +101,14 @@ const Tee = (props) => {
     <ListItem
       onPress={selectTee}
       containerStyle={styles.listItemContainer}
-      testID={`favorite_tee_${tee.tee_id}`}>
+      testID={`favorite_tee_${tee.tee_id}`}
+    >
       <FavoriteIcon fave={tee.fave} />
       <ListItem.Content>
         <ListItem.Title>{title}</ListItem.Title>
-        <ListItem.Subtitle style={styles.subtitle}>{subtitle}</ListItem.Subtitle>
+        <ListItem.Subtitle style={styles.subtitle}>
+          {subtitle}
+        </ListItem.Subtitle>
       </ListItem.Content>
       {showRemove ? (
         <Icon
@@ -113,7 +116,7 @@ const Tee = (props) => {
           color="red"
           onPress={async () => {
             await remove(rkey);
-            navigation.navigate('GameSetup');
+            navigation.navigate("GameSetup");
           }}
         />
       ) : null}
@@ -125,7 +128,7 @@ export default Tee;
 
 const styles = StyleSheet.create({
   subtitle: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
   },
   listItemContainer: {

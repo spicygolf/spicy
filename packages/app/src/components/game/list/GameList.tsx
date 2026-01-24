@@ -44,9 +44,8 @@ export function GameList({
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>
-        No games yet? Time to get in the game! 🏌️
-      </Text>
+      <Text style={styles.emptyText}>No games yet?</Text>
+      <Text style={styles.emptyText}>Time to get out there! 🏌️</Text>
       <Text style={styles.emptySubtext}>
         Tap the "New Game" button above to start your first round
       </Text>

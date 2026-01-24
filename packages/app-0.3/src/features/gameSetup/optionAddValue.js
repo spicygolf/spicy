@@ -1,7 +1,7 @@
-import { isBinary } from 'common/utils/game';
-import React, { useState } from 'react';
-import { KeyboardAvoidingView, StyleSheet, View } from 'react-native';
-import { Button, Input } from 'react-native-elements';
+import { isBinary } from "common/utils/game";
+import { useState } from "react";
+import { KeyboardAvoidingView, StyleSheet, View } from "react-native";
+import { Button, Input } from "react-native-elements";
 
 const OptionAddValue = ({ option, addOptionValue }) => {
   const [newValue, setNewValue] = useState();
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     flex: 4,
   },
   row: {
-    display: 'flex',
-    flexDirection: 'row',
+    display: "flex",
+    flexDirection: "row",
   },
 });

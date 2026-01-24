@@ -1,0 +1,8 @@
+{
+  "name": "buy_in",
+  "disp": "Buy-In Amount",
+  "type": "game",
+  "version": "1",
+  "valueType": "num",
+  "defaultValue": "40"
+}

@@ -1,17 +1,16 @@
-import { useNavigation } from '@react-navigation/native';
-import BackToLogin from 'features/account/backToLogin';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Button, Card } from 'react-native-elements';
+import { useNavigation } from "@react-navigation/native";
+import BackToLogin from "features/account/backToLogin";
+import { StyleSheet, Text, View } from "react-native";
+import { Button, Card } from "react-native-elements";
 
 const RegisterError = (props) => {
   let error = {
     error: 500,
-    message: 'Unknown error',
+    message: "Unknown error",
   };
   const { route } = props;
   //console.log('route', route);
-  if (route && route.params && route.params.e) {
+  if (route?.params?.e) {
     error = route.params.e;
   }
   const navigation = useNavigation();
@@ -32,7 +31,7 @@ const RegisterError = (props) => {
             title="Prev"
             type="solid"
             onPress={() => {
-              navigation.navigate('RegisterPlayer');
+              navigation.navigate("RegisterPlayer");
             }}
             accessibilityLabel="Register Prev 10000"
             testID="register_prev_10000_button"
@@ -48,19 +47,19 @@ export default RegisterError;
 
 const styles = StyleSheet.create({
   button_row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     padding: 15,
   },
   changes: {
     paddingBottom: 20,
   },
   container: {
-    backgroundColor: '#b30000',
+    backgroundColor: "#b30000",
     flex: 1,
   },
   field_input: {
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
     height: 40,
     marginBottom: 10,
@@ -68,7 +67,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   field_label: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
     marginTop: 5,
   },

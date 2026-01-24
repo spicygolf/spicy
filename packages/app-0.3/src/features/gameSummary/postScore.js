@@ -1,13 +1,17 @@
-import { useMutation } from '@apollo/client';
-import { getHoles } from 'common/utils/game';
-import { get_hole, get_round_for_player, get_score_value } from 'common/utils/rounds';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { POST_ROUND_MUTATION } from 'features/rounds/graphql';
-import { reduce } from 'lodash';
-import moment from 'moment';
-import React, { useContext, useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { Button, Card } from 'react-native-elements';
+import { useMutation } from "@apollo/client";
+import { getHoles } from "common/utils/game";
+import {
+  get_hole,
+  get_round_for_player,
+  get_score_value,
+} from "common/utils/rounds";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { POST_ROUND_MUTATION } from "features/rounds/graphql";
+import { reduce } from "lodash";
+import moment from "moment";
+import { useContext, useEffect, useState } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import { Button, Card } from "react-native-elements";
 
 const PostScore = (props) => {
   const { player, game } = props;
@@ -23,7 +27,7 @@ const PostScore = (props) => {
 
   const calcPosting = (lRound) => {
     return lRound.scores.map((s) => {
-      const gross = get_score_value('gross', s);
+      const gross = get_score_value("gross", s);
       const hole = get_hole(s.hole, lRound);
       //console.log('renderHole hole', hole);
       const coursePops = parseFloat(s.coursePops) || 0;
@@ -60,7 +64,7 @@ const PostScore = (props) => {
 
     if (error) {
       // TODO: error component
-      console.log('Error posting round to handicap service', error);
+      console.log("Error posting round to handicap service", error);
     }
   };
 
@@ -85,9 +89,13 @@ const PostScore = (props) => {
         );
       }
     } else if (round.posting && round.posting.success === true) {
-      const { date_validated, adjusted_gross_score, posted_by, estimated_handicap } =
-        round.posting;
-      const dt = moment(date_validated).format('lll');
+      const {
+        date_validated,
+        adjusted_gross_score,
+        posted_by,
+        estimated_handicap,
+      } = round.posting;
+      const dt = moment(date_validated).format("lll");
       ret = (
         <View>
           <Text style={styles.postingTxt}>
@@ -148,7 +156,12 @@ const PostScore = (props) => {
           <Text style={styles.grossTxt}>{item.gross}</Text>
         </View>
         <View style={styles.adjusted}>
-          <Text style={[styles.adjustedTxt, item.isAdjusted ? styles.isAdjusted : null]}>
+          <Text
+            style={[
+              styles.adjustedTxt,
+              item.isAdjusted ? styles.isAdjusted : null,
+            ]}
+          >
             {item.adjusted}
           </Text>
         </View>
@@ -191,18 +204,18 @@ export default PostScore;
 const styles = StyleSheet.create({
   adjusted: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   adjustedTxt: {
-    alignSelf: 'center',
-    borderColor: 'transparent',
+    alignSelf: "center",
+    borderColor: "transparent",
     borderWidth: 1,
-    color: '#000',
+    color: "#000",
     fontSize: 12,
     height: 21,
     paddingHorizontal: 15,
     paddingVertical: 2,
-    textAlign: 'right',
+    textAlign: "right",
   },
   buttonStyle: {
     width: 150,
@@ -223,67 +236,67 @@ const styles = StyleSheet.create({
   },
   gross: {
     flex: 1,
-    justifyContent: 'center',
-    textAlign: 'center',
+    justifyContent: "center",
+    textAlign: "center",
   },
   grossTxt: {
-    alignSelf: 'center',
+    alignSelf: "center",
     fontSize: 12,
   },
   hdcp: {
     flex: 1,
-    justifyContent: 'center',
-    textAlign: 'center',
+    justifyContent: "center",
+    textAlign: "center",
   },
   hdcpTxt: {
-    alignSelf: 'center',
-    color: '#666',
+    alignSelf: "center",
+    color: "#666",
     fontSize: 12,
   },
   hdr: {
-    backgroundColor: '#eee',
-    color: '#333',
+    backgroundColor: "#eee",
+    color: "#333",
     flex: 1,
     fontSize: 12,
     paddingVertical: 5,
-    textAlign: 'center',
+    textAlign: "center",
   },
   hole: {
     flex: 1,
-    justifyContent: 'center',
-    textAlign: 'center',
+    justifyContent: "center",
+    textAlign: "center",
   },
   holeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   holeTxt: {
-    alignSelf: 'center',
-    color: '#666',
+    alignSelf: "center",
+    color: "#666",
     fontSize: 12,
   },
   isAdjusted: {
-    borderColor: '#111',
+    borderColor: "#111",
     borderWidth: 1,
   },
   playerName: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   playerView: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingBottom: 5,
   },
   playerViewTxt: {
     flex: 3,
   },
   postRoundButton: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
     flex: 4,
   },
   postingError: {
-    color: 'red',
-    fontWeight: 'bold',
+    color: "red",
+    fontWeight: "bold",
   },
   postingTxt: {
     fontSize: 10,

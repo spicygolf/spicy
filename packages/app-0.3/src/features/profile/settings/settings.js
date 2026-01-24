@@ -1,45 +1,45 @@
-import { useNavigation } from '@react-navigation/native';
-import { dark, light } from 'common/colors';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import React, { useContext } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
-import DeviceInfo from 'react-native-device-info';
-import { Icon, ListItem } from 'react-native-elements';
+import { useNavigation } from "@react-navigation/native";
+import { dark, light } from "common/colors";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { useContext } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import DeviceInfo from "react-native-device-info";
+import { Icon, ListItem } from "react-native-elements";
 
-const SettingsHome = (props) => {
+const SettingsHome = (_props) => {
   const { currentPlayer, impersonate } = useContext(CurrentPlayerContext);
 
   const navigation = useNavigation();
 
   const settings_data = [
     {
-      key: '0',
-      name: 'Account',
-      icon: 'account',
-      icon_type: 'material-community',
-      nav: 'Account',
+      key: "0",
+      name: "Account",
+      icon: "account",
+      icon_type: "material-community",
+      nav: "Account",
     },
     {
-      key: '90',
-      name: 'Clear Local Data',
-      icon: 'delete-sweep',
-      icon_type: 'material-community',
-      nav: 'ClearCache',
+      key: "90",
+      name: "Clear Local Data",
+      icon: "delete-sweep",
+      icon_type: "material-community",
+      nav: "ClearCache",
     },
     {
-      key: '99',
-      name: 'Logout',
-      icon: 'logout',
-      icon_type: 'material-community',
-      nav: 'Logout',
+      key: "99",
+      name: "Logout",
+      icon: "logout",
+      icon_type: "material-community",
+      nav: "Logout",
     },
     {
-      key: '999',
-      name: 'Impersonate',
-      icon: 'sunglasses',
-      icon_type: 'material-community',
-      nav: 'Impersonate',
-      level: 'admin',
+      key: "999",
+      name: "Impersonate",
+      icon: "sunglasses",
+      icon_type: "material-community",
+      nav: "Impersonate",
+      level: "admin",
     },
   ];
 
@@ -47,13 +47,10 @@ const SettingsHome = (props) => {
 
   const renderSetting = ({ item }) => {
     // console.log('impersonate', impersonate);
-    if (item.level === 'admin') {
+    if (item.level === "admin") {
       if (
-        (currentPlayer && currentPlayer.level && currentPlayer.level === 'admin') ||
-        (impersonate &&
-          impersonate.original &&
-          impersonate.original.level &&
-          impersonate.original.level === 'admin')
+        (currentPlayer?.level && currentPlayer.level === "admin") ||
+        (impersonate?.original?.level && impersonate.original.level === "admin")
       ) {
         // do nothing... i.e. continue on rendering the setting
       } else {
@@ -86,8 +83,8 @@ export default SettingsHome;
 
 const styles = StyleSheet.create({
   app_info: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     marginHorizontal: 15,
     marginVertical: 10,
   },

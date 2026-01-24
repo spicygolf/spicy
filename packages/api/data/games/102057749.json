@@ -1,0 +1,39 @@
+{
+  "legacyId": "102057749",
+  "exportedAt": "2026-01-24T15:49:41.127Z",
+  "game": {
+    "_key": "102057749",
+    "_id": "games/102057749",
+    "_rev": "_k_OgNT2--N",
+    "name": "Individual Match Play",
+    "start": "2020-09-20T14:52:18Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [],
+    "options": [],
+    "end": null
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/102058017",
+        "_key": "102058017",
+        "_rev": "_k_OgNeG-Il",
+        "date": "2020-09-20T14:52:18Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "102058023",
+        "_id": "edges/102058023",
+        "_from": "rounds/102058017",
+        "_to": "games/102057749",
+        "_rev": "_k_OgNiC-A4",
+        "type": "round2game",
+        "handicap_index": "19.7"
+      },
+      "playerId": "65888247"
+    }
+  ],
+  "gamespecKey": "72068149"
+}

@@ -18,9 +18,9 @@ interface PostHogProviderProps {
  * If POSTHOG_API_KEY is not set, PostHog is disabled and children are rendered directly.
  */
 export function PostHogProvider({ children }: PostHogProviderProps) {
-  // Skip PostHog if API key is not configured (e.g., in CI/E2E tests)
-  if (!POSTHOG_API_KEY) {
-    if (!__DEV__) {
+  // Skip PostHog in development mode or if API key is not configured
+  if (__DEV__ || !POSTHOG_API_KEY) {
+    if (!__DEV__ && !POSTHOG_API_KEY) {
       console.warn(
         "PostHog analytics disabled: POSTHOG_API_KEY not set. " +
           "This is expected in E2E tests but not in production builds.",

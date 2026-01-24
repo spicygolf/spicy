@@ -1,0 +1,80 @@
+{
+  "legacyId": "112056555",
+  "exportedAt": "2026-01-24T15:49:41.121Z",
+  "game": {
+    "_key": "112056555",
+    "_id": "games/112056555",
+    "_rev": "_k_OgNT2--V",
+    "name": "Team Match Play",
+    "start": "2020-11-01T18:33:53Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/112784864",
+        "_key": "112784864",
+        "_rev": "_k_OgNeG-JD",
+        "date": "2020-11-01T18:33:53Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "112784870",
+        "_id": "edges/112784870",
+        "_from": "rounds/112784864",
+        "_to": "games/112056555",
+        "_rev": "_k_OgNiG--q",
+        "type": "round2game",
+        "handicap_index": "1.7"
+      },
+      "playerId": "65885001"
+    },
+    {
+      "round": {
+        "_id": "rounds/112061988",
+        "_key": "112061988",
+        "_rev": "_k_OgNeG-I5",
+        "date": "2020-11-01T18:33:53Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "112061994",
+        "_id": "edges/112061994",
+        "_from": "rounds/112061988",
+        "_to": "games/112056555",
+        "_rev": "_k_OgNiG--m",
+        "type": "round2game",
+        "handicap_index": "10.4"
+      },
+      "playerId": "65889345"
+    },
+    {
+      "round": {
+        "_id": "rounds/112057525",
+        "_key": "112057525",
+        "_rev": "_k_OgNeG-I3",
+        "date": "2020-11-01T18:33:53Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "112057531",
+        "_id": "edges/112057531",
+        "_from": "rounds/112057525",
+        "_to": "games/112056555",
+        "_rev": "_k_OgNiG--e",
+        "type": "round2game",
+        "handicap_index": "10.2"
+      },
+      "playerId": "65896637"
+    }
+  ],
+  "gamespecKey": "72068183"
+}

@@ -1,24 +1,23 @@
-import { useQuery } from '@apollo/client';
-import { GET_PLAYERS_FOLLOWERS_QUERY } from 'features/players/graphql';
-import React from 'react';
-import { Text, View } from 'react-native';
+import { useQuery } from "@apollo/client";
+import { GET_PLAYERS_FOLLOWERS_QUERY } from "features/players/graphql";
+import { Text, View } from "react-native";
 
-import { styles } from './styles';
+import { styles } from "./styles";
 
 const FollowersStat = ({ pkey }) => {
-  let stat = ' ';
+  let stat = " ";
 
   const { error, data } = useQuery(GET_PLAYERS_FOLLOWERS_QUERY, {
     variables: {
       pkey,
     },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
   });
-  if (error && error.message !== 'Network request failed') {
-    stat = '?';
+  if (error && error.message !== "Network request failed") {
+    stat = "?";
   }
 
-  if (data && data.getPlayersFollowers) {
+  if (data?.getPlayersFollowers) {
     stat = data.getPlayersFollowers.length;
   }
 

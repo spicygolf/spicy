@@ -1,11 +1,17 @@
-import { GhinCourseSearchContext } from 'common/components/ghin/course/searchContext';
-import { useSearchCourseQuery } from 'features/courses/useSearchCourseQuery';
-import { orderBy } from 'lodash-es';
-import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
-import { ListItem } from 'react-native-elements';
+import { GhinCourseSearchContext } from "common/components/ghin/course/searchContext";
+import { useSearchCourseQuery } from "features/courses/useSearchCourseQuery";
+import { orderBy } from "lodash-es";
+import { useContext, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { ListItem } from "react-native-elements";
 
-const GhinCourseSearchResults = (props) => {
+const GhinCourseSearchResults = (_props) => {
   const { search, setCourse } = useContext(GhinCourseSearchContext);
   const [page, setPage] = useState(1);
   const perPage = 25;
@@ -17,7 +23,7 @@ const GhinCourseSearchResults = (props) => {
     const cleaned = old.map((c) => {
       let display_name = c.facility_name;
       if (c.facility_name !== c.course_name) {
-        display_name = display_name + ' - ' + c.course_name;
+        display_name = `${display_name} - ${c.course_name}`;
       }
       const city_state = `${c.city}, ${c.state}`;
       return {
@@ -26,7 +32,7 @@ const GhinCourseSearchResults = (props) => {
         city_state,
       };
     });
-    return orderBy(cleaned, ['display_name'], ['asc']);
+    return orderBy(cleaned, ["display_name"], ["asc"]);
   };
 
   const renderCourse = ({ item: course }) => {
@@ -40,7 +46,8 @@ const GhinCourseSearchResults = (props) => {
         key={course.course_id}
         onPress={() => {
           setCourse(course);
-        }}>
+        }}
+      >
         <ListItem.Content style={styles.container}>
           <ListItem.Title style={styles.course_name}>
             {course.display_name}
@@ -84,7 +91,7 @@ const GhinCourseSearchResults = (props) => {
     );
   }
 
-  if (error && error.message !== 'Network request failed') {
+  if (error && error.message !== "Network request failed") {
     console.log(error);
     // TODO: error component
     return <Text>Error Searching Courses: `{error.message}`</Text>;
@@ -124,9 +131,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   course_citystate: {
-    color: '#999',
+    color: "#999",
     fontSize: 11,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   course_name: {
     // color: '#999',
@@ -136,8 +143,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   no_results: {
-    alignSelf: 'center',
-    color: '#999',
+    alignSelf: "center",
+    color: "#999",
     fontSize: 20,
   },
 });

@@ -1,12 +1,17 @@
-import { useNavigation } from '@react-navigation/native';
-import { validateEmail, validatePassword } from 'common/utils/account';
-import BackToLogin from 'features/account/backToLogin';
-import { RegisterContext } from 'features/account/registerContext';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Card, Input } from 'react-native-elements';
+import { useNavigation } from "@react-navigation/native";
+import { validateEmail, validatePassword } from "common/utils/account";
+import BackToLogin from "features/account/backToLogin";
+import { RegisterContext } from "features/account/registerContext";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
+import { Button, Card, Input } from "react-native-elements";
 
-const RegisterBasics = (props) => {
+const RegisterBasics = (_props) => {
   const { registration, setRegistration } = useContext(RegisterContext);
   const navigation = useNavigation();
   const emailRef = useRef(null);
@@ -17,9 +22,9 @@ const RegisterBasics = (props) => {
 
   const validate = useCallback(
     (type, text) => {
-      const eTest = type === 'email' ? text : registration.email;
-      const pTest = type === 'password' ? text : registration.password;
-      const p2Test = type === 'password2' ? text : registration.password2;
+      const eTest = type === "email" ? text : registration.email;
+      const pTest = type === "password" ? text : registration.password;
+      const p2Test = type === "password2" ? text : registration.password2;
 
       setEmailValid(validateEmail(eTest));
       setPassValid(validatePassword(pTest) && pTest === p2Test);
@@ -29,7 +34,7 @@ const RegisterBasics = (props) => {
   );
 
   useEffect(() => {
-    if (emailRef && emailRef.current) {
+    if (emailRef?.current) {
       // emailRef.current.focus();
       validate();
     }
@@ -50,13 +55,15 @@ const RegisterBasics = (props) => {
                   labelStyle={styles.label}
                   containerStyle={styles.field_input}
                   inputStyle={styles.field_input_txt}
-                  errorMessage={emailValid ? '' : 'Please enter a valid email address'}
+                  errorMessage={
+                    emailValid ? "" : "Please enter a valid email address"
+                  }
                   onChangeText={(text) => {
                     setRegistration({
                       ...registration,
                       email: text,
                     });
-                    validate('email', text);
+                    validate("email", text);
                   }}
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -72,15 +79,15 @@ const RegisterBasics = (props) => {
                   inputStyle={styles.field_input_txt}
                   errorMessage={
                     passValid
-                      ? ''
-                      : 'Please enter a valid and matching password (4+ characters)'
+                      ? ""
+                      : "Please enter a valid and matching password (4+ characters)"
                   }
                   onChangeText={(text) => {
                     setRegistration({
                       ...registration,
                       password: text,
                     });
-                    validate('password', text);
+                    validate("password", text);
                   }}
                   autoCompleteType="password"
                   secureTextEntry={true}
@@ -94,13 +101,15 @@ const RegisterBasics = (props) => {
                   labelStyle={styles.label}
                   containerStyle={styles.field_input}
                   inputStyle={styles.field_input_txt}
-                  errorMessage={pass2Valid ? '' : 'Please enter a matching password'}
+                  errorMessage={
+                    pass2Valid ? "" : "Please enter a matching password"
+                  }
                   onChangeText={(text) => {
                     setRegistration({
                       ...registration,
                       password2: text,
                     });
-                    validate('password2', text);
+                    validate("password2", text);
                   }}
                   autoCompleteType="password"
                   secureTextEntry={true}
@@ -114,10 +123,10 @@ const RegisterBasics = (props) => {
             <Button
               style={styles.next}
               title="Next"
-              type={emailValid && passValid && pass2Valid ? 'solid' : 'outline'}
+              type={emailValid && passValid && pass2Valid ? "solid" : "outline"}
               disabled={!(emailValid && passValid && pass2Valid)}
               onPress={() => {
-                navigation.navigate('RegisterHandicap');
+                navigation.navigate("RegisterHandicap");
               }}
               accessibilityLabel="Register Next 1"
               testID="register_next_1_button"
@@ -133,12 +142,12 @@ export default RegisterBasics;
 
 const styles = StyleSheet.create({
   button_row: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     padding: 15,
   },
   container: {
-    backgroundColor: '#b30000',
+    backgroundColor: "#b30000",
     flex: 1,
   },
   field: {
@@ -146,14 +155,14 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   field_input: {
-    color: '#000',
+    color: "#000",
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
   label: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
-    fontWeight: 'normal',
+    fontWeight: "normal",
   },
   login_button: {
     marginBottom: 15,

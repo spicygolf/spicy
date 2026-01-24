@@ -1,0 +1,38 @@
+{
+  "legacyId": "128084057",
+  "exportedAt": "2026-01-24T15:49:41.071Z",
+  "game": {
+    "_key": "128084057",
+    "_id": "games/128084057",
+    "_rev": "_k_OgNT2-_T",
+    "name": "Vegas",
+    "start": "2020-12-31T15:50:53Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/128084148",
+        "_key": "128084148",
+        "_rev": "_k_OgNeK-_4",
+        "date": "2020-12-31T15:50:53Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "128084158",
+        "_id": "edges/128084158",
+        "_from": "rounds/128084148",
+        "_to": "games/128084057",
+        "_rev": "_k_OgNiW-_i",
+        "type": "round2game",
+        "handicap_index": "23.0"
+      },
+      "playerId": "65882199"
+    }
+  ],
+  "gamespecKey": "117463059"
+}

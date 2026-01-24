@@ -1,16 +1,16 @@
-import Error from 'common/components/error';
-import { scoring } from 'common/utils/score';
-import { GameContext } from 'features/game/gameContext';
-import GameStack from 'features/game/gamestack';
-import GameUpdatedListener from 'features/game/gameUpdatedListener';
-import { useGetGameQuery } from 'features/game/hooks/useGetGameQuery';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import ScorePostedListener from 'features/rounds/scorePostedListener';
-import useAppState from 'hooks/useAppState';
-import React, { useContext, useEffect } from 'react';
-import { ActivityIndicator } from 'react-native';
+import Error from "common/components/error";
+import { scoring } from "common/utils/score";
+import { GameContext } from "features/game/gameContext";
+import GameStack from "features/game/gamestack";
+import GameUpdatedListener from "features/game/gameUpdatedListener";
+import { useGetGameQuery } from "features/game/hooks/useGetGameQuery";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import ScorePostedListener from "features/rounds/scorePostedListener";
+import useAppState from "hooks/useAppState";
+import { useContext, useEffect } from "react";
+import { ActivityIndicator } from "react-native";
 
-const Game = props => {
+const Game = (props) => {
   const { route } = props;
   const { currentGameKey, readonly } = route.params;
 
@@ -22,7 +22,7 @@ const Game = props => {
     variables: {
       gkey: currentGameKey,
     },
-    fetchPolicy: 'network-only',
+    fetchPolicy: "network-only",
   });
 
   useEffect(
@@ -39,7 +39,7 @@ const Game = props => {
     return <ActivityIndicator />;
   }
 
-  if (error && error.message !== 'Network request failed') {
+  if (error && error.message !== "Network request failed") {
     return <Error error={error} />;
   }
 
@@ -53,8 +53,7 @@ const Game = props => {
     // console.log(JSON.stringify(scores, null, 2));
 
     const { _key: gkey } = game;
-    const activeGameSpec =
-      game && game.gamespecs && game.gamespecs[0] ? game.gamespecs[0] : null;
+    const activeGameSpec = game?.gamespecs?.[0] ? game.gamespecs[0] : null;
 
     const game_listener = <GameUpdatedListener gkey={game._key} />;
 
@@ -65,7 +64,7 @@ const Game = props => {
         We need key as well as rkey, because we include listeners as children of
         the GameContext.Provider below, even tho they don't render anything.
       */
-    const round_listeners = game.rounds.map(r => (
+    const round_listeners = game.rounds.map((r) => (
       <ScorePostedListener key={r._key} rkey={r._key} />
     ));
 
@@ -78,7 +77,8 @@ const Game = props => {
           currentPlayerKey: currentPlayer._key,
           activeGameSpec,
           readonly,
-        }}>
+        }}
+      >
         {game_listener}
         {round_listeners}
         <GameStack />
@@ -89,8 +89,8 @@ const Game = props => {
   return (
     <Error
       error={{
-        message: 'getGame query returned nothing.  Cache funkiness?',
-        remedy: 'Profile -> Settings -> Clear Local Data',
+        message: "getGame query returned nothing.  Cache funkiness?",
+        remedy: "Profile -> Settings -> Clear Local Data",
       }}
     />
   );

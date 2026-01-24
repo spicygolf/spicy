@@ -1,5 +1,5 @@
-import { useSubscription } from '@apollo/client';
-import { GAME_UPDATED_SUBSCRIPTION } from 'features/game/graphql';
+import { useSubscription } from "@apollo/client";
+import { GAME_UPDATED_SUBSCRIPTION } from "features/game/graphql";
 
 const GameUpdatedListener = ({ gkey }) => {
   const { loading, error, data } = useSubscription(GAME_UPDATED_SUBSCRIPTION, {
@@ -11,11 +11,11 @@ const GameUpdatedListener = ({ gkey }) => {
     return null;
   }
   if (error) {
-    console.log('Error in GameUpdatedListener', error);
+    console.log("Error in GameUpdatedListener", error);
     return null;
   }
 
-  if (data && data.gameUpdated) {
+  if (data?.gameUpdated) {
     //console.log('gameUpdated', data);
   }
 

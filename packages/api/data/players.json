@@ -1,0 +1,3069 @@
+{
+  "exportedAt": "2026-01-24T16:39:22.599Z",
+  "count": 220,
+  "players": [
+    {
+      "_key": "66171147",
+      "name": "Matt Rackey",
+      "short": "Matt",
+      "handicap": {
+        "source": "manual",
+        "index": "8.8"
+      }
+    },
+    {
+      "_key": "67483078",
+      "name": "AppStore Connect",
+      "short": "AppStore",
+      "handicap": {
+        "index": "9.4"
+      }
+    },
+    {
+      "_key": "68756568",
+      "name": "Dru Jenkins ",
+      "short": "Dru",
+      "handicap": {
+        "source": "manual",
+        "index": "15.9"
+      }
+    },
+    {
+      "_key": "69634793",
+      "name": "Bobby Guiendon",
+      "short": "Darth Vader"
+    },
+    {
+      "_key": "69742217",
+      "name": "Carter Noland",
+      "short": "Carter"
+    },
+    {
+      "_key": "70001586",
+      "name": "Stephen Provancher",
+      "short": "Provo"
+    },
+    {
+      "_key": "71083340",
+      "name": "Josh Hooper",
+      "short": "Hooper",
+      "handicap": {
+        "source": "manual",
+        "index": "15.0"
+      }
+    },
+    {
+      "_key": "75617568",
+      "name": "Matt Wags",
+      "short": "Wags ",
+      "handicap": {
+        "source": "manual",
+        "index": "15.9"
+      }
+    },
+    {
+      "_key": "83197072",
+      "name": "Tyler McKeever",
+      "short": "Tyler",
+      "handicap": {
+        "source": "manual",
+        "index": "0"
+      }
+    },
+    {
+      "_key": "83236174",
+      "name": "John Stephens",
+      "short": "JC",
+      "handicap": {
+        "source": "manual",
+        "index": "19"
+      }
+    },
+    {
+      "_key": "86709257",
+      "name": "Steve",
+      "short": "Steve",
+      "handicap": {
+        "source": "manual",
+        "index": "16"
+      }
+    },
+    {
+      "_key": "86709398",
+      "name": "Harris",
+      "short": "Harry Harris",
+      "handicap": {
+        "source": "manual",
+        "index": "20"
+      }
+    },
+    {
+      "_key": "94238610",
+      "name": "Marcus",
+      "short": "Evans",
+      "handicap": {
+        "source": "manual",
+        "index": "14"
+      }
+    },
+    {
+      "_key": "94856163",
+      "name": "Don Brown",
+      "short": "Don",
+      "handicap": {
+        "source": "manual",
+        "index": "20"
+      }
+    },
+    {
+      "_key": "99882172",
+      "name": "Price Carlton",
+      "short": "Price",
+      "handicap": {
+        "source": "manual",
+        "index": "15"
+      }
+    },
+    {
+      "_key": "102785907",
+      "name": "Andruw Jones",
+      "short": "AJ",
+      "handicap": {
+        "source": "manual",
+        "index": "10"
+      }
+    },
+    {
+      "_key": "117972196",
+      "name": "Chris Carter",
+      "short": "CHC"
+    },
+    {
+      "_key": "122347890",
+      "name": "Philip Campbell",
+      "short": "PC",
+      "handicap": {
+        "source": "manual",
+        "index": "11.3"
+      }
+    },
+    {
+      "_key": "122348093",
+      "name": "Bilal Malik",
+      "short": "BM",
+      "handicap": {
+        "source": "manual",
+        "index": "15"
+      }
+    },
+    {
+      "_key": "122348271",
+      "name": "Bryan McKnight",
+      "short": "BRY",
+      "handicap": {
+        "source": "manual",
+        "index": "16"
+      }
+    },
+    {
+      "_key": "128168043",
+      "name": "Tim Barry",
+      "short": "Tim "
+    },
+    {
+      "_key": "72266135",
+      "name": "Greg Hart",
+      "short": "Greg",
+      "handicap": {
+        "source": "ghin",
+        "id": "10365605",
+        "firstName": "Greg",
+        "lastName": "Hart",
+        "playerName": "Greg Hart",
+        "gender": "M",
+        "active": true,
+        "index": "3.7",
+        "revDate": "2020-11-30"
+      }
+    },
+    {
+      "_key": "112042808",
+      "name": "Noel Hillman",
+      "short": "Hillman",
+      "handicap": {
+        "source": "manual",
+        "index": "1.4"
+      }
+    },
+    {
+      "_key": "132505604",
+      "name": "Justin Stenger",
+      "short": "Justin",
+      "handicap": {
+        "source": "manual",
+        "index": "12"
+      }
+    },
+    {
+      "_key": "68439689",
+      "name": "Cameron Casper",
+      "handicap": {
+        "source": "ghin",
+        "id": "751741",
+        "firstName": "Cameron",
+        "lastName": "Casper",
+        "playerName": "Cameron Casper",
+        "gender": "M",
+        "active": true,
+        "index": "4.0",
+        "revDate": "2020-01-01"
+      }
+    },
+    {
+      "_key": "68439086",
+      "name": "Jason Rosenfelt",
+      "short": "Rosy",
+      "handicap": {
+        "source": "ghin",
+        "id": "1995423",
+        "firstName": "Jason",
+        "lastName": "Rosenfelt",
+        "playerName": "Jason Rosenfelt",
+        "gender": "M",
+        "active": true,
+        "index": "+0.7",
+        "revDate": "2021-01-13"
+      }
+    },
+    {
+      "_key": "68442802",
+      "name": "David Gibson",
+      "handicap": {
+        "source": "ghin",
+        "id": "9317604",
+        "firstName": "David",
+        "lastName": "Gibson",
+        "playerName": "David Gibson",
+        "gender": "M",
+        "active": true,
+        "index": "10.4",
+        "revDate": "2021-01-29"
+      }
+    },
+    {
+      "_key": "135116067",
+      "name": "Arjuna Anday",
+      "short": "Juna"
+    },
+    {
+      "_key": "142952637",
+      "name": "Bo Ginn",
+      "short": "Bo",
+      "handicap": {
+        "source": "manual",
+        "index": "10.0"
+      }
+    },
+    {
+      "_key": "142953086",
+      "name": "Adam Lee",
+      "short": "Woj",
+      "handicap": {
+        "source": "manual",
+        "index": "8.2"
+      }
+    },
+    {
+      "_key": "143153404",
+      "name": "Scott",
+      "short": "Hall",
+      "handicap": {
+        "source": "manual",
+        "index": "4.5"
+      }
+    },
+    {
+      "_key": "143543961",
+      "name": "Phillip Campbell",
+      "short": "Phillip C"
+    },
+    {
+      "_key": "143554145",
+      "name": "Scott",
+      "short": "Scott",
+      "handicap": {
+        "source": "manual",
+        "index": "18"
+      }
+    },
+    {
+      "_key": "151548580",
+      "name": "Dan Dodson",
+      "short": "Dodson",
+      "handicap": {
+        "source": "manual",
+        "index": "14.1"
+      }
+    },
+    {
+      "_key": "151549260",
+      "name": "Ted Harris",
+      "short": "Harris",
+      "handicap": {
+        "source": "manual",
+        "index": "11.8"
+      }
+    },
+    {
+      "_key": "151550215",
+      "name": "Michael Palma",
+      "short": "Palms",
+      "handicap": {
+        "source": "manual",
+        "index": "7.8"
+      }
+    },
+    {
+      "_key": "155996909",
+      "name": "Randy Gepp",
+      "short": "Randy",
+      "handicap": {
+        "source": "manual",
+        "index": "4.4"
+      }
+    },
+    {
+      "_key": "155997197",
+      "name": "Nick Lotito",
+      "short": "Nick",
+      "handicap": {
+        "source": "manual",
+        "index": "10.1"
+      }
+    },
+    {
+      "_key": "158124740",
+      "name": "Shon Garmon",
+      "short": "Shon",
+      "handicap": {
+        "source": "manual",
+        "index": "6"
+      }
+    },
+    {
+      "_key": "158125410",
+      "name": "Scott Beaver",
+      "short": "Scott",
+      "handicap": {
+        "source": "manual",
+        "index": "10"
+      }
+    },
+    {
+      "_key": "158125913",
+      "name": "Chris Ferguson",
+      "short": "Chris",
+      "handicap": {
+        "source": "manual",
+        "index": "9"
+      }
+    },
+    {
+      "_key": "66138446",
+      "name": "Bradley Jansen",
+      "handicap": {
+        "source": "ghin",
+        "id": "10178768",
+        "firstName": "Bradley",
+        "lastName": "Jansen",
+        "playerName": "Bradley Jansen",
+        "gender": "M",
+        "active": true,
+        "index": "6.2",
+        "revDate": "2020-01-07"
+      }
+    },
+    {
+      "_key": "163181019",
+      "name": "Nick ",
+      "short": "Nick ",
+      "handicap": {
+        "source": "manual",
+        "index": "10.1"
+      }
+    },
+    {
+      "_key": "163181349",
+      "name": "Palms",
+      "short": "Palms",
+      "handicap": {
+        "source": "manual",
+        "index": "8.7"
+      }
+    },
+    {
+      "_key": "179757074",
+      "name": "Gam Mattingly",
+      "short": "Gam",
+      "handicap": {
+        "source": "ghin",
+        "id": "932238",
+        "firstName": "Gam",
+        "lastName": "Mattingly",
+        "playerName": "Gam Mattingly",
+        "gender": "M",
+        "active": true,
+        "index": "1.6",
+        "revDate": "2021-06-03"
+      }
+    },
+    {
+      "_key": "182970636",
+      "name": "Brian Merman",
+      "short": "Brian",
+      "handicap": {
+        "source": "ghin",
+        "id": "794133",
+        "firstName": "Brian",
+        "lastName": "Merman",
+        "playerName": "Brian Merman",
+        "gender": "M",
+        "active": true,
+        "index": "5.6",
+        "revDate": "2021-05-24"
+      }
+    },
+    {
+      "_key": "185296625",
+      "name": "Adam Edenfield",
+      "short": "Adam",
+      "handicap": {
+        "source": "ghin",
+        "id": "89687",
+        "firstName": "Adam",
+        "lastName": "Edenfield",
+        "playerName": "Adam Edenfield",
+        "gender": "M",
+        "active": true,
+        "index": "5.3",
+        "revDate": "2021-07-03"
+      }
+    },
+    {
+      "_key": "192203793",
+      "name": "Tom Lehmann",
+      "short": "TL",
+      "handicap": {
+        "source": "manual",
+        "index": "19"
+      }
+    },
+    {
+      "_key": "194197482",
+      "name": "Chris Bennett",
+      "short": "Chris",
+      "handicap": {
+        "source": "ghin",
+        "id": "1953147",
+        "firstName": "Chris",
+        "lastName": "Bennett",
+        "playerName": "Chris Bennett",
+        "gender": "M",
+        "active": true,
+        "index": "6.7",
+        "revDate": "2021-07-26"
+      }
+    },
+    {
+      "_key": "196537817",
+      "name": "Sean Gormley",
+      "short": "Sean",
+      "handicap": {
+        "source": "ghin",
+        "id": "10077115",
+        "firstName": "SEAN",
+        "lastName": "GORMLEY",
+        "playerName": "SEAN GORMLEY",
+        "gender": "M",
+        "active": true,
+        "index": "10.4",
+        "revDate": "2021-08-02"
+      }
+    },
+    {
+      "_key": "198887046",
+      "name": "Bjorn",
+      "short": "Bjorn",
+      "handicap": {
+        "source": "manual",
+        "index": "2"
+      }
+    },
+    {
+      "_key": "198887790",
+      "name": "Brian",
+      "short": "Brian",
+      "handicap": {
+        "source": "manual",
+        "index": "18"
+      }
+    },
+    {
+      "_key": "198888403",
+      "name": "Rusty",
+      "short": "Rusty",
+      "handicap": {
+        "source": "manual",
+        "index": "17"
+      }
+    },
+    {
+      "_key": "200941379",
+      "name": "Joseph Gibson",
+      "short": "Joseph",
+      "handicap": {
+        "source": "ghin",
+        "id": "7267293",
+        "firstName": "Joseph",
+        "lastName": "Gibson",
+        "playerName": "Joseph Gibson",
+        "gender": "M",
+        "active": true,
+        "index": "1.1",
+        "revDate": "2021-07-11"
+      }
+    },
+    {
+      "_key": "200941649",
+      "name": "Boone Dupree",
+      "short": "Boone",
+      "handicap": {
+        "source": "ghin",
+        "id": "1921540",
+        "firstName": "Boone",
+        "lastName": "Dupree",
+        "playerName": "Boone Dupree",
+        "gender": "M",
+        "active": true,
+        "index": "12.3",
+        "revDate": "2021-07-12"
+      }
+    },
+    {
+      "_key": "207116934",
+      "name": "Justin Stenger",
+      "short": "Justin",
+      "handicap": {
+        "source": "ghin",
+        "id": "1257780",
+        "firstName": "Justin",
+        "lastName": "Stenger",
+        "playerName": "Justin Stenger",
+        "gender": "M",
+        "active": true,
+        "index": "10.9",
+        "revDate": "2021-09-05"
+      }
+    },
+    {
+      "_key": "213751920",
+      "name": "Google Play",
+      "short": "Play"
+    },
+    {
+      "_key": "216119831",
+      "name": "Jason Jung",
+      "short": "Jason",
+      "handicap": {
+        "source": "ghin",
+        "id": "10563535",
+        "firstName": "Jason",
+        "lastName": "Jung",
+        "playerName": "Jason Jung",
+        "gender": "M",
+        "active": true,
+        "index": "13.0",
+        "revDate": "2021-09-22"
+      }
+    },
+    {
+      "_key": "234675688",
+      "name": "Gregory Reihing",
+      "short": "Greg"
+    },
+    {
+      "_key": "235075531",
+      "name": "Tim Stewart",
+      "short": "Tim",
+      "handicap": {
+        "source": "manual",
+        "index": "-5"
+      }
+    },
+    {
+      "_key": "235659889",
+      "name": "Greg Cornwell",
+      "short": "Greg",
+      "handicap": {
+        "source": "ghin",
+        "id": "10564845",
+        "firstName": "Greg",
+        "lastName": "Cornwell",
+        "playerName": "Greg Cornwell",
+        "gender": "M",
+        "active": true,
+        "index": "14.3",
+        "revDate": "2021-09-06"
+      }
+    },
+    {
+      "_key": "162387647",
+      "name": "Donald Brown",
+      "short": "Donald",
+      "handicap": {
+        "source": "ghin",
+        "id": "3070362",
+        "firstName": "Donald",
+        "lastName": "Brown",
+        "playerName": "Donald Brown",
+        "gender": "M",
+        "active": true,
+        "index": "20.5",
+        "revDate": "2021-04-29"
+      }
+    },
+    {
+      "_key": "72262250",
+      "name": "Carter Noland",
+      "short": "Carter",
+      "handicap": {
+        "source": "ghin",
+        "id": "10401592",
+        "firstName": "Carter",
+        "lastName": "Noland",
+        "playerName": "Carter Noland",
+        "gender": "M",
+        "active": true,
+        "index": "5.2",
+        "revDate": "2021-12-20"
+      }
+    },
+    {
+      "_key": "72266801",
+      "name": "Brent Pease",
+      "handicap": {
+        "source": "ghin",
+        "id": "2965823",
+        "firstName": "Brent",
+        "lastName": "Pease",
+        "playerName": "Brent Pease",
+        "gender": "M",
+        "active": true,
+        "index": "9.7",
+        "revDate": "2021-12-04"
+      }
+    },
+    {
+      "_key": "72279852",
+      "name": "Corey Goff",
+      "short": "Corey",
+      "handicap": {
+        "source": "ghin",
+        "id": "10364861",
+        "firstName": "Corey",
+        "lastName": "Goff",
+        "playerName": "Corey Goff",
+        "gender": "M",
+        "active": true,
+        "index": "9.1",
+        "revDate": "2021-12-20"
+      }
+    },
+    {
+      "_key": "66136626",
+      "name": "Dan Einhorn",
+      "short": "Dan",
+      "handicap": {
+        "source": "ghin",
+        "id": "10178648",
+        "firstName": "Dan",
+        "lastName": "Einhorn",
+        "playerName": "Dan Einhorn",
+        "gender": "M",
+        "active": true,
+        "index": "12.7",
+        "revDate": "2021-10-06"
+      }
+    },
+    {
+      "_key": "66102106",
+      "name": "Drew Hermann",
+      "handicap": {
+        "source": "ghin",
+        "id": "863680",
+        "firstName": "Drew",
+        "lastName": "Hermann",
+        "playerName": "Drew Hermann",
+        "gender": "M",
+        "active": true,
+        "index": "10.3",
+        "revDate": "2021-11-13"
+      }
+    },
+    {
+      "_key": "72249349",
+      "name": "Jon Karcsh",
+      "short": "Jon",
+      "handicap": {
+        "source": "ghin",
+        "id": "10302888",
+        "firstName": "Jon ",
+        "lastName": "Karcsh",
+        "playerName": "Jon  Karcsh",
+        "gender": "M",
+        "active": true,
+        "index": "7.3",
+        "revDate": "2022-01-17"
+      }
+    },
+    {
+      "_key": "66101217",
+      "name": "Mason Ambler",
+      "handicap": {
+        "source": "ghin",
+        "id": "484178",
+        "firstName": "Mason",
+        "lastName": "Ambler",
+        "playerName": "Mason Ambler",
+        "gender": "M",
+        "active": true,
+        "index": "3.4",
+        "revDate": "2021-10-18"
+      }
+    },
+    {
+      "_key": "93793789",
+      "name": "Josh Hooper",
+      "handicap": {
+        "source": "ghin",
+        "id": "2324745",
+        "firstName": "Josh",
+        "lastName": "Hooper",
+        "playerName": "Josh Hooper",
+        "gender": "M",
+        "active": true,
+        "index": "17.3",
+        "revDate": "2021-12-28"
+      }
+    },
+    {
+      "_key": "66101559",
+      "name": "Taylor Creasy",
+      "handicap": {
+        "source": "ghin",
+        "id": "2820891",
+        "firstName": "Taylor",
+        "lastName": "Creasy",
+        "playerName": "Taylor Creasy",
+        "gender": "M",
+        "active": true,
+        "index": "1.9",
+        "revDate": "2022-01-18"
+      }
+    },
+    {
+      "_key": "72338383",
+      "name": "Todd Meyers",
+      "handicap": {
+        "source": "ghin",
+        "id": "1756782",
+        "firstName": "Todd",
+        "lastName": "Meyers",
+        "playerName": "Todd Meyers",
+        "gender": "M",
+        "active": true,
+        "index": "17.4",
+        "revDate": "2022-02-02"
+      }
+    },
+    {
+      "_key": "65882199",
+      "name": "Rusty Gattmann",
+      "short": "Rusty",
+      "handicap": {
+        "source": "ghin",
+        "id": "8857",
+        "firstName": "Rusty",
+        "lastName": "Gattmann",
+        "playerName": "Rusty Gattmann",
+        "gender": "M",
+        "active": true,
+        "index": "17.8",
+        "revDate": "2022-01-26"
+      }
+    },
+    {
+      "_key": "65882211",
+      "name": "John Heilman",
+      "handicap": {
+        "source": "ghin",
+        "id": "16987",
+        "firstName": "John",
+        "lastName": "Heilman",
+        "playerName": "John Heilman",
+        "gender": "M",
+        "active": true,
+        "index": "8.7",
+        "revDate": "2021-10-25"
+      }
+    },
+    {
+      "_key": "65882229",
+      "name": "Chris Carter",
+      "handicap": {
+        "source": "ghin",
+        "id": "34007",
+        "firstName": "Chris",
+        "lastName": "Carter",
+        "playerName": "Chris Carter",
+        "gender": "M",
+        "active": true,
+        "index": "16.3",
+        "revDate": "2022-01-02"
+      }
+    },
+    {
+      "_key": "65882277",
+      "name": "Russ B Lambros",
+      "short": "Russ",
+      "handicap": {
+        "source": "ghin",
+        "id": "66785",
+        "firstName": "Russ",
+        "lastName": "Lambros",
+        "playerName": "Russ Lambros",
+        "gender": "M",
+        "active": true,
+        "index": "8.3",
+        "revDate": "2022-01-29"
+      }
+    },
+    {
+      "_key": "65882337",
+      "name": "Will Pignetti",
+      "handicap": {
+        "source": "ghin",
+        "id": "119312",
+        "firstName": "Will",
+        "lastName": "Pignetti",
+        "playerName": "Will Pignetti",
+        "gender": "M",
+        "active": true,
+        "index": "7.0",
+        "revDate": "2021-11-28"
+      }
+    },
+    {
+      "_key": "65882343",
+      "name": "Doug Johnson",
+      "handicap": {
+        "source": "ghin",
+        "id": "136537",
+        "firstName": "Doug",
+        "lastName": "Johnson",
+        "playerName": "Doug Johnson",
+        "gender": "M",
+        "active": true,
+        "index": "6.3",
+        "revDate": "2022-01-15"
+      }
+    },
+    {
+      "_key": "65882368",
+      "name": "James Kane",
+      "handicap": {
+        "source": "ghin",
+        "id": "181429",
+        "firstName": "James",
+        "lastName": "Kane",
+        "playerName": "James Kane",
+        "gender": "M",
+        "active": true,
+        "index": "13.4",
+        "revDate": "2021-12-29"
+      }
+    },
+    {
+      "_key": "65882385",
+      "name": "Mac Joye",
+      "handicap": {
+        "source": "ghin",
+        "id": "219770",
+        "firstName": "Mac",
+        "lastName": "Joye",
+        "playerName": "Mac Joye",
+        "gender": "M",
+        "active": true,
+        "index": "4.0",
+        "revDate": "2022-01-29"
+      }
+    },
+    {
+      "_key": "65882391",
+      "name": "James McCabe",
+      "short": "Jim",
+      "handicap": {
+        "source": "ghin",
+        "id": "223817",
+        "firstName": "James",
+        "lastName": "McCabe",
+        "playerName": "James Mccabe",
+        "gender": "M",
+        "active": true,
+        "index": "0.1",
+        "revDate": "2022-01-29"
+      }
+    },
+    {
+      "_key": "65882409",
+      "name": "Zach Ettner",
+      "short": "Zach",
+      "handicap": {
+        "source": "ghin",
+        "id": "258711",
+        "firstName": "Zach",
+        "lastName": "Ettner",
+        "playerName": "Zach Ettner",
+        "gender": "M",
+        "active": true,
+        "index": "4.8",
+        "revDate": "2021-10-28"
+      }
+    },
+    {
+      "_key": "65882427",
+      "name": "Paul Puckett",
+      "handicap": {
+        "source": "ghin",
+        "id": "265990",
+        "firstName": "Paul",
+        "lastName": "Puckett",
+        "playerName": "Paul Puckett",
+        "gender": "M",
+        "active": true,
+        "index": "6.1",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65882499",
+      "name": "Randy Gepp",
+      "handicap": {
+        "source": "ghin",
+        "id": "288620",
+        "firstName": "Randy",
+        "lastName": "Gepp",
+        "playerName": "Randy Gepp",
+        "gender": "M",
+        "active": true,
+        "index": "5.2",
+        "revDate": "2022-02-02"
+      }
+    },
+    {
+      "_key": "35420455",
+      "name": "Chris Rauber",
+      "short": "Chris",
+      "handicap": {
+        "source": "ghin",
+        "id": "300557",
+        "firstName": "Chris",
+        "lastName": "Rauber",
+        "playerName": "Chris Rauber",
+        "gender": "M",
+        "active": true,
+        "index": "4.4",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65882768",
+      "name": "Will Challas",
+      "handicap": {
+        "source": "ghin",
+        "id": "325456",
+        "firstName": "Will",
+        "lastName": "Challas",
+        "playerName": "Will Challas",
+        "gender": "M",
+        "active": true,
+        "index": "5.2",
+        "revDate": "2022-01-19"
+      }
+    },
+    {
+      "_key": "65882786",
+      "name": "Brian Smith",
+      "handicap": {
+        "source": "ghin",
+        "id": "325459",
+        "firstName": "Brian",
+        "lastName": "Smith",
+        "playerName": "Brian Smith",
+        "gender": "M",
+        "active": true,
+        "index": "18.9",
+        "revDate": "2022-01-23"
+      }
+    },
+    {
+      "_key": "78989634",
+      "name": "Brett Donnelly",
+      "handicap": {
+        "source": "ghin",
+        "id": "366578",
+        "firstName": "Brett",
+        "lastName": "Donnelly",
+        "playerName": "Brett Donnelly",
+        "gender": "M",
+        "active": true,
+        "index": "0.3",
+        "revDate": "2021-10-13"
+      }
+    },
+    {
+      "_key": "65883619",
+      "name": "Samir Parekh",
+      "handicap": {
+        "source": "ghin",
+        "id": "391623",
+        "firstName": "Samir",
+        "lastName": "Parekh",
+        "playerName": "Samir Parekh",
+        "gender": "M",
+        "active": true,
+        "index": "6.9",
+        "revDate": "2022-02-02"
+      }
+    },
+    {
+      "_key": "35243665",
+      "name": "David Griffin",
+      "handicap": {
+        "source": "ghin",
+        "id": "400179",
+        "firstName": "David",
+        "lastName": "Griffin",
+        "playerName": "David Griffin",
+        "gender": "M",
+        "active": true,
+        "index": "13.3",
+        "revDate": "2021-11-23"
+      }
+    },
+    {
+      "_key": "196529116",
+      "name": "Phil Musser",
+      "short": "Phil",
+      "handicap": {
+        "source": "ghin",
+        "id": "2465034",
+        "firstName": "PHIL",
+        "lastName": "MUSSER",
+        "playerName": "Phil Musser",
+        "gender": "M",
+        "active": true,
+        "index": "3.7",
+        "revDate": "2021-12-15"
+      }
+    },
+    {
+      "_key": "234260710",
+      "name": "Mickey Urmann",
+      "handicap": {
+        "source": "ghin",
+        "id": "486111",
+        "firstName": "Mickey",
+        "lastName": "Urmann",
+        "playerName": "Mickey Urmann",
+        "gender": "M",
+        "active": true,
+        "index": "7.3",
+        "revDate": "2022-01-15"
+      }
+    },
+    {
+      "_key": "75253843",
+      "name": "Craig Mycoskie",
+      "handicap": {
+        "source": "ghin",
+        "id": "899571",
+        "firstName": "Craig",
+        "lastName": "Mycoskie",
+        "playerName": "Craig Mycoskie",
+        "gender": "M",
+        "active": true,
+        "index": "6.7",
+        "revDate": "2021-12-24"
+      }
+    },
+    {
+      "_key": "72263073",
+      "name": "Mike Santone",
+      "short": "Mike",
+      "handicap": {
+        "source": "ghin",
+        "id": "2608952",
+        "firstName": "Mike",
+        "lastName": "Santone",
+        "playerName": "Mike Santone",
+        "gender": "M",
+        "active": true,
+        "index": "7.5",
+        "revDate": "2022-01-29"
+      }
+    },
+    {
+      "_key": "72276939",
+      "name": "Dennis Noyce",
+      "short": "Dennis",
+      "handicap": {
+        "source": "ghin",
+        "id": "2245133",
+        "firstName": "Dennis",
+        "lastName": "Noyce",
+        "playerName": "Dennis Noyce",
+        "gender": "M",
+        "active": true,
+        "index": "11.6",
+        "revDate": "2021-11-08"
+      }
+    },
+    {
+      "_key": "35419635",
+      "name": "Jemel David",
+      "short": "jndiii",
+      "handicap": {
+        "source": "ghin",
+        "id": "470950",
+        "firstName": "Jemel",
+        "lastName": "David",
+        "playerName": "Jemel David",
+        "gender": "M",
+        "active": true,
+        "index": "5.4",
+        "revDate": "2021-12-05"
+      }
+    },
+    {
+      "_key": "35217480",
+      "name": "Scott Serafin",
+      "short": "Fin",
+      "handicap": {
+        "source": "ghin",
+        "id": "472794",
+        "firstName": "Scott",
+        "lastName": "Serafin",
+        "playerName": "Scott Serafin",
+        "gender": "M",
+        "active": true,
+        "index": "5.2",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65883672",
+      "name": "Jason Taylor",
+      "short": "JT",
+      "handicap": {
+        "source": "ghin",
+        "id": "437309",
+        "firstName": "Jason",
+        "lastName": "Taylor",
+        "playerName": "Jason Taylor",
+        "gender": "M",
+        "active": true,
+        "index": "14.6",
+        "revDate": "2021-10-25"
+      }
+    },
+    {
+      "_key": "36115351",
+      "name": "Mark McKinney",
+      "short": "Mark",
+      "handicap": {
+        "source": "ghin",
+        "id": "609528",
+        "firstName": "Mark",
+        "lastName": "McKinney",
+        "playerName": "Mark Mckinney",
+        "gender": "M",
+        "active": true,
+        "index": "7.5",
+        "revDate": "2021-12-25"
+      }
+    },
+    {
+      "_key": "65883765",
+      "name": "Jay Smith",
+      "handicap": {
+        "source": "ghin",
+        "id": "642014",
+        "firstName": "Jay",
+        "lastName": "Smith",
+        "playerName": "Jay Smith",
+        "gender": "M",
+        "active": true,
+        "index": "5.7",
+        "revDate": "2021-11-27"
+      }
+    },
+    {
+      "_key": "65883783",
+      "name": "Larry White",
+      "handicap": {
+        "source": "ghin",
+        "id": "690698",
+        "firstName": "Larry",
+        "lastName": "White",
+        "playerName": "Larry White",
+        "gender": "M",
+        "active": true,
+        "index": "3.9",
+        "revDate": "2022-01-28"
+      }
+    },
+    {
+      "_key": "65883777",
+      "name": "Jay Gordon",
+      "handicap": {
+        "source": "ghin",
+        "id": "720038",
+        "firstName": "Jay",
+        "lastName": "Gordon",
+        "playerName": "Jay Gordon",
+        "gender": "M",
+        "active": true,
+        "index": "2.6",
+        "revDate": "2021-11-29"
+      }
+    },
+    {
+      "_key": "65883818",
+      "name": "Damien Grant",
+      "handicap": {
+        "source": "ghin",
+        "id": "753821",
+        "firstName": "Damien",
+        "lastName": "Grant",
+        "playerName": "Damien Grant",
+        "gender": "M",
+        "active": true,
+        "index": "9.9",
+        "revDate": "2022-01-16"
+      }
+    },
+    {
+      "_key": "65883837",
+      "name": "Matt Campbell",
+      "handicap": {
+        "source": "ghin",
+        "id": "753826",
+        "firstName": "Matt",
+        "lastName": "Campbell",
+        "playerName": "Matt Campbell",
+        "gender": "M",
+        "active": true,
+        "index": "10.7",
+        "revDate": "2021-12-25"
+      }
+    },
+    {
+      "_key": "65883843",
+      "name": "Ryan Conway",
+      "short": "Ryan",
+      "handicap": {
+        "source": "ghin",
+        "id": "753827",
+        "firstName": "Ryan",
+        "lastName": "Conway",
+        "playerName": "Ryan Conway",
+        "gender": "M",
+        "active": true,
+        "index": "5.1",
+        "revDate": "2021-12-12"
+      }
+    },
+    {
+      "_key": "65883854",
+      "name": "Josh Gregory",
+      "handicap": {
+        "source": "ghin",
+        "id": "753832",
+        "firstName": "Josh",
+        "lastName": "Gregory",
+        "playerName": "Josh Gregory",
+        "gender": "M",
+        "active": true,
+        "index": "2.5",
+        "revDate": "2021-12-13"
+      }
+    },
+    {
+      "_key": "65883890",
+      "name": "Kenneth Barrett",
+      "short": "Kenneth",
+      "handicap": {
+        "source": "ghin",
+        "id": "753836",
+        "firstName": "Ken",
+        "lastName": "Barrett",
+        "playerName": "Ken Barrett",
+        "gender": "M",
+        "active": true,
+        "index": "4.7",
+        "revDate": "2022-01-17"
+      }
+    },
+    {
+      "_key": "65883950",
+      "name": "Robert Wright",
+      "short": "Rob",
+      "handicap": {
+        "source": "ghin",
+        "id": "856191",
+        "firstName": "Robert",
+        "lastName": "Wright",
+        "playerName": "Robert Wright",
+        "gender": "M",
+        "active": true,
+        "index": "4.4",
+        "revDate": "2021-12-13"
+      }
+    },
+    {
+      "_key": "65883974",
+      "name": "Phillip Campbell",
+      "short": "Phillip",
+      "handicap": {
+        "source": "ghin",
+        "id": "934642",
+        "firstName": "Phillip",
+        "lastName": "Campbell",
+        "playerName": "Phillip Campbell",
+        "gender": "M",
+        "active": true,
+        "index": "10.1",
+        "revDate": "2022-01-26"
+      }
+    },
+    {
+      "_key": "65883998",
+      "name": "Greg Woofter",
+      "short": "Greg",
+      "handicap": {
+        "source": "ghin",
+        "id": "1004393",
+        "firstName": "Greg",
+        "lastName": "Woofter",
+        "playerName": "Greg Woofter",
+        "gender": "M",
+        "active": true,
+        "index": "12.4",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65884075",
+      "name": "Steve Cutts",
+      "handicap": {
+        "source": "ghin",
+        "id": "1127095",
+        "firstName": "Steve",
+        "lastName": "Cutts",
+        "playerName": "Steve Cutts",
+        "gender": "M",
+        "active": true,
+        "index": "12.7",
+        "revDate": "2021-12-05"
+      }
+    },
+    {
+      "_key": "65884099",
+      "name": "Alan Cronic",
+      "short": "Alan",
+      "handicap": {
+        "source": "ghin",
+        "id": "1127101",
+        "firstName": "Alan",
+        "lastName": "Cronic",
+        "playerName": "Alan Cronic",
+        "gender": "M",
+        "active": true,
+        "index": "12.0",
+        "revDate": "2022-01-18"
+      }
+    },
+    {
+      "_key": "65884129",
+      "name": "David Ankenbrandt",
+      "handicap": {
+        "source": "ghin",
+        "id": "1127109",
+        "firstName": "David",
+        "lastName": "Ankenbrandt",
+        "playerName": "David Ankenbrandt",
+        "gender": "M",
+        "active": true,
+        "index": "4.1",
+        "revDate": "2022-01-24"
+      }
+    },
+    {
+      "_key": "65884983",
+      "name": "Jamie Delmedico",
+      "short": "Jamie",
+      "handicap": {
+        "source": "ghin",
+        "id": "1150251",
+        "firstName": "Jamie",
+        "lastName": "Delmedico",
+        "playerName": "Jamie Delmedico",
+        "gender": "M",
+        "active": true,
+        "index": "4.2",
+        "revDate": "2021-11-20"
+      }
+    },
+    {
+      "_key": "65885001",
+      "name": "Michael Glennon",
+      "handicap": {
+        "source": "ghin",
+        "id": "1152747",
+        "firstName": "Michael",
+        "lastName": "Glennon",
+        "playerName": "Michael Glennon",
+        "gender": "M",
+        "active": true,
+        "index": "2.1",
+        "revDate": "2022-01-29"
+      }
+    },
+    {
+      "_key": "65885019",
+      "name": "Greg Brinkley",
+      "short": "Greg",
+      "handicap": {
+        "source": "ghin",
+        "id": "1152762",
+        "firstName": "Greg",
+        "lastName": "Brinkley",
+        "playerName": "Greg Brinkley",
+        "gender": "M",
+        "active": true,
+        "index": "4.7",
+        "revDate": "2022-02-02"
+      }
+    },
+    {
+      "_key": "234261951",
+      "name": "Chris Aiello",
+      "handicap": {
+        "source": "ghin",
+        "id": "1422181",
+        "firstName": "Chris",
+        "lastName": "Aiello",
+        "playerName": "Chris Aiello",
+        "gender": "M",
+        "active": true,
+        "index": "10.3",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65896637",
+      "name": "Eric Froseth",
+      "short": "Eric",
+      "handicap": {
+        "source": "ghin",
+        "id": "1152771",
+        "firstName": "Eric",
+        "lastName": "Froseth",
+        "playerName": "Eric Froseth",
+        "gender": "M",
+        "active": true,
+        "index": "8.3",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65885055",
+      "name": "Brian Huefner",
+      "short": "Brian",
+      "handicap": {
+        "source": "ghin",
+        "id": "1152778",
+        "firstName": "Brian",
+        "lastName": "Huefner",
+        "playerName": "Brian Huefner",
+        "gender": "M",
+        "active": true,
+        "index": "9.6",
+        "revDate": "2022-01-20"
+      }
+    },
+    {
+      "_key": "34483698",
+      "name": "Brad Anderson",
+      "short": "boorad",
+      "handicap": {
+        "source": "ghin",
+        "id": "1152839",
+        "firstName": "Brad",
+        "lastName": "Anderson",
+        "playerName": "Brad Anderson",
+        "gender": "M",
+        "active": true,
+        "index": "5.3",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65885138",
+      "name": "Stanley Sharp",
+      "handicap": {
+        "source": "ghin",
+        "id": "1185910",
+        "firstName": "Stan",
+        "lastName": "Sharp",
+        "playerName": "Stan Sharp",
+        "gender": "M",
+        "active": true,
+        "index": "9.3",
+        "revDate": "2022-02-01"
+      }
+    },
+    {
+      "_key": "65885186",
+      "name": "Gregory Reihing",
+      "handicap": {
+        "source": "ghin",
+        "id": "1275047",
+        "firstName": "Gregory",
+        "lastName": "Reihing",
+        "playerName": "Gregory Reihing",
+        "gender": "M",
+        "active": true,
+        "index": "1.3",
+        "revDate": "2022-01-28"
+      }
+    },
+    {
+      "_key": "65885204",
+      "name": "Ross Poole",
+      "short": "Ross",
+      "handicap": {
+        "source": "ghin",
+        "id": "1315441",
+        "firstName": "Ross",
+        "lastName": "Poole",
+        "playerName": "Ross Poole",
+        "gender": "M",
+        "active": true,
+        "index": "5.0",
+        "revDate": "2021-08-23"
+      }
+    },
+    {
+      "_key": "65885198",
+      "name": "Reid Smith-Vaniz",
+      "handicap": {
+        "source": "ghin",
+        "id": "1319256",
+        "firstName": "Reid",
+        "lastName": "Smith-Vaniz",
+        "playerName": "Reid Smith-vaniz",
+        "gender": "M",
+        "active": true,
+        "index": "3.9",
+        "revDate": "2022-01-03"
+      }
+    },
+    {
+      "_key": "65885210",
+      "name": "JP Pignetti",
+      "short": "JP",
+      "handicap": {
+        "source": "ghin",
+        "id": "1319258",
+        "firstName": "JP",
+        "lastName": "Pignetti",
+        "playerName": "Jp Pignetti",
+        "gender": "M",
+        "active": true,
+        "index": "9.8",
+        "revDate": "2021-11-08"
+      }
+    },
+    {
+      "_key": "65885252",
+      "name": "Hayes Todd",
+      "short": "Hayzerbeam",
+      "handicap": {
+        "source": "ghin",
+        "id": "1319266",
+        "firstName": "Hayes",
+        "lastName": "Todd",
+        "playerName": "Hayes Todd",
+        "gender": "M",
+        "active": true,
+        "index": "1.5",
+        "revDate": "2022-01-19"
+      }
+    },
+    {
+      "_key": "65885276",
+      "name": "Thad Kodish",
+      "handicap": {
+        "source": "ghin",
+        "id": "1319273",
+        "firstName": "Thad",
+        "lastName": "Kodish",
+        "playerName": "Thad Kodish",
+        "gender": "M",
+        "active": true,
+        "index": "8.9",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65885306",
+      "name": "Christopher Fioritto",
+      "handicap": {
+        "source": "ghin",
+        "id": "1338174",
+        "firstName": "Christopher",
+        "lastName": "Fioritto",
+        "playerName": "Christopher Fioritto",
+        "gender": "M",
+        "active": true,
+        "index": "2.9",
+        "revDate": "2022-01-16"
+      }
+    },
+    {
+      "_key": "65885342",
+      "name": "Marshall Murphey",
+      "short": "Marshall",
+      "handicap": {
+        "source": "ghin",
+        "id": "1393396",
+        "firstName": "Marshall",
+        "lastName": "Murphey",
+        "playerName": "Marshall Murphey",
+        "gender": "M",
+        "active": true,
+        "index": "7.9",
+        "revDate": "2022-01-01"
+      }
+    },
+    {
+      "_key": "65885348",
+      "name": "Andy DeVries",
+      "handicap": {
+        "source": "ghin",
+        "id": "1393397",
+        "firstName": "Andy",
+        "lastName": "DeVries",
+        "playerName": "Andy Devries",
+        "gender": "M",
+        "active": true,
+        "index": "+0.8",
+        "revDate": "2022-01-15"
+      }
+    },
+    {
+      "_key": "65885360",
+      "name": "Jason Nettles",
+      "handicap": {
+        "source": "ghin",
+        "id": "1393399",
+        "firstName": "Jason",
+        "lastName": "Nettles",
+        "playerName": "Jason Nettles",
+        "gender": "M",
+        "active": true,
+        "index": "19.3",
+        "revDate": "2021-12-19"
+      }
+    },
+    {
+      "_key": "65885372",
+      "name": "Jeff Larocco",
+      "short": "Jeff",
+      "handicap": {
+        "source": "ghin",
+        "id": "1393402",
+        "firstName": "Jeff",
+        "lastName": "Larocco",
+        "playerName": "Jeff Larocco",
+        "gender": "M",
+        "active": true,
+        "index": "11.3",
+        "revDate": "2021-11-29"
+      }
+    },
+    {
+      "_key": "65885409",
+      "name": "Jimmy Stafford",
+      "handicap": {
+        "source": "ghin",
+        "id": "1393409",
+        "firstName": "Jimmy",
+        "lastName": "Stafford",
+        "playerName": "Jimmy Stafford",
+        "gender": "M",
+        "active": true,
+        "index": "15.0",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65885498",
+      "name": "Ted Harris",
+      "handicap": {
+        "source": "ghin",
+        "id": "1504406",
+        "firstName": "Ted",
+        "lastName": "Harris",
+        "playerName": "Ted Harris",
+        "gender": "M",
+        "active": true,
+        "index": "12.0",
+        "revDate": "2022-01-20"
+      }
+    },
+    {
+      "_key": "65885522",
+      "name": "Tim Holdroyd",
+      "handicap": {
+        "source": "ghin",
+        "id": "1531115",
+        "firstName": "Tim",
+        "lastName": "Holdroyd",
+        "playerName": "Tim Holdroyd",
+        "gender": "M",
+        "active": true,
+        "index": "11.1",
+        "revDate": "2021-12-21"
+      }
+    },
+    {
+      "_key": "65885546",
+      "name": "Bobby Mercado",
+      "handicap": {
+        "source": "ghin",
+        "id": "1583248",
+        "firstName": "Bobby",
+        "lastName": "Mercado",
+        "playerName": "Bobby Mercado",
+        "gender": "M",
+        "active": true,
+        "index": "10.5",
+        "revDate": "2022-01-29"
+      }
+    },
+    {
+      "_key": "70330052",
+      "name": "Andrew Kardian",
+      "short": "Andrew",
+      "handicap": {
+        "source": "ghin",
+        "id": "10367793",
+        "firstName": "Andrew",
+        "lastName": "Kardian",
+        "playerName": "Andrew Kardian",
+        "gender": "M",
+        "active": true,
+        "index": "14.2",
+        "revDate": "2022-01-09"
+      }
+    },
+    {
+      "_key": "66100257",
+      "name": "Michael Hosch",
+      "short": "Hosch",
+      "handicap": {
+        "source": "ghin",
+        "id": "2890015",
+        "firstName": "Michael",
+        "lastName": "Hosch",
+        "playerName": "Michael Hosch",
+        "gender": "M",
+        "active": true,
+        "index": "8.3",
+        "revDate": "2021-12-28"
+      }
+    },
+    {
+      "_key": "35564495",
+      "name": "Chris Caruso",
+      "short": "Caruso",
+      "handicap": {
+        "source": "ghin",
+        "id": "1583298",
+        "firstName": "Chris",
+        "lastName": "Caruso",
+        "playerName": "Chris Caruso",
+        "gender": "M",
+        "active": true,
+        "index": "1.9",
+        "revDate": "2022-01-29"
+      }
+    },
+    {
+      "_key": "65886470",
+      "name": "Jeremy Corcoran",
+      "handicap": {
+        "source": "ghin",
+        "id": "1597396",
+        "firstName": "Jeremy",
+        "lastName": "Corcoran",
+        "playerName": "Jeremy Corcoran",
+        "gender": "M",
+        "active": true,
+        "index": "4.6",
+        "revDate": "2022-01-28"
+      }
+    },
+    {
+      "_key": "65886506",
+      "name": "David Gimbel",
+      "handicap": {
+        "source": "ghin",
+        "id": "1718778",
+        "firstName": "David",
+        "lastName": "Gimbel",
+        "playerName": "David Gimbel",
+        "gender": "M",
+        "active": true,
+        "index": "6.9",
+        "revDate": "2022-01-29"
+      }
+    },
+    {
+      "_key": "65886512",
+      "name": "Gil Madrid",
+      "short": "Gil",
+      "handicap": {
+        "source": "ghin",
+        "id": "1720991",
+        "firstName": "Gil",
+        "lastName": "Madrid",
+        "playerName": "Gil Madrid",
+        "gender": "M",
+        "active": true,
+        "index": "12.6",
+        "revDate": "2022-02-01"
+      }
+    },
+    {
+      "_key": "35216720",
+      "name": "Eric Kilfeather",
+      "handicap": {
+        "source": "ghin",
+        "id": "1826821",
+        "firstName": "Eric",
+        "lastName": "Kilfeather",
+        "playerName": "Eric Kilfeather",
+        "gender": "M",
+        "active": true,
+        "index": "2.3",
+        "revDate": "2022-02-02"
+      }
+    },
+    {
+      "_key": "65886751",
+      "name": "Andy Labanauskas",
+      "handicap": {
+        "source": "ghin",
+        "id": "1837373",
+        "firstName": "Andy",
+        "lastName": "Labanauskas",
+        "playerName": "Andy Labanauskas",
+        "gender": "M",
+        "active": true,
+        "index": "+2.0",
+        "revDate": "2022-02-02"
+      }
+    },
+    {
+      "_key": "35420073",
+      "name": "Tim Barry",
+      "handicap": {
+        "source": "ghin",
+        "id": "2015204",
+        "firstName": "Tim",
+        "lastName": "Barry",
+        "playerName": "Tim Barry",
+        "gender": "M",
+        "active": true,
+        "index": "11.3",
+        "revDate": "2021-06-22"
+      }
+    },
+    {
+      "_key": "65886828",
+      "name": "Chris Kidd",
+      "short": "Chris",
+      "handicap": {
+        "source": "ghin",
+        "id": "2099101",
+        "firstName": "Chris",
+        "lastName": "Kidd",
+        "playerName": "Chris Kidd",
+        "gender": "M",
+        "active": true,
+        "index": "16.0",
+        "revDate": "2021-11-19"
+      }
+    },
+    {
+      "_key": "65886943",
+      "name": "Karl Ots",
+      "short": "Karl",
+      "handicap": {
+        "source": "ghin",
+        "id": "2287416",
+        "firstName": "Karl",
+        "lastName": "Ots",
+        "playerName": "Karl Ots",
+        "gender": "M",
+        "active": true,
+        "index": "14.9",
+        "revDate": "2021-11-12"
+      }
+    },
+    {
+      "_key": "195324613",
+      "name": "Jacob Cleghorn",
+      "short": "Jacob",
+      "handicap": {
+        "source": "ghin",
+        "id": "4139949",
+        "firstName": "Jacob",
+        "lastName": "Cleghorn",
+        "playerName": "Jacob Cleghorn",
+        "gender": "M",
+        "active": true,
+        "index": "10.2",
+        "revDate": "2021-10-21"
+      }
+    },
+    {
+      "_key": "74676649",
+      "name": "Kurt Niemeyer",
+      "handicap": {
+        "source": "ghin",
+        "id": "985837",
+        "firstName": "Kurt",
+        "lastName": "Niemeyer",
+        "playerName": "Kurt Niemeyer",
+        "gender": "M",
+        "active": true,
+        "index": "6.6",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "72256595",
+      "name": "Marc Noland",
+      "short": "Marc",
+      "handicap": {
+        "source": "ghin",
+        "id": "2983539",
+        "firstName": "Marc",
+        "lastName": "Noland",
+        "playerName": "Marc Noland",
+        "gender": "M",
+        "active": true,
+        "index": "7.0",
+        "revDate": "2021-12-25"
+      }
+    },
+    {
+      "_key": "65887913",
+      "name": "Allen Whipple",
+      "handicap": {
+        "source": "ghin",
+        "id": "2383783",
+        "firstName": "Allen",
+        "lastName": "Whipple",
+        "playerName": "Allen Whipple",
+        "gender": "M",
+        "active": true,
+        "index": "9.1",
+        "revDate": "2021-09-19"
+      }
+    },
+    {
+      "_key": "35217104",
+      "name": "Steven Pederson",
+      "short": "Steven",
+      "handicap": {
+        "source": "ghin",
+        "id": "2386132",
+        "firstName": "Steven",
+        "lastName": "Pederson",
+        "playerName": "Steven Pederson",
+        "gender": "M",
+        "active": true,
+        "index": "3.4",
+        "revDate": "2022-01-09"
+      }
+    },
+    {
+      "_key": "65887924",
+      "name": "Phil Walsh",
+      "handicap": {
+        "source": "ghin",
+        "id": "2389441",
+        "firstName": "Phil",
+        "lastName": "Walsh",
+        "playerName": "Phil Walsh",
+        "gender": "M",
+        "active": true,
+        "index": "15.6",
+        "revDate": "2021-10-19"
+      }
+    },
+    {
+      "_key": "65887936",
+      "name": "David Eastman",
+      "handicap": {
+        "source": "ghin",
+        "id": "2397560",
+        "firstName": "David",
+        "lastName": "Eastman",
+        "playerName": "David Eastman",
+        "gender": "M",
+        "active": true,
+        "index": "9.1",
+        "revDate": "2021-12-06"
+      }
+    },
+    {
+      "_key": "90438174",
+      "name": "Tim Landers",
+      "short": "Tim",
+      "handicap": {
+        "source": "ghin",
+        "id": "2399051",
+        "firstName": "Tim",
+        "lastName": "Landers",
+        "playerName": "Tim Landers",
+        "gender": "M",
+        "active": true,
+        "index": "2.1",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65888021",
+      "name": "Heath Turner",
+      "handicap": {
+        "source": "ghin",
+        "id": "2520862",
+        "firstName": "Heath",
+        "lastName": "Turner",
+        "playerName": "Heath Turner",
+        "gender": "M",
+        "active": true,
+        "index": "17.3",
+        "revDate": "2021-09-06"
+      }
+    },
+    {
+      "_key": "65888039",
+      "name": "Ontario Smith",
+      "short": "Ontario",
+      "handicap": {
+        "source": "ghin",
+        "id": "2559213",
+        "firstName": "Ontario",
+        "lastName": "Smith",
+        "playerName": "Ontario Smith",
+        "gender": "M",
+        "active": true,
+        "index": "9.5",
+        "revDate": "2022-02-02"
+      }
+    },
+    {
+      "_key": "65888117",
+      "name": "Patrick Herold",
+      "handicap": {
+        "source": "ghin",
+        "id": "2629127",
+        "firstName": "Patrick",
+        "lastName": "Herold",
+        "playerName": "Patrick Herold",
+        "gender": "M",
+        "active": true,
+        "index": "7.2",
+        "revDate": "2022-01-20"
+      }
+    },
+    {
+      "_key": "65888170",
+      "name": "Scott Madley",
+      "short": "smads",
+      "handicap": {
+        "source": "ghin",
+        "id": "2670641",
+        "firstName": "Scott",
+        "lastName": "Madley",
+        "playerName": "Scott Madley",
+        "gender": "M",
+        "active": true,
+        "index": "+2.2",
+        "revDate": "2022-01-15"
+      }
+    },
+    {
+      "_key": "63233525",
+      "name": "Jorge Ferrari",
+      "short": "Jorge",
+      "handicap": {
+        "source": "ghin",
+        "id": "2697682",
+        "firstName": "Jorge",
+        "lastName": "Ferrari",
+        "playerName": "Jorge Ferrari",
+        "gender": "M",
+        "active": true,
+        "index": "5.2",
+        "revDate": "2022-01-20"
+      }
+    },
+    {
+      "_key": "65888247",
+      "name": "Gilbert Valdez",
+      "short": "Gilbert",
+      "handicap": {
+        "source": "ghin",
+        "id": "2849354",
+        "firstName": "Gilbert",
+        "lastName": "Valdez",
+        "playerName": "Gilbert Valdez",
+        "gender": "M",
+        "active": true,
+        "index": "16.4",
+        "revDate": "2022-01-24"
+      }
+    },
+    {
+      "_key": "153750076",
+      "name": "Ben Bussard",
+      "handicap": {
+        "source": "ghin",
+        "id": "2874055",
+        "firstName": "Ben",
+        "lastName": "Bussard",
+        "playerName": "Ben Bussard",
+        "gender": "M",
+        "active": true,
+        "index": "7.8",
+        "revDate": "2021-12-31"
+      }
+    },
+    {
+      "_key": "65888265",
+      "name": "Johan Rolf",
+      "handicap": {
+        "source": "ghin",
+        "id": "2922258",
+        "firstName": "Johan",
+        "lastName": "Rolf",
+        "playerName": "Johan Rolf",
+        "gender": "M",
+        "active": true,
+        "index": "11.4",
+        "revDate": "2020-05-06"
+      }
+    },
+    {
+      "_key": "195320303",
+      "name": "Marc Degenkolb",
+      "short": "Marc",
+      "handicap": {
+        "source": "ghin",
+        "id": "7440573",
+        "firstName": "Marc",
+        "lastName": "Degenkolb",
+        "playerName": "Marc Degenkolb",
+        "gender": "M",
+        "active": true,
+        "index": "4.1",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "234264270",
+      "name": "Myles Rowe",
+      "handicap": {
+        "source": "ghin",
+        "id": "10768537",
+        "firstName": "Myles",
+        "lastName": "Rowe",
+        "playerName": "Myles Rowe",
+        "gender": "M",
+        "active": true,
+        "index": "8.3",
+        "revDate": "2022-01-26"
+      }
+    },
+    {
+      "_key": "74677754",
+      "name": "Michael Spector",
+      "handicap": {
+        "source": "ghin",
+        "id": "1442753",
+        "firstName": "Michael",
+        "lastName": "Spector",
+        "playerName": "Michael Spector",
+        "gender": "M",
+        "active": true,
+        "index": "9.1",
+        "revDate": "2022-01-16"
+      }
+    },
+    {
+      "_key": "74677808",
+      "name": "Marc Ghirardi",
+      "handicap": {
+        "source": "ghin",
+        "id": "1442790",
+        "firstName": "Marc",
+        "lastName": "Ghirardi",
+        "playerName": "Marc Ghirardi",
+        "gender": "M",
+        "active": true,
+        "index": "7.2",
+        "revDate": "2022-01-10"
+      }
+    },
+    {
+      "_key": "75847258",
+      "name": "Kevin Jacobs",
+      "short": "KJ",
+      "handicap": {
+        "source": "ghin",
+        "id": "10075515",
+        "firstName": "KEVIN",
+        "lastName": "JACOBS",
+        "playerName": "Kevin Jacobs",
+        "gender": "M",
+        "active": true,
+        "index": "10.0",
+        "revDate": "2021-12-13"
+      }
+    },
+    {
+      "_key": "65888361",
+      "name": "Nora Anderson",
+      "short": "Nora",
+      "handicap": {
+        "source": "ghin",
+        "id": "3034907",
+        "firstName": "Nora",
+        "lastName": "Anderson",
+        "playerName": "Nora Anderson",
+        "gender": "F",
+        "active": true,
+        "index": "7.4",
+        "revDate": "2021-12-25"
+      }
+    },
+    {
+      "_key": "65889171",
+      "name": "Nate Seymour",
+      "short": "Natrodamus",
+      "handicap": {
+        "source": "ghin",
+        "id": "3054670",
+        "firstName": "Nate",
+        "lastName": "Seymour",
+        "playerName": "Nate Seymour",
+        "gender": "M",
+        "active": true,
+        "index": "10.2",
+        "revDate": "2021-11-19"
+      }
+    },
+    {
+      "_key": "67396479",
+      "name": "Bjorn Reichenbaugh",
+      "short": "Bjorn",
+      "handicap": {
+        "source": "ghin",
+        "id": "3077998",
+        "firstName": "Bjorn",
+        "lastName": "Reichenbaugh",
+        "playerName": "Bjorn Reichenbaugh",
+        "gender": "M",
+        "active": true,
+        "index": "4.1",
+        "revDate": "2022-01-29"
+      }
+    },
+    {
+      "_key": "65889237",
+      "name": "Bilal Malik",
+      "handicap": {
+        "source": "ghin",
+        "id": "3082718",
+        "firstName": "Bilal",
+        "lastName": "Malik",
+        "playerName": "Bilal Malik",
+        "gender": "M",
+        "active": true,
+        "index": "13.0",
+        "revDate": "2021-12-04"
+      }
+    },
+    {
+      "_key": "86128798",
+      "name": "Bert Vandermeer",
+      "handicap": {
+        "source": "ghin",
+        "id": "3087005",
+        "firstName": "Bert",
+        "lastName": "Vandermeer",
+        "playerName": "Bert Vandermeer",
+        "gender": "M",
+        "active": true,
+        "index": "16.4",
+        "revDate": "2022-01-02"
+      }
+    },
+    {
+      "_key": "80558747",
+      "name": "Ryan Edwards",
+      "short": "Ryan",
+      "handicap": {
+        "source": "ghin",
+        "id": "3163182",
+        "firstName": "Ryan",
+        "lastName": "Edwards",
+        "playerName": "Ryan Edwards",
+        "gender": "M",
+        "active": true,
+        "index": "10.0",
+        "revDate": "2022-01-16"
+      }
+    },
+    {
+      "_key": "65889345",
+      "name": "Bob Glenn",
+      "handicap": {
+        "source": "ghin",
+        "id": "3242927",
+        "firstName": "Bob",
+        "lastName": "Glenn",
+        "playerName": "Bob Glenn",
+        "gender": "M",
+        "active": true,
+        "index": "8.1",
+        "revDate": "2022-01-24"
+      }
+    },
+    {
+      "_key": "65889410",
+      "name": "Nick Lotito",
+      "handicap": {
+        "source": "ghin",
+        "id": "3465980",
+        "firstName": "Nick",
+        "lastName": "Lotito",
+        "playerName": "Nick Lotito",
+        "gender": "M",
+        "active": true,
+        "index": "12.0",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65110903",
+      "name": "Anthony Polvino",
+      "handicap": {
+        "source": "ghin",
+        "id": "3737047",
+        "firstName": "Anthony",
+        "lastName": "Polvino",
+        "playerName": "Anthony Polvino",
+        "gender": "M",
+        "active": true,
+        "index": "12.5",
+        "revDate": "2020-11-17"
+      }
+    },
+    {
+      "_key": "65889463",
+      "name": "Anthony Nievera",
+      "handicap": {
+        "source": "ghin",
+        "id": "3996555",
+        "firstName": "Anthony",
+        "lastName": "Nievera",
+        "playerName": "Anthony Nievera",
+        "gender": "M",
+        "active": true,
+        "index": "13.2",
+        "revDate": "2021-06-16"
+      }
+    },
+    {
+      "_key": "65889517",
+      "name": "Jay Sadd",
+      "handicap": {
+        "source": "ghin",
+        "id": "4104337",
+        "firstName": "Jay",
+        "lastName": "Sadd",
+        "playerName": "Jay Sadd",
+        "gender": "M",
+        "active": true,
+        "index": "4.5",
+        "revDate": "2021-12-12"
+      }
+    },
+    {
+      "_key": "65889601",
+      "name": "Greg Bowerman",
+      "handicap": {
+        "source": "ghin",
+        "id": "4210311",
+        "firstName": "Greg",
+        "lastName": "Bowerman",
+        "playerName": "Greg Bowerman",
+        "gender": "M",
+        "active": true,
+        "index": "16.5",
+        "revDate": "2021-05-02"
+      }
+    },
+    {
+      "_key": "65889643",
+      "name": "Alan Blount",
+      "short": "Alan",
+      "handicap": {
+        "source": "ghin",
+        "id": "4439006",
+        "firstName": "Alan",
+        "lastName": "Blount",
+        "playerName": "Alan Blount",
+        "gender": "M",
+        "active": true,
+        "index": "6.6",
+        "revDate": "2022-02-02"
+      }
+    },
+    {
+      "_key": "74678448",
+      "name": "Scott Hennessy",
+      "handicap": {
+        "source": "ghin",
+        "id": "1620095",
+        "firstName": "Scott",
+        "lastName": "Hennessy",
+        "playerName": "Scott Hennessy",
+        "gender": "M",
+        "active": true,
+        "index": "13.7",
+        "revDate": "2022-01-04"
+      }
+    },
+    {
+      "_key": "74678622",
+      "name": "Wes Moss",
+      "handicap": {
+        "source": "ghin",
+        "id": "1774950",
+        "firstName": "Wes",
+        "lastName": "Moss",
+        "playerName": "Wes Moss",
+        "gender": "M",
+        "active": true,
+        "index": "14.4",
+        "revDate": "2021-09-07"
+      }
+    },
+    {
+      "_key": "65890591",
+      "name": "Scott Manning",
+      "handicap": {
+        "source": "ghin",
+        "id": "4879852",
+        "firstName": "Scott",
+        "lastName": "Manning",
+        "playerName": "Scott Manning",
+        "gender": "M",
+        "active": true,
+        "index": "7.7",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65890622",
+      "name": "Jim Milanowski",
+      "handicap": {
+        "source": "ghin",
+        "id": "4984783",
+        "firstName": "Jim",
+        "lastName": "Milanowski",
+        "playerName": "Jim Milanowski",
+        "gender": "M",
+        "active": true,
+        "index": "+1.2",
+        "revDate": "2022-01-24"
+      }
+    },
+    {
+      "_key": "65890633",
+      "name": "Steve Breaux",
+      "handicap": {
+        "source": "ghin",
+        "id": "4993976",
+        "firstName": "Steve",
+        "lastName": "Breaux",
+        "playerName": "Steve Breaux",
+        "gender": "M",
+        "active": true,
+        "index": "7.0",
+        "revDate": "2021-12-24"
+      }
+    },
+    {
+      "_key": "65890741",
+      "name": "Scott Davis",
+      "handicap": {
+        "source": "ghin",
+        "id": "5124153",
+        "firstName": "Scott",
+        "lastName": "Davis",
+        "playerName": "Scott Davis",
+        "gender": "M",
+        "active": true,
+        "index": "8.3",
+        "revDate": "2022-01-25"
+      }
+    },
+    {
+      "_key": "65890724",
+      "name": "Chris Santy",
+      "handicap": {
+        "source": "ghin",
+        "id": "5277766",
+        "firstName": "Chris",
+        "lastName": "Santy",
+        "playerName": "Chris Santy",
+        "gender": "M",
+        "active": true,
+        "index": "14.6",
+        "revDate": "2021-12-06"
+      }
+    },
+    {
+      "_key": "65890855",
+      "name": "Matt Veneri",
+      "handicap": {
+        "source": "ghin",
+        "id": "5698769",
+        "firstName": "Matt",
+        "lastName": "Veneri",
+        "playerName": "Matt Veneri",
+        "gender": "M",
+        "active": true,
+        "index": "9.1",
+        "revDate": "2022-01-24"
+      }
+    },
+    {
+      "_key": "35898834",
+      "name": "Jeff Fancher",
+      "short": "Jeff",
+      "handicap": {
+        "source": "ghin",
+        "id": "5721847",
+        "firstName": "Jeff",
+        "lastName": "Fancher",
+        "playerName": "Jeff Fancher",
+        "gender": "M",
+        "active": true,
+        "index": "11.6",
+        "revDate": "2021-12-27"
+      }
+    },
+    {
+      "_key": "65890919",
+      "name": "Brad Denson",
+      "handicap": {
+        "source": "ghin",
+        "id": "5721863",
+        "firstName": "Brad",
+        "lastName": "Denson",
+        "playerName": "Brad Denson",
+        "gender": "M",
+        "active": true,
+        "index": "15.7",
+        "revDate": "2021-10-25"
+      }
+    },
+    {
+      "_key": "65891040",
+      "name": "Marc Taylor",
+      "handicap": {
+        "source": "ghin",
+        "id": "5855210",
+        "firstName": "Marc",
+        "lastName": "Taylor",
+        "playerName": "Marc Taylor",
+        "gender": "M",
+        "active": true,
+        "index": "14.2",
+        "revDate": "2022-01-16"
+      }
+    },
+    {
+      "_key": "65892165",
+      "name": "Reggie Walker",
+      "handicap": {
+        "source": "ghin",
+        "id": "6694279",
+        "firstName": "Reggie",
+        "lastName": "Walker",
+        "playerName": "Reggie Walker",
+        "gender": "M",
+        "active": true,
+        "index": "17.0",
+        "revDate": "2022-01-24"
+      }
+    },
+    {
+      "_key": "65892315",
+      "name": "David Ewing",
+      "handicap": {
+        "source": "ghin",
+        "id": "6966881",
+        "firstName": "David",
+        "lastName": "Ewing",
+        "playerName": "David Ewing",
+        "gender": "M",
+        "active": true,
+        "index": "18.5",
+        "revDate": "2021-12-30"
+      }
+    },
+    {
+      "_key": "65892339",
+      "name": "Jake Milanowski",
+      "handicap": {
+        "source": "ghin",
+        "id": "7124251",
+        "firstName": "Jake",
+        "lastName": "Milanowski",
+        "playerName": "Jake Milanowski",
+        "gender": "M",
+        "active": true,
+        "index": "+3.8",
+        "revDate": "2021-07-11"
+      }
+    },
+    {
+      "_key": "65892351",
+      "name": "TJ Murphy",
+      "handicap": {
+        "source": "ghin",
+        "id": "7175529",
+        "firstName": "Tj",
+        "lastName": "Murphy",
+        "playerName": "Tj Murphy",
+        "gender": "M",
+        "active": true,
+        "index": "6.1",
+        "revDate": "2022-01-01"
+      }
+    },
+    {
+      "_key": "65892405",
+      "name": "Nicholas Ewing",
+      "handicap": {
+        "source": "ghin",
+        "id": "7250007",
+        "firstName": "Nicholas",
+        "lastName": "Ewing",
+        "playerName": "Nicholas Ewing",
+        "gender": "M",
+        "active": true,
+        "index": "13.0",
+        "revDate": "2020-01-01"
+      }
+    },
+    {
+      "_key": "65892459",
+      "name": "Sedgie Newsom",
+      "handicap": {
+        "source": "ghin",
+        "id": "7263853",
+        "firstName": "Sedgie",
+        "lastName": "Newsom",
+        "playerName": "Sedgie Newsom",
+        "gender": "M",
+        "active": true,
+        "index": "5.3",
+        "revDate": "2022-01-09"
+      }
+    },
+    {
+      "_key": "65892502",
+      "name": "James Roberts",
+      "handicap": {
+        "source": "ghin",
+        "id": "7348049",
+        "firstName": "James",
+        "lastName": "Roberts",
+        "playerName": "James Roberts",
+        "gender": "M",
+        "active": true,
+        "index": "9.0",
+        "revDate": "2022-01-20"
+      }
+    },
+    {
+      "_key": "65892531",
+      "name": "Marcus Herring",
+      "handicap": {
+        "source": "ghin",
+        "id": "7501038",
+        "firstName": "Marcus",
+        "lastName": "Herring",
+        "playerName": "Marcus Herring",
+        "gender": "M",
+        "active": true,
+        "index": "8.9",
+        "revDate": "2021-12-10"
+      }
+    },
+    {
+      "_key": "65892543",
+      "name": "Nathan Chapman",
+      "handicap": {
+        "source": "ghin",
+        "id": "7683891",
+        "firstName": "Nathan",
+        "lastName": "Chapman",
+        "playerName": "Nathan Chapman",
+        "gender": "M",
+        "active": true,
+        "index": "6.9",
+        "revDate": "2022-01-20"
+      }
+    },
+    {
+      "_key": "74680421",
+      "name": "Brian Macaluso",
+      "handicap": {
+        "source": "ghin",
+        "id": "2317419",
+        "firstName": "Brian",
+        "lastName": "Macaluso",
+        "playerName": "Brian Macaluso",
+        "gender": "M",
+        "active": true,
+        "index": "6.0",
+        "revDate": "2022-01-18"
+      }
+    },
+    {
+      "_key": "74673300",
+      "name": "David Clemons",
+      "short": "David",
+      "handicap": {
+        "source": "ghin",
+        "id": "2331885",
+        "firstName": "David",
+        "lastName": "Clemons",
+        "playerName": "David Clemons",
+        "gender": "M",
+        "active": true,
+        "index": "6.2",
+        "revDate": "2021-11-01"
+      }
+    },
+    {
+      "_key": "74680576",
+      "name": "Michael Bulger",
+      "handicap": {
+        "source": "ghin",
+        "id": "2331897",
+        "firstName": "Michael",
+        "lastName": "Bulger",
+        "playerName": "Michael Bulger",
+        "gender": "M",
+        "active": true,
+        "index": "10.2",
+        "revDate": "2021-11-26"
+      }
+    },
+    {
+      "_key": "65893369",
+      "name": "Justin Wilde",
+      "handicap": {
+        "source": "ghin",
+        "id": "7983677",
+        "firstName": "Justin",
+        "lastName": "Wilde",
+        "playerName": "Justin Wilde",
+        "gender": "M",
+        "active": true,
+        "index": "5.9",
+        "revDate": "2021-11-22"
+      }
+    },
+    {
+      "_key": "65893375",
+      "name": "Miles Theodore",
+      "short": "Miles",
+      "handicap": {
+        "source": "ghin",
+        "id": "8633580",
+        "firstName": "Miles",
+        "lastName": "Theodore",
+        "playerName": "Miles Theodore",
+        "gender": "M",
+        "active": true,
+        "index": "10.1",
+        "revDate": "2021-11-29"
+      }
+    },
+    {
+      "_key": "65893363",
+      "name": "Jeff Miller",
+      "short": "Jeff",
+      "handicap": {
+        "source": "ghin",
+        "id": "8674960",
+        "firstName": "Jeff",
+        "lastName": "Miller",
+        "playerName": "Jeff Miller",
+        "gender": "M",
+        "active": true,
+        "index": "9.5",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "65893411",
+      "name": "Daniel Cutts",
+      "short": "Danimal",
+      "handicap": {
+        "source": "ghin",
+        "id": "10239582",
+        "firstName": "Daniel",
+        "lastName": "Cutts",
+        "playerName": "Daniel Cutts",
+        "gender": "M",
+        "active": true,
+        "index": "19.0",
+        "revDate": "2021-12-29"
+      }
+    },
+    {
+      "_key": "84055851",
+      "name": "Daniel Duncan ",
+      "handicap": {
+        "source": "ghin",
+        "id": "10333707",
+        "firstName": "Dan",
+        "lastName": "Duncan ",
+        "playerName": "Dan Duncan ",
+        "gender": "M",
+        "active": true,
+        "index": "1.6",
+        "revDate": "2022-01-29"
+      }
+    },
+    {
+      "_key": "65893424",
+      "name": "Scott Pollard",
+      "handicap": {
+        "source": "ghin",
+        "id": "10322856",
+        "firstName": "Scott",
+        "lastName": "Pollard",
+        "playerName": "Scott Pollard",
+        "gender": "M",
+        "active": true,
+        "index": "18.4",
+        "revDate": "2022-01-31"
+      }
+    },
+    {
+      "_key": "67131125",
+      "name": "Matt Rackey",
+      "short": "Matt",
+      "handicap": {
+        "source": "ghin",
+        "id": "10351934",
+        "firstName": "Matt",
+        "lastName": "Rackey",
+        "playerName": "Matt Rackey",
+        "gender": "M",
+        "active": true,
+        "index": "7.6",
+        "revDate": "2022-01-16"
+      }
+    },
+    {
+      "_key": "80802172",
+      "name": "Daniel Moriarty",
+      "handicap": {
+        "source": "ghin",
+        "id": "10502367",
+        "firstName": "Daniel",
+        "lastName": "Moriarty",
+        "playerName": "Daniel Moriarty",
+        "gender": "M",
+        "active": true,
+        "index": "12.7",
+        "revDate": "2022-01-29"
+      }
+    },
+    {
+      "_key": "80561457",
+      "name": "Hunter Rice",
+      "handicap": {
+        "source": "ghin",
+        "id": "10500627",
+        "firstName": "Hunter",
+        "lastName": "Rice",
+        "playerName": "Hunter Rice",
+        "gender": "M",
+        "active": true,
+        "index": "11.4",
+        "revDate": "2021-12-27"
+      }
+    },
+    {
+      "_key": "140866339",
+      "name": "Robb Phillips",
+      "short": "Robb",
+      "handicap": {
+        "source": "ghin",
+        "id": "10573855",
+        "firstName": "Robb",
+        "lastName": "Phillips",
+        "playerName": "Robb Phillips",
+        "gender": "M",
+        "active": true,
+        "index": "2.3",
+        "revDate": "2022-01-28"
+      }
+    },
+    {
+      "_key": "245004985",
+      "name": "Greg Cornwell",
+      "short": "Greg",
+      "handicap": {
+        "source": "ghin",
+        "id": "10564845",
+        "firstName": "Greg",
+        "lastName": "Cornwell",
+        "playerName": "Greg Cornwell",
+        "gender": "M",
+        "active": true,
+        "index": "14.1",
+        "revDate": "2021-11-21"
+      }
+    },
+    {
+      "_key": "107693764",
+      "name": "Graham Lewis",
+      "handicap": {
+        "source": "ghin",
+        "id": "10677021",
+        "firstName": "Graham",
+        "lastName": "Lewis",
+        "playerName": "Graham Lewis",
+        "gender": "M",
+        "active": true,
+        "index": "2.6",
+        "revDate": "2022-02-01"
+      }
+    },
+    {
+      "_key": "135186606",
+      "name": "Adam Oates",
+      "short": "Adam",
+      "handicap": {
+        "source": "ghin",
+        "id": "10756021",
+        "firstName": "Adam",
+        "lastName": "Oates",
+        "playerName": "Adam Oates",
+        "gender": "M",
+        "active": true,
+        "index": "17.4",
+        "revDate": "2021-12-29"
+      }
+    },
+    {
+      "_key": "74681902",
+      "name": "Kyle Sherman",
+      "handicap": {
+        "source": "ghin",
+        "id": "3095345",
+        "firstName": "Kyle",
+        "lastName": "Sherman",
+        "playerName": "Kyle Sherman",
+        "gender": "M",
+        "active": true,
+        "index": "10.2",
+        "revDate": "2022-01-06"
+      }
+    },
+    {
+      "_key": "74684286",
+      "name": "Paul Mulligan",
+      "handicap": {
+        "source": "ghin",
+        "id": "5242901",
+        "firstName": "Paul",
+        "lastName": "Mulligan",
+        "playerName": "Paul Mulligan",
+        "gender": "M",
+        "active": true,
+        "index": "15.6",
+        "revDate": "2020-11-29"
+      }
+    },
+    {
+      "_key": "113144585",
+      "name": "Shanon Chase",
+      "short": "Shanon",
+      "handicap": {
+        "source": "ghin",
+        "id": "10690446",
+        "firstName": "Shanon",
+        "lastName": "Chase",
+        "playerName": "Shanon Chase",
+        "gender": "M",
+        "active": true,
+        "index": "4.7",
+        "revDate": "2022-01-31"
+      }
+    }
+  ]
+}

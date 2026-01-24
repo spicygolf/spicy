@@ -10,8 +10,12 @@ import { PlayerAccount } from "spicylib/schema";
 import { getCountries } from "./countries";
 import { getCourseDetails, searchCourses } from "./courses";
 import { getJazzWorker, setupWorker } from "./jazz_worker";
-import { importGameSpecsToCatalog, importGamesFromArango } from "./lib/catalog";
-import { linkPlayerToUser } from "./lib/link";
+import {
+  importGameSpecsToCatalog,
+  importGamesFromFiles,
+  resetCatalog,
+} from "./lib/catalog";
+import { linkPlayerToUser, lookupPlayer } from "./lib/link";
 import { playerSearch } from "./players";
 import { isAdminAccount, requireAdminAccount } from "./utils/auth";
 import { authenticateJazzRequest } from "./utils/jazz-auth";
@@ -106,7 +110,7 @@ const corsOrigin =
 const app = new Elysia()
   .use(
     cors({
-      origin: [corsOrigin, "http://localhost:5173"],
+      origin: [corsOrigin, "http://localhost:5173", "http://localhost:5000"],
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "x-jazz-auth"],
       credentials: true,
@@ -230,6 +234,39 @@ const app = new Elysia()
   })
   // Admin endpoints - protected by Jazz auth + admin check
   .post(
+    `/${api}/catalog/reset`,
+    async ({ jazzAccountId, body }) => {
+      try {
+        requireAdminAccount(jazzAccountId);
+
+        const options = body as {
+          clearSpecs?: boolean;
+          clearOptions?: boolean;
+          clearGames?: boolean;
+          clearPlayers?: boolean;
+          clearCourses?: boolean;
+        } | null;
+
+        console.log(
+          `Catalog reset started by ${jazzAccountId}`,
+          JSON.stringify(options),
+        );
+        const { account } = await getJazzWorker();
+
+        const result = await resetCatalog(
+          account as co.loaded<typeof PlayerAccount>,
+          options ?? undefined,
+        );
+        console.log("Reset result:", JSON.stringify(result));
+        return result;
+      } catch (error) {
+        console.error("Reset failed:", error);
+        throw error;
+      }
+    },
+    { jazzAuth: true },
+  )
+  .post(
     `/${api}/catalog/import`,
     async ({ jazzAccountId, body }) => {
       try {
@@ -286,10 +323,9 @@ const app = new Elysia()
         try {
           const { account } = await getJazzWorker();
 
-          console.log("Calling importGamesFromArango...");
-          const result = await importGamesFromArango(
+          console.log("Calling importGamesFromFiles...");
+          const result = await importGamesFromFiles(
             account as co.loaded<typeof PlayerAccount>,
-            undefined,
             legacyId ? { legacyId } : undefined,
           );
           console.log("Games import result:", JSON.stringify(result));
@@ -308,12 +344,42 @@ const app = new Elysia()
     { jazzAuth: true },
   )
   .post(
+    `/${api}/player/lookup`,
+    async ({ body }) => {
+      try {
+        const { ghinId } = body as { ghinId: string };
+        if (!ghinId) {
+          throw new Error("GHIN ID required");
+        }
+
+        console.log(`Looking up player with GHIN ${ghinId}`);
+
+        // Get the worker account to access catalog
+        const { account: workerAccount } = await getJazzWorker();
+
+        // Delegate to the lookup function
+        const result = await lookupPlayer(
+          ghinId,
+          workerAccount as co.loaded<typeof PlayerAccount>,
+        );
+
+        return result;
+      } catch (error) {
+        console.error("Player lookup failed:", error);
+        throw error;
+      }
+    },
+    // No jazzAuth required - this is a read-only preview
+  )
+  .post(
     `/${api}/player/link`,
     async ({ body, jazzAccountId }) => {
       try {
         if (!jazzAccountId) {
           throw new Error("User not authenticated or no Jazz account");
         }
+
+        console.log(`[/player/link] body:`, JSON.stringify(body));
 
         const { ghinId } = body as { ghinId: string };
         if (!ghinId) {
@@ -372,7 +438,7 @@ const app = new Elysia()
 
         // Load catalog courses map
         const loadedCatalog = await catalog.$jazz.ensureLoaded({
-          resolve: { courses: {} },
+          resolve: { courses: true },
         });
 
         if (!loadedCatalog.courses) {

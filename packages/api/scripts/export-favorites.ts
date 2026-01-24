@@ -92,7 +92,7 @@ async function exportFavorites(): Promise<void> {
     const seen = seenFavoritePlayers.get(fav.playerKey)!;
     if (!seen.has(fav.favoritePlayerKey)) {
       seen.add(fav.favoritePlayerKey);
-      playerFavoritesMap.get(fav.playerKey)!.favoritePlayers.push({
+      playerFavoritesMap.get(fav.playerKey)?.favoritePlayers.push({
         favoritePlayerKey: fav.favoritePlayerKey,
         ghinId: playerGhinMap.get(fav.favoritePlayerKey) ?? null,
         addedAt: fav.addedAt,
@@ -120,7 +120,7 @@ async function exportFavorites(): Promise<void> {
     const seen = seenFavoriteCourseTees.get(fav.playerKey)!;
     if (!seen.has(compositeKey)) {
       seen.add(compositeKey);
-      playerFavoritesMap.get(fav.playerKey)!.favoriteCourseTees.push({
+      playerFavoritesMap.get(fav.playerKey)?.favoriteCourseTees.push({
         courseId: fav.courseId,
         teeId: fav.teeId,
         addedAt: fav.addedAt,

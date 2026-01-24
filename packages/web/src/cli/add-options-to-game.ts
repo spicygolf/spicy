@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * Add Options to Game and GameSpec
  *
@@ -11,11 +12,16 @@
  *   bun run src/cli/add-options-to-game.ts co_zJkF8xhjVFRNemoSdXZnZrUtHM2
  */
 
-import { config } from "dotenv";
 import { resolve } from "node:path";
+import { config } from "dotenv";
 import type { Account, ID } from "jazz-tools";
 import { startWorker } from "jazz-tools/worker";
-import { Game, MultiplierOption, MapOfOptions } from "spicylib/schema";
+import {
+  Game,
+  type MapOfOptions,
+  type MultiplierOption,
+} from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 
 // Load environment from API package
 config({ path: resolve(import.meta.dir, "../../../api/.env") });
@@ -98,47 +104,29 @@ async function addMultiplierOption(
   optionDef: MultiplierOptionDef,
 ): Promise<boolean> {
   const existing = optionsMap[optionDef.name];
-  if (existing?.$isLoaded) {
+  if (existing) {
     console.log(`  Option "${optionDef.name}" already exists, skipping`);
     return false;
   }
 
-  const newOption = MultiplierOption.create(
-    {
-      name: optionDef.name,
-      disp: optionDef.disp,
-      type: "multiplier",
-      version: optionDef.version,
-      value: optionDef.value,
-    },
-    { owner: optionsMap.$jazz.owner },
-  );
-
-  // Set optional fields
-  if (optionDef.seq !== undefined) {
-    newOption.$jazz.set("seq", optionDef.seq);
-  }
-  if (optionDef.icon) {
-    newOption.$jazz.set("icon", optionDef.icon);
-  }
-  if (optionDef.based_on) {
-    newOption.$jazz.set("based_on", optionDef.based_on);
-  }
-  if (optionDef.scope) {
-    newOption.$jazz.set("scope", optionDef.scope);
-  }
-  if (optionDef.availability) {
-    newOption.$jazz.set("availability", optionDef.availability);
-  }
-  if (optionDef.override !== undefined) {
-    newOption.$jazz.set("override", optionDef.override);
-  }
-  if (optionDef.value_from) {
-    newOption.$jazz.set("value_from", optionDef.value_from);
-  }
-  if (optionDef.input_value !== undefined) {
-    newOption.$jazz.set("input_value", optionDef.input_value);
-  }
+  // Options are now plain objects - create directly
+  const newOption: MultiplierOption = {
+    name: optionDef.name,
+    disp: optionDef.disp,
+    type: "multiplier",
+    version: optionDef.version,
+    value: optionDef.value,
+    ...(optionDef.seq !== undefined && { seq: optionDef.seq }),
+    ...(optionDef.icon && { icon: optionDef.icon }),
+    ...(optionDef.based_on && { based_on: optionDef.based_on }),
+    ...(optionDef.scope && { scope: optionDef.scope }),
+    ...(optionDef.availability && { availability: optionDef.availability }),
+    ...(optionDef.override !== undefined && { override: optionDef.override }),
+    ...(optionDef.value_from && { value_from: optionDef.value_from }),
+    ...(optionDef.input_value !== undefined && {
+      input_value: optionDef.input_value,
+    }),
+  };
 
   optionsMap.$jazz.set(optionDef.name, newOption);
   console.log(`  Added option "${optionDef.name}"`);
@@ -168,14 +156,11 @@ async function main() {
   });
 
   try {
-    // Load the game with specs and options
+    // Load the game with spec - game.spec is the working copy of options
     const game = await Game.load(gameId as ID<Game>, {
       resolve: {
-        specs: {
-          $each: {
-            options: { $each: true },
-          },
-        },
+        spec: { $each: true },
+        specRef: { $each: true },
       },
     });
 
@@ -186,40 +171,41 @@ async function main() {
 
     console.log(`\nGame: ${game.name}`);
 
-    const spec = game.specs?.[0];
+    const spec = game.specRef;
     if (!spec?.$isLoaded) {
       console.error("Game has no spec loaded");
       process.exit(1);
     }
 
-    console.log(`Spec: ${spec.name} (${spec.$jazz.id})`);
+    const specName = getSpecField(spec, "name");
+    console.log(`Spec: ${specName} (${spec.$jazz.id})`);
 
-    // Ensure spec has options map
-    if (!spec.$jazz.has("options") || !spec.options) {
-      console.log("Creating options map on spec...");
-      const optionsMap = MapOfOptions.create({}, { owner: spec.$jazz.owner });
-      spec.$jazz.set("options", optionsMap);
-    }
+    // GameSpec IS the options map directly - no need to check for nested options
+    console.log(
+      `\nCurrent options: ${Object.keys(spec).filter((k) => !k.startsWith("$")).length}`,
+    );
+    console.log(
+      `  ${Object.keys(spec)
+        .filter((k) => !k.startsWith("$"))
+        .join(", ")}`,
+    );
 
-    const specOptions = spec.options;
-    if (!specOptions?.$isLoaded) {
-      console.error("Failed to access spec options");
-      process.exit(1);
-    }
-
-    console.log(`\nCurrent options: ${Object.keys(specOptions).length}`);
-    console.log(`  ${Object.keys(specOptions).join(", ")}`);
-
-    // Add new multiplier options
+    // Add new multiplier options - spec IS the options map
     console.log("\nAdding new multiplier options to spec:");
-    const addedTwelve = await addMultiplierOption(specOptions, TWELVE_OPTION);
-    const addedCustom = await addMultiplierOption(specOptions, CUSTOM_OPTION);
+    const addedTwelve = await addMultiplierOption(spec, TWELVE_OPTION);
+    const addedCustom = await addMultiplierOption(spec, CUSTOM_OPTION);
 
     if (!addedTwelve && !addedCustom) {
       console.log("\nNo new options added (all already exist)");
     } else {
-      console.log(`\nUpdated options: ${Object.keys(specOptions).length}`);
-      console.log(`  ${Object.keys(specOptions).join(", ")}`);
+      console.log(
+        `\nUpdated options: ${Object.keys(spec).filter((k) => !k.startsWith("$")).length}`,
+      );
+      console.log(
+        `  ${Object.keys(spec)
+          .filter((k) => !k.startsWith("$"))
+          .join(", ")}`,
+      );
     }
 
     // Wait for sync

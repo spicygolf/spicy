@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const POST_ROUND_MUTATION = gql`
   mutation PostRoundToHandicapService($rkey: String!, $posted_by: String!) {

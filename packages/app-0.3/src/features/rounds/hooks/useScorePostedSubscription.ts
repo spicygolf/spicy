@@ -1,4 +1,4 @@
-import { gql, useSubscription } from '@apollo/client';
+import { gql, useSubscription } from "@apollo/client";
 
 const query = gql`
   subscription onScorePosted($rkey: String!) {

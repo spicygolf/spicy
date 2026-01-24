@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const LOOKUP_PLAYER_BY_GHIN = gql`
   query LookupPlayerByGhin($ghin: String!) {

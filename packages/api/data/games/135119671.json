@@ -1,0 +1,16 @@
+{
+  "legacyId": "135119671",
+  "exportedAt": "2026-01-24T15:49:41.051Z",
+  "game": {
+    "_key": "135119671",
+    "_id": "games/135119671",
+    "_rev": "_k_OgNT2-_t",
+    "name": "Individual Match Play",
+    "start": "2021-01-27T04:12:03Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [],
+    "options": []
+  },
+  "rounds": [],
+  "gamespecKey": "72068149"
+}

@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const ADD_LINK_MUTATION = gql`
   mutation link($from: LinkInput!, $to: LinkInput!, $other: [KV]) {

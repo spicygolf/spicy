@@ -1,16 +1,16 @@
-import { getRatings } from 'common/utils/game';
-import { addFavesToTee } from 'common/utils/tees';
-import { useGetCourseQuery } from 'features/courses/useGetCourseQuery';
+import { getRatings } from "common/utils/game";
+import { addFavesToTee } from "common/utils/tees";
+import { useGetCourseQuery } from "features/courses/useGetCourseQuery";
 // import { useGetFavoriteTeesForPlayerQuery } from 'features/courses/useGetFavoriteTeesForPlayerQuery';
-import { GameContext } from 'features/game/gameContext';
-import { AddCourseContext } from 'features/gameSetup/addCourseContext';
-import TeeList from 'features/gameSetup/TeeList';
-import { orderBy } from 'lodash';
-import React, { useContext } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { Icon, ListItem } from 'react-native-elements';
+import { GameContext } from "features/game/gameContext";
+import { AddCourseContext } from "features/gameSetup/addCourseContext";
+import TeeList from "features/gameSetup/TeeList";
+import { orderBy } from "lodash";
+import { useContext } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { Icon, ListItem } from "react-native-elements";
 
-const AddCourseSearchTee = (props) => {
+const AddCourseSearchTee = (_props) => {
   const { course, setCourse } = useContext(AddCourseContext);
   const { game, currentPlayerKey } = useContext(GameContext);
   const course_id = parseInt(course.course_id, 10) || 0;
@@ -55,14 +55,14 @@ const AddCourseSearchTee = (props) => {
   // decorate tees with faves data
   let tees = selectedCourse.data?.getCourse?.tees?.map((tee) => {
     const { rating } = getRatings(game.scope.holes, tee);
-    let newTee = addFavesToTee({ tee, faves, game, currentPlayerKey });
+    const newTee = addFavesToTee({ tee, faves, game, currentPlayerKey });
     return {
       ...newTee,
       course_id,
       order: rating,
     };
   });
-  tees = orderBy(tees, ['gender', 'order'], ['desc', 'desc']);
+  tees = orderBy(tees, ["gender", "order"], ["desc", "desc"]);
 
   return (
     <View style={styles.container}>
@@ -73,7 +73,11 @@ const AddCourseSearchTee = (props) => {
             {course.city_state}
           </ListItem.Subtitle>
         </ListItem.Content>
-        <Icon name="remove-circle" color="red" onPress={() => setCourse(null)} />
+        <Icon
+          name="remove-circle"
+          color="red"
+          onPress={() => setCourse(null)}
+        />
       </ListItem>
       <TeeList tees={tees} showRemove={false} allowAddToRound={true} />
     </View>
@@ -88,7 +92,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   citystate: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
   },
   listContainer: {

@@ -10,7 +10,7 @@
  * - useState storing Jazz objects
  */
 
-import { readFileSync, existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 
 interface ValidationIssue {
   file: string;
@@ -65,7 +65,7 @@ function validateFile(filePath: string): ValidationIssue[] {
         .slice(i, Math.min(i + 10, lines.length))
         .join("\n");
       // Match }, [deps]) or ), [deps]) pattern
-      const depsMatch = contextLines.match(/[}\)]\s*,\s*\[([^\]]+)\]/);
+      const depsMatch = contextLines.match(/[})]\s*,\s*\[([^\]]+)\]/);
       if (depsMatch) {
         const deps = depsMatch[1].split(",").map((d) => d.trim());
         const jazzDeps = deps.filter((d) => isJazzCoValue(d));

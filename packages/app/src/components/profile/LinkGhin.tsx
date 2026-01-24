@@ -2,16 +2,31 @@
  * Link GHIN Component
  *
  * Allows users to link their account to their GHIN player record.
- * This grants access to their imported games and player data.
+ *
+ * Flow:
+ * 1. User enters GHIN ID and taps "Link"
+ * 2. If historical data exists, show import options as a bonus
+ * 3. If no historical data, link directly
  */
 
 import { useAccount } from "jazz-tools/react-native";
 import { useState } from "react";
-import { Alert, TouchableOpacity, View } from "react-native";
+import { Alert, Switch, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Game, ListOfGames, PlayerAccount } from "spicylib/schema";
 import { apiPost } from "@/lib/api-client";
 import { Button, Text, TextInput } from "@/ui";
+
+interface PlayerLookupResult {
+  found: boolean;
+  playerId?: string;
+  playerName?: string;
+  ghinId?: string;
+  legacyId?: string;
+  gameCount: number;
+  favoritePlayersCount: number;
+  favoriteCoursesCount: number;
+}
 
 interface LinkPlayerResult {
   success: boolean;
@@ -40,6 +55,14 @@ export function LinkGhin() {
   const [isLinking, setIsLinking] = useState(false);
   const [progress, setProgress] = useState<ImportProgress | null>(null);
 
+  // Lookup/preview state
+  const [lookupResult, setLookupResult] = useState<PlayerLookupResult | null>(
+    null,
+  );
+  const [importGames, setImportGames] = useState(true);
+  const [importFavoritePlayers, setImportFavoritePlayers] = useState(true);
+  const [importFavoriteCourses, setImportFavoriteCourses] = useState(true);
+
   // Check if linked to a GHIN/catalog player (not just the default player created on signup)
   const linkedPlayer =
     me?.$isLoaded && me.root?.$isLoaded && me.root.player?.$isLoaded
@@ -47,7 +70,7 @@ export function LinkGhin() {
       : null;
   const isLinked = linkedPlayer?.$jazz.has("ghinId") ?? false;
 
-  const handleLink = async () => {
+  const handleLinkWithLookup = async () => {
     if (!ghinId.trim()) {
       Alert.alert("Error", "Please enter your GHIN ID");
       return;
@@ -60,11 +83,81 @@ export function LinkGhin() {
 
     setIsLinking(true);
     setProgress({ phase: "linking", current: 0, total: 0 });
+    setLookupResult(null);
+
+    try {
+      // First, check if there's historical data
+      const lookupData = await apiPost<PlayerLookupResult>("/player/lookup", {
+        ghinId: ghinId.trim(),
+      });
+
+      if (!lookupData.found) {
+        Alert.alert(
+          "Not Found",
+          `No player found with GHIN ID ${ghinId}. Make sure the player data has been imported.`,
+        );
+        setIsLinking(false);
+        setProgress(null);
+        return;
+      }
+
+      // Check if there's any historical data to import
+      const hasHistoricalData =
+        lookupData.gameCount > 0 ||
+        lookupData.favoritePlayersCount > 0 ||
+        lookupData.favoriteCoursesCount > 0;
+
+      if (hasHistoricalData) {
+        // Show import options as a bonus
+        setLookupResult(lookupData);
+        setImportGames(lookupData.gameCount > 0);
+        setImportFavoritePlayers(lookupData.favoritePlayersCount > 0);
+        setImportFavoriteCourses(lookupData.favoriteCoursesCount > 0);
+        setIsLinking(false);
+        setProgress(null);
+        return;
+      }
+
+      // No historical data - proceed directly to link
+      await performLink();
+    } catch (error) {
+      console.error("Link failed:", error);
+      Alert.alert(
+        "Link Failed",
+        error instanceof Error ? error.message : "Unknown error occurred",
+      );
+      setIsLinking(false);
+      setProgress(null);
+    }
+  };
+
+  // Core link function - called directly or after showing import options
+  const performLink = async () => {
+    if (!me?.$isLoaded || !me.root?.$isLoaded) {
+      Alert.alert("Error", "Account not loaded. Please try again.");
+      return;
+    }
+
+    setIsLinking(true);
+    setProgress({ phase: "linking", current: 0, total: 0 });
 
     try {
       // Call the API to link the player
+      const trimmedGhinId = ghinId.trim();
+      console.log(
+        `[LinkGhin] performLink called with ghinId: "${trimmedGhinId}"`,
+      );
+
+      if (!trimmedGhinId) {
+        Alert.alert(
+          "Error",
+          "GHIN ID is empty. Please enter your GHIN ID again.",
+        );
+        return;
+      }
+
       const result = await apiPost<LinkPlayerResult>("/player/link", {
-        ghinId: ghinId.trim(),
+        ghinId: trimmedGhinId,
       });
 
       const gameIds = result.gameIds || [];
@@ -194,6 +287,11 @@ export function LinkGhin() {
     );
   };
 
+  const handleCancel = () => {
+    setLookupResult(null);
+    setGhinId("");
+  };
+
   const renderProgress = () => {
     if (!progress) return null;
 
@@ -225,6 +323,91 @@ export function LinkGhin() {
     );
   };
 
+  const renderPreview = () => {
+    if (!lookupResult?.found) return null;
+
+    const hasData =
+      lookupResult.gameCount > 0 ||
+      lookupResult.favoritePlayersCount > 0 ||
+      lookupResult.favoriteCoursesCount > 0;
+
+    return (
+      <View style={styles.previewContainer}>
+        <Text style={styles.previewTitle}>
+          Welcome back, {lookupResult.playerName}!
+        </Text>
+
+        {hasData ? (
+          <>
+            <Text style={styles.previewSubtitle}>
+              We found your data from Spicy Golf v0.3:
+            </Text>
+
+            {lookupResult.gameCount > 0 && (
+              <View style={styles.optionRow}>
+                <Switch
+                  value={importGames}
+                  onValueChange={setImportGames}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.action,
+                  }}
+                />
+                <Text style={styles.optionLabel}>
+                  Import {lookupResult.gameCount} game
+                  {lookupResult.gameCount !== 1 ? "s" : ""}
+                </Text>
+              </View>
+            )}
+
+            {lookupResult.favoritePlayersCount > 0 && (
+              <View style={styles.optionRow}>
+                <Switch
+                  value={importFavoritePlayers}
+                  onValueChange={setImportFavoritePlayers}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.action,
+                  }}
+                />
+                <Text style={styles.optionLabel}>
+                  Import {lookupResult.favoritePlayersCount} favorite player
+                  {lookupResult.favoritePlayersCount !== 1 ? "s" : ""}
+                </Text>
+              </View>
+            )}
+
+            {lookupResult.favoriteCoursesCount > 0 && (
+              <View style={styles.optionRow}>
+                <Switch
+                  value={importFavoriteCourses}
+                  onValueChange={setImportFavoriteCourses}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.action,
+                  }}
+                />
+                <Text style={styles.optionLabel}>
+                  Import {lookupResult.favoriteCoursesCount} favorite course
+                  {lookupResult.favoriteCoursesCount !== 1 ? "s" : ""}
+                </Text>
+              </View>
+            )}
+          </>
+        ) : (
+          <Text style={styles.previewSubtitle}>
+            No historical data found, but we can still link your account.
+          </Text>
+        )}
+
+        <View style={styles.buttonRow}>
+          <Button label="Cancel" onPress={handleCancel} variant="secondary" />
+          <Button label="Link & Import" onPress={performLink} />
+        </View>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>GHIN Player Link</Text>
@@ -252,7 +435,11 @@ export function LinkGhin() {
         </View>
       ) : (
         <View style={styles.linkContainer}>
-          {!isLinking && (
+          {isLinking ? (
+            renderProgress()
+          ) : lookupResult ? (
+            renderPreview()
+          ) : (
             <>
               <Text style={styles.description}>
                 Enter your GHIN ID to link your account.
@@ -265,19 +452,16 @@ export function LinkGhin() {
                   onChangeText={setGhinId}
                   placeholder="Enter your GHIN ID"
                   keyboardType="number-pad"
-                  editable={!isLinking}
                 />
               </View>
 
               <Button
-                label="Link Player"
-                onPress={handleLink}
+                label="Link"
+                onPress={handleLinkWithLookup}
                 disabled={!ghinId.trim()}
               />
             </>
           )}
-
-          {renderProgress()}
         </View>
       )}
     </View>
@@ -368,5 +552,31 @@ const styles = StyleSheet.create((theme) => ({
   unlinkText: {
     fontSize: 14,
     fontWeight: "500",
+  },
+  previewContainer: {
+    gap: 16,
+    paddingVertical: 8,
+  },
+  previewTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  previewSubtitle: {
+    fontSize: 14,
+    color: theme.colors.secondary,
+  },
+  optionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  optionLabel: {
+    fontSize: 14,
+    flex: 1,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 8,
   },
 }));

@@ -9,11 +9,7 @@
   "max_players": 4,
   "location_type": "multiple",
   "teams": false,
-  "options": [
-    "use_handicaps",
-    "auto_press",
-    "auto_press_trigger"
-  ],
+  "options": ["use_handicaps", "auto_press", "auto_press_trigger"],
   "junk": [],
   "multipliers": []
 }

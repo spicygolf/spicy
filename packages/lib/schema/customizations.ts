@@ -1,4 +1,5 @@
 import { co, z } from "jazz-tools";
+import { getSpecField } from "../scoring/option-utils";
 import type { GameSpec } from "./gamespecs";
 import { MapOfOptions } from "./options";
 
@@ -58,19 +59,24 @@ export function getEffectiveSpecMetadata(
   short: string;
   long_description?: string;
 } {
+  const specName = getSpecField(catalogSpec, "name") as string | undefined;
+  const specShort = getSpecField(catalogSpec, "short") as string | undefined;
+  const specLongDesc = getSpecField(catalogSpec, "long_description") as
+    | string
+    | undefined;
+
   if (!customization) {
     return {
-      name: catalogSpec.name,
-      short: catalogSpec.short,
-      long_description: catalogSpec.long_description,
+      name: specName || "",
+      short: specShort || specName || "",
+      long_description: specLongDesc,
     };
   }
 
   return {
-    name: customization.name || catalogSpec.name,
-    short: customization.short || catalogSpec.short,
-    long_description:
-      customization.long_description || catalogSpec.long_description,
+    name: customization.name || specName || "",
+    short: customization.short || specShort || specName || "",
+    long_description: customization.long_description || specLongDesc,
   };
 }
 

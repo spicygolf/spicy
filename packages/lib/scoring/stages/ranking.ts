@@ -6,6 +6,7 @@
  */
 
 import { deepClone } from "../../utils/clone";
+import { getSpecField } from "../option-utils";
 import { rankWithTies } from "../ranking-engine";
 import type { ScoringContext } from "../types";
 
@@ -167,8 +168,8 @@ export function rankTeamsCumulative(ctx: ScoringContext): ScoringContext {
   // Points games: higher points = better
   // Skins games: higher points = better (winning skins)
   // The spec_type field indicates the game scoring mechanism
-  const isPointsGame =
-    gameSpec?.spec_type === "points" || gameSpec?.spec_type === "skins";
+  const specType = getSpecField(gameSpec, "spec_type");
+  const isPointsGame = specType === "points" || specType === "skins";
 
   // Get teams with cumulative totals
   const teamsWithTotals = Object.entries(newScoreboard.cumulative.teams)

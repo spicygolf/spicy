@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const UPDATE_PLAYER_MUTATION = gql`
   mutation UpdatePlayer($player: PlayerInput!) {

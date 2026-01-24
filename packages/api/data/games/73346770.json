@@ -1,0 +1,16 @@
+{
+  "legacyId": "73346770",
+  "exportedAt": "2026-01-24T15:49:41.335Z",
+  "game": {
+    "_key": "73346770",
+    "_id": "games/73346770",
+    "_rev": "_k_OgNTu-AC",
+    "name": "Five Points",
+    "start": "2020-05-19T14:33:14Z",
+    "holes": [],
+    "options": [],
+    "scope": { "holes": "all18", "teams_rotate": "never" }
+  },
+  "rounds": [],
+  "gamespecKey": "65384954"
+}

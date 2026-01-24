@@ -1,6 +1,6 @@
-import { scoring } from 'common/utils/score';
+import { scoring } from "common/utils/score";
 
-import { makeGame } from './score.util';
+import { makeGame } from "./score.util";
 
 const birdiesCancelFlip = true;
 
@@ -10,8 +10,8 @@ const hole1 = {
   multipliers: [],
 };
 
-describe('common/utils/score - Vegas tests', () => {
-  test('Vegas - Scoring - no blood', () => {
+describe("common/utils/score - Vegas tests", () => {
+  test("Vegas - Scoring - no blood", () => {
     const data = [
       { player: 1, team: 1, score: 4, pops: 0, junk: [] },
       { player: 2, team: 1, score: 5, pops: 0, junk: [] },
@@ -32,7 +32,7 @@ describe('common/utils/score - Vegas tests', () => {
     expect(received).toContainEqual({ team: 2, points: 45 });
   });
 
-  test('Vegas - Scoring - 1 pt', () => {
+  test("Vegas - Scoring - 1 pt", () => {
     const data = [
       { player: 1, team: 1, score: 4, pops: 0, junk: [] },
       { player: 2, team: 1, score: 5, pops: 0, junk: [] },
@@ -53,7 +53,7 @@ describe('common/utils/score - Vegas tests', () => {
     expect(received).toContainEqual({ team: 2, points: 44 });
   });
 
-  test('Vegas - Scoring - birdie flip w pop', () => {
+  test("Vegas - Scoring - birdie flip w pop", () => {
     const data = [
       { player: 1, team: 1, score: 3, pops: 0, junk: [] },
       { player: 2, team: 1, score: 4, pops: 0, junk: [] },
@@ -75,7 +75,7 @@ describe('common/utils/score - Vegas tests', () => {
     expect(received).toContainEqual({ team: 2, points: 54 });
   });
 
-  test('Vegas - Scoring - two birdies adds 10', () => {
+  test("Vegas - Scoring - two birdies adds 10", () => {
     const data = [
       { player: 1, team: 1, score: 3, pops: 0, junk: [] },
       { player: 2, team: 1, score: 3, pops: 0, junk: [] },
@@ -98,7 +98,7 @@ describe('common/utils/score - Vegas tests', () => {
     expect(received).toContainEqual({ team: 2, holeNetTotal: -21 });
   });
 
-  test('Vegas - Scoring - birdies cancel flip', () => {
+  test("Vegas - Scoring - birdies cancel flip", () => {
     const data = [
       { player: 1, team: 1, score: 3, pops: 0, junk: [] },
       { player: 2, team: 1, score: 4, pops: 0, junk: [] },
@@ -120,7 +120,7 @@ describe('common/utils/score - Vegas tests', () => {
     expect(received).toContainEqual({ team: 2, points: 37 });
   });
 
-  test('Vegas - Scoring - eagle adds 10', () => {
+  test("Vegas - Scoring - eagle adds 10", () => {
     const data = [
       { player: 1, team: 1, score: 2, pops: 0, junk: [] },
       { player: 2, team: 1, score: 4, pops: 0, junk: [] },
@@ -143,7 +143,7 @@ describe('common/utils/score - Vegas tests', () => {
     expect(received).toContainEqual({ team: 2, holeNetTotal: -50 });
   });
 
-  test('Vegas - Scoring - eagle over birdie', () => {
+  test("Vegas - Scoring - eagle over birdie", () => {
     const data = [
       { player: 1, team: 1, score: 2, pops: 0, junk: [] },
       { player: 2, team: 1, score: 4, pops: 0, junk: [] },
@@ -166,7 +166,7 @@ describe('common/utils/score - Vegas tests', () => {
     expect(received).toContainEqual({ team: 2, holeNetTotal: -49 });
   });
 
-  test('Vegas - Scoring - eagles cancel', () => {
+  test("Vegas - Scoring - eagles cancel", () => {
     const data = [
       { player: 1, team: 1, score: 2, pops: 0, junk: [] },
       { player: 2, team: 1, score: 4, pops: 0, junk: [] },
@@ -197,48 +197,48 @@ const makeVegasGame = ({ birdies_cancel_flip, holes, data }) => {
   return makeGame({
     gamespecs: [
       {
-        better: 'lower',
+        better: "lower",
         options: [
           {
-            type: 'junk',
-            name: 'birdie',
-            disp: 'Birdie',
+            type: "junk",
+            name: "birdie",
+            disp: "Birdie",
             seq: 0,
-            sub_type: 'vegas',
+            sub_type: "vegas",
             value: 0,
-            limit: '',
-            scope: 'player',
-            icon: 'album',
-            show_in: 'score',
-            score_to_par: 'exactly -1',
-            based_on: 'gross',
+            limit: "",
+            scope: "player",
+            icon: "album",
+            show_in: "score",
+            score_to_par: "exactly -1",
+            based_on: "gross",
           },
           {
-            type: 'junk',
-            name: 'eagle',
-            disp: 'Eagle',
+            type: "junk",
+            name: "eagle",
+            disp: "Eagle",
             seq: 1,
-            sub_type: 'vegas',
+            sub_type: "vegas",
             value: 0,
-            limit: '',
-            scope: 'player',
-            icon: 'album',
-            show_in: 'score',
-            score_to_par: 'exactly -2',
-            based_on: 'gross',
+            limit: "",
+            scope: "player",
+            icon: "album",
+            show_in: "score",
+            score_to_par: "exactly -2",
+            based_on: "gross",
           },
           {
-            type: 'junk',
-            name: 'two_birdies_add',
-            disp: '2 Birdies +10',
+            type: "junk",
+            name: "two_birdies_add",
+            disp: "2 Birdies +10",
             seq: 2,
-            sub_type: 'dot',
+            sub_type: "dot",
             value: 10,
-            limit: '',
-            scope: 'team',
-            icon: 'album',
-            show_in: 'score',
-            calculation: 'logic',
+            limit: "",
+            scope: "team",
+            icon: "album",
+            show_in: "score",
+            calculation: "logic",
             logic: `{
                 'and': [
                   {
@@ -261,21 +261,21 @@ const makeVegasGame = ({ birdies_cancel_flip, holes, data }) => {
                   }
                 ]
               }`,
-            based_on: 'gross',
-            better: 'lower',
+            based_on: "gross",
+            better: "lower",
           },
           {
-            type: 'junk',
-            name: 'eagle_add',
-            disp: 'Eagle +10',
+            type: "junk",
+            name: "eagle_add",
+            disp: "Eagle +10",
             seq: 3,
-            sub_type: 'dot',
+            sub_type: "dot",
             value: 10,
-            limit: '',
-            scope: 'team',
-            icon: 'album',
-            show_in: 'score',
-            calculation: 'logic',
+            limit: "",
+            scope: "team",
+            icon: "album",
+            show_in: "score",
+            calculation: "logic",
             logic: `{
                 'and': [
                   {
@@ -292,21 +292,21 @@ const makeVegasGame = ({ birdies_cancel_flip, holes, data }) => {
                   }
                 ]
               }`,
-            based_on: 'gross',
-            better: 'lower',
+            based_on: "gross",
+            better: "lower",
           },
           {
-            type: 'junk',
-            name: 'two_eagles_add',
-            disp: '2 Eagles +20',
+            type: "junk",
+            name: "two_eagles_add",
+            disp: "2 Eagles +20",
             seq: 4,
-            sub_type: 'dot',
+            sub_type: "dot",
             value: 20,
-            limit: '',
-            scope: 'team',
-            icon: 'album',
-            show_in: 'score',
-            calculation: 'logic',
+            limit: "",
+            scope: "team",
+            icon: "album",
+            show_in: "score",
+            calculation: "logic",
             logic: `{
                 'and': [
                   {
@@ -323,27 +323,27 @@ const makeVegasGame = ({ birdies_cancel_flip, holes, data }) => {
                   }
                 ]
               }`,
-            based_on: 'gross',
-            better: 'lower',
+            based_on: "gross",
+            better: "lower",
           },
           {
-            type: 'game',
-            name: 'birdies_cancel_flip',
-            sub_type: 'bool',
+            type: "game",
+            name: "birdies_cancel_flip",
+            sub_type: "bool",
             value: birdies_cancel_flip,
           },
         ],
         scoring: {
           hole: [
             {
-              name: 'team',
-              disp: 'Team Score',
+              name: "team",
+              disp: "Team Score",
               seq: 1,
               points: 0,
-              source: 'scores',
-              scope: 'team',
-              type: 'vegas',
-              based_on: 'net',
+              source: "scores",
+              scope: "team",
+              type: "vegas",
+              based_on: "net",
             },
           ],
         },

@@ -27,11 +27,15 @@
     "lucide-react": "0.562.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "6",
+    "remark-gfm": "^4.0.1",
     "spicylib": "workspace:*",
     "tailwind-merge": "3.4.0",
     "tailwindcss-animate": "1.0.7"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
     "@types/node": "22.10.2",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.2.3",

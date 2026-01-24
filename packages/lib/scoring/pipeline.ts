@@ -197,32 +197,38 @@ function runPipeline(ctx: ScoringContext): ScoringContext {
 // =============================================================================
 
 function extractGameSpec(game: Game): GameSpec {
-  if (!game.specs?.$isLoaded || game.specs.length === 0) {
-    throw new Error("Game must have at least one game spec");
+  // Primary: game.spec (working copy with user modifications)
+  if (game.spec?.$isLoaded) {
+    return game.spec;
   }
 
-  const spec = game.specs[0];
-  if (!spec?.$isLoaded) {
-    throw new Error("Game spec must be loaded");
+  // Fallback: specRef (catalog spec)
+  if (game.specRef?.$isLoaded) {
+    return game.specRef;
   }
 
-  return spec;
+  throw new Error("Game must have a game spec (spec or specRef)");
 }
 
 function extractOptions(
   game: Game,
   gameSpec: GameSpec,
 ): MapOfOptions | undefined {
-  // Prefer game-level options (customized), fall back to spec options
-  if (game.options?.$isLoaded) {
-    return game.options;
+  // Primary: game.spec (working copy with user modifications)
+  if (game.spec?.$isLoaded) {
+    return game.spec;
   }
 
-  if (gameSpec.options?.$isLoaded) {
-    return gameSpec.options;
+  // Fallback: specRef (catalog spec)
+  if (game.specRef?.$isLoaded) {
+    return game.specRef;
   }
 
-  // No options available
+  // Final fallback to gameSpec parameter
+  if (gameSpec?.$isLoaded) {
+    return gameSpec;
+  }
+
   return undefined;
 }
 
@@ -267,7 +273,8 @@ function buildPlayerHandicaps(
   // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
   const handicapIndexFromOption = options?.["handicap_index_from"];
   const handicapMode =
-    handicapIndexFromOption?.$isLoaded &&
+    handicapIndexFromOption &&
+    handicapIndexFromOption.type === "game" &&
     handicapIndexFromOption.value === "full"
       ? "full"
       : "low";

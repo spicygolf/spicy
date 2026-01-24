@@ -1,14 +1,14 @@
-import { useMutation } from '@apollo/client';
-import { omitTypename } from 'common/utils/game';
-import { GameContext } from 'features/game/gameContext';
-import { UPDATE_GAME_SCOPE_MUTATION } from 'features/game/graphql';
-import { cloneDeep, find } from 'lodash';
-import React, { useContext } from 'react';
-import { View } from 'react-native';
-import DraggableFlatList from 'react-native-draggable-flatlist';
-import { Icon, ListItem } from 'react-native-elements';
+import { useMutation } from "@apollo/client";
+import { omitTypename } from "common/utils/game";
+import { GameContext } from "features/game/gameContext";
+import { UPDATE_GAME_SCOPE_MUTATION } from "features/game/graphql";
+import { cloneDeep, find } from "lodash";
+import { useContext } from "react";
+import { View } from "react-native";
+import DraggableFlatList from "react-native-draggable-flatlist";
+import { Icon, ListItem } from "react-native-elements";
 
-const WolfOrderChooser = (props) => {
+const WolfOrderChooser = (_props) => {
   const { game, readonly } = useContext(GameContext);
   const { players } = game;
 
@@ -18,9 +18,9 @@ const WolfOrderChooser = (props) => {
     if (!game || !game.scope || readonly) {
       return;
     }
-    console.log('setOrder data', newOrderPlayers);
+    console.log("setOrder data", newOrderPlayers);
 
-    let newScope = cloneDeep(game.scope);
+    const newScope = cloneDeep(game.scope);
     newScope.wolf_order = newOrderPlayers.map((p) => p._key);
     const newScopeWithoutTypes = omitTypename(newScope);
 
@@ -30,9 +30,9 @@ const WolfOrderChooser = (props) => {
         scope: newScopeWithoutTypes,
       },
       optimisticResponse: {
-        __typename: 'Mutation',
+        __typename: "Mutation",
         updateGameScope: {
-          __typename: 'Game',
+          __typename: "Game",
           _key: game._key,
           scope: newScope,
         },
@@ -40,7 +40,7 @@ const WolfOrderChooser = (props) => {
     });
 
     if (error) {
-      console.log('Error updating game scope - wolfOrderChooser', error);
+      console.log("Error updating game scope - wolfOrderChooser", error);
     }
   };
 
@@ -48,16 +48,13 @@ const WolfOrderChooser = (props) => {
   //        also handle if it's null or maybe even if mismatched w/ game.players
   let sorted_players = [];
   if (
-    game &&
-    game.scope &&
-    game.scope.wolf_order &&
-    game.scope.wolf_order.length &&
+    game?.scope?.wolf_order?.length &&
     game.scope.wolf_order.length === game.players.length
   ) {
     sorted_players = game.scope.wolf_order.map((pkey) => {
       const p = find(players, { _key: pkey });
       if (!p) {
-        console.log('a player in wolf_order that is not in players?');
+        console.log("a player in wolf_order that is not in players?");
       }
       return p;
     });
@@ -68,13 +65,13 @@ const WolfOrderChooser = (props) => {
 
   const renderItem = ({ item, index, drag, isActive }) => {
     const seq = index + 1;
-    const seqText = isActive ? '    ' : `${seq}. `;
+    const seqText = isActive ? "    " : `${seq}. `;
     return (
       <ListItem
         key={`item-${index}`}
         // eslint-disable-next-line react-native/no-inline-styles
         containerStyle={{
-          backgroundColor: isActive ? '#ddd' : '#fff',
+          backgroundColor: isActive ? "#ddd" : "#fff",
         }}
         onLongPress={drag}
       >

@@ -1,4 +1,4 @@
-import { ghinRequest, Pagination } from './ghin';
+import { ghinRequest } from "./ghin";
 
 type GetCourseRequest = {
   q: GetCourseQuery;
@@ -9,12 +9,11 @@ type GetCourseQuery = {
   include_altered_tees?: boolean;
 };
 
-type GetCourseResponse = {
+type GetCourseResponse = {};
 
-};
-
-export const getCourse = async ({q}: GetCourseRequest): Promise<GetCourseResponse | null> => {
-
+export const getCourse = async ({
+  q,
+}: GetCourseRequest): Promise<GetCourseResponse | null> => {
   const { course_id } = q;
 
   const params = {
@@ -22,7 +21,7 @@ export const getCourse = async ({q}: GetCourseRequest): Promise<GetCourseRespons
   };
 
   const resp = await ghinRequest({
-    method: 'get',
+    method: "get",
     url: `/courses/${course_id}.json`,
     params,
     data: {},
@@ -72,7 +71,7 @@ export const getCourse = async ({q}: GetCourseRequest): Promise<GetCourseRespons
           allocation: h.Allocation,
         })),
         course: null,
-      }))
+      })),
     };
     return ret;
   }

@@ -63,7 +63,23 @@ export interface SeedMultiplierOption {
   value_from?: string;
 }
 
-export type SeedOption = SeedGameOption | SeedJunkOption | SeedMultiplierOption;
+export interface SeedMetaOption {
+  name: string;
+  disp: string;
+  type: "meta";
+  valueType: "bool" | "num" | "menu" | "text" | "text_array";
+  value?: string | string[];
+  choices?: Array<{ name: string; disp: string }>;
+  seq?: number;
+  searchable?: boolean;
+  required?: boolean;
+}
+
+export type SeedOption =
+  | SeedGameOption
+  | SeedJunkOption
+  | SeedMultiplierOption
+  | SeedMetaOption;
 
 /**
  * Option reference: either a name (string) or an object with name + overrides
@@ -96,6 +112,8 @@ export interface SeedSpec {
   options: OptionRef[]; // Game option names or objects with overrides
   junk: OptionRef[]; // Junk option names or objects with overrides
   multipliers: OptionRef[]; // Multiplier option names or objects with overrides
+  /** Embedded meta options for unified format (optional, new architecture) */
+  meta?: SeedMetaOption[];
 }
 
 /**
@@ -258,6 +276,16 @@ export async function loadSeedSpecsAsV03(): Promise<
       input_value?: boolean;
       value_from?: string;
     }>;
+    meta?: Array<{
+      name: string;
+      disp: string;
+      valueType: "bool" | "num" | "menu" | "text" | "text_array";
+      value?: string | string[];
+      choices?: Array<{ name: string; disp: string }>;
+      seq?: number;
+      searchable?: boolean;
+      required?: boolean;
+    }>;
   }>
 > {
   const [specs, optionsMap] = await Promise.all([
@@ -389,6 +417,8 @@ export async function loadSeedSpecsAsV03(): Promise<
         input_value?: boolean;
         value_from?: string;
       }>,
+      // Pass through embedded meta options directly (new unified format)
+      meta: spec.meta,
     };
   });
 }

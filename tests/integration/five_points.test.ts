@@ -4,18 +4,18 @@
  * Tests the scoring engine with Five Points game fixtures.
  */
 
-import { describe, it, expect, beforeAll } from "bun:test";
+import { beforeAll, describe, expect, it } from "bun:test";
+import { score } from "../../packages/lib/scoring/pipeline";
+import type { Scoreboard } from "../../packages/lib/scoring/types";
 import {
-  loadFixture,
-  transformFixture,
-  generateTestCases,
   compareJunkArrays,
   deepGet,
   type Fixture,
+  generateTestCases,
+  loadFixture,
   type TransformedFixture,
+  transformFixture,
 } from "../lib";
-import { score } from "../../packages/lib/scoring/pipeline";
-import type { Scoreboard } from "../../packages/lib/scoring/types";
 
 describe("Five Points", () => {
   describe("basic_game fixture", () => {

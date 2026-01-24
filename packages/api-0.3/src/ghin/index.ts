@@ -1,11 +1,6 @@
-import { getCourse } from './getCourse';
-import { searchPlayer } from './searchPlayer';
-import { getTee } from './getTee';
-import { searchCourse } from './searchCourse';
+import { getCourse } from "./getCourse";
+import { getTee } from "./getTee";
+import { searchCourse } from "./searchCourse";
+import { searchPlayer } from "./searchPlayer";
 
-export {
-  searchPlayer,
-  searchCourse,
-  getCourse,
-  getTee,
-};
+export { searchPlayer, searchCourse, getCourse, getTee };

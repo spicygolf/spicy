@@ -1,10 +1,9 @@
-import { useMutation } from '@apollo/client';
-import { green } from 'common/colors';
-import React from 'react';
-import { Icon } from 'react-native-elements';
+import { useMutation } from "@apollo/client";
+import { green } from "common/colors";
+import { Icon } from "react-native-elements";
 
-import { ADD_LINK_MUTATION } from '../graphql/link';
-import { REMOVE_LINK_MUTATION } from '../graphql/unlink';
+import { ADD_LINK_MUTATION } from "../graphql/link";
+import { REMOVE_LINK_MUTATION } from "../graphql/unlink";
 
 const FavoriteIcon = (props) => {
   const { fave } = props;
@@ -12,14 +11,14 @@ const FavoriteIcon = (props) => {
   const [removeLink] = useMutation(REMOVE_LINK_MUTATION);
 
   const iconData = {
-    name: fave?.faved ? 'star' : 'star-border',
+    name: fave?.faved ? "star" : "star-border",
     fn: fave?.faved ? removeLink : addLink,
     variables: fave?.faved
       ? { from: fave?.from, to: fave?.to }
       : {
           from: fave?.from,
           to: fave?.to,
-          other: [{ key: 'favorite', value: 'true' }],
+          other: [{ key: "favorite", value: "true" }],
         },
   };
 
@@ -34,7 +33,10 @@ const FavoriteIcon = (props) => {
           refetchQueries: fave.refetchQueries,
         });
         if (errors) {
-          console.log(`favoriteIcon error performing '${iconData.fn.name}'`, errors);
+          console.log(
+            `favoriteIcon error performing '${iconData.fn.name}'`,
+            errors,
+          );
         }
       }}
     />

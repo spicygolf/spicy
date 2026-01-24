@@ -1,0 +1,58 @@
+{
+  "legacyId": "148520857",
+  "exportedAt": "2026-01-24T15:49:40.980Z",
+  "game": {
+    "_key": "148520857",
+    "_id": "games/148520857",
+    "_rev": "_k_OgNT2-Az",
+    "name": "Five Points",
+    "start": "2021-03-18T16:43:42Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [
+      { "hole": "1", "teams": [], "multipliers": [] },
+      { "hole": "2", "teams": [], "multipliers": [] },
+      { "hole": "3", "teams": [], "multipliers": [] },
+      { "hole": "4", "teams": [], "multipliers": [] },
+      { "hole": "5", "teams": [], "multipliers": [] },
+      { "hole": "6", "teams": [], "multipliers": [] },
+      { "hole": "7", "teams": [], "multipliers": [] },
+      { "hole": "8", "teams": [], "multipliers": [] },
+      { "hole": "9", "teams": [], "multipliers": [] },
+      { "hole": "10", "teams": [], "multipliers": [] },
+      { "hole": "11", "teams": [], "multipliers": [] },
+      { "hole": "12", "teams": [], "multipliers": [] },
+      { "hole": "13", "teams": [], "multipliers": [] },
+      { "hole": "14", "teams": [], "multipliers": [] },
+      { "hole": "15", "teams": [], "multipliers": [] },
+      { "hole": "16", "teams": [], "multipliers": [] },
+      { "hole": "17", "teams": [], "multipliers": [] },
+      { "hole": "18", "teams": [], "multipliers": [] }
+    ],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/148521036",
+        "_key": "148521036",
+        "_rev": "_k_OgNeK-DY",
+        "date": "2021-03-18T16:43:42Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "148521186",
+        "_id": "edges/148521186",
+        "_from": "rounds/148521036",
+        "_to": "games/148520857",
+        "_rev": "_k_OgNiy-CY",
+        "type": "round2game",
+        "ts": "2021-03-18T16:43:44.989Z",
+        "handicap_index": "18.3"
+      },
+      "playerId": "65888247"
+    }
+  ],
+  "gamespecKey": "65384954"
+}

@@ -1,19 +1,22 @@
-import { useLazyQuery, useMutation } from '@apollo/client';
-import { useNavigation } from '@react-navigation/native';
-import GhinSearchPlayer from 'common/components/ghin/player/search';
-import { GameContext } from 'features/game/gameContext';
-import { ADD_PLAYER_MUTATION, LOOKUP_PLAYER_BY_GHIN } from 'features/players/graphql';
-import moment from 'moment';
-import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useLazyQuery, useMutation } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import GhinSearchPlayer from "common/components/ghin/player/search";
+import { GameContext } from "features/game/gameContext";
+import {
+  ADD_PLAYER_MUTATION,
+  LOOKUP_PLAYER_BY_GHIN,
+} from "features/players/graphql";
+import moment from "moment";
+import { useContext, useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
 
 const AddPlayerGHINSearch = () => {
   const defaultNewPlayer = {
-    country: 'USA', // TODO: make this default player-specific
-    state: '',
-    last_name: '',
-    first_name: '',
-    status: 'Active',
+    country: "USA", // TODO: make this default player-specific
+    state: "",
+    last_name: "",
+    first_name: "",
+    status: "Active",
   };
   const [newPlayer, setNewPlayer] = useState(defaultNewPlayer);
   const [lookupPkey, { data: lPkey }] = useLazyQuery(LOOKUP_PLAYER_BY_GHIN);
@@ -41,11 +44,11 @@ const AddPlayerGHINSearch = () => {
   useEffect(
     () => {
       const handleLookup = async () => {
-        let lrlPlayer = {
+        const lrlPlayer = {
           name: newPlayer.name,
           handicap: newPlayer.handicap,
         };
-        if (lPkey && lPkey.lookupPlayerByGhin) {
+        if (lPkey?.lookupPlayerByGhin) {
           const l = lPkey.lookupPlayerByGhin;
           if (l.length > 0) {
             // found existing spicy user for this ghin player
@@ -55,7 +58,7 @@ const AddPlayerGHINSearch = () => {
               name: newPlayer.name,
               short: newPlayer.short,
               handicap: newPlayer.handicap,
-              statusAuthz: ['prod'],
+              statusAuthz: ["prod"],
               createdBy: currentPlayerKey,
               createdDate: moment.utc().format(),
             };
@@ -64,7 +67,7 @@ const AddPlayerGHINSearch = () => {
             });
             if (error) {
               // TODO: error component
-              console.log('error adding player', error);
+              console.log("error adding player", error);
               return;
             }
             if (data?.addPlayer?._key) {
@@ -74,13 +77,19 @@ const AddPlayerGHINSearch = () => {
           }
           // then add player/round to game
           //console.log('lrlPlayer', lrlPlayer);
-          navigation.navigate('LinkRoundList', { game, player: lrlPlayer });
+          navigation.navigate("LinkRoundList", { game, player: lrlPlayer });
         }
       };
       handleLookup();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentPlayerKey, lPkey, newPlayer.handicap, newPlayer.name, newPlayer.short],
+    [
+      currentPlayerKey,
+      lPkey,
+      newPlayer.handicap,
+      newPlayer.name,
+      newPlayer.short,
+    ],
   );
 
   return (

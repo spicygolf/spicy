@@ -10,11 +10,7 @@
   "location_type": "local",
   "long_description": "### AKA\n* Points\n### Description\n* A three-person game with nine points awarded on each hole.\n### Points\n* When all three players tie (net), each player is awarded 3 points\n* When one player wins the hole, one scores second lowest, and the last player scores third lowest, points are awarded 5, 3, 1\n* When one player wins the hole, and the two others tie for second, points are awarded 5, 2, 2\n* When two players tie for low, and the third player scores the second lowest, points are awarded 4, 4, 1\n### Examples\n| Player 1 | Player 2 | Player 3 | Points |\n| -------- | -------- | -------- | ------ |\n| 4 | 4 | 4 | 3, 3, 3 |\n| 4 | 5 | 6 | 5, 3, 1 |\n| 4 | 5 | 5 | 5, 2, 2 |\n| 4 | 4 | 5 | 4, 4, 1 |",
   "teams": false,
-  "options": [
-    "stakes",
-    "use_handicaps",
-    "handicap_index_from"
-  ],
+  "options": ["stakes", "use_handicaps", "handicap_index_from"],
   "junk": [
     "all_tie",
     "outright_winner",

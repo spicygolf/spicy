@@ -1,0 +1,35 @@
+{
+  "legacyId": "143543999",
+  "exportedAt": "2026-01-24T15:49:41.003Z",
+  "game": {
+    "_key": "143543999",
+    "_id": "games/143543999",
+    "_rev": "_k_OgNT2-AX",
+    "name": "Five Points",
+    "start": "2021-02-28T13:47:21Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [
+      { "hole": "1", "teams": [], "multipliers": [] },
+      { "hole": "2", "teams": [], "multipliers": [] },
+      { "hole": "3", "teams": [], "multipliers": [] },
+      { "hole": "4", "teams": [], "multipliers": [] },
+      { "hole": "5", "teams": [], "multipliers": [] },
+      { "hole": "6", "teams": [], "multipliers": [] },
+      { "hole": "7", "teams": [], "multipliers": [] },
+      { "hole": "8", "teams": [], "multipliers": [] },
+      { "hole": "9", "teams": [], "multipliers": [] },
+      { "hole": "10", "teams": [], "multipliers": [] },
+      { "hole": "11", "teams": [], "multipliers": [] },
+      { "hole": "12", "teams": [], "multipliers": [] },
+      { "hole": "13", "teams": [], "multipliers": [] },
+      { "hole": "14", "teams": [], "multipliers": [] },
+      { "hole": "15", "teams": [], "multipliers": [] },
+      { "hole": "16", "teams": [], "multipliers": [] },
+      { "hole": "17", "teams": [], "multipliers": [] },
+      { "hole": "18", "teams": [], "multipliers": [] }
+    ],
+    "options": []
+  },
+  "rounds": [],
+  "gamespecKey": "65384954"
+}

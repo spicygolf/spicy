@@ -1,9 +1,9 @@
-import { db } from '../db/db';
+import { db } from "../db/db";
 
-export const mutate = async ({mutation, options = {}, debug}) => {
+export const mutate = async ({ mutation, options = {}, debug }) => {
   let ret = {
     success: false,
-    message: 'Unknown error',
+    message: "Unknown error",
   };
 
   try {
@@ -28,7 +28,7 @@ export const mutate = async ({mutation, options = {}, debug}) => {
   return ret;
 };
 
-export const all = async ({query, options = {}, debug}) => {
+export const all = async ({ query, options = {}, debug }) => {
   try {
     const cursor = await db.query(query, options);
     if (debug) {
@@ -45,7 +45,7 @@ export const all = async ({query, options = {}, debug}) => {
   }
 };
 
-export const next = async ({query, options = {}, debug}) => {
+export const next = async ({ query, options = {}, debug }) => {
   try {
     const cursor = await db.query(query, options);
     if (debug) {
@@ -63,18 +63,17 @@ export const next = async ({query, options = {}, debug}) => {
 };
 
 export const refreshEdge = async (type, f, t, data = {}) => {
-  let newEdge = {
+  const newEdge = {
     type: type,
     _from: f,
     _to: t,
     ...data,
   };
   const edge = new Edge(type);
-  const existing = await edge.find({type: type, _from: f, _to: t});
-  if( existing && existing.length ) {
+  const existing = await edge.find({ type: type, _from: f, _to: t });
+  if (existing?.length) {
     newEdge._key = existing[0]._key;
   }
   edge.set(newEdge);
-  await edge.save({overwrite: true});
+  await edge.save({ overwrite: true });
 };
-

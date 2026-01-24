@@ -4,11 +4,14 @@
  * Utility functions for loading fixtures and asserting on scoreboard results.
  */
 
-import { readFileSync, readdirSync, existsSync } from "node:fs";
-import { join, basename } from "node:path";
-import type { Fixture } from "./fixture-types";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { basename, join } from "node:path";
 import { validateFixture } from "./fixture-schema";
-import { transformFixture, type TransformedFixture } from "./fixture-transformer";
+import {
+  type TransformedFixture,
+  transformFixture,
+} from "./fixture-transformer";
+import type { Fixture } from "./fixture-types";
 
 // =============================================================================
 // Path Resolution
@@ -201,7 +204,14 @@ export function generateTestCases(fixture: Fixture): GeneratedTestCase[] {
           if (teamExp.points !== undefined) {
             cases.push({
               name: `hole ${holeNum} team ${teamId} points`,
-              expectedPath: ["expected", "holes", holeNum, "teams", teamId, "points"],
+              expectedPath: [
+                "expected",
+                "holes",
+                holeNum,
+                "teams",
+                teamId,
+                "points",
+              ],
               actualPath: ["holes", holeNum, "teams", teamId, "points"],
               expected: teamExp.points,
               assertionType: "equals",
@@ -210,7 +220,14 @@ export function generateTestCases(fixture: Fixture): GeneratedTestCase[] {
           if (teamExp.lowBall !== undefined) {
             cases.push({
               name: `hole ${holeNum} team ${teamId} lowBall`,
-              expectedPath: ["expected", "holes", holeNum, "teams", teamId, "lowBall"],
+              expectedPath: [
+                "expected",
+                "holes",
+                holeNum,
+                "teams",
+                teamId,
+                "lowBall",
+              ],
               actualPath: ["holes", holeNum, "teams", teamId, "lowBall"],
               expected: teamExp.lowBall,
               assertionType: "equals",
@@ -219,7 +236,14 @@ export function generateTestCases(fixture: Fixture): GeneratedTestCase[] {
           if (teamExp.total !== undefined) {
             cases.push({
               name: `hole ${holeNum} team ${teamId} total`,
-              expectedPath: ["expected", "holes", holeNum, "teams", teamId, "total"],
+              expectedPath: [
+                "expected",
+                "holes",
+                holeNum,
+                "teams",
+                teamId,
+                "total",
+              ],
               actualPath: ["holes", holeNum, "teams", teamId, "total"],
               expected: teamExp.total,
               assertionType: "equals",
@@ -234,7 +258,14 @@ export function generateTestCases(fixture: Fixture): GeneratedTestCase[] {
           if (playerExp.junk !== undefined) {
             cases.push({
               name: `hole ${holeNum} player ${playerId} junk`,
-              expectedPath: ["expected", "holes", holeNum, "players", playerId, "junk"],
+              expectedPath: [
+                "expected",
+                "holes",
+                holeNum,
+                "players",
+                playerId,
+                "junk",
+              ],
               actualPath: ["holes", holeNum, "players", playerId, "junk"],
               expected: playerExp.junk,
               assertionType: "containsAll",
@@ -243,7 +274,14 @@ export function generateTestCases(fixture: Fixture): GeneratedTestCase[] {
           if (playerExp.points !== undefined) {
             cases.push({
               name: `hole ${holeNum} player ${playerId} points`,
-              expectedPath: ["expected", "holes", holeNum, "players", playerId, "points"],
+              expectedPath: [
+                "expected",
+                "holes",
+                holeNum,
+                "players",
+                playerId,
+                "points",
+              ],
               actualPath: ["holes", holeNum, "players", playerId, "points"],
               expected: playerExp.points,
               assertionType: "equals",
@@ -252,7 +290,14 @@ export function generateTestCases(fixture: Fixture): GeneratedTestCase[] {
           if (playerExp.gross !== undefined) {
             cases.push({
               name: `hole ${holeNum} player ${playerId} gross`,
-              expectedPath: ["expected", "holes", holeNum, "players", playerId, "gross"],
+              expectedPath: [
+                "expected",
+                "holes",
+                holeNum,
+                "players",
+                playerId,
+                "gross",
+              ],
               actualPath: ["holes", holeNum, "players", playerId, "gross"],
               expected: playerExp.gross,
               assertionType: "equals",
@@ -261,7 +306,14 @@ export function generateTestCases(fixture: Fixture): GeneratedTestCase[] {
           if (playerExp.net !== undefined) {
             cases.push({
               name: `hole ${holeNum} player ${playerId} net`,
-              expectedPath: ["expected", "holes", holeNum, "players", playerId, "net"],
+              expectedPath: [
+                "expected",
+                "holes",
+                holeNum,
+                "players",
+                playerId,
+                "net",
+              ],
               actualPath: ["holes", holeNum, "players", playerId, "net"],
               expected: playerExp.net,
               assertionType: "equals",
@@ -286,11 +338,19 @@ export function generateTestCases(fixture: Fixture): GeneratedTestCase[] {
   // Cumulative expected values
   if (fixture.expected.cumulative) {
     if (fixture.expected.cumulative.teams) {
-      for (const [teamId, teamExp] of Object.entries(fixture.expected.cumulative.teams)) {
+      for (const [teamId, teamExp] of Object.entries(
+        fixture.expected.cumulative.teams,
+      )) {
         if (teamExp.pointsTotal !== undefined) {
           cases.push({
             name: `cumulative team ${teamId} pointsTotal`,
-            expectedPath: ["expected", "cumulative", "teams", teamId, "pointsTotal"],
+            expectedPath: [
+              "expected",
+              "cumulative",
+              "teams",
+              teamId,
+              "pointsTotal",
+            ],
             actualPath: ["cumulative", "teams", teamId, "pointsTotal"],
             expected: teamExp.pointsTotal,
             assertionType: "equals",
@@ -300,11 +360,19 @@ export function generateTestCases(fixture: Fixture): GeneratedTestCase[] {
     }
 
     if (fixture.expected.cumulative.players) {
-      for (const [playerId, playerExp] of Object.entries(fixture.expected.cumulative.players)) {
+      for (const [playerId, playerExp] of Object.entries(
+        fixture.expected.cumulative.players,
+      )) {
         if (playerExp.pointsTotal !== undefined) {
           cases.push({
             name: `cumulative player ${playerId} pointsTotal`,
-            expectedPath: ["expected", "cumulative", "players", playerId, "pointsTotal"],
+            expectedPath: [
+              "expected",
+              "cumulative",
+              "players",
+              playerId,
+              "pointsTotal",
+            ],
             actualPath: ["cumulative", "players", playerId, "pointsTotal"],
             expected: playerExp.pointsTotal,
             assertionType: "equals",
@@ -313,7 +381,13 @@ export function generateTestCases(fixture: Fixture): GeneratedTestCase[] {
         if (playerExp.grossTotal !== undefined) {
           cases.push({
             name: `cumulative player ${playerId} grossTotal`,
-            expectedPath: ["expected", "cumulative", "players", playerId, "grossTotal"],
+            expectedPath: [
+              "expected",
+              "cumulative",
+              "players",
+              playerId,
+              "grossTotal",
+            ],
             actualPath: ["cumulative", "players", playerId, "grossTotal"],
             expected: playerExp.grossTotal,
             assertionType: "equals",
@@ -330,7 +404,10 @@ export function generateTestCases(fixture: Fixture): GeneratedTestCase[] {
 // Re-exports
 // =============================================================================
 
-export { validateFixture, safeValidateFixture } from "./fixture-schema";
-export { transformFixture, transformFixtureToGame } from "./fixture-transformer";
-export type { Fixture } from "./fixture-types";
+export { safeValidateFixture, validateFixture } from "./fixture-schema";
 export type { TransformedFixture } from "./fixture-transformer";
+export {
+  transformFixture,
+  transformFixtureToGame,
+} from "./fixture-transformer";
+export type { Fixture } from "./fixture-types";

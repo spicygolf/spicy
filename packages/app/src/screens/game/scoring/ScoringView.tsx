@@ -640,19 +640,17 @@ export function ScoringView({
             userMultiplierNames.add(mult.name);
           }
 
-          // Get spec options for looking up display names of automatic multipliers
-          const spec = game?.specs?.$isLoaded ? game.specs[0] : null;
-          const specOptions = spec?.$isLoaded ? spec.options : null;
+          // Get spec for looking up display names of automatic multipliers
+          // game.spec is the working copy of options
+          const spec = game?.spec?.$isLoaded ? game.spec : null;
           const earnedMultiplierButtons: OptionButton[] = (
             teamHoleResult?.multipliers ?? []
           )
             .filter((m) => !userMultiplierNames.has(m.name))
             .map((m) => {
               // Look up the option definition from the spec for display name and icon
-              const optDefRaw = specOptions?.$isLoaded
-                ? specOptions[m.name]
-                : null;
-              const optDef = optDefRaw?.$isLoaded ? optDefRaw : null;
+              // Options are plain JSON objects, no $isLoaded check needed
+              const optDef = spec ? spec[m.name] : null;
               // Icon is only on multiplier/junk options, not game options
               const icon =
                 optDef?.type === "multiplier" || optDef?.type === "junk"

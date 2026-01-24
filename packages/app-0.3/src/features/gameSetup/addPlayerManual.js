@@ -1,17 +1,17 @@
-import { useMutation } from '@apollo/client';
-import { useNavigation } from '@react-navigation/native';
-import { green } from 'common/colors';
-import { validateFloat, validateName } from 'common/utils/account';
-import { GameContext } from 'features/game/gameContext';
-import { query as getGameQuery } from 'features/game/hooks/useGetGameQuery';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { ADD_PLAYER_MUTATION } from 'features/players/graphql';
-import moment from 'moment';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
-import { Button, Card } from 'react-native-elements';
+import { useMutation } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import { green } from "common/colors";
+import { validateFloat, validateName } from "common/utils/account";
+import { GameContext } from "features/game/gameContext";
+import { query as getGameQuery } from "features/game/hooks/useGetGameQuery";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { ADD_PLAYER_MUTATION } from "features/players/graphql";
+import moment from "moment";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, Card } from "react-native-elements";
 
-const AddPlayerManual = (props) => {
+const AddPlayerManual = (_props) => {
   const { game } = useContext(GameContext);
   const { _key: gkey } = game;
   const { currentPlayer } = useContext(CurrentPlayerContext);
@@ -19,15 +19,15 @@ const AddPlayerManual = (props) => {
   const navigation = useNavigation();
 
   const [player, setPlayer] = useState({
-    name: '',
-    short: '',
+    name: "",
+    short: "",
     handicap: {
-      source: 'manual',
-      index: '',
+      source: "manual",
+      index: "",
     },
-    statusAuthz: ['prod'],
+    statusAuthz: ["prod"],
     createdBy: currentPlayer._key,
-    createdDate: '',
+    createdDate: "",
   });
 
   const add = async () => {
@@ -47,16 +47,16 @@ const AddPlayerManual = (props) => {
       ],
     });
     if (error) {
-      console.log('Error adding player', error);
+      console.log("Error adding player", error);
     }
     //console.log('data', data);
-    if (data && data.addPlayer) {
+    if (data?.addPlayer) {
       const p = {
         _key: data.addPlayer._key,
         name: player.name,
         handicap: player.handicap,
       };
-      navigation.navigate('LinkRoundList', {
+      navigation.navigate("LinkRoundList", {
         game,
         player: p,
         round: null,
@@ -66,9 +66,9 @@ const AddPlayerManual = (props) => {
 
   const validate = useCallback(
     (type, text) => {
-      const nTest = type === 'name' ? text : player.name;
-      const sTest = type === 'short' ? text : player.short;
-      const hTest = type === 'index' ? text : player.handicap?.index;
+      const nTest = type === "name" ? text : player.name;
+      const sTest = type === "short" ? text : player.short;
+      const hTest = type === "index" ? text : player.handicap?.index;
       setNameValid(validateName(nTest));
       setShortValid(validateName(sTest));
       setHIValid(validateFloat(hTest));
@@ -77,13 +77,13 @@ const AddPlayerManual = (props) => {
   );
 
   const [nameValid, setNameValid] = useState(false);
-  const nValid = { borderColor: nameValid ? green : '#ddd' };
+  const nValid = { borderColor: nameValid ? green : "#ddd" };
 
   const [shortValid, setShortValid] = useState(false);
-  const sValid = { borderColor: shortValid ? green : '#ddd' };
+  const sValid = { borderColor: shortValid ? green : "#ddd" };
 
   const [hiValid, setHIValid] = useState(false);
-  const hValid = { borderColor: hiValid ? green : '#ddd' };
+  const hValid = { borderColor: hiValid ? green : "#ddd" };
 
   useEffect(() => validate(), [validate]);
 
@@ -99,7 +99,7 @@ const AddPlayerManual = (props) => {
                 ...player,
                 name: text,
               });
-              validate('name', text);
+              validate("name", text);
             }}
             autoCapitalize="words"
             value={player.name}
@@ -114,7 +114,7 @@ const AddPlayerManual = (props) => {
                 ...player,
                 short: text,
               });
-              validate('short', text);
+              validate("short", text);
             }}
             autoCapitalize="words"
             value={player.short}
@@ -129,11 +129,11 @@ const AddPlayerManual = (props) => {
                 setPlayer({
                   ...player,
                   handicap: {
-                    source: 'manual',
+                    source: "manual",
                     index: text,
                   },
                 });
-                validate('index', text);
+                validate("index", text);
               }}
               keyboardType="decimal-pad"
               value={player.handicap?.index.toString()}
@@ -143,7 +143,7 @@ const AddPlayerManual = (props) => {
         <Button
           style={styles.add}
           title="Add"
-          type={nameValid && shortValid && hiValid ? 'solid' : 'outline'}
+          type={nameValid && shortValid && hiValid ? "solid" : "outline"}
           disabled={!(nameValid && shortValid && hiValid)}
           onPress={add}
           accessibilityLabel="AddPlayerManual"
@@ -161,9 +161,9 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   field_input: {
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
-    color: '#000',
+    color: "#000",
     height: 40,
     marginBottom: 10,
     paddingLeft: 10,
@@ -171,19 +171,19 @@ const styles = StyleSheet.create({
   },
   field_input_view: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   field_label: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
     marginTop: 5,
   },
   handicap_field_container: {
-    alignItems: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    flexDirection: "row",
   },
   handicap_field_input: {
-    alignItems: 'center',
+    alignItems: "center",
     marginLeft: 20,
     width: 70,
   },

@@ -1,0 +1,57 @@
+{
+  "legacyId": "175143803",
+  "exportedAt": "2026-01-24T15:49:40.902Z",
+  "game": {
+    "_key": "175143803",
+    "_id": "games/175143803",
+    "_rev": "_k_OgNT6-_E",
+    "name": "Vegas",
+    "start": "2021-06-02T20:32:10Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [
+      { "hole": "1", "teams": [], "multipliers": [] },
+      { "hole": "2", "teams": [], "multipliers": [] },
+      { "hole": "3", "teams": [], "multipliers": [] },
+      { "hole": "4", "teams": [], "multipliers": [] },
+      { "hole": "5", "teams": [], "multipliers": [] },
+      { "hole": "6", "teams": [], "multipliers": [] },
+      { "hole": "7", "teams": [], "multipliers": [] },
+      { "hole": "8", "teams": [], "multipliers": [] },
+      { "hole": "9", "teams": [], "multipliers": [] },
+      { "hole": "10", "teams": [], "multipliers": [] },
+      { "hole": "11", "teams": [], "multipliers": [] },
+      { "hole": "12", "teams": [], "multipliers": [] },
+      { "hole": "13", "teams": [], "multipliers": [] },
+      { "hole": "14", "teams": [], "multipliers": [] },
+      { "hole": "15", "teams": [], "multipliers": [] },
+      { "hole": "16", "teams": [], "multipliers": [] },
+      { "hole": "17", "teams": [], "multipliers": [] },
+      { "hole": "18", "teams": [], "multipliers": [] }
+    ],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/175143897",
+        "_key": "175143897",
+        "_rev": "_k_OgNeK-Hw",
+        "date": "2021-06-02T20:32:10Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "175143961",
+        "_id": "edges/175143961",
+        "_from": "rounds/175143897",
+        "_to": "games/175143803",
+        "_rev": "_k_OgNjS-_k",
+        "type": "round2game",
+        "ts": "2021-06-02T20:32:13.045Z"
+      },
+      "playerId": "135116067"
+    }
+  ],
+  "gamespecKey": "117463059"
+}

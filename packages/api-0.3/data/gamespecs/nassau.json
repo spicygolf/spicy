@@ -28,7 +28,7 @@
         "units_won": 1
       }
     ],
-    "back" : [
+    "back": [
       {
         "name": "total",
         "disp": "Total",
@@ -67,7 +67,5 @@
       "default": 2
     }
   ],
-  "todos": [
-    "remove disp attributes, feed off of name slug for i18n, l10n"
-  ]
+  "todos": ["remove disp attributes, feed off of name slug for i18n, l10n"]
 }

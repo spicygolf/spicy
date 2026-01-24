@@ -1,46 +1,53 @@
-import { useMutation } from '@apollo/client';
-import { green } from 'common/colors';
-import HoleChooser from 'common/components/holeChooser';
-import { getHolesToUpdate, omitTypename, teamsRotateOptions } from 'common/utils/game';
-import { setGameMeta } from 'common/utils/metadata';
-import { GameContext } from 'features/game/gameContext';
-import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
-import { find } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { Button, Icon, ListItem } from 'react-native-elements';
+import { useMutation } from "@apollo/client";
+import { green } from "common/colors";
+import HoleChooser from "common/components/holeChooser";
+import {
+  getHolesToUpdate,
+  omitTypename,
+  teamsRotateOptions,
+} from "common/utils/game";
+import { setGameMeta } from "common/utils/metadata";
+import { GameContext } from "features/game/gameContext";
+import { UPDATE_GAME_HOLES_MUTATION } from "features/game/graphql";
+import { find } from "lodash";
+import { useContext, useEffect, useState } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import { Button, Icon, ListItem } from "react-native-elements";
 
 const ChangeTeams = ({ currentHole, close }) => {
   const { game } = useContext(GameContext);
   const { _key: gkey } = game;
-  const [selected, setSelected] = useState('0');
+  const [selected, setSelected] = useState("0");
   const [holes, setHoles] = useState([]);
 
   const [updateGameHoles] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
   const choices = [
-    { key: '0', name: 'gameSetup', disp: 'Game Setup' },
-    { key: '1', name: 'currentHole', disp: 'Current Hole' },
-    { key: '2', name: 'custom', disp: 'Custom' },
+    { key: "0", name: "gameSetup", disp: "Game Setup" },
+    { key: "1", name: "currentHole", disp: "Current Hole" },
+    { key: "2", name: "custom", disp: "Custom" },
   ];
 
-  let teams_rotate = find(teamsRotateOptions, { slug: game.scope.teams_rotate });
-  const teams_rotate_caption =
-    teams_rotate && teams_rotate.caption ? teams_rotate.caption : '';
+  const teams_rotate = find(teamsRotateOptions, {
+    slug: game.scope.teams_rotate,
+  });
+  const teams_rotate_caption = teams_rotate?.caption
+    ? teams_rotate.caption
+    : "";
 
   const renderChoice = ({ item }) => {
     let title = item.disp;
     switch (item.name) {
-      case 'gameSetup':
+      case "gameSetup":
         title = `${item.disp}: ${teams_rotate_caption}`;
         break;
-      case 'currentHole':
+      case "currentHole":
         title = `${item.disp}: ${currentHole}`;
         break;
       default:
         break;
     }
-    const leftAvatarColor = item.key === selected ? green : 'transparent';
+    const leftAvatarColor = item.key === selected ? green : "transparent";
 
     return (
       <ListItem onPress={() => setSelected(item.key)}>
@@ -62,7 +69,7 @@ const ChangeTeams = ({ currentHole, close }) => {
   };
 
   const changeTeamsOnHoles = async () => {
-    let newHoles = game.holes.map((h) => {
+    const newHoles = game.holes.map((h) => {
       if (holes.includes(h.hole)) {
         return {
           ...h,
@@ -81,9 +88,9 @@ const ChangeTeams = ({ currentHole, close }) => {
         holes: newHolesWithoutTypes,
       },
       optimisticResponse: {
-        __typename: 'Mutation',
+        __typename: "Mutation",
         updateGameHoles: {
-          __typename: 'Game',
+          __typename: "Game",
           _key: gkey,
           holes: newHoles,
         },
@@ -91,9 +98,9 @@ const ChangeTeams = ({ currentHole, close }) => {
     });
 
     if (error) {
-      console.log('Error updating game - changeTeams', error);
+      console.log("Error updating game - changeTeams", error);
     } else {
-      setGameMeta(gkey, 'holesToUpdate', holes);
+      setGameMeta(gkey, "holesToUpdate", holes);
     }
   };
 
@@ -103,13 +110,13 @@ const ChangeTeams = ({ currentHole, close }) => {
 
   useEffect(() => {
     switch (selected) {
-      case '0': // gameSetup
+      case "0": // gameSetup
         setHoles(getHolesToUpdate(game.scope.teams_rotate, game, currentHole));
         break;
-      case '1': // current hole
+      case "1": // current hole
         setHoles([currentHole]);
         break;
-      case '2': // custom
+      case "2": // custom
         // just leave what's already set for custom
         break;
       default:
@@ -120,7 +127,9 @@ const ChangeTeams = ({ currentHole, close }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Change Teams</Text>
-      <Text style={styles.description}>Change players on teams according to:</Text>
+      <Text style={styles.description}>
+        Change players on teams according to:
+      </Text>
       <View style={styles.choicesList}>
         <FlatList
           data={choices}
@@ -132,7 +141,7 @@ const ChangeTeams = ({ currentHole, close }) => {
         holes={holes}
         onChange={onCustomChange}
         title="Preview:"
-        active={selected === '2'}
+        active={selected === "2"}
       />
       <View style={styles.button_row}>
         <Button
@@ -163,8 +172,8 @@ export default ChangeTeams;
 
 const styles = StyleSheet.create({
   button_row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingTop: 40,
   },
   choicesList: {},
@@ -187,14 +196,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   separator: {
-    backgroundColor: '#ddd',
+    backgroundColor: "#ddd",
     height: 1,
-    width: '100%',
+    width: "100%",
   },
   title: {
-    alignSelf: 'center',
+    alignSelf: "center",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     paddingBottom: 10,
   },
 });

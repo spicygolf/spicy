@@ -1,13 +1,13 @@
-import { aql } from 'arangojs';
-import datefnstz from 'date-fns-tz';
-import { isEqual } from 'lodash-es';
+import { aql } from "arangojs";
+import datefnstz from "date-fns-tz";
+import { isEqual } from "lodash-es";
 
-import { db } from '../db/db';
-import { Doc } from './doc';
+import { db } from "../db/db";
+import { Doc } from "./doc";
 
 const { zonedTimeToUtc } = datefnstz;
 
-const collection = db.collection('tees');
+const collection = db.collection("tees");
 
 class Tee extends Doc {
   constructor() {
@@ -15,7 +15,7 @@ class Tee extends Doc {
   }
 
   async getCourse(tKey) {
-    console.error('TODO: refactor models/tee/getCourse');
+    console.error("TODO: refactor models/tee/getCourse");
     return;
     const teeID = `tees/${tKey}`;
     //console.log('teeID', teeID);
@@ -80,10 +80,8 @@ class Tee extends Doc {
     return await cursor.all();
   }
 
-
-
   async _getExistingTee(courseid, name, gender) {
-    console.error('TODO: refactor models/tee/_getExistingTee');
+    console.error("TODO: refactor models/tee/_getExistingTee");
     return;
     const q = aql`
       FOR v, e
@@ -101,14 +99,14 @@ class Tee extends Doc {
   }
 
   _existingTeeChanged(oldTee, newTee) {
-    if (newTee.tee_id != oldTee.tee_id) return true;
+    if (newTee.tee_id !== oldTee.tee_id) return true;
     if (!isEqual(newTee.Ratings, oldTee.Ratings)) return true;
     if (!isEqual(newTee.holes, oldTee.holes)) return true;
     return false;
   }
 
   _getNowTS() {
-    const utcDate = zonedTimeToUtc(new Date(), 'America/New_York');
+    const utcDate = zonedTimeToUtc(new Date(), "America/New_York");
     const now = utcDate.toISOString();
     return now;
   }

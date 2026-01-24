@@ -86,6 +86,25 @@
       },
       "skillPath": "error-handling",
       "priority": 75
+    },
+    {
+      "name": "documentation",
+      "description": "Markdown, docstrings, and code documentation standards",
+      "triggers": {
+        "keywords": [
+          "markdown",
+          "docstring",
+          "jsdoc",
+          "comment",
+          "documentation",
+          "readme",
+          "docs",
+          ".md"
+        ],
+        "filePatterns": ["*.md", "README*"]
+      },
+      "skillPath": "documentation",
+      "priority": 70
     }
   ]
 }

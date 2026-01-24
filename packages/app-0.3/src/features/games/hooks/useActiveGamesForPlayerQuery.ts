@@ -1,4 +1,4 @@
-import { gql, useQuery } from '@apollo/client';
+import { gql, useQuery } from "@apollo/client";
 
 export const query = gql`
   query ActiveGamesForPlayer($pkey: String!) {

@@ -251,11 +251,19 @@ export interface MockGame extends MockJazzBase {
   start: Date;
   name: string;
   scope: MockGameScope;
-  specs: (MockGameSpec[] & MockJazzBase) | undefined;
+  /**
+   * Working copy of the spec's options for this game.
+   * This is what scoring and display code should read from.
+   */
+  spec: MockMapOfOptions | undefined;
+  /**
+   * Reference to the original catalog spec.
+   * Used for display and "reset to defaults" functionality.
+   */
+  specRef: MockGameSpec | undefined;
   holes: (MockGameHole[] & MockJazzBase) | undefined;
   players: (unknown[] & MockJazzBase) | undefined;
   rounds: (MockRoundToGame[] & MockJazzBase) | undefined;
-  options: MockMapOfOptions | undefined;
 }
 
 // =============================================================================
@@ -604,14 +612,14 @@ export function createMockGame(
     start: new Date(),
     name: fixture.name,
     scope: createMockGameScope(holesScope, hasTeams, teamCount),
-    specs: createMockList(nextMockId("gamespecs"), [spec]),
+    spec: options, // Working copy of options for scoring
+    specRef: spec, // Reference to catalog spec
     holes: createMockGameHoles(fixture, roundToGames),
     players: createMockList(nextMockId("players"), []),
     rounds: createMockList(
       nextMockId("rounds"),
       Array.from(roundToGames.values()),
     ),
-    options,
   });
 }
 

@@ -7,8 +7,8 @@
  * 2. Remind about progress tracking and decomposition
  */
 
-import { readFileSync, existsSync } from "fs";
-import { join, dirname } from "path";
+import { existsSync, readFileSync } from "fs";
+import { join } from "path";
 
 interface SkillRule {
   name: string;

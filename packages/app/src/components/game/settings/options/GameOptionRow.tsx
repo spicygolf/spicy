@@ -24,11 +24,10 @@ export function GameOptionRow({
       case "bool":
         return value === "true" || value === "1" ? "Yes" : "No";
       case "menu":
-        if (option.choices?.$isLoaded) {
-          const choice = option.choices.find(
-            (c) => c?.$isLoaded && c.name === value,
-          );
-          return choice?.$isLoaded ? choice.disp : value;
+        // Choices are plain JSON arrays now
+        if (option.choices) {
+          const choice = option.choices.find((c) => c.name === value);
+          return choice ? choice.disp : value;
         }
         return value;
       case "num":
@@ -61,13 +60,14 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: theme.gap(1.5),
+    paddingVertical: theme.gap(1),
+    paddingHorizontal: theme.gap(1),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
     backgroundColor: theme.colors.background,
   },
   optionLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "500",
     color: theme.colors.primary,
     flex: 1,
@@ -75,10 +75,10 @@ const styles = StyleSheet.create((theme) => ({
   optionValue: {
     flexDirection: "row",
     alignItems: "center",
-    gap: theme.gap(1),
+    gap: theme.gap(0.75),
   },
   optionValueText: {
-    fontSize: 16,
+    fontSize: 14,
     color: theme.colors.secondary,
   },
 }));

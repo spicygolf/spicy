@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const DELETE_ROUND_MUTATION = gql`
   mutation DeleteRound($rkey: String!) {

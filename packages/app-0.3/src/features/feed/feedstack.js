@@ -1,11 +1,10 @@
-import { createStackNavigator } from '@react-navigation/stack';
-import { blue } from 'common/colors';
-import Games from 'features/feed/games';
-import Stats from 'features/feed/stats';
-import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { createStackNavigator } from "@react-navigation/stack";
+import { blue } from "common/colors";
+import Games from "features/feed/games";
+import Stats from "features/feed/stats";
+import { SafeAreaView, StyleSheet } from "react-native";
 
-const FeedStack = (props) => {
+const FeedStack = (_props) => {
   const Stack = createStackNavigator();
 
   return (
@@ -13,7 +12,7 @@ const FeedStack = (props) => {
       <Stack.Navigator
         initialRouteName="FeedHome"
         screenOptions={{
-          title: 'Feed',
+          title: "Feed",
           headerShown: false,
         }}
       >
@@ -21,7 +20,7 @@ const FeedStack = (props) => {
           name="FeedStats"
           component={Stats}
           options={{
-            title: 'Feed',
+            title: "Feed",
             headerShown: false,
           }}
         />
@@ -29,7 +28,7 @@ const FeedStack = (props) => {
           name="FeedGames"
           component={Games}
           options={{
-            title: 'Games',
+            title: "Games",
             headerShown: true,
           }}
         />

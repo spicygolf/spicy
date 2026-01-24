@@ -1,0 +1,420 @@
+{
+  "legacyId": "72567643",
+  "exportedAt": "2026-01-24T15:49:41.339Z",
+  "game": {
+    "_key": "72567643",
+    "_id": "games/72567643",
+    "_rev": "_k_OgNTu-_4",
+    "name": "Team Match Play",
+    "start": "2020-05-15T17:26:38Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/72572072",
+        "_key": "72572072",
+        "_rev": "_k_OgNeG--R",
+        "date": "2020-05-15T17:26:38Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "72572077",
+        "_id": "edges/72572077",
+        "_from": "rounds/72572072",
+        "_to": "games/72567643",
+        "_rev": "_k_OgNha-_c",
+        "type": "round2game",
+        "handicap_index": "7.1"
+      },
+      "playerId": null
+    },
+    {
+      "round": {
+        "_id": "rounds/72571077",
+        "_key": "72571077",
+        "_rev": "_k_OgNeG--L",
+        "date": "2020-05-15T17:26:38Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "72571082",
+        "_id": "edges/72571082",
+        "_from": "rounds/72571077",
+        "_to": "games/72567643",
+        "_rev": "_k_OgNha-_Y",
+        "type": "round2game",
+        "handicap_index": "6.2"
+      },
+      "playerId": null
+    },
+    {
+      "round": {
+        "_id": "rounds/72570580",
+        "_key": "72570580",
+        "_rev": "_k_OgNeG--J",
+        "date": "2020-05-15T17:26:38Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "72570585",
+        "_id": "edges/72570585",
+        "_from": "rounds/72570580",
+        "_to": "games/72567643",
+        "_rev": "_k_OgNha-_W",
+        "type": "round2game",
+        "handicap_index": "7.1"
+      },
+      "playerId": null
+    },
+    {
+      "round": {
+        "_id": "rounds/72570319",
+        "_key": "72570319",
+        "_rev": "_k_OgNeG--H",
+        "date": "2020-05-15T17:26:38Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "72570324",
+        "_id": "edges/72570324",
+        "_from": "rounds/72570319",
+        "_to": "games/72567643",
+        "_rev": "_k_OgNha-_U",
+        "type": "round2game",
+        "handicap_index": "6.2"
+      },
+      "playerId": null
+    },
+    {
+      "round": {
+        "_id": "rounds/72570073",
+        "_key": "72570073",
+        "_rev": "_k_OgNeG--F",
+        "date": "2020-05-15T17:26:38Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "72570078",
+        "_id": "edges/72570078",
+        "_from": "rounds/72570073",
+        "_to": "games/72567643",
+        "_rev": "_k_OgNha-_S",
+        "type": "round2game",
+        "handicap_index": "6.2"
+      },
+      "playerId": null
+    },
+    {
+      "round": {
+        "_id": "rounds/72568018",
+        "_key": "72568018",
+        "_rev": "_k_OgNeG--z",
+        "date": "2020-05-15T17:26:38Z",
+        "scores": [
+          {
+            "hole": "1",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-20T21:30:52Z" }]
+          },
+          {
+            "hole": "2",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-20T21:31:05Z" }]
+          },
+          {
+            "hole": "3",
+            "values": [{ "k": "gross", "v": "4", "ts": "2020-05-20T21:32:15Z" }]
+          },
+          {
+            "hole": "4",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-20T21:32:37Z" }]
+          },
+          {
+            "hole": "5",
+            "values": [{ "k": "gross", "v": "3", "ts": "2020-05-20T21:32:57Z" }]
+          },
+          {
+            "hole": "6",
+            "values": [{ "k": "gross", "v": "4", "ts": "2020-05-20T21:33:21Z" }]
+          },
+          {
+            "hole": "7",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-20T21:33:40Z" }]
+          },
+          {
+            "hole": "8",
+            "values": [{ "k": "gross", "v": "4", "ts": "2020-05-20T21:33:58Z" }]
+          },
+          {
+            "hole": "9",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-20T21:34:09Z" }]
+          },
+          {
+            "hole": "10",
+            "values": [{ "k": "gross", "v": "6", "ts": "2020-05-20T21:34:28Z" }]
+          },
+          {
+            "hole": "11",
+            "values": [{ "k": "gross", "v": "4", "ts": "2020-05-20T21:34:42Z" }]
+          },
+          {
+            "hole": "12",
+            "values": [{ "k": "gross", "v": "3", "ts": "2020-05-20T21:34:56Z" }]
+          },
+          {
+            "hole": "13",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-20T21:35:07Z" }]
+          },
+          {
+            "hole": "14",
+            "values": [{ "k": "gross", "v": "4", "ts": "2020-05-20T21:35:23Z" }]
+          },
+          {
+            "hole": "15",
+            "values": [{ "k": "gross", "v": "4", "ts": "2020-05-20T21:35:37Z" }]
+          },
+          {
+            "hole": "16",
+            "values": [{ "k": "gross", "v": "3", "ts": "2020-05-20T21:35:56Z" }]
+          },
+          {
+            "hole": "17",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-20T21:36:10Z" }]
+          },
+          {
+            "hole": "18",
+            "values": [{ "k": "gross", "v": "6", "ts": "2020-05-20T21:36:29Z" }]
+          }
+        ],
+        "seq": 1,
+        "tee_id": 234570
+      },
+      "edge": {
+        "_key": "72568023",
+        "_id": "edges/72568023",
+        "_from": "rounds/72568018",
+        "_to": "games/72567643",
+        "_rev": "_k_OgNha-_Q",
+        "type": "round2game",
+        "handicap_index": "4.5",
+        "course_handicap": "8"
+      },
+      "playerId": "35217480"
+    },
+    {
+      "round": {
+        "_id": "rounds/72569048",
+        "_key": "72569048",
+        "_rev": "_k_OgNeG--D",
+        "date": "2020-05-15T17:26:38Z",
+        "scores": [],
+        "seq": 1,
+        "tee_id": 234570
+      },
+      "edge": {
+        "_key": "72569053",
+        "_id": "edges/72569053",
+        "_from": "rounds/72569048",
+        "_to": "games/72567643",
+        "_rev": "_k_OgNha-_G",
+        "type": "round2game",
+        "handicap_index": "7.1"
+      },
+      "playerId": null
+    },
+    {
+      "round": {
+        "_id": "rounds/72568254",
+        "_key": "72568254",
+        "_rev": "_k_OgNeG--B",
+        "date": "2020-05-15T17:26:38Z",
+        "scores": [],
+        "seq": 1,
+        "tee_id": 234570
+      },
+      "edge": {
+        "_key": "72568259",
+        "_id": "edges/72568259",
+        "_from": "rounds/72568254",
+        "_to": "games/72567643",
+        "_rev": "_k_OgNha-_E",
+        "type": "round2game",
+        "handicap_index": "4.3"
+      },
+      "playerId": null
+    }
+  ],
+  "gamespecKey": "72068183",
+  "tees": {
+    "234570": {
+      "tee_id": 234570,
+      "name": "Gold",
+      "TotalYardage": 6748,
+      "holes": [
+        {
+          "hole": 1,
+          "hole_id": 964964,
+          "length": 400,
+          "par": 4,
+          "handicap": 9
+        },
+        {
+          "hole": 2,
+          "hole_id": 964965,
+          "length": 438,
+          "par": 4,
+          "handicap": 3
+        },
+        {
+          "hole": 3,
+          "hole_id": 964966,
+          "length": 149,
+          "par": 3,
+          "handicap": 11
+        },
+        {
+          "hole": 4,
+          "hole_id": 964967,
+          "length": 558,
+          "par": 5,
+          "handicap": 5
+        },
+        {
+          "hole": 5,
+          "hole_id": 964968,
+          "length": 183,
+          "par": 3,
+          "handicap": 17
+        },
+        {
+          "hole": 6,
+          "hole_id": 964969,
+          "length": 306,
+          "par": 4,
+          "handicap": 15
+        },
+        {
+          "hole": 7,
+          "hole_id": 964970,
+          "length": 562,
+          "par": 5,
+          "handicap": 1
+        },
+        {
+          "hole": 8,
+          "hole_id": 964971,
+          "length": 429,
+          "par": 4,
+          "handicap": 13
+        },
+        {
+          "hole": 9,
+          "hole_id": 964972,
+          "length": 391,
+          "par": 4,
+          "handicap": 7
+        },
+        {
+          "hole": 10,
+          "hole_id": 964973,
+          "length": 417,
+          "par": 4,
+          "handicap": 2
+        },
+        {
+          "hole": 11,
+          "hole_id": 964974,
+          "length": 393,
+          "par": 4,
+          "handicap": 6
+        },
+        {
+          "hole": 12,
+          "hole_id": 964975,
+          "length": 137,
+          "par": 3,
+          "handicap": 18
+        },
+        {
+          "hole": 13,
+          "hole_id": 964976,
+          "length": 535,
+          "par": 5,
+          "handicap": 12
+        },
+        {
+          "hole": 14,
+          "hole_id": 964977,
+          "length": 382,
+          "par": 4,
+          "handicap": 16
+        },
+        {
+          "hole": 15,
+          "hole_id": 964978,
+          "length": 311,
+          "par": 4,
+          "handicap": 10
+        },
+        {
+          "hole": 16,
+          "hole_id": 964979,
+          "length": 190,
+          "par": 3,
+          "handicap": 14
+        },
+        {
+          "hole": 17,
+          "hole_id": 964980,
+          "length": 433,
+          "par": 4,
+          "handicap": 4
+        },
+        {
+          "hole": 18,
+          "hole_id": 964981,
+          "length": 534,
+          "par": 5,
+          "handicap": 8
+        }
+      ],
+      "Ratings": [
+        {
+          "RatingType": "Total",
+          "CourseRating": 73.8,
+          "SlopeRating": 146,
+          "BogeyRating": 101
+        },
+        {
+          "RatingType": "Front",
+          "CourseRating": 37,
+          "SlopeRating": 144,
+          "BogeyRating": 50.4
+        },
+        {
+          "RatingType": "Back",
+          "CourseRating": 36.8,
+          "SlopeRating": 148,
+          "BogeyRating": 50.6
+        }
+      ],
+      "course": {
+        "course_id": 9233,
+        "course_name": "Hawks Ridge Golf Club",
+        "course_city": "Ball Ground",
+        "course_state": "GA"
+      }
+    }
+  }
+}

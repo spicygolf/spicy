@@ -1,8 +1,7 @@
-import Stats from 'features/feed/stats';
-import React from 'react';
-import { View } from 'react-native';
+import Stats from "features/feed/stats";
+import { View } from "react-native";
 
-const FeedHome = (props) => {
+const FeedHome = (_props) => {
   return (
     <View>
       <Stats />

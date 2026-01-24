@@ -1,4 +1,4 @@
-import { ghinRequest, Pagination } from './ghin';
+import { ghinRequest } from "./ghin";
 
 type GetTeeRequest = {
   q: GetTeeQuery;
@@ -8,12 +8,11 @@ type GetTeeQuery = {
   tee_id?: string;
 };
 
-type GetTeeResponse = {
+type GetTeeResponse = {};
 
-};
-
-export const getTee = async ({q}: GetTeeRequest): Promise<GetTeeResponse | null> => {
-
+export const getTee = async ({
+  q,
+}: GetTeeRequest): Promise<GetTeeResponse | null> => {
   const { tee_id } = q;
 
   const params = {
@@ -21,7 +20,7 @@ export const getTee = async ({q}: GetTeeRequest): Promise<GetTeeResponse | null>
   };
 
   const resp = await ghinRequest({
-    method: 'get',
+    method: "get",
     url: `/TeeSetRatings/${tee_id}.json`,
     params,
     data: {},

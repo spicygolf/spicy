@@ -1,12 +1,12 @@
-import { useQuery } from '@apollo/client';
-import { useNavigation } from '@react-navigation/native';
-import { blue, light } from 'common/colors';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { GET_PLAYER_QUERY } from 'features/players/graphql';
-import FollowersStat from 'features/profile/stats/followers';
-import FollowingStat from 'features/profile/stats/following';
-import GamesStat from 'features/profile/stats/games';
-import React, { useContext, useEffect, useState } from 'react';
+import { useQuery } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import { blue, light } from "common/colors";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { GET_PLAYER_QUERY } from "features/players/graphql";
+import FollowersStat from "features/profile/stats/followers";
+import FollowingStat from "features/profile/stats/following";
+import GamesStat from "features/profile/stats/games";
+import { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -15,40 +15,40 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { Button, Card, Icon, ListItem } from 'react-native-elements';
+} from "react-native";
+import { Button, Card, Icon, ListItem } from "react-native-elements";
 
-const ProfileHome = (props) => {
+const ProfileHome = (_props) => {
   const navigation = useNavigation();
   const [handicapContent, setHandicapContent] = useState(null);
   const { currentPlayer } = useContext(CurrentPlayerContext);
-  const pkey = currentPlayer && currentPlayer._key ? currentPlayer._key : null;
+  const pkey = currentPlayer?._key ? currentPlayer._key : null;
 
   const { loading, error, data } = useQuery(GET_PLAYER_QUERY, {
     variables: {
       player: pkey,
     },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
   });
 
   const getField = (field) => {
-    if (currentPlayer && currentPlayer[field]) {
+    if (currentPlayer?.[field]) {
       return currentPlayer[field];
     }
-    return '';
+    return "";
   };
 
   //console.log('currentPlayer', currentPlayer);
 
-  const name = getField('name');
-  const short = getField('short');
+  const name = getField("name");
+  const short = getField("short");
 
   useEffect(() => {
     if (loading) {
       setHandicapContent(<ActivityIndicator />);
     }
     if (error) {
-      console.log('error fetching handicap: ', error.message);
+      console.log("error fetching handicap: ", error.message);
     }
     if (data?.getPlayer?.handicap?.source) {
       const { source, index, revDate } = data.getPlayer.handicap;
@@ -69,9 +69,11 @@ const ProfileHome = (props) => {
           </View>
           <Button
             type="clear"
-            icon={<Icon name="add-link" type="material" size={36} color={blue} />}
+            icon={
+              <Icon name="add-link" type="material" size={36} color={blue} />
+            }
             onPress={() => {
-              navigation.navigate('LinkHandicap');
+              navigation.navigate("LinkHandicap");
             }}
           />
         </View>,
@@ -84,12 +86,19 @@ const ProfileHome = (props) => {
       <ScrollView keyboardShouldPersistTaps="handled">
         <Card wrapperStyle={styles.card_wrapper}>
           <ListItem>
-            <Icon name="settings" type="material" color="transparent" size={24} />
+            <Icon
+              name="settings"
+              type="material"
+              color="transparent"
+              size={24}
+            />
             <ListItem.Content style={styles.name_view}>
               <ListItem.Title style={styles.name}>{name}</ListItem.Title>
-              <ListItem.Subtitle style={styles.short}>{short}</ListItem.Subtitle>
+              <ListItem.Subtitle style={styles.short}>
+                {short}
+              </ListItem.Subtitle>
             </ListItem.Content>
-            <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+            <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
               <Icon name="settings" type="material" color={light} size={24} />
             </TouchableOpacity>
           </ListItem>
@@ -123,47 +132,47 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   index: {
-    alignSelf: 'center',
+    alignSelf: "center",
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   name: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     paddingBottom: 3,
-    textAlign: 'center',
+    textAlign: "center",
   },
   name_view: {
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 10,
   },
   no_hc_link_txt: {
-    alignSelf: 'center',
+    alignSelf: "center",
     fontSize: 11,
   },
   no_hc_link_view: {
-    alignItems: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    flexDirection: "row",
   },
   revDate: {
-    alignSelf: 'center',
+    alignSelf: "center",
     fontSize: 8,
   },
   short: {
     fontSize: 12,
     paddingBottom: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   source: {
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   stats_view: {
-    alignItems: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    flexDirection: "row",
     flex: 2,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   subname_view: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
 });

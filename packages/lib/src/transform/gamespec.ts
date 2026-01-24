@@ -5,7 +5,7 @@
  * Shared between API (catalog import) and web (user spec export).
  */
 
-import type { GameSpecV03 } from "./arango-types";
+import type { GameSpecV03 } from "./legacy-types";
 import type { TransformedGameSpec, TransformedOption } from "./types";
 
 /**
@@ -68,6 +68,27 @@ export function transformGameSpec(v03Spec: GameSpecV03): TransformedGameSpec {
       value: mult.value,
     }));
     allOptions.push(...multiplierOptions);
+  }
+
+  // Transform meta options (new unified format)
+  if (v03Spec.meta && v03Spec.meta.length > 0) {
+    const metaOptions = v03Spec.meta.map((meta) => ({
+      name: meta.name,
+      disp: meta.disp,
+      type: "meta" as const,
+      valueType: meta.valueType as
+        | "bool"
+        | "num"
+        | "menu"
+        | "text"
+        | "text_array",
+      value: meta.value,
+      choices: meta.choices,
+      seq: meta.seq,
+      searchable: meta.searchable,
+      required: meta.required,
+    }));
+    allOptions.push(...metaOptions);
   }
 
   if (allOptions.length > 0) {

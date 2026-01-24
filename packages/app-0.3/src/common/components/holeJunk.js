@@ -1,18 +1,23 @@
-import { useMutation } from '@apollo/client';
-import { blue } from 'common/colors';
-import { getAllOptions, getJunk, omitTypename, setTeamJunk } from 'common/utils/game';
-import { get_net_score, get_score_value } from 'common/utils/rounds';
-import { isScoreToParJunk } from 'common/utils/score';
-import ScoringWrapper from 'common/utils/ScoringWrapper';
-import { getScoreTeamForPlayer } from 'common/utils/teams';
-import { GameContext } from 'features/game/gameContext';
-import { UPDATE_GAME_HOLES_MUTATION } from 'features/game/graphql';
-import { find, sortBy } from 'lodash';
-import React, { useContext } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
-import { Button, Icon } from 'react-native-elements';
+import { useMutation } from "@apollo/client";
+import { blue } from "common/colors";
+import {
+  getAllOptions,
+  getJunk,
+  omitTypename,
+  setTeamJunk,
+} from "common/utils/game";
+import { get_net_score, get_score_value } from "common/utils/rounds";
+import ScoringWrapper from "common/utils/ScoringWrapper";
+import { isScoreToParJunk } from "common/utils/score";
+import { getScoreTeamForPlayer } from "common/utils/teams";
+import { GameContext } from "features/game/gameContext";
+import { UPDATE_GAME_HOLES_MUTATION } from "features/game/graphql";
+import { find, sortBy } from "lodash";
+import { useContext } from "react";
+import { FlatList, StyleSheet, View } from "react-native";
+import { Button, Icon } from "react-native-elements";
 
-const HoleJunk = props => {
+const HoleJunk = (props) => {
   const { hole, score, pkey, test } = props;
   // some testing things
   const { team, player_index } = test;
@@ -20,19 +25,23 @@ const HoleJunk = props => {
 
   const [updateGameHoles] = useMutation(UPDATE_GAME_HOLES_MUTATION);
 
-  const par = hole && hole.par ? parseFloat(hole.par) : 0.0;
+  const par = hole?.par ? parseFloat(hole.par) : 0.0;
 
   const { game, scores, readonly } = useContext(GameContext);
   const { _key: gkey } = game;
 
-  const alljunk = getAllOptions({ game, type: 'junk' });
+  const alljunk = getAllOptions({ game, type: "junk" });
   // console.log('allJunk in holeJunk', alljunk);
-  const sorted_junk = sortBy(alljunk, ['seq']);
+  const sorted_junk = sortBy(alljunk, ["seq"]);
   if (sorted_junk.length === 0) {
     return null;
   }
 
-  const scoreTeamForPlayer = getScoreTeamForPlayer({ scores, hole: hole.hole, pkey });
+  const scoreTeamForPlayer = getScoreTeamForPlayer({
+    scores,
+    hole: hole.hole,
+    pkey,
+  });
 
   const oneHoleScoring = {
     holes: [
@@ -48,17 +57,17 @@ const HoleJunk = props => {
       return;
     } // viewing game only, so do nothing
     // only set in DB if junk is based on user input
-    if (!junk || !junk.based_on || junk.based_on !== 'user') {
+    if (!junk || !junk.based_on || junk.based_on !== "user") {
       return;
     }
     if (!game || !game.holes) {
       return;
     }
 
-    let newHoles = game.holes.map(nh => {
-      let newHole = { ...nh };
+    const newHoles = game.holes.map((nh) => {
+      const newHole = { ...nh };
       if (nh.hole === hole.hole) {
-        let newTeams = newHole.teams.map(t => {
+        const newTeams = newHole.teams.map((t) => {
           return setTeamJunk({ ...t }, junk, newValue.toString(), pkey);
         });
         newHole.teams = newTeams;
@@ -73,9 +82,9 @@ const HoleJunk = props => {
         holes: newHolesWithoutTypes,
       },
       optimisticResponse: {
-        __typename: 'Mutation',
+        __typename: "Mutation",
         updateGameHoles: {
-          __typename: 'Game',
+          __typename: "Game",
           _key: gkey,
           holes: newHoles,
         },
@@ -83,7 +92,7 @@ const HoleJunk = props => {
     });
 
     if (error) {
-      console.log('Error updating game - holeJunk', error);
+      console.log("Error updating game - holeJunk", error);
     }
   };
 
@@ -103,9 +112,9 @@ const HoleJunk = props => {
     return logic;
   };
 
-  const renderJunk = junk => {
+  const renderJunk = (junk) => {
     // go through all reasons to not show junk and return null
-    if (junk.show_in === 'none') {
+    if (junk.show_in === "none") {
       return null;
     }
     if (!checkJunkAvailability({ hole, score, junk })) {
@@ -113,23 +122,23 @@ const HoleJunk = props => {
     }
 
     // TODO: junk.name needs l10n, i18n - use junk.name as slug
-    let type = 'outline';
+    let type = "outline";
     let color = blue;
 
     // don't show team junk here
-    if (junk.show_in === 'team') {
+    if (junk.show_in === "team") {
       return null;
     }
 
     // TODO: are all junk true/false?
     const val = getJunk(junk.name, pkey, game, hole.hole);
-    let selected = val && (val === true || val === 'true') ? true : false;
+    let selected = !!(val && (val === true || val === "true"));
 
     // if junk shouldn't be rendered except if a condition is achieved, then
     // return null
-    if (junk.show_in === 'score') {
+    if (junk.show_in === "score") {
       if (
-        junk.scope === 'team' &&
+        junk.scope === "team" &&
         scoreTeamForPlayer &&
         scoreTeamForPlayer.players &&
         scoreTeamForPlayer.players.length === 1
@@ -143,9 +152,9 @@ const HoleJunk = props => {
           return null;
         }
       } else {
-        const based_on = junk.based_on || 'gross';
-        let s = get_score_value('gross', score);
-        if (based_on === 'net') {
+        const based_on = junk.based_on || "gross";
+        let s = get_score_value("gross", score);
+        if (based_on === "net") {
           s = get_net_score(s, score);
         }
 
@@ -166,15 +175,17 @@ const HoleJunk = props => {
     }
 
     if (selected) {
-      type = 'solid';
-      color = 'white';
+      type = "solid";
+      color = "white";
     }
     const testID = `h_${h}_t_${team}_p_${player_index + 1}_j_${junk.seq}`;
     //console.log('testID', testID);
     return (
       <Button
         title={junk.disp}
-        icon={<Icon style={styles.icon} name={junk.icon} size={20} color={color} />}
+        icon={
+          <Icon style={styles.icon} name={junk.icon} size={20} color={color} />
+        }
         type={type}
         buttonStyle={styles.button}
         titleStyle={styles.buttonTitle}

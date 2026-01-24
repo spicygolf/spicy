@@ -1,14 +1,20 @@
-import { useMutation } from '@apollo/client';
-import { blue } from 'common/colors';
-import { omitTypename } from 'common/utils/game';
-import { get_net_score, get_score_value } from 'common/utils/rounds';
-import { upsertScore } from 'common/utils/score';
-import { shapeStyles } from 'common/utils/styles';
-import { GameContext } from 'features/game/gameContext';
-import { POST_SCORE_MUTATION } from 'features/rounds/graphql';
-import useAppState from 'hooks/useAppState';
-import React, { useCallback, useContext, useEffect, useRef } from 'react';
-import { FlatList, StyleSheet, Text, TouchableHighlight, View } from 'react-native';
+import { useMutation } from "@apollo/client";
+import { blue } from "common/colors";
+import { omitTypename } from "common/utils/game";
+import { get_net_score, get_score_value } from "common/utils/rounds";
+import { upsertScore } from "common/utils/score";
+import { shapeStyles } from "common/utils/styles";
+import { GameContext } from "features/game/gameContext";
+import { POST_SCORE_MUTATION } from "features/rounds/graphql";
+import useAppState from "hooks/useAppState";
+import { useCallback, useContext, useEffect, useRef } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableHighlight,
+  View,
+} from "react-native";
 
 const scoreSize = 40;
 
@@ -46,11 +52,11 @@ const HoleScore = (props) => {
   // TODO: this also could be because the course/tee has no holes.
   //
   if (!hole) {
-    console.log('no hole', score, rkey);
+    console.log("no hole", score, rkey);
     return null;
   }
 
-  const gross = get_score_value('gross', score);
+  const gross = get_score_value("gross", score);
   //console.log('holeScore score', hole, score);
   //const net = get_net_score(gross, score);
 
@@ -58,7 +64,7 @@ const HoleScore = (props) => {
   const first = par - 2 >= 0 ? par - 1 : 0;
 
   // populate array of score options
-  let score_options = [];
+  const score_options = [];
   for (let i = 1; i < 13; i++) {
     score_options.push({
       key: i.toString(),
@@ -69,21 +75,21 @@ const HoleScore = (props) => {
 
   const renderScore = (item) => {
     //console.log('renderScore item', item);
-    let score_styles = [styles.score_option];
-    let hole_score_styles = [styles.hole_score_text];
-    let size = scoreSize - 2;
-    let color = 'transparent';
+    const score_styles = [styles.score_option];
+    const hole_score_styles = [styles.hole_score_text];
+    const size = scoreSize - 2;
+    let color = "transparent";
     let outerShape = shapeStyles(size, color).none;
     let innerShape = shapeStyles(size - 5, color).none;
 
     if (item.selected) {
       score_styles.push(styles.score_option_selected);
       hole_score_styles.push(styles.hole_score_text_selected);
-      color = 'white';
+      color = "white";
     } else {
       score_styles.push(styles.score_option_not_selected);
       hole_score_styles.push(styles.hole_score_text_not_selected);
-      color = 'black';
+      color = "black";
     }
     if (item.toPar === -2) {
       // eagle
@@ -106,7 +112,7 @@ const HoleScore = (props) => {
 
     let content = <Text style={hole_score_styles}>{item.key}</Text>;
 
-    if (score && score.pops && score.pops !== '0') {
+    if (score?.pops && score.pops !== "0") {
       const net = get_net_score(item.key, score);
       content = (
         <Text style={[hole_score_styles, styles.pop_text]}>
@@ -120,7 +126,8 @@ const HoleScore = (props) => {
       <TouchableHighlight
         onPress={() => setScore(item)}
         onLongPress={() => setScore(item)}
-        testID={testID}>
+        testID={testID}
+      >
         <View style={score_styles}>
           <View style={outerShape}>
             <View style={innerShape}>{content}</View>
@@ -138,7 +145,7 @@ const HoleScore = (props) => {
       return;
     } // no change in score, so do nothing
     const { key: newGross } = item;
-    let newScore = upsertScore(score, newGross);
+    const newScore = upsertScore(score, newGross);
     const newScoreWithoutTypes = omitTypename(newScore);
 
     const { error } = await postScore({
@@ -147,16 +154,16 @@ const HoleScore = (props) => {
         score: newScoreWithoutTypes,
       },
       optimisticResponse: {
-        __typename: 'Mutation',
+        __typename: "Mutation",
         postScore: {
-          __typename: 'Round',
+          __typename: "Round",
           _key: rkey,
           scores: [newScore],
         },
       },
     });
     if (error) {
-      console.log('Error posting score - holeScore', error);
+      console.log("Error posting score - holeScore", error);
     }
   };
 
@@ -166,8 +173,8 @@ const HoleScore = (props) => {
       data={score_options}
       renderItem={({ item }) => renderScore(item)}
       ref={flatlistRef}
-      onStartShouldSetPanResponderCapture={(evt, gestureState) => false}
-      onScrollToIndexFailed={(e) => {
+      onStartShouldSetPanResponderCapture={(_evt, _gestureState) => false}
+      onScrollToIndexFailed={(_e) => {
         //console.log('onScrollToIndexFailed e', e);
         // this horrible hack seems to fix #15
         setTimeout(() => scroll(), 250);
@@ -183,10 +190,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   hole_score_text_not_selected: {
-    color: '#111',
+    color: "#111",
   },
   hole_score_text_selected: {
-    color: 'white',
+    color: "white",
   },
   pop_text: {
     fontSize: 14,
@@ -197,13 +204,13 @@ const styles = StyleSheet.create({
     width: scoreSize,
   },
   score_option_not_selected: {
-    backgroundColor: '#ddd',
+    backgroundColor: "#ddd",
   },
   score_option_selected: {
     backgroundColor: blue,
   },
   touchable: {
-    height: '100%',
-    width: '100%',
+    height: "100%",
+    width: "100%",
   },
 });

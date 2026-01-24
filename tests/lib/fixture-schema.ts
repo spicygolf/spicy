@@ -137,9 +137,8 @@ export function validateFixture(data: unknown): ValidatedFixture {
 /**
  * Safely validate a fixture, returning result with error info
  */
-export function safeValidateFixture(data: unknown): z.SafeParseReturnType<
-  unknown,
-  ValidatedFixture
-> {
+export function safeValidateFixture(
+  data: unknown,
+): z.SafeParseReturnType<unknown, ValidatedFixture> {
   return FixtureSchema.safeParse(data);
 }

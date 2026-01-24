@@ -1,4 +1,4 @@
-import { ghinRequest, Pagination } from './ghin';
+import { ghinRequest } from "./ghin";
 
 type SearchCourseRequest = {
   q: SearchCourseQuery;
@@ -20,12 +20,11 @@ type SearchCourseQuery = {
   updated_at?: string;
 };
 
-type SearchCourseResponse = {
+type SearchCourseResponse = {};
 
-};
-
-export const searchCourse = async ({q}: SearchCourseRequest): Promise<SearchCourseResponse | null> => {
-
+export const searchCourse = async ({
+  q,
+}: SearchCourseRequest): Promise<SearchCourseResponse | null> => {
   // don't search unless we have at least three characters
   if (q.name.length < 3) {
     return [];
@@ -36,7 +35,7 @@ export const searchCourse = async ({q}: SearchCourseRequest): Promise<SearchCour
   };
 
   const resp = await ghinRequest({
-    method: 'get',
+    method: "get",
     url: `/courses/search.json`,
     params,
     data: {},

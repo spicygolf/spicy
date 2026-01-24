@@ -23,7 +23,7 @@ export function GameTeamsList() {
   const { game } = useGame(undefined, {
     resolve: {
       scope: { teamsConfig: true },
-      specs: { $each: { teamsConfig: true } },
+      spec: { $each: { $each: true } }, // Working copy of options (MapOfOptions -> Option fields)
       players: {
         $each: {
           name: true,
@@ -65,11 +65,11 @@ export function GameTeamsList() {
 
   const { theme } = useUnistyles();
 
-  // Get specs for useTeamsMode
+  // Get spec for useTeamsMode (working copy from game.spec)
   // biome-ignore lint/correctness/useExhaustiveDependencies: Use game.$jazz.id to avoid recomputation on Jazz progressive loading
   const specs = useMemo(() => {
-    if (!game?.$isLoaded || !game.specs?.$isLoaded) return [];
-    return Array.from(game.specs).filter((s) => s?.$isLoaded);
+    if (!game?.$isLoaded || !game.spec?.$isLoaded) return [];
+    return [game.spec];
   }, [game?.$jazz.id]);
 
   // Determine teams mode

@@ -72,7 +72,7 @@ export function DeleteGameButton() {
           <FontAwesome6
             name="trash-can"
             iconStyle="solid"
-            size={16}
+            size={12}
             color={theme.colors.error}
           />
           <Text style={styles.deleteButtonText}>Delete Game</Text>
@@ -166,7 +166,8 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: theme.gap(1.5),
+    paddingVertical: theme.gap(1),
+    paddingHorizontal: theme.gap(1),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
     backgroundColor: theme.colors.background,
@@ -174,11 +175,11 @@ const styles = StyleSheet.create((theme) => ({
   deleteButtonLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: theme.gap(1),
+    gap: theme.gap(0.75),
     flex: 1,
   },
   deleteButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "500",
     color: theme.colors.error,
   },

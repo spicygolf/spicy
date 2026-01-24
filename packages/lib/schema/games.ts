@@ -1,6 +1,6 @@
 import { co, z } from "jazz-tools";
 import { ListOfGameHoles } from "./gameholes";
-import { ListOfGameSpecs } from "./gamespecs";
+import { GameSpec } from "./gamespecs";
 import { MapOfOptions } from "./options";
 import { ListOfPlayers } from "./players";
 import { ListOfRoundToGames } from "./rounds";
@@ -28,24 +28,28 @@ export const Game = co.map({
   start: z.date(),
   name: z.string(),
   scope: GameScope,
-  specs: ListOfGameSpecs,
+
+  /**
+   * Working copy of the spec's options for this game.
+   * Created by copying from the catalog spec (specRef) at game creation.
+   * User modifications to game options go here directly.
+   * This is what scoring and display code should read from.
+   */
+  spec: co.optional(MapOfOptions),
+
+  /**
+   * Reference to the original catalog spec.
+   * Used for:
+   * - "Reset to defaults" - copy specRef options back to spec
+   * - "Show diff" - compare spec vs specRef to see what changed
+   * - Display original spec name/description
+   * Do NOT read options from here for scoring - use spec instead.
+   */
+  specRef: co.optional(GameSpec),
+
   holes: ListOfGameHoles,
   players: ListOfPlayers,
   rounds: ListOfRoundToGames,
-
-  /**
-   * Options for this specific game instance.
-   * Copied from GameSpec.options when the game is created, then customized as needed.
-   *
-   * This is a snapshot/copy approach (not references):
-   * - When creating game: copy all options from gamespec
-   * - Users can modify values for this specific game
-   * - Games are self-contained and don't break when catalog changes
-   * - Historical games maintain their original scoring logic
-   *
-   * Example: Game starts with "stakes: 1" from gamespec, user changes to "stakes: 5"
-   */
-  options: co.optional(MapOfOptions),
 
   /**
    * Legacy ID from ArangoDB v0.3 import (_key field).

@@ -1,12 +1,11 @@
-import { useMutation } from '@apollo/client';
-import { useNavigation } from '@react-navigation/native';
-import { ADD_LINK_MUTATION } from 'common/graphql/link';
-import { getHoles, omitTypename } from 'common/utils/game';
-import { omitDeep } from 'common/utils/game';
-import { ADD_GAME_MUTATION } from 'features/games/graphql';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { useMutation } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import { ADD_LINK_MUTATION } from "common/graphql/link";
+import { getHoles, omitDeep, omitTypename } from "common/utils/game";
+import { ADD_GAME_MUTATION } from "features/games/graphql";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 
 const NewGame = (props) => {
   const { route } = props;
@@ -23,7 +22,7 @@ const NewGame = (props) => {
   const teams_rotate =
     gamespec.team_change_every && gamespec.team_change_every > 0
       ? `every${gamespec.team_change_every}`
-      : 'never';
+      : "never";
 
   /*
     // TODO: for #140, maybe something like:
@@ -42,22 +41,22 @@ const NewGame = (props) => {
 
   const initialHoles = getHoles({
     scope: {
-      holes: 'all18',
+      holes: "all18",
     },
     holes: [],
   });
 
-  let newGame = {
-    __typename: 'Game',
+  const newGame = {
+    __typename: "Game",
     name: gamespec.disp,
     start: game_start,
     scope: {
-      __typename: 'GameScope',
-      holes: 'all18',
+      __typename: "GameScope",
+      holes: "all18",
       teams_rotate,
     },
     holes: initialHoles.map((h) => ({
-      __typename: 'GameHole',
+      __typename: "GameHole",
       hole: h,
       teams: [],
       multipliers: [],
@@ -78,8 +77,8 @@ const NewGame = (props) => {
         },
       });
 
-      if (error && error.message !== 'Network request failed') {
-        console.log('Error adding game: ', error.message);
+      if (error && error.message !== "Network request failed") {
+        console.log("Error adding game: ", error.message);
       }
       //console.log('newGame data', data);
       return data.addGame;
@@ -93,12 +92,12 @@ const NewGame = (props) => {
       //console.log('Begin linking game to gamespec');
       const { error, data } = await addLinkMutation({
         variables: {
-          from: { type: 'game', value: game._key },
-          to: { type: 'gamespec', value: gamespec._key },
+          from: { type: "game", value: game._key },
+          to: { type: "gamespec", value: gamespec._key },
         },
       });
-      if (error && error.message !== 'Network request failed') {
-        console.log('Error linking game to gamespec: ', error.message);
+      if (error && error.message !== "Network request failed") {
+        console.log("Error linking game to gamespec: ", error.message);
       }
       //console.log('newGame linkg2gs', data);
       return data.link;
@@ -117,16 +116,16 @@ const NewGame = (props) => {
         ...newGameWithoutTypes,
         gamespecs: [gamespec],
       };
-      const player = omitDeep(currentPlayer, '__typename');
+      const player = omitDeep(currentPlayer, "__typename");
       delete player.token;
       // TODO: maybe read a user setting and not do this?
       // Caddies & scorers wouldn't always want to be added.
       // If setting is false, navigate to 'Game' only
-      navigation.navigate('Game', {
+      navigation.navigate("Game", {
         currentGameKey: gkey,
-        screen: 'Setup',
+        screen: "Setup",
         params: {
-          screen: 'LinkRoundList',
+          screen: "LinkRoundList",
           params: {
             game,
             player,

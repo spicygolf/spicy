@@ -1,5 +1,4 @@
-import { gql } from '@apollo/client';
-import { useQuery } from '@apollo/client';
+import { gql, useQuery } from "@apollo/client";
 
 export const query = gql`
   query getCountriesAndStates {

@@ -1,9 +1,8 @@
-import { Doc } from './doc';
-import { aql } from 'arangojs';
-import { db } from '../db/db';
+import { aql } from "arangojs";
+import { db } from "../db/db";
+import { Doc } from "./doc";
 
-const collection = db.collection('gamespecs');
-
+const collection = db.collection("gamespecs");
 
 class GameSpec extends Doc {
   constructor() {
@@ -24,8 +23,7 @@ class GameSpec extends Doc {
     `);
     return await cursor.all();
   }
-
-};
+}
 
 const _GameSpec = GameSpec;
 export { _GameSpec as GameSpec };

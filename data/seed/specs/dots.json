@@ -12,11 +12,7 @@
   "teams": null,
   "team_size": null,
   "team_change_every": 0,
-  "options": [
-    "stakes",
-    "use_handicaps",
-    "handicap_index_from"
-  ],
+  "options": ["stakes", "use_handicaps", "handicap_index_from"],
   "junk": [
     "low_ball",
     "birdie",

@@ -1,20 +1,22 @@
-import { useQuery } from '@apollo/client';
-import { useNavigation } from '@react-navigation/native';
-import { STAT_FOR_PLAYER_FEED } from 'features/feed//graphql';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import React, { useContext } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Card } from 'react-native-elements';
+import { useQuery } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import { STAT_FOR_PLAYER_FEED } from "features/feed//graphql";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { useContext } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Card } from "react-native-elements";
 
 const Stat = (props) => {
   const { stat, side } = props;
   const navigation = useNavigation();
-  let title = '';
+  let title = "";
 
   const { currentPlayer: cp } = useContext(CurrentPlayerContext);
   //console.log('cp', cp);
   const currentPlayer = `players/${cp._key}`;
-  const myClubs = cp?.handicap?.clubs ? cp.handicap.clubs.map((c) => `${c.id}`) : [];
+  const myClubs = cp?.handicap?.clubs
+    ? cp.handicap.clubs.map((c) => `${c.id}`)
+    : [];
 
   const { error, data } = useQuery(STAT_FOR_PLAYER_FEED, {
     variables: {
@@ -25,29 +27,29 @@ const Stat = (props) => {
   });
 
   switch (stat) {
-    case 'public':
-      title = 'Spicy Golf';
+    case "public":
+      title = "Spicy Golf";
       break;
-    case 'myclubs':
-      title = 'My Club';
+    case "myclubs":
+      title = "My Club";
       if (myClubs.length > 1) {
-        title = title + 's';
+        title = `${title}s`;
       }
       break;
-    case 'faves':
-      title = 'My Favorites';
+    case "faves":
+      title = "My Favorites";
       break;
-    case 'me':
-      title = 'Me';
+    case "me":
+      title = "Me";
       break;
   }
 
-  if (error && error.message !== 'Network request failed') {
+  if (error && error.message !== "Network request failed") {
     console.log(error);
     // TODO: error component
   }
 
-  let statValue = ' ';
+  let statValue = " ";
   if (data) {
     statValue = data.statForPlayerFeed;
   }
@@ -57,7 +59,7 @@ const Stat = (props) => {
     <View style={[styles.tov, styles[side]]}>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate('FeedGames', props);
+          navigation.navigate("FeedGames", props);
         }}
       >
         <Card>
@@ -83,7 +85,7 @@ const styles = StyleSheet.create({
   stat: {
     fontSize: 48,
     //fontWeight: 'bold',
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   tov: {
     flex: 1,

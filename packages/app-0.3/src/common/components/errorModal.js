@@ -1,6 +1,5 @@
-import Error from 'common/components/error';
-import React from 'react';
-import { Overlay } from 'react-native-elements';
+import Error from "common/components/error";
+import { Overlay } from "react-native-elements";
 
 const ErrorModal = (props) => {
   const { visible, toggle, error } = props;

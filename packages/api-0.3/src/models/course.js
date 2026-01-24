@@ -1,12 +1,15 @@
-import datefnstz from 'date-fns-tz';
+import datefnstz from "date-fns-tz";
 
-import { db } from '../db/db';
-import { Doc } from './doc';
-import { getCourse as getCourseGhin, searchCourse as searchCourseGhin } from '../ghin';
+import { db } from "../db/db";
+import {
+  getCourse as getCourseGhin,
+  searchCourse as searchCourseGhin,
+} from "../ghin";
+import { Doc } from "./doc";
 
 const { zonedTimeToUtc } = datefnstz;
 
-const collection = db.collection('courses');
+const collection = db.collection("courses");
 
 class Course extends Doc {
   constructor() {
@@ -23,7 +26,6 @@ class Course extends Doc {
     return searchCourseGhin({ q });
   }
 
-
   _normalize(orig) {
     return {
       course_id: orig.course_id ? orig.course_id : orig.CourseId,
@@ -36,7 +38,6 @@ class Course extends Doc {
         : null,
     };
   }
-
 }
 
 const _Course = Course;

@@ -1,0 +1,14 @@
+{
+  "name": "stableford_double_eagle",
+  "disp": "Double Eagle (6 pts)",
+  "type": "junk",
+  "sub_type": "dot",
+  "value": 6,
+  "seq": 1,
+  "scope": "player",
+  "icon": "star",
+  "show_in": "score",
+  "based_on": "net",
+  "limit": null,
+  "score_to_par": "at_most -3"
+}

@@ -1,7 +1,6 @@
-import FavoriteIcon from 'common/components/favoriteIcon';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { ListItem } from 'react-native-elements';
+import FavoriteIcon from "common/components/favoriteIcon";
+import { StyleSheet, Text, View } from "react-native";
+import { ListItem } from "react-native-elements";
 
 const handicap = (h) => (
   <View>
@@ -22,7 +21,9 @@ const Player = (props) => {
       <FavoriteIcon fave={item.fave} />
       <ListItem.Content>
         <ListItem.Title>{title}</ListItem.Title>
-        <ListItem.Subtitle style={styles.subtitle}>{subtitle}</ListItem.Subtitle>
+        <ListItem.Subtitle style={styles.subtitle}>
+          {subtitle}
+        </ListItem.Subtitle>
       </ListItem.Content>
       {handicap(hdcp)}
     </ListItem>
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   subtitle: {
-    color: '#999',
+    color: "#999",
     fontSize: 11,
   },
 });

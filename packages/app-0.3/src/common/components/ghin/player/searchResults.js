@@ -1,11 +1,17 @@
-import { useQuery } from '@apollo/client';
-import { GhinPlayerSearchContext } from 'common/components/ghin/player/searchContext';
-import { SEARCH_PLAYER_QUERY } from 'features/players/graphql';
-import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
-import { ListItem } from 'react-native-elements';
+import { useQuery } from "@apollo/client";
+import { GhinPlayerSearchContext } from "common/components/ghin/player/searchContext";
+import { SEARCH_PLAYER_QUERY } from "features/players/graphql";
+import { useContext, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { ListItem } from "react-native-elements";
 
-const GhinPlayerSearchResults = (props) => {
+const GhinPlayerSearchResults = (_props) => {
   const { state, setState } = useContext(GhinPlayerSearchContext);
   const [page, setPage] = useState(1);
   const [golfers, setGolfers] = useState([]);
@@ -41,17 +47,22 @@ const GhinPlayerSearchResults = (props) => {
             first_name: state.firstName,
             last_name: state.lastName,
             handicap: {
-              source: 'ghin',
+              source: "ghin",
               id: gn,
               index: hdcp,
             },
             name: player_name,
             short: fn,
           });
-        }}>
+        }}
+      >
         <ListItem.Content style={styles.container}>
-          <ListItem.Title style={styles.player_name}>{player_name}</ListItem.Title>
-          <ListItem.Subtitle style={styles.player_club}>{player_club}</ListItem.Subtitle>
+          <ListItem.Title style={styles.player_name}>
+            {player_name}
+          </ListItem.Title>
+          <ListItem.Subtitle style={styles.player_club}>
+            {player_club}
+          </ListItem.Subtitle>
         </ListItem.Content>
         {handicap(hdcp)}
       </ListItem>
@@ -65,7 +76,7 @@ const GhinPlayerSearchResults = (props) => {
         state: state.state,
         first_name: state.firstName,
         last_name: state.lastName,
-        status: 'Active',
+        status: "Active",
       },
       p: {
         page,
@@ -93,7 +104,7 @@ const GhinPlayerSearchResults = (props) => {
     );
   }
 
-  if (error && error.message !== 'Network request failed') {
+  if (error && error.message !== "Network request failed") {
     console.log(error);
     // TODO: error component
     return <Text>Error Searching Players: `{error.message}`</Text>;
@@ -144,12 +155,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   no_results: {
-    alignSelf: 'center',
-    color: '#999',
+    alignSelf: "center",
+    color: "#999",
     fontSize: 20,
   },
   player_club: {
-    color: '#999',
+    color: "#999",
     fontSize: 11,
   },
 });

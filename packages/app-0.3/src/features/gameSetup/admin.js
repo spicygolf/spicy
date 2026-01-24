@@ -1,19 +1,22 @@
-import { useLazyQuery, useMutation } from '@apollo/client';
-import { useNavigation } from '@react-navigation/native';
-import { REMOVE_LINK_MUTATION } from 'common/graphql/unlink';
-import { rmgame } from 'common/utils/game';
-import { rmlink } from 'common/utils/links';
-import { rmround } from 'common/utils/rounds';
-import { GameContext } from 'features/game/gameContext';
-import { DELETE_GAME_MUTATION, GET_DELETE_GAME_INFO_QUERY } from 'features/game/graphql';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { DELETE_ROUND_MUTATION } from 'features/rounds/graphql';
-import { find } from 'lodash';
-import React, { useContext, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { Button, Card, Overlay } from 'react-native-elements';
+import { useLazyQuery, useMutation } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import { REMOVE_LINK_MUTATION } from "common/graphql/unlink";
+import { rmgame } from "common/utils/game";
+import { rmlink } from "common/utils/links";
+import { rmround } from "common/utils/rounds";
+import { GameContext } from "features/game/gameContext";
+import {
+  DELETE_GAME_MUTATION,
+  GET_DELETE_GAME_INFO_QUERY,
+} from "features/game/graphql";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { DELETE_ROUND_MUTATION } from "features/rounds/graphql";
+import { find } from "lodash";
+import { useContext, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { Button, Card, Overlay } from "react-native-elements";
 
-const Admin = (props) => {
+const Admin = (_props) => {
   const { gkey, game } = useContext(GameContext);
   const { currentPlayer } = useContext(CurrentPlayerContext);
 
@@ -31,23 +34,23 @@ const Admin = (props) => {
       variables: {
         gkey: gkey,
       },
-      fetchPolicy: 'no-cache',
+      fetchPolicy: "no-cache",
     },
   );
   if (loading) {
     return <ActivityIndicator />;
   }
-  if (error && error.message !== 'Network request failed') {
-    console.log('Error getting deleteGameInfo', error);
+  if (error && error.message !== "Network request failed") {
+    console.log("Error getting deleteGameInfo", error);
   }
   //console.log('dgiRes in function body', dgiRes);
 
   const doDeleteGame = async () => {
-    const dgiRes = data && data.getDeleteGameInfo ? data.getDeleteGameInfo : null;
+    const dgiRes = data?.getDeleteGameInfo ? data.getDeleteGameInfo : null;
     //console.log('dgiRes in doDeleteGame', dgiRes);
     if (dgiRes == null) {
       // TODO: error component
-      console.error('No DeleteGameInfo available, cannot delete game');
+      console.error("No DeleteGameInfo available, cannot delete game");
       return;
     }
 
@@ -57,13 +60,19 @@ const Admin = (props) => {
 
     // remove round2game links and rounds with no links to other games
     await dgi.rounds.map(async (r) => {
-      await rmlink('round', r.vertex, 'game', lGKey, unlink);
-      if (r && r.other && r.other.length === 0) {
+      await rmlink("round", r.vertex, "game", lGKey, unlink);
+      if (r?.other && r.other.length === 0) {
         //console.log('round to delete', r);
         // we need to delete round2player edge as well as round
         const gRound = find(game.rounds, { _key: r.vertex });
-        if (gRound && gRound.player && gRound.player[0] && gRound.player[0]._key) {
-          await rmlink('round', r.vertex, 'player', gRound.player[0]._key, unlink);
+        if (gRound?.player?.[0]?._key) {
+          await rmlink(
+            "round",
+            r.vertex,
+            "player",
+            gRound.player[0]._key,
+            unlink,
+          );
         }
         await rmround(r.vertex, deleteRound);
       }
@@ -71,18 +80,18 @@ const Admin = (props) => {
 
     // remove player links
     await dgi.players.map(async (p) => {
-      await rmlink('player', p.vertex, 'game', lGKey, unlink);
+      await rmlink("player", p.vertex, "game", lGKey, unlink);
     });
 
     // remove gamespec links
     await dgi.gamespecs.map(async (gs) => {
-      await rmlink('game', lGKey, 'gamespec', gs.vertex, unlink);
+      await rmlink("game", lGKey, "gamespec", gs.vertex, unlink);
     });
 
     // remove game
     await rmgame(lGKey, currentPlayer._key, deleteGame);
 
-    navigation.navigate('Games');
+    navigation.navigate("Games");
   };
 
   // render stuffs
@@ -94,7 +103,7 @@ const Admin = (props) => {
     setShowSure(!showSure);
   };
 
-  const bg = showSure ? '#fbb' : '#fff';
+  const bg = showSure ? "#fbb" : "#fff";
 
   return (
     <View>
@@ -143,10 +152,10 @@ export default Admin;
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: 'red',
+    backgroundColor: "red",
   },
   button_row: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   no_button: {
     flex: 1,

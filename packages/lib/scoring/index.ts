@@ -35,10 +35,14 @@ export {
 } from "./multiplier-engine";
 // Option utilities (per-hole option value resolution)
 export {
+  copySpecOptions,
   getFrontNinePreDoubleTotalFromHoles,
+  getGameOptions,
   getJunkOptionsForHole,
+  getMetaOption,
   getOptionForHole,
   getOptionValueForHole,
+  getSpecField,
   isOptionOnHole,
 } from "./option-utils";
 // Main pipeline
@@ -52,6 +56,23 @@ export {
 } from "./points-engine";
 // Ranking engine
 export { rankWithTies } from "./ranking-engine";
+export type {
+  DebtRecord,
+  Payout,
+  PlayerMetrics,
+  PoolConfig,
+  SettlementResult,
+} from "./settlement-engine";
+// Settlement engine (multi-pool payouts)
+export {
+  calculateAllPayouts,
+  calculateNetPositions,
+  calculatePoolPayouts,
+  calculateSettlement,
+  extractQuotaMetrics,
+  extractSkinsMetric,
+  reconcileDebts,
+} from "./settlement-engine";
 // Pipeline stages (for testing/debugging)
 export {
   assignTeams,

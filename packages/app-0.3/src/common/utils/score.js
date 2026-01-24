@@ -5,7 +5,7 @@ import {
   getJunk,
   getOptionValue,
   isOptionOnThisHole,
-} from 'common/utils/game';
+} from "common/utils/game";
 import {
   get_hole,
   get_net_score,
@@ -13,13 +13,21 @@ import {
   get_round_for_player,
   get_score,
   get_score_value,
-} from 'common/utils/rounds';
-import ScoringWrapper from 'common/utils/ScoringWrapper';
-import { cloneDeep, concat, filter, find, findIndex, max, orderBy } from 'lodash';
-import moment from 'moment';
+} from "common/utils/rounds";
+import ScoringWrapper from "common/utils/ScoringWrapper";
+import {
+  cloneDeep,
+  concat,
+  filter,
+  find,
+  findIndex,
+  max,
+  orderBy,
+} from "lodash";
+import moment from "moment";
 
 export const getScoringFromGamespecs = (game) => {
-  let ret = {};
+  const ret = {};
   game.gamespecs.map((gs) => {
     const { scoring } = gs;
     if (!scoring) {
@@ -48,14 +56,14 @@ export const getScoringFromGamespecs = (game) => {
 //
 export const scoring = (game) => {
   const allScoring = getScoringFromGamespecs(game);
-  const allJunk = getAllOptions({ game, type: 'junk' });
-  const allMultipliers = getAllOptions({ game, type: 'multiplier' });
-  const pointsGame = getGamespecKVs(game, 'type').includes('points');
-  const matchplayGame = getGamespecKVs(game, 'type').includes('match');
-  const betterPoints = getGamespecKVs(game, 'better');
+  const allJunk = getAllOptions({ game, type: "junk" });
+  const allMultipliers = getAllOptions({ game, type: "multiplier" });
+  const pointsGame = getGamespecKVs(game, "type").includes("points");
+  const matchplayGame = getGamespecKVs(game, "type").includes("match");
+  const betterPoints = getGamespecKVs(game, "better");
 
   // player scoring
-  let players = game.players.map((p) => {
+  const players = game.players.map((p) => {
     if (!p) {
       return;
     }
@@ -76,7 +84,7 @@ export const scoring = (game) => {
   });
 
   // return value of main scoring function
-  let ret = {
+  const ret = {
     holes: [],
     players,
   };
@@ -100,7 +108,10 @@ export const scoring = (game) => {
       if (!isOptionOnThisHole({ option: gsJunk, hole })) {
         return;
       }
-      if (gsJunk.limit === 'one_team_per_group' || gsJunk.limit === 'one_per_group') {
+      if (
+        gsJunk.limit === "one_team_per_group" ||
+        gsJunk.limit === "one_per_group"
+      ) {
         const jo = getOptionValue({ option: gsJunk, hole });
         possiblePoints += jo.value;
         // console.log(
@@ -115,14 +126,20 @@ export const scoring = (game) => {
 
     teams = gHole.teams.map((gTeam) => {
       let teamPoints = 0;
-      let team = {
+      const team = {
         team: gTeam.team,
         players: gTeam.players.map((gPlayer) => {
           const pkey = gPlayer;
-          const { p, tp, pp } = calcPlayerJunk({ players, pkey, game, hole, allJunk });
+          const { p, tp, pp } = calcPlayerJunk({
+            players,
+            pkey,
+            game,
+            hole,
+            allJunk,
+          });
           teamPoints += tp;
           possiblePoints += pp;
-          if (p && p.score && p.score.gross && p.score.gross.value) {
+          if (p?.score?.gross?.value) {
             ++scoresEntered;
           }
           return p;
@@ -180,8 +197,8 @@ export const scoring = (game) => {
       if (!isOptionOnThisHole({ option: gsMult, hole })) {
         return;
       }
-      if (gsMult.based_on === 'user') {
-        if (gHole && gHole.multipliers) {
+      if (gsMult.based_on === "user") {
+        if (gHole?.multipliers) {
           //console.log('scoring gHole', gHole);
           filter(gHole.multipliers, { name: gsMult.name }).map((mult) => {
             multipliers.push({
@@ -209,7 +226,7 @@ export const scoring = (game) => {
                   });
                 }
               } catch (e) {
-                console.log('logic error', e);
+                console.log("logic error", e);
               }
             }
           });
@@ -222,10 +239,10 @@ export const scoring = (game) => {
     for (let i = 0; i < multipliers.length; i++) {
       const m = multipliers[i];
       const mv = getOptionValue({ option: m, hole });
-      if (m.name === 'custom' && !mv?.value) {
-        const gMult = find(gHole?.multipliers, { name: 'custom' });
+      if (m.name === "custom" && !mv?.value) {
+        const gMult = find(gHole?.multipliers, { name: "custom" });
         mv.value = gMult?.value;
-        console.log('custom value', mv);
+        console.log("custom value", mv);
       }
       if (m?.override === true) {
         // this multiplier overrides all others, so only use its value and exit loop
@@ -243,15 +260,15 @@ export const scoring = (game) => {
       // give points to players on this team
       t.players.map((p) => {
         p.score.points.value = holeTotal;
-        incrementPlayer(players, p.pkey, 'points', holeTotal);
+        incrementPlayer(players, p.pkey, "points", holeTotal);
       });
     });
     if (teams.length === 2) {
       // calculate net total points
       teams.map((t) => {
-        const otherTeamIndex = t.team === '1' ? 1 : 0;
+        const otherTeamIndex = t.team === "1" ? 1 : 0;
         let holeNetTotal = t.holeTotal - teams[otherTeamIndex].holeTotal;
-        if (betterPoints.includes('lower')) {
+        if (betterPoints.includes("lower")) {
           holeNetTotal = teams[otherTeamIndex].holeTotal - t.holeTotal;
           //console.log('lower points is better', t.team, holeNetTotal);
         }
@@ -259,17 +276,17 @@ export const scoring = (game) => {
         // give points to players on this team
         t.players.map((p) => {
           p.score.points.value = t.holeNetTotal; // overwrite holeTotal points in 2-team
-          incrementPlayer(players, p.pkey, 'netPoints', t.holeNetTotal);
+          incrementPlayer(players, p.pkey, "netPoints", t.holeNetTotal);
         });
       });
     }
 
     // warnings
-    let warnings = [];
+    const warnings = [];
     let markedJunk = 0,
       requiredJunk = 0;
     allJunk.map((junk) => {
-      if (junk.scope === 'player' && junk.limit === 'one_per_group') {
+      if (junk.scope === "player" && junk.limit === "one_per_group") {
         ++requiredJunk;
         teams.map((t) => {
           t.players.map((p) => {
@@ -281,7 +298,7 @@ export const scoring = (game) => {
       }
     });
     if (markedJunk < requiredJunk && game.players.length === scoresEntered) {
-      warnings.push('Mark all possible points');
+      warnings.push("Mark all possible points");
     }
 
     // hole scoring
@@ -301,7 +318,7 @@ export const scoring = (game) => {
   // loop thru holes, calculating runningTotal, match for each team
   let allHolesScoredSoFar = true;
   let isMatchOver = false;
-  let matchResult = '';
+  let matchResult = "";
   let winningTeam = null;
   ret.holes.map((h, i) => {
     // see if this hole is fully-scored
@@ -313,9 +330,10 @@ export const scoring = (game) => {
     h.teams.map((t) => {
       let lastHoleRunningTotal = 0;
       if (i > 0) {
-        let lastHole = find(ret.holes[i - 1].teams, { team: t.team });
-        lastHoleRunningTotal =
-          lastHole && lastHole.runningTotal ? lastHole.runningTotal : 0;
+        const lastHole = find(ret.holes[i - 1].teams, { team: t.team });
+        lastHoleRunningTotal = lastHole?.runningTotal
+          ? lastHole.runningTotal
+          : 0;
       }
       //console.log('lastHoleRunningTotal', lastHoleRunningTotal, 't', t);
       t.runningTotal =
@@ -336,12 +354,12 @@ export const scoring = (game) => {
           }
           return;
         }
-        const otherTeamIndex = t.team === '1' ? 1 : 0;
+        const otherTeamIndex = t.team === "1" ? 1 : 0;
         const diff = t.runningTotal - h.teams[otherTeamIndex].runningTotal;
 
         if (pointsGame) {
           t.runningDiff = diff;
-          if (betterPoints.includes('lower')) {
+          if (betterPoints.includes("lower")) {
             t.runningDiff *= -1;
           }
         }
@@ -389,21 +407,21 @@ const calcPlayerJunk = ({ players, pkey, game, hole, allScoring, allJunk }) => {
 
   const round = get_round_for_player(game.rounds, pkey);
   const score = get_score(hole, round);
-  const gross = get_score_value('gross', score);
+  const gross = get_score_value("gross", score);
   const net = get_net_score(gross, score);
   const pops = get_pops(score);
   const teeHole = get_hole(hole, round);
-  const par = teeHole && teeHole.par ? parseFloat(teeHole.par) : 0.0;
+  const par = teeHole?.par ? parseFloat(teeHole.par) : 0.0;
   const grossToPar = gross && gross > 0 ? gross - par : 0;
   const netToPar = net - par;
 
   // add to players section of scores
-  incrementPlayer(players, pkey, 'gross', gross);
-  incrementPlayer(players, pkey, 'net', net);
-  incrementPlayer(players, pkey, 'grossToPar', grossToPar);
-  incrementPlayer(players, pkey, 'netToPar', netToPar);
+  incrementPlayer(players, pkey, "gross", gross);
+  incrementPlayer(players, pkey, "net", net);
+  incrementPlayer(players, pkey, "grossToPar", grossToPar);
+  incrementPlayer(players, pkey, "netToPar", netToPar);
   if (gross > 0) {
-    incrementPlayer(players, pkey, 'holesScored', 1);
+    incrementPlayer(players, pkey, "holesScored", 1);
   }
 
   // player junk
@@ -413,23 +431,25 @@ const calcPlayerJunk = ({ players, pkey, game, hole, allScoring, allJunk }) => {
       return;
     }
     // console.log('calcPlayerJunk', gsJunk);
-    if (gsJunk.scope !== 'player') {
+    if (gsJunk.scope !== "player") {
       return;
     }
     let j = false;
     switch (gsJunk.based_on) {
-      case 'user':
+      case "user": {
         const jv = getJunk(gsJunk.name, pkey, game, hole);
         // console.log('jv', jv);
-        if (jv === 'true' || jv === true) {
+        if (jv === "true" || jv === true) {
           j = true;
         }
         break;
-      case 'gross':
-      case 'net':
-        const s = gsJunk.based_on === 'gross' ? gross : net;
-        j = isScoreToParJunk(gsJunk, s, par) ? true : false;
+      }
+      case "gross":
+      case "net": {
+        const s = gsJunk.based_on === "gross" ? gross : net;
+        j = !!isScoreToParJunk(gsJunk, s, par);
         break;
+      }
       default:
         console.log(`scoring - invalid junk based_on
           '${gsJunk.based_on}'`);
@@ -465,7 +485,14 @@ const calcPlayerJunk = ({ players, pkey, game, hole, allScoring, allJunk }) => {
   };
 };
 
-const calcTeamScore = ({ teams, allScoring, allJunk, game, scoresEntered, hole }) => {
+const calcTeamScore = ({
+  teams,
+  allScoring,
+  allJunk,
+  game,
+  scoresEntered,
+  hole,
+}) => {
   // ready to calc yet?  check if all scores are in
   //console.log('calcTeamScore', game.players, scoresEntered, teams);
   if (game.players.length !== scoresEntered) {
@@ -481,8 +508,8 @@ const calcTeamScore = ({ teams, allScoring, allJunk, game, scoresEntered, hole }
         continue;
       }
       lScoring.map((s) => {
-        if (s.scope === 'team') {
-          if (scoringType === 'hole' && s.type === 'vegas') {
+        if (s.scope === "team") {
+          if (scoringType === "hole" && s.type === "vegas") {
             ret = vegasTeamScore({ team: ret, teams, game, hole, s });
           }
         }
@@ -494,13 +521,13 @@ const calcTeamScore = ({ teams, allScoring, allJunk, game, scoresEntered, hole }
       if (!isOptionOnThisHole({ option: gsJunk, hole })) {
         return;
       }
-      if (gsJunk.scope === 'team') {
-        if (gsJunk.sub_type === 'dot') {
+      if (gsJunk.scope === "team") {
+        if (gsJunk.sub_type === "dot") {
           switch (gsJunk.calculation) {
             // TODO: convert low_ball and low_team over to logic, and get rid of
             //       gsJunk.calculation and best_ball and sum cases below.
             //       i.e. only use gsJunk.logic field going forward
-            case 'logic':
+            case "logic": {
               const oneHoleScoring = {
                 holes: [
                   {
@@ -509,7 +536,11 @@ const calcTeamScore = ({ teams, allScoring, allJunk, game, scoresEntered, hole }
                   },
                 ],
               };
-              const scoringWrapper = new ScoringWrapper(game, oneHoleScoring, hole);
+              const scoringWrapper = new ScoringWrapper(
+                game,
+                oneHoleScoring,
+                hole,
+              );
               let junk_pts = 0;
               try {
                 const logic = scoringWrapper.logic(gsJunk.logic, {
@@ -524,39 +555,44 @@ const calcTeamScore = ({ teams, allScoring, allJunk, game, scoresEntered, hole }
                   junk_pts = jo.value;
                 }
               } catch (e) {
-                console.log('logic error', e);
+                console.log("logic error", e);
               }
               ret.score[gsJunk.name] = junk_pts;
               break;
+            }
             // TODO: see above, only use 'logic' in future
-            case 'best_ball':
+            case "best_ball": {
               const orderedBalls = orderBy(team.players, (p) =>
                 parseFloat(p.score[gsJunk.based_on].value),
               );
               //console.log('orderedBalls', orderedBalls);
-              let val = orderedBalls.map((p) =>
+              const val = orderedBalls.map((p) =>
                 parseFloat(p.score[gsJunk.based_on].value),
               );
               ret.score[gsJunk.name] = val;
               break;
+            }
             // TODO: see above, only use 'logic' in future
-            case 'sum':
+            case "sum": {
               let sum = 0.0;
               team.players.map((player) => {
-                const newScore = parseFloat(player.score[gsJunk.based_on].value);
+                const newScore = parseFloat(
+                  player.score[gsJunk.based_on].value,
+                );
                 sum = sum + newScore;
               });
               // make value an array because of best_ball calc above needing to be
               // an array that you iterate thru to break ties
               ret.score[gsJunk.name] = [sum];
               break;
+            }
             default:
               console.log(`unknown team junk calculation:
                 '${gsJunk.calculation}'`);
               break;
           }
         } else {
-          console.log('unknown junk type: ', gsJunk.sub_type);
+          console.log("unknown junk type: ", gsJunk.sub_type);
         }
       }
     });
@@ -583,15 +619,15 @@ const calcTeamJunk = ({
     };
   }
 
-  let ret = cloneDeep(teams);
+  const ret = cloneDeep(teams);
   let maxJunkPoints = 0;
 
   allJunk.map((gsJunk) => {
     if (!isOptionOnThisHole({ option: gsJunk, hole })) {
       return;
     }
-    if (gsJunk.scope === 'team') {
-      if (gsJunk.sub_type === 'dot') {
+    if (gsJunk.scope === "team") {
+      if (gsJunk.sub_type === "dot") {
         // get all team scores array
         const teamScores = teams.map((t, i) => {
           // console.log(`${gsJunk.name} score`, t.score[gsJunk.name]);
@@ -605,13 +641,17 @@ const calcTeamJunk = ({
         // console.log('teamScores', teamScores);
 
         switch (gsJunk.calculation) {
-          case 'logic':
+          case "logic": {
             // logic already has points calculated, so just use them
-            const betterMult = betterPoints === 'lower' ? -1 : 1;
+            const betterMult = betterPoints === "lower" ? -1 : 1;
             for (let i = 0; i < teamScores.length; i++) {
-              if (teamScores[i].value !== 0 && game.players.length === scoresEntered) {
+              if (
+                teamScores[i].value !== 0 &&
+                game.players.length === scoresEntered
+              ) {
                 ret[i].junk.push(gsJunk);
-                ret[i].points = ret[i].points + teamScores[i].value * betterMult;
+                ret[i].points =
+                  ret[i].points + teamScores[i].value * betterMult;
                 // of the junk that has points, add the max # of these junk to possiblePoints
                 // TODO: this works for 9/10 Points game (3,3,3 or 5,3,1, etc),
                 //       but does it work universally?  Other junk?
@@ -619,7 +659,8 @@ const calcTeamJunk = ({
               }
             }
             break;
-          default:
+          }
+          default: {
             // TODO: replace low_ball and low_total with logic (like above)
             //       and move these bits into ScoringWrapper under custom fns
 
@@ -629,7 +670,7 @@ const calcTeamJunk = ({
             const ties_option = getOptionValue({
               game,
               hole,
-              option: 'next_ball_breaks_ties',
+              option: "next_ball_breaks_ties",
             });
             const lenOfScores =
               ties_option && ties_option.value === true ? maxLenScores : 1;
@@ -650,14 +691,14 @@ const calcTeamJunk = ({
                   //console.log('adding to countOfBest cuz tied');
                   ++countOfBest;
                 }
-                if (gsJunk.better === 'lower') {
+                if (gsJunk.better === "lower") {
                   if (teamScores[i].value[j] < best.value[j]) {
                     best = teamScores[i];
                     //console.log('this team beat best team', best);
                     countOfBest = 1;
                     break; // don't go further with these orderedScores
                   }
-                } else if (gsJunk.better === 'higher') {
+                } else if (gsJunk.better === "higher") {
                   if (teamScores[i].value[j] > best.value[j]) {
                     best = teamScores[i];
                     //console.log('this team beat best team', best);
@@ -687,9 +728,10 @@ const calcTeamJunk = ({
               ret[best.index].points = ret[best.index].points + jo.value;
             }
             break;
+          }
         }
       } else {
-        console.log('unknown junk type: ', gsJunk.sub_type);
+        console.log("unknown junk type: ", gsJunk.sub_type);
       }
     }
   });
@@ -705,22 +747,22 @@ export const isScoreToParJunk = (junk, s, par) => {
   if (!junk.score_to_par) {
     return null;
   }
-  const [fit, amount] = junk.score_to_par.split(' ');
+  const [fit, amount] = junk.score_to_par.split(" ");
   //console.log(junk.name, junk.based_on, s, hole.par, fit, amount);
 
   let ret;
   switch (fit) {
-    case 'exactly':
+    case "exactly":
       if (s - par !== parseFloat(amount)) {
         return null;
       }
       ret = junk;
       break;
-    case 'less_than':
-      console.log('less_than');
+    case "less_than":
+      console.log("less_than");
       break;
-    case 'greater_than':
-      console.log('greater_than');
+    case "greater_than":
+      console.log("greater_than");
       break;
     default:
       // if condition not achieved, return null
@@ -736,24 +778,24 @@ export const format = ({ v, type, showDown = true }) => {
   }
 
   // logic
-  if (type === 'points' && parseFloat(v) === 0) {
+  if (type === "points" && parseFloat(v) === 0) {
     return v;
   }
-  if (type === 'points' && parseFloat(v) > 0) {
+  if (type === "points" && parseFloat(v) > 0) {
     return `+${v}`;
   }
-  if (type === 'match') {
-    if (v && v.toString().includes('&')) {
+  if (type === "match") {
+    if (v?.toString().includes("&")) {
       return v;
     }
     if (parseFloat(v) < 0) {
-      return showDown ? `${-1 * v} dn` : '';
+      return showDown ? `${-1 * v} dn` : "";
     }
     if (parseFloat(v) > 0) {
       return `${v} up`;
     }
     if (parseFloat(v) === 0) {
-      return 'tied';
+      return "tied";
     }
   }
   return v;
@@ -763,20 +805,20 @@ export const upsertScore = (score, newGross) => {
   const ts = moment.utc().format();
 
   const newScore = {
-    __typename: 'Score',
+    __typename: "Score",
     hole: score.hole,
     values: [],
   };
-  if (score && score.values && score.values.length) {
+  if (score?.values?.length) {
     score.values.map((s) => {
       let newVal = s.v;
       let newTS = s.ts;
-      if (s.k === 'gross') {
+      if (s.k === "gross") {
         newVal = newGross;
         newTS = ts;
       }
       newScore.values.push({
-        __typename: 'Value',
+        __typename: "Value",
         k: s.k,
         v: newVal,
         ts: newTS,
@@ -785,8 +827,8 @@ export const upsertScore = (score, newGross) => {
   } else {
     newScore.values = [
       {
-        __typename: 'Value',
-        k: 'gross',
+        __typename: "Value",
+        k: "gross",
         v: newGross,
         ts: ts,
       },
@@ -803,7 +845,7 @@ export const vegasTeamScore = ({ team, teams, game, hole, s }) => {
     .map((p) => parseFloat(p.score[s.based_on].value))
     .sort();
 
-  const otherTeamIndex = team.team === '1' ? 1 : 0;
+  const otherTeamIndex = team.team === "1" ? 1 : 0;
   const otherTeam = teams[otherTeamIndex];
 
   // flips digits?  add10?
@@ -818,14 +860,14 @@ export const vegasTeamScore = ({ team, teams, game, hole, s }) => {
   otherTeam.players.map((p) => {
     otherTeamJunk = concat(otherTeamJunk, p.junk);
   });
-  const thisTeamBirdies = countJunk(thisTeamJunk, { name: 'birdie' });
-  const thisTeamEagles = countJunk(thisTeamJunk, { name: 'eagle' });
-  const otherTeamBirdies = countJunk(otherTeamJunk, { name: 'birdie' });
-  const otherTeamEagles = countJunk(otherTeamJunk, { name: 'eagle' });
+  const thisTeamBirdies = countJunk(thisTeamJunk, { name: "birdie" });
+  const thisTeamEagles = countJunk(thisTeamJunk, { name: "eagle" });
+  const otherTeamBirdies = countJunk(otherTeamJunk, { name: "birdie" });
+  const otherTeamEagles = countJunk(otherTeamJunk, { name: "eagle" });
   const birdies_cancel_option = getOptionValue({
     game,
     hole,
-    option: 'birdies_cancel_flip',
+    option: "birdies_cancel_flip",
   });
 
   if (otherTeamBirdies) {
@@ -843,7 +885,7 @@ export const vegasTeamScore = ({ team, teams, game, hole, s }) => {
   if (flip) {
     teamDigits.sort((a, b) => b - a);
   }
-  let points = teamDigits[0] * 10 + teamDigits[1];
+  const points = teamDigits[0] * 10 + teamDigits[1];
   team.points += points;
 
   //console.log('scoring vegas  this team', team);

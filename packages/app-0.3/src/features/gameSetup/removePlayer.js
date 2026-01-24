@@ -1,10 +1,10 @@
-import { query as getGameQuery } from 'features/game/hooks/useGetGameQuery';
-import { useRemovePlayerFromGameMutation } from 'features/gameSetup/hooks/useRemovePlayerFromGameMutation';
-import React, { useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { Icon } from 'react-native-elements';
+import { query as getGameQuery } from "features/game/hooks/useGetGameQuery";
+import { useRemovePlayerFromGameMutation } from "features/gameSetup/hooks/useRemovePlayerFromGameMutation";
+import { useState } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { Icon } from "react-native-elements";
 
-import ErrorModal from '../../common/components/errorModal';
+import ErrorModal from "../../common/components/errorModal";
 
 const RemovePlayer = (props) => {
   const { pkey, gkey, rkey } = props;
@@ -42,7 +42,9 @@ const RemovePlayer = (props) => {
     }
   };
 
-  let icon = <Icon name="remove-circle" color="red" onPress={() => removePlayer()} />;
+  let icon = (
+    <Icon name="remove-circle" color="red" onPress={() => removePlayer()} />
+  );
   if (isRemoving) {
     icon = <ActivityIndicator />;
   }

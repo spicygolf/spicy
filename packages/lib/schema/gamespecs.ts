@@ -1,50 +1,35 @@
 import { co, z } from "jazz-tools";
 import { MapOfOptions } from "./options";
-import { TeamsConfig } from "./teamsconfig";
 
-export const GameSpec = co.map({
-  name: z.string(),
-  short: z.string(),
-  long_description: z.string().optional(), // Markdown description
-  version: z.number(),
-  status: z.literal(["prod", "dev", "test"]),
-  spec_type: z.literal(["points", "skins"]),
-  min_players: z.number(),
-  location_type: z.literal(["local", "virtual"]),
-  legacyId: z.string().optional(), // ArangoDB _key for matching during import
-
-  /**
-   * Team configuration for this game spec.
-   * Defines how teams work for this game type.
-   */
-  teamsConfig: co.optional(TeamsConfig),
-
-  /**
-   * Unified options map for this game spec
-   * Individual game instances get a copy of these via Game.options
-   *
-   * Uses co.record() for O(1) lookups by name, which is critical during scoring
-   * when resolving references (e.g., multiplier.based_on = "birdie")
-   *
-   * Key: option name (e.g., "birdie", "stakes", "double")
-   * Value: Option (discriminated union of GameOption, JunkOption, MultiplierOption)
-   *
-   * Benefits over separate lists:
-   * - Single source for all options (no more gameOptions/junkOptions/multiplierOptions)
-   * - O(1) lookup by name: options["birdie"] instead of options.find(o => o.name === "birdie")
-   * - Type-safe via discriminated union on "type" field
-   * - Can filter by type: Object.values(options).filter(o => o.type === "junk")
-   */
-  options: co.optional(MapOfOptions),
-
-  // TODO: DEPRECATED - remove after migration
-  teams: z.optional(z.boolean()),
-  // recursive field specs contains a list of game specs
-  // TODO: not working yet: https://zod.dev/v4?id=recursive-objects
-  // get specs(): typeof co.list<typeof GameSpec> {
-  //   return ListOfGameSpecs.create([]);
-  // },
-});
+/**
+ * GameSpec - Game specification/template
+ *
+ * GameSpec IS the options map directly. All data is stored as Option entries:
+ *
+ * Core metadata (MetaOption entries):
+ * - spec["name"] (type: meta, valueType: text, required: true)
+ * - spec["version"] (type: meta, valueType: num)
+ * - spec["legacyId"] (type: meta, valueType: text) - ArangoDB _key for import
+ * - spec["short"] (type: meta, valueType: text)
+ * - spec["long_description"] (type: meta, valueType: text)
+ * - spec["status"] (type: meta, valueType: menu)
+ * - spec["spec_type"] (type: meta, valueType: menu)
+ * - spec["min_players"] (type: meta, valueType: num)
+ * - spec["max_players"] (type: meta, valueType: num)
+ * - spec["location_type"] (type: meta, valueType: menu)
+ * - spec["teams"] (type: meta, valueType: bool)
+ * - spec["team_size"] (type: meta, valueType: num)
+ * - spec["team_change_every"] (type: meta, valueType: num)
+ *
+ * Game/Junk/Multiplier options are also entries in the map.
+ *
+ * Benefits:
+ * - O(1) lookup by name: spec["birdie"]
+ * - Type-safe via discriminated union on "type" field
+ * - Filter by type: Object.values(spec).filter(o => o.type === "junk")
+ * - No wrapper object - the spec IS the map
+ */
+export const GameSpec = MapOfOptions;
 export type GameSpec = co.loaded<typeof GameSpec>;
 
 export const ListOfGameSpecs = co.list(GameSpec);

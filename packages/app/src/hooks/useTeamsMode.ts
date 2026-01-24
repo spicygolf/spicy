@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { Game, GameSpec } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 
 export interface TeamsModeResult {
   /**
@@ -49,26 +50,22 @@ export interface TeamsModeResult {
 }
 
 /**
- * Determines whether a spec forces teams mode based on its teamsConfig.
+ * Determines whether a spec forces teams mode based on its options.
  *
  * A spec forces teams when:
- * - rotateEvery > 0 (rotating teams like Wolf)
- * - teamCount < min_players (true team game like Five Points with 2 teams for 4 players)
- * - maxPlayersPerTeam > 1 (team size constraint like Vegas)
+ * - team_change_every > 0 (rotating teams like Wolf)
+ * - teams is true (spec explicitly requires teams)
+ * - team_size > 1 (team size constraint like Vegas)
  */
 export function computeSpecForcesTeams(spec: GameSpec): boolean {
   if (!spec?.$isLoaded) return false;
 
-  const tc = spec.teamsConfig;
-  if (!tc?.$isLoaded) return false;
+  const teamChangeEvery =
+    (getSpecField(spec, "team_change_every") as number) ?? 0;
+  const teams = (getSpecField(spec, "teams") as boolean) ?? false;
+  const teamSize = (getSpecField(spec, "team_size") as number) ?? 0;
 
-  const rotateEvery = tc.rotateEvery ?? 0;
-  const teamCount = tc.teamCount ?? spec.min_players;
-  const maxPlayersPerTeam = tc.maxPlayersPerTeam ?? 0;
-
-  return (
-    rotateEvery > 0 || teamCount < spec.min_players || maxPlayersPerTeam > 1
-  );
+  return teamChangeEvery > 0 || teams || teamSize > 1;
 }
 
 /**
@@ -111,27 +108,20 @@ export function useTeamsMode(
 
     if (!game?.$isLoaded) return defaults;
 
-    // Get specs from parameter or from game
-    const gameSpecs: GameSpec[] = specs ?? [];
-    if (!specs && game.specs?.$isLoaded) {
-      for (const spec of game.specs) {
-        if (spec?.$isLoaded) {
-          gameSpecs.push(spec);
-        }
-      }
-    }
+    // Get spec from parameter or from game.spec (working copy)
+    const gameSpec: GameSpec | null =
+      specs?.[0] ?? (game.spec?.$isLoaded ? game.spec : null);
 
-    // Calculate min_players from specs
-    const minPlayers =
-      gameSpecs.length > 0
-        ? Math.min(...gameSpecs.map((s) => s.min_players))
-        : 2;
+    // Calculate min_players from spec
+    const minPlayers = gameSpec
+      ? ((getSpecField(gameSpec, "min_players") as number) ?? 2)
+      : 2;
 
     // Count players
     const playerCount = game.players?.$isLoaded ? game.players.length : 0;
 
-    // Check if any spec forces teams
-    const specForcesTeams = gameSpecs.some(computeSpecForcesTeams);
+    // Check if spec forces teams
+    const specForcesTeams = gameSpec ? computeSpecForcesTeams(gameSpec) : false;
 
     // Check if user has manually activated teams
     const isUserActivated = Boolean(

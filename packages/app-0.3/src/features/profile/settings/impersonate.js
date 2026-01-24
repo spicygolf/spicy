@@ -1,16 +1,22 @@
-import { useApolloClient } from '@apollo/client';
-import SpicySearchPlayer from 'common/components/spicy/player/search';
-import { clearCache } from 'common/utils/account';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import React, { useContext, useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, Card } from 'react-native-elements';
+import { useApolloClient } from "@apollo/client";
+import SpicySearchPlayer from "common/components/spicy/player/search";
+import { clearCache } from "common/utils/account";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { useContext, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { Button, Card } from "react-native-elements";
 
-const Impersonate = (props) => {
+const Impersonate = (_props) => {
   const client = useApolloClient();
 
   const defaultNewPlayer = {
-    search: '',
+    search: "",
   };
 
   const [newPlayer, setNewPlayer] = useState(defaultNewPlayer);
@@ -20,17 +26,19 @@ const Impersonate = (props) => {
   // console.log('CurrentPlayerContext', useContext(CurrentPlayerContext));
 
   const impersonatePlayer = (iPlayer) => {
-    console.log('impersonate', iPlayer);
+    console.log("impersonate", iPlayer);
     clearCache(client);
     setCurrentPlayerKey(iPlayer);
   };
 
   let content;
-  if (impersonate && impersonate.original) {
+  if (impersonate?.original) {
     content = (
       <View>
         <Card>
-          <Text style={styles.field_label}>Impersonating {currentPlayer.name}</Text>
+          <Text style={styles.field_label}>
+            Impersonating {currentPlayer.name}
+          </Text>
           <Button
             title="Stop"
             buttonStyle={styles.button}
@@ -73,20 +81,20 @@ export default Impersonate;
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: 'red',
+    backgroundColor: "red",
     margin: 10,
   },
   field_input: {
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
-    color: '#000',
+    color: "#000",
     height: 40,
     marginBottom: 10,
     paddingLeft: 10,
     paddingRight: 10,
   },
   field_label: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     margin: 5,
   },
 });

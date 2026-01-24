@@ -1,0 +1,161 @@
+{
+  "legacyId": "192186622",
+  "exportedAt": "2026-01-24T15:49:40.880Z",
+  "game": {
+    "_key": "192186622",
+    "_id": "games/192186622",
+    "_rev": "_k_OgNT6-_s",
+    "name": "Team Match Play",
+    "start": "2021-07-25T14:54:50Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [
+      {
+        "hole": "1",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "2",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "3",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "4",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "5",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "6",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "7",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "8",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "9",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "10",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "11",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "12",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "13",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "14",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "15",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "16",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "17",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "18",
+        "teams": [
+          { "team": "1", "players": ["80558747"], "junk": [] },
+          { "team": "2", "players": ["155830850", "192187845"], "junk": [] }
+        ],
+        "multipliers": []
+      }
+    ],
+    "options": []
+  },
+  "rounds": [],
+  "gamespecKey": "72068183"
+}

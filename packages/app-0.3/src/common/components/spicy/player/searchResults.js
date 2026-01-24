@@ -1,24 +1,23 @@
-import { useQuery } from '@apollo/client';
-import { SpicyPlayerSearchContext } from 'common/components/spicy/player/searchContext';
-import { GameContext } from 'features/game/gameContext';
-import Player from 'features/gameSetup/Player';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
+import { useQuery } from "@apollo/client";
+import { SpicyPlayerSearchContext } from "common/components/spicy/player/searchContext";
+import { GameContext } from "features/game/gameContext";
+import Player from "features/gameSetup/Player";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
 import {
   GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
   SEARCH_PLAYER_QUERY,
-} from 'features/players/graphql';
-import { find } from 'lodash';
-import React, { useContext } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+} from "features/players/graphql";
+import { find } from "lodash";
+import { useContext } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
 const SpicyPlayerSearchResults = () => {
   const { state, onPress } = useContext(SpicyPlayerSearchContext);
   // console.log('spicy player search results context', state);
 
   const renderGolfer = ({ item }) => {
-    const handicap =
-      item && item.handicap && item.handicap.index ? item.handicap.index : 'NH';
-    const clubs = item?.handicap?.clubs?.map((c) => c.name).join(', ');
+    const handicap = item?.handicap?.index ? item.handicap.index : "NH";
+    const clubs = item?.handicap?.clubs?.map((c) => c.name).join(", ");
 
     return (
       <Player
@@ -34,7 +33,7 @@ const SpicyPlayerSearchResults = () => {
 
   const { currentPlayer } = useContext(CurrentPlayerContext);
   const gameCtx = useContext(GameContext);
-  const game = gameCtx && gameCtx.game ? gameCtx.game : null;
+  const game = gameCtx?.game ? gameCtx.game : null;
 
   // get this player's favorite players
   const { data: fData } = useQuery(GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY, {
@@ -42,18 +41,18 @@ const SpicyPlayerSearchResults = () => {
       pkey: currentPlayer._key,
     },
   });
-  const favorites =
-    fData && fData.getFavoritePlayersForPlayer ? fData.getFavoritePlayersForPlayer : [];
+  const favorites = fData?.getFavoritePlayersForPlayer
+    ? fData.getFavoritePlayersForPlayer
+    : [];
 
   // load search term results
   const { data } = useQuery(SEARCH_PLAYER_QUERY, {
     variables: {
       q: state.search,
     },
-    fetchPolicy: 'no-cache',
+    fetchPolicy: "no-cache",
   });
-  const searchPlayers =
-    data && data.searchPlayer && data.searchPlayer.length ? data.searchPlayer : [];
+  const searchPlayers = data?.searchPlayer?.length ? data.searchPlayer : [];
 
   // build players array for render
   let players = [];
@@ -61,9 +60,9 @@ const SpicyPlayerSearchResults = () => {
     players = searchPlayers.map((p) => ({
       ...p,
       fave: {
-        faved: find(favorites, { _key: p._key }) ? true : false,
-        from: { type: 'player', value: currentPlayer._key },
-        to: { type: 'player', value: p._key },
+        faved: !!find(favorites, { _key: p._key }),
+        from: { type: "player", value: currentPlayer._key },
+        to: { type: "player", value: p._key },
         refetchQueries: [
           {
             query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
@@ -107,12 +106,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   no_results: {
-    alignSelf: 'center',
-    color: '#999',
+    alignSelf: "center",
+    color: "#999",
     fontSize: 20,
   },
   player_club: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
   },
   results_list: {},

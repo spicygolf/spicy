@@ -1,4 +1,4 @@
-import { Course } from '../models/course';
+import { Course } from "../models/course";
 
 export const CourseTypeDefs = `
 type Course {
@@ -51,8 +51,8 @@ export const CourseResolvers = {
       return c.getCourse({ q });
     },
     searchCourse: async (_, { q }) => {
-      if (q.course_name === '') return [];
-      let c = new Course();
+      if (q.course_name === "") return [];
+      const c = new Course();
       return c.searchCourse({ q });
     },
   },

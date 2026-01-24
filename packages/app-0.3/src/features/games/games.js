@@ -1,38 +1,44 @@
-import { useLazyQuery } from '@apollo/client';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { blue } from 'common/colors';
-import Error from 'common/components/error';
-import { getCoursesPlayersTxt } from 'common/utils/game';
-import { query as activeGamesForPlayerQuery } from 'features/games/hooks/useActiveGamesForPlayerQuery';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { filter, reverse, sortBy } from 'lodash';
-import moment from 'moment';
-import React, { useCallback, useContext, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Icon, ListItem } from 'react-native-elements';
+import { useLazyQuery } from "@apollo/client";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { blue } from "common/colors";
+import Error from "common/components/error";
+import { getCoursesPlayersTxt } from "common/utils/game";
+import { query as activeGamesForPlayerQuery } from "features/games/hooks/useActiveGamesForPlayerQuery";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { filter, reverse, sortBy } from "lodash";
+import moment from "moment";
+import React, { useCallback, useContext, useState } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Icon, ListItem } from "react-native-elements";
 
-const Games = (props) => {
+const Games = (_props) => {
   const navigation = useNavigation();
   const { currentPlayer } = useContext(CurrentPlayerContext);
   //console.log('currentPlayerKey', currentPlayerKey);
   const [isFetching, setIsFetching] = useState(false);
 
   const newGamePressed = () => {
-    navigation.navigate('NewGameScreen');
+    navigation.navigate("NewGameScreen");
   };
 
   const itemPressed = (item, setup) => {
     if (setup) {
-      navigation.navigate('Game', {
+      navigation.navigate("Game", {
         currentGameKey: item._key,
         readonly: false,
-        screen: 'Setup',
+        screen: "Setup",
         params: {
-          screen: 'GameSetup',
+          screen: "GameSetup",
         },
       });
     } else {
-      navigation.navigate('Game', {
+      navigation.navigate("Game", {
         currentGameKey: item._key,
         readonly: false,
       });
@@ -42,12 +48,12 @@ const Games = (props) => {
   const buildSubtitle = (game) => {
     const { coursesTxt, playersTxt } = getCoursesPlayersTxt(game);
 
-    const startTime = moment(game.start).format('llll');
+    const startTime = moment(game.start).format("llll");
 
     return (
       <View>
         <Text style={styles.subtitle}>{`${coursesTxt} - ${playersTxt}`}</Text>
-        <Text style={styles.subtitle}>{startTime || ''}</Text>
+        <Text style={styles.subtitle}>{startTime || ""}</Text>
       </View>
     );
   };
@@ -56,7 +62,7 @@ const Games = (props) => {
     if (!item) {
       return null;
     }
-    const name = item.name || '';
+    const name = item.name || "";
     const subtitle = buildSubtitle(item);
 
     return (
@@ -90,27 +96,33 @@ const Games = (props) => {
     setIsFetching(false);
   }, [getGameList]);
 
-  const [getGameList, { error, data }] = useLazyQuery(activeGamesForPlayerQuery, {
-    variables: {
-      pkey: currentPlayer._key,
+  const [getGameList, { error, data }] = useLazyQuery(
+    activeGamesForPlayerQuery,
+    {
+      variables: {
+        pkey: currentPlayer._key,
+      },
+      fetchPolicy: "cache-and-network",
     },
-    fetchPolicy: 'cache-and-network',
-  });
-  if (error && error.message !== 'Network request failed') {
+  );
+  if (error && error.message !== "Network request failed") {
     return <Error error={error} />;
   }
 
-  const games = data && data.activeGamesForPlayer ? data.activeGamesForPlayer : [];
+  const games = data?.activeGamesForPlayer ? data.activeGamesForPlayer : [];
   const filtered_games = filter(games, (g) => g);
   // sort games descending by start time
-  const sorted_games = reverse(sortBy(filtered_games, ['start']));
+  const sorted_games = reverse(sortBy(filtered_games, ["start"]));
   //console.log('sorted_games', sorted_games);
 
   return (
     <View style={styles.container}>
       <View style={styles.gamesSubMenu}>
         <View>
-          <TouchableOpacity onPress={newGamePressed} style={styles.newGameButton}>
+          <TouchableOpacity
+            onPress={newGamePressed}
+            style={styles.newGameButton}
+          >
             <Icon
               name="add-circle"
               color={blue}
@@ -137,26 +149,26 @@ export default Games;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     flex: 1,
   },
   gamesSubMenu: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingTop: 10,
   },
   newGameButton: {
-    alignItems: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    flexDirection: "row",
   },
   newGameText: {
     color: blue,
     paddingLeft: 5,
   },
   subtitle: {
-    color: '#666',
+    color: "#666",
     fontSize: 12,
   },
   title: {
-    color: '#111',
+    color: "#111",
   },
 });

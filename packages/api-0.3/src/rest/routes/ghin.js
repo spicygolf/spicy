@@ -5,7 +5,7 @@ const {
 } = process.env;
 
 const handlers = {
-  countries_and_states: async (req, h) => {
+  countries_and_states: async (_req, _h) => {
     return countries_and_states_json;
   },
 };

@@ -1,13 +1,11 @@
-import { aql } from 'arangojs';
+import { aql } from "arangojs";
+import { db } from "../db/db";
+import { searchPlayer as searchPlayerGhin } from "../ghin";
+import { all, next } from "../util/database";
+import { Doc } from "./doc";
+import { Game } from "./game";
 
-import { searchPlayer as searchPlayerGhin } from '../ghin';
-import { db } from '../db/db';
-import { titleize } from '../util/text';
-import { Doc } from './doc';
-import { Game } from './game';
-import { all, next } from '../util/database';
-
-const collection = db.collection('players');
+const collection = db.collection("players");
 
 class Player extends Doc {
   constructor() {
@@ -21,7 +19,7 @@ class Player extends Doc {
         FILTER p._id == ${player_id}
         RETURN p
     `;
-    return next({query});
+    return next({ query });
   }
 
   async searchPlayer({ q, p }) {
@@ -60,7 +58,7 @@ class Player extends Doc {
         rounds: rounds
       })
     `;
-    return all({query});
+    return all({ query });
   }
 
   // get the gamespecs this player usually accesses
@@ -91,8 +89,6 @@ class Player extends Doc {
     return cursor.all();
   }
 
-
-
   async loadByHandicap(h) {
     const query = aql`
       FOR p IN players
@@ -107,7 +103,7 @@ class Player extends Doc {
         `Error: There are '${results.length}' players with handicap '${h}'.`,
       );
     }
-    if (results && results[0]) {
+    if (results?.[0]) {
       return results[0];
     }
     return null;
@@ -132,8 +128,8 @@ class Player extends Doc {
     return await cursor.all();
   }
 
-  async register(player) {
-    console.error('TODO: rework models.player.register()');
+  async register(_player) {
+    console.error("TODO: rework models.player.register()");
     return;
     //console.log('player', JSON.stringify(player, null, ' '));
     // let newPlayer = {};
@@ -272,7 +268,7 @@ class Player extends Doc {
           FILTER e.type == 'player2player' AND e.favorite == 'true'
           RETURN DISTINCT(v)
     `;
-    return all({query});
+    return all({ query });
   }
 
   async lookupPlayerByGhin(ghin) {
@@ -376,7 +372,7 @@ class Player extends Doc {
       },
     };
     this.set(oldDoc);
-    const old_res = await this.save({ overwrite: true });
+    const _old_res = await this.save({ overwrite: true });
     //console.log('oldDoc', oldDoc);
     //console.log('oldDoc res', old_res);
 
@@ -396,7 +392,7 @@ class Player extends Doc {
     const resp = await searchPlayerGhin({
       q: {
         golfer_id: id,
-        status: 'Active',
+        status: "Active",
       },
       p: {
         page: 1,
@@ -405,7 +401,7 @@ class Player extends Doc {
     });
 
     const golfer = resp[0] || {};
-    const clubs = resp.map(g => ({
+    const clubs = resp.map((g) => ({
       id: g.club_id,
       name: g.club_name,
       state: g.state,
@@ -417,7 +413,7 @@ class Player extends Doc {
       revDate: golfer.rev_date,
       gender: golfer.gender,
       clubs,
-    }
+    };
   }
 
   async _getGamesForPlayer(player_id) {
@@ -441,7 +437,7 @@ class Player extends Doc {
         UPDATE { _key: e._key, _to: ${new_id} } IN edges
       `;
     let cursor = await db.query(q);
-    const to_res = await cursor.all();
+    const _to_res = await cursor.all();
 
     // _from
     q = aql`
@@ -450,21 +446,21 @@ class Player extends Doc {
         UPDATE { _key: e._key, _from: ${new_id} } IN edges
       `;
     cursor = await db.query(q);
-    const from_res = await cursor.all();
+    const _from_res = await cursor.all();
   }
 
   async _updatePlayerGames({ old_id, new_id, game_keys }) {
-    const old_key = old_id.split('/')[1];
-    const new_key = new_id.split('/')[1];
+    const old_key = old_id.split("/")[1];
+    const new_key = new_id.split("/")[1];
     game_keys.map(async (gkey) => {
       const gm = new Game();
-      let g = await gm.load(gkey);
+      const g = await gm.load(gkey);
       g.holes = g.holes.map((h) => {
         h.teams = h.teams.map((t) => {
           const pI = t.players.indexOf(old_key);
           if (pI > -1) t.players[pI] = new_key;
           t.junk = t.junk.map((j) => {
-            if (j.player == old_key) j.player = new_key;
+            if (j.player === old_key) j.player = new_key;
             return j;
           });
           return t;
@@ -473,7 +469,7 @@ class Player extends Doc {
       });
       //console.log('g', JSON.stringify(g, null, 2));
       gm.set(g);
-      const gm_res = await gm.save({ overwrite: true });
+      const _gm_res = await gm.save({ overwrite: true });
       //console.log('gm_res', gm_res);
     });
   }
@@ -484,7 +480,7 @@ class Player extends Doc {
     const rid = `rounds/${rkey}`;
 
     // start transaction
-    const trx = await db.beginTransaction({ write: ['games', 'edges'] });
+    const trx = await db.beginTransaction({ write: ["games", "edges"] });
     let q;
 
     // remove player2game edge
@@ -542,10 +538,10 @@ class Player extends Doc {
 
     let messages = [];
     switch (result.status) {
-      case 'aborted':
+      case "aborted":
         messages = [
           {
-            message: 'Error removing player from game: transaction aborted',
+            message: "Error removing player from game: transaction aborted",
             p2g,
             r2g,
             g,
@@ -554,7 +550,7 @@ class Player extends Doc {
     }
 
     return {
-      success: result.status === 'committed',
+      success: result.status === "committed",
       _key: gkey,
       messages,
     };

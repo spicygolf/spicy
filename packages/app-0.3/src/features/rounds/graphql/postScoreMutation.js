@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const POST_SCORE_MUTATION = gql`
   mutation PostScore($rkey: String!, $score: ScoreInput!) {

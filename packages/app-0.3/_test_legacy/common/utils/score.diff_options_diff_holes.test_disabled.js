@@ -1,22 +1,22 @@
-import { scoring } from 'common/utils/score';
+import { scoring } from "common/utils/score";
 
-import { makeGame } from './score.util';
+import { makeGame } from "./score.util";
 
-let hole1 = {
+const hole1 = {
   hole: 1,
   par: 4,
   multipliers: [],
 };
 
-let hole2 = {
+const hole2 = {
   hole: 2,
   par: 4,
   multipliers: [],
 };
 
-describe('common/utils/score - Options tests', () => {
-  test('Options - Scoring - game option different on holes', () => {
-    let data = [
+describe("common/utils/score - Options tests", () => {
+  test("Options - Scoring - game option different on holes", () => {
+    const data = [
       { player: 1, team: 1, hole: 1, score: 4, pops: 0, junk: [] },
       { player: 2, team: 1, hole: 1, score: 4, pops: 0, junk: [] },
       { player: 3, team: 2, hole: 1, score: 4, pops: 0, junk: [] },
@@ -34,18 +34,24 @@ describe('common/utils/score - Options tests', () => {
       team: parseInt(t.team, 10),
       points: t.points,
     }));
-    expect(received).toContainEqual({ team: 1, points: 0 }, { team: 2, points: 0 });
+    expect(received).toContainEqual(
+      { team: 1, points: 0 },
+      { team: 2, points: 0 },
+    );
 
     // hole 2 - tie, second ball breaks tie
     received = scores.holes[1].teams.map((t) => ({
       team: parseInt(t.team, 10),
       points: t.points,
     }));
-    expect(received).toContainEqual({ team: 1, points: 1 }, { team: 2, points: 0 });
+    expect(received).toContainEqual(
+      { team: 1, points: 1 },
+      { team: 2, points: 0 },
+    );
   });
 
-  test('Options - Scoring - junk option different on holes', () => {
-    let data = [
+  test("Options - Scoring - junk option different on holes", () => {
+    const data = [
       { player: 1, team: 1, hole: 1, score: 3, pops: 0, junk: [] },
       { player: 2, team: 1, hole: 1, score: 4, pops: 0, junk: [] },
       { player: 3, team: 2, hole: 1, score: 4, pops: 0, junk: [] },
@@ -79,10 +85,10 @@ describe('common/utils/score - Options tests', () => {
     );
   });
 
-  test('Options - Scoring - multiplier option different on holes', () => {
-    hole1.multipliers.push({ name: 'double', team: '1', first_hole: '1' });
-    hole2.multipliers.push({ name: 'double', team: '2', first_hole: '2' });
-    let data = [
+  test("Options - Scoring - multiplier option different on holes", () => {
+    hole1.multipliers.push({ name: "double", team: "1", first_hole: "1" });
+    hole2.multipliers.push({ name: "double", team: "2", first_hole: "2" });
+    const data = [
       { player: 1, team: 1, hole: 1, score: 4, pops: 0, junk: [] },
       { player: 2, team: 1, hole: 1, score: 4, pops: 0, junk: [] },
       { player: 3, team: 2, hole: 1, score: 5, pops: 0, junk: [] },
@@ -126,81 +132,81 @@ const makeMatchplayGame = ({ holes, data }) => {
   return makeGame({
     gamespecs: [
       {
-        type: 'match',
+        type: "match",
         options: [
           {
-            name: 'low_ball',
-            disp: 'Low Ball',
+            name: "low_ball",
+            disp: "Low Ball",
             seq: 1,
-            type: 'junk',
+            type: "junk",
             value: 1,
-            limit: 'one_team_per_group',
-            scope: 'team',
-            icon: 'album',
-            show_in: 'score',
-            based_on: 'net',
-            calculation: 'best_ball',
-            better: 'lower',
-            sub_type: 'dot',
+            limit: "one_team_per_group",
+            scope: "team",
+            icon: "album",
+            show_in: "score",
+            based_on: "net",
+            calculation: "best_ball",
+            better: "lower",
+            sub_type: "dot",
           },
           {
-            name: 'birdie',
-            disp: 'Birdie',
+            name: "birdie",
+            disp: "Birdie",
             seq: 2,
-            type: 'junk',
+            type: "junk",
             value: 1,
-            limit: '',
-            scope: 'player',
-            icon: 'album',
-            show_in: 'score',
-            score_to_par: 'exactly -1',
-            based_on: 'gross',
-            sub_type: 'dot',
-            holes: ['1'],
+            limit: "",
+            scope: "player",
+            icon: "album",
+            show_in: "score",
+            score_to_par: "exactly -1",
+            based_on: "gross",
+            sub_type: "dot",
+            holes: ["1"],
           },
           {
-            name: 'birdie',
-            disp: 'Birdie',
+            name: "birdie",
+            disp: "Birdie",
             seq: 2,
-            type: 'junk',
+            type: "junk",
             value: 2,
-            limit: '',
-            scope: 'player',
-            icon: 'album',
-            show_in: 'score',
-            score_to_par: 'exactly -1',
-            based_on: 'gross',
-            sub_type: 'dot',
-            holes: ['2'],
+            limit: "",
+            scope: "player",
+            icon: "album",
+            show_in: "score",
+            score_to_par: "exactly -1",
+            based_on: "gross",
+            sub_type: "dot",
+            holes: ["2"],
           },
           {
-            name: 'double',
-            disp: '2x',
+            name: "double",
+            disp: "2x",
             seq: 2,
             value: 2,
-            icon: 'album',
-            based_on: 'user',
-            scope: 'hole',
+            icon: "album",
+            based_on: "user",
+            scope: "hole",
             availability:
               "{\n        'team_down_the_most': [\n          {'getPrevHole': []},\n          {'var': 'team'}\n        ]\n      }",
-            type: 'multiplier',
-            holes: ['1'],
+            type: "multiplier",
+            holes: ["1"],
           },
           {
-            name: 'next_ball_breaks_ties',
-            disp: 'Next ball breaks ties',
-            type: 'game',
+            name: "next_ball_breaks_ties",
+            disp: "Next ball breaks ties",
+            type: "game",
             value: false,
-            sub_type: 'bool',
-            holes: ['1'],
+            sub_type: "bool",
+            holes: ["1"],
           },
           {
-            name: 'next_ball_breaks_ties',
-            disp: 'Next ball breaks ties',
-            type: 'game',
+            name: "next_ball_breaks_ties",
+            disp: "Next ball breaks ties",
+            type: "game",
             value: true,
-            sub_type: 'bool',
-            holes: ['2'],
+            sub_type: "bool",
+            holes: ["2"],
           },
         ],
         scoring: {

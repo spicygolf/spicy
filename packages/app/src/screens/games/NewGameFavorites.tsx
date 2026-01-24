@@ -11,6 +11,7 @@ import DraggableFlatList, {
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { FavoriteSpec, GameSpec } from "spicylib/schema";
 import { type ListOfGameSpecs, PlayerAccount } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
 import { SpecDescription } from "@/components/game/new/SpecDescription";
 import { useCreateGame } from "@/hooks";
@@ -54,7 +55,8 @@ export function NewGameFavorites({ viewMode }: NewGameFavoritesProps) {
 
   const handleSelectSpec = useCallback(
     async (spec: GameSpec) => {
-      const game = await createGame(spec.name, [spec]);
+      const name = (getSpecField(spec, "name") as string) || "";
+      const game = await createGame(name, [spec]);
       if (!game) return;
       navigation.navigate("Game", {
         gameId: game.$jazz.id,
@@ -116,6 +118,9 @@ export function NewGameFavorites({ viewMode }: NewGameFavoritesProps) {
       }
 
       const spec = item.spec;
+      const specName = (getSpecField(spec, "name") as string) || "";
+      const specType = (getSpecField(spec, "spec_type") as string) || "";
+      const short = (getSpecField(spec, "short") as string) || "";
 
       return (
         <TouchableOpacity
@@ -134,9 +139,9 @@ export function NewGameFavorites({ viewMode }: NewGameFavoritesProps) {
             <View style={styles.contentArea}>
               <View style={styles.topRow}>
                 <View style={styles.favoriteInfo}>
-                  <Text style={styles.specName}>{spec.name}</Text>
+                  <Text style={styles.specName}>{specName}</Text>
                   <Text style={styles.specSub}>
-                    {spec.spec_type} • {spec.short}
+                    {specType} • {short}
                   </Text>
                 </View>
 
