@@ -1,0 +1,41 @@
+{
+  "legacyId": "98458541",
+  "exportedAt": "2026-01-24T15:49:41.135Z",
+  "game": {
+    "_key": "98458541",
+    "_id": "games/98458541",
+    "_rev": "_k_OgNT2--D",
+    "name": "Five Points",
+    "start": "2020-09-05T21:42:43Z",
+    "scope": {
+      "holes": "all18",
+      "teams_rotate": "never"
+    },
+    "holes": [],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/98458626",
+        "_key": "98458626",
+        "_rev": "_k_OgNeG-IN",
+        "date": "2020-09-05T21:42:43Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "98458634",
+        "_id": "edges/98458634",
+        "_from": "rounds/98458626",
+        "_to": "games/98458541",
+        "_rev": "_k_OgNiC--Y",
+        "type": "round2game",
+        "handicap_index": "5.7"
+      },
+      "playerId": "65888361"
+    }
+  ],
+  "gamespecKey": "65384954"
+}

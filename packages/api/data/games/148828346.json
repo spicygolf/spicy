@@ -1,0 +1,1611 @@
+{
+  "legacyId": "148828346",
+  "exportedAt": "2026-01-24T15:49:40.977Z",
+  "game": {
+    "_key": "148828346",
+    "_id": "games/148828346",
+    "_rev": "_k_OgNT2-A3",
+    "name": "Individual Match Play",
+    "start": "2021-03-19T13:40:19Z",
+    "scope": {
+      "holes": "all18",
+      "teams_rotate": "never"
+    },
+    "holes": [
+      {
+        "hole": "1",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "2",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "3",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "4",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "5",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "6",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "7",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "8",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "9",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "10",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "11",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "12",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "13",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "14",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "15",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "16",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "17",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "18",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "34483698"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [
+              "72279852"
+            ],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      }
+    ],
+    "options": [],
+    "end": null
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/148820403",
+        "_key": "148820403",
+        "_rev": "_k_OgNeK-Dg",
+        "date": "2021-03-19T13:40:51Z",
+        "posting": {
+          "success": true,
+          "messages": [
+            "Posting Round to GHIN handicap service succeeded."
+          ],
+          "id": 703741683,
+          "adjusted_gross_score": 86,
+          "differential": 10.7,
+          "date_validated": "2021-03-19T17:46:47.168Z",
+          "exceptional": false,
+          "posted_by": "Brad Anderson"
+        },
+        "scores": [
+          {
+            "hole": "1",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T13:53:18Z"
+              }
+            ]
+          },
+          {
+            "hole": "2",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T14:04:25Z"
+              }
+            ]
+          },
+          {
+            "hole": "3",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T14:18:48Z"
+              }
+            ]
+          },
+          {
+            "hole": "4",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T14:33:03Z"
+              }
+            ]
+          },
+          {
+            "hole": "5",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T14:42:55Z"
+              }
+            ]
+          },
+          {
+            "hole": "6",
+            "values": [
+              {
+                "k": "gross",
+                "v": "3",
+                "ts": "2021-03-19T14:53:06Z"
+              }
+            ]
+          },
+          {
+            "hole": "7",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T15:08:56Z"
+              }
+            ]
+          },
+          {
+            "hole": "8",
+            "values": [
+              {
+                "k": "gross",
+                "v": "3",
+                "ts": "2021-03-19T15:18:37Z"
+              }
+            ]
+          },
+          {
+            "hole": "9",
+            "values": [
+              {
+                "k": "gross",
+                "v": "6",
+                "ts": "2021-03-19T15:34:25Z"
+              }
+            ]
+          },
+          {
+            "hole": "10",
+            "values": [
+              {
+                "k": "gross",
+                "v": "6",
+                "ts": "2021-03-19T15:56:03Z"
+              }
+            ]
+          },
+          {
+            "hole": "11",
+            "values": [
+              {
+                "k": "gross",
+                "v": "6",
+                "ts": "2021-03-19T16:09:22Z"
+              }
+            ]
+          },
+          {
+            "hole": "12",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T16:22:51Z"
+              }
+            ]
+          },
+          {
+            "hole": "13",
+            "values": [
+              {
+                "k": "gross",
+                "v": "3",
+                "ts": "2021-03-19T16:33:31Z"
+              }
+            ]
+          },
+          {
+            "hole": "14",
+            "values": [
+              {
+                "k": "gross",
+                "v": "8",
+                "ts": "2021-03-19T16:51:56Z"
+              }
+            ]
+          },
+          {
+            "hole": "15",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T17:02:48Z"
+              }
+            ]
+          },
+          {
+            "hole": "16",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T17:16:40Z"
+              }
+            ]
+          },
+          {
+            "hole": "17",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T17:26:48Z"
+              }
+            ]
+          },
+          {
+            "hole": "18",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T17:44:56Z"
+              }
+            ]
+          }
+        ],
+        "seq": 1,
+        "tees": [
+          {
+            "tee_id": 586750,
+            "name": "Presidents",
+            "TotalYardage": 6719,
+            "holes": [
+              {
+                "hole": 1,
+                "hole_id": 540065,
+                "length": 444,
+                "par": 4,
+                "handicap": 3
+              },
+              {
+                "hole": 2,
+                "hole_id": 3017494,
+                "length": 428,
+                "par": 4,
+                "handicap": 9
+              },
+              {
+                "hole": 3,
+                "hole_id": 3017495,
+                "length": 347,
+                "par": 4,
+                "handicap": 15
+              },
+              {
+                "hole": 4,
+                "hole_id": 540068,
+                "length": 413,
+                "par": 4,
+                "handicap": 1
+              },
+              {
+                "hole": 5,
+                "hole_id": 540069,
+                "length": 380,
+                "par": 4,
+                "handicap": 7
+              },
+              {
+                "hole": 6,
+                "hole_id": 540070,
+                "length": 122,
+                "par": 3,
+                "handicap": 17
+              },
+              {
+                "hole": 7,
+                "hole_id": 3017499,
+                "length": 511,
+                "par": 5,
+                "handicap": 11
+              },
+              {
+                "hole": 8,
+                "hole_id": 540072,
+                "length": 193,
+                "par": 3,
+                "handicap": 5
+              },
+              {
+                "hole": 9,
+                "hole_id": 3017501,
+                "length": 511,
+                "par": 5,
+                "handicap": 13
+              },
+              {
+                "hole": 10,
+                "hole_id": 540074,
+                "length": 432,
+                "par": 4,
+                "handicap": 2
+              },
+              {
+                "hole": 11,
+                "hole_id": 540075,
+                "length": 416,
+                "par": 4,
+                "handicap": 6
+              },
+              {
+                "hole": 12,
+                "hole_id": 3017504,
+                "length": 348,
+                "par": 4,
+                "handicap": 12
+              },
+              {
+                "hole": 13,
+                "hole_id": 3017505,
+                "length": 187,
+                "par": 3,
+                "handicap": 18
+              },
+              {
+                "hole": 14,
+                "hole_id": 3017506,
+                "length": 512,
+                "par": 5,
+                "handicap": 10
+              },
+              {
+                "hole": 15,
+                "hole_id": 540079,
+                "length": 352,
+                "par": 4,
+                "handicap": 4
+              },
+              {
+                "hole": 16,
+                "hole_id": 3017508,
+                "length": 352,
+                "par": 4,
+                "handicap": 16
+              },
+              {
+                "hole": 17,
+                "hole_id": 540081,
+                "length": 192,
+                "par": 3,
+                "handicap": 14
+              },
+              {
+                "hole": 18,
+                "hole_id": 3017510,
+                "length": 579,
+                "par": 5,
+                "handicap": 8
+              }
+            ],
+            "Ratings": [
+              {
+                "RatingType": "Total",
+                "CourseRating": 72.8,
+                "SlopeRating": 139,
+                "BogeyRating": 98.6
+              },
+              {
+                "RatingType": "Back",
+                "CourseRating": 36.4,
+                "SlopeRating": 140,
+                "BogeyRating": 49.4
+              },
+              {
+                "RatingType": "Front",
+                "CourseRating": 36.4,
+                "SlopeRating": 138,
+                "BogeyRating": 49.2
+              }
+            ],
+            "course": {
+              "course_id": 13995,
+              "course_name": "Druid Hills Golf Club",
+              "course_city": "Atlanta",
+              "course_state": "GA"
+            }
+          },
+          {
+            "tee_id": 586750,
+            "name": "Presidents",
+            "TotalYardage": 6719,
+            "holes": [
+              {
+                "hole": 1,
+                "hole_id": 540065,
+                "length": 444,
+                "par": 4,
+                "handicap": 3
+              },
+              {
+                "hole": 2,
+                "hole_id": 3017494,
+                "length": 428,
+                "par": 4,
+                "handicap": 9
+              },
+              {
+                "hole": 3,
+                "hole_id": 3017495,
+                "length": 347,
+                "par": 4,
+                "handicap": 15
+              },
+              {
+                "hole": 4,
+                "hole_id": 540068,
+                "length": 413,
+                "par": 4,
+                "handicap": 1
+              },
+              {
+                "hole": 5,
+                "hole_id": 540069,
+                "length": 380,
+                "par": 4,
+                "handicap": 7
+              },
+              {
+                "hole": 6,
+                "hole_id": 540070,
+                "length": 122,
+                "par": 3,
+                "handicap": 17
+              },
+              {
+                "hole": 7,
+                "hole_id": 3017499,
+                "length": 511,
+                "par": 5,
+                "handicap": 11
+              },
+              {
+                "hole": 8,
+                "hole_id": 540072,
+                "length": 193,
+                "par": 3,
+                "handicap": 5
+              },
+              {
+                "hole": 9,
+                "hole_id": 3017501,
+                "length": 511,
+                "par": 5,
+                "handicap": 13
+              },
+              {
+                "hole": 10,
+                "hole_id": 540074,
+                "length": 432,
+                "par": 4,
+                "handicap": 2
+              },
+              {
+                "hole": 11,
+                "hole_id": 540075,
+                "length": 416,
+                "par": 4,
+                "handicap": 6
+              },
+              {
+                "hole": 12,
+                "hole_id": 3017504,
+                "length": 348,
+                "par": 4,
+                "handicap": 12
+              },
+              {
+                "hole": 13,
+                "hole_id": 3017505,
+                "length": 187,
+                "par": 3,
+                "handicap": 18
+              },
+              {
+                "hole": 14,
+                "hole_id": 3017506,
+                "length": 512,
+                "par": 5,
+                "handicap": 10
+              },
+              {
+                "hole": 15,
+                "hole_id": 540079,
+                "length": 352,
+                "par": 4,
+                "handicap": 4
+              },
+              {
+                "hole": 16,
+                "hole_id": 3017508,
+                "length": 352,
+                "par": 4,
+                "handicap": 16
+              },
+              {
+                "hole": 17,
+                "hole_id": 540081,
+                "length": 192,
+                "par": 3,
+                "handicap": 14
+              },
+              {
+                "hole": 18,
+                "hole_id": 3017510,
+                "length": 579,
+                "par": 5,
+                "handicap": 8
+              }
+            ],
+            "Ratings": [
+              {
+                "RatingType": "Total",
+                "CourseRating": 72.8,
+                "SlopeRating": 139,
+                "BogeyRating": 98.6
+              },
+              {
+                "RatingType": "Back",
+                "CourseRating": 36.4,
+                "SlopeRating": 140,
+                "BogeyRating": 49.4
+              },
+              {
+                "RatingType": "Front",
+                "CourseRating": 36.4,
+                "SlopeRating": 138,
+                "BogeyRating": 49.2
+              }
+            ],
+            "course": {
+              "course_id": 13995,
+              "course_name": "Druid Hills Golf Club",
+              "course_city": "Atlanta",
+              "course_state": "GA"
+            }
+          }
+        ]
+      },
+      "edge": {
+        "_key": "148834485",
+        "_id": "edges/148834485",
+        "_from": "rounds/148820403",
+        "_to": "games/148828346",
+        "_rev": "_k_OgNi6--i",
+        "type": "round2game",
+        "ts": "2021-03-19T13:40:48.971Z",
+        "handicap_index": "10.7",
+        "course_handicap": "14"
+      },
+      "playerId": "72279852"
+    },
+    {
+      "round": {
+        "_id": "rounds/148814266",
+        "_key": "148814266",
+        "_rev": "_k_OgNeK-Dc",
+        "date": "2021-03-19T13:40:51Z",
+        "posting": {
+          "success": true,
+          "messages": [
+            "Posting Round to GHIN handicap service succeeded."
+          ],
+          "id": 703741626,
+          "adjusted_gross_score": 82,
+          "differential": 7.5,
+          "date_validated": "2021-03-19T17:46:28.893Z",
+          "exceptional": false,
+          "posted_by": "Brad Anderson"
+        },
+        "scores": [
+          {
+            "hole": "1",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T13:52:59Z"
+              }
+            ]
+          },
+          {
+            "hole": "2",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T14:04:04Z"
+              }
+            ]
+          },
+          {
+            "hole": "3",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T14:18:34Z"
+              }
+            ]
+          },
+          {
+            "hole": "4",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T14:32:54Z"
+              }
+            ]
+          },
+          {
+            "hole": "5",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T14:42:51Z"
+              }
+            ]
+          },
+          {
+            "hole": "6",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T14:52:29Z"
+              }
+            ]
+          },
+          {
+            "hole": "7",
+            "values": [
+              {
+                "k": "gross",
+                "v": "7",
+                "ts": "2021-03-19T15:08:43Z"
+              }
+            ]
+          },
+          {
+            "hole": "8",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T15:18:32Z"
+              }
+            ]
+          },
+          {
+            "hole": "9",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T15:34:16Z"
+              }
+            ]
+          },
+          {
+            "hole": "10",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T15:55:52Z"
+              }
+            ]
+          },
+          {
+            "hole": "11",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T16:08:25Z"
+              }
+            ]
+          },
+          {
+            "hole": "12",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T16:22:42Z"
+              }
+            ]
+          },
+          {
+            "hole": "13",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T16:33:21Z"
+              }
+            ]
+          },
+          {
+            "hole": "14",
+            "values": [
+              {
+                "k": "gross",
+                "v": "6",
+                "ts": "2021-03-19T16:51:14Z"
+              }
+            ]
+          },
+          {
+            "hole": "15",
+            "values": [
+              {
+                "k": "gross",
+                "v": "3",
+                "ts": "2021-03-19T17:02:38Z"
+              }
+            ]
+          },
+          {
+            "hole": "16",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T17:16:31Z"
+              }
+            ]
+          },
+          {
+            "hole": "17",
+            "values": [
+              {
+                "k": "gross",
+                "v": "4",
+                "ts": "2021-03-19T17:26:42Z"
+              }
+            ]
+          },
+          {
+            "hole": "18",
+            "values": [
+              {
+                "k": "gross",
+                "v": "5",
+                "ts": "2021-03-19T17:44:51Z"
+              }
+            ]
+          }
+        ],
+        "seq": 1,
+        "tees": [
+          {
+            "tee_id": 586750,
+            "name": "Presidents",
+            "TotalYardage": 6719,
+            "holes": [
+              {
+                "hole": 1,
+                "hole_id": 540065,
+                "length": 444,
+                "par": 4,
+                "handicap": 3
+              },
+              {
+                "hole": 2,
+                "hole_id": 3017494,
+                "length": 428,
+                "par": 4,
+                "handicap": 9
+              },
+              {
+                "hole": 3,
+                "hole_id": 3017495,
+                "length": 347,
+                "par": 4,
+                "handicap": 15
+              },
+              {
+                "hole": 4,
+                "hole_id": 540068,
+                "length": 413,
+                "par": 4,
+                "handicap": 1
+              },
+              {
+                "hole": 5,
+                "hole_id": 540069,
+                "length": 380,
+                "par": 4,
+                "handicap": 7
+              },
+              {
+                "hole": 6,
+                "hole_id": 540070,
+                "length": 122,
+                "par": 3,
+                "handicap": 17
+              },
+              {
+                "hole": 7,
+                "hole_id": 3017499,
+                "length": 511,
+                "par": 5,
+                "handicap": 11
+              },
+              {
+                "hole": 8,
+                "hole_id": 540072,
+                "length": 193,
+                "par": 3,
+                "handicap": 5
+              },
+              {
+                "hole": 9,
+                "hole_id": 3017501,
+                "length": 511,
+                "par": 5,
+                "handicap": 13
+              },
+              {
+                "hole": 10,
+                "hole_id": 540074,
+                "length": 432,
+                "par": 4,
+                "handicap": 2
+              },
+              {
+                "hole": 11,
+                "hole_id": 540075,
+                "length": 416,
+                "par": 4,
+                "handicap": 6
+              },
+              {
+                "hole": 12,
+                "hole_id": 3017504,
+                "length": 348,
+                "par": 4,
+                "handicap": 12
+              },
+              {
+                "hole": 13,
+                "hole_id": 3017505,
+                "length": 187,
+                "par": 3,
+                "handicap": 18
+              },
+              {
+                "hole": 14,
+                "hole_id": 3017506,
+                "length": 512,
+                "par": 5,
+                "handicap": 10
+              },
+              {
+                "hole": 15,
+                "hole_id": 540079,
+                "length": 352,
+                "par": 4,
+                "handicap": 4
+              },
+              {
+                "hole": 16,
+                "hole_id": 3017508,
+                "length": 352,
+                "par": 4,
+                "handicap": 16
+              },
+              {
+                "hole": 17,
+                "hole_id": 540081,
+                "length": 192,
+                "par": 3,
+                "handicap": 14
+              },
+              {
+                "hole": 18,
+                "hole_id": 3017510,
+                "length": 579,
+                "par": 5,
+                "handicap": 8
+              }
+            ],
+            "Ratings": [
+              {
+                "RatingType": "Total",
+                "CourseRating": 72.8,
+                "SlopeRating": 139,
+                "BogeyRating": 98.6
+              },
+              {
+                "RatingType": "Back",
+                "CourseRating": 36.4,
+                "SlopeRating": 140,
+                "BogeyRating": 49.4
+              },
+              {
+                "RatingType": "Front",
+                "CourseRating": 36.4,
+                "SlopeRating": 138,
+                "BogeyRating": 49.2
+              }
+            ],
+            "course": {
+              "course_id": 13995,
+              "course_name": "Druid Hills Golf Club",
+              "course_city": "Atlanta",
+              "course_state": "GA"
+            }
+          },
+          {
+            "tee_id": 586750,
+            "name": "Presidents",
+            "TotalYardage": 6719,
+            "holes": [
+              {
+                "hole": 1,
+                "hole_id": 540065,
+                "length": 444,
+                "par": 4,
+                "handicap": 3
+              },
+              {
+                "hole": 2,
+                "hole_id": 3017494,
+                "length": 428,
+                "par": 4,
+                "handicap": 9
+              },
+              {
+                "hole": 3,
+                "hole_id": 3017495,
+                "length": 347,
+                "par": 4,
+                "handicap": 15
+              },
+              {
+                "hole": 4,
+                "hole_id": 540068,
+                "length": 413,
+                "par": 4,
+                "handicap": 1
+              },
+              {
+                "hole": 5,
+                "hole_id": 540069,
+                "length": 380,
+                "par": 4,
+                "handicap": 7
+              },
+              {
+                "hole": 6,
+                "hole_id": 540070,
+                "length": 122,
+                "par": 3,
+                "handicap": 17
+              },
+              {
+                "hole": 7,
+                "hole_id": 3017499,
+                "length": 511,
+                "par": 5,
+                "handicap": 11
+              },
+              {
+                "hole": 8,
+                "hole_id": 540072,
+                "length": 193,
+                "par": 3,
+                "handicap": 5
+              },
+              {
+                "hole": 9,
+                "hole_id": 3017501,
+                "length": 511,
+                "par": 5,
+                "handicap": 13
+              },
+              {
+                "hole": 10,
+                "hole_id": 540074,
+                "length": 432,
+                "par": 4,
+                "handicap": 2
+              },
+              {
+                "hole": 11,
+                "hole_id": 540075,
+                "length": 416,
+                "par": 4,
+                "handicap": 6
+              },
+              {
+                "hole": 12,
+                "hole_id": 3017504,
+                "length": 348,
+                "par": 4,
+                "handicap": 12
+              },
+              {
+                "hole": 13,
+                "hole_id": 3017505,
+                "length": 187,
+                "par": 3,
+                "handicap": 18
+              },
+              {
+                "hole": 14,
+                "hole_id": 3017506,
+                "length": 512,
+                "par": 5,
+                "handicap": 10
+              },
+              {
+                "hole": 15,
+                "hole_id": 540079,
+                "length": 352,
+                "par": 4,
+                "handicap": 4
+              },
+              {
+                "hole": 16,
+                "hole_id": 3017508,
+                "length": 352,
+                "par": 4,
+                "handicap": 16
+              },
+              {
+                "hole": 17,
+                "hole_id": 540081,
+                "length": 192,
+                "par": 3,
+                "handicap": 14
+              },
+              {
+                "hole": 18,
+                "hole_id": 3017510,
+                "length": 579,
+                "par": 5,
+                "handicap": 8
+              }
+            ],
+            "Ratings": [
+              {
+                "RatingType": "Total",
+                "CourseRating": 72.8,
+                "SlopeRating": 139,
+                "BogeyRating": 98.6
+              },
+              {
+                "RatingType": "Back",
+                "CourseRating": 36.4,
+                "SlopeRating": 140,
+                "BogeyRating": 49.4
+              },
+              {
+                "RatingType": "Front",
+                "CourseRating": 36.4,
+                "SlopeRating": 138,
+                "BogeyRating": 49.2
+              }
+            ],
+            "course": {
+              "course_id": 13995,
+              "course_name": "Druid Hills Golf Club",
+              "course_city": "Atlanta",
+              "course_state": "GA"
+            }
+          },
+          {
+            "tee_id": 586750,
+            "name": "Presidents",
+            "TotalYardage": 6719,
+            "holes": [
+              {
+                "hole": 1,
+                "hole_id": 540065,
+                "length": 444,
+                "par": 4,
+                "handicap": 3
+              },
+              {
+                "hole": 2,
+                "hole_id": 3017494,
+                "length": 428,
+                "par": 4,
+                "handicap": 9
+              },
+              {
+                "hole": 3,
+                "hole_id": 3017495,
+                "length": 347,
+                "par": 4,
+                "handicap": 15
+              },
+              {
+                "hole": 4,
+                "hole_id": 540068,
+                "length": 413,
+                "par": 4,
+                "handicap": 1
+              },
+              {
+                "hole": 5,
+                "hole_id": 540069,
+                "length": 380,
+                "par": 4,
+                "handicap": 7
+              },
+              {
+                "hole": 6,
+                "hole_id": 540070,
+                "length": 122,
+                "par": 3,
+                "handicap": 17
+              },
+              {
+                "hole": 7,
+                "hole_id": 3017499,
+                "length": 511,
+                "par": 5,
+                "handicap": 11
+              },
+              {
+                "hole": 8,
+                "hole_id": 540072,
+                "length": 193,
+                "par": 3,
+                "handicap": 5
+              },
+              {
+                "hole": 9,
+                "hole_id": 3017501,
+                "length": 511,
+                "par": 5,
+                "handicap": 13
+              },
+              {
+                "hole": 10,
+                "hole_id": 540074,
+                "length": 432,
+                "par": 4,
+                "handicap": 2
+              },
+              {
+                "hole": 11,
+                "hole_id": 540075,
+                "length": 416,
+                "par": 4,
+                "handicap": 6
+              },
+              {
+                "hole": 12,
+                "hole_id": 3017504,
+                "length": 348,
+                "par": 4,
+                "handicap": 12
+              },
+              {
+                "hole": 13,
+                "hole_id": 3017505,
+                "length": 187,
+                "par": 3,
+                "handicap": 18
+              },
+              {
+                "hole": 14,
+                "hole_id": 3017506,
+                "length": 512,
+                "par": 5,
+                "handicap": 10
+              },
+              {
+                "hole": 15,
+                "hole_id": 540079,
+                "length": 352,
+                "par": 4,
+                "handicap": 4
+              },
+              {
+                "hole": 16,
+                "hole_id": 3017508,
+                "length": 352,
+                "par": 4,
+                "handicap": 16
+              },
+              {
+                "hole": 17,
+                "hole_id": 540081,
+                "length": 192,
+                "par": 3,
+                "handicap": 14
+              },
+              {
+                "hole": 18,
+                "hole_id": 3017510,
+                "length": 579,
+                "par": 5,
+                "handicap": 8
+              }
+            ],
+            "Ratings": [
+              {
+                "RatingType": "Total",
+                "CourseRating": 72.8,
+                "SlopeRating": 139,
+                "BogeyRating": 98.6
+              },
+              {
+                "RatingType": "Back",
+                "CourseRating": 36.4,
+                "SlopeRating": 140,
+                "BogeyRating": 49.4
+              },
+              {
+                "RatingType": "Front",
+                "CourseRating": 36.4,
+                "SlopeRating": 138,
+                "BogeyRating": 49.2
+              }
+            ],
+            "course": {
+              "course_id": 13995,
+              "course_name": "Druid Hills Golf Club",
+              "course_city": "Atlanta",
+              "course_state": "GA"
+            }
+          }
+        ]
+      },
+      "edge": {
+        "_key": "148831413",
+        "_id": "edges/148831413",
+        "_from": "rounds/148814266",
+        "_to": "games/148828346",
+        "_rev": "_k_OgNi6--e",
+        "type": "round2game",
+        "ts": "2021-03-19T13:40:34.753Z",
+        "handicap_index": "7.1",
+        "course_handicap": "10"
+      },
+      "playerId": "34483698"
+    }
+  ],
+  "gamespecKey": "72068149"
+}

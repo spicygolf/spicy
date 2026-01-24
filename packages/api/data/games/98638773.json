@@ -1,0 +1,544 @@
+{
+  "legacyId": "98638773",
+  "exportedAt": "2026-01-24T15:49:41.133Z",
+  "game": {
+    "_key": "98638773",
+    "_id": "games/98638773",
+    "_rev": "_k_OgNT2--F",
+    "name": "Individual Match Play",
+    "start": "2020-09-06T13:28:10Z",
+    "scope": {
+      "holes": "all18",
+      "teams_rotate": "never"
+    },
+    "holes": [],
+    "options": [],
+    "end": null
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/98645796",
+        "_key": "98645796",
+        "_rev": "_k_OgNeG-IR",
+        "date": "2020-09-06T13:28:10Z",
+        "scores": [],
+        "seq": 1,
+        "tees": [
+          {
+            "tee_id": 68962,
+            "name": "White",
+            "TotalYardage": 6120,
+            "holes": [
+              {
+                "hole": 1,
+                "hole_id": 2312138,
+                "length": 358,
+                "par": 4,
+                "handicap": 15
+              },
+              {
+                "hole": 2,
+                "hole_id": 2312139,
+                "length": 334,
+                "par": 4,
+                "handicap": 1
+              },
+              {
+                "hole": 3,
+                "hole_id": 2312140,
+                "length": 115,
+                "par": 3,
+                "handicap": 17
+              },
+              {
+                "hole": 4,
+                "hole_id": 2312141,
+                "length": 403,
+                "par": 4,
+                "handicap": 9
+              },
+              {
+                "hole": 5,
+                "hole_id": 2312142,
+                "length": 343,
+                "par": 4,
+                "handicap": 3
+              },
+              {
+                "hole": 6,
+                "hole_id": 2312143,
+                "length": 480,
+                "par": 5,
+                "handicap": 11
+              },
+              {
+                "hole": 7,
+                "hole_id": 2312144,
+                "length": 417,
+                "par": 4,
+                "handicap": 7
+              },
+              {
+                "hole": 8,
+                "hole_id": 2312145,
+                "length": 135,
+                "par": 3,
+                "handicap": 13
+              },
+              {
+                "hole": 9,
+                "hole_id": 2312146,
+                "length": 494,
+                "par": 5,
+                "handicap": 5
+              },
+              {
+                "hole": 10,
+                "hole_id": 2312147,
+                "length": 392,
+                "par": 4,
+                "handicap": 14
+              },
+              {
+                "hole": 11,
+                "hole_id": 2312148,
+                "length": 132,
+                "par": 3,
+                "handicap": 16
+              },
+              {
+                "hole": 12,
+                "hole_id": 2312149,
+                "length": 377,
+                "par": 4,
+                "handicap": 2
+              },
+              {
+                "hole": 13,
+                "hole_id": 2312150,
+                "length": 486,
+                "par": 5,
+                "handicap": 8
+              },
+              {
+                "hole": 14,
+                "hole_id": 2312151,
+                "length": 361,
+                "par": 4,
+                "handicap": 10
+              },
+              {
+                "hole": 15,
+                "hole_id": 2312152,
+                "length": 142,
+                "par": 3,
+                "handicap": 18
+              },
+              {
+                "hole": 16,
+                "hole_id": 2312153,
+                "length": 336,
+                "par": 4,
+                "handicap": 12
+              },
+              {
+                "hole": 17,
+                "hole_id": 2312154,
+                "length": 320,
+                "par": 4,
+                "handicap": 4
+              },
+              {
+                "hole": 18,
+                "hole_id": 2312155,
+                "length": 495,
+                "par": 5,
+                "handicap": 6
+              }
+            ],
+            "Ratings": [
+              {
+                "RatingType": "Total",
+                "CourseRating": 76.1,
+                "SlopeRating": 137,
+                "BogeyRating": 108.4
+              },
+              {
+                "RatingType": "Front",
+                "CourseRating": 38.2,
+                "SlopeRating": 138,
+                "BogeyRating": 54.5
+              },
+              {
+                "RatingType": "Back",
+                "CourseRating": 37.9,
+                "SlopeRating": 136,
+                "BogeyRating": 53.9
+              }
+            ],
+            "course": {
+              "course_id": 8160,
+              "course_name": "Hills",
+              "course_city": "Hilton Head",
+              "course_state": "SC"
+            }
+          },
+          {
+            "tee_id": 68962,
+            "name": "White",
+            "TotalYardage": 6120,
+            "holes": [
+              {
+                "hole": 1,
+                "hole_id": 2312138,
+                "length": 358,
+                "par": 4,
+                "handicap": 15
+              },
+              {
+                "hole": 2,
+                "hole_id": 2312139,
+                "length": 334,
+                "par": 4,
+                "handicap": 1
+              },
+              {
+                "hole": 3,
+                "hole_id": 2312140,
+                "length": 115,
+                "par": 3,
+                "handicap": 17
+              },
+              {
+                "hole": 4,
+                "hole_id": 2312141,
+                "length": 403,
+                "par": 4,
+                "handicap": 9
+              },
+              {
+                "hole": 5,
+                "hole_id": 2312142,
+                "length": 343,
+                "par": 4,
+                "handicap": 3
+              },
+              {
+                "hole": 6,
+                "hole_id": 2312143,
+                "length": 480,
+                "par": 5,
+                "handicap": 11
+              },
+              {
+                "hole": 7,
+                "hole_id": 2312144,
+                "length": 417,
+                "par": 4,
+                "handicap": 7
+              },
+              {
+                "hole": 8,
+                "hole_id": 2312145,
+                "length": 135,
+                "par": 3,
+                "handicap": 13
+              },
+              {
+                "hole": 9,
+                "hole_id": 2312146,
+                "length": 494,
+                "par": 5,
+                "handicap": 5
+              },
+              {
+                "hole": 10,
+                "hole_id": 2312147,
+                "length": 392,
+                "par": 4,
+                "handicap": 14
+              },
+              {
+                "hole": 11,
+                "hole_id": 2312148,
+                "length": 132,
+                "par": 3,
+                "handicap": 16
+              },
+              {
+                "hole": 12,
+                "hole_id": 2312149,
+                "length": 377,
+                "par": 4,
+                "handicap": 2
+              },
+              {
+                "hole": 13,
+                "hole_id": 2312150,
+                "length": 486,
+                "par": 5,
+                "handicap": 8
+              },
+              {
+                "hole": 14,
+                "hole_id": 2312151,
+                "length": 361,
+                "par": 4,
+                "handicap": 10
+              },
+              {
+                "hole": 15,
+                "hole_id": 2312152,
+                "length": 142,
+                "par": 3,
+                "handicap": 18
+              },
+              {
+                "hole": 16,
+                "hole_id": 2312153,
+                "length": 336,
+                "par": 4,
+                "handicap": 12
+              },
+              {
+                "hole": 17,
+                "hole_id": 2312154,
+                "length": 320,
+                "par": 4,
+                "handicap": 4
+              },
+              {
+                "hole": 18,
+                "hole_id": 2312155,
+                "length": 495,
+                "par": 5,
+                "handicap": 6
+              }
+            ],
+            "Ratings": [
+              {
+                "RatingType": "Total",
+                "CourseRating": 76.1,
+                "SlopeRating": 137,
+                "BogeyRating": 108.4
+              },
+              {
+                "RatingType": "Front",
+                "CourseRating": 38.2,
+                "SlopeRating": 138,
+                "BogeyRating": 54.5
+              },
+              {
+                "RatingType": "Back",
+                "CourseRating": 37.9,
+                "SlopeRating": 136,
+                "BogeyRating": 53.9
+              }
+            ],
+            "course": {
+              "course_id": 8160,
+              "course_name": "Hills",
+              "course_city": "Hilton Head",
+              "course_state": "SC"
+            }
+          }
+        ]
+      },
+      "edge": {
+        "_key": "98645802",
+        "_id": "edges/98645802",
+        "_from": "rounds/98645796",
+        "_to": "games/98638773",
+        "_rev": "_k_OgNiC-_e",
+        "type": "round2game",
+        "handicap_index": "5.7",
+        "course_handicap": "11"
+      },
+      "playerId": "65888361"
+    },
+    {
+      "round": {
+        "_id": "rounds/98641018",
+        "_key": "98641018",
+        "_rev": "_k_OgNeG-IP",
+        "date": "2020-09-06T13:28:10Z",
+        "scores": [],
+        "seq": 1,
+        "tees": [
+          {
+            "tee_id": 27702,
+            "name": "White",
+            "TotalYardage": 6122,
+            "holes": [
+              {
+                "hole": 1,
+                "hole_id": 2048132,
+                "length": 358,
+                "par": 4,
+                "handicap": 11
+              },
+              {
+                "hole": 2,
+                "hole_id": 2048134,
+                "length": 334,
+                "par": 4,
+                "handicap": 1
+              },
+              {
+                "hole": 3,
+                "hole_id": 2048136,
+                "length": 115,
+                "par": 3,
+                "handicap": 17
+              },
+              {
+                "hole": 4,
+                "hole_id": 2048138,
+                "length": 403,
+                "par": 4,
+                "handicap": 13
+              },
+              {
+                "hole": 5,
+                "hole_id": 2048140,
+                "length": 343,
+                "par": 4,
+                "handicap": 3
+              },
+              {
+                "hole": 6,
+                "hole_id": 2048142,
+                "length": 480,
+                "par": 5,
+                "handicap": 7
+              },
+              {
+                "hole": 7,
+                "hole_id": 2048144,
+                "length": 417,
+                "par": 4,
+                "handicap": 9
+              },
+              {
+                "hole": 8,
+                "hole_id": 2048146,
+                "length": 135,
+                "par": 3,
+                "handicap": 15
+              },
+              {
+                "hole": 9,
+                "hole_id": 2048148,
+                "length": 494,
+                "par": 5,
+                "handicap": 5
+              },
+              {
+                "hole": 10,
+                "hole_id": 2048150,
+                "length": 392,
+                "par": 4,
+                "handicap": 6
+              },
+              {
+                "hole": 11,
+                "hole_id": 2048152,
+                "length": 132,
+                "par": 3,
+                "handicap": 16
+              },
+              {
+                "hole": 12,
+                "hole_id": 2048154,
+                "length": 377,
+                "par": 4,
+                "handicap": 2
+              },
+              {
+                "hole": 13,
+                "hole_id": 2048156,
+                "length": 486,
+                "par": 5,
+                "handicap": 8
+              },
+              {
+                "hole": 14,
+                "hole_id": 2048158,
+                "length": 361,
+                "par": 4,
+                "handicap": 14
+              },
+              {
+                "hole": 15,
+                "hole_id": 2048160,
+                "length": 142,
+                "par": 3,
+                "handicap": 18
+              },
+              {
+                "hole": 16,
+                "hole_id": 2048162,
+                "length": 336,
+                "par": 4,
+                "handicap": 12
+              },
+              {
+                "hole": 17,
+                "hole_id": 2048164,
+                "length": 320,
+                "par": 4,
+                "handicap": 4
+              },
+              {
+                "hole": 18,
+                "hole_id": 2048166,
+                "length": 497,
+                "par": 5,
+                "handicap": 10
+              }
+            ],
+            "Ratings": [
+              {
+                "RatingType": "Total",
+                "CourseRating": 71.4,
+                "SlopeRating": 124,
+                "BogeyRating": 94.5
+              },
+              {
+                "RatingType": "Front",
+                "CourseRating": 35.6,
+                "SlopeRating": 119,
+                "BogeyRating": 46.7
+              },
+              {
+                "RatingType": "Back",
+                "CourseRating": 35.8,
+                "SlopeRating": 129,
+                "BogeyRating": 47.8
+              }
+            ],
+            "course": {
+              "course_id": 8160,
+              "course_name": "Hills",
+              "course_city": "Hilton Head",
+              "course_state": "SC"
+            }
+          }
+        ]
+      },
+      "edge": {
+        "_key": "98641024",
+        "_id": "edges/98641024",
+        "_from": "rounds/98641018",
+        "_to": "games/98638773",
+        "_rev": "_k_OgNiC-_c",
+        "type": "round2game",
+        "handicap_index": "5.0",
+        "course_handicap": "10"
+      },
+      "playerId": "34483698"
+    }
+  ],
+  "gamespecKey": "72068149"
+}

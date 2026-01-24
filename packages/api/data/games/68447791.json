@@ -1,0 +1,413 @@
+{
+  "legacyId": "68447791",
+  "exportedAt": "2026-01-24T15:49:41.394Z",
+  "game": {
+    "_key": "68447791",
+    "_id": "games/68447791",
+    "_rev": "_k_OgNTu--W",
+    "name": "Five Points",
+    "start": "2020-04-22T22:17:39Z",
+    "holes": [
+      {
+        "hole": "1",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "2",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "3",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "4",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "5",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "6",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "7",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "8",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "9",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "10",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "11",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "12",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "13",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "14",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "15",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "16",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "17",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "18",
+        "teams": [
+          {
+            "team": "1",
+            "players": [
+              "68439086",
+              "68442802"
+            ],
+            "junk": []
+          },
+          {
+            "team": "2",
+            "players": [],
+            "junk": []
+          }
+        ],
+        "multipliers": []
+      }
+    ],
+    "options": [
+      {
+        "name": "pre_double_rest_of_nine",
+        "disp": "Pre-double is for rest of nine",
+        "type": "bool",
+        "value": "false"
+      }
+    ],
+    "end": null,
+    "scope": {
+      "holes": "all18",
+      "teams_rotate": "never"
+    }
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/68453422",
+        "_key": "68453422",
+        "_rev": "_k_OgNeC-BA",
+        "date": "2020-04-22T22:17:39Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "68453427",
+        "_id": "edges/68453427",
+        "_from": "rounds/68453422",
+        "_to": "games/68447791",
+        "_rev": "_k_OgNhK-DJ",
+        "type": "round2game",
+        "handicap_index": "9.0"
+      },
+      "playerId": "68442802"
+    },
+    {
+      "round": {
+        "_id": "rounds/68447822",
+        "_key": "68447822",
+        "_rev": "_k_OgNeC-B-",
+        "date": "2020-04-22T22:17:39Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "68447827",
+        "_id": "edges/68447827",
+        "_from": "rounds/68447822",
+        "_to": "games/68447791",
+        "_rev": "_k_OgNhK-DD",
+        "type": "round2game",
+        "handicap_index": "3.9"
+      },
+      "playerId": "68439086"
+    }
+  ],
+  "gamespecKey": "65384954"
+}
