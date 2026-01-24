@@ -81,8 +81,8 @@ export function getJunkOptions(ctx: ScoringContext): JunkOption[] {
   for (const key of Object.keys(options)) {
     if (key.startsWith("$") || key === "_refs") continue;
     const opt = options[key];
-    // Check if loaded and is a junk option
-    if (opt?.$isLoaded && opt.type === "junk") {
+    // Check if it's a junk option (options are plain JSON, no $isLoaded check needed)
+    if (opt && opt.type === "junk") {
       junkOptions.push(opt as JunkOption);
     }
   }

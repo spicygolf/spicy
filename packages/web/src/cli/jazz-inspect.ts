@@ -381,10 +381,10 @@ async function inspectOptions(
     );
 
     if (optionName) {
-      // Show specific option - spec IS the options map
+      // Show specific option - spec IS the options map, options are plain objects
       const opt = spec[optionName];
-      if (!opt?.$isLoaded) {
-        console.error(`Option "${optionName}" not found or not loaded`);
+      if (!opt) {
+        console.error(`Option "${optionName}" not found`);
         console.log(`\nAvailable options: ${keys.join(", ")}`);
         await done();
         return;
@@ -400,8 +400,8 @@ async function inspectOptions(
       if (opt.type === "meta") {
         console.log(`  valueType: ${opt.valueType}`);
         console.log(`  value: ${opt.value}`);
-        if (opt.valueArray?.$isLoaded) {
-          console.log(`  valueArray: [${[...opt.valueArray].join(", ")}]`);
+        if (opt.valueArray) {
+          console.log(`  valueArray: [${opt.valueArray.join(", ")}]`);
         }
         console.log(`  searchable: ${opt.searchable}`);
         console.log(`  required: ${opt.required}`);
@@ -435,12 +435,12 @@ async function inspectOptions(
         console.log(`  value: ${gameOpt.value}`);
       }
     } else {
-      // List all options - spec IS the options map
+      // List all options - spec IS the options map, options are plain objects
       console.log(`Found ${keys.length} options:\n`);
 
       for (const key of keys.sort()) {
         const opt = spec[key];
-        if (opt?.$isLoaded) {
+        if (opt) {
           const typeInfo =
             opt.type === "multiplier"
               ? `mult, value=${(opt as MultiplierOption).value}, scope=${(opt as MultiplierOption).scope}`
@@ -448,8 +448,6 @@ async function inspectOptions(
                 ? `junk, value=${(opt as JunkOption).value}, scope=${(opt as JunkOption).scope}`
                 : `game`;
           console.log(`  ${key}: ${opt.disp} (${typeInfo})`);
-        } else {
-          console.log(`  ${key}: (not loaded)`);
         }
       }
     }

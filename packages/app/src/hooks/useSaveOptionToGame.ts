@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { type Game, GameOption } from "spicylib/schema";
+import type { Game, GameOption } from "spicylib/schema";
 
 /**
  * Hook to save a game option value to the game's spec.
@@ -26,7 +26,7 @@ export function useSaveOptionToGame(game: Game | null | undefined) {
       // Get the option from game.spec
       const specOption = game.spec[optionName];
 
-      if (!specOption?.$isLoaded) {
+      if (!specOption) {
         console.warn(
           `Cannot save option: spec option "${optionName}" not found`,
         );
@@ -41,8 +41,11 @@ export function useSaveOptionToGame(game: Game | null | undefined) {
         return;
       }
 
-      // Update the value directly on the spec option
-      (specOption as GameOption).$jazz.set("value", newValue);
+      // Options are plain JSON, update by setting a new object with the updated value
+      game.spec.$jazz.set(optionName, {
+        ...(specOption as GameOption),
+        value: newValue,
+      });
     },
     [game],
   );

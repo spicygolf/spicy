@@ -13,13 +13,10 @@ import { TextOptionModal } from "./TextOptionModal";
 
 export function GameOptionsList() {
   // game.spec is the working copy of options (user modifications go here)
+  // Options are plain JSON objects, so just need $each: true (not nested)
   const { game } = useGame(undefined, {
     resolve: {
-      spec: {
-        $each: {
-          choices: { $each: true },
-        },
-      },
+      spec: { $each: true },
       scope: { teamsConfig: true },
       players: { $each: true },
     },
@@ -35,6 +32,7 @@ export function GameOptionsList() {
   const saveOptionToGame = useSaveOptionToGame(game);
 
   // Get game options from game.spec (the working copy)
+  // Options are plain JSON objects now, no $isLoaded checks needed
   const gameOptions = useMemo(() => {
     if (!game?.$isLoaded || !game.spec?.$isLoaded) {
       return [];
@@ -45,10 +43,10 @@ export function GameOptionsList() {
     for (const key of Object.keys(spec)) {
       if (key.startsWith("$") || key === "_refs") continue;
       const option = spec[key];
-      if (option?.$isLoaded && option.type === "game") {
+      if (option && option.type === "game") {
         const gameOpt = option as GameOption;
         // Filter out teamOnly options when teams mode is not active
-        if (gameOpt.$jazz.has("teamOnly") && gameOpt.teamOnly && !isTeamsMode) {
+        if (gameOpt.teamOnly && !isTeamsMode) {
           continue;
         }
         options.push(gameOpt);
@@ -70,7 +68,7 @@ export function GameOptionsList() {
       }
 
       const specOption = game.spec[optionName];
-      if (specOption?.$isLoaded && specOption.type === "game") {
+      if (specOption && specOption.type === "game") {
         const opt = specOption as GameOption;
         return opt.value ?? opt.defaultValue;
       }

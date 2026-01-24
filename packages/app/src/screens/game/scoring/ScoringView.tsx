@@ -649,8 +649,8 @@ export function ScoringView({
             .filter((m) => !userMultiplierNames.has(m.name))
             .map((m) => {
               // Look up the option definition from the spec for display name and icon
-              const optDefRaw = spec?.$isLoaded ? spec[m.name] : null;
-              const optDef = optDefRaw?.$isLoaded ? optDefRaw : null;
+              // Options are plain JSON objects, no $isLoaded check needed
+              const optDef = spec ? spec[m.name] : null;
               // Icon is only on multiplier/junk options, not game options
               const icon =
                 optDef?.type === "multiplier" || optDef?.type === "junk"

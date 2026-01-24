@@ -16,7 +16,11 @@ import { resolve } from "node:path";
 import { config } from "dotenv";
 import type { Account, ID } from "jazz-tools";
 import { startWorker } from "jazz-tools/worker";
-import { Game, MapOfOptions, MultiplierOption } from "spicylib/schema";
+import {
+  Game,
+  type MapOfOptions,
+  type MultiplierOption,
+} from "spicylib/schema";
 import { getSpecField } from "spicylib/scoring";
 
 // Load environment from API package
@@ -100,47 +104,29 @@ async function addMultiplierOption(
   optionDef: MultiplierOptionDef,
 ): Promise<boolean> {
   const existing = optionsMap[optionDef.name];
-  if (existing?.$isLoaded) {
+  if (existing) {
     console.log(`  Option "${optionDef.name}" already exists, skipping`);
     return false;
   }
 
-  const newOption = MultiplierOption.create(
-    {
-      name: optionDef.name,
-      disp: optionDef.disp,
-      type: "multiplier",
-      version: optionDef.version,
-      value: optionDef.value,
-    },
-    { owner: optionsMap.$jazz.owner },
-  );
-
-  // Set optional fields
-  if (optionDef.seq !== undefined) {
-    newOption.$jazz.set("seq", optionDef.seq);
-  }
-  if (optionDef.icon) {
-    newOption.$jazz.set("icon", optionDef.icon);
-  }
-  if (optionDef.based_on) {
-    newOption.$jazz.set("based_on", optionDef.based_on);
-  }
-  if (optionDef.scope) {
-    newOption.$jazz.set("scope", optionDef.scope);
-  }
-  if (optionDef.availability) {
-    newOption.$jazz.set("availability", optionDef.availability);
-  }
-  if (optionDef.override !== undefined) {
-    newOption.$jazz.set("override", optionDef.override);
-  }
-  if (optionDef.value_from) {
-    newOption.$jazz.set("value_from", optionDef.value_from);
-  }
-  if (optionDef.input_value !== undefined) {
-    newOption.$jazz.set("input_value", optionDef.input_value);
-  }
+  // Options are now plain objects - create directly
+  const newOption: MultiplierOption = {
+    name: optionDef.name,
+    disp: optionDef.disp,
+    type: "multiplier",
+    version: optionDef.version,
+    value: optionDef.value,
+    ...(optionDef.seq !== undefined && { seq: optionDef.seq }),
+    ...(optionDef.icon && { icon: optionDef.icon }),
+    ...(optionDef.based_on && { based_on: optionDef.based_on }),
+    ...(optionDef.scope && { scope: optionDef.scope }),
+    ...(optionDef.availability && { availability: optionDef.availability }),
+    ...(optionDef.override !== undefined && { override: optionDef.override }),
+    ...(optionDef.value_from && { value_from: optionDef.value_from }),
+    ...(optionDef.input_value !== undefined && {
+      input_value: optionDef.input_value,
+    }),
+  };
 
   optionsMap.$jazz.set(optionDef.name, newOption);
   console.log(`  Added option "${optionDef.name}"`);

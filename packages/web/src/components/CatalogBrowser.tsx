@@ -85,18 +85,13 @@ export function CatalogBrowser({
         }
       }
 
-      // Extract options from unified map
+      // Extract options from unified map - options are now plain objects
       if (catalog.options?.$isLoaded) {
         const catalogOptions = catalog.options;
         for (const key of Object.keys(catalogOptions)) {
           if (key.startsWith("_") || key.startsWith("$")) continue;
           const opt = catalogOptions[key as keyof typeof catalogOptions];
-          if (
-            opt &&
-            typeof opt === "object" &&
-            "$jazz" in opt &&
-            opt.$isLoaded
-          ) {
+          if (opt && typeof opt === "object") {
             const option = opt as Option;
             // Filter by type into separate arrays
             if (option.type === "game") {
@@ -264,7 +259,7 @@ export function CatalogBrowser({
                 </TableHeader>
                 <TableBody>
                   {gameOptions.map((opt) => (
-                    <TableRow key={opt.$jazz.id}>
+                    <TableRow key={opt.name}>
                       <TableCell className="font-medium">{opt.name}</TableCell>
                       <TableCell>{opt.disp}</TableCell>
                       <TableCell>
@@ -301,7 +296,7 @@ export function CatalogBrowser({
                 </TableHeader>
                 <TableBody>
                   {junkOptions.map((opt) => (
-                    <TableRow key={opt.$jazz.id}>
+                    <TableRow key={opt.name}>
                       <TableCell className="font-medium">{opt.name}</TableCell>
                       <TableCell>{opt.disp}</TableCell>
                       <TableCell>
@@ -342,7 +337,7 @@ export function CatalogBrowser({
                 </TableHeader>
                 <TableBody>
                   {multiplierOptions.map((opt) => (
-                    <TableRow key={opt.$jazz.id}>
+                    <TableRow key={opt.name}>
                       <TableCell className="font-medium">{opt.name}</TableCell>
                       <TableCell>{opt.disp}</TableCell>
                       <TableCell>

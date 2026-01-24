@@ -149,10 +149,11 @@ function createScoringFingerprint(game: Game | null): number | null {
   }
 
   // 5. Game spec options (includes any user modifications)
+  // Options are plain JSON objects, no $isLoaded check needed
   for (const key of Object.keys(spec)) {
     if (key.startsWith("$") || key === "_refs") continue;
     const opt = spec[key];
-    if (opt?.$isLoaded && opt.type === "game" && opt.value !== undefined) {
+    if (opt && opt.type === "game" && opt.value !== undefined) {
       parts.push(`go:${key}:${opt.value}`);
     }
   }

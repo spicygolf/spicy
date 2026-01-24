@@ -114,7 +114,7 @@ function SpecDetailContent({
   const locationType = getSpecField(spec, "location_type");
   const longDescription = getSpecField(spec, "long_description");
 
-  // Collect options by type - GameSpec IS the options map directly
+  // Collect options by type - GameSpec IS the options map, options are plain objects
   const gameOptions: Option[] = [];
   const junkOptions: Option[] = [];
   const multiplierOptions: Option[] = [];
@@ -124,7 +124,7 @@ function SpecDetailContent({
     if (key.startsWith("$") || key === "_refs") continue;
     if (!spec.$jazz.has(key)) continue;
     const opt = spec[key];
-    if (opt?.$isLoaded) {
+    if (opt) {
       switch (opt.type) {
         case "game":
           gameOptions.push(opt);
@@ -296,11 +296,9 @@ function OptionRow({ option }: OptionRowProps): React.JSX.Element {
       const defaultVal = option.defaultValue;
       if (option.valueType === "bool") {
         valueDisplay = defaultVal === "true" ? "Yes" : "No";
-      } else if (option.valueType === "menu" && option.choices?.$isLoaded) {
-        const choice = option.choices.find(
-          (c) => c?.$isLoaded && c.name === defaultVal,
-        );
-        valueDisplay = choice?.$isLoaded ? choice.disp : defaultVal;
+      } else if (option.valueType === "menu" && option.choices) {
+        const choice = option.choices.find((c) => c.name === defaultVal);
+        valueDisplay = choice ? choice.disp : defaultVal;
       } else {
         valueDisplay = defaultVal;
       }

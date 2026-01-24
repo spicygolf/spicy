@@ -89,20 +89,19 @@ function isValidBetter(value: unknown): value is "lower" | "higher" {
 }
 
 import {
-  ChoiceMap,
-  ChoicesList,
+  type Choice,
   Club,
   Course,
   CourseDefaultTee,
   Game,
   GameCatalog,
   GameHole,
-  GameOption,
+  type GameOption,
   GameScope,
   GameSpec,
   Handicap,
   HoleScores,
-  JunkOption,
+  type JunkOption,
   ListOfClubs,
   ListOfGameHoles,
   ListOfPlayers,
@@ -118,15 +117,14 @@ import {
   MapOfGames,
   MapOfOptions,
   MapOfPlayers,
-  MetaOption,
-  MultiplierOption,
+  type MetaOption,
+  type MultiplierOption,
   Player,
   type PlayerAccount,
   Round,
   RoundScores,
   RoundToGame,
   RoundToTeam,
-  StringList,
   Team,
   TeamOption,
   TeamsConfig,
@@ -445,7 +443,7 @@ export async function upsertGameSpec(
 
   // Build options to add to spec (GameSpec IS the options map)
 
-  // Helper to create a meta option
+  // Helper to create a meta option (plain JSON object)
   const createMetaOption = (
     name: string,
     disp: string,
@@ -457,39 +455,32 @@ export async function upsertGameSpec(
       searchable?: boolean;
       required?: boolean;
     },
-  ) => {
-    const metaOption = MetaOption.create(
-      { name, disp, type: "meta", valueType },
-      { owner: specs.$jazz.owner },
-    );
+  ): MetaOption => {
+    const metaOption: MetaOption = {
+      name,
+      disp,
+      type: "meta",
+      valueType,
+    };
 
     // Set value based on type
     if (valueType === "text_array" && Array.isArray(value)) {
-      metaOption.$jazz.set(
-        "valueArray",
-        StringList.create([...value], { owner: specs.$jazz.owner }),
-      );
+      metaOption.valueArray = [...value];
     } else if (value !== undefined) {
-      metaOption.$jazz.set("value", String(value));
+      metaOption.value = String(value);
     }
 
     // Set optional fields
     if (extras?.choices) {
-      metaOption.$jazz.set(
-        "choices",
-        ChoicesList.create(
-          extras.choices.map((c) =>
-            ChoiceMap.create(c, { owner: specs.$jazz.owner }),
-          ),
-          { owner: specs.$jazz.owner },
-        ),
-      );
+      metaOption.choices = extras.choices.map((c) => ({
+        name: c.name,
+        disp: c.disp,
+      }));
     }
-    if (extras?.seq !== undefined) metaOption.$jazz.set("seq", extras.seq);
+    if (extras?.seq !== undefined) metaOption.seq = extras.seq;
     if (extras?.searchable !== undefined)
-      metaOption.$jazz.set("searchable", extras.searchable);
-    if (extras?.required !== undefined)
-      metaOption.$jazz.set("required", extras.required);
+      metaOption.searchable = extras.searchable;
+    if (extras?.required !== undefined) metaOption.required = extras.required;
 
     return metaOption;
   };
@@ -665,59 +656,44 @@ export async function upsertGameSpec(
 
       // For junk options, check if the spec has an overridden value
       if (opt.type === "junk" && "value" in opt) {
-        if (!catalogOption.$isLoaded) {
+        // Options are plain JSON, so just check if catalogOption exists
+        if (catalogOption.type !== "junk") {
           spec.$jazz.set(opt.name, catalogOption);
           continue;
         }
-        const loadedCatalogOpt = catalogOption;
 
         // If values differ, create a new JunkOption with the spec's overridden value
-        if (
-          loadedCatalogOpt.$isLoaded &&
-          loadedCatalogOpt.type === "junk" &&
-          loadedCatalogOpt.value !== opt.value
-        ) {
+        if (catalogOption.value !== opt.value) {
           const junkData = specData.junk?.find((j) => j.name === opt.name);
           if (junkData) {
-            const newJunkOption = JunkOption.create(
-              {
-                name: loadedCatalogOpt.name,
-                disp: loadedCatalogOpt.disp,
-                type: "junk",
-                version: loadedCatalogOpt.version,
-                value: opt.value,
-              },
-              { owner: specs.$jazz.owner },
-            );
-
-            if (loadedCatalogOpt.sub_type)
-              newJunkOption.$jazz.set("sub_type", loadedCatalogOpt.sub_type);
-            if (loadedCatalogOpt.seq !== undefined)
-              newJunkOption.$jazz.set("seq", loadedCatalogOpt.seq);
-            if (loadedCatalogOpt.scope)
-              newJunkOption.$jazz.set("scope", loadedCatalogOpt.scope);
-            if (loadedCatalogOpt.icon)
-              newJunkOption.$jazz.set("icon", loadedCatalogOpt.icon);
-            if (loadedCatalogOpt.show_in)
-              newJunkOption.$jazz.set("show_in", loadedCatalogOpt.show_in);
-            if (loadedCatalogOpt.based_on)
-              newJunkOption.$jazz.set("based_on", loadedCatalogOpt.based_on);
-            if (loadedCatalogOpt.limit)
-              newJunkOption.$jazz.set("limit", loadedCatalogOpt.limit);
-            if (loadedCatalogOpt.calculation)
-              newJunkOption.$jazz.set(
-                "calculation",
-                loadedCatalogOpt.calculation,
-              );
-            if (loadedCatalogOpt.logic)
-              newJunkOption.$jazz.set("logic", loadedCatalogOpt.logic);
-            if (loadedCatalogOpt.better)
-              newJunkOption.$jazz.set("better", loadedCatalogOpt.better);
-            if (loadedCatalogOpt.score_to_par)
-              newJunkOption.$jazz.set(
-                "score_to_par",
-                loadedCatalogOpt.score_to_par,
-              );
+            const newJunkOption: JunkOption = {
+              name: catalogOption.name,
+              disp: catalogOption.disp,
+              type: "junk",
+              version: catalogOption.version,
+              value: opt.value,
+              ...(catalogOption.sub_type && {
+                sub_type: catalogOption.sub_type,
+              }),
+              ...(catalogOption.seq !== undefined && {
+                seq: catalogOption.seq,
+              }),
+              ...(catalogOption.scope && { scope: catalogOption.scope }),
+              ...(catalogOption.icon && { icon: catalogOption.icon }),
+              ...(catalogOption.show_in && { show_in: catalogOption.show_in }),
+              ...(catalogOption.based_on && {
+                based_on: catalogOption.based_on,
+              }),
+              ...(catalogOption.limit && { limit: catalogOption.limit }),
+              ...(catalogOption.calculation && {
+                calculation: catalogOption.calculation,
+              }),
+              ...(catalogOption.logic && { logic: catalogOption.logic }),
+              ...(catalogOption.better && { better: catalogOption.better }),
+              ...(catalogOption.score_to_par && {
+                score_to_par: catalogOption.score_to_par,
+              }),
+            };
 
             spec.$jazz.set(opt.name, newJunkOption);
             continue;
@@ -727,52 +703,37 @@ export async function upsertGameSpec(
 
       // For multiplier options, check if the spec has an overridden value
       if (opt.type === "multiplier" && "value" in opt) {
-        if (!catalogOption.$isLoaded) {
+        // Options are plain JSON, so just check type
+        if (catalogOption.type !== "multiplier") {
           spec.$jazz.set(opt.name, catalogOption);
           continue;
         }
-        const loadedCatalogOpt = catalogOption;
 
-        if (
-          loadedCatalogOpt.$isLoaded &&
-          loadedCatalogOpt.type === "multiplier" &&
-          loadedCatalogOpt.value !== opt.value
-        ) {
-          const newMultOption = MultiplierOption.create(
-            {
-              name: loadedCatalogOpt.name,
-              disp: loadedCatalogOpt.disp,
-              type: "multiplier",
-              version: loadedCatalogOpt.version,
-              value: opt.value,
-            },
-            { owner: specs.$jazz.owner },
-          );
-
-          if (loadedCatalogOpt.sub_type)
-            newMultOption.$jazz.set("sub_type", loadedCatalogOpt.sub_type);
-          if (loadedCatalogOpt.seq !== undefined)
-            newMultOption.$jazz.set("seq", loadedCatalogOpt.seq);
-          if (loadedCatalogOpt.icon)
-            newMultOption.$jazz.set("icon", loadedCatalogOpt.icon);
-          if (loadedCatalogOpt.based_on)
-            newMultOption.$jazz.set("based_on", loadedCatalogOpt.based_on);
-          if (loadedCatalogOpt.scope)
-            newMultOption.$jazz.set("scope", loadedCatalogOpt.scope);
-          if (loadedCatalogOpt.availability)
-            newMultOption.$jazz.set(
-              "availability",
-              loadedCatalogOpt.availability,
-            );
-          if (loadedCatalogOpt.override !== undefined)
-            newMultOption.$jazz.set("override", loadedCatalogOpt.override);
-          if (loadedCatalogOpt.input_value !== undefined)
-            newMultOption.$jazz.set(
-              "input_value",
-              loadedCatalogOpt.input_value,
-            );
-          if (loadedCatalogOpt.value_from)
-            newMultOption.$jazz.set("value_from", loadedCatalogOpt.value_from);
+        if (catalogOption.value !== opt.value) {
+          const newMultOption: MultiplierOption = {
+            name: catalogOption.name,
+            disp: catalogOption.disp,
+            type: "multiplier",
+            version: catalogOption.version,
+            value: opt.value,
+            ...(catalogOption.sub_type && { sub_type: catalogOption.sub_type }),
+            ...(catalogOption.seq !== undefined && { seq: catalogOption.seq }),
+            ...(catalogOption.icon && { icon: catalogOption.icon }),
+            ...(catalogOption.based_on && { based_on: catalogOption.based_on }),
+            ...(catalogOption.scope && { scope: catalogOption.scope }),
+            ...(catalogOption.availability && {
+              availability: catalogOption.availability,
+            }),
+            ...(catalogOption.override !== undefined && {
+              override: catalogOption.override,
+            }),
+            ...(catalogOption.input_value !== undefined && {
+              input_value: catalogOption.input_value,
+            }),
+            ...(catalogOption.value_from && {
+              value_from: catalogOption.value_from,
+            }),
+          };
 
           spec.$jazz.set(opt.name, newMultOption);
           continue;
@@ -832,188 +793,107 @@ async function upsertOptions(
     const exists = optionsMap.$jazz.has(opt.name);
 
     // Create the appropriate option type based on discriminator
+    // Options are plain JSON objects, so just create object literals
     if (opt.type === "game") {
-      const newOption = GameOption.create(
-        {
-          name: opt.name,
-          disp: opt.disp,
-          type: "game",
-          version: opt.version,
-          valueType: opt.valueType,
-          defaultValue: opt.defaultValue,
-        },
-        { owner: optionsMap.$jazz.owner },
-      );
-
-      // Set optional fields
-      if (opt.seq !== undefined && typeof opt.seq === "number") {
-        newOption.$jazz.set("seq", opt.seq);
-      }
-      if (opt.teamOnly === true) {
-        newOption.$jazz.set("teamOnly", true);
-      }
-
-      // Add choices if present (for menu type options)
-      if (opt.choices && opt.choices.length > 0) {
-        const choicesList = ChoicesList.create([], {
-          owner: newOption.$jazz.owner,
-        });
-
-        for (const choice of opt.choices) {
-          const choiceItem = ChoiceMap.create(
-            { name: choice.name, disp: choice.disp },
-            { owner: newOption.$jazz.owner },
-          );
-          choicesList.$jazz.push(choiceItem);
-        }
-
-        newOption.$jazz.set("choices", choicesList);
-      }
+      const newOption: GameOption = {
+        name: opt.name,
+        disp: opt.disp,
+        type: "game",
+        version: opt.version,
+        valueType: opt.valueType,
+        defaultValue: opt.defaultValue,
+        ...(opt.seq !== undefined &&
+          typeof opt.seq === "number" && { seq: opt.seq }),
+        ...(opt.teamOnly === true && { teamOnly: true }),
+        ...(opt.choices &&
+          opt.choices.length > 0 && {
+            choices: opt.choices.map((c) => ({ name: c.name, disp: c.disp })),
+          }),
+      };
 
       optionsMap.$jazz.set(opt.name, newOption);
     } else if (opt.type === "junk") {
-      const newOption = JunkOption.create(
-        {
-          name: opt.name,
-          disp: opt.disp,
-          type: "junk",
-          version: opt.version,
-          value: opt.value,
-        },
-        { owner: optionsMap.$jazz.owner },
-      );
-
-      // Set optional fields with validation
-      if (opt.sub_type && isValidJunkSubType(opt.sub_type)) {
-        newOption.$jazz.set("sub_type", opt.sub_type);
-      }
-      if (opt.seq !== undefined && typeof opt.seq === "number") {
-        newOption.$jazz.set("seq", opt.seq);
-      }
-      if (opt.scope && isValidJunkScope(opt.scope)) {
-        newOption.$jazz.set("scope", opt.scope);
-      }
-      if (opt.icon && typeof opt.icon === "string") {
-        newOption.$jazz.set("icon", opt.icon);
-      }
-      if (opt.show_in && isValidShowIn(opt.show_in)) {
-        newOption.$jazz.set("show_in", opt.show_in);
-      }
-      if (opt.based_on && isValidBasedOn(opt.based_on)) {
-        newOption.$jazz.set("based_on", opt.based_on);
-      }
-      if (opt.limit && typeof opt.limit === "string") {
-        newOption.$jazz.set("limit", opt.limit);
-      }
-      if (opt.calculation && typeof opt.calculation === "string") {
-        newOption.$jazz.set("calculation", opt.calculation);
-      }
-      if (opt.logic && typeof opt.logic === "string") {
-        newOption.$jazz.set("logic", opt.logic);
-      }
-      if (opt.better && isValidBetter(opt.better)) {
-        newOption.$jazz.set("better", opt.better);
-      }
-      if (opt.score_to_par && typeof opt.score_to_par === "string") {
-        newOption.$jazz.set("score_to_par", opt.score_to_par);
-      }
+      const newOption: JunkOption = {
+        name: opt.name,
+        disp: opt.disp,
+        type: "junk",
+        version: opt.version,
+        value: opt.value,
+        ...(opt.sub_type &&
+          isValidJunkSubType(opt.sub_type) && { sub_type: opt.sub_type }),
+        ...(opt.seq !== undefined &&
+          typeof opt.seq === "number" && { seq: opt.seq }),
+        ...(opt.scope && isValidJunkScope(opt.scope) && { scope: opt.scope }),
+        ...(opt.icon && typeof opt.icon === "string" && { icon: opt.icon }),
+        ...(opt.show_in &&
+          isValidShowIn(opt.show_in) && { show_in: opt.show_in }),
+        ...(opt.based_on &&
+          isValidBasedOn(opt.based_on) && { based_on: opt.based_on }),
+        ...(opt.limit && typeof opt.limit === "string" && { limit: opt.limit }),
+        ...(opt.calculation &&
+          typeof opt.calculation === "string" && {
+            calculation: opt.calculation,
+          }),
+        ...(opt.logic && typeof opt.logic === "string" && { logic: opt.logic }),
+        ...(opt.better && isValidBetter(opt.better) && { better: opt.better }),
+        ...(opt.score_to_par &&
+          typeof opt.score_to_par === "string" && {
+            score_to_par: opt.score_to_par,
+          }),
+      };
 
       optionsMap.$jazz.set(opt.name, newOption);
     } else if (opt.type === "multiplier") {
-      // Always create new option - Jazz doesn't reliably persist updates to existing CoValues
-      const newOption = MultiplierOption.create(
-        {
-          name: opt.name,
-          disp: opt.disp,
-          type: "multiplier",
-          version: opt.version,
-          ...(opt.value !== undefined ? { value: opt.value } : {}),
-        },
-        { owner: optionsMap.$jazz.owner },
-      );
-
-      // Set optional fields with validation
-      if (opt.sub_type && isValidMultiplierSubType(opt.sub_type)) {
-        newOption.$jazz.set("sub_type", opt.sub_type);
-      }
-      if (opt.seq !== undefined && typeof opt.seq === "number") {
-        newOption.$jazz.set("seq", opt.seq);
-      }
-      if (opt.icon && typeof opt.icon === "string") {
-        newOption.$jazz.set("icon", opt.icon);
-      }
-      if (opt.based_on && typeof opt.based_on === "string") {
-        newOption.$jazz.set("based_on", opt.based_on);
-      }
-      if (opt.scope && isValidMultiplierScope(opt.scope)) {
-        newOption.$jazz.set("scope", opt.scope);
-      }
-      if (opt.availability && typeof opt.availability === "string") {
-        newOption.$jazz.set("availability", opt.availability);
-      }
-      if (opt.override !== undefined && typeof opt.override === "boolean") {
-        newOption.$jazz.set("override", opt.override);
-      }
-      if (
-        opt.input_value !== undefined &&
-        typeof opt.input_value === "boolean"
-      ) {
-        newOption.$jazz.set("input_value", opt.input_value);
-      }
-      if (opt.value_from && typeof opt.value_from === "string") {
-        newOption.$jazz.set("value_from", opt.value_from);
-      }
+      const newOption: MultiplierOption = {
+        name: opt.name,
+        disp: opt.disp,
+        type: "multiplier",
+        version: opt.version,
+        ...(opt.value !== undefined && { value: opt.value }),
+        ...(opt.sub_type &&
+          isValidMultiplierSubType(opt.sub_type) && { sub_type: opt.sub_type }),
+        ...(opt.seq !== undefined &&
+          typeof opt.seq === "number" && { seq: opt.seq }),
+        ...(opt.icon && typeof opt.icon === "string" && { icon: opt.icon }),
+        ...(opt.based_on &&
+          typeof opt.based_on === "string" && { based_on: opt.based_on }),
+        ...(opt.scope &&
+          isValidMultiplierScope(opt.scope) && { scope: opt.scope }),
+        ...(opt.availability &&
+          typeof opt.availability === "string" && {
+            availability: opt.availability,
+          }),
+        ...(opt.override !== undefined &&
+          typeof opt.override === "boolean" && { override: opt.override }),
+        ...(opt.input_value !== undefined &&
+          typeof opt.input_value === "boolean" && {
+            input_value: opt.input_value,
+          }),
+        ...(opt.value_from &&
+          typeof opt.value_from === "string" && { value_from: opt.value_from }),
+      };
 
       optionsMap.$jazz.set(opt.name, newOption);
     } else if (opt.type === "meta") {
-      // Create MetaOption for spec metadata (new unified format)
-      const newOption = MetaOption.create(
-        {
-          name: opt.name,
-          disp: opt.disp,
-          type: "meta",
-          valueType: opt.valueType,
-        },
-        { owner: optionsMap.$jazz.owner },
-      );
-
-      // Set value based on valueType
-      if (opt.valueType === "text_array" && Array.isArray(opt.value)) {
-        const stringList = StringList.create([...opt.value], {
-          owner: optionsMap.$jazz.owner,
-        });
-        newOption.$jazz.set("valueArray", stringList);
-      } else if (opt.value !== undefined && typeof opt.value === "string") {
-        newOption.$jazz.set("value", opt.value);
-      }
-
-      // Set optional fields
-      if (opt.seq !== undefined && typeof opt.seq === "number") {
-        newOption.$jazz.set("seq", opt.seq);
-      }
-      if (opt.searchable === true) {
-        newOption.$jazz.set("searchable", true);
-      }
-      if (opt.required === true) {
-        newOption.$jazz.set("required", true);
-      }
-
-      // Add choices if present (for menu type)
-      if (opt.choices && opt.choices.length > 0) {
-        const choicesList = ChoicesList.create([], {
-          owner: newOption.$jazz.owner,
-        });
-
-        for (const choice of opt.choices) {
-          const choiceItem = ChoiceMap.create(
-            { name: choice.name, disp: choice.disp },
-            { owner: newOption.$jazz.owner },
-          );
-          choicesList.$jazz.push(choiceItem);
-        }
-
-        newOption.$jazz.set("choices", choicesList);
-      }
+      const newOption: MetaOption = {
+        name: opt.name,
+        disp: opt.disp,
+        type: "meta",
+        valueType: opt.valueType,
+        ...(opt.valueType === "text_array" &&
+          Array.isArray(opt.value) && { valueArray: [...opt.value] }),
+        ...(opt.valueType !== "text_array" &&
+          opt.value !== undefined &&
+          typeof opt.value === "string" && { value: opt.value }),
+        ...(opt.seq !== undefined &&
+          typeof opt.seq === "number" && { seq: opt.seq }),
+        ...(opt.searchable === true && { searchable: true }),
+        ...(opt.required === true && { required: true }),
+        ...(opt.choices &&
+          opt.choices.length > 0 && {
+            choices: opt.choices.map((c) => ({ name: c.name, disp: c.disp })),
+          }),
+      };
 
       optionsMap.$jazz.set(opt.name, newOption);
     }
@@ -2840,9 +2720,8 @@ async function importGame(
             // Find option in catalog - use $jazz.has to check existence
             if (catalogOptions.$jazz.has(option.name)) {
               const catalogOption = catalogOptions[option.name];
-              if (catalogOption?.$isLoaded) {
-                // Option is loaded, we can reference it
-                // @ts-expect-error - MaybeLoaded nested types in migration code
+              if (catalogOption) {
+                // Options are plain JSON, just copy them
                 holeOptions.$jazz.set(option.name, catalogOption);
               }
             }
@@ -3021,11 +2900,9 @@ async function importGame(
     );
     // Set spec (working copy) and specRef (catalog reference) after creation
     if (gameSpecCopy) {
-      // @ts-expect-error - MaybeLoaded types in migration code, gameSpecCopy is verified loaded
       newGame.$jazz.set("spec", gameSpecCopy);
     }
     if (gameSpec) {
-      // @ts-expect-error - MaybeLoaded types in migration code, gameSpec is verified loaded above
       newGame.$jazz.set("specRef", gameSpec);
     }
     finalGame = newGame;
@@ -3050,9 +2927,12 @@ async function importGame(
         gameSpecCopy.$jazz.has(option.name)
       ) {
         const specOption = gameSpecCopy[option.name];
-        if (specOption?.$isLoaded && specOption.type === "game") {
-          // Set the value override directly on the spec copy
-          (specOption as GameOption).$jazz.set("value", option.value);
+        if (specOption && specOption.type === "game") {
+          // Options are plain JSON, so update by creating a new object with the value override
+          gameSpecCopy.$jazz.set(option.name, {
+            ...specOption,
+            value: option.value,
+          });
         }
       }
     }

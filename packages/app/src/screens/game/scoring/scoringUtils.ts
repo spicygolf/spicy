@@ -33,10 +33,11 @@ export function getUserJunkOptions(game: Game): JunkOption[] {
   const spec = game.spec?.$isLoaded ? game.spec : null;
   if (!spec) return junkOptions;
 
+  // Options are plain JSON objects, no $isLoaded check needed
   for (const key of Object.keys(spec)) {
     const opt = spec[key];
     if (
-      opt?.$isLoaded &&
+      opt &&
       opt.type === "junk" &&
       opt.based_on === "user" &&
       (opt.show_in === "score" || opt.show_in === "faves")
@@ -63,10 +64,11 @@ export function getCalculatedPlayerJunkOptions(game: Game): JunkOption[] {
   const spec = game.spec?.$isLoaded ? game.spec : null;
   if (!spec) return junkOptions;
 
+  // Options are plain JSON objects, no $isLoaded check needed
   for (const key of Object.keys(spec)) {
     const opt = spec[key];
     if (
-      opt?.$isLoaded &&
+      opt &&
       opt.type === "junk" &&
       opt.scope === "player" &&
       opt.based_on !== "user" && // Not user-marked
@@ -96,10 +98,11 @@ export function getCalculatedTeamJunkOptions(game: Game): JunkOption[] {
   const spec = game.spec?.$isLoaded ? game.spec : null;
   if (!spec) return junkOptions;
 
+  // Options are plain JSON objects, no $isLoaded check needed
   for (const key of Object.keys(spec)) {
     const opt = spec[key];
     if (
-      opt?.$isLoaded &&
+      opt &&
       opt.type === "junk" &&
       opt.scope === "team" &&
       opt.calculation && // Has a calculation method (best_ball, sum, etc.)
@@ -187,13 +190,10 @@ export function getMultiplierOptions(game: Game): MultiplierOption[] {
   const spec = game.spec?.$isLoaded ? game.spec : null;
   if (!spec) return multiplierOptions;
 
+  // Options are plain JSON objects, no $isLoaded check needed
   for (const key of Object.keys(spec)) {
     const opt = spec[key];
-    if (
-      opt?.$isLoaded &&
-      opt.type === "multiplier" &&
-      opt.based_on === "user"
-    ) {
+    if (opt && opt.type === "multiplier" && opt.based_on === "user") {
       multiplierOptions.push(opt);
     }
   }

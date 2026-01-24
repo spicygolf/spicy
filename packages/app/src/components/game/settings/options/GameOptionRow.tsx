@@ -24,11 +24,10 @@ export function GameOptionRow({
       case "bool":
         return value === "true" || value === "1" ? "Yes" : "No";
       case "menu":
-        if (option.choices?.$isLoaded) {
-          const choice = option.choices.find(
-            (c) => c?.$isLoaded && c.name === value,
-          );
-          return choice?.$isLoaded ? choice.disp : value;
+        // Choices are plain JSON arrays now
+        if (option.choices) {
+          const choice = option.choices.find((c) => c.name === value);
+          return choice ? choice.disp : value;
         }
         return value;
       case "num":

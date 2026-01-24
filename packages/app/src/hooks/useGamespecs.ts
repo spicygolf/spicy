@@ -1,6 +1,6 @@
 import { Group } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { GameSpec, MetaOption, PlayerAccount } from "spicylib/schema";
+import { GameSpec, type MetaOption, PlayerAccount } from "spicylib/schema";
 import { useJazzWorker } from "./useJazzWorker";
 
 export function useGamespecs() {
@@ -61,22 +61,19 @@ export function useGamespecs() {
     // GameSpec IS the options map directly - create it empty and add meta options
     const gameSpec = GameSpec.create({}, { owner: group });
 
-    // Helper to create and add a meta option
+    // Helper to create and add a meta option (plain JSON object)
     const addMetaOption = (
       optName: string,
       value: string | number | boolean,
       valueType: "text" | "num" | "bool" | "menu",
     ) => {
-      const opt = MetaOption.create(
-        {
-          type: "meta",
-          name: optName,
-          disp: optName, // Display name same as option name for now
-          valueType,
-          value: String(value),
-        },
-        { owner: group },
-      );
+      const opt: MetaOption = {
+        type: "meta",
+        name: optName,
+        disp: optName, // Display name same as option name for now
+        valueType,
+        value: String(value),
+      };
       gameSpec.$jazz.set(optName, opt);
     };
 

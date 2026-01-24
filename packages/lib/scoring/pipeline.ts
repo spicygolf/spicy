@@ -273,7 +273,8 @@ function buildPlayerHandicaps(
   // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
   const handicapIndexFromOption = options?.["handicap_index_from"];
   const handicapMode =
-    handicapIndexFromOption?.$isLoaded &&
+    handicapIndexFromOption &&
+    handicapIndexFromOption.type === "game" &&
     handicapIndexFromOption.value === "full"
       ? "full"
       : "low";

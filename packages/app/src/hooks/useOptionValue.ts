@@ -37,9 +37,10 @@ export function useOptionValue(
   optionType: Option["type"],
 ): string | number | undefined {
   // 1. Check hole-level override (most specific)
+  // Options are plain JSON objects, no $isLoaded check needed on the option itself
   if (currentHole?.options?.$isLoaded) {
     const holeOption = currentHole.options[optionName];
-    if (holeOption?.$isLoaded && holeOption.type === optionType) {
+    if (holeOption && holeOption.type === optionType) {
       if (optionType === "game") {
         const gameOption = holeOption as GameOption;
         return gameOption.value ?? gameOption.defaultValue;
@@ -56,7 +57,7 @@ export function useOptionValue(
   // 2. Check game.spec (the working copy of options)
   if (game?.$isLoaded && game.spec?.$isLoaded) {
     const specOption = game.spec[optionName];
-    if (specOption?.$isLoaded && specOption.type === optionType) {
+    if (specOption && specOption.type === optionType) {
       if (optionType === "game") {
         const opt = specOption as GameOption;
         return opt.value ?? opt.defaultValue;

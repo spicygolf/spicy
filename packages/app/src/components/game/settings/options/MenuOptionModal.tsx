@@ -20,7 +20,8 @@ export function MenuOptionModal({
 }: MenuOptionModalProps) {
   const value = currentValue ?? option.defaultValue;
 
-  if (!option.choices?.$isLoaded) {
+  // Choices are plain JSON arrays now
+  if (!option.choices) {
     return null;
   }
 
@@ -41,8 +42,6 @@ export function MenuOptionModal({
           <ScrollView style={styles.scrollView}>
             <View style={styles.options}>
               {option.choices.map((choice) => {
-                if (!choice?.$isLoaded) return null;
-
                 const isSelected = value === choice.name;
 
                 return (

@@ -137,8 +137,8 @@ export function getMultiplierOptions(ctx: ScoringContext): MultiplierOption[] {
   for (const key of Object.keys(options)) {
     if (key.startsWith("$") || key === "_refs") continue;
     const opt = options[key];
-    // Check if loaded and is a multiplier option
-    if (opt?.$isLoaded && opt.type === "multiplier") {
+    // Check if it's a multiplier option (options are plain JSON, no $isLoaded check needed)
+    if (opt && opt.type === "multiplier") {
       multiplierOptions.push(opt as MultiplierOption);
     }
   }

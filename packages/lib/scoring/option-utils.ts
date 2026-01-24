@@ -50,7 +50,7 @@ export function getOptionValueForHole(
   const gameHole = ctx.gameHoles.find((h) => h.hole === holeNum);
   if (gameHole?.options?.$isLoaded) {
     const holeOption = gameHole.options[optionName];
-    if (holeOption?.$isLoaded) {
+    if (holeOption) {
       const value = extractOptionValue(holeOption);
       if (value !== undefined) {
         return value;
@@ -60,7 +60,7 @@ export function getOptionValueForHole(
 
   // 2. Fall back to game/spec options
   const option = ctx.options?.[optionName];
-  if (option?.$isLoaded) {
+  if (option) {
     return extractOptionValue(option);
   }
 
@@ -84,14 +84,14 @@ export function getOptionForHole(
   const gameHole = ctx.gameHoles.find((h) => h.hole === holeNum);
   if (gameHole?.options?.$isLoaded) {
     const holeOption = gameHole.options[optionName];
-    if (holeOption?.$isLoaded) {
+    if (holeOption) {
       return holeOption;
     }
   }
 
   // 2. Fall back to game/spec options
   const option = ctx.options?.[optionName];
-  if (option?.$isLoaded) {
+  if (option) {
     return option;
   }
 
@@ -244,7 +244,7 @@ export function getJunkOptionsForHole(
     if (!options.$jazz.has(key)) continue;
 
     const opt = options[key];
-    if (opt?.$isLoaded && opt.type === "junk") {
+    if (opt && opt.type === "junk") {
       // Check if there's a per-hole override
       const holeOption = getOptionForHole(key, holeNum, ctx);
       if (holeOption && holeOption.type === "junk") {
@@ -289,13 +289,13 @@ export function getMetaOption(
   // In tests, $jazz may not exist on mock objects
   if (spec.$jazz?.has && !spec.$jazz.has(optionName)) return undefined;
   const option = spec[optionName];
-  if (!option?.$isLoaded || option.type !== "meta") return undefined;
+  if (!option || option.type !== "meta") return undefined;
 
   const metaOpt = option as MetaOption;
 
   // For text_array type, return the array value
   if (metaOpt.valueType === "text_array") {
-    if (!metaOpt.valueArray?.$isLoaded) return undefined;
+    if (!metaOpt.valueArray) return undefined;
     return [...metaOpt.valueArray];
   }
 
@@ -367,8 +367,11 @@ function getOptionsFromGame(game: Game | undefined | null) {
  * This creates a deep copy of options so the game has its own independent
  * working copy that can be modified without affecting the catalog spec.
  *
+ * Options are plain JSON objects (not CoMaps), so copying is simple:
+ * just structuredClone each option into the new MapOfOptions.
+ *
  * @param sourceSpec - The spec to copy options from (typically game.specRef)
- * @param owner - The Jazz Group that will own the new options
+ * @param owner - The Jazz Group that will own the new MapOfOptions
  * @returns A new MapOfOptions with copies of all options
  */
 export async function copySpecOptions(
@@ -376,159 +379,22 @@ export async function copySpecOptions(
   owner: Group,
 ): Promise<MapOfOptions> {
   // Import schema types dynamically to avoid circular dependency
-  const {
-    MapOfOptions,
-    GameOption,
-    JunkOption,
-    MultiplierOption,
-    MetaOption,
-    ChoicesList,
-    ChoiceMap,
-    StringList,
-  } = await import("../schema");
+  const { MapOfOptions } = await import("../schema");
 
   const newSpec = MapOfOptions.create({}, { owner });
 
   if (!sourceSpec?.$isLoaded) return newSpec;
 
-  // Iterate over all options in source spec
+  // Iterate over all options in source spec and deep-copy each one
   for (const key of Object.keys(sourceSpec)) {
     if (key.startsWith("$") || key === "_refs") continue;
     if (!sourceSpec.$jazz.has(key)) continue;
 
     const option = sourceSpec[key];
-    if (!option?.$isLoaded) continue;
+    if (!option) continue;
 
-    // Create a copy based on option type
-    switch (option.type) {
-      case "game": {
-        const src = option as GameOption;
-        const copy = GameOption.create(
-          {
-            name: src.name,
-            disp: src.disp,
-            type: "game",
-            version: src.version,
-            valueType: src.valueType,
-            defaultValue: src.defaultValue,
-          },
-          { owner },
-        );
-        if (src.value !== undefined) copy.$jazz.set("value", src.value);
-        if (src.seq !== undefined) copy.$jazz.set("seq", src.seq);
-        if (src.teamOnly !== undefined)
-          copy.$jazz.set("teamOnly", src.teamOnly);
-        // Copy choices if present
-        if (src.$jazz.has("choices") && src.choices?.$isLoaded) {
-          const choicesCopy = ChoicesList.create([], { owner });
-          for (const choice of src.choices) {
-            if (choice?.$isLoaded) {
-              choicesCopy.$jazz.push(
-                ChoiceMap.create(
-                  { name: choice.name, disp: choice.disp },
-                  { owner },
-                ),
-              );
-            }
-          }
-          copy.$jazz.set("choices", choicesCopy);
-        }
-        newSpec.$jazz.set(key, copy);
-        break;
-      }
-      case "junk": {
-        const src = option as JunkOption;
-        const copy = JunkOption.create(
-          {
-            name: src.name,
-            disp: src.disp,
-            type: "junk",
-            version: src.version,
-            value: src.value,
-          },
-          { owner },
-        );
-        if (src.sub_type) copy.$jazz.set("sub_type", src.sub_type);
-        if (src.seq !== undefined) copy.$jazz.set("seq", src.seq);
-        if (src.scope) copy.$jazz.set("scope", src.scope);
-        if (src.icon) copy.$jazz.set("icon", src.icon);
-        if (src.show_in) copy.$jazz.set("show_in", src.show_in);
-        if (src.based_on) copy.$jazz.set("based_on", src.based_on);
-        if (src.limit) copy.$jazz.set("limit", src.limit);
-        if (src.calculation) copy.$jazz.set("calculation", src.calculation);
-        if (src.logic) copy.$jazz.set("logic", src.logic);
-        if (src.better) copy.$jazz.set("better", src.better);
-        if (src.score_to_par) copy.$jazz.set("score_to_par", src.score_to_par);
-        newSpec.$jazz.set(key, copy);
-        break;
-      }
-      case "multiplier": {
-        const src = option as MultiplierOption;
-        const copy = MultiplierOption.create(
-          {
-            name: src.name,
-            disp: src.disp,
-            type: "multiplier",
-            version: src.version,
-          },
-          { owner },
-        );
-        if (src.value !== undefined) copy.$jazz.set("value", src.value);
-        if (src.sub_type) copy.$jazz.set("sub_type", src.sub_type);
-        if (src.seq !== undefined) copy.$jazz.set("seq", src.seq);
-        if (src.icon) copy.$jazz.set("icon", src.icon);
-        if (src.based_on) copy.$jazz.set("based_on", src.based_on);
-        if (src.scope) copy.$jazz.set("scope", src.scope);
-        if (src.availability) copy.$jazz.set("availability", src.availability);
-        if (src.override !== undefined)
-          copy.$jazz.set("override", src.override);
-        if (src.input_value !== undefined)
-          copy.$jazz.set("input_value", src.input_value);
-        if (src.value_from) copy.$jazz.set("value_from", src.value_from);
-        newSpec.$jazz.set(key, copy);
-        break;
-      }
-      case "meta": {
-        const src = option as MetaOption;
-        const copy = MetaOption.create(
-          {
-            name: src.name,
-            disp: src.disp,
-            type: "meta",
-            valueType: src.valueType,
-          },
-          { owner },
-        );
-        if (src.value !== undefined) copy.$jazz.set("value", src.value);
-        if (src.seq !== undefined) copy.$jazz.set("seq", src.seq);
-        if (src.searchable !== undefined)
-          copy.$jazz.set("searchable", src.searchable);
-        if (src.required !== undefined)
-          copy.$jazz.set("required", src.required);
-        // Copy valueArray if present (for text_array type)
-        if (src.$jazz.has("valueArray") && src.valueArray?.$isLoaded) {
-          const arrayCopy = StringList.create([...src.valueArray], { owner });
-          copy.$jazz.set("valueArray", arrayCopy);
-        }
-        // Copy choices if present (for menu type)
-        if (src.$jazz.has("choices") && src.choices?.$isLoaded) {
-          const choicesCopy = ChoicesList.create([], { owner });
-          for (const choice of src.choices) {
-            if (choice?.$isLoaded) {
-              choicesCopy.$jazz.push(
-                ChoiceMap.create(
-                  { name: choice.name, disp: choice.disp },
-                  { owner },
-                ),
-              );
-            }
-          }
-          copy.$jazz.set("choices", choicesCopy);
-        }
-        newSpec.$jazz.set(key, copy);
-        break;
-      }
-    }
+    // Options are plain JSON objects, so structuredClone creates a deep copy
+    newSpec.$jazz.set(key, structuredClone(option));
   }
 
   return newSpec;
