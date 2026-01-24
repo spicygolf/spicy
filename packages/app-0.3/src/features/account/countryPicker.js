@@ -1,14 +1,14 @@
-import { Dropdown } from 'react-native-element-dropdown';
+import { Dropdown } from "react-native-element-dropdown";
 
-const CountryPicker = props => {
+const CountryPicker = (props) => {
   const { countries, selectedValue, onValueChange } = props;
 
-  const items = countries.map(country => ({
+  const items = countries.map((country) => ({
     label: country.name,
     value: country.code,
   }));
 
-  const onChange = selection => {
+  const onChange = (selection) => {
     onValueChange(selection.value);
   };
 

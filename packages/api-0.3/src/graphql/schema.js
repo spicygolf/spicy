@@ -1,70 +1,68 @@
-import { flattenDeep, merge } from 'lodash-es';
+import { flattenDeep, merge } from "lodash-es";
 
 import {
   AccountMutationSigs,
   AccountQuerySigs,
   AccountResolvers,
-  AccountTypeDefs
-} from './account';
+  AccountTypeDefs,
+} from "./account";
 import {
   CourseMutationSigs,
   CourseQuerySigs,
   CourseResolvers,
-  CourseTypeDefs
-} from './course';
+  CourseTypeDefs,
+} from "./course";
 import {
   EventMutationSigs,
   EventQuerySigs,
   EventResolvers,
-  EventTypeDefs
-} from './event';
+  EventTypeDefs,
+} from "./event";
 import {
   GameMutationSigs,
   GameQuerySigs,
   GameResolvers,
   GameSubscriptionSigs,
   GameTypeDefs,
-} from './game';
+} from "./game";
 import {
   GameSpecMutationSigs,
   GameSpecQuerySigs,
   GameSpecResolvers,
-  GameSpecTypeDefs
-} from './gamespec';
+  GameSpecTypeDefs,
+} from "./gamespec";
 import {
   LinkMutationSigs,
   LinkQuerySigs,
   LinkResolvers,
-  LinkTypeDefs
-} from './link';
+  LinkTypeDefs,
+} from "./link";
 import {
   OptionMutationSigs,
   OptionQuerySigs,
   OptionResolvers,
-  OptionTypeDefs
-} from './option';
+  OptionTypeDefs,
+} from "./option";
 import {
   PlayerMutationSigs,
   PlayerQuerySigs,
   PlayerResolvers,
-  PlayerTypeDefs
-} from './player';
+  PlayerTypeDefs,
+} from "./player";
 import {
   RoundMutationSigs,
   RoundQuerySigs,
   RoundResolvers,
   RoundSubscriptionSigs,
-  RoundTypeDefs
-} from './round';
-import {
-  SharedTypeDefs
-} from './shared';
+  RoundTypeDefs,
+} from "./round";
+import { SharedTypeDefs } from "./shared";
 import {
   TeeMutationSigs,
   TeeQuerySigs,
   TeeResolvers,
-  TeeTypeDefs
-} from './tee';
+  TeeTypeDefs,
+} from "./tee";
 
 const TypeDefs = [
   AccountTypeDefs,
@@ -131,11 +129,6 @@ const resolvers = merge(
 );
 
 export const schema = {
-  typeDefs: flattenDeep([
-    TypeDefs,
-    RootQuery,
-    RootMutation,
-    RootSubscription,
-  ]),
+  typeDefs: flattenDeep([TypeDefs, RootQuery, RootMutation, RootSubscription]),
   resolvers: resolvers,
 };

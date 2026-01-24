@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const UPDATE_GAME_HOLES_MUTATION = gql`
   mutation UpdateGameHoles($gkey: String!, $holes: [GameHoleInput]!) {

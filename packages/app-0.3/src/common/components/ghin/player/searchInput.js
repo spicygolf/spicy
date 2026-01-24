@@ -1,12 +1,12 @@
-import Error from 'common/components/error';
-import { GhinPlayerSearchContext } from 'common/components/ghin/player/searchContext';
-import { useGetCountriesAndStatesQuery } from 'common/hooks/useGetCountriesAndStatesQuery';
-import CountryPicker from 'features/account/countryPicker';
-import StatePicker from 'features/account/statePicker';
-import { find } from 'lodash';
-import React, { useContext } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { Input } from 'react-native-elements';
+import Error from "common/components/error";
+import { GhinPlayerSearchContext } from "common/components/ghin/player/searchContext";
+import { useGetCountriesAndStatesQuery } from "common/hooks/useGetCountriesAndStatesQuery";
+import CountryPicker from "features/account/countryPicker";
+import StatePicker from "features/account/statePicker";
+import { find } from "lodash";
+import { useContext } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { Input } from "react-native-elements";
 
 const GhinPlayerSearchInput = () => {
   const { state, setState } = useContext(GhinPlayerSearchContext);
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   field_input: {
-    color: '#000',
+    color: "#000",
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
@@ -113,9 +113,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   label: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
-    fontWeight: 'normal',
+    fontWeight: "normal",
   },
   last_name: {
     paddingRight: 5,
@@ -128,6 +128,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
 });

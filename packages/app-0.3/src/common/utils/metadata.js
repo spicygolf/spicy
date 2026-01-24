@@ -1,14 +1,14 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { filter, find, findIndex } from 'lodash';
-import moment from 'moment';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { filter, find, findIndex } from "lodash";
+import moment from "moment";
 
-export const getMeta = async key => {
+export const getMeta = async (key) => {
   let ret = null;
   try {
     const value = await AsyncStorage.getItem(key);
     ret = JSON.parse(value);
   } catch (e) {
-    console.log('Error getting metadata from AsyncStorage', e);
+    console.log("Error getting metadata from AsyncStorage", e);
   }
   return ret;
 };
@@ -18,15 +18,15 @@ export const setMeta = async (key, value) => {
 };
 
 export const getGamesMeta = async () => {
-  return await getMeta('games');
+  return await getMeta("games");
 };
 
-export const setGamesMeta = async gamesMeta => {
-  return await setMeta('games', gamesMeta);
+export const setGamesMeta = async (gamesMeta) => {
+  return await setMeta("games", gamesMeta);
 };
 
-export const getGameMeta = async gkey => {
-  const games = await getMeta('games');
+export const getGameMeta = async (gkey) => {
+  const games = await getMeta("games");
   return find(games, { gkey: gkey });
 };
 
@@ -55,8 +55,8 @@ export const setGameMeta = async (gkey, key, value) => {
 };
 
 // Don't let storage get out of control, only keep last week of games meta
-export const filterGamesMeta = gamesMeta => {
-  return filter(gamesMeta, g => {
-    return moment.utc(g.ts) > moment.utc().subtract(1, 'week');
+export const filterGamesMeta = (gamesMeta) => {
+  return filter(gamesMeta, (g) => {
+    return moment.utc(g.ts) > moment.utc().subtract(1, "week");
   });
 };

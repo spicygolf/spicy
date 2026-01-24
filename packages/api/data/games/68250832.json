@@ -1,1 +1,197 @@
-{"legacyId":"68250832","exportedAt":"2026-01-24T15:49:41.400Z","game":{"_key":"68250832","_id":"games/68250832","_rev":"_k_OgNTu--w","name":"Five Points","start":"2020-04-22T03:04:03Z","holes":[{"hole":"1","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"2","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"3","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"4","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"5","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"6","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"7","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"8","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"9","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"10","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"11","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"12","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"13","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"14","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"15","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"16","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"17","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]},{"hole":"18","teams":[{"team":"1","players":[],"junk":[]},{"team":"2","players":[],"junk":[]}],"multipliers":[]}],"options":[{"name":"use_handicaps","disp":"Use handicaps","type":"bool","value":"true"},{"name":"handicap_index_from","disp":"Index off of the low handicap or use full handicaps","type":"menu","value":"full"}],"end":null,"scope":{"holes":"all18","teams_rotate":"never"}},"rounds":[{"round":{"_id":"rounds/68250863","_key":"68250863","_rev":"_k_OgNeC-Ao","date":"2020-04-22T03:04:03Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"68250868","_id":"edges/68250868","_from":"rounds/68250863","_to":"games/68250832","_rev":"_k_OgNhK-BF","type":"round2game","handicap_index":"13.0"},"playerId":"65886512"}],"gamespecKey":"65384954"}
+{
+  "legacyId": "68250832",
+  "exportedAt": "2026-01-24T15:49:41.400Z",
+  "game": {
+    "_key": "68250832",
+    "_id": "games/68250832",
+    "_rev": "_k_OgNTu--w",
+    "name": "Five Points",
+    "start": "2020-04-22T03:04:03Z",
+    "holes": [
+      {
+        "hole": "1",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "2",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "3",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "4",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "5",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "6",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "7",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "8",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "9",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "10",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "11",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "12",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "13",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "14",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "15",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "16",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "17",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "18",
+        "teams": [
+          { "team": "1", "players": [], "junk": [] },
+          { "team": "2", "players": [], "junk": [] }
+        ],
+        "multipliers": []
+      }
+    ],
+    "options": [
+      {
+        "name": "use_handicaps",
+        "disp": "Use handicaps",
+        "type": "bool",
+        "value": "true"
+      },
+      {
+        "name": "handicap_index_from",
+        "disp": "Index off of the low handicap or use full handicaps",
+        "type": "menu",
+        "value": "full"
+      }
+    ],
+    "end": null,
+    "scope": { "holes": "all18", "teams_rotate": "never" }
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/68250863",
+        "_key": "68250863",
+        "_rev": "_k_OgNeC-Ao",
+        "date": "2020-04-22T03:04:03Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "68250868",
+        "_id": "edges/68250868",
+        "_from": "rounds/68250863",
+        "_to": "games/68250832",
+        "_rev": "_k_OgNhK-BF",
+        "type": "round2game",
+        "handicap_index": "13.0"
+      },
+      "playerId": "65886512"
+    }
+  ],
+  "gamespecKey": "65384954"
+}

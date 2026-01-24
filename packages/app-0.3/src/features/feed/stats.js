@@ -1,18 +1,18 @@
-import { blue } from 'common/colors';
-import { subDays, subMonths, subWeeks, subYears } from 'date-fns';
-import { zonedTimeToUtc } from 'date-fns-tz';
-import Stat from 'features/feed/stat';
-import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { ButtonGroup } from 'react-native-elements';
+import { blue } from "common/colors";
+import { subDays, subMonths, subWeeks, subYears } from "date-fns";
+import { zonedTimeToUtc } from "date-fns-tz";
+import Stat from "features/feed/stat";
+import { useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { ButtonGroup } from "react-native-elements";
 
-const Stats = (props) => {
+const Stats = (_props) => {
   const [timeFrame, setTimeFrame] = useState(1);
 
-  const buttons = ['1d', '1w', '1m', 'ytd', '1y'];
+  const buttons = ["1d", "1w", "1m", "ytd", "1y"];
   const now = new Date();
   const endDate = zonedTimeToUtc(now).toISOString();
-  let begDate = '';
+  let begDate = "";
   switch (timeFrame) {
     case 0:
       begDate = subDays(now, 1).toISOString();
@@ -23,10 +23,11 @@ const Stats = (props) => {
     case 2:
       begDate = subMonths(now, 1).toISOString();
       break;
-    case 3:
+    case 3: {
       const y = now.getUTCFullYear();
       begDate = zonedTimeToUtc(new Date(y, 0, 1)).toISOString();
       break;
+    }
     case 4:
       begDate = subYears(now, 1).toISOString();
       break;
@@ -72,18 +73,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   selectedButton: {
     backgroundColor: blue,
   },
   selectedButtonText: {
-    color: 'white',
+    color: "white",
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     paddingTop: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

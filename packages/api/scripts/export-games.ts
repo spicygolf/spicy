@@ -121,7 +121,7 @@ async function exportGames(): Promise<void> {
       if (!playerGamesMap.has(playerId)) {
         playerGamesMap.set(playerId, []);
       }
-      playerGamesMap.get(playerId)!.push(gameData.legacyId);
+      playerGamesMap.get(playerId)?.push(gameData.legacyId);
     }
 
     // Add to games list

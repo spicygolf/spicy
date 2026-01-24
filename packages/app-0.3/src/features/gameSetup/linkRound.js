@@ -1,13 +1,16 @@
-import { useNavigation } from '@react-navigation/native';
-import Error from 'common/components/error';
-import { addPlayerToOwnTeam, getGamespecKVs } from 'common/utils/game';
-import { omitDeep } from 'common/utils/game';
-import { query as getGameQuery } from 'features/game/hooks/useGetGameQuery';
-import { query as activeGamesForPlayerQuery } from 'features/games/hooks/useActiveGamesForPlayerQuery';
-import { useLinkRoundMutation } from 'features/gameSetup/hooks/useLinkRoundMutation';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import React, { useContext, useEffect } from 'react';
-import { ActivityIndicator } from 'react-native';
+import { useNavigation } from "@react-navigation/native";
+import Error from "common/components/error";
+import {
+  addPlayerToOwnTeam,
+  getGamespecKVs,
+  omitDeep,
+} from "common/utils/game";
+import { query as getGameQuery } from "features/game/hooks/useGetGameQuery";
+import { useLinkRoundMutation } from "features/gameSetup/hooks/useLinkRoundMutation";
+import { query as activeGamesForPlayerQuery } from "features/games/hooks/useActiveGamesForPlayerQuery";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { useContext, useEffect } from "react";
+import { ActivityIndicator } from "react-native";
 
 const LinkRound = (props) => {
   const navigation = useNavigation();
@@ -16,18 +19,18 @@ const LinkRound = (props) => {
   const { _key: gkey, start: game_start } = game;
 
   const { _key: pkey } = p;
-  const player = omitDeep(p, '__typename');
+  const player = omitDeep(p, "__typename");
 
-  let round =
+  const round =
     r && !isNewRound
-      ? omitDeep(r, '__typename')
+      ? omitDeep(r, "__typename")
       : {
           date: game_start,
           seq: 1,
           scores: [],
         };
 
-  const teamGame = getGamespecKVs(game, 'teams').includes(true);
+  const teamGame = getGamespecKVs(game, "teams").includes(true);
   const newHoles = teamGame ? addPlayerToOwnTeam({ pkey, game }) : null;
 
   const { currentPlayer } = useContext(CurrentPlayerContext);
@@ -52,7 +55,7 @@ const LinkRound = (props) => {
         variables: {
           pkey: currentPlayerKey,
         },
-        fetchPolicy: 'cache-and-network',
+        fetchPolicy: "cache-and-network",
       },
     ],
     awaitRefetchQueries: true,
@@ -70,11 +73,11 @@ const LinkRound = (props) => {
   }
 
   if (data) {
-    navigation.navigate('Game', {
+    navigation.navigate("Game", {
       currentGameKey: gkey,
-      screen: 'Setup',
+      screen: "Setup",
       params: {
-        screen: 'GameSetup',
+        screen: "GameSetup",
       },
     });
   }

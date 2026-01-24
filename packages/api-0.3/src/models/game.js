@@ -1,16 +1,15 @@
-import { aql } from 'arangojs';
-import { find } from 'lodash-es';
+import { aql } from "arangojs";
+import { find } from "lodash-es";
 
-import { db } from '../db/db';
-import { next } from '../util/database';
-import { pubsub } from '../server';
-import { Doc } from './doc';
+import { db } from "../db/db";
+import { pubsub } from "../server";
+import { next } from "../util/database";
+import { Doc } from "./doc";
+
 // import { Round } from './round';
 
-const collection = db.collection('games');
-const GAME_UPDATED = 'GAME_UPDATED';
-
-
+const collection = db.collection("games");
+const GAME_UPDATED = "GAME_UPDATED";
 
 class Game extends Doc {
   constructor() {
@@ -23,7 +22,7 @@ class Game extends Doc {
   }
 
   async search(q) {
-    return this._collection.fulltext('name', q);
+    return this._collection.fulltext("name", q);
   }
 
   async updateGame(gkey, game) {
@@ -33,7 +32,7 @@ class Game extends Doc {
       _id: oldGame._id,
       _key: oldGame._key,
       _rev: oldGame._rev,
-      ...game
+      ...game,
     };
     //console.log('newG', newG);
     return this._updateGame(newG);
@@ -41,7 +40,7 @@ class Game extends Doc {
 
   async updateGameHoles(gkey, holes) {
     const oldGame = await this.load(gkey);
-    let newG = {
+    const newG = {
       ...oldGame,
       holes,
     };
@@ -50,7 +49,7 @@ class Game extends Doc {
 
   async updateGameScope(gkey, scope) {
     const oldGame = await this.load(gkey);
-    let newG = {
+    const newG = {
       ...oldGame,
       scope,
     };
@@ -59,7 +58,7 @@ class Game extends Doc {
 
   async _updateGame(newG) {
     // write to db
-    const newGame = await this.update(newG, {returnNew: true});
+    const newGame = await this.update(newG, { returnNew: true });
 
     // publish changes for subscriptions
     pubsub.publish(GAME_UPDATED, {
@@ -119,7 +118,7 @@ class Game extends Doc {
         })
     `;
 
-    let game = await next({query}); // only return one, so use 'next' for this.
+    const game = await next({ query }); // only return one, so use 'next' for this.
     // game = await this.checkRoundTees(game);
     const gameWithPops = this._calculatePops(game);
     return gameWithPops;
@@ -155,43 +154,42 @@ class Game extends Doc {
   // }
 
   _calculatePops(game) {
-
     let lowIndex = null;
     let handicapIndexFrom = null;
-    const useHandicapsOption = this._getOption(game, 'use_handicaps');
-    if( useHandicapsOption.value ) {
-      handicapIndexFrom = this._getOption(game, 'handicap_index_from');
-      if( handicapIndexFrom && handicapIndexFrom.value == 'low' ) {
+    const useHandicapsOption = this._getOption(game, "use_handicaps");
+    if (useHandicapsOption.value) {
+      handicapIndexFrom = this._getOption(game, "handicap_index_from");
+      if (handicapIndexFrom && handicapIndexFrom.value === "low") {
         lowIndex = this._getLowIndex(game);
       }
     }
 
-    const newRounds = game.rounds.map(r => {
+    const newRounds = game.rounds.map((r) => {
       // if no tee information, can't calculate strokes/pops
-      if( !(r && r.tees && r.tees[0]) ) return r;
+      if (!r?.tees?.[0]) return r;
       const tee = r.tees[0] || null;
 
       // player's handicap for this game
-      const hdcp = (
-        tee.game_handicap ? tee.game_handicap : (tee.course_handicap || '0')
-      ) - lowIndex;
+      const hdcp =
+        (tee.game_handicap ? tee.game_handicap : tee.course_handicap || "0") -
+        lowIndex;
 
-      let newR = {
+      const newR = {
         ...r,
-        scores: []
+        scores: [],
       };
 
       // loop thru the tee holes and add pops
       // TODO: this assumes tee.holes is complete
       // ^ may want to detect if we have r.scores holes that aren't in tee.holes
-      tee.holes.map(tHole => {
+      tee.holes.map((tHole) => {
         const pops = useHandicapsOption.value
           ? this._getPops(tHole.handicap, hdcp)
-          : '0';
-        const coursePops = this._getPops(tHole.allocation, hdcp || '0');
-        let rHole = find(r.scores, { hole: tHole.number.toString()});
-        if( !rHole ) {
-          rHole = {hole: tHole.number, values: [], pops, coursePops}
+          : "0";
+        const coursePops = this._getPops(tHole.allocation, hdcp || "0");
+        let rHole = find(r.scores, { hole: tHole.number.toString() });
+        if (!rHole) {
+          rHole = { hole: tHole.number, values: [], pops, coursePops };
         } else {
           rHole.pops = pops;
           rHole.coursePops = coursePops;
@@ -203,9 +201,8 @@ class Game extends Doc {
     });
     return {
       ...game,
-      rounds: newRounds
+      rounds: newRounds,
     };
-
   }
 
   _getPops(tHoleHdcp, rPlayerHdcp) {
@@ -213,10 +210,10 @@ class Game extends Doc {
     const playerHdcp = parseFloat(rPlayerHdcp);
 
     // no or weird hole handicap, so return no pops
-    if( holeHdcp < 1 || holeHdcp > 18 ) return 0;
+    if (holeHdcp < 1 || holeHdcp > 18) return 0;
 
     let basePops = 0;
-    if( playerHdcp >= 0 ) {
+    if (playerHdcp >= 0) {
       basePops = Math.floor(playerHdcp / 18);
     } else {
       basePops = Math.ceil(playerHdcp / 18);
@@ -224,8 +221,8 @@ class Game extends Doc {
     const remPops = playerHdcp % 18;
 
     let pop = 0;
-    if( playerHdcp >= 0 ) pop = ( holeHdcp <= remPops ) ? 1 : 0;
-    if( playerHdcp < 0 ) pop = ( (18-holeHdcp) < (-1*remPops) ) ? -1 : 0;
+    if (playerHdcp >= 0) pop = holeHdcp <= remPops ? 1 : 0;
+    if (playerHdcp < 0) pop = 18 - holeHdcp < -1 * remPops ? -1 : 0;
     const holePops = basePops + pop;
     return holePops;
   }
@@ -233,38 +230,40 @@ class Game extends Doc {
   _getLowIndex(game) {
     let lowIndex = 0.0;
     game.rounds.map((r, i) => {
-      if( !(r?.tees && r.tees[0]) ) return lowIndex;
+      if (!r?.tees?.[0]) return lowIndex;
       const tee = r.tees[0];
-      const hdcp = tee.game_handicap ? tee.game_handicap : (tee.course_handicap || 0);
-      if( i == 0 ) lowIndex = hdcp; // set initial lowIndex from first round
-      if( parseFloat(hdcp) < lowIndex ) lowIndex = hdcp;
+      const hdcp = tee.game_handicap
+        ? tee.game_handicap
+        : tee.course_handicap || 0;
+      if (i === 0) lowIndex = hdcp; // set initial lowIndex from first round
+      if (parseFloat(hdcp) < lowIndex) lowIndex = hdcp;
     });
     return lowIndex;
   }
 
   _getOption(game, option) {
     // first get list of all gamespec options linked to this game
-    let allGSoptions = [];
-    if( !game || !game.gamespecs ) return [];
-    game.gamespecs.map(gs => {
-      gs.options.map(o => {
+    const allGSoptions = [];
+    if (!game || !game.gamespecs) return [];
+    game.gamespecs.map((gs) => {
+      gs.options.map((o) => {
         allGSoptions.push(o);
       });
     });
 
     // TODO: this will only find the first one.  If the same option exists in
     // two different gamespecs linked to this game, /shrug
-    const gso = find(allGSoptions, {name: option});
-    let v = ( gso && gso.default ) ? gso.default : null;
+    const gso = find(allGSoptions, { name: option });
+    let v = gso?.default ? gso.default : null;
     //console.log('1', gso, null, v);
 
-    const go = find(game.options, {name: option});
-    if( go && go.value ) v = go.value;
+    const go = find(game.options, { name: option });
+    if (go?.value) v = go.value;
     //console.log('2', gso, go, v);
 
     // convert bool
-    if( (gso && gso.type == 'bool') ) {
-      v = (v === true || v === 'true');
+    if (gso && gso.type === "bool") {
+      v = v === true || v === "true";
     }
     //console.log('3', gso, go, v);
 
@@ -321,8 +320,8 @@ class Game extends Doc {
 
   async statForPlayerFeed({ begDate, endDate, stat, currentPlayer, myClubs }) {
     let query, cursor;
-    switch(stat) {
-      case 'public':
+    switch (stat) {
+      case "public":
         query = `
         FOR g IN games
           FILTER g.start > '${begDate}' AND g.start < '${endDate}'
@@ -331,7 +330,7 @@ class Game extends Doc {
         `;
         cursor = await db.query(query);
         break;
-      case 'myclubs':
+      case "myclubs":
         // query = `
         // FOR g IN games
         //   FILTER g.start > '${begDate}' AND g.start < '${endDate}'
@@ -360,7 +359,7 @@ class Game extends Doc {
         // `;
         // cursor = await db.query(query, {myClubs});
         break;
-      case 'faves':
+      case "faves":
         query = `
         FOR g IN games
         FILTER g.start > '${begDate}' AND g.start < '${endDate}'
@@ -389,7 +388,7 @@ class Game extends Doc {
         `;
         cursor = await db.query(query);
         break;
-      case 'me':
+      case "me":
         query = `
         FOR g IN games
         FILTER g.start > '${begDate}' AND g.start < '${endDate}'
@@ -415,8 +414,8 @@ class Game extends Doc {
 
   async gamesForPlayerFeed({ stat, begDate, endDate, currentPlayer, myClubs }) {
     let query, cursor;
-    switch(stat) {
-      case 'public':
+    switch (stat) {
+      case "public":
         query = `
         FOR g IN games
           FILTER g.start > '${begDate}' AND g.start < '${endDate}'
@@ -456,7 +455,7 @@ class Game extends Doc {
         `;
         cursor = await db.query(query);
         break;
-      case 'myclubs':
+      case "myclubs":
         // query = `
         // FOR g IN games
         //   FILTER g.start > '${begDate}' AND g.start < '${endDate}'
@@ -506,7 +505,7 @@ class Game extends Doc {
         // `;
         // cursor = await db.query(query, {myClubs});
         break;
-      case 'faves':
+      case "faves":
         query = `
         FOR g IN games
         FILTER g.start > '${begDate}' AND g.start < '${endDate}'
@@ -558,7 +557,7 @@ class Game extends Doc {
         `;
         cursor = await db.query(query);
         break;
-      case 'me':
+      case "me":
         query = `
         FOR g IN games
           FILTER g.start > '${begDate}' AND g.start < '${endDate}'
@@ -604,8 +603,7 @@ class Game extends Doc {
     //console.log('query', query);
     return await cursor.all();
   }
-
-};
+}
 
 const _Game = Game;
 export { _Game as Game };

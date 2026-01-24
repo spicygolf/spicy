@@ -1,24 +1,24 @@
-import { useApolloClient } from '@apollo/client';
-import { dark } from 'common/colors';
-import { clearCache } from 'common/utils/account';
-import React, { useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
-import { Button, Card } from 'react-native-elements';
+import { useApolloClient } from "@apollo/client";
+import { dark } from "common/colors";
+import { clearCache } from "common/utils/account";
+import { useState } from "react";
+import { StyleSheet, Text } from "react-native";
+import { Button, Card } from "react-native-elements";
 
-const ClearCache = (props) => {
+const ClearCache = (_props) => {
   const [cleared, setCleared] = useState(false);
   const client = useApolloClient();
 
-  let message = '';
+  let message = "";
   if (cleared) {
-    message = 'Local Data Cleared';
+    message = "Local Data Cleared";
   }
 
   return (
     <Card>
       <Text style={styles.note}>
-        Press to clear local data from your device. This should not affect anything, as
-        the app will re-fetch what it needs from the server.
+        Press to clear local data from your device. This should not affect
+        anything, as the app will re-fetch what it needs from the server.
       </Text>
       <Button
         title="Clear Local Data"
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   message: {
     marginTop: 20,
     minHeight: 40,
-    textAlign: 'center',
+    textAlign: "center",
   },
   note: {
     color: dark,

@@ -1,7 +1,6 @@
-import { findIndex } from 'lodash';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Icon } from 'react-native-elements';
+import { findIndex } from "lodash";
+import { StyleSheet, Text, View } from "react-native";
+import { Icon } from "react-native-elements";
 
 const sortNumber = (a, b) => a - b;
 
@@ -9,7 +8,7 @@ const HoleNav = (props) => {
   const { holes: holesOrig, holeInfo, changeHole } = props;
 
   const holes = holesOrig.sort(sortNumber);
-  holes.push('Summary');
+  holes.push("Summary");
   const currentHoleIndex = findIndex(holes, (h) => {
     return h === holeInfo.hole;
   });
@@ -38,7 +37,7 @@ const HoleNav = (props) => {
             }
             changeHole(holes[newHoleIndex].toString());
           }}
-          testID={'holeNav_prev'}
+          testID={"holeNav_prev"}
         />
       </View>
       <View style={styles.currentHole}>
@@ -56,7 +55,7 @@ const HoleNav = (props) => {
             }
             changeHole(holes[newHoleIndex].toString());
           }}
-          testID={'holeNav_next'}
+          testID={"holeNav_next"}
         />
       </View>
     </View>
@@ -67,27 +66,27 @@ export default HoleNav;
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   currentHole: {
     flex: 3,
     //flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   direction: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   holeInfo: {
     fontSize: 9,
   },
   holeInfoValue: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   holeText: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

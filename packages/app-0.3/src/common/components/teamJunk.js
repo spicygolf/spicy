@@ -1,25 +1,26 @@
-import { blue } from 'common/colors';
-import { find, orderBy } from 'lodash';
-import React from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
-import { Button, Icon } from 'react-native-elements';
+import { blue } from "common/colors";
+import { find, orderBy } from "lodash";
+import { FlatList, StyleSheet, View } from "react-native";
+import { Button, Icon } from "react-native-elements";
 
 const TeamJunk = (props) => {
   const { team: teamNum, scoring, currentHole } = props;
 
   const renderJunk = (junk) => {
-    if (junk.show_in === 'none') {
+    if (junk.show_in === "none") {
       return null;
     }
 
     // TODO: junk.name needs l10n, i18n - use junk.name as slug
-    const type = 'solid';
-    const color = 'white';
+    const type = "solid";
+    const color = "white";
 
     return (
       <Button
         title={junk.disp}
-        icon={<Icon style={styles.icon} name={junk.icon} size={20} color={color} />}
+        icon={
+          <Icon style={styles.icon} name={junk.icon} size={20} color={color} />
+        }
         type={type}
         buttonStyle={styles.button}
         titleStyle={styles.buttonTitle}
@@ -42,7 +43,7 @@ const TeamJunk = (props) => {
     return null;
   }
 
-  const sorted_junk = orderBy(team.junk, ['seq'], ['asc']);
+  const sorted_junk = orderBy(team.junk, ["seq"], ["asc"]);
   if (sorted_junk.length === 0) {
     return null;
   }

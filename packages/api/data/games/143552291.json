@@ -1,1 +1,80 @@
-{"legacyId":"143552291","exportedAt":"2026-01-24T15:49:41.001Z","game":{"_key":"143552291","_id":"games/143552291","_rev":"_k_OgNT2-Ab","name":"Five Points","start":"2021-02-28T14:17:41Z","scope":{"holes":"all18","teams_rotate":"never"},"holes":[{"hole":"1","teams":[],"multipliers":[]},{"hole":"2","teams":[],"multipliers":[]},{"hole":"3","teams":[],"multipliers":[]},{"hole":"4","teams":[],"multipliers":[]},{"hole":"5","teams":[],"multipliers":[]},{"hole":"6","teams":[],"multipliers":[]},{"hole":"7","teams":[],"multipliers":[]},{"hole":"8","teams":[],"multipliers":[]},{"hole":"9","teams":[],"multipliers":[]},{"hole":"10","teams":[],"multipliers":[]},{"hole":"11","teams":[],"multipliers":[]},{"hole":"12","teams":[],"multipliers":[]},{"hole":"13","teams":[],"multipliers":[]},{"hole":"14","teams":[],"multipliers":[]},{"hole":"15","teams":[],"multipliers":[]},{"hole":"16","teams":[],"multipliers":[]},{"hole":"17","teams":[],"multipliers":[]},{"hole":"18","teams":[],"multipliers":[]}],"options":[]},"rounds":[{"round":{"_id":"rounds/143554317","_key":"143554317","_rev":"_k_OgNeK-CK","date":"2021-02-28T14:17:41Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"143554323","_id":"edges/143554323","_from":"rounds/143554317","_to":"games/143552291","_rev":"_k_OgNiu-Ae","type":"round2game","ts":"2021-02-28T14:18:55.045Z","handicap_index":"18"},"playerId":"143554145"},{"round":{"_id":"rounds/143552462","_key":"143552462","_rev":"_k_OgNeK-CI","date":"2021-02-28T14:17:41Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"143552612","_id":"edges/143552612","_from":"rounds/143552462","_to":"games/143552291","_rev":"_k_OgNiu-AY","type":"round2game","ts":"2021-02-28T14:17:45.038Z","handicap_index":"18.3"},"playerId":"65888247"}],"gamespecKey":"65384954"}
+{
+  "legacyId": "143552291",
+  "exportedAt": "2026-01-24T15:49:41.001Z",
+  "game": {
+    "_key": "143552291",
+    "_id": "games/143552291",
+    "_rev": "_k_OgNT2-Ab",
+    "name": "Five Points",
+    "start": "2021-02-28T14:17:41Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [
+      { "hole": "1", "teams": [], "multipliers": [] },
+      { "hole": "2", "teams": [], "multipliers": [] },
+      { "hole": "3", "teams": [], "multipliers": [] },
+      { "hole": "4", "teams": [], "multipliers": [] },
+      { "hole": "5", "teams": [], "multipliers": [] },
+      { "hole": "6", "teams": [], "multipliers": [] },
+      { "hole": "7", "teams": [], "multipliers": [] },
+      { "hole": "8", "teams": [], "multipliers": [] },
+      { "hole": "9", "teams": [], "multipliers": [] },
+      { "hole": "10", "teams": [], "multipliers": [] },
+      { "hole": "11", "teams": [], "multipliers": [] },
+      { "hole": "12", "teams": [], "multipliers": [] },
+      { "hole": "13", "teams": [], "multipliers": [] },
+      { "hole": "14", "teams": [], "multipliers": [] },
+      { "hole": "15", "teams": [], "multipliers": [] },
+      { "hole": "16", "teams": [], "multipliers": [] },
+      { "hole": "17", "teams": [], "multipliers": [] },
+      { "hole": "18", "teams": [], "multipliers": [] }
+    ],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/143554317",
+        "_key": "143554317",
+        "_rev": "_k_OgNeK-CK",
+        "date": "2021-02-28T14:17:41Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "143554323",
+        "_id": "edges/143554323",
+        "_from": "rounds/143554317",
+        "_to": "games/143552291",
+        "_rev": "_k_OgNiu-Ae",
+        "type": "round2game",
+        "ts": "2021-02-28T14:18:55.045Z",
+        "handicap_index": "18"
+      },
+      "playerId": "143554145"
+    },
+    {
+      "round": {
+        "_id": "rounds/143552462",
+        "_key": "143552462",
+        "_rev": "_k_OgNeK-CI",
+        "date": "2021-02-28T14:17:41Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "143552612",
+        "_id": "edges/143552612",
+        "_from": "rounds/143552462",
+        "_to": "games/143552291",
+        "_rev": "_k_OgNiu-AY",
+        "type": "round2game",
+        "ts": "2021-02-28T14:17:45.038Z",
+        "handicap_index": "18.3"
+      },
+      "playerId": "65888247"
+    }
+  ],
+  "gamespecKey": "65384954"
+}

@@ -1,16 +1,17 @@
-import { course_handicap, formatCourseHandicap } from 'common/utils/handicap';
-import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Input } from 'react-native-elements';
+import { course_handicap, formatCourseHandicap } from "common/utils/handicap";
+import { useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { Input } from "react-native-elements";
 
 const HandicapInput = (props) => {
   const { label, init, update, showCourse, tee, holes } = props;
   const [handicap, setHandicap] = useState(init);
   const [valid, setValid] = useState(true);
-  const ch = showCourse === 'true' ? course_handicap(handicap, tee, holes) : null;
+  const ch =
+    showCourse === "true" ? course_handicap(handicap, tee, holes) : null;
 
   const validate = (h) => {
-    if (h === '') {
+    if (h === "") {
       setValid(true);
       return;
     }
@@ -20,7 +21,7 @@ const HandicapInput = (props) => {
   };
 
   const rightContent =
-    showCourse === 'true' ? (
+    showCourse === "true" ? (
       <View style={styles.field}>
         <Text style={styles.label}>Course Handicap</Text>
         <View style={styles.field_display_view}>
@@ -39,7 +40,7 @@ const HandicapInput = (props) => {
           labelStyle={styles.label}
           containerStyle={styles.field_input}
           inputStyle={styles.field_input_txt}
-          errorMessage={valid ? '' : 'Please enter a valid handicap'}
+          errorMessage={valid ? "" : "Please enter a valid handicap"}
           onChangeText={(text) => {
             validate(text);
             setHandicap(text);
@@ -66,16 +67,16 @@ const styles = StyleSheet.create({
   },
   field_display: {
     fontSize: 18,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 5,
   },
   field_display_view: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingBottom: 22,
   },
   field_input: {
-    color: '#000',
+    color: "#000",
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
@@ -83,11 +84,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   fields_row: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   label: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
-    fontWeight: 'normal',
+    fontWeight: "normal",
   },
 });

@@ -1,15 +1,15 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import AppStackTabs from 'app/components/AppStackTabs';
-import Error from 'common/components/error';
-import { useLoginQuery } from 'features/account/hooks/useLoginQuery';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import AppStackTabs from "app/components/AppStackTabs";
+import Error from "common/components/error";
+import { useLoginQuery } from "features/account/hooks/useLoginQuery";
 // import RegisterAgain from 'features/account/registerAgain';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import React, { useState } from 'react';
-import { ActivityIndicator } from 'react-native';
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { useState } from "react";
+import { ActivityIndicator } from "react-native";
 
 const AppStack = ({ email, fbToken, fbUser }) => {
   // eslint-disable-next-line no-unused-vars
-  const [currentPlayer, setCurrentPlayer] = useState(null);
+  const [_currentPlayer, setCurrentPlayer] = useState(null);
   const [impersonate, setImpersonate] = useState(null);
 
   const { loading, data, error } = useLoginQuery({
@@ -29,8 +29,8 @@ const AppStack = ({ email, fbToken, fbUser }) => {
 
   if (data?.login) {
     const { player, message } = data.login;
-    if (message === 'user_logged_in') {
-      AsyncStorage.setItem('token', player.token);
+    if (message === "user_logged_in") {
+      AsyncStorage.setItem("token", player.token);
       return (
         <CurrentPlayerContext.Provider
           value={{
@@ -39,7 +39,8 @@ const AppStack = ({ email, fbToken, fbUser }) => {
             impersonate,
             setImpersonate,
             user: fbUser,
-          }}>
+          }}
+        >
           <AppStackTabs />
         </CurrentPlayerContext.Provider>
       );

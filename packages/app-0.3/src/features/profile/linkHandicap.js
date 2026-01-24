@@ -1,20 +1,19 @@
-import { useApolloClient } from '@apollo/client';
-import { useMutation } from '@apollo/client';
-import { useNavigation } from '@react-navigation/native';
-import GhinSearchPlayer from 'common/components/ghin/player/search';
-import { logout } from 'common/utils/account';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { MERGE_PLAYERS_MUTATION } from 'features/players/graphql';
-import React, { useContext, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Button, Card } from 'react-native-elements';
+import { useApolloClient, useMutation } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import GhinSearchPlayer from "common/components/ghin/player/search";
+import { logout } from "common/utils/account";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { MERGE_PLAYERS_MUTATION } from "features/players/graphql";
+import { useContext, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { Button, Card } from "react-native-elements";
 
-const LinkHandicap = (props) => {
+const LinkHandicap = (_props) => {
   const defaultNewLink = {
-    country: 'USA',
-    state: '',
-    lastName: '',
-    firstName: '',
+    country: "USA",
+    state: "",
+    lastName: "",
+    firstName: "",
   };
 
   const { currentPlayer, setCurrentPlayer, setCurrentPlayerKey, setToken } =
@@ -23,7 +22,7 @@ const LinkHandicap = (props) => {
   const client = useApolloClient();
   const navigation = useNavigation();
 
-  const [service /*, setService */] = useState('ghin');
+  const [service /*, setService */] = useState("ghin");
   const [newLink, setNewLink] = useState(defaultNewLink);
 
   const [mergePlayers] = useMutation(MERGE_PLAYERS_MUTATION);
@@ -40,7 +39,7 @@ const LinkHandicap = (props) => {
         },
       },
     });
-    if (data && data.mergePlayers) {
+    if (data?.mergePlayers) {
       // now logout
       setCurrentPlayer(null);
       setCurrentPlayerKey(null);
@@ -71,7 +70,7 @@ const LinkHandicap = (props) => {
   let search = null;
 
   switch (service) {
-    case 'ghin':
+    case "ghin":
       search = (
         <Card wrapperStyle={styles.card_wrapper}>
           <Card.Title>GHIN® Player Search</Card.Title>
@@ -84,7 +83,7 @@ const LinkHandicap = (props) => {
       break;
   }
 
-  if (newLink && newLink.handicap) {
+  if (newLink?.handicap) {
     //console.log('newLink', newLink);
     return (
       <View style={styles.container}>
@@ -92,7 +91,9 @@ const LinkHandicap = (props) => {
           <Card.Title>Confirm Link</Card.Title>
           <View style={styles.row}>
             <Text style={styles.label}>source</Text>
-            <Text style={styles.value}>{newLink.handicap.source.toUpperCase()}</Text>
+            <Text style={styles.value}>
+              {newLink.handicap.source.toUpperCase()}
+            </Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>name</Text>
@@ -159,12 +160,12 @@ export default LinkHandicap;
 
 const styles = StyleSheet.create({
   button_row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     padding: 15,
   },
   card_wrapper: {
-    height: '96%',
+    height: "96%",
   },
   container: {
     //flex: 1,
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   label: {
-    color: '#999',
+    color: "#999",
     flex: 1,
     fontSize: 12,
   },
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
   },
   note: {
     fontSize: 11,
-    textAlign: 'center',
+    textAlign: "center",
   },
   note_view: {
     marginTop: 25,
@@ -193,8 +194,8 @@ const styles = StyleSheet.create({
     width: 150,
   },
   row: {
-    alignItems: 'baseline',
-    flexDirection: 'row',
+    alignItems: "baseline",
+    flexDirection: "row",
     marginVertical: 5,
   },
   value: {

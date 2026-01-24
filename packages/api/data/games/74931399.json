@@ -1,1 +1,273 @@
-{"legacyId":"74931399","exportedAt":"2026-01-24T15:49:41.306Z","game":{"_key":"74931399","_id":"games/74931399","_rev":"_k_OgNTy--f","name":"Team Match Play","start":"2020-05-27T17:50:15Z","scope":{"holes":"all18","teams_rotate":"never"},"holes":[],"options":[]},"rounds":[{"round":{"_id":"rounds/74930223","_key":"74930223","_rev":"_k_OgNeG-AZ","date":"2020-05-27T17:40:24Z","scores":[{"hole":"1","values":[{"k":"gross","v":"5","ts":"2020-05-27T18:15:22Z"}]},{"hole":"2","values":[{"k":"gross","v":"6","ts":"2020-05-27T18:32:55Z"}]},{"hole":"3","values":[{"k":"gross","v":"3","ts":"2020-05-27T18:39:59Z"}]},{"hole":"4","values":[{"k":"gross","v":"4","ts":"2020-05-27T18:54:01Z"}]},{"hole":"5","values":[{"k":"gross","v":"5","ts":"2020-05-27T19:03:50Z"}]},{"hole":"6","values":[{"k":"gross","v":"7","ts":"2020-05-27T19:19:08Z"}]},{"hole":"7","values":[{"k":"gross","v":"5","ts":"2020-05-27T19:33:26Z"}]},{"hole":"8","values":[{"k":"gross","v":"4","ts":"2020-05-27T19:47:42Z"}]},{"hole":"9","values":[{"k":"gross","v":"6","ts":"2020-05-27T20:02:22Z"}]},{"hole":"10","values":[{"k":"gross","v":"6","ts":"2020-05-27T20:19:47Z"}]},{"hole":"11","values":[{"k":"gross","v":"5","ts":"2020-05-27T20:32:04Z"}]},{"hole":"12","values":[{"k":"gross","v":"4","ts":"2020-05-27T20:43:48Z"}]},{"hole":"13","values":[{"k":"gross","v":"3","ts":"2020-05-27T20:55:10Z"}]},{"hole":"14","values":[{"k":"gross","v":"5","ts":"2020-05-27T21:13:30Z"}]},{"hole":"15","values":[{"k":"gross","v":"5","ts":"2020-05-27T21:24:18Z"}]},{"hole":"16","values":[{"k":"gross","v":"2","ts":"2020-05-27T21:32:42Z"}]},{"hole":"17","values":[{"k":"gross","v":"6","ts":"2020-05-27T21:49:53Z"}]},{"hole":"18","values":[{"k":"gross","v":"6","ts":"2020-05-27T22:02:06Z"}]}],"seq":1,"tee_id":334907},"edge":{"_key":"74932732","_id":"edges/74932732","_from":"rounds/74930223","_to":"games/74931399","_rev":"_k_OgNhi-Cm","type":"round2game","handicap_index":"4.2","course_handicap":"7"},"playerId":"34483698"}],"gamespecKey":"72068183","tees":{"334907":{"tee_id":334907,"name":"Ross Tees","TotalYardage":6372,"holes":[{"hole":1,"hole_id":2715562,"length":482,"par":5,"handicap":11},{"hole":2,"hole_id":2715561,"length":440,"par":4,"handicap":5},{"hole":3,"hole_id":2715560,"length":134,"par":3,"handicap":17},{"hole":4,"hole_id":2715559,"length":355,"par":4,"handicap":9},{"hole":5,"hole_id":2715558,"length":189,"par":3,"handicap":7},{"hole":6,"hole_id":2715557,"length":400,"par":4,"handicap":1},{"hole":7,"hole_id":2715556,"length":392,"par":4,"handicap":3},{"hole":8,"hole_id":2715555,"length":341,"par":4,"handicap":15},{"hole":9,"hole_id":2715563,"length":367,"par":4,"handicap":13},{"hole":10,"hole_id":2715554,"length":482,"par":5,"handicap":4},{"hole":11,"hole_id":2715564,"length":371,"par":4,"handicap":12},{"hole":12,"hole_id":2715565,"length":343,"par":4,"handicap":14},{"hole":13,"hole_id":2715566,"length":184,"par":3,"handicap":16},{"hole":14,"hole_id":2715567,"length":397,"par":4,"handicap":2},{"hole":15,"hole_id":2715568,"length":483,"par":5,"handicap":6},{"hole":16,"hole_id":2715569,"length":168,"par":3,"handicap":18},{"hole":17,"hole_id":2715570,"length":436,"par":4,"handicap":8},{"hole":18,"hole_id":2715571,"length":408,"par":4,"handicap":10}],"Ratings":[{"RatingType":"Total","CourseRating":70.8,"SlopeRating":129,"BogeyRating":94.7},{"RatingType":"Front","CourseRating":35.1,"SlopeRating":130,"BogeyRating":47.2},{"RatingType":"Back","CourseRating":35.7,"SlopeRating":127,"BogeyRating":47.5}],"course":{"course_id":397,"course_name":"Pine Needles","course_city":"Southern Pines","course_state":"NC"}}}}
+{
+  "legacyId": "74931399",
+  "exportedAt": "2026-01-24T15:49:41.306Z",
+  "game": {
+    "_key": "74931399",
+    "_id": "games/74931399",
+    "_rev": "_k_OgNTy--f",
+    "name": "Team Match Play",
+    "start": "2020-05-27T17:50:15Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/74930223",
+        "_key": "74930223",
+        "_rev": "_k_OgNeG-AZ",
+        "date": "2020-05-27T17:40:24Z",
+        "scores": [
+          {
+            "hole": "1",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-27T18:15:22Z" }]
+          },
+          {
+            "hole": "2",
+            "values": [{ "k": "gross", "v": "6", "ts": "2020-05-27T18:32:55Z" }]
+          },
+          {
+            "hole": "3",
+            "values": [{ "k": "gross", "v": "3", "ts": "2020-05-27T18:39:59Z" }]
+          },
+          {
+            "hole": "4",
+            "values": [{ "k": "gross", "v": "4", "ts": "2020-05-27T18:54:01Z" }]
+          },
+          {
+            "hole": "5",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-27T19:03:50Z" }]
+          },
+          {
+            "hole": "6",
+            "values": [{ "k": "gross", "v": "7", "ts": "2020-05-27T19:19:08Z" }]
+          },
+          {
+            "hole": "7",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-27T19:33:26Z" }]
+          },
+          {
+            "hole": "8",
+            "values": [{ "k": "gross", "v": "4", "ts": "2020-05-27T19:47:42Z" }]
+          },
+          {
+            "hole": "9",
+            "values": [{ "k": "gross", "v": "6", "ts": "2020-05-27T20:02:22Z" }]
+          },
+          {
+            "hole": "10",
+            "values": [{ "k": "gross", "v": "6", "ts": "2020-05-27T20:19:47Z" }]
+          },
+          {
+            "hole": "11",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-27T20:32:04Z" }]
+          },
+          {
+            "hole": "12",
+            "values": [{ "k": "gross", "v": "4", "ts": "2020-05-27T20:43:48Z" }]
+          },
+          {
+            "hole": "13",
+            "values": [{ "k": "gross", "v": "3", "ts": "2020-05-27T20:55:10Z" }]
+          },
+          {
+            "hole": "14",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-27T21:13:30Z" }]
+          },
+          {
+            "hole": "15",
+            "values": [{ "k": "gross", "v": "5", "ts": "2020-05-27T21:24:18Z" }]
+          },
+          {
+            "hole": "16",
+            "values": [{ "k": "gross", "v": "2", "ts": "2020-05-27T21:32:42Z" }]
+          },
+          {
+            "hole": "17",
+            "values": [{ "k": "gross", "v": "6", "ts": "2020-05-27T21:49:53Z" }]
+          },
+          {
+            "hole": "18",
+            "values": [{ "k": "gross", "v": "6", "ts": "2020-05-27T22:02:06Z" }]
+          }
+        ],
+        "seq": 1,
+        "tee_id": 334907
+      },
+      "edge": {
+        "_key": "74932732",
+        "_id": "edges/74932732",
+        "_from": "rounds/74930223",
+        "_to": "games/74931399",
+        "_rev": "_k_OgNhi-Cm",
+        "type": "round2game",
+        "handicap_index": "4.2",
+        "course_handicap": "7"
+      },
+      "playerId": "34483698"
+    }
+  ],
+  "gamespecKey": "72068183",
+  "tees": {
+    "334907": {
+      "tee_id": 334907,
+      "name": "Ross Tees",
+      "TotalYardage": 6372,
+      "holes": [
+        {
+          "hole": 1,
+          "hole_id": 2715562,
+          "length": 482,
+          "par": 5,
+          "handicap": 11
+        },
+        {
+          "hole": 2,
+          "hole_id": 2715561,
+          "length": 440,
+          "par": 4,
+          "handicap": 5
+        },
+        {
+          "hole": 3,
+          "hole_id": 2715560,
+          "length": 134,
+          "par": 3,
+          "handicap": 17
+        },
+        {
+          "hole": 4,
+          "hole_id": 2715559,
+          "length": 355,
+          "par": 4,
+          "handicap": 9
+        },
+        {
+          "hole": 5,
+          "hole_id": 2715558,
+          "length": 189,
+          "par": 3,
+          "handicap": 7
+        },
+        {
+          "hole": 6,
+          "hole_id": 2715557,
+          "length": 400,
+          "par": 4,
+          "handicap": 1
+        },
+        {
+          "hole": 7,
+          "hole_id": 2715556,
+          "length": 392,
+          "par": 4,
+          "handicap": 3
+        },
+        {
+          "hole": 8,
+          "hole_id": 2715555,
+          "length": 341,
+          "par": 4,
+          "handicap": 15
+        },
+        {
+          "hole": 9,
+          "hole_id": 2715563,
+          "length": 367,
+          "par": 4,
+          "handicap": 13
+        },
+        {
+          "hole": 10,
+          "hole_id": 2715554,
+          "length": 482,
+          "par": 5,
+          "handicap": 4
+        },
+        {
+          "hole": 11,
+          "hole_id": 2715564,
+          "length": 371,
+          "par": 4,
+          "handicap": 12
+        },
+        {
+          "hole": 12,
+          "hole_id": 2715565,
+          "length": 343,
+          "par": 4,
+          "handicap": 14
+        },
+        {
+          "hole": 13,
+          "hole_id": 2715566,
+          "length": 184,
+          "par": 3,
+          "handicap": 16
+        },
+        {
+          "hole": 14,
+          "hole_id": 2715567,
+          "length": 397,
+          "par": 4,
+          "handicap": 2
+        },
+        {
+          "hole": 15,
+          "hole_id": 2715568,
+          "length": 483,
+          "par": 5,
+          "handicap": 6
+        },
+        {
+          "hole": 16,
+          "hole_id": 2715569,
+          "length": 168,
+          "par": 3,
+          "handicap": 18
+        },
+        {
+          "hole": 17,
+          "hole_id": 2715570,
+          "length": 436,
+          "par": 4,
+          "handicap": 8
+        },
+        {
+          "hole": 18,
+          "hole_id": 2715571,
+          "length": 408,
+          "par": 4,
+          "handicap": 10
+        }
+      ],
+      "Ratings": [
+        {
+          "RatingType": "Total",
+          "CourseRating": 70.8,
+          "SlopeRating": 129,
+          "BogeyRating": 94.7
+        },
+        {
+          "RatingType": "Front",
+          "CourseRating": 35.1,
+          "SlopeRating": 130,
+          "BogeyRating": 47.2
+        },
+        {
+          "RatingType": "Back",
+          "CourseRating": 35.7,
+          "SlopeRating": 127,
+          "BogeyRating": 47.5
+        }
+      ],
+      "course": {
+        "course_id": 397,
+        "course_name": "Pine Needles",
+        "course_city": "Southern Pines",
+        "course_state": "NC"
+      }
+    }
+  }
+}

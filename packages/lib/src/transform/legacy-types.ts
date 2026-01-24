@@ -1,9 +1,10 @@
 /**
- * Legacy ArangoDB Types
+ * ArangoDB Type Definitions
  *
- * Type definitions for data structures that originated from ArangoDB.
- * These types are used for imported game/player data compatibility.
- * No runtime ArangoDB dependency is required for these types.
+ * Type definitions for data structures from the legacy ArangoDB v0.3 system.
+ * Used for importing and transforming historical game data.
+ *
+ * NOTE: No runtime ArangoDB dependency is required for these types.
  */
 
 export interface GameSpecV03 {
@@ -42,12 +43,12 @@ export interface GameSpecV03 {
     type: string;
     default?: unknown;
     choices?: Array<{ name: string; disp: string }>;
+    teamOnly?: boolean;
   }>;
-  /** Embedded meta options for unified format (new architecture) */
   meta?: Array<{
     name: string;
     disp: string;
-    valueType: "bool" | "num" | "menu" | "text" | "text_array";
+    valueType: string;
     value?: string | string[];
     choices?: Array<{ name: string; disp: string }>;
     seq?: number;
@@ -66,7 +67,6 @@ export interface TeeRating {
 
 /**
  * Raw rating format as stored in ArangoDB
- * Array of objects with RatingType discriminator
  */
 export interface ArangoTeeRating {
   RatingType: "Total" | "Front" | "Back";

@@ -1,6 +1,6 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAccount } from "jazz-tools/react";
 import { ArrowRight, BookOpen, User } from "lucide-react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { PlayerAccount } from "spicylib/schema";
 import { Button } from "../components/ui/button";
 

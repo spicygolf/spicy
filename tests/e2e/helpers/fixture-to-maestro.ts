@@ -5,7 +5,7 @@
  * This enables a single fixture file to drive both unit tests and E2E tests.
  */
 
-import type { Fixture, FixtureHoleData } from "../../lib/fixture-types";
+import type { Fixture } from "../../lib/fixture-types";
 
 interface MaestroStep {
   [key: string]: unknown;
@@ -130,7 +130,7 @@ export function generateLeaderboardVerificationSteps(
 
   // Verify team scores if teams exist
   if (fixture.expected.cumulative?.teams) {
-    for (const [teamId, teamData] of Object.entries(
+    for (const [_teamId, teamData] of Object.entries(
       fixture.expected.cumulative.teams,
     )) {
       if (teamData.pointsTotal !== undefined) {

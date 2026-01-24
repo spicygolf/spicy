@@ -1,7 +1,7 @@
-import { Round, linkRound } from '../models/round';
-import { withFilter } from 'graphql-subscriptions';
+import { withFilter } from "graphql-subscriptions";
+import { linkRound, Round } from "../models/round";
 
-const SCORE_POSTED = "SCORE_POSTED"
+const SCORE_POSTED = "SCORE_POSTED";
 
 export const RoundTypeDefs = `
 type Value {
@@ -103,7 +103,7 @@ export const RoundSubscriptionSigs = `
 export const RoundResolvers = {
   Query: {
     getRoundsForPlayerDay: async (_, { pkey, day }) => {
-      let r = new Round();
+      const r = new Round();
       return r.getRoundsForPlayerDay(pkey, day);
     },
   },
@@ -111,16 +111,16 @@ export const RoundResolvers = {
     linkRound,
     addRound: (_, { round }) => {
       // TODO: add to immutable message log?
-      let r = new Round();
+      const r = new Round();
       r.set(round);
       return r.save();
     },
     addTeeToRound: async (_, tee) => {
-      let r = new Round();
+      const r = new Round();
       return r.addTeeToRound(tee);
     },
     removeTeeFromRound: async (_, tee) => {
-      let r = new Round();
+      const r = new Round();
       return r.removeTeeFromRound(tee);
     },
     postScore: (_root, args, _context) => {
@@ -132,15 +132,15 @@ export const RoundResolvers = {
           scores: [score],
         },
       });
-      let r = new Round();
+      const r = new Round();
       return r.postScore(rkey, score);
     },
     deleteRound: (_, { rkey }) => {
-      let r = new Round();
+      const r = new Round();
       return r.remove(rkey);
     },
     postRoundToHandicapService: (_, { rkey, posted_by }) => {
-      let r = new Round();
+      const r = new Round();
       return r.postRoundToHandicapService(rkey, posted_by);
     },
   },
@@ -152,25 +152,27 @@ export const RoundResolvers = {
           return pubsub.asyncIterator([SCORE_POSTED]);
         },
         (payload, variables) => {
-          return (payload.scorePosted._key === variables.rkey);
+          return payload.scorePosted._key === variables.rkey;
         },
       ),
-    }
+    },
   },
   Round: {
     player: (round) => {
-      let r = new Round();
+      const r = new Round();
       return r.getPlayer(round._key);
     },
     tees: (round) => {
-      let r = new Round();
+      const r = new Round();
       return r.getTees(round);
     },
     course_handicap: async (round) => {
       // Get course_handicap from the tees array (it's in the first tee)
-      let r = new Round();
+      const r = new Round();
       const tees = await r.getTees(round);
-      return tees && tees[0] && tees[0].course_handicap ? tees[0].course_handicap.toString() : null;
+      return tees?.[0]?.course_handicap
+        ? tees[0].course_handicap.toString()
+        : null;
     },
     scores: async (round) => {
       // Calculate pops for each score based on course_handicap and hole allocation
@@ -178,14 +180,18 @@ export const RoundResolvers = {
         return [];
       }
 
-      let r = new Round();
+      const r = new Round();
       const tees = await r.getTees(round);
-      const courseHandicap = tees && tees[0] && tees[0].course_handicap ? parseInt(tees[0].course_handicap) : 0;
+      const courseHandicap = tees?.[0]?.course_handicap
+        ? parseInt(tees[0].course_handicap, 10)
+        : 0;
 
-      return round.scores.map(score => {
+      return round.scores.map((score) => {
         // Find the hole in the tee data
-        const holeNumber = parseInt(score.hole);
-        const hole = tees && tees[0] && tees[0].holes ? tees[0].holes.find(h => h.number === holeNumber) : null;
+        const holeNumber = parseInt(score.hole, 10);
+        const hole = tees?.[0]?.holes
+          ? tees[0].holes.find((h) => h.number === holeNumber)
+          : null;
         const allocation = hole ? hole.allocation : 18;
 
         // Calculate pops (strokes received on this hole)

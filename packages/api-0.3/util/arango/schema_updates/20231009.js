@@ -1,5 +1,5 @@
-import { db } from '../../../src/db/db';
-import { next } from '../../../src/util/database';
+import { db } from "../../../src/db/db";
+import { next } from "../../../src/util/database";
 
 /*
 
@@ -12,22 +12,21 @@ import { next } from '../../../src/util/database';
 
 const main = async () => {
   try {
-
     // TODO: copy all tee docs into round docs first, before deleting docs and edges below
 
     // TODO: copy all player2tee "favorites" somewhere before deleting docs and edges below
 
     // remove collections
-    const tees = db.collection('tees');
+    const tees = db.collection("tees");
     await tees.drop();
 
-    const associations = db.collection('associations');
+    const associations = db.collection("associations");
     await associations.drop();
 
-    const clubs = db.collection('clubs');
+    const clubs = db.collection("clubs");
     await clubs.drop();
 
-    const courses = db.collection('courses');
+    const courses = db.collection("courses");
     await courses.drop();
 
     // remove all edges to tees
@@ -36,14 +35,14 @@ const main = async () => {
         FILTER e.type LIKE "%2tee"
         REMOVE {_key: e._key} IN edges
     `;
-    await next({query});
+    await next({ query });
 
     query = `
       FOR e IN edges
         FILTER e.type LIKE "tee2%"
         REMOVE {_key: e._key} IN edges
     `;
-    await next({query});
+    await next({ query });
 
     // remove all edges to clubs
     query = `
@@ -51,17 +50,16 @@ const main = async () => {
         FILTER e.type LIKE "%2club"
         REMOVE {_key: e._key} IN edges
     `;
-    await next({query});
+    await next({ query });
 
     query = `
       FOR e IN edges
         FILTER e.type LIKE "club2%"
         REMOVE {_key: e._key} IN edges
     `;
-    await next({query});
-
+    await next({ query });
   } catch (e) {
-    console.log('error', e);
+    console.log("error", e);
   }
 };
 

@@ -1,16 +1,15 @@
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { green } from 'common/colors';
-import AddPlayerFavorites from 'features/gameSetup/addPlayerFavorites';
-import AddPlayerGHINSearch from 'features/gameSetup/addPlayerGHINSearch';
-import AddPlayerManual from 'features/gameSetup/addPlayerManual';
-import React from 'react';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { green } from "common/colors";
+import AddPlayerFavorites from "features/gameSetup/addPlayerFavorites";
+import AddPlayerGHINSearch from "features/gameSetup/addPlayerGHINSearch";
+import AddPlayerManual from "features/gameSetup/addPlayerManual";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 const TabIcon = ({ name, color }) => {
   return <Icon size={24} color={color} name={name} />;
 };
 
-const AddPlayerTabs = (props) => {
+const AddPlayerTabs = (_props) => {
   const Tab = createMaterialTopTabNavigator();
 
   return (
@@ -19,29 +18,30 @@ const AddPlayerTabs = (props) => {
       screenOptions={{}}
       tabBarOptions={{
         activeTintColor: green,
-        inactiveTintColor: '#555',
+        inactiveTintColor: "#555",
         style: {
-          backgroundColor: 'none',
+          backgroundColor: "none",
         },
         labelStyle: {
-          textTransform: 'none',
+          textTransform: "none",
           fontSize: 12,
         },
         indicatorStyle: {
           backgroundColor: green,
         },
         tabStyle: {
-          justifyContent: 'flex-start',
+          justifyContent: "flex-start",
         },
         showIcon: true,
-      }}>
+      }}
+    >
       <Tab.Screen
         name="AddPlayerFavorites"
         component={AddPlayerFavorites}
         options={{
-          title: 'Favorites',
+          title: "Favorites",
           tabBarIcon: ({ focused }) => {
-            return <TabIcon color={focused ? green : '#555'} name="star" />;
+            return <TabIcon color={focused ? green : "#555"} name="star" />;
           },
         }}
       />
@@ -49,9 +49,9 @@ const AddPlayerTabs = (props) => {
         name="AddPlayerGHINSearch"
         component={AddPlayerGHINSearch}
         options={{
-          title: 'GHIN®\nSearch',
+          title: "GHIN®\nSearch",
           tabBarIcon: ({ focused }) => {
-            return <TabIcon color={focused ? green : '#555'} name="search" />;
+            return <TabIcon color={focused ? green : "#555"} name="search" />;
           },
         }}
       />
@@ -59,9 +59,9 @@ const AddPlayerTabs = (props) => {
         name="AddPlayerManual"
         component={AddPlayerManual}
         options={{
-          title: 'Manual',
+          title: "Manual",
           tabBarIcon: ({ focused }) => {
-            return <TabIcon color={focused ? green : '#555'} name="add" />;
+            return <TabIcon color={focused ? green : "#555"} name="add" />;
           },
         }}
       />

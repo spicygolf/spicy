@@ -1,8 +1,6 @@
-import { useMutation } from '@apollo/client';
-import { POST_SCORE_MUTATION, ROUND_FRAGMENT } from 'features/rounds/graphql';
-import { find } from 'lodash';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useMutation } from "@apollo/client";
+import { POST_SCORE_MUTATION } from "features/rounds/graphql";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export const ToggleHole = ({ round_id, hole, type, gotit, updateCache }) => {
   const [postScore] = useMutation(POST_SCORE_MUTATION);
@@ -17,7 +15,7 @@ export const ToggleHole = ({ round_id, hole, type, gotit, updateCache }) => {
             {
               k: type,
               v: !gotit,
-              ts: '', // TODO: replace moment with date-fns: moment.utc().format(),
+              ts: "", // TODO: replace moment with date-fns: moment.utc().format(),
             },
           ],
         },
@@ -90,21 +88,21 @@ var styles = StyleSheet.create({
   },
   holeText: {
     fontSize: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   no: {
-    borderColor: '#aaa',
+    borderColor: "#aaa",
     borderWidth: 1,
   },
   noText: {
-    color: '#aaa',
+    color: "#aaa",
   },
   yes: {
-    borderColor: '#000',
+    borderColor: "#000",
     borderWidth: 2,
   },
   yesText: {
-    color: '#000',
-    fontWeight: 'bold',
+    color: "#000",
+    fontWeight: "bold",
   },
 });

@@ -1,13 +1,13 @@
-import { useNavigation } from '@react-navigation/native';
-import { blue } from 'common/colors';
-import GhinSearchPlayer from 'common/components/ghin/player/search';
-import BackToLogin from 'features/account/backToLogin';
-import { RegisterContext } from 'features/account/registerContext';
-import React, { useContext, useEffect } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import { Button, Card } from 'react-native-elements';
+import { useNavigation } from "@react-navigation/native";
+import { blue } from "common/colors";
+import GhinSearchPlayer from "common/components/ghin/player/search";
+import BackToLogin from "features/account/backToLogin";
+import { RegisterContext } from "features/account/registerContext";
+import { useContext, useEffect } from "react";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { Button, Card } from "react-native-elements";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const RegisterHandicap = () => {
   const { registration, setRegistration } = useContext(RegisterContext);
@@ -16,14 +16,17 @@ const RegisterHandicap = () => {
   useEffect(() => {
     //console.log('registration', registration);
     if (registration.handicap?.id) {
-      navigation.navigate('RegisterPlayer');
+      navigation.navigate("RegisterPlayer");
     }
   }, [navigation, registration]);
 
   return (
     <View style={styles.container}>
       <BackToLogin />
-      <Card containerStyle={styles.card_container} wrapperStyle={styles.card_wrapper}>
+      <Card
+        containerStyle={styles.card_container}
+        wrapperStyle={styles.card_wrapper}
+      >
         <Card.Title>Register - Handicap</Card.Title>
         <Card.Divider />
         <View style={styles.card_wrapper} testID="register_2_view">
@@ -39,11 +42,11 @@ const RegisterHandicap = () => {
             I don't keep a GHIN® handicap.
             <Text
               onPress={() => {
-                navigation.navigate('RegisterPlayer');
+                navigation.navigate("RegisterPlayer");
               }}
               style={styles.skip_text}
             >
-              {' '}
+              {" "}
               Skip this step
             </Text>
           </Text>
@@ -68,10 +71,10 @@ const RegisterHandicap = () => {
         <Button
           style={styles.next}
           title="Next"
-          type={registration.ghinCreds ? 'solid' : 'outline'}
+          type={registration.ghinCreds ? "solid" : "outline"}
           disabled={!registration.ghinCreds}
           onPress={() => {
-            navigation.navigate('RegisterPlayer');
+            navigation.navigate("RegisterPlayer");
           }}
           accessibilityLabel="Register Next 2"
           testID="register_next_2_button"
@@ -85,9 +88,9 @@ export default RegisterHandicap;
 
 const styles = StyleSheet.create({
   button_row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     padding: 15,
   },
   card_container: {
@@ -99,22 +102,22 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   container: {
-    backgroundColor: '#b30000',
+    backgroundColor: "#b30000",
     flex: 12,
   },
   divider: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
     marginVertical: 5,
   },
   dividerText: {
     color: blue,
-    textAlign: 'center',
+    textAlign: "center",
     width: width / 8,
   },
   field_input: {
-    color: '#000',
+    color: "#000",
     fontSize: 16,
   },
   hrLine: {
@@ -130,11 +133,11 @@ const styles = StyleSheet.create({
   },
   skip_text: {
     color: blue,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: 6,
   },
   skip_view: {
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
     paddingBottom: 15,
     paddingHorizontal: 10,
   },

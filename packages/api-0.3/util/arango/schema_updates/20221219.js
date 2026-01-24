@@ -28,7 +28,7 @@ const main = async () => {
       delete newGS._rev;
       
       try {
-        const res = await gsc.update(gs._key, newGS);
+        const _res = await gsc.update(gs._key, newGS);
       } catch (error) {
         console.log('error', error.message);
       }

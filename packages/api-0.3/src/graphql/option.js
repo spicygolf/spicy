@@ -1,4 +1,4 @@
-import { Option } from '../models/option';
+import { Option } from "../models/option";
 
 export const OptionTypeDefs = `
 type Choice {
@@ -50,16 +50,16 @@ export const OptionResolvers = {
     },
     findOption: (_, { name }) => {
       var o = new Option();
-      return o.find(name)
-        .then((res) => ( res && res[0] ) ? res[0] : null )
-        .catch((err) => null);
+      return o
+        .find(name)
+        .then((res) => (res?.[0] ? res[0] : null))
+        .catch((_err) => null);
     },
     searchOption: async (_, { q }) => {
       var o = new Option();
       const cursor = await o.search(q);
       return cursor.all();
-    }
+    },
   },
-  Mutation: {
-  },
+  Mutation: {},
 };

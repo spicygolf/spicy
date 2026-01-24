@@ -1,29 +1,29 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import auth from '@react-native-firebase/auth';
-import { baseUri, scheme } from 'common/config';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import auth from "@react-native-firebase/auth";
+import { baseUri, scheme } from "common/config";
 
 export const registerPlayer = async (registration, fbUser) => {
   // REST call to register player
   const uri = `${scheme}://${baseUri}/account/register`;
 
   const res = await fetch(uri, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify({
       ...registration,
       fbUser: fbUser,
     }),
     headers: {
-      'Cache-Control': 'no-cache',
-      'Content-Type': 'application/json',
+      "Cache-Control": "no-cache",
+      "Content-Type": "application/json",
     },
   });
   const payload = await res.json();
-  console.log('register payload', payload);
+  console.log("register payload", payload);
   return payload;
 };
 
-export const login = async fbUser => {
-  let token = '';
+export const login = async (fbUser) => {
+  let token = "";
   if (fbUser.getIdToken) {
     token = await fbUser.getIdToken();
   }
@@ -32,14 +32,14 @@ export const login = async fbUser => {
   const uri = `${scheme}://${baseUri}/account/login`;
   // console.log('uri', uri);
   const res = await fetch(uri, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify({
       email: fbUser.email,
       fbToken: token,
     }),
     headers: {
-      'Cache-Control': 'no-cache',
-      'Content-Type': 'application/json',
+      "Cache-Control": "no-cache",
+      "Content-Type": "application/json",
     },
   });
   // console.log('res', res);
@@ -59,32 +59,32 @@ export const login = async fbUser => {
     case 401:
       // we got thru Firebase, but not SpicyGolf login.  Did we have a failed
       // registration?
-      console.log('login forbidden');
+      console.log("login forbidden");
       ret = {
-        message: 'Got thru Firebase login, but not SpicyGolf.',
-        navTo: 'RegisterAgain',
+        message: "Got thru Firebase login, but not SpicyGolf.",
+        navTo: "RegisterAgain",
       };
       break;
     default:
       // TODO: handle errors
-      console.log('login error - payload', payload);
+      console.log("login error - payload", payload);
       ret = payload;
   }
   return ret;
 };
 
-export const logout = async client => {
+export const logout = async (client) => {
   // zap local storage
-  await AsyncStorage.removeItem('token');
+  await AsyncStorage.removeItem("token");
 
   // zap cache
   try {
     // clear apollo client cache/store
-    if (client && typeof client.clearStore === 'function') {
+    if (client && typeof client.clearStore === "function") {
       client.clearStore();
     }
   } catch (e) {
-    console.error('err client', e);
+    console.error("err client", e);
   }
 
   // call API logout endpoint
@@ -92,29 +92,29 @@ export const logout = async client => {
   return true;
 };
 
-export const clearCache = async client => {
+export const clearCache = async (client) => {
   await client.clearStore();
   // client.cache.data.clear();
-  for( const key of Object.keys(client.cache.data.data) ) {
-    const e = client.cache.evict({id: key});
-    console.log('evict', key, e);
+  for (const key of Object.keys(client.cache.data.data)) {
+    const e = client.cache.evict({ id: key });
+    console.log("evict", key, e);
   }
   const gc = client.cache.gc();
-  console.log('gc', gc);
-  console.log('cache', client.cache.data.data);
+  console.log("gc", gc);
+  console.log("cache", client.cache.data.data);
   return true;
 };
 
-export const getCurrentUser = fbUser => {
+export const getCurrentUser = (fbUser) => {
   return login(fbUser)
-    .then(login_res => {
+    .then((login_res) => {
       // console.log('login_res', login_res);
       return {
         ...login_res,
         fbUser: fbUser,
       };
     })
-    .catch(e => {
+    .catch((e) => {
       //console.log('getCurrentUser error', e);
       return e;
     });
@@ -124,19 +124,19 @@ export const validate = (type, text) => {
   let ret = false;
 
   switch (type) {
-    case 'email':
+    case "email":
       ret = validateEmail(text);
       break;
-    case 'password':
+    case "password":
       ret = validatePassword(text);
       break;
-    case 'name':
+    case "name":
       ret = validateName(text);
       break;
-    case 'int':
+    case "int":
       ret = validateInteger(text);
       break;
-    case 'float':
+    case "float":
       ret = validateFloat(text);
       break;
     default:
@@ -146,8 +146,8 @@ export const validate = (type, text) => {
   return ret;
 };
 
-export const validateEmail = email => {
-  if (email === '') {
+export const validateEmail = (email) => {
+  if (email === "") {
     return true;
   }
   if (!email) {
@@ -158,8 +158,8 @@ export const validateEmail = email => {
   return re.test(String(email).toLowerCase());
 };
 
-export const validatePassword = pass => {
-  if (pass === '') {
+export const validatePassword = (pass) => {
+  if (pass === "") {
     return true;
   }
   if (!pass) {
@@ -170,7 +170,7 @@ export const validatePassword = pass => {
   }
 };
 
-export const validateName = name => {
+export const validateName = (name) => {
   if (!name) {
     return false;
   }
@@ -178,41 +178,41 @@ export const validateName = name => {
   return re.test(String(name).toLowerCase());
 };
 
-export const validateInteger = number => {
+export const validateInteger = (number) => {
   if (!number) {
     return false;
   }
   return Number.isInteger(parseInt(number, 10));
 };
 
-export const validateFloat = number => {
+export const validateFloat = (number) => {
   if (!number) {
     return false;
   }
   return !Number.isNaN(parseFloat(number));
 };
 
-export const build_qs = args => {
+export const build_qs = (args) => {
   const a = [];
-  for (let key in args) {
-    if (args.hasOwnProperty(key)) {
+  for (const key in args) {
+    if (Object.hasOwn(args, key)) {
       a.push(`${key}=${args[key]}`);
     }
   }
-  return a.join('&');
+  return a.join("&");
 };
 
-export const parseFirebaseError = e => {
-  const split = e.message.split(']');
-  let slug = '';
-  if (split && split[0]) {
-    let slugSplit = split[0].split('[');
-    if (slugSplit && slugSplit[1]) {
+export const parseFirebaseError = (e) => {
+  const split = e.message.split("]");
+  let slug = "";
+  if (split?.[0]) {
+    const slugSplit = split[0].split("[");
+    if (slugSplit?.[1]) {
       slug = slugSplit[1].trim();
     }
   }
   let message = e.message;
-  if (split && split[1]) {
+  if (split?.[1]) {
     message = split[1].trim();
   }
 

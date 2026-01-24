@@ -1,6 +1,5 @@
-import { cloneDeep } from 'lodash-es';
-import { db } from '../../../src/db/db';
-
+import { cloneDeep } from "lodash-es";
+import { db } from "../../../src/db/db";
 
 /*
 
@@ -28,29 +27,27 @@ import { db } from '../../../src/db/db';
 
  */
 
-const main = async() => {
-
+const main = async () => {
   try {
-    const collection = db.collection('games');
+    const collection = db.collection("games");
     const games = await collection.all();
 
-    games.map(async g => {
-      if( g.scope && g.scope.holes ) return;
-      let newG = cloneDeep(g);
+    games.map(async (g) => {
+      if (g.scope?.holes) return;
+      const newG = cloneDeep(g);
 
       newG.scope = {
         holes: newG.holes,
-        teams_rotate: newG.teams.rotate || 'never',
+        teams_rotate: newG.teams.rotate || "never",
       };
       newG.holes = newG.teams.holes || [];
       delete newG.teams;
       //console.log('newG', newG);
       collection.replace(newG._id, newG);
     });
-  } catch(e) {
-    console.log('error', e);
+  } catch (e) {
+    console.log("error", e);
   }
-
 };
 
 main();

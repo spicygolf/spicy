@@ -1,45 +1,55 @@
-import { acronym, last } from 'common/utils/text';
-import { query as activeGamesForPlayerQuery } from 'features/games/hooks/useActiveGamesForPlayerQuery';
-import { cloneDeep, filter, find, findIndex, groupBy, isEqual, reduce } from 'lodash';
+import { acronym, last } from "common/utils/text";
+import { query as activeGamesForPlayerQuery } from "features/games/hooks/useActiveGamesForPlayerQuery";
+import {
+  cloneDeep,
+  filter,
+  find,
+  findIndex,
+  groupBy,
+  isEqual,
+  reduce,
+} from "lodash";
 
 /**
  *  return array of strings - hole numbers in the game
  *
  */
-export const getHoles = game => {
+export const getHoles = (game) => {
   if (!game.holes || !game.holes.length) {
     let ret = [];
     switch (game.scope.holes) {
-      case 'all18':
-        ret = Array.from(Array(18).keys()).map(x => (++x).toString());
+      case "all18":
+        ret = Array.from(Array(18).keys()).map((x) => (++x).toString());
         break;
-      case 'front9':
-        ret = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+      case "front9":
+        ret = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
         break;
-      case 'back9':
-        ret = ['10', '11', '12', '13', '14', '15', '16', '17', '18'];
+      case "back9":
+        ret = ["10", "11", "12", "13", "14", "15", "16", "17", "18"];
         break;
       default:
-        console.log(`getHoles - invalid value for holes: '${game.scope.holes}'`);
+        console.log(
+          `getHoles - invalid value for holes: '${game.scope.holes}'`,
+        );
         break;
     }
     return ret;
   }
-  return game.holes.map(h => h.hole.toString());
+  return game.holes.map((h) => h.hole.toString());
 };
 
 export const getRatings = (holes, tee) => {
   let ratings;
 
   switch (holes) {
-    case 'front9':
-      ratings = find(tee.ratings, { rating_type: 'Front' });
+    case "front9":
+      ratings = find(tee.ratings, { rating_type: "Front" });
       break;
-    case 'back9':
-      ratings = find(tee.ratings, { rating_type: 'Back' });
+    case "back9":
+      ratings = find(tee.ratings, { rating_type: "Back" });
       break;
-    case 'all18':
-      ratings = find(tee.ratings, { rating_type: 'Total' });
+    case "all18":
+      ratings = find(tee.ratings, { rating_type: "Total" });
       break;
     default:
       console.log(`course_handicap - invalid value for holes: '${holes}'`);
@@ -61,10 +71,10 @@ export const getRatings = (holes, tee) => {
   };
 };
 
-export const getNewGameForUpdate = game => {
+export const getNewGameForUpdate = (game) => {
   // do this to get the exact right doc structure of a game to send
   // to updateGame mutation (i.e. no __typename keys that come from cache)
-  let ret = {
+  const ret = {
     name: game.name,
     start: game.start,
     end: game.end,
@@ -73,16 +83,16 @@ export const getNewGameForUpdate = game => {
       teams_rotate: game.scope.teams_rotate,
     },
     holes: game.holes
-      ? game.holes.map(h => {
+      ? game.holes.map((h) => {
           return {
             hole: h.hole,
             teams: h.teams
-              ? h.teams.map(t => {
+              ? h.teams.map((t) => {
                   return {
                     team: t.team,
                     players: t.players,
                     junk: t.junk
-                      ? t.junk.map(j => {
+                      ? t.junk.map((j) => {
                           return {
                             name: j.name,
                             player: j.player,
@@ -94,7 +104,7 @@ export const getNewGameForUpdate = game => {
                 })
               : [],
             multipliers: h.multipliers
-              ? h.multipliers.map(m => {
+              ? h.multipliers.map((m) => {
                   return {
                     name: m.name,
                     team: m.team,
@@ -106,11 +116,11 @@ export const getNewGameForUpdate = game => {
         })
       : [],
     options: game.options
-      ? game.options.map(o => {
+      ? game.options.map((o) => {
           return {
             name: o.name,
             values: o.values
-              ? o.values.map(v => {
+              ? o.values.map((v) => {
                   return {
                     value: v.value,
                     holes: v.holes,
@@ -126,20 +136,20 @@ export const getNewGameForUpdate = game => {
 
 // https://stackoverflow.com/a/175787/598628
 function isNumeric(str) {
-  if (typeof str !== 'string') {
+  if (typeof str !== "string") {
     return false;
   } // we only process strings!
   return (
-    !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-    !isNaN(parseFloat(str))
+    !Number.isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+    !Number.isNaN(parseFloat(str))
   ); // ...and ensure strings of whitespace fail
 }
 
 // From https://gist.github.com/Billy-/d94b65998501736bfe6521eadc1ab538
 export const omitDeep = (value, key) => {
   if (Array.isArray(value)) {
-    return value.map(i => omitDeep(i, key));
-  } else if (typeof value === 'object' && value !== null) {
+    return value.map((i) => omitDeep(i, key));
+  } else if (typeof value === "object" && value !== null) {
     return Object.keys(value).reduce((newObject, k) => {
       if (k === key) {
         return newObject;
@@ -150,39 +160,39 @@ export const omitDeep = (value, key) => {
   return value;
 };
 
-export const omitTypename = value => omitDeep(value, '__typename');
+export const omitTypename = (value) => omitDeep(value, "__typename");
 
-export const getAllGamespecOptions = game => {
-  let options = [];
-  game.gamespecs.map(gs => {
+export const getAllGamespecOptions = (game) => {
+  const options = [];
+  game.gamespecs.map((gs) => {
     // Include options from options array
     if (gs.options) {
-      gs.options.map(o => {
+      gs.options.map((o) => {
         options.push({
           ...o,
           sub_type: o.type, // Move original type (e.g., 'num', 'bool', 'menu') to sub_type
-          type: 'game', // Set type to 'game' so getAllOptions({type: 'game'}) finds them
+          type: "game", // Set type to 'game' so getAllOptions({type: 'game'}) finds them
           gamespec_key: gs._key,
         });
       });
     }
     // Include junk items (store original type in sub_type, use 'junk' as type for filtering)
     if (gs.junk) {
-      gs.junk.map(o => {
+      gs.junk.map((o) => {
         options.push({
           ...o,
           sub_type: o.type, // Move original type (e.g., 'dot') to sub_type
-          type: 'junk', // Set type to 'junk' so getAllOptions({type: 'junk'}) finds them
+          type: "junk", // Set type to 'junk' so getAllOptions({type: 'junk'}) finds them
           gamespec_key: gs._key,
         });
       });
     }
     // Include multipliers (they're also options with type='multiplier')
     if (gs.multipliers) {
-      gs.multipliers.map(o => {
+      gs.multipliers.map((o) => {
         options.push({
           ...o,
-          type: 'multiplier', // Ensure type is set
+          type: "multiplier", // Ensure type is set
           gamespec_key: gs._key,
         });
       });
@@ -192,20 +202,29 @@ export const getAllGamespecOptions = game => {
 };
 
 export const getAllOptions = ({ game, type }) => {
-  let options = [];
+  const options = [];
   const gsOptions = getAllGamespecOptions(game);
-  if (gsOptions && gsOptions.length) {
-    gsOptions.map(gso => {
+  if (gsOptions?.length) {
+    gsOptions.map((gso) => {
       if (gso.type === type) {
         let values = gso.values;
-        if (typeof values === 'undefined' || values === null || values.length === 0) {
+        if (
+          typeof values === "undefined" ||
+          values === null ||
+          values.length === 0
+        ) {
           // For junk/multipliers, use gso.value; for regular options, use gso.default
           const optionValue = gso.value !== undefined ? gso.value : gso.default;
-          values = [{ value: optionValue, holes: (game.holes || []).map(h => h.hole) }];
+          values = [
+            {
+              value: optionValue,
+              holes: (game.holes || []).map((h) => h.hole),
+            },
+          ];
         }
-        values = values.map(v => ({
+        values = values.map((v) => ({
           ...v,
-          holes: v.holes !== null ? v.holes : game.holes.map(h => h.hole),
+          holes: v.holes !== null ? v.holes : game.holes.map((h) => h.hole),
         }));
         // console.log('values', values);
         let o = {
@@ -232,15 +251,15 @@ export const getAllOptions = ({ game, type }) => {
 export const getOptionValue = ({ hole, option }) => {
   let ret = null;
 
-  if (option && option.values) {
-    option.values.map(v => {
+  if (option?.values) {
+    option.values.map((v) => {
       if (v.holes.includes(hole)) {
         ret = v.value;
       }
     });
     // convert bool
-    if (option.type === 'bool') {
-      ret = ret === true || ret === 'true';
+    if (option.type === "bool") {
+      ret = ret === true || ret === "true";
     }
 
     // convert number
@@ -261,7 +280,7 @@ export const isOptionOnThisHole = ({ option, hole }) => {
     return false;
   }
   let ret = false;
-  option.values.map(v => {
+  option.values.map((v) => {
     if (v.holes?.indexOf(hole) >= 0) {
       ret = true;
     }
@@ -278,7 +297,7 @@ export const isSameHolesList = (holes1, holes2) => {
 
 export const getGamespecKVs = (game, key) => {
   //console.log('getGamespecKVs game', game);
-  const ret = game.gamespecs.map(gs => {
+  const ret = game.gamespecs.map((gs) => {
     return gs[key];
   });
   return ret;
@@ -292,7 +311,7 @@ export const getJunk = (junkName, pkey, game, holeNum) => {
   if (!gHole || !gHole.teams) {
     return null;
   }
-  const gTeam = find(gHole.teams, t => t && t.players && t.players.includes(pkey));
+  const gTeam = find(gHole.teams, (t) => t?.players?.includes(pkey));
   if (!gTeam || !gTeam.junk) {
     return null;
   }
@@ -307,22 +326,25 @@ export const getJunk = (junkName, pkey, game, holeNum) => {
 };
 
 export const setTeamJunk = (t, junk, newValue, pkey) => {
-  if (findIndex(t.players, p => p === pkey) >= 0) {
+  if (findIndex(t.players, (p) => p === pkey) >= 0) {
     // this is the player's team for junk being set
-    let newJunk = [];
+    const newJunk = [];
     //console.log('team junk', t.junk);
     if (newValue) {
       newJunk.push({
-        __typename: 'GameJunk',
+        __typename: "GameJunk",
         name: junk.name,
         player: pkey,
         value: newValue,
       });
     }
-    if (t.junk && t.junk.length) {
-      t.junk.map(j => {
+    if (t.junk?.length) {
+      t.junk.map((j) => {
         if (j.name === junk.name) {
-          if ((!junk.limit || junk.limit !== 'one_per_group') && j.player !== pkey) {
+          if (
+            (!junk.limit || junk.limit !== "one_per_group") &&
+            j.player !== pkey
+          ) {
             newJunk.push(j);
           }
         } else {
@@ -336,11 +358,11 @@ export const setTeamJunk = (t, junk, newValue, pkey) => {
     };
   } else {
     // this is not the player's team for junk being set
-    let newJunk = [];
-    if (t.junk && t.junk.length) {
-      t.junk.map(j => {
+    const newJunk = [];
+    if (t.junk?.length) {
+      t.junk.map((j) => {
         if (j.name === junk.name) {
-          if (junk.limit !== 'one_per_group') {
+          if (junk.limit !== "one_per_group") {
             newJunk.push(j);
           }
         } else {
@@ -366,14 +388,14 @@ export const rmgame = async (gkey, currentPlayerKey, mutation) => {
         variables: {
           pkey: currentPlayerKey,
         },
-        fetchPolicy: 'network-only',
+        fetchPolicy: "network-only",
       },
     ],
     awaitFetchQueries: true,
   });
   if (error) {
-    console.log('error removing game', error);
-    console.log('rmgame', gkey);
+    console.log("error removing game", error);
+    console.log("rmgame", gkey);
     return null;
   }
   return data;
@@ -393,27 +415,28 @@ export const getHolesToUpdate = (term, game, currentHole) => {
     ret = [];
 
   switch (term) {
-    case 'never':
+    case "never":
       ret = holes;
       break;
-    case 'rest_of_nine':
+    case "rest_of_nine":
       begHole = parseInt(currentHole, 10);
       endHole = Math.floor((begHole - 1) / 9) * 9 + 9;
       ret = holes.splice(begHole - 1, endHole - begHole + 1);
       //console.log('rest_of_nine', begHole, endHole, ret);
       break;
-    case 'hole':
-    case 'every1':
+    case "hole":
+    case "every1":
       ret = [currentHole];
       break;
-    case 'every3':
-    case 'every6':
+    case "every3":
+    case "every6": {
       const cnt = parseInt(term.charAt(term.length - 1), 10);
       begHole = parseInt(currentHole, 10);
       endHole = begHole + cnt - 1;
       ret = holes.splice(begHole - 1, endHole - begHole + 1);
       //console.log('everyX', cnt, begHole, endHole, ret);
       break;
+    }
     default:
       console.log(`Unhandled term case: '${term}'`);
       break;
@@ -425,14 +448,14 @@ export const getHolesToUpdate = (term, game, currentHole) => {
  * calculates a new 'holes' value for the provided game object and returns this value.
  */
 export const addPlayerToOwnTeam = ({ pkey, game }) => {
-  let newGame = getNewGameForUpdate(game);
+  const newGame = getNewGameForUpdate(game);
 
   const holesToUpdate = getHolesToUpdate(newGame.scope.teams_rotate, game);
   if (!newGame.holes) {
     newGame.holes = [];
   }
   //console.log('holesToUpdate', holesToUpdate);
-  holesToUpdate.map(h => {
+  holesToUpdate.map((h) => {
     const holeIndex = findIndex(newGame.holes, { hole: h });
     if (holeIndex < 0) {
       // if hole data doesn't exist, create it with the single player team
@@ -440,7 +463,7 @@ export const addPlayerToOwnTeam = ({ pkey, game }) => {
         hole: h,
         teams: [
           {
-            team: '1',
+            team: "1",
             players: [pkey],
             junk: [],
           },
@@ -470,7 +493,7 @@ export const addPlayerToOwnTeam = ({ pkey, game }) => {
       } else {
         newGame.holes[holeIndex].teams = [
           {
-            team: '1',
+            team: "1",
             players: [pkey],
             junk: [],
           },
@@ -483,7 +506,7 @@ export const addPlayerToOwnTeam = ({ pkey, game }) => {
 
 export const playerListIndividual = ({ game }) => {
   return filter(
-    game.players.map(p => {
+    game.players.map((p) => {
       if (!p) {
         return null;
       }
@@ -491,10 +514,10 @@ export const playerListIndividual = ({ game }) => {
         key: p._key,
         pkey: p._key,
         name: p.name,
-        team: '0',
+        team: "0",
       };
     }),
-    p => p != null,
+    (p) => p != null,
   );
 };
 
@@ -503,39 +526,39 @@ export const playerListWithTeams = ({ game, scores }) => {
   if (!scores || !scores.holes || !scores.holes[0]) {
     return ret;
   }
-  scores.holes[0].teams.map(t => {
-    t.players.map(p => {
+  scores.holes[0].teams.map((t) => {
+    t.players.map((p) => {
       const gP = find(game.players, { _key: p.pkey });
       ret.push({
         key: p.pkey,
         pkey: p.pkey,
-        name: gP && gP.name ? gP.name : '',
+        name: gP?.name ? gP.name : "",
         team: t.team,
       });
     });
   });
-  return filter(ret, p => p != null);
+  return filter(ret, (p) => p != null);
 };
 
-export const getCoursesPlayersTxt = game => {
-  let courses = [],
+export const getCoursesPlayersTxt = (game) => {
+  const courses = [],
     acronyms = [],
     players = [];
-  (game?.rounds ?? []).map(r => {
+  (game?.rounds ?? []).map((r) => {
     if (r?.player[0]) {
       players.push(last(r.player[0].name));
     }
     const tee_courses = reduce(
       r?.tees,
       (cum, t) => {
-        if (t && cum.indexOf(t?.course?.course_name || '') < 0) {
+        if (t && cum.indexOf(t?.course?.course_name || "") < 0) {
           cum.push(t.course.course_name);
         }
         return cum;
       },
       [],
     );
-    tee_courses.map(c => {
+    tee_courses.map((c) => {
       if (courses.indexOf(c) < 0) {
         courses.push(c);
       }
@@ -546,12 +569,13 @@ export const getCoursesPlayersTxt = game => {
     });
   });
 
-  const courseFull = courses.length === 1 ? courses[0] : acronyms.join(', ');
+  const courseFull = courses.length === 1 ? courses[0] : acronyms.join(", ");
 
-  const coursesTxt = acronyms.length > 2 ? 'various courses' : acronyms.join(', ');
+  const coursesTxt =
+    acronyms.length > 2 ? "various courses" : acronyms.join(", ");
 
   const playersTxt =
-    players.length > 5 ? `${players.length} players` : players.join(', ');
+    players.length > 5 ? `${players.length} players` : players.join(", ");
 
   return {
     courseFull,
@@ -561,26 +585,28 @@ export const getCoursesPlayersTxt = game => {
 };
 
 export const teamsRotateOptions = [
-  { slug: 'never', caption: 'Never' },
-  { slug: 'every1', caption: 'Every 1' },
-  { slug: 'every3', caption: 'Every 3' },
-  { slug: 'every6', caption: 'Every 6' },
+  { slug: "never", caption: "Never" },
+  { slug: "every1", caption: "Every 1" },
+  { slug: "every3", caption: "Every 3" },
+  { slug: "every6", caption: "Every 6" },
 ];
 
-export const teamsRotate = game =>
-  game && game.scope && game.scope.teams_rotate && game.scope.teams_rotate !== 'never';
+export const teamsRotate = (game) =>
+  game?.scope?.teams_rotate && game.scope.teams_rotate !== "never";
 
 export const getLocalHoleInfo = ({ game, currentHole }) => {
   // we should have already checked gamespec.location_type == 'local' but...
   let par, length, handicap;
   let sameCourse = true;
-  game.rounds.map(r => {
+  game.rounds.map((r) => {
     // check to see if tee is set yet
     if (!(r?.tees?.length === 1)) {
       return { hole: currentHole };
     }
 
-    const teeHole = find(r.tees[0].holes, { number: parseInt(currentHole, 10) });
+    const teeHole = find(r.tees[0].holes, {
+      number: parseInt(currentHole, 10),
+    });
     if (!teeHole) {
       sameCourse = false;
       return;
@@ -608,7 +634,7 @@ export const getLocalHoleInfo = ({ game, currentHole }) => {
 };
 
 export const isTeeSameForAllPlayers = ({ game }) => {
-  const distinct_tees = groupBy(game.rounds, r => {
+  const distinct_tees = groupBy(game.rounds, (r) => {
     if (r?.tees?.length === 1) {
       return r.tees[0]?.tee_id;
     }
@@ -623,10 +649,10 @@ export const isTeeSameForAllPlayers = ({ game }) => {
  *  return -1 if data is whack, or we're done with full rounds of wolf rotation
  */
 export const getWolfPlayerIndex = ({ game, currentHole }) => {
-  if (!(game && game.players && game.players.length)) {
+  if (!game?.players?.length) {
     return -1;
   }
-  if (!(game && game.scope && game.scope.wolf_order && game.scope.wolf_order.length)) {
+  if (!game?.scope?.wolf_order?.length) {
     return -1;
   }
   if (game.players.length !== game.scope.wolf_order.length) {
@@ -648,15 +674,15 @@ export const getWolfPlayerIndex = ({ game, currentHole }) => {
   return remainder;
 };
 
-export const isBinary = option =>
-  option.sub_type === 'bool' ||
-  (option.sub_type === 'menu' && option.choices.length === 2);
+export const isBinary = (option) =>
+  option.sub_type === "bool" ||
+  (option.sub_type === "menu" && option.choices.length === 2);
 
 // return
-export const getPreMultiplierTotal = hole => {
+export const getPreMultiplierTotal = (hole) => {
   let tot = 1;
-  hole.multipliers.map(m => {
-    if (m.name.startsWith('pre_')) {
+  hole.multipliers.map((m) => {
+    if (m.name.startsWith("pre_")) {
       tot *= parseInt(m.default, 10);
     }
   });

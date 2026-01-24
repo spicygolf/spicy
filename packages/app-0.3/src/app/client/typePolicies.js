@@ -1,10 +1,10 @@
-import { cloneDeep, findIndex } from 'lodash';
+import { cloneDeep, findIndex } from "lodash";
 
 const typePolicies = {
   Query: {
     fields: {
       getFavoritePlayersForPlayer: {
-        merge: (existing = [], incoming) => {
+        merge: (_existing = [], incoming) => {
           return incoming;
           //return {...existing, ...incoming};
         },
@@ -25,7 +25,7 @@ const typePolicies = {
           if (existing.length === 0) {
             return incoming;
           }
-          let newScores = [];
+          const newScores = [];
           existing.map((h) => {
             newScores.push(cloneDeep(h));
           });

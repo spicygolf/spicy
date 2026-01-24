@@ -1,35 +1,32 @@
-import { getTee } from './getTee';
-import { searchPlayer } from './searchPlayer';
+import { getTee } from "./getTee";
+import { searchPlayer } from "./searchPlayer";
 
 const main = async () => {
-
   // search for a player
   const searchPlayerResp = await searchPlayer({
     q: {
-      last_name: 'anderson%',
-      first_name: '',
-      country: 'US',
-      state: 'GA',
+      last_name: "anderson%",
+      first_name: "",
+      country: "US",
+      state: "GA",
       // status: 'Active',
-      sorting_criteria: 'last_name_first_name',
-      order: 'ASC'
+      sorting_criteria: "last_name_first_name",
+      order: "ASC",
     },
     p: {
       page: 1,
       per_page: 50,
-    }
+    },
   });
-  console.log('searchPlayer', searchPlayerResp);
+  console.log("searchPlayer", searchPlayerResp);
 
   // get a tee set
   const getTeeResp = await getTee({
     q: {
-      tee_id: '456824',
-    }
+      tee_id: "456824",
+    },
   });
-  console.log('getTee', getTeeResp);
-
-
+  console.log("getTee", getTeeResp);
 };
 
 main();

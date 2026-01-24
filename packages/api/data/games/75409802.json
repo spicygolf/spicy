@@ -1,1 +1,16 @@
-{"legacyId":"75409802","exportedAt":"2026-01-24T15:49:41.285Z","game":{"_key":"75409802","_id":"games/75409802","_rev":"_k_OgNTy--z","name":"Team Match Play","start":"2020-05-28T19:20:47Z","scope":{"holes":"all18","teams_rotate":"never"},"holes":[],"options":[]},"rounds":[],"gamespecKey":"72068183"}
+{
+  "legacyId": "75409802",
+  "exportedAt": "2026-01-24T15:49:41.285Z",
+  "game": {
+    "_key": "75409802",
+    "_id": "games/75409802",
+    "_rev": "_k_OgNTy--z",
+    "name": "Team Match Play",
+    "start": "2020-05-28T19:20:47Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [],
+    "options": []
+  },
+  "rounds": [],
+  "gamespecKey": "72068183"
+}

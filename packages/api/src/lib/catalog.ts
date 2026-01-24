@@ -135,8 +135,6 @@ import {
   TeeHole,
 } from "spicylib/schema";
 import { transformGameSpec } from "spicylib/transform";
-import { formatHandicapDisplay } from "spicylib/utils";
-
 import {
   type ArangoTeeRating,
   convertArangoRatings,
@@ -144,7 +142,8 @@ import {
   type GameWithRoundsV03,
   type RoundToGameEdgeV03,
   type RoundV03,
-} from "../utils/arango";
+} from "spicylib/transform/legacy-types";
+import { formatHandicapDisplay } from "spicylib/utils";
 import { loadPlayers } from "../utils/players-file";
 
 export interface ImportResult {

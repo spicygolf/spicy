@@ -1,4 +1,4 @@
-import { getCountriesAndStates, login } from '../models/account';
+import { getCountriesAndStates, login } from "../models/account";
 
 export const AccountTypeDefs = `
   type LoginResponse {
@@ -33,6 +33,5 @@ export const AccountResolvers = {
     login,
     getCountriesAndStates,
   },
-  Mutation: {
-  }
+  Mutation: {},
 };

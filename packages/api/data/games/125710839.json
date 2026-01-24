@@ -1,1 +1,185 @@
-{"legacyId":"125710839","exportedAt":"2026-01-24T15:49:41.077Z","game":{"_key":"125710839","_id":"games/125710839","_rev":"_k_OgNT2-_L","name":"Five Points","start":"2020-12-23T18:00:00Z","scope":{"holes":"all18","teams_rotate":"never"},"holes":[],"options":[]},"rounds":[{"round":{"_id":"rounds/125722813","_key":"125722813","_rev":"_k_OgNeK-_q","date":"2020-12-23T18:00:00Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"125722819","_id":"edges/125722819","_from":"rounds/125722813","_to":"games/125710839","_rev":"_k_OgNiO-CM","type":"round2game","handicap_index":"18.3"},"playerId":"72338383"},{"round":{"_id":"rounds/125721302","_key":"125721302","_rev":"_k_OgNeK-_o","date":"2020-12-23T18:00:00Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"125721308","_id":"edges/125721308","_from":"rounds/125721302","_to":"games/125710839","_rev":"_k_OgNiO-CG","type":"round2game","handicap_index":"15.6"},"playerId":"74684286"},{"round":{"_id":"rounds/125720068","_key":"125720068","_rev":"_k_OgNeK-_m","date":"2020-12-23T18:00:00Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"125720074","_id":"edges/125720074","_from":"rounds/125720068","_to":"games/125710839","_rev":"_k_OgNiO-CA","type":"round2game","handicap_index":"7.8"},"playerId":"74680421"},{"round":{"_id":"rounds/125718697","_key":"125718697","_rev":"_k_OgNeK-_k","date":"2020-12-23T18:00:00Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"125718703","_id":"edges/125718703","_from":"rounds/125718697","_to":"games/125710839","_rev":"_k_OgNiO-B6","type":"round2game","handicap_index":"6.7"},"playerId":"74681902"},{"round":{"_id":"rounds/125718125","_key":"125718125","_rev":"_k_OgNeK-_i","date":"2020-12-23T18:00:00Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"125718131","_id":"edges/125718131","_from":"rounds/125718125","_to":"games/125710839","_rev":"_k_OgNiO-B0","type":"round2game","handicap_index":"6.3"},"playerId":"74676649"},{"round":{"_id":"rounds/125717604","_key":"125717604","_rev":"_k_OgNeK-_g","date":"2020-12-23T18:00:00Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"125717610","_id":"edges/125717610","_from":"rounds/125717604","_to":"games/125710839","_rev":"_k_OgNiO-Bu","type":"round2game","handicap_index":"12.2"},"playerId":"74680576"},{"round":{"_id":"rounds/125714188","_key":"125714188","_rev":"_k_OgNeK-_e","date":"2020-12-23T18:00:00Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"125714194","_id":"edges/125714194","_from":"rounds/125714188","_to":"games/125710839","_rev":"_k_OgNiO-Bo","type":"round2game","handicap_index":"9.0"},"playerId":"74677754"},{"round":{"_id":"rounds/125711023","_key":"125711023","_rev":"_k_OgNeK-_c","date":"2020-12-23T18:00:00Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"125711107","_id":"edges/125711107","_from":"rounds/125711023","_to":"games/125710839","_rev":"_k_OgNiO-Bi","type":"round2game","handicap_index":"7.7"},"playerId":"74673300"}],"gamespecKey":"65384954"}
+{
+  "legacyId": "125710839",
+  "exportedAt": "2026-01-24T15:49:41.077Z",
+  "game": {
+    "_key": "125710839",
+    "_id": "games/125710839",
+    "_rev": "_k_OgNT2-_L",
+    "name": "Five Points",
+    "start": "2020-12-23T18:00:00Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/125722813",
+        "_key": "125722813",
+        "_rev": "_k_OgNeK-_q",
+        "date": "2020-12-23T18:00:00Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "125722819",
+        "_id": "edges/125722819",
+        "_from": "rounds/125722813",
+        "_to": "games/125710839",
+        "_rev": "_k_OgNiO-CM",
+        "type": "round2game",
+        "handicap_index": "18.3"
+      },
+      "playerId": "72338383"
+    },
+    {
+      "round": {
+        "_id": "rounds/125721302",
+        "_key": "125721302",
+        "_rev": "_k_OgNeK-_o",
+        "date": "2020-12-23T18:00:00Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "125721308",
+        "_id": "edges/125721308",
+        "_from": "rounds/125721302",
+        "_to": "games/125710839",
+        "_rev": "_k_OgNiO-CG",
+        "type": "round2game",
+        "handicap_index": "15.6"
+      },
+      "playerId": "74684286"
+    },
+    {
+      "round": {
+        "_id": "rounds/125720068",
+        "_key": "125720068",
+        "_rev": "_k_OgNeK-_m",
+        "date": "2020-12-23T18:00:00Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "125720074",
+        "_id": "edges/125720074",
+        "_from": "rounds/125720068",
+        "_to": "games/125710839",
+        "_rev": "_k_OgNiO-CA",
+        "type": "round2game",
+        "handicap_index": "7.8"
+      },
+      "playerId": "74680421"
+    },
+    {
+      "round": {
+        "_id": "rounds/125718697",
+        "_key": "125718697",
+        "_rev": "_k_OgNeK-_k",
+        "date": "2020-12-23T18:00:00Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "125718703",
+        "_id": "edges/125718703",
+        "_from": "rounds/125718697",
+        "_to": "games/125710839",
+        "_rev": "_k_OgNiO-B6",
+        "type": "round2game",
+        "handicap_index": "6.7"
+      },
+      "playerId": "74681902"
+    },
+    {
+      "round": {
+        "_id": "rounds/125718125",
+        "_key": "125718125",
+        "_rev": "_k_OgNeK-_i",
+        "date": "2020-12-23T18:00:00Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "125718131",
+        "_id": "edges/125718131",
+        "_from": "rounds/125718125",
+        "_to": "games/125710839",
+        "_rev": "_k_OgNiO-B0",
+        "type": "round2game",
+        "handicap_index": "6.3"
+      },
+      "playerId": "74676649"
+    },
+    {
+      "round": {
+        "_id": "rounds/125717604",
+        "_key": "125717604",
+        "_rev": "_k_OgNeK-_g",
+        "date": "2020-12-23T18:00:00Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "125717610",
+        "_id": "edges/125717610",
+        "_from": "rounds/125717604",
+        "_to": "games/125710839",
+        "_rev": "_k_OgNiO-Bu",
+        "type": "round2game",
+        "handicap_index": "12.2"
+      },
+      "playerId": "74680576"
+    },
+    {
+      "round": {
+        "_id": "rounds/125714188",
+        "_key": "125714188",
+        "_rev": "_k_OgNeK-_e",
+        "date": "2020-12-23T18:00:00Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "125714194",
+        "_id": "edges/125714194",
+        "_from": "rounds/125714188",
+        "_to": "games/125710839",
+        "_rev": "_k_OgNiO-Bo",
+        "type": "round2game",
+        "handicap_index": "9.0"
+      },
+      "playerId": "74677754"
+    },
+    {
+      "round": {
+        "_id": "rounds/125711023",
+        "_key": "125711023",
+        "_rev": "_k_OgNeK-_c",
+        "date": "2020-12-23T18:00:00Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "125711107",
+        "_id": "edges/125711107",
+        "_from": "rounds/125711023",
+        "_to": "games/125710839",
+        "_rev": "_k_OgNiO-Bi",
+        "type": "round2game",
+        "handicap_index": "7.7"
+      },
+      "playerId": "74673300"
+    }
+  ],
+  "gamespecKey": "65384954"
+}

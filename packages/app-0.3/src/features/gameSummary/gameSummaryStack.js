@@ -1,9 +1,8 @@
-import { createStackNavigator } from '@react-navigation/stack';
-import GameSummary from 'features/gameSummary/gameSummary';
-import PostScores from 'features/gameSummary/postScores';
-import React from 'react';
+import { createStackNavigator } from "@react-navigation/stack";
+import GameSummary from "features/gameSummary/gameSummary";
+import PostScores from "features/gameSummary/postScores";
 
-const GameSummaryStack = (props) => {
+const GameSummaryStack = (_props) => {
   const Stack = createStackNavigator();
 
   return (

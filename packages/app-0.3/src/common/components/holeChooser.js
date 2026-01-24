@@ -1,13 +1,13 @@
-import { GameContext } from 'features/game/gameContext';
-import React, { useContext } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Button } from 'react-native-elements';
+import { GameContext } from "features/game/gameContext";
+import { useContext } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { Button } from "react-native-elements";
 
 const HoleChooser = ({ holes, onChange, title, active }) => {
   const { game } = useContext(GameContext);
 
   const holePressed = (h, on) => {
-    let newHoles = [...holes];
+    const newHoles = [...holes];
     //console.log('hole pressed', h, on, newHoles);
     if (on) {
       newHoles.push(h);
@@ -36,7 +36,7 @@ const HoleChooser = ({ holes, onChange, title, active }) => {
           key={h.hole}
           buttonStyle={styles.holeButton}
           title={h.hole}
-          type={on ? 'solid' : 'outline'}
+          type={on ? "solid" : "outline"}
           onPress={active ? () => holePressed(h.hole, !on) : () => {}}
         />
       );
@@ -61,10 +61,10 @@ export default HoleChooser;
 const styles = StyleSheet.create({
   holeButton: {
     margin: 1,
-    minWidth: '10%',
+    minWidth: "10%",
   },
   rowOfHoles: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 });

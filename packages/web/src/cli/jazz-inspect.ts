@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * Jazz CoValue Inspector CLI
  *
@@ -21,8 +22,8 @@
  *   bun run jazz options co_zg5ZpS9hkN4P2pFNumajafW41FN custom  # Inspect specific option
  */
 
-import { config } from "dotenv";
 import { resolve } from "node:path";
+import { config } from "dotenv";
 import type { ID } from "jazz-tools";
 import { startWorker } from "jazz-tools/worker";
 import {

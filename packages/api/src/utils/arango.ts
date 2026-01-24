@@ -1,3 +1,17 @@
+/**
+ * ArangoDB Connection Utilities
+ *
+ * FOR EXPORT SCRIPTS ONLY - NOT USED AT RUNTIME
+ *
+ * This file is used only by the one-time migration scripts in scripts/:
+ * - export-games.ts
+ * - export-players.ts
+ * - export-favorites.ts
+ *
+ * The API server does NOT use ArangoDB at runtime - all data is loaded
+ * from JSON files exported by these scripts.
+ */
+
 import { Database } from "arangojs";
 import longDescriptionsData from "../../data/gamespec-long-descriptions.json";
 

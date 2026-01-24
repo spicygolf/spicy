@@ -1,10 +1,9 @@
-import { Doc } from './doc';
-import { db } from '../db/db';
+import { db } from "../db/db";
+import { Doc } from "./doc";
 
-const collection = db.collection('edges');
+const collection = db.collection("edges");
 
 class Edge extends Doc {
-
   constructor(type) {
     super(collection);
     this._doc.type = type;
@@ -17,18 +16,17 @@ class Edge extends Doc {
   }
 
   other(other) {
-    if( other && Array.isArray(other) ) {
-      other.map(kv => {
+    if (other && Array.isArray(other)) {
+      other.map((kv) => {
         // if v == '' delete it from edge
-        if( kv.value === '' ) {
-          delete this._doc[kv.key]
+        if (kv.value === "") {
+          delete this._doc[kv.key];
         } else {
           this._doc[kv.key] = kv.value;
         }
       });
     }
   }
-
 }
 
 export { Edge };

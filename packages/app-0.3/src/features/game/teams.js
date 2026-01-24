@@ -1,18 +1,18 @@
-import TeamJunk from 'common/components/teamJunk';
-import TeamMultipliers from 'common/components/teamMultipliers';
-import TeamTotals from 'common/components/teamTotals';
-import ChangeTeams from 'features/game/changeTeams';
-import { GameContext } from 'features/game/gameContext';
-import Player from 'features/game/player';
-import { find, orderBy } from 'lodash';
-import React, { useContext, useState } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Card, Icon, Overlay } from 'react-native-elements';
+import TeamJunk from "common/components/teamJunk";
+import TeamMultipliers from "common/components/teamMultipliers";
+import TeamTotals from "common/components/teamTotals";
+import ChangeTeams from "features/game/changeTeams";
+import { GameContext } from "features/game/gameContext";
+import Player from "features/game/player";
+import { find, orderBy } from "lodash";
+import { useContext, useState } from "react";
+import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Card, Icon, Overlay } from "react-native-elements";
 
 const Teams = ({ teams, scoring, currentHole }) => {
   const { game, activeGameSpec } = useContext(GameContext);
   const { players } = game;
-  const ordered_teams = orderBy(teams, ['team'], ['asc']);
+  const ordered_teams = orderBy(teams, ["team"], ["asc"]);
 
   const [visible, setVisible] = useState(false);
 
@@ -21,10 +21,7 @@ const Teams = ({ teams, scoring, currentHole }) => {
   };
 
   const changeTeamsContent =
-    game &&
-    game.scope &&
-    game.scope.teams_rotate &&
-    game.scope.teams_rotate !== 'never' ? (
+    game?.scope?.teams_rotate && game.scope.teams_rotate !== "never" ? (
       <TouchableOpacity onPress={toggleOverlay}>
         <Icon type="material" name="people" color="#999" />
       </TouchableOpacity>
@@ -32,7 +29,11 @@ const Teams = ({ teams, scoring, currentHole }) => {
 
   const _renderPlayer = ({ team, player, player_index }) => {
     return (
-      <Player player={player} currentHole={currentHole} test={{ team, player_index }} />
+      <Player
+        player={player}
+        currentHole={currentHole}
+        test={{ team, player_index }}
+      />
     );
   };
 
@@ -65,8 +66,16 @@ const Teams = ({ teams, scoring, currentHole }) => {
             }
             keyExtractor={(i) => i._key}
           />
-          <TeamJunk team={item.team} scoring={scoring} currentHole={currentHole} />
-          <TeamMultipliers team={item.team} scoring={scoring} currentHole={currentHole} />
+          <TeamJunk
+            team={item.team}
+            scoring={scoring}
+            currentHole={currentHole}
+          />
+          <TeamMultipliers
+            team={item.team}
+            scoring={scoring}
+            currentHole={currentHole}
+          />
           <View style={styles.settings_totals}>
             {changeTeamsContent}
             <TeamTotals
@@ -114,7 +123,7 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   settings_totals: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginHorizontal: 5,
     paddingHorizontal: 5,
   },

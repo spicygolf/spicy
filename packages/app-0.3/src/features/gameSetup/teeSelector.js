@@ -1,8 +1,7 @@
-import { useNavigation } from '@react-navigation/native';
-import { acronym } from 'common/utils/text';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Button } from 'react-native-elements';
+import { useNavigation } from "@react-navigation/native";
+import { acronym } from "common/utils/text";
+import { StyleSheet, Text, View } from "react-native";
+import { Button } from "react-native-elements";
 
 const TeeSelector = (props) => {
   const navigation = useNavigation();
@@ -11,10 +10,14 @@ const TeeSelector = (props) => {
 
   // TODO: here we now have `tees` instead of `tee`
   //       handle none, one (most common), and multiple `tees`
-  const tee = (tees && tees[0]) || {};
+  const tee = tees?.[0] || {};
 
-  const course = tee?.course?.course_name ? ' - ' + acronym(tee.course.course_name) : '';
-  let buttonName = tee && tee.tee_name ? `${tee.tee_name}${course}` : 'Select Course/Tee';
+  const course = tee?.course?.course_name
+    ? ` - ${acronym(tee.course.course_name)}`
+    : "";
+  let buttonName = tee?.tee_name
+    ? `${tee.tee_name}${course}`
+    : "Select Course/Tee";
   let pressFn;
 
   if (readonly) {
@@ -29,14 +32,14 @@ const TeeSelector = (props) => {
   // If for some reason we don't go to LinkRound
   if (rkey) {
     pressFn = () =>
-      navigation.navigate('AddCourse', {
+      navigation.navigate("AddCourse", {
         rkey,
         tees,
         player,
       });
   } else {
-    pressFn = () => navigation.navigate('LinkRoundList', { game, player });
-    buttonName = 'Select Round';
+    pressFn = () => navigation.navigate("LinkRoundList", { game, player });
+    buttonName = "Select Round";
   }
 
   return (
@@ -57,7 +60,7 @@ export default TeeSelector;
 
 const styles = StyleSheet.create({
   button: {
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
     paddingBottom: 3,
     paddingLeft: 0,
     paddingRight: 0,

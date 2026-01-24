@@ -1,1 +1,162 @@
-{"legacyId":"66110255","exportedAt":"2026-01-24T15:49:41.422Z","game":{"_key":"66110255","_id":"games/66110255","_rev":"_k_OgNTu--6","name":"Five Points","start":"2020-03-31T18:27:17Z","holes":[{"hole":"1","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"2","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"3","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"4","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"5","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"6","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"7","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"8","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"9","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"10","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"11","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"12","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"13","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"14","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"15","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"16","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"17","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]},{"hole":"18","teams":[{"team":"1","players":["66100257"]},{"team":"2","players":[]}],"multipliers":[]}],"options":[],"end":null,"scope":{"holes":"all18","teams_rotate":"never"}},"rounds":[],"gamespecKey":"65384954"}
+{
+  "legacyId": "66110255",
+  "exportedAt": "2026-01-24T15:49:41.422Z",
+  "game": {
+    "_key": "66110255",
+    "_id": "games/66110255",
+    "_rev": "_k_OgNTu--6",
+    "name": "Five Points",
+    "start": "2020-03-31T18:27:17Z",
+    "holes": [
+      {
+        "hole": "1",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "2",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "3",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "4",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "5",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "6",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "7",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "8",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "9",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "10",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "11",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "12",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "13",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "14",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "15",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "16",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "17",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      },
+      {
+        "hole": "18",
+        "teams": [
+          { "team": "1", "players": ["66100257"] },
+          { "team": "2", "players": [] }
+        ],
+        "multipliers": []
+      }
+    ],
+    "options": [],
+    "end": null,
+    "scope": { "holes": "all18", "teams_rotate": "never" }
+  },
+  "rounds": [],
+  "gamespecKey": "65384954"
+}

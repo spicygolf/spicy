@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const SEARCH_PLAYER_QUERY = gql`
   query SearchPlayer($q: Search!, $p: Pagination!) {

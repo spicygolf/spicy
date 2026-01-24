@@ -1,15 +1,14 @@
-import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
 import { useCoState } from "jazz-tools/react";
 import { Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  PlayerAccount,
   type GameCatalog,
   type GameSpec,
+  PlayerAccount,
   type PlayerAccountProfile,
 } from "spicylib/schema";
 import { getMetaOption, getSpecField } from "spicylib/scoring";
-import { Input } from "../../components/ui/input";
 import {
   Card,
   CardContent,
@@ -17,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
 
 /**
  * SpecBrowser - Player-facing game spec browser with alias search

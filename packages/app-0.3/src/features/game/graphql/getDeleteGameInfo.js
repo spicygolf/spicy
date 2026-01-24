@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const GET_DELETE_GAME_INFO_QUERY = gql`
   query GetDeleteGameInfo($gkey: String!) {

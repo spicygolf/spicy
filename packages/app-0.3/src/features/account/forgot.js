@@ -1,13 +1,19 @@
-import auth from '@react-native-firebase/auth';
-import { useNavigation } from '@react-navigation/native';
-import { validateEmail } from 'common/utils/account';
-import React, { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, Card, Input } from 'react-native-elements';
+import auth from "@react-native-firebase/auth";
+import { useNavigation } from "@react-navigation/native";
+import { validateEmail } from "common/utils/account";
+import { useEffect, useRef, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { Button, Card, Input } from "react-native-elements";
 
-const Forgot = (props) => {
+const Forgot = (_props) => {
   const [sent, setSent] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [emailValid, setEmailValid] = useState(true);
 
   const navigation = useNavigation();
@@ -19,21 +25,21 @@ const Forgot = (props) => {
 
       setSent(true);
       // clear fields after successful login
-      setEmail('');
+      setEmail("");
       setEmailValid(false);
       emailRef.current.focus();
     } catch (e) {
-      console.log('forgot error', e.message, e.code);
+      console.log("forgot error", e.message, e.code);
     }
   };
 
   const validate = (type, text) => {
-    const eTest = type === 'email' ? text : email;
+    const eTest = type === "email" ? text : email;
     setEmailValid(validateEmail(eTest));
   };
 
   useEffect(() => {
-    if (emailRef && emailRef.current) {
+    if (emailRef?.current) {
       emailRef.current.focus();
     }
   }, [emailRef]);
@@ -43,7 +49,7 @@ const Forgot = (props) => {
       style={styles.login_button}
       onPress={forgot}
       title="Send Password Reset Email"
-      type={emailValid ? 'solid' : 'outline'}
+      type={emailValid ? "solid" : "outline"}
       disabled={!emailValid}
       accessibilityLabel="Send Password Reset Email"
       testID="forgot_button"
@@ -58,8 +64,11 @@ const Forgot = (props) => {
         <View style={styles.back_to_login_view}>
           <Text style={styles.back_to_text}>
             Back to
-            <Text onPress={() => navigation.navigate('Login')} style={styles.login_text}>
-              {' '}
+            <Text
+              onPress={() => navigation.navigate("Login")}
+              style={styles.login_text}
+            >
+              {" "}
               Login
             </Text>
           </Text>
@@ -74,10 +83,12 @@ const Forgot = (props) => {
                 labelStyle={styles.label}
                 containerStyle={styles.field_input}
                 inputStyle={styles.field_input_txt}
-                errorMessage={emailValid ? '' : 'Please enter a valid email address'}
+                errorMessage={
+                  emailValid ? "" : "Please enter a valid email address"
+                }
                 onChangeText={(text) => {
                   setEmail(text);
-                  validate('email', text);
+                  validate("email", text);
                 }}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -97,14 +108,14 @@ export default Forgot;
 
 var styles = StyleSheet.create({
   back_to_login_view: {
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
     margin: 15,
   },
   back_to_text: {
-    color: '#ccc',
+    color: "#ccc",
   },
   container: {
-    backgroundColor: '#b30000',
+    backgroundColor: "#b30000",
     flex: 1,
   },
   field: {
@@ -112,17 +123,17 @@ var styles = StyleSheet.create({
     marginBottom: 15,
   },
   field_input: {
-    color: '#000',
+    color: "#000",
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
   label: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
-    fontWeight: 'normal',
+    fontWeight: "normal",
   },
   loginView: {
-    height: '100%',
+    height: "100%",
     margin: 10,
   },
   login_button: {
@@ -130,8 +141,8 @@ var styles = StyleSheet.create({
     marginTop: 15,
   },
   login_text: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     marginLeft: 6,
   },
 });

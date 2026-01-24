@@ -1,1 +1,16 @@
-{"legacyId":"125194025","exportedAt":"2026-01-24T15:49:41.080Z","game":{"_key":"125194025","_id":"games/125194025","_rev":"_k_OgNT2-_F","name":"Five Points","start":"2020-12-20T16:40:41Z","scope":{"holes":"all18","teams_rotate":"never"},"holes":[],"options":[]},"rounds":[],"gamespecKey":"65384954"}
+{
+  "legacyId": "125194025",
+  "exportedAt": "2026-01-24T15:49:41.080Z",
+  "game": {
+    "_key": "125194025",
+    "_id": "games/125194025",
+    "_rev": "_k_OgNT2-_F",
+    "name": "Five Points",
+    "start": "2020-12-20T16:40:41Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [],
+    "options": []
+  },
+  "rounds": [],
+  "gamespecKey": "65384954"
+}

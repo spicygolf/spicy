@@ -21,16 +21,6 @@
     "discount_threshold",
     "discount_percent"
   ],
-  "junk": [
-    "birdie",
-    "eagle",
-    "two_birdies_add",
-    "eagle_add",
-    "two_eagles_add"
-  ],
-  "multipliers": [
-    "pre_double",
-    "double",
-    "double_back"
-  ]
+  "junk": ["birdie", "eagle", "two_birdies_add", "eagle_add", "two_eagles_add"],
+  "multipliers": ["pre_double", "double", "double_back"]
 }

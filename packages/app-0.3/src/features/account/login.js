@@ -1,11 +1,11 @@
-import auth from '@react-native-firebase/auth';
-import { useNavigation } from '@react-navigation/native';
+import auth from "@react-native-firebase/auth";
+import { useNavigation } from "@react-navigation/native";
 import {
   parseFirebaseError,
   validateEmail,
   validatePassword,
-} from 'common/utils/account';
-import React, { useRef, useState } from 'react';
+} from "common/utils/account";
+import { useRef, useState } from "react";
 import {
   Image,
   KeyboardAvoidingView,
@@ -13,12 +13,12 @@ import {
   StyleSheet,
   Text,
   View,
-} from 'react-native';
-import { Button, Card, Input } from 'react-native-elements';
+} from "react-native";
+import { Button, Card, Input } from "react-native-elements";
 
-const Login = (props) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const Login = (_props) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [emailValid, setEmailValid] = useState(true);
   const [passValid, setPassValid] = useState(true);
   const [loginError, setLoginError] = useState();
@@ -26,21 +26,21 @@ const Login = (props) => {
   const navigation = useNavigation();
   const emailRef = useRef(null);
 
-  const logo = require('../../../assets/img/logo200.png');
+  const logo = require("../../../assets/img/logo200.png");
 
   const login = async () => {
     try {
       await auth().signInWithEmailAndPassword(email, password);
     } catch (e) {
-      console.log('login error', e.message, e.code);
+      console.log("login error", e.message, e.code);
       const { message } = parseFirebaseError(e);
       setLoginError(message);
     }
   };
 
   const validate = (type, text) => {
-    const eTest = type === 'email' ? text : email;
-    const pTest = type === 'password' ? text : password;
+    const eTest = type === "email" ? text : email;
+    const pTest = type === "password" ? text : password;
 
     setEmailValid(validateEmail(eTest));
     setPassValid(validatePassword(pTest));
@@ -63,10 +63,12 @@ const Login = (props) => {
                 labelStyle={styles.label}
                 containerStyle={styles.field_input}
                 inputStyle={styles.field_input_txt}
-                errorMessage={emailValid ? '' : 'Please enter a valid email address'}
+                errorMessage={
+                  emailValid ? "" : "Please enter a valid email address"
+                }
                 onChangeText={(text) => {
                   setEmail(text);
-                  validate('email', text);
+                  validate("email", text);
                 }}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -81,10 +83,10 @@ const Login = (props) => {
                 labelStyle={styles.label}
                 containerStyle={styles.field_input}
                 inputStyle={styles.field_input_txt}
-                errorMessage={passValid ? '' : 'Please enter a valid password'}
+                errorMessage={passValid ? "" : "Please enter a valid password"}
                 onChangeText={(text) => {
                   setPassword(text);
-                  validate('password', text);
+                  validate("password", text);
                 }}
                 autoCompleteType="password"
                 secureTextEntry={true}
@@ -96,7 +98,7 @@ const Login = (props) => {
             <View style={styles.forgot_pwd_view}>
               <Button
                 onPress={() => {
-                  navigation.navigate('Forgot');
+                  navigation.navigate("Forgot");
                 }}
                 title="FORGOT PASSWORD?"
                 type="clear"
@@ -113,7 +115,7 @@ const Login = (props) => {
               onPress={login}
               title="LOGIN"
               titleStyle={styles.login_button_title}
-              type={emailValid && passValid ? 'solid' : 'outline'}
+              type={emailValid && passValid ? "solid" : "outline"}
               disabled={!(emailValid && passValid)}
               accessibilityLabel="Login"
               testID="login_button"
@@ -124,7 +126,7 @@ const Login = (props) => {
           <Text style={styles.register_label}>Don't have an account?</Text>
           <Button
             onPress={() => {
-              navigation.navigate('Register');
+              navigation.navigate("Register");
             }}
             title="REGISTER"
             type="clear"
@@ -140,68 +142,68 @@ export default Login;
 
 var styles = StyleSheet.create({
   container: {
-    backgroundColor: '#b30000',
+    backgroundColor: "#b30000",
     flex: 1,
   },
   error_text: {
-    color: 'red',
+    color: "red",
   },
   field: {
     flex: 1,
     marginBottom: 5,
   },
   field_input: {
-    color: '#000',
+    color: "#000",
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
   forgot_button_title: {
     //color: '#000',
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 13,
   },
   forgot_pwd_view: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
   },
   label: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
-    fontWeight: 'normal',
+    fontWeight: "normal",
   },
   loginView: {
-    height: '100%',
+    height: "100%",
     margin: 10,
   },
   login_button: {
     marginVertical: 15,
   },
   login_button_title: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   logo: {
     height: 100,
   },
   logo_view: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     paddingVertical: 7,
   },
   register_button_title: {
-    color: '#ddd',
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
+    color: "#ddd",
+    fontWeight: "bold",
+    textDecorationLine: "underline",
   },
   register_label: {
-    color: '#ccc',
+    color: "#ccc",
   },
   register_view: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 25,
   },
   welcome: {
-    color: '#ddd',
+    color: "#ddd",
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

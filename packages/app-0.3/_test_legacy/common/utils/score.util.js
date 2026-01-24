@@ -1,12 +1,17 @@
-import { findIndex } from 'lodash';
+import { findIndex } from "lodash";
 
-export const makeGame = ({ gamespecs = [], options = [], holes = [], data = [] }) => {
-  let players = [];
-  let rounds = [];
-  let holeteams = {};
+export const makeGame = ({
+  gamespecs = [],
+  options = [],
+  holes = [],
+  data = [],
+}) => {
+  const players = [];
+  const rounds = [];
+  const holeteams = {};
   data.map((d) => {
     const newPlayer = { _key: `p_${d.player}` };
-    const dhole = d && d.hole ? `${d.hole}` : '1';
+    const dhole = d?.hole ? `${d.hole}` : "1";
     const playerIndex = findIndex(players, newPlayer);
     if (playerIndex < 0) {
       players.push(newPlayer);
@@ -17,17 +22,24 @@ export const makeGame = ({ gamespecs = [], options = [], holes = [], data = [] }
         _key: `r_${d.player}`,
         player: [newPlayer],
         scores: [
-          { hole: dhole, values: [{ k: 'gross', v: `${d.score}` }], pops: `${d.pops}` },
+          {
+            hole: dhole,
+            values: [{ k: "gross", v: `${d.score}` }],
+            pops: `${d.pops}`,
+          },
         ],
         tee: {
-          holes: holes.map((hole) => ({ hole: `${hole.hole}`, par: `${hole.par}` })),
+          holes: holes.map((hole) => ({
+            hole: `${hole.hole}`,
+            par: `${hole.par}`,
+          })),
         },
       };
       rounds.push(newRound);
     } else {
       rounds[roundIndex].scores.push({
         hole: dhole,
-        values: [{ k: 'gross', v: `${d.score}` }],
+        values: [{ k: "gross", v: `${d.score}` }],
         pops: `${d.pops}`,
       });
     }
@@ -44,7 +56,7 @@ export const makeGame = ({ gamespecs = [], options = [], holes = [], data = [] }
       holeteams[dhole][teamIndex].junk.push({
         ...j,
         player: `p_${d.player}`,
-        value: 'true',
+        value: "true",
       });
     });
   });

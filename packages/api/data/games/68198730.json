@@ -1,1 +1,38 @@
-{"legacyId":"68198730","exportedAt":"2026-01-24T15:49:41.401Z","game":{"_key":"68198730","_id":"games/68198730","_rev":"_k_OgNTu-_O","name":"Five Points","start":"2020-04-22T01:51:53Z","holes":[],"options":[],"scope":{"holes":"all18","teams_rotate":"never"}},"rounds":[{"round":{"_id":"rounds/68198761","_key":"68198761","_rev":"_k_OgNeC-Ak","date":"2020-04-22T01:51:53Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"68198766","_id":"edges/68198766","_from":"rounds/68198761","_to":"games/68198730","_rev":"_k_OgNhK-A1","type":"round2game","handicap_index":"2.2"},"playerId":"35564495"}],"gamespecKey":"65384954"}
+{
+  "legacyId": "68198730",
+  "exportedAt": "2026-01-24T15:49:41.401Z",
+  "game": {
+    "_key": "68198730",
+    "_id": "games/68198730",
+    "_rev": "_k_OgNTu-_O",
+    "name": "Five Points",
+    "start": "2020-04-22T01:51:53Z",
+    "holes": [],
+    "options": [],
+    "scope": { "holes": "all18", "teams_rotate": "never" }
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/68198761",
+        "_key": "68198761",
+        "_rev": "_k_OgNeC-Ak",
+        "date": "2020-04-22T01:51:53Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "68198766",
+        "_id": "edges/68198766",
+        "_from": "rounds/68198761",
+        "_to": "games/68198730",
+        "_rev": "_k_OgNhK-A1",
+        "type": "round2game",
+        "handicap_index": "2.2"
+      },
+      "playerId": "35564495"
+    }
+  ],
+  "gamespecKey": "65384954"
+}

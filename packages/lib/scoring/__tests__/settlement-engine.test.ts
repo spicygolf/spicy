@@ -223,10 +223,10 @@ describe("settlement-engine", () => {
       expect(Math.abs(totalNet)).toBeLessThan(1); // Allow for rounding
 
       // Alice should be positive (won front, overall, 2 skins)
-      expect(netPositions["p1"]).toBeGreaterThan(0);
+      expect(netPositions.p1).toBeGreaterThan(0);
 
       // Charlie should be negative (won nothing, last in most categories)
-      expect(netPositions["p3"]).toBeLessThan(0);
+      expect(netPositions.p3).toBeLessThan(0);
     });
   });
 
@@ -358,12 +358,12 @@ describe("settlement-engine", () => {
       const result = calculateSettlement(simplePools, dominantPlayers, 400);
 
       // Winner should have very positive net
-      expect(result.netPositions["p1"]).toBeGreaterThan(100);
+      expect(result.netPositions.p1).toBeGreaterThan(100);
 
       // Losers should have negative nets
-      expect(result.netPositions["p2"]).toBeLessThan(0);
-      expect(result.netPositions["p3"]).toBeLessThan(0);
-      expect(result.netPositions["p4"]).toBeLessThan(0);
+      expect(result.netPositions.p2).toBeLessThan(0);
+      expect(result.netPositions.p3).toBeLessThan(0);
+      expect(result.netPositions.p4).toBeLessThan(0);
     });
   });
 });

@@ -1,6 +1,6 @@
-import { green } from 'common/colors';
-import { registerPlayer, validateName } from 'common/utils/account';
-import React, { useState } from 'react';
+import { green } from "common/colors";
+import { registerPlayer, validateName } from "common/utils/account";
+import { useState } from "react";
 import {
   KeyboardAvoidingView,
   SafeAreaView,
@@ -9,31 +9,31 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import { Button, Card } from 'react-native-elements';
+} from "react-native";
+import { Button, Card } from "react-native-elements";
 
 const RegisterAgain = (props) => {
   const { fbUser, retryCreds } = props;
 
   const [registration, setRegistration] = useState({
     email: fbUser.email,
-    name: '',
-    short: '',
+    name: "",
+    short: "",
   });
 
   const [nameValid, setNameValid] = useState(false);
   const [shortValid, setShortValid] = useState(false);
 
   const validate = (type, text) => {
-    const nTest = type === 'name' ? text : registration.name;
-    const sTest = type === 'short' ? text : registration.short;
+    const nTest = type === "name" ? text : registration.name;
+    const sTest = type === "short" ? text : registration.short;
 
     setNameValid(validateName(nTest));
     setShortValid(validateName(sTest));
   };
 
-  const nValid = { borderColor: nameValid ? green : '#ddd' };
-  const sValid = { borderColor: shortValid ? green : '#ddd' };
+  const nValid = { borderColor: nameValid ? green : "#ddd" };
+  const sValid = { borderColor: shortValid ? green : "#ddd" };
 
   const register = async () => {
     await registerPlayer(registration, {
@@ -55,8 +55,9 @@ const RegisterAgain = (props) => {
             <Card.Title>Registration Error</Card.Title>
             <Card.Divider />
             <Text style={styles.sorry}>
-              We encountered an error during registration. How embarrassing for us. Can
-              you please fill out the following fields again so we can try to fix this?
+              We encountered an error during registration. How embarrassing for
+              us. Can you please fill out the following fields again so we can
+              try to fix this?
             </Text>
             <View style={styles.field_container}>
               <Text style={styles.field_label}>Email</Text>
@@ -71,7 +72,7 @@ const RegisterAgain = (props) => {
                     ...registration,
                     name: text,
                   });
-                  validate('name', text);
+                  validate("name", text);
                 }}
                 autoCapitalize="words"
                 value={registration.name}
@@ -86,7 +87,7 @@ const RegisterAgain = (props) => {
                     ...registration,
                     short: text,
                   });
-                  validate('short', text);
+                  validate("short", text);
                 }}
                 autoCapitalize="words"
                 value={registration.short}
@@ -97,7 +98,7 @@ const RegisterAgain = (props) => {
             <Button
               buttonStyle={styles.next}
               title="Fix Registration"
-              type={nameValid && shortValid ? 'solid' : 'outline'}
+              type={nameValid && shortValid ? "solid" : "outline"}
               disabled={!(nameValid && shortValid)}
               onPress={() => {
                 register();
@@ -116,26 +117,26 @@ export default RegisterAgain;
 
 const styles = StyleSheet.create({
   button_row: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     padding: 15,
   },
   container: {
-    backgroundColor: '#b30000',
+    backgroundColor: "#b30000",
     flex: 1,
   },
 
   field_input: {
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
-    color: '#000',
+    color: "#000",
     height: 40,
     marginBottom: 10,
     paddingLeft: 10,
     paddingRight: 10,
   },
   field_label: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
     marginTop: 5,
   },

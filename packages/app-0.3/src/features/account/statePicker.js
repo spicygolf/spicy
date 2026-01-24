@@ -1,14 +1,14 @@
-import { Dropdown } from 'react-native-element-dropdown';
+import { Dropdown } from "react-native-element-dropdown";
 
-const StatePicker = props => {
+const StatePicker = (props) => {
   const { states, selectedValue, onValueChange } = props;
 
-  const items = states.map(state => ({
+  const items = states.map((state) => ({
     label: state.name,
     value: state.name,
   }));
 
-  const onChange = selection => {
+  const onChange = (selection) => {
     onValueChange(selection.value);
   };
 

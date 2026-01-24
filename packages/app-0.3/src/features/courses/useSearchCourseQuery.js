@@ -1,5 +1,4 @@
-import { gql } from '@apollo/client';
-import { useQuery } from '@apollo/client';
+import { gql, useQuery } from "@apollo/client";
 
 const query = gql`
   query SearchCourse($q: SearchCourse!) {

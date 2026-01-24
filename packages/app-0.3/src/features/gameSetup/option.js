@@ -1,19 +1,22 @@
-import { useMutation } from '@apollo/client';
-import { useNavigation } from '@react-navigation/core';
-import { getHoles, isSameHolesList } from 'common/utils/game';
-import { getNewGameForUpdate } from 'common/utils/game';
-import { GameContext } from 'features/game/gameContext';
-import { UPDATE_GAME_MUTATION } from 'features/game/graphql';
-import { query as getGameQuery } from 'features/game/hooks/useGetGameQuery';
-import OptionBool from 'features/gameSetup/optionBool';
-import OptionDisplay from 'features/gameSetup/optionDisplay';
-import OptionMenu from 'features/gameSetup/optionMenu';
-import OptionNum from 'features/gameSetup/optionNum';
-import OptionPct from 'features/gameSetup/optionPct';
-import { findIndex } from 'lodash';
-import React, { useContext } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Icon } from 'react-native-elements';
+import { useMutation } from "@apollo/client";
+import { useNavigation } from "@react-navigation/core";
+import {
+  getHoles,
+  getNewGameForUpdate,
+  isSameHolesList,
+} from "common/utils/game";
+import { GameContext } from "features/game/gameContext";
+import { UPDATE_GAME_MUTATION } from "features/game/graphql";
+import { query as getGameQuery } from "features/game/hooks/useGetGameQuery";
+import OptionBool from "features/gameSetup/optionBool";
+import OptionDisplay from "features/gameSetup/optionDisplay";
+import OptionMenu from "features/gameSetup/optionMenu";
+import OptionNum from "features/gameSetup/optionNum";
+import OptionPct from "features/gameSetup/optionPct";
+import { findIndex } from "lodash";
+import { useContext } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { Icon } from "react-native-elements";
 
 const Option = ({ item }) => {
   // console.log('Option item', item);
@@ -36,7 +39,7 @@ const Option = ({ item }) => {
     };
     // console.log('newOption', newOption);
 
-    let newGame = getNewGameForUpdate(game);
+    const newGame = getNewGameForUpdate(game);
     if (!newGame.options) {
       newGame.options = [];
     }
@@ -63,32 +66,48 @@ const Option = ({ item }) => {
         },
       ],
       optimisticResponse: {
-        __typename: 'Mutation',
+        __typename: "Mutation",
         updateGame: {
-          __typename: 'Game',
+          __typename: "Game",
           ...newGame,
         },
       },
     });
     if (error) {
-      console.log('Error setting option in game', error);
+      console.log("Error setting option in game", error);
     }
   };
 
   const getOptionComponent = (lItem) => {
     let ret = <OptionDisplay option={lItem} />;
     switch (lItem.sub_type) {
-      case 'num':
-        ret = <OptionNum option={lItem} setOption={setOption} readonly={readonly} />;
+      case "num":
+        ret = (
+          <OptionNum option={lItem} setOption={setOption} readonly={readonly} />
+        );
         break;
-      case 'pct':
-        ret = <OptionPct option={lItem} setOption={setOption} readonly={readonly} />;
+      case "pct":
+        ret = (
+          <OptionPct option={lItem} setOption={setOption} readonly={readonly} />
+        );
         break;
-      case 'bool':
-        ret = <OptionBool option={lItem} setOption={setOption} readonly={readonly} />;
+      case "bool":
+        ret = (
+          <OptionBool
+            option={lItem}
+            setOption={setOption}
+            readonly={readonly}
+          />
+        );
         break;
-      case 'menu':
-        ret = <OptionMenu option={lItem} setOption={setOption} readonly={readonly} />;
+      case "menu":
+        ret = (
+          <OptionMenu
+            option={lItem}
+            setOption={setOption}
+            readonly={readonly}
+          />
+        );
         break;
       default:
         break;
@@ -98,15 +117,16 @@ const Option = ({ item }) => {
 
   let holes = getHoles(game);
   let custom = false;
-  if (item && item.values) {
+  if (item?.values) {
     holes = item.values[0].holes;
     custom = !isSameHolesList(getHoles(game), holes);
   }
   const content = custom ? (
     <Text
       onPress={async () => {
-        navigation.navigate('OptionsCustom', { okey: item.key, setOption });
-      }}>
+        navigation.navigate("OptionsCustom", { okey: item.key, setOption });
+      }}
+    >
       custom
     </Text>
   ) : (
@@ -123,7 +143,7 @@ const Option = ({ item }) => {
         color="#999"
         size={32}
         onPress={async () => {
-          navigation.navigate('OptionsCustom', { okey: item.key, setOption });
+          navigation.navigate("OptionsCustom", { okey: item.key, setOption });
         }}
       />
     </View>
@@ -134,14 +154,14 @@ export default Option;
 
 const styles = StyleSheet.create({
   field_container: {
-    alignItems: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    flexDirection: "row",
   },
   field_input_view: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 2,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
   },
   field_label: {
     flex: 3,

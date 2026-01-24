@@ -1,7 +1,7 @@
-import { Doc } from './doc';
-import { db } from '../db/db';
+import { db } from "../db/db";
+import { Doc } from "./doc";
 
-const collection = db.collection('events');
+const collection = db.collection("events");
 
 class Event extends Doc {
   constructor() {

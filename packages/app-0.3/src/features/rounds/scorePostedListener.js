@@ -1,4 +1,4 @@
-import { useScorePostedSubscription } from 'features/rounds/hooks/useScorePostedSubscription';
+import { useScorePostedSubscription } from "features/rounds/hooks/useScorePostedSubscription";
 
 const ScorePostedListener = ({ rkey }) => {
   const { loading, error, data } = useScorePostedSubscription({
@@ -9,11 +9,11 @@ const ScorePostedListener = ({ rkey }) => {
     return null;
   }
   if (error) {
-    console.log('Error in ScorePostedListener', error);
+    console.log("Error in ScorePostedListener", error);
   }
 
-  if (data && data.scorePosted) {
-    console.log('data', data);
+  if (data?.scorePosted) {
+    console.log("data", data);
   }
 
   // non-display component

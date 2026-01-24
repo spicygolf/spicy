@@ -1,9 +1,9 @@
-import { SpicyPlayerSearchContext } from 'common/components/spicy/player/searchContext';
-import React, { useContext } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Input } from 'react-native-elements';
+import { SpicyPlayerSearchContext } from "common/components/spicy/player/searchContext";
+import { useContext } from "react";
+import { StyleSheet, View } from "react-native";
+import { Input } from "react-native-elements";
 
-const SpicyPlayerSearchInput = (props) => {
+const SpicyPlayerSearchInput = (_props) => {
   const { state, setState } = useContext(SpicyPlayerSearchContext);
 
   // console.log('SpicyPlayerSearchInput', state);
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   field_input: {
-    color: '#000',
+    color: "#000",
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },
@@ -49,9 +49,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   label: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
-    fontWeight: 'normal',
+    fontWeight: "normal",
   },
   picker_country: {
     flex: 1,
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 10,
   },
 });

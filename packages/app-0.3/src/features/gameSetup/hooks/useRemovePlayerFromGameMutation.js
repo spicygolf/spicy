@@ -1,4 +1,4 @@
-import { gql, useMutation } from '@apollo/client';
+import { gql, useMutation } from "@apollo/client";
 
 const mutation = gql`
   mutation RemovePlayerFromGame($pkey: String!, $gkey: String!, $rkey: String!) {

@@ -1,1 +1,732 @@
-{"legacyId":"172356299","exportedAt":"2026-01-24T15:49:40.910Z","game":{"_key":"172356299","_id":"games/172356299","_rev":"_k_OgNT6--8","name":"Five Points","start":"2021-05-27T18:20:32Z","scope":{"holes":"all18","teams_rotate":"never"},"holes":[{"hole":"1","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[{"name":"prox","player":"65883890","value":"true"}]}],"multipliers":[{"name":"double","team":"2","first_hole":"1"}]},{"hole":"2","teams":[{"team":"1","players":["34483698","135116067"],"junk":[{"name":"prox","player":"135116067","value":"true"}]},{"team":"2","players":["65883890","35564495"],"junk":[]}],"multipliers":[{"name":"pre_double","team":"2","first_hole":"2"}]},{"hole":"3","teams":[{"team":"1","players":["34483698","135116067"],"junk":[{"name":"prox","player":"135116067","value":"true"}]},{"team":"2","players":["65883890","35564495"],"junk":[]}],"multipliers":[{"name":"pre_double","team":"2","first_hole":"2"}]},{"hole":"4","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[{"name":"prox","player":"65883890","value":"true"}]}],"multipliers":[{"name":"pre_double","team":"2","first_hole":"2"},{"name":"double","team":"2","first_hole":"4"}]},{"hole":"5","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[{"name":"prox","player":"65883890","value":"true"}]}],"multipliers":[{"name":"pre_double","team":"2","first_hole":"2"}]},{"hole":"6","teams":[{"team":"1","players":["34483698","135116067"],"junk":[{"name":"prox","player":"135116067","value":"true"}]},{"team":"2","players":["65883890","35564495"],"junk":[]}],"multipliers":[{"name":"pre_double","team":"2","first_hole":"2"},{"name":"double","team":"1","first_hole":"6"}]},{"hole":"7","teams":[{"team":"1","players":["34483698","135116067"],"junk":[{"name":"prox","player":"135116067","value":"true"}]},{"team":"2","players":["65883890","35564495"],"junk":[]}],"multipliers":[{"name":"pre_double","team":"2","first_hole":"2"},{"name":"double","team":"1","first_hole":"7"}]},{"hole":"8","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[{"name":"prox","player":"65883890","value":"true"}]}],"multipliers":[{"name":"pre_double","team":"2","first_hole":"2"},{"name":"pre_double","team":"2","first_hole":"8"},{"name":"double","team":"2","first_hole":"8"}]},{"hole":"9","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[{"name":"prox","player":"65883890","value":"true"}]}],"multipliers":[{"name":"pre_double","team":"2","first_hole":"2"},{"name":"pre_double","team":"2","first_hole":"8"},{"name":"double","team":"2","first_hole":"9"}]},{"hole":"10","teams":[{"team":"1","players":["34483698","135116067"],"junk":[{"name":"prox","player":"135116067","value":"true"}]},{"team":"2","players":["65883890","35564495"],"junk":[]}],"multipliers":[{"name":"double","team":"1","first_hole":"10"},{"name":"double_back","team":"2","first_hole":"10"}]},{"hole":"11","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[{"name":"prox","player":"35564495","value":"true"}]}],"multipliers":[{"name":"pre_double","team":"1","first_hole":"11"},{"name":"double","team":"1","first_hole":"11"},{"name":"double_back","team":"2","first_hole":"11"}]},{"hole":"12","teams":[{"team":"1","players":["34483698","135116067"],"junk":[{"name":"prox","player":"135116067","value":"true"}]},{"team":"2","players":["65883890","35564495"],"junk":[]}],"multipliers":[{"name":"pre_double","team":"1","first_hole":"11"},{"name":"pre_double","team":"1","first_hole":"12"}]},{"hole":"13","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[{"name":"prox","player":"35564495","value":"true"}]}],"multipliers":[{"name":"pre_double","team":"1","first_hole":"11"},{"name":"pre_double","team":"1","first_hole":"12"},{"name":"double","team":"1","first_hole":"13"}]},{"hole":"14","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[]}],"multipliers":[{"name":"pre_double","team":"1","first_hole":"11"},{"name":"pre_double","team":"1","first_hole":"12"}]},{"hole":"15","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[]}],"multipliers":[{"name":"pre_double","team":"1","first_hole":"11"},{"name":"pre_double","team":"1","first_hole":"12"}]},{"hole":"16","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[]}],"multipliers":[{"name":"pre_double","team":"1","first_hole":"11"},{"name":"pre_double","team":"1","first_hole":"12"}]},{"hole":"17","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[]}],"multipliers":[{"name":"pre_double","team":"1","first_hole":"11"},{"name":"pre_double","team":"1","first_hole":"12"}]},{"hole":"18","teams":[{"team":"1","players":["34483698","135116067"],"junk":[]},{"team":"2","players":["65883890","35564495"],"junk":[]}],"multipliers":[{"name":"pre_double","team":"1","first_hole":"11"},{"name":"pre_double","team":"1","first_hole":"12"}]}],"options":[]},"rounds":[{"round":{"_id":"rounds/172372393","_key":"172372393","_rev":"_k_OgNeK-HQ","date":"2021-05-27T18:20:32Z","scores":[{"hole":"1","values":[{"k":"gross","v":"5","ts":"2021-05-27T18:34:52Z"}]},{"hole":"2","values":[{"k":"gross","v":"4","ts":"2021-05-27T18:48:15Z"}]},{"hole":"3","values":[{"k":"gross","v":"4","ts":"2021-05-27T19:02:11Z"}]},{"hole":"4","values":[{"k":"gross","v":"4","ts":"2021-05-27T19:14:30Z"}]},{"hole":"5","values":[{"k":"gross","v":"5","ts":"2021-05-27T19:32:10Z"}]},{"hole":"6","values":[{"k":"gross","v":"3","ts":"2021-05-27T19:42:55Z"}]},{"hole":"7","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:03:47Z"}]},{"hole":"8","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:11:56Z"}]},{"hole":"9","values":[{"k":"gross","v":"6","ts":"2021-05-27T20:24:00Z"}]},{"hole":"10","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:37:08Z"}]},{"hole":"11","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:49:25Z"}]},{"hole":"12","values":[{"k":"gross","v":"4","ts":"2021-05-27T21:00:34Z"}]},{"hole":"13","values":[{"k":"gross","v":"3","ts":"2021-05-27T21:11:28Z"}]}],"seq":1,"tee_id":456824},"edge":{"_key":"172372399","_id":"edges/172372399","_from":"rounds/172372393","_to":"games/172356299","_rev":"_k_OgNjO-Ce","type":"round2game","ts":"2021-05-27T18:20:15.606Z","course_handicap":"2","handicap_index":"0.0","game_handicap":"0"},"playerId":"135116067"},{"round":{"_id":"rounds/172364103","_key":"172364103","_rev":"_k_OgNeK-HW","date":"2021-05-27T18:20:32Z","scores":[{"hole":"1","values":[{"k":"gross","v":"5","ts":"2021-05-27T18:34:59Z"}]},{"hole":"2","values":[{"k":"gross","v":"4","ts":"2021-05-27T18:48:20Z"}]},{"hole":"3","values":[{"k":"gross","v":"6","ts":"2021-05-27T19:02:39Z"}]},{"hole":"4","values":[{"k":"gross","v":"6","ts":"2021-05-27T19:14:37Z"}]},{"hole":"5","values":[{"k":"gross","v":"5","ts":"2021-05-27T19:32:22Z"}]},{"hole":"6","values":[{"k":"gross","v":"5","ts":"2021-05-27T19:43:06Z"}]},{"hole":"7","values":[{"k":"gross","v":"7","ts":"2021-05-27T20:04:09Z"}]},{"hole":"8","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:12:05Z"}]},{"hole":"9","values":[{"k":"gross","v":"5","ts":"2021-05-27T20:24:19Z"}]},{"hole":"10","values":[{"k":"gross","v":"5","ts":"2021-05-27T20:37:14Z"}]},{"hole":"11","values":[{"k":"gross","v":"3","ts":"2021-05-27T20:49:32Z"}]},{"hole":"12","values":[{"k":"gross","v":"4","ts":"2021-05-27T21:00:43Z"}]},{"hole":"13","values":[{"k":"gross","v":"3","ts":"2021-05-27T21:12:37Z"}]}],"seq":1,"tee_id":456824},"edge":{"_key":"172364109","_id":"edges/172364109","_from":"rounds/172364103","_to":"games/172356299","_rev":"_k_OgNjO-Cc","type":"round2game","ts":"2021-05-27T18:19:07.885Z","handicap_index":"1.8","course_handicap":"4"},"playerId":"35564495"},{"round":{"_id":"rounds/172368058","_key":"172368058","_rev":"_k_OgNeK-HU","date":"2021-05-27T18:20:32Z","scores":[{"hole":"1","values":[{"k":"gross","v":"4","ts":"2021-05-27T18:34:55Z"}]},{"hole":"2","values":[{"k":"gross","v":"5","ts":"2021-05-27T18:48:18Z"}]},{"hole":"3","values":[{"k":"gross","v":"5","ts":"2021-05-27T19:02:28Z"}]},{"hole":"4","values":[{"k":"gross","v":"3","ts":"2021-05-27T19:15:11Z"}]},{"hole":"5","values":[{"k":"gross","v":"4","ts":"2021-05-27T19:31:56Z"}]},{"hole":"6","values":[{"k":"gross","v":"4","ts":"2021-05-27T19:43:03Z"}]},{"hole":"7","values":[{"k":"gross","v":"5","ts":"2021-05-27T20:04:11Z"}]},{"hole":"8","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:12:00Z"}]},{"hole":"9","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:23:51Z"}]},{"hole":"10","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:37:11Z"}]},{"hole":"11","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:49:30Z"}]},{"hole":"12","values":[{"k":"gross","v":"5","ts":"2021-05-27T21:00:45Z"}]},{"hole":"13","values":[{"k":"gross","v":"4","ts":"2021-05-27T21:12:24Z"}]}],"seq":1,"tee_id":456824},"edge":{"_key":"172368065","_id":"edges/172368065","_from":"rounds/172368058","_to":"games/172356299","_rev":"_k_OgNjO-Ca","type":"round2game","ts":"2021-05-27T18:19:40.272Z","handicap_index":"5.5","course_handicap":"9"},"playerId":"65883890"},{"round":{"_id":"rounds/172358256","_key":"172358256","_rev":"_k_OgNeK-HS","date":"2021-05-27T18:20:32Z","scores":[{"hole":"1","values":[{"k":"gross","v":"4","ts":"2021-05-27T18:34:49Z"}]},{"hole":"2","values":[{"k":"gross","v":"5","ts":"2021-05-27T18:48:13Z"}]},{"hole":"3","values":[{"k":"gross","v":"5","ts":"2021-05-27T19:02:09Z"}]},{"hole":"4","values":[{"k":"gross","v":"4","ts":"2021-05-27T19:14:27Z"}]},{"hole":"5","values":[{"k":"gross","v":"5","ts":"2021-05-27T19:31:53Z"}]},{"hole":"6","values":[{"k":"gross","v":"5","ts":"2021-05-27T19:43:00Z"}]},{"hole":"7","values":[{"k":"gross","v":"6","ts":"2021-05-27T20:03:50Z"}]},{"hole":"8","values":[{"k":"gross","v":"5","ts":"2021-05-27T20:11:52Z"}]},{"hole":"9","values":[{"k":"gross","v":"5","ts":"2021-05-27T20:23:30Z"}]},{"hole":"10","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:37:02Z"}]},{"hole":"11","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:49:15Z"}]},{"hole":"12","values":[{"k":"gross","v":"4","ts":"2021-05-27T20:58:01Z"}]},{"hole":"13","values":[{"k":"gross","v":"3","ts":"2021-05-27T21:12:22Z"}]}],"seq":1,"tee_id":456824},"edge":{"_key":"172360185","_id":"edges/172360185","_from":"rounds/172358256","_to":"games/172356299","_rev":"_k_OgNjO-CY","type":"round2game","ts":"2021-05-27T18:18:55.694Z","handicap_index":"4.1","course_handicap":"7"},"playerId":"34483698"}],"gamespecKey":"65384954","tees":{"456824":{"tee_id":456824,"name":"Dogwood","TotalYardage":6947,"holes":[{"hole":1,"hole_id":3017493,"length":467,"par":4,"handicap":3},{"hole":2,"hole_id":3017494,"length":428,"par":4,"handicap":9},{"hole":3,"hole_id":3017495,"length":347,"par":4,"handicap":15},{"hole":4,"hole_id":3017496,"length":431,"par":4,"handicap":1},{"hole":5,"hole_id":3017497,"length":421,"par":4,"handicap":7},{"hole":6,"hole_id":3017498,"length":128,"par":3,"handicap":17},{"hole":7,"hole_id":3017499,"length":511,"par":5,"handicap":11},{"hole":8,"hole_id":3017500,"length":227,"par":3,"handicap":5},{"hole":9,"hole_id":3017501,"length":511,"par":5,"handicap":13},{"hole":10,"hole_id":3017502,"length":449,"par":4,"handicap":2},{"hole":11,"hole_id":3017503,"length":432,"par":4,"handicap":6},{"hole":12,"hole_id":3017504,"length":348,"par":4,"handicap":12},{"hole":13,"hole_id":3017505,"length":187,"par":3,"handicap":18},{"hole":14,"hole_id":3017506,"length":512,"par":5,"handicap":10},{"hole":15,"hole_id":3017507,"length":392,"par":4,"handicap":4},{"hole":16,"hole_id":3017508,"length":352,"par":4,"handicap":16},{"hole":17,"hole_id":3017509,"length":225,"par":3,"handicap":14},{"hole":18,"hole_id":3017510,"length":579,"par":5,"handicap":8}],"Ratings":[{"RatingType":"Total","CourseRating":73.7,"SlopeRating":142,"BogeyRating":100.1},{"RatingType":"Front","CourseRating":36.8,"SlopeRating":142,"BogeyRating":50},{"RatingType":"Back","CourseRating":36.9,"SlopeRating":142,"BogeyRating":50.1}],"course":{"course_id":13995,"course_name":"Druid Hills Golf Club","course_city":"Atlanta","course_state":"GA"}}}}
+{
+  "legacyId": "172356299",
+  "exportedAt": "2026-01-24T15:49:40.910Z",
+  "game": {
+    "_key": "172356299",
+    "_id": "games/172356299",
+    "_rev": "_k_OgNT6--8",
+    "name": "Five Points",
+    "start": "2021-05-27T18:20:32Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [
+      {
+        "hole": "1",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          {
+            "team": "2",
+            "players": ["65883890", "35564495"],
+            "junk": [{ "name": "prox", "player": "65883890", "value": "true" }]
+          }
+        ],
+        "multipliers": [{ "name": "double", "team": "2", "first_hole": "1" }]
+      },
+      {
+        "hole": "2",
+        "teams": [
+          {
+            "team": "1",
+            "players": ["34483698", "135116067"],
+            "junk": [{ "name": "prox", "player": "135116067", "value": "true" }]
+          },
+          { "team": "2", "players": ["65883890", "35564495"], "junk": [] }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "2", "first_hole": "2" }
+        ]
+      },
+      {
+        "hole": "3",
+        "teams": [
+          {
+            "team": "1",
+            "players": ["34483698", "135116067"],
+            "junk": [{ "name": "prox", "player": "135116067", "value": "true" }]
+          },
+          { "team": "2", "players": ["65883890", "35564495"], "junk": [] }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "2", "first_hole": "2" }
+        ]
+      },
+      {
+        "hole": "4",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          {
+            "team": "2",
+            "players": ["65883890", "35564495"],
+            "junk": [{ "name": "prox", "player": "65883890", "value": "true" }]
+          }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "2", "first_hole": "2" },
+          { "name": "double", "team": "2", "first_hole": "4" }
+        ]
+      },
+      {
+        "hole": "5",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          {
+            "team": "2",
+            "players": ["65883890", "35564495"],
+            "junk": [{ "name": "prox", "player": "65883890", "value": "true" }]
+          }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "2", "first_hole": "2" }
+        ]
+      },
+      {
+        "hole": "6",
+        "teams": [
+          {
+            "team": "1",
+            "players": ["34483698", "135116067"],
+            "junk": [{ "name": "prox", "player": "135116067", "value": "true" }]
+          },
+          { "team": "2", "players": ["65883890", "35564495"], "junk": [] }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "2", "first_hole": "2" },
+          { "name": "double", "team": "1", "first_hole": "6" }
+        ]
+      },
+      {
+        "hole": "7",
+        "teams": [
+          {
+            "team": "1",
+            "players": ["34483698", "135116067"],
+            "junk": [{ "name": "prox", "player": "135116067", "value": "true" }]
+          },
+          { "team": "2", "players": ["65883890", "35564495"], "junk": [] }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "2", "first_hole": "2" },
+          { "name": "double", "team": "1", "first_hole": "7" }
+        ]
+      },
+      {
+        "hole": "8",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          {
+            "team": "2",
+            "players": ["65883890", "35564495"],
+            "junk": [{ "name": "prox", "player": "65883890", "value": "true" }]
+          }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "2", "first_hole": "2" },
+          { "name": "pre_double", "team": "2", "first_hole": "8" },
+          { "name": "double", "team": "2", "first_hole": "8" }
+        ]
+      },
+      {
+        "hole": "9",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          {
+            "team": "2",
+            "players": ["65883890", "35564495"],
+            "junk": [{ "name": "prox", "player": "65883890", "value": "true" }]
+          }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "2", "first_hole": "2" },
+          { "name": "pre_double", "team": "2", "first_hole": "8" },
+          { "name": "double", "team": "2", "first_hole": "9" }
+        ]
+      },
+      {
+        "hole": "10",
+        "teams": [
+          {
+            "team": "1",
+            "players": ["34483698", "135116067"],
+            "junk": [{ "name": "prox", "player": "135116067", "value": "true" }]
+          },
+          { "team": "2", "players": ["65883890", "35564495"], "junk": [] }
+        ],
+        "multipliers": [
+          { "name": "double", "team": "1", "first_hole": "10" },
+          { "name": "double_back", "team": "2", "first_hole": "10" }
+        ]
+      },
+      {
+        "hole": "11",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          {
+            "team": "2",
+            "players": ["65883890", "35564495"],
+            "junk": [{ "name": "prox", "player": "35564495", "value": "true" }]
+          }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "1", "first_hole": "11" },
+          { "name": "double", "team": "1", "first_hole": "11" },
+          { "name": "double_back", "team": "2", "first_hole": "11" }
+        ]
+      },
+      {
+        "hole": "12",
+        "teams": [
+          {
+            "team": "1",
+            "players": ["34483698", "135116067"],
+            "junk": [{ "name": "prox", "player": "135116067", "value": "true" }]
+          },
+          { "team": "2", "players": ["65883890", "35564495"], "junk": [] }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "1", "first_hole": "11" },
+          { "name": "pre_double", "team": "1", "first_hole": "12" }
+        ]
+      },
+      {
+        "hole": "13",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          {
+            "team": "2",
+            "players": ["65883890", "35564495"],
+            "junk": [{ "name": "prox", "player": "35564495", "value": "true" }]
+          }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "1", "first_hole": "11" },
+          { "name": "pre_double", "team": "1", "first_hole": "12" },
+          { "name": "double", "team": "1", "first_hole": "13" }
+        ]
+      },
+      {
+        "hole": "14",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          { "team": "2", "players": ["65883890", "35564495"], "junk": [] }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "1", "first_hole": "11" },
+          { "name": "pre_double", "team": "1", "first_hole": "12" }
+        ]
+      },
+      {
+        "hole": "15",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          { "team": "2", "players": ["65883890", "35564495"], "junk": [] }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "1", "first_hole": "11" },
+          { "name": "pre_double", "team": "1", "first_hole": "12" }
+        ]
+      },
+      {
+        "hole": "16",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          { "team": "2", "players": ["65883890", "35564495"], "junk": [] }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "1", "first_hole": "11" },
+          { "name": "pre_double", "team": "1", "first_hole": "12" }
+        ]
+      },
+      {
+        "hole": "17",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          { "team": "2", "players": ["65883890", "35564495"], "junk": [] }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "1", "first_hole": "11" },
+          { "name": "pre_double", "team": "1", "first_hole": "12" }
+        ]
+      },
+      {
+        "hole": "18",
+        "teams": [
+          { "team": "1", "players": ["34483698", "135116067"], "junk": [] },
+          { "team": "2", "players": ["65883890", "35564495"], "junk": [] }
+        ],
+        "multipliers": [
+          { "name": "pre_double", "team": "1", "first_hole": "11" },
+          { "name": "pre_double", "team": "1", "first_hole": "12" }
+        ]
+      }
+    ],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/172372393",
+        "_key": "172372393",
+        "_rev": "_k_OgNeK-HQ",
+        "date": "2021-05-27T18:20:32Z",
+        "scores": [
+          {
+            "hole": "1",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T18:34:52Z" }]
+          },
+          {
+            "hole": "2",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T18:48:15Z" }]
+          },
+          {
+            "hole": "3",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T19:02:11Z" }]
+          },
+          {
+            "hole": "4",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T19:14:30Z" }]
+          },
+          {
+            "hole": "5",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T19:32:10Z" }]
+          },
+          {
+            "hole": "6",
+            "values": [{ "k": "gross", "v": "3", "ts": "2021-05-27T19:42:55Z" }]
+          },
+          {
+            "hole": "7",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:03:47Z" }]
+          },
+          {
+            "hole": "8",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:11:56Z" }]
+          },
+          {
+            "hole": "9",
+            "values": [{ "k": "gross", "v": "6", "ts": "2021-05-27T20:24:00Z" }]
+          },
+          {
+            "hole": "10",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:37:08Z" }]
+          },
+          {
+            "hole": "11",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:49:25Z" }]
+          },
+          {
+            "hole": "12",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T21:00:34Z" }]
+          },
+          {
+            "hole": "13",
+            "values": [{ "k": "gross", "v": "3", "ts": "2021-05-27T21:11:28Z" }]
+          }
+        ],
+        "seq": 1,
+        "tee_id": 456824
+      },
+      "edge": {
+        "_key": "172372399",
+        "_id": "edges/172372399",
+        "_from": "rounds/172372393",
+        "_to": "games/172356299",
+        "_rev": "_k_OgNjO-Ce",
+        "type": "round2game",
+        "ts": "2021-05-27T18:20:15.606Z",
+        "course_handicap": "2",
+        "handicap_index": "0.0",
+        "game_handicap": "0"
+      },
+      "playerId": "135116067"
+    },
+    {
+      "round": {
+        "_id": "rounds/172364103",
+        "_key": "172364103",
+        "_rev": "_k_OgNeK-HW",
+        "date": "2021-05-27T18:20:32Z",
+        "scores": [
+          {
+            "hole": "1",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T18:34:59Z" }]
+          },
+          {
+            "hole": "2",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T18:48:20Z" }]
+          },
+          {
+            "hole": "3",
+            "values": [{ "k": "gross", "v": "6", "ts": "2021-05-27T19:02:39Z" }]
+          },
+          {
+            "hole": "4",
+            "values": [{ "k": "gross", "v": "6", "ts": "2021-05-27T19:14:37Z" }]
+          },
+          {
+            "hole": "5",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T19:32:22Z" }]
+          },
+          {
+            "hole": "6",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T19:43:06Z" }]
+          },
+          {
+            "hole": "7",
+            "values": [{ "k": "gross", "v": "7", "ts": "2021-05-27T20:04:09Z" }]
+          },
+          {
+            "hole": "8",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:12:05Z" }]
+          },
+          {
+            "hole": "9",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T20:24:19Z" }]
+          },
+          {
+            "hole": "10",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T20:37:14Z" }]
+          },
+          {
+            "hole": "11",
+            "values": [{ "k": "gross", "v": "3", "ts": "2021-05-27T20:49:32Z" }]
+          },
+          {
+            "hole": "12",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T21:00:43Z" }]
+          },
+          {
+            "hole": "13",
+            "values": [{ "k": "gross", "v": "3", "ts": "2021-05-27T21:12:37Z" }]
+          }
+        ],
+        "seq": 1,
+        "tee_id": 456824
+      },
+      "edge": {
+        "_key": "172364109",
+        "_id": "edges/172364109",
+        "_from": "rounds/172364103",
+        "_to": "games/172356299",
+        "_rev": "_k_OgNjO-Cc",
+        "type": "round2game",
+        "ts": "2021-05-27T18:19:07.885Z",
+        "handicap_index": "1.8",
+        "course_handicap": "4"
+      },
+      "playerId": "35564495"
+    },
+    {
+      "round": {
+        "_id": "rounds/172368058",
+        "_key": "172368058",
+        "_rev": "_k_OgNeK-HU",
+        "date": "2021-05-27T18:20:32Z",
+        "scores": [
+          {
+            "hole": "1",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T18:34:55Z" }]
+          },
+          {
+            "hole": "2",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T18:48:18Z" }]
+          },
+          {
+            "hole": "3",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T19:02:28Z" }]
+          },
+          {
+            "hole": "4",
+            "values": [{ "k": "gross", "v": "3", "ts": "2021-05-27T19:15:11Z" }]
+          },
+          {
+            "hole": "5",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T19:31:56Z" }]
+          },
+          {
+            "hole": "6",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T19:43:03Z" }]
+          },
+          {
+            "hole": "7",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T20:04:11Z" }]
+          },
+          {
+            "hole": "8",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:12:00Z" }]
+          },
+          {
+            "hole": "9",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:23:51Z" }]
+          },
+          {
+            "hole": "10",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:37:11Z" }]
+          },
+          {
+            "hole": "11",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:49:30Z" }]
+          },
+          {
+            "hole": "12",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T21:00:45Z" }]
+          },
+          {
+            "hole": "13",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T21:12:24Z" }]
+          }
+        ],
+        "seq": 1,
+        "tee_id": 456824
+      },
+      "edge": {
+        "_key": "172368065",
+        "_id": "edges/172368065",
+        "_from": "rounds/172368058",
+        "_to": "games/172356299",
+        "_rev": "_k_OgNjO-Ca",
+        "type": "round2game",
+        "ts": "2021-05-27T18:19:40.272Z",
+        "handicap_index": "5.5",
+        "course_handicap": "9"
+      },
+      "playerId": "65883890"
+    },
+    {
+      "round": {
+        "_id": "rounds/172358256",
+        "_key": "172358256",
+        "_rev": "_k_OgNeK-HS",
+        "date": "2021-05-27T18:20:32Z",
+        "scores": [
+          {
+            "hole": "1",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T18:34:49Z" }]
+          },
+          {
+            "hole": "2",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T18:48:13Z" }]
+          },
+          {
+            "hole": "3",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T19:02:09Z" }]
+          },
+          {
+            "hole": "4",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T19:14:27Z" }]
+          },
+          {
+            "hole": "5",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T19:31:53Z" }]
+          },
+          {
+            "hole": "6",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T19:43:00Z" }]
+          },
+          {
+            "hole": "7",
+            "values": [{ "k": "gross", "v": "6", "ts": "2021-05-27T20:03:50Z" }]
+          },
+          {
+            "hole": "8",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T20:11:52Z" }]
+          },
+          {
+            "hole": "9",
+            "values": [{ "k": "gross", "v": "5", "ts": "2021-05-27T20:23:30Z" }]
+          },
+          {
+            "hole": "10",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:37:02Z" }]
+          },
+          {
+            "hole": "11",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:49:15Z" }]
+          },
+          {
+            "hole": "12",
+            "values": [{ "k": "gross", "v": "4", "ts": "2021-05-27T20:58:01Z" }]
+          },
+          {
+            "hole": "13",
+            "values": [{ "k": "gross", "v": "3", "ts": "2021-05-27T21:12:22Z" }]
+          }
+        ],
+        "seq": 1,
+        "tee_id": 456824
+      },
+      "edge": {
+        "_key": "172360185",
+        "_id": "edges/172360185",
+        "_from": "rounds/172358256",
+        "_to": "games/172356299",
+        "_rev": "_k_OgNjO-CY",
+        "type": "round2game",
+        "ts": "2021-05-27T18:18:55.694Z",
+        "handicap_index": "4.1",
+        "course_handicap": "7"
+      },
+      "playerId": "34483698"
+    }
+  ],
+  "gamespecKey": "65384954",
+  "tees": {
+    "456824": {
+      "tee_id": 456824,
+      "name": "Dogwood",
+      "TotalYardage": 6947,
+      "holes": [
+        {
+          "hole": 1,
+          "hole_id": 3017493,
+          "length": 467,
+          "par": 4,
+          "handicap": 3
+        },
+        {
+          "hole": 2,
+          "hole_id": 3017494,
+          "length": 428,
+          "par": 4,
+          "handicap": 9
+        },
+        {
+          "hole": 3,
+          "hole_id": 3017495,
+          "length": 347,
+          "par": 4,
+          "handicap": 15
+        },
+        {
+          "hole": 4,
+          "hole_id": 3017496,
+          "length": 431,
+          "par": 4,
+          "handicap": 1
+        },
+        {
+          "hole": 5,
+          "hole_id": 3017497,
+          "length": 421,
+          "par": 4,
+          "handicap": 7
+        },
+        {
+          "hole": 6,
+          "hole_id": 3017498,
+          "length": 128,
+          "par": 3,
+          "handicap": 17
+        },
+        {
+          "hole": 7,
+          "hole_id": 3017499,
+          "length": 511,
+          "par": 5,
+          "handicap": 11
+        },
+        {
+          "hole": 8,
+          "hole_id": 3017500,
+          "length": 227,
+          "par": 3,
+          "handicap": 5
+        },
+        {
+          "hole": 9,
+          "hole_id": 3017501,
+          "length": 511,
+          "par": 5,
+          "handicap": 13
+        },
+        {
+          "hole": 10,
+          "hole_id": 3017502,
+          "length": 449,
+          "par": 4,
+          "handicap": 2
+        },
+        {
+          "hole": 11,
+          "hole_id": 3017503,
+          "length": 432,
+          "par": 4,
+          "handicap": 6
+        },
+        {
+          "hole": 12,
+          "hole_id": 3017504,
+          "length": 348,
+          "par": 4,
+          "handicap": 12
+        },
+        {
+          "hole": 13,
+          "hole_id": 3017505,
+          "length": 187,
+          "par": 3,
+          "handicap": 18
+        },
+        {
+          "hole": 14,
+          "hole_id": 3017506,
+          "length": 512,
+          "par": 5,
+          "handicap": 10
+        },
+        {
+          "hole": 15,
+          "hole_id": 3017507,
+          "length": 392,
+          "par": 4,
+          "handicap": 4
+        },
+        {
+          "hole": 16,
+          "hole_id": 3017508,
+          "length": 352,
+          "par": 4,
+          "handicap": 16
+        },
+        {
+          "hole": 17,
+          "hole_id": 3017509,
+          "length": 225,
+          "par": 3,
+          "handicap": 14
+        },
+        {
+          "hole": 18,
+          "hole_id": 3017510,
+          "length": 579,
+          "par": 5,
+          "handicap": 8
+        }
+      ],
+      "Ratings": [
+        {
+          "RatingType": "Total",
+          "CourseRating": 73.7,
+          "SlopeRating": 142,
+          "BogeyRating": 100.1
+        },
+        {
+          "RatingType": "Front",
+          "CourseRating": 36.8,
+          "SlopeRating": 142,
+          "BogeyRating": 50
+        },
+        {
+          "RatingType": "Back",
+          "CourseRating": 36.9,
+          "SlopeRating": 142,
+          "BogeyRating": 50.1
+        }
+      ],
+      "course": {
+        "course_id": 13995,
+        "course_name": "Druid Hills Golf Club",
+        "course_city": "Atlanta",
+        "course_state": "GA"
+      }
+    }
+  }
+}

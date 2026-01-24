@@ -1,7 +1,7 @@
-import { Game } from '../models/game';
-import { withFilter } from 'graphql-subscriptions';
+import { withFilter } from "graphql-subscriptions";
+import { Game } from "../models/game";
 
-const GAME_UPDATED = 'GAME_UPDATED';
+const GAME_UPDATED = "GAME_UPDATED";
 
 export const GameTypeDefs = `
 type Game {
@@ -149,10 +149,10 @@ export const GameResolvers = {
       const g = new Game();
       return g
         .statForPlayerFeed(args)
-        .then((res) => (res && res[0] ? res[0] : 0))
+        .then((res) => (res?.[0] ? res[0] : 0))
         .catch((e) => {
           console.log(
-            'statForPlayerFeed query error',
+            "statForPlayerFeed query error",
             e.response.body.errorMessage,
           );
           return 0;
@@ -174,8 +174,8 @@ export const GameResolvers = {
       const g = new Game();
       return g
         .find(name)
-        .then((res) => (res && res[0] ? res[0] : null))
-        .catch((err) => null);
+        .then((res) => (res?.[0] ? res[0] : null))
+        .catch((_err) => null);
     },
     searchGame: async (_, { q }) => {
       const g = new Game();

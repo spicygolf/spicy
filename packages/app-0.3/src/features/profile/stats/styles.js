@@ -1,14 +1,14 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   stat_label: {
     fontSize: 11,
-    textAlign: 'center',
+    textAlign: "center",
   },
   stat_value: {
     fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   stat_view: {
     paddingHorizontal: 5,

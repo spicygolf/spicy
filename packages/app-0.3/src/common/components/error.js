@@ -1,5 +1,4 @@
-import React from 'react';
-import { SafeAreaView, StyleSheet, Text, ScrollView } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text } from "react-native";
 
 const Error = (props) => {
   const { error } = props;
@@ -18,11 +17,11 @@ export default Error;
 
 export const styles = StyleSheet.create({
   title: {
-    alignSelf: 'center',
-    fontWeight: 'bold',
+    alignSelf: "center",
+    fontWeight: "bold",
   },
   message: {
-    fontFamily: 'Courier New',
+    fontFamily: "Courier New",
     fontSize: 9,
   },
 });

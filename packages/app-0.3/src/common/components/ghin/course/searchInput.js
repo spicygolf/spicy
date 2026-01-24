@@ -1,11 +1,7 @@
-import { GhinCourseSearchContext } from 'common/components/ghin/course/searchContext';
-import { baseUri, scheme } from 'common/config';
-import CountryPicker from 'features/account/countryPicker';
-import StatePicker from 'features/account/statePicker';
-import { find } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Input } from 'react-native-elements';
+import { GhinCourseSearchContext } from "common/components/ghin/course/searchContext";
+import { useContext } from "react";
+import { StyleSheet, View } from "react-native";
+import { Input } from "react-native-elements";
 
 const GhinCourseSearchInput = () => {
   const { search, setSearch } = useContext(GhinCourseSearchContext);
@@ -87,7 +83,7 @@ export default GhinCourseSearchInput;
 const styles = StyleSheet.create({
   container: {},
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   // picker_country: {
   //   flex: 1,
@@ -100,12 +96,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   label: {
-    color: '#999',
+    color: "#999",
     fontSize: 12,
-    fontWeight: 'normal',
+    fontWeight: "normal",
   },
   field_input: {
-    color: '#000',
+    color: "#000",
     marginHorizontal: 0,
     paddingHorizontal: 0,
   },

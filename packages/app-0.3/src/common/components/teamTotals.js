@@ -1,8 +1,8 @@
-import { format } from 'common/utils/score';
-import { GameContext } from 'features/game/gameContext';
-import { filter, find } from 'lodash';
-import React, { useContext } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { format } from "common/utils/score";
+import { GameContext } from "features/game/gameContext";
+import { filter, find } from "lodash";
+import { useContext } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 const TeamTotals = (props) => {
   const { team: teamNum, scoring, currentHole, type, betterPoints } = props;
@@ -20,11 +20,14 @@ const TeamTotals = (props) => {
 
   let netPoints = team.points;
   let otherTeam = null;
-  const otherTeams = filter(hole.teams, (t) => t.team.toString() !== teamNum.toString());
+  const otherTeams = filter(
+    hole.teams,
+    (t) => t.team.toString() !== teamNum.toString(),
+  );
   if (otherTeams && otherTeams.length === 1) {
     otherTeam = otherTeams[0];
     netPoints = team.points - otherTeam.points;
-    if (betterPoints === 'lower') {
+    if (betterPoints === "lower") {
       netPoints *= -1;
     }
     if (netPoints < 0) {
@@ -32,38 +35,42 @@ const TeamTotals = (props) => {
     }
   }
   const netTotal = netPoints * hole.holeMultiplier;
-  let diff = otherTeam ? team.runningTotal - otherTeam.runningTotal : team.runningTotal;
-  if (betterPoints === 'lower') {
+  let diff = otherTeam
+    ? team.runningTotal - otherTeam.runningTotal
+    : team.runningTotal;
+  if (betterPoints === "lower") {
     diff *= -1;
   }
   const multiplier = `x ${hole.holeMultiplier} = ${format({ v: netTotal, type })}`;
 
   let totalTxt = format({ v: diff, type });
-  if (totalTxt === '' && type === 'points') {
-    totalTxt = '0';
+  if (totalTxt === "" && type === "points") {
+    totalTxt = "0";
   }
   let total = `Total: ${totalTxt}`;
 
   // handle totals differently for match play
-  if (type === 'match' && team.matchOver) {
+  if (type === "match" && team.matchOver) {
     if (team.win) {
       total = `Win: ${format({ v: team.matchDiff, type })}`;
     } else {
-      total = '';
+      total = "";
     }
   }
   // don't show team totals if the teams are rotating at all
-  if (type !== 'match' && game.scope.teams_rotate !== 'never') {
-    total = '';
+  if (type !== "match" && game.scope.teams_rotate !== "never") {
+    total = "";
   }
 
   const multTxt = `${hole.holeMultiplier}x`;
 
   let holeTxt =
-    netPoints !== 0 || otherTeam?.points !== 0 ? `${netPoints} ${multiplier}` : multTxt;
-  holeTxt = 'Hole: ' + holeTxt;
-  if (type === 'match') {
-    holeTxt = '';
+    netPoints !== 0 || otherTeam?.points !== 0
+      ? `${netPoints} ${multiplier}`
+      : multTxt;
+  holeTxt = `Hole: ${holeTxt}`;
+  if (type === "match") {
+    holeTxt = "";
   }
 
   return (
@@ -86,9 +93,9 @@ const styles = StyleSheet.create({
     //fontSize: 16,
   },
   totalsView: {
-    flexDirection: 'row',
+    flexDirection: "row",
     flex: 2,
-    justifyContent: 'space-around',
+    justifyContent: "space-around",
     paddingBottom: 5,
     paddingLeft: 10,
     paddingRight: 10,

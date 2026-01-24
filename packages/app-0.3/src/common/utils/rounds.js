@@ -1,8 +1,8 @@
-import { find } from 'lodash';
+import { find } from "lodash";
 
 export const get_round_for_player = (rounds, pkey) => {
   const ret = find(rounds, (r) => {
-    if (r && r.player[0] && r.player[0]._key) {
+    if (r?.player[0]?._key) {
       return r.player[0]._key === pkey;
     } else {
       return null;
@@ -16,12 +16,15 @@ export const get_round_for_player = (rounds, pkey) => {
 export const get_hole = (hole, round) => {
   if (round?.tees?.length > 0) {
     if (round.tees.length === 1) {
-      const ret = find(round.tees[0]?.holes, (h) => h?.number?.toString() === hole);
+      const ret = find(
+        round.tees[0]?.holes,
+        (h) => h?.number?.toString() === hole,
+      );
       //console.log('hole', hole);
       return ret;
     } else {
       // TODO: handle a round with more than one tee
-      console.log('TODO: handle a round with more than one tee');
+      console.log("TODO: handle a round with more than one tee");
       return null;
     }
   } else {
@@ -43,7 +46,7 @@ export const get_score = (hole, round) => {
 };
 
 export const get_score_value = (name, score) => {
-  if (score && score.values) {
+  if (score?.values) {
     const ret = find(score.values, (val) => val.k === name);
     if (!ret || !ret.v) {
       return null;
@@ -63,7 +66,7 @@ export const get_net_score = (gross, score) => {
   const p = parseFloat(score.pops);
   //console.log('g', g, 'p', p);
   let net = g - p;
-  if (isNaN(net)) {
+  if (Number.isNaN(net)) {
     net = null;
   }
   return net;
@@ -71,7 +74,7 @@ export const get_net_score = (gross, score) => {
 
 export const get_pops = (score) => {
   //console.log('score', score);
-  return score && score.pops ? parseFloat(score.pops) : 0;
+  return score?.pops ? parseFloat(score.pops) : 0;
 };
 
 export const rmround = async (rkey, mutation) => {
@@ -81,8 +84,8 @@ export const rmround = async (rkey, mutation) => {
     },
   });
   if (error) {
-    console.log('error removing round', error);
-    console.log('rmround', rkey);
+    console.log("error removing round", error);
+    console.log("rmround", rkey);
     return null;
   }
   return data;

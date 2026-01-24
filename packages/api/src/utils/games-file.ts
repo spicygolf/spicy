@@ -12,7 +12,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { GameWithRoundsV03 } from "./arango";
+import type { GameWithRoundsV03 } from "spicylib/transform/legacy-types";
 
 /** Tee data as stored in the compacted file */
 interface StoredTeeData {

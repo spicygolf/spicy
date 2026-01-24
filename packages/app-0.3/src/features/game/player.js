@@ -1,12 +1,12 @@
-import { blue } from 'common/colors';
-import HoleJunk from 'common/components/holeJunk';
-import HoleScore from 'common/components/holeScore';
-import { getWolfPlayerIndex } from 'common/utils/game';
-import { get_hole, get_round_for_player, get_score } from 'common/utils/rounds';
-import { GameContext } from 'features/game/gameContext';
-import TeeSelector from 'features/gameSetup/teeSelector';
-import React, { useContext } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { blue } from "common/colors";
+import HoleJunk from "common/components/holeJunk";
+import HoleScore from "common/components/holeScore";
+import { getWolfPlayerIndex } from "common/utils/game";
+import { get_hole, get_round_for_player, get_score } from "common/utils/rounds";
+import { GameContext } from "features/game/gameContext";
+import TeeSelector from "features/gameSetup/teeSelector";
+import { useContext } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 const Player = (props) => {
   const { player, currentHole, test } = props;
@@ -25,7 +25,7 @@ const Player = (props) => {
   const score = get_score(currentHole, round);
 
   const wolfPlayerIndex = getWolfPlayerIndex({ game, currentHole });
-  let wolfPKey = '';
+  let wolfPKey = "";
   if (wolfPlayerIndex > -1) {
     wolfPKey = game.scope.wolf_order[wolfPlayerIndex];
   }
@@ -48,7 +48,7 @@ const Player = (props) => {
     <View style={styles.player_container}>
       <View style={styles.player_score_container}>
         <View style={styles.player_name}>
-          <Text style={styles.player_name_txt}>{player.name || ''}</Text>
+          <Text style={styles.player_name_txt}>{player.name || ""}</Text>
           {wolf}
         </View>
         <View style={styles.hole_score}>{holeScore}</View>
@@ -69,20 +69,20 @@ var styles = StyleSheet.create({
   },
   player_junk_container: {
     flex: 4,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     paddingTop: 5,
   },
   player_name: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   player_name_txt: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   player_score_container: {
-    flexDirection: 'row',
+    flexDirection: "row",
     flex: 2,
   },
   wolf: {

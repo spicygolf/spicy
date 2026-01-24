@@ -1,23 +1,22 @@
-import { useActiveGamesForPlayerQuery } from 'features/games/hooks/useActiveGamesForPlayerQuery';
-import React from 'react';
-import { Text, View } from 'react-native';
+import { useActiveGamesForPlayerQuery } from "features/games/hooks/useActiveGamesForPlayerQuery";
+import { Text, View } from "react-native";
 
-import { styles } from './styles';
+import { styles } from "./styles";
 
 const GamesStat = ({ pkey }) => {
-  let stat = ' ';
+  let stat = " ";
 
   const { error, data } = useActiveGamesForPlayerQuery({
     variables: {
       pkey,
     },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
   });
-  if (error && error.message !== 'Network request failed') {
-    stat = '?';
+  if (error && error.message !== "Network request failed") {
+    stat = "?";
   }
 
-  if (data && data.activeGamesForPlayer) {
+  if (data?.activeGamesForPlayer) {
     stat = data.activeGamesForPlayer.length;
   }
 

@@ -1,8 +1,7 @@
-import React from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from "react-native";
 
-const Splash = (props) => {
-  const logo = require('../../../assets/img/logo200.png');
+const Splash = (_props) => {
+  const logo = require("../../../assets/img/logo200.png");
 
   return (
     <View style={styles.container}>
@@ -15,9 +14,9 @@ export default Splash;
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    backgroundColor: '#b30000',
+    alignItems: "center",
+    backgroundColor: "#b30000",
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
 });

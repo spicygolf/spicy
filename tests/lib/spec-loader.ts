@@ -4,7 +4,7 @@
  * Loads game specs and options from data/seed/ directory.
  */
 
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // =============================================================================

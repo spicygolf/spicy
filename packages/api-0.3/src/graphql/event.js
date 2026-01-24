@@ -1,4 +1,4 @@
-import { Event } from '../models/event';
+import { Event } from "../models/event";
 
 export const EventTypeDefs = `
 type Event {
@@ -30,18 +30,17 @@ export const EventMutationSigs = `
 `;
 
 export const EventResolvers = {
-  Query: {
-  },
+  Query: {},
   Mutation: {
     addEvent: async (_, { event }) => {
       // TODO: add to immutable message log?
       var e = new Event();
       e.set(event);
       const newEvent = await e.save({
-        returnNew: true
+        returnNew: true,
       });
       //console.log('addEvent event', newEvent);
       return newEvent.new;
     },
-  }
+  },
 };

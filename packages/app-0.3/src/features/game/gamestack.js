@@ -1,19 +1,19 @@
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { green } from 'common/colors';
-import { getCoursesPlayersTxt } from 'common/utils/game';
-import { GameContext } from 'features/game/gameContext';
-import Leaderboard from 'features/game/leaderboard';
-import Score from 'features/game/score';
-import GameSetupStack from 'features/gameSetup/gameSetupStack';
-import moment from 'moment';
-import React, { useContext } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { green } from "common/colors";
+import { getCoursesPlayersTxt } from "common/utils/game";
+import { GameContext } from "features/game/gameContext";
+import Leaderboard from "features/game/leaderboard";
+import Score from "features/game/score";
+import GameSetupStack from "features/gameSetup/gameSetupStack";
+import moment from "moment";
+import { useContext } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
-const GameStack = (props) => {
+const GameStack = (_props) => {
   const { game } = useContext(GameContext);
   const { gamespecs } = game;
-  const gamespec_name = gamespecs.map((gs) => gs.disp).join('-');
-  const start = moment(game.start).format('llll');
+  const gamespec_name = gamespecs.map((gs) => gs.disp).join("-");
+  const start = moment(game.start).format("llll");
   const { courseFull } = getCoursesPlayersTxt(game);
 
   const Tab = createMaterialTopTabNavigator();
@@ -29,9 +29,9 @@ const GameStack = (props) => {
       <Tab.Navigator
         initialRouteName="Score"
         screenOptions={{
-          inactiveTintColor: '#ccc',
-          inactiveBackgroundColor: '#666',
-          activeTintColor: '#fff',
+          inactiveTintColor: "#ccc",
+          inactiveBackgroundColor: "#666",
+          activeTintColor: "#fff",
           style: {
             backgroundColor: green,
           },
@@ -40,29 +40,30 @@ const GameStack = (props) => {
           labelStyle: styles.tabBarLabel,
           style: styles.tabBar,
         }}
-        swipeEnabled={false}>
+        swipeEnabled={false}
+      >
         <Tab.Screen
           name="Leaderboard"
           component={Leaderboard}
           options={{
-            title: 'Leaderboard',
-            tabBarTestID: 'game_leaderboard_tab',
+            title: "Leaderboard",
+            tabBarTestID: "game_leaderboard_tab",
           }}
         />
         <Tab.Screen
           name="Score"
           component={Score}
           options={{
-            title: 'Score',
-            tabBarTestID: 'game_score_tab',
+            title: "Score",
+            tabBarTestID: "game_score_tab",
           }}
         />
         <Tab.Screen
           name="Setup"
           component={GameSetupStack}
           options={{
-            title: 'Setup',
-            tabBarTestID: 'game_setup_tab',
+            title: "Setup",
+            tabBarTestID: "game_setup_tab",
           }}
         />
       </Tab.Navigator>
@@ -77,8 +78,8 @@ const styles = StyleSheet.create({
     flex: 12,
   },
   gname: {
-    alignItems: 'center',
-    backgroundColor: 'white',
+    alignItems: "center",
+    backgroundColor: "white",
     paddingVertical: 5,
   },
   gname_txt: {
@@ -92,6 +93,6 @@ const styles = StyleSheet.create({
     maxHeight: 35,
   },
   tabBarLabel: {
-    textTransform: 'capitalize',
+    textTransform: "capitalize",
   },
 });

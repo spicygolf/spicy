@@ -1,15 +1,15 @@
-import { green } from 'common/colors';
-import { validateFloat } from 'common/utils/account';
-import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput } from 'react-native';
+import { green } from "common/colors";
+import { validateFloat } from "common/utils/account";
+import { useCallback, useEffect, useState } from "react";
+import { StyleSheet, Text, TextInput } from "react-native";
 
-const OptionPct = props => {
+const OptionPct = (props) => {
   const { option, setOption, readonly, index = 0 } = props;
   const [value, setValue] = useState(option.values[0].value || null);
 
   const validate = useCallback(
     (type, text) => {
-      const oTest = type === 'num' ? text : value;
+      const oTest = type === "num" ? text : value;
       let valid = false;
       valid = validateFloat(oTest);
       const v = parseFloat(oTest);
@@ -20,7 +20,7 @@ const OptionPct = props => {
   );
 
   const [optionValid, setOptionValid] = useState(false);
-  const oValid = { borderColor: optionValid ? green : '#ddd' };
+  const oValid = { borderColor: optionValid ? green : "#ddd" };
 
   useEffect(() => validate(), [validate]);
 
@@ -29,13 +29,13 @@ const OptionPct = props => {
       <TextInput
         editable={!readonly}
         style={[styles.field_input, oValid]}
-        onChangeText={text => {
+        onChangeText={(text) => {
           setValue(text);
-          validate('num', text);
+          validate("num", text);
         }}
         onEndEditing={() => {
           if (optionValid) {
-            let newOption = {
+            const newOption = {
               name: option.name,
               values: option.values.map((v, i) => ({
                 value: i === index ? value.toString() : v.value,
@@ -46,7 +46,7 @@ const OptionPct = props => {
           }
         }}
         keyboardType="decimal-pad"
-        value={value ? value.toString() : ''}
+        value={value ? value.toString() : ""}
       />
       <Text style={styles.sign}>%</Text>
     </>
@@ -57,9 +57,9 @@ export default OptionPct;
 
 const styles = StyleSheet.create({
   field_input: {
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
-    color: '#000',
+    color: "#000",
     flex: 0.8,
     height: 40,
     marginBottom: 10,
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   sign: {
     flex: 0.2,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     padding: 5,
   },
 });

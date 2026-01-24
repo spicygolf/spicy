@@ -1,16 +1,16 @@
-import { useQuery } from '@apollo/client';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { green } from 'common/colors';
-import { GameListContext } from 'features/games/gameListContext';
-import GameNav from 'features/games/gamenav';
-import { GAMESPECS_FOR_PLAYER_QUERY } from 'features/games/graphql';
-import NewGameCards from 'features/games/newGameCards';
-import NewGameList from 'features/games/newGameList';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import { orderBy } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useQuery } from "@apollo/client";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { green } from "common/colors";
+import { GameListContext } from "features/games/gameListContext";
+import GameNav from "features/games/gamenav";
+import { GAMESPECS_FOR_PLAYER_QUERY } from "features/games/graphql";
+import NewGameCards from "features/games/newGameCards";
+import NewGameList from "features/games/newGameList";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { orderBy } from "lodash";
+import { useContext, useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 const TabIcon = ({ name, color }) => {
   return <Icon size={24} color={color} name={name} />;
@@ -25,7 +25,7 @@ const NewGameScreen = () => {
     variables: {
       pkey: currentPlayer._key,
     },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
   });
 
   let content;
@@ -35,22 +35,21 @@ const NewGameScreen = () => {
   }
 
   // TODO: error component instead of below...
-  if (error && error.message !== 'Network request failed') {
+  if (error && error.message !== "Network request failed") {
     console.log(error);
     content = <Text>Error: {error.message}</Text>;
   }
 
   //console.log('data', data);
-  if (data && data.gameSpecsForPlayer) {
+  if (data?.gameSpecsForPlayer) {
     data.gameSpecsForPlayer.map(({ player_count }) => {
       total += player_count;
     });
     // console.log('player total games', player_total);
   }
-  const gamespecs =
-    data && data.gameSpecsForPlayer
-      ? orderBy(data.gameSpecsForPlayer, ['player_count'], ['desc'])
-      : [];
+  const gamespecs = data?.gameSpecsForPlayer
+    ? orderBy(data.gameSpecsForPlayer, ["player_count"], ["desc"])
+    : [];
 
   useEffect(
     () => {
@@ -73,29 +72,30 @@ const NewGameScreen = () => {
         screenOptions={{}}
         tabBarOptions={{
           activeTintColor: green,
-          inactiveTintColor: '#555',
+          inactiveTintColor: "#555",
           style: {
-            backgroundColor: 'none',
+            backgroundColor: "none",
           },
           labelStyle: {
-            textTransform: 'none',
+            textTransform: "none",
             fontSize: 12,
           },
           indicatorStyle: {
             backgroundColor: green,
           },
           tabStyle: {
-            justifyContent: 'flex-start',
+            justifyContent: "flex-start",
           },
           showIcon: true,
-        }}>
+        }}
+      >
         <Tab.Screen
           name="NewGameList"
           component={NewGameList}
           options={{
-            title: 'List',
+            title: "List",
             tabBarIcon: ({ focused }) => {
-              return <TabIcon color={focused ? green : '#555'} name="toc" />;
+              return <TabIcon color={focused ? green : "#555"} name="toc" />;
             },
           }}
         />
@@ -103,9 +103,11 @@ const NewGameScreen = () => {
           name="NewGameCards"
           component={NewGameCards}
           options={{
-            title: 'Description',
+            title: "Description",
             tabBarIcon: ({ focused }) => {
-              return <TabIcon color={focused ? green : '#555'} name="article" />;
+              return (
+                <TabIcon color={focused ? green : "#555"} name="article" />
+              );
             },
           }}
         />
@@ -118,7 +120,8 @@ const NewGameScreen = () => {
       value={{
         gameList,
         setGameList,
-      }}>
+      }}
+    >
       {content}
     </GameListContext.Provider>
   );

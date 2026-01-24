@@ -1,4 +1,4 @@
-import { Tee } from '../models/tee';
+import { Tee } from "../models/tee";
 
 export const TeeTypeDefs = `
 type Tee {
@@ -62,6 +62,5 @@ export const TeeResolvers = {
       return t.getFavoriteTeesForPlayer(pkey, gametime);
     },
   },
-  Mutation: {
-  },
+  Mutation: {},
 };

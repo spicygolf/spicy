@@ -1,5 +1,5 @@
-import { db } from '../db/db';
-import pkg from 'date-fns-tz';
+import pkg from "date-fns-tz";
+import { db } from "../db/db";
 
 const { zonedTimeToUtc } = pkg;
 
@@ -25,12 +25,12 @@ class Doc {
     // fetch from collection by key
     try {
       var d = await this._collection.lookupByKeys([key]);
-      if (d && d[0]) {
-        delete d[0]['_rev'];
+      if (d?.[0]) {
+        delete d[0]._rev;
         this._doc = d[0];
       }
     } catch (e) {
-      console.error('doc.load error', e.message);
+      console.error("doc.load error", e.message);
     }
     return this._doc;
   }
@@ -52,7 +52,7 @@ class Doc {
     try {
       return await this._collection.save(this._doc, options || {});
     } catch (e) {
-      console.error('doc.save() error: ', e);
+      console.error("doc.save() error: ", e);
     }
   }
 
@@ -64,7 +64,7 @@ class Doc {
         options || {},
       );
     } catch (e) {
-      console.error('doc.update() error: ', e);
+      console.error("doc.update() error: ", e);
     }
   }
 
@@ -75,7 +75,7 @@ class Doc {
     }
 
     const existing = await this.find(example);
-    if (existing && existing.length) newValue._key = existing[0]._key;
+    if (existing?.length) newValue._key = existing[0]._key;
 
     this.set(newValue);
     return this.save({ ...options, overwrite: true });
@@ -93,7 +93,7 @@ class Doc {
     // so, we don't do aql`` but actual javascript template literal ``
     const exampleS = JSON.stringify(example);
     const newValueS = JSON.stringify(newValue);
-    let upsertAQL = `
+    const upsertAQL = `
       UPSERT ${exampleS}
       INSERT ${newValueS}
       UPDATE ${newValueS}

@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * Update Game Spec Reference
  *
@@ -11,8 +12,8 @@
  *   bun run src/cli/update-game-spec.ts co_zJkF8xhjVFRNemoSdXZnZrUtHM2 co_zg5ZpS9hkN4P2pFNumajafW41FN
  */
 
-import { config } from "dotenv";
 import { resolve } from "node:path";
+import { config } from "dotenv";
 import type { Account, ID } from "jazz-tools";
 import { startWorker } from "jazz-tools/worker";
 import { Game, GameSpec } from "spicylib/schema";

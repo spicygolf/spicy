@@ -1,4 +1,4 @@
-import { Player } from '../models/player';
+import { Player } from "../models/player";
 
 export const PlayerTypeDefs = `
 type Player {
@@ -109,13 +109,13 @@ export const PlayerMutationSigs = `
 
 export const PlayerResolvers = {
   Query: {
-    getPlayer: async (root, { _key }) => {
+    getPlayer: async (_root, { _key }) => {
       const p = new Player();
       return await p.getPlayer(_key);
     },
-    searchPlayer: async (_, { q, p }, context) => {
-      let pl = new Player();
-      const ret = await pl.searchPlayer({q, p});
+    searchPlayer: async (_, { q, p }, _context) => {
+      const pl = new Player();
+      const ret = await pl.searchPlayer({ q, p });
       // console.log('players', ret?.players);
       return ret?.players || [];
     },
@@ -144,7 +144,7 @@ export const PlayerResolvers = {
   },
   Player: {
     handicap: async (player) => {
-      if( player?.handicap?.id ) {
+      if (player?.handicap?.id) {
         const p = new Player();
         return p.getHandicap(player.handicap);
       } else {
@@ -179,7 +179,7 @@ export const PlayerResolvers = {
     },
     removePlayerFromGame: (_, args) => {
       const p = new Player();
-      return p.removePlayerFromGame(args)
+      return p.removePlayerFromGame(args);
     },
   },
 };

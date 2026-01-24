@@ -1,16 +1,17 @@
-import { useParams, Link } from "react-router-dom";
 import { useCoState } from "jazz-tools/react";
 import { ArrowLeft } from "lucide-react";
 import Markdown from "react-markdown";
+import { Link, useParams } from "react-router-dom";
 import remarkGfm from "remark-gfm";
 import {
-  PlayerAccount,
   type GameCatalog,
   type GameSpec,
   type Option,
+  PlayerAccount,
   type PlayerAccountProfile,
 } from "spicylib/schema";
 import { getMetaOption, getSpecField } from "spicylib/scoring";
+import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -19,7 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
 
 /**
  * SpecDetail - Detailed view of a game spec

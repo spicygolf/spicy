@@ -1,18 +1,17 @@
-import { createStackNavigator } from '@react-navigation/stack';
-import { green } from 'common/colors';
-import Game from 'features/game/game';
-import Games from 'features/games/games';
-import NewGame from 'features/games/newGame';
-import NewGameCards from 'features/games/newGameCards';
-import NewGameInfo from 'features/games/newGameInfo';
-import NewGameList from 'features/games/newGameList';
-import NewGameScreen from 'features/games/newGameScreen';
-import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { createStackNavigator } from "@react-navigation/stack";
+import { green } from "common/colors";
+import Game from "features/game/game";
+import Games from "features/games/games";
+import NewGame from "features/games/newGame";
+import NewGameCards from "features/games/newGameCards";
+import NewGameInfo from "features/games/newGameInfo";
+import NewGameList from "features/games/newGameList";
+import NewGameScreen from "features/games/newGameScreen";
+import { SafeAreaView, StyleSheet } from "react-native";
 
-const GamesStack = (props) => {
+const GamesStack = (_props) => {
   const nada = {
-    animation: 'timing',
+    animation: "timing",
     config: {
       duration: 0,
     },
@@ -25,8 +24,8 @@ const GamesStack = (props) => {
       <Stack.Navigator
         initialRouteName="Games"
         screenOptions={{
-          title: 'Games',
-          headerMode: 'none',
+          title: "Games",
+          headerMode: "none",
           headerShown: false,
           headerStyle: {
             height: 0,

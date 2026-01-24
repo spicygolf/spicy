@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const GET_ROUNDS_FOR_PLAYER_DAY_QUERY = gql`
   query GetRoundsForPlayerDay($pkey: String!, $day: String!) {

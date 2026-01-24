@@ -1,15 +1,14 @@
-import { createStackNavigator } from '@react-navigation/stack';
-import AddCourse from 'features/gameSetup/addCourse';
-import AddPlayer from 'features/gameSetup/addPlayer';
-import EditPlayer from 'features/gameSetup/editPlayer';
-import GameSetupScreen from 'features/gameSetup/gameSetupScreen';
-import LinkRoundList from 'features/gameSetup/linkRoundList';
-import OptionsCustom from 'features/gameSetup/optionsCustom';
-import React from 'react';
+import { createStackNavigator } from "@react-navigation/stack";
+import AddCourse from "features/gameSetup/addCourse";
+import AddPlayer from "features/gameSetup/addPlayer";
+import EditPlayer from "features/gameSetup/editPlayer";
+import GameSetupScreen from "features/gameSetup/gameSetupScreen";
+import LinkRoundList from "features/gameSetup/linkRoundList";
+import OptionsCustom from "features/gameSetup/optionsCustom";
 
-const GameSetupStack = (props) => {
+const GameSetupStack = (_props) => {
   const nada = {
-    animation: 'timing',
+    animation: "timing",
     config: {
       duration: 0,
     },

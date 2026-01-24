@@ -1,6 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { GameSpecV03 } from "./arango";
+import type { GameSpecV03 } from "spicylib/transform/legacy-types";
 
 // Use api-0.3 package as the source of truth for gamespec JSON files
 const GAMESPEC_DATA_PATH = join(process.cwd(), "../api-0.3/data/gamespecs");

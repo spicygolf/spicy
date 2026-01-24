@@ -1,1 +1,200 @@
-{"legacyId":"91601227","exportedAt":"2026-01-24T15:49:41.183Z","game":{"_key":"91601227","_id":"games/91601227","_rev":"_k_OgNTy-Ax","name":"Five Points","start":"2020-08-08T00:15:26Z","scope":{"holes":"all18","teams_rotate":"never"},"holes":[],"options":[]},"rounds":[{"round":{"_id":"rounds/91601326","_key":"91601326","_rev":"_k_OgNeG-Gt","date":"2020-08-08T00:15:26Z","scores":[],"seq":1,"tee_id":382755},"edge":{"_key":"91601332","_id":"edges/91601332","_from":"rounds/91601326","_to":"games/91601227","_rev":"_k_OgNh6-Cm","type":"round2game","handicap_index":"6.2","course_handicap":"10"},"playerId":"65882409"}],"gamespecKey":"65384954","tees":{"382755":{"tee_id":382755,"name":"Dogwood","TotalYardage":6891,"holes":[{"hole":1,"hole_id":3017493,"length":467,"par":4,"handicap":11},{"hole":2,"hole_id":3017494,"length":422,"par":4,"handicap":13},{"hole":3,"hole_id":3017495,"length":340,"par":4,"handicap":15},{"hole":4,"hole_id":3017496,"length":428,"par":4,"handicap":5},{"hole":5,"hole_id":3017497,"length":421,"par":4,"handicap":1},{"hole":6,"hole_id":3017498,"length":169,"par":3,"handicap":17},{"hole":7,"hole_id":3017499,"length":507,"par":5,"handicap":3},{"hole":8,"hole_id":3017500,"length":220,"par":3,"handicap":7},{"hole":9,"hole_id":3017501,"length":510,"par":5,"handicap":9},{"hole":10,"hole_id":3017502,"length":445,"par":4,"handicap":6},{"hole":11,"hole_id":3017503,"length":422,"par":4,"handicap":4},{"hole":12,"hole_id":3017504,"length":350,"par":4,"handicap":10},{"hole":13,"hole_id":3017505,"length":181,"par":3,"handicap":16},{"hole":14,"hole_id":3017506,"length":500,"par":5,"handicap":2},{"hole":15,"hole_id":3017507,"length":382,"par":4,"handicap":14},{"hole":16,"hole_id":3017508,"length":336,"par":4,"handicap":12},{"hole":17,"hole_id":3017509,"length":217,"par":3,"handicap":18},{"hole":18,"hole_id":3017510,"length":574,"par":5,"handicap":8}],"Ratings":[{"RatingType":"Total","CourseRating":73.9,"SlopeRating":142,"BogeyRating":100.3},{"RatingType":"Front","CourseRating":37,"SlopeRating":142,"BogeyRating":50.2},{"RatingType":"Back","CourseRating":36.9,"SlopeRating":142,"BogeyRating":50.1}],"course":{"course_id":13995,"course_name":"Druid Hills Golf Club","course_city":"Atlanta","course_state":"GA"}}}}
+{
+  "legacyId": "91601227",
+  "exportedAt": "2026-01-24T15:49:41.183Z",
+  "game": {
+    "_key": "91601227",
+    "_id": "games/91601227",
+    "_rev": "_k_OgNTy-Ax",
+    "name": "Five Points",
+    "start": "2020-08-08T00:15:26Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/91601326",
+        "_key": "91601326",
+        "_rev": "_k_OgNeG-Gt",
+        "date": "2020-08-08T00:15:26Z",
+        "scores": [],
+        "seq": 1,
+        "tee_id": 382755
+      },
+      "edge": {
+        "_key": "91601332",
+        "_id": "edges/91601332",
+        "_from": "rounds/91601326",
+        "_to": "games/91601227",
+        "_rev": "_k_OgNh6-Cm",
+        "type": "round2game",
+        "handicap_index": "6.2",
+        "course_handicap": "10"
+      },
+      "playerId": "65882409"
+    }
+  ],
+  "gamespecKey": "65384954",
+  "tees": {
+    "382755": {
+      "tee_id": 382755,
+      "name": "Dogwood",
+      "TotalYardage": 6891,
+      "holes": [
+        {
+          "hole": 1,
+          "hole_id": 3017493,
+          "length": 467,
+          "par": 4,
+          "handicap": 11
+        },
+        {
+          "hole": 2,
+          "hole_id": 3017494,
+          "length": 422,
+          "par": 4,
+          "handicap": 13
+        },
+        {
+          "hole": 3,
+          "hole_id": 3017495,
+          "length": 340,
+          "par": 4,
+          "handicap": 15
+        },
+        {
+          "hole": 4,
+          "hole_id": 3017496,
+          "length": 428,
+          "par": 4,
+          "handicap": 5
+        },
+        {
+          "hole": 5,
+          "hole_id": 3017497,
+          "length": 421,
+          "par": 4,
+          "handicap": 1
+        },
+        {
+          "hole": 6,
+          "hole_id": 3017498,
+          "length": 169,
+          "par": 3,
+          "handicap": 17
+        },
+        {
+          "hole": 7,
+          "hole_id": 3017499,
+          "length": 507,
+          "par": 5,
+          "handicap": 3
+        },
+        {
+          "hole": 8,
+          "hole_id": 3017500,
+          "length": 220,
+          "par": 3,
+          "handicap": 7
+        },
+        {
+          "hole": 9,
+          "hole_id": 3017501,
+          "length": 510,
+          "par": 5,
+          "handicap": 9
+        },
+        {
+          "hole": 10,
+          "hole_id": 3017502,
+          "length": 445,
+          "par": 4,
+          "handicap": 6
+        },
+        {
+          "hole": 11,
+          "hole_id": 3017503,
+          "length": 422,
+          "par": 4,
+          "handicap": 4
+        },
+        {
+          "hole": 12,
+          "hole_id": 3017504,
+          "length": 350,
+          "par": 4,
+          "handicap": 10
+        },
+        {
+          "hole": 13,
+          "hole_id": 3017505,
+          "length": 181,
+          "par": 3,
+          "handicap": 16
+        },
+        {
+          "hole": 14,
+          "hole_id": 3017506,
+          "length": 500,
+          "par": 5,
+          "handicap": 2
+        },
+        {
+          "hole": 15,
+          "hole_id": 3017507,
+          "length": 382,
+          "par": 4,
+          "handicap": 14
+        },
+        {
+          "hole": 16,
+          "hole_id": 3017508,
+          "length": 336,
+          "par": 4,
+          "handicap": 12
+        },
+        {
+          "hole": 17,
+          "hole_id": 3017509,
+          "length": 217,
+          "par": 3,
+          "handicap": 18
+        },
+        {
+          "hole": 18,
+          "hole_id": 3017510,
+          "length": 574,
+          "par": 5,
+          "handicap": 8
+        }
+      ],
+      "Ratings": [
+        {
+          "RatingType": "Total",
+          "CourseRating": 73.9,
+          "SlopeRating": 142,
+          "BogeyRating": 100.3
+        },
+        {
+          "RatingType": "Front",
+          "CourseRating": 37,
+          "SlopeRating": 142,
+          "BogeyRating": 50.2
+        },
+        {
+          "RatingType": "Back",
+          "CourseRating": 36.9,
+          "SlopeRating": 142,
+          "BogeyRating": 50.1
+        }
+      ],
+      "course": {
+        "course_id": 13995,
+        "course_name": "Druid Hills Golf Club",
+        "course_city": "Atlanta",
+        "course_state": "GA"
+      }
+    }
+  }
+}

@@ -1,9 +1,9 @@
 module.exports = {
-  arrowParens: 'avoid',
+  arrowParens: "avoid",
   bracketSameLine: true,
   bracketSpacing: true,
   singleQuote: true,
-  trailingComma: 'all',
+  trailingComma: "all",
   // added from stock RN
   printWidth: 90,
   semi: true,

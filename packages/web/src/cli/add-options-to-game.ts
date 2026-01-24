@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * Add Options to Game and GameSpec
  *
@@ -11,11 +12,11 @@
  *   bun run src/cli/add-options-to-game.ts co_zJkF8xhjVFRNemoSdXZnZrUtHM2
  */
 
-import { config } from "dotenv";
 import { resolve } from "node:path";
+import { config } from "dotenv";
 import type { Account, ID } from "jazz-tools";
 import { startWorker } from "jazz-tools/worker";
-import { Game, MultiplierOption, MapOfOptions } from "spicylib/schema";
+import { Game, MapOfOptions, MultiplierOption } from "spicylib/schema";
 
 // Load environment from API package
 config({ path: resolve(import.meta.dir, "../../../api/.env") });

@@ -16,12 +16,7 @@
     "handicap_index_from",
     "next_ball_breaks_ties"
   ],
-  "junk": [
-    "low_ball"
-  ],
+  "junk": ["low_ball"],
   "multipliers": [],
-  "legacy_keys": [
-    "72068149",
-    "72068183"
-  ]
+  "legacy_keys": ["72068149", "72068183"]
 }

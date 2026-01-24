@@ -1,10 +1,10 @@
-import { Doc } from './doc';
-import { aql } from 'arangojs';
-import { db } from '../db/db';
-import { next } from '../util/database';
-import { getTee as getTeeGhin, searchPlayer } from '../ghin';
+import { aql } from "arangojs";
+import { db } from "../db/db";
+import { searchPlayer } from "../ghin";
+import { next } from "../util/database";
+import { Doc } from "./doc";
 
-const collection = db.collection('rounds');
+const collection = db.collection("rounds");
 
 class Round extends Doc {
   constructor() {
@@ -71,7 +71,7 @@ class Round extends Doc {
   }
 
   async getPlayer(rkey) {
-    const round = 'rounds/' + rkey;
+    const round = `rounds/${rkey}`;
 
     const playerInRound = aql`
       FOR v, e
@@ -97,7 +97,7 @@ class Round extends Doc {
     );
     return;
 
-    const round = 'rounds/' + rkey;
+    const round = `rounds/${rkey}`;
 
     const teeCourse = aql`
     FOR tv, te
@@ -122,17 +122,17 @@ class Round extends Doc {
   // pretty convoluted, but handles a shit-ton of writes at once with ArangoDB
   // transactions surrounding the read of old docs before writing new ones.
   async postScore(round, score) {
-    const action = String(function (params) {
-      const db = require('@arangodb').db;
+    const action = String((params) => {
+      const db = require("@arangodb").db;
 
-      let doc = Object.assign({}, db.rounds.document(params.round));
+      const doc = Object.assign({}, db.rounds.document(params.round));
       let scoreExisted = false;
 
       // loop through old scores
       for (let i = 0; i < doc.scores.length; i++) {
-        let oldscore = doc.scores[i];
-        let newscore = params.score;
-        if (oldscore.hole == newscore.hole) {
+        const oldscore = doc.scores[i];
+        const newscore = params.score;
+        if (oldscore.hole === newscore.hole) {
           // found the new score hole within old score holes,
           // so add/overwrite w new score
           scoreExisted = true;
@@ -142,7 +142,7 @@ class Round extends Doc {
             let valueExisted = false;
             // loop thru old values to see if new value key is there
             for (let l = 0; l < oldscore.values.length; l++) {
-              if (oldscore.values[l].k == newscore.values[j].k) {
+              if (oldscore.values[l].k === newscore.values[j].k) {
                 // found the new value key within old values,
                 // so overwrite w new value and date
                 valueExisted = true;
@@ -175,7 +175,7 @@ class Round extends Doc {
 
     const ret = await db.transaction(
       {
-        write: 'rounds',
+        write: "rounds",
       },
       action,
       {
@@ -210,7 +210,7 @@ class Round extends Doc {
   }
 
   async postRoundToHandicapService(rkey, posted_by) {
-    console.error('TODO: rework postRoundToHandicapService');
+    console.error("TODO: rework postRoundToHandicapService");
     return;
 
     const round = await this.load(rkey);
@@ -225,21 +225,19 @@ class Round extends Doc {
 
     let resp;
     switch (service) {
-      case 'ghin':
+      case "ghin": {
         const { token } = await login(
           player.handicap.id,
           player.handicap.lastName,
         );
         resp = await postRound({ player, round, course, tee, token });
         if (
-          resp &&
-          resp.score &&
-          resp.score.status &&
-          resp.score.status.toLowerCase() == 'validated'
+          resp?.score?.status &&
+          resp.score.status.toLowerCase() === "validated"
         ) {
           posting.success = true;
           posting.messages.push(
-            'Posting Round to GHIN handicap service succeeded.',
+            "Posting Round to GHIN handicap service succeeded.",
           );
           posting = {
             ...posting,
@@ -254,12 +252,13 @@ class Round extends Doc {
         } else {
           // TODO: handle errors, or at least add some errors to messages array
           console.error(resp);
-          console.error('TODO: add ^^^^ error(s) to messages array');
+          console.error("TODO: add ^^^^ error(s) to messages array");
           messages.push(
-            'Posting round to handicap service failed.  Please post manually.',
+            "Posting round to handicap service failed.  Please post manually.",
           );
         }
         break;
+      }
       default:
     }
 
@@ -273,8 +272,7 @@ class Round extends Doc {
   }
 
   getService(player) {
-    if (player && player.handicap && player.handicap.source)
-      return player.handicap.source.toLowerCase();
+    if (player?.handicap?.source) return player.handicap.source.toLowerCase();
     return null;
   }
 
@@ -284,11 +282,13 @@ class Round extends Doc {
   async addTeeToRound({ rkey, course_id, tee_id, course_handicap }) {
     // send in a minimal round object to getTees that are decorated with GHIN info
     const newTees = await this.getTees({
-      tees: [{
-        course_id,
-        tee_id,
-        course_handicap,
-      }],
+      tees: [
+        {
+          course_id,
+          tee_id,
+          course_handicap,
+        },
+      ],
     });
 
     const round_id = `rounds/${rkey}`;
@@ -299,7 +299,7 @@ class Round extends Doc {
         } IN rounds
         RETURN NEW
       `;
-    return next({query});
+    return next({ query });
   }
 
   /**
@@ -319,7 +319,7 @@ class Round extends Doc {
       } IN rounds
       RETURN NEW
     `;
-    return next({query, debug: true});
+    return next({ query, debug: true });
   }
 }
 
@@ -339,10 +339,11 @@ export const linkRound = async (_, args) => {
   let q, cursor;
 
   // start transaction
-  const trx = await db.beginTransaction({ write: ['games', 'rounds', 'edges']});
+  const trx = await db.beginTransaction({
+    write: ["games", "rounds", "edges"],
+  });
 
   try {
-
     // link player to game
     q = aql`
       LET p2g = {
@@ -414,22 +415,24 @@ export const linkRound = async (_, args) => {
     // commit transaction
     const result = await trx.commit();
 
-    let message = '';
+    let message = "";
     switch (result.status) {
-      case 'aborted':
+      case "aborted":
         message = JSON.stringify(
           {
-            message: 'Error linking round: transaction aborted',
+            message: "Error linking round: transaction aborted",
             p2g,
             g,
             r2g,
             r2p,
-          }, null, 2
+          },
+          null,
+          2,
         );
     }
 
     return {
-      success: result.status === 'committed',
+      success: result.status === "committed",
       _key: r._key,
       message,
     };
@@ -460,14 +463,14 @@ const getHandicap = async (player) => {
       },
     });
 
-    if (search[0] && search[0].hi_display) {
+    if (search[0]?.hi_display) {
       return search[0].hi_display;
     }
   }
 
   // didn't find anything
-  console.error('models/round.js getHandicap - error no data', player);
-  return '';
+  console.error("models/round.js getHandicap - error no data", player);
+  return "";
 };
 
 const _Round = Round;

@@ -1,19 +1,24 @@
-import { useQuery } from '@apollo/client';
-import { useNavigation } from '@react-navigation/native';
-import { GameContext } from 'features/game/gameContext';
-import Player from 'features/gameSetup/Player';
-import { GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY } from 'features/players/graphql';
-import React, { useContext } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { useQuery } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import { GameContext } from "features/game/gameContext";
+import Player from "features/gameSetup/Player";
+import { GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY } from "features/players/graphql";
+import { useContext } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-const AddPlayerFavorites = (props) => {
+const AddPlayerFavorites = (_props) => {
   const navigation = useNavigation();
   const { currentPlayerKey, game } = useContext(GameContext);
 
   const _renderFavoritesPlayer = ({ item, index }) => {
-    const handicap =
-      item && item.handicap && item.handicap.index ? item.handicap.index : 'NH';
-    const clubs = item?.handicap?.clubs?.map((c) => c.name).join(', ');
+    const handicap = item?.handicap?.index ? item.handicap.index : "NH";
+    const clubs = item?.handicap?.clubs?.map((c) => c.name).join(", ");
 
     return (
       <Player
@@ -29,19 +34,22 @@ const AddPlayerFavorites = (props) => {
             name: lItem.name,
             handicap: { index: lItem?.handicap?.index },
           };
-          navigation.navigate('LinkRoundList', { game, player });
+          navigation.navigate("LinkRoundList", { game, player });
         }}
         testID={index}
       />
     );
   };
 
-  const { loading, error, data } = useQuery(GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY, {
-    variables: {
-      pkey: currentPlayerKey,
+  const { loading, error, data } = useQuery(
+    GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
+    {
+      variables: {
+        pkey: currentPlayerKey,
+      },
+      fetchPolicy: "cache-and-network",
     },
-    fetchPolicy: 'cache-and-network',
-  });
+  );
 
   if (loading) {
     return (
@@ -51,7 +59,7 @@ const AddPlayerFavorites = (props) => {
     );
   }
 
-  if (error && error.message !== 'Network request failed') {
+  if (error && error.message !== "Network request failed") {
     console.log(error);
     // TODO: error component
     return <Text>Error Loading Favorite Players: `{error.message}`</Text>;
@@ -62,8 +70,8 @@ const AddPlayerFavorites = (props) => {
     ...p,
     fave: {
       faved: true,
-      from: { type: 'player', value: currentPlayerKey },
-      to: { type: 'player', value: p._key },
+      from: { type: "player", value: currentPlayerKey },
+      to: { type: "player", value: p._key },
       refetchQueries: [
         {
           query: GET_FAVORITE_PLAYERS_FOR_PLAYER_QUERY,
@@ -83,7 +91,7 @@ const AddPlayerFavorites = (props) => {
           data={newPlayers}
           renderItem={_renderFavoritesPlayer}
           keyExtractor={(item) => item._key}
-          keyboardShouldPersistTaps={'handled'}
+          keyboardShouldPersistTaps={"handled"}
         />
       </View>
     </View>

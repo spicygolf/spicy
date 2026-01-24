@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const MERGE_PLAYERS_MUTATION = gql`
   mutation MergePlayers($source: PlayerKeyInput!, $target: HandicapInput!) {

@@ -11,7 +11,7 @@
   "scoring": {
     "hole": [],
     "front": [],
-    "back" : [],
+    "back": [],
     "total": []
   },
   "junk": [
@@ -49,8 +49,8 @@
       "disp": "Index off of the low handicap or use full handicaps",
       "type": "menu",
       "choices": [
-        {"name":"low", "disp": "Low"},
-        {"name":"full", "disp": "Full"}
+        { "name": "low", "disp": "Low" },
+        { "name": "full", "disp": "Full" }
       ],
       "default": "low"
     },

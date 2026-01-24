@@ -1,4 +1,4 @@
-import { GameSpec } from '../models/gamespec';
+import { GameSpec } from "../models/gamespec";
 
 export const GameSpecTypeDefs = `
 type HoleScoringSpec {
@@ -87,8 +87,8 @@ export const GameSpecResolvers = {
       var gs = new GameSpec();
       return gs
         .find(name)
-        .then((res) => (res && res[0] ? res[0] : null))
-        .catch((err) => null);
+        .then((res) => (res?.[0] ? res[0] : null))
+        .catch((_err) => null);
     },
     searchGameSpec: async (_, { q }) => {
       var gs = new GameSpec();

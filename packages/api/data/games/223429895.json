@@ -1,1 +1,35 @@
-{"legacyId":"223429895","exportedAt":"2026-01-24T15:49:40.779Z","game":{"_key":"223429895","_id":"games/223429895","_rev":"_k_OgNT6-Am","name":"Five Points","start":"2021-10-20T16:30:03Z","scope":{"holes":"all18","teams_rotate":"never"},"holes":[{"hole":"1","teams":[],"multipliers":[]},{"hole":"2","teams":[],"multipliers":[]},{"hole":"3","teams":[],"multipliers":[]},{"hole":"4","teams":[],"multipliers":[]},{"hole":"5","teams":[],"multipliers":[]},{"hole":"6","teams":[],"multipliers":[]},{"hole":"7","teams":[],"multipliers":[]},{"hole":"8","teams":[],"multipliers":[]},{"hole":"9","teams":[],"multipliers":[]},{"hole":"10","teams":[],"multipliers":[]},{"hole":"11","teams":[],"multipliers":[]},{"hole":"12","teams":[],"multipliers":[]},{"hole":"13","teams":[],"multipliers":[]},{"hole":"14","teams":[],"multipliers":[]},{"hole":"15","teams":[],"multipliers":[]},{"hole":"16","teams":[],"multipliers":[]},{"hole":"17","teams":[],"multipliers":[]},{"hole":"18","teams":[],"multipliers":[]}],"options":[]},"rounds":[],"gamespecKey":"65384954"}
+{
+  "legacyId": "223429895",
+  "exportedAt": "2026-01-24T15:49:40.779Z",
+  "game": {
+    "_key": "223429895",
+    "_id": "games/223429895",
+    "_rev": "_k_OgNT6-Am",
+    "name": "Five Points",
+    "start": "2021-10-20T16:30:03Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [
+      { "hole": "1", "teams": [], "multipliers": [] },
+      { "hole": "2", "teams": [], "multipliers": [] },
+      { "hole": "3", "teams": [], "multipliers": [] },
+      { "hole": "4", "teams": [], "multipliers": [] },
+      { "hole": "5", "teams": [], "multipliers": [] },
+      { "hole": "6", "teams": [], "multipliers": [] },
+      { "hole": "7", "teams": [], "multipliers": [] },
+      { "hole": "8", "teams": [], "multipliers": [] },
+      { "hole": "9", "teams": [], "multipliers": [] },
+      { "hole": "10", "teams": [], "multipliers": [] },
+      { "hole": "11", "teams": [], "multipliers": [] },
+      { "hole": "12", "teams": [], "multipliers": [] },
+      { "hole": "13", "teams": [], "multipliers": [] },
+      { "hole": "14", "teams": [], "multipliers": [] },
+      { "hole": "15", "teams": [], "multipliers": [] },
+      { "hole": "16", "teams": [], "multipliers": [] },
+      { "hole": "17", "teams": [], "multipliers": [] },
+      { "hole": "18", "teams": [], "multipliers": [] }
+    ],
+    "options": []
+  },
+  "rounds": [],
+  "gamespecKey": "65384954"
+}

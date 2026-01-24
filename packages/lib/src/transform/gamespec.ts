@@ -5,7 +5,7 @@
  * Shared between API (catalog import) and web (user spec export).
  */
 
-import type { GameSpecV03 } from "./arango-types";
+import type { GameSpecV03 } from "./legacy-types";
 import type { TransformedGameSpec, TransformedOption } from "./types";
 
 /**

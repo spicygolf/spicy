@@ -1,12 +1,12 @@
-import HoleChooser from 'common/components/holeChooser';
-import { getAllOptions, isBinary } from 'common/utils/game';
-import { GameContext } from 'features/game/gameContext';
-import GameNav from 'features/games/gamenav';
-import { cloneDeep, find } from 'lodash';
-import React, { useContext } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import HoleChooser from "common/components/holeChooser";
+import { getAllOptions, isBinary } from "common/utils/game";
+import { GameContext } from "features/game/gameContext";
+import GameNav from "features/games/gamenav";
+import { cloneDeep, find } from "lodash";
+import { useContext } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
-import OptionAddValue from './optionAddValue';
+import OptionAddValue from "./optionAddValue";
 
 const OptionsCustom = (props) => {
   const { route } = props;
@@ -14,23 +14,23 @@ const OptionsCustom = (props) => {
   const { okey, setOption } = params;
 
   const { game } = useContext(GameContext);
-  const allOptions = getAllOptions({ game, type: 'game' });
+  const allOptions = getAllOptions({ game, type: "game" });
   const option = find(allOptions, (o) => o.key === okey);
   // console.log('OptionsCustom option.values', option.values);
 
   const addOptionValue = (newValue) => {
-    if (!newValue || newValue === '') {
+    if (!newValue || newValue === "") {
       return;
     }
-    let o = cloneDeep(option);
-    o.values.push({ __typename: 'OptionValue', value: newValue, holes: [] });
+    const o = cloneDeep(option);
+    o.values.push({ __typename: "OptionValue", value: newValue, holes: [] });
     setOption(o);
   };
 
   const setHoles = ({ item, hole, newValue }) => {
     // console.log('setHoles', item, hole, newValue, option);
 
-    let o = cloneDeep(option);
+    const o = cloneDeep(option);
     const selected = newValue === true;
 
     // loop thru existing option to build new option
@@ -62,17 +62,18 @@ const OptionsCustom = (props) => {
     //  (bool types and menu types with only two options)
     if (!selected) {
       let otherOptionValue;
-      if (o.sub_type === 'bool') {
+      if (o.sub_type === "bool") {
         // bool option so make sure other option is in option.values[]
-        otherOptionValue = (item.value !== 'true').toString();
-      } else if (o.sub_type === 'menu' && o.choices.length === 2) {
+        otherOptionValue = (item.value !== "true").toString();
+      } else if (o.sub_type === "menu" && o.choices.length === 2) {
         // two-choice option, so make sure other option is in option.values[]
-        otherOptionValue = o.choices.filter((c) => c.name !== item.value)[0].name;
+        otherOptionValue = o.choices.filter((c) => c.name !== item.value)[0]
+          .name;
       } else {
         if (o.values.length === 1) {
           // only one option, so can't move this to another value
           // pop up a notice to tell user to add more option values?
-          console.log('only one option value, so cannot add');
+          console.log("only one option value, so cannot add");
           return;
         }
       }
@@ -82,7 +83,11 @@ const OptionsCustom = (props) => {
       if (!otherOption) {
         const holes = [];
         holes.push(hole);
-        o.values.push({ __typename: 'OptionValue', value: otherOptionValue, holes });
+        o.values.push({
+          __typename: "OptionValue",
+          value: otherOptionValue,
+          holes,
+        });
       } else {
         otherOption.holes.push(hole);
       }
@@ -93,10 +98,10 @@ const OptionsCustom = (props) => {
   };
 
   const getOptionValueDisplay = (value) => {
-    if (option.sub_type === 'bool') {
-      return value === 'true' ? 'Yes' : 'No';
+    if (option.sub_type === "bool") {
+      return value === "true" ? "Yes" : "No";
     }
-    if (option.sub_type === 'menu') {
+    if (option.sub_type === "menu") {
       return find(option.choices, (c) => c.name === value).disp;
     }
     return value;
@@ -127,7 +132,7 @@ const OptionsCustom = (props) => {
 
   return (
     <View style={styles.container}>
-      <GameNav title="Customize Options" showBack={true} backTo={'GameSetup'} />
+      <GameNav title="Customize Options" showBack={true} backTo={"GameSetup"} />
       <View style={styles.title}>
         <Text>Option:</Text>
         <Text style={styles.name}>{option.disp}</Text>
@@ -154,7 +159,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   name: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     paddingHorizontal: 10,
   },
   optionContainer: {
@@ -165,15 +170,15 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   title: {
-    alignSelf: 'center',
-    flexDirection: 'row',
+    alignSelf: "center",
+    flexDirection: "row",
     paddingVertical: 10,
   },
   value: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     paddingRight: 10,
   },
   valueContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
 });

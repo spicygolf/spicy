@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { AdminApp } from "./admin/AdminApp";
 import { PlayerApp } from "./player/PlayerApp";

@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { AppState } from 'react-native';
+import { useEffect, useState } from "react";
+import { AppState } from "react-native";
 
-import usePrevious from './usePrevious';
+import usePrevious from "./usePrevious";
 
 const AppStateTypes = {
-  active: 'active',
-  background: 'background',
-  inactive: 'inactive',
+  active: "active",
+  background: "background",
+  inactive: "inactive",
 };
 
 export default function useAppState() {
@@ -18,7 +18,7 @@ export default function useAppState() {
   }
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', onChange);
+    const subscription = AppState.addEventListener("change", onChange);
     return () => subscription.remove();
   }, []);
 

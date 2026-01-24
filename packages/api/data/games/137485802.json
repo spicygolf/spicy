@@ -1,1 +1,37 @@
-{"legacyId":"137485802","exportedAt":"2026-01-24T15:49:41.042Z","game":{"_key":"137485802","_id":"games/137485802","_rev":"_k_OgNT2-_7","name":"Vegas","start":"2021-02-04T23:12:41Z","scope":{"holes":"all18","teams_rotate":"never"},"holes":[],"options":[]},"rounds":[{"round":{"_id":"rounds/137482306","_key":"137482306","_rev":"_k_OgNeK-BK","date":"2021-02-04T23:07:15Z","scores":[],"seq":1,"tees":[]},"edge":{"_key":"137485857","_id":"edges/137485857","_from":"rounds/137482306","_to":"games/137485802","_rev":"_k_OgNim-_8","type":"round2game"},"playerId":"135116067"}],"gamespecKey":"117463059"}
+{
+  "legacyId": "137485802",
+  "exportedAt": "2026-01-24T15:49:41.042Z",
+  "game": {
+    "_key": "137485802",
+    "_id": "games/137485802",
+    "_rev": "_k_OgNT2-_7",
+    "name": "Vegas",
+    "start": "2021-02-04T23:12:41Z",
+    "scope": { "holes": "all18", "teams_rotate": "never" },
+    "holes": [],
+    "options": []
+  },
+  "rounds": [
+    {
+      "round": {
+        "_id": "rounds/137482306",
+        "_key": "137482306",
+        "_rev": "_k_OgNeK-BK",
+        "date": "2021-02-04T23:07:15Z",
+        "scores": [],
+        "seq": 1,
+        "tees": []
+      },
+      "edge": {
+        "_key": "137485857",
+        "_id": "edges/137485857",
+        "_from": "rounds/137482306",
+        "_to": "games/137485802",
+        "_rev": "_k_OgNim-_8",
+        "type": "round2game"
+      },
+      "playerId": "135116067"
+    }
+  ],
+  "gamespecKey": "117463059"
+}

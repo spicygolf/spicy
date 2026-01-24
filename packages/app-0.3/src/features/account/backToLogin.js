@@ -1,8 +1,7 @@
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useNavigation } from "@react-navigation/native";
+import { StyleSheet, Text, View } from "react-native";
 
-const BackToLogin = (props) => {
+const BackToLogin = (_props) => {
   const navigation = useNavigation();
 
   return (
@@ -11,11 +10,11 @@ const BackToLogin = (props) => {
         Already have an account?
         <Text
           onPress={() => {
-            navigation.navigate('Login');
+            navigation.navigate("Login");
           }}
           style={styles.login_button}
         >
-          {' '}
+          {" "}
           Login
         </Text>
       </Text>
@@ -27,12 +26,12 @@ export default BackToLogin;
 
 const styles = StyleSheet.create({
   login_button: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     marginLeft: 6,
   },
   login_text: {
-    color: '#ccc',
+    color: "#ccc",
   },
   login_view: {
     paddingLeft: 15,

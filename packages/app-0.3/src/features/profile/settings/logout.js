@@ -1,12 +1,12 @@
-import { useApolloClient } from '@apollo/client';
-import { dark } from 'common/colors';
-import { logout } from 'common/utils/account';
-import { CurrentPlayerContext } from 'features/players/currentPlayerContext';
-import React, { useContext } from 'react';
-import { StyleSheet, Text } from 'react-native';
-import { Button, Card } from 'react-native-elements';
+import { useApolloClient } from "@apollo/client";
+import { dark } from "common/colors";
+import { logout } from "common/utils/account";
+import { CurrentPlayerContext } from "features/players/currentPlayerContext";
+import { useContext } from "react";
+import { StyleSheet, Text } from "react-native";
+import { Button, Card } from "react-native-elements";
 
-const Logout = (props) => {
+const Logout = (_props) => {
   const { setCurrentPlayer } = useContext(CurrentPlayerContext);
 
   const client = useApolloClient();
