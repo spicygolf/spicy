@@ -15,7 +15,13 @@ export function MultiplierOptionRow({
 }: MultiplierOptionRowProps) {
   const { theme } = useUnistyles();
 
-  const valueDisplay = option.value ? `${option.value}x` : "variable";
+  // Show "variable" if value comes from dynamic calculation (value_from) or user input (input_value)
+  const isVariable = option.value_from || option.input_value;
+  const valueDisplay = isVariable
+    ? "variable"
+    : option.value
+      ? `${option.value}x`
+      : "variable";
 
   return (
     <Pressable style={styles.optionRow} onPress={onPress}>
