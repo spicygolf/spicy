@@ -512,6 +512,80 @@ export async function upsertGameSpec(
     );
   }
 
+  // Add short name (defaults to full name if not specified)
+  spec.$jazz.set(
+    "short",
+    createMetaOption("short", "Short Name", "text", transformed.short),
+  );
+
+  // Add min_players (required)
+  spec.$jazz.set(
+    "min_players",
+    createMetaOption(
+      "min_players",
+      "Minimum Players",
+      "num",
+      transformed.min_players,
+    ),
+  );
+
+  // Add max_players if present
+  if (specData.max_players !== undefined) {
+    spec.$jazz.set(
+      "max_players",
+      createMetaOption(
+        "max_players",
+        "Maximum Players",
+        "num",
+        specData.max_players,
+      ),
+    );
+  }
+
+  // Add status (prod/dev/test)
+  spec.$jazz.set(
+    "status",
+    createMetaOption("status", "Status", "menu", transformed.status, {
+      choices: [
+        { name: "prod", disp: "Production" },
+        { name: "dev", disp: "Development" },
+        { name: "test", disp: "Test" },
+      ],
+    }),
+  );
+
+  // Add spec_type (points/skins/stableford/quota)
+  spec.$jazz.set(
+    "spec_type",
+    createMetaOption("spec_type", "Game Type", "menu", transformed.spec_type, {
+      choices: [
+        { name: "points", disp: "Points" },
+        { name: "skins", disp: "Skins" },
+        { name: "stableford", disp: "Stableford" },
+        { name: "quota", disp: "Quota" },
+      ],
+    }),
+  );
+
+  // Add location_type if present
+  if (transformed.location_type) {
+    spec.$jazz.set(
+      "location_type",
+      createMetaOption(
+        "location_type",
+        "Location Type",
+        "menu",
+        transformed.location_type,
+        {
+          choices: [
+            { name: "golf", disp: "Golf Course" },
+            { name: "any", disp: "Any Location" },
+          ],
+        },
+      ),
+    );
+  }
+
   // Add long_description if present
   if (transformed.long_description) {
     spec.$jazz.set(
