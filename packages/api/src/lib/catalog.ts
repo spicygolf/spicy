@@ -519,10 +519,67 @@ export async function upsertGameSpec(
   }
 
   // Build spec.options with references to catalog options OR create new options with overrides
-  if (transformed.options && transformed.options.length > 0 && catalogOptions) {
+  if (transformed.options && transformed.options.length > 0) {
     const specOptionsMap: Record<string, unknown> = {};
 
     for (const opt of transformed.options) {
+      // For meta options, always create a NEW option for this spec
+      // Meta options (short, aliases, status, etc.) are spec-specific, not shared from catalog
+      if (opt.type === "meta") {
+        const metaOpt = opt as MetaOptionData;
+        const newMetaOption = MetaOption.create(
+          {
+            name: metaOpt.name,
+            disp: metaOpt.disp,
+            type: "meta",
+            valueType: metaOpt.valueType,
+          },
+          { owner: specs.$jazz.owner },
+        );
+
+        // Set the value based on valueType
+        if (
+          metaOpt.valueType === "text_array" &&
+          Array.isArray(metaOpt.value)
+        ) {
+          newMetaOption.$jazz.set(
+            "valueArray",
+            StringList.create([...metaOpt.value], {
+              owner: specs.$jazz.owner,
+            }),
+          );
+        } else if (metaOpt.value !== undefined) {
+          newMetaOption.$jazz.set("value", String(metaOpt.value));
+        }
+
+        // Set optional fields
+        if (metaOpt.choices) {
+          newMetaOption.$jazz.set(
+            "choices",
+            ChoicesList.create(
+              metaOpt.choices.map((c) =>
+                ChoiceMap.create(c, { owner: specs.$jazz.owner }),
+              ),
+              { owner: specs.$jazz.owner },
+            ),
+          );
+        }
+        if (metaOpt.seq !== undefined) {
+          newMetaOption.$jazz.set("seq", metaOpt.seq);
+        }
+        if (metaOpt.searchable !== undefined) {
+          newMetaOption.$jazz.set("searchable", metaOpt.searchable);
+        }
+        if (metaOpt.required !== undefined) {
+          newMetaOption.$jazz.set("required", metaOpt.required);
+        }
+
+        specOptionsMap[opt.name] = newMetaOption;
+        continue;
+      }
+
+      // For game/junk/multiplier options, look up from catalog
+      if (!catalogOptions) continue;
       const catalogOption = catalogOptions[opt.name];
       if (!catalogOption) continue;
 
@@ -1723,24 +1780,9 @@ export async function importGameSpecsToCatalog(
         }
       }
 
-      // Collect embedded meta options (new unified format)
-      if (spec.meta && spec.meta.length > 0) {
-        for (const metaOpt of spec.meta) {
-          if (!allOptions.has(metaOpt.name)) {
-            allOptions.set(metaOpt.name, {
-              type: "meta",
-              name: metaOpt.name,
-              disp: metaOpt.disp,
-              valueType: metaOpt.valueType,
-              value: metaOpt.value,
-              choices: metaOpt.choices,
-              seq: metaOpt.seq,
-              searchable: metaOpt.searchable,
-              required: metaOpt.required,
-            });
-          }
-        }
-      }
+      // NOTE: Meta options are NOT collected into the catalog-level allOptions.
+      // Meta options (short, aliases, status, spec_type, etc.) are spec-specific
+      // and are created fresh for each spec in upsertGameSpec().
     } catch (error) {
       result.errors.push({
         item: `spec:${spec.disp || spec.name || spec._key || "unknown"}`,
