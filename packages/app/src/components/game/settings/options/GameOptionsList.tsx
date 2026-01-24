@@ -1,15 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { GameOption } from "spicylib/schema";
+import type { GameOption, JunkOption, MultiplierOption } from "spicylib/schema";
 import { useGame, useSaveOptionToGame, useTeamsMode } from "@/hooks";
 import { Text } from "@/ui";
 import { BoolOptionModal } from "./BoolOptionModal";
 import { DeleteGameButton } from "./DeleteGameButton";
 import { GameOptionRow } from "./GameOptionRow";
+import { JunkOptionRow } from "./JunkOptionRow";
 import { MenuOptionModal } from "./MenuOptionModal";
+import { MultiplierOptionRow } from "./MultiplierOptionRow";
 import { NumOptionModal } from "./NumOptionModal";
+import { OptionSectionHeader } from "./OptionSectionHeader";
+import { RemoveOptionModal } from "./RemoveOptionModal";
 import { TextOptionModal } from "./TextOptionModal";
+
+type ModalType = "game" | "junk" | "multiplier" | null;
 
 export function GameOptionsList() {
   // game.spec is the working copy of options (user modifications go here)
@@ -27,37 +33,50 @@ export function GameOptionsList() {
   const [selectedOptionName, setSelectedOptionName] = useState<string | null>(
     null,
   );
+  const [modalType, setModalType] = useState<ModalType>(null);
   const [showModal, setShowModal] = useState(false);
 
   const saveOptionToGame = useSaveOptionToGame(game);
 
-  // Get game options from game.spec (the working copy)
+  // Get options from game.spec (the working copy), grouped by type
   // Options are plain JSON objects now, no $isLoaded checks needed
-  const gameOptions = useMemo(() => {
+  const { gameOptions, junkOptions, multiplierOptions } = useMemo(() => {
     if (!game?.$isLoaded || !game.spec?.$isLoaded) {
-      return [];
+      return { gameOptions: [], junkOptions: [], multiplierOptions: [] };
     }
 
     const spec = game.spec;
-    const options: GameOption[] = [];
+    const gameOpts: GameOption[] = [];
+    const junkOpts: JunkOption[] = [];
+    const multiplierOpts: MultiplierOption[] = [];
+
     for (const key of Object.keys(spec)) {
       if (key.startsWith("$") || key === "_refs") continue;
       const option = spec[key];
-      if (option && option.type === "game") {
+      if (!option) continue;
+
+      if (option.type === "game") {
         const gameOpt = option as GameOption;
         // Filter out teamOnly options when teams mode is not active
         if (gameOpt.teamOnly && !isTeamsMode) {
           continue;
         }
-        options.push(gameOpt);
+        gameOpts.push(gameOpt);
+      } else if (option.type === "junk") {
+        junkOpts.push(option as JunkOption);
+      } else if (option.type === "multiplier") {
+        multiplierOpts.push(option as MultiplierOption);
       }
     }
 
-    return options.sort((a, b) => {
-      const seqA = a.seq ?? 999;
-      const seqB = b.seq ?? 999;
-      return seqA - seqB;
-    });
+    const sortBySeq = <T extends { seq?: number }>(a: T, b: T) =>
+      (a.seq ?? 999) - (b.seq ?? 999);
+
+    return {
+      gameOptions: gameOpts.sort(sortBySeq),
+      junkOptions: junkOpts.sort(sortBySeq),
+      multiplierOptions: multiplierOpts.sort(sortBySeq),
+    };
   }, [game, isTeamsMode]);
 
   // Helper to get current value from game.spec
@@ -78,10 +97,26 @@ export function GameOptionsList() {
     [game],
   );
 
-  const handleOptionPress = useCallback((option: GameOption) => {
+  const handleGameOptionPress = useCallback((option: GameOption) => {
     setSelectedOptionName(option.name);
+    setModalType("game");
     setShowModal(true);
   }, []);
+
+  const handleJunkOptionPress = useCallback((option: JunkOption) => {
+    setSelectedOptionName(option.name);
+    setModalType("junk");
+    setShowModal(true);
+  }, []);
+
+  const handleMultiplierOptionPress = useCallback(
+    (option: MultiplierOption) => {
+      setSelectedOptionName(option.name);
+      setModalType("multiplier");
+      setShowModal(true);
+    },
+    [],
+  );
 
   const handleOptionSelect = useCallback(
     (value: string) => {
@@ -94,28 +129,69 @@ export function GameOptionsList() {
     [selectedOptionName, saveOptionToGame],
   );
 
+  const handleRemoveOption = useCallback(() => {
+    if (!selectedOptionName || !game?.spec?.$isLoaded) {
+      return;
+    }
+
+    // Remove the option from the game's spec
+    game.spec.$jazz.delete(selectedOptionName);
+    setShowModal(false);
+    setSelectedOptionName(null);
+    setModalType(null);
+  }, [selectedOptionName, game]);
+
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
     setSelectedOptionName(null);
+    setModalType(null);
   }, []);
 
-  // Look up the selected option from gameOptions by name
-  const selectedOption = selectedOptionName
-    ? (gameOptions.find((opt) => opt.name === selectedOptionName) ?? null)
-    : null;
+  // Look up the selected option by name based on modal type
+  const selectedGameOption =
+    modalType === "game" && selectedOptionName
+      ? (gameOptions.find((opt) => opt.name === selectedOptionName) ?? null)
+      : null;
+
+  const selectedJunkOption =
+    modalType === "junk" && selectedOptionName
+      ? (junkOptions.find((opt) => opt.name === selectedOptionName) ?? null)
+      : null;
+
+  const selectedMultiplierOption =
+    modalType === "multiplier" && selectedOptionName
+      ? (multiplierOptions.find((opt) => opt.name === selectedOptionName) ??
+        null)
+      : null;
 
   // Auto-clear modal state if the selected option no longer exists
   useEffect(() => {
-    if (showModal && selectedOptionName && !selectedOption) {
-      setShowModal(false);
-      setSelectedOptionName(null);
+    if (showModal && selectedOptionName) {
+      const optionExists =
+        selectedGameOption || selectedJunkOption || selectedMultiplierOption;
+      if (!optionExists) {
+        setShowModal(false);
+        setSelectedOptionName(null);
+        setModalType(null);
+      }
     }
-  }, [showModal, selectedOptionName, selectedOption]);
+  }, [
+    showModal,
+    selectedOptionName,
+    selectedGameOption,
+    selectedJunkOption,
+    selectedMultiplierOption,
+  ]);
 
-  if (gameOptions.length === 0) {
+  const hasNoOptions =
+    gameOptions.length === 0 &&
+    junkOptions.length === 0 &&
+    multiplierOptions.length === 0;
+
+  if (hasNoOptions) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>No game options available</Text>
+        <Text style={styles.emptyText}>No options available</Text>
         <DeleteGameButton />
       </View>
     );
@@ -124,57 +200,105 @@ export function GameOptionsList() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        {gameOptions.map((option) => (
-          <GameOptionRow
-            key={option.name}
-            option={option}
-            currentValue={getCurrentValue(option.name)}
-            onPress={() => handleOptionPress(option)}
-          />
-        ))}
+        {/* Game Options Section */}
+        {gameOptions.length > 0 && (
+          <>
+            <OptionSectionHeader title="Settings" />
+            {gameOptions.map((option) => (
+              <GameOptionRow
+                key={option.name}
+                option={option}
+                currentValue={getCurrentValue(option.name)}
+                onPress={() => handleGameOptionPress(option)}
+              />
+            ))}
+          </>
+        )}
+
+        {/* Junk Options Section */}
+        {junkOptions.length > 0 && (
+          <>
+            <OptionSectionHeader title="Junk (Points)" />
+            {junkOptions.map((option) => (
+              <JunkOptionRow
+                key={option.name}
+                option={option}
+                onPress={() => handleJunkOptionPress(option)}
+              />
+            ))}
+          </>
+        )}
+
+        {/* Multiplier Options Section */}
+        {multiplierOptions.length > 0 && (
+          <>
+            <OptionSectionHeader title="Multipliers" />
+            {multiplierOptions.map((option) => (
+              <MultiplierOptionRow
+                key={option.name}
+                option={option}
+                onPress={() => handleMultiplierOptionPress(option)}
+              />
+            ))}
+          </>
+        )}
+
+        {/* Admin Section */}
+        <OptionSectionHeader title="Admin" />
         <DeleteGameButton />
       </ScrollView>
 
-      {selectedOption && (
+      {/* Game Option Modals */}
+      {selectedGameOption && (
         <>
-          {selectedOption.valueType === "bool" && (
+          {selectedGameOption.valueType === "bool" && (
             <BoolOptionModal
               visible={showModal}
-              option={selectedOption}
-              currentValue={getCurrentValue(selectedOption.name)}
+              option={selectedGameOption}
+              currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
             />
           )}
-          {selectedOption.valueType === "menu" && (
+          {selectedGameOption.valueType === "menu" && (
             <MenuOptionModal
               visible={showModal}
-              option={selectedOption}
-              currentValue={getCurrentValue(selectedOption.name)}
+              option={selectedGameOption}
+              currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
             />
           )}
-          {selectedOption.valueType === "num" && (
+          {selectedGameOption.valueType === "num" && (
             <NumOptionModal
               visible={showModal}
-              option={selectedOption}
-              currentValue={getCurrentValue(selectedOption.name)}
+              option={selectedGameOption}
+              currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
             />
           )}
-          {selectedOption.valueType === "text" && (
+          {selectedGameOption.valueType === "text" && (
             <TextOptionModal
               visible={showModal}
-              option={selectedOption}
-              currentValue={getCurrentValue(selectedOption.name)}
+              option={selectedGameOption}
+              currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
             />
           )}
         </>
       )}
+
+      {/* Junk/Multiplier Remove Modal */}
+      <RemoveOptionModal
+        visible={
+          showModal && (modalType === "junk" || modalType === "multiplier")
+        }
+        option={selectedJunkOption || selectedMultiplierOption}
+        onRemove={handleRemoveOption}
+        onClose={handleCloseModal}
+      />
     </View>
   );
 }

@@ -1,53 +1,33 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import type { GameOption } from "spicylib/schema";
+import type { JunkOption } from "spicylib/schema";
 import { Text } from "@/ui";
 
-interface GameOptionRowProps {
-  option: GameOption;
-  currentValue: string | undefined;
+interface JunkOptionRowProps {
+  option: JunkOption;
   onPress: () => void;
 }
 
-export function GameOptionRow({
-  option,
-  currentValue,
-  onPress,
-}: GameOptionRowProps) {
+export function JunkOptionRow({ option, onPress }: JunkOptionRowProps) {
   const { theme } = useUnistyles();
 
-  const displayValue = () => {
-    const value = currentValue ?? option.defaultValue;
-
-    switch (option.valueType) {
-      case "bool":
-        return value === "true" || value === "1" ? "Yes" : "No";
-      case "menu":
-        // Choices are plain JSON arrays now
-        if (option.choices) {
-          const choice = option.choices.find((c) => c.name === value);
-          return choice ? choice.disp : value;
-        }
-        return value;
-      case "num":
-        return value;
-      case "text":
-        return value;
-      default:
-        return value;
-    }
-  };
+  const scopeLabel = option.scope ? ` (${option.scope})` : "";
 
   return (
     <Pressable style={styles.optionRow} onPress={onPress}>
-      <Text style={styles.optionLabel}>{option.disp}</Text>
+      <View style={styles.optionLeft}>
+        <Text style={styles.optionLabel}>{option.disp}</Text>
+      </View>
       <View style={styles.optionValue}>
-        <Text style={styles.optionValueText}>{displayValue()}</Text>
+        <Text style={styles.optionValueText}>
+          {option.value} {option.value === 1 ? "pt" : "pts"}
+          {scopeLabel}
+        </Text>
         <FontAwesome6
           name="chevron-right"
           iconStyle="solid"
-          size={14}
+          size={10}
           color={theme.colors.secondary}
         />
       </View>
@@ -60,25 +40,28 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: theme.gap(1),
+    paddingVertical: theme.gap(0.75),
     paddingHorizontal: theme.gap(1),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
     backgroundColor: theme.colors.background,
   },
+  optionLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(0.75),
+    flex: 1,
+  },
   optionLabel: {
     fontSize: 14,
-    fontWeight: "500",
     color: theme.colors.primary,
-    flex: 1,
   },
   optionValue: {
     flexDirection: "row",
     alignItems: "center",
-    gap: theme.gap(0.75),
   },
   optionValueText: {
-    fontSize: 14,
+    fontSize: 13,
     color: theme.colors.secondary,
   },
 }));
