@@ -42,6 +42,16 @@ export interface GameSpecV03 {
     choices?: Array<{ name: string; disp: string }>;
     teamOnly?: boolean;
   }>;
+  meta?: Array<{
+    name: string;
+    disp: string;
+    valueType: string;
+    value?: string | string[];
+    choices?: Array<{ name: string; disp: string }>;
+    seq?: number;
+    searchable?: boolean;
+    required?: boolean;
+  }>;
   default_options?: unknown[];
   todos?: string[];
 }

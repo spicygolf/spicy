@@ -29,10 +29,23 @@ export interface TransformedMultiplierOption {
   value: number;
 }
 
+export interface TransformedMetaOption {
+  name: string;
+  disp: string;
+  type: "meta";
+  valueType: "bool" | "num" | "menu" | "text" | "text_array";
+  value?: string | string[];
+  choices?: Array<{ name: string; disp: string }>;
+  seq?: number;
+  searchable?: boolean;
+  required?: boolean;
+}
+
 export type TransformedOption =
   | TransformedGameOption
   | TransformedJunkOption
-  | TransformedMultiplierOption;
+  | TransformedMultiplierOption
+  | TransformedMetaOption;
 
 export interface TransformedGameSpec {
   name: string;
