@@ -171,18 +171,12 @@ export function useAddPlayerToGame() {
 function computeShouldAutoAssignTeam(game: Game): boolean {
   if (!game.$isLoaded) return false;
 
-  // Get specs from game
-  const specs = [];
-  if (game.specs?.$isLoaded) {
-    for (const spec of game.specs) {
-      if (spec?.$isLoaded) specs.push(spec);
-    }
-  }
+  // Get spec from game (working copy)
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (!spec) return false;
 
-  if (specs.length === 0) return false;
-
-  // Check if any spec forces teams mode
-  const specForcesTeams = specs.some(computeSpecForcesTeams);
+  // Check if spec forces teams mode
+  const specForcesTeams = computeSpecForcesTeams(spec);
   if (specForcesTeams) return false;
 
   // Check if user has manually activated teams mode
@@ -192,10 +186,8 @@ function computeShouldAutoAssignTeam(game: Game): boolean {
     game.scope.teamsConfig.active === true;
   if (userActivated) return false;
 
-  // Get min_players from specs
-  const minPlayers = Math.min(
-    ...specs.map((s) => (getSpecField(s, "min_players") as number) ?? 2),
-  );
+  // Get min_players from spec
+  const minPlayers = (getSpecField(spec, "min_players") as number) ?? 2;
 
   // Current player count (before adding)
   const currentPlayerCount = game.players?.$isLoaded ? game.players.length : 0;

@@ -45,11 +45,10 @@ export interface ScoreboardResult {
  */
 function createScoringFingerprint(game: Game | null): number | null {
   if (!game?.$isLoaded) return null;
-  if (!game.specs?.$isLoaded || game.specs.length === 0) return null;
+  if (!game.spec?.$isLoaded) return null;
 
-  // GameSpec IS the options map directly
-  const spec = game.specs[0];
-  if (!spec?.$isLoaded) return null;
+  // game.spec is the working copy of options
+  const spec = game.spec;
   if (!game.holes?.$isLoaded || game.holes.length === 0) return null;
   if (!game.rounds?.$isLoaded || game.rounds.length === 0) return null;
 
@@ -143,14 +142,12 @@ function createScoringFingerprint(game: Game | null): number | null {
     }
   }
 
-  // 5. Game-level option overrides (if any)
-  if (game.options?.$isLoaded) {
-    for (const key of Object.keys(game.options)) {
-      if (key.startsWith("$") || key === "_refs") continue;
-      const opt = game.options[key];
-      if (opt?.$isLoaded && opt.value !== undefined) {
-        parts.push(`go:${key}:${opt.value}`);
-      }
+  // 5. Game spec options (includes any user modifications)
+  for (const key of Object.keys(spec)) {
+    if (key.startsWith("$") || key === "_refs") continue;
+    const opt = spec[key];
+    if (opt?.$isLoaded && opt.type === "game" && opt.value !== undefined) {
+      parts.push(`go:${key}:${opt.value}`);
     }
   }
 

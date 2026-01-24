@@ -197,12 +197,12 @@ function runPipeline(ctx: ScoringContext): ScoringContext {
 // =============================================================================
 
 function extractGameSpec(game: Game): GameSpec {
-  // New architecture: use specRef (the live catalog spec)
-  if (game.specRef?.$isLoaded) {
-    return game.specRef;
+  // New architecture: use game.spec (working copy with user modifications)
+  if (game.spec?.$isLoaded) {
+    return game.spec;
   }
 
-  // Old architecture: use game.specs[0]
+  // Legacy: use game.specs[0]
   if (game.specs?.$isLoaded && game.specs.length > 0) {
     const spec = game.specs[0];
     if (spec?.$isLoaded) {
@@ -210,7 +210,12 @@ function extractGameSpec(game: Game): GameSpec {
     }
   }
 
-  throw new Error("Game must have a game spec (specRef or specs[0])");
+  // Fallback: use specRef (catalog spec)
+  if (game.specRef?.$isLoaded) {
+    return game.specRef;
+  }
+
+  throw new Error("Game must have a game spec (spec, specs[0], or specRef)");
 }
 
 function extractOptions(
@@ -218,23 +223,17 @@ function extractOptions(
   gameSpec: GameSpec,
 ): MapOfOptions | undefined {
   // Priority order:
-  // 1. Game-level option overrides (user customizations for this game)
-  // 2. Spec reference (live spec from catalog) - GameSpec IS the options map
-  // 3. Legacy game.specs[0] (backwards compat) - GameSpec IS the options map
-  // 4. Primary game spec (final fallback) - GameSpec IS the options map
+  // 1. Game's working spec copy (game.spec) - user modifications are here
+  // 2. Legacy game.specs[0] (backwards compat)
+  // 3. Spec reference (catalog spec - fallback if spec not populated)
+  // 4. Primary game spec (final fallback)
 
-  if (game.options?.$isLoaded) {
-    return game.options;
+  // New architecture: game.spec is the working copy with user modifications
+  if (game.spec?.$isLoaded) {
+    return game.spec;
   }
 
-  // Check specRef (new architecture - live spec reference)
-  // GameSpec IS the options map directly
-  if (game.specRef?.$isLoaded) {
-    return game.specRef;
-  }
-
-  // Fall back to game.specs[0] (old architecture)
-  // GameSpec IS the options map directly
+  // Legacy: game.specs[0]
   if (game.specs?.$isLoaded && game.specs.length > 0) {
     const legacySpec = game.specs[0];
     if (legacySpec?.$isLoaded) {
@@ -242,8 +241,12 @@ function extractOptions(
     }
   }
 
+  // Fallback: specRef (catalog spec)
+  if (game.specRef?.$isLoaded) {
+    return game.specRef;
+  }
+
   // Final fallback to gameSpec (if different from above)
-  // GameSpec IS the options map directly
   if (gameSpec?.$isLoaded) {
     return gameSpec;
   }

@@ -12,18 +12,10 @@ import { NumOptionModal } from "./NumOptionModal";
 import { TextOptionModal } from "./TextOptionModal";
 
 export function GameOptionsList() {
-  // GameSpec IS the options map - resolve specs with $each to load all options
+  // game.spec is the working copy of options (user modifications go here)
   const { game } = useGame(undefined, {
     resolve: {
-      specs: {
-        $each: {
-          $each: {
-            choices: { $each: true },
-          },
-          teamsConfig: true,
-        },
-      },
-      options: {
+      spec: {
         $each: {
           choices: { $each: true },
         },
@@ -42,17 +34,13 @@ export function GameOptionsList() {
 
   const saveOptionToGame = useSaveOptionToGame(game);
 
-  // GameSpec IS the options map directly (no wrapper)
+  // Get game options from game.spec (the working copy)
   const gameOptions = useMemo(() => {
-    if (!game?.$isLoaded || !game.specs?.$isLoaded || game.specs.length === 0) {
+    if (!game?.$isLoaded || !game.spec?.$isLoaded) {
       return [];
     }
 
-    const spec = game.specs[0];
-    if (!spec?.$isLoaded) {
-      return [];
-    }
-
+    const spec = game.spec;
     const options: GameOption[] = [];
     for (const key of Object.keys(spec)) {
       if (key.startsWith("$") || key === "_refs") continue;
@@ -74,32 +62,17 @@ export function GameOptionsList() {
     });
   }, [game, isTeamsMode]);
 
-  // Helper to get current value (check game.options first, then fall back to spec)
+  // Helper to get current value from game.spec
   const getCurrentValue = useCallback(
     (optionName: string): string | undefined => {
-      // Check game.options first (game instance override)
-      if (
-        game?.$isLoaded &&
-        game.$jazz.has("options") &&
-        game.options?.$isLoaded
-      ) {
-        const gameOption = game.options[optionName];
-        if (gameOption?.$isLoaded && gameOption.type === "game") {
-          const opt = gameOption as GameOption;
-          return opt.value ?? opt.defaultValue;
-        }
+      if (!game?.$isLoaded || !game.spec?.$isLoaded) {
+        return undefined;
       }
 
-      // Fall back to spec (GameSpec IS the options map directly)
-      if (game?.$isLoaded && game.specs?.$isLoaded && game.specs.length > 0) {
-        const spec = game.specs[0];
-        if (spec?.$isLoaded) {
-          const specOption = spec[optionName];
-          if (specOption?.$isLoaded && specOption.type === "game") {
-            const opt = specOption as GameOption;
-            return opt.value ?? opt.defaultValue;
-          }
-        }
+      const specOption = game.spec[optionName];
+      if (specOption?.$isLoaded && specOption.type === "game") {
+        const opt = specOption as GameOption;
+        return opt.value ?? opt.defaultValue;
       }
 
       return undefined;

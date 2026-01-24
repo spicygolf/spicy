@@ -158,8 +158,8 @@ describe("Five Points Integration Tests", () => {
     it("should have spec options with correct overrides", () => {
       requireGame();
 
-      // GameSpec IS the options map directly (no wrapper)
-      const spec = game.specs?.[0];
+      // game.spec is the working copy of options (or fall back to specs[0] for legacy)
+      const spec = game.spec?.$isLoaded ? game.spec : game.specs?.[0];
       expect(spec?.$isLoaded).toBe(true);
 
       // Five Points overrides low_ball and low_total to value 2 (base is 1)

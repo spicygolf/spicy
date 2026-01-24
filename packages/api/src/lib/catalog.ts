@@ -133,7 +133,7 @@ import {
   Tee,
   TeeHole,
 } from "spicylib/schema";
-import { getSpecField } from "spicylib/scoring";
+import { copySpecOptions, getSpecField } from "spicylib/scoring";
 import { transformGameSpec } from "spicylib/transform";
 import {
   type ArangoTeeRating,
@@ -2898,6 +2898,14 @@ async function importGame(
     `${existingGame ? "Updating" : "Creating"} game ${game._key}: rounds=${roundToGames.length}, players=${players.length}, specRef=${specName}, holes=${gameHoles.length}`,
   );
 
+  // Copy spec options to create the game's working copy
+  // spec = working copy (user modifications go here)
+  // specRef = reference to catalog spec (for reset/diff)
+  let gameSpecCopy: MapOfOptions | undefined;
+  if (gameSpec?.$isLoaded) {
+    gameSpecCopy = await copySpecOptions(gameSpec, gameGroup);
+  }
+
   // Create new game or update existing one
   let finalGame: Game;
 
@@ -2910,12 +2918,19 @@ async function importGame(
     existingGame.$jazz.set("players", players);
     existingGame.$jazz.set("rounds", roundToGames);
     existingGame.$jazz.set("legacyId", game._key);
-    // Set specRef (the new way) and clear deprecated specs array
+    // Set spec (working copy) and specRef (catalog reference)
+    if (gameSpecCopy) {
+      existingGame.$jazz.set("spec", gameSpecCopy);
+    }
     if (gameSpec) {
       existingGame.$jazz.set("specRef", gameSpec);
     }
+    // Clear deprecated fields
     if (existingGame.$jazz.has("specs")) {
       existingGame.$jazz.delete("specs");
+    }
+    if (existingGame.$jazz.has("options")) {
+      existingGame.$jazz.delete("options");
     }
     finalGame = existingGame;
   } else {
@@ -2932,7 +2947,11 @@ async function importGame(
       },
       { owner: gameGroup },
     );
-    // Set specRef after creation (optional field)
+    // Set spec (working copy) and specRef (catalog reference) after creation
+    if (gameSpecCopy) {
+      // @ts-expect-error - MaybeLoaded types in migration code, gameSpecCopy is verified loaded
+      newGame.$jazz.set("spec", gameSpecCopy);
+    }
     if (gameSpec) {
       // @ts-expect-error - MaybeLoaded types in migration code, gameSpec is verified loaded above
       newGame.$jazz.set("specRef", gameSpec);
@@ -2940,70 +2959,30 @@ async function importGame(
     finalGame = newGame;
   }
 
-  // Import game-level option overrides from v0.3 data
+  // Apply v0.3 game-level option overrides to game.spec
   // v0.3 game options have two types:
   // 1. Game-level: {name, disp, type, value} - applies to entire game
   // 2. Hole-level: {name, values: [{value, holes}]} - applies to specific holes
-  const catalogOptions = loadedCatalog.options;
-  if (game.options && game.options.length > 0 && catalogOptions?.$isLoaded) {
-    const gameOptionsMap = MapOfOptions.create({}, { owner: gameGroup });
-
+  if (game.options && game.options.length > 0 && gameSpecCopy) {
     for (const option of game.options) {
       // Skip hole-level options (they have a values array, handled elsewhere)
       if ("values" in option && option.values && Array.isArray(option.values)) {
         continue;
       }
 
-      // Game-level option - copy from catalog and set value override
+      // Game-level option - apply override to game.spec
       if (
         "value" in option &&
         option.name &&
         option.value &&
-        catalogOptions.$jazz.has(option.name)
+        gameSpecCopy.$jazz.has(option.name)
       ) {
-        const catalogOption = catalogOptions[option.name];
-        if (catalogOption?.$isLoaded && catalogOption.type === "game") {
-          const gameOption = catalogOption as GameOption;
-
-          // Create new option for this game
-          const newOption = GameOption.create(
-            {
-              name: gameOption.name,
-              disp: gameOption.disp,
-              type: "game",
-              version: gameOption.version,
-              valueType: gameOption.valueType,
-              defaultValue: gameOption.defaultValue,
-            },
-            { owner: gameGroup },
-          );
-
-          // Copy choices if they exist
-          if (
-            gameOption.$jazz.has("choices") &&
-            gameOption.choices?.$isLoaded
-          ) {
-            // @ts-expect-error - MaybeLoaded types in migration code
-            newOption.$jazz.set("choices", gameOption.choices);
-          }
-
-          // Copy seq if it exists
-          if (gameOption.$jazz.has("seq") && gameOption.seq !== undefined) {
-            newOption.$jazz.set("seq", gameOption.seq);
-          }
-
-          // Set the value from v0.3 data
-          newOption.$jazz.set("value", option.value);
-
-          // Add to game options map
-          gameOptionsMap.$jazz.set(option.name, newOption);
+        const specOption = gameSpecCopy[option.name];
+        if (specOption?.$isLoaded && specOption.type === "game") {
+          // Set the value override directly on the spec copy
+          (specOption as GameOption).$jazz.set("value", option.value);
         }
       }
-    }
-
-    // Set game.options if we created any options
-    if (Object.keys(gameOptionsMap).length > 0) {
-      finalGame.$jazz.set("options", gameOptionsMap);
     }
   }
 

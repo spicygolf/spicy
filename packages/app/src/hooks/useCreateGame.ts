@@ -9,6 +9,7 @@ import {
   ListOfRoundToGames,
   PlayerAccount,
 } from "spicylib/schema";
+import { copySpecOptions } from "spicylib/scoring";
 import { addPlayerToGameCore } from "../utils/addPlayerToGameCore";
 import { reportError } from "../utils/reportError";
 import { useJazzWorker } from "./useJazzWorker";
@@ -106,14 +107,18 @@ export function useCreateGame() {
       }
     }
 
+    // Copy spec options to create the game's working copy
+    // spec = working copy (user modifications go here)
+    // specRef = reference to catalog spec (for reset/diff)
+    const spec = await copySpecOptions(firstSpec, group);
+
     // Create the game
-    // specRef points to catalog spec for scoring rules
-    // game.options holds any user customizations (not implemented yet)
     const game = Game.create(
       {
         start: new Date(),
         name,
         scope,
+        spec,
         specRef: firstSpec,
         holes,
         players,

@@ -9,12 +9,14 @@
  * - This helper merges both: check GameHole.options first, then fall back to game/spec options
  */
 
+import type { Group } from "jazz-tools";
 import type {
   Game,
   GameHole,
   GameOption,
   GameSpec,
   JunkOption,
+  MapOfOptions,
   MetaOption,
   MultiplierOption,
   Option,
@@ -332,9 +334,11 @@ export function getSpecField(
  * Get the effective options source for a game.
  *
  * Resolution order:
- * 1. Game-level option overrides
- * 2. Spec reference options (live spec from catalog)
- * 3. Legacy game.specs[0] options
+ * 1. Game's working spec copy (game.spec) - primary source
+ * 2. Legacy game.specs[0] options - backwards compatibility
+ * 3. Spec reference (game.specRef) - fallback if spec not copied yet
+ *
+ * Note: game.options is deprecated - user changes go into game.spec directly.
  *
  * @param game - Game to get options from
  * @returns The options map or undefined
@@ -355,23 +359,18 @@ function getOptionsFromGame(game: Game | undefined | null) {
     return o.$jazz?.has ? o.$jazz.has(field) : field in (o as object);
   };
 
-  // Game-level overrides (only if the field exists AND has options)
-  if (hasField(game, "options") && game.options?.$isLoaded) {
-    // Check if options map has any actual options (not just empty)
-    const hasOptions = Object.keys(game.options).some(
+  // 1. Game's working spec copy (primary source)
+  if (hasField(game, "spec") && game.spec?.$isLoaded) {
+    // Check if spec map has any actual options (not just empty)
+    const hasOptions = Object.keys(game.spec).some(
       (k) => !k.startsWith("$") && k !== "_refs",
     );
     if (hasOptions) {
-      return game.options;
+      return game.spec;
     }
   }
 
-  // Spec reference (live) - GameSpec IS the options map
-  if (hasField(game, "specRef") && game.specRef?.$isLoaded) {
-    return game.specRef;
-  }
-
-  // Legacy game.specs[0] - GameSpec IS the options map
+  // 2. Legacy game.specs[0] - backwards compatibility
   if (
     hasField(game, "specs") &&
     game.specs?.$isLoaded &&
@@ -383,5 +382,183 @@ function getOptionsFromGame(game: Game | undefined | null) {
     }
   }
 
+  // 3. Spec reference (fallback if spec not populated yet)
+  if (hasField(game, "specRef") && game.specRef?.$isLoaded) {
+    return game.specRef;
+  }
+
   return undefined;
+}
+
+/**
+ * Copy all options from a source spec to a new MapOfOptions.
+ *
+ * This creates a deep copy of options so the game has its own independent
+ * working copy that can be modified without affecting the catalog spec.
+ *
+ * @param sourceSpec - The spec to copy options from (typically game.specRef)
+ * @param owner - The Jazz Group that will own the new options
+ * @returns A new MapOfOptions with copies of all options
+ */
+export async function copySpecOptions(
+  sourceSpec: GameSpec | MapOfOptions,
+  owner: Group,
+): Promise<MapOfOptions> {
+  // Import schema types dynamically to avoid circular dependency
+  const {
+    MapOfOptions,
+    GameOption,
+    JunkOption,
+    MultiplierOption,
+    MetaOption,
+    ChoicesList,
+    ChoiceMap,
+    StringList,
+  } = await import("../schema");
+
+  const newSpec = MapOfOptions.create({}, { owner });
+
+  if (!sourceSpec?.$isLoaded) return newSpec;
+
+  // Iterate over all options in source spec
+  for (const key of Object.keys(sourceSpec)) {
+    if (key.startsWith("$") || key === "_refs") continue;
+    if (!sourceSpec.$jazz.has(key)) continue;
+
+    const option = sourceSpec[key];
+    if (!option?.$isLoaded) continue;
+
+    // Create a copy based on option type
+    switch (option.type) {
+      case "game": {
+        const src = option as GameOption;
+        const copy = GameOption.create(
+          {
+            name: src.name,
+            disp: src.disp,
+            type: "game",
+            version: src.version,
+            valueType: src.valueType,
+            defaultValue: src.defaultValue,
+          },
+          { owner },
+        );
+        if (src.value !== undefined) copy.$jazz.set("value", src.value);
+        if (src.seq !== undefined) copy.$jazz.set("seq", src.seq);
+        if (src.teamOnly !== undefined)
+          copy.$jazz.set("teamOnly", src.teamOnly);
+        // Copy choices if present
+        if (src.$jazz.has("choices") && src.choices?.$isLoaded) {
+          const choicesCopy = ChoicesList.create([], { owner });
+          for (const choice of src.choices) {
+            if (choice?.$isLoaded) {
+              choicesCopy.$jazz.push(
+                ChoiceMap.create(
+                  { name: choice.name, disp: choice.disp },
+                  { owner },
+                ),
+              );
+            }
+          }
+          copy.$jazz.set("choices", choicesCopy);
+        }
+        newSpec.$jazz.set(key, copy);
+        break;
+      }
+      case "junk": {
+        const src = option as JunkOption;
+        const copy = JunkOption.create(
+          {
+            name: src.name,
+            disp: src.disp,
+            type: "junk",
+            version: src.version,
+            value: src.value,
+          },
+          { owner },
+        );
+        if (src.sub_type) copy.$jazz.set("sub_type", src.sub_type);
+        if (src.seq !== undefined) copy.$jazz.set("seq", src.seq);
+        if (src.scope) copy.$jazz.set("scope", src.scope);
+        if (src.icon) copy.$jazz.set("icon", src.icon);
+        if (src.show_in) copy.$jazz.set("show_in", src.show_in);
+        if (src.based_on) copy.$jazz.set("based_on", src.based_on);
+        if (src.limit) copy.$jazz.set("limit", src.limit);
+        if (src.calculation) copy.$jazz.set("calculation", src.calculation);
+        if (src.logic) copy.$jazz.set("logic", src.logic);
+        if (src.better) copy.$jazz.set("better", src.better);
+        if (src.score_to_par) copy.$jazz.set("score_to_par", src.score_to_par);
+        newSpec.$jazz.set(key, copy);
+        break;
+      }
+      case "multiplier": {
+        const src = option as MultiplierOption;
+        const copy = MultiplierOption.create(
+          {
+            name: src.name,
+            disp: src.disp,
+            type: "multiplier",
+            version: src.version,
+          },
+          { owner },
+        );
+        if (src.value !== undefined) copy.$jazz.set("value", src.value);
+        if (src.sub_type) copy.$jazz.set("sub_type", src.sub_type);
+        if (src.seq !== undefined) copy.$jazz.set("seq", src.seq);
+        if (src.icon) copy.$jazz.set("icon", src.icon);
+        if (src.based_on) copy.$jazz.set("based_on", src.based_on);
+        if (src.scope) copy.$jazz.set("scope", src.scope);
+        if (src.availability) copy.$jazz.set("availability", src.availability);
+        if (src.override !== undefined)
+          copy.$jazz.set("override", src.override);
+        if (src.input_value !== undefined)
+          copy.$jazz.set("input_value", src.input_value);
+        if (src.value_from) copy.$jazz.set("value_from", src.value_from);
+        newSpec.$jazz.set(key, copy);
+        break;
+      }
+      case "meta": {
+        const src = option as MetaOption;
+        const copy = MetaOption.create(
+          {
+            name: src.name,
+            disp: src.disp,
+            type: "meta",
+            valueType: src.valueType,
+          },
+          { owner },
+        );
+        if (src.value !== undefined) copy.$jazz.set("value", src.value);
+        if (src.seq !== undefined) copy.$jazz.set("seq", src.seq);
+        if (src.searchable !== undefined)
+          copy.$jazz.set("searchable", src.searchable);
+        if (src.required !== undefined)
+          copy.$jazz.set("required", src.required);
+        // Copy valueArray if present (for text_array type)
+        if (src.$jazz.has("valueArray") && src.valueArray?.$isLoaded) {
+          const arrayCopy = StringList.create([...src.valueArray], { owner });
+          copy.$jazz.set("valueArray", arrayCopy);
+        }
+        // Copy choices if present (for menu type)
+        if (src.$jazz.has("choices") && src.choices?.$isLoaded) {
+          const choicesCopy = ChoicesList.create([], { owner });
+          for (const choice of src.choices) {
+            if (choice?.$isLoaded) {
+              choicesCopy.$jazz.push(
+                ChoiceMap.create(
+                  { name: choice.name, disp: choice.disp },
+                  { owner },
+                ),
+              );
+            }
+          }
+          copy.$jazz.set("choices", choicesCopy);
+        }
+        newSpec.$jazz.set(key, copy);
+        break;
+      }
+    }
+  }
+
+  return newSpec;
 }

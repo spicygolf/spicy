@@ -35,6 +35,7 @@ export {
 } from "./multiplier-engine";
 // Option utilities (per-hole option value resolution)
 export {
+  copySpecOptions,
   getFrontNinePreDoubleTotalFromHoles,
   getGameOptions,
   getJunkOptionsForHole,

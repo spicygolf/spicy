@@ -2,16 +2,15 @@
 
 ## Overview
 
-GameSpec is a unified options map. ALL data is stored as Option entries in the `options` map - there are no top-level data fields.
+GameSpec is a unified options map. ALL data is stored as Option entries in the map - there are no top-level data fields.
 
 ## Current State (Implemented)
 
 ### GameSpec Schema
 ```typescript
 // packages/lib/schema/gamespecs.ts
-export const GameSpec = co.map({
-  options: co.optional(MapOfOptions),
-});
+// GameSpec IS MapOfOptions directly
+export const GameSpec = MapOfOptions;
 ```
 
 ### Meta Options for Spec Metadata
@@ -41,10 +40,19 @@ const minPlayers = getSpecField(spec, "min_players") as number;
 const status = getSpecField(spec, "status") as string;
 ```
 
-### Game References
-- `Game.specRef` - Reference to catalog spec (for display/diff/revert)
-- `Game.options` - Game-level option overrides
-- `GameHole.options` - Per-hole option overrides
+### Game References - IMPORTANT
+- `Game.spec` - **Working copy** of the spec's options for this game. Created by copying from catalog spec at game creation. User modifications go here directly.
+- `Game.specRef` - Reference to the **original** catalog spec. Used for:
+  - "Reset to defaults" - Copy specRef options back to spec
+  - "Show diff" - Compare spec vs specRef to see what changed
+  - Display original spec name/description
+- `GameHole.options` - Per-hole option overrides (optional)
+
+**CRITICAL**: When rendering/using game options, read from `game.spec`, NOT `game.specRef`. The `specRef` is only for comparison/revert operations.
+
+**DEPRECATED**: `Game.options` is being removed - user changes go directly into `game.spec`.
+
+**DEPRECATED**: `Game.specs` (array) is being removed - use `game.spec` (single copy) instead.
 
 ## Seed File Format
 
@@ -77,19 +85,12 @@ const status = getSpecField(spec, "status") as string;
 }
 ```
 
-The `upsertGameSpec` function transforms this into a unified options map where:
-- Top-level fields (name, version, status, etc.) become meta options
-- Options array references become game options (looked up from catalog)
-- Junk array becomes junk options (with value overrides)
-- Multipliers array becomes multiplier options
-- Meta array items are added as meta options
-
 ## Key Files
 
 ### Schema
-- `packages/lib/schema/gamespecs.ts` - GameSpec with options-only
+- `packages/lib/schema/gamespecs.ts` - GameSpec = MapOfOptions
 - `packages/lib/schema/options.ts` - Option types (Game, Junk, Multiplier, Meta)
-- `packages/lib/schema/games.ts` - Game with specRef
+- `packages/lib/schema/games.ts` - Game with spec + specRef
 
 ### Import
 - `packages/api/src/lib/catalog.ts` - upsertGameSpec creates unified options
@@ -100,7 +101,9 @@ The `upsertGameSpec` function transforms this into a unified options map where:
 
 ## Remaining Work
 
-1. **Fix TypeScript errors** - Update all code that reads deprecated top-level fields
-2. **Test import flow** - Reset catalog, import specs, verify options structure
-3. **The Big Game** - Build quota/Stableford scoring (Phase 2)
-4. **Web UI** - Player customization interface (Phase 3)
+1. **Add `spec` field to Game schema** - Working copy of options (MapOfOptions)
+2. **Update useCreateGame** - Copy spec options into game.spec at creation
+3. **Update game import (catalog.ts)** - Copy spec options into game.spec
+4. **Update GameOptionsList** - Read from game.spec not game.specs
+5. **Update other components** - Change from specs/specRef to spec
+6. **Remove deprecated fields** - game.options, game.specs (after migration)

@@ -3,7 +3,8 @@
 /**
  * Update Game Spec Reference
  *
- * Updates a game's spec reference to point to the current catalog spec.
+ * Updates a game's spec and specRef to point to the current catalog spec.
+ * Creates a new working copy in game.spec and sets specRef to the catalog spec.
  *
  * Usage:
  *   bun run src/cli/update-game-spec.ts <gameId> <newSpecId>
@@ -17,7 +18,7 @@ import { config } from "dotenv";
 import type { Account, ID } from "jazz-tools";
 import { startWorker } from "jazz-tools/worker";
 import { Game, GameSpec } from "spicylib/schema";
-import { getSpecField } from "spicylib/scoring";
+import { copySpecOptions, getSpecField } from "spicylib/scoring";
 
 // Load environment from API package
 config({ path: resolve(import.meta.dir, "../../../api/.env") });
@@ -60,9 +61,9 @@ async function main() {
   });
 
   try {
-    // Load the game with specs list
+    // Load the game with spec
     const game = await Game.load(gameId as ID<Game>, {
-      resolve: { specs: { $each: true } },
+      resolve: { spec: true, specRef: true },
     });
 
     if (!game?.$isLoaded) {
@@ -75,12 +76,12 @@ async function main() {
     const currentSpecName = currentSpec?.$isLoaded
       ? getSpecField(currentSpec, "name")
       : "(none)";
-    console.log(`  Current spec ID: ${currentSpec?.$jazz?.id || "(none)"}`);
-    console.log(`  Current spec name: ${currentSpecName}`);
+    console.log(`  Current specRef ID: ${currentSpec?.$jazz?.id || "(none)"}`);
+    console.log(`  Current specRef name: ${currentSpecName}`);
 
-    // Load the new spec
+    // Load the new spec with all options
     const newSpec = await GameSpec.load(newSpecId as ID<GameSpec>, {
-      resolve: { options: true },
+      resolve: { $each: true },
     });
 
     if (!newSpec?.$isLoaded) {
@@ -92,13 +93,23 @@ async function main() {
     const newSpecVersion = getSpecField(newSpec, "version");
     console.log(`  New spec: ${newSpecName} v${newSpecVersion}`);
 
-    // Update the first element of specs list
-    if (game.specs?.$isLoaded && game.specs.length > 0) {
-      game.specs.$jazz.splice(0, 1, newSpec);
-      console.log(`\nReplaced specs[0] with new spec`);
-    } else {
-      console.error("Game has no specs list or it's empty");
-      process.exit(1);
+    // Create a copy of the spec options for game.spec (working copy)
+    const specCopy = await copySpecOptions(newSpec, game.$jazz.owner);
+    console.log(`\nCreated working copy of spec options`);
+
+    // Update game.spec (working copy) and game.specRef (catalog reference)
+    game.$jazz.set("spec", specCopy);
+    game.$jazz.set("specRef", newSpec);
+    console.log(`Set game.spec and game.specRef`);
+
+    // Clear deprecated fields if present
+    if (game.$jazz.has("specs")) {
+      game.$jazz.delete("specs");
+      console.log(`Cleared deprecated game.specs`);
+    }
+    if (game.$jazz.has("options")) {
+      game.$jazz.delete("options");
+      console.log(`Cleared deprecated game.options`);
     }
 
     console.log(`\nSpec reference updated successfully!`);

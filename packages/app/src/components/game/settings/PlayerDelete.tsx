@@ -141,18 +141,12 @@ export function PlayerDelete({ player }: { player: Player }) {
 function checkAndRevertToSeamlessMode(game: Game): void {
   if (!game.$isLoaded) return;
 
-  // Get specs
-  const specs: GameSpec[] = [];
-  if (game.specs?.$isLoaded) {
-    for (const spec of game.specs) {
-      if (spec?.$isLoaded) specs.push(spec);
-    }
-  }
-
-  if (specs.length === 0) return;
+  // Get spec from game.spec (working copy)
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (!spec) return;
 
   // Check if spec forces teams mode
-  const specForcesTeams = specs.some(computeSpecForcesTeams);
+  const specForcesTeams = computeSpecForcesTeams(spec);
   if (specForcesTeams) return; // Don't revert if spec forces teams
 
   // Check if user has manually activated teams mode
@@ -162,10 +156,8 @@ function checkAndRevertToSeamlessMode(game: Game): void {
     game.scope.teamsConfig.active === true;
   if (userActivated) return; // Don't revert if user manually activated
 
-  // Get min_players from specs
-  const minPlayers = Math.min(
-    ...specs.map((s) => (getSpecField(s, "min_players") as number) ?? 2),
-  );
+  // Get min_players from spec
+  const minPlayers = (getSpecField(spec, "min_players") as number) ?? 2;
 
   // Current player count (after removal)
   const playerCount = game.players?.$isLoaded ? game.players.length : 0;

@@ -108,31 +108,20 @@ export function useTeamsMode(
 
     if (!game?.$isLoaded) return defaults;
 
-    // Get specs from parameter or from game
-    const gameSpecs: GameSpec[] = specs ?? [];
-    if (!specs && game.specs?.$isLoaded) {
-      for (const spec of game.specs) {
-        if (spec?.$isLoaded) {
-          gameSpecs.push(spec);
-        }
-      }
-    }
+    // Get spec from parameter or from game.spec (working copy)
+    const gameSpec: GameSpec | null =
+      specs?.[0] ?? (game.spec?.$isLoaded ? game.spec : null);
 
-    // Calculate min_players from specs
-    const minPlayers =
-      gameSpecs.length > 0
-        ? Math.min(
-            ...gameSpecs.map(
-              (s) => (getSpecField(s, "min_players") as number) ?? 2,
-            ),
-          )
-        : 2;
+    // Calculate min_players from spec
+    const minPlayers = gameSpec
+      ? ((getSpecField(gameSpec, "min_players") as number) ?? 2)
+      : 2;
 
     // Count players
     const playerCount = game.players?.$isLoaded ? game.players.length : 0;
 
-    // Check if any spec forces teams
-    const specForcesTeams = gameSpecs.some(computeSpecForcesTeams);
+    // Check if spec forces teams
+    const specForcesTeams = gameSpec ? computeSpecForcesTeams(gameSpec) : false;
 
     // Check if user has manually activated teams
     const isUserActivated = Boolean(

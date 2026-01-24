@@ -10,8 +10,7 @@ import type {
 /**
  * Get an option value from the game, checking in this order:
  * 1. GameHole.options (most specific - hole-level overrides)
- * 2. Game.options (game instance overrides)
- * 3. GameSpec.options (defaults from spec)
+ * 2. Game.spec (the game's working copy of options)
  *
  * @param game - The game instance
  * @param currentHole - The current hole (optional, for hole-level overrides)
@@ -54,39 +53,19 @@ export function useOptionValue(
     }
   }
 
-  // 2. Check game instance options (game-level override)
-  if (game?.$isLoaded && game.$jazz.has("options") && game.options?.$isLoaded) {
-    const gameOption = game.options[optionName];
-    if (gameOption?.$isLoaded && gameOption.type === optionType) {
+  // 2. Check game.spec (the working copy of options)
+  if (game?.$isLoaded && game.spec?.$isLoaded) {
+    const specOption = game.spec[optionName];
+    if (specOption?.$isLoaded && specOption.type === optionType) {
       if (optionType === "game") {
-        const opt = gameOption as GameOption;
+        const opt = specOption as GameOption;
         return opt.value ?? opt.defaultValue;
       }
       if (optionType === "junk") {
-        return (gameOption as JunkOption).value;
+        return (specOption as JunkOption).value;
       }
       if (optionType === "multiplier") {
-        return (gameOption as MultiplierOption).value;
-      }
-    }
-  }
-
-  // 3. Fall back to gamespec (defaults) - GameSpec IS the options map
-  if (game?.specs?.$isLoaded && game.specs.length > 0) {
-    const spec = game.specs[0];
-    if (spec?.$isLoaded) {
-      const specOption = spec[optionName];
-      if (specOption?.$isLoaded && specOption.type === optionType) {
-        if (optionType === "game") {
-          const gameOption = specOption as GameOption;
-          return gameOption.value ?? gameOption.defaultValue;
-        }
-        if (optionType === "junk") {
-          return (specOption as JunkOption).value;
-        }
-        if (optionType === "multiplier") {
-          return (specOption as MultiplierOption).value;
-        }
+        return (specOption as MultiplierOption).value;
       }
     }
   }

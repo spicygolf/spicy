@@ -30,14 +30,25 @@ export const Game = co.map({
   scope: GameScope,
 
   /**
-   * Reference to the game spec in the catalog.
-   * This is the authoritative source for scoring rules.
-   * Also used for display, "reset to defaults", and "show diff" features.
+   * Working copy of the spec's options for this game.
+   * Created by copying from the catalog spec (specRef) at game creation.
+   * User modifications to game options go here directly.
+   * This is what scoring and display code should read from.
+   */
+  spec: co.optional(MapOfOptions),
+
+  /**
+   * Reference to the original catalog spec.
+   * Used for:
+   * - "Reset to defaults" - copy specRef options back to spec
+   * - "Show diff" - compare spec vs specRef to see what changed
+   * - Display original spec name/description
+   * Do NOT read options from here for scoring - use spec instead.
    */
   specRef: co.optional(GameSpec),
 
   /**
-   * @deprecated Use specRef instead.
+   * @deprecated Use spec instead.
    * Kept for backwards compatibility with existing games.
    */
   specs: co.optional(ListOfGameSpecs),
@@ -47,10 +58,8 @@ export const Game = co.map({
   rounds: ListOfRoundToGames,
 
   /**
-   * Game-level option overrides.
-   * Values here override the specRef defaults.
-   * Used when users customize options for a specific game.
-   * Per-hole overrides go in GameHole.options instead.
+   * @deprecated User modifications now go directly into spec.
+   * Kept for backwards compatibility with existing games.
    */
   options: co.optional(MapOfOptions),
 

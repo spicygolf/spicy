@@ -29,9 +29,9 @@ import {
 export function getUserJunkOptions(game: Game): JunkOption[] {
   const junkOptions: JunkOption[] = [];
 
-  // Get options from game spec - GameSpec IS the options map
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return junkOptions;
+  // Get options from game.spec (working copy)
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (!spec) return junkOptions;
 
   for (const key of Object.keys(spec)) {
     const opt = spec[key];
@@ -59,9 +59,9 @@ export function getUserJunkOptions(game: Game): JunkOption[] {
 export function getCalculatedPlayerJunkOptions(game: Game): JunkOption[] {
   const junkOptions: JunkOption[] = [];
 
-  // GameSpec IS the options map
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return junkOptions;
+  // Get options from game.spec (working copy)
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (!spec) return junkOptions;
 
   for (const key of Object.keys(spec)) {
     const opt = spec[key];
@@ -92,9 +92,9 @@ export function getCalculatedPlayerJunkOptions(game: Game): JunkOption[] {
 export function getCalculatedTeamJunkOptions(game: Game): JunkOption[] {
   const junkOptions: JunkOption[] = [];
 
-  // GameSpec IS the options map
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return junkOptions;
+  // Get options from game.spec (working copy)
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (!spec) return junkOptions;
 
   for (const key of Object.keys(spec)) {
     const opt = spec[key];
@@ -183,9 +183,9 @@ export function hasPlayerJunk(
 export function getMultiplierOptions(game: Game): MultiplierOption[] {
   const multiplierOptions: MultiplierOption[] = [];
 
-  // GameSpec IS the options map
-  const spec = game.specs?.$isLoaded ? game.specs[0] : null;
-  if (!spec?.$isLoaded) return multiplierOptions;
+  // Get options from game.spec (working copy)
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (!spec) return multiplierOptions;
 
   for (const key of Object.keys(spec)) {
     const opt = spec[key];

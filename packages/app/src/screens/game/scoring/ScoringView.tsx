@@ -641,8 +641,8 @@ export function ScoringView({
           }
 
           // Get spec for looking up display names of automatic multipliers
-          // GameSpec IS the options map directly (no wrapper)
-          const spec = game?.specs?.$isLoaded ? game.specs[0] : null;
+          // game.spec is the working copy of options
+          const spec = game?.spec?.$isLoaded ? game.spec : null;
           const earnedMultiplierButtons: OptionButton[] = (
             teamHoleResult?.multipliers ?? []
           )
