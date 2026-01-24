@@ -40,7 +40,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: theme.gap(0.75),
+    paddingVertical: theme.gap(1),
     paddingHorizontal: theme.gap(1),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
@@ -49,19 +49,20 @@ const styles = StyleSheet.create((theme) => ({
   optionLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: theme.gap(0.75),
     flex: 1,
   },
   optionLabel: {
     fontSize: 14,
+    fontWeight: "500",
     color: theme.colors.primary,
   },
   optionValue: {
     flexDirection: "row",
     alignItems: "center",
+    gap: theme.gap(0.75),
   },
   optionValueText: {
-    fontSize: 13,
+    fontSize: 14,
     color: theme.colors.secondary,
   },
 }));
