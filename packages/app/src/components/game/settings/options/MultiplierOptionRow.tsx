@@ -16,8 +16,6 @@ export function MultiplierOptionRow({
   const { theme } = useUnistyles();
 
   const valueDisplay = option.value ? `${option.value}x` : "variable";
-  const scopeLabel =
-    option.scope && option.scope !== "none" ? ` (${option.scope})` : "";
 
   return (
     <Pressable style={styles.optionRow} onPress={onPress}>
@@ -25,14 +23,11 @@ export function MultiplierOptionRow({
         <Text style={styles.optionLabel}>{option.disp}</Text>
       </View>
       <View style={styles.optionValue}>
-        <Text style={styles.optionValueText}>
-          {valueDisplay}
-          {scopeLabel}
-        </Text>
+        <Text style={styles.optionValueText}>{valueDisplay}</Text>
         <FontAwesome6
           name="chevron-right"
           iconStyle="solid"
-          size={10}
+          size={14}
           color={theme.colors.secondary}
         />
       </View>

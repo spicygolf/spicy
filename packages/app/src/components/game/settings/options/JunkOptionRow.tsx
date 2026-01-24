@@ -12,8 +12,6 @@ interface JunkOptionRowProps {
 export function JunkOptionRow({ option, onPress }: JunkOptionRowProps) {
   const { theme } = useUnistyles();
 
-  const scopeLabel = option.scope ? ` (${option.scope})` : "";
-
   return (
     <Pressable style={styles.optionRow} onPress={onPress}>
       <View style={styles.optionLeft}>
@@ -22,12 +20,11 @@ export function JunkOptionRow({ option, onPress }: JunkOptionRowProps) {
       <View style={styles.optionValue}>
         <Text style={styles.optionValueText}>
           {option.value} {option.value === 1 ? "pt" : "pts"}
-          {scopeLabel}
         </Text>
         <FontAwesome6
           name="chevron-right"
           iconStyle="solid"
-          size={10}
+          size={14}
           color={theme.colors.secondary}
         />
       </View>

@@ -80,7 +80,7 @@ export function DeleteGameButton() {
         <FontAwesome6
           name="chevron-right"
           iconStyle="solid"
-          size={10}
+          size={14}
           color={theme.colors.error}
         />
       </Pressable>
