@@ -119,6 +119,7 @@ import {
   MapOfGames,
   MapOfOptions,
   MapOfPlayers,
+  MetaOption,
   MultiplierOption,
   Player,
   type PlayerAccount,
@@ -126,6 +127,7 @@ import {
   RoundScores,
   RoundToGame,
   RoundToTeam,
+  StringList,
   Team,
   TeamOption,
   TeamsConfig,
@@ -219,7 +221,23 @@ interface MultiplierOptionData {
   value_from?: string;
 }
 
-type OptionData = GameOptionData | JunkOptionData | MultiplierOptionData;
+interface MetaOptionData {
+  type: "meta";
+  name: string;
+  disp: string;
+  valueType: "bool" | "num" | "menu" | "text" | "text_array";
+  value?: string | string[];
+  choices?: Array<{ name: string; disp: string }>;
+  seq?: number;
+  searchable?: boolean;
+  required?: boolean;
+}
+
+type OptionData =
+  | GameOptionData
+  | JunkOptionData
+  | MultiplierOptionData
+  | MetaOptionData;
 
 /**
  * Load the GameCatalog for the worker account
@@ -670,6 +688,57 @@ async function upsertOptions(
       }
       if (opt.value_from && typeof opt.value_from === "string") {
         newOption.$jazz.set("value_from", opt.value_from);
+      }
+
+      optionsMap.$jazz.set(opt.name, newOption);
+    } else if (opt.type === "meta") {
+      // Create MetaOption for spec metadata (new unified format)
+      const newOption = MetaOption.create(
+        {
+          name: opt.name,
+          disp: opt.disp,
+          type: "meta",
+          valueType: opt.valueType,
+        },
+        { owner: optionsMap.$jazz.owner },
+      );
+
+      // Set value based on valueType
+      if (opt.valueType === "text_array" && Array.isArray(opt.value)) {
+        const stringList = StringList.create([...opt.value], {
+          owner: optionsMap.$jazz.owner,
+        });
+        newOption.$jazz.set("valueArray", stringList);
+      } else if (opt.value !== undefined && typeof opt.value === "string") {
+        newOption.$jazz.set("value", opt.value);
+      }
+
+      // Set optional fields
+      if (opt.seq !== undefined && typeof opt.seq === "number") {
+        newOption.$jazz.set("seq", opt.seq);
+      }
+      if (opt.searchable === true) {
+        newOption.$jazz.set("searchable", true);
+      }
+      if (opt.required === true) {
+        newOption.$jazz.set("required", true);
+      }
+
+      // Add choices if present (for menu type)
+      if (opt.choices && opt.choices.length > 0) {
+        const choicesList = ChoicesList.create([], {
+          owner: newOption.$jazz.owner,
+        });
+
+        for (const choice of opt.choices) {
+          const choiceItem = ChoiceMap.create(
+            { name: choice.name, disp: choice.disp },
+            { owner: newOption.$jazz.owner },
+          );
+          choicesList.$jazz.push(choiceItem);
+        }
+
+        newOption.$jazz.set("choices", choicesList);
       }
 
       optionsMap.$jazz.set(opt.name, newOption);
@@ -1511,6 +1580,25 @@ export async function importGameSpecsToCatalog(
                 });
               }
             }
+          }
+        }
+      }
+
+      // Collect embedded meta options (new unified format)
+      if (spec.meta && spec.meta.length > 0) {
+        for (const metaOpt of spec.meta) {
+          if (!allOptions.has(metaOpt.name)) {
+            allOptions.set(metaOpt.name, {
+              type: "meta",
+              name: metaOpt.name,
+              disp: metaOpt.disp,
+              valueType: metaOpt.valueType,
+              value: metaOpt.value,
+              choices: metaOpt.choices,
+              seq: metaOpt.seq,
+              searchable: metaOpt.searchable,
+              required: metaOpt.required,
+            });
           }
         }
       }

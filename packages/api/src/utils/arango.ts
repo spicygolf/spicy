@@ -74,6 +74,17 @@ export interface GameSpecV03 {
     default?: unknown;
     choices?: Array<{ name: string; disp: string }>;
   }>;
+  /** Embedded meta options for unified format (new architecture) */
+  meta?: Array<{
+    name: string;
+    disp: string;
+    valueType: "bool" | "num" | "menu" | "text" | "text_array";
+    value?: string | string[];
+    choices?: Array<{ name: string; disp: string }>;
+    seq?: number;
+    searchable?: boolean;
+    required?: boolean;
+  }>;
   default_options?: unknown[];
   todos?: string[];
 }

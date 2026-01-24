@@ -2,7 +2,7 @@
   "_key": "65384954",
   "name": "five_points",
   "disp": "Five Points",
-  "version": 1,
+  "version": 2,
   "status": "prod",
   "type": "points",
   "min_players": 4,
@@ -39,5 +39,65 @@
     "custom",
     "birdie_bbq",
     "eagle_bbq"
+  ],
+  "meta": [
+    {
+      "name": "short",
+      "disp": "Short Name",
+      "valueType": "text",
+      "value": "5pts"
+    },
+    {
+      "name": "aliases",
+      "disp": "Also Known As",
+      "valueType": "text_array",
+      "value": ["Scotch", "Umbrella"],
+      "searchable": true
+    },
+    {
+      "name": "spec_type",
+      "disp": "Scoring Format",
+      "valueType": "menu",
+      "value": "points",
+      "choices": [
+        { "name": "points", "disp": "Points" },
+        { "name": "skins", "disp": "Skins" },
+        { "name": "stableford", "disp": "Stableford" },
+        { "name": "quota", "disp": "Quota" }
+      ]
+    },
+    {
+      "name": "min_players",
+      "disp": "Minimum Players",
+      "valueType": "num",
+      "value": "4"
+    },
+    {
+      "name": "max_players",
+      "disp": "Maximum Players",
+      "valueType": "num",
+      "value": "4"
+    },
+    {
+      "name": "status",
+      "disp": "Status",
+      "valueType": "menu",
+      "value": "prod",
+      "choices": [
+        { "name": "prod", "disp": "Production" },
+        { "name": "dev", "disp": "Development" },
+        { "name": "test", "disp": "Test" }
+      ]
+    },
+    {
+      "name": "location_type",
+      "disp": "Location Type",
+      "valueType": "menu",
+      "value": "local",
+      "choices": [
+        { "name": "local", "disp": "Local (Same Foursome)" },
+        { "name": "virtual", "disp": "Virtual (Remote Players)" }
+      ]
+    }
   ]
 }
