@@ -379,6 +379,8 @@ const app = new Elysia()
           throw new Error("User not authenticated or no Jazz account");
         }
 
+        console.log(`[/player/link] body:`, JSON.stringify(body));
+
         const { ghinId } = body as { ghinId: string };
         if (!ghinId) {
           throw new Error("GHIN ID required");

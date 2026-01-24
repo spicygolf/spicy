@@ -143,8 +143,21 @@ export function LinkGhin() {
 
     try {
       // Call the API to link the player
+      const trimmedGhinId = ghinId.trim();
+      console.log(
+        `[LinkGhin] performLink called with ghinId: "${trimmedGhinId}"`,
+      );
+
+      if (!trimmedGhinId) {
+        Alert.alert(
+          "Error",
+          "GHIN ID is empty. Please enter your GHIN ID again.",
+        );
+        return;
+      }
+
       const result = await apiPost<LinkPlayerResult>("/player/link", {
-        ghinId: ghinId.trim(),
+        ghinId: trimmedGhinId,
       });
 
       const gameIds = result.gameIds || [];

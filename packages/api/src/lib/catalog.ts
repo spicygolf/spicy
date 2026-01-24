@@ -95,7 +95,7 @@ import {
   Course,
   CourseDefaultTee,
   Game,
-  type GameCatalog,
+  GameCatalog,
   GameHole,
   GameOption,
   GameScope,
@@ -1486,8 +1486,12 @@ export async function importFavoritesForPlayer(
           `[DEBUG] Looking for course ${courseKey}, tee ${fav.teeId}`,
         );
 
-        // Access course directly from map
-        let courseRef = catalogCourses[courseKey];
+        // Check if course exists in catalog using proper Jazz pattern
+        let courseRef: (typeof catalogCourses)[string] | null = null;
+
+        if (catalogCourses.$jazz.has(courseKey)) {
+          courseRef = catalogCourses[courseKey];
+        }
 
         if (!courseRef) {
           console.log(
@@ -1509,27 +1513,38 @@ export async function importFavoritesForPlayer(
           }
         }
 
-        // Load course to access its tees list and find the matching tee
-        const course = courseRef.$isLoaded
-          ? courseRef
-          : await Course.load(courseRef.$jazz.id, { resolve: { tees: {} } });
+        // Load course with tees resolved - always use Course.load to ensure tees are loaded
+        // Even if courseRef.$isLoaded is true, the tees property may not be resolved
+        const course = await Course.load(courseRef.$jazz.id, {
+          resolve: { tees: { $each: true } },
+        });
 
         if (!course?.$isLoaded) {
+          console.log(`[DEBUG] Course ${courseKey} failed to load`);
           result.errors.push(`Favorite course failed to load: ${courseKey}`);
           continue;
         }
 
         // Ensure tees list is loaded
         if (!course.tees?.$isLoaded) {
+          console.log(
+            `[DEBUG] Course ${courseKey} tees not loaded after Course.load. course.tees exists: ${!!course.tees}, $isLoaded: ${course.tees?.$isLoaded}`,
+          );
           result.errors.push(`Course tees not loaded: ${courseKey}`);
           continue;
         }
 
+        console.log(
+          `[DEBUG] Course ${courseKey} loaded with ${course.tees.length} tees`,
+        );
+
         // Find the tee by teeId - the tee might not be loaded but we can check the reference
+        // Note: fav.teeId is a number from JSON, t.id is a string in Jazz schema
+        const teeIdString = String(fav.teeId);
         let teeRef = null;
         for (let i = 0; i < course.tees.length; i++) {
           const t = course.tees[i];
-          if (t?.$isLoaded && t.id === fav.teeId) {
+          if (t?.$isLoaded && t.id === teeIdString) {
             teeRef = t;
             break;
           }
@@ -2970,37 +2985,54 @@ export async function importGamesFromFiles(
   };
 
   try {
-    // Load catalog ONCE with all required maps
-    console.log("Loading catalog maps...");
-    let loadedCatalog = await catalog.$jazz.ensureLoaded({
-      resolve: { games: {}, players: {}, specs: {}, options: {}, courses: {} },
-    });
-
-    // Initialize maps if needed
-    if (!loadedCatalog.$jazz.has("games")) {
-      const group = Group.create(workerAccount);
-      group.makePublic();
-      loadedCatalog.$jazz.set("games", MapOfGames.create({}, { owner: group }));
-    }
-    if (!loadedCatalog.$jazz.has("courses")) {
-      const group = Group.create(workerAccount);
-      group.makePublic();
-      loadedCatalog.$jazz.set(
-        "courses",
-        MapOfCourses.create({}, { owner: group }),
-      );
-    }
-
-    // Re-load after initialization
-    loadedCatalog = await catalog.$jazz.ensureLoaded({
+    // IMPORTANT: Use GameCatalog.load() to get fresh data from Jazz sync server.
+    // This is critical when games import runs immediately after players import -
+    // ensureLoaded() may return stale data from the local cache, causing players
+    // to not be found and rounds to be skipped.
+    console.log("Loading catalog maps (fresh load)...");
+    const freshCatalog = await GameCatalog.load(catalog.$jazz.id, {
       resolve: {
         games: {},
-        players: {},
+        players: { $each: true },
         specs: { $each: true },
         options: {},
         courses: {},
       },
     });
+
+    if (!freshCatalog?.$isLoaded) {
+      throw new Error("Failed to load catalog");
+    }
+
+    // Initialize maps if needed using the fresh catalog
+    if (!freshCatalog.$jazz.has("games")) {
+      const group = Group.create(workerAccount);
+      group.makePublic();
+      freshCatalog.$jazz.set("games", MapOfGames.create({}, { owner: group }));
+    }
+    if (!freshCatalog.$jazz.has("courses")) {
+      const group = Group.create(workerAccount);
+      group.makePublic();
+      freshCatalog.$jazz.set(
+        "courses",
+        MapOfCourses.create({}, { owner: group }),
+      );
+    }
+
+    // Reload to get the initialized maps
+    const loadedCatalog = await GameCatalog.load(catalog.$jazz.id, {
+      resolve: {
+        games: {},
+        players: { $each: true },
+        specs: { $each: true },
+        options: {},
+        courses: {},
+      },
+    });
+
+    if (!loadedCatalog?.$isLoaded) {
+      throw new Error("Failed to reload catalog after initialization");
+    }
 
     if (
       !loadedCatalog.games ||
