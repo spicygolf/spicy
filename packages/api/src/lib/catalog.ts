@@ -3222,11 +3222,16 @@ export async function importGamesFromFiles(
         `Processing batch: ${i + 1}-${Math.min(i + batchSize, total)} of ${total}`,
       );
 
-      for (const gameListItem of batch) {
+      for (let j = 0; j < batch.length; j++) {
+        const gameListItem = batch[j];
+        const gameNum = i + j + 1;
         try {
           const exportedGame = await loadGame(gameListItem.legacyId);
 
           if (!exportedGame) {
+            console.log(
+              `[${gameNum}/${total}] ${gameListItem.legacyId}: FAILED (file not found)`,
+            );
             result.games.failed++;
             result.errors.push({
               gameId: gameListItem.legacyId,
@@ -3254,8 +3259,14 @@ export async function importGamesFromFiles(
           if (importResult.success) {
             if (importResult.gameCreated) {
               result.games.created++;
+              console.log(
+                `[${gameNum}/${total}] ${gameListItem.legacyId}: created`,
+              );
             } else {
               result.games.updated++;
+              console.log(
+                `[${gameNum}/${total}] ${gameListItem.legacyId}: updated`,
+              );
             }
             result.courses.created += importResult.courses.created;
             result.courses.updated += importResult.courses.updated;
@@ -3268,6 +3279,9 @@ export async function importGamesFromFiles(
             result.rounds.skipped += importResult.rounds.skipped;
           } else {
             result.games.failed++;
+            console.log(
+              `[${gameNum}/${total}] ${gameListItem.legacyId}: FAILED - ${importResult.error || "Unknown error"}`,
+            );
             result.errors.push({
               gameId: gameListItem.legacyId,
               error: importResult.error || "Unknown error",
@@ -3275,9 +3289,14 @@ export async function importGamesFromFiles(
           }
         } catch (error) {
           result.games.failed++;
+          const errorMsg =
+            error instanceof Error ? error.message : String(error);
+          console.log(
+            `[${gameNum}/${total}] ${gameListItem.legacyId}: ERROR - ${errorMsg}`,
+          );
           result.errors.push({
             gameId: gameListItem.legacyId,
-            error: error instanceof Error ? error.message : String(error),
+            error: errorMsg,
           });
         }
       }
