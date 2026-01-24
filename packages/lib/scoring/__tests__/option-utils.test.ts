@@ -256,20 +256,9 @@ describe("getMetaOption", () => {
       expect(result).toBeUndefined();
     });
 
-    it("returns undefined for unloaded option", () => {
-      const spec = createMockSpec({
-        short: {
-          $isLoaded: false,
-          name: "short",
-          type: "meta",
-          valueType: "text",
-          value: "5pts",
-        } as unknown as Partial<MetaOption>,
-      });
-
-      const result = getMetaOption(spec as GameSpec, "short");
-      expect(result).toBeUndefined();
-    });
+    // Note: "unloaded option" test removed - options are now plain JSON objects,
+    // not CoMaps, so there's no $isLoaded state. If an option exists in the spec,
+    // it's fully available.
   });
 });
 
