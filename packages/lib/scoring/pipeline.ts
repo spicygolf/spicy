@@ -219,20 +219,14 @@ function extractOptions(
 ): MapOfOptions | undefined {
   // Priority order:
   // 1. Game-level option overrides (user customizations for this game)
-  // 2. Spec snapshot options (copied at game creation for historical consistency)
-  // 3. Spec reference options (live spec, may have changed - backwards compat)
-  // 4. Primary game spec options (from game.specs[0], backwards compat)
+  // 2. Spec reference options (live spec from catalog)
+  // 3. Primary game spec options (from game.specs[0], backwards compat)
 
   if (game.options?.$isLoaded) {
     return game.options;
   }
 
-  // Check specSnapshot first (new architecture - historical options)
-  if (game.specSnapshot?.$isLoaded && game.specSnapshot.options?.$isLoaded) {
-    return game.specSnapshot.options;
-  }
-
-  // Fall back to specRef (new architecture - live spec reference)
+  // Check specRef (new architecture - live spec reference)
   if (game.specRef?.$isLoaded && game.specRef.options?.$isLoaded) {
     return game.specRef.options;
   }

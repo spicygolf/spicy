@@ -24,44 +24,20 @@ export const GameScope = co.map({
 });
 export type GameScope = co.loaded<typeof GameScope>;
 
-/**
- * Snapshot of a GameSpec's configuration at game creation time.
- * This preserves historical scoring rules even if the catalog spec changes.
- */
-export const SpecSnapshot = co.map({
-  /** Spec name at time of game creation */
-  name: z.string(),
-  /** Spec version at time of game creation */
-  version: z.number(),
-  /**
-   * Deep copy of all options from the spec at game creation.
-   * This is the authoritative source for scoring this game.
-   */
-  options: co.optional(MapOfOptions),
-});
-export type SpecSnapshot = co.loaded<typeof SpecSnapshot>;
-
 export const Game = co.map({
   start: z.date(),
   name: z.string(),
   scope: GameScope,
 
   /**
-   * Reference to the original spec in the catalog.
-   * Used for display/linking purposes only - NOT for scoring.
-   * The spec may have been updated since this game was created.
+   * Reference to the game spec in the catalog.
+   * This is the authoritative source for scoring rules.
+   * Also used for display, "reset to defaults", and "show diff" features.
    */
   specRef: co.optional(GameSpec),
 
   /**
-   * Snapshot of spec configuration at game creation time.
-   * This is the authoritative source for scoring rules.
-   * Contains deep copies of all options from the original spec.
-   */
-  specSnapshot: co.optional(SpecSnapshot),
-
-  /**
-   * @deprecated Use specRef and specSnapshot instead.
+   * @deprecated Use specRef instead.
    * Kept for backwards compatibility with existing games.
    */
   specs: co.optional(ListOfGameSpecs),
@@ -72,8 +48,9 @@ export const Game = co.map({
 
   /**
    * Game-level option overrides.
-   * Values here override the specSnapshot defaults.
+   * Values here override the specRef defaults.
    * Used when users customize options for a specific game.
+   * Per-hole overrides go in GameHole.options instead.
    */
   options: co.optional(MapOfOptions),
 

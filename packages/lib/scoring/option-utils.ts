@@ -18,7 +18,6 @@ import type {
   MetaOption,
   MultiplierOption,
   Option,
-  SpecSnapshot,
 } from "../schema";
 import type { ScoringContext } from "./types";
 
@@ -262,12 +261,12 @@ export function getJunkOptionsForHole(
 // =============================================================================
 
 /**
- * Get a meta option value from a GameSpec or SpecSnapshot.
+ * Get a meta option value from a GameSpec.
  *
  * Meta options store spec-level metadata like short name, aliases, status, etc.
  * This replaces direct access to deprecated top-level GameSpec fields.
  *
- * @param source - GameSpec or SpecSnapshot to read from
+ * @param source - GameSpec to read from
  * @param optionName - Name of the meta option (e.g., "short", "aliases", "status")
  * @returns The meta option value, or undefined if not found
  *
@@ -277,7 +276,7 @@ export function getJunkOptionsForHole(
  * const status = getMetaOption(spec, "status"); // "prod"
  */
 export function getMetaOption(
-  source: GameSpec | SpecSnapshot | undefined | null,
+  source: GameSpec | undefined | null,
   optionName: string,
 ): string | number | boolean | string[] | undefined {
   if (!source?.$isLoaded) return undefined;
@@ -355,9 +354,8 @@ export function getSpecField(
  *
  * Resolution order:
  * 1. Game-level option overrides
- * 2. Spec snapshot options (historical)
- * 3. Spec reference options (live)
- * 4. Legacy game.specs[0] options
+ * 2. Spec reference options (live spec from catalog)
+ * 3. Legacy game.specs[0] options
  *
  * @param game - Game to get options from
  * @returns The options map or undefined
@@ -374,11 +372,6 @@ function getOptionsFromGame(game: Game | undefined | null) {
   // Game-level overrides
   if (game.options?.$isLoaded) {
     return game.options;
-  }
-
-  // Spec snapshot (historical)
-  if (game.specSnapshot?.$isLoaded && game.specSnapshot.options?.$isLoaded) {
-    return game.specSnapshot.options;
   }
 
   // Spec reference (live)
