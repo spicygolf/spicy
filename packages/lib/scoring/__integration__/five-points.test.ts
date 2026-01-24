@@ -27,17 +27,12 @@ const JAZZ_WORKER_ACCOUNT = process.env.JAZZ_WORKER_ACCOUNT;
 const JAZZ_WORKER_SECRET = process.env.JAZZ_WORKER_SECRET;
 
 // The Five Points game we're testing
-const FIVE_POINTS_GAME_ID = "co_zEEke11BQDqGfoPUeQztziP2wf7";
+const FIVE_POINTS_GAME_ID = "co_zf8FwoJKa1jSov3tnUx71ybXLB2";
 
 // Deep resolve query to load all nested data
-// Note: GameSpec IS the options map directly (no wrapper), so we use $each to load all options
+// Note: game.spec is the working copy of options (MapOfOptions)
 const GAME_RESOLVE = {
-  specs: {
-    $each: {
-      $each: true, // Load all options in the spec (GameSpec IS the options map)
-      teamsConfig: true,
-    },
-  },
+  spec: { $each: true }, // Working copy of options for scoring
   holes: {
     $each: {
       teams: {
@@ -70,7 +65,6 @@ const GAME_RESOLVE = {
     },
   },
   players: { $each: { handicap: true } },
-  options: true,
 } as const;
 
 // Worker instance for all tests
@@ -691,35 +685,40 @@ describe("Five Points Integration Tests", () => {
       expect(hole12Doubles.length).toBeGreaterThan(0);
     });
 
-    it("should detect pre_double multipliers on holes 16-18", () => {
+    it("should detect pre_double multipliers stored on first_hole only", () => {
       requireGame();
 
-      // Hole 16: has both pre_double and double
-      const hole16 = game.holes?.find((h) => h?.hole === "16");
-      const hole16Teams = hole16?.teams ?? [];
-      const hole16PreDoubles = hole16Teams.flatMap(
-        (t) =>
-          t?.options?.filter((opt) => opt?.optionName === "pre_double") ?? [],
-      );
-      expect(hole16PreDoubles.length).toBeGreaterThan(0);
+      // Find all pre_double multipliers and their firstHole values
+      // New schema: multipliers are only stored on their first_hole, not every hole
+      const preDoubles: Array<{
+        hole: string;
+        team: string;
+        firstHole: string | undefined;
+      }> = [];
+      for (const hole of game.holes ?? []) {
+        if (!hole?.$isLoaded) continue;
+        for (const team of hole.teams ?? []) {
+          if (!team?.$isLoaded) continue;
+          for (const opt of team.options ?? []) {
+            if (opt?.optionName === "pre_double") {
+              preDoubles.push({
+                hole: hole.hole,
+                team: team.team,
+                firstHole: opt.firstHole,
+              });
+            }
+          }
+        }
+      }
 
-      // Hole 17: has pre_double
-      const hole17 = game.holes?.find((h) => h?.hole === "17");
-      const hole17Teams = hole17?.teams ?? [];
-      const hole17PreDoubles = hole17Teams.flatMap(
-        (t) =>
-          t?.options?.filter((opt) => opt?.optionName === "pre_double") ?? [],
-      );
-      expect(hole17PreDoubles.length).toBeGreaterThan(0);
+      // Game should have pre_double multipliers
+      expect(preDoubles.length).toBeGreaterThan(0);
 
-      // Hole 18: both teams have pre_double
-      const hole18 = game.holes?.find((h) => h?.hole === "18");
-      const hole18Teams = hole18?.teams ?? [];
-      const hole18PreDoubles = hole18Teams.flatMap(
-        (t) =>
-          t?.options?.filter((opt) => opt?.optionName === "pre_double") ?? [],
-      );
-      expect(hole18PreDoubles.length).toBe(2); // Both teams
+      // Multipliers should only be stored on their first_hole
+      // (the scoring engine inherits them to subsequent holes)
+      for (const pd of preDoubles) {
+        expect(pd.hole).toBe(pd.firstHole);
+      }
     });
   });
 });

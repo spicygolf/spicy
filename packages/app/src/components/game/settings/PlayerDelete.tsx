@@ -11,7 +11,7 @@ export function PlayerDelete({ player }: { player: Player }) {
   const { game } = useGame(undefined, {
     resolve: {
       scope: { teamsConfig: true },
-      specs: { $each: { teamsConfig: true } },
+      spec: { $each: true }, // Working copy of options (for teams config)
       players: true,
       rounds: {
         $each: {

@@ -23,7 +23,7 @@ export function GameTeamsList() {
   const { game } = useGame(undefined, {
     resolve: {
       scope: { teamsConfig: true },
-      specs: { $each: { teamsConfig: true } },
+      spec: { $each: true }, // Working copy of options (for teams config)
       players: {
         $each: {
           name: true,

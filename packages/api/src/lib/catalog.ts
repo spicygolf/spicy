@@ -2489,6 +2489,7 @@ async function importGame(
   courses: { created: number; updated: number; skipped: number };
   tees: { created: number; updated: number; skipped: number };
   rounds: { created: number; updated: number; skipped: number };
+  roundErrors: Array<{ roundId: string; error: string }>;
 }> {
   const { game, rounds: roundsData, gamespecKey } = gameData;
 
@@ -2506,6 +2507,7 @@ async function importGame(
       courses: { created: 0, updated: 0, skipped: 0 },
       tees: { created: 0, updated: 0, skipped: 0 },
       rounds: { created: 0, updated: 0, skipped: 0 },
+      roundErrors: [],
     };
   }
 
@@ -2515,6 +2517,7 @@ async function importGame(
     tees: { created: 0, updated: 0, skipped: 0 },
     rounds: { created: 0, updated: 0, skipped: 0 },
   };
+  const roundErrors: Array<{ roundId: string; error: string }> = [];
 
   // Check if game already exists in the catalog index
   const gameExistedInCatalog = gamesMap.$jazz.has(game._key);
@@ -2685,7 +2688,9 @@ async function importGame(
       // @ts-expect-error - upsertUnique returns MaybeLoaded but we've verified $isLoaded above
       roundToGames.$jazz.push(roundToGame);
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`Failed to import round ${roundData.round._key}:`, error);
+      roundErrors.push({ roundId: roundData.round._key, error: errorMsg });
     }
   }
 
@@ -3065,6 +3070,7 @@ async function importGame(
     courses: stats.courses,
     tees: stats.tees,
     rounds: stats.rounds,
+    roundErrors,
   };
 }
 
@@ -3235,6 +3241,13 @@ export async function importGamesFromFiles(
           result.rounds.created += importResult.rounds.created;
           result.rounds.updated += importResult.rounds.updated;
           result.rounds.skipped += importResult.rounds.skipped;
+          // Add any round-level errors to the result
+          for (const roundError of importResult.roundErrors) {
+            result.errors.push({
+              gameId: singleGameId,
+              error: `Round ${roundError.roundId}: ${roundError.error}`,
+            });
+          }
         } else {
           result.games.failed++;
           result.errors.push({
@@ -3323,6 +3336,13 @@ export async function importGamesFromFiles(
             result.rounds.created += importResult.rounds.created;
             result.rounds.updated += importResult.rounds.updated;
             result.rounds.skipped += importResult.rounds.skipped;
+            // Add any round-level errors to the result
+            for (const roundError of importResult.roundErrors) {
+              result.errors.push({
+                gameId: gameListItem.legacyId,
+                error: `Round ${roundError.roundId}: ${roundError.error}`,
+              });
+            }
           } else {
             result.games.failed++;
             console.log(

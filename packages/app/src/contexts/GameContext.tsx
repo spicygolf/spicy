@@ -23,12 +23,7 @@ const SCORING_RESOLVE = {
   name: true,
   start: true,
   scope: { teamsConfig: true },
-  specs: {
-    $each: {
-      options: { $each: true },
-    },
-  },
-  options: { $each: true }, // Game-level option overrides
+  spec: { $each: true }, // Working copy of options for scoring
   holes: {
     $each: {
       teams: {
