@@ -5,7 +5,6 @@ import {
   Game,
   GameScope,
   ListOfGameHoles,
-  ListOfGameSpecs,
   ListOfPlayers,
   ListOfRoundToGames,
   PlayerAccount,
@@ -60,16 +59,6 @@ export function useCreateGame() {
       }
     }
 
-    // Create an empty list and push the spec references
-    // We can't pass existing specs to create() because they may have different owners
-    const gameSpecs = ListOfGameSpecs.create([], { owner: group });
-    for (const spec of specs) {
-      if (spec?.$isLoaded) {
-        // biome-ignore lint/suspicious/noExplicitAny: Jazz list type compatibility
-        gameSpecs.$jazz.push(spec as any);
-      }
-    }
-
     // Create players list
     const players = ListOfPlayers.create([], { owner: group });
 
@@ -113,16 +102,14 @@ export function useCreateGame() {
     }
 
     // Create the game
+    // specRef points to catalog spec for scoring rules
+    // game.options holds any user customizations (not implemented yet)
     const game = Game.create(
       {
         start: new Date(),
         name,
         scope,
-        // specRef points to catalog spec for scoring rules
-        // game.options holds any user customizations
         specRef: firstSpec,
-        // Backwards compat: also populate specs array
-        specs: gameSpecs,
         holes,
         players,
         rounds: roundToGames,
