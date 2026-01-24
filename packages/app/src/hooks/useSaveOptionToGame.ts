@@ -20,11 +20,11 @@ export function useSaveOptionToGame(game: Game | null | undefined) {
         return;
       }
 
-      // Get the spec option as template
+      // Get the spec option as template - GameSpec IS the options map
       const specOption =
         game.specs?.$isLoaded && game.specs.length > 0
-          ? game.specs[0]?.$isLoaded && game.specs[0].options?.$isLoaded
-            ? game.specs[0].options[optionName]
+          ? game.specs[0]?.$isLoaded
+            ? game.specs[0][optionName]
             : undefined
           : undefined;
 

@@ -79,7 +79,8 @@ export function useCreateGame() {
     // If the first spec has team config options, create a TeamsConfig for the game scope
     const firstSpec = specs[0];
 
-    if (firstSpec?.$isLoaded && firstSpec.options?.$isLoaded) {
+    // GameSpec IS the options map directly
+    if (firstSpec?.$isLoaded) {
       const { getSpecField } = await import("spicylib/scoring");
       const teams = getSpecField(firstSpec, "teams") as boolean;
       const teamChangeEvery = getSpecField(

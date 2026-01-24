@@ -47,8 +47,9 @@ function createScoringFingerprint(game: Game | null): number | null {
   if (!game?.$isLoaded) return null;
   if (!game.specs?.$isLoaded || game.specs.length === 0) return null;
 
+  // GameSpec IS the options map directly
   const spec = game.specs[0];
-  if (!spec?.$isLoaded || !spec.options?.$isLoaded) return null;
+  if (!spec?.$isLoaded) return null;
   if (!game.holes?.$isLoaded || game.holes.length === 0) return null;
   if (!game.rounds?.$isLoaded || game.rounds.length === 0) return null;
 

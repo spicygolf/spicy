@@ -1,11 +1,6 @@
 import { Group } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import {
-  GameSpec,
-  MapOfOptions,
-  MetaOption,
-  PlayerAccount,
-} from "spicylib/schema";
+import { GameSpec, MetaOption, PlayerAccount } from "spicylib/schema";
 import { useJazzWorker } from "./useJazzWorker";
 
 export function useGamespecs() {
@@ -63,11 +58,11 @@ export function useGamespecs() {
     const group = Group.create();
     group.addMember(me, "admin");
 
-    // Create options map with meta options for all fields
-    const options = MapOfOptions.create({}, { owner: group });
+    // GameSpec IS the options map directly - create it empty and add meta options
+    const gameSpec = GameSpec.create({}, { owner: group });
 
-    // Helper to create a meta option
-    const createMetaOption = (
+    // Helper to create and add a meta option
+    const addMetaOption = (
       optName: string,
       value: string | number | boolean,
       valueType: "text" | "num" | "bool" | "menu",
@@ -82,22 +77,20 @@ export function useGamespecs() {
         },
         { owner: group },
       );
-      options.$jazz.set(optName, opt);
+      gameSpec.$jazz.set(optName, opt);
     };
 
-    createMetaOption("name", spec.name, "text");
-    createMetaOption("short", spec.short, "text");
+    addMetaOption("name", spec.name, "text");
+    addMetaOption("short", spec.short, "text");
     if (spec.long_description) {
-      createMetaOption("long_description", spec.long_description, "text");
+      addMetaOption("long_description", spec.long_description, "text");
     }
-    createMetaOption("version", spec.version, "num");
-    createMetaOption("status", spec.status, "menu");
-    createMetaOption("spec_type", spec.spec_type, "menu");
-    createMetaOption("min_players", spec.min_players, "num");
-    createMetaOption("location_type", spec.location_type, "menu");
+    addMetaOption("version", spec.version, "num");
+    addMetaOption("status", spec.status, "menu");
+    addMetaOption("spec_type", spec.spec_type, "menu");
+    addMetaOption("min_players", spec.min_players, "num");
+    addMetaOption("location_type", spec.location_type, "menu");
 
-    // Create the GameSpec with options only
-    const gameSpec = GameSpec.create({ options }, { owner: group });
     me.root.specs.$jazz.push(gameSpec);
 
     return gameSpec;

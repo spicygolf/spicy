@@ -359,9 +359,10 @@ async function inspectOptions(
   });
 
   try {
+    // GameSpec IS the options map - resolve with $each to load all options
     const spec = await GameSpec.load(specId as ID<GameSpec>, {
       loadAs: worker,
-      resolve: { options: { $each: true } },
+      resolve: { $each: true },
     });
 
     if (!spec?.$isLoaded) {
@@ -374,20 +375,14 @@ async function inspectOptions(
     const specShort = getSpecField(spec, "short") as string;
     console.log(`Spec: ${specName} (${specShort})\n`);
 
-    const options = spec.options;
-    if (!options?.$isLoaded) {
-      console.error("Options not loaded");
-      await done();
-      return;
-    }
-
-    const keys = Object.keys(options).filter(
+    // GameSpec IS the options map directly
+    const keys = Object.keys(spec).filter(
       (k) => !k.startsWith("$") && k !== "_schema",
     );
 
     if (optionName) {
-      // Show specific option
-      const opt = options[optionName];
+      // Show specific option - spec IS the options map
+      const opt = spec[optionName];
       if (!opt?.$isLoaded) {
         console.error(`Option "${optionName}" not found or not loaded`);
         console.log(`\nAvailable options: ${keys.join(", ")}`);
@@ -440,11 +435,11 @@ async function inspectOptions(
         console.log(`  value: ${gameOpt.value}`);
       }
     } else {
-      // List all options
+      // List all options - spec IS the options map
       console.log(`Found ${keys.length} options:\n`);
 
       for (const key of keys.sort()) {
-        const opt = options[key];
+        const opt = spec[key];
         if (opt?.$isLoaded) {
           const typeInfo =
             opt.type === "multiplier"

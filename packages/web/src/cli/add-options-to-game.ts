@@ -170,13 +170,11 @@ async function main() {
   });
 
   try {
-    // Load the game with specs and options
+    // Load the game with specs - GameSpec IS the options map, so resolve with $each
     const game = await Game.load(gameId as ID<Game>, {
       resolve: {
         specs: {
-          $each: {
-            options: { $each: true },
-          },
+          $each: { $each: true },
         },
       },
     });
@@ -197,32 +195,32 @@ async function main() {
     const specName = getSpecField(spec, "name");
     console.log(`Spec: ${specName} (${spec.$jazz.id})`);
 
-    // Ensure spec has options map
-    if (!spec.$jazz.has("options") || !spec.options) {
-      console.log("Creating options map on spec...");
-      const optionsMap = MapOfOptions.create({}, { owner: spec.$jazz.owner });
-      spec.$jazz.set("options", optionsMap);
-    }
+    // GameSpec IS the options map directly - no need to check for nested options
+    console.log(
+      `\nCurrent options: ${Object.keys(spec).filter((k) => !k.startsWith("$")).length}`,
+    );
+    console.log(
+      `  ${Object.keys(spec)
+        .filter((k) => !k.startsWith("$"))
+        .join(", ")}`,
+    );
 
-    const specOptions = spec.options;
-    if (!specOptions?.$isLoaded) {
-      console.error("Failed to access spec options");
-      process.exit(1);
-    }
-
-    console.log(`\nCurrent options: ${Object.keys(specOptions).length}`);
-    console.log(`  ${Object.keys(specOptions).join(", ")}`);
-
-    // Add new multiplier options
+    // Add new multiplier options - spec IS the options map
     console.log("\nAdding new multiplier options to spec:");
-    const addedTwelve = await addMultiplierOption(specOptions, TWELVE_OPTION);
-    const addedCustom = await addMultiplierOption(specOptions, CUSTOM_OPTION);
+    const addedTwelve = await addMultiplierOption(spec, TWELVE_OPTION);
+    const addedCustom = await addMultiplierOption(spec, CUSTOM_OPTION);
 
     if (!addedTwelve && !addedCustom) {
       console.log("\nNo new options added (all already exist)");
     } else {
-      console.log(`\nUpdated options: ${Object.keys(specOptions).length}`);
-      console.log(`  ${Object.keys(specOptions).join(", ")}`);
+      console.log(
+        `\nUpdated options: ${Object.keys(spec).filter((k) => !k.startsWith("$")).length}`,
+      );
+      console.log(
+        `  ${Object.keys(spec)
+          .filter((k) => !k.startsWith("$"))
+          .join(", ")}`,
+      );
     }
 
     // Wait for sync

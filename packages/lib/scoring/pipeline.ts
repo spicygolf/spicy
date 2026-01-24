@@ -219,30 +219,33 @@ function extractOptions(
 ): MapOfOptions | undefined {
   // Priority order:
   // 1. Game-level option overrides (user customizations for this game)
-  // 2. Spec reference options (live spec from catalog)
-  // 3. Legacy game.specs[0] options (backwards compat)
-  // 4. Primary game spec options (final fallback)
+  // 2. Spec reference (live spec from catalog) - GameSpec IS the options map
+  // 3. Legacy game.specs[0] (backwards compat) - GameSpec IS the options map
+  // 4. Primary game spec (final fallback) - GameSpec IS the options map
 
   if (game.options?.$isLoaded) {
     return game.options;
   }
 
   // Check specRef (new architecture - live spec reference)
-  if (game.specRef?.$isLoaded && game.specRef.options?.$isLoaded) {
-    return game.specRef.options;
+  // GameSpec IS the options map directly
+  if (game.specRef?.$isLoaded) {
+    return game.specRef;
   }
 
-  // Fall back to game.specs[0] (old architecture), even if specRef is present
+  // Fall back to game.specs[0] (old architecture)
+  // GameSpec IS the options map directly
   if (game.specs?.$isLoaded && game.specs.length > 0) {
     const legacySpec = game.specs[0];
-    if (legacySpec?.$isLoaded && legacySpec.options?.$isLoaded) {
-      return legacySpec.options;
+    if (legacySpec?.$isLoaded) {
+      return legacySpec;
     }
   }
 
-  // Final fallback to gameSpec options (if different from above)
-  if (gameSpec.options?.$isLoaded) {
-    return gameSpec.options;
+  // Final fallback to gameSpec (if different from above)
+  // GameSpec IS the options map directly
+  if (gameSpec?.$isLoaded) {
+    return gameSpec;
   }
 
   // No options available

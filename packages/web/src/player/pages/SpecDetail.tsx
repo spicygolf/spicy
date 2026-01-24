@@ -34,11 +34,12 @@ export function SpecDetail(): React.JSX.Element {
 
   const workerAccountId = import.meta.env.VITE_JAZZ_WORKER_ACCOUNT || "";
 
+  // GameSpec IS the options map - resolve specs with $each to load all options in each spec
   const workerAccount = useCoState(PlayerAccount, workerAccountId, {
     resolve: {
       profile: {
         catalog: {
-          specs: { $each: { options: { $each: true } } },
+          specs: { $each: { $each: true } },
         },
       },
     },
@@ -113,32 +114,30 @@ function SpecDetailContent({
   const locationType = getSpecField(spec, "location_type");
   const longDescription = getSpecField(spec, "long_description");
 
-  // Collect options by type
+  // Collect options by type - GameSpec IS the options map directly
   const gameOptions: Option[] = [];
   const junkOptions: Option[] = [];
   const multiplierOptions: Option[] = [];
   const metaOptions: Option[] = [];
 
-  if (spec.options?.$isLoaded) {
-    for (const key of Object.keys(spec.options)) {
-      if (key.startsWith("$") || key === "_refs") continue;
-      if (!spec.options.$jazz.has(key)) continue;
-      const opt = spec.options[key];
-      if (opt?.$isLoaded) {
-        switch (opt.type) {
-          case "game":
-            gameOptions.push(opt);
-            break;
-          case "junk":
-            junkOptions.push(opt);
-            break;
-          case "multiplier":
-            multiplierOptions.push(opt);
-            break;
-          case "meta":
-            metaOptions.push(opt);
-            break;
-        }
+  for (const key of Object.keys(spec)) {
+    if (key.startsWith("$") || key === "_refs") continue;
+    if (!spec.$jazz.has(key)) continue;
+    const opt = spec[key];
+    if (opt?.$isLoaded) {
+      switch (opt.type) {
+        case "game":
+          gameOptions.push(opt);
+          break;
+        case "junk":
+          junkOptions.push(opt);
+          break;
+        case "multiplier":
+          multiplierOptions.push(opt);
+          break;
+        case "meta":
+          metaOptions.push(opt);
+          break;
       }
     }
   }

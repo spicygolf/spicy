@@ -31,11 +31,12 @@ export function SpecBrowser(): React.JSX.Element {
 
   const workerAccountId = import.meta.env.VITE_JAZZ_WORKER_ACCOUNT || "";
 
+  // GameSpec IS the options map - resolve specs with $each to load all options in each spec
   const workerAccount = useCoState(PlayerAccount, workerAccountId, {
     resolve: {
       profile: {
         catalog: {
-          specs: { $each: { options: { $each: true } } },
+          specs: { $each: { $each: true } },
         },
       },
     },

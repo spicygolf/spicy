@@ -30,10 +30,11 @@ const JAZZ_WORKER_SECRET = process.env.JAZZ_WORKER_SECRET;
 const FIVE_POINTS_GAME_ID = "co_zEEke11BQDqGfoPUeQztziP2wf7";
 
 // Deep resolve query to load all nested data
+// Note: GameSpec IS the options map directly (no wrapper), so we use $each to load all options
 const GAME_RESOLVE = {
   specs: {
     $each: {
-      options: { $each: true },
+      $each: true, // Load all options in the spec (GameSpec IS the options map)
       teamsConfig: true,
     },
   },
@@ -157,23 +158,23 @@ describe("Five Points Integration Tests", () => {
     it("should have spec options with correct overrides", () => {
       requireGame();
 
+      // GameSpec IS the options map directly (no wrapper)
       const spec = game.specs?.[0];
       expect(spec?.$isLoaded).toBe(true);
-      expect(spec?.options?.$isLoaded).toBe(true);
 
       // Five Points overrides low_ball and low_total to value 2 (base is 1)
       // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
-      const lowBall = spec?.options?.["low_ball"];
+      const lowBall = spec?.["low_ball"];
       expect(lowBall?.$isLoaded).toBe(true);
       expect(lowBall?.value).toBe(2);
 
       // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
-      const lowTotal = spec?.options?.["low_total"];
+      const lowTotal = spec?.["low_total"];
       expect(lowTotal?.$isLoaded).toBe(true);
       expect(lowTotal?.value).toBe(2);
 
       // prox should be value 1
-      const prox = spec?.options?.prox;
+      const prox = spec?.prox;
       expect(prox?.$isLoaded).toBe(true);
       expect(prox?.value).toBe(1);
     });

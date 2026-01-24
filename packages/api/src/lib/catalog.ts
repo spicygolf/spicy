@@ -428,8 +428,9 @@ export async function upsertGameSpec(
   const exists = specs.$jazz.has(key);
   const transformed = transformGameSpec(specData);
 
-  // Get or create the spec - only set the bare minimum required fields
+  // Get or create the spec - GameSpec IS the options map directly
   let spec: GameSpec;
+  const isUpdate = exists;
   if (exists) {
     const existingSpec = specs[key];
     if (!existingSpec?.$isLoaded) {
@@ -437,12 +438,11 @@ export async function upsertGameSpec(
     }
     spec = existingSpec;
   } else {
-    // Create new spec with empty shell - all data goes in options map
+    // Create new spec - GameSpec IS MapOfOptions, so create empty record
     spec = GameSpec.create({}, { owner: specs.$jazz.owner });
   }
 
-  // Build the unified options map with ALL data (meta + game + junk + multiplier options)
-  const specOptionsMap: Record<string, unknown> = {};
+  // Build options to add to spec (GameSpec IS the options map)
 
   // Helper to create a meta option
   const createMetaOption = (
@@ -493,36 +493,34 @@ export async function upsertGameSpec(
     return metaOption;
   };
 
-  // Add core identity as meta options
-  specOptionsMap.name = createMetaOption(
+  // Add core identity as meta options - set directly on spec (which IS the options map)
+  spec.$jazz.set(
     "name",
-    "Name",
-    "text",
-    transformed.name,
-    { required: true },
+    createMetaOption("name", "Name", "text", transformed.name, {
+      required: true,
+    }),
   );
-  specOptionsMap.version = createMetaOption(
+  spec.$jazz.set(
     "version",
-    "Version",
-    "num",
-    transformed.version,
+    createMetaOption("version", "Version", "num", transformed.version),
   );
   if (specData._key) {
-    specOptionsMap.legacyId = createMetaOption(
+    spec.$jazz.set(
       "legacyId",
-      "Legacy ID",
-      "text",
-      specData._key,
+      createMetaOption("legacyId", "Legacy ID", "text", specData._key),
     );
   }
 
   // Add long_description if present
   if (transformed.long_description) {
-    specOptionsMap.long_description = createMetaOption(
+    spec.$jazz.set(
       "long_description",
-      "Description",
-      "text",
-      transformed.long_description,
+      createMetaOption(
+        "long_description",
+        "Description",
+        "text",
+        transformed.long_description,
+      ),
     );
   }
 
@@ -531,28 +529,32 @@ export async function upsertGameSpec(
     specData.teams !== undefined ||
     specData.team_change_every !== undefined
   ) {
-    specOptionsMap.teams = createMetaOption(
+    spec.$jazz.set(
       "teams",
-      "Team Game",
-      "bool",
-      specData.teams ? "true" : "false",
+      createMetaOption(
+        "teams",
+        "Team Game",
+        "bool",
+        specData.teams ? "true" : "false",
+      ),
     );
 
     if (specData.team_size && specData.team_size > 0) {
-      specOptionsMap.team_size = createMetaOption(
+      spec.$jazz.set(
         "team_size",
-        "Team Size",
-        "num",
-        specData.team_size,
+        createMetaOption("team_size", "Team Size", "num", specData.team_size),
       );
     }
 
     if (specData.team_change_every !== undefined) {
-      specOptionsMap.team_change_every = createMetaOption(
+      spec.$jazz.set(
         "team_change_every",
-        "Rotate Teams Every N Holes",
-        "num",
-        specData.team_change_every,
+        createMetaOption(
+          "team_change_every",
+          "Rotate Teams Every N Holes",
+          "num",
+          specData.team_change_every,
+        ),
       );
     }
   }
@@ -563,17 +565,20 @@ export async function upsertGameSpec(
       // Meta options are created fresh for each spec (spec-specific metadata)
       if (opt.type === "meta") {
         const metaOpt = opt as MetaOptionData;
-        specOptionsMap[opt.name] = createMetaOption(
-          metaOpt.name,
-          metaOpt.disp,
-          metaOpt.valueType,
-          metaOpt.value as string | number | string[] | undefined,
-          {
-            choices: metaOpt.choices,
-            seq: metaOpt.seq,
-            searchable: metaOpt.searchable,
-            required: metaOpt.required,
-          },
+        spec.$jazz.set(
+          opt.name,
+          createMetaOption(
+            metaOpt.name,
+            metaOpt.disp,
+            metaOpt.valueType,
+            metaOpt.value as string | number | string[] | undefined,
+            {
+              choices: metaOpt.choices,
+              seq: metaOpt.seq,
+              searchable: metaOpt.searchable,
+              required: metaOpt.required,
+            },
+          ),
         );
         continue;
       }
@@ -586,7 +591,7 @@ export async function upsertGameSpec(
       // For junk options, check if the spec has an overridden value
       if (opt.type === "junk" && "value" in opt) {
         if (!catalogOption.$isLoaded) {
-          specOptionsMap[opt.name] = catalogOption;
+          spec.$jazz.set(opt.name, catalogOption);
           continue;
         }
         const loadedCatalogOpt = catalogOption;
@@ -639,7 +644,7 @@ export async function upsertGameSpec(
                 loadedCatalogOpt.score_to_par,
               );
 
-            specOptionsMap[opt.name] = newJunkOption;
+            spec.$jazz.set(opt.name, newJunkOption);
             continue;
           }
         }
@@ -648,7 +653,7 @@ export async function upsertGameSpec(
       // For multiplier options, check if the spec has an overridden value
       if (opt.type === "multiplier" && "value" in opt) {
         if (!catalogOption.$isLoaded) {
-          specOptionsMap[opt.name] = catalogOption;
+          spec.$jazz.set(opt.name, catalogOption);
           continue;
         }
         const loadedCatalogOpt = catalogOption;
@@ -694,21 +699,18 @@ export async function upsertGameSpec(
           if (loadedCatalogOpt.value_from)
             newMultOption.$jazz.set("value_from", loadedCatalogOpt.value_from);
 
-          specOptionsMap[opt.name] = newMultOption;
+          spec.$jazz.set(opt.name, newMultOption);
           continue;
         }
       }
 
       // Default: reference the catalog option directly (no override needed)
-      specOptionsMap[opt.name] = catalogOption;
+      spec.$jazz.set(opt.name, catalogOption);
     }
   }
 
-  // Set the unified options map on the spec
-  spec.$jazz.set("options", specOptionsMap as MapOfOptions);
-
   // Only add to map if new (existing specs are already in the map)
-  if (!exists) {
+  if (!isUpdate) {
     specs.$jazz.set(key, spec);
   }
 

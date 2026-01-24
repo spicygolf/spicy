@@ -277,18 +277,16 @@ export function getJunkOptionsForHole(
  * const status = getMetaOption(spec, "status"); // "prod"
  */
 export function getMetaOption(
-  source: GameSpec | undefined | null,
+  spec: GameSpec | undefined | null,
   optionName: string,
 ): string | number | boolean | string[] | undefined {
-  if (!source?.$isLoaded) return undefined;
+  if (!spec?.$isLoaded) return undefined;
 
-  const options = source.options;
-  if (!options?.$isLoaded) return undefined;
-
+  // GameSpec IS the options map directly (no wrapper)
   // Check if option exists before accessing (Jazz CoMap pattern)
   // In tests, $jazz may not exist on mock objects
-  if (options.$jazz?.has && !options.$jazz.has(optionName)) return undefined;
-  const option = options[optionName];
+  if (spec.$jazz?.has && !spec.$jazz.has(optionName)) return undefined;
+  const option = spec[optionName];
   if (!option?.$isLoaded || option.type !== "meta") return undefined;
 
   const metaOpt = option as MetaOption;
@@ -368,29 +366,20 @@ function getOptionsFromGame(game: Game | undefined | null) {
     }
   }
 
-  // Spec reference (live)
-  if (
-    hasField(game, "specRef") &&
-    game.specRef?.$isLoaded &&
-    hasField(game.specRef, "options") &&
-    game.specRef.options?.$isLoaded
-  ) {
-    return game.specRef.options;
+  // Spec reference (live) - GameSpec IS the options map
+  if (hasField(game, "specRef") && game.specRef?.$isLoaded) {
+    return game.specRef;
   }
 
-  // Legacy game.specs[0]
+  // Legacy game.specs[0] - GameSpec IS the options map
   if (
     hasField(game, "specs") &&
     game.specs?.$isLoaded &&
     game.specs.length > 0
   ) {
     const spec = game.specs[0];
-    if (
-      spec?.$isLoaded &&
-      hasField(spec, "options") &&
-      spec.options?.$isLoaded
-    ) {
-      return spec.options;
+    if (spec?.$isLoaded) {
+      return spec;
     }
   }
 

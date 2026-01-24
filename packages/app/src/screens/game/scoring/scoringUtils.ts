@@ -29,15 +29,12 @@ import {
 export function getUserJunkOptions(game: Game): JunkOption[] {
   const junkOptions: JunkOption[] = [];
 
-  // Get options from game spec
+  // Get options from game spec - GameSpec IS the options map
   const spec = game.specs?.$isLoaded ? game.specs[0] : null;
   if (!spec?.$isLoaded) return junkOptions;
 
-  const options = spec.options;
-  if (!options?.$isLoaded) return junkOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
+  for (const key of Object.keys(spec)) {
+    const opt = spec[key];
     if (
       opt?.$isLoaded &&
       opt.type === "junk" &&
@@ -62,14 +59,12 @@ export function getUserJunkOptions(game: Game): JunkOption[] {
 export function getCalculatedPlayerJunkOptions(game: Game): JunkOption[] {
   const junkOptions: JunkOption[] = [];
 
+  // GameSpec IS the options map
   const spec = game.specs?.$isLoaded ? game.specs[0] : null;
   if (!spec?.$isLoaded) return junkOptions;
 
-  const options = spec.options;
-  if (!options?.$isLoaded) return junkOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
+  for (const key of Object.keys(spec)) {
+    const opt = spec[key];
     if (
       opt?.$isLoaded &&
       opt.type === "junk" &&
@@ -97,14 +92,12 @@ export function getCalculatedPlayerJunkOptions(game: Game): JunkOption[] {
 export function getCalculatedTeamJunkOptions(game: Game): JunkOption[] {
   const junkOptions: JunkOption[] = [];
 
+  // GameSpec IS the options map
   const spec = game.specs?.$isLoaded ? game.specs[0] : null;
   if (!spec?.$isLoaded) return junkOptions;
 
-  const options = spec.options;
-  if (!options?.$isLoaded) return junkOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
+  for (const key of Object.keys(spec)) {
+    const opt = spec[key];
     if (
       opt?.$isLoaded &&
       opt.type === "junk" &&
@@ -190,14 +183,12 @@ export function hasPlayerJunk(
 export function getMultiplierOptions(game: Game): MultiplierOption[] {
   const multiplierOptions: MultiplierOption[] = [];
 
+  // GameSpec IS the options map
   const spec = game.specs?.$isLoaded ? game.specs[0] : null;
   if (!spec?.$isLoaded) return multiplierOptions;
 
-  const options = spec.options;
-  if (!options?.$isLoaded) return multiplierOptions;
-
-  for (const key of Object.keys(options)) {
-    const opt = options[key];
+  for (const key of Object.keys(spec)) {
+    const opt = spec[key];
     if (
       opt?.$isLoaded &&
       opt.type === "multiplier" &&

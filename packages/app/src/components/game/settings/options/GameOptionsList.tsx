@@ -12,14 +12,13 @@ import { NumOptionModal } from "./NumOptionModal";
 import { TextOptionModal } from "./TextOptionModal";
 
 export function GameOptionsList() {
+  // GameSpec IS the options map - resolve specs with $each to load all options
   const { game } = useGame(undefined, {
     resolve: {
       specs: {
         $each: {
-          options: {
-            $each: {
-              choices: { $each: true },
-            },
+          $each: {
+            choices: { $each: true },
           },
           teamsConfig: true,
         },
@@ -43,19 +42,21 @@ export function GameOptionsList() {
 
   const saveOptionToGame = useSaveOptionToGame(game);
 
+  // GameSpec IS the options map directly (no wrapper)
   const gameOptions = useMemo(() => {
     if (!game?.$isLoaded || !game.specs?.$isLoaded || game.specs.length === 0) {
       return [];
     }
 
     const spec = game.specs[0];
-    if (!spec?.$isLoaded || !spec.options?.$isLoaded) {
+    if (!spec?.$isLoaded) {
       return [];
     }
 
     const options: GameOption[] = [];
-    for (const key in spec.options) {
-      const option = spec.options[key];
+    for (const key of Object.keys(spec)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      const option = spec[key];
       if (option?.$isLoaded && option.type === "game") {
         const gameOpt = option as GameOption;
         // Filter out teamOnly options when teams mode is not active
@@ -89,11 +90,11 @@ export function GameOptionsList() {
         }
       }
 
-      // Fall back to spec.options
+      // Fall back to spec (GameSpec IS the options map directly)
       if (game?.$isLoaded && game.specs?.$isLoaded && game.specs.length > 0) {
         const spec = game.specs[0];
-        if (spec?.$isLoaded && spec.options?.$isLoaded) {
-          const specOption = spec.options[optionName];
+        if (spec?.$isLoaded) {
+          const specOption = spec[optionName];
           if (specOption?.$isLoaded && specOption.type === "game") {
             const opt = specOption as GameOption;
             return opt.value ?? opt.defaultValue;

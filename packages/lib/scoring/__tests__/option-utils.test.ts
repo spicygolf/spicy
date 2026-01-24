@@ -79,23 +79,22 @@ function createTextArrayMetaOption(
 }
 
 /**
- * Create a mock GameSpec with options
+ * Create a mock GameSpec (GameSpec IS the options map directly, no wrapper)
  */
 function createMockSpec(
   options: Record<string, Partial<MetaOption>>,
-  topLevelFields: Partial<GameSpec> = {},
+  _topLevelFields: Partial<GameSpec> = {},
 ): Partial<GameSpec> {
-  const optionsMap = {
+  // GameSpec IS the options map directly - add $isLoaded and $jazz.has
+  const spec = {
     $isLoaded: true,
+    $jazz: {
+      has: (key: string) => key in options,
+    },
     ...options,
   };
 
-  return {
-    $isLoaded: true,
-    name: "test_spec",
-    options: optionsMap,
-    ...topLevelFields,
-  } as Partial<GameSpec>;
+  return spec as Partial<GameSpec>;
 }
 
 /**

@@ -71,11 +71,11 @@ export function useOptionValue(
     }
   }
 
-  // 3. Fall back to gamespec options (defaults)
+  // 3. Fall back to gamespec (defaults) - GameSpec IS the options map
   if (game?.specs?.$isLoaded && game.specs.length > 0) {
     const spec = game.specs[0];
-    if (spec?.$isLoaded && spec.options?.$isLoaded) {
-      const specOption = spec.options[optionName];
+    if (spec?.$isLoaded) {
+      const specOption = spec[optionName];
       if (specOption?.$isLoaded && specOption.type === optionType) {
         if (optionType === "game") {
           const gameOption = specOption as GameOption;
