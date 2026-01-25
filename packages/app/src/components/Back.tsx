@@ -16,9 +16,11 @@ export function Back<ParamList extends ParamListBase = ParamListBase>({
   const theme = UnistylesRuntime.getTheme();
   const navigation = useNavigation();
 
+  const hitSlop = { top: 12, bottom: 12, left: 12, right: 12 };
+
   if (home) {
     return (
-      <Link href={home}>
+      <Link href={home} hitSlop={hitSlop}>
         <FontAwesome6
           name="chevron-left"
           size={20}
@@ -30,7 +32,7 @@ export function Back<ParamList extends ParamListBase = ParamListBase>({
   }
 
   return (
-    <Pressable onPress={() => navigation.goBack()}>
+    <Pressable onPress={() => navigation.goBack()} hitSlop={hitSlop}>
       <FontAwesome6
         name="chevron-left"
         size={20}

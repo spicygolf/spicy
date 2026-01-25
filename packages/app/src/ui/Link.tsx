@@ -1,7 +1,7 @@
 import type { NavigationProp, ParamListBase } from "@react-navigation/native";
 import { useLinkTo, useNavigation } from "@react-navigation/native";
 import type React from "react";
-import type { StyleProp, ViewStyle } from "react-native";
+import type { Insets, StyleProp, ViewStyle } from "react-native";
 import { Linking, Pressable } from "react-native";
 
 type HrefName<ParamList extends ParamListBase> = {
@@ -36,12 +36,14 @@ interface LinkProps<ParamList extends ParamListBase> {
   href: Href<ParamList>;
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
+  hitSlop?: Insets;
 }
 
 export function Link<ParamList extends ParamListBase>({
   href,
   children,
   style,
+  hitSlop,
 }: LinkProps<ParamList>) {
   const navigation = useNavigation<NavigationProp<ParamList>>();
   const linkTo = useLinkTo();
@@ -76,7 +78,7 @@ export function Link<ParamList extends ParamListBase>({
   };
 
   return (
-    <Pressable onPressIn={onPressIn} style={style}>
+    <Pressable onPressIn={onPressIn} style={style} hitSlop={hitSlop}>
       {children}
     </Pressable>
   );

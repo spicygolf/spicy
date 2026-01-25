@@ -28,7 +28,11 @@ export function useCreateGame() {
   const worker = useJazzWorker();
 
   const createGame = async (name: string, specs: GameSpec[]) => {
-    if (!me?.$isLoaded || !me.root?.$isLoaded) {
+    if (!me?.$isLoaded) {
+      return null;
+    }
+
+    if (!me.root?.$isLoaded) {
       return null;
     }
 
@@ -110,7 +114,7 @@ export function useCreateGame() {
     // Copy spec options to create the game's working copy
     // spec = working copy (user modifications go here)
     // specRef = reference to catalog spec (for reset/diff)
-    const spec = await copySpecOptions(firstSpec, group);
+    const spec = copySpecOptions(firstSpec, group);
 
     // Create the game
     const game = Game.create(

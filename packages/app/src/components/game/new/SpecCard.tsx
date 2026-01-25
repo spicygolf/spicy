@@ -1,13 +1,13 @@
 import type { NavigationProp } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
-import { Animated, ScrollView, TouchableOpacity, View } from "react-native";
+import { Animated, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameSpec } from "spicylib/schema";
 import { getSpecField } from "spicylib/scoring";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
 import { useCreateGame } from "@/hooks";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
-import { Markdown, Text } from "@/ui";
+import { Button, Markdown, Text } from "@/ui";
 
 interface SpecCardProps {
   spec: GameSpec;
@@ -97,9 +97,7 @@ export function SpecCard({
                 `${short}\n\nType: ${specType}\nMin Players: ${minPlayers}\nTeams: ${teams ? "Yes" : "No"}`}
             </Markdown>
           </ScrollView>
-          <TouchableOpacity style={styles.playButton} onPress={handlePlayGame}>
-            <Text style={styles.playButtonText}>Play Game</Text>
-          </TouchableOpacity>
+          <Button label="Play Game" onPress={handlePlayGame} />
         </View>
       </View>
     </Animated.View>
@@ -144,17 +142,6 @@ const styles = StyleSheet.create((theme) => ({
   scrollView: {
     flex: 1,
     paddingVertical: theme.gap(1),
-  },
-  playButton: {
-    backgroundColor: theme.colors.action,
-    paddingVertical: theme.gap(1.5),
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: theme.gap(1),
-  },
-  playButtonText: {
-    color: theme.colors.background,
-    fontSize: 16,
-    fontWeight: "600",
+    marginBottom: theme.gap(1),
   },
 }));
