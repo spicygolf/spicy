@@ -94,7 +94,7 @@ async function main() {
     console.log(`  New spec: ${newSpecName} v${newSpecVersion}`);
 
     // Create a copy of the spec options for game.spec (working copy)
-    const specCopy = await copySpecOptions(newSpec, game.$jazz.owner);
+    const specCopy = copySpecOptions(newSpec, game.$jazz.owner);
     console.log(`\nCreated working copy of spec options`);
 
     // Update game.spec (working copy) and game.specRef (catalog reference)
