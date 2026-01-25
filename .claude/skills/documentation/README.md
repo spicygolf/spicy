@@ -1,39 +1,10 @@
 # Documentation Standards
 
-Guidelines for markdown files, docstrings, and code documentation in Spicy Golf.
-
-## Markdown Code Blocks
-
-**Severity**: LOW | **Enforcement**: RECOMMENDED
-
-Always specify a language identifier on fenced code blocks in markdown files.
-
-```markdown
-<!-- GOOD -->
-```typescript
-const x = 1;
-```
-
-<!-- GOOD for plain text/directory trees -->
-```text
-packages/
-├── app/
-└── lib/
-```
-
-<!-- BAD - no language specified -->
-```
-const x = 1;
-```
-```
-
-This helps with syntax highlighting and satisfies markdownlint (MD040).
+CodeRabbit flags PRs with low docstring coverage. Aim for good coverage on exported functions.
 
 ## Docstrings
 
-**Severity**: MEDIUM | **Enforcement**: RECOMMENDED
-
-Add JSDoc docstrings to exported functions and complex internal functions.
+When writing or modifying functions, **add JSDoc docstrings to exported functions**.
 
 ```typescript
 /**
@@ -53,44 +24,55 @@ export function calculateCourseHandicap(
 }
 ```
 
-### When to Add Docstrings
+### When Docstrings Are Required
 
-- **Always**: Exported functions, especially in `packages/lib`
-- **Always**: Complex business logic (scoring, settlement, handicaps)
-- **Usually**: React hooks with non-obvious behavior
-- **Optional**: Simple utility functions with self-explanatory names
-- **Skip**: Internal helper functions that are only used in one place
+| Context | Required? |
+|---------|-----------|
+| Exported functions in `packages/lib` | **YES** |
+| Exported functions in any package | **YES** |
+| React hooks (`use*` functions) | **YES** |
+| Complex business logic | **YES** |
+| Simple private helper functions | No |
+| Single-line arrow functions | No |
 
-### Docstring Content
+### Minimum Docstring Content
 
-- First line: Brief description of what the function does
-- `@param` for each parameter with description
-- `@returns` describing what is returned
-- `@throws` if the function can throw (rare - prefer returning undefined)
-- `@example` for complex functions (optional)
+1. **First line**: Brief description of what the function does
+2. **@param**: For each parameter
+3. **@returns**: What is returned (skip for void functions)
 
-## README Files
+For very simple functions with obvious parameters (e.g., `getPlayerName(player)`), a single-line docstring without `@param` is acceptable.
 
-**Severity**: LOW | **Enforcement**: RECOMMENDED
+### Quick Templates
 
-- Do NOT proactively create README files unless explicitly requested
-- When creating READMEs, keep them concise and focused
-- Use proper markdown formatting with headers, lists, and code blocks
+**Simple function:**
+```typescript
+/** Get the player's display name, falling back to "Unknown" if not set. */
+export function getPlayerName(player: Player): string {
+```
+
+**Function with params:**
+```typescript
+/**
+ * Format a score relative to par.
+ *
+ * @param score - The gross score
+ * @param par - The hole's par value
+ * @returns Formatted string like "+2" or "-1" or "E"
+ */
+export function formatScoreToPar(score: number, par: number): string {
+```
+
+## Markdown Code Blocks
+
+Always specify a language identifier on fenced code blocks:
+
+- Use `typescript` for TS code
+- Use `text` for plain text, directory trees, ASCII diagrams
+- Use `bash` for shell commands
 
 ## Code Comments
 
-**Severity**: LOW | **Enforcement**: RECOMMENDED
-
-- Avoid obvious comments that just restate the code
-- Use comments for "why" not "what"
+- Comment "why" not "what"
+- Don't add obvious comments
 - Keep comments up to date when code changes
-
-```typescript
-// BAD: Obvious comment
-// Increment counter by 1
-counter += 1;
-
-// GOOD: Explains why
-// Reset to 1 because hole numbers are 1-indexed, not 0-indexed
-holeIndex = 1;
-```

@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { TouchableOpacity } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
-import type { Game, GameSpec, Player } from "spicylib/schema";
+import type { Game, Player } from "spicylib/schema";
 import { getSpecField } from "spicylib/scoring";
 import { useGame } from "@/hooks";
 import { computeSpecForcesTeams } from "@/hooks/useTeamsMode";

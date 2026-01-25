@@ -110,7 +110,7 @@ export function useCreateGame() {
     // Copy spec options to create the game's working copy
     // spec = working copy (user modifications go here)
     // specRef = reference to catalog spec (for reset/diff)
-    const spec = await copySpecOptions(firstSpec, group);
+    const spec = copySpecOptions(firstSpec, group);
 
     // Create the game
     const game = Game.create(

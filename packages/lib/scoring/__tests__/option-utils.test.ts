@@ -1,6 +1,12 @@
-import { describe, expect, it } from "bun:test";
-import type { GameSpec, MetaOption, StringList } from "../../schema";
+import { describe, expect, it, mock } from "bun:test";
+import type {
+  GameSpec,
+  MapOfOptions,
+  MetaOption,
+  StringList,
+} from "../../schema";
 import {
+  copySpecOptions,
   getFrontNinePreDoubleTotalFromHoles,
   getMetaOption,
   getSpecField,
@@ -515,5 +521,200 @@ describe("getFrontNinePreDoubleTotalFromHoles", () => {
       gameHoles as Parameters<typeof getFrontNinePreDoubleTotalFromHoles>[0],
     );
     expect(result).toBe(1); // Only pre_double matters
+  });
+});
+
+// =============================================================================
+// Tests: copySpecOptions
+// =============================================================================
+
+describe("copySpecOptions", () => {
+  /**
+   * Create a mock MapOfOptions that tracks set operations
+   */
+  function createMockMapOfOptions() {
+    const storage: Record<string, unknown> = {};
+    return {
+      $isLoaded: true,
+      $jazz: {
+        has: (key: string) => key in storage,
+        set: (key: string, value: unknown) => {
+          storage[key] = value;
+        },
+        owner: {} as unknown,
+      },
+      // Expose storage for test assertions
+      _storage: storage,
+    };
+  }
+
+  /**
+   * Create a mock source spec with options
+   */
+  function createMockSourceSpec(options: Record<string, unknown>) {
+    return {
+      $isLoaded: true,
+      $jazz: {
+        has: (key: string) => key in options,
+      },
+      ...options,
+    };
+  }
+
+  it("copies all options from source to new MapOfOptions", async () => {
+    const mockResult = createMockMapOfOptions();
+
+    // Temporarily replace MapOfOptions.create
+    const schema = await import("../../schema");
+    const originalCreate = schema.MapOfOptions.create;
+    schema.MapOfOptions.create = mock(
+      () => mockResult as unknown as MapOfOptions,
+    );
+
+    try {
+      const sourceSpec = createMockSourceSpec({
+        birdie: { type: "junk", name: "birdie", value: 1 },
+        eagle: { type: "junk", name: "eagle", value: 2 },
+        min_players: { type: "meta", name: "min_players", value: "2" },
+      });
+
+      const mockGroup = {} as Parameters<typeof copySpecOptions>[1];
+      copySpecOptions(sourceSpec as GameSpec, mockGroup);
+
+      // Verify all options were copied
+      expect(mockResult._storage.birdie).toEqual({
+        type: "junk",
+        name: "birdie",
+        value: 1,
+      });
+      expect(mockResult._storage.eagle).toEqual({
+        type: "junk",
+        name: "eagle",
+        value: 2,
+      });
+      expect(mockResult._storage.min_players).toEqual({
+        type: "meta",
+        name: "min_players",
+        value: "2",
+      });
+    } finally {
+      schema.MapOfOptions.create = originalCreate;
+    }
+  });
+
+  it("creates deep copies (modifications don't affect original)", async () => {
+    const mockResult = createMockMapOfOptions();
+
+    const schema = await import("../../schema");
+    const originalCreate = schema.MapOfOptions.create;
+    schema.MapOfOptions.create = mock(
+      () => mockResult as unknown as MapOfOptions,
+    );
+
+    try {
+      const originalOption = {
+        type: "junk",
+        name: "birdie",
+        value: 1,
+        nested: { deep: "value" },
+      };
+      const sourceSpec = createMockSourceSpec({
+        birdie: originalOption,
+      });
+
+      const mockGroup = {} as Parameters<typeof copySpecOptions>[1];
+      copySpecOptions(sourceSpec as GameSpec, mockGroup);
+
+      // Modify the copy
+      const copiedOption = mockResult._storage.birdie as typeof originalOption;
+      copiedOption.value = 999;
+      copiedOption.nested.deep = "modified";
+
+      // Original should be unchanged
+      expect(originalOption.value).toBe(1);
+      expect(originalOption.nested.deep).toBe("value");
+    } finally {
+      schema.MapOfOptions.create = originalCreate;
+    }
+  });
+
+  it("skips $ prefixed keys and _refs", async () => {
+    const mockResult = createMockMapOfOptions();
+
+    const schema = await import("../../schema");
+    const originalCreate = schema.MapOfOptions.create;
+    schema.MapOfOptions.create = mock(
+      () => mockResult as unknown as MapOfOptions,
+    );
+
+    try {
+      const sourceSpec = createMockSourceSpec({
+        birdie: { type: "junk", name: "birdie", value: 1 },
+        $isLoaded: true,
+        $jazz: { has: () => true },
+        _refs: { some: "ref" },
+      });
+
+      const mockGroup = {} as Parameters<typeof copySpecOptions>[1];
+      copySpecOptions(sourceSpec as GameSpec, mockGroup);
+
+      // Only birdie should be copied
+      expect(Object.keys(mockResult._storage)).toEqual(["birdie"]);
+    } finally {
+      schema.MapOfOptions.create = originalCreate;
+    }
+  });
+
+  it("returns empty MapOfOptions for unloaded source", async () => {
+    const mockResult = createMockMapOfOptions();
+
+    const schema = await import("../../schema");
+    const originalCreate = schema.MapOfOptions.create;
+    schema.MapOfOptions.create = mock(
+      () => mockResult as unknown as MapOfOptions,
+    );
+
+    try {
+      const sourceSpec = { $isLoaded: false };
+
+      const mockGroup = {} as Parameters<typeof copySpecOptions>[1];
+      copySpecOptions(sourceSpec as GameSpec, mockGroup);
+
+      // Nothing should be copied
+      expect(Object.keys(mockResult._storage)).toEqual([]);
+    } finally {
+      schema.MapOfOptions.create = originalCreate;
+    }
+  });
+
+  it("skips null/undefined options", async () => {
+    const mockResult = createMockMapOfOptions();
+
+    const schema = await import("../../schema");
+    const originalCreate = schema.MapOfOptions.create;
+    schema.MapOfOptions.create = mock(
+      () => mockResult as unknown as MapOfOptions,
+    );
+
+    try {
+      const sourceSpec = {
+        $isLoaded: true,
+        $jazz: {
+          has: (key: string) =>
+            ["birdie", "nullOption", "undefinedOption"].includes(key),
+        },
+        birdie: { type: "junk", name: "birdie", value: 1 },
+        nullOption: null,
+        undefinedOption: undefined,
+      };
+
+      const mockGroup = {} as Parameters<typeof copySpecOptions>[1];
+      copySpecOptions(sourceSpec as unknown as GameSpec, mockGroup);
+
+      // Only birdie should be copied (null/undefined skipped)
+      expect(Object.keys(mockResult._storage)).toEqual(["birdie"]);
+    } finally {
+      schema.MapOfOptions.create = originalCreate;
+    }
   });
 });

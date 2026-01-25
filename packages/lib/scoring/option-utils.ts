@@ -10,17 +10,18 @@
  */
 
 import type { Group } from "jazz-tools";
-import type {
-  Game,
-  GameHole,
-  GameOption,
-  GameSpec,
-  JunkOption,
+import {
+  type Game,
+  type GameHole,
+  type GameOption,
+  type GameSpec,
+  type JunkOption,
   MapOfOptions,
-  MetaOption,
-  MultiplierOption,
-  Option,
+  type MetaOption,
+  type MultiplierOption,
+  type Option,
 } from "../schema";
+import { deepClone } from "../utils/clone";
 import type { ScoringContext } from "./types";
 
 // =============================================================================
@@ -374,13 +375,10 @@ function getOptionsFromGame(game: Game | undefined | null) {
  * @param owner - The Jazz Group that will own the new MapOfOptions
  * @returns A new MapOfOptions with copies of all options
  */
-export async function copySpecOptions(
+export function copySpecOptions(
   sourceSpec: GameSpec | MapOfOptions,
   owner: Group,
-): Promise<MapOfOptions> {
-  // Import schema types dynamically to avoid circular dependency
-  const { MapOfOptions } = await import("../schema");
-
+): MapOfOptions {
   const newSpec = MapOfOptions.create({}, { owner });
 
   if (!sourceSpec?.$isLoaded) return newSpec;
@@ -393,8 +391,8 @@ export async function copySpecOptions(
     const option = sourceSpec[key];
     if (!option) continue;
 
-    // Options are plain JSON objects, so structuredClone creates a deep copy
-    newSpec.$jazz.set(key, structuredClone(option));
+    // Options are plain JSON objects, so deep clone creates a copy
+    newSpec.$jazz.set(key, deepClone(option));
   }
 
   return newSpec;

@@ -89,7 +89,6 @@ function isValidBetter(value: unknown): value is "lower" | "higher" {
 }
 
 import {
-  type Choice,
   Club,
   Course,
   CourseDefaultTee,
@@ -2861,7 +2860,7 @@ async function importGame(
   // specRef = reference to catalog spec (for reset/diff)
   let gameSpecCopy: MapOfOptions | undefined;
   if (gameSpec?.$isLoaded) {
-    gameSpecCopy = await copySpecOptions(gameSpec, gameGroup);
+    gameSpecCopy = copySpecOptions(gameSpec, gameGroup);
   }
 
   // Create new game or update existing one
