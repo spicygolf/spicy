@@ -89,22 +89,50 @@
     },
     {
       "name": "documentation",
-      "description": "Markdown, docstrings, and code documentation standards",
+      "description": "Docstrings for exported functions (CodeRabbit requires 80% coverage)",
       "triggers": {
-        "keywords": [
-          "markdown",
-          "docstring",
-          "jsdoc",
-          "comment",
-          "documentation",
-          "readme",
-          "docs",
-          ".md"
-        ],
-        "filePatterns": ["*.md", "README*"]
+        "always": true
       },
       "skillPath": "documentation",
       "priority": 70
+    },
+    {
+      "name": "pr-review-bots",
+      "description": "Interacting with GitHub PR review bots (CodeRabbit)",
+      "triggers": {
+        "keywords": [
+          "coderabbit",
+          "@coderabbitai",
+          "review bot",
+          "pr comment",
+          "pr review",
+          "pr feedback",
+          "reply to bot",
+          "bot said",
+          "bot flagged",
+          "false positive"
+        ]
+      },
+      "skillPath": "pr-review-bots",
+      "priority": 56
+    },
+    {
+      "name": "ci-debugging",
+      "description": "CI failure debugging - run tests locally first, git commit timeouts",
+      "triggers": {
+        "keywords": [
+          "CI failed",
+          "CI failure",
+          "tests failed",
+          "build failed",
+          "gh run",
+          "gh pr checks",
+          "workflow failed",
+          "github actions"
+        ]
+      },
+      "skillPath": "ci-debugging",
+      "priority": 64
     }
   ]
 }
