@@ -14,7 +14,12 @@ export function useGameInitialization(game: Game | null) {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: game causes infinite loops due to Jazz reactivity
   useEffect(() => {
-    if (!game?.$isLoaded || !game.holes?.$isLoaded || initialized.current) {
+    if (
+      !game?.$isLoaded ||
+      !game.holes?.$isLoaded ||
+      !game.rounds?.$isLoaded ||
+      initialized.current
+    ) {
       return;
     }
 
