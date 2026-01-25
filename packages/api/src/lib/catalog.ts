@@ -89,7 +89,6 @@ function isValidBetter(value: unknown): value is "lower" | "higher" {
 }
 
 import {
-  type Choice,
   Club,
   Course,
   CourseDefaultTee,
