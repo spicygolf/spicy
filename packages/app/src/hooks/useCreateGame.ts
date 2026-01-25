@@ -28,11 +28,7 @@ export function useCreateGame() {
   const worker = useJazzWorker();
 
   const createGame = async (name: string, specs: GameSpec[]) => {
-    if (!me?.$isLoaded) {
-      return null;
-    }
-
-    if (!me.root?.$isLoaded) {
+    if (!me?.$isLoaded || !me.root?.$isLoaded) {
       return null;
     }
 
