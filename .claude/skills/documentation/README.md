@@ -1,12 +1,10 @@
 # Documentation Standards
 
-CodeRabbit requires **80% docstring coverage** on PRs. This skill ensures compliance.
+CodeRabbit flags PRs with low docstring coverage. Aim for good coverage on exported functions.
 
-## Docstrings (CRITICAL)
+## Docstrings
 
-**Severity**: HIGH | **Enforcement**: REQUIRED for PR approval
-
-When writing or modifying functions, **always add JSDoc docstrings to exported functions**.
+When writing or modifying functions, **add JSDoc docstrings to exported functions**.
 
 ```typescript
 /**
@@ -40,8 +38,10 @@ export function calculateCourseHandicap(
 ### Minimum Docstring Content
 
 1. **First line**: Brief description of what the function does
-2. **@param**: For each parameter (skip if self-evident AND few params)
+2. **@param**: For each parameter
 3. **@returns**: What is returned (skip for void functions)
+
+For very simple functions with obvious parameters (e.g., `getPlayerName(player)`), a single-line docstring without `@param` is acceptable.
 
 ### Quick Templates
 

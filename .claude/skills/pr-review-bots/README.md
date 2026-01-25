@@ -153,7 +153,8 @@ Unlike CodeRabbit, Amazon Q does **not** automatically resolve its comments when
 # You must manually resolve in the GitHub UI or reply to the thread.
 
 # To reply explaining a fix:
-gh api "repos/{owner}/{repo}/pulls/comments/{comment_id}/replies" \
+gh api "repos/{owner}/{repo}/pulls/{pr}/comments" -X POST \
+  -F in_reply_to={comment_id} \
   -f body="Fixed in commit abc123. Added validation before interpolation."
 ```
 
