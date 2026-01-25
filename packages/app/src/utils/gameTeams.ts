@@ -12,6 +12,8 @@ import {
   RoundToTeam,
   Team,
 } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
+import { computeSpecForcesTeams } from "@/utils/teamsMode";
 
 /**
  * Ensures that holes exist for the game based on game.scope.holes configuration.
@@ -493,4 +495,100 @@ export function reassignAllPlayersSeamless(game: Game): boolean {
   }
 
   return true;
+}
+
+/**
+ * Computes whether the game is in seamless mode (individual play).
+ * In seamless mode, each player gets their own team (1:1 assignment).
+ *
+ * This is the non-hook version for use in utility functions.
+ * For React components, use useTeamsMode() hook instead.
+ */
+export function computeIsSeamlessMode(game: Game): boolean {
+  if (!game?.$isLoaded) return false;
+
+  // Check if spec forces teams
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (spec && computeSpecForcesTeams(spec)) {
+    return false;
+  }
+
+  // Check if user has manually activated teams
+  if (
+    game.scope?.$isLoaded &&
+    game.scope.teamsConfig?.$isLoaded &&
+    game.scope.teamsConfig.active === true
+  ) {
+    return false;
+  }
+
+  // Check if over player threshold (teams mode auto-activates)
+  const minPlayers = spec
+    ? ((getSpecField(spec, "min_players") as number) ?? 2)
+    : 2;
+  const playerCount = game.players?.$isLoaded ? game.players.length : 0;
+  if (playerCount > minPlayers) {
+    return false;
+  }
+
+  return true; // Seamless mode
+}
+
+/**
+ * Checks if all players in the game have team assignments on hole 1.
+ */
+function allPlayersHaveTeamAssignments(game: Game): boolean {
+  if (!game.holes?.$isLoaded || game.holes.length === 0) {
+    return false;
+  }
+
+  const firstHole = game.holes[0];
+  if (!firstHole?.$isLoaded || !firstHole.teams?.$isLoaded) {
+    return false;
+  }
+
+  if (firstHole.teams.length === 0) {
+    return false;
+  }
+
+  // Count assigned players
+  let assignedCount = 0;
+  for (const team of firstHole.teams) {
+    if (!team?.$isLoaded || !team.rounds?.$isLoaded) continue;
+    assignedCount += team.rounds.length;
+  }
+
+  const totalPlayers = game.rounds?.$isLoaded ? game.rounds.length : 0;
+  return assignedCount >= totalPlayers && totalPlayers > 0;
+}
+
+/**
+ * Ensures all players have 1:1 team assignments in seamless (individual) mode.
+ *
+ * This is idempotent - safe to call multiple times:
+ * - If game is in teams mode (user toggle, spec forces, or over threshold): no-op
+ * - If all players already have teams: no-op
+ * - Otherwise: assigns each player to their own team
+ *
+ * @param game - The game (must have holes, rounds, scope, spec resolved)
+ * @returns true if teams were ensured (either already existed or were created)
+ */
+export function ensureSeamlessTeamAssignments(game: Game): boolean {
+  if (!game?.$isLoaded || !game.holes?.$isLoaded || !game.rounds?.$isLoaded) {
+    return false;
+  }
+
+  // Check if we're in seamless mode (individual play)
+  const isSeamlessMode = computeIsSeamlessMode(game);
+  if (!isSeamlessMode) {
+    return false; // Teams mode - don't auto-assign
+  }
+
+  // Check if teams already exist and all players are assigned
+  if (allPlayersHaveTeamAssignments(game)) {
+    return true; // Already assigned
+  }
+
+  // Assign all players 1:1
+  return reassignAllPlayersSeamless(game);
 }
