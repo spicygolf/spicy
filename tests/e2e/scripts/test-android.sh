@@ -55,10 +55,20 @@ export MAESTRO_DRIVER_STARTUP_TIMEOUT=300000
 export MAESTRO_CLI_NO_ANALYTICS=1
 export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
 
-echo "Running End-to-End tests on Android..."
-# Run each flow in subdirectories (Maestro doesn't recurse by default)
+echo "Running cleanup to remove leftover games..."
+# Run cleanup first (don't fail if it has issues)
 maestro test \
-  tests/e2e/flows/five_points/basic_game.yaml \
+  tests/e2e/flows/shared/cleanup_games.yaml \
+  --config tests/e2e/.maestro/config.yml \
+  --env PLATFORM=android \
+  --env TEST_PASSPHRASE="$TEST_PASSPHRASE" \
+  --test-output-dir "$OUTPUT_DIR" \
+  || echo "Cleanup completed (errors are expected if no games exist)"
+
+echo "Running End-to-End tests on Android..."
+# Run smoke tests (all flows in the smoke directory)
+maestro test \
+  tests/e2e/flows/five_points/smoke/ \
   --config tests/e2e/.maestro/config.yml \
   --env PLATFORM=android \
   --env TEST_PASSPHRASE="$TEST_PASSPHRASE" \
