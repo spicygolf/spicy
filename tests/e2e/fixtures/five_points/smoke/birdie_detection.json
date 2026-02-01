@@ -1,0 +1,75 @@
+{
+  "name": "Five Points - Birdie Detection",
+  "description": "E2E smoke test: Verify automatic birdie junk detection",
+  "spec": "five_points",
+
+  "e2e": {
+    "priority": "smoke",
+    "tags": ["birdie", "automatic-junk", "scoring"],
+    "estimatedTime": 120
+  },
+
+  "course": {
+    "name": "E2E Test Course",
+    "tee": "Blue",
+    "rating": 71.5,
+    "slope": 128,
+    "holes": [
+      { "hole": 1, "par": 4, "handicap": 5, "yards": 385 }
+    ]
+  },
+
+  "players": [
+    { "id": "p1", "name": "Test Player", "short": "TP", "handicapIndex": 10.0 },
+    { "id": "p2", "name": "Guest Bob", "short": "Bob", "handicapIndex": 12.0 },
+    { "id": "p3", "name": "Guest Carol", "short": "Car", "handicapIndex": 8.0 },
+    { "id": "p4", "name": "Guest Dave", "short": "Dav", "handicapIndex": 14.0 }
+  ],
+
+  "teams": {
+    "1": ["p1", "p2"],
+    "2": ["p3", "p4"]
+  },
+
+  "options": {
+    "low_ball": 2,
+    "low_total": 2,
+    "birdie": 1
+  },
+
+  "holes": {
+    "1": {
+      "scores": {
+        "p1": { "gross": 3 },
+        "p2": { "gross": 5 },
+        "p3": { "gross": 5 },
+        "p4": { "gross": 6 }
+      },
+      "junk": {
+        "birdie": ["p1"]
+      },
+      "multipliers": {}
+    }
+  },
+
+  "expected": {
+    "holes": {
+      "1": {
+        "holeMultiplier": 1,
+        "teams": {
+          "1": { "lowBall": 3, "total": 8, "points": 5 },
+          "2": { "lowBall": 5, "total": 11, "points": 0 }
+        },
+        "players": {
+          "p1": { "junk": ["birdie"] }
+        }
+      }
+    },
+    "cumulative": {
+      "teams": {
+        "1": { "pointsTotal": 5 },
+        "2": { "pointsTotal": 0 }
+      }
+    }
+  }
+}

@@ -12,15 +12,20 @@
  *   bun generate-flows.ts --dry-run               # Preview without writing
  */
 
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { basename, dirname, join } from "node:path";
 import {
   type E2EFixture,
   generateFullFlow,
 } from "../helpers/fixture-to-maestro";
-import { loadFixture } from "../../lib/test-helpers";
 
-const FIXTURES_BASE = join(__dirname, "../../e2e/fixtures");
+const FIXTURES_BASE = join(__dirname, "../fixtures");
 const FLOWS_BASE = join(__dirname, "../flows");
 
 interface GenerateOptions {
@@ -108,13 +113,27 @@ function findFixtures(gameType: string, options: GenerateOptions): string[] {
   return fixtures;
 }
 
+/**
+ * Load a fixture from the e2e fixtures directory
+ */
+function loadE2EFixture(fixturePath: string): E2EFixture {
+  const fullPath = join(FIXTURES_BASE, `${fixturePath}.json`);
+  if (!existsSync(fullPath)) {
+    throw new Error(
+      `Fixture not found: ${fixturePath}.json (expected at ${fullPath})`,
+    );
+  }
+  const content = readFileSync(fullPath, "utf-8");
+  return JSON.parse(content) as E2EFixture;
+}
+
 function generateFlow(
   fixturePath: string,
   options: GenerateOptions,
 ): { success: boolean; outputPath?: string; error?: string } {
   try {
-    // Load the fixture
-    const fixture = loadFixture(`${fixturePath}.json`) as E2EFixture;
+    // Load the fixture from e2e fixtures directory
+    const fixture = loadE2EFixture(fixturePath);
 
     // Generate the flow
     const { yaml, meta } = generateFullFlow(fixture);
@@ -129,7 +148,9 @@ function generateFlow(
       console.log(`Would generate: ${outputPath}`);
       if (options.verbose) {
         console.log(`  Holes: ${meta.holeCount}, Players: ${meta.playerCount}`);
-        console.log(`  Has junk: ${meta.hasJunk}, Has multipliers: ${meta.hasMultipliers}`);
+        console.log(
+          `  Has junk: ${meta.hasJunk}, Has multipliers: ${meta.hasMultipliers}`,
+        );
       }
       return { success: true, outputPath };
     }
@@ -201,7 +222,9 @@ async function main() {
     }
   }
 
-  console.log(`\n${options.dryRun ? "Would generate" : "Generated"}: ${totalGenerated} flows`);
+  console.log(
+    `\n${options.dryRun ? "Would generate" : "Generated"}: ${totalGenerated} flows`,
+  );
   if (totalFailed > 0) {
     console.error(`Failed: ${totalFailed} flows`);
     process.exit(1);
