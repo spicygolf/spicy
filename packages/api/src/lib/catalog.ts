@@ -140,7 +140,7 @@ import {
   type RoundToGameEdgeV03,
   type RoundV03,
 } from "spicylib/transform/legacy-types";
-import { formatHandicapDisplay } from "spicylib/utils";
+import { calculateTeamCount, formatHandicapDisplay } from "spicylib/utils";
 import { loadPlayers } from "../utils/players-file";
 
 export interface ImportResult {
@@ -2819,23 +2819,14 @@ async function importGame(
       | number
       | undefined;
 
-    // Priority: num_teams > team_size calculation > player count
-    if (specNumTeams && specNumTeams > 0) {
-      // Explicit num_teams takes precedence
-      teamCount = specNumTeams;
-      maxPlayersPerTeam = specTeamSize;
-    } else if (
-      specTeams &&
-      specTeamSize &&
-      specTeamSize > 0 &&
-      specMinPlayers
-    ) {
-      // Fall back to team_size calculation
-      teamCount = Math.ceil(specMinPlayers / specTeamSize);
-      maxPlayersPerTeam = specTeamSize;
-    } else {
-      teamCount = players.length;
-    }
+    // Calculate team count using shared utility (priority: num_teams > team_size > fallback)
+    teamCount = calculateTeamCount({
+      numTeams: specNumTeams,
+      teamSize: specTeams ? specTeamSize : undefined, // Only use team_size if teams enabled
+      minPlayers: specMinPlayers,
+      fallback: players.length,
+    });
+    maxPlayersPerTeam = specTeamSize;
     rotateEvery = specRotateEvery ?? 0;
   } else {
     // Fallback if no gamespec

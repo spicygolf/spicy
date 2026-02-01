@@ -83,6 +83,7 @@ export function useCreateGame() {
     // GameSpec IS the options map directly
     if (firstSpec?.$isLoaded) {
       const { getSpecField } = await import("spicylib/scoring");
+      const { calculateTeamCount } = await import("spicylib/utils");
       const teams = getSpecField(firstSpec, "teams") as boolean;
       const teamChangeEvery = getSpecField(
         firstSpec,
@@ -97,15 +98,12 @@ export function useCreateGame() {
       if (teams || teamChangeEvery || teamSize || numTeams) {
         const { TeamsConfig } = await import("spicylib/schema");
 
-        // Priority: num_teams > team_size calculation > minPlayers
-        let calculatedTeamCount: number;
-        if (numTeams && numTeams > 0) {
-          calculatedTeamCount = numTeams;
-        } else if (teamSize && teamSize > 0) {
-          calculatedTeamCount = Math.ceil(minPlayers / teamSize);
-        } else {
-          calculatedTeamCount = minPlayers;
-        }
+        const calculatedTeamCount = calculateTeamCount({
+          numTeams,
+          teamSize,
+          minPlayers,
+          fallback: minPlayers,
+        });
 
         // maxPlayersPerTeam is a soft guideline, not a hard constraint.
         // When undefined, teams can have any number of players (laissez-faire).
