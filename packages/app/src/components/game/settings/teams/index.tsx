@@ -12,6 +12,7 @@ import {
   reassignAllPlayersSeamless,
   saveTeamAssignmentsToAllRelevantHoles,
 } from "@/utils/gameTeams";
+import { getSpecNumTeams } from "@/utils/teamsMode";
 import { RotationChangeModal } from "./RotationChangeModal";
 import { RotationFrequencyPicker } from "./RotationFrequencyPicker";
 import { TeamAssignments } from "./TeamAssignments";
@@ -114,6 +115,16 @@ export function GameTeamsList() {
     // Normalize null to defaultTeamCount (can happen with legacy imported data)
     return value ?? defaultTeamCount;
   }, [game]);
+
+  // Check if spec has fixed num_teams (e.g., Five Points = 2 teams)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Use game.$jazz.id to avoid recomputation on Jazz progressive loading
+  const specNumTeams = useMemo(() => {
+    if (!game?.$isLoaded || !game.spec?.$isLoaded) return undefined;
+    return getSpecNumTeams(game.spec);
+  }, [game?.$jazz.id]);
+
+  // Only allow adding teams when num_teams is not fixed by the spec
+  const canAddTeam = specNumTeams === undefined;
 
   const allPlayerRounds = useMemo(() => {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded) return [];
@@ -225,6 +236,29 @@ export function GameTeamsList() {
     },
     [teamAssignments, saveTeamAssignmentsToGame],
   );
+
+  const handleAddTeam = useCallback(() => {
+    if (!game?.$isLoaded || !game.scope?.$isLoaded) return;
+
+    const newTeamCount = teamCount + 1;
+
+    if (!game.scope.$jazz.has("teamsConfig")) {
+      const config = TeamsConfig.create(
+        {
+          rotateEvery: 0,
+          teamCount: newTeamCount,
+        },
+        { owner: game.$jazz.owner },
+      );
+      // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
+      // @ts-ignore - Jazz $jazz.set types are overly strict
+      game.scope.$jazz.set("teamsConfig", config);
+    } else if (game.scope.teamsConfig?.$isLoaded) {
+      // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
+      // @ts-ignore - Jazz $jazz.set types are overly strict
+      game.scope.teamsConfig.$jazz.set("teamCount", newTeamCount);
+    }
+  }, [game, teamCount]);
 
   const handleRotationChange = useCallback(
     async (value: number) => {
@@ -423,6 +457,8 @@ export function GameTeamsList() {
           teamAssignments={teamAssignments}
           onDrop={handleDrop}
           onTossBalls={handleTossBalls}
+          canAddTeam={canAddTeam}
+          onAddTeam={handleAddTeam}
         />
       </>
     );

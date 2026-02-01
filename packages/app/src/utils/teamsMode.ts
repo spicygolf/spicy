@@ -21,3 +21,16 @@ export function computeSpecForcesTeams(spec: GameSpec): boolean {
 
   return teamChangeEvery > 0 || teams || teamSize > 1 || numTeams > 1;
 }
+
+/**
+ * Returns the num_teams value from a spec if it's set and positive.
+ * Used to determine if team count is fixed (e.g., Five Points = 2 teams).
+ *
+ * @param spec - The game spec to check
+ * @returns The num_teams value if set and > 0, otherwise undefined
+ */
+export function getSpecNumTeams(spec: GameSpec): number | undefined {
+  if (!spec?.$isLoaded) return undefined;
+  const numTeams = (getSpecField(spec, "num_teams") as number) ?? 0;
+  return numTeams > 0 ? numTeams : undefined;
+}
