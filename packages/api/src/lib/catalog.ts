@@ -604,13 +604,17 @@ export async function upsertGameSpec(
       ),
     );
 
+    // Handle team_size: set if present and positive, delete if removed from seed
     if (specData.team_size && specData.team_size > 0) {
       spec.$jazz.set(
         "team_size",
         createMetaOption("team_size", "Team Size", "num", specData.team_size),
       );
+    } else if (spec.$jazz.has("team_size")) {
+      spec.$jazz.delete("team_size");
     }
 
+    // Handle num_teams: set if present and positive, delete if removed from seed
     if (specData.num_teams && specData.num_teams > 0) {
       spec.$jazz.set(
         "num_teams",
@@ -621,6 +625,8 @@ export async function upsertGameSpec(
           specData.num_teams,
         ),
       );
+    } else if (spec.$jazz.has("num_teams")) {
+      spec.$jazz.delete("num_teams");
     }
 
     if (specData.team_change_every !== undefined) {
@@ -2826,7 +2832,9 @@ async function importGame(
       minPlayers: specMinPlayers,
       fallback: players.length,
     });
-    maxPlayersPerTeam = specTeamSize;
+    // Treat 0 or undefined as "no limit" (laissez-faire)
+    maxPlayersPerTeam =
+      specTeamSize && specTeamSize > 0 ? specTeamSize : undefined;
     rotateEvery = specRotateEvery ?? 0;
   } else {
     // Fallback if no gamespec
