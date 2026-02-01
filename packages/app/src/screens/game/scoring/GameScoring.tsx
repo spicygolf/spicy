@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ChangeTeamsModal } from "@/components/game/scoring";
@@ -67,6 +67,22 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
 
   if (!game) {
     return null;
+  }
+
+  // Check loading state first, before evaluating derived data like holesList
+  const isLoading =
+    !game.rounds?.$isLoaded ||
+    (game.rounds.length > 0 && game.rounds.some((rtg) => !rtg?.$isLoaded));
+
+  if (isLoading) {
+    return (
+      <Screen>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" />
+          <Text style={styles.message}>Loading game...</Text>
+        </View>
+      </Screen>
+    );
   }
 
   if (holesList.length === 0) {
