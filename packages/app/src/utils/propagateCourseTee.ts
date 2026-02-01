@@ -1,4 +1,4 @@
-import type { Course, Game, Tee } from "spicylib/schema";
+import type { Course, Game, Player, Round, Tee } from "spicylib/schema";
 
 /**
  * Finds an existing course/tee selection from other players in the game.
@@ -48,22 +48,24 @@ export function isTeeCompatibleWithGender(
  * @param course - The course to propagate
  * @param tee - The tee to propagate
  * @param excludePlayerId - Optional player ID to exclude (the one who just selected)
+ * @returns The number of rounds that were updated
  */
 export function propagateCourseTeeToPlayers(
   game: Game,
   course: Course,
   tee: Tee,
   excludePlayerId?: string,
-): void {
+): number {
   if (!game.$isLoaded || !game.rounds?.$isLoaded || !game.players?.$isLoaded) {
-    return;
+    return 0;
   }
 
   if (!course.$isLoaded || !tee.$isLoaded) {
-    return;
+    return 0;
   }
 
   const teeGender = tee.gender;
+  let updatedCount = 0;
 
   for (const rtg of game.rounds) {
     if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
@@ -98,22 +100,31 @@ export function propagateCourseTeeToPlayers(
     // Apply course and tee to this round
     round.$jazz.set("course", course);
     round.$jazz.set("tee", tee);
+    updatedCount++;
   }
+
+  return updatedCount;
 }
 
 /**
- * Applies an existing course/tee from the game to a newly added player's round.
- * Called after creating a round for a new player.
+ * Applies an existing course/tee from the game to a newly created round.
+ * Called immediately after creating a round for a new player.
  *
- * @param game - The game with rounds and players loaded
- * @param playerId - The Jazz ID of the player whose round should receive the course/tee
+ * @param game - The game with players loaded (to find existing course/tee)
+ * @param round - The newly created round to apply course/tee to
+ * @param player - The player for this round (for gender compatibility check)
  * @returns true if course/tee was applied, false otherwise
  */
 export function applyExistingCourseTeeToRound(
   game: Game,
-  playerId: string,
+  round: Round,
+  player: Player,
 ): boolean {
-  if (!game.$isLoaded || !game.players?.$isLoaded || !game.rounds?.$isLoaded) {
+  if (!game.$isLoaded) {
+    return false;
+  }
+
+  if (!round.$isLoaded || !player.$isLoaded) {
     return false;
   }
 
@@ -124,40 +135,14 @@ export function applyExistingCourseTeeToRound(
 
   const { course, tee } = existing;
 
-  // Find the player to check gender
-  let player = null;
-  for (const p of game.players) {
-    if (p?.$isLoaded && p.$jazz.id === playerId) {
-      player = p;
-      break;
-    }
-  }
-
-  if (!player?.$isLoaded) {
-    return false;
-  }
-
   // Check gender compatibility
   if (!isTeeCompatibleWithGender(tee.gender, player.gender)) {
     return false;
   }
 
-  // Find the round for this player
-  let rtg = null;
-  for (const r of game.rounds) {
-    if (r?.$isLoaded && r.round?.$isLoaded && r.round.playerId === playerId) {
-      rtg = r;
-      break;
-    }
-  }
-
-  if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) {
-    return false;
-  }
-
-  // Apply course and tee
-  rtg.round.$jazz.set("course", course);
-  rtg.round.$jazz.set("tee", tee);
+  // Apply course and tee directly to the provided round
+  round.$jazz.set("course", course);
+  round.$jazz.set("tee", tee);
 
   return true;
 }

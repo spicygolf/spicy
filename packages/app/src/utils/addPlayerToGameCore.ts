@@ -230,8 +230,8 @@ export async function addPlayerToGameCore(
       roundAutoCreated = newRound !== null;
 
       // Auto-apply existing course/tee from other players if available
-      if (roundAutoCreated) {
-        applyExistingCourseTeeToRound(game, finalPlayer.$jazz.id);
+      if (newRound) {
+        applyExistingCourseTeeToRound(game, newRound, playerWithRounds);
       }
     }
   }
