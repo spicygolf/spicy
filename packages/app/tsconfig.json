@@ -10,5 +10,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["index.js", "src/**/*.ts", "src/**/*.tsx", "package.json"]
+  "include": ["index.js", "src/**/*.ts", "src/**/*.tsx", "package.json"],
+  "exclude": ["**/*.test.ts", "**/*.spec.ts"]
 }
