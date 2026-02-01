@@ -89,16 +89,28 @@ export function useCreateGame() {
         "team_change_every",
       ) as number;
       const teamSize = getSpecField(firstSpec, "team_size") as number;
+      const numTeams = getSpecField(firstSpec, "num_teams") as number;
       const minPlayers =
         (getSpecField(firstSpec, "min_players") as number) ?? 2;
 
       // Only create teamsConfig if spec has teams enabled or team-related options
-      if (teams || teamChangeEvery || teamSize) {
+      if (teams || teamChangeEvery || teamSize || numTeams) {
         const { TeamsConfig } = await import("spicylib/schema");
+
+        // Priority: num_teams > team_size calculation > minPlayers
+        let calculatedTeamCount: number;
+        if (numTeams && numTeams > 0) {
+          calculatedTeamCount = numTeams;
+        } else if (teamSize && teamSize > 0) {
+          calculatedTeamCount = Math.ceil(minPlayers / teamSize);
+        } else {
+          calculatedTeamCount = minPlayers;
+        }
+
         const teamsConfig = TeamsConfig.create(
           {
             rotateEvery: teamChangeEvery ?? 0,
-            teamCount: minPlayers, // Default to one team per player
+            teamCount: calculatedTeamCount,
             maxPlayersPerTeam: teamSize ?? 0,
           },
           { owner: group },

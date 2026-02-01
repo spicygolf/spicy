@@ -611,6 +611,18 @@ export async function upsertGameSpec(
       );
     }
 
+    if (specData.num_teams && specData.num_teams > 0) {
+      spec.$jazz.set(
+        "num_teams",
+        createMetaOption(
+          "num_teams",
+          "Number of Teams",
+          "num",
+          specData.num_teams,
+        ),
+      );
+    }
+
     if (specData.team_change_every !== undefined) {
       spec.$jazz.set(
         "team_change_every",
@@ -2797,6 +2809,9 @@ async function importGame(
     const specTeamSize = getSpecField(gameSpec, "team_size") as
       | number
       | undefined;
+    const specNumTeams = getSpecField(gameSpec, "num_teams") as
+      | number
+      | undefined;
     const specRotateEvery = getSpecField(gameSpec, "team_change_every") as
       | number
       | undefined;
@@ -2804,7 +2819,18 @@ async function importGame(
       | number
       | undefined;
 
-    if (specTeams && specTeamSize && specTeamSize > 0 && specMinPlayers) {
+    // Priority: num_teams > team_size calculation > player count
+    if (specNumTeams && specNumTeams > 0) {
+      // Explicit num_teams takes precedence
+      teamCount = specNumTeams;
+      maxPlayersPerTeam = specTeamSize;
+    } else if (
+      specTeams &&
+      specTeamSize &&
+      specTeamSize > 0 &&
+      specMinPlayers
+    ) {
+      // Fall back to team_size calculation
       teamCount = Math.ceil(specMinPlayers / specTeamSize);
       maxPlayersPerTeam = specTeamSize;
     } else {
