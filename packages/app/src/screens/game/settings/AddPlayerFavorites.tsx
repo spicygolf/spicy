@@ -68,14 +68,12 @@ export function AddPlayerFavorites() {
 
       if (result.isOk()) {
         const { player, roundAutoCreated } = result.value;
-        if (roundAutoCreated) {
-          // Round was auto-created, go back to player list.
-          // Uses goBack() because this screen is nested inside AddPlayerNavigator.
-          navigation.goBack();
-        } else {
+        if (!roundAutoCreated) {
           // Need to select or create a round
           navigation.navigate("AddRoundToGame", { playerId: player.$jazz.id });
         }
+        // If roundAutoCreated, stay on this screen to allow adding more players.
+        // The player list is reactive - the added player will show with a checkmark.
       } else {
         console.error(result.error);
       }
