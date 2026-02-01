@@ -89,7 +89,11 @@ export function GameListItem({ game }: { game: Game | null | undefined }) {
   };
 
   return (
-    <TouchableOpacity onPress={handleGamePress} style={styles.container}>
+    <TouchableOpacity
+      onPress={handleGamePress}
+      style={styles.container}
+      testID="game-list-item"
+    >
       <View style={styles.game}>
         <Text style={styles.gameName}>{loadedGame.name}</Text>
         <Text style={styles.gameDateTime}>

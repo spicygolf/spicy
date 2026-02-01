@@ -9,6 +9,7 @@ interface TextProps {
   style?: StyleProp<TextStyle>;
   numberOfLines?: number;
   ellipsizeMode?: "head" | "middle" | "tail" | "clip";
+  testID?: string;
 }
 
 export function Text({
@@ -16,12 +17,14 @@ export function Text({
   style,
   numberOfLines,
   ellipsizeMode,
+  testID,
 }: TextProps) {
   return (
     <RNText
       style={[styles.text, style]}
       numberOfLines={numberOfLines}
       ellipsizeMode={ellipsizeMode}
+      testID={testID}
     >
       {children}
     </RNText>

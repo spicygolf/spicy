@@ -54,6 +54,7 @@ export function GameList({
 
   return (
     <FlatList
+      testID="games-list"
       data={paginatedGames}
       renderItem={({ item }) => <GameListItem game={item} />}
       keyExtractor={(item) => item.$jazz.id}

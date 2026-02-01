@@ -98,6 +98,7 @@ export function PlayerScoreRow({
             onUnscore={onUnscore}
             readonly={readonly}
             size={size}
+            playerId={player.$jazz.id}
           />
         </View>
 
