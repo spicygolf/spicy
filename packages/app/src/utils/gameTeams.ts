@@ -546,21 +546,31 @@ export function computeIsSeamlessMode(game: Game): boolean {
  * Finds the next available team number for seamless mode.
  * Looks at existing team assignments on hole 1 and returns the lowest
  * unused positive integer.
+ *
+ * If team data is not fully loaded, returns a safe fallback (players.length + 1)
+ * to guarantee uniqueness and avoid duplicate team numbers.
  */
 export function getNextAvailableTeamNumber(game: Game): number {
+  // Safe fallback: players.length + 1 is guaranteed unique
+  const safeFallback = (game.players?.$isLoaded ? game.players.length : 0) + 1;
+
   if (!game?.holes?.$isLoaded || game.holes.length === 0) {
-    return 1;
+    return safeFallback;
   }
 
   const firstHole = game.holes[0];
   if (!firstHole?.$isLoaded || !firstHole.teams?.$isLoaded) {
-    return 1;
+    return safeFallback;
   }
 
   // Collect all existing team numbers
+  // If any team isn't loaded, bail out to avoid returning a duplicate
   const existingTeamNumbers = new Set<number>();
   for (const team of firstHole.teams) {
-    if (!team?.$isLoaded) continue;
+    if (!team?.$isLoaded) {
+      // Team not loaded - can't guarantee uniqueness, use safe fallback
+      return safeFallback;
+    }
     const num = Number.parseInt(team.team, 10);
     if (!Number.isNaN(num)) {
       existingTeamNumbers.add(num);
