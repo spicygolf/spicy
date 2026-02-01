@@ -1,4 +1,4 @@
-# /review - Code Review Branch Commits
+# Code Review Branch Commits
 
 Review all commits on the current branch since diverging from main.
 
@@ -8,9 +8,6 @@ Review all commits on the current branch since diverging from main.
 - If there is prior conversation history in this session (e.g., you helped write the code being reviewed), STOP immediately
 - Inform the user: "Code reviews should be done in a fresh context to avoid bias. Please start a new Claude Code session and run /review there."
 - A reviewer should not be the same "person" who wrote the code
-
-## Activation
-- User-invocable: `/review`
 
 ## Instructions
 

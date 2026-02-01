@@ -1,9 +1,6 @@
-# /pr - Create Pull Request
+# Create Pull Request
 
 Create a pull request for the current branch.
-
-## Activation
-- User-invocable: `/pr`
 
 ## Instructions
 
