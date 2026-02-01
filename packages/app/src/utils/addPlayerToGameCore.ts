@@ -6,7 +6,7 @@ import { createRoundForPlayer, getRoundsForDate } from "./createRoundForPlayer";
 import {
   autoAssignPlayerToTeam,
   computeIsSeamlessMode,
-  ensureGameHoles,
+  getNextAvailableTeamNumber,
 } from "./gameTeams";
 import { reportError } from "./reportError";
 
@@ -246,10 +246,9 @@ export async function addPlayerToGameCore(
     }
 
     if (roundToGame) {
-      // Ensure holes exist before assigning teams
-      ensureGameHoles(game);
-      // Assign to team number = current player count (their position)
-      const teamNumber = game.players?.length ?? 1;
+      // Find next available team number (handles gaps from removed players)
+      const teamNumber = getNextAvailableTeamNumber(game);
+      // autoAssignPlayerToTeam ensures holes exist internally
       autoAssignPlayerToTeam(game, roundToGame, teamNumber);
     }
   }

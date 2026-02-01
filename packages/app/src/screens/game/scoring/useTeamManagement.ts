@@ -28,14 +28,21 @@ export function useTeamManagement(
   >("period");
 
   // Direct access to Jazz data - no useMemo needed per jazz.xml patterns
-  // Default rotateEvery to 0 for individual/seamless mode (no teamsConfig)
+  // Determine rotateEvery based on teamsConfig presence:
+  // - undefined: scope not loaded yet (still loading)
+  // - 0: no teamsConfig = individual/seamless mode = fixed teams
+  // - N: teams rotate every N holes
   let rotateEvery: number | undefined;
-  if (game?.scope?.$isLoaded && game.scope.$jazz.has("teamsConfig")) {
+  if (!game?.scope?.$isLoaded) {
+    // Scope not loaded - keep undefined to indicate loading state
+    rotateEvery = undefined;
+  } else if (game.scope.$jazz.has("teamsConfig")) {
+    // Has teamsConfig - use its value (or undefined if teamsConfig not loaded)
     rotateEvery = game.scope.teamsConfig?.$isLoaded
       ? game.scope.teamsConfig.rotateEvery
       : undefined;
-  } else if (game?.scope?.$isLoaded) {
-    // No teamsConfig = individual/seamless mode = fixed teams (rotateEvery: 0)
+  } else {
+    // Scope loaded but no teamsConfig = individual/seamless mode
     rotateEvery = 0;
   }
 
