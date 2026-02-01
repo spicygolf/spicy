@@ -12,6 +12,8 @@ interface TeamAssignmentsProps {
   teamAssignments: Map<string, number>;
   onDrop: (playerId: string, targetTeam: number) => void;
   onTossBalls: () => void;
+  canAddTeam: boolean;
+  onAddTeam: () => void;
 }
 
 export function TeamAssignments({
@@ -20,6 +22,8 @@ export function TeamAssignments({
   teamAssignments,
   onDrop,
   onTossBalls,
+  canAddTeam,
+  onAddTeam,
 }: TeamAssignmentsProps) {
   const { theme } = useUnistyles();
 
@@ -74,7 +78,12 @@ export function TeamAssignments({
     <>
       <View style={styles.header}>
         <Text style={styles.title}>Team Assignments</Text>
-        <Button label="Toss Balls" onPress={onTossBalls} />
+        <View style={styles.headerButtons}>
+          {canAddTeam && (
+            <Button label="Add Team" onPress={onAddTeam} variant="secondary" />
+          )}
+          <Button label="Toss Balls" onPress={onTossBalls} />
+        </View>
       </View>
 
       <DraxScrollView
@@ -189,6 +198,11 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     marginBottom: theme.gap(2),
     paddingTop: theme.gap(2),
+  },
+  headerButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(1),
   },
   title: {
     fontSize: 16,

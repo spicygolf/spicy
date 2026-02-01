@@ -30,4 +30,4 @@ When activated, perform a full code review of the commits since branching from m
    - Issues & suggestions (ranked by severity)
    - Recommended actions (if any)
 
-Run `bun tsc` and `./scripts/code-quality.sh` to verify the code compiles and passes lint.
+Run `./scripts/code-quality.sh` to verify the code compiles and passes lint.
