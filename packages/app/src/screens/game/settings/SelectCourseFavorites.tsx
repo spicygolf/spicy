@@ -14,6 +14,7 @@ import { FavoriteTeeItem } from "@/components/game/settings/FavoriteTeeItem";
 import { useGame } from "@/hooks";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
 import { Screen, Text } from "@/ui";
+import { propagateCourseTeeToPlayers } from "@/utils/propagateCourseTee";
 
 type Props = MaterialTopTabScreenProps<
   SelectCourseTabParamList,
@@ -105,9 +106,19 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
       round.$jazz.set("course", loadedFavorite.course);
       round.$jazz.set("tee", loadedFavorite.tee);
 
+      // Propagate course/tee to other players who don't have one set
+      if (game?.$isLoaded && player?.$isLoaded) {
+        propagateCourseTeeToPlayers(
+          game,
+          loadedFavorite.course,
+          loadedFavorite.tee,
+          player.$jazz.id,
+        );
+      }
+
       navigation.getParent()?.goBack();
     },
-    [round, navigation],
+    [round, navigation, game, player],
   );
 
   const removeFavorite = useCallback(

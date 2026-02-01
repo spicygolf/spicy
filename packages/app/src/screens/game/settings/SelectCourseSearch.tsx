@@ -26,6 +26,7 @@ import { useGhinCourseDetailsQuery } from "@/hooks/useGhinCourseDetailsQuery";
 import { useGhinSearchCourseQuery } from "@/hooks/useGhinSearchCourseQuery";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
 import { Screen, Text } from "@/ui";
+import { propagateCourseTeeToPlayers } from "@/utils/propagateCourseTee";
 
 type Props = MaterialTopTabScreenProps<
   SelectCourseTabParamList,
@@ -281,6 +282,11 @@ export function SelectCourseSearch({ route, navigation }: Props) {
     // Set course and tee references on round
     round.$jazz.set("course", course);
     round.$jazz.set("tee", tee);
+
+    // Propagate course/tee to other players who don't have one set
+    if (game?.$isLoaded && player?.$isLoaded) {
+      propagateCourseTeeToPlayers(game, course, tee, player.$jazz.id);
+    }
 
     // Handle favoriting if requested
     if (shouldFavorite && me?.$isLoaded && me.root?.$isLoaded) {

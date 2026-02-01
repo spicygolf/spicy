@@ -8,6 +8,7 @@ import {
   computeIsSeamlessMode,
   getNextAvailableTeamNumber,
 } from "./gameTeams";
+import { applyExistingCourseTeeToRound } from "./propagateCourseTee";
 import { reportError } from "./reportError";
 
 export type PlayerData = Parameters<typeof Player.create>[0];
@@ -227,6 +228,11 @@ export async function addPlayerToGameCore(
     if (roundsForGameDate.length === 0) {
       const newRound = await createRoundForPlayer(game, playerWithRounds);
       roundAutoCreated = newRound !== null;
+
+      // Auto-apply existing course/tee from other players if available
+      if (roundAutoCreated) {
+        applyExistingCourseTeeToRound(game, finalPlayer.$jazz.id);
+      }
     }
   }
 
