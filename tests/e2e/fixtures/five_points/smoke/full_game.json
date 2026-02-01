@@ -1,0 +1,528 @@
+{
+  "name": "Five Points Full Game",
+  "description": "Comprehensive E2E test covering scoring, junk, and multipliers",
+  "spec": "five_points",
+  "e2e": {
+    "priority": "smoke",
+    "tags": [
+      "scoring",
+      "junk",
+      "multipliers",
+      "full-game"
+    ]
+  },
+  "course": {
+    "name": "E2E Test Course",
+    "tee": "Blue",
+    "rating": 71.5,
+    "slope": 128,
+    "holes": [
+      {
+        "hole": 1,
+        "par": 4,
+        "handicap": 5,
+        "yards": 400
+      },
+      {
+        "hole": 2,
+        "par": 5,
+        "handicap": 11,
+        "yards": 400
+      },
+      {
+        "hole": 3,
+        "par": 3,
+        "handicap": 15,
+        "yards": 400
+      },
+      {
+        "hole": 4,
+        "par": 4,
+        "handicap": 3,
+        "yards": 400
+      },
+      {
+        "hole": 5,
+        "par": 4,
+        "handicap": 7,
+        "yards": 400
+      },
+      {
+        "hole": 6,
+        "par": 5,
+        "handicap": 13,
+        "yards": 400
+      },
+      {
+        "hole": 7,
+        "par": 3,
+        "handicap": 17,
+        "yards": 400
+      },
+      {
+        "hole": 8,
+        "par": 4,
+        "handicap": 1,
+        "yards": 400
+      },
+      {
+        "hole": 9,
+        "par": 4,
+        "handicap": 9,
+        "yards": 400
+      },
+      {
+        "hole": 10,
+        "par": 4,
+        "handicap": 6,
+        "yards": 400
+      },
+      {
+        "hole": 11,
+        "par": 5,
+        "handicap": 12,
+        "yards": 400
+      },
+      {
+        "hole": 12,
+        "par": 3,
+        "handicap": 16,
+        "yards": 400
+      },
+      {
+        "hole": 13,
+        "par": 4,
+        "handicap": 4,
+        "yards": 400
+      },
+      {
+        "hole": 14,
+        "par": 4,
+        "handicap": 8,
+        "yards": 400
+      },
+      {
+        "hole": 15,
+        "par": 5,
+        "handicap": 14,
+        "yards": 400
+      },
+      {
+        "hole": 16,
+        "par": 3,
+        "handicap": 18,
+        "yards": 400
+      },
+      {
+        "hole": 17,
+        "par": 4,
+        "handicap": 2,
+        "yards": 400
+      },
+      {
+        "hole": 18,
+        "par": 5,
+        "handicap": 10,
+        "yards": 400
+      }
+    ]
+  },
+  "players": [
+    {
+      "id": "p1",
+      "name": "Brad",
+      "short": "Bra",
+      "handicapIndex": 10
+    },
+    {
+      "id": "p2",
+      "name": "Scott",
+      "short": "Sco",
+      "handicapIndex": 12
+    },
+    {
+      "id": "p3",
+      "name": "Tim",
+      "short": "Tim",
+      "handicapIndex": 8
+    },
+    {
+      "id": "p4",
+      "name": "Eric",
+      "short": "Eri",
+      "handicapIndex": 14
+    }
+  ],
+  "teams": {
+    "1": [
+      "p1",
+      "p2"
+    ],
+    "2": [
+      "p3",
+      "p4"
+    ]
+  },
+  "holes": {
+    "1": {
+      "scores": {
+        "p1": {
+          "gross": 4
+        },
+        "p2": {
+          "gross": 5
+        },
+        "p3": {
+          "gross": 5
+        },
+        "p4": {
+          "gross": 6
+        }
+      }
+    },
+    "2": {
+      "scores": {
+        "p1": {
+          "gross": 5
+        },
+        "p2": {
+          "gross": 6
+        },
+        "p3": {
+          "gross": 3
+        },
+        "p4": {
+          "gross": 5
+        }
+      },
+      "junk": {
+        "birdie": "p3"
+      }
+    },
+    "3": {
+      "scores": {
+        "p1": {
+          "gross": 3
+        },
+        "p2": {
+          "gross": 4
+        },
+        "p3": {
+          "gross": 3
+        },
+        "p4": {
+          "gross": 4
+        }
+      },
+      "junk": {
+        "prox": "p1"
+      }
+    },
+    "4": {
+      "scores": {
+        "p1": {
+          "gross": 4
+        },
+        "p2": {
+          "gross": 5
+        },
+        "p3": {
+          "gross": 5
+        },
+        "p4": {
+          "gross": 5
+        }
+      },
+      "multipliers": {
+        "1": [
+          "double"
+        ]
+      }
+    },
+    "5": {
+      "scores": {
+        "p1": {
+          "gross": 5
+        },
+        "p2": {
+          "gross": 5
+        },
+        "p3": {
+          "gross": 4
+        },
+        "p4": {
+          "gross": 5
+        }
+      },
+      "multipliers": {
+        "1": [
+          "double"
+        ],
+        "2": [
+          "double_back"
+        ]
+      }
+    },
+    "6": {
+      "scores": {
+        "p1": {
+          "gross": 5
+        },
+        "p2": {
+          "gross": 6
+        },
+        "p3": {
+          "gross": 4
+        },
+        "p4": {
+          "gross": 6
+        }
+      },
+      "junk": {
+        "birdie": "p3",
+        "prox": "p3"
+      }
+    },
+    "7": {
+      "scores": {
+        "p1": {
+          "gross": 3
+        },
+        "p2": {
+          "gross": 4
+        },
+        "p3": {
+          "gross": 3
+        },
+        "p4": {
+          "gross": 4
+        }
+      }
+    },
+    "8": {
+      "scores": {
+        "p1": {
+          "gross": 4
+        },
+        "p2": {
+          "gross": 4
+        },
+        "p3": {
+          "gross": 4
+        },
+        "p4": {
+          "gross": 5
+        }
+      }
+    },
+    "9": {
+      "scores": {
+        "p1": {
+          "gross": 4
+        },
+        "p2": {
+          "gross": 5
+        },
+        "p3": {
+          "gross": 4
+        },
+        "p4": {
+          "gross": 5
+        }
+      },
+      "multipliers": {
+        "1": [
+          "double"
+        ],
+        "2": [
+          "double"
+        ]
+      }
+    },
+    "10": {
+      "scores": {
+        "p1": {
+          "gross": 5
+        },
+        "p2": {
+          "gross": 5
+        },
+        "p3": {
+          "gross": 4
+        },
+        "p4": {
+          "gross": 5
+        }
+      }
+    },
+    "11": {
+      "scores": {
+        "p1": {
+          "gross": 5
+        },
+        "p2": {
+          "gross": 6
+        },
+        "p3": {
+          "gross": 5
+        },
+        "p4": {
+          "gross": 6
+        }
+      }
+    },
+    "12": {
+      "scores": {
+        "p1": {
+          "gross": 3
+        },
+        "p2": {
+          "gross": 3
+        },
+        "p3": {
+          "gross": 4
+        },
+        "p4": {
+          "gross": 4
+        }
+      },
+      "junk": {
+        "prox": "p2"
+      }
+    },
+    "13": {
+      "scores": {
+        "p1": {
+          "gross": 5
+        },
+        "p2": {
+          "gross": 5
+        },
+        "p3": {
+          "gross": 4
+        },
+        "p4": {
+          "gross": 4
+        }
+      },
+      "multipliers": {
+        "2": [
+          "double"
+        ]
+      }
+    },
+    "14": {
+      "scores": {
+        "p1": {
+          "gross": 4
+        },
+        "p2": {
+          "gross": 5
+        },
+        "p3": {
+          "gross": 5
+        },
+        "p4": {
+          "gross": 4
+        }
+      },
+      "multipliers": {
+        "1": [
+          "double"
+        ],
+        "2": [
+          "double"
+        ]
+      }
+    },
+    "15": {
+      "scores": {
+        "p1": {
+          "gross": 4
+        },
+        "p2": {
+          "gross": 6
+        },
+        "p3": {
+          "gross": 5
+        },
+        "p4": {
+          "gross": 6
+        }
+      },
+      "junk": {
+        "birdie": "p1"
+      }
+    },
+    "16": {
+      "scores": {
+        "p1": {
+          "gross": 2
+        },
+        "p2": {
+          "gross": 4
+        },
+        "p3": {
+          "gross": 3
+        },
+        "p4": {
+          "gross": 4
+        }
+      },
+      "junk": {
+        "birdie": "p1",
+        "prox": "p3"
+      }
+    },
+    "17": {
+      "scores": {
+        "p1": {
+          "gross": 5
+        },
+        "p2": {
+          "gross": 6
+        },
+        "p3": {
+          "gross": 5
+        },
+        "p4": {
+          "gross": 6
+        }
+      }
+    },
+    "18": {
+      "scores": {
+        "p1": {
+          "gross": 4
+        },
+        "p2": {
+          "gross": 5
+        },
+        "p3": {
+          "gross": 4
+        },
+        "p4": {
+          "gross": 5
+        }
+      },
+      "junk": {
+        "birdie": [
+          "p1",
+          "p3"
+        ]
+      },
+      "multipliers": {
+        "1": [
+          "double"
+        ],
+        "2": [
+          "double_back"
+        ]
+      }
+    }
+  },
+  "expected": {
+    "holes": {},
+    "cumulative": {}
+  }
+}

@@ -146,7 +146,7 @@ function parseScores(
 }
 
 /**
- * Parse junk awards: "prox:p1 birdie:p3"
+ * Parse junk awards: "prox:p1 birdie:p3" or "birdie:p1 birdie:p3"
  */
 function parseJunk(segment: string): Record<string, string | string[]> {
   const junk: Record<string, string | string[]> = {};
@@ -156,9 +156,19 @@ function parseJunk(segment: string): Record<string, string | string[]> {
   for (const part of parts) {
     const [junkName, playerId] = part.split(":");
     if (junkName && playerId) {
-      // Handle multiple players for same junk (birdie:p1,p3)
+      // Handle multiple players for same junk
       const playerIds = playerId.split(",");
-      junk[junkName] = playerIds.length === 1 ? playerIds[0] : playerIds;
+
+      // Check if this junk type already exists
+      if (junk[junkName]) {
+        // Convert to array and add new players
+        const existing = Array.isArray(junk[junkName])
+          ? junk[junkName]
+          : [junk[junkName] as string];
+        junk[junkName] = [...existing, ...playerIds];
+      } else {
+        junk[junkName] = playerIds.length === 1 ? playerIds[0] : playerIds;
+      }
     }
   }
 
@@ -189,7 +199,39 @@ function parseMultipliers(segment: string): Record<string, string[]> {
 }
 
 /**
+ * Check if a segment looks like scores (all numbers)
+ */
+function looksLikeScores(segment: string): boolean {
+  if (!segment.trim()) return false;
+  const parts = segment.trim().split(/\s+/);
+  return parts.every((p) => /^\d+$/.test(p));
+}
+
+/**
+ * Check if a segment looks like junk (contains : but not t1:, t2:, etc.)
+ */
+function looksLikeJunk(segment: string): boolean {
+  if (!segment.trim()) return false;
+  // Junk format: prox:p1 birdie:p3 (not t1:double)
+  return segment.includes(":") && !segment.match(/\bt\d+:/);
+}
+
+/**
+ * Check if a segment looks like multipliers (t1:double format)
+ */
+function looksLikeMultipliers(segment: string): boolean {
+  if (!segment.trim()) return false;
+  return /\bt\d+:/.test(segment);
+}
+
+/**
  * Parse a hole line: "h1: (p1 p2) vs (p3 p4) | 4 4 5 6 | prox:p1 | t1:double"
+ *
+ * Format is flexible - segments are identified by content:
+ * - Teams: contains parentheses (p1 p2)
+ * - Scores: all numbers (4 4 5 6)
+ * - Junk: name:player format (prox:p1)
+ * - Multipliers: t#:name format (t1:double)
  */
 function parseHoleLine(
   line: string,
@@ -207,23 +249,24 @@ function parseHoleLine(
   // Split by | into segments
   const segments = rest.split("|").map((s) => s.trim());
 
-  // First segment might be teams or scores
+  // Identify each segment by its content
   let teamsSegment = "";
   let scoresSegment = "";
   let junkSegment = "";
   let multipliersSegment = "";
 
-  if (segments[0]?.includes("(")) {
-    // First segment is teams
-    teamsSegment = segments[0];
-    scoresSegment = segments[1] || "";
-    junkSegment = segments[2] || "";
-    multipliersSegment = segments[3] || "";
-  } else {
-    // First segment is scores (teams inherited)
-    scoresSegment = segments[0] || "";
-    junkSegment = segments[1] || "";
-    multipliersSegment = segments[2] || "";
+  for (const segment of segments) {
+    if (!segment) continue;
+
+    if (segment.includes("(")) {
+      teamsSegment = segment;
+    } else if (looksLikeScores(segment)) {
+      scoresSegment = segment;
+    } else if (looksLikeJunk(segment)) {
+      junkSegment = segment;
+    } else if (looksLikeMultipliers(segment)) {
+      multipliersSegment = segment;
+    }
   }
 
   // Parse teams (or use current)
@@ -244,7 +287,8 @@ function parseHoleLine(
     data: {
       scores,
       junk: Object.keys(junk).length > 0 ? junk : undefined,
-      multipliers: Object.keys(multipliers).length > 0 ? multipliers : undefined,
+      multipliers:
+        Object.keys(multipliers).length > 0 ? multipliers : undefined,
     },
     teams,
   };
@@ -294,7 +338,11 @@ export function parseDSL(dsl: string): ParsedDSL {
     } else if (line.startsWith("holes:")) {
       holeDefinitions = parseHoleDefinitions(line.slice(6).trim());
     } else if (line.match(/^h\d+:/i)) {
-      const { holeNum, data, teams } = parseHoleLine(line, players, currentTeams);
+      const { holeNum, data, teams } = parseHoleLine(
+        line,
+        players,
+        currentTeams,
+      );
       holes[holeNum] = data;
       currentTeams = teams;
     }
