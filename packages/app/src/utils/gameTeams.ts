@@ -13,6 +13,7 @@ import {
   Team,
 } from "spicylib/schema";
 import { getSpecField } from "spicylib/scoring";
+
 import { computeSpecForcesTeams } from "@/utils/teamsMode";
 
 /**
@@ -503,19 +504,28 @@ export function reassignAllPlayersSeamless(game: Game): boolean {
  *
  * This is the non-hook version for use in utility functions.
  * For React components, use useTeamsMode() hook instead.
+ *
+ * Returns false if required data is not yet loaded (scope, spec, players).
  */
 export function computeIsSeamlessMode(game: Game): boolean {
-  if (!game?.$isLoaded) return false;
+  // Wait for all required data to be loaded before making a decision
+  if (
+    !game?.$isLoaded ||
+    !game.scope?.$isLoaded ||
+    !game.spec?.$isLoaded ||
+    !game.players?.$isLoaded
+  ) {
+    return false;
+  }
 
   // Check if spec forces teams
-  const spec = game.spec?.$isLoaded ? game.spec : null;
-  if (spec && computeSpecForcesTeams(spec)) {
+  const spec = game.spec;
+  if (computeSpecForcesTeams(spec)) {
     return false;
   }
 
   // Check if user has manually activated teams
   if (
-    game.scope?.$isLoaded &&
     game.scope.teamsConfig?.$isLoaded &&
     game.scope.teamsConfig.active === true
   ) {
@@ -523,15 +533,47 @@ export function computeIsSeamlessMode(game: Game): boolean {
   }
 
   // Check if over player threshold (teams mode auto-activates)
-  const minPlayers = spec
-    ? ((getSpecField(spec, "min_players") as number) ?? 2)
-    : 2;
-  const playerCount = game.players?.$isLoaded ? game.players.length : 0;
+  const minPlayers = (getSpecField(spec, "min_players") as number) ?? 2;
+  const playerCount = game.players.length;
   if (playerCount > minPlayers) {
     return false;
   }
 
   return true; // Seamless mode
+}
+
+/**
+ * Finds the next available team number for seamless mode.
+ * Looks at existing team assignments on hole 1 and returns the lowest
+ * unused positive integer.
+ */
+export function getNextAvailableTeamNumber(game: Game): number {
+  if (!game?.holes?.$isLoaded || game.holes.length === 0) {
+    return 1;
+  }
+
+  const firstHole = game.holes[0];
+  if (!firstHole?.$isLoaded || !firstHole.teams?.$isLoaded) {
+    return 1;
+  }
+
+  // Collect all existing team numbers
+  const existingTeamNumbers = new Set<number>();
+  for (const team of firstHole.teams) {
+    if (!team?.$isLoaded) continue;
+    const num = Number.parseInt(team.team, 10);
+    if (!Number.isNaN(num)) {
+      existingTeamNumbers.add(num);
+    }
+  }
+
+  // Find the lowest unused positive integer
+  let nextNumber = 1;
+  while (existingTeamNumbers.has(nextNumber)) {
+    nextNumber++;
+  }
+
+  return nextNumber;
 }
 
 /**
