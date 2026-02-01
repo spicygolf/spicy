@@ -2859,7 +2859,8 @@ async function importGame(
     { owner: gameGroup },
   );
 
-  // Set optional maxPlayersPerTeam if defined
+  // Set optional maxPlayersPerTeam if defined (soft guideline, not enforced).
+  // This is intentionally laissez-faire - allows 3v2, 3v3, etc. even when set.
   if (maxPlayersPerTeam !== undefined) {
     teamsConfig.$jazz.set("maxPlayersPerTeam", maxPlayersPerTeam);
   }

@@ -107,11 +107,14 @@ export function useCreateGame() {
           calculatedTeamCount = minPlayers;
         }
 
+        // maxPlayersPerTeam is a soft guideline, not a hard constraint.
+        // When undefined, teams can have any number of players (laissez-faire).
+        // Even when set, we allow flexibility (e.g., 3v2 instead of strict 2v2).
         const teamsConfig = TeamsConfig.create(
           {
             rotateEvery: teamChangeEvery ?? 0,
             teamCount: calculatedTeamCount,
-            maxPlayersPerTeam: teamSize ?? 0,
+            maxPlayersPerTeam: teamSize || undefined,
           },
           { owner: group },
         );
