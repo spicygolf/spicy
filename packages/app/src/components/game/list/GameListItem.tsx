@@ -99,7 +99,11 @@ export function GameListItem({ game }: { game: Game | null | undefined }) {
         <GameCourseTeeDisplay rounds={loadedGame.rounds} />
         {playerNames && <Text style={styles.playerNames}>{playerNames}</Text>}
       </View>
-      <TouchableOpacity onPress={handleSettingsPress} style={styles.actions}>
+      <TouchableOpacity
+        onPress={handleSettingsPress}
+        style={styles.actions}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
         <FontAwesome6 name="gear" size={18} color="#666" iconStyle="solid" />
       </TouchableOpacity>
     </TouchableOpacity>
