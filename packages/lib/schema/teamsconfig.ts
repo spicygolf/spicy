@@ -22,8 +22,15 @@ export const TeamsConfig = co.map({
   teamCount: z.number(),
 
   /**
-   * Maximum number of players allowed per team (optional constraint).
-   * If not set, teams can have any number of players.
+   * Suggested maximum players per team (soft guideline, not enforced).
+   *
+   * This is intentionally laissez-faire:
+   * - undefined: No suggestion, teams can have any number of players
+   * - When set: A guideline (e.g., team_size=2 suggests pairs), but we allow
+   *   flexibility for real-world scenarios like 3v2 or 3v3 with 5-6 players
+   *
+   * The UI may use this for initial team distribution, but users can always
+   * adjust teams manually regardless of this value.
    */
   maxPlayersPerTeam: z.optional(z.number()),
 

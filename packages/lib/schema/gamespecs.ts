@@ -19,6 +19,7 @@ import { MapOfOptions } from "./options";
  * - spec["location_type"] (type: meta, valueType: menu)
  * - spec["teams"] (type: meta, valueType: bool)
  * - spec["team_size"] (type: meta, valueType: num)
+ * - spec["num_teams"] (type: meta, valueType: num)
  * - spec["team_change_every"] (type: meta, valueType: num)
  *
  * Game/Junk/Multiplier options are also entries in the map.

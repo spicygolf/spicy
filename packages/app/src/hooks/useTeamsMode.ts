@@ -26,8 +26,8 @@ export interface TeamsModeResult {
   canToggle: boolean;
 
   /**
-   * True when the spec forces teams mode (computed from teamsConfig).
-   * Based on: rotateEvery > 0, teamCount < min_players, or maxPlayersPerTeam > 1.
+   * True when the spec forces teams mode (computed from spec options).
+   * Based on: team_change_every > 0, teams is true, team_size > 1, or num_teams > 1.
    */
   specForcesTeams: boolean;
 
@@ -57,7 +57,7 @@ export interface TeamsModeResult {
  * Hook to determine the teams mode for a game.
  *
  * Teams mode is determined by (in order of priority):
- * 1. Spec forces teams (rotateEvery > 0, teamCount < min_players, or maxPlayersPerTeam > 1)
+ * 1. Spec forces teams (team_change_every > 0, teams is true, team_size > 1, or num_teams > 1)
  * 2. User toggle (game.scope.teamsConfig.active = true)
  * 3. Player count > min_players (auto-activates)
  *

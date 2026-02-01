@@ -83,23 +83,37 @@ export function useCreateGame() {
     // GameSpec IS the options map directly
     if (firstSpec?.$isLoaded) {
       const { getSpecField } = await import("spicylib/scoring");
+      const { calculateTeamCount } = await import("spicylib/utils");
       const teams = getSpecField(firstSpec, "teams") as boolean;
       const teamChangeEvery = getSpecField(
         firstSpec,
         "team_change_every",
       ) as number;
       const teamSize = getSpecField(firstSpec, "team_size") as number;
+      const numTeams = getSpecField(firstSpec, "num_teams") as number;
       const minPlayers =
         (getSpecField(firstSpec, "min_players") as number) ?? 2;
 
       // Only create teamsConfig if spec has teams enabled or team-related options
-      if (teams || teamChangeEvery || teamSize) {
+      if (teams || teamChangeEvery || teamSize || numTeams) {
         const { TeamsConfig } = await import("spicylib/schema");
+
+        const calculatedTeamCount = calculateTeamCount({
+          numTeams,
+          teamSize: teams ? teamSize : undefined, // Only use team_size if teams enabled
+          minPlayers,
+          fallback: minPlayers,
+        });
+
+        // maxPlayersPerTeam is a soft guideline, not a hard constraint.
+        // When undefined, teams can have any number of players (laissez-faire).
+        // Even when set, we allow flexibility (e.g., 3v2 instead of strict 2v2).
+        // Treat 0 as undefined (no limit).
         const teamsConfig = TeamsConfig.create(
           {
             rotateEvery: teamChangeEvery ?? 0,
-            teamCount: minPlayers, // Default to one team per player
-            maxPlayersPerTeam: teamSize ?? 0,
+            teamCount: calculatedTeamCount,
+            maxPlayersPerTeam: teamSize && teamSize > 0 ? teamSize : undefined,
           },
           { owner: group },
         );
