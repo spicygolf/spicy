@@ -3,6 +3,11 @@ import { Group } from "jazz-tools";
 import { err, ok, type Result } from "neverthrow";
 import { type Game, Handicap, ListOfRounds, Player } from "spicylib/schema";
 import { createRoundForPlayer, getRoundsForDate } from "./createRoundForPlayer";
+import {
+  autoAssignPlayerToTeam,
+  computeIsSeamlessMode,
+  ensureGameHoles,
+} from "./gameTeams";
 import { reportError } from "./reportError";
 
 export type PlayerData = Parameters<typeof Player.create>[0];
@@ -222,6 +227,30 @@ export async function addPlayerToGameCore(
     if (roundsForGameDate.length === 0) {
       const newRound = await createRoundForPlayer(game, playerWithRounds);
       roundAutoCreated = newRound !== null;
+    }
+  }
+
+  // Auto-assign team in seamless mode (1:1 player to team)
+  // This ensures both useCreateGame and useAddPlayerToGame get team assignment
+  if (computeIsSeamlessMode(game) && game.rounds?.$isLoaded) {
+    // Find the RoundToGame for this player
+    const playerId = finalPlayer.$jazz.id;
+    let roundToGame = null;
+
+    for (const rtg of game.rounds) {
+      if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+      if (rtg.round.playerId === playerId) {
+        roundToGame = rtg;
+        break;
+      }
+    }
+
+    if (roundToGame) {
+      // Ensure holes exist before assigning teams
+      ensureGameHoles(game);
+      // Assign to team number = current player count (their position)
+      const teamNumber = game.players?.length ?? 1;
+      autoAssignPlayerToTeam(game, roundToGame, teamNumber);
     }
   }
 
