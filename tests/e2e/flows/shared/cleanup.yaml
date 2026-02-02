@@ -1,6 +1,9 @@
 # Sub-flow: Clean up any existing games
 # Expects: User logged in, on home screen with "New Game" visible
 # Provides: All games deleted, ready to create new game
+#
+# This is a reusable sub-flow that can be called from any test flow.
+# For standalone cleanup (with login), use cleanup_games.yaml instead.
 
 appId: golf.spicy
 ---

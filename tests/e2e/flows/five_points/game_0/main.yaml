@@ -20,7 +20,7 @@ appId: golf.spicy
 - runFlow: "login.yaml"
 
 # Clean up any existing games
-- runFlow: "cleanup.yaml"
+- runFlow: "../../shared/cleanup.yaml"
 
 # Create new game
 - runFlow: "new_game.yaml"

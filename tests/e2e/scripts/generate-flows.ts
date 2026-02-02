@@ -163,19 +163,19 @@ function generateSubFlowFiles(
     if (options.dryRun) {
       console.log(`Would generate sub-flows in: ${outputDir}`);
       if (options.verbose) {
-        console.log(`  - game.yaml (main orchestration)`);
+        console.log(`  - main.yaml (orchestration)`);
         console.log(`  - login.yaml`);
-        console.log(`  - cleanup.yaml`);
         console.log(`  - new_game.yaml`);
         console.log(`  - add_players.yaml`);
         console.log(`  - start_game.yaml`);
         console.log(`  - leaderboard.yaml`);
         console.log(`  - holes/ (${Object.keys(flows.holes).length} files)`);
+        console.log(`  (uses shared/cleanup.yaml)`);
       }
       return {
         success: true,
         outputPath: outputDir,
-        fileCount: 7 + Object.keys(flows.holes).length,
+        fileCount: 6 + Object.keys(flows.holes).length,
       };
     }
 
@@ -188,11 +188,10 @@ function generateSubFlowFiles(
     }
 
     // Write main flow
-    writeFileSync(join(outputDir, "game.yaml"), flows.main);
+    writeFileSync(join(outputDir, "main.yaml"), flows.main);
 
-    // Write sub-flows
+    // Write sub-flows (cleanup is shared, not generated per-game)
     writeFileSync(join(outputDir, "login.yaml"), flows.login);
-    writeFileSync(join(outputDir, "cleanup.yaml"), flows.cleanup);
     writeFileSync(join(outputDir, "new_game.yaml"), flows.newGame);
     writeFileSync(join(outputDir, "add_players.yaml"), flows.addPlayers);
     writeFileSync(join(outputDir, "start_game.yaml"), flows.startGame);
@@ -203,7 +202,7 @@ function generateSubFlowFiles(
       writeFileSync(join(holesDir, `hole_${holeNum}.yaml`), yaml);
     }
 
-    const fileCount = 7 + Object.keys(flows.holes).length;
+    const fileCount = 6 + Object.keys(flows.holes).length;
 
     if (options.verbose) {
       console.log(`Generated ${fileCount} files in: ${outputDir}`);
