@@ -3,8 +3,9 @@
 #
 # This flow tests:
 # - Login with test account
+# - Clean up any existing games
 # - Create Five Points game
-# - Add 4 players (Brad, Scott, Tim, Eric)
+# - Add 3 guest players (logged-in player is added automatically)
 # - Play 18 holes with scoring, junk, and multipliers
 # - Verify final leaderboard
 
@@ -18,10 +19,13 @@ appId: golf.spicy
 # Login
 - runFlow: "login.yaml"
 
+# Clean up any existing games
+- runFlow: "cleanup.yaml"
+
 # Create new game
 - runFlow: "new_game.yaml"
 
-# Add players
+# Add guest players (logged-in player already added)
 - runFlow: "add_players.yaml"
 
 # Start game

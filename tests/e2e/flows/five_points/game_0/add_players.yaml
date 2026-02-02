@@ -1,16 +1,9 @@
-# Sub-flow: Add 4 players (Brad, Scott, Tim, Eric)
-# Expects: Game settings screen, "Add Player" visible
-# Provides: 4 players added, ready to start game
+# Sub-flow: Add 3 guest players (Scott, Tim, Eric)
+# Expects: Game settings screen, logged-in player already added automatically
+# Provides: 4 players total, ready to start game
 
 appId: golf.spicy
 ---
-
-# Add first player (test account) using "Add Me"
-- tapOn: "Add Me"
-
-- waitForAnimationToEnd:
-    timeout: 3000
-
 # Add Scott (guest)
 - tapOn: "Add Player"
 

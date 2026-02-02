@@ -71,6 +71,8 @@ export interface GeneratedSubFlows {
   main: string;
   /** Login sub-flow */
   login: string;
+  /** Cleanup sub-flow (delete existing games) */
+  cleanup: string;
   /** New game sub-flow */
   newGame: string;
   /** Add players sub-flow */
@@ -192,22 +194,92 @@ export function generateCreateGameSteps(specName: string): MaestroStep[] {
 }
 
 /**
+ * Generate steps to clean up any existing games.
+ * Should be run after login to ensure a clean state.
+ */
+export function generateCleanupSteps(): MaestroStep[] {
+  return [
+    { takeScreenshot: "cleanup_before" },
+    {
+      repeat: {
+        times: 10,
+        commands: [
+          {
+            runFlow: {
+              when: {
+                visible: {
+                  id: "game-list-item",
+                },
+              },
+              commands: [
+                {
+                  tapOn: {
+                    id: "game-list-item",
+                    index: 0,
+                  },
+                },
+                {
+                  waitForAnimationToEnd: {
+                    timeout: 5000,
+                  },
+                },
+                { tapOn: "Settings" },
+                {
+                  waitForAnimationToEnd: {
+                    timeout: 3000,
+                  },
+                },
+                {
+                  scrollUntilVisible: {
+                    element: {
+                      text: "Delete Game",
+                    },
+                    direction: "DOWN",
+                    timeout: 5000,
+                  },
+                },
+                { tapOn: "Delete Game" },
+                {
+                  extendedWaitUntil: {
+                    visible: "Delete",
+                    timeout: 3000,
+                  },
+                },
+                {
+                  tapOn: {
+                    text: "Delete",
+                    index: 1,
+                  },
+                },
+                {
+                  extendedWaitUntil: {
+                    visible: "New Game",
+                    timeout: 5000,
+                  },
+                },
+                {
+                  waitForAnimationToEnd: {
+                    timeout: 1000,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    { takeScreenshot: "cleanup_after" },
+  ];
+}
+
+/**
  * Generate steps to add players from a fixture.
- * Uses "Add Me" for the test account and "Add Guest" for others.
+ * The logged-in player is added automatically, so we only add guests.
  */
 export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
   const steps: MaestroStep[] = [];
 
-  // Add the first player using "Add Me"
-  steps.push(
-    { tapOn: "Add Me" },
-    {
-      waitForAnimationToEnd: {
-        timeout: 3000,
-      },
-    },
-  );
-
+  // Logged-in player is added automatically, so start from index 1
   // For additional players, use "Add Guest" with their names
   for (let i = 1; i < fixture.players.length; i++) {
     const player = fixture.players[i];
@@ -555,10 +627,13 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     `# Login`,
     `- runFlow: "login.yaml"`,
     ``,
+    `# Clean up any existing games`,
+    `- runFlow: "cleanup.yaml"`,
+    ``,
     `# Create new game`,
     `- runFlow: "new_game.yaml"`,
     ``,
-    `# Add players`,
+    `# Add guest players (logged-in player already added)`,
     `- runFlow: "add_players.yaml"`,
     ``,
     `# Start game`,
@@ -584,12 +659,20 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     (h) => h.multipliers,
   );
 
+  // Guest players (all except first which is the logged-in user)
+  const guestPlayers = fixture.players.slice(1);
+
   return {
     main: mainLines.join("\n"),
     login: stepsToYaml(
       generateLoginSteps(),
       "golf.spicy",
       `# Sub-flow: Login to test account\n# Expects: App launched with clearState\n# Provides: User logged in, "New Game" visible`,
+    ),
+    cleanup: stepsToYaml(
+      generateCleanupSteps(),
+      "golf.spicy",
+      `# Sub-flow: Clean up any existing games\n# Expects: User logged in, on home screen with "New Game" visible\n# Provides: All games deleted, ready to create new game`,
     ),
     newGame: stepsToYaml(
       generateCreateGameSteps(fixture.spec),
@@ -599,7 +682,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     addPlayers: stepsToYaml(
       generateAddPlayersSteps(fixture),
       "golf.spicy",
-      `# Sub-flow: Add ${fixture.players.length} players (${fixture.players.map((p) => p.name).join(", ")})\n# Expects: Game settings screen, "Add Player" visible\n# Provides: ${fixture.players.length} players added, ready to start game`,
+      `# Sub-flow: Add ${guestPlayers.length} guest players (${guestPlayers.map((p) => p.name).join(", ")})\n# Expects: Game settings screen, logged-in player already added automatically\n# Provides: ${fixture.players.length} players total, ready to start game`,
     ),
     startGame: stepsToYaml(
       generateStartGameSteps(),
