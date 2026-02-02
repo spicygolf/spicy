@@ -22,6 +22,12 @@
  *   h1: (p1 p2) vs (p3 p4) | 4 4 5 6 | prox:p1
  *   h2: | 5 5 4 5 | birdie:p3 | t2:double
  *   h3: | 4 6 5 5 | | t1:double t2:double_back
+ *
+ * IMPORTANT: Player Order Convention
+ *   The FIRST player in the players list (p1) is assumed to be the logged-in
+ *   test user. When generating Maestro flows, this player is added automatically
+ *   by the app, and only subsequent players (p2, p3, p4, etc.) are added as guests.
+ *   Ensure your fixture's first player matches the test account's display name.
  */
 
 import type {
