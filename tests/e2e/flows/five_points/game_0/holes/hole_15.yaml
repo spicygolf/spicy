@@ -6,46 +6,48 @@ appId: golf.spicy
 ---
 
 - runFlow:
-    when:
-    commands:
-      - swipe:
-          direction: "LEFT"
-          duration: 300
-      - waitForAnimationToEnd:
-          timeout: 1000
+      when:
+          notVisible:
+              text: "Hole 15"
+      commands:
+        - swipe:
+              direction: "LEFT"
+              duration: 300
+        - waitForAnimationToEnd:
+              timeout: 1000
 
 - extendedWaitUntil:
-    visible: "Hole 15"
-    timeout: 5000
+      visible: "Hole 15"
+      timeout: 5000
 
 - tapOn:
-    id: "player-p1-decrement"
+      id: "player-p1-decrement"
 
 - waitForAnimationToEnd:
-    timeout: 500
+      timeout: 500
 
 - tapOn:
-    id: "player-p2-increment"
+      id: "player-p2-increment"
 
 - waitForAnimationToEnd:
-    timeout: 500
+      timeout: 500
 
 - tapOn:
-    id: "player-p3-score"
+      id: "player-p3-score"
 
 - waitForAnimationToEnd:
-    timeout: 500
+      timeout: 500
 
 - tapOn:
-    id: "player-p4-increment"
+      id: "player-p4-increment"
 
 - waitForAnimationToEnd:
-    timeout: 500
+      timeout: 500
 
 - tapOn:
-    id: "junk-birdie-p1"
+      id: "junk-birdie-p1"
 
 - waitForAnimationToEnd:
-    timeout: 300
+      timeout: 300
 
 - takeScreenshot: "hole_15_complete"

@@ -8,6 +8,6 @@ appId: golf.spicy
 - tapOn: "Leaderboard"
 
 - waitForAnimationToEnd:
-    timeout: 3000
+      timeout: 3000
 
 - takeScreenshot: "final_leaderboard"

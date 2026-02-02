@@ -833,6 +833,72 @@ export function stepsToYaml(
 }
 
 /**
+ * Recursively serialize a value to YAML format
+ */
+function valueToYaml(
+  value: unknown,
+  indent: number,
+  isArrayItem = false,
+): string {
+  const prefix = "  ".repeat(indent);
+  const itemPrefix = isArrayItem ? "- " : "";
+
+  if (value === true) {
+    return `${prefix}${itemPrefix}true`;
+  }
+  if (value === false) {
+    return `${prefix}${itemPrefix}false`;
+  }
+  if (typeof value === "string") {
+    return `${prefix}${itemPrefix}"${value}"`;
+  }
+  if (typeof value === "number") {
+    return `${prefix}${itemPrefix}${value}`;
+  }
+  if (Array.isArray(value)) {
+    const lines: string[] = [];
+    for (const item of value) {
+      lines.push(valueToYaml(item, indent, true));
+    }
+    return lines.join("\n");
+  }
+  if (typeof value === "object" && value !== null) {
+    const obj = value as Record<string, unknown>;
+    const entries = Object.entries(obj);
+
+    if (entries.length === 0) {
+      return `${prefix}${itemPrefix}{}`;
+    }
+
+    const lines: string[] = [];
+    for (let i = 0; i < entries.length; i++) {
+      const [key, val] = entries[i];
+      // First key gets the array item prefix if this is an array item
+      const keyPrefix = i === 0 && isArrayItem ? `${prefix}- ` : `${prefix}  `;
+
+      if (
+        typeof val === "string" ||
+        typeof val === "number" ||
+        typeof val === "boolean"
+      ) {
+        const formattedVal = typeof val === "string" ? `"${val}"` : String(val);
+        lines.push(`${keyPrefix}${key}: ${formattedVal}`);
+      } else if (Array.isArray(val)) {
+        lines.push(`${keyPrefix}${key}:`);
+        lines.push(valueToYaml(val, indent + 2, false));
+      } else if (typeof val === "object" && val !== null) {
+        lines.push(`${keyPrefix}${key}:`);
+        // Recursively serialize nested object (not as array item)
+        const nestedLines = valueToYaml(val, indent + 2, false);
+        lines.push(nestedLines);
+      }
+    }
+    return lines.join("\n");
+  }
+  return `${prefix}${itemPrefix}null`;
+}
+
+/**
  * Convert a single step to YAML format
  */
 function stepToYaml(step: MaestroStep, indent: number): string {
@@ -849,47 +915,10 @@ function stepToYaml(step: MaestroStep, indent: number): string {
     } else if (typeof value === "number") {
       lines.push(`${prefix}- ${key}: ${value}`);
     } else if (typeof value === "object" && value !== null) {
-      // Object value - expand properties
-      const obj = value as Record<string, unknown>;
-      const entries = Object.entries(obj);
-
-      if (entries.length === 0) {
-        lines.push(`${prefix}- ${key}: {}`);
-      } else {
-        lines.push(`${prefix}- ${key}:`);
-        for (const [subKey, subValue] of entries) {
-          if (typeof subValue === "string") {
-            lines.push(`${prefix}    ${subKey}: "${subValue}"`);
-          } else if (typeof subValue === "number") {
-            lines.push(`${prefix}    ${subKey}: ${subValue}`);
-          } else if (typeof subValue === "boolean") {
-            lines.push(`${prefix}    ${subKey}: ${subValue}`);
-          } else if (Array.isArray(subValue)) {
-            // Handle arrays (like commands in runFlow)
-            lines.push(`${prefix}    ${subKey}:`);
-            for (const item of subValue) {
-              if (typeof item === "object" && item !== null) {
-                const nestedYaml = stepToYaml(item as MaestroStep, indent + 3);
-                lines.push(nestedYaml);
-              }
-            }
-          } else if (typeof subValue === "object" && subValue !== null) {
-            // Nested object
-            lines.push(`${prefix}    ${subKey}:`);
-            for (const [nestedKey, nestedValue] of Object.entries(
-              subValue as Record<string, unknown>,
-            )) {
-              if (typeof nestedValue === "string") {
-                lines.push(`${prefix}      ${nestedKey}: "${nestedValue}"`);
-              } else if (typeof nestedValue === "number") {
-                lines.push(`${prefix}      ${nestedKey}: ${nestedValue}`);
-              } else if (typeof nestedValue === "boolean") {
-                lines.push(`${prefix}      ${nestedKey}: ${nestedValue}`);
-              }
-            }
-          }
-        }
-      }
+      // Object value - use recursive serializer
+      lines.push(`${prefix}- ${key}:`);
+      const nestedYaml = valueToYaml(value, indent + 2, false);
+      lines.push(nestedYaml);
     }
   }
 

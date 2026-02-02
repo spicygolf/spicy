@@ -8,8 +8,8 @@ appId: golf.spicy
 - tapOn: "Start Game"
 
 - waitForAnimationToEnd:
-    timeout: 5000
+      timeout: 5000
 
 - extendedWaitUntil:
-    visible: "Hole 1"
-    timeout: 10000
+      visible: "Hole 1"
+      timeout: 10000

@@ -8,22 +8,22 @@ appId: golf.spicy
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn: "Add Guest"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn:
-    text: "(?i)name"
+      text: "(?i)name"
 
 - inputText: "Scott"
 
 - hideKeyboard
 
 - tapOn:
-    text: "(?i)handicap"
+      text: "(?i)handicap"
 
 - inputText: "12"
 
@@ -32,27 +32,27 @@ appId: golf.spicy
 - tapOn: "Done"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn: "Add Guest"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn:
-    text: "(?i)name"
+      text: "(?i)name"
 
 - inputText: "Tim"
 
 - hideKeyboard
 
 - tapOn:
-    text: "(?i)handicap"
+      text: "(?i)handicap"
 
 - inputText: "8"
 
@@ -61,27 +61,27 @@ appId: golf.spicy
 - tapOn: "Done"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn: "Add Guest"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn:
-    text: "(?i)name"
+      text: "(?i)name"
 
 - inputText: "Eric"
 
 - hideKeyboard
 
 - tapOn:
-    text: "(?i)handicap"
+      text: "(?i)handicap"
 
 - inputText: "14"
 
@@ -90,4 +90,4 @@ appId: golf.spicy
 - tapOn: "Done"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
