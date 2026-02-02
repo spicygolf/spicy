@@ -47,13 +47,12 @@ appId: golf.spicy
             - tapOn:
                 id: "delete-game-button"
 
-            # Confirm deletion in modal
-            - extendedWaitUntil:
-                visible:
-                  id: "delete-game-confirm"
-                timeout: 3000
+            # Confirm deletion in modal - use text since testID in Modal may not be accessible
+            - waitForAnimationToEnd:
+                timeout: 1000
             - tapOn:
-                id: "delete-game-confirm"
+                text: "Delete"
+                index: 1
 
             # Wait for navigation back to games list
             - extendedWaitUntil:
