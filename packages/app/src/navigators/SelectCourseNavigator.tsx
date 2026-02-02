@@ -38,6 +38,7 @@ export function SelectCourseNavigator({ route }: Props) {
       marginBottom: 20,
       color: theme.colors.primary,
     },
+    swipeEnabled: false,
   };
 
   return (
