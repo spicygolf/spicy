@@ -1,4 +1,4 @@
-# Hole 3: Par 3 with prox - Brad closest
+# Hole 3
 # Scores: p1=3, p2=4, p3=3, p4=4
 # Junk: prox:p1
 
@@ -7,8 +7,6 @@ appId: golf.spicy
 
 - runFlow:
     when:
-      notVisible:
-        text: "Hole 3"
     commands:
       - swipe:
           direction: "LEFT"
@@ -21,19 +19,7 @@ appId: golf.spicy
     timeout: 5000
 
 - tapOn:
-    id: "player-p1-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- tapOn:
     id: "player-p2-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- tapOn:
-    id: "player-p3-increment"
 
 - waitForAnimationToEnd:
     timeout: 500

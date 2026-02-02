@@ -1,4 +1,4 @@
-# Hole 12: Par 3 - another prox
+# Hole 12
 # Scores: p1=3, p2=3, p3=4, p4=4
 # Junk: prox:p2
 
@@ -7,8 +7,6 @@ appId: golf.spicy
 
 - runFlow:
     when:
-      notVisible:
-        text: "Hole 12"
     commands:
       - swipe:
           direction: "LEFT"
@@ -19,18 +17,6 @@ appId: golf.spicy
 - extendedWaitUntil:
     visible: "Hole 12"
     timeout: 5000
-
-- tapOn:
-    id: "player-p1-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- tapOn:
-    id: "player-p2-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
 
 - tapOn:
     id: "player-p3-increment"

@@ -409,12 +409,8 @@ export function generateScoreEntrySteps(
   const diff = targetGross - defaultGross;
 
   if (diff === 0) {
-    // Just tap the score to activate it at the default
-    steps.push({
-      tapOn: {
-        id: `player-${playerId}-increment`,
-      },
-    });
+    // Score matches default (par + pops) - no action needed.
+    // The app accepts default scores automatically when navigating away.
   } else if (diff > 0) {
     // Increment diff times
     for (let i = 0; i < diff; i++) {
@@ -514,16 +510,22 @@ export function generateHoleScoringSteps(
     // In real tests, this would need course handicap calculation
     const pops = 0;
 
-    steps.push(
-      ...generateScoreEntrySteps(playerId, scoreData.gross, par, pops),
+    const scoreSteps = generateScoreEntrySteps(
+      playerId,
+      scoreData.gross,
+      par,
+      pops,
     );
+    steps.push(...scoreSteps);
 
-    // Small delay between score entries
-    steps.push({
-      waitForAnimationToEnd: {
-        timeout: 500,
-      },
-    });
+    // Small delay between score entries (only if we actually tapped something)
+    if (scoreSteps.length > 0) {
+      steps.push({
+        waitForAnimationToEnd: {
+          timeout: 500,
+        },
+      });
+    }
   }
 
   // Toggle junk awards

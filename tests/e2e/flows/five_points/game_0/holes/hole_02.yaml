@@ -1,4 +1,4 @@
-# Hole 2: Team 2 wins - birdie by Tim
+# Hole 2
 # Scores: p1=5, p2=6, p3=3, p4=5
 # Junk: birdie:p3
 
@@ -7,8 +7,6 @@ appId: golf.spicy
 
 - runFlow:
     when:
-      notVisible:
-        text: "Hole 2"
     commands:
       - swipe:
           direction: "LEFT"
@@ -21,12 +19,6 @@ appId: golf.spicy
     timeout: 5000
 
 - tapOn:
-    id: "player-p1-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- tapOn:
     id: "player-p2-increment"
 
 - waitForAnimationToEnd:
@@ -37,12 +29,6 @@ appId: golf.spicy
 
 - tapOn:
     id: "player-p3-decrement"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- tapOn:
-    id: "player-p4-increment"
 
 - waitForAnimationToEnd:
     timeout: 500

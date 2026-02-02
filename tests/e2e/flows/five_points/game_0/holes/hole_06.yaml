@@ -1,4 +1,4 @@
-# Hole 6: Multiple junk - birdie + prox same player
+# Hole 6
 # Scores: p1=5, p2=6, p3=4, p4=6
 # Junk: birdie:p3 prox:p3
 
@@ -7,8 +7,6 @@ appId: golf.spicy
 
 - runFlow:
     when:
-      notVisible:
-        text: "Hole 6"
     commands:
       - swipe:
           direction: "LEFT"
@@ -19,12 +17,6 @@ appId: golf.spicy
 - extendedWaitUntil:
     visible: "Hole 6"
     timeout: 5000
-
-- tapOn:
-    id: "player-p1-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
 
 - tapOn:
     id: "player-p2-increment"

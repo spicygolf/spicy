@@ -1,4 +1,4 @@
-# Hole 17: Second hardest hole - high scores
+# Hole 17
 # Scores: p1=5, p2=6, p3=5, p4=6
 
 appId: golf.spicy
@@ -6,8 +6,6 @@ appId: golf.spicy
 
 - runFlow:
     when:
-      notVisible:
-        text: "Hole 17"
     commands:
       - swipe:
           direction: "LEFT"

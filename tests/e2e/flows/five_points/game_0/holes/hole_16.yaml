@@ -1,4 +1,4 @@
-# Hole 16: Par 3 - prox and birdie different players
+# Hole 16
 # Scores: p1=2, p2=4, p3=3, p4=4
 # Junk: birdie:p1 prox:p3
 
@@ -7,8 +7,6 @@ appId: golf.spicy
 
 - runFlow:
     when:
-      notVisible:
-        text: "Hole 16"
     commands:
       - swipe:
           direction: "LEFT"
@@ -28,12 +26,6 @@ appId: golf.spicy
 
 - tapOn:
     id: "player-p2-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- tapOn:
-    id: "player-p3-increment"
 
 - waitForAnimationToEnd:
     timeout: 500

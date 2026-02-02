@@ -1,4 +1,4 @@
-# Hole 8: All pars - Team 1 wins on low total tiebreaker
+# Hole 8
 # Scores: p1=4, p2=4, p3=4, p4=5
 
 appId: golf.spicy
@@ -6,8 +6,6 @@ appId: golf.spicy
 
 - runFlow:
     when:
-      notVisible:
-        text: "Hole 8"
     commands:
       - swipe:
           direction: "LEFT"
@@ -18,24 +16,6 @@ appId: golf.spicy
 - extendedWaitUntil:
     visible: "Hole 8"
     timeout: 5000
-
-- tapOn:
-    id: "player-p1-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- tapOn:
-    id: "player-p2-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- tapOn:
-    id: "player-p3-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
 
 - tapOn:
     id: "player-p4-increment"

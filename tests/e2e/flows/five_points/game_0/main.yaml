@@ -1,16 +1,11 @@
-# Five Points - Game 0 (18-Hole E2E Test)
+# Five Points Full Game
 # Main orchestration flow that runs sub-flows
 #
-# This flow tests:
-# - Login with test account
-# - Clean up any existing games
-# - Create Five Points game
-# - Add 3 guest players (logged-in player is added automatically)
-# - Play 18 holes with scoring, junk, and multipliers
-# - Verify final leaderboard
+# Generated from fixture - do not edit directly
 
 appId: golf.spicy
 ---
+
 - takeScreenshot: "test_start"
 
 - launchApp:

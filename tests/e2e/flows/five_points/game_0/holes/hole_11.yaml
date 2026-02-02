@@ -1,4 +1,4 @@
-# Hole 11: Eagle opportunity (par 5) - not scored though
+# Hole 11
 # Scores: p1=5, p2=6, p3=5, p4=6
 
 appId: golf.spicy
@@ -6,8 +6,6 @@ appId: golf.spicy
 
 - runFlow:
     when:
-      notVisible:
-        text: "Hole 11"
     commands:
       - swipe:
           direction: "LEFT"
@@ -20,19 +18,7 @@ appId: golf.spicy
     timeout: 5000
 
 - tapOn:
-    id: "player-p1-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- tapOn:
     id: "player-p2-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- tapOn:
-    id: "player-p3-increment"
 
 - waitForAnimationToEnd:
     timeout: 500

@@ -1,4 +1,4 @@
-# Hole 4: Double multiplier - Team 1 presses
+# Hole 4
 # Scores: p1=4, p2=5, p3=5, p4=5
 # Multipliers: t1:double
 
@@ -7,8 +7,6 @@ appId: golf.spicy
 
 - runFlow:
     when:
-      notVisible:
-        text: "Hole 4"
     commands:
       - swipe:
           direction: "LEFT"
@@ -19,12 +17,6 @@ appId: golf.spicy
 - extendedWaitUntil:
     visible: "Hole 4"
     timeout: 5000
-
-- tapOn:
-    id: "player-p1-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
 
 - tapOn:
     id: "player-p2-increment"

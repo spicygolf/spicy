@@ -1,9 +1,10 @@
-# Sub-flow: Create new Five Points game
+# Sub-flow: Create new five_points game
 # Expects: User logged in, "New Game" visible
 # Provides: Game settings screen visible, "Add Player" visible
 
 appId: golf.spicy
 ---
+
 - tapOn: "New Game"
 
 - waitForAnimationToEnd:
@@ -22,12 +23,6 @@ appId: golf.spicy
 
 - tapOn:
     id: "spec-five-points"
-
-- waitForAnimationToEnd:
-    timeout: 3000
-
-# Ensure we're on Players tab (app may remember last tab from previous game)
-- tapOn: "Players"
 
 - extendedWaitUntil:
     visible: "Add Player"

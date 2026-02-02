@@ -1,4 +1,4 @@
-# Hole 10: Back nine start - clean scoring
+# Hole 10
 # Scores: p1=5, p2=5, p3=4, p4=5
 
 appId: golf.spicy
@@ -6,8 +6,6 @@ appId: golf.spicy
 
 - runFlow:
     when:
-      notVisible:
-        text: "Hole 10"
     commands:
       - swipe:
           direction: "LEFT"
@@ -27,12 +25,6 @@ appId: golf.spicy
 
 - tapOn:
     id: "player-p2-increment"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- tapOn:
-    id: "player-p3-increment"
 
 - waitForAnimationToEnd:
     timeout: 500

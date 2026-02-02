@@ -4,7 +4,7 @@
 
 appId: golf.spicy
 ---
-# Add Scott (guest)
+
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
@@ -34,7 +34,6 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 2000
 
-# Add Tim (guest)
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
@@ -64,7 +63,6 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 2000
 
-# Add Eric (guest)
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
