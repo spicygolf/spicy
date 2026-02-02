@@ -30,6 +30,12 @@ appId: golf.spicy
     timeout: 500
 
 - tapOn:
+    id: "player-p3-score"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
     id: "player-p4-increment"
 
 - waitForAnimationToEnd:

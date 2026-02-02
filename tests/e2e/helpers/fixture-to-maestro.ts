@@ -409,8 +409,12 @@ export function generateScoreEntrySteps(
   const diff = targetGross - defaultGross;
 
   if (diff === 0) {
-    // Score matches default (par + pops) - no action needed.
-    // The app accepts default scores automatically when navigating away.
+    // Score matches default (par + pops) - tap the score to confirm it
+    steps.push({
+      tapOn: {
+        id: `player-${playerId}-score`,
+      },
+    });
   } else if (diff > 0) {
     // Increment diff times
     for (let i = 0; i < diff; i++) {

@@ -271,6 +271,7 @@ export function ScoreInput({
           disabled={readonly}
           activeOpacity={0.6}
           accessibilityLabel={`Score: ${displayGross}${showNet ? ` net ${displayNet}` : ""}`}
+          testID={playerId ? `player-${playerId}-score` : undefined}
         >
           {/* Fixed height container to prevent vertical shifting */}
           <View
