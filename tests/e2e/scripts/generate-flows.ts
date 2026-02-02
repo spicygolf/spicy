@@ -73,8 +73,14 @@ Options:
   --verbose, -v       Show detailed output
   --help, -h          Show this help message
 
+Output Modes:
+  Default (sub-flows): Generates separate YAML files for each phase:
+    - main.yaml (orchestration), login.yaml, new_game.yaml, add_players.yaml,
+    - start_game.yaml, leaderboard.yaml, holes/hole_XX.yaml
+  --single: Generates a single monolithic YAML file (legacy mode)
+
 Examples:
-  bun generate-flows.ts                         # Generate all with sub-flows
+  bun generate-flows.ts                         # Generate all (sub-flows mode)
   bun generate-flows.ts --single                # Generate single-file flows
   bun generate-flows.ts --category game_0       # Generate game_0 tests only
   bun generate-flows.ts --fixture game          # Generate specific fixture
