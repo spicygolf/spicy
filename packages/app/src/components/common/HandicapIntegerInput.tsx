@@ -58,7 +58,7 @@ export function HandicapIntegerInput({
         value={value}
         onChangeText={handleChangeText}
         placeholder={placeholder}
-        keyboardType="numbers-and-punctuation"
+        keyboardType="default"
         hasError={!!error}
         {...rest}
       />

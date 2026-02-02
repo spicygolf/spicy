@@ -1,32 +1,28 @@
 /**
- * Manual course/tee entry screen for courses not in GHIN database.
+ * Manual course/tee entry screen - Step 1: Basic course info.
  *
- * Creates Course and Tee Jazz objects with default par 4 for all holes.
- * Rating supports decimals, slope is an integer.
+ * Collects course name, tee name, gender, holes, and optional ratings.
+ * Navigates to ManualCourseHoles for per-hole par and handicap entry.
  */
 
 import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
 import { useCallback, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import {
-  CourseDefaultTee,
-  Course as CourseSchema,
-  ListOfTeeHoles,
-  ListOfTees,
-  TeeHole,
-  Tee as TeeSchema,
-} from "spicylib/schema";
 import { useGame } from "@/hooks";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
+import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Picker, Screen, Text, TextInput } from "@/ui";
-import { propagateCourseTeeToPlayers } from "@/utils/propagateCourseTee";
 
 type Props = MaterialTopTabScreenProps<
   SelectCourseTabParamList,
   "SelectCourseManual"
 >;
+
+type StackNavProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 
 const GENDER_OPTIONS = [
   { label: "Mixed", value: "Mixed" },
@@ -59,11 +55,9 @@ function filterIntegerInput(input: string): string {
   return input.replace(/[^\d]/g, "");
 }
 
-export function SelectCourseManual({
-  route,
-  navigation,
-}: Props): React.ReactElement {
+export function SelectCourseManual({ route }: Props): React.ReactElement {
   const { playerId, roundId } = route.params;
+  const stackNavigation = useNavigation<StackNavProp>();
   const { game } = useGame(undefined, {
     resolve: {
       players: { $each: { gender: true } },
@@ -79,7 +73,6 @@ export function SelectCourseManual({
   const [totalYardage, setTotalYardage] = useState("");
   const [courseRating, setCourseRating] = useState("");
   const [slopeRating, setSlopeRating] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Find player from game
@@ -128,106 +121,42 @@ export function SelectCourseManual({
     return Object.keys(newErrors).length === 0;
   }, [courseName, teeName, courseRating, slopeRating]);
 
-  const handleSubmit = useCallback(async (): Promise<void> => {
-    if (!round?.$isLoaded || !validate()) return;
+  const handleNext = useCallback((): void => {
+    if (!roundId || !validate()) return;
 
-    setIsSubmitting(true);
-
-    const group = round.$jazz.owner;
     const numHoles = Number.parseInt(holesCount, 10);
-
-    // Generate unique IDs for manual entries
-    const courseId = `manual-${Date.now()}`;
-    const teeId = `manual-tee-${Date.now()}`;
-
-    // Create TeeHole objects with default par 4 and sequential handicap
-    const holes: TeeHole[] = [];
-    for (let i = 0; i < numHoles; i++) {
-      holes.push(
-        TeeHole.create(
-          {
-            id: `${teeId}-hole-${i + 1}`,
-            number: i + 1,
-            par: 4,
-            yards: 0,
-            meters: 0,
-            handicap: i + 1,
-          },
-          { owner: group },
-        ),
-      );
-    }
-
-    // Build ratings (use provided values or defaults)
     const rating = courseRating.trim()
       ? Number.parseFloat(courseRating)
       : numHoles === 18
         ? 72
         : 36;
     const slope = slopeRating.trim() ? Number.parseInt(slopeRating, 10) : 113;
-
-    const ratings = {
-      total: { rating, slope, bogey: 0 },
-      front: { rating: rating / 2, slope, bogey: 0 },
-      back: { rating: rating / 2, slope, bogey: 0 },
-    };
-
     const yardage = totalYardage.trim() ? Number.parseInt(totalYardage, 10) : 0;
 
-    // Create Tee
-    const tee = TeeSchema.create(
-      {
-        id: teeId,
-        name: teeName.trim(),
-        gender: teeGender,
-        holes: ListOfTeeHoles.create(holes, { owner: group }),
-        holesCount: numHoles,
-        totalYardage: yardage,
-        totalMeters: yardage ? Math.round(yardage * 0.9144) : 0,
-        ratings,
-      },
-      { owner: group },
-    );
-
-    // Create Course
-    const course = CourseSchema.create(
-      {
-        id: courseId,
-        status: "active",
-        name: courseName.trim(),
-        city: "",
-        state: "",
-        season: { all_year: true },
-        default_tee: CourseDefaultTee.create({}, { owner: group }),
-        tees: ListOfTees.create([tee], { owner: group }),
-      },
-      { owner: group },
-    );
-
-    // Set on round
-    round.$jazz.set("course", course);
-    round.$jazz.set("tee", tee);
-
-    // Propagate to other players
-    if (game?.$isLoaded && player?.$isLoaded) {
-      propagateCourseTeeToPlayers(game, course, tee, player.$jazz.id);
-    }
-
-    setIsSubmitting(false);
-    navigation.getParent()?.goBack();
+    // Navigate to hole details screen
+    stackNavigation.navigate("ManualCourseHoles", {
+      playerId,
+      roundId,
+      courseName: courseName.trim(),
+      teeName: teeName.trim(),
+      teeGender,
+      holesCount: numHoles,
+      totalYardage: yardage,
+      courseRating: rating,
+      slopeRating: slope,
+    });
   }, [
-    round,
+    roundId,
     validate,
     holesCount,
     courseRating,
     slopeRating,
     totalYardage,
+    courseName,
     teeName,
     teeGender,
-    courseName,
-    game,
-    player,
-    navigation,
+    playerId,
+    stackNavigation,
   ]);
 
   if (!player) {
@@ -359,15 +288,14 @@ export function SelectCourseManual({
           </View>
 
           <Text style={styles.helperText}>
-            All holes default to par 4. Rating and slope are used for handicap
-            calculations.
+            Next: Enter par and handicap for each hole.
           </Text>
 
           <View style={styles.buttonContainer}>
             <Button
-              label={isSubmitting ? "Saving..." : "Save Course & Tee"}
-              onPress={handleSubmit}
-              disabled={!isValid || isSubmitting}
+              label="Next: Hole Details"
+              onPress={handleNext}
+              disabled={!isValid}
             />
           </View>
         </ScrollView>
