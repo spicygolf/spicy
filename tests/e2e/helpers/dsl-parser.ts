@@ -360,6 +360,28 @@ export function parseDSL(dsl: string): ParsedDSL {
     holes: holeDefinitions,
   };
 
+  // Validate hole count: definitions should match hole data entries
+  const definedHoleNumbers = new Set(
+    holeDefinitions.map((h) => String(h.hole)),
+  );
+  const dataHoleNumbers = new Set(Object.keys(holes));
+
+  // Check for hole data without definitions
+  for (const holeNum of dataHoleNumbers) {
+    if (!definedHoleNumbers.has(holeNum)) {
+      throw new Error(
+        `Hole ${holeNum} has score data but no definition in 'holes:' line`,
+      );
+    }
+  }
+
+  // Check for definitions without data (warning only - might be intentional for partial tests)
+  for (const holeNum of definedHoleNumbers) {
+    if (!dataHoleNumbers.has(holeNum)) {
+      console.warn(`Warning: Hole ${holeNum} is defined but has no score data`);
+    }
+  }
+
   return {
     name,
     description,
