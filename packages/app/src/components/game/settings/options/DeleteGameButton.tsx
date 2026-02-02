@@ -150,6 +150,7 @@ export function DeleteGameButton() {
               <Pressable
                 style={styles.cancelButton}
                 onPress={() => setShowModal(false)}
+                testID="delete-game-cancel"
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </Pressable>
