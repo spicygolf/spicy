@@ -48,11 +48,29 @@ function filterIntegerInput(input: string): string {
   return input.replace(/[^\d]/g, "");
 }
 
+/**
+ * Find which handicap values appear more than once.
+ */
+function findDuplicateHandicaps(holes: HoleData[]): Set<number> {
+  const counts = new Map<number, number>();
+  for (const hole of holes) {
+    counts.set(hole.handicap, (counts.get(hole.handicap) || 0) + 1);
+  }
+  const duplicates = new Set<number>();
+  for (const [handicap, count] of counts) {
+    if (count > 1) {
+      duplicates.add(handicap);
+    }
+  }
+  return duplicates;
+}
+
 interface HoleRowProps {
   holeNumber: number;
   hole: HoleData;
   onParChange: (par: number) => void;
   onHandicapChange: (handicap: string) => void;
+  isDuplicate: boolean;
 }
 
 function HoleRow({
@@ -60,6 +78,7 @@ function HoleRow({
   hole,
   onParChange,
   onHandicapChange,
+  isDuplicate,
 }: HoleRowProps): React.ReactElement {
   return (
     <View style={styles.holeRow}>
@@ -77,7 +96,8 @@ function HoleRow({
         onChangeText={(text) => onHandicapChange(filterIntegerInput(text))}
         keyboardType="number-pad"
         maxLength={2}
-        style={styles.hdcpInput}
+        style={[styles.hdcpInput, isDuplicate && styles.hdcpInputError]}
+        hasError={isDuplicate}
       />
     </View>
   );
@@ -342,6 +362,10 @@ export function ManualCourseHoles({
   // Calculate total par
   const totalPar = holes.reduce((sum, h) => sum + h.par, 0);
 
+  // Find duplicate handicaps for validation
+  const duplicateHandicaps = findDuplicateHandicaps(holes);
+  const hasDuplicateHandicaps = duplicateHandicaps.size > 0;
+
   // Split holes for side-by-side layout (18 holes only)
   const frontNine = is18Holes ? holes.slice(0, 9) : holes;
   const backNine = is18Holes ? holes.slice(9, 18) : [];
@@ -386,6 +410,7 @@ export function ManualCourseHoles({
                   hole={hole}
                   onParChange={(par) => updateHolePar(index, par)}
                   onHandicapChange={(hcp) => updateHoleHandicap(index, hcp)}
+                  isDuplicate={duplicateHandicaps.has(hole.handicap)}
                 />
               ))}
             </View>
@@ -405,6 +430,7 @@ export function ManualCourseHoles({
                   hole={hole}
                   onParChange={(par) => updateHolePar(index + 9, par)}
                   onHandicapChange={(hcp) => updateHoleHandicap(index + 9, hcp)}
+                  isDuplicate={duplicateHandicaps.has(hole.handicap)}
                 />
               ))}
             </View>
@@ -424,9 +450,16 @@ export function ManualCourseHoles({
                 hole={hole}
                 onParChange={(par) => updateHolePar(index, par)}
                 onHandicapChange={(hcp) => updateHoleHandicap(index, hcp)}
+                isDuplicate={duplicateHandicaps.has(hole.handicap)}
               />
             ))}
           </View>
+        )}
+
+        {hasDuplicateHandicaps && (
+          <Text style={styles.errorText}>
+            Each hole must have a unique handicap value (1-{numHoles}).
+          </Text>
         )}
 
         <View style={styles.buttonContainer}>
@@ -439,7 +472,7 @@ export function ManualCourseHoles({
                   : "Save Course & Tee"
             }
             onPress={handleSave}
-            disabled={isSubmitting}
+            disabled={isSubmitting || hasDuplicateHandicaps}
           />
         </View>
       </ScrollView>
@@ -528,6 +561,16 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     textAlign: "center",
     fontSize: 14,
+  },
+  hdcpInputError: {
+    borderColor: theme.colors.error,
+    borderWidth: 1,
+  },
+  errorText: {
+    color: theme.colors.error,
+    fontSize: 12,
+    textAlign: "center",
+    marginBottom: theme.gap(1),
   },
   buttonContainer: {
     marginTop: theme.gap(3),
