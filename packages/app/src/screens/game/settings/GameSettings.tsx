@@ -13,6 +13,7 @@ import { AddPlayerNavigator } from "@/navigators/AddPlayerNavigator";
 import { SelectCourseNavigator } from "@/navigators/SelectCourseNavigator";
 import { AddRoundToGame } from "@/screens/game/settings/AddRoundToGame";
 import { HandicapAdjustment } from "@/screens/game/settings/HandicapAdjustment";
+import { ManualCourseHoles } from "@/screens/game/settings/ManualCourseHoles";
 import { Screen } from "@/ui";
 
 // Stack navigation for the settings flows (add player, select course, etc.)
@@ -22,6 +23,18 @@ export type GameSettingsStackParamList = {
   AddRoundToGame: { playerId: string };
   SelectCourseNavigator: { playerId: string; roundId?: string };
   HandicapAdjustment: { playerId: string; roundToGameId?: string };
+  ManualCourseHoles: {
+    playerId: string;
+    roundId: string;
+    courseName: string;
+    teeName: string;
+    teeGender: "M" | "F" | "Mixed";
+    holesCount: number;
+    totalYardage: number;
+    courseRating: number;
+    slopeRating: number;
+    isEditMode?: boolean;
+  };
 };
 
 // Tab navigation for the main settings views
@@ -127,6 +140,7 @@ export function GameSettings() {
         )}
       </Stack.Screen>
       <Stack.Screen name="HandicapAdjustment" component={HandicapAdjustment} />
+      <Stack.Screen name="ManualCourseHoles" component={ManualCourseHoles} />
     </Stack.Navigator>
   );
 }

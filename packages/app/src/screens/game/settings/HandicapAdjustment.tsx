@@ -6,50 +6,16 @@ import { ScrollView, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { calculateCourseHandicap, formatCourseHandicap } from "spicylib/utils";
 import { Back } from "@/components/Back";
+import { HandicapIndexInput } from "@/components/common/HandicapIndexInput";
+import { HandicapIntegerInput } from "@/components/common/HandicapIntegerInput";
 import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
-import { Input, Screen, Text } from "@/ui";
+import { Screen, Text } from "@/ui";
 
 type Props = NativeStackScreenProps<
   GameSettingsStackParamList,
   "HandicapAdjustment"
 >;
-
-/**
- * Filter input to only allow valid handicap index characters.
- * Allows optional leading + (for plus handicaps), digits, and one decimal point.
- * Note: In golf, "+" means plus handicap (better than scratch). There's no
- * such thing as a negative handicap index in user input - just use the number.
- */
-function filterHandicapIndexInput(input: string): string {
-  // Remove any invalid characters, keeping only +, digits, and decimal point
-  // Only allow + at the start
-  let filtered = input.replace(/[^+\d.]/g, "");
-  // Remove + if not at start
-  if (filtered.indexOf("+") > 0) {
-    filtered = filtered.replace(/\+/g, "");
-  }
-  // Only allow one decimal point
-  const parts = filtered.split(".");
-  if (parts.length > 2) {
-    filtered = `${parts[0]}.${parts.slice(1).join("")}`;
-  }
-  return filtered;
-}
-
-/**
- * Filter input to only allow valid game handicap characters.
- * Allows optional leading + (for plus handicaps), and digits only (integers).
- */
-function filterGameHandicapInput(input: string): string {
-  // Remove any invalid characters, keeping only + and digits
-  let filtered = input.replace(/[^+\d]/g, "");
-  // Remove + if not at start
-  if (filtered.indexOf("+") > 0) {
-    filtered = filtered.replace(/\+/g, "");
-  }
-  return filtered;
-}
 
 export function HandicapAdjustment({ route, navigation }: Props) {
   const { playerId, roundToGameId } = route.params;
@@ -269,15 +235,10 @@ export function HandicapAdjustment({ route, navigation }: Props) {
           </Text>
           <View style={styles.inputRow}>
             <View style={styles.inputWrapper}>
-              <Input
-                label=""
+              <HandicapIndexInput
                 value={indexInput}
-                onChangeText={(text) =>
-                  setIndexInput(filterHandicapIndexInput(text))
-                }
+                onChangeText={setIndexInput}
                 onBlur={() => saveIndexOverride(indexInput)}
-                placeholder="e.g., 12.5 or +2.3"
-                keyboardType="numbers-and-punctuation"
               />
             </View>
             {hasIndexOverride && (
@@ -331,20 +292,15 @@ export function HandicapAdjustment({ route, navigation }: Props) {
           </Text>
           <View style={styles.inputRow}>
             <View style={styles.inputWrapper}>
-              <Input
-                label=""
+              <HandicapIntegerInput
                 value={gameHandicapInput}
-                onChangeText={(text) =>
-                  setGameHandicapInput(filterGameHandicapInput(text))
-                }
+                onChangeText={setGameHandicapInput}
                 onBlur={() =>
                   saveGameHandicapOverride(
                     gameHandicapInput,
                     previewCourseHandicap,
                   )
                 }
-                placeholder="e.g., 10 or +2"
-                keyboardType="numbers-and-punctuation"
               />
             </View>
             {hasGameHandicapOverride && (

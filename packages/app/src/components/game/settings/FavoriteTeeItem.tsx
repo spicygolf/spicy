@@ -24,8 +24,12 @@ interface TeeData {
 
 interface FavoriteTeeItemProps {
   item: MaybeLoaded<CourseTee>;
-  drag: () => void;
-  isActive: boolean;
+  /** Drag handler for reorderable lists. If provided, enables drag-to-reorder. */
+  drag?: () => void;
+  /** Whether the item is currently being dragged */
+  isActive?: boolean;
+  /** Explicit flag to show drag handle. Defaults to true if `drag` is provided. */
+  isDraggable?: boolean;
   onPress: () => void;
   onRemove: () => void;
 }
@@ -34,6 +38,7 @@ export function FavoriteTeeItem({
   item,
   drag,
   isActive,
+  isDraggable: isDraggableProp,
   onPress,
   onRemove,
 }: FavoriteTeeItemProps) {
@@ -99,12 +104,15 @@ export function FavoriteTeeItem({
     return null;
   }
 
+  // Default isDraggable to true if drag handler is provided
+  const isDraggable = isDraggableProp ?? !!drag;
+
   return (
     <TouchableOpacity
       style={[styles.favoriteItem, isActive && styles.draggingItem]}
       onPress={onPress}
-      onLongPress={drag}
-      delayLongPress={200}
+      onLongPress={isDraggable ? drag : undefined}
+      delayLongPress={isDraggable ? 200 : undefined}
     >
       <View style={styles.itemRow}>
         <FavoriteButton isFavorited={true} onToggle={onRemove} size={20} />
@@ -129,14 +137,16 @@ export function FavoriteTeeItem({
               </Text>
             </View>
 
-            <View style={styles.dragHandle}>
-              <FontAwesome6
-                name="grip-lines"
-                iconStyle="solid"
-                size={16}
-                color="#999"
-              />
-            </View>
+            {isDraggable && (
+              <View style={styles.dragHandle}>
+                <FontAwesome6
+                  name="grip-lines"
+                  iconStyle="solid"
+                  size={16}
+                  color="#999"
+                />
+              </View>
+            )}
           </View>
 
           <Text style={styles.teeDetailText}>

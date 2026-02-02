@@ -288,8 +288,8 @@ export function SelectCourseSearch({ route, navigation }: Props) {
       propagateCourseTeeToPlayers(game, course, tee, player.$jazz.id);
     }
 
-    // Handle favoriting if requested
-    if (shouldFavorite && me?.$isLoaded && me.root?.$isLoaded) {
+    // Track usage and handle favoriting
+    if (me?.$isLoaded && me.root?.$isLoaded) {
       const root = me.root;
       const loaded = await root.$jazz.ensureLoaded({
         resolve: { favorites: { courseTees: { $each: true } } },
@@ -320,7 +320,8 @@ export function SelectCourseSearch({ route, navigation }: Props) {
 
         const courseTees = favorites.courseTees;
         if (courseTees?.$isLoaded) {
-          const existingIndex = courseTees.findIndex((fav) => {
+          // Find existing favorite for this course/tee combo
+          const existingFav = courseTees.find((fav) => {
             return (
               fav?.$isLoaded &&
               fav.$jazz.has("tee") &&
@@ -332,13 +333,18 @@ export function SelectCourseSearch({ route, navigation }: Props) {
             );
           });
 
-          if (existingIndex < 0) {
+          if (existingFav?.$isLoaded) {
+            // Update lastUsedAt on existing favorite
+            existingFav.$jazz.set("lastUsedAt", new Date());
+          } else if (shouldFavorite) {
+            // Create new favorite with lastUsedAt
             const favoritesGroup = courseTees.$jazz.owner;
             const newFavorite = CourseTee.create(
               {
                 course,
                 tee,
                 addedAt: new Date(),
+                lastUsedAt: new Date(),
               },
               { owner: favoritesGroup },
             );

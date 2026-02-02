@@ -8,6 +8,7 @@ export const CourseTee = co.map({
   course: Course,
   tee: Tee,
   addedAt: z.date(),
+  lastUsedAt: z.optional(z.date()),
 });
 
 export type CourseTee = co.loaded<typeof CourseTee>;
