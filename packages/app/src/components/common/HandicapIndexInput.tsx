@@ -63,7 +63,7 @@ export function HandicapIndexInput({
         value={value}
         onChangeText={handleChangeText}
         placeholder={placeholder}
-        keyboardType="default"
+        keyboardType="phone-pad"
         hasError={!!error}
         {...rest}
       />

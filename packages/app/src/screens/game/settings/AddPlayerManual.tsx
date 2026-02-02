@@ -8,13 +8,7 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useState } from "react";
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  View,
-} from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { HandicapIndexInput } from "@/components/common/HandicapIndexInput";
 import { type PlayerData, useAddPlayerToGame } from "@/hooks";
@@ -114,79 +108,71 @@ export function AddPlayerManual(): React.ReactElement {
 
   return (
     <Screen>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.field}>
-            <Text style={styles.label}>Name</Text>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Full name"
-              autoCapitalize="words"
-              hasError={!!errors.name}
-            />
-            {errors.name ? (
-              <Text style={styles.errorText}>{errors.name}</Text>
-            ) : null}
-          </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Name</Text>
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            placeholder="Full name"
+            autoCapitalize="words"
+            hasError={!!errors.name}
+          />
+          {errors.name ? (
+            <Text style={styles.errorText}>{errors.name}</Text>
+          ) : null}
+        </View>
 
-          <View style={styles.field}>
-            <Text style={styles.label}>Short Name</Text>
-            <TextInput
-              value={shortName}
-              onChangeText={setShortName}
-              placeholder="Nickname for scorecard"
-              autoCapitalize="words"
-              hasError={!!errors.shortName}
-            />
-            {errors.shortName ? (
-              <Text style={styles.errorText}>{errors.shortName}</Text>
-            ) : null}
-          </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Short Name</Text>
+          <TextInput
+            value={shortName}
+            onChangeText={setShortName}
+            placeholder="Nickname for scorecard"
+            autoCapitalize="words"
+            hasError={!!errors.shortName}
+          />
+          {errors.shortName ? (
+            <Text style={styles.errorText}>{errors.shortName}</Text>
+          ) : null}
+        </View>
 
-          <View style={styles.field}>
-            <Text style={styles.label}>Gender</Text>
-            <Picker
-              title="Select gender"
-              items={GENDER_OPTIONS}
-              selectedValue={gender}
-              onValueChange={(value) => setGender(value as "M" | "F")}
-            />
-          </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Gender</Text>
+          <Picker
+            title="Select gender"
+            items={GENDER_OPTIONS}
+            selectedValue={gender}
+            onValueChange={(value) => setGender(value as "M" | "F")}
+          />
+        </View>
 
-          <View style={styles.field}>
-            <Text style={styles.label}>Handicap Index (optional)</Text>
-            <HandicapIndexInput
-              value={handicapIndex}
-              onChangeText={setHandicapIndex}
-              error={errors.handicapIndex}
-              helperText="You can override the game handicap later in game settings."
-            />
-          </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Handicap Index (optional)</Text>
+          <HandicapIndexInput
+            value={handicapIndex}
+            onChangeText={setHandicapIndex}
+            error={errors.handicapIndex}
+            helperText="You can override the game handicap later in game settings."
+          />
+        </View>
 
-          <View style={styles.buttonContainer}>
-            <Button
-              label={isSubmitting ? "Adding..." : "Add Player"}
-              onPress={handleSubmit}
-              disabled={!isValid || isSubmitting}
-            />
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        <View style={styles.buttonContainer}>
+          <Button
+            label={isSubmitting ? "Adding..." : "Add Player"}
+            onPress={handleSubmit}
+            disabled={!isValid || isSubmitting}
+          />
+        </View>
+      </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
-  container: {
-    flex: 1,
-  },
   scrollContent: {
     padding: theme.gap(2),
   },
