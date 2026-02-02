@@ -64,7 +64,7 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     return rtg?.$isLoaded && rtg.round?.$isLoaded ? rtg.round : null;
   })();
 
-  const favoritedTees = (() => {
+  const allFavorites = (() => {
     if (
       !me?.$isLoaded ||
       !me.root?.$isLoaded ||
@@ -84,6 +84,23 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     });
   })();
 
+  // Get recent tees (those with lastUsedAt), sorted by most recent first
+  const recentTees = (() => {
+    const withLastUsed = allFavorites.filter(
+      (fav) => fav?.$isLoaded && fav.lastUsedAt,
+    );
+    return withLastUsed
+      .sort((a, b) => {
+        const aTime = a?.$isLoaded && a.lastUsedAt ? a.lastUsedAt.getTime() : 0;
+        const bTime = b?.$isLoaded && b.lastUsedAt ? b.lastUsedAt.getTime() : 0;
+        return bTime - aTime; // Most recent first
+      })
+      .slice(0, 5); // Show top 5 recent
+  })();
+
+  // Favorites are the full list (for drag/drop reordering)
+  const favoritedTees = allFavorites;
+
   const handleSelectTee = useCallback(
     async (favorite: MaybeLoaded<CourseTee>) => {
       if (!round?.$isLoaded || !favorite?.$isLoaded) {
@@ -101,6 +118,9 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
       if (!loadedFavorite.course?.$isLoaded || !loadedFavorite.tee?.$isLoaded) {
         return;
       }
+
+      // Update lastUsedAt for recents tracking
+      loadedFavorite.$jazz.set("lastUsedAt", new Date());
 
       // Set the course and tee on the round
       round.$jazz.set("course", loadedFavorite.course);
@@ -228,14 +248,33 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
 
   return (
     <Screen>
-      <DraggableFlatList
-        data={favoritedTees}
-        keyExtractor={(item) => item.$jazz.id}
-        renderItem={renderItem}
-        onDragEnd={handleReorder}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        contentContainerStyle={styles.listContainer}
-      />
+      {recentTees.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Recent</Text>
+          {recentTees.map((item) => (
+            <View key={`recent-${item.$jazz.id}`}>
+              <FavoriteTeeItem
+                item={item}
+                onPress={() => handleSelectTee(item)}
+                onRemove={() => removeFavorite(item)}
+              />
+              <View style={styles.separator} />
+            </View>
+          ))}
+        </View>
+      )}
+
+      <View style={styles.section}>
+        <Text style={styles.sectionHeader}>Favorites</Text>
+        <DraggableFlatList
+          data={favoritedTees}
+          keyExtractor={(item) => item.$jazz.id}
+          renderItem={renderItem}
+          onDragEnd={handleReorder}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          contentContainerStyle={styles.listContainer}
+        />
+      </View>
     </Screen>
   );
 }
@@ -260,6 +299,18 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.secondary,
     textAlign: "center",
     lineHeight: 20,
+  },
+  section: {
+    marginBottom: theme.gap(1),
+  },
+  sectionHeader: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: theme.colors.secondary,
+    textTransform: "uppercase",
+    paddingHorizontal: theme.gap(2),
+    paddingVertical: theme.gap(1),
+    backgroundColor: theme.colors.background,
   },
   listContainer: {
     paddingBottom: theme.gap(1),

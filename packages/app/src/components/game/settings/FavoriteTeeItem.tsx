@@ -24,8 +24,8 @@ interface TeeData {
 
 interface FavoriteTeeItemProps {
   item: MaybeLoaded<CourseTee>;
-  drag: () => void;
-  isActive: boolean;
+  drag?: () => void;
+  isActive?: boolean;
   onPress: () => void;
   onRemove: () => void;
 }
@@ -99,12 +99,14 @@ export function FavoriteTeeItem({
     return null;
   }
 
+  const isDraggable = !!drag;
+
   return (
     <TouchableOpacity
       style={[styles.favoriteItem, isActive && styles.draggingItem]}
       onPress={onPress}
-      onLongPress={drag}
-      delayLongPress={200}
+      onLongPress={isDraggable ? drag : undefined}
+      delayLongPress={isDraggable ? 200 : undefined}
     >
       <View style={styles.itemRow}>
         <FavoriteButton isFavorited={true} onToggle={onRemove} size={20} />
@@ -129,14 +131,16 @@ export function FavoriteTeeItem({
               </Text>
             </View>
 
-            <View style={styles.dragHandle}>
-              <FontAwesome6
-                name="grip-lines"
-                iconStyle="solid"
-                size={16}
-                color="#999"
-              />
-            </View>
+            {isDraggable && (
+              <View style={styles.dragHandle}>
+                <FontAwesome6
+                  name="grip-lines"
+                  iconStyle="solid"
+                  size={16}
+                  color="#999"
+                />
+              </View>
+            )}
           </View>
 
           <Text style={styles.teeDetailText}>
