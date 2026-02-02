@@ -17,10 +17,18 @@ import { Text, TextInput } from "@/ui";
 export function filterHandicapIntegerInput(input: string): string {
   // Remove any invalid characters, keeping only + and digits
   let filtered = input.replace(/[^+\d]/g, "");
-  // Only allow + at the start
-  if (filtered.indexOf("+") > 0) {
-    filtered = filtered.replace(/\+/g, "");
+
+  // Check if input originally started with + before removing all + signs
+  const hadLeadingPlus = filtered.startsWith("+");
+
+  // Remove all + characters
+  filtered = filtered.replace(/\+/g, "");
+
+  // Re-add single leading + if originally present
+  if (hadLeadingPlus) {
+    filtered = `+${filtered}`;
   }
+
   return filtered;
 }
 

@@ -24,6 +24,7 @@ import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Picker, Screen, Text, TextInput } from "@/ui";
 import { propagateCourseTeeToPlayers } from "@/utils/propagateCourseTee";
+import { reportError } from "@/utils/reportError";
 
 type Props = NativeStackScreenProps<
   GameSettingsStackParamList,
@@ -228,131 +229,144 @@ export function ManualCourseHoles({
 
     setIsSubmitting(true);
 
-    const group = round.$jazz.owner;
+    try {
+      const group = round.$jazz.owner;
 
-    // Build ratings
-    const rating = courseRating || (numHoles === 18 ? 72 : 36);
-    const slope = slopeRating || 113;
+      // Build ratings
+      const rating = courseRating || (numHoles === 18 ? 72 : 36);
+      const slope = slopeRating || 113;
 
-    const ratings = {
-      total: { rating, slope, bogey: 0 },
-      front: { rating: rating / 2, slope, bogey: 0 },
-      back: { rating: rating / 2, slope, bogey: 0 },
-    };
+      const ratings = {
+        total: { rating, slope, bogey: 0 },
+        front: { rating: rating / 2, slope, bogey: 0 },
+        back: { rating: rating / 2, slope, bogey: 0 },
+      };
 
-    const yardage = totalYardage || 0;
+      const yardage = totalYardage || 0;
 
-    // Check if we're editing an existing manual course
-    // Use $jazz.has() to safely check optional refs before accessing
-    const existingCourse =
-      round.$jazz.has("course") && round.course?.$isLoaded
-        ? round.course
-        : null;
-    const existingTeeObj =
-      round.$jazz.has("tee") && round.tee?.$isLoaded ? round.tee : null;
+      // Check if we're editing an existing manual course
+      // Use $jazz.has() to safely check optional refs before accessing
+      const existingCourse =
+        round.$jazz.has("course") && round.course?.$isLoaded
+          ? round.course
+          : null;
+      const existingTeeObj =
+        round.$jazz.has("tee") && round.tee?.$isLoaded ? round.tee : null;
 
-    if (
-      isEditMode &&
-      existingCourse &&
-      existingTeeObj &&
-      existingTeeObj.holes?.$isLoaded
-    ) {
-      // Update existing course
-      existingCourse.$jazz.set("name", courseName);
+      if (
+        isEditMode &&
+        existingCourse &&
+        existingTeeObj &&
+        existingTeeObj.holes?.$isLoaded
+      ) {
+        // Update existing course
+        existingCourse.$jazz.set("name", courseName);
 
-      // Update existing tee
-      existingTeeObj.$jazz.set("name", teeName);
-      existingTeeObj.$jazz.set("gender", teeGender);
-      existingTeeObj.$jazz.set("totalYardage", yardage);
-      existingTeeObj.$jazz.set(
-        "totalMeters",
-        yardage ? Math.round(yardage * 0.9144) : 0,
-      );
-      existingTeeObj.$jazz.set("ratings", ratings);
+        // Update existing tee
+        existingTeeObj.$jazz.set("name", teeName);
+        existingTeeObj.$jazz.set("gender", teeGender);
+        existingTeeObj.$jazz.set("totalYardage", yardage);
+        existingTeeObj.$jazz.set(
+          "totalMeters",
+          yardage ? Math.round(yardage * 0.9144) : 0,
+        );
+        existingTeeObj.$jazz.set("ratings", ratings);
 
-      // Update each hole
-      const existingHoles = existingTeeObj.holes;
-      for (let i = 0; i < holes.length; i++) {
-        const hole = existingHoles[i];
-        if (hole?.$isLoaded) {
-          hole.$jazz.set("par", holes[i].par);
-          hole.$jazz.set("handicap", holes[i].handicap);
+        // Update each hole
+        const existingHoles = existingTeeObj.holes;
+        for (let i = 0; i < holes.length; i++) {
+          const hole = existingHoles[i];
+          if (hole?.$isLoaded) {
+            hole.$jazz.set("par", holes[i].par);
+            hole.$jazz.set("handicap", holes[i].handicap);
+          }
+        }
+
+        // Propagate updates to other players
+        if (game?.$isLoaded && player?.$isLoaded) {
+          propagateCourseTeeToPlayers(
+            game,
+            existingCourse,
+            existingTeeObj,
+            player.$jazz.id,
+          );
+        }
+      } else {
+        // Create new course and tee
+        const courseId = `manual-${Date.now()}`;
+        const teeId = `manual-tee-${Date.now()}`;
+
+        // Create TeeHole objects
+        const teeHoles: TeeHole[] = holes.map((hole, i) =>
+          TeeHole.create(
+            {
+              id: `${teeId}-hole-${i + 1}`,
+              number: i + 1,
+              par: hole.par,
+              yards: 0,
+              meters: 0,
+              handicap: hole.handicap,
+            },
+            { owner: group },
+          ),
+        );
+
+        // Create Tee
+        const tee = TeeSchema.create(
+          {
+            id: teeId,
+            name: teeName,
+            gender: teeGender,
+            holes: ListOfTeeHoles.create(teeHoles, { owner: group }),
+            holesCount: numHoles,
+            totalYardage: yardage,
+            totalMeters: yardage ? Math.round(yardage * 0.9144) : 0,
+            ratings,
+          },
+          { owner: group },
+        );
+
+        // Create Course
+        const course = CourseSchema.create(
+          {
+            id: courseId,
+            status: "active",
+            name: courseName,
+            city: "",
+            state: "",
+            season: { all_year: true },
+            default_tee: CourseDefaultTee.create({}, { owner: group }),
+            tees: ListOfTees.create([tee], { owner: group }),
+          },
+          { owner: group },
+        );
+
+        // Set on round
+        round.$jazz.set("course", course);
+        round.$jazz.set("tee", tee);
+
+        // Propagate to other players
+        if (game?.$isLoaded && player?.$isLoaded) {
+          propagateCourseTeeToPlayers(game, course, tee, player.$jazz.id);
         }
       }
 
-      // Propagate updates to other players
-      if (game?.$isLoaded && player?.$isLoaded) {
-        propagateCourseTeeToPlayers(
-          game,
-          existingCourse,
-          existingTeeObj,
-          player.$jazz.id,
-        );
-      }
-    } else {
-      // Create new course and tee
-      const courseId = `manual-${Date.now()}`;
-      const teeId = `manual-tee-${Date.now()}`;
-
-      // Create TeeHole objects
-      const teeHoles: TeeHole[] = holes.map((hole, i) =>
-        TeeHole.create(
-          {
-            id: `${teeId}-hole-${i + 1}`,
-            number: i + 1,
-            par: hole.par,
-            yards: 0,
-            meters: 0,
-            handicap: hole.handicap,
-          },
-          { owner: group },
-        ),
-      );
-
-      // Create Tee
-      const tee = TeeSchema.create(
-        {
-          id: teeId,
-          name: teeName,
-          gender: teeGender,
-          holes: ListOfTeeHoles.create(teeHoles, { owner: group }),
-          holesCount: numHoles,
-          totalYardage: yardage,
-          totalMeters: yardage ? Math.round(yardage * 0.9144) : 0,
-          ratings,
+      // Navigate back to game settings tabs (pop both ManualCourseHoles and SelectCourseNavigator)
+      navigation.popToTop();
+    } catch (error) {
+      reportError(error as Error, {
+        source: "ManualCourseHoles.handleSave",
+        context: {
+          roundId,
+          playerId,
+          isEditMode,
+          courseName,
+          teeName,
         },
-        { owner: group },
-      );
-
-      // Create Course
-      const course = CourseSchema.create(
-        {
-          id: courseId,
-          status: "active",
-          name: courseName,
-          city: "",
-          state: "",
-          season: { all_year: true },
-          default_tee: CourseDefaultTee.create({}, { owner: group }),
-          tees: ListOfTees.create([tee], { owner: group }),
-        },
-        { owner: group },
-      );
-
-      // Set on round
-      round.$jazz.set("course", course);
-      round.$jazz.set("tee", tee);
-
-      // Propagate to other players
-      if (game?.$isLoaded && player?.$isLoaded) {
-        propagateCourseTeeToPlayers(game, course, tee, player.$jazz.id);
-      }
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
-
-    // Navigate back to game settings tabs (pop both ManualCourseHoles and SelectCourseNavigator)
-    navigation.popToTop();
   }, [
     round,
     holes,
@@ -367,6 +381,8 @@ export function ManualCourseHoles({
     player,
     navigation,
     isEditMode,
+    playerId,
+    roundId,
   ]);
 
   // Determine loading vs error states
