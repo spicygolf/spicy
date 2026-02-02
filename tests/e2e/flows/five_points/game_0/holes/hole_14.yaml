@@ -1,0 +1,59 @@
+# Hole 14
+# Scores: p1=4, p2=5, p3=5, p4=4
+# Multipliers: t1:double t2:double
+
+appId: golf.spicy
+---
+
+- runFlow:
+      when:
+          notVisible:
+              text: "Hole 14"
+      commands:
+        - swipe:
+              direction: "LEFT"
+              duration: 300
+        - waitForAnimationToEnd:
+              timeout: 1000
+
+- extendedWaitUntil:
+      visible: "Hole 14"
+      timeout: 5000
+
+- tapOn:
+      id: "player-p1-score"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- tapOn:
+      id: "player-p2-increment"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- tapOn:
+      id: "player-p3-increment"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- tapOn:
+      id: "player-p4-score"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- tapOn:
+      id: "multiplier-double-1"
+
+- waitForAnimationToEnd:
+      timeout: 300
+
+- tapOn:
+      id: "multiplier-double-2"
+
+- waitForAnimationToEnd:
+      timeout: 300
+
+- takeScreenshot: "hole_14_complete"

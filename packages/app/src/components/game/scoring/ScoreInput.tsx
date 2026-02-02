@@ -17,6 +17,8 @@ interface ScoreInputProps {
   onUnscore?: () => void;
   readonly?: boolean;
   size?: ScoreInputSize;
+  /** Player ID for testID generation (e2e testing) */
+  playerId?: string;
 }
 
 // Base dimensions at scale 1.0
@@ -83,6 +85,7 @@ export function ScoreInput({
   onUnscore,
   readonly = false,
   size = "md",
+  playerId,
 }: ScoreInputProps) {
   const { theme } = useUnistyles();
   const dim = getScaledDimensions(size);
@@ -246,6 +249,7 @@ export function ScoreInput({
           onPress={handleDecrement}
           disabled={readonly || (gross !== null && gross <= 1)}
           accessibilityLabel="Decrease score"
+          testID={playerId ? `player-${playerId}-decrement` : undefined}
         >
           <FontAwesome6
             name="minus"
@@ -267,6 +271,7 @@ export function ScoreInput({
           disabled={readonly}
           activeOpacity={0.6}
           accessibilityLabel={`Score: ${displayGross}${showNet ? ` net ${displayNet}` : ""}`}
+          testID={playerId ? `player-${playerId}-score` : undefined}
         >
           {/* Fixed height container to prevent vertical shifting */}
           <View
@@ -346,6 +351,7 @@ export function ScoreInput({
           onPress={handleIncrement}
           disabled={readonly || (gross !== null && gross >= 12)}
           accessibilityLabel="Increase score"
+          testID={playerId ? `player-${playerId}-increment` : undefined}
         >
           <FontAwesome6
             name="plus"

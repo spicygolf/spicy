@@ -8,6 +8,19 @@ mkdir -p "$OUTPUT_DIR"
 DERIVED_DATA_PATH="$HOME/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e"
 APP_PATH="$DERIVED_DATA_PATH/Build/Products/Debug-iphonesimulator/spicygolf.app"
 
+# Load environment variables (platform-specific passphrases)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../.env" ]; then
+  source "$SCRIPT_DIR/../.env"
+fi
+
+# Use iOS-specific passphrase
+TEST_PASSPHRASE="${TEST_PASSPHRASE_IOS:-$TEST_PASSPHRASE}"
+if [ -z "$TEST_PASSPHRASE" ]; then
+  echo "Error: TEST_PASSPHRASE_IOS not set. Please set it in tests/e2e/.env"
+  exit 1
+fi
+
 # Cleanup function to kill Metro on exit
 cleanup() {
   echo "Cleaning up..."
@@ -53,9 +66,8 @@ export MAESTRO_CLI_NO_ANALYTICS=1
 export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
 
 echo "Running End-to-End tests on iOS..."
-# Run each flow in subdirectories (Maestro doesn't recurse by default)
 maestro test \
-  tests/e2e/flows/five_points/basic_game.yaml \
+  tests/e2e/flows/five_points/game_0/main.yaml \
   --config tests/e2e/.maestro/config.yml \
   --env PLATFORM=ios \
   --env TEST_PASSPHRASE="$TEST_PASSPHRASE" \

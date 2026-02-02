@@ -1,0 +1,46 @@
+# Hole 7
+# Scores: p1=3, p2=4, p3=3, p4=4
+
+appId: golf.spicy
+---
+
+- runFlow:
+      when:
+          notVisible:
+              text: "Hole 7"
+      commands:
+        - swipe:
+              direction: "LEFT"
+              duration: 300
+        - waitForAnimationToEnd:
+              timeout: 1000
+
+- extendedWaitUntil:
+      visible: "Hole 7"
+      timeout: 5000
+
+- tapOn:
+      id: "player-p1-score"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- tapOn:
+      id: "player-p2-increment"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- tapOn:
+      id: "player-p3-score"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- tapOn:
+      id: "player-p4-increment"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- takeScreenshot: "hole_7_complete"

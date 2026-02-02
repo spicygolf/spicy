@@ -4,6 +4,8 @@ import { Text } from "@/ui";
 import { type OptionButton, OptionsButtons } from "./OptionsButtons";
 
 interface TeamFooterProps {
+  /** Team ID for testID generation (e2e testing) */
+  teamId?: string;
   /** Team junk badges (read-only calculated junk like low_ball, low_total) */
   teamJunkOptions?: OptionButton[];
   /** Multiplier press buttons (user-toggleable) */
@@ -23,6 +25,7 @@ interface TeamFooterProps {
 }
 
 export function TeamFooter({
+  teamId,
   teamJunkOptions = [],
   multiplierOptions = [],
   earnedMultipliers = [],
@@ -88,7 +91,10 @@ export function TeamFooter({
 
         {/* Right: Running differential */}
         <View style={styles.runningDiffSection}>
-          <Text style={styles.runningDiffValue}>
+          <Text
+            style={styles.runningDiffValue}
+            testID={teamId ? `team-${teamId}-points` : undefined}
+          >
             {runningDiff > 0 ? "+" : ""}
             {runningDiff}
           </Text>

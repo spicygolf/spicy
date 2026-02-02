@@ -67,6 +67,7 @@ export function DeleteGameButton() {
         style={styles.deleteButton}
         onPress={() => setShowModal(true)}
         disabled={!canDelete}
+        testID="delete-game-button"
       >
         <View style={styles.deleteButtonLeft}>
           <FontAwesome6
@@ -94,10 +95,12 @@ export function DeleteGameButton() {
         <Pressable
           style={styles.modalOverlay}
           onPress={() => setShowModal(false)}
+          accessible={false}
         >
           <Pressable
             style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
+            accessible={false}
           >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Delete Game</Text>
@@ -147,10 +150,16 @@ export function DeleteGameButton() {
               <Pressable
                 style={styles.cancelButton}
                 onPress={() => setShowModal(false)}
+                testID="delete-game-cancel"
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </Pressable>
-              <Pressable style={styles.confirmButton} onPress={handleDelete}>
+              <Pressable
+                style={styles.confirmButton}
+                onPress={handleDelete}
+                testID="delete-game-confirm"
+                accessible={true}
+              >
                 <Text style={styles.confirmButtonText}>Delete</Text>
               </Pressable>
             </View>

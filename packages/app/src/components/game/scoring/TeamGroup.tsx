@@ -6,6 +6,8 @@ import type { OptionButton } from "./OptionsButtons";
 import { TeamFooter } from "./TeamFooter";
 
 interface TeamGroupProps {
+  /** Team ID for testID generation (e2e testing) */
+  teamId?: string;
   teamName?: string;
   /** Team junk badges (read-only calculated junk like low_ball, low_total) */
   teamJunkOptions?: OptionButton[];
@@ -27,6 +29,7 @@ interface TeamGroupProps {
 }
 
 export function TeamGroup({
+  teamId,
   teamName,
   teamJunkOptions = [],
   multiplierOptions = [],
@@ -52,6 +55,7 @@ export function TeamGroup({
 
       {/* Footer - team junk, multipliers, hole math, running diff */}
       <TeamFooter
+        teamId={teamId}
         teamJunkOptions={teamJunkOptions}
         multiplierOptions={multiplierOptions}
         earnedMultipliers={earnedMultipliers}

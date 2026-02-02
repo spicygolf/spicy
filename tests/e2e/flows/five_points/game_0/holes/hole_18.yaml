@@ -1,0 +1,72 @@
+# Hole 18
+# Scores: p1=4, p2=5, p3=4, p4=5
+# Junk: birdie:p1 birdie:p3
+# Multipliers: t1:double t2:double_back
+
+appId: golf.spicy
+---
+
+- runFlow:
+      when:
+          notVisible:
+              text: "Hole 18"
+      commands:
+        - swipe:
+              direction: "LEFT"
+              duration: 300
+        - waitForAnimationToEnd:
+              timeout: 1000
+
+- extendedWaitUntil:
+      visible: "Hole 18"
+      timeout: 5000
+
+- tapOn:
+      id: "player-p1-decrement"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- tapOn:
+      id: "player-p2-score"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- tapOn:
+      id: "player-p3-decrement"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- tapOn:
+      id: "player-p4-score"
+
+- waitForAnimationToEnd:
+      timeout: 500
+
+- tapOn:
+      id: "junk-birdie-p1"
+
+- waitForAnimationToEnd:
+      timeout: 300
+
+- tapOn:
+      id: "junk-birdie-p3"
+
+- waitForAnimationToEnd:
+      timeout: 300
+
+- tapOn:
+      id: "multiplier-double-1"
+
+- waitForAnimationToEnd:
+      timeout: 300
+
+- tapOn:
+      id: "multiplier-double_back-2"
+
+- waitForAnimationToEnd:
+      timeout: 300
+
+- takeScreenshot: "hole_18_complete"

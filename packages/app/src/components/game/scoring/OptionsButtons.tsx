@@ -43,6 +43,11 @@ export interface OptionButton {
    * Earned multipliers are displayed as badges and cannot be toggled.
    */
   earned?: boolean;
+  /**
+   * ID for testID generation (e2e testing).
+   * For player junk: player ID. For team multipliers: team ID.
+   */
+  ownerId?: string;
 }
 
 interface OptionsButtonsProps {
@@ -185,6 +190,11 @@ export function OptionsButtons({
         const fontSize = isBadge ? dim.badgeFontSize : dim.buttonFontSize;
         const iconSize = isBadge ? dim.badgeIconSize : dim.buttonIconSize;
 
+        // Generate testID: junk-{name}-{ownerId} or multiplier-{name}-{ownerId}
+        const testID = option.ownerId
+          ? `${option.type}-${option.name}-${option.ownerId}`
+          : undefined;
+
         return (
           <TouchableOpacity
             key={option.name}
@@ -196,6 +206,7 @@ export function OptionsButtons({
             ]}
             onPress={() => onOptionPress(option.name)}
             disabled={isDisabled}
+            testID={testID}
             accessibilityLabel={[
               option.displayName,
               showPoints &&

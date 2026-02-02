@@ -161,7 +161,7 @@ jobs:
         id: test_ios
         run: ./tests/e2e/scripts/test-ios.sh
         env:
-          TEST_PASSPHRASE: ${{ secrets.E2E_TEST_PASSPHRASE }}
+          TEST_PASSPHRASE: ${{ secrets.E2E_TEST_PASSPHRASE_IOS }}
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
@@ -333,7 +333,7 @@ jobs:
           disable-animations: true
           script: ./tests/e2e/scripts/test-android.sh
         env:
-          TEST_PASSPHRASE: ${{ secrets.E2E_TEST_PASSPHRASE }}
+          TEST_PASSPHRASE: ${{ secrets.E2E_TEST_PASSPHRASE_ANDROID }}
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4

@@ -1,0 +1,98 @@
+# Cleanup leftover games from previous test runs
+# Run this before test suites to ensure a clean state
+#
+# This flow:
+# 1. Logs in to the test account
+# 2. Iterates through any existing games
+# 3. Deletes each game via the settings icon
+#
+# Usage: Run with `|| true` so failures don't block tests
+#   maestro test cleanup_games.yaml || true
+
+appId: golf.spicy
+---
+# Launch fresh
+- launchApp:
+    clearState: true
+
+# Wait for app to initialize
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Wait for auth screen
+- extendedWaitUntil:
+    visible: "Spicy Golf"
+    timeout: 10000
+
+# Log in with test passphrase
+- tapOn:
+    id: "login-button"
+- tapOn:
+    text: "(?i)Enter your passphrase"
+- inputText: "${TEST_PASSPHRASE}"
+- hideKeyboard
+- tapOn:
+    id: "login-submit-button"
+
+# Wait for home screen
+- extendedWaitUntil:
+    visible: "New Game"
+    timeout: 15000
+
+# Take screenshot to see initial state
+- takeScreenshot: cleanup_before
+
+# Try to delete games if any exist
+# We repeat up to 10 times to handle multiple games
+- repeat:
+    times: 10
+    commands:
+      # Check if a game exists and delete it
+      - runFlow:
+          when:
+            visible:
+              id: "game-list-item"
+          commands:
+            # Tap settings icon directly (faster than opening game first)
+            - tapOn:
+                id: "game-list-item-settings"
+                index: 0
+
+            # Wait for settings screen
+            - waitForAnimationToEnd:
+                timeout: 3000
+
+            # Tap Options tab (Delete Game is there)
+            - tapOn: "Options"
+
+            - waitForAnimationToEnd:
+                timeout: 1000
+
+            # Scroll to find Delete Game button
+            - scrollUntilVisible:
+                element:
+                  id: "delete-game-button"
+                direction: DOWN
+                timeout: 5000
+
+            # Tap Delete Game
+            - tapOn:
+                id: "delete-game-button"
+
+            # Confirm deletion in modal
+            - waitForAnimationToEnd:
+                timeout: 1000
+            - tapOn:
+                id: "delete-game-confirm"
+
+            # Wait for navigation back to games list
+            - extendedWaitUntil:
+                visible: "New Game"
+                timeout: 5000
+
+            # Small delay before checking for more games
+            - waitForAnimationToEnd:
+                timeout: 1000
+
+# Take screenshot to confirm cleanup
+- takeScreenshot: cleanup_after
