@@ -62,6 +62,12 @@ appId: golf.spicy
             - waitForAnimationToEnd:
                 timeout: 3000
 
+            # Tap Options tab (Delete Game is there)
+            - tapOn: "Options"
+
+            - waitForAnimationToEnd:
+                timeout: 1000
+
             # Scroll to find Delete Game button
             - scrollUntilVisible:
                 element:
