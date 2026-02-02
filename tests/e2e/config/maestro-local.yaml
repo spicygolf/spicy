@@ -1,0 +1,8 @@
+# Maestro configuration for local development
+# Screenshots and debug output go to /tmp/maestro-local/
+
+appId: golf.spicy
+
+# Local output directory for screenshots and logs
+output:
+  path: /tmp/maestro-local

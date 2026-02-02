@@ -107,6 +107,7 @@ export function GameListItem({ game }: { game: Game | null | undefined }) {
         onPress={handleSettingsPress}
         style={styles.actions}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        testID="game-list-item-settings"
       >
         <FontAwesome6 name="gear" size={18} color="#666" iconStyle="solid" />
       </TouchableOpacity>

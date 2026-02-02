@@ -7,7 +7,6 @@
 
 appId: golf.spicy
 ---
-
 # Take screenshot to see initial state
 - takeScreenshot: cleanup_before
 
@@ -22,17 +21,10 @@ appId: golf.spicy
             visible:
               id: "game-list-item"
           commands:
-            # Tap the first game to open it
+            # Tap settings icon directly (faster than opening game first)
             - tapOn:
-                id: "game-list-item"
+                id: "game-list-item-settings"
                 index: 0
-
-            # Wait for game to load
-            - waitForAnimationToEnd:
-                timeout: 5000
-
-            # Navigate to settings (gear icon or Settings tab)
-            - tapOn: "Settings"
 
             # Wait for settings screen
             - waitForAnimationToEnd:
@@ -54,7 +46,7 @@ appId: golf.spicy
                 timeout: 3000
             - tapOn:
                 text: "Delete"
-                index: 1  # Second "Delete" button (the confirm one)
+                index: 1 # Second "Delete" button (the confirm one)
 
             # Wait for navigation back to games list
             - extendedWaitUntil:
