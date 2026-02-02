@@ -1,0 +1,30 @@
+# Sub-flow: Login to test account
+# Expects: App launched with clearState
+# Provides: User logged in, "New Game" visible
+
+appId: golf.spicy
+---
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible: "Spicy Golf"
+    timeout: 10000
+
+- tapOn:
+    id: "login-button"
+
+- tapOn:
+    text: "(?i)Enter your passphrase"
+
+- inputText: "${TEST_PASSPHRASE}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible: "New Game"
+    timeout: 15000

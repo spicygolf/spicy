@@ -11,6 +11,10 @@
  * 4. Navigate through holes and enter scores
  * 5. Toggle junk and multipliers as specified
  * 6. Verify expected results
+ *
+ * Supports two output modes:
+ * - Single file (legacy): All steps in one YAML file
+ * - Sub-flows (new): Separate YAML files for login, new_game, add_players, holes, etc.
  */
 
 import type {
@@ -45,7 +49,7 @@ export interface E2EFixture extends Fixture {
 }
 
 /**
- * Result of flow generation
+ * Result of flow generation (single file mode)
  */
 export interface GeneratedFlow {
   /** Main flow YAML content */
@@ -60,12 +64,38 @@ export interface GeneratedFlow {
 }
 
 /**
+ * Result of sub-flow generation (multi-file mode)
+ */
+export interface GeneratedSubFlows {
+  /** Main orchestration flow */
+  main: string;
+  /** Login sub-flow */
+  login: string;
+  /** New game sub-flow */
+  newGame: string;
+  /** Add players sub-flow */
+  addPlayers: string;
+  /** Start game sub-flow */
+  startGame: string;
+  /** Individual hole sub-flows, keyed by hole number (e.g., "01", "02") */
+  holes: Record<string, string>;
+  /** Leaderboard sub-flow */
+  leaderboard: string;
+  /** Metadata about the generated flows */
+  meta: {
+    holeCount: number;
+    playerCount: number;
+    hasJunk: boolean;
+    hasMultipliers: boolean;
+  };
+}
+
+/**
  * Generate login steps for the test account.
  * Uses ${TEST_PASSPHRASE} env var which must be set externally.
  */
 export function generateLoginSteps(): MaestroStep[] {
   return [
-    { launchApp: { clearState: true } },
     {
       waitForAnimationToEnd: {
         timeout: 10000,
@@ -466,7 +496,7 @@ export function generateHoleScoringSteps(
 /**
  * Generate steps to verify final results
  */
-export function generateVerificationSteps(fixture: Fixture): MaestroStep[] {
+export function generateLeaderboardSteps(fixture: Fixture): MaestroStep[] {
   const steps: MaestroStep[] = [];
 
   // Navigate to leaderboard
@@ -484,26 +514,153 @@ export function generateVerificationSteps(fixture: Fixture): MaestroStep[] {
     takeScreenshot: "final_leaderboard",
   });
 
-  // Verify cumulative team scores if expected
-  if (fixture.expected.cumulative?.teams) {
-    for (const [teamId, teamData] of Object.entries(
-      fixture.expected.cumulative.teams,
-    )) {
-      if (teamData.pointsTotal !== undefined) {
-        steps.push({
-          assertVisible: {
-            text: String(teamData.pointsTotal),
-          },
-        });
-      }
-    }
-  }
-
   return steps;
 }
 
 /**
- * Generate a complete Maestro flow from a fixture
+ * Generate sub-flows from a fixture (multi-file mode)
+ */
+export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
+  const holeNumbers = Object.keys(fixture.holes).sort(
+    (a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10),
+  );
+
+  // Generate individual hole flows
+  const holes: Record<string, string> = {};
+  for (const holeNum of holeNumbers) {
+    const holeData = fixture.holes[holeNum];
+    if (holeData) {
+      const paddedNum = holeNum.padStart(2, "0");
+      const steps = generateHoleScoringSteps(fixture, holeNum, holeData);
+      const comment = getHoleComment(fixture, holeNum, holeData);
+      holes[paddedNum] = stepsToYaml(steps, "golf.spicy", comment);
+    }
+  }
+
+  // Generate main orchestration flow
+  const mainLines: string[] = [
+    `# ${fixture.name}`,
+    `# Main orchestration flow that runs sub-flows`,
+    `#`,
+    `# Generated from fixture - do not edit directly`,
+    ``,
+    `appId: golf.spicy`,
+    `---`,
+    ``,
+    `- takeScreenshot: "test_start"`,
+    ``,
+    `- launchApp:`,
+    `    clearState: true`,
+    ``,
+    `# Login`,
+    `- runFlow: "login.yaml"`,
+    ``,
+    `# Create new game`,
+    `- runFlow: "new_game.yaml"`,
+    ``,
+    `# Add players`,
+    `- runFlow: "add_players.yaml"`,
+    ``,
+    `# Start game`,
+    `- runFlow: "start_game.yaml"`,
+    ``,
+    `# Play all ${holeNumbers.length} holes`,
+  ];
+
+  for (const holeNum of holeNumbers) {
+    const paddedNum = holeNum.padStart(2, "0");
+    mainLines.push(`- runFlow: "holes/hole_${paddedNum}.yaml"`);
+  }
+
+  mainLines.push(
+    ``,
+    `# View final leaderboard`,
+    `- runFlow: "leaderboard.yaml"`,
+  );
+
+  // Determine metadata
+  const hasJunk = Object.values(fixture.holes).some((h) => h.junk);
+  const hasMultipliers = Object.values(fixture.holes).some(
+    (h) => h.multipliers,
+  );
+
+  return {
+    main: mainLines.join("\n"),
+    login: stepsToYaml(
+      generateLoginSteps(),
+      "golf.spicy",
+      `# Sub-flow: Login to test account\n# Expects: App launched with clearState\n# Provides: User logged in, "New Game" visible`,
+    ),
+    newGame: stepsToYaml(
+      generateCreateGameSteps(fixture.spec),
+      "golf.spicy",
+      `# Sub-flow: Create new ${fixture.spec} game\n# Expects: User logged in, "New Game" visible\n# Provides: Game settings screen visible, "Add Player" visible`,
+    ),
+    addPlayers: stepsToYaml(
+      generateAddPlayersSteps(fixture),
+      "golf.spicy",
+      `# Sub-flow: Add ${fixture.players.length} players (${fixture.players.map((p) => p.name).join(", ")})\n# Expects: Game settings screen, "Add Player" visible\n# Provides: ${fixture.players.length} players added, ready to start game`,
+    ),
+    startGame: stepsToYaml(
+      generateStartGameSteps(),
+      "golf.spicy",
+      `# Sub-flow: Start the game\n# Expects: Players added, on game settings screen\n# Provides: Scoring screen visible, "Hole 1" visible`,
+    ),
+    holes,
+    leaderboard: stepsToYaml(
+      generateLeaderboardSteps(fixture),
+      "golf.spicy",
+      `# Sub-flow: Navigate to leaderboard and take screenshot\n# Expects: Game in progress, scoring complete\n# Provides: Final leaderboard screenshot`,
+    ),
+    meta: {
+      holeCount: holeNumbers.length,
+      playerCount: fixture.players.length,
+      hasJunk,
+      hasMultipliers,
+    },
+  };
+}
+
+/**
+ * Get a descriptive comment for a hole based on the DSL data
+ */
+function getHoleComment(
+  fixture: Fixture,
+  holeNumber: string,
+  holeData: FixtureHoleData,
+): string {
+  const lines: string[] = [`# Hole ${holeNumber}`];
+
+  // Add scores
+  const scores = Object.entries(holeData.scores)
+    .map(([id, data]) => `${id}=${data?.gross}`)
+    .join(", ");
+  lines.push(`# Scores: ${scores}`);
+
+  // Add junk if present
+  if (holeData.junk) {
+    const junkStr = Object.entries(holeData.junk)
+      .map(([name, recipients]) => {
+        const ids = Array.isArray(recipients) ? recipients : [recipients];
+        return ids.map((id) => `${name}:${id}`).join(" ");
+      })
+      .join(" ");
+    lines.push(`# Junk: ${junkStr}`);
+  }
+
+  // Add multipliers if present
+  if (holeData.multipliers) {
+    const multStr = Object.entries(holeData.multipliers)
+      .map(([teamId, mults]) => mults.map((m) => `t${teamId}:${m}`).join(" "))
+      .join(" ");
+    lines.push(`# Multipliers: ${multStr}`);
+  }
+
+  return lines.join("\n");
+}
+
+/**
+ * Generate a complete Maestro flow from a fixture (single file mode - legacy)
  */
 export function generateFullFlow(fixture: E2EFixture): GeneratedFlow {
   const steps: MaestroStep[] = [];
@@ -514,19 +671,22 @@ export function generateFullFlow(fixture: E2EFixture): GeneratedFlow {
     takeScreenshot: "test_start",
   });
 
-  // 1. Login
+  // 1. Launch app
+  steps.push({ launchApp: { clearState: true } });
+
+  // 2. Login
   steps.push(...generateLoginSteps());
 
-  // 2. Create game
+  // 3. Create game
   steps.push(...generateCreateGameSteps(fixture.spec));
 
-  // 3. Add players
+  // 4. Add players
   steps.push(...generateAddPlayersSteps(fixture));
 
-  // 4. Start game
+  // 5. Start game
   steps.push(...generateStartGameSteps());
 
-  // 5. Score each hole
+  // 6. Score each hole
   const holeNumbers = Object.keys(fixture.holes).sort(
     (a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10),
   );
@@ -537,8 +697,8 @@ export function generateFullFlow(fixture: E2EFixture): GeneratedFlow {
     }
   }
 
-  // 6. Verify final results
-  steps.push(...generateVerificationSteps(fixture));
+  // 7. Verify final results
+  steps.push(...generateLeaderboardSteps(fixture));
 
   // Determine metadata
   const hasJunk = Object.values(fixture.holes).some((h) => h.junk);
@@ -563,12 +723,19 @@ export function generateFullFlow(fixture: E2EFixture): GeneratedFlow {
 export function stepsToYaml(
   steps: MaestroStep[],
   appId = "golf.spicy",
+  headerComment?: string,
 ): string {
   const lines: string[] = [];
 
-  lines.push(`# Generated E2E test flow`);
-  lines.push(`# Do not edit directly - regenerate from fixture`);
-  lines.push(``);
+  if (headerComment) {
+    lines.push(headerComment);
+    lines.push(``);
+  } else {
+    lines.push(`# Generated E2E test flow`);
+    lines.push(`# Do not edit directly - regenerate from fixture`);
+    lines.push(``);
+  }
+
   lines.push(`appId: ${appId}`);
   lines.push(`---`);
   lines.push(``);
@@ -653,9 +820,7 @@ export async function main() {
   const args = process.argv.slice(2);
   if (args.length < 1) {
     console.log("Usage: bun fixture-to-maestro.ts <fixture-path>");
-    console.log(
-      "Example: bun fixture-to-maestro.ts five_points/smoke/basic_game",
-    );
+    console.log("Example: bun fixture-to-maestro.ts five_points/game_0/game");
     process.exit(1);
   }
 

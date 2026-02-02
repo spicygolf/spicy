@@ -1,0 +1,59 @@
+# Hole 16: Par 3 - prox and birdie different players
+# Scores: p1=2, p2=4, p3=3, p4=4
+# Junk: birdie:p1 prox:p3
+
+appId: golf.spicy
+---
+
+- runFlow:
+    when:
+      notVisible:
+        text: "Hole 16"
+    commands:
+      - swipe:
+          direction: "LEFT"
+          duration: 300
+      - waitForAnimationToEnd:
+          timeout: 1000
+
+- extendedWaitUntil:
+    visible: "Hole 16"
+    timeout: 5000
+
+- tapOn:
+    id: "player-p1-decrement"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "player-p2-increment"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "player-p3-increment"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "player-p4-increment"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "junk-birdie-p1"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "junk-prox-p3"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- takeScreenshot: "hole_16_complete"

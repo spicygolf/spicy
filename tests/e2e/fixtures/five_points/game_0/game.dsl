@@ -1,10 +1,10 @@
-# Five Points - Full 18-Hole E2E Test
+# Five Points - Game 0 (18-Hole E2E Test)
 # Progressive complexity: basic scoring → junk → multipliers → stacking
 
-name: Five Points Full Game
+name: Five Points Game 0
 desc: Comprehensive E2E test covering scoring, junk, and multipliers
 spec: five_points
-priority: smoke
+priority: core
 tags: scoring junk multipliers full-game
 
 players: p1 Brad 10, p2 Scott 12, p3 Tim 8, p4 Eric 14

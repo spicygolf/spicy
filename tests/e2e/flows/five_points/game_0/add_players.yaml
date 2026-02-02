@@ -1,0 +1,102 @@
+# Sub-flow: Add 4 players (Brad, Scott, Tim, Eric)
+# Expects: Game settings screen, "Add Player" visible
+# Provides: 4 players added, ready to start game
+
+appId: golf.spicy
+---
+
+# Add first player (test account) using "Add Me"
+- tapOn: "Add Me"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Add Scott (guest)
+- tapOn: "Add Player"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- tapOn: "Add Guest"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- tapOn:
+    text: "(?i)name"
+
+- inputText: "Scott"
+
+- hideKeyboard
+
+- tapOn:
+    text: "(?i)handicap"
+
+- inputText: "12"
+
+- hideKeyboard
+
+- tapOn: "Done"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Add Tim (guest)
+- tapOn: "Add Player"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- tapOn: "Add Guest"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- tapOn:
+    text: "(?i)name"
+
+- inputText: "Tim"
+
+- hideKeyboard
+
+- tapOn:
+    text: "(?i)handicap"
+
+- inputText: "8"
+
+- hideKeyboard
+
+- tapOn: "Done"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Add Eric (guest)
+- tapOn: "Add Player"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- tapOn: "Add Guest"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- tapOn:
+    text: "(?i)name"
+
+- inputText: "Eric"
+
+- hideKeyboard
+
+- tapOn:
+    text: "(?i)handicap"
+
+- inputText: "14"
+
+- hideKeyboard
+
+- tapOn: "Done"
+
+- waitForAnimationToEnd:
+    timeout: 2000
