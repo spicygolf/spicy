@@ -67,6 +67,7 @@ export function DeleteGameButton() {
         style={styles.deleteButton}
         onPress={() => setShowModal(true)}
         disabled={!canDelete}
+        testID="delete-game-button"
       >
         <View style={styles.deleteButtonLeft}>
           <FontAwesome6
@@ -150,7 +151,11 @@ export function DeleteGameButton() {
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </Pressable>
-              <Pressable style={styles.confirmButton} onPress={handleDelete}>
+              <Pressable
+                style={styles.confirmButton}
+                onPress={handleDelete}
+                testID="delete-game-confirm"
+              >
                 <Text style={styles.confirmButtonText}>Delete</Text>
               </Pressable>
             </View>
