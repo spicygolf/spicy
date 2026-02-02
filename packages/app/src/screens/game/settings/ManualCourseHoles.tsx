@@ -202,9 +202,8 @@ export function ManualCourseHoles({
 
     setIsSubmitting(false);
 
-    // Navigate all the way back to game settings
-    // Pop twice: once from ManualCourseHoles, once from SelectCourseNavigator
-    navigation.getParent()?.getParent()?.goBack();
+    // Navigate back to game settings tabs (pop both ManualCourseHoles and SelectCourseNavigator)
+    navigation.popToTop();
   }, [
     round,
     holes,
