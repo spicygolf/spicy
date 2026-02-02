@@ -4,7 +4,6 @@
 
 appId: golf.spicy
 ---
-
 - tapOn: "New Game"
 
 - waitForAnimationToEnd:
@@ -23,6 +22,12 @@ appId: golf.spicy
 
 - tapOn:
     id: "spec-five-points"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Ensure we're on Players tab (app may remember last tab from previous game)
+- tapOn: "Players"
 
 - extendedWaitUntil:
     visible: "Add Player"
