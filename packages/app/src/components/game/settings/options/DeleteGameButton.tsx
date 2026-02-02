@@ -155,6 +155,7 @@ export function DeleteGameButton() {
                 style={styles.confirmButton}
                 onPress={handleDelete}
                 testID="delete-game-confirm"
+                accessibilityLabel="delete-game-confirm"
               >
                 <Text style={styles.confirmButtonText}>Delete</Text>
               </Pressable>
