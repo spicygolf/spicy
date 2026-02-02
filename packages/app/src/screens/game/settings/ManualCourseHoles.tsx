@@ -3,11 +3,12 @@
  *
  * Allows entry of par and handicap (allocation) for each hole.
  * Creates the Course and Tee Jazz objects on save.
+ * For 18 holes, displays front 9 and back 9 side by side.
  */
 
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
@@ -47,6 +48,41 @@ function filterIntegerInput(input: string): string {
   return input.replace(/[^\d]/g, "");
 }
 
+interface HoleRowProps {
+  holeNumber: number;
+  hole: HoleData;
+  onParChange: (par: number) => void;
+  onHandicapChange: (handicap: string) => void;
+}
+
+function HoleRow({
+  holeNumber,
+  hole,
+  onParChange,
+  onHandicapChange,
+}: HoleRowProps): React.ReactElement {
+  return (
+    <View style={styles.holeRow}>
+      <Text style={styles.holeNumber}>{holeNumber}</Text>
+      <View style={styles.parPicker}>
+        <Picker
+          title="Par"
+          items={PAR_OPTIONS}
+          selectedValue={hole.par.toString()}
+          onValueChange={(value) => onParChange(Number.parseInt(value, 10))}
+        />
+      </View>
+      <TextInput
+        value={hole.handicap.toString()}
+        onChangeText={(text) => onHandicapChange(filterIntegerInput(text))}
+        keyboardType="number-pad"
+        maxLength={2}
+        style={styles.hdcpInput}
+      />
+    </View>
+  );
+}
+
 export function ManualCourseHoles({
   route,
   navigation,
@@ -61,16 +97,18 @@ export function ManualCourseHoles({
     totalYardage,
     courseRating,
     slopeRating,
+    isEditMode = false,
   } = route.params;
 
   const { game } = useGame(undefined, {
     resolve: {
       players: { $each: { gender: true } },
-      rounds: { $each: { round: true } },
+      rounds: { $each: { round: { course: true, tee: { holes: true } } } },
     },
   });
 
   const numHoles = holesCount;
+  const is18Holes = numHoles === 18;
 
   // Initialize holes with default par 4 and sequential handicap
   const [holes, setHoles] = useState<HoleData[]>(() =>
@@ -80,6 +118,7 @@ export function ManualCourseHoles({
     })),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Find player from game
   const player = (() => {
@@ -100,6 +139,32 @@ export function ManualCourseHoles({
     );
     return rtg?.$isLoaded && rtg.round?.$isLoaded ? rtg.round : null;
   })();
+
+  // Initialize holes from existing tee data in edit mode
+  const existingTee = round?.tee;
+  useEffect(() => {
+    if (hasInitialized) return;
+    if (!isEditMode || !existingTee?.$isLoaded || !existingTee.holes?.$isLoaded)
+      return;
+
+    const existingHoles = existingTee.holes;
+    if (existingHoles.length > 0) {
+      const loadedHoles: HoleData[] = [];
+      for (let i = 0; i < numHoles; i++) {
+        const hole = existingHoles[i];
+        if (hole?.$isLoaded) {
+          loadedHoles.push({
+            par: hole.par || 4,
+            handicap: hole.handicap || i + 1,
+          });
+        } else {
+          loadedHoles.push({ par: 4, handicap: i + 1 });
+        }
+      }
+      setHoles(loadedHoles);
+    }
+    setHasInitialized(true);
+  }, [isEditMode, existingTee, numHoles, hasInitialized]);
 
   const updateHolePar = useCallback((index: number, par: number): void => {
     setHoles((prev) => {
@@ -130,25 +195,6 @@ export function ManualCourseHoles({
 
     const group = round.$jazz.owner;
 
-    // Generate unique IDs for manual entries
-    const courseId = `manual-${Date.now()}`;
-    const teeId = `manual-tee-${Date.now()}`;
-
-    // Create TeeHole objects
-    const teeHoles: TeeHole[] = holes.map((hole, i) =>
-      TeeHole.create(
-        {
-          id: `${teeId}-hole-${i + 1}`,
-          number: i + 1,
-          par: hole.par,
-          yards: 0,
-          meters: 0,
-          handicap: hole.handicap,
-        },
-        { owner: group },
-      ),
-    );
-
     // Build ratings
     const rating = courseRating || (numHoles === 18 ? 72 : 36);
     const slope = slopeRating || 113;
@@ -161,43 +207,106 @@ export function ManualCourseHoles({
 
     const yardage = totalYardage || 0;
 
-    // Create Tee
-    const tee = TeeSchema.create(
-      {
-        id: teeId,
-        name: teeName,
-        gender: teeGender,
-        holes: ListOfTeeHoles.create(teeHoles, { owner: group }),
-        holesCount: numHoles,
-        totalYardage: yardage,
-        totalMeters: yardage ? Math.round(yardage * 0.9144) : 0,
-        ratings,
-      },
-      { owner: group },
-    );
+    // Check if we're editing an existing manual course
+    const existingCourse = round.course;
+    const existingTeeObj = round.tee;
 
-    // Create Course
-    const course = CourseSchema.create(
-      {
-        id: courseId,
-        status: "active",
-        name: courseName,
-        city: "",
-        state: "",
-        season: { all_year: true },
-        default_tee: CourseDefaultTee.create({}, { owner: group }),
-        tees: ListOfTees.create([tee], { owner: group }),
-      },
-      { owner: group },
-    );
+    if (
+      isEditMode &&
+      existingCourse?.$isLoaded &&
+      existingTeeObj?.$isLoaded &&
+      existingTeeObj.holes?.$isLoaded
+    ) {
+      // Update existing course
+      existingCourse.$jazz.set("name", courseName);
 
-    // Set on round
-    round.$jazz.set("course", course);
-    round.$jazz.set("tee", tee);
+      // Update existing tee
+      existingTeeObj.$jazz.set("name", teeName);
+      existingTeeObj.$jazz.set("gender", teeGender);
+      existingTeeObj.$jazz.set("totalYardage", yardage);
+      existingTeeObj.$jazz.set(
+        "totalMeters",
+        yardage ? Math.round(yardage * 0.9144) : 0,
+      );
+      existingTeeObj.$jazz.set("ratings", ratings);
 
-    // Propagate to other players
-    if (game?.$isLoaded && player?.$isLoaded) {
-      propagateCourseTeeToPlayers(game, course, tee, player.$jazz.id);
+      // Update each hole
+      const existingHoles = existingTeeObj.holes;
+      for (let i = 0; i < holes.length; i++) {
+        const hole = existingHoles[i];
+        if (hole?.$isLoaded) {
+          hole.$jazz.set("par", holes[i].par);
+          hole.$jazz.set("handicap", holes[i].handicap);
+        }
+      }
+
+      // Propagate updates to other players
+      if (game?.$isLoaded && player?.$isLoaded) {
+        propagateCourseTeeToPlayers(
+          game,
+          existingCourse,
+          existingTeeObj,
+          player.$jazz.id,
+        );
+      }
+    } else {
+      // Create new course and tee
+      const courseId = `manual-${Date.now()}`;
+      const teeId = `manual-tee-${Date.now()}`;
+
+      // Create TeeHole objects
+      const teeHoles: TeeHole[] = holes.map((hole, i) =>
+        TeeHole.create(
+          {
+            id: `${teeId}-hole-${i + 1}`,
+            number: i + 1,
+            par: hole.par,
+            yards: 0,
+            meters: 0,
+            handicap: hole.handicap,
+          },
+          { owner: group },
+        ),
+      );
+
+      // Create Tee
+      const tee = TeeSchema.create(
+        {
+          id: teeId,
+          name: teeName,
+          gender: teeGender,
+          holes: ListOfTeeHoles.create(teeHoles, { owner: group }),
+          holesCount: numHoles,
+          totalYardage: yardage,
+          totalMeters: yardage ? Math.round(yardage * 0.9144) : 0,
+          ratings,
+        },
+        { owner: group },
+      );
+
+      // Create Course
+      const course = CourseSchema.create(
+        {
+          id: courseId,
+          status: "active",
+          name: courseName,
+          city: "",
+          state: "",
+          season: { all_year: true },
+          default_tee: CourseDefaultTee.create({}, { owner: group }),
+          tees: ListOfTees.create([tee], { owner: group }),
+        },
+        { owner: group },
+      );
+
+      // Set on round
+      round.$jazz.set("course", course);
+      round.$jazz.set("tee", tee);
+
+      // Propagate to other players
+      if (game?.$isLoaded && player?.$isLoaded) {
+        propagateCourseTeeToPlayers(game, course, tee, player.$jazz.id);
+      }
     }
 
     setIsSubmitting(false);
@@ -217,6 +326,7 @@ export function ManualCourseHoles({
     game,
     player,
     navigation,
+    isEditMode,
   ]);
 
   if (!player || !round) {
@@ -231,6 +341,10 @@ export function ManualCourseHoles({
 
   // Calculate total par
   const totalPar = holes.reduce((sum, h) => sum + h.par, 0);
+
+  // Split holes for side-by-side layout (18 holes only)
+  const frontNine = is18Holes ? holes.slice(0, 9) : holes;
+  const backNine = is18Holes ? holes.slice(9, 18) : [];
 
   return (
     <Screen>
@@ -254,44 +368,76 @@ export function ManualCourseHoles({
           </Text>
         </View>
 
-        <View style={styles.headerRow}>
-          <Text style={[styles.headerCell, styles.holeColumn]}>Hole</Text>
-          <Text style={[styles.headerCell, styles.parColumn]}>Par</Text>
-          <Text style={[styles.headerCell, styles.hdcpColumn]}>Hdcp</Text>
-        </View>
-
-        {holes.map((hole, index) => (
-          <View key={`hole-${index + 1}`} style={styles.holeRow}>
-            <Text style={[styles.holeNumber, styles.holeColumn]}>
-              {index + 1}
-            </Text>
-            <View style={styles.parColumn}>
-              <Picker
-                title="Par"
-                items={PAR_OPTIONS}
-                selectedValue={hole.par.toString()}
-                onValueChange={(value) =>
-                  updateHolePar(index, Number.parseInt(value, 10))
-                }
-              />
+        {is18Holes ? (
+          // Side-by-side layout for 18 holes
+          <View style={styles.twoColumnContainer}>
+            {/* Front 9 */}
+            <View style={styles.nineColumn}>
+              <Text style={styles.nineHeader}>Front 9</Text>
+              <View style={styles.columnHeaderRow}>
+                <Text style={styles.columnHeader}>#</Text>
+                <Text style={styles.columnHeader}>Par</Text>
+                <Text style={styles.columnHeader}>Hdcp</Text>
+              </View>
+              {frontNine.map((hole, index) => (
+                <HoleRow
+                  key={`front-${index + 1}`}
+                  holeNumber={index + 1}
+                  hole={hole}
+                  onParChange={(par) => updateHolePar(index, par)}
+                  onHandicapChange={(hcp) => updateHoleHandicap(index, hcp)}
+                />
+              ))}
             </View>
-            <View style={styles.hdcpColumn}>
-              <TextInput
-                value={hole.handicap.toString()}
-                onChangeText={(text) =>
-                  updateHoleHandicap(index, filterIntegerInput(text))
-                }
-                keyboardType="number-pad"
-                maxLength={2}
-                style={styles.hdcpInput}
-              />
+
+            {/* Back 9 */}
+            <View style={styles.nineColumn}>
+              <Text style={styles.nineHeader}>Back 9</Text>
+              <View style={styles.columnHeaderRow}>
+                <Text style={styles.columnHeader}>#</Text>
+                <Text style={styles.columnHeader}>Par</Text>
+                <Text style={styles.columnHeader}>Hdcp</Text>
+              </View>
+              {backNine.map((hole, index) => (
+                <HoleRow
+                  key={`back-${index + 10}`}
+                  holeNumber={index + 10}
+                  hole={hole}
+                  onParChange={(par) => updateHolePar(index + 9, par)}
+                  onHandicapChange={(hcp) => updateHoleHandicap(index + 9, hcp)}
+                />
+              ))}
             </View>
           </View>
-        ))}
+        ) : (
+          // Single column for 9 holes
+          <View style={styles.singleColumn}>
+            <View style={styles.columnHeaderRow}>
+              <Text style={styles.columnHeader}>#</Text>
+              <Text style={styles.columnHeader}>Par</Text>
+              <Text style={styles.columnHeader}>Hdcp</Text>
+            </View>
+            {holes.map((hole, index) => (
+              <HoleRow
+                key={`hole-${index + 1}`}
+                holeNumber={index + 1}
+                hole={hole}
+                onParChange={(par) => updateHolePar(index, par)}
+                onHandicapChange={(hcp) => updateHoleHandicap(index, hcp)}
+              />
+            ))}
+          </View>
+        )}
 
         <View style={styles.buttonContainer}>
           <Button
-            label={isSubmitting ? "Saving..." : "Save Course & Tee"}
+            label={
+              isSubmitting
+                ? "Saving..."
+                : isEditMode
+                  ? "Save Changes"
+                  : "Save Course & Tee"
+            }
             onPress={handleSave}
             disabled={isSubmitting}
           />
@@ -334,39 +480,54 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 14,
     color: theme.colors.secondary,
   },
-  headerRow: {
+  twoColumnContainer: {
     flexDirection: "row",
-    paddingVertical: theme.gap(1),
+    gap: theme.gap(2),
+  },
+  nineColumn: {
+    flex: 1,
+  },
+  singleColumn: {
+    flex: 1,
+  },
+  nineHeader: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: theme.gap(1),
+    textAlign: "center",
+  },
+  columnHeaderRow: {
+    flexDirection: "row",
+    paddingBottom: theme.gap(0.5),
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
-    marginBottom: theme.gap(1),
+    marginBottom: theme.gap(0.5),
   },
-  headerCell: {
-    fontSize: 12,
+  columnHeader: {
+    flex: 1,
+    fontSize: 11,
     fontWeight: "bold",
     color: theme.colors.secondary,
+    textAlign: "center",
   },
   holeRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: theme.gap(0.5),
-  },
-  holeColumn: {
-    width: 50,
-  },
-  parColumn: {
-    width: 80,
-    marginRight: theme.gap(2),
-  },
-  hdcpColumn: {
-    width: 60,
+    paddingVertical: theme.gap(0.25),
   },
   holeNumber: {
-    fontSize: 16,
+    flex: 1,
+    fontSize: 14,
     fontWeight: "bold",
+    textAlign: "center",
+  },
+  parPicker: {
+    flex: 1,
   },
   hdcpInput: {
+    flex: 1,
     textAlign: "center",
+    fontSize: 14,
   },
   buttonContainer: {
     marginTop: theme.gap(3),

@@ -1,6 +1,7 @@
 /**
  * Manual course/tee entry screen - Step 1: Basic course info.
  *
+ * Shows edit view if round already has a manual course, otherwise shows create form.
  * Collects course name, tee name, gender, holes, and optional ratings.
  * Navigates to ManualCourseHoles for per-hole par and handicap entry.
  */
@@ -9,13 +10,20 @@ import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-t
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useGame } from "@/hooks";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Picker, Screen, Text, TextInput } from "@/ui";
+
+/**
+ * Check if a course is manually created (has ID starting with "manual-")
+ */
+function isManualCourse(courseId: string | undefined): boolean {
+  return courseId?.startsWith("manual-") ?? false;
+}
 
 type Props = MaterialTopTabScreenProps<
   SelectCourseTabParamList,
@@ -61,7 +69,7 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
   const { game } = useGame(undefined, {
     resolve: {
       players: { $each: { gender: true } },
-      rounds: { $each: { round: true } },
+      rounds: { $each: { round: { course: true, tee: { holes: true } } } },
     },
   });
 
@@ -74,6 +82,8 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
   const [courseRating, setCourseRating] = useState("");
   const [slopeRating, setSlopeRating] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Find player from game
   const player = (() => {
@@ -94,6 +104,43 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
     );
     return rtg?.$isLoaded && rtg.round?.$isLoaded ? rtg.round : null;
   })();
+
+  // Check if round has a manual course and initialize edit mode
+  const existingCourse = round?.course;
+  const existingTee = round?.tee;
+  const hasManualCourse =
+    existingCourse?.$isLoaded && isManualCourse(existingCourse.id);
+
+  // Initialize form with existing data when in edit mode
+  useEffect(() => {
+    if (hasInitialized) return;
+    if (
+      !hasManualCourse ||
+      !existingCourse?.$isLoaded ||
+      !existingTee?.$isLoaded
+    )
+      return;
+
+    setIsEditMode(true);
+    setCourseName(existingCourse.name || "");
+    setTeeName(existingTee.name || "");
+    setTeeGender(existingTee.gender || "Mixed");
+    setHolesCount(existingTee.holesCount === 9 ? "9" : "18");
+    setTotalYardage(
+      existingTee.totalYardage ? String(existingTee.totalYardage) : "",
+    );
+    setCourseRating(
+      existingTee.ratings?.total?.rating
+        ? String(existingTee.ratings.total.rating)
+        : "",
+    );
+    setSlopeRating(
+      existingTee.ratings?.total?.slope
+        ? String(existingTee.ratings.total.slope)
+        : "",
+    );
+    setHasInitialized(true);
+  }, [hasManualCourse, existingCourse, existingTee, hasInitialized]);
 
   const validate = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
@@ -121,6 +168,19 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
     return Object.keys(newErrors).length === 0;
   }, [courseName, teeName, courseRating, slopeRating]);
 
+  const handleCreateNew = useCallback((): void => {
+    // Reset form to create a new course
+    setIsEditMode(false);
+    setCourseName("");
+    setTeeName("");
+    setTeeGender("Mixed");
+    setHolesCount("18");
+    setTotalYardage("");
+    setCourseRating("");
+    setSlopeRating("");
+    setErrors({});
+  }, []);
+
   const handleNext = useCallback((): void => {
     if (!roundId || !validate()) return;
 
@@ -144,6 +204,7 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
       totalYardage: yardage,
       courseRating: rating,
       slopeRating: slope,
+      isEditMode,
     });
   }, [
     roundId,
@@ -157,6 +218,7 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
     teeGender,
     playerId,
     stackNavigation,
+    isEditMode,
   ]);
 
   if (!player) {
@@ -187,6 +249,17 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
+        {isEditMode && (
+          <View style={styles.editModeHeader}>
+            <Text style={styles.editModeText}>Editing Manual Course</Text>
+            <Button
+              label="Create New Course"
+              onPress={handleCreateNew}
+              variant="secondary"
+            />
+          </View>
+        )}
+
         <View style={styles.field}>
           <Text style={styles.label}>Course Name</Text>
           <TextInput
@@ -280,12 +353,14 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
         </View>
 
         <Text style={styles.helperText}>
-          Next: Enter par and handicap for each hole.
+          {isEditMode
+            ? "Update the course details and hole information."
+            : "Next: Enter par and handicap for each hole."}
         </Text>
 
         <View style={styles.buttonContainer}>
           <Button
-            label="Next: Hole Details"
+            label={isEditMode ? "Edit Hole Details" : "Next: Hole Details"}
             onPress={handleNext}
             disabled={!isValid}
           />
@@ -304,6 +379,20 @@ const styles = StyleSheet.create((theme) => ({
   },
   scrollContent: {
     padding: theme.gap(2),
+  },
+  editModeHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.gap(2),
+    paddingBottom: theme.gap(2),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  editModeText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: theme.colors.primary,
   },
   field: {
     marginBottom: theme.gap(2),

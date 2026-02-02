@@ -33,6 +33,7 @@ export type GameSettingsStackParamList = {
     totalYardage: number;
     courseRating: number;
     slopeRating: number;
+    isEditMode?: boolean;
   };
 };
 
