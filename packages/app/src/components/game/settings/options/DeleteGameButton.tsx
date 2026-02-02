@@ -95,10 +95,12 @@ export function DeleteGameButton() {
         <Pressable
           style={styles.modalOverlay}
           onPress={() => setShowModal(false)}
+          accessible={false}
         >
           <Pressable
             style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
+            accessible={false}
           >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Delete Game</Text>
@@ -155,7 +157,7 @@ export function DeleteGameButton() {
                 style={styles.confirmButton}
                 onPress={handleDelete}
                 testID="delete-game-confirm"
-                accessibilityLabel="delete-game-confirm"
+                accessible={true}
               >
                 <Text style={styles.confirmButtonText}>Delete</Text>
               </Pressable>
