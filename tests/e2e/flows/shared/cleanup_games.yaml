@@ -79,12 +79,10 @@ appId: golf.spicy
             - tapOn:
                 id: "delete-game-button"
 
-            # Confirm deletion in modal
-            - extendedWaitUntil:
-                visible: "Are you sure you want to delete"
-                timeout: 3000
-            - tapOn:
-                id: "delete-game-confirm"
+            # Confirm deletion in modal (Modal content may not be in accessibility tree)
+            - waitForAnimationToEnd:
+                timeout: 2000
+            - tapOn: "Delete"
 
             # Wait for navigation back to games list
             - extendedWaitUntil:
