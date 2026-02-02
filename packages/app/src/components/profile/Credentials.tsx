@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Credentials component for displaying and editing user account info.
+ */
+
 import Clipboard from "@react-native-clipboard/clipboard";
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useAccount } from "jazz-tools/react-native";
@@ -7,11 +11,13 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { PlayerAccount } from "spicylib/schema";
 import { Text, TextInput } from "@/ui";
 
+/** Copy icon for clipboard actions. */
 const CopyIcon = () => {
   const { theme } = useUnistyles();
   return <FontAwesome6 name="copy" size={12} color={theme.colors.secondary} />;
 };
 
+/** Edit/pencil icon for inline editing. */
 const EditIcon = () => {
   const { theme } = useUnistyles();
   return (
@@ -24,6 +30,7 @@ const EditIcon = () => {
   );
 };
 
+/** Checkmark icon for confirming edits. */
 const CheckIcon = () => {
   const { theme } = useUnistyles();
   return (
@@ -36,6 +43,7 @@ const CheckIcon = () => {
   );
 };
 
+/** X icon for canceling edits. */
 const XIcon = () => {
   const { theme } = useUnistyles();
   return (
@@ -48,6 +56,10 @@ const XIcon = () => {
   );
 };
 
+/**
+ * Displays user credentials (login info, player name, account ID) with
+ * inline editing for the root player name and copy-to-clipboard for IDs.
+ */
 export function Credentials() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState("");
