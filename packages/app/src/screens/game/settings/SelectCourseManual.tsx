@@ -10,7 +10,7 @@ import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-t
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useGame } from "@/hooks";
@@ -83,7 +83,7 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
   const [slopeRating, setSlopeRating] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isEditMode, setIsEditMode] = useState(false);
-  const [hasInitialized, setHasInitialized] = useState(false);
+  const hasInitializedRef = useRef(false);
 
   // Find player from game
   const player = (() => {
@@ -106,14 +106,17 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
   })();
 
   // Check if round has a manual course and initialize edit mode
-  const existingCourse = round?.course;
-  const existingTee = round?.tee;
+  // Use $jazz.has() to safely check optional refs before accessing
+  const existingCourse =
+    round?.$isLoaded && round.$jazz.has("course") ? round.course : null;
+  const existingTee =
+    round?.$isLoaded && round.$jazz.has("tee") ? round.tee : null;
   const hasManualCourse =
     existingCourse?.$isLoaded && isManualCourse(existingCourse.id);
 
   // Initialize form with existing data when in edit mode
   useEffect(() => {
-    if (hasInitialized) return;
+    if (hasInitializedRef.current) return;
     if (
       !hasManualCourse ||
       !existingCourse?.$isLoaded ||
@@ -139,8 +142,8 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
         ? String(existingTee.ratings.total.slope)
         : "",
     );
-    setHasInitialized(true);
-  }, [hasManualCourse, existingCourse, existingTee, hasInitialized]);
+    hasInitializedRef.current = true;
+  }, [hasManualCourse, existingCourse, existingTee]);
 
   const validate = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};

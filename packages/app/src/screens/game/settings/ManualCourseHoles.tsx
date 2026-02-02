@@ -8,7 +8,7 @@
 
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
@@ -49,20 +49,32 @@ function filterIntegerInput(input: string): string {
 }
 
 /**
- * Find which handicap values appear more than once.
+ * Find which handicap values appear more than once or are out of range.
+ * For 9-hole courses, valid range is 1-9. For 18-hole courses, 1-18.
  */
-function findDuplicateHandicaps(holes: HoleData[]): Set<number> {
+function findInvalidHandicaps(
+  holes: HoleData[],
+  maxHandicap: number,
+): Set<number> {
   const counts = new Map<number, number>();
+  const invalid = new Set<number>();
+
   for (const hole of holes) {
+    // Check for out-of-range handicaps
+    if (hole.handicap < 1 || hole.handicap > maxHandicap) {
+      invalid.add(hole.handicap);
+    }
     counts.set(hole.handicap, (counts.get(hole.handicap) || 0) + 1);
   }
-  const duplicates = new Set<number>();
+
+  // Add duplicates to invalid set
   for (const [handicap, count] of counts) {
     if (count > 1) {
-      duplicates.add(handicap);
+      invalid.add(handicap);
     }
   }
-  return duplicates;
+
+  return invalid;
 }
 
 interface HoleRowProps {
@@ -138,7 +150,7 @@ export function ManualCourseHoles({
     })),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasInitialized, setHasInitialized] = useState(false);
+  const hasInitializedRef = useRef(false);
 
   // Find player from game
   const player = (() => {
@@ -161,9 +173,11 @@ export function ManualCourseHoles({
   })();
 
   // Initialize holes from existing tee data in edit mode
-  const existingTee = round?.tee;
+  // Use $jazz.has() to safely check optional refs before accessing
+  const existingTee =
+    round?.$isLoaded && round.$jazz.has("tee") ? round.tee : null;
   useEffect(() => {
-    if (hasInitialized) return;
+    if (hasInitializedRef.current) return;
     if (!isEditMode || !existingTee?.$isLoaded || !existingTee.holes?.$isLoaded)
       return;
 
@@ -183,8 +197,8 @@ export function ManualCourseHoles({
       }
       setHoles(loadedHoles);
     }
-    setHasInitialized(true);
-  }, [isEditMode, existingTee, numHoles, hasInitialized]);
+    hasInitializedRef.current = true;
+  }, [isEditMode, existingTee, numHoles]);
 
   const updateHolePar = useCallback((index: number, par: number): void => {
     setHoles((prev) => {
@@ -197,7 +211,8 @@ export function ManualCourseHoles({
   const updateHoleHandicap = useCallback(
     (index: number, handicapStr: string): void => {
       const handicap = handicapStr ? Number.parseInt(handicapStr, 10) : 1;
-      if (!Number.isNaN(handicap) && handicap >= 1 && handicap <= 18) {
+      // Allow values 1-numHoles (9 for 9-hole, 18 for 18-hole courses)
+      if (!Number.isNaN(handicap) && handicap >= 1 && handicap <= numHoles) {
         setHoles((prev) => {
           const updated = [...prev];
           updated[index] = { ...updated[index], handicap };
@@ -205,7 +220,7 @@ export function ManualCourseHoles({
         });
       }
     },
-    [],
+    [numHoles],
   );
 
   const handleSave = useCallback(async (): Promise<void> => {
@@ -228,13 +243,18 @@ export function ManualCourseHoles({
     const yardage = totalYardage || 0;
 
     // Check if we're editing an existing manual course
-    const existingCourse = round.course;
-    const existingTeeObj = round.tee;
+    // Use $jazz.has() to safely check optional refs before accessing
+    const existingCourse =
+      round.$jazz.has("course") && round.course?.$isLoaded
+        ? round.course
+        : null;
+    const existingTeeObj =
+      round.$jazz.has("tee") && round.tee?.$isLoaded ? round.tee : null;
 
     if (
       isEditMode &&
-      existingCourse?.$isLoaded &&
-      existingTeeObj?.$isLoaded &&
+      existingCourse &&
+      existingTeeObj &&
       existingTeeObj.holes?.$isLoaded
     ) {
       // Update existing course
@@ -349,7 +369,12 @@ export function ManualCourseHoles({
     isEditMode,
   ]);
 
-  if (!player || !round) {
+  // Determine loading vs error states
+  const isLoading = !game?.$isLoaded || !game.players?.$isLoaded;
+  const playerNotFound = !isLoading && !player;
+  const roundNotFound = !isLoading && !round;
+
+  if (isLoading) {
     return (
       <Screen>
         <View style={styles.centerContainer}>
@@ -359,12 +384,24 @@ export function ManualCourseHoles({
     );
   }
 
+  if (playerNotFound || roundNotFound) {
+    return (
+      <Screen>
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>
+            {playerNotFound ? "Player not found" : "Round not found"}
+          </Text>
+        </View>
+      </Screen>
+    );
+  }
+
   // Calculate total par
   const totalPar = holes.reduce((sum, h) => sum + h.par, 0);
 
-  // Find duplicate handicaps for validation
-  const duplicateHandicaps = findDuplicateHandicaps(holes);
-  const hasDuplicateHandicaps = duplicateHandicaps.size > 0;
+  // Find invalid handicaps (duplicates or out of range) for validation
+  const invalidHandicaps = findInvalidHandicaps(holes, numHoles);
+  const hasInvalidHandicaps = invalidHandicaps.size > 0;
 
   // Split holes for side-by-side layout (18 holes only)
   const frontNine = is18Holes ? holes.slice(0, 9) : holes;
@@ -410,7 +447,7 @@ export function ManualCourseHoles({
                   hole={hole}
                   onParChange={(par) => updateHolePar(index, par)}
                   onHandicapChange={(hcp) => updateHoleHandicap(index, hcp)}
-                  isDuplicate={duplicateHandicaps.has(hole.handicap)}
+                  isDuplicate={invalidHandicaps.has(hole.handicap)}
                 />
               ))}
             </View>
@@ -430,7 +467,7 @@ export function ManualCourseHoles({
                   hole={hole}
                   onParChange={(par) => updateHolePar(index + 9, par)}
                   onHandicapChange={(hcp) => updateHoleHandicap(index + 9, hcp)}
-                  isDuplicate={duplicateHandicaps.has(hole.handicap)}
+                  isDuplicate={invalidHandicaps.has(hole.handicap)}
                 />
               ))}
             </View>
@@ -450,13 +487,13 @@ export function ManualCourseHoles({
                 hole={hole}
                 onParChange={(par) => updateHolePar(index, par)}
                 onHandicapChange={(hcp) => updateHoleHandicap(index, hcp)}
-                isDuplicate={duplicateHandicaps.has(hole.handicap)}
+                isDuplicate={invalidHandicaps.has(hole.handicap)}
               />
             ))}
           </View>
         )}
 
-        {hasDuplicateHandicaps && (
+        {hasInvalidHandicaps && (
           <Text style={styles.errorText}>
             Each hole must have a unique handicap value (1-{numHoles}).
           </Text>
@@ -472,7 +509,7 @@ export function ManualCourseHoles({
                   : "Save Course & Tee"
             }
             onPress={handleSave}
-            disabled={isSubmitting || hasDuplicateHandicaps}
+            disabled={isSubmitting || hasInvalidHandicaps}
           />
         </View>
       </ScrollView>

@@ -24,8 +24,12 @@ interface TeeData {
 
 interface FavoriteTeeItemProps {
   item: MaybeLoaded<CourseTee>;
+  /** Drag handler for reorderable lists. If provided, enables drag-to-reorder. */
   drag?: () => void;
+  /** Whether the item is currently being dragged */
   isActive?: boolean;
+  /** Explicit flag to show drag handle. Defaults to true if `drag` is provided. */
+  isDraggable?: boolean;
   onPress: () => void;
   onRemove: () => void;
 }
@@ -34,6 +38,7 @@ export function FavoriteTeeItem({
   item,
   drag,
   isActive,
+  isDraggable: isDraggableProp,
   onPress,
   onRemove,
 }: FavoriteTeeItemProps) {
@@ -99,7 +104,8 @@ export function FavoriteTeeItem({
     return null;
   }
 
-  const isDraggable = !!drag;
+  // Default isDraggable to true if drag handler is provided
+  const isDraggable = isDraggableProp ?? !!drag;
 
   return (
     <TouchableOpacity
