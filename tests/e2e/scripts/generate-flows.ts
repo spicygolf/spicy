@@ -176,7 +176,7 @@ function generateSubFlowFiles(
         console.log(`  - start_game.yaml`);
         console.log(`  - leaderboard.yaml`);
         console.log(`  - holes/ (${Object.keys(flows.holes).length} files)`);
-        console.log(`  (uses shared/cleanup.yaml)`);
+        console.log(`  (uses shared/cleanup_deep.yaml)`);
       }
       return {
         success: true,

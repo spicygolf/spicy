@@ -632,7 +632,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     `- runFlow: "login.yaml"`,
     ``,
     `# Clean up any existing games`,
-    `- runFlow: "../../shared/cleanup.yaml"`,
+    `- runFlow: "../../shared/cleanup_deep.yaml"`,
     ``,
     `# Create new game`,
     `- runFlow: "new_game.yaml"`,
@@ -673,7 +673,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
       "golf.spicy",
       `# Sub-flow: Login to test account\n# Expects: App launched with clearState\n# Provides: User logged in, "New Game" visible`,
     ),
-    // Note: cleanup uses shared/cleanup.yaml, not generated per-game
+    // Note: cleanup uses shared/cleanup_deep.yaml, not generated per-game
     newGame: stepsToYaml(
       generateCreateGameSteps(fixture.spec),
       "golf.spicy",

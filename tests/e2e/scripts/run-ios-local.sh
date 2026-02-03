@@ -37,7 +37,7 @@ FLOW="${1:-main.yaml}"
 # Handle shortcuts
 case "$FLOW" in
   cleanup)
-    FLOW_PATH="$E2E_DIR/flows/shared/cleanup_games.yaml"
+    FLOW_PATH="$E2E_DIR/flows/shared/cleanup_deep.yaml"
     ;;
   login|login.yaml)
     FLOW_PATH="$E2E_DIR/flows/five_points/game_0/login.yaml"
