@@ -517,6 +517,7 @@ export function ManualCourseHoles({
 
         <View style={styles.buttonContainer}>
           <Button
+            testID="manual-course-save-button"
             label={
               isSubmitting
                 ? "Saving..."

@@ -42,6 +42,7 @@ export function AppNavigator() {
         options={{
           title: "Games",
           headerShown: false,
+          tabBarButtonTestID: "tab-games",
           tabBarIcon: ({ color }) => (
             <Ionicons size={28} name="golf" color={color} />
           ),
@@ -53,6 +54,7 @@ export function AppNavigator() {
         options={{
           title: "Profile",
           headerShown: false,
+          tabBarButtonTestID: "tab-profile",
           tabBarIcon: ({ color }) => (
             <View>
               <FontAwesome6

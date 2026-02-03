@@ -266,6 +266,7 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
         <View style={styles.field}>
           <Text style={styles.label}>Course Name</Text>
           <TextInput
+            testID="manual-course-name-input"
             value={courseName}
             onChangeText={setCourseName}
             placeholder="e.g., Pebble Beach"
@@ -280,6 +281,7 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
         <View style={styles.field}>
           <Text style={styles.label}>Tee Name</Text>
           <TextInput
+            testID="manual-course-tee-input"
             value={teeName}
             onChangeText={setTeeName}
             placeholder="e.g., Blue, White, Red"
@@ -363,6 +365,7 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
 
         <View style={styles.buttonContainer}>
           <Button
+            testID="manual-course-next-button"
             label={isEditMode ? "Edit Hole Details" : "Next: Hole Details"}
             onPress={handleNext}
             disabled={!isValid}
