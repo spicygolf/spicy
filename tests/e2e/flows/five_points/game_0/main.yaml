@@ -5,6 +5,7 @@
 
 appId: golf.spicy
 ---
+
 - takeScreenshot: "test_start"
 
 - launchApp:
@@ -13,13 +14,13 @@ appId: golf.spicy
 # Login
 - runFlow: "login.yaml"
 
-# Clean up any existing games (deep cleanup to minimize Jazz orphans)
+# Clean up any existing games
 - runFlow: "../../shared/cleanup_deep.yaml"
 
 # Create new game
 - runFlow: "new_game.yaml"
 
-# Add guest players (logged-in player already added) and select course/tee
+# Add guest players (logged-in player already added)
 - runFlow: "add_players.yaml"
 
 # Start game
@@ -48,5 +49,5 @@ appId: golf.spicy
 # View final leaderboard
 - runFlow: "leaderboard.yaml"
 
-# Clean up at end of test (leave account clean for next run)
+# Clean up test data
 - runFlow: "../../shared/cleanup_deep.yaml"

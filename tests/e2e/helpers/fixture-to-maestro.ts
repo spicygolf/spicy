@@ -273,12 +273,13 @@ export function generateCleanupSteps(): MaestroStep[] {
 /**
  * Generate steps to add players from a fixture.
  * The logged-in player is added automatically, so we only add guests.
+ * Uses the Manual tab with testIDs for reliable E2E testing.
  */
 export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
   const steps: MaestroStep[] = [];
 
   // Logged-in player is added automatically, so start from index 1
-  // For additional players, use "Add Guest" with their names
+  // For additional players, use the Manual tab
   for (let i = 1; i < fixture.players.length; i++) {
     const player = fixture.players[i];
     steps.push(
@@ -288,35 +289,41 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
           timeout: 2000,
         },
       },
-      // Tap "Add Guest" option
-      { tapOn: "Add Guest" },
+      // Tap "Manual" tab
+      { tapOn: "Manual" },
       {
         waitForAnimationToEnd: {
-          timeout: 2000,
+          timeout: 1000,
         },
       },
       // Enter player name
       {
         tapOn: {
-          text: "(?i)name",
+          id: "manual-player-name-input",
         },
       },
       { inputText: player.name },
+      // Enter short name (same as name)
+      {
+        tapOn: {
+          id: "manual-player-short-input",
+        },
+      },
+      { inputText: player.name },
+      // Enter handicap
+      {
+        tapOn: {
+          id: "manual-player-handicap-input",
+        },
+      },
+      { inputText: String(player.handicapIndex) },
       { hideKeyboard: true },
-      // Enter handicap if provided
-      ...(player.handicapIndex > 0
-        ? [
-            {
-              tapOn: {
-                text: "(?i)handicap",
-              },
-            },
-            { inputText: String(player.handicapIndex) },
-            { hideKeyboard: true },
-          ]
-        : []),
-      // Confirm/save the guest
-      { tapOn: "Done" },
+      // Submit the player
+      {
+        tapOn: {
+          id: "manual-player-submit-button",
+        },
+      },
       {
         waitForAnimationToEnd: {
           timeout: 2000,
@@ -324,6 +331,62 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
       },
     );
   }
+
+  // After adding all players, select course/tee for the first player
+  // (will propagate to all players)
+  steps.push(
+    // Tap on "Select Course/Tee" for first player
+    { tapOn: "Select Course/Tee" },
+    {
+      waitForAnimationToEnd: {
+        timeout: 2000,
+      },
+    },
+    // Tap "Manual" tab for course entry
+    { tapOn: "Manual" },
+    {
+      waitForAnimationToEnd: {
+        timeout: 1000,
+      },
+    },
+    // Enter course name
+    {
+      tapOn: {
+        id: "manual-course-name-input",
+      },
+    },
+    { inputText: "Test Course" },
+    // Enter tee name
+    {
+      tapOn: {
+        id: "manual-course-tee-input",
+      },
+    },
+    { inputText: "Blue" },
+    { hideKeyboard: true },
+    // Tap Next to go to hole setup
+    {
+      tapOn: {
+        id: "manual-course-next-button",
+      },
+    },
+    {
+      waitForAnimationToEnd: {
+        timeout: 2000,
+      },
+    },
+    // On ManualCourseHoles screen - use defaults, just save
+    {
+      tapOn: {
+        id: "manual-course-save-button",
+      },
+    },
+    {
+      waitForAnimationToEnd: {
+        timeout: 3000,
+      },
+    },
+  );
 
   return steps;
 }
@@ -655,6 +718,9 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     ``,
     `# View final leaderboard`,
     `- runFlow: "leaderboard.yaml"`,
+    ``,
+    `# Clean up test data`,
+    `- runFlow: "../../shared/cleanup_deep.yaml"`,
   );
 
   // Determine metadata

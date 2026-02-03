@@ -1,154 +1,139 @@
-# Sub-flow: Add 3 guest players (Scott, Tim, Eric) and select course/tee
-# Expects: Game settings screen with Players tab, logged-in player already added automatically
-# Provides: 4 players total with course/tee selected, ready to start game
+# Sub-flow: Add 3 guest players (Scott, Tim, Eric)
+# Expects: Game settings screen, logged-in player already added automatically
+# Provides: 4 players total, ready to start game
 
 appId: golf.spicy
 ---
-# =============================================================================
-# Add Scott (HC 12)
-# =============================================================================
+
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+      timeout: 1000
 
 - tapOn:
-    id: "manual-player-name-input"
+      id: "manual-player-name-input"
 
 - inputText: "Scott"
 
 - tapOn:
-    id: "manual-player-short-input"
+      id: "manual-player-short-input"
 
 - inputText: "Scott"
 
 - tapOn:
-    id: "manual-player-handicap-input"
+      id: "manual-player-handicap-input"
 
 - inputText: "12"
 
 - hideKeyboard
 
 - tapOn:
-    id: "manual-player-submit-button"
+      id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
-# =============================================================================
-# Add Tim (HC 8)
-# =============================================================================
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+      timeout: 1000
 
 - tapOn:
-    id: "manual-player-name-input"
+      id: "manual-player-name-input"
 
 - inputText: "Tim"
 
 - tapOn:
-    id: "manual-player-short-input"
+      id: "manual-player-short-input"
 
 - inputText: "Tim"
 
 - tapOn:
-    id: "manual-player-handicap-input"
+      id: "manual-player-handicap-input"
 
 - inputText: "8"
 
 - hideKeyboard
 
 - tapOn:
-    id: "manual-player-submit-button"
+      id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
-# =============================================================================
-# Add Eric (HC 14)
-# =============================================================================
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+      timeout: 1000
 
 - tapOn:
-    id: "manual-player-name-input"
+      id: "manual-player-name-input"
 
 - inputText: "Eric"
 
 - tapOn:
-    id: "manual-player-short-input"
+      id: "manual-player-short-input"
 
 - inputText: "Eric"
 
 - tapOn:
-    id: "manual-player-handicap-input"
+      id: "manual-player-handicap-input"
 
 - inputText: "14"
 
 - hideKeyboard
 
 - tapOn:
-    id: "manual-player-submit-button"
+      id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
-# =============================================================================
-# Select Course/Tee (will propagate to all players)
-# Tap on any player row showing "Select Course/Tee"
-# =============================================================================
 - tapOn: "Select Course/Tee"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+      timeout: 1000
 
 - tapOn:
-    id: "manual-course-name-input"
+      id: "manual-course-name-input"
 
 - inputText: "Test Course"
 
 - tapOn:
-    id: "manual-course-tee-input"
+      id: "manual-course-tee-input"
 
 - inputText: "Blue"
 
 - hideKeyboard
 
 - tapOn:
-    id: "manual-course-next-button"
+      id: "manual-course-next-button"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+      timeout: 2000
 
-# On ManualCourseHoles screen - use defaults for par/handicap
 - tapOn:
-    id: "manual-course-save-button"
+      id: "manual-course-save-button"
 
 - waitForAnimationToEnd:
-    timeout: 3000
-
-- takeScreenshot: "add_players_complete"
+      timeout: 3000
