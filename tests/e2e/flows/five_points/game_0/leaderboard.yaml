@@ -3,6 +3,9 @@
 # Provides: Final leaderboard screenshot
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - tapOn: "Leaderboard"

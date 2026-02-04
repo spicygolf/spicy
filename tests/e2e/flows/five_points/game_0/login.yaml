@@ -3,6 +3,9 @@
 # Provides: User logged in, "New Game" visible
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - waitForAnimationToEnd:

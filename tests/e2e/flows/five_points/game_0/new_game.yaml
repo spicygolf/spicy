@@ -3,6 +3,9 @@
 # Provides: Game settings screen visible, "Add Player" visible
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - tapOn: "New Game"

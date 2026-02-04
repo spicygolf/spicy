@@ -3,123 +3,124 @@
 # Provides: 4 players total, ready for course/tee selection
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
-# === Add Player: Scott ===
+
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+      timeout: 1000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-    timeout: 500
+      timeout: 500
 
 - tapOn:
-    id: "manual-player-name-input"
+      id: "manual-player-name-input"
 
 - inputText: "Scott"
 
 - tapOn:
-    id: "manual-player-short-input"
+      id: "manual-player-short-input"
 
 - inputText: "Scott"
 
 - tapOn:
-    id: "manual-player-handicap-input"
+      id: "manual-player-handicap-input"
 
 - inputText: "4.1"
 
 - hideKeyboard
 
 - tapOn:
-    id: "manual-player-submit-button"
+      id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+      timeout: 1000
 
 - tapOn:
-    id: "nav-back-button"
+      id: "nav-back-button"
 
 - waitForAnimationToEnd:
-    timeout: 500
+      timeout: 500
 
-# === Add Player: Tim ===
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+      timeout: 1000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-    timeout: 500
+      timeout: 500
 
 - tapOn:
-    id: "manual-player-name-input"
+      id: "manual-player-name-input"
 
 - inputText: "Tim"
 
 - tapOn:
-    id: "manual-player-short-input"
+      id: "manual-player-short-input"
 
 - inputText: "Tim"
 
 - tapOn:
-    id: "manual-player-handicap-input"
+      id: "manual-player-handicap-input"
 
 - inputText: "+0.9"
 
 - hideKeyboard
 
 - tapOn:
-    id: "manual-player-submit-button"
+      id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+      timeout: 1000
 
 - tapOn:
-    id: "nav-back-button"
+      id: "nav-back-button"
 
 - waitForAnimationToEnd:
-    timeout: 500
+      timeout: 500
 
-# === Add Player: Eric ===
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+      timeout: 1000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-    timeout: 500
+      timeout: 500
 
 - tapOn:
-    id: "manual-player-name-input"
+      id: "manual-player-name-input"
 
 - inputText: "Eric"
 
 - tapOn:
-    id: "manual-player-short-input"
+      id: "manual-player-short-input"
 
 - inputText: "Eric"
 
 - tapOn:
-    id: "manual-player-handicap-input"
+      id: "manual-player-handicap-input"
 
 - inputText: "12.9"
 
 - hideKeyboard
 
 - tapOn:
-    id: "manual-player-submit-button"
+      id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+      timeout: 1000
 
 - tapOn:
-    id: "nav-back-button"
+      id: "nav-back-button"
 
 - waitForAnimationToEnd:
-    timeout: 500
+      timeout: 500

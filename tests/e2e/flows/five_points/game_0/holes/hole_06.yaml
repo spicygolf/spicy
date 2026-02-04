@@ -3,6 +3,9 @@
 # Junk: birdie:p3 prox:p3
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - runFlow:

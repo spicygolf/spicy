@@ -173,6 +173,7 @@ function generateSubFlowFiles(
         console.log(`  - login.yaml`);
         console.log(`  - new_game.yaml`);
         console.log(`  - add_players.yaml`);
+        console.log(`  - select_course_tee.yaml`);
         console.log(`  - start_game.yaml`);
         console.log(`  - leaderboard.yaml`);
         console.log(`  - holes/ (${Object.keys(flows.holes).length} files)`);
@@ -181,7 +182,7 @@ function generateSubFlowFiles(
       return {
         success: true,
         outputPath: outputDir,
-        fileCount: 6 + Object.keys(flows.holes).length,
+        fileCount: 7 + Object.keys(flows.holes).length,
       };
     }
 
@@ -200,6 +201,10 @@ function generateSubFlowFiles(
     writeFileSync(join(outputDir, "login.yaml"), flows.login);
     writeFileSync(join(outputDir, "new_game.yaml"), flows.newGame);
     writeFileSync(join(outputDir, "add_players.yaml"), flows.addPlayers);
+    writeFileSync(
+      join(outputDir, "select_course_tee.yaml"),
+      flows.selectCourseTee,
+    );
     writeFileSync(join(outputDir, "start_game.yaml"), flows.startGame);
     writeFileSync(join(outputDir, "leaderboard.yaml"), flows.leaderboard);
 
@@ -208,7 +213,7 @@ function generateSubFlowFiles(
       writeFileSync(join(holesDir, `hole_${holeNum}.yaml`), yaml);
     }
 
-    const fileCount = 6 + Object.keys(flows.holes).length;
+    const fileCount = 7 + Object.keys(flows.holes).length;
 
     if (options.verbose) {
       console.log(`Generated ${fileCount} files in: ${outputDir}`);

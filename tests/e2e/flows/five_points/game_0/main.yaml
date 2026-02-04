@@ -9,6 +9,7 @@ platform:
   ios:
     snapshotKeyHonorModalViews: false
 ---
+
 - takeScreenshot: "test_start"
 
 - launchApp:

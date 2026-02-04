@@ -3,6 +3,9 @@
 # Multipliers: t2:double
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - runFlow:

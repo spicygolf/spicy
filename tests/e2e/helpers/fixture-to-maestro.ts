@@ -75,6 +75,8 @@ export interface GeneratedSubFlows {
   newGame: string;
   /** Add players sub-flow */
   addPlayers: string;
+  /** Select course and tee sub-flow (manual entry) */
+  selectCourseTee: string;
   /** Start game sub-flow */
   startGame: string;
   /** Individual hole sub-flows, keyed by hole number (e.g., "01", "02") */
@@ -286,14 +288,14 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
       { tapOn: "Add Player" },
       {
         waitForAnimationToEnd: {
-          timeout: 2000,
+          timeout: 1000,
         },
       },
       // Tap "Manual" tab
       { tapOn: "Manual" },
       {
         waitForAnimationToEnd: {
-          timeout: 1000,
+          timeout: 500,
         },
       },
       // Enter player name
@@ -331,7 +333,7 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
       },
       {
         waitForAnimationToEnd: {
-          timeout: 2000,
+          timeout: 1000,
         },
       },
       // Navigate back to game settings screen
@@ -342,14 +344,23 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
       },
       {
         waitForAnimationToEnd: {
-          timeout: 1000,
+          timeout: 500,
         },
       },
     );
   }
 
-  // After adding all players, handle course/tee selection for the first player
-  // (will propagate to all players)
+  return steps;
+}
+
+/**
+ * Generate steps to select/create course and tee for the first player.
+ * This handles round selection (if player has existing rounds) and manual course entry.
+ * The course/tee selection propagates to all players in the game.
+ */
+export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
+  const steps: MaestroStep[] = [];
+
   // The logged-in player (first player) may show "Select Round" if they have existing rounds
   // or "Select Course/Tee" if a round was auto-created. We handle both cases.
   const firstPlayerSlug = fixture.players[0].name
@@ -399,14 +410,14 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
     },
     {
       waitForAnimationToEnd: {
-        timeout: 2000,
+        timeout: 1000,
       },
     },
     // Tap "Manual" tab for course entry
     { tapOn: "Manual" },
     {
       waitForAnimationToEnd: {
-        timeout: 1000,
+        timeout: 500,
       },
     },
     // Enter course name from fixture
@@ -437,14 +448,11 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
       },
     },
     { inputText: fixture.course.slope?.toString() || "" },
-    // Scroll down to make Next button visible above keyboard
+    // Dismiss keyboard by tapping header before tapping Next button
+    { tapOn: "Course Name" },
     {
-      scrollUntilVisible: {
-        element: {
-          id: "manual-course-next-button",
-        },
-        direction: "DOWN",
-        timeout: 3000,
+      waitForAnimationToEnd: {
+        timeout: 500,
       },
     },
     // Tap Next to go to hole setup
@@ -455,13 +463,15 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
     },
     {
       waitForAnimationToEnd: {
-        timeout: 2000,
+        timeout: 1000,
       },
     },
   );
 
   // On ManualCourseHoles screen - set par and handicap for each hole from fixture
   // Par defaults to 4, Handicap starts empty (user must fill in all)
+  // Note: Dropdown items use text matching (accessibilityLabel) not id matching
+  // (itemTestIDField doesn't work reliably on iOS)
   for (const holeData of fixture.course.holes) {
     const holeNum = holeData.hole;
 
@@ -475,17 +485,17 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
         },
         {
           waitForAnimationToEnd: {
-            timeout: 1000,
+            timeout: 300,
           },
         },
-        // Tap the par value in the dropdown using accessibilityLabel (text matching)
-        // Note: itemTestIDField doesn't work reliably on iOS, so we use accessibilityLabel
+        // Tap the par value in the dropdown using text matching (accessibilityLabel)
+        // IMPORTANT: Must use bare string, not { id: ... } - iOS testID doesn't work for dropdown items
         {
           tapOn: `hole-${holeNum}-par-item-${holeData.par}`,
         },
         {
           waitForAnimationToEnd: {
-            timeout: 500,
+            timeout: 200,
           },
         },
       );
@@ -502,16 +512,24 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
     );
   }
 
-  // Scroll down to make Save button visible above keyboard
-  steps.push({
-    scrollUntilVisible: {
-      element: {
-        id: "manual-course-save-button",
+  // Dismiss keyboard and scroll down to make Save button visible
+  steps.push(
+    { tapOn: "Front 9" },
+    {
+      waitForAnimationToEnd: {
+        timeout: 500,
       },
-      direction: "DOWN",
-      timeout: 3000,
     },
-  });
+    {
+      scrollUntilVisible: {
+        element: {
+          id: "manual-course-save-button",
+        },
+        direction: "DOWN",
+        timeout: 3000,
+      },
+    },
+  );
 
   // Save the course
   steps.push(
@@ -823,6 +841,10 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     `# Generated from fixture - do not edit directly`,
     ``,
     `appId: golf.spicy`,
+    `# Allow Maestro to see elements inside dropdown modals on iOS`,
+    `platform:`,
+    `  ios:`,
+    `    snapshotKeyHonorModalViews: false`,
     `---`,
     ``,
     `- takeScreenshot: "test_start"`,
@@ -841,6 +863,9 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     ``,
     `# Add guest players (logged-in player already added)`,
     `- runFlow: "add_players.yaml"`,
+    ``,
+    `# Select course and tee (manual entry)`,
+    `- runFlow: "select_course_tee.yaml"`,
     ``,
     `# Start game`,
     `- runFlow: "start_game.yaml"`,
@@ -887,7 +912,12 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     addPlayers: stepsToYaml(
       generateAddPlayersSteps(fixture),
       "golf.spicy",
-      `# Sub-flow: Add ${guestPlayers.length} guest players (${guestPlayers.map((p) => p.name).join(", ")})\n# Expects: Game settings screen, logged-in player already added automatically\n# Provides: ${fixture.players.length} players total, ready to start game`,
+      `# Sub-flow: Add ${guestPlayers.length} guest players (${guestPlayers.map((p) => p.name).join(", ")})\n# Expects: Game settings screen, logged-in player already added automatically\n# Provides: ${fixture.players.length} players total, ready for course/tee selection`,
+    ),
+    selectCourseTee: stepsToYaml(
+      generateSelectCourseTeeSteps(fixture),
+      "golf.spicy",
+      `# Sub-flow: Select course and tee for ${fixture.players[0].name} (manual entry)\n# Expects: Game settings screen with players added\n# Provides: Course and tee configured, ready to start game`,
     ),
     startGame: stepsToYaml(
       generateStartGameSteps(),

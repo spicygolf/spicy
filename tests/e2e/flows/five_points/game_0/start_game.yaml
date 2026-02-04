@@ -3,6 +3,9 @@
 # Provides: Scoring screen visible, "Hole 1" visible
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - tapOn: "Start Game"

@@ -3,6 +3,9 @@
 # Junk: prox:p2
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - runFlow:

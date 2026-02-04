@@ -2,6 +2,9 @@
 # Scores: p1=5, p2=5, p3=4, p4=5
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - runFlow:
