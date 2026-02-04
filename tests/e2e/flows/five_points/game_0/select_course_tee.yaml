@@ -3,8 +3,6 @@
 # Provides: Course and tee configured, ready to start game
 
 appId: golf.spicy
-# Allow Maestro to see elements inside dropdown modals on iOS
-# (react-native-element-dropdown uses accessibilityViewIsModal which hides sibling views)
 platform:
   ios:
     snapshotKeyHonorModalViews: false
@@ -73,6 +71,7 @@ platform:
 # Druid Hills Golf Club - Blue Tees
 # Par defaults to 4, Handicap starts empty (user must fill in all)
 # Strategy: Edit 1-8, then 10-17 (skipping 9 and 18), then scroll down for 9 and 18
+# Note: Dropdown items use text matching (accessibilityLabel) not id matching (testID doesn't work on iOS)
 
 # Hole 1: Par 4 (default), Hdcp 3
 - tapOn:

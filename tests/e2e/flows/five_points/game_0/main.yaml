@@ -4,6 +4,10 @@
 # Generated from fixture - do not edit directly
 
 appId: golf.spicy
+# Allow Maestro to see elements inside dropdown modals on iOS
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 - takeScreenshot: "test_start"
 

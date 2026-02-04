@@ -8,12 +8,12 @@ appId: golf.spicy
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+    timeout: 1000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+    timeout: 500
 
 - tapOn:
     id: "manual-player-name-input"
@@ -36,24 +36,24 @@ appId: golf.spicy
     id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+    timeout: 1000
 
 - tapOn:
     id: "nav-back-button"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+    timeout: 500
 
 # === Add Player: Tim ===
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+    timeout: 1000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+    timeout: 500
 
 - tapOn:
     id: "manual-player-name-input"
@@ -76,24 +76,24 @@ appId: golf.spicy
     id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+    timeout: 1000
 
 - tapOn:
     id: "nav-back-button"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+    timeout: 500
 
 # === Add Player: Eric ===
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+    timeout: 1000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+    timeout: 500
 
 - tapOn:
     id: "manual-player-name-input"
@@ -116,10 +116,10 @@ appId: golf.spicy
     id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+    timeout: 1000
 
 - tapOn:
     id: "nav-back-button"
 
 - waitForAnimationToEnd:
-    timeout: 1000
+    timeout: 500

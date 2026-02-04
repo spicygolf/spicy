@@ -55,11 +55,14 @@ const itemsWithTestID = items.map((item) => ({
 />
 ```
 
-3. **In flow YAML** - Use text matching (maps from accessibilityLabel):
+3. **In flow YAML** - Use text matching (maps from accessibilityLabel), NOT id matching:
 ```yaml
-# Use text matching, not id matching for dropdown items
-- tapOn: "hole-6-par-item-3"  # Correct (matches accessibilityLabel)
-# NOT: tapOn: { id: "hole-6-par-item-3" }  # Won't work
+# CORRECT: Use bare string (text matching via accessibilityLabel)
+- tapOn: "hole-6-par-item-3"
+
+# WRONG: id matching doesn't work for dropdown items on iOS
+- tapOn:
+    id: "hole-6-par-item-3"  # This will fail with "Element not found"
 ```
 
 ### Keyboard Blocking Elements
