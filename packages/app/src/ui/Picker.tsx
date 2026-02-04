@@ -1,9 +1,14 @@
+import { useMemo } from "react";
 import { Dropdown } from "react-native-element-dropdown";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 export interface PickerItem {
   label: string;
   value: string;
+}
+
+interface PickerItemInternal extends PickerItem {
+  testID: string;
 }
 
 interface PickerProps {
@@ -14,6 +19,12 @@ interface PickerProps {
   testID?: string;
 }
 
+/**
+ * Dropdown picker component with E2E testID support.
+ *
+ * Each dropdown item gets a testID in the format: `{pickerTestID}-item-{value}`
+ * For example, if testID="hole-6-par" and value="3", the item testID is "hole-6-par-item-3"
+ */
 export function Picker({
   title,
   items,
@@ -22,17 +33,28 @@ export function Picker({
   testID,
 }: PickerProps) {
   const { theme } = useUnistyles();
-  const onChange = (selection: PickerItem) => {
+  const onChange = (selection: PickerItemInternal) => {
     onValueChange(selection.value);
   };
+
+  // Add testID to each item for E2E testing
+  const itemsWithTestID: PickerItemInternal[] = useMemo(() => {
+    return items.map((item) => ({
+      ...item,
+      testID: testID
+        ? `${testID}-item-${item.value}`
+        : `picker-item-${item.value}`,
+    }));
+  }, [items, testID]);
 
   return (
     <Dropdown
       testID={testID}
       value={selectedValue}
-      data={items}
+      data={itemsWithTestID}
       labelField="label"
       valueField="value"
+      itemTestIDField="testID"
       onChange={onChange}
       style={styles.picker}
       placeholder={title}

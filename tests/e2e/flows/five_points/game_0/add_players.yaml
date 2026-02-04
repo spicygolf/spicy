@@ -216,8 +216,7 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "3"
-    index: 0
+    id: "hole-6-par-item-3"
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -230,8 +229,7 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "5"
-    index: 0
+    id: "hole-7-par-item-5"
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -244,8 +242,7 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "3"
-    index: 0
+    id: "hole-8-par-item-3"
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -258,8 +255,7 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "5"
-    index: 0
+    id: "hole-9-par-item-5"
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -287,8 +283,7 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "3"
-    index: 0
+    id: "hole-13-par-item-3"
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -301,8 +296,7 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "5"
-    index: 0
+    id: "hole-14-par-item-5"
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -325,8 +319,7 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "3"
-    index: 0
+    id: "hole-17-par-item-3"
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -339,8 +332,7 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "5"
-    index: 0
+    id: "hole-18-par-item-5"
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:

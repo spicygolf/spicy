@@ -469,11 +469,10 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
             timeout: 500,
           },
         },
-        // Tap the par value in the dropdown (use index: 0 to get first match)
+        // Tap the par value in the dropdown using testID (e.g., hole-6-par-item-3)
         {
           tapOn: {
-            text: holeData.par.toString(),
-            index: 0,
+            id: `hole-${holeNum}-par-item-${holeData.par}`,
           },
         },
         {
