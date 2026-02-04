@@ -107,8 +107,15 @@ export function FavoriteTeeItem({
   // Default isDraggable to true if drag handler is provided
   const isDraggable = isDraggableProp ?? !!drag;
 
+  // Generate testID from course name for E2E testing
+  const courseNameSlug = teeData.courseName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-");
+  const testId = `favorite-tee-${courseNameSlug}`;
+
   return (
     <TouchableOpacity
+      testID={testId}
       style={[styles.favoriteItem, isActive && styles.draggingItem]}
       onPress={onPress}
       onLongPress={isDraggable ? drag : undefined}

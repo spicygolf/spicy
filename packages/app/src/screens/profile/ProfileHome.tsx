@@ -68,6 +68,7 @@ export function ProfileHome() {
           />
           {showDevTools && (
             <ProfileRow
+              testID="developer-tools-row"
               title="Developer Tools"
               onPress={() => navigation.navigate("DeveloperToolsScreen")}
             />

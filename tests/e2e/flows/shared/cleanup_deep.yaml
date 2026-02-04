@@ -5,7 +5,6 @@
 
 appId: golf.spicy
 ---
-
 - takeScreenshot: "cleanup_deep_start"
 
 # Navigate to Profile tab
@@ -15,8 +14,15 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 2000
 
+# Wait for Developer Tools to appear (data may need to load)
+- extendedWaitUntil:
+    visible:
+      id: "developer-tools-row"
+    timeout: 10000
+
 # Navigate to Developer Tools
-- tapOn: "Developer Tools"
+- tapOn:
+    id: "developer-tools-row"
 
 - waitForAnimationToEnd:
     timeout: 2000

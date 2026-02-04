@@ -10,7 +10,7 @@
  * rather than full data trees.
  */
 
-import type { Game, ListOfGames } from "spicylib/schema";
+import type { Game, ListOfGames, Player } from "spicylib/schema";
 
 /**
  * Deep delete a game and all its related data.
@@ -138,6 +138,62 @@ export async function deepDeleteAllGames(games: ListOfGames): Promise<number> {
   // Clear the games list itself
   // biome-ignore lint/suspicious/noExplicitAny: Jazz list type needs assertion for mutation
   (games as any).$jazz.splice(0, games.length);
+
+  return count;
+}
+
+/**
+ * Clear all rounds for a player.
+ *
+ * This removes all rounds from the player's rounds list, clearing scores first.
+ * Used to ensure the logged-in user starts fresh in E2E tests.
+ *
+ * @param player - The player whose rounds should be cleared
+ * @returns Number of rounds that were cleared
+ * @throws Error if called in production builds
+ */
+export async function clearPlayerRounds(player: Player): Promise<number> {
+  if (!__DEV__) {
+    throw new Error(
+      "clearPlayerRounds is only available in development builds",
+    );
+  }
+
+  if (!player?.$isLoaded) {
+    return 0;
+  }
+
+  // Ensure rounds are loaded with scores
+  const loadedPlayer = await player.$jazz.ensureLoaded({
+    resolve: {
+      rounds: { $each: { scores: true } },
+    },
+  });
+
+  if (!loadedPlayer.rounds?.$isLoaded) {
+    return 0;
+  }
+
+  const count = loadedPlayer.rounds.length;
+
+  // Clear scores for each round first
+  // biome-ignore lint/suspicious/noExplicitAny: Jazz resolved types need type assertion for mutations
+  const rounds = loadedPlayer.rounds as any;
+  for (let i = 0; i < rounds.length; i++) {
+    const round = rounds[i];
+    if (!round?.$isLoaded) continue;
+
+    if (round.scores?.$isLoaded) {
+      for (const key of Object.keys(round.scores)) {
+        if (!key.startsWith("$") && key !== "_refs") {
+          round.scores.$jazz.delete(key);
+        }
+      }
+    }
+  }
+
+  // Clear the rounds list
+  rounds.$jazz.splice(0, rounds.length);
 
   return count;
 }

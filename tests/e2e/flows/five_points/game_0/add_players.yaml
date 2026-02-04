@@ -4,136 +4,431 @@
 
 appId: golf.spicy
 ---
-
+# === Add Player: Scott ===
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-      timeout: 2000
+    timeout: 2000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-      timeout: 1000
+    timeout: 1000
 
 - tapOn:
-      id: "manual-player-name-input"
+    id: "manual-player-name-input"
 
 - inputText: "Scott"
 
 - tapOn:
-      id: "manual-player-short-input"
+    id: "manual-player-short-input"
 
 - inputText: "Scott"
 
 - tapOn:
-      id: "manual-player-handicap-input"
+    id: "manual-player-handicap-input"
 
-- inputText: "12"
+- inputText: "4.1"
 
 - hideKeyboard
 
 - tapOn:
-      id: "manual-player-submit-button"
+    id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-      timeout: 2000
+    timeout: 2000
 
+- tapOn:
+    id: "nav-back-button"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# === Add Player: Tim ===
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-      timeout: 2000
+    timeout: 2000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-      timeout: 1000
+    timeout: 1000
 
 - tapOn:
-      id: "manual-player-name-input"
+    id: "manual-player-name-input"
 
 - inputText: "Tim"
 
 - tapOn:
-      id: "manual-player-short-input"
+    id: "manual-player-short-input"
 
 - inputText: "Tim"
 
 - tapOn:
-      id: "manual-player-handicap-input"
+    id: "manual-player-handicap-input"
 
-- inputText: "8"
+- inputText: "+0.9"
 
 - hideKeyboard
 
 - tapOn:
-      id: "manual-player-submit-button"
+    id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-      timeout: 2000
+    timeout: 2000
 
+- tapOn:
+    id: "nav-back-button"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# === Add Player: Eric ===
 - tapOn: "Add Player"
 
 - waitForAnimationToEnd:
-      timeout: 2000
+    timeout: 2000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-      timeout: 1000
+    timeout: 1000
 
 - tapOn:
-      id: "manual-player-name-input"
+    id: "manual-player-name-input"
 
 - inputText: "Eric"
 
 - tapOn:
-      id: "manual-player-short-input"
+    id: "manual-player-short-input"
 
 - inputText: "Eric"
 
 - tapOn:
-      id: "manual-player-handicap-input"
+    id: "manual-player-handicap-input"
 
-- inputText: "14"
+- inputText: "12.9"
 
 - hideKeyboard
 
 - tapOn:
-      id: "manual-player-submit-button"
+    id: "manual-player-submit-button"
 
 - waitForAnimationToEnd:
-      timeout: 2000
+    timeout: 2000
 
-- tapOn: "Select Course/Tee"
+- tapOn:
+    id: "nav-back-button"
 
 - waitForAnimationToEnd:
-      timeout: 2000
+    timeout: 1000
+
+# === Select/Create Round for Brad ===
+- runFlow:
+    when:
+      visible:
+        id: "select-round-brad"
+    commands:
+      - tapOn:
+          id: "select-round-brad"
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - tapOn:
+          id: "create-new-round-button"
+      - waitForAnimationToEnd:
+          timeout: 2000
+
+# === Select Course/Tee (Manual Entry) ===
+- tapOn:
+    id: "select-course-tee-brad"
+
+- waitForAnimationToEnd:
+    timeout: 2000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-      timeout: 1000
+    timeout: 1000
 
 - tapOn:
-      id: "manual-course-name-input"
+    id: "manual-course-name-input"
 
-- inputText: "Test Course"
+- inputText: "Druid Hills Golf Club"
 
 - tapOn:
-      id: "manual-course-tee-input"
+    id: "manual-course-tee-input"
 
 - inputText: "Blue"
 
 - hideKeyboard
 
 - tapOn:
-      id: "manual-course-next-button"
+    id: "manual-course-next-button"
 
 - waitForAnimationToEnd:
-      timeout: 2000
+    timeout: 2000
+
+# === Enter Hole Details (Par & Handicap) ===
+# Druid Hills Golf Club - Blue Tees
+# Default is par 4 and sequential handicap (1-18)
+# We only change what differs from defaults
+
+# Hole 1: Par 4 (default), Hdcp 3
+- longPressOn:
+    id: "hole-1-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "3"
+
+- hideKeyboard
+
+# Hole 2: Par 4 (default), Hdcp 7
+- longPressOn:
+    id: "hole-2-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "7"
+
+- hideKeyboard
+
+# Hole 3: Par 4 (default), Hdcp 15
+- longPressOn:
+    id: "hole-3-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "15"
+
+- hideKeyboard
+
+# Hole 4: Par 4 (default), Hdcp 1
+- longPressOn:
+    id: "hole-4-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "1"
+
+- hideKeyboard
+
+# Hole 5: Par 4 (default), Hdcp 5 (default) - skip
+
+# Hole 6: Par 3, Hdcp 17
+- tapOn:
+    id: "hole-6-par"
+
+- waitForAnimationToEnd:
+    timeout: 500
 
 - tapOn:
-      id: "manual-course-save-button"
+    id: "hole-6-par-item-3"
 
 - waitForAnimationToEnd:
-      timeout: 3000
+    timeout: 500
+
+- longPressOn:
+    id: "hole-6-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "17"
+
+- hideKeyboard
+
+# Hole 7: Par 5, Hdcp 11
+- tapOn:
+    id: "hole-7-par"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "hole-7-par-item-5"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- longPressOn:
+    id: "hole-7-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "11"
+
+- hideKeyboard
+
+# Hole 8: Par 3, Hdcp 9
+- tapOn:
+    id: "hole-8-par"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "hole-8-par-item-3"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- longPressOn:
+    id: "hole-8-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "9"
+
+- hideKeyboard
+
+# Hole 9: Par 5, Hdcp 13
+- tapOn:
+    id: "hole-9-par"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "hole-9-par-item-5"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- longPressOn:
+    id: "hole-9-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "13"
+
+- hideKeyboard
+
+# Hole 10: Par 4 (default), Hdcp 2
+- longPressOn:
+    id: "hole-10-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "2"
+
+- hideKeyboard
+
+# Hole 11: Par 4 (default), Hdcp 6
+- longPressOn:
+    id: "hole-11-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "6"
+
+- hideKeyboard
+
+# Hole 12: Par 4 (default), Hdcp 12 (default) - skip
+
+# Hole 13: Par 3, Hdcp 18
+- tapOn:
+    id: "hole-13-par"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "hole-13-par-item-3"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- longPressOn:
+    id: "hole-13-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "18"
+
+- hideKeyboard
+
+# Hole 14: Par 5, Hdcp 10
+- tapOn:
+    id: "hole-14-par"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "hole-14-par-item-5"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- longPressOn:
+    id: "hole-14-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "10"
+
+- hideKeyboard
+
+# Hole 15: Par 4 (default), Hdcp 4
+- longPressOn:
+    id: "hole-15-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "4"
+
+- hideKeyboard
+
+# Hole 16: Par 4 (default), Hdcp 16 (default) - skip
+
+# Hole 17: Par 3, Hdcp 14
+- tapOn:
+    id: "hole-17-par"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "hole-17-par-item-3"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- longPressOn:
+    id: "hole-17-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "14"
+
+- hideKeyboard
+
+# Hole 18: Par 5, Hdcp 8
+- tapOn:
+    id: "hole-18-par"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "hole-18-par-item-5"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- longPressOn:
+    id: "hole-18-handicap"
+
+- tapOn: "Select All"
+
+- inputText: "8"
+
+- hideKeyboard
+
+# === Save Course & Tee ===
+- tapOn:
+    id: "manual-course-save-button"
+
+- waitForAnimationToEnd:
+    timeout: 3000

@@ -21,7 +21,7 @@ export function GameNav(props: GameNavProps) {
     : () => navigation.goBack();
 
   const left = showBack ? (
-    <TouchableOpacity onPress={() => back()}>
+    <TouchableOpacity testID="nav-back-button" onPress={() => back()}>
       <FontAwesome6
         name="chevron-left"
         size={20}

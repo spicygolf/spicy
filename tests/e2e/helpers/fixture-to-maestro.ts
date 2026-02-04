@@ -310,13 +310,18 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
         },
       },
       { inputText: player.name },
-      // Enter handicap
+      // Enter handicap (negative values display with + prefix)
       {
         tapOn: {
           id: "manual-player-handicap-input",
         },
       },
-      { inputText: String(player.handicapIndex) },
+      {
+        inputText:
+          player.handicapIndex < 0
+            ? `+${Math.abs(player.handicapIndex)}`
+            : String(player.handicapIndex),
+      },
       { hideKeyboard: true },
       // Submit the player
       {
@@ -329,14 +334,69 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
           timeout: 2000,
         },
       },
+      // Navigate back to game settings screen
+      {
+        tapOn: {
+          id: "nav-back-button",
+        },
+      },
+      {
+        waitForAnimationToEnd: {
+          timeout: 1000,
+        },
+      },
     );
   }
 
-  // After adding all players, select course/tee for the first player
+  // After adding all players, handle course/tee selection for the first player
   // (will propagate to all players)
+  // The logged-in player (first player) may show "Select Round" if they have existing rounds
+  // or "Select Course/Tee" if a round was auto-created. We handle both cases.
+  const firstPlayerSlug = fixture.players[0].name
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+
   steps.push(
-    // Tap on "Select Course/Tee" for first player
-    { tapOn: "Select Course/Tee" },
+    // First, try to tap "Select Round" (if player has existing rounds for today)
+    // If not visible, fall through to "Select Course/Tee"
+    {
+      runFlow: {
+        when: {
+          visible: {
+            id: `select-round-${firstPlayerSlug}`,
+          },
+        },
+        commands: [
+          {
+            tapOn: {
+              id: `select-round-${firstPlayerSlug}`,
+            },
+          },
+          {
+            waitForAnimationToEnd: {
+              timeout: 2000,
+            },
+          },
+          // Create a new round for this game
+          {
+            tapOn: {
+              id: "create-new-round-button",
+            },
+          },
+          {
+            waitForAnimationToEnd: {
+              timeout: 2000,
+            },
+          },
+        ],
+      },
+    },
+    // Now tap "Select Course/Tee" (should be visible after round is created/selected)
+    {
+      tapOn: {
+        id: `select-course-tee-${firstPlayerSlug}`,
+      },
+    },
     {
       waitForAnimationToEnd: {
         timeout: 2000,
@@ -349,20 +409,20 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
         timeout: 1000,
       },
     },
-    // Enter course name
+    // Enter course name from fixture
     {
       tapOn: {
         id: "manual-course-name-input",
       },
     },
-    { inputText: "Test Course" },
-    // Enter tee name
+    { inputText: fixture.course.name },
+    // Enter tee name from fixture
     {
       tapOn: {
         id: "manual-course-tee-input",
       },
     },
-    { inputText: "Blue" },
+    { inputText: fixture.course.tee },
     { hideKeyboard: true },
     // Tap Next to go to hole setup
     {
@@ -375,7 +435,58 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
         timeout: 2000,
       },
     },
-    // On ManualCourseHoles screen - use defaults, just save
+  );
+
+  // On ManualCourseHoles screen - set par and handicap for each hole from fixture
+  // Default is par 4 and sequential handicaps (1-18), so we only change what differs
+  for (const holeData of fixture.course.holes) {
+    const holeNum = holeData.hole;
+
+    // Set par if not 4 (default)
+    if (holeData.par !== 4) {
+      steps.push(
+        {
+          tapOn: {
+            id: `hole-${holeNum}-par`,
+          },
+        },
+        {
+          waitForAnimationToEnd: {
+            timeout: 500,
+          },
+        },
+        // Tap the par value in the dropdown using testID (e.g., hole-6-par-item-3)
+        {
+          tapOn: {
+            id: `hole-${holeNum}-par-item-${holeData.par}`,
+          },
+        },
+        {
+          waitForAnimationToEnd: {
+            timeout: 500,
+          },
+        },
+      );
+    }
+
+    // Set handicap if not equal to hole number (default is sequential 1-18)
+    if (holeData.handicap !== holeNum) {
+      steps.push(
+        // Use longPressOn + Select All for reliable text replacement on iOS
+        {
+          longPressOn: {
+            id: `hole-${holeNum}-handicap`,
+          },
+        },
+        { tapOn: "Select All" },
+        { inputText: holeData.handicap.toString() },
+        { hideKeyboard: true },
+      );
+    }
+  }
+
+  // Save the course
+  steps.push(
     {
       tapOn: {
         id: "manual-course-save-button",

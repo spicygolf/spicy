@@ -98,6 +98,7 @@ function HoleRow({
       <Text style={styles.holeNumber}>{holeNumber}</Text>
       <View style={styles.parPicker}>
         <Picker
+          testID={`hole-${holeNumber}-par`}
           title="Par"
           items={PAR_OPTIONS}
           selectedValue={hole.par.toString()}
@@ -105,6 +106,7 @@ function HoleRow({
         />
       </View>
       <TextInput
+        testID={`hole-${holeNumber}-handicap`}
         value={hole.handicap.toString()}
         onChangeText={(text) => onHandicapChange(filterIntegerInput(text))}
         keyboardType="number-pad"

@@ -158,7 +158,11 @@ export function AddRoundToGame({ route, navigation }: Props) {
             No rounds found for {gameDate.toLocaleDateString()}
           </Text>
           {!isCreating && (
-            <Button label="Create New Round" onPress={handleCreateNewRound} />
+            <Button
+              testID="create-new-round-button"
+              label="Create New Round"
+              onPress={handleCreateNewRound}
+            />
           )}
         </View>
       ) : (
@@ -197,6 +201,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
             ListFooterComponent={
               !isCreating ? (
                 <Button
+                  testID="create-new-round-button"
                   label="Create New Round"
                   onPress={handleCreateNewRound}
                 />

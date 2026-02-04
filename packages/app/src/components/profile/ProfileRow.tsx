@@ -14,6 +14,7 @@ interface ProfileRowProps {
   title: string;
   subtitle?: string;
   showWarning?: boolean;
+  testID?: string;
   onPress: () => void;
 }
 
@@ -21,12 +22,17 @@ export function ProfileRow({
   title,
   subtitle,
   showWarning,
+  testID,
   onPress,
 }: ProfileRowProps) {
   const { theme } = useUnistyles();
 
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={onPress}
+      testID={testID}
+    >
       <Text style={styles.title}>{title}</Text>
       {showWarning && (
         <View
