@@ -381,6 +381,10 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
  * The course/tee selection propagates to all players in the game.
  */
 export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
+  if (fixture.players.length === 0) {
+    throw new Error("Fixture must have at least one player");
+  }
+
   const steps: MaestroStep[] = [];
 
   // The logged-in player (first player) may show "Select Round" if they have existing rounds
@@ -661,6 +665,7 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
 
     // Clear and enter the handicap index override
     // Use longPress + Select All for reliable text clearing on iOS
+    // Note: handicapOverride is guaranteed defined after filter() above
     steps.push(
       {
         longPressOn: {
@@ -668,7 +673,7 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
         },
       },
       { tapOn: "Select All" },
-      { inputText: player.handicapOverride },
+      { inputText: player.handicapOverride! },
     );
 
     // Navigate back to game settings (back button dismisses keyboard and saves)
