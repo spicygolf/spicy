@@ -417,3 +417,53 @@ export function copySpecOptions(
   );
   return newSpec;
 }
+
+/**
+ * Reset a game's spec (working copy) from its specRef (catalog spec).
+ *
+ * This replaces all options in the target spec with copies from the source,
+ * effectively reverting any user customizations back to the catalog defaults.
+ *
+ * @param targetSpec - The game's working spec to reset (game.spec)
+ * @param sourceSpec - The catalog spec to copy from (game.specRef)
+ * @returns Number of options reset
+ */
+export function resetSpecFromRef(
+  targetSpec: GameSpec | MapOfOptions,
+  sourceSpec: GameSpec | MapOfOptions,
+): number {
+  if (!targetSpec?.$isLoaded || !sourceSpec?.$isLoaded) {
+    console.warn("[resetSpecFromRef] Specs not loaded");
+    return 0;
+  }
+
+  // Get all keys from source spec
+  const sourceKeys = Object.keys(sourceSpec).filter(
+    (k) => !k.startsWith("$") && k !== "_refs" && sourceSpec.$jazz.has(k),
+  );
+
+  // Get all keys from target spec (to remove options not in source)
+  const targetKeys = Object.keys(targetSpec).filter(
+    (k) => !k.startsWith("$") && k !== "_refs" && targetSpec.$jazz.has(k),
+  );
+
+  // Remove options from target that don't exist in source
+  for (const key of targetKeys) {
+    if (!sourceSpec.$jazz.has(key)) {
+      targetSpec.$jazz.delete(key);
+    }
+  }
+
+  // Copy all options from source to target
+  let resetCount = 0;
+  for (const key of sourceKeys) {
+    const option = sourceSpec[key];
+    if (!option) continue;
+
+    targetSpec.$jazz.set(key, deepClone(option));
+    resetCount++;
+  }
+
+  console.log("[resetSpecFromRef] Reset", resetCount, "options from catalog");
+  return resetCount;
+}

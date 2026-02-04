@@ -44,6 +44,7 @@ export {
   getOptionValueForHole,
   getSpecField,
   isOptionOnHole,
+  resetSpecFromRef,
 } from "./option-utils";
 // Main pipeline
 export { buildContext, score, scoreWithContext } from "./pipeline";

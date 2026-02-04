@@ -13,6 +13,7 @@ import { MultiplierOptionRow } from "./MultiplierOptionRow";
 import { NumOptionModal } from "./NumOptionModal";
 import { OptionSectionHeader } from "./OptionSectionHeader";
 import { RemoveOptionModal } from "./RemoveOptionModal";
+import { ResetSpecButton } from "./ResetSpecButton";
 import { TextOptionModal } from "./TextOptionModal";
 
 type ModalType = "game" | "junk" | "multiplier" | null;
@@ -245,6 +246,7 @@ export function GameOptionsList() {
 
         {/* Admin Section */}
         <OptionSectionHeader title="Admin" />
+        <ResetSpecButton />
         <DeleteGameButton />
       </ScrollView>
 
