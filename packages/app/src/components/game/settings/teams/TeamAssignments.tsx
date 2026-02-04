@@ -185,6 +185,7 @@ export function TeamAssignments({
                             style={styles.dragHandleContainer}
                             draggingStyle={styles.dragHandleDragging}
                             dragReleasedStyle={styles.dragHandleReleased}
+                            hoverStyle={styles.hoverView}
                             dragPayload={player.id}
                             renderContent={({ viewState }) => (
                               <View
@@ -203,7 +204,7 @@ export function TeamAssignments({
                               </View>
                             )}
                             renderHoverContent={() => (
-                              <View style={styles.dragPreview}>
+                              <View style={styles.hoverContent}>
                                 <View style={styles.dragHandle}>
                                   <FontAwesome6
                                     name="grip-lines"
@@ -212,16 +213,14 @@ export function TeamAssignments({
                                     color={theme.colors.secondary}
                                   />
                                 </View>
-                                <View style={styles.dragPreviewInfo}>
-                                  <Text style={styles.playerName}>
-                                    {player.playerName}
+                                <Text style={styles.hoverPlayerName}>
+                                  {player.playerName}
+                                </Text>
+                                {player.handicap !== undefined && (
+                                  <Text style={styles.hoverHandicap}>
+                                    HI: {player.handicap}
                                   </Text>
-                                  {player.handicap !== undefined && (
-                                    <Text style={styles.handicap}>
-                                      HI: {player.handicap}
-                                    </Text>
-                                  )}
-                                </View>
+                                )}
                               </View>
                             )}
                           />
@@ -410,24 +409,29 @@ const styles = StyleSheet.create((theme) => ({
     fontStyle: "italic",
     textAlign: "center",
   },
-  dragPreview: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.card,
+  hoverView: {
+    width: 280,
+    backgroundColor: theme.colors.background,
     borderRadius: 8,
-    paddingVertical: theme.gap(1),
-    paddingHorizontal: theme.gap(1.5),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
   },
-  dragPreviewInfo: {
+  hoverContent: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    padding: theme.gap(1.5),
+    gap: theme.gap(1.5),
+  },
+  hoverPlayerName: {
+    fontSize: 16,
+    fontWeight: "500",
     flex: 1,
-    marginLeft: theme.gap(1),
+  },
+  hoverHandicap: {
+    fontSize: 14,
+    color: theme.colors.secondary,
   },
 }));
