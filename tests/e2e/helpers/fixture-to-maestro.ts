@@ -438,6 +438,12 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
     },
     { inputText: fixture.course.slope?.toString() || "" },
     { hideKeyboard: true },
+    // Wait for keyboard to fully dismiss
+    {
+      waitForAnimationToEnd: {
+        timeout: 1000,
+      },
+    },
     // Tap Next to go to hole setup
     {
       tapOn: {
