@@ -354,7 +354,7 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.background,
   },
   dragHandleContainer: {
-    paddingVertical: theme.gap(1.5),
+    paddingVertical: theme.gap(1),
     paddingLeft: theme.gap(2),
     paddingRight: theme.gap(1),
   },
@@ -379,7 +379,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: theme.gap(1.5),
+    paddingVertical: theme.gap(1),
     paddingRight: theme.gap(2),
     paddingLeft: theme.gap(1),
   },
@@ -422,8 +422,8 @@ const styles = StyleSheet.create((theme) => ({
   hoverContent: {
     flexDirection: "row",
     alignItems: "center",
-    padding: theme.gap(1.5),
-    gap: theme.gap(1.5),
+    padding: theme.gap(1),
+    gap: theme.gap(1),
   },
   hoverPlayerName: {
     fontSize: 16,
