@@ -9,252 +9,262 @@ platform:
 ---
 
 - runFlow:
-      when:
-          visible:
-              id: "select-round-brad"
-      commands:
-        - tapOn:
-              id: "select-round-brad"
-        - waitForAnimationToEnd:
-              timeout: 2000
-        - tapOn:
-              id: "create-new-round-button"
-        - waitForAnimationToEnd:
-              timeout: 2000
+    when:
+      visible:
+        id: "select-round-brad"
+    commands:
+    - tapOn:
+        id: "select-round-brad"
+    - waitForAnimationToEnd:
+        timeout: 2000
+    - tapOn:
+        id: "create-new-round-button"
+    - waitForAnimationToEnd:
+        timeout: 2000
 
 - tapOn:
-      id: "select-course-tee-brad"
+    id: "select-course-tee-brad"
 
 - waitForAnimationToEnd:
-      timeout: 1000
+    timeout: 1000
 
 - tapOn: "Manual"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "manual-course-name-input"
+    id: "manual-course-name-input"
 
 - inputText: "Druid Hills Golf Club"
 
 - tapOn:
-      id: "manual-course-tee-input"
+    id: "manual-course-tee-input"
 
 - inputText: "Blue"
 
 - tapOn:
-      id: "manual-course-rating-input"
+    id: "manual-course-rating-input"
 
 - inputText: "71.8"
 
 - tapOn:
-      id: "manual-course-slope-input"
+    id: "manual-course-slope-input"
 
 - inputText: "134"
 
 - tapOn: "Course Name"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "manual-course-next-button"
+    id: "manual-course-next-button"
 
 - waitForAnimationToEnd:
-      timeout: 1000
+    timeout: 1000
 
 - tapOn:
-      id: "hole-1-handicap"
+    id: "hole-1-handicap"
 
 - inputText: "3"
 
 - tapOn:
-      id: "hole-2-handicap"
+    id: "hole-2-handicap"
 
 - inputText: "7"
 
 - tapOn:
-      id: "hole-3-handicap"
+    id: "hole-3-handicap"
 
 - inputText: "15"
 
 - tapOn:
-      id: "hole-4-handicap"
+    id: "hole-4-handicap"
 
 - inputText: "1"
 
 - tapOn:
-      id: "hole-5-handicap"
+    id: "hole-5-handicap"
 
 - inputText: "5"
 
 - tapOn:
-      id: "hole-6-par"
+    id: "hole-6-par"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 300
 
 - tapOn: "hole-6-par-item-3"
 
 - waitForAnimationToEnd:
-      timeout: 200
+    timeout: 200
 
 - tapOn:
-      id: "hole-6-handicap"
+    id: "hole-6-handicap"
 
 - inputText: "17"
 
 - tapOn:
-      id: "hole-7-par"
+    id: "hole-7-par"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 300
 
 - tapOn: "hole-7-par-item-5"
 
 - waitForAnimationToEnd:
-      timeout: 200
+    timeout: 200
 
 - tapOn:
-      id: "hole-7-handicap"
+    id: "hole-7-handicap"
 
 - inputText: "11"
 
 - tapOn:
-      id: "hole-8-par"
+    id: "hole-8-par"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 300
 
 - tapOn: "hole-8-par-item-3"
 
 - waitForAnimationToEnd:
-      timeout: 200
+    timeout: 200
 
 - tapOn:
-      id: "hole-8-handicap"
+    id: "hole-8-handicap"
 
 - inputText: "9"
 
 - tapOn:
-      id: "hole-9-par"
-
-- waitForAnimationToEnd:
-      timeout: 300
-
-- tapOn: "hole-9-par-item-5"
-
-- waitForAnimationToEnd:
-      timeout: 200
-
-- tapOn:
-      id: "hole-9-handicap"
-
-- inputText: "13"
-
-- tapOn:
-      id: "hole-10-handicap"
+    id: "hole-10-handicap"
 
 - inputText: "2"
 
 - tapOn:
-      id: "hole-11-handicap"
+    id: "hole-11-handicap"
 
 - inputText: "6"
 
 - tapOn:
-      id: "hole-12-handicap"
+    id: "hole-12-handicap"
 
 - inputText: "12"
 
 - tapOn:
-      id: "hole-13-par"
+    id: "hole-13-par"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 300
 
 - tapOn: "hole-13-par-item-3"
 
 - waitForAnimationToEnd:
-      timeout: 200
+    timeout: 200
 
 - tapOn:
-      id: "hole-13-handicap"
+    id: "hole-13-handicap"
 
 - inputText: "18"
 
 - tapOn:
-      id: "hole-14-par"
+    id: "hole-14-par"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 300
 
 - tapOn: "hole-14-par-item-5"
 
 - waitForAnimationToEnd:
-      timeout: 200
+    timeout: 200
 
 - tapOn:
-      id: "hole-14-handicap"
+    id: "hole-14-handicap"
 
 - inputText: "10"
 
 - tapOn:
-      id: "hole-15-handicap"
+    id: "hole-15-handicap"
 
 - inputText: "4"
 
 - tapOn:
-      id: "hole-16-handicap"
+    id: "hole-16-handicap"
 
 - inputText: "16"
 
 - tapOn:
-      id: "hole-17-par"
+    id: "hole-17-par"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 300
 
 - tapOn: "hole-17-par-item-3"
 
 - waitForAnimationToEnd:
-      timeout: 200
+    timeout: 200
 
 - tapOn:
-      id: "hole-17-handicap"
+    id: "hole-17-handicap"
 
 - inputText: "14"
 
-- tapOn:
-      id: "hole-18-par"
+- tapOn: "Front 9"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 500
+
+- scrollUntilVisible:
+    element:
+      id: "manual-course-save-button"
+    direction: "DOWN"
+    timeout: 3000
+
+- tapOn:
+    id: "hole-9-par"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn: "hole-9-par-item-5"
+
+- waitForAnimationToEnd:
+    timeout: 200
+
+- tapOn:
+    id: "hole-9-handicap"
+
+- inputText: "13"
+
+- tapOn: "Front 9"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "hole-18-par"
+
+- waitForAnimationToEnd:
+    timeout: 300
 
 - tapOn: "hole-18-par-item-5"
 
 - waitForAnimationToEnd:
-      timeout: 200
+    timeout: 200
 
 - tapOn:
-      id: "hole-18-handicap"
+    id: "hole-18-handicap"
 
 - inputText: "8"
 
 - tapOn: "Front 9"
 
 - waitForAnimationToEnd:
-      timeout: 500
-
-- scrollUntilVisible:
-      element:
-          id: "manual-course-save-button"
-      direction: "DOWN"
-      timeout: 3000
+    timeout: 500
 
 - tapOn:
-      id: "manual-course-save-button"
+    id: "manual-course-save-button"
 
 - waitForAnimationToEnd:
-      timeout: 3000
+    timeout: 3000

@@ -472,12 +472,20 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
   // Par defaults to 4, Handicap starts empty (user must fill in all)
   // Note: Dropdown items use text matching (accessibilityLabel) not id matching
   // (itemTestIDField doesn't work reliably on iOS)
-  for (const holeData of fixture.course.holes) {
-    const holeNum = holeData.hole;
+  //
+  // Strategy: Edit holes 1-8, then 10-17 (skipping 9 and 18 which are at the bottom
+  // of their sections and covered by keyboard), then scroll down for 9 and 18
+
+  // Helper to generate steps for a single hole
+  const generateHoleEntrySteps = (holeNum: number): MaestroStep[] => {
+    const holeData = fixture.course.holes.find((h) => h.hole === holeNum);
+    if (!holeData) return [];
+
+    const holeSteps: MaestroStep[] = [];
 
     // Set par if not 4 (default)
     if (holeData.par !== 4) {
-      steps.push(
+      holeSteps.push(
         {
           tapOn: {
             id: `hole-${holeNum}-par`,
@@ -502,7 +510,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     }
 
     // Enter handicap (always required since inputs start empty)
-    steps.push(
+    holeSteps.push(
       {
         tapOn: {
           id: `hole-${holeNum}-handicap`,
@@ -510,9 +518,21 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
       },
       { inputText: holeData.handicap.toString() },
     );
+
+    return holeSteps;
+  };
+
+  // Holes 1-8 (skip hole 9 - at bottom of front 9, keyboard covers it)
+  for (let i = 1; i <= 8; i++) {
+    steps.push(...generateHoleEntrySteps(i));
   }
 
-  // Dismiss keyboard and scroll down to make Save button visible
+  // Holes 10-17 (skip hole 18 - at bottom of back 9, keyboard covers it)
+  for (let i = 10; i <= 17; i++) {
+    steps.push(...generateHoleEntrySteps(i));
+  }
+
+  // Dismiss keyboard and scroll down to reveal holes 9 and 18
   steps.push(
     { tapOn: "Front 9" },
     {
@@ -527,6 +547,32 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
         },
         direction: "DOWN",
         timeout: 3000,
+      },
+    },
+  );
+
+  // Hole 9 (now visible after scroll)
+  steps.push(...generateHoleEntrySteps(9));
+
+  // Dismiss keyboard before editing hole 18
+  steps.push(
+    { tapOn: "Front 9" },
+    {
+      waitForAnimationToEnd: {
+        timeout: 500,
+      },
+    },
+  );
+
+  // Hole 18 (now visible after scroll)
+  steps.push(...generateHoleEntrySteps(18));
+
+  // Dismiss keyboard before tapping save
+  steps.push(
+    { tapOn: "Front 9" },
+    {
+      waitForAnimationToEnd: {
+        timeout: 500,
       },
     },
   );
@@ -1074,6 +1120,7 @@ export function stepsToYaml(
 
 /**
  * Recursively serialize a value to YAML format
+ * Uses 2-space indentation to match manual YAML style
  */
 function valueToYaml(
   value: unknown,
@@ -1125,11 +1172,12 @@ function valueToYaml(
         lines.push(`${keyPrefix}${key}: ${formattedVal}`);
       } else if (Array.isArray(val)) {
         lines.push(`${keyPrefix}${key}:`);
-        lines.push(valueToYaml(val, indent + 2, false));
+        // Use indent + 1 for proper 2-space indentation
+        lines.push(valueToYaml(val, indent + 1, false));
       } else if (typeof val === "object" && val !== null) {
         lines.push(`${keyPrefix}${key}:`);
-        // Recursively serialize nested object (not as array item)
-        const nestedLines = valueToYaml(val, indent + 2, false);
+        // Use indent + 1 for proper 2-space indentation
+        const nestedLines = valueToYaml(val, indent + 1, false);
         lines.push(nestedLines);
       }
     }
@@ -1140,6 +1188,7 @@ function valueToYaml(
 
 /**
  * Convert a single step to YAML format
+ * Uses 2-space indentation to match manual YAML style
  */
 function stepToYaml(step: MaestroStep, indent: number): string {
   const prefix = "  ".repeat(indent);
@@ -1157,7 +1206,8 @@ function stepToYaml(step: MaestroStep, indent: number): string {
     } else if (typeof value === "object" && value !== null) {
       // Object value - use recursive serializer
       lines.push(`${prefix}- ${key}:`);
-      const nestedYaml = valueToYaml(value, indent + 2, false);
+      // Use indent + 1 for proper 2-space indentation
+      const nestedYaml = valueToYaml(value, indent + 1, false);
       lines.push(nestedYaml);
     }
   }

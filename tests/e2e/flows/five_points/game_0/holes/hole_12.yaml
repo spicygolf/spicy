@@ -9,48 +9,48 @@ platform:
 ---
 
 - runFlow:
-      when:
-          notVisible:
-              text: "Hole 12"
-      commands:
-        - swipe:
-              direction: "LEFT"
-              duration: 300
-        - waitForAnimationToEnd:
-              timeout: 1000
+    when:
+      notVisible:
+        text: "Hole 12"
+    commands:
+    - swipe:
+        direction: "LEFT"
+        duration: 300
+    - waitForAnimationToEnd:
+        timeout: 1000
 
 - extendedWaitUntil:
-      visible: "Hole 12"
-      timeout: 5000
+    visible: "Hole 12"
+    timeout: 5000
 
 - tapOn:
-      id: "player-p1-decrement"
+    id: "player-p1-decrement"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "player-p2-decrement"
+    id: "player-p2-decrement"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "player-p3-score"
+    id: "player-p3-score"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "player-p4-score"
+    id: "player-p4-score"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "junk-prox-p2"
+    id: "junk-prox-p2"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 300
 
 - takeScreenshot: "hole_12_complete"
