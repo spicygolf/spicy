@@ -423,6 +423,20 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
       },
     },
     { inputText: fixture.course.tee },
+    // Enter course rating if provided
+    {
+      tapOn: {
+        id: "manual-course-rating-input",
+      },
+    },
+    { inputText: fixture.course.rating?.toString() || "" },
+    // Enter slope rating if provided
+    {
+      tapOn: {
+        id: "manual-course-slope-input",
+      },
+    },
+    { inputText: fixture.course.slope?.toString() || "" },
     { hideKeyboard: true },
     // Tap Next to go to hole setup
     {
@@ -455,10 +469,11 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
             timeout: 500,
           },
         },
-        // Tap the par value in the dropdown using exact text match (regex)
+        // Tap the par value in the dropdown (use index: 0 to get first match)
         {
           tapOn: {
-            text: `^${holeData.par}$`,
+            text: holeData.par.toString(),
+            index: 0,
           },
         },
         {

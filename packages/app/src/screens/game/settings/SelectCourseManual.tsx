@@ -331,6 +331,7 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
           <View style={styles.halfField}>
             <Text style={styles.label}>Course Rating (optional)</Text>
             <TextInput
+              testID="manual-course-rating-input"
               value={courseRating}
               onChangeText={(text) => setCourseRating(filterDecimalInput(text))}
               placeholder="e.g., 72.5"
@@ -345,6 +346,7 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
           <View style={styles.halfField}>
             <Text style={styles.label}>Slope Rating (optional)</Text>
             <TextInput
+              testID="manual-course-slope-input"
               value={slopeRating}
               onChangeText={(text) => setSlopeRating(filterIntegerInput(text))}
               placeholder="e.g., 135"

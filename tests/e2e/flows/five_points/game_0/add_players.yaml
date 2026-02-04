@@ -161,6 +161,17 @@ appId: golf.spicy
 
 - inputText: "Blue"
 
+# Enter course rating and slope
+- tapOn:
+    id: "manual-course-rating-input"
+
+- inputText: "71.8"
+
+- tapOn:
+    id: "manual-course-slope-input"
+
+- inputText: "134"
+
 - hideKeyboard
 
 - tapOn:
@@ -172,7 +183,7 @@ appId: golf.spicy
 # === Enter Hole Details (Par & Handicap) ===
 # Druid Hills Golf Club - Blue Tees
 # Par defaults to 4, Handicap starts empty (user must fill in all)
-# Format: Hole X: Par Y, Hdcp Z
+# For par changes: tap picker, then tap the value with index: 0 (first match in dropdown)
 
 # Hole 1: Par 4 (default), Hdcp 3
 - tapOn:
@@ -205,7 +216,8 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "^3$"
+    text: "3"
+    index: 0
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -218,7 +230,8 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "^5$"
+    text: "5"
+    index: 0
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -231,7 +244,8 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "^3$"
+    text: "3"
+    index: 0
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -244,7 +258,8 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "^5$"
+    text: "5"
+    index: 0
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -272,7 +287,8 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "^3$"
+    text: "3"
+    index: 0
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -285,7 +301,8 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "^5$"
+    text: "5"
+    index: 0
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -308,7 +325,8 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "^3$"
+    text: "3"
+    index: 0
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
@@ -321,7 +339,8 @@ appId: golf.spicy
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
-    text: "^5$"
+    text: "5"
+    index: 0
 - waitForAnimationToEnd:
     timeout: 500
 - tapOn:
