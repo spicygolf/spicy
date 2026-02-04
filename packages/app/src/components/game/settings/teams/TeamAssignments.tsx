@@ -1,8 +1,8 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { Pressable, View } from "react-native";
 import { DraxScrollView, DraxView } from "react-native-drax";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Button, Text } from "@/ui";
 import type { PlayerRoundItem, TeamSection } from "./types";
@@ -180,6 +180,11 @@ export function TeamAssignments({
                       const nextTeam =
                         currentTeam >= teamCount ? 0 : currentTeam + 1;
 
+                      // Create tap gesture for cycling teams (works alongside DraxView's long-press drag)
+                      const tapGesture = Gesture.Tap().onEnd(() => {
+                        onDrop(player.id, nextTeam);
+                      });
+
                       return (
                         <DraxView
                           key={player.id}
@@ -188,42 +193,36 @@ export function TeamAssignments({
                           dragReleasedStyle={styles.playerReleased}
                           dragPayload={player.id}
                           renderContent={({ viewState }) => (
-                            <View
-                              style={[
-                                styles.playerContent,
-                                viewState?.dragStatus === 2 &&
-                                  styles.playerContentDragging,
-                              ]}
-                            >
-                              <View style={styles.dragHandle}>
-                                <FontAwesome6
-                                  name="grip-lines"
-                                  iconStyle="solid"
-                                  size={16}
-                                  color={theme.colors.secondary}
-                                />
-                              </View>
-                              {/* TouchableOpacity from gesture-handler for tap-to-cycle (E2E testing) */}
-                              {/* Must use gesture-handler version to work inside DraxView */}
-                              <TouchableOpacity
+                            <GestureDetector gesture={tapGesture}>
+                              <View
                                 testID={playerTestId}
                                 accessibilityLabel={playerTestId}
-                                style={styles.playerInfo}
-                                onPress={() => {
-                                  // Tap cycles player to next team
-                                  onDrop(player.id, nextTeam);
-                                }}
+                                style={[
+                                  styles.playerContent,
+                                  viewState?.dragStatus === 2 &&
+                                    styles.playerContentDragging,
+                                ]}
                               >
-                                <Text style={styles.playerName}>
-                                  {player.playerName}
-                                </Text>
-                                {player.handicap && (
-                                  <Text style={styles.handicap}>
-                                    HI: {player.handicap}
+                                <View style={styles.dragHandle}>
+                                  <FontAwesome6
+                                    name="grip-lines"
+                                    iconStyle="solid"
+                                    size={16}
+                                    color={theme.colors.secondary}
+                                  />
+                                </View>
+                                <View style={styles.playerInfo}>
+                                  <Text style={styles.playerName}>
+                                    {player.playerName}
                                   </Text>
-                                )}
-                              </TouchableOpacity>
-                            </View>
+                                  {player.handicap && (
+                                    <Text style={styles.handicap}>
+                                      HI: {player.handicap}
+                                    </Text>
+                                  )}
+                                </View>
+                              </View>
+                            </GestureDetector>
                           )}
                         />
                       );

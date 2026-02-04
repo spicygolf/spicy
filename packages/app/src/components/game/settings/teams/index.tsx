@@ -25,6 +25,7 @@ export function GameTeamsList() {
     resolve: {
       scope: { teamsConfig: true },
       spec: { $each: { $each: true } }, // Working copy of options (MapOfOptions -> Option fields)
+      specRef: { $each: { $each: true } }, // Catalog spec - for reading num_teams
       players: {
         $each: {
           name: true,
@@ -117,17 +118,18 @@ export function GameTeamsList() {
   }, [game]);
 
   // Check if spec has fixed num_teams (e.g., Five Points = 2 teams)
+  // Read from specRef (catalog spec) since num_teams is a spec definition, not a per-game override
   // biome-ignore lint/correctness/useExhaustiveDependencies: Use game.$jazz.id to avoid recomputation on Jazz progressive loading
   const specNumTeams = useMemo(() => {
-    if (!game?.$isLoaded || !game.spec?.$isLoaded) return undefined;
-    return getSpecNumTeams(game.spec);
+    if (!game?.$isLoaded || !game.specRef?.$isLoaded) return undefined;
+    return getSpecNumTeams(game.specRef);
   }, [game?.$jazz.id]);
 
   // Only allow adding teams when:
-  // 1. Spec is loaded (don't show button during loading)
+  // 1. specRef is loaded (don't show button during loading)
   // 2. num_teams is not fixed by the spec
   const canAddTeam = Boolean(
-    game?.$isLoaded && game.spec?.$isLoaded && specNumTeams === undefined,
+    game?.$isLoaded && game.specRef?.$isLoaded && specNumTeams === undefined,
   );
 
   const allPlayerRounds = useMemo(() => {
