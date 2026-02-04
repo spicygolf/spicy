@@ -36,21 +36,24 @@ export function DeveloperToolsScreen() {
     },
   });
 
+  const isRootLoaded = me?.$isLoaded && me.root?.$isLoaded;
+
   const gamesCount =
-    me?.$isLoaded && me.root?.$isLoaded && me.root.games?.$isLoaded
+    isRootLoaded && me.root.$jazz.has("games") && me.root.games?.$isLoaded
       ? me.root.games.length
       : 0;
 
   const roundsCount =
-    me?.$isLoaded &&
-    me.root?.$isLoaded &&
+    isRootLoaded &&
+    me.root.$jazz.has("player") &&
     me.root.player?.$isLoaded &&
+    me.root.player.$jazz.has("rounds") &&
     me.root.player.rounds?.$isLoaded
       ? me.root.player.rounds.length
       : 0;
 
   const handleDeepDeleteAllGames = useCallback(async () => {
-    if (!me?.$isLoaded || !me.root?.$isLoaded) {
+    if (!isRootLoaded) {
       return;
     }
 
@@ -67,12 +70,16 @@ export function DeveloperToolsScreen() {
       let deletedGames = 0;
 
       // Delete all games
-      if (me.root.games?.$isLoaded && me.root.games.length > 0) {
+      if (
+        me.root.$jazz.has("games") &&
+        me.root.games?.$isLoaded &&
+        me.root.games.length > 0
+      ) {
         deletedGames = await deepDeleteAllGames(me.root.games);
       }
 
       // Clear the logged-in player's rounds
-      if (me.root.player?.$isLoaded) {
+      if (me.root.$jazz.has("player") && me.root.player?.$isLoaded) {
         await clearPlayerRounds(me.root.player);
       }
 
@@ -85,7 +92,7 @@ export function DeveloperToolsScreen() {
     } finally {
       setIsDeleting(false);
     }
-  }, [me, gamesCount, roundsCount]);
+  }, [me, isRootLoaded, gamesCount, roundsCount]);
 
   return (
     <Screen>

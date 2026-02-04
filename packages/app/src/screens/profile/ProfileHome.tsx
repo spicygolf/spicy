@@ -41,8 +41,9 @@ export function ProfileHome() {
       me.root.settings.recoveryPhraseSaved !== true);
 
   // Show Developer Tools in dev builds or for admin users
-  const isAdmin =
-    isLoaded && me.root.player?.$isLoaded && me.root.player.level === "admin";
+  const hasPlayer =
+    isLoaded && me.root.$jazz.has("player") && me.root.player?.$isLoaded;
+  const isAdmin = hasPlayer && me.root.player.level === "admin";
   const showDevTools = __DEV__ || isAdmin;
 
   return (
