@@ -1,8 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { Pressable, View } from "react-native";
 import { DraxScrollView, DraxView } from "react-native-drax";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Button, Text } from "@/ui";
 import type { PlayerRoundItem, TeamSection } from "./types";
@@ -180,51 +179,48 @@ export function TeamAssignments({
                       const nextTeam =
                         currentTeam >= teamCount ? 0 : currentTeam + 1;
 
-                      // Create tap gesture for cycling teams (works alongside DraxView's long-press drag)
-                      const tapGesture = Gesture.Tap().onEnd(() => {
-                        onDrop(player.id, nextTeam);
-                      });
-
                       return (
-                        <DraxView
-                          key={player.id}
-                          style={styles.playerItem}
-                          draggingStyle={styles.playerDragging}
-                          dragReleasedStyle={styles.playerReleased}
-                          dragPayload={player.id}
-                          renderContent={({ viewState }) => (
-                            <GestureDetector gesture={tapGesture}>
+                        <View key={player.id} style={styles.playerItem}>
+                          {/* Drag handle - only this area triggers drag */}
+                          <DraxView
+                            style={styles.dragHandleContainer}
+                            draggingStyle={styles.dragHandleDragging}
+                            dragReleasedStyle={styles.dragHandleReleased}
+                            dragPayload={player.id}
+                            renderContent={({ viewState }) => (
                               <View
-                                testID={playerTestId}
-                                accessibilityLabel={playerTestId}
                                 style={[
-                                  styles.playerContent,
+                                  styles.dragHandle,
                                   viewState?.dragStatus === 2 &&
-                                    styles.playerContentDragging,
+                                    styles.dragHandleActive,
                                 ]}
                               >
-                                <View style={styles.dragHandle}>
-                                  <FontAwesome6
-                                    name="grip-lines"
-                                    iconStyle="solid"
-                                    size={16}
-                                    color={theme.colors.secondary}
-                                  />
-                                </View>
-                                <View style={styles.playerInfo}>
-                                  <Text style={styles.playerName}>
-                                    {player.playerName}
-                                  </Text>
-                                  {player.handicap && (
-                                    <Text style={styles.handicap}>
-                                      HI: {player.handicap}
-                                    </Text>
-                                  )}
-                                </View>
+                                <FontAwesome6
+                                  name="grip-lines"
+                                  iconStyle="solid"
+                                  size={16}
+                                  color={theme.colors.secondary}
+                                />
                               </View>
-                            </GestureDetector>
-                          )}
-                        />
+                            )}
+                          />
+                          {/* Player info - tappable to cycle teams */}
+                          <Pressable
+                            testID={playerTestId}
+                            accessibilityLabel={playerTestId}
+                            style={styles.playerInfo}
+                            onPress={() => onDrop(player.id, nextTeam)}
+                          >
+                            <Text style={styles.playerName}>
+                              {player.playerName}
+                            </Text>
+                            {player.handicap !== undefined && (
+                              <Text style={styles.handicap}>
+                                HI: {player.handicap}
+                              </Text>
+                            )}
+                          </Pressable>
+                        </View>
                       );
                     })}
                   </View>
@@ -335,44 +331,37 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
-  },
-  playerContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: theme.gap(1),
-    paddingHorizontal: theme.gap(2),
     backgroundColor: theme.colors.background,
-    width: "100%",
   },
-  playerContentDragging: {
-    backgroundColor: theme.colors.background,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    opacity: 0.9,
+  dragHandleContainer: {
+    paddingVertical: theme.gap(1.5),
+    paddingLeft: theme.gap(2),
+    paddingRight: theme.gap(1),
   },
-  playerDragging: {
+  dragHandleDragging: {
     opacity: 0.3,
   },
-  playerReleased: {
+  dragHandleReleased: {
     opacity: 1,
   },
   dragHandle: {
     width: 24,
+    height: 24,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: theme.gap(2),
+  },
+  dragHandleActive: {
+    backgroundColor: theme.colors.background,
+    borderRadius: 4,
   },
   playerInfo: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingVertical: theme.gap(1.5),
+    paddingRight: theme.gap(2),
+    paddingLeft: theme.gap(1),
   },
   playerName: {
     fontSize: 16,
