@@ -1,0 +1,252 @@
+# Sub-flow: Select course and tee for Brad (manual entry)
+# Expects: Game settings screen with players added
+# Provides: Course and tee configured, ready to start game
+
+appId: golf.spicy
+# Allow Maestro to see elements inside dropdown modals on iOS
+# (react-native-element-dropdown uses accessibilityViewIsModal which hides sibling views)
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
+---
+# === Select/Create Round for Brad ===
+- runFlow:
+    when:
+      visible:
+        id: "select-round-brad"
+    commands:
+      - tapOn:
+          id: "select-round-brad"
+      - waitForAnimationToEnd:
+          timeout: 2000
+      - tapOn:
+          id: "create-new-round-button"
+      - waitForAnimationToEnd:
+          timeout: 2000
+
+# === Select Course/Tee (Manual Entry) ===
+- tapOn:
+    id: "select-course-tee-brad"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+- tapOn: "Manual"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "manual-course-name-input"
+
+- inputText: "Druid Hills Golf Club"
+
+- tapOn:
+    id: "manual-course-tee-input"
+
+- inputText: "Blue"
+
+# Enter course rating and slope
+- tapOn:
+    id: "manual-course-rating-input"
+
+- inputText: "71.8"
+
+- tapOn:
+    id: "manual-course-slope-input"
+
+- inputText: "134"
+
+# Tap header to dismiss keyboard
+- tapOn: "Course Name"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "manual-course-next-button"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# === Enter Hole Details (Par & Handicap) ===
+# Druid Hills Golf Club - Blue Tees
+# Par defaults to 4, Handicap starts empty (user must fill in all)
+# Strategy: Edit 1-8, then 10-17 (skipping 9 and 18), then scroll down for 9 and 18
+
+# Hole 1: Par 4 (default), Hdcp 3
+- tapOn:
+    id: "hole-1-handicap"
+- inputText: "3"
+
+# Hole 2: Par 4 (default), Hdcp 7
+- tapOn:
+    id: "hole-2-handicap"
+- inputText: "7"
+
+# Hole 3: Par 4 (default), Hdcp 15
+- tapOn:
+    id: "hole-3-handicap"
+- inputText: "15"
+
+# Hole 4: Par 4 (default), Hdcp 1
+- tapOn:
+    id: "hole-4-handicap"
+- inputText: "1"
+
+# Hole 5: Par 4 (default), Hdcp 5
+- tapOn:
+    id: "hole-5-handicap"
+- inputText: "5"
+
+# Hole 6: Par 3, Hdcp 17
+- tapOn:
+    id: "hole-6-par"
+- waitForAnimationToEnd:
+    timeout: 300
+- tapOn: "hole-6-par-item-3"
+- waitForAnimationToEnd:
+    timeout: 200
+- tapOn:
+    id: "hole-6-handicap"
+- inputText: "17"
+
+# Hole 7: Par 5, Hdcp 11
+- tapOn:
+    id: "hole-7-par"
+- waitForAnimationToEnd:
+    timeout: 300
+- tapOn: "hole-7-par-item-5"
+- waitForAnimationToEnd:
+    timeout: 200
+- tapOn:
+    id: "hole-7-handicap"
+- inputText: "11"
+
+# Hole 8: Par 3, Hdcp 9
+- tapOn:
+    id: "hole-8-par"
+- waitForAnimationToEnd:
+    timeout: 300
+- tapOn: "hole-8-par-item-3"
+- waitForAnimationToEnd:
+    timeout: 200
+- tapOn:
+    id: "hole-8-handicap"
+- inputText: "9"
+
+# Skip hole 9 for now (at bottom, keyboard covers it)
+
+# Hole 10: Par 4 (default), Hdcp 2
+- tapOn:
+    id: "hole-10-handicap"
+- inputText: "2"
+
+# Hole 11: Par 4 (default), Hdcp 6
+- tapOn:
+    id: "hole-11-handicap"
+- inputText: "6"
+
+# Hole 12: Par 4 (default), Hdcp 12
+- tapOn:
+    id: "hole-12-handicap"
+- inputText: "12"
+
+# Hole 13: Par 3, Hdcp 18
+- tapOn:
+    id: "hole-13-par"
+- waitForAnimationToEnd:
+    timeout: 300
+- tapOn: "hole-13-par-item-3"
+- waitForAnimationToEnd:
+    timeout: 200
+- tapOn:
+    id: "hole-13-handicap"
+- inputText: "18"
+
+# Hole 14: Par 5, Hdcp 10
+- tapOn:
+    id: "hole-14-par"
+- waitForAnimationToEnd:
+    timeout: 300
+- tapOn: "hole-14-par-item-5"
+- waitForAnimationToEnd:
+    timeout: 200
+- tapOn:
+    id: "hole-14-handicap"
+- inputText: "10"
+
+# Hole 15: Par 4 (default), Hdcp 4
+- tapOn:
+    id: "hole-15-handicap"
+- inputText: "4"
+
+# Hole 16: Par 4 (default), Hdcp 16
+- tapOn:
+    id: "hole-16-handicap"
+- inputText: "16"
+
+# Hole 17: Par 3, Hdcp 14
+- tapOn:
+    id: "hole-17-par"
+- waitForAnimationToEnd:
+    timeout: 300
+- tapOn: "hole-17-par-item-3"
+- waitForAnimationToEnd:
+    timeout: 200
+- tapOn:
+    id: "hole-17-handicap"
+- inputText: "14"
+
+# Dismiss keyboard and scroll down to reveal holes 9 and 18
+- tapOn: "Front 9"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- scrollUntilVisible:
+    element:
+      id: "manual-course-save-button"
+    direction: "DOWN"
+    timeout: 3000
+
+# Hole 9: Par 5, Hdcp 13
+- tapOn:
+    id: "hole-9-par"
+- waitForAnimationToEnd:
+    timeout: 300
+- tapOn: "hole-9-par-item-5"
+- waitForAnimationToEnd:
+    timeout: 200
+- tapOn:
+    id: "hole-9-handicap"
+- inputText: "13"
+
+# Dismiss keyboard before editing hole 18
+- tapOn: "Front 9"
+- waitForAnimationToEnd:
+    timeout: 500
+
+# Hole 18: Par 5, Hdcp 8
+- tapOn:
+    id: "hole-18-par"
+- waitForAnimationToEnd:
+    timeout: 300
+- tapOn: "hole-18-par-item-5"
+- waitForAnimationToEnd:
+    timeout: 200
+- tapOn:
+    id: "hole-18-handicap"
+- inputText: "8"
+
+# === Save Course & Tee ===
+# Dismiss keyboard before tapping save
+- tapOn: "Front 9"
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "manual-course-save-button"
+
+- waitForAnimationToEnd:
+    timeout: 3000

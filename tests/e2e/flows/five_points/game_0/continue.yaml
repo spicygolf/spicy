@@ -1,0 +1,11 @@
+# Debug flow: Continue from course/tee selection
+# Use this to test course/tee entry without running the full flow
+# Expects: Game settings screen with players added, ready for course selection
+
+appId: golf.spicy
+# Allow Maestro to see elements inside dropdown modals on iOS
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
+---
+- runFlow: "select_course_tee.yaml"

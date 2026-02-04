@@ -11,7 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useGame } from "@/hooks";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
@@ -248,137 +248,151 @@ export function SelectCourseManual({ route }: Props): React.ReactElement {
 
   return (
     <Screen>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 140 : 0}
       >
-        {isEditMode && (
-          <View style={styles.editModeHeader}>
-            <Text style={styles.editModeText}>Editing Manual Course</Text>
-            <Button
-              label="Create New Course"
-              onPress={handleCreateNew}
-              variant="secondary"
-            />
-          </View>
-        )}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          {isEditMode && (
+            <View style={styles.editModeHeader}>
+              <Text style={styles.editModeText}>Editing Manual Course</Text>
+              <Button
+                label="Create New Course"
+                onPress={handleCreateNew}
+                variant="secondary"
+              />
+            </View>
+          )}
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Course Name</Text>
-          <TextInput
-            testID="manual-course-name-input"
-            value={courseName}
-            onChangeText={setCourseName}
-            placeholder="e.g., Pebble Beach"
-            autoCapitalize="words"
-            hasError={!!errors.courseName}
-          />
-          {errors.courseName ? (
-            <Text style={styles.errorText}>{errors.courseName}</Text>
-          ) : null}
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Tee Name</Text>
-          <TextInput
-            testID="manual-course-tee-input"
-            value={teeName}
-            onChangeText={setTeeName}
-            placeholder="e.g., Blue, White, Red"
-            autoCapitalize="words"
-            hasError={!!errors.teeName}
-          />
-          {errors.teeName ? (
-            <Text style={styles.errorText}>{errors.teeName}</Text>
-          ) : null}
-        </View>
-
-        <View style={styles.row}>
-          <View style={styles.halfField}>
-            <Text style={styles.label}>Gender</Text>
-            <Picker
-              title="Select gender"
-              items={GENDER_OPTIONS}
-              selectedValue={teeGender}
-              onValueChange={(value) =>
-                setTeeGender(value as "M" | "F" | "Mixed")
-              }
-            />
-          </View>
-
-          <View style={styles.halfField}>
-            <Text style={styles.label}>Holes</Text>
-            <Picker
-              title="Select holes"
-              items={HOLES_OPTIONS}
-              selectedValue={holesCount}
-              onValueChange={(value) => setHolesCount(value as "9" | "18")}
-            />
-          </View>
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Total Yardage (optional)</Text>
-          <TextInput
-            value={totalYardage}
-            onChangeText={(text) => setTotalYardage(filterIntegerInput(text))}
-            placeholder="e.g., 6500"
-            keyboardType="number-pad"
-          />
-        </View>
-
-        <View style={styles.row}>
-          <View style={styles.halfField}>
-            <Text style={styles.label}>Course Rating (optional)</Text>
+          <View style={styles.field}>
+            <Text style={styles.label}>Course Name</Text>
             <TextInput
-              testID="manual-course-rating-input"
-              value={courseRating}
-              onChangeText={(text) => setCourseRating(filterDecimalInput(text))}
-              placeholder="e.g., 72.5"
-              keyboardType="decimal-pad"
-              hasError={!!errors.courseRating}
+              testID="manual-course-name-input"
+              value={courseName}
+              onChangeText={setCourseName}
+              placeholder="e.g., Pebble Beach"
+              autoCapitalize="words"
+              hasError={!!errors.courseName}
             />
-            {errors.courseRating ? (
-              <Text style={styles.errorText}>{errors.courseRating}</Text>
+            {errors.courseName ? (
+              <Text style={styles.errorText}>{errors.courseName}</Text>
             ) : null}
           </View>
 
-          <View style={styles.halfField}>
-            <Text style={styles.label}>Slope Rating (optional)</Text>
+          <View style={styles.field}>
+            <Text style={styles.label}>Tee Name</Text>
             <TextInput
-              testID="manual-course-slope-input"
-              value={slopeRating}
-              onChangeText={(text) => setSlopeRating(filterIntegerInput(text))}
-              placeholder="e.g., 135"
+              testID="manual-course-tee-input"
+              value={teeName}
+              onChangeText={setTeeName}
+              placeholder="e.g., Blue, White, Red"
+              autoCapitalize="words"
+              hasError={!!errors.teeName}
+            />
+            {errors.teeName ? (
+              <Text style={styles.errorText}>{errors.teeName}</Text>
+            ) : null}
+          </View>
+
+          <View style={styles.row}>
+            <View style={styles.halfField}>
+              <Text style={styles.label}>Gender</Text>
+              <Picker
+                title="Select gender"
+                items={GENDER_OPTIONS}
+                selectedValue={teeGender}
+                onValueChange={(value) =>
+                  setTeeGender(value as "M" | "F" | "Mixed")
+                }
+              />
+            </View>
+
+            <View style={styles.halfField}>
+              <Text style={styles.label}>Holes</Text>
+              <Picker
+                title="Select holes"
+                items={HOLES_OPTIONS}
+                selectedValue={holesCount}
+                onValueChange={(value) => setHolesCount(value as "9" | "18")}
+              />
+            </View>
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Total Yardage (optional)</Text>
+            <TextInput
+              value={totalYardage}
+              onChangeText={(text) => setTotalYardage(filterIntegerInput(text))}
+              placeholder="e.g., 6500"
               keyboardType="number-pad"
-              hasError={!!errors.slopeRating}
             />
-            {errors.slopeRating ? (
-              <Text style={styles.errorText}>{errors.slopeRating}</Text>
-            ) : null}
           </View>
-        </View>
 
-        <Text style={styles.helperText}>
-          {isEditMode
-            ? "Update the course details and hole information."
-            : "Next: Enter par and handicap for each hole."}
-        </Text>
+          <View style={styles.row}>
+            <View style={styles.halfField}>
+              <Text style={styles.label}>Course Rating (optional)</Text>
+              <TextInput
+                testID="manual-course-rating-input"
+                value={courseRating}
+                onChangeText={(text) =>
+                  setCourseRating(filterDecimalInput(text))
+                }
+                placeholder="e.g., 72.5"
+                keyboardType="decimal-pad"
+                hasError={!!errors.courseRating}
+              />
+              {errors.courseRating ? (
+                <Text style={styles.errorText}>{errors.courseRating}</Text>
+              ) : null}
+            </View>
 
-        <View style={styles.buttonContainer}>
-          <Button
-            testID="manual-course-next-button"
-            label={isEditMode ? "Edit Hole Details" : "Next: Hole Details"}
-            onPress={handleNext}
-            disabled={!isValid}
-          />
-        </View>
-      </ScrollView>
+            <View style={styles.halfField}>
+              <Text style={styles.label}>Slope Rating (optional)</Text>
+              <TextInput
+                testID="manual-course-slope-input"
+                value={slopeRating}
+                onChangeText={(text) =>
+                  setSlopeRating(filterIntegerInput(text))
+                }
+                placeholder="e.g., 135"
+                keyboardType="number-pad"
+                hasError={!!errors.slopeRating}
+              />
+              {errors.slopeRating ? (
+                <Text style={styles.errorText}>{errors.slopeRating}</Text>
+              ) : null}
+            </View>
+          </View>
+
+          <Text style={styles.helperText}>
+            {isEditMode
+              ? "Update the course details and hole information."
+              : "Next: Enter par and handicap for each hole."}
+          </Text>
+
+          <View style={styles.buttonContainer}>
+            <Button
+              testID="manual-course-next-button"
+              label={isEditMode ? "Edit Hole Details" : "Next: Hole Details"}
+              onPress={handleNext}
+              disabled={!isValid}
+            />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
@@ -387,6 +401,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   scrollContent: {
     padding: theme.gap(2),
+    paddingBottom: theme.gap(8),
   },
   editModeHeader: {
     flexDirection: "row",

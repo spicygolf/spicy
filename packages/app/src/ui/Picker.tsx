@@ -9,6 +9,7 @@ export interface PickerItem {
 
 interface PickerItemInternal extends PickerItem {
   testID: string;
+  accessibilityLabel: string;
 }
 
 interface PickerProps {
@@ -37,13 +38,15 @@ export function Picker({
     onValueChange(selection.value);
   };
 
-  // Add testID to each item for E2E testing
+  // Add testID and accessibilityLabel to each item for E2E testing
+  // accessibilityLabel is used because itemTestIDField doesn't work reliably on iOS
   const itemsWithTestID: PickerItemInternal[] = useMemo(() => {
+    const itemTestID = (value: string) =>
+      testID ? `${testID}-item-${value}` : `picker-item-${value}`;
     return items.map((item) => ({
       ...item,
-      testID: testID
-        ? `${testID}-item-${item.value}`
-        : `picker-item-${item.value}`,
+      testID: itemTestID(item.value),
+      accessibilityLabel: itemTestID(item.value),
     }));
   }, [items, testID]);
 
@@ -55,6 +58,7 @@ export function Picker({
       labelField="label"
       valueField="value"
       itemTestIDField="testID"
+      itemAccessibilityLabelField="accessibilityLabel"
       onChange={onChange}
       style={styles.picker}
       placeholder={title}

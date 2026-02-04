@@ -5,7 +5,6 @@
 
 appId: golf.spicy
 ---
-
 - takeScreenshot: "test_start"
 
 - launchApp:
@@ -22,6 +21,9 @@ appId: golf.spicy
 
 # Add guest players (logged-in player already added)
 - runFlow: "add_players.yaml"
+
+# Select course and tee (manual entry)
+- runFlow: "select_course_tee.yaml"
 
 # Start game
 - runFlow: "start_game.yaml"

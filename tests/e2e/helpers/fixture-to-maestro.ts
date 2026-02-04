@@ -437,11 +437,14 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
       },
     },
     { inputText: fixture.course.slope?.toString() || "" },
-    { hideKeyboard: true },
-    // Wait for keyboard to fully dismiss
+    // Scroll down to make Next button visible above keyboard
     {
-      waitForAnimationToEnd: {
-        timeout: 1000,
+      scrollUntilVisible: {
+        element: {
+          id: "manual-course-next-button",
+        },
+        direction: "DOWN",
+        timeout: 3000,
       },
     },
     // Tap Next to go to hole setup
@@ -472,14 +475,13 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
         },
         {
           waitForAnimationToEnd: {
-            timeout: 500,
+            timeout: 1000,
           },
         },
-        // Tap the par value in the dropdown using testID (e.g., hole-6-par-item-3)
+        // Tap the par value in the dropdown using accessibilityLabel (text matching)
+        // Note: itemTestIDField doesn't work reliably on iOS, so we use accessibilityLabel
         {
-          tapOn: {
-            id: `hole-${holeNum}-par-item-${holeData.par}`,
-          },
+          tapOn: `hole-${holeNum}-par-item-${holeData.par}`,
         },
         {
           waitForAnimationToEnd: {
@@ -500,8 +502,16 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
     );
   }
 
-  // Hide keyboard after entering all values
-  steps.push({ hideKeyboard: true });
+  // Scroll down to make Save button visible above keyboard
+  steps.push({
+    scrollUntilVisible: {
+      element: {
+        id: "manual-course-save-button",
+      },
+      direction: "DOWN",
+      timeout: 3000,
+    },
+  });
 
   // Save the course
   steps.push(
@@ -1015,6 +1025,11 @@ export function stepsToYaml(
   }
 
   lines.push(`appId: ${appId}`);
+  // Allow Maestro to see elements inside dropdown modals on iOS
+  // (react-native-element-dropdown uses accessibilityViewIsModal which hides sibling views)
+  lines.push(`platform:`);
+  lines.push(`  ios:`);
+  lines.push(`    snapshotKeyHonorModalViews: false`);
   lines.push(`---`);
   lines.push(``);
 
