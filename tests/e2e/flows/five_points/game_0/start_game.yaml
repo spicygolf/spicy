@@ -11,7 +11,7 @@ platform:
 - tapOn: "Start Game"
 
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 3000
 
 - extendedWaitUntil:
     visible: "Hole 1"

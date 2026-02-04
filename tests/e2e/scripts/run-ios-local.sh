@@ -9,8 +9,8 @@
 
 set -e
 
-# Get the booted iOS simulator UDID
-IOS_DEVICE=$(xcrun simctl list devices | grep -i "(Booted)" | grep -oE "[0-9A-F-]{36}" | head -1)
+# Get the booted iOS simulator UDID (allow lowercase UDIDs for safety)
+IOS_DEVICE=$(xcrun simctl list devices | grep -i "(Booted)" | grep -oE "[0-9A-Fa-f-]{36}" | head -1 || true)
 
 if [ -z "$IOS_DEVICE" ]; then
   echo "Error: No booted iOS simulator found"

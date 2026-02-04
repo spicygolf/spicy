@@ -20,7 +20,7 @@ platform:
 
 - extendedWaitUntil:
     visible: "Hole 8"
-    timeout: 5000
+    timeout: 3000
 
 - tapOn:
     id: "player-p1-increment"
@@ -42,6 +42,9 @@ platform:
 
 - tapOn:
     id: "player-p4-increment"
+
+- waitForAnimationToEnd:
+    timeout: 300
 
 - tapOn:
     id: "player-p4-increment"

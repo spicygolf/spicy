@@ -16,11 +16,11 @@ platform:
     - tapOn:
         id: "select-round-brad"
     - waitForAnimationToEnd:
-        timeout: 2000
+        timeout: 3000
     - tapOn:
         id: "create-new-round-button"
     - waitForAnimationToEnd:
-        timeout: 2000
+        timeout: 3000
 
 - tapOn:
     id: "select-course-tee-brad"
@@ -98,7 +98,7 @@ platform:
 - tapOn: "hole-6-par-item-3"
 
 - waitForAnimationToEnd:
-    timeout: 200
+    timeout: 300
 
 - tapOn:
     id: "hole-6-handicap"
@@ -114,7 +114,7 @@ platform:
 - tapOn: "hole-7-par-item-5"
 
 - waitForAnimationToEnd:
-    timeout: 200
+    timeout: 300
 
 - tapOn:
     id: "hole-7-handicap"
@@ -130,7 +130,7 @@ platform:
 - tapOn: "hole-8-par-item-3"
 
 - waitForAnimationToEnd:
-    timeout: 200
+    timeout: 300
 
 - tapOn:
     id: "hole-8-handicap"
@@ -161,7 +161,7 @@ platform:
 - tapOn: "hole-13-par-item-3"
 
 - waitForAnimationToEnd:
-    timeout: 200
+    timeout: 300
 
 - tapOn:
     id: "hole-13-handicap"
@@ -177,7 +177,7 @@ platform:
 - tapOn: "hole-14-par-item-5"
 
 - waitForAnimationToEnd:
-    timeout: 200
+    timeout: 300
 
 - tapOn:
     id: "hole-14-handicap"
@@ -203,7 +203,7 @@ platform:
 - tapOn: "hole-17-par-item-3"
 
 - waitForAnimationToEnd:
-    timeout: 200
+    timeout: 300
 
 - tapOn:
     id: "hole-17-handicap"
@@ -230,7 +230,7 @@ platform:
 - tapOn: "hole-9-par-item-5"
 
 - waitForAnimationToEnd:
-    timeout: 200
+    timeout: 300
 
 - tapOn:
     id: "hole-9-handicap"
@@ -251,7 +251,7 @@ platform:
 - tapOn: "hole-18-par-item-5"
 
 - waitForAnimationToEnd:
-    timeout: 200
+    timeout: 300
 
 - tapOn:
     id: "hole-18-handicap"

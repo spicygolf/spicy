@@ -20,10 +20,13 @@ platform:
 
 - extendedWaitUntil:
     visible: "Hole 7"
-    timeout: 5000
+    timeout: 3000
 
 - tapOn:
     id: "player-p1-decrement"
+
+- waitForAnimationToEnd:
+    timeout: 300
 
 - tapOn:
     id: "player-p1-decrement"
@@ -39,6 +42,9 @@ platform:
 
 - tapOn:
     id: "player-p3-decrement"
+
+- waitForAnimationToEnd:
+    timeout: 300
 
 - tapOn:
     id: "player-p3-decrement"

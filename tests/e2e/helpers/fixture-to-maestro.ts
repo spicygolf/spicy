@@ -27,6 +27,25 @@ interface MaestroStep {
   [key: string]: unknown;
 }
 
+// =============================================================================
+// Timeout Constants (in milliseconds)
+// =============================================================================
+
+/** Wait for app launch and initial load */
+const TIMEOUT_APP_LAUNCH = 10000;
+/** Wait for login/authentication to complete */
+const TIMEOUT_LOGIN = 15000;
+/** Wait for API data to load (specs, courses, etc.) */
+const TIMEOUT_API_LOAD = 10000;
+/** Wait for navigation/screen transitions */
+const TIMEOUT_NAVIGATION = 3000;
+/** Wait for standard animations (modals, dropdowns) */
+const TIMEOUT_ANIMATION = 500;
+/** Wait for quick UI updates (button taps, toggles) */
+const TIMEOUT_UI_UPDATE = 300;
+/** Wait for hole navigation swipe */
+const TIMEOUT_HOLE_SWIPE = 1000;
+
 /**
  * E2E-specific metadata that can be added to fixtures
  */
@@ -103,13 +122,13 @@ export function generateLoginSteps(): MaestroStep[] {
   return [
     {
       waitForAnimationToEnd: {
-        timeout: 10000,
+        timeout: TIMEOUT_APP_LAUNCH,
       },
     },
     {
       extendedWaitUntil: {
         visible: "Spicy Golf",
-        timeout: 10000,
+        timeout: TIMEOUT_APP_LAUNCH,
       },
     },
     {
@@ -132,7 +151,7 @@ export function generateLoginSteps(): MaestroStep[] {
     {
       extendedWaitUntil: {
         visible: "New Game",
-        timeout: 15000,
+        timeout: TIMEOUT_LOGIN,
       },
     },
   ];
@@ -158,7 +177,7 @@ export function generateCreateGameSteps(specName: string): MaestroStep[] {
     { tapOn: "New Game" },
     {
       waitForAnimationToEnd: {
-        timeout: 3000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
     // Switch to Search tab to find spec
@@ -169,7 +188,7 @@ export function generateCreateGameSteps(specName: string): MaestroStep[] {
     },
     {
       waitForAnimationToEnd: {
-        timeout: 3000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
     // Wait for specs to load from API
@@ -178,7 +197,7 @@ export function generateCreateGameSteps(specName: string): MaestroStep[] {
         visible: {
           id: spec.testId,
         },
-        timeout: 10000,
+        timeout: TIMEOUT_API_LOAD,
       },
     },
     {
@@ -190,7 +209,7 @@ export function generateCreateGameSteps(specName: string): MaestroStep[] {
     {
       extendedWaitUntil: {
         visible: "Add Player",
-        timeout: 10000,
+        timeout: TIMEOUT_API_LOAD,
       },
     },
   ];
@@ -223,13 +242,13 @@ export function generateCleanupSteps(): MaestroStep[] {
                 },
                 {
                   waitForAnimationToEnd: {
-                    timeout: 5000,
+                    timeout: TIMEOUT_NAVIGATION,
                   },
                 },
                 { tapOn: "Settings" },
                 {
                   waitForAnimationToEnd: {
-                    timeout: 3000,
+                    timeout: TIMEOUT_NAVIGATION,
                   },
                 },
                 {
@@ -238,14 +257,14 @@ export function generateCleanupSteps(): MaestroStep[] {
                       text: "Delete Game",
                     },
                     direction: "DOWN",
-                    timeout: 5000,
+                    timeout: TIMEOUT_NAVIGATION,
                   },
                 },
                 { tapOn: "Delete Game" },
                 {
                   extendedWaitUntil: {
                     visible: "Delete",
-                    timeout: 3000,
+                    timeout: TIMEOUT_NAVIGATION,
                   },
                 },
                 {
@@ -257,12 +276,12 @@ export function generateCleanupSteps(): MaestroStep[] {
                 {
                   extendedWaitUntil: {
                     visible: "New Game",
-                    timeout: 5000,
+                    timeout: TIMEOUT_NAVIGATION,
                   },
                 },
                 {
                   waitForAnimationToEnd: {
-                    timeout: 1000,
+                    timeout: TIMEOUT_HOLE_SWIPE,
                   },
                 },
               ],
@@ -291,14 +310,14 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
       { tapOn: "Add Player" },
       {
         waitForAnimationToEnd: {
-          timeout: 1000,
+          timeout: TIMEOUT_HOLE_SWIPE,
         },
       },
       // Tap "Manual" tab
       { tapOn: "Manual" },
       {
         waitForAnimationToEnd: {
-          timeout: 500,
+          timeout: TIMEOUT_ANIMATION,
         },
       },
       // Enter player name
@@ -336,7 +355,7 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
       },
       {
         waitForAnimationToEnd: {
-          timeout: 1000,
+          timeout: TIMEOUT_HOLE_SWIPE,
         },
       },
       // Navigate back to game settings screen
@@ -347,7 +366,7 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
       },
       {
         waitForAnimationToEnd: {
-          timeout: 500,
+          timeout: TIMEOUT_ANIMATION,
         },
       },
     );
@@ -388,7 +407,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
           },
           {
             waitForAnimationToEnd: {
-              timeout: 2000,
+              timeout: TIMEOUT_NAVIGATION,
             },
           },
           // Create a new round for this game
@@ -399,7 +418,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
           },
           {
             waitForAnimationToEnd: {
-              timeout: 2000,
+              timeout: TIMEOUT_NAVIGATION,
             },
           },
         ],
@@ -413,14 +432,14 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     },
     {
       waitForAnimationToEnd: {
-        timeout: 1000,
+        timeout: TIMEOUT_HOLE_SWIPE,
       },
     },
     // Tap "Manual" tab for course entry
     { tapOn: "Manual" },
     {
       waitForAnimationToEnd: {
-        timeout: 500,
+        timeout: TIMEOUT_ANIMATION,
       },
     },
     // Enter course name from fixture
@@ -455,7 +474,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     { tapOn: "Course Name" },
     {
       waitForAnimationToEnd: {
-        timeout: 500,
+        timeout: TIMEOUT_ANIMATION,
       },
     },
     // Tap Next to go to hole setup
@@ -466,7 +485,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     },
     {
       waitForAnimationToEnd: {
-        timeout: 1000,
+        timeout: TIMEOUT_HOLE_SWIPE,
       },
     },
   );
@@ -496,7 +515,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
         },
         {
           waitForAnimationToEnd: {
-            timeout: 300,
+            timeout: TIMEOUT_UI_UPDATE,
           },
         },
         // Tap the par value in the dropdown using text matching (accessibilityLabel)
@@ -506,7 +525,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
         },
         {
           waitForAnimationToEnd: {
-            timeout: 200,
+            timeout: TIMEOUT_UI_UPDATE,
           },
         },
       );
@@ -540,7 +559,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     { tapOn: "Front 9" },
     {
       waitForAnimationToEnd: {
-        timeout: 500,
+        timeout: TIMEOUT_ANIMATION,
       },
     },
     {
@@ -549,7 +568,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
           id: "manual-course-save-button",
         },
         direction: "DOWN",
-        timeout: 3000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
   );
@@ -562,7 +581,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     { tapOn: "Front 9" },
     {
       waitForAnimationToEnd: {
-        timeout: 500,
+        timeout: TIMEOUT_ANIMATION,
       },
     },
   );
@@ -575,7 +594,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     { tapOn: "Front 9" },
     {
       waitForAnimationToEnd: {
-        timeout: 500,
+        timeout: TIMEOUT_ANIMATION,
       },
     },
   );
@@ -589,7 +608,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     },
     {
       waitForAnimationToEnd: {
-        timeout: 3000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
   );
@@ -622,7 +641,7 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
         visible: {
           id: `handicap-adjustment-${playerSlug}`,
         },
-        timeout: 5000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     });
 
@@ -635,7 +654,7 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
       },
       {
         waitForAnimationToEnd: {
-          timeout: 1000,
+          timeout: TIMEOUT_HOLE_SWIPE,
         },
       },
     );
@@ -661,7 +680,7 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
       },
       {
         waitForAnimationToEnd: {
-          timeout: 500,
+          timeout: TIMEOUT_ANIMATION,
         },
       },
     );
@@ -678,14 +697,14 @@ export function generateStartGameSteps(): MaestroStep[] {
     { tapOn: "Start Game" },
     {
       waitForAnimationToEnd: {
-        timeout: 5000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
     // Wait for scoring view to load
     {
       extendedWaitUntil: {
         visible: "Hole 1",
-        timeout: 10000,
+        timeout: TIMEOUT_API_LOAD,
       },
     },
   ];
@@ -714,7 +733,7 @@ export function generateNavigateToHoleSteps(holeNumber: number): MaestroStep[] {
           },
           {
             waitForAnimationToEnd: {
-              timeout: 1000,
+              timeout: TIMEOUT_HOLE_SWIPE,
             },
           },
         ],
@@ -723,7 +742,7 @@ export function generateNavigateToHoleSteps(holeNumber: number): MaestroStep[] {
     {
       extendedWaitUntil: {
         visible: `Hole ${holeNumber}`,
-        timeout: 5000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
   ];
@@ -732,6 +751,7 @@ export function generateNavigateToHoleSteps(holeNumber: number): MaestroStep[] {
 /**
  * Generate steps to enter a score for a player.
  * Uses the +/- buttons to increment/decrement from the default (par + pops).
+ * Adds waits between consecutive taps to ensure UI settles.
  *
  * @param playerId - The Jazz ID of the player
  * @param targetGross - The target gross score
@@ -758,8 +778,16 @@ export function generateScoreEntrySteps(
       },
     });
   } else if (diff > 0) {
-    // Increment diff times
+    // Increment diff times, with waits between consecutive taps
     for (let i = 0; i < diff; i++) {
+      if (i > 0) {
+        // Add wait between consecutive taps to let UI settle
+        steps.push({
+          waitForAnimationToEnd: {
+            timeout: TIMEOUT_UI_UPDATE,
+          },
+        });
+      }
       steps.push({
         tapOn: {
           id: `player-${playerId}-increment`,
@@ -767,8 +795,16 @@ export function generateScoreEntrySteps(
       });
     }
   } else {
-    // Decrement |diff| times
+    // Decrement |diff| times, with waits between consecutive taps
     for (let i = 0; i < Math.abs(diff); i++) {
+      if (i > 0) {
+        // Add wait between consecutive taps to let UI settle
+        steps.push({
+          waitForAnimationToEnd: {
+            timeout: TIMEOUT_UI_UPDATE,
+          },
+        });
+      }
       steps.push({
         tapOn: {
           id: `player-${playerId}-decrement`,
@@ -868,7 +904,7 @@ export function generateHoleScoringSteps(
     if (scoreSteps.length > 0) {
       steps.push({
         waitForAnimationToEnd: {
-          timeout: 500,
+          timeout: TIMEOUT_ANIMATION,
         },
       });
     }
@@ -882,7 +918,7 @@ export function generateHoleScoringSteps(
         steps.push(...generateJunkToggleSteps(junkName, playerId));
         steps.push({
           waitForAnimationToEnd: {
-            timeout: 300,
+            timeout: TIMEOUT_UI_UPDATE,
           },
         });
       }
@@ -896,7 +932,7 @@ export function generateHoleScoringSteps(
         steps.push(...generateMultiplierToggleSteps(multiplierName, teamId));
         steps.push({
           waitForAnimationToEnd: {
-            timeout: 300,
+            timeout: TIMEOUT_UI_UPDATE,
           },
         });
       }
@@ -914,7 +950,7 @@ export function generateHoleScoringSteps(
 /**
  * Generate steps to verify final results
  */
-export function generateLeaderboardSteps(fixture: Fixture): MaestroStep[] {
+export function generateLeaderboardSteps(_fixture: Fixture): MaestroStep[] {
   const steps: MaestroStep[] = [];
 
   // Navigate to leaderboard
@@ -922,7 +958,7 @@ export function generateLeaderboardSteps(fixture: Fixture): MaestroStep[] {
     { tapOn: "Leaderboard" },
     {
       waitForAnimationToEnd: {
-        timeout: 3000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
   );

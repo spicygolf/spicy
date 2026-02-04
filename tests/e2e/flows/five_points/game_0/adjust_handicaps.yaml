@@ -11,7 +11,7 @@ platform:
 - extendedWaitUntil:
     visible:
       id: "handicap-adjustment-brad"
-    timeout: 5000
+    timeout: 3000
 
 - tapOn:
     id: "handicap-adjustment-brad"

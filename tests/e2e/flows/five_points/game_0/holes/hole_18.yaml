@@ -22,7 +22,7 @@ platform:
 
 - extendedWaitUntil:
     visible: "Hole 18"
-    timeout: 5000
+    timeout: 3000
 
 - tapOn:
     id: "player-p1-decrement"
