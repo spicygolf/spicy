@@ -2,6 +2,7 @@ import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useMemo } from "react";
 import { Pressable, View } from "react-native";
 import { DraxScrollView, DraxView } from "react-native-drax";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Button, Text } from "@/ui";
 import type { PlayerRoundItem, TeamSection } from "./types";
@@ -114,9 +115,9 @@ export function TeamAssignments({
           // A team can be deleted if:
           // 1. It's not "Unassigned" (teamNumber > 0)
           // 2. It's empty (no players)
-          // 3. Current team count exceeds spec minimum (or no minimum)
+          // 3. Current team count exceeds spec minimum (default to 2 if no spec)
           // 4. It's the last team (highest number) - to prevent gaps
-          const minTeams = specNumTeams ?? 0;
+          const minTeams = specNumTeams ?? 2; // Default to 2 teams minimum
           const canDeleteTeam =
             section.teamNumber > 0 &&
             section.players.length === 0 &&
@@ -202,8 +203,9 @@ export function TeamAssignments({
                                   color={theme.colors.secondary}
                                 />
                               </View>
-                              {/* Pressable wrapper for tap-to-cycle (E2E testing) */}
-                              <Pressable
+                              {/* TouchableOpacity from gesture-handler for tap-to-cycle (E2E testing) */}
+                              {/* Must use gesture-handler version to work inside DraxView */}
+                              <TouchableOpacity
                                 testID={playerTestId}
                                 accessibilityLabel={playerTestId}
                                 style={styles.playerInfo}
@@ -220,7 +222,7 @@ export function TeamAssignments({
                                     HI: {player.handicap}
                                   </Text>
                                 )}
-                              </Pressable>
+                              </TouchableOpacity>
                             </View>
                           )}
                         />

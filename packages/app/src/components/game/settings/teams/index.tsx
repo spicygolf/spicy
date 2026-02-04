@@ -269,7 +269,7 @@ export function GameTeamsList() {
       if (!game?.$isLoaded || !game.scope?.$isLoaded) return;
 
       // Only allow deleting if it's the last team and count exceeds spec minimum
-      const minTeams = specNumTeams ?? 0;
+      const minTeams = specNumTeams ?? 2; // Default to 2 teams minimum
       if (teamNumber !== teamCount || teamCount <= minTeams) return;
 
       const newTeamCount = teamCount - 1;
