@@ -1,6 +1,6 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useMemo } from "react";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { DraxScrollView, DraxView } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Button, Text } from "@/ui";
@@ -14,6 +14,10 @@ interface TeamAssignmentsProps {
   onTossBalls: () => void;
   canAddTeam: boolean;
   onAddTeam: () => void;
+  /** Minimum number of teams required by spec (undefined = no minimum) */
+  specNumTeams?: number;
+  /** Callback when a team is deleted */
+  onDeleteTeam?: (teamNumber: number) => void;
 }
 
 /**
@@ -28,6 +32,8 @@ export function TeamAssignments({
   teamCount,
   teamAssignments,
   onDrop,
+  specNumTeams,
+  onDeleteTeam,
   onTossBalls,
   canAddTeam,
   onAddTeam,
@@ -105,6 +111,18 @@ export function TeamAssignments({
               ? "team-unassigned-dropzone"
               : `team-${section.teamNumber}-dropzone`;
 
+          // A team can be deleted if:
+          // 1. It's not "Unassigned" (teamNumber > 0)
+          // 2. It's empty (no players)
+          // 3. Current team count exceeds spec minimum (or no minimum)
+          // 4. It's the last team (highest number) - to prevent gaps
+          const minTeams = specNumTeams ?? 0;
+          const canDeleteTeam =
+            section.teamNumber > 0 &&
+            section.players.length === 0 &&
+            teamCount > minTeams &&
+            section.teamNumber === teamCount; // Only allow deleting the last team
+
           return (
             <DraxView
               key={section.teamNumber}
@@ -124,10 +142,27 @@ export function TeamAssignments({
                 ]}
               >
                 <Text style={styles.teamHeaderText}>{section.teamName}</Text>
-                <Text style={styles.playerCount}>
-                  {section.players.length} player
-                  {section.players.length !== 1 ? "s" : ""}
-                </Text>
+                <View style={styles.teamHeaderRight}>
+                  {canDeleteTeam && onDeleteTeam && (
+                    <Pressable
+                      testID={`team-${section.teamNumber}-delete`}
+                      onPress={() => onDeleteTeam(section.teamNumber)}
+                      style={styles.deleteTeamButton}
+                      hitSlop={8}
+                    >
+                      <FontAwesome6
+                        name="trash"
+                        iconStyle="solid"
+                        size={14}
+                        color={theme.colors.error}
+                      />
+                    </Pressable>
+                  )}
+                  <Text style={styles.playerCount}>
+                    {section.players.length} player
+                    {section.players.length !== 1 ? "s" : ""}
+                  </Text>
+                </View>
               </View>
 
               <View style={styles.dropZone}>
@@ -151,25 +186,13 @@ export function TeamAssignments({
                           draggingStyle={styles.playerDragging}
                           dragReleasedStyle={styles.playerReleased}
                           dragPayload={player.id}
-                          onDragStart={() => {
-                            // Drag started - normal drag behavior
-                          }}
                           renderContent={({ viewState }) => (
                             <View
-                              testID={playerTestId}
-                              accessibilityLabel={playerTestId}
                               style={[
                                 styles.playerContent,
                                 viewState?.dragStatus === 2 &&
                                   styles.playerContentDragging,
                               ]}
-                              // Tap to cycle to next team (for E2E testing - Maestro can't drag)
-                              onTouchEnd={() => {
-                                // Only handle tap if not dragging
-                                if (viewState?.dragStatus !== 2) {
-                                  onDrop(player.id, nextTeam);
-                                }
-                              }}
                             >
                               <View style={styles.dragHandle}>
                                 <FontAwesome6
@@ -179,7 +202,16 @@ export function TeamAssignments({
                                   color={theme.colors.secondary}
                                 />
                               </View>
-                              <View style={styles.playerInfo}>
+                              {/* Pressable wrapper for tap-to-cycle (E2E testing) */}
+                              <Pressable
+                                testID={playerTestId}
+                                accessibilityLabel={playerTestId}
+                                style={styles.playerInfo}
+                                onPress={() => {
+                                  // Tap cycles player to next team
+                                  onDrop(player.id, nextTeam);
+                                }}
+                              >
                                 <Text style={styles.playerName}>
                                   {player.playerName}
                                 </Text>
@@ -188,7 +220,7 @@ export function TeamAssignments({
                                     HI: {player.handicap}
                                   </Text>
                                 )}
-                              </View>
+                              </Pressable>
                             </View>
                           )}
                         />
@@ -282,6 +314,14 @@ const styles = StyleSheet.create((theme) => ({
   playerCount: {
     fontSize: 12,
     color: theme.colors.secondary,
+  },
+  teamHeaderRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(2),
+  },
+  deleteTeamButton: {
+    padding: theme.gap(1),
   },
   dropZone: {
     minHeight: 80,

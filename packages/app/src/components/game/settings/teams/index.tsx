@@ -123,8 +123,12 @@ export function GameTeamsList() {
     return getSpecNumTeams(game.spec);
   }, [game?.$jazz.id]);
 
-  // Only allow adding teams when num_teams is not fixed by the spec
-  const canAddTeam = specNumTeams === undefined;
+  // Only allow adding teams when:
+  // 1. Spec is loaded (don't show button during loading)
+  // 2. num_teams is not fixed by the spec
+  const canAddTeam = Boolean(
+    game?.$isLoaded && game.spec?.$isLoaded && specNumTeams === undefined,
+  );
 
   const allPlayerRounds = useMemo(() => {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded) return [];
@@ -259,6 +263,25 @@ export function GameTeamsList() {
       game.scope.teamsConfig.$jazz.set("teamCount", newTeamCount);
     }
   }, [game, teamCount]);
+
+  const handleDeleteTeam = useCallback(
+    (teamNumber: number) => {
+      if (!game?.$isLoaded || !game.scope?.$isLoaded) return;
+
+      // Only allow deleting if it's the last team and count exceeds spec minimum
+      const minTeams = specNumTeams ?? 0;
+      if (teamNumber !== teamCount || teamCount <= minTeams) return;
+
+      const newTeamCount = teamCount - 1;
+
+      if (game.scope.teamsConfig?.$isLoaded) {
+        // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
+        // @ts-ignore - Jazz $jazz.set types are overly strict
+        game.scope.teamsConfig.$jazz.set("teamCount", newTeamCount);
+      }
+    },
+    [game, teamCount, specNumTeams],
+  );
 
   const handleRotationChange = useCallback(
     async (value: number) => {
@@ -459,6 +482,8 @@ export function GameTeamsList() {
           onTossBalls={handleTossBalls}
           canAddTeam={canAddTeam}
           onAddTeam={handleAddTeam}
+          specNumTeams={specNumTeams}
+          onDeleteTeam={handleDeleteTeam}
         />
       </>
     );
