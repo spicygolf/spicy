@@ -616,6 +616,16 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
   for (const player of playersWithOverrides) {
     const playerSlug = player.name.toLowerCase().replace(/\s+/g, "-");
 
+    // Wait for the handicap display to be visible (needs roundToGame to be loaded)
+    steps.push({
+      extendedWaitUntil: {
+        visible: {
+          id: `handicap-adjustment-${playerSlug}`,
+        },
+        timeout: 5000,
+      },
+    });
+
     // Tap on the player's handicap display to open HandicapAdjustment
     steps.push(
       {
@@ -640,10 +650,9 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
       },
       { eraseText: 10 },
       { inputText: player.handicapOverride },
-      { hideKeyboard: true },
     );
 
-    // Navigate back to game settings
+    // Navigate back to game settings (back button dismisses keyboard and saves)
     steps.push(
       {
         tapOn: {

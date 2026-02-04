@@ -134,11 +134,7 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
                   })
               : undefined
           }
-          testID={
-            roundToGame?.$isLoaded
-              ? `handicap-adjustment-${playerNameSlug}`
-              : undefined
-          }
+          testID={`handicap-adjustment-${playerNameSlug}`}
         />
       </View>
       <View style={styles.delete}>

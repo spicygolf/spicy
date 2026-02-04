@@ -32,7 +32,11 @@ export function Back<ParamList extends ParamListBase = ParamListBase>({
   }
 
   return (
-    <Pressable onPress={() => navigation.goBack()} hitSlop={hitSlop}>
+    <Pressable
+      onPress={() => navigation.goBack()}
+      hitSlop={hitSlop}
+      testID="nav-back-button"
+    >
       <FontAwesome6
         name="chevron-left"
         size={20}

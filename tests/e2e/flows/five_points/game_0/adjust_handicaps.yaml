@@ -8,6 +8,11 @@ platform:
     snapshotKeyHonorModalViews: false
 ---
 
+- extendedWaitUntil:
+    visible:
+      id: "handicap-adjustment-brad"
+    timeout: 5000
+
 - tapOn:
     id: "handicap-adjustment-brad"
 
@@ -20,8 +25,6 @@ platform:
 - eraseText: 10
 
 - inputText: "5.1"
-
-- hideKeyboard
 
 - tapOn:
     id: "nav-back-button"

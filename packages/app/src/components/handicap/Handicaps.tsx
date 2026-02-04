@@ -1,5 +1,5 @@
 import type { MaybeLoaded } from "jazz-tools";
-import { TouchableOpacity, View } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player, Round, RoundToGame } from "spicylib/schema";
 import {
@@ -103,10 +103,13 @@ export function Handicaps({
   const label = gameHandicap !== undefined ? "game" : "course";
   const courseGameHandicap = gameHandicap ?? courseHandicap;
 
-  const Container = onPress ? TouchableOpacity : View;
-
   return (
-    <Container style={styles.container} onPress={onPress} testID={testID}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={onPress}
+      testID={testID}
+      disabled={!onPress}
+    >
       <Handicap
         label="index"
         display={handicapIndexDisplay}
@@ -121,7 +124,7 @@ export function Handicaps({
         }
         color={hasCourseGameOverride ? "#FFA500" : undefined}
       />
-    </Container>
+    </TouchableOpacity>
   );
 }
 
