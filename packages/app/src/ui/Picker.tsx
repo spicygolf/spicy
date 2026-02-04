@@ -1,14 +1,9 @@
-import { useMemo } from "react";
 import { Dropdown } from "react-native-element-dropdown";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 export interface PickerItem {
   label: string;
   value: string;
-}
-
-interface PickerItemWithTestID extends PickerItem {
-  itemTestID: string;
 }
 
 interface PickerProps {
@@ -27,26 +22,17 @@ export function Picker({
   testID,
 }: PickerProps) {
   const { theme } = useUnistyles();
-  const onChange = (selection: PickerItemWithTestID) => {
+  const onChange = (selection: PickerItem) => {
     onValueChange(selection.value);
   };
-
-  // Add testID to each item for E2E testing (e.g., "hole-6-par-item-3")
-  const itemsWithTestID: PickerItemWithTestID[] = useMemo(() => {
-    return items.map((item) => ({
-      ...item,
-      itemTestID: testID ? `${testID}-item-${item.value}` : item.value,
-    }));
-  }, [items, testID]);
 
   return (
     <Dropdown
       testID={testID}
       value={selectedValue}
-      data={itemsWithTestID}
+      data={items}
       labelField="label"
       valueField="value"
-      itemTestIDField="itemTestID"
       onChange={onChange}
       style={styles.picker}
       placeholder={title}

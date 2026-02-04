@@ -438,7 +438,7 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
   );
 
   // On ManualCourseHoles screen - set par and handicap for each hole from fixture
-  // Default is par 4 and sequential handicaps (1-18), so we only change what differs
+  // Par defaults to 4, Handicap starts empty (user must fill in all)
   for (const holeData of fixture.course.holes) {
     const holeNum = holeData.hole;
 
@@ -455,10 +455,10 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
             timeout: 500,
           },
         },
-        // Tap the par value in the dropdown using testID (e.g., hole-6-par-item-3)
+        // Tap the par value in the dropdown using exact text match (regex)
         {
           tapOn: {
-            id: `hole-${holeNum}-par-item-${holeData.par}`,
+            text: `^${holeData.par}$`,
           },
         },
         {
@@ -469,21 +469,19 @@ export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
       );
     }
 
-    // Set handicap if not equal to hole number (default is sequential 1-18)
-    if (holeData.handicap !== holeNum) {
-      steps.push(
-        // Use longPressOn + Select All for reliable text replacement on iOS
-        {
-          longPressOn: {
-            id: `hole-${holeNum}-handicap`,
-          },
+    // Enter handicap (always required since inputs start empty)
+    steps.push(
+      {
+        tapOn: {
+          id: `hole-${holeNum}-handicap`,
         },
-        { tapOn: "Select All" },
-        { inputText: holeData.handicap.toString() },
-        { hideKeyboard: true },
-      );
-    }
+      },
+      { inputText: holeData.handicap.toString() },
+    );
   }
+
+  // Hide keyboard after entering all values
+  steps.push({ hideKeyboard: true });
 
   // Save the course
   steps.push(

@@ -171,257 +171,161 @@ appId: golf.spicy
 
 # === Enter Hole Details (Par & Handicap) ===
 # Druid Hills Golf Club - Blue Tees
-# Default is par 4 and sequential handicap (1-18)
-# We only change what differs from defaults
+# Par defaults to 4, Handicap starts empty (user must fill in all)
+# Format: Hole X: Par Y, Hdcp Z
 
 # Hole 1: Par 4 (default), Hdcp 3
-- longPressOn:
+- tapOn:
     id: "hole-1-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "3"
 
-- hideKeyboard
-
 # Hole 2: Par 4 (default), Hdcp 7
-- longPressOn:
+- tapOn:
     id: "hole-2-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "7"
 
-- hideKeyboard
-
 # Hole 3: Par 4 (default), Hdcp 15
-- longPressOn:
+- tapOn:
     id: "hole-3-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "15"
 
-- hideKeyboard
-
 # Hole 4: Par 4 (default), Hdcp 1
-- longPressOn:
+- tapOn:
     id: "hole-4-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "1"
 
-- hideKeyboard
-
-# Hole 5: Par 4 (default), Hdcp 5 (default) - skip
+# Hole 5: Par 4 (default), Hdcp 5
+- tapOn:
+    id: "hole-5-handicap"
+- inputText: "5"
 
 # Hole 6: Par 3, Hdcp 17
 - tapOn:
     id: "hole-6-par"
-
 - waitForAnimationToEnd:
     timeout: 500
-
 - tapOn:
-    id: "hole-6-par-item-3"
-
+    text: "^3$"
 - waitForAnimationToEnd:
     timeout: 500
-
-- longPressOn:
+- tapOn:
     id: "hole-6-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "17"
-
-- hideKeyboard
 
 # Hole 7: Par 5, Hdcp 11
 - tapOn:
     id: "hole-7-par"
-
 - waitForAnimationToEnd:
     timeout: 500
-
 - tapOn:
-    id: "hole-7-par-item-5"
-
+    text: "^5$"
 - waitForAnimationToEnd:
     timeout: 500
-
-- longPressOn:
+- tapOn:
     id: "hole-7-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "11"
-
-- hideKeyboard
 
 # Hole 8: Par 3, Hdcp 9
 - tapOn:
     id: "hole-8-par"
-
 - waitForAnimationToEnd:
     timeout: 500
-
 - tapOn:
-    id: "hole-8-par-item-3"
-
+    text: "^3$"
 - waitForAnimationToEnd:
     timeout: 500
-
-- longPressOn:
+- tapOn:
     id: "hole-8-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "9"
-
-- hideKeyboard
 
 # Hole 9: Par 5, Hdcp 13
 - tapOn:
     id: "hole-9-par"
-
 - waitForAnimationToEnd:
     timeout: 500
-
 - tapOn:
-    id: "hole-9-par-item-5"
-
+    text: "^5$"
 - waitForAnimationToEnd:
     timeout: 500
-
-- longPressOn:
+- tapOn:
     id: "hole-9-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "13"
 
-- hideKeyboard
-
 # Hole 10: Par 4 (default), Hdcp 2
-- longPressOn:
+- tapOn:
     id: "hole-10-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "2"
 
-- hideKeyboard
-
 # Hole 11: Par 4 (default), Hdcp 6
-- longPressOn:
+- tapOn:
     id: "hole-11-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "6"
 
-- hideKeyboard
-
-# Hole 12: Par 4 (default), Hdcp 12 (default) - skip
+# Hole 12: Par 4 (default), Hdcp 12
+- tapOn:
+    id: "hole-12-handicap"
+- inputText: "12"
 
 # Hole 13: Par 3, Hdcp 18
 - tapOn:
     id: "hole-13-par"
-
 - waitForAnimationToEnd:
     timeout: 500
-
 - tapOn:
-    id: "hole-13-par-item-3"
-
+    text: "^3$"
 - waitForAnimationToEnd:
     timeout: 500
-
-- longPressOn:
+- tapOn:
     id: "hole-13-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "18"
-
-- hideKeyboard
 
 # Hole 14: Par 5, Hdcp 10
 - tapOn:
     id: "hole-14-par"
-
 - waitForAnimationToEnd:
     timeout: 500
-
 - tapOn:
-    id: "hole-14-par-item-5"
-
+    text: "^5$"
 - waitForAnimationToEnd:
     timeout: 500
-
-- longPressOn:
+- tapOn:
     id: "hole-14-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "10"
 
-- hideKeyboard
-
 # Hole 15: Par 4 (default), Hdcp 4
-- longPressOn:
+- tapOn:
     id: "hole-15-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "4"
 
-- hideKeyboard
-
-# Hole 16: Par 4 (default), Hdcp 16 (default) - skip
+# Hole 16: Par 4 (default), Hdcp 16
+- tapOn:
+    id: "hole-16-handicap"
+- inputText: "16"
 
 # Hole 17: Par 3, Hdcp 14
 - tapOn:
     id: "hole-17-par"
-
 - waitForAnimationToEnd:
     timeout: 500
-
 - tapOn:
-    id: "hole-17-par-item-3"
-
+    text: "^3$"
 - waitForAnimationToEnd:
     timeout: 500
-
-- longPressOn:
+- tapOn:
     id: "hole-17-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "14"
-
-- hideKeyboard
 
 # Hole 18: Par 5, Hdcp 8
 - tapOn:
     id: "hole-18-par"
-
 - waitForAnimationToEnd:
     timeout: 500
-
 - tapOn:
-    id: "hole-18-par-item-5"
-
+    text: "^5$"
 - waitForAnimationToEnd:
     timeout: 500
-
-- longPressOn:
+- tapOn:
     id: "hole-18-handicap"
-
-- tapOn: "Select All"
-
 - inputText: "8"
 
 - hideKeyboard
