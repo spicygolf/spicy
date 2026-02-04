@@ -615,7 +615,16 @@ export async function upsertGameSpec(
     }
 
     // Handle num_teams: set if present and positive, delete if removed from seed
+    console.log(
+      `[upsertGameSpec] ${specData.disp} num_teams check:`,
+      specData.num_teams,
+      "typeof:",
+      typeof specData.num_teams,
+    );
     if (specData.num_teams && specData.num_teams > 0) {
+      console.log(
+        `[upsertGameSpec] Setting num_teams=${specData.num_teams} for ${specData.disp}`,
+      );
       spec.$jazz.set(
         "num_teams",
         createMetaOption(
