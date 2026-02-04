@@ -19,10 +19,10 @@ platform:
 - waitForAnimationToEnd:
     timeout: 1000
 
-- tapOn:
+- longPressOn:
     id: "handicap-index-input"
 
-- eraseText: 10
+- tapOn: "Select All"
 
 - inputText: "5.1"
 

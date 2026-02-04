@@ -641,14 +641,14 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
     );
 
     // Clear and enter the handicap index override
-    // The input may have an existing value, so we need to clear it first
+    // Use longPress + Select All for reliable text clearing on iOS
     steps.push(
       {
-        tapOn: {
+        longPressOn: {
           id: "handicap-index-input",
         },
       },
-      { eraseText: 10 },
+      { tapOn: "Select All" },
       { inputText: player.handicapOverride },
     );
 

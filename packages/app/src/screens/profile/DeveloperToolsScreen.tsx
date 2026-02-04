@@ -65,7 +65,6 @@ export function DeveloperToolsScreen() {
     setIsDeleting(true);
     try {
       let deletedGames = 0;
-      let deletedRounds = 0;
 
       // Delete all games
       if (me.root.games?.$isLoaded && me.root.games.length > 0) {
@@ -74,7 +73,7 @@ export function DeveloperToolsScreen() {
 
       // Clear the logged-in player's rounds
       if (me.root.player?.$isLoaded) {
-        deletedRounds = await clearPlayerRounds(me.root.player);
+        await clearPlayerRounds(me.root.player);
       }
 
       setLastDeleteCount(deletedGames);
