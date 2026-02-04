@@ -116,8 +116,8 @@ export function ResetSpecButton() {
             </View>
 
             <Text style={styles.modalMessage}>
-              Reset all game options to their catalog defaults? This will revert
-              any customizations you've made.
+              Reset all game options to their defaults? This will revert any
+              customizations you've made.
             </Text>
 
             {error && (
