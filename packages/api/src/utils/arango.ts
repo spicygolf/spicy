@@ -65,6 +65,7 @@ export interface GameSpecV03 {
   long_description?: string;
   teams?: boolean;
   team_size?: number;
+  num_teams?: number;
   team_determination?: string;
   team_change_every?: number;
   scoring?: Record<string, unknown>;
