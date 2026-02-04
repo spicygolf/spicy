@@ -30,6 +30,9 @@ platform:
 # Select course and tee (manual entry)
 - runFlow: "select_course_tee.yaml"
 
+# Adjust handicap indexes
+- runFlow: "adjust_handicaps.yaml"
+
 # Start game
 - runFlow: "start_game.yaml"
 

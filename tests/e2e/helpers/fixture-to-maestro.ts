@@ -77,6 +77,8 @@ export interface GeneratedSubFlows {
   addPlayers: string;
   /** Select course and tee sub-flow (manual entry) */
   selectCourseTee: string;
+  /** Adjust handicaps sub-flow (optional, only if players have handicap overrides) */
+  adjustHandicaps: string | null;
   /** Start game sub-flow */
   startGame: string;
   /** Individual hole sub-flows, keyed by hole number (e.g., "01", "02") */
@@ -89,6 +91,7 @@ export interface GeneratedSubFlows {
     playerCount: number;
     hasJunk: boolean;
     hasMultipliers: boolean;
+    hasHandicapOverrides: boolean;
   };
 }
 
@@ -595,6 +598,70 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
 }
 
 /**
+ * Generate steps to adjust handicap index for players with overrides.
+ * This navigates to the HandicapAdjustment screen for each player and enters the override value.
+ */
+export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
+  const steps: MaestroStep[] = [];
+
+  // Find players with handicap overrides
+  const playersWithOverrides = fixture.players.filter(
+    (p) => p.handicapOverride !== undefined,
+  );
+
+  if (playersWithOverrides.length === 0) {
+    return steps;
+  }
+
+  for (const player of playersWithOverrides) {
+    const playerSlug = player.name.toLowerCase().replace(/\s+/g, "-");
+
+    // Tap on the player's handicap display to open HandicapAdjustment
+    steps.push(
+      {
+        tapOn: {
+          id: `handicap-adjustment-${playerSlug}`,
+        },
+      },
+      {
+        waitForAnimationToEnd: {
+          timeout: 1000,
+        },
+      },
+    );
+
+    // Clear and enter the handicap index override
+    // The input may have an existing value, so we need to clear it first
+    steps.push(
+      {
+        tapOn: {
+          id: "handicap-index-input",
+        },
+      },
+      { eraseText: 10 },
+      { inputText: player.handicapOverride },
+      { hideKeyboard: true },
+    );
+
+    // Navigate back to game settings
+    steps.push(
+      {
+        tapOn: {
+          id: "nav-back-button",
+        },
+      },
+      {
+        waitForAnimationToEnd: {
+          timeout: 500,
+        },
+      },
+    );
+  }
+
+  return steps;
+}
+
+/**
  * Generate steps to start the game (navigate from settings to scoring)
  */
 export function generateStartGameSteps(): MaestroStep[] {
@@ -912,12 +979,29 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     ``,
     `# Select course and tee (manual entry)`,
     `- runFlow: "select_course_tee.yaml"`,
+  ];
+
+  // Check if any players have handicap overrides
+  const playersWithOverrides = fixture.players.filter(
+    (p) => p.handicapOverride !== undefined,
+  );
+  const hasHandicapOverrides = playersWithOverrides.length > 0;
+
+  if (hasHandicapOverrides) {
+    mainLines.push(
+      ``,
+      `# Adjust handicap indexes`,
+      `- runFlow: "adjust_handicaps.yaml"`,
+    );
+  }
+
+  mainLines.push(
     ``,
     `# Start game`,
     `- runFlow: "start_game.yaml"`,
     ``,
     `# Play all ${holeNumbers.length} holes`,
-  ];
+  );
 
   for (const holeNum of holeNumbers) {
     const paddedNum = holeNum.padStart(2, "0");
@@ -942,6 +1026,17 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
   // Guest players (all except first which is the logged-in user)
   const guestPlayers = fixture.players.slice(1);
 
+  // Generate adjust handicaps sub-flow if needed
+  const adjustHandicapsSteps = generateAdjustHandicapsSteps(fixture);
+  const adjustHandicapsYaml =
+    adjustHandicapsSteps.length > 0
+      ? stepsToYaml(
+          adjustHandicapsSteps,
+          "golf.spicy",
+          `# Sub-flow: Adjust handicap indexes for players with overrides\n# Expects: Game settings screen with course/tee selected\n# Provides: Handicap indexes adjusted, ready to start game`,
+        )
+      : null;
+
   return {
     main: mainLines.join("\n"),
     login: stepsToYaml(
@@ -963,8 +1058,9 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     selectCourseTee: stepsToYaml(
       generateSelectCourseTeeSteps(fixture),
       "golf.spicy",
-      `# Sub-flow: Select course and tee for ${fixture.players[0].name} (manual entry)\n# Expects: Game settings screen with players added\n# Provides: Course and tee configured, ready to start game`,
+      `# Sub-flow: Select course and tee for ${fixture.players[0].name} (manual entry)\n# Expects: Game settings screen with players added\n# Provides: Course and tee configured, ready for handicap adjustment or start game`,
     ),
+    adjustHandicaps: adjustHandicapsYaml,
     startGame: stepsToYaml(
       generateStartGameSteps(),
       "golf.spicy",
@@ -981,6 +1077,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
       playerCount: fixture.players.length,
       hasJunk,
       hasMultipliers,
+      hasHandicapOverrides,
     },
   };
 }

@@ -51,6 +51,8 @@ export interface FixturePlayer {
   handicapIndex: number;
   /** Short name for display (optional) */
   short?: string;
+  /** Handicap index override for the round (optional, for E2E testing) */
+  handicapOverride?: string;
 }
 
 /**

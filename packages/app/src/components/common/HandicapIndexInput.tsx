@@ -49,6 +49,8 @@ interface HandicapIndexInputProps
   helperText?: string;
   /** Error message to display */
   error?: string;
+  /** Optional testID for E2E testing */
+  testID?: string;
 }
 
 export function HandicapIndexInput({
@@ -58,6 +60,7 @@ export function HandicapIndexInput({
   helperText,
   error,
   placeholder = "e.g., 12.5 or +2.3",
+  testID,
   ...rest
 }: HandicapIndexInputProps): React.ReactElement {
   const handleChangeText = (text: string): void => {
@@ -73,6 +76,7 @@ export function HandicapIndexInput({
         placeholder={placeholder}
         keyboardType="phone-pad"
         hasError={!!error}
+        testID={testID}
         {...rest}
       />
       {helperText && !error ? (

@@ -239,6 +239,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
                 value={indexInput}
                 onChangeText={setIndexInput}
                 onBlur={() => saveIndexOverride(indexInput)}
+                testID="handicap-index-input"
               />
             </View>
             {hasIndexOverride && (

@@ -14,9 +14,17 @@ interface Props {
   round?: MaybeLoaded<Round> | null;
   roundToGame?: MaybeLoaded<RoundToGame>;
   onPress?: () => void;
+  /** Optional testID for E2E testing */
+  testID?: string;
 }
 
-export function Handicaps({ player, round, roundToGame, onPress }: Props) {
+export function Handicaps({
+  player,
+  round,
+  roundToGame,
+  onPress,
+  testID,
+}: Props) {
   // Calculate course handicap directly - no useState or useEffect needed
   // Jazz is reactive, so this will recalculate when round or roundToGame changes
   const calculatedCourseHandicap = (() => {
@@ -98,7 +106,7 @@ export function Handicaps({ player, round, roundToGame, onPress }: Props) {
   const Container = onPress ? TouchableOpacity : View;
 
   return (
-    <Container style={styles.container} onPress={onPress}>
+    <Container style={styles.container} onPress={onPress} testID={testID}>
       <Handicap
         label="index"
         display={handicapIndexDisplay}

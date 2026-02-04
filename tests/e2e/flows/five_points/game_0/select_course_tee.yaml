@@ -1,6 +1,6 @@
 # Sub-flow: Select course and tee for Brad (manual entry)
 # Expects: Game settings screen with players added
-# Provides: Course and tee configured, ready to start game
+# Provides: Course and tee configured, ready for handicap adjustment or start game
 
 appId: golf.spicy
 platform:

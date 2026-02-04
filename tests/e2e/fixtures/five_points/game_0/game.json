@@ -127,7 +127,8 @@
       "id": "p1",
       "name": "Brad",
       "short": "Bra",
-      "handicapIndex": 5.1
+      "handicapIndex": 5.1,
+      "handicapOverride": "5.1"
     },
     {
       "id": "p2",
