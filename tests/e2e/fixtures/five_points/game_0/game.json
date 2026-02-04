@@ -4,126 +4,121 @@
   "spec": "five_points",
   "e2e": {
     "priority": "smoke",
-    "tags": [
-      "scoring",
-      "junk",
-      "multipliers",
-      "full-game"
-    ]
+    "tags": ["scoring", "junk", "multipliers", "full-game"]
   },
   "course": {
-    "name": "E2E Test Course",
+    "name": "Druid Hills Golf Club",
     "tee": "Blue",
-    "rating": 71.5,
-    "slope": 128,
+    "rating": 71.8,
+    "slope": 134,
     "holes": [
       {
         "hole": 1,
         "par": 4,
-        "handicap": 5,
-        "yards": 400
+        "handicap": 3,
+        "yards": 444
       },
       {
         "hole": 2,
-        "par": 5,
-        "handicap": 11,
-        "yards": 400
+        "par": 4,
+        "handicap": 7,
+        "yards": 392
       },
       {
         "hole": 3,
-        "par": 3,
+        "par": 4,
         "handicap": 15,
-        "yards": 400
+        "yards": 320
       },
       {
         "hole": 4,
         "par": 4,
-        "handicap": 3,
-        "yards": 400
+        "handicap": 1,
+        "yards": 413
       },
       {
         "hole": 5,
         "par": 4,
-        "handicap": 7,
-        "yards": 400
+        "handicap": 5,
+        "yards": 380
       },
       {
         "hole": 6,
-        "par": 5,
-        "handicap": 13,
-        "yards": 400
+        "par": 3,
+        "handicap": 17,
+        "yards": 122
       },
       {
         "hole": 7,
-        "par": 3,
-        "handicap": 17,
-        "yards": 400
+        "par": 5,
+        "handicap": 11,
+        "yards": 485
       },
       {
         "hole": 8,
-        "par": 4,
-        "handicap": 1,
-        "yards": 400
+        "par": 3,
+        "handicap": 9,
+        "yards": 193
       },
       {
         "hole": 9,
-        "par": 4,
-        "handicap": 9,
-        "yards": 400
+        "par": 5,
+        "handicap": 13,
+        "yards": 485
       },
       {
         "hole": 10,
         "par": 4,
-        "handicap": 6,
-        "yards": 400
+        "handicap": 2,
+        "yards": 432
       },
       {
         "hole": 11,
-        "par": 5,
-        "handicap": 12,
-        "yards": 400
+        "par": 4,
+        "handicap": 6,
+        "yards": 416
       },
       {
         "hole": 12,
-        "par": 3,
-        "handicap": 16,
-        "yards": 400
+        "par": 4,
+        "handicap": 12,
+        "yards": 333
       },
       {
         "hole": 13,
-        "par": 4,
-        "handicap": 4,
-        "yards": 400
+        "par": 3,
+        "handicap": 18,
+        "yards": 160
       },
       {
         "hole": 14,
-        "par": 4,
-        "handicap": 8,
-        "yards": 400
+        "par": 5,
+        "handicap": 10,
+        "yards": 493
       },
       {
         "hole": 15,
-        "par": 5,
-        "handicap": 14,
-        "yards": 400
+        "par": 4,
+        "handicap": 4,
+        "yards": 352
       },
       {
         "hole": 16,
-        "par": 3,
-        "handicap": 18,
-        "yards": 400
+        "par": 4,
+        "handicap": 16,
+        "yards": 319
       },
       {
         "hole": 17,
-        "par": 4,
-        "handicap": 2,
-        "yards": 400
+        "par": 3,
+        "handicap": 14,
+        "yards": 192
       },
       {
         "hole": 18,
         "par": 5,
-        "handicap": 10,
-        "yards": 400
+        "handicap": 8,
+        "yards": 509
       }
     ]
   },
@@ -132,36 +127,31 @@
       "id": "p1",
       "name": "Brad",
       "short": "Bra",
-      "handicapIndex": 10
+      "handicapIndex": 5.1,
+      "handicapOverride": "5.1"
     },
     {
       "id": "p2",
       "name": "Scott",
       "short": "Sco",
-      "handicapIndex": 12
+      "handicapIndex": 4.1
     },
     {
       "id": "p3",
       "name": "Tim",
       "short": "Tim",
-      "handicapIndex": 8
+      "handicapIndex": -0.9
     },
     {
       "id": "p4",
       "name": "Eric",
       "short": "Eri",
-      "handicapIndex": 14
+      "handicapIndex": 12.9
     }
   ],
   "teams": {
-    "1": [
-      "p1",
-      "p2"
-    ],
-    "2": [
-      "p3",
-      "p4"
-    ]
+    "1": ["p1", "p2"],
+    "2": ["p3", "p4"]
   },
   "holes": {
     "1": {
@@ -234,9 +224,7 @@
         }
       },
       "multipliers": {
-        "1": [
-          "double"
-        ]
+        "1": ["double"]
       }
     },
     "5": {
@@ -255,12 +243,8 @@
         }
       },
       "multipliers": {
-        "1": [
-          "double"
-        ],
-        "2": [
-          "double_back"
-        ]
+        "1": ["double"],
+        "2": ["double_back"]
       }
     },
     "6": {
@@ -331,12 +315,8 @@
         }
       },
       "multipliers": {
-        "1": [
-          "double"
-        ],
-        "2": [
-          "double"
-        ]
+        "1": ["double"],
+        "2": ["double"]
       }
     },
     "10": {
@@ -406,9 +386,7 @@
         }
       },
       "multipliers": {
-        "2": [
-          "double"
-        ]
+        "2": ["double"]
       }
     },
     "14": {
@@ -427,12 +405,8 @@
         }
       },
       "multipliers": {
-        "1": [
-          "double"
-        ],
-        "2": [
-          "double"
-        ]
+        "1": ["double"],
+        "2": ["double"]
       }
     },
     "15": {
@@ -506,18 +480,11 @@
         }
       },
       "junk": {
-        "birdie": [
-          "p1",
-          "p3"
-        ]
+        "birdie": ["p1", "p3"]
       },
       "multipliers": {
-        "1": [
-          "double"
-        ],
-        "2": [
-          "double_back"
-        ]
+        "1": ["double"],
+        "2": ["double_back"]
       }
     }
   },

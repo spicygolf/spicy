@@ -1,0 +1,57 @@
+# Deep cleanup flow: Navigate to Developer Tools and delete all games
+# This properly cleans up all game data including nested structures to minimize Jazz orphans
+# Expects: User is logged in
+# Provides: Clean state with no games
+
+appId: golf.spicy
+---
+- takeScreenshot: "cleanup_deep_start"
+
+# Navigate to Profile tab
+- tapOn:
+    id: "tab-profile"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Wait for Developer Tools to appear (data may need to load)
+- extendedWaitUntil:
+    visible:
+      id: "developer-tools-row"
+    timeout: 10000
+
+# Navigate to Developer Tools
+- tapOn:
+    id: "developer-tools-row"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- takeScreenshot: "cleanup_deep_devtools"
+
+# Deep delete all games (button may be disabled if no games exist, which is fine)
+- runFlow:
+    when:
+      visible:
+        id: "deep-delete-all-games-button"
+    commands:
+      - tapOn:
+          id: "deep-delete-all-games-button"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+- takeScreenshot: "cleanup_deep_after_delete"
+
+# Navigate back to Games tab
+- tapOn:
+    id: "tab-games"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Verify we're back at games list with New Game visible
+- extendedWaitUntil:
+    visible: "New Game"
+    timeout: 5000
+
+- takeScreenshot: "cleanup_deep_complete"

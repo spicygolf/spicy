@@ -3,57 +3,66 @@
 # Junk: birdie:p1 prox:p3
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - runFlow:
-      when:
-          notVisible:
-              text: "Hole 16"
-      commands:
-        - swipe:
-              direction: "LEFT"
-              duration: 300
-        - waitForAnimationToEnd:
-              timeout: 1000
+    when:
+      notVisible:
+        text: "Hole 16"
+    commands:
+    - swipe:
+        direction: "LEFT"
+        duration: 300
+    - waitForAnimationToEnd:
+        timeout: 1000
 
 - extendedWaitUntil:
-      visible: "Hole 16"
-      timeout: 5000
+    visible: "Hole 16"
+    timeout: 3000
 
 - tapOn:
-      id: "player-p1-decrement"
+    id: "player-p1-decrement"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 300
 
 - tapOn:
-      id: "player-p2-increment"
+    id: "player-p1-decrement"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "player-p3-score"
+    id: "player-p2-score"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "player-p4-increment"
+    id: "player-p3-decrement"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "junk-birdie-p1"
+    id: "player-p4-score"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 500
 
 - tapOn:
-      id: "junk-prox-p3"
+    id: "junk-birdie-p1"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 300
+
+- tapOn:
+    id: "junk-prox-p3"
+
+- waitForAnimationToEnd:
+    timeout: 300
 
 - takeScreenshot: "hole_16_complete"

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Dropdown } from "react-native-element-dropdown";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
@@ -6,30 +7,58 @@ export interface PickerItem {
   value: string;
 }
 
+interface PickerItemInternal extends PickerItem {
+  testID: string;
+  accessibilityLabel: string;
+}
+
 interface PickerProps {
   title: string;
   items: PickerItem[];
   selectedValue: string | undefined;
   onValueChange: (value: string) => void;
+  testID?: string;
 }
 
+/**
+ * Dropdown picker component with E2E testID support.
+ *
+ * Each dropdown item gets a testID in the format: `{pickerTestID}-item-{value}`
+ * For example, if testID="hole-6-par" and value="3", the item testID is "hole-6-par-item-3"
+ */
 export function Picker({
   title,
   items,
   selectedValue,
   onValueChange,
+  testID,
 }: PickerProps) {
   const { theme } = useUnistyles();
-  const onChange = (selection: PickerItem) => {
+  const onChange = (selection: PickerItemInternal) => {
     onValueChange(selection.value);
   };
 
+  // Add testID and accessibilityLabel to each item for E2E testing
+  // accessibilityLabel is used because itemTestIDField doesn't work reliably on iOS
+  const itemsWithTestID: PickerItemInternal[] = useMemo(() => {
+    const itemTestID = (value: string) =>
+      testID ? `${testID}-item-${value}` : `picker-item-${value}`;
+    return items.map((item) => ({
+      ...item,
+      testID: itemTestID(item.value),
+      accessibilityLabel: itemTestID(item.value),
+    }));
+  }, [items, testID]);
+
   return (
     <Dropdown
+      testID={testID}
       value={selectedValue}
-      data={items}
+      data={itemsWithTestID}
       labelField="label"
       valueField="value"
+      itemTestIDField="testID"
+      itemAccessibilityLabelField="accessibilityLabel"
       onChange={onChange}
       style={styles.picker}
       placeholder={title}

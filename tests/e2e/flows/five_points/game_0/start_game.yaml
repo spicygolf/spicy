@@ -3,13 +3,16 @@
 # Provides: Scoring screen visible, "Hole 1" visible
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - tapOn: "Start Game"
 
 - waitForAnimationToEnd:
-      timeout: 5000
+    timeout: 3000
 
 - extendedWaitUntil:
-      visible: "Hole 1"
-      timeout: 10000
+    visible: "Hole 1"
+    timeout: 10000

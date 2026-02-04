@@ -1,45 +1,26 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { CommonActions, useNavigation } from "@react-navigation/native";
-import { TouchableOpacity, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { Back } from "@/components/Back";
 import { Text } from "@/ui";
 
 interface GameNavProps {
+  /** Navigate to a specific screen by name instead of going back */
   backTo?: string;
+  /** Whether to show the back button */
   showBack?: boolean;
-  showScore?: boolean;
+  /** Header title */
   title: string;
 }
 
-export function GameNav(props: GameNavProps) {
-  const { backTo, showBack, showScore: _, title } = props;
-  const navigation = useNavigation();
-  const { theme } = useUnistyles();
+/**
+ * Navigation header with optional back button and centered title.
+ *
+ * Used in tab navigators to provide consistent header styling.
+ */
+export function GameNav(props: GameNavProps): React.ReactElement {
+  const { backTo, showBack, title } = props;
 
-  const back = backTo
-    ? () => navigation.dispatch(CommonActions.navigate({ name: backTo }))
-    : () => navigation.goBack();
-
-  const left = showBack ? (
-    <TouchableOpacity onPress={() => back()}>
-      <FontAwesome6
-        name="chevron-left"
-        size={20}
-        color={theme.colors.primary}
-        iconStyle="solid"
-      />
-    </TouchableOpacity>
-  ) : (
-    <Text />
-  );
-
-  // const right = showScore ? (
-  //   <TouchableOpacity onPress={() => navigation.navigate('Score', { game, scores })}>
-  //     <Icon name="lead-pencil" size={30} color="#666" />
-  //   </TouchableOpacity>
-  // ) : (
-  //   <Text />
-  // );
+  const left = showBack ? <Back backTo={backTo} /> : <Text />;
   const right = <Text />;
 
   return (

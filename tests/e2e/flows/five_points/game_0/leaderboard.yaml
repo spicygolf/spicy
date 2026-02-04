@@ -3,11 +3,14 @@
 # Provides: Final leaderboard screenshot
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - tapOn: "Leaderboard"
 
 - waitForAnimationToEnd:
-      timeout: 3000
+    timeout: 3000
 
 - takeScreenshot: "final_leaderboard"

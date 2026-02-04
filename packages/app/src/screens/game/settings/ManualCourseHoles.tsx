@@ -9,7 +9,7 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
   CourseDefaultTee,
@@ -33,7 +33,7 @@ type Props = NativeStackScreenProps<
 
 interface HoleData {
   par: number;
-  handicap: number;
+  handicap: number | null; // null = not yet entered
 }
 
 const PAR_OPTIONS = [
@@ -52,6 +52,7 @@ function filterIntegerInput(input: string): string {
 /**
  * Find which handicap values appear more than once or are out of range.
  * For 9-hole courses, valid range is 1-9. For 18-hole courses, 1-18.
+ * Returns set of invalid handicap values (excludes null/empty).
  */
 function findInvalidHandicaps(
   holes: HoleData[],
@@ -61,6 +62,9 @@ function findInvalidHandicaps(
   const invalid = new Set<number>();
 
   for (const hole of holes) {
+    // Skip null/empty handicaps (handled separately)
+    if (hole.handicap === null) continue;
+
     // Check for out-of-range handicaps
     if (hole.handicap < 1 || hole.handicap > maxHandicap) {
       invalid.add(hole.handicap);
@@ -76,6 +80,13 @@ function findInvalidHandicaps(
   }
 
   return invalid;
+}
+
+/**
+ * Check if all handicaps are filled in (not null).
+ */
+function hasEmptyHandicaps(holes: HoleData[]): boolean {
+  return holes.some((hole) => hole.handicap === null);
 }
 
 interface HoleRowProps {
@@ -98,6 +109,7 @@ function HoleRow({
       <Text style={styles.holeNumber}>{holeNumber}</Text>
       <View style={styles.parPicker}>
         <Picker
+          testID={`hole-${holeNumber}-par`}
           title="Par"
           items={PAR_OPTIONS}
           selectedValue={hole.par.toString()}
@@ -105,7 +117,9 @@ function HoleRow({
         />
       </View>
       <TextInput
-        value={hole.handicap.toString()}
+        testID={`hole-${holeNumber}-handicap`}
+        value={hole.handicap !== null ? hole.handicap.toString() : ""}
+        placeholder=""
         onChangeText={(text) => onHandicapChange(filterIntegerInput(text))}
         keyboardType="number-pad"
         maxLength={2}
@@ -143,11 +157,11 @@ export function ManualCourseHoles({
   const numHoles = holesCount;
   const is18Holes = numHoles === 18;
 
-  // Initialize holes with default par 4 and sequential handicap
+  // Initialize holes with default par 4 and empty handicap (user must fill in)
   const [holes, setHoles] = useState<HoleData[]>(() =>
-    Array.from({ length: numHoles }, (_, i) => ({
+    Array.from({ length: numHoles }, () => ({
       par: 4,
-      handicap: i + 1,
+      handicap: null,
     })),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -211,7 +225,17 @@ export function ManualCourseHoles({
 
   const updateHoleHandicap = useCallback(
     (index: number, handicapStr: string): void => {
-      const handicap = handicapStr ? Number.parseInt(handicapStr, 10) : 1;
+      // Allow empty string (sets to null)
+      if (handicapStr === "") {
+        setHoles((prev) => {
+          const updated = [...prev];
+          updated[index] = { ...updated[index], handicap: null };
+          return updated;
+        });
+        return;
+      }
+
+      const handicap = Number.parseInt(handicapStr, 10);
       // Allow values 1-numHoles (9 for 9-hole, 18 for 18-hole courses)
       if (!Number.isNaN(handicap) && handicap >= 1 && handicap <= numHoles) {
         setHoles((prev) => {
@@ -272,13 +296,13 @@ export function ManualCourseHoles({
         );
         existingTeeObj.$jazz.set("ratings", ratings);
 
-        // Update each hole
+        // Update each hole (handicaps are guaranteed non-null at this point due to validation)
         const existingHoles = existingTeeObj.holes;
         for (let i = 0; i < holes.length; i++) {
           const hole = existingHoles[i];
           if (hole?.$isLoaded) {
             hole.$jazz.set("par", holes[i].par);
-            hole.$jazz.set("handicap", holes[i].handicap);
+            hole.$jazz.set("handicap", holes[i].handicap as number);
           }
         }
 
@@ -296,7 +320,7 @@ export function ManualCourseHoles({
         const courseId = `manual-${Date.now()}`;
         const teeId = `manual-tee-${Date.now()}`;
 
-        // Create TeeHole objects
+        // Create TeeHole objects (handicaps are guaranteed non-null at this point due to validation)
         const teeHoles: TeeHole[] = holes.map((hole, i) =>
           TeeHole.create(
             {
@@ -305,7 +329,7 @@ export function ManualCourseHoles({
               par: hole.par,
               yards: 0,
               meters: 0,
-              handicap: hole.handicap,
+              handicap: hole.handicap as number,
             },
             { owner: group },
           ),
@@ -415,9 +439,11 @@ export function ManualCourseHoles({
   // Calculate total par
   const totalPar = holes.reduce((sum, h) => sum + h.par, 0);
 
-  // Find invalid handicaps (duplicates or out of range) for validation
+  // Validation: check for empty, duplicate, or out-of-range handicaps
   const invalidHandicaps = findInvalidHandicaps(holes, numHoles);
   const hasInvalidHandicaps = invalidHandicaps.size > 0;
+  const hasIncompleteHandicaps = hasEmptyHandicaps(holes);
+  const canSave = !hasInvalidHandicaps && !hasIncompleteHandicaps;
 
   // Split holes for side-by-side layout (18 holes only)
   const frontNine = is18Holes ? holes.slice(0, 9) : holes;
@@ -435,105 +461,133 @@ export function ManualCourseHoles({
         </View>
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
       >
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryText}>
-            {numHoles} holes • Total Par: {totalPar}
-          </Text>
-        </View>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryText}>
+              {numHoles} holes • Total Par: {totalPar}
+            </Text>
+          </View>
 
-        {is18Holes ? (
-          // Side-by-side layout for 18 holes
-          <View style={styles.twoColumnContainer}>
-            {/* Front 9 */}
-            <View style={styles.nineColumn}>
-              <Text style={styles.nineHeader}>Front 9</Text>
+          {is18Holes ? (
+            // Side-by-side layout for 18 holes
+            <View style={styles.twoColumnContainer}>
+              {/* Front 9 */}
+              <View style={styles.nineColumn}>
+                <Text style={styles.nineHeader}>Front 9</Text>
+                <View style={styles.columnHeaderRow}>
+                  <Text style={styles.columnHeader}>#</Text>
+                  <Text style={styles.columnHeader}>Par</Text>
+                  <Text style={styles.columnHeader}>Hdcp</Text>
+                </View>
+                {frontNine.map((hole, index) => (
+                  <HoleRow
+                    key={`front-${index + 1}`}
+                    holeNumber={index + 1}
+                    hole={hole}
+                    onParChange={(par) => updateHolePar(index, par)}
+                    onHandicapChange={(hcp) => updateHoleHandicap(index, hcp)}
+                    isDuplicate={
+                      hole.handicap !== null &&
+                      invalidHandicaps.has(hole.handicap)
+                    }
+                  />
+                ))}
+              </View>
+
+              {/* Back 9 */}
+              <View style={styles.nineColumn}>
+                <Text style={styles.nineHeader}>Back 9</Text>
+                <View style={styles.columnHeaderRow}>
+                  <Text style={styles.columnHeader}>#</Text>
+                  <Text style={styles.columnHeader}>Par</Text>
+                  <Text style={styles.columnHeader}>Hdcp</Text>
+                </View>
+                {backNine.map((hole, index) => (
+                  <HoleRow
+                    key={`back-${index + 10}`}
+                    holeNumber={index + 10}
+                    hole={hole}
+                    onParChange={(par) => updateHolePar(index + 9, par)}
+                    onHandicapChange={(hcp) =>
+                      updateHoleHandicap(index + 9, hcp)
+                    }
+                    isDuplicate={
+                      hole.handicap !== null &&
+                      invalidHandicaps.has(hole.handicap)
+                    }
+                  />
+                ))}
+              </View>
+            </View>
+          ) : (
+            // Single column for 9 holes
+            <View style={styles.singleColumn}>
               <View style={styles.columnHeaderRow}>
                 <Text style={styles.columnHeader}>#</Text>
                 <Text style={styles.columnHeader}>Par</Text>
                 <Text style={styles.columnHeader}>Hdcp</Text>
               </View>
-              {frontNine.map((hole, index) => (
+              {holes.map((hole, index) => (
                 <HoleRow
-                  key={`front-${index + 1}`}
+                  key={`hole-${index + 1}`}
                   holeNumber={index + 1}
                   hole={hole}
                   onParChange={(par) => updateHolePar(index, par)}
                   onHandicapChange={(hcp) => updateHoleHandicap(index, hcp)}
-                  isDuplicate={invalidHandicaps.has(hole.handicap)}
+                  isDuplicate={
+                    hole.handicap !== null &&
+                    invalidHandicaps.has(hole.handicap)
+                  }
                 />
               ))}
             </View>
+          )}
 
-            {/* Back 9 */}
-            <View style={styles.nineColumn}>
-              <Text style={styles.nineHeader}>Back 9</Text>
-              <View style={styles.columnHeaderRow}>
-                <Text style={styles.columnHeader}>#</Text>
-                <Text style={styles.columnHeader}>Par</Text>
-                <Text style={styles.columnHeader}>Hdcp</Text>
-              </View>
-              {backNine.map((hole, index) => (
-                <HoleRow
-                  key={`back-${index + 10}`}
-                  holeNumber={index + 10}
-                  hole={hole}
-                  onParChange={(par) => updateHolePar(index + 9, par)}
-                  onHandicapChange={(hcp) => updateHoleHandicap(index + 9, hcp)}
-                  isDuplicate={invalidHandicaps.has(hole.handicap)}
-                />
-              ))}
-            </View>
+          {hasIncompleteHandicaps && (
+            <Text style={styles.errorText}>
+              Enter a handicap value (1-{numHoles}) for each hole.
+            </Text>
+          )}
+
+          {hasInvalidHandicaps && !hasIncompleteHandicaps && (
+            <Text style={styles.errorText}>
+              Each hole must have a unique handicap value (1-{numHoles}).
+            </Text>
+          )}
+
+          <View style={styles.buttonContainer}>
+            <Button
+              testID="manual-course-save-button"
+              label={
+                isSubmitting
+                  ? "Saving..."
+                  : isEditMode
+                    ? "Save Changes"
+                    : "Save Course & Tee"
+              }
+              onPress={handleSave}
+              disabled={isSubmitting || !canSave}
+            />
           </View>
-        ) : (
-          // Single column for 9 holes
-          <View style={styles.singleColumn}>
-            <View style={styles.columnHeaderRow}>
-              <Text style={styles.columnHeader}>#</Text>
-              <Text style={styles.columnHeader}>Par</Text>
-              <Text style={styles.columnHeader}>Hdcp</Text>
-            </View>
-            {holes.map((hole, index) => (
-              <HoleRow
-                key={`hole-${index + 1}`}
-                holeNumber={index + 1}
-                hole={hole}
-                onParChange={(par) => updateHolePar(index, par)}
-                onHandicapChange={(hcp) => updateHoleHandicap(index, hcp)}
-                isDuplicate={invalidHandicaps.has(hole.handicap)}
-              />
-            ))}
-          </View>
-        )}
-
-        {hasInvalidHandicaps && (
-          <Text style={styles.errorText}>
-            Each hole must have a unique handicap value (1-{numHoles}).
-          </Text>
-        )}
-
-        <View style={styles.buttonContainer}>
-          <Button
-            label={
-              isSubmitting
-                ? "Saving..."
-                : isEditMode
-                  ? "Save Changes"
-                  : "Save Course & Tee"
-            }
-            onPress={handleSave}
-            disabled={isSubmitting || hasInvalidHandicaps}
-          />
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",

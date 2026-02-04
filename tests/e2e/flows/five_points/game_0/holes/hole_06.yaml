@@ -3,57 +3,90 @@
 # Junk: birdie:p3 prox:p3
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - runFlow:
-      when:
-          notVisible:
-              text: "Hole 6"
-      commands:
-        - swipe:
-              direction: "LEFT"
-              duration: 300
-        - waitForAnimationToEnd:
-              timeout: 1000
+    when:
+      notVisible:
+        text: "Hole 6"
+    commands:
+    - swipe:
+        direction: "LEFT"
+        duration: 300
+    - waitForAnimationToEnd:
+        timeout: 1000
 
 - extendedWaitUntil:
-      visible: "Hole 6"
-      timeout: 5000
+    visible: "Hole 6"
+    timeout: 3000
 
 - tapOn:
-      id: "player-p1-score"
+    id: "player-p1-increment"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 300
 
 - tapOn:
-      id: "player-p2-increment"
+    id: "player-p1-increment"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "player-p3-decrement"
+    id: "player-p2-increment"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 300
 
 - tapOn:
-      id: "player-p4-increment"
+    id: "player-p2-increment"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 300
 
 - tapOn:
-      id: "junk-birdie-p3"
+    id: "player-p2-increment"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 500
 
 - tapOn:
-      id: "junk-prox-p3"
+    id: "player-p3-increment"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 500
+
+- tapOn:
+    id: "player-p4-increment"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "player-p4-increment"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "player-p4-increment"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "junk-birdie-p3"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "junk-prox-p3"
+
+- waitForAnimationToEnd:
+    timeout: 300
 
 - takeScreenshot: "hole_6_complete"

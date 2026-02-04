@@ -89,6 +89,7 @@ async function exportFavorites(): Promise<void> {
     }
 
     // Deduplicate by favoritePlayerKey
+    // biome-ignore lint/style/noNonNullAssertion: Map entry is guaranteed to exist from set above
     const seen = seenFavoritePlayers.get(fav.playerKey)!;
     if (!seen.has(fav.favoritePlayerKey)) {
       seen.add(fav.favoritePlayerKey);
@@ -117,6 +118,7 @@ async function exportFavorites(): Promise<void> {
 
     // Deduplicate by composite key (courseId + teeId)
     const compositeKey = `${fav.courseId}-${fav.teeId}`;
+    // biome-ignore lint/style/noNonNullAssertion: Map entry is guaranteed to exist from set above
     const seen = seenFavoriteCourseTees.get(fav.playerKey)!;
     if (!seen.has(compositeKey)) {
       seen.add(compositeKey);

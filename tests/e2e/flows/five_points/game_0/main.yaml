@@ -4,6 +4,10 @@
 # Generated from fixture - do not edit directly
 
 appId: golf.spicy
+# Allow Maestro to see elements inside dropdown modals on iOS
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - takeScreenshot: "test_start"
@@ -15,13 +19,19 @@ appId: golf.spicy
 - runFlow: "login.yaml"
 
 # Clean up any existing games
-- runFlow: "../../shared/cleanup.yaml"
+- runFlow: "../../shared/cleanup_deep.yaml"
 
 # Create new game
 - runFlow: "new_game.yaml"
 
 # Add guest players (logged-in player already added)
 - runFlow: "add_players.yaml"
+
+# Select course and tee (manual entry)
+- runFlow: "select_course_tee.yaml"
+
+# Adjust handicap indexes
+- runFlow: "adjust_handicaps.yaml"
 
 # Start game
 - runFlow: "start_game.yaml"
@@ -48,3 +58,6 @@ appId: golf.spicy
 
 # View final leaderboard
 - runFlow: "leaderboard.yaml"
+
+# Clean up test data
+- runFlow: "../../shared/cleanup_deep.yaml"

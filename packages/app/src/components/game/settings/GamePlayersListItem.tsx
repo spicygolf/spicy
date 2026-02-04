@@ -86,12 +86,23 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
       });
   }
 
+  // Generate testID for player row actions (for E2E testing)
+  // Use player name (lowercased, spaces removed) for predictable testID
+  const playerNameSlug = player.name.toLowerCase().replace(/\s+/g, "-");
+  let playerRowTestId: string | undefined;
+  if (!hasRounds) {
+    playerRowTestId = `select-round-${playerNameSlug}`;
+  } else if (needsCourseAndTee) {
+    playerRowTestId = `select-course-tee-${playerNameSlug}`;
+  }
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.player}
         onPress={onPress}
         disabled={!onPress}
+        testID={playerRowTestId}
       >
         <Text style={styles.player_name}>{player.name}</Text>
         {subtitle && (
@@ -123,6 +134,7 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
                   })
               : undefined
           }
+          testID={`handicap-adjustment-${playerNameSlug}`}
         />
       </View>
       <View style={styles.delete}>

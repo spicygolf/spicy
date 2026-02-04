@@ -40,6 +40,12 @@ export function ProfileHome() {
       !me.root.settings?.$isLoaded ||
       me.root.settings.recoveryPhraseSaved !== true);
 
+  // Show Developer Tools in dev builds or for admin users
+  const hasPlayer =
+    isLoaded && me.root.$jazz.has("player") && me.root.player?.$isLoaded;
+  const isAdmin = hasPlayer && me.root.player.level === "admin";
+  const showDevTools = __DEV__ || isAdmin;
+
   return (
     <Screen>
       <View style={styles.container}>
@@ -61,10 +67,13 @@ export function ProfileHome() {
             showWarning={showAccountWarning}
             onPress={() => navigation.navigate("AccountScreen")}
           />
-          <ProfileRow
-            title="Developer Tools"
-            onPress={() => navigation.navigate("DeveloperToolsScreen")}
-          />
+          {showDevTools && (
+            <ProfileRow
+              testID="developer-tools-row"
+              title="Developer Tools"
+              onPress={() => navigation.navigate("DeveloperToolsScreen")}
+            />
+          )}
         </View>
 
         <View style={styles.logoutSection}>

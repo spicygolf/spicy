@@ -2,51 +2,84 @@
 # Scores: p1=5, p2=6, p3=5, p4=6
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - runFlow:
-      when:
-          notVisible:
-              text: "Hole 17"
-      commands:
-        - swipe:
-              direction: "LEFT"
-              duration: 300
-        - waitForAnimationToEnd:
-              timeout: 1000
+    when:
+      notVisible:
+        text: "Hole 17"
+    commands:
+    - swipe:
+        direction: "LEFT"
+        duration: 300
+    - waitForAnimationToEnd:
+        timeout: 1000
 
 - extendedWaitUntil:
-      visible: "Hole 17"
-      timeout: 5000
+    visible: "Hole 17"
+    timeout: 3000
 
 - tapOn:
-      id: "player-p1-increment"
+    id: "player-p1-increment"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 300
 
 - tapOn:
-      id: "player-p2-increment"
-
-- tapOn:
-      id: "player-p2-increment"
+    id: "player-p1-increment"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "player-p3-increment"
+    id: "player-p2-increment"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 300
 
 - tapOn:
-      id: "player-p4-increment"
-
-- tapOn:
-      id: "player-p4-increment"
+    id: "player-p2-increment"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 300
+
+- tapOn:
+    id: "player-p2-increment"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "player-p3-increment"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "player-p3-increment"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "player-p4-increment"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "player-p4-increment"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "player-p4-increment"
+
+- waitForAnimationToEnd:
+    timeout: 500
 
 - takeScreenshot: "hole_17_complete"

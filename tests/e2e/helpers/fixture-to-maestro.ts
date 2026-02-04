@@ -27,6 +27,25 @@ interface MaestroStep {
   [key: string]: unknown;
 }
 
+// =============================================================================
+// Timeout Constants (in milliseconds)
+// =============================================================================
+
+/** Wait for app launch and initial load */
+const TIMEOUT_APP_LAUNCH = 10000;
+/** Wait for login/authentication to complete */
+const TIMEOUT_LOGIN = 15000;
+/** Wait for API data to load (specs, courses, etc.) */
+const TIMEOUT_API_LOAD = 10000;
+/** Wait for navigation/screen transitions */
+const TIMEOUT_NAVIGATION = 3000;
+/** Wait for standard animations (modals, dropdowns) */
+const TIMEOUT_ANIMATION = 500;
+/** Wait for quick UI updates (button taps, toggles) */
+const TIMEOUT_UI_UPDATE = 300;
+/** Wait for hole navigation swipe */
+const TIMEOUT_HOLE_SWIPE = 1000;
+
 /**
  * E2E-specific metadata that can be added to fixtures
  */
@@ -75,6 +94,10 @@ export interface GeneratedSubFlows {
   newGame: string;
   /** Add players sub-flow */
   addPlayers: string;
+  /** Select course and tee sub-flow (manual entry) */
+  selectCourseTee: string;
+  /** Adjust handicaps sub-flow (optional, only if players have handicap overrides) */
+  adjustHandicaps: string | null;
   /** Start game sub-flow */
   startGame: string;
   /** Individual hole sub-flows, keyed by hole number (e.g., "01", "02") */
@@ -87,6 +110,7 @@ export interface GeneratedSubFlows {
     playerCount: number;
     hasJunk: boolean;
     hasMultipliers: boolean;
+    hasHandicapOverrides: boolean;
   };
 }
 
@@ -98,13 +122,13 @@ export function generateLoginSteps(): MaestroStep[] {
   return [
     {
       waitForAnimationToEnd: {
-        timeout: 10000,
+        timeout: TIMEOUT_APP_LAUNCH,
       },
     },
     {
       extendedWaitUntil: {
         visible: "Spicy Golf",
-        timeout: 10000,
+        timeout: TIMEOUT_APP_LAUNCH,
       },
     },
     {
@@ -127,7 +151,7 @@ export function generateLoginSteps(): MaestroStep[] {
     {
       extendedWaitUntil: {
         visible: "New Game",
-        timeout: 15000,
+        timeout: TIMEOUT_LOGIN,
       },
     },
   ];
@@ -153,7 +177,7 @@ export function generateCreateGameSteps(specName: string): MaestroStep[] {
     { tapOn: "New Game" },
     {
       waitForAnimationToEnd: {
-        timeout: 3000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
     // Switch to Search tab to find spec
@@ -164,7 +188,7 @@ export function generateCreateGameSteps(specName: string): MaestroStep[] {
     },
     {
       waitForAnimationToEnd: {
-        timeout: 3000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
     // Wait for specs to load from API
@@ -173,7 +197,7 @@ export function generateCreateGameSteps(specName: string): MaestroStep[] {
         visible: {
           id: spec.testId,
         },
-        timeout: 10000,
+        timeout: TIMEOUT_API_LOAD,
       },
     },
     {
@@ -185,7 +209,7 @@ export function generateCreateGameSteps(specName: string): MaestroStep[] {
     {
       extendedWaitUntil: {
         visible: "Add Player",
-        timeout: 10000,
+        timeout: TIMEOUT_API_LOAD,
       },
     },
   ];
@@ -218,13 +242,13 @@ export function generateCleanupSteps(): MaestroStep[] {
                 },
                 {
                   waitForAnimationToEnd: {
-                    timeout: 5000,
+                    timeout: TIMEOUT_NAVIGATION,
                   },
                 },
                 { tapOn: "Settings" },
                 {
                   waitForAnimationToEnd: {
-                    timeout: 3000,
+                    timeout: TIMEOUT_NAVIGATION,
                   },
                 },
                 {
@@ -233,14 +257,14 @@ export function generateCleanupSteps(): MaestroStep[] {
                       text: "Delete Game",
                     },
                     direction: "DOWN",
-                    timeout: 5000,
+                    timeout: TIMEOUT_NAVIGATION,
                   },
                 },
                 { tapOn: "Delete Game" },
                 {
                   extendedWaitUntil: {
                     visible: "Delete",
-                    timeout: 3000,
+                    timeout: TIMEOUT_NAVIGATION,
                   },
                 },
                 {
@@ -252,12 +276,12 @@ export function generateCleanupSteps(): MaestroStep[] {
                 {
                   extendedWaitUntil: {
                     visible: "New Game",
-                    timeout: 5000,
+                    timeout: TIMEOUT_NAVIGATION,
                   },
                 },
                 {
                   waitForAnimationToEnd: {
-                    timeout: 1000,
+                    timeout: TIMEOUT_HOLE_SWIPE,
                   },
                 },
               ],
@@ -273,53 +297,395 @@ export function generateCleanupSteps(): MaestroStep[] {
 /**
  * Generate steps to add players from a fixture.
  * The logged-in player is added automatically, so we only add guests.
+ * Uses the Manual tab with testIDs for reliable E2E testing.
  */
 export function generateAddPlayersSteps(fixture: Fixture): MaestroStep[] {
   const steps: MaestroStep[] = [];
 
   // Logged-in player is added automatically, so start from index 1
-  // For additional players, use "Add Guest" with their names
+  // For additional players, use the Manual tab
   for (let i = 1; i < fixture.players.length; i++) {
     const player = fixture.players[i];
     steps.push(
       { tapOn: "Add Player" },
       {
         waitForAnimationToEnd: {
-          timeout: 2000,
+          timeout: TIMEOUT_HOLE_SWIPE,
         },
       },
-      // Tap "Add Guest" option
-      { tapOn: "Add Guest" },
+      // Tap "Manual" tab
+      { tapOn: "Manual" },
       {
         waitForAnimationToEnd: {
-          timeout: 2000,
+          timeout: TIMEOUT_ANIMATION,
         },
       },
       // Enter player name
       {
         tapOn: {
-          text: "(?i)name",
+          id: "manual-player-name-input",
         },
       },
       { inputText: player.name },
+      // Enter short name (same as name)
+      {
+        tapOn: {
+          id: "manual-player-short-input",
+        },
+      },
+      { inputText: player.name },
+      // Enter handicap (negative values display with + prefix)
+      {
+        tapOn: {
+          id: "manual-player-handicap-input",
+        },
+      },
+      {
+        inputText:
+          player.handicapIndex < 0
+            ? `+${Math.abs(player.handicapIndex)}`
+            : String(player.handicapIndex),
+      },
       { hideKeyboard: true },
-      // Enter handicap if provided
-      ...(player.handicapIndex > 0
-        ? [
-            {
-              tapOn: {
-                text: "(?i)handicap",
-              },
-            },
-            { inputText: String(player.handicapIndex) },
-            { hideKeyboard: true },
-          ]
-        : []),
-      // Confirm/save the guest
-      { tapOn: "Done" },
+      // Submit the player
+      {
+        tapOn: {
+          id: "manual-player-submit-button",
+        },
+      },
       {
         waitForAnimationToEnd: {
-          timeout: 2000,
+          timeout: TIMEOUT_HOLE_SWIPE,
+        },
+      },
+      // Navigate back to game settings screen
+      {
+        tapOn: {
+          id: "nav-back-button",
+        },
+      },
+      {
+        waitForAnimationToEnd: {
+          timeout: TIMEOUT_ANIMATION,
+        },
+      },
+    );
+  }
+
+  return steps;
+}
+
+/**
+ * Generate steps to select/create course and tee for the first player.
+ * This handles round selection (if player has existing rounds) and manual course entry.
+ * The course/tee selection propagates to all players in the game.
+ */
+export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
+  if (fixture.players.length === 0) {
+    throw new Error("Fixture must have at least one player");
+  }
+
+  const steps: MaestroStep[] = [];
+
+  // The logged-in player (first player) may show "Select Round" if they have existing rounds
+  // or "Select Course/Tee" if a round was auto-created. We handle both cases.
+  const firstPlayerSlug = fixture.players[0].name
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+
+  steps.push(
+    // First, try to tap "Select Round" (if player has existing rounds for today)
+    // If not visible, fall through to "Select Course/Tee"
+    {
+      runFlow: {
+        when: {
+          visible: {
+            id: `select-round-${firstPlayerSlug}`,
+          },
+        },
+        commands: [
+          {
+            tapOn: {
+              id: `select-round-${firstPlayerSlug}`,
+            },
+          },
+          {
+            waitForAnimationToEnd: {
+              timeout: TIMEOUT_NAVIGATION,
+            },
+          },
+          // Create a new round for this game
+          {
+            tapOn: {
+              id: "create-new-round-button",
+            },
+          },
+          {
+            waitForAnimationToEnd: {
+              timeout: TIMEOUT_NAVIGATION,
+            },
+          },
+        ],
+      },
+    },
+    // Now tap "Select Course/Tee" (should be visible after round is created/selected)
+    {
+      tapOn: {
+        id: `select-course-tee-${firstPlayerSlug}`,
+      },
+    },
+    {
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_HOLE_SWIPE,
+      },
+    },
+    // Tap "Manual" tab for course entry
+    { tapOn: "Manual" },
+    {
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_ANIMATION,
+      },
+    },
+    // Enter course name from fixture
+    {
+      tapOn: {
+        id: "manual-course-name-input",
+      },
+    },
+    { inputText: fixture.course.name },
+    // Enter tee name from fixture
+    {
+      tapOn: {
+        id: "manual-course-tee-input",
+      },
+    },
+    { inputText: fixture.course.tee },
+    // Enter course rating if provided
+    {
+      tapOn: {
+        id: "manual-course-rating-input",
+      },
+    },
+    { inputText: fixture.course.rating?.toString() || "" },
+    // Enter slope rating if provided
+    {
+      tapOn: {
+        id: "manual-course-slope-input",
+      },
+    },
+    { inputText: fixture.course.slope?.toString() || "" },
+    // Dismiss keyboard by tapping header before tapping Next button
+    { tapOn: "Course Name" },
+    {
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_ANIMATION,
+      },
+    },
+    // Tap Next to go to hole setup
+    {
+      tapOn: {
+        id: "manual-course-next-button",
+      },
+    },
+    {
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_HOLE_SWIPE,
+      },
+    },
+  );
+
+  // On ManualCourseHoles screen - set par and handicap for each hole from fixture
+  // Par defaults to 4, Handicap starts empty (user must fill in all)
+  // Note: Dropdown items use text matching (accessibilityLabel) not id matching
+  // (itemTestIDField doesn't work reliably on iOS)
+  //
+  // Strategy: Edit holes 1-8, then 10-17 (skipping 9 and 18 which are at the bottom
+  // of their sections and covered by keyboard), then scroll down for 9 and 18
+
+  // Helper to generate steps for a single hole
+  const generateHoleEntrySteps = (holeNum: number): MaestroStep[] => {
+    const holeData = fixture.course.holes.find((h) => h.hole === holeNum);
+    if (!holeData) return [];
+
+    const holeSteps: MaestroStep[] = [];
+
+    // Set par if not 4 (default)
+    if (holeData.par !== 4) {
+      holeSteps.push(
+        {
+          tapOn: {
+            id: `hole-${holeNum}-par`,
+          },
+        },
+        {
+          waitForAnimationToEnd: {
+            timeout: TIMEOUT_UI_UPDATE,
+          },
+        },
+        // Tap the par value in the dropdown using text matching (accessibilityLabel)
+        // IMPORTANT: Must use bare string, not { id: ... } - iOS testID doesn't work for dropdown items
+        {
+          tapOn: `hole-${holeNum}-par-item-${holeData.par}`,
+        },
+        {
+          waitForAnimationToEnd: {
+            timeout: TIMEOUT_UI_UPDATE,
+          },
+        },
+      );
+    }
+
+    // Enter handicap (always required since inputs start empty)
+    holeSteps.push(
+      {
+        tapOn: {
+          id: `hole-${holeNum}-handicap`,
+        },
+      },
+      { inputText: holeData.handicap.toString() },
+    );
+
+    return holeSteps;
+  };
+
+  // Holes 1-8 (skip hole 9 - at bottom of front 9, keyboard covers it)
+  for (let i = 1; i <= 8; i++) {
+    steps.push(...generateHoleEntrySteps(i));
+  }
+
+  // Holes 10-17 (skip hole 18 - at bottom of back 9, keyboard covers it)
+  for (let i = 10; i <= 17; i++) {
+    steps.push(...generateHoleEntrySteps(i));
+  }
+
+  // Dismiss keyboard and scroll down to reveal holes 9 and 18
+  steps.push(
+    { tapOn: "Front 9" },
+    {
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_ANIMATION,
+      },
+    },
+    {
+      scrollUntilVisible: {
+        element: {
+          id: "manual-course-save-button",
+        },
+        direction: "DOWN",
+        timeout: TIMEOUT_NAVIGATION,
+      },
+    },
+  );
+
+  // Hole 9 (now visible after scroll)
+  steps.push(...generateHoleEntrySteps(9));
+
+  // Dismiss keyboard before editing hole 18
+  steps.push(
+    { tapOn: "Front 9" },
+    {
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_ANIMATION,
+      },
+    },
+  );
+
+  // Hole 18 (now visible after scroll)
+  steps.push(...generateHoleEntrySteps(18));
+
+  // Dismiss keyboard before tapping save
+  steps.push(
+    { tapOn: "Front 9" },
+    {
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_ANIMATION,
+      },
+    },
+  );
+
+  // Save the course
+  steps.push(
+    {
+      tapOn: {
+        id: "manual-course-save-button",
+      },
+    },
+    {
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_NAVIGATION,
+      },
+    },
+  );
+
+  return steps;
+}
+
+/**
+ * Generate steps to adjust handicap index for players with overrides.
+ * This navigates to the HandicapAdjustment screen for each player and enters the override value.
+ */
+export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
+  const steps: MaestroStep[] = [];
+
+  // Find players with handicap overrides
+  const playersWithOverrides = fixture.players.filter(
+    (p) => p.handicapOverride !== undefined,
+  );
+
+  if (playersWithOverrides.length === 0) {
+    return steps;
+  }
+
+  for (const player of playersWithOverrides) {
+    const playerSlug = player.name.toLowerCase().replace(/\s+/g, "-");
+
+    // Wait for the handicap display to be visible (needs roundToGame to be loaded)
+    steps.push({
+      extendedWaitUntil: {
+        visible: {
+          id: `handicap-adjustment-${playerSlug}`,
+        },
+        timeout: TIMEOUT_NAVIGATION,
+      },
+    });
+
+    // Tap on the player's handicap display to open HandicapAdjustment
+    steps.push(
+      {
+        tapOn: {
+          id: `handicap-adjustment-${playerSlug}`,
+        },
+      },
+      {
+        waitForAnimationToEnd: {
+          timeout: TIMEOUT_HOLE_SWIPE,
+        },
+      },
+    );
+
+    // Clear and enter the handicap index override
+    // Use longPress + Select All for reliable text clearing on iOS
+    // Note: handicapOverride is guaranteed defined after filter() above
+    steps.push(
+      {
+        longPressOn: {
+          id: "handicap-index-input",
+        },
+      },
+      { tapOn: "Select All" },
+      { inputText: player.handicapOverride! },
+    );
+
+    // Navigate back to game settings (back button dismisses keyboard and saves)
+    steps.push(
+      {
+        tapOn: {
+          id: "nav-back-button",
+        },
+      },
+      {
+        waitForAnimationToEnd: {
+          timeout: TIMEOUT_ANIMATION,
         },
       },
     );
@@ -336,14 +702,14 @@ export function generateStartGameSteps(): MaestroStep[] {
     { tapOn: "Start Game" },
     {
       waitForAnimationToEnd: {
-        timeout: 5000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
     // Wait for scoring view to load
     {
       extendedWaitUntil: {
         visible: "Hole 1",
-        timeout: 10000,
+        timeout: TIMEOUT_API_LOAD,
       },
     },
   ];
@@ -372,7 +738,7 @@ export function generateNavigateToHoleSteps(holeNumber: number): MaestroStep[] {
           },
           {
             waitForAnimationToEnd: {
-              timeout: 1000,
+              timeout: TIMEOUT_HOLE_SWIPE,
             },
           },
         ],
@@ -381,7 +747,7 @@ export function generateNavigateToHoleSteps(holeNumber: number): MaestroStep[] {
     {
       extendedWaitUntil: {
         visible: `Hole ${holeNumber}`,
-        timeout: 5000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
   ];
@@ -390,6 +756,7 @@ export function generateNavigateToHoleSteps(holeNumber: number): MaestroStep[] {
 /**
  * Generate steps to enter a score for a player.
  * Uses the +/- buttons to increment/decrement from the default (par + pops).
+ * Adds waits between consecutive taps to ensure UI settles.
  *
  * @param playerId - The Jazz ID of the player
  * @param targetGross - The target gross score
@@ -416,8 +783,16 @@ export function generateScoreEntrySteps(
       },
     });
   } else if (diff > 0) {
-    // Increment diff times
+    // Increment diff times, with waits between consecutive taps
     for (let i = 0; i < diff; i++) {
+      if (i > 0) {
+        // Add wait between consecutive taps to let UI settle
+        steps.push({
+          waitForAnimationToEnd: {
+            timeout: TIMEOUT_UI_UPDATE,
+          },
+        });
+      }
       steps.push({
         tapOn: {
           id: `player-${playerId}-increment`,
@@ -425,8 +800,16 @@ export function generateScoreEntrySteps(
       });
     }
   } else {
-    // Decrement |diff| times
+    // Decrement |diff| times, with waits between consecutive taps
     for (let i = 0; i < Math.abs(diff); i++) {
+      if (i > 0) {
+        // Add wait between consecutive taps to let UI settle
+        steps.push({
+          waitForAnimationToEnd: {
+            timeout: TIMEOUT_UI_UPDATE,
+          },
+        });
+      }
       steps.push({
         tapOn: {
           id: `player-${playerId}-decrement`,
@@ -526,7 +909,7 @@ export function generateHoleScoringSteps(
     if (scoreSteps.length > 0) {
       steps.push({
         waitForAnimationToEnd: {
-          timeout: 500,
+          timeout: TIMEOUT_ANIMATION,
         },
       });
     }
@@ -540,7 +923,7 @@ export function generateHoleScoringSteps(
         steps.push(...generateJunkToggleSteps(junkName, playerId));
         steps.push({
           waitForAnimationToEnd: {
-            timeout: 300,
+            timeout: TIMEOUT_UI_UPDATE,
           },
         });
       }
@@ -554,7 +937,7 @@ export function generateHoleScoringSteps(
         steps.push(...generateMultiplierToggleSteps(multiplierName, teamId));
         steps.push({
           waitForAnimationToEnd: {
-            timeout: 300,
+            timeout: TIMEOUT_UI_UPDATE,
           },
         });
       }
@@ -572,7 +955,7 @@ export function generateHoleScoringSteps(
 /**
  * Generate steps to verify final results
  */
-export function generateLeaderboardSteps(fixture: Fixture): MaestroStep[] {
+export function generateLeaderboardSteps(_fixture: Fixture): MaestroStep[] {
   const steps: MaestroStep[] = [];
 
   // Navigate to leaderboard
@@ -580,7 +963,7 @@ export function generateLeaderboardSteps(fixture: Fixture): MaestroStep[] {
     { tapOn: "Leaderboard" },
     {
       waitForAnimationToEnd: {
-        timeout: 3000,
+        timeout: TIMEOUT_NAVIGATION,
       },
     },
   );
@@ -621,6 +1004,10 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     `# Generated from fixture - do not edit directly`,
     ``,
     `appId: golf.spicy`,
+    `# Allow Maestro to see elements inside dropdown modals on iOS`,
+    `platform:`,
+    `  ios:`,
+    `    snapshotKeyHonorModalViews: false`,
     `---`,
     ``,
     `- takeScreenshot: "test_start"`,
@@ -632,7 +1019,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     `- runFlow: "login.yaml"`,
     ``,
     `# Clean up any existing games`,
-    `- runFlow: "../../shared/cleanup.yaml"`,
+    `- runFlow: "../../shared/cleanup_deep.yaml"`,
     ``,
     `# Create new game`,
     `- runFlow: "new_game.yaml"`,
@@ -640,11 +1027,31 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     `# Add guest players (logged-in player already added)`,
     `- runFlow: "add_players.yaml"`,
     ``,
+    `# Select course and tee (manual entry)`,
+    `- runFlow: "select_course_tee.yaml"`,
+  ];
+
+  // Check if any players have handicap overrides
+  const playersWithOverrides = fixture.players.filter(
+    (p) => p.handicapOverride !== undefined,
+  );
+  const hasHandicapOverrides = playersWithOverrides.length > 0;
+
+  if (hasHandicapOverrides) {
+    mainLines.push(
+      ``,
+      `# Adjust handicap indexes`,
+      `- runFlow: "adjust_handicaps.yaml"`,
+    );
+  }
+
+  mainLines.push(
+    ``,
     `# Start game`,
     `- runFlow: "start_game.yaml"`,
     ``,
     `# Play all ${holeNumbers.length} holes`,
-  ];
+  );
 
   for (const holeNum of holeNumbers) {
     const paddedNum = holeNum.padStart(2, "0");
@@ -655,6 +1062,9 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     ``,
     `# View final leaderboard`,
     `- runFlow: "leaderboard.yaml"`,
+    ``,
+    `# Clean up test data`,
+    `- runFlow: "../../shared/cleanup_deep.yaml"`,
   );
 
   // Determine metadata
@@ -666,6 +1076,17 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
   // Guest players (all except first which is the logged-in user)
   const guestPlayers = fixture.players.slice(1);
 
+  // Generate adjust handicaps sub-flow if needed
+  const adjustHandicapsSteps = generateAdjustHandicapsSteps(fixture);
+  const adjustHandicapsYaml =
+    adjustHandicapsSteps.length > 0
+      ? stepsToYaml(
+          adjustHandicapsSteps,
+          "golf.spicy",
+          `# Sub-flow: Adjust handicap indexes for players with overrides\n# Expects: Game settings screen with course/tee selected\n# Provides: Handicap indexes adjusted, ready to start game`,
+        )
+      : null;
+
   return {
     main: mainLines.join("\n"),
     login: stepsToYaml(
@@ -673,7 +1094,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
       "golf.spicy",
       `# Sub-flow: Login to test account\n# Expects: App launched with clearState\n# Provides: User logged in, "New Game" visible`,
     ),
-    // Note: cleanup uses shared/cleanup.yaml, not generated per-game
+    // Note: cleanup uses shared/cleanup_deep.yaml, not generated per-game
     newGame: stepsToYaml(
       generateCreateGameSteps(fixture.spec),
       "golf.spicy",
@@ -682,8 +1103,14 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     addPlayers: stepsToYaml(
       generateAddPlayersSteps(fixture),
       "golf.spicy",
-      `# Sub-flow: Add ${guestPlayers.length} guest players (${guestPlayers.map((p) => p.name).join(", ")})\n# Expects: Game settings screen, logged-in player already added automatically\n# Provides: ${fixture.players.length} players total, ready to start game`,
+      `# Sub-flow: Add ${guestPlayers.length} guest players (${guestPlayers.map((p) => p.name).join(", ")})\n# Expects: Game settings screen, logged-in player already added automatically\n# Provides: ${fixture.players.length} players total, ready for course/tee selection`,
     ),
+    selectCourseTee: stepsToYaml(
+      generateSelectCourseTeeSteps(fixture),
+      "golf.spicy",
+      `# Sub-flow: Select course and tee for ${fixture.players[0].name} (manual entry)\n# Expects: Game settings screen with players added\n# Provides: Course and tee configured, ready for handicap adjustment or start game`,
+    ),
+    adjustHandicaps: adjustHandicapsYaml,
     startGame: stepsToYaml(
       generateStartGameSteps(),
       "golf.spicy",
@@ -700,6 +1127,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
       playerCount: fixture.players.length,
       hasJunk,
       hasMultipliers,
+      hasHandicapOverrides,
     },
   };
 }
@@ -820,6 +1248,11 @@ export function stepsToYaml(
   }
 
   lines.push(`appId: ${appId}`);
+  // Allow Maestro to see elements inside dropdown modals on iOS
+  // (react-native-element-dropdown uses accessibilityViewIsModal which hides sibling views)
+  lines.push(`platform:`);
+  lines.push(`  ios:`);
+  lines.push(`    snapshotKeyHonorModalViews: false`);
   lines.push(`---`);
   lines.push(``);
 
@@ -834,6 +1267,7 @@ export function stepsToYaml(
 
 /**
  * Recursively serialize a value to YAML format
+ * Uses 2-space indentation to match manual YAML style
  */
 function valueToYaml(
   value: unknown,
@@ -885,11 +1319,12 @@ function valueToYaml(
         lines.push(`${keyPrefix}${key}: ${formattedVal}`);
       } else if (Array.isArray(val)) {
         lines.push(`${keyPrefix}${key}:`);
-        lines.push(valueToYaml(val, indent + 2, false));
+        // Use indent + 1 for proper 2-space indentation
+        lines.push(valueToYaml(val, indent + 1, false));
       } else if (typeof val === "object" && val !== null) {
         lines.push(`${keyPrefix}${key}:`);
-        // Recursively serialize nested object (not as array item)
-        const nestedLines = valueToYaml(val, indent + 2, false);
+        // Use indent + 1 for proper 2-space indentation
+        const nestedLines = valueToYaml(val, indent + 1, false);
         lines.push(nestedLines);
       }
     }
@@ -900,6 +1335,7 @@ function valueToYaml(
 
 /**
  * Convert a single step to YAML format
+ * Uses 2-space indentation to match manual YAML style
  */
 function stepToYaml(step: MaestroStep, indent: number): string {
   const prefix = "  ".repeat(indent);
@@ -917,7 +1353,8 @@ function stepToYaml(step: MaestroStep, indent: number): string {
     } else if (typeof value === "object" && value !== null) {
       // Object value - use recursive serializer
       lines.push(`${prefix}- ${key}:`);
-      const nestedYaml = valueToYaml(value, indent + 2, false);
+      // Use indent + 1 for proper 2-space indentation
+      const nestedYaml = valueToYaml(value, indent + 1, false);
       lines.push(nestedYaml);
     }
   }

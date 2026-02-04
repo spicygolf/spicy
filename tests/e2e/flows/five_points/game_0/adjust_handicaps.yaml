@@ -1,0 +1,33 @@
+# Sub-flow: Adjust handicap indexes for players with overrides
+# Expects: Game settings screen with course/tee selected
+# Provides: Handicap indexes adjusted, ready to start game
+
+appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
+---
+
+- extendedWaitUntil:
+    visible:
+      id: "handicap-adjustment-brad"
+    timeout: 3000
+
+- tapOn:
+    id: "handicap-adjustment-brad"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+- longPressOn:
+    id: "handicap-index-input"
+
+- tapOn: "Select All"
+
+- inputText: "5.1"
+
+- tapOn:
+    id: "nav-back-button"
+
+- waitForAnimationToEnd:
+    timeout: 500

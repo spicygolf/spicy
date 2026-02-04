@@ -133,6 +133,25 @@
       },
       "skillPath": "ci-debugging",
       "priority": 64
+    },
+    {
+      "name": "e2e-testing",
+      "description": "Maestro E2E testing patterns for React Native",
+      "triggers": {
+        "keywords": [
+          "e2e",
+          "maestro",
+          "end-to-end",
+          "test flow",
+          "testID",
+          "accessibilityLabel",
+          "dropdown",
+          "modal",
+          "run-ios-local"
+        ]
+      },
+      "skillPath": "e2e-testing",
+      "priority": 60
     }
   ]
 }

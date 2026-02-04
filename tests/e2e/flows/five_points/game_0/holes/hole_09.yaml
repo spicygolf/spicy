@@ -3,57 +3,60 @@
 # Multipliers: t1:double t2:double
 
 appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
 ---
 
 - runFlow:
-      when:
-          notVisible:
-              text: "Hole 9"
-      commands:
-        - swipe:
-              direction: "LEFT"
-              duration: 300
-        - waitForAnimationToEnd:
-              timeout: 1000
+    when:
+      notVisible:
+        text: "Hole 9"
+    commands:
+    - swipe:
+        direction: "LEFT"
+        duration: 300
+    - waitForAnimationToEnd:
+        timeout: 1000
 
 - extendedWaitUntil:
-      visible: "Hole 9"
-      timeout: 5000
+    visible: "Hole 9"
+    timeout: 3000
 
 - tapOn:
-      id: "player-p1-score"
+    id: "player-p1-decrement"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "player-p2-increment"
+    id: "player-p2-score"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "player-p3-score"
+    id: "player-p3-decrement"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "player-p4-increment"
+    id: "player-p4-score"
 
 - waitForAnimationToEnd:
-      timeout: 500
+    timeout: 500
 
 - tapOn:
-      id: "multiplier-double-1"
+    id: "multiplier-double-1"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 300
 
 - tapOn:
-      id: "multiplier-double-2"
+    id: "multiplier-double-2"
 
 - waitForAnimationToEnd:
-      timeout: 300
+    timeout: 300
 
 - takeScreenshot: "hole_9_complete"

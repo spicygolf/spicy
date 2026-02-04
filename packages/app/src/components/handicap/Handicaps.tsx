@@ -1,5 +1,5 @@
 import type { MaybeLoaded } from "jazz-tools";
-import { TouchableOpacity, View } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player, Round, RoundToGame } from "spicylib/schema";
 import {
@@ -14,9 +14,17 @@ interface Props {
   round?: MaybeLoaded<Round> | null;
   roundToGame?: MaybeLoaded<RoundToGame>;
   onPress?: () => void;
+  /** Optional testID for E2E testing */
+  testID?: string;
 }
 
-export function Handicaps({ player, round, roundToGame, onPress }: Props) {
+export function Handicaps({
+  player,
+  round,
+  roundToGame,
+  onPress,
+  testID,
+}: Props) {
   // Calculate course handicap directly - no useState or useEffect needed
   // Jazz is reactive, so this will recalculate when round or roundToGame changes
   const calculatedCourseHandicap = (() => {
@@ -95,10 +103,13 @@ export function Handicaps({ player, round, roundToGame, onPress }: Props) {
   const label = gameHandicap !== undefined ? "game" : "course";
   const courseGameHandicap = gameHandicap ?? courseHandicap;
 
-  const Container = onPress ? TouchableOpacity : View;
-
   return (
-    <Container style={styles.container} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={onPress}
+      testID={testID}
+      disabled={!onPress}
+    >
       <Handicap
         label="index"
         display={handicapIndexDisplay}
@@ -113,7 +124,7 @@ export function Handicaps({ player, round, roundToGame, onPress }: Props) {
         }
         color={hasCourseGameOverride ? "#FFA500" : undefined}
       />
-    </Container>
+    </TouchableOpacity>
   );
 }
 

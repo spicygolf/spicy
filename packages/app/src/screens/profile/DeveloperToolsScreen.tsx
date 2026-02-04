@@ -1,8 +1,99 @@
-import { View } from "react-native";
+/**
+ * Developer Tools Screen
+ *
+ * Provides development and testing utilities. Only visible when __DEV__ is true
+ * or the user has admin level access.
+ */
+
+import { useAccount } from "jazz-tools/react-native";
+import { useCallback, useState } from "react";
+import { Alert, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { Screen, Text } from "@/ui";
+import { PlayerAccount } from "spicylib/schema";
+import { Button, Screen, Text } from "@/ui";
+import { clearPlayerRounds, deepDeleteAllGames } from "@/utils/e2eCleanup";
 
 export function DeveloperToolsScreen() {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [lastDeleteCount, setLastDeleteCount] = useState<number | null>(null);
+
+  const me = useAccount(PlayerAccount, {
+    resolve: {
+      root: {
+        player: {
+          rounds: { $each: { scores: true } },
+        },
+        games: {
+          $each: {
+            holes: {
+              $each: { teams: { $each: { rounds: true, options: true } } },
+            },
+            rounds: { $each: { round: { scores: true } } },
+            players: true,
+          },
+        },
+      },
+    },
+  });
+
+  const isRootLoaded = me?.$isLoaded && me.root?.$isLoaded;
+
+  const gamesCount =
+    isRootLoaded && me.root.$jazz.has("games") && me.root.games?.$isLoaded
+      ? me.root.games.length
+      : 0;
+
+  const roundsCount =
+    isRootLoaded &&
+    me.root.$jazz.has("player") &&
+    me.root.player?.$isLoaded &&
+    me.root.player.$jazz.has("rounds") &&
+    me.root.player.rounds?.$isLoaded
+      ? me.root.player.rounds.length
+      : 0;
+
+  const handleDeepDeleteAllGames = useCallback(async () => {
+    if (!isRootLoaded) {
+      return;
+    }
+
+    if (gamesCount === 0 && roundsCount === 0) {
+      Alert.alert(
+        "Nothing to Delete",
+        "There are no games or rounds to delete.",
+      );
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      let deletedGames = 0;
+
+      // Delete all games
+      if (
+        me.root.$jazz.has("games") &&
+        me.root.games?.$isLoaded &&
+        me.root.games.length > 0
+      ) {
+        deletedGames = await deepDeleteAllGames(me.root.games);
+      }
+
+      // Clear the logged-in player's rounds
+      if (me.root.$jazz.has("player") && me.root.player?.$isLoaded) {
+        await clearPlayerRounds(me.root.player);
+      }
+
+      setLastDeleteCount(deletedGames);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Failed to delete games",
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [me, isRootLoaded, gamesCount, roundsCount]);
+
   return (
     <Screen>
       <View style={styles.container}>
@@ -11,8 +102,40 @@ export function DeveloperToolsScreen() {
           production builds.
         </Text>
 
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>No developer tools available</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>E2E Test Cleanup</Text>
+          <Text style={styles.sectionDescription}>
+            Deep delete all games and their related data (players, rounds,
+            scores, teams), plus clear your personal rounds. This minimizes Jazz
+            orphaned data by clearing nested structures before removing
+            references.
+          </Text>
+
+          <View style={styles.statsRow}>
+            <Text style={styles.statsLabel}>Current games:</Text>
+            <Text style={styles.statsValue}>{gamesCount}</Text>
+          </View>
+
+          <View style={styles.statsRow}>
+            <Text style={styles.statsLabel}>Your rounds:</Text>
+            <Text style={styles.statsValue}>{roundsCount}</Text>
+          </View>
+
+          {lastDeleteCount !== null && (
+            <View style={styles.statsRow}>
+              <Text style={styles.statsLabel}>Last deleted:</Text>
+              <Text style={styles.statsValue}>{lastDeleteCount} games</Text>
+            </View>
+          )}
+
+          <View style={styles.buttonContainer}>
+            <Button
+              testID="deep-delete-all-games-button"
+              label={isDeleting ? "Deleting..." : "Deep Delete All Data"}
+              onPress={handleDeepDeleteAllGames}
+              disabled={isDeleting || (gamesCount === 0 && roundsCount === 0)}
+            />
+          </View>
         </View>
       </View>
     </Screen>
@@ -22,20 +145,41 @@ export function DeveloperToolsScreen() {
 const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
-    gap: theme.gap(2),
+    gap: theme.gap(3),
   },
   description: {
     fontSize: 14,
     color: theme.colors.secondary,
   },
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
+  section: {
+    backgroundColor: theme.colors.card,
+    borderRadius: 8,
+    padding: theme.gap(2),
+    gap: theme.gap(1.5),
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  sectionDescription: {
+    fontSize: 13,
+    color: theme.colors.secondary,
+    lineHeight: 18,
+  },
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
-  emptyText: {
+  statsLabel: {
     fontSize: 14,
     color: theme.colors.secondary,
-    fontStyle: "italic",
+  },
+  statsValue: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  buttonContainer: {
+    marginTop: theme.gap(1),
   },
 }));

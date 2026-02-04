@@ -115,6 +115,7 @@ export function AddPlayerManual(): React.ReactElement {
         <View style={styles.field}>
           <Text style={styles.label}>Name</Text>
           <TextInput
+            testID="manual-player-name-input"
             value={name}
             onChangeText={setName}
             placeholder="Full name"
@@ -129,6 +130,7 @@ export function AddPlayerManual(): React.ReactElement {
         <View style={styles.field}>
           <Text style={styles.label}>Short Name</Text>
           <TextInput
+            testID="manual-player-short-input"
             value={shortName}
             onChangeText={setShortName}
             placeholder="Nickname for scorecard"
@@ -153,6 +155,7 @@ export function AddPlayerManual(): React.ReactElement {
         <View style={styles.field}>
           <Text style={styles.label}>Handicap Index (optional)</Text>
           <HandicapIndexInput
+            testID="manual-player-handicap-input"
             value={handicapIndex}
             onChangeText={setHandicapIndex}
             error={errors.handicapIndex}
@@ -162,6 +165,7 @@ export function AddPlayerManual(): React.ReactElement {
 
         <View style={styles.buttonContainer}>
           <Button
+            testID="manual-player-submit-button"
             label={isSubmitting ? "Adding..." : "Add Player"}
             onPress={handleSubmit}
             disabled={!isValid || isSubmitting}

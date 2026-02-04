@@ -9,6 +9,17 @@
 
 set -e
 
+# Get the booted iOS simulator UDID (allow lowercase UDIDs for safety)
+IOS_DEVICE=$(xcrun simctl list devices | grep -i "(Booted)" | grep -oE "[0-9A-Fa-f-]{36}" | head -1 || true)
+
+if [ -z "$IOS_DEVICE" ]; then
+  echo "Error: No booted iOS simulator found"
+  echo "Start a simulator first: open -a Simulator"
+  exit 1
+fi
+
+echo "Using iOS simulator: $IOS_DEVICE"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 E2E_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 OUTPUT_DIR="/tmp/maestro-local"
@@ -37,7 +48,7 @@ FLOW="${1:-main.yaml}"
 # Handle shortcuts
 case "$FLOW" in
   cleanup)
-    FLOW_PATH="$E2E_DIR/flows/shared/cleanup_games.yaml"
+    FLOW_PATH="$E2E_DIR/flows/shared/cleanup_deep.yaml"
     ;;
   login|login.yaml)
     FLOW_PATH="$E2E_DIR/flows/five_points/game_0/login.yaml"
@@ -75,7 +86,7 @@ echo "Running: $FLOW_PATH"
 echo "Output:  $OUTPUT_DIR"
 echo ""
 
-maestro test "$FLOW_PATH" \
+MAESTRO_DEVICE="$IOS_DEVICE" maestro test "$FLOW_PATH" \
   --env TEST_PASSPHRASE="$TEST_PASSPHRASE_IOS" \
   --test-output-dir "$OUTPUT_DIR"
 
