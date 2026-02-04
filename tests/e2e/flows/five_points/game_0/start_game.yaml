@@ -1,5 +1,5 @@
 # Sub-flow: Start the game
-# Expects: Players added, on game settings screen
+# Expects: Players added, teams assigned (if applicable), on game settings screen
 # Provides: Scoring screen visible, "Hole 1" visible
 
 appId: golf.spicy

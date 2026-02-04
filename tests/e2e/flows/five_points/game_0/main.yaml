@@ -33,6 +33,9 @@ platform:
 # Adjust handicap indexes
 - runFlow: "adjust_handicaps.yaml"
 
+# Assign players to teams
+- runFlow: "assign_teams.yaml"
+
 # Start game
 - runFlow: "start_game.yaml"
 

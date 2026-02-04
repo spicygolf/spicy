@@ -1,0 +1,57 @@
+# Sub-flow: Assign players to teams
+# Expects: Game settings screen (Players tab)
+# Provides: Team 1: Brad, Scott; Team 2: Tim, Eric
+
+appId: golf.spicy
+platform:
+  ios:
+    snapshotKeyHonorModalViews: false
+---
+
+- tapOn:
+    text: "Teams"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- extendedWaitUntil:
+    visible: "Team Assignments"
+    timeout: 10000
+
+- tapOn:
+    id: "team-player-brad"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "team-player-scott"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "team-player-tim"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "team-player-tim"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "team-player-eric"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "team-player-eric"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- takeScreenshot: "team_assignments_complete"

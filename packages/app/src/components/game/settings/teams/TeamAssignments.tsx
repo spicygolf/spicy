@@ -16,6 +16,13 @@ interface TeamAssignmentsProps {
   onAddTeam: () => void;
 }
 
+/**
+ * Create a URL-safe slug from a player name for use in testIDs
+ */
+function slugify(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, "-");
+}
+
 export function TeamAssignments({
   allPlayerRounds,
   teamCount,
@@ -91,81 +98,112 @@ export function TeamAssignments({
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={true}
       >
-        {teamSections.map((section) => (
-          <DraxView
-            key={section.teamNumber}
-            style={styles.teamSection}
-            onReceiveDragDrop={(event) => {
-              if (event.dragged.payload) {
-                onDrop(event.dragged.payload as string, section.teamNumber);
-              }
-            }}
-            receivingStyle={styles.teamSectionReceiving}
-          >
-            <View
-              style={[
-                styles.teamHeader,
-                section.teamNumber === 0 && styles.unassignedHeader,
-              ]}
-            >
-              <Text style={styles.teamHeaderText}>{section.teamName}</Text>
-              <Text style={styles.playerCount}>
-                {section.players.length} player
-                {section.players.length !== 1 ? "s" : ""}
-              </Text>
-            </View>
+        {teamSections.map((section) => {
+          // Create testID: "team-1-dropzone", "team-2-dropzone", "team-unassigned-dropzone"
+          const sectionTestId =
+            section.teamNumber === 0
+              ? "team-unassigned-dropzone"
+              : `team-${section.teamNumber}-dropzone`;
 
-            <View style={styles.dropZone}>
-              {section.players.length > 0 ? (
-                <View style={styles.playersList}>
-                  {section.players.map((player) => {
-                    return (
-                      <DraxView
-                        key={player.id}
-                        style={styles.playerItem}
-                        draggingStyle={styles.playerDragging}
-                        dragReleasedStyle={styles.playerReleased}
-                        dragPayload={player.id}
-                        renderContent={({ viewState }) => (
-                          <View
-                            style={[
-                              styles.playerContent,
-                              viewState?.dragStatus === 2 &&
-                                styles.playerContentDragging,
-                            ]}
-                          >
-                            <View style={styles.dragHandle}>
-                              <FontAwesome6
-                                name="grip-lines"
-                                iconStyle="solid"
-                                size={16}
-                                color={theme.colors.secondary}
-                              />
-                            </View>
-                            <View style={styles.playerInfo}>
-                              <Text style={styles.playerName}>
-                                {player.playerName}
-                              </Text>
-                              {player.handicap && (
-                                <Text style={styles.handicap}>
-                                  HI: {player.handicap}
+          return (
+            <DraxView
+              key={section.teamNumber}
+              style={styles.teamSection}
+              testID={sectionTestId}
+              onReceiveDragDrop={(event) => {
+                if (event.dragged.payload) {
+                  onDrop(event.dragged.payload as string, section.teamNumber);
+                }
+              }}
+              receivingStyle={styles.teamSectionReceiving}
+            >
+              <View
+                style={[
+                  styles.teamHeader,
+                  section.teamNumber === 0 && styles.unassignedHeader,
+                ]}
+              >
+                <Text style={styles.teamHeaderText}>{section.teamName}</Text>
+                <Text style={styles.playerCount}>
+                  {section.players.length} player
+                  {section.players.length !== 1 ? "s" : ""}
+                </Text>
+              </View>
+
+              <View style={styles.dropZone}>
+                {section.players.length > 0 ? (
+                  <View style={styles.playersList}>
+                    {section.players.map((player) => {
+                      // Create testID based on player name slug: "team-player-brad", "team-player-scott"
+                      const playerSlug = slugify(player.playerName);
+                      const playerTestId = `team-player-${playerSlug}`;
+
+                      // Calculate next team for tap-to-cycle assignment
+                      // Unassigned (0) -> Team 1, Team 1 -> Team 2, ..., Team N -> Unassigned
+                      const currentTeam = section.teamNumber;
+                      const nextTeam =
+                        currentTeam >= teamCount ? 0 : currentTeam + 1;
+
+                      return (
+                        <DraxView
+                          key={player.id}
+                          style={styles.playerItem}
+                          draggingStyle={styles.playerDragging}
+                          dragReleasedStyle={styles.playerReleased}
+                          dragPayload={player.id}
+                          onDragStart={() => {
+                            // Drag started - normal drag behavior
+                          }}
+                          renderContent={({ viewState }) => (
+                            <View
+                              testID={playerTestId}
+                              accessibilityLabel={playerTestId}
+                              style={[
+                                styles.playerContent,
+                                viewState?.dragStatus === 2 &&
+                                  styles.playerContentDragging,
+                              ]}
+                              // Tap to cycle to next team (for E2E testing - Maestro can't drag)
+                              onTouchEnd={() => {
+                                // Only handle tap if not dragging
+                                if (viewState?.dragStatus !== 2) {
+                                  onDrop(player.id, nextTeam);
+                                }
+                              }}
+                            >
+                              <View style={styles.dragHandle}>
+                                <FontAwesome6
+                                  name="grip-lines"
+                                  iconStyle="solid"
+                                  size={16}
+                                  color={theme.colors.secondary}
+                                />
+                              </View>
+                              <View style={styles.playerInfo}>
+                                <Text style={styles.playerName}>
+                                  {player.playerName}
                                 </Text>
-                              )}
+                                {player.handicap && (
+                                  <Text style={styles.handicap}>
+                                    HI: {player.handicap}
+                                  </Text>
+                                )}
+                              </View>
                             </View>
-                          </View>
-                        )}
-                      />
-                    );
-                  })}
-                </View>
-              ) : (
-                <View style={styles.emptyTeam}>
-                  <Text style={styles.emptyTeamText}>Drag players here</Text>
-                </View>
-              )}
-            </View>
-          </DraxView>
-        ))}
+                          )}
+                        />
+                      );
+                    })}
+                  </View>
+                ) : (
+                  <View style={styles.emptyTeam}>
+                    <Text style={styles.emptyTeamText}>Drag players here</Text>
+                  </View>
+                )}
+              </View>
+            </DraxView>
+          );
+        })}
       </DraxScrollView>
     </>
   );

@@ -1,6 +1,6 @@
 # Sub-flow: Adjust handicap indexes for players with overrides
 # Expects: Game settings screen with course/tee selected
-# Provides: Handicap indexes adjusted, ready to start game
+# Provides: Handicap indexes adjusted, ready to assign teams or start game
 
 appId: golf.spicy
 platform:

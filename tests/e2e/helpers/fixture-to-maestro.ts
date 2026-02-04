@@ -98,6 +98,8 @@ export interface GeneratedSubFlows {
   selectCourseTee: string;
   /** Adjust handicaps sub-flow (optional, only if players have handicap overrides) */
   adjustHandicaps: string | null;
+  /** Assign teams sub-flow (optional, only if fixture has team assignments) */
+  assignTeams: string | null;
   /** Start game sub-flow */
   startGame: string;
   /** Individual hole sub-flows, keyed by hole number (e.g., "01", "02") */
@@ -111,6 +113,7 @@ export interface GeneratedSubFlows {
     hasJunk: boolean;
     hasMultipliers: boolean;
     hasHandicapOverrides: boolean;
+    hasTeamAssignments: boolean;
   };
 }
 
@@ -695,6 +698,107 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
 }
 
 /**
+ * Create a URL-safe slug from a player name for use in testIDs
+ */
+function slugify(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, "-");
+}
+
+/**
+ * Generate steps to assign players to teams.
+ * Navigates to Teams tab and taps on each player to cycle them to their target team.
+ *
+ * Players start in "Unassigned" (team 0). Tapping a player cycles them:
+ * - From Unassigned (0) -> Team 1
+ * - From Team 1 -> Team 2
+ * - From Team 2 -> Unassigned (0) (for 2 teams)
+ *
+ * So to get a player to Team N, tap them N times from Unassigned.
+ */
+export function generateAssignTeamsSteps(fixture: Fixture): MaestroStep[] {
+  const steps: MaestroStep[] = [];
+
+  // If no teams defined in fixture, return empty steps
+  if (!fixture.teams || Object.keys(fixture.teams).length === 0) {
+    return steps;
+  }
+
+  // Navigate to Teams tab
+  steps.push(
+    {
+      tapOn: {
+        text: "Teams",
+      },
+    },
+    {
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_NAVIGATION,
+      },
+    },
+  );
+
+  // Wait for Teams tab content to load
+  steps.push({
+    extendedWaitUntil: {
+      visible: "Team Assignments",
+      timeout: TIMEOUT_API_LOAD,
+    },
+  });
+
+  // Build a map of player ID to target team number
+  const playerIdToTeam = new Map<string, number>();
+  for (const [teamId, playerIds] of Object.entries(fixture.teams)) {
+    const teamNumber = Number.parseInt(teamId, 10);
+    for (const playerId of playerIds) {
+      playerIdToTeam.set(playerId, teamNumber);
+    }
+  }
+
+  // For each player, tap them the right number of times to reach their team
+  // Order: process by team to minimize tap count (Team 1 first, then Team 2, etc.)
+  const teamNumbers = Object.keys(fixture.teams)
+    .map((t) => Number.parseInt(t, 10))
+    .sort((a, b) => a - b);
+
+  for (const teamNumber of teamNumbers) {
+    const playerIds = fixture.teams[String(teamNumber)] || [];
+
+    for (const playerId of playerIds) {
+      // Find the player info from fixture
+      const player = fixture.players.find((p) => p.id === playerId);
+      if (!player) continue;
+
+      const playerSlug = slugify(player.name);
+      const playerTestId = `team-player-${playerSlug}`;
+
+      // Tap the player `teamNumber` times to cycle them from Unassigned to target team
+      // Unassigned (0) -> Team 1 (1 tap) -> Team 2 (2 taps) -> etc.
+      for (let i = 0; i < teamNumber; i++) {
+        steps.push(
+          {
+            tapOn: {
+              id: playerTestId,
+            },
+          },
+          {
+            waitForAnimationToEnd: {
+              timeout: TIMEOUT_UI_UPDATE,
+            },
+          },
+        );
+      }
+    }
+  }
+
+  // Take screenshot after team assignments
+  steps.push({
+    takeScreenshot: "team_assignments_complete",
+  });
+
+  return steps;
+}
+
+/**
  * Generate steps to start the game (navigate from settings to scoring)
  */
 export function generateStartGameSteps(): MaestroStep[] {
@@ -1045,6 +1149,18 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     );
   }
 
+  // Check if fixture has team assignments
+  const hasTeamAssignments =
+    fixture.teams && Object.keys(fixture.teams).length > 0;
+
+  if (hasTeamAssignments) {
+    mainLines.push(
+      ``,
+      `# Assign players to teams`,
+      `- runFlow: "assign_teams.yaml"`,
+    );
+  }
+
   mainLines.push(
     ``,
     `# Start game`,
@@ -1083,7 +1199,29 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
       ? stepsToYaml(
           adjustHandicapsSteps,
           "golf.spicy",
-          `# Sub-flow: Adjust handicap indexes for players with overrides\n# Expects: Game settings screen with course/tee selected\n# Provides: Handicap indexes adjusted, ready to start game`,
+          `# Sub-flow: Adjust handicap indexes for players with overrides\n# Expects: Game settings screen with course/tee selected\n# Provides: Handicap indexes adjusted, ready to assign teams or start game`,
+        )
+      : null;
+
+  // Generate assign teams sub-flow if needed
+  const assignTeamsSteps = generateAssignTeamsSteps(fixture);
+  const teamNames = fixture.teams
+    ? Object.entries(fixture.teams)
+        .map(([teamId, playerIds]) => {
+          const names = playerIds
+            .map((pid) => fixture.players.find((p) => p.id === pid)?.name)
+            .filter(Boolean)
+            .join(", ");
+          return `Team ${teamId}: ${names}`;
+        })
+        .join("; ")
+    : "";
+  const assignTeamsYaml =
+    assignTeamsSteps.length > 0
+      ? stepsToYaml(
+          assignTeamsSteps,
+          "golf.spicy",
+          `# Sub-flow: Assign players to teams\n# Expects: Game settings screen (Players tab)\n# Provides: ${teamNames}`,
         )
       : null;
 
@@ -1108,13 +1246,14 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     selectCourseTee: stepsToYaml(
       generateSelectCourseTeeSteps(fixture),
       "golf.spicy",
-      `# Sub-flow: Select course and tee for ${fixture.players[0].name} (manual entry)\n# Expects: Game settings screen with players added\n# Provides: Course and tee configured, ready for handicap adjustment or start game`,
+      `# Sub-flow: Select course and tee for ${fixture.players[0].name} (manual entry)\n# Expects: Game settings screen with players added\n# Provides: Course and tee configured, ready for handicap adjustment or team assignment`,
     ),
     adjustHandicaps: adjustHandicapsYaml,
+    assignTeams: assignTeamsYaml,
     startGame: stepsToYaml(
       generateStartGameSteps(),
       "golf.spicy",
-      `# Sub-flow: Start the game\n# Expects: Players added, on game settings screen\n# Provides: Scoring screen visible, "Hole 1" visible`,
+      `# Sub-flow: Start the game\n# Expects: Players added, teams assigned (if applicable), on game settings screen\n# Provides: Scoring screen visible, "Hole 1" visible`,
     ),
     holes,
     leaderboard: stepsToYaml(
@@ -1128,6 +1267,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
       hasJunk,
       hasMultipliers,
       hasHandicapOverrides,
+      hasTeamAssignments: hasTeamAssignments ?? false,
     },
   };
 }
