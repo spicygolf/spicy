@@ -381,7 +381,22 @@ export function copySpecOptions(
 ): MapOfOptions {
   const newSpec = MapOfOptions.create({}, { owner });
 
-  if (!sourceSpec?.$isLoaded) return newSpec;
+  if (!sourceSpec?.$isLoaded) {
+    console.log("[copySpecOptions] sourceSpec not loaded, returning empty");
+    return newSpec;
+  }
+
+  // Debug: Log available keys in source spec
+  const allKeys = Object.keys(sourceSpec).filter(
+    (k) => !k.startsWith("$") && k !== "_refs",
+  );
+  const hasKeys = allKeys.filter((k) => sourceSpec.$jazz.has(k));
+  console.log("[copySpecOptions] Available keys:", allKeys.length, allKeys);
+  console.log(
+    "[copySpecOptions] Keys with $jazz.has:",
+    hasKeys.length,
+    hasKeys,
+  );
 
   // Iterate over all options in source spec and deep-copy each one
   for (const key of Object.keys(sourceSpec)) {
@@ -395,5 +410,10 @@ export function copySpecOptions(
     newSpec.$jazz.set(key, deepClone(option));
   }
 
+  console.log(
+    "[copySpecOptions] Copied",
+    hasKeys.length,
+    "options to new spec",
+  );
   return newSpec;
 }
