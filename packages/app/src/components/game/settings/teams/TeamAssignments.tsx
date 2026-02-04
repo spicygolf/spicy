@@ -57,13 +57,12 @@ export function TeamAssignments({
     const unassignedPlayers = allPlayerRounds.filter(
       (p) => !teamAssignments.has(p.id),
     );
-    if (unassignedPlayers.length > 0) {
-      sections.push({
-        teamNumber: 0,
-        teamName: "Unassigned",
-        players: unassignedPlayers,
-      });
-    }
+    // Always show Unassigned section so players can be moved back to it
+    sections.push({
+      teamNumber: 0,
+      teamName: "Unassigned",
+      players: unassignedPlayers,
+    });
 
     return sections;
   }, [allPlayerRounds, teamAssignments, teamCount]);
@@ -201,6 +200,28 @@ export function TeamAssignments({
                                   size={16}
                                   color={theme.colors.secondary}
                                 />
+                              </View>
+                            )}
+                            renderHoverContent={() => (
+                              <View style={styles.dragPreview}>
+                                <View style={styles.dragHandle}>
+                                  <FontAwesome6
+                                    name="grip-lines"
+                                    iconStyle="solid"
+                                    size={16}
+                                    color={theme.colors.secondary}
+                                  />
+                                </View>
+                                <View style={styles.dragPreviewInfo}>
+                                  <Text style={styles.playerName}>
+                                    {player.playerName}
+                                  </Text>
+                                  {player.handicap !== undefined && (
+                                    <Text style={styles.handicap}>
+                                      HI: {player.handicap}
+                                    </Text>
+                                  )}
+                                </View>
                               </View>
                             )}
                           />
@@ -388,5 +409,25 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.secondary,
     fontStyle: "italic",
     textAlign: "center",
+  },
+  dragPreview: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.card,
+    borderRadius: 8,
+    paddingVertical: theme.gap(1),
+    paddingHorizontal: theme.gap(1.5),
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  dragPreviewInfo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flex: 1,
+    marginLeft: theme.gap(1),
   },
 }));

@@ -217,7 +217,9 @@ export function GameTeamsList() {
 
   // Derive team assignments directly from Jazz data - no local state needed
   // Uses firstHole (deeply loaded) instead of game.holes[0] for efficiency
-  const teamAssignments = useMemo((): Map<string, number> => {
+  // Note: No useMemo - Jazz useCoState handles reactivity, and useMemo would
+  // cache stale values since Jazz updates data in place without changing refs
+  const teamAssignments = ((): Map<string, number> => {
     const assignments = new Map<string, number>();
 
     if (!firstHole?.$isLoaded || !firstHole.teams?.$isLoaded) {
@@ -244,7 +246,7 @@ export function GameTeamsList() {
     }
 
     return assignments;
-  }, [firstHole]);
+  })();
 
   const saveTeamAssignmentsToGame = useCallback(
     (assignments: Map<string, number>) => {
