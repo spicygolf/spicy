@@ -118,19 +118,29 @@ export function GameTeamsList() {
   }, [game]);
 
   // Check if spec has fixed num_teams (e.g., Five Points = 2 teams)
-  // Read from specRef (catalog spec) since num_teams is a spec definition, not a per-game override
+  // Try spec first (working copy), fall back to specRef (catalog spec)
   // biome-ignore lint/correctness/useExhaustiveDependencies: Use game.$jazz.id to avoid recomputation on Jazz progressive loading
   const specNumTeams = useMemo(() => {
-    if (!game?.$isLoaded || !game.specRef?.$isLoaded) return undefined;
-    return getSpecNumTeams(game.specRef);
+    if (!game?.$isLoaded) return undefined;
+    // Try working copy first
+    if (game.spec?.$isLoaded) {
+      const fromSpec = getSpecNumTeams(game.spec);
+      if (fromSpec !== undefined) return fromSpec;
+    }
+    // Fall back to catalog spec
+    if (game.specRef?.$isLoaded) {
+      return getSpecNumTeams(game.specRef);
+    }
+    return undefined;
   }, [game?.$jazz.id]);
 
   // Only allow adding teams when:
-  // 1. specRef is loaded (don't show button during loading)
+  // 1. Either spec or specRef is loaded (don't show button during loading)
   // 2. num_teams is not fixed by the spec
-  const canAddTeam = Boolean(
-    game?.$isLoaded && game.specRef?.$isLoaded && specNumTeams === undefined,
+  const specLoaded = Boolean(
+    game?.$isLoaded && (game.spec?.$isLoaded || game.specRef?.$isLoaded),
   );
+  const canAddTeam = specLoaded && specNumTeams === undefined;
 
   const allPlayerRounds = useMemo(() => {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded) return [];
