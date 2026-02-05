@@ -33,8 +33,10 @@
 import type {
   Fixture,
   FixtureCourse,
+  FixtureExpectedJunk,
   FixtureHole,
   FixtureHoleData,
+  FixtureHoleExpected,
   FixturePlayer,
   FixtureTeams,
 } from "../../lib/fixture-types";
@@ -54,7 +56,7 @@ interface ParsedDSL {
 /**
  * Parse players line with support for plus handicaps and optional overrides.
  *
- * Format: "p1 Brad 5.1, p2 Scott 4.1, p3 Tim +0.9, p4 Eric 12.9 [5.1]"
+ * Format: "Brad 5.1, Scott 4.1, Tim +0.9, Eric 12.9 [5.1]"
  *
  * - Plus handicaps use + prefix (e.g., +0.9 becomes -0.9 internally)
  * - Optional handicapOverride in brackets (e.g., [5.1])
@@ -64,13 +66,13 @@ function parsePlayers(line: string): FixturePlayer[] {
   const parts = line.split(",").map((p) => p.trim());
 
   for (const part of parts) {
-    // Match: id name handicap [optional_override]
+    // Match: name handicap [optional_override]
     // Handicap can be: 10, 10.5, +0.9 (plus handicap)
     const match = part.match(
-      /^(\w+)\s+(.+?)\s+(\+?\d+(?:\.\d+)?)(?:\s+\[([^\]]+)\])?$/,
+      /^(.+?)\s+(\+?\d+(?:\.\d+)?)(?:\s+\[([^\]]+)\])?$/,
     );
     if (match) {
-      const [, id, name, handicapStr, overrideStr] = match;
+      const [, name, handicapStr, overrideStr] = match;
 
       // Parse handicap - plus handicaps (e.g., +0.9) become negative
       let handicapIndex = Number.parseFloat(handicapStr);
@@ -78,10 +80,14 @@ function parsePlayers(line: string): FixturePlayer[] {
         handicapIndex = -Math.abs(handicapIndex);
       }
 
+      // Normalize name: capitalize first letter, lowercase rest
+      const normalizedName =
+        name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+
       const player: FixturePlayer = {
-        id,
-        name,
-        short: name.substring(0, 3),
+        id: normalizedName.toLowerCase(), // Lowercase for testIDs
+        name: normalizedName,
+        short: normalizedName.substring(0, 3),
         handicapIndex,
       };
 
@@ -137,7 +143,8 @@ function parseHoleDefinitions(line: string): FixtureHole[] {
 }
 
 /**
- * Parse team assignment: "(p1 p2) vs (p3 p4)"
+ * Parse team assignment: "(Brad Scott) vs (Tim Eric)"
+ * Player names are converted to lowercase IDs.
  */
 function parseTeams(segment: string): FixtureTeams | null {
   if (!segment.includes("(")) {
@@ -149,7 +156,11 @@ function parseTeams(segment: string): FixtureTeams | null {
   let teamNum = 1;
 
   for (const match of teamMatches) {
-    const playerIds = match[1].trim().split(/\s+/);
+    // Convert names to lowercase IDs
+    const playerIds = match[1]
+      .trim()
+      .split(/\s+/)
+      .map((name) => name.toLowerCase());
     teams[String(teamNum)] = playerIds;
     teamNum++;
   }
@@ -174,8 +185,14 @@ function parseScores(
   return scores;
 }
 
+// Junk types that require user interaction (clicking in UI)
+// Other junk types (birdie, eagle, etc.) are auto-calculated from scores
+const USER_TOGGLEABLE_JUNK = new Set(["prox"]);
+
 /**
- * Parse junk awards: "prox:p1 birdie:p3" or "birdie:p1 birdie:p3"
+ * Parse junk awards: "prox:Brad" (user-toggleable junk only)
+ * Only includes junk that requires clicking in the UI (e.g., prox).
+ * Player names are converted to lowercase IDs.
  */
 function parseJunk(segment: string): Record<string, string | string[]> {
   const junk: Record<string, string | string[]> = {};
@@ -183,10 +200,15 @@ function parseJunk(segment: string): Record<string, string | string[]> {
 
   const parts = segment.trim().split(/\s+/);
   for (const part of parts) {
-    const [junkName, playerId] = part.split(":");
-    if (junkName && playerId) {
-      // Handle multiple players for same junk
-      const playerIds = playerId.split(",");
+    const [junkName, playerName] = part.split(":");
+    if (junkName && playerName) {
+      // Only include user-toggleable junk (prox, etc.)
+      if (!USER_TOGGLEABLE_JUNK.has(junkName)) {
+        continue;
+      }
+
+      // Handle multiple players for same junk, convert to lowercase IDs
+      const playerIds = playerName.split(",").map((name) => name.toLowerCase());
 
       // Check if this junk type already exists
       if (junk[junkName]) {
@@ -205,7 +227,7 @@ function parseJunk(segment: string): Record<string, string | string[]> {
 }
 
 /**
- * Parse multipliers: "t1:double t2:double_back"
+ * Parse multipliers: "double:t1 double_back:t2"
  */
 function parseMultipliers(segment: string): Record<string, string[]> {
   const multipliers: Record<string, string[]> = {};
@@ -213,8 +235,8 @@ function parseMultipliers(segment: string): Record<string, string[]> {
 
   const parts = segment.trim().split(/\s+/);
   for (const part of parts) {
-    const [teamId, multiplierName] = part.split(":");
-    if (teamId && multiplierName) {
+    const [multiplierName, teamId] = part.split(":");
+    if (multiplierName && teamId) {
       // Convert t1 -> 1
       const teamKey = teamId.replace(/^t/, "");
       if (!multipliers[teamKey]) {
@@ -237,20 +259,20 @@ function looksLikeScores(segment: string): boolean {
 }
 
 /**
- * Check if a segment looks like junk (contains : but not t1:, t2:, etc.)
+ * Check if a segment looks like junk (contains : but not :t1, :t2, etc.)
  */
 function looksLikeJunk(segment: string): boolean {
   if (!segment.trim()) return false;
-  // Junk format: prox:p1 birdie:p3 (not t1:double)
-  return segment.includes(":") && !segment.match(/\bt\d+:/);
+  // Junk format: prox:Brad (not double:t1)
+  return segment.includes(":") && !segment.match(/:t\d+\b/);
 }
 
 /**
- * Check if a segment looks like multipliers (t1:double format)
+ * Check if a segment looks like multipliers (double:t1 format)
  */
 function looksLikeMultipliers(segment: string): boolean {
   if (!segment.trim()) return false;
-  return /\bt\d+:/.test(segment);
+  return /:t\d+\b/.test(segment);
 }
 
 /**
@@ -262,6 +284,69 @@ function looksLikeMultipliers(segment: string): boolean {
  * - Junk: name:player format (prox:p1)
  * - Multipliers: t#:name format (t1:double)
  */
+/**
+ * Parse expected results from the right side of =>
+ * Format: holePoints | runningTotals | awardedJunk
+ * Example: 3 0 | -2 2 | low_ball:2:t2
+ */
+function parseExpected(expectedStr: string): FixtureHoleExpected | undefined {
+  if (!expectedStr.trim()) return undefined;
+
+  const segments = expectedStr.split("|").map((s) => s.trim());
+  const expected: FixtureHoleExpected = {};
+
+  // First segment: hole points (e.g., "3 0")
+  if (segments[0]) {
+    const points = segments[0].split(/\s+/).map(Number);
+    if (points.length >= 2 && points.every((n) => !Number.isNaN(n))) {
+      expected.holePoints = [points[0], points[1]];
+    }
+  }
+
+  // Second segment: running totals (e.g., "-2 2")
+  if (segments[1]) {
+    const totals = segments[1].split(/\s+/).map(Number);
+    if (totals.length >= 2 && totals.every((n) => !Number.isNaN(n))) {
+      expected.runningTotals = [totals[0], totals[1]];
+    }
+  }
+
+  // Third+ segments: awarded junk (e.g., "low_ball:2:t1" or "low_ball:t1")
+  if (segments[2]) {
+    const junkParts = segments[2].split(/\s+/);
+    const awardedJunk: FixtureExpectedJunk[] = [];
+
+    for (const part of junkParts) {
+      // Format with points: name:points:team (e.g., "low_ball:2:t1")
+      const matchWithPoints = part.match(/^(\w+):(\d+):t(\d+)$/);
+      if (matchWithPoints) {
+        awardedJunk.push({
+          name: matchWithPoints[1],
+          points: Number.parseInt(matchWithPoints[2], 10),
+          teamId: matchWithPoints[3],
+        });
+        continue;
+      }
+
+      // Format without points: name:team (e.g., "low_ball:t1") - points looked up from spec
+      const matchNoPoints = part.match(/^(\w+):t(\d+)$/);
+      if (matchNoPoints) {
+        awardedJunk.push({
+          name: matchNoPoints[1],
+          points: 0, // Will be looked up from spec during assertion generation
+          teamId: matchNoPoints[2],
+        });
+      }
+    }
+
+    if (awardedJunk.length > 0) {
+      expected.awardedJunk = awardedJunk;
+    }
+  }
+
+  return Object.keys(expected).length > 0 ? expected : undefined;
+}
+
 function parseHoleLine(
   line: string,
   players: FixturePlayer[],
@@ -273,7 +358,15 @@ function parseHoleLine(
     throw new Error(`Invalid hole line: ${line}`);
   }
   const holeNum = holeMatch[1];
-  const rest = line.slice(holeMatch[0].length);
+  let rest = line.slice(holeMatch[0].length);
+
+  // Check for => delimiter (separates input from expected assertions)
+  let expectedStr = "";
+  if (rest.includes("=>")) {
+    const [inputPart, expectPart] = rest.split("=>").map((s) => s.trim());
+    rest = inputPart;
+    expectedStr = expectPart;
+  }
 
   // Split by | into segments
   const segments = rest.split("|").map((s) => s.trim());
@@ -305,11 +398,14 @@ function parseHoleLine(
   // Parse scores
   const scores = parseScores(scoresSegment, players);
 
-  // Parse junk
+  // Parse junk (only user-toggleable, not auto-awarded)
   const junk = parseJunk(junkSegment);
 
   // Parse multipliers
   const multipliers = parseMultipliers(multipliersSegment);
+
+  // Parse expected results (assertions)
+  const expected = parseExpected(expectedStr);
 
   return {
     holeNum,
@@ -318,6 +414,7 @@ function parseHoleLine(
       junk: Object.keys(junk).length > 0 ? junk : undefined,
       multipliers:
         Object.keys(multipliers).length > 0 ? multipliers : undefined,
+      expected,
     },
     teams,
   };

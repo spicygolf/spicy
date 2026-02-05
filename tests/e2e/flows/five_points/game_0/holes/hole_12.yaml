@@ -1,6 +1,6 @@
 # Hole 12 (Par 4, Hdcp 12)
-# Scores: p1=3, p2=3, p3=4, p4=4(+1)
-# Junk: prox:p2
+# Scores: brad=3, scott=3, tim=4, eric=4(+1)
+# Junk: prox:scott
 
 appId: golf.spicy
 platform:
@@ -13,31 +13,31 @@ platform:
     text: "12"
 
 - tapOn:
-    id: "player-p1-decrement"
+    id: "player-brad-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p2-decrement"
+    id: "player-scott-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p3-score"
+    id: "player-tim-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-decrement"
+    id: "player-eric-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "junk-prox-p2"
+    id: "junk-prox-scott"
 
 - waitForAnimationToEnd:
     timeout: 300

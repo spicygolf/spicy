@@ -1,5 +1,5 @@
 # Hole 5 (Par 4, Hdcp 5)
-# Scores: p1=5(+1), p2=5(+1), p3=4, p4=5(+1)
+# Scores: brad=5(+1), scott=5(+1), tim=4, eric=5(+1)
 # Multipliers: t1:double t2:double_back
 
 appId: golf.spicy
@@ -13,25 +13,25 @@ platform:
     text: "5"
 
 - tapOn:
-    id: "player-p1-score"
+    id: "player-brad-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p2-score"
+    id: "player-scott-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p3-score"
+    id: "player-tim-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-score"
+    id: "player-eric-score"
 
 - waitForAnimationToEnd:
     timeout: 500

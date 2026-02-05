@@ -98,7 +98,7 @@ export function PlayerScoreRow({
             onUnscore={onUnscore}
             readonly={readonly}
             size={size}
-            playerId={player.$jazz.id}
+            playerId={player.name.toLowerCase().replace(/\s+/g, "-")}
           />
         </View>
 

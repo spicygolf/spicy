@@ -85,7 +85,13 @@ export function TeamFooter({
         <View style={styles.holeMathSection}>
           <Text style={styles.holeMathLabel}>Hole:</Text>
           <Text style={styles.holeMathText}>
-            {junkTotal} × {holeMultiplier} = {holePoints}
+            {junkTotal} × {holeMultiplier} ={" "}
+          </Text>
+          <Text
+            style={styles.holeMathText}
+            testID={teamId ? `team-${teamId}-hole-points` : undefined}
+          >
+            {holePoints}
           </Text>
         </View>
 

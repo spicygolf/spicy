@@ -7,8 +7,5 @@ platform:
   ios:
     snapshotKeyHonorModalViews: false
 ---
-# Start game (navigate to scoring)
-- runFlow: "start_game.yaml"
-
 # Play all 18 holes
 - runFlow: "holes.yaml"

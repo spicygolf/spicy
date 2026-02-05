@@ -1,5 +1,6 @@
 # Hole 1 (Par 4, Hdcp 3)
-# Scores: p1=4(+1), p2=5(+1), p3=5, p4=6(+1)
+# Scores: brad=5(+1), scott=5(+1), tim=4, eric=5(+1)
+# Junk: prox:brad
 
 appId: golf.spicy
 platform:
@@ -12,28 +13,50 @@ platform:
     text: "1"
 
 - tapOn:
-    id: "player-p1-decrement"
+    id: "player-brad-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p2-score"
+    id: "player-scott-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p3-increment"
+    id: "player-tim-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-increment"
+    id: "player-eric-score"
 
 - waitForAnimationToEnd:
     timeout: 500
+
+- tapOn:
+    id: "junk-prox-brad"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- assertVisible:
+    id: "team-1-hole-points"
+    text: "1"
+
+- assertVisible:
+    id: "team-2-hole-points"
+    text: "0"
+
+- assertVisible:
+    id: "team-1-points"
+    text: "+1"
+
+- assertVisible:
+    id: "team-2-points"
+    text: "-1"
 
 - takeScreenshot: "hole_1_complete"
 

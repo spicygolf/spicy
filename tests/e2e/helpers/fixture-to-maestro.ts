@@ -20,6 +20,7 @@
 import type {
   Fixture,
   FixtureHoleData,
+  FixtureHoleExpected,
   FixturePlayer,
 } from "../../lib/fixture-types";
 import { calculatePops } from "../../../packages/lib/utils/scores";
@@ -980,6 +981,74 @@ export function generatePointsVerificationSteps(
 }
 
 /**
+ * Generate assertion steps for expected hole results
+ * Asserts hole points, running totals, and awarded junk
+ */
+export function generateExpectedAssertionSteps(
+  expected: FixtureHoleExpected,
+): MaestroStep[] {
+  const steps: MaestroStep[] = [];
+
+  // Assert hole points (points earned this hole)
+  if (expected.holePoints) {
+    const [team1Points, team2Points] = expected.holePoints;
+    steps.push({
+      assertVisible: {
+        id: "team-1-hole-points",
+        text: String(team1Points),
+      },
+    });
+    steps.push({
+      assertVisible: {
+        id: "team-2-hole-points",
+        text: String(team2Points),
+      },
+    });
+  }
+
+  // Assert running totals (cumulative)
+  if (expected.runningTotals) {
+    const [team1Total, team2Total] = expected.runningTotals;
+    // Format: +N or -N or 0
+    const formatTotal = (n: number) =>
+      n > 0 ? `+${n}` : n < 0 ? String(n) : "0";
+    steps.push({
+      assertVisible: {
+        id: "team-1-points",
+        text: formatTotal(team1Total),
+      },
+    });
+    steps.push({
+      assertVisible: {
+        id: "team-2-points",
+        text: formatTotal(team2Total),
+      },
+    });
+  }
+
+  // Assert awarded junk badges
+  if (expected.awardedJunk) {
+    for (const junk of expected.awardedJunk) {
+      // TestID format: junk-{name}-{teamId}
+      const assertStep: MaestroStep = {
+        assertVisible: {
+          id: `junk-${junk.name}-${junk.teamId}`,
+        },
+      };
+      // If points are specified (non-zero), also assert the points value
+      if (junk.points > 0) {
+        (assertStep.assertVisible as Record<string, unknown>).text = String(
+          junk.points,
+        );
+      }
+      steps.push(assertStep);
+    }
+  }
+
+  return steps;
+}
+
+/**
  * Generate all steps for scoring a single hole
  *
  * @param fixture - The test fixture
@@ -1059,6 +1128,11 @@ export function generateHoleScoringSteps(
         });
       }
     }
+  }
+
+  // Assert expected results (if provided)
+  if (holeData.expected) {
+    steps.push(...generateExpectedAssertionSteps(holeData.expected));
   }
 
   // Take screenshot for debugging

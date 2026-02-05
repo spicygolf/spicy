@@ -7,9 +7,9 @@ spec: five_points
 priority: smoke
 tags: scoring junk multipliers full-game
 
-# Players: id name handicap [override]
+# Players: name handicap [override]
 # Plus handicaps use + prefix (e.g., +0.9)
-players: p1 Brad 5.1 [5.1], p2 Scott 4.1, p3 Tim +0.9, p4 Eric 12.9
+players: Brad 5.1 [5.1], Scott 4.1, Tim +0.9, Eric 12.9
 
 # Course: name | tee | rating/slope
 course: Druid Hills Golf Club | Blue | 71.8/134
@@ -21,60 +21,60 @@ holes: 1-4-3-444, 2-4-7-392, 3-4-15-320, 4-4-1-413, 5-4-5-380, 6-3-17-122, 7-5-1
 # FRONT NINE
 # ============================================
 
-# Hole 1: Basic scoring - establish teams
-h1: (p1 p2) vs (p3 p4) | 4 5 5 6
+# Hole 1: Basic scoring, establish teams, only prox, 1pt
+h1: (Brad Scott) vs (Tim Eric) | 5 5 4 5 | prox:Brad | | => 1 0 | 1 -1
 
-# Hole 2: Birdie by Tim (par 4, score 3)
-h2: | 5 6 3 5 | birdie:p3
+# Hole 2: basic, prox, low ball, 3pts
+h2: | 6 5 3 6 | prox:Tim | | => 0 3 | -2 2 | low_ball:t2
 
-# Hole 3: Prox on par 4
-h3: | 3 4 3 4 | prox:p1
+# Hole 3: basic, prox, low ball other team 1pt
+h3: | 4 6 5 6 | prox:tim | | => 1 0 | -1 1 | low_ball:t1
 
-# Hole 4: Team 1 doubles
-h4: | 4 5 5 5 | | t1:double
+# Hole 4: basic, prox, low ball, low team 5pts
+h4: | 5 4 5 5 | prox:scott | | => 5 0 | 4 -4 | low_ball:t1 low_team: t1
 
 # Hole 5: Both teams press
-h5: | 5 5 4 5 | | t1:double t2:double_back
+# h5: | 5 5 4 5 | | double:t1 double_back:t2
 
-# Hole 6: Par 3 - birdie + prox (Tim scores 4 on par 3 = bogey, but marking birdie for test)
-h6: | 5 6 4 6 | birdie:p3 prox:p3
+# Hole 6: Par 3 - prox for Tim
+# h6: | 5 6 3 6 | prox:Tim
 
 # Hole 7: Par 5 - eagles by Brad and Tim (score 3 on par 5)
-h7: | 3 4 3 4
+# h7: | 3 4 3 4
 
 # Hole 8: Par 3
-h8: | 4 4 4 5
+# h8: | 4 4 4 5
 
 # Hole 9: Par 5 - both teams double
-h9: | 4 5 4 5 | | t1:double t2:double
+# h9: | 4 5 4 5 | | double:t1 double:t2
 
 # ============================================
 # BACK NINE
 # ============================================
 
 # Hole 10: Par 4
-h10: | 5 5 4 5
+# h10: | 5 5 4 5
 
 # Hole 11: Par 4
-h11: | 5 6 5 6
+# h11: | 5 6 5 6
 
 # Hole 12: Par 4 - prox for Scott
-h12: | 3 3 4 4 | prox:p2
+# h12: | 3 3 4 4 | prox:Scott
 
 # Hole 13: Par 3 - Team 2 doubles
-h13: | 5 5 4 4 | | t2:double
+# h13: | 5 5 4 4 | | double:t2
 
 # Hole 14: Par 5 - both teams double
-h14: | 4 5 5 4 | | t1:double t2:double
+# h14: | 4 5 5 4 | | double:t1 double:t2
 
 # Hole 15: Par 4 - birdie by Brad
-h15: | 4 6 5 6 | birdie:p1
+# h15: | 4 6 5 6
 
-# Hole 16: Par 4 - eagle by Brad (2 on par 4), birdie marking + prox
-h16: | 2 4 3 4 | birdie:p1 prox:p3
+# Hole 16: Par 4 - eagle by Brad (2 on par 4), prox for Tim
+# h16: | 2 4 3 4 | prox:Tim
 
 # Hole 17: Par 3
-h17: | 5 6 5 6
+# h17: | 5 6 5 6
 
 # Hole 18: Par 5 - birdies by Brad and Tim, multipliers
-h18: | 4 5 4 5 | birdie:p1 birdie:p3 | t1:double t2:double_back
+# h18: | 4 5 4 5 | | double:t1 double_back:t2

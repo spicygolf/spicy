@@ -1,5 +1,5 @@
 # Hole 8 (Par 3, Hdcp 9)
-# Scores: p1=4, p2=4, p3=4, p4=5(+1)
+# Scores: brad=4, scott=4, tim=4, eric=5(+1)
 
 appId: golf.spicy
 platform:
@@ -12,25 +12,25 @@ platform:
     text: "8"
 
 - tapOn:
-    id: "player-p1-increment"
+    id: "player-brad-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p2-increment"
+    id: "player-scott-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p3-increment"
+    id: "player-tim-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-increment"
+    id: "player-eric-increment"
 
 - waitForAnimationToEnd:
     timeout: 500

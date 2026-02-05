@@ -1,6 +1,5 @@
 # Hole 18 (Par 5, Hdcp 8)
-# Scores: p1=4, p2=5, p3=4, p4=5(+1)
-# Junk: birdie:p1 birdie:p3
+# Scores: brad=4, scott=5, tim=4, eric=5(+1)
 # Multipliers: t1:double t2:double_back
 
 appId: golf.spicy
@@ -14,40 +13,28 @@ platform:
     text: "18"
 
 - tapOn:
-    id: "player-p1-decrement"
+    id: "player-brad-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p2-score"
+    id: "player-scott-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p3-decrement"
+    id: "player-tim-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-decrement"
+    id: "player-eric-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
-
-- tapOn:
-    id: "junk-birdie-p1"
-
-- waitForAnimationToEnd:
-    timeout: 300
-
-- tapOn:
-    id: "junk-birdie-p3"
-
-- waitForAnimationToEnd:
-    timeout: 300
 
 - tapOn:
     id: "multiplier-double-1"
