@@ -26,25 +26,6 @@ bun e2e:check
 ./tests/e2e/scripts/run-ios-local.sh five_points/game_0/continue.yaml
 ```
 
-### Directory Structure
-
-```
-tests/e2e/
-├── fixtures/           # DSL source + generated JSON
-│   └── <spec>/<game_N>/
-│       ├── game.dsl    # Hand-written source of truth
-│       └── game.json   # Generated
-├── flows/              # Generated Maestro YAML
-│   └── <spec>/<game_N>/
-│       ├── main.yaml
-│       ├── continue.yaml  # Hand-written dev file
-│       └── holes/*.yaml
-├── helpers/            # Generator code
-│   ├── dsl-parser.ts
-│   └── fixture-to-maestro.ts
-└── scripts/            # CLI tools
-```
-
 ### DSL Syntax
 
 ```dsl

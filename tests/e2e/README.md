@@ -2,44 +2,6 @@
 
 End-to-end tests for Spicy Golf using [Maestro](https://maestro.mobile.dev/).
 
-## Directory Structure
-
-```
-tests/e2e/
-├── fixtures/           # Test data (DSL source files → JSON)
-│   └── five_points/
-│       └── game_0/
-│           ├── game.dsl      # Source of truth (hand-written)
-│           └── game.json     # Generated from DSL
-├── flows/              # Maestro YAML flow files (generated)
-│   ├── shared/         # Reusable flows (cleanup, etc.)
-│   └── five_points/
-│       └── game_0/
-│           ├── main.yaml           # Orchestrates full test
-│           ├── continue.yaml       # Dev convenience (hand-written)
-│           ├── login.yaml
-│           ├── new_game.yaml
-│           ├── add_players.yaml
-│           ├── select_course_tee.yaml
-│           ├── adjust_handicaps.yaml
-│           ├── assign_teams.yaml
-│           ├── start_game.yaml
-│           ├── leaderboard.yaml
-│           └── holes/
-│               ├── hole_01.yaml
-│               └── ...
-├── helpers/            # TypeScript utilities
-│   ├── dsl-parser.ts         # Parses DSL to fixture
-│   └── fixture-to-maestro.ts # Generates YAML from fixture
-├── scripts/            # CLI scripts
-│   ├── dsl-to-json.ts        # Convert DSL → JSON
-│   ├── generate-flows.ts     # Generate YAML flows
-│   ├── check-generated.ts    # CI: verify generated files
-│   └── run-ios-local.sh      # Run tests locally
-└── lib/                # Shared test utilities
-    └── fixture-types.ts
-```
-
 ## Quick Start
 
 ### Run a test locally
