@@ -14,6 +14,12 @@ players: Brad 5.1 [5.1], Scott 4.1, Tim +0.9, Eric 12.9
 # Course: name | tee | rating/slope
 course: Druid Hills Golf Club | Blue | 71.8/134
 
+# Junk definitions: name points (for assertion lookups)
+junk: prox 1 | low_ball 2 | low_total 2
+
+# Multiplier definitions: name value (for future use)
+mults: double 2 | pre_double 2 | double_back 2
+
 # Hole definitions: hole-par-handicap-yards
 holes: 1-4-3-444, 2-4-7-392, 3-4-15-320, 4-4-1-413, 5-4-5-380, 6-3-17-122, 7-5-11-485, 8-3-9-193, 9-5-13-485, 10-4-2-432, 11-4-6-416, 12-4-12-333, 13-3-18-160, 14-5-10-493, 15-4-4-352, 16-4-16-319, 17-3-14-192, 18-5-8-509
 
@@ -25,13 +31,13 @@ holes: 1-4-3-444, 2-4-7-392, 3-4-15-320, 4-4-1-413, 5-4-5-380, 6-3-17-122, 7-5-1
 h1: (Brad Scott) vs (Tim Eric) | 5 5 4 5 | prox:Brad | | => 1 0 | 1 -1
 
 # Hole 2: basic, prox, low ball, 3pts
-h2: | 6 5 4 7 | prox:Tim | | => 0 3 | -2 2 | low_ball:2:t2
+h2: | 6 5 4 7 | prox:Tim | | => 0 3 | -2 2 | low_ball:t2
 
 # Hole 3: basic, prox, low ball other team 1pt
-h3: | 4 6 5 6 | prox:tim | | => 1 0 | -1 1 | low_ball:2:t1
+h3: | 4 6 5 6 | prox:tim | | => 1 0 | -1 1 | low_ball:t1
 
 # Hole 4: basic, prox, low ball, low team 5pts
-h4: | 5 4 5 5 | prox:scott | | => 5 0 | 4 -4 | low_ball:2:t1 low_total:2:t1
+h4: | 5 4 5 5 | prox:scott | | => 5 0 | 4 -4 | low_ball:t1 low_total:t1
 
 # Hole 5: Both teams press
 # h5: | 5 5 4 5 | | double:t1 double_back:t2

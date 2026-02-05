@@ -23,6 +23,7 @@ import type {
   FixtureHoleExpected,
   FixturePlayer,
 } from "../../lib/fixture-types";
+import type { OptionDefinitions } from "./dsl-parser";
 import { calculatePops } from "../../../packages/lib/utils/scores";
 
 interface MaestroStep {
@@ -67,6 +68,8 @@ export interface E2EMetadata {
  */
 export interface E2EFixture extends Fixture {
   e2e?: E2EMetadata;
+  /** Option definitions for looking up junk/multiplier points values */
+  optionDefs?: OptionDefinitions;
 }
 
 /**
@@ -983,9 +986,13 @@ export function generatePointsVerificationSteps(
 /**
  * Generate assertion steps for expected hole results
  * Asserts hole points, running totals, and awarded junk
+ *
+ * @param expected - Expected results from DSL
+ * @param optionDefs - Option definitions for looking up junk points when not specified
  */
 export function generateExpectedAssertionSteps(
   expected: FixtureHoleExpected,
+  optionDefs?: OptionDefinitions,
 ): MaestroStep[] {
   const steps: MaestroStep[] = [];
 
@@ -1035,11 +1042,15 @@ export function generateExpectedAssertionSteps(
           id: `junk-${junk.name}-${junk.teamId}`,
         },
       };
-      // If points are specified (non-zero), also assert the points value
-      if (junk.points > 0) {
-        (assertStep.assertVisible as Record<string, unknown>).text = String(
-          junk.points,
-        );
+      // Look up points from optionDefs if not specified in DSL (points = 0)
+      let points = junk.points;
+      if (points === 0 && optionDefs?.junk[junk.name]) {
+        points = optionDefs.junk[junk.name];
+      }
+      // Assert points value if we have one
+      if (points > 0) {
+        (assertStep.assertVisible as Record<string, unknown>).text =
+          String(points);
       }
       steps.push(assertStep);
     }
@@ -1055,12 +1066,14 @@ export function generateExpectedAssertionSteps(
  * @param holeNumber - The hole number as string
  * @param holeData - The hole's score/junk/multiplier data
  * @param shotsOffMap - Pre-calculated shots off for each player (for pops calculation)
+ * @param optionDefs - Option definitions for looking up junk points
  */
 export function generateHoleScoringSteps(
   fixture: Fixture,
   holeNumber: string,
   holeData: FixtureHoleData,
   shotsOffMap?: Map<string, number>,
+  optionDefs?: OptionDefinitions,
 ): MaestroStep[] {
   const steps: MaestroStep[] = [];
   const holeNum = Number.parseInt(holeNumber, 10);
@@ -1132,7 +1145,9 @@ export function generateHoleScoringSteps(
 
   // Assert expected results (if provided)
   if (holeData.expected) {
-    steps.push(...generateExpectedAssertionSteps(holeData.expected));
+    steps.push(
+      ...generateExpectedAssertionSteps(holeData.expected, optionDefs),
+    );
   }
 
   // Take screenshot for debugging
@@ -1195,6 +1210,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
         holeNum,
         holeData,
         shotsOffMap,
+        fixture.optionDefs,
       );
       const comment = getHoleComment(fixture, holeNum, holeData, shotsOffMap);
       holes[paddedNum] = stepsToYaml(steps, "golf.spicy", comment);
@@ -1458,7 +1474,15 @@ export function generateFullFlow(fixture: E2EFixture): GeneratedFlow {
   for (const holeNum of holeNumbers) {
     const holeData = fixture.holes[holeNum];
     if (holeData) {
-      steps.push(...generateHoleScoringSteps(fixture, holeNum, holeData));
+      steps.push(
+        ...generateHoleScoringSteps(
+          fixture,
+          holeNum,
+          holeData,
+          undefined,
+          fixture.optionDefs,
+        ),
+      );
     }
   }
 

@@ -42,6 +42,14 @@ import type {
 } from "../../lib/fixture-types";
 import type { E2EMetadata } from "./fixture-to-maestro";
 
+/** Junk/multiplier value definitions from DSL header */
+export interface OptionDefinitions {
+  /** Junk name -> points value (e.g., { prox: 1, low_ball: 2 }) */
+  junk: Record<string, number>;
+  /** Multiplier name -> multiplier value (e.g., { double: 2, pre_double: 2 }) */
+  multipliers: Record<string, number>;
+}
+
 interface ParsedDSL {
   name: string;
   description?: string;
@@ -51,6 +59,44 @@ interface ParsedDSL {
   players: FixturePlayer[];
   teams: FixtureTeams;
   holes: Record<string, FixtureHoleData>;
+  /** Option definitions for looking up points values */
+  optionDefs: OptionDefinitions;
+}
+
+/**
+ * Parse junk definitions: "prox 1 | low_ball 2 | low_total 2"
+ * Returns a map of junk name -> points value
+ */
+function parseJunkDefinitions(line: string): Record<string, number> {
+  const defs: Record<string, number> = {};
+  const parts = line.split("|").map((p) => p.trim());
+
+  for (const part of parts) {
+    const match = part.match(/^(\w+)\s+(\d+)$/);
+    if (match) {
+      defs[match[1]] = Number.parseInt(match[2], 10);
+    }
+  }
+
+  return defs;
+}
+
+/**
+ * Parse multiplier definitions: "double 2 | pre_double 2 | double_back 2"
+ * Returns a map of multiplier name -> multiplier value
+ */
+function parseMultiplierDefinitions(line: string): Record<string, number> {
+  const defs: Record<string, number> = {};
+  const parts = line.split("|").map((p) => p.trim());
+
+  for (const part of parts) {
+    const match = part.match(/^(\w+)\s+(\d+)$/);
+    if (match) {
+      defs[match[1]] = Number.parseInt(match[2], 10);
+    }
+  }
+
+  return defs;
 }
 
 /**
@@ -443,6 +489,7 @@ export function parseDSL(dsl: string): ParsedDSL {
   let players: FixturePlayer[] = [];
   let currentTeams: FixtureTeams = {};
   const holes: Record<string, FixtureHoleData> = {};
+  const optionDefs: OptionDefinitions = { junk: {}, multipliers: {} };
 
   for (const line of lines) {
     if (line.startsWith("name:")) {
@@ -457,6 +504,16 @@ export function parseDSL(dsl: string): ParsedDSL {
     } else if (line.startsWith("tags:")) {
       const tags = line.slice(5).trim().split(/\s+/);
       e2e = { ...e2e, tags };
+    } else if (line.startsWith("junk:")) {
+      Object.assign(
+        optionDefs.junk,
+        parseJunkDefinitions(line.slice(5).trim()),
+      );
+    } else if (line.startsWith("mults:")) {
+      Object.assign(
+        optionDefs.multipliers,
+        parseMultiplierDefinitions(line.slice(6).trim()),
+      );
     } else if (line.startsWith("players:")) {
       players = parsePlayers(line.slice(8).trim());
     } else if (line.startsWith("course:")) {
@@ -511,13 +568,16 @@ export function parseDSL(dsl: string): ParsedDSL {
     players,
     teams: currentTeams,
     holes,
+    optionDefs,
   };
 }
 
 /**
  * Convert parsed DSL to full Fixture format
  */
-export function dslToFixture(dsl: string): Fixture & { e2e?: E2EMetadata } {
+export function dslToFixture(
+  dsl: string,
+): Fixture & { e2e?: E2EMetadata; optionDefs?: OptionDefinitions } {
   const parsed = parseDSL(dsl);
 
   return {
@@ -529,6 +589,7 @@ export function dslToFixture(dsl: string): Fixture & { e2e?: E2EMetadata } {
     players: parsed.players,
     teams: parsed.teams,
     holes: parsed.holes,
+    optionDefs: parsed.optionDefs,
     expected: {
       // Expected values can be added manually or calculated
       holes: {},
