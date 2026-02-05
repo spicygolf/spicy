@@ -7,20 +7,9 @@ platform:
     snapshotKeyHonorModalViews: false
 ---
 
-- runFlow:
-    when:
-      notVisible:
-        text: "Hole 17"
-    commands:
-    - swipe:
-        direction: "LEFT"
-        duration: 300
-    - waitForAnimationToEnd:
-        timeout: 1000
-
-- extendedWaitUntil:
-    visible: "Hole 17"
-    timeout: 3000
+- assertVisible:
+    id: "hole-number"
+    text: "17"
 
 - tapOn:
     id: "player-p1-increment"
@@ -77,3 +66,9 @@ platform:
     timeout: 500
 
 - takeScreenshot: "hole_17_complete"
+
+- tapOn:
+    id: "hole-nav-next"
+
+- waitForAnimationToEnd:
+    timeout: 1000

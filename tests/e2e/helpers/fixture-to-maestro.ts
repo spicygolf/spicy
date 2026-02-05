@@ -831,38 +831,32 @@ export function generateStartGameSteps(): MaestroStep[] {
 }
 
 /**
- * Generate steps to navigate to a specific hole
+ * Generate steps to verify we're on a specific hole
  */
-export function generateNavigateToHoleSteps(holeNumber: number): MaestroStep[] {
+export function generateVerifyHoleSteps(holeNumber: number): MaestroStep[] {
   return [
-    // Swipe left to go to next hole (or implement hole picker)
-    // For now, we assume sequential navigation
     {
-      runFlow: {
-        when: {
-          notVisible: {
-            text: `Hole ${holeNumber}`,
-          },
-        },
-        commands: [
-          {
-            swipe: {
-              direction: "LEFT",
-              duration: 300,
-            },
-          },
-          {
-            waitForAnimationToEnd: {
-              timeout: TIMEOUT_HOLE_SWIPE,
-            },
-          },
-        ],
+      assertVisible: {
+        id: "hole-number",
+        text: String(holeNumber),
+      },
+    },
+  ];
+}
+
+/**
+ * Generate steps to navigate to the next hole
+ */
+export function generateNextHoleSteps(): MaestroStep[] {
+  return [
+    {
+      tapOn: {
+        id: "hole-nav-next",
       },
     },
     {
-      extendedWaitUntil: {
-        visible: `Hole ${holeNumber}`,
-        timeout: TIMEOUT_NAVIGATION,
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_HOLE_SWIPE,
       },
     },
   ];
@@ -1002,8 +996,8 @@ export function generateHoleScoringSteps(
   const steps: MaestroStep[] = [];
   const holeNum = Number.parseInt(holeNumber, 10);
 
-  // Navigate to this hole
-  steps.push(...generateNavigateToHoleSteps(holeNum));
+  // Verify we're on the correct hole
+  steps.push(...generateVerifyHoleSteps(holeNum));
 
   // Get hole info from course
   const courseHole = fixture.course.holes.find((h) => h.hole === holeNum);
@@ -1071,6 +1065,9 @@ export function generateHoleScoringSteps(
   steps.push({
     takeScreenshot: `hole_${holeNumber}_complete`,
   });
+
+  // Navigate to next hole (or summary after last hole)
+  steps.push(...generateNextHoleSteps());
 
   return steps;
 }
