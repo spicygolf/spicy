@@ -5,8 +5,14 @@ import { useState } from "react";
 import { FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { PlayerAccount } from "spicylib/schema";
+import {
+  adjustHandicapsToLow,
+  calculateCourseHandicap,
+  type PlayerHandicap,
+} from "spicylib/utils";
 import { GamePlayersListItem } from "@/components/game/settings/GamePlayersListItem";
 import { useAddPlayerToGame, useGame } from "@/hooks";
+import { useOptionValue } from "@/hooks/useOptionValue";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button } from "@/ui";
 import { EmptyPlayersList } from "./EmptyPlayersList";
@@ -23,6 +29,21 @@ export function GamePlayersList() {
           ghinId: true,
         },
       },
+      rounds: {
+        $each: {
+          round: {
+            playerId: true,
+            tee: {
+              ratings: true,
+            },
+            handicapIndex: true,
+          },
+          handicapIndex: true,
+          courseHandicap: true,
+          gameHandicap: true,
+        },
+      },
+      spec: true,
     },
     select: (g) => {
       if (!g.$isLoaded) return null;
@@ -47,6 +68,57 @@ export function GamePlayersList() {
     game?.$isLoaded && game.players?.$isLoaded
       ? game.players.filter((p) => p?.$isLoaded)
       : [];
+
+  // Get handicap mode from game options (default is "low")
+  const handicapIndexFromValue = useOptionValue(
+    game,
+    null,
+    "handicap_index_from",
+    "game",
+  );
+  const handicapMode = handicapIndexFromValue === "full" ? "full" : "low";
+
+  // Calculate adjusted handicaps map when in "low" mode
+  // This gives us "shots off" for each player relative to the lowest handicap
+  const adjustedHandicaps = ((): Map<string, number> | null => {
+    if (handicapMode !== "low") return null;
+    if (!game?.$isLoaded || !game.rounds?.$isLoaded) return null;
+
+    const playerHandicaps: PlayerHandicap[] = [];
+
+    for (const rtg of game.rounds) {
+      if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+
+      const round = rtg.round;
+      const playerId = round.playerId;
+      if (!playerId) continue;
+
+      // Get courseHandicap: prefer stored value, else calculate from tee data
+      let courseHandicap = rtg.courseHandicap;
+      if (courseHandicap === undefined) {
+        const tee = round.tee;
+        if (tee?.$isLoaded && rtg.handicapIndex !== undefined) {
+          const calculated = calculateCourseHandicap({
+            handicapIndex: String(rtg.handicapIndex),
+            tee,
+            holesPlayed: "all18",
+          });
+          courseHandicap = calculated ?? 0;
+        } else {
+          courseHandicap = 0;
+        }
+      }
+
+      playerHandicaps.push({
+        playerId,
+        courseHandicap,
+        gameHandicap: rtg.gameHandicap,
+      });
+    }
+
+    if (playerHandicaps.length === 0) return null;
+    return adjustHandicapsToLow(playerHandicaps);
+  })();
 
   // Check if current player is already in the game
   // Computed directly - no useMemo needed since this is a simple check
@@ -117,7 +189,12 @@ export function GamePlayersList() {
       </View>
       <FlatList
         data={players}
-        renderItem={({ item }) => <GamePlayersListItem player={item} />}
+        renderItem={({ item }) => (
+          <GamePlayersListItem
+            player={item}
+            shotsOff={adjustedHandicaps?.get(item.$jazz.id) ?? null}
+          />
+        )}
         keyExtractor={(item) => item.$jazz.id}
         ListEmptyComponent={<EmptyPlayersList />}
         contentContainerStyle={styles.flatlist}

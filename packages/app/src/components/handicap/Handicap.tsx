@@ -28,6 +28,6 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 8,
   },
   display: {
-    fontSize: 16,
+    fontSize: 14,
   },
 }));

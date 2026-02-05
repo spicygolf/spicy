@@ -12,7 +12,16 @@ import { PlayerDelete } from "./PlayerDelete";
 
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 
-export function GamePlayersListItem({ player }: { player: Player | null }) {
+interface GamePlayersListItemProps {
+  player: Player | null;
+  /** Shots off the lowest handicap player (only in "low" mode) */
+  shotsOff: number | null;
+}
+
+export function GamePlayersListItem({
+  player,
+  shotsOff,
+}: GamePlayersListItemProps): React.ReactNode {
   const navigation = useNavigation<NavigationProp>();
   const { game } = useGame(undefined, {
     resolve: {
@@ -125,6 +134,7 @@ export function GamePlayersListItem({ player }: { player: Player | null }) {
           player={player}
           round={gameRound}
           roundToGame={roundToGame}
+          shotsOff={shotsOff}
           onPress={
             roundToGame?.$isLoaded
               ? () =>

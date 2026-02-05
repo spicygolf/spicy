@@ -13,6 +13,8 @@ interface Props {
   player: Player | null;
   round?: MaybeLoaded<Round> | null;
   roundToGame?: MaybeLoaded<RoundToGame>;
+  /** Shots off the lowest handicap player (only shown when not null) */
+  shotsOff?: number | null;
   onPress?: () => void;
   /** Optional testID for E2E testing */
   testID?: string;
@@ -22,6 +24,7 @@ export function Handicaps({
   player,
   round,
   roundToGame,
+  shotsOff,
   onPress,
   testID,
 }: Props) {
@@ -124,6 +127,9 @@ export function Handicaps({
         }
         color={hasCourseGameOverride ? "#FFA500" : undefined}
       />
+      {shotsOff !== null && shotsOff !== undefined && (
+        <Handicap label="shots" display={String(shotsOff)} />
+      )}
     </TouchableOpacity>
   );
 }
