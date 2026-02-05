@@ -6,21 +6,7 @@ platform:
   ios:
     snapshotKeyHonorModalViews: false
 ---
-
-- runFlow:
-    when:
-      notVisible:
-        text: "Hole 1"
-    commands:
-    - swipe:
-        direction: "LEFT"
-        duration: 300
-    - waitForAnimationToEnd:
-        timeout: 1000
-
-- extendedWaitUntil:
-    visible: "Hole 1"
-    timeout: 3000
+# Hole 1 is already visible after starting game
 
 - tapOn:
     id: "player-p1-score"

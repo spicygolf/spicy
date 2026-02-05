@@ -182,6 +182,7 @@ export function TeamAssignments({
                         <View key={player.id} style={styles.playerItem}>
                           {/* Drag handle - only this area triggers drag */}
                           <DraxView
+                            testID={`${playerTestId}-drag`}
                             style={styles.dragHandleContainer}
                             draggingStyle={styles.dragHandleDragging}
                             dragReleasedStyle={styles.dragHandleReleased}

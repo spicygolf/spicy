@@ -7,21 +7,12 @@ platform:
   ios:
     snapshotKeyHonorModalViews: false
 ---
+# Navigate to hole 9
+- tapOn:
+    id: "hole-nav-next"
 
-- runFlow:
-    when:
-      notVisible:
-        text: "Hole 9"
-    commands:
-    - swipe:
-        direction: "LEFT"
-        duration: 300
-    - waitForAnimationToEnd:
-        timeout: 1000
-
-- extendedWaitUntil:
-    visible: "Hole 9"
-    timeout: 3000
+- waitForAnimationToEnd:
+    timeout: 1000
 
 - tapOn:
     id: "player-p1-decrement"

@@ -70,7 +70,11 @@ export function GameHeader({
     <View style={styles.container}>
       <View style={styles.headerRow}>
         {/* Left Icon - Toggle between Leaderboard/Scoring */}
-        <TouchableOpacity style={styles.iconButton} onPress={handleToggle}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={handleToggle}
+          testID="game-header-toggle"
+        >
           <FontAwesome6
             name={getToggleIcon()}
             iconStyle="solid"

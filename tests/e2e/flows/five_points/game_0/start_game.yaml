@@ -1,18 +1,19 @@
 # Sub-flow: Start the game
 # Expects: Players added, teams assigned (if applicable), on game settings screen
-# Provides: Scoring screen visible, "Hole 1" visible
+# Provides: Scoring screen visible, hole 1 visible
 
 appId: golf.spicy
 platform:
   ios:
     snapshotKeyHonorModalViews: false
 ---
-
-- tapOn: "Start Game"
+- tapOn:
+    id: "game-header-toggle"
 
 - waitForAnimationToEnd:
     timeout: 3000
 
 - extendedWaitUntil:
-    visible: "Hole 1"
+    visible:
+      id: "hole-number"
     timeout: 10000

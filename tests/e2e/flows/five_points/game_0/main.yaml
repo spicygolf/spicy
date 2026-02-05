@@ -9,7 +9,6 @@ platform:
   ios:
     snapshotKeyHonorModalViews: false
 ---
-
 - takeScreenshot: "test_start"
 
 - launchApp:
@@ -40,24 +39,7 @@ platform:
 - runFlow: "start_game.yaml"
 
 # Play all 18 holes
-- runFlow: "holes/hole_01.yaml"
-- runFlow: "holes/hole_02.yaml"
-- runFlow: "holes/hole_03.yaml"
-- runFlow: "holes/hole_04.yaml"
-- runFlow: "holes/hole_05.yaml"
-- runFlow: "holes/hole_06.yaml"
-- runFlow: "holes/hole_07.yaml"
-- runFlow: "holes/hole_08.yaml"
-- runFlow: "holes/hole_09.yaml"
-- runFlow: "holes/hole_10.yaml"
-- runFlow: "holes/hole_11.yaml"
-- runFlow: "holes/hole_12.yaml"
-- runFlow: "holes/hole_13.yaml"
-- runFlow: "holes/hole_14.yaml"
-- runFlow: "holes/hole_15.yaml"
-- runFlow: "holes/hole_16.yaml"
-- runFlow: "holes/hole_17.yaml"
-- runFlow: "holes/hole_18.yaml"
+- runFlow: "holes.yaml"
 
 # View final leaderboard
 - runFlow: "leaderboard.yaml"

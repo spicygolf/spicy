@@ -1,11 +1,14 @@
 # Debug flow: Continue from team assignment
-# Use this to test team assignment without running the full flow
-# Expects: Game settings screen with course/tee and handicaps already configured
+# Use this to test scoring without running the full flow
+# Expects: Game settings screen with teams already assigned
 
 appId: golf.spicy
-# Allow Maestro to see elements inside dropdown modals on iOS
 platform:
   ios:
     snapshotKeyHonorModalViews: false
 ---
-- runFlow: "assign_teams.yaml"
+# Start game (navigate to scoring)
+- runFlow: "start_game.yaml"
+
+# Play all 18 holes
+- runFlow: "holes.yaml"
