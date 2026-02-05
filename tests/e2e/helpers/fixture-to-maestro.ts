@@ -512,7 +512,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
 
     const holeSteps: MaestroStep[] = [];
 
-    // Enter par (always, even if 4 - simpler and more consistent)
+    // Enter par
     holeSteps.push(
       {
         tapOn: {
@@ -522,7 +522,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
       { inputText: holeData.par.toString() },
     );
 
-    // Enter handicap (always required since inputs start empty)
+    // Enter handicap
     holeSteps.push(
       {
         tapOn: {

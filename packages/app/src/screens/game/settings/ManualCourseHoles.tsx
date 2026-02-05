@@ -32,7 +32,7 @@ type Props = NativeStackScreenProps<
 >;
 
 interface HoleData {
-  par: number;
+  par: number | null; // null = not yet entered
   handicap: number | null; // null = not yet entered
   yards: number | null; // null = not yet entered (optional)
 }
@@ -78,10 +78,10 @@ function findInvalidHandicaps(
 }
 
 /**
- * Check if all handicaps are filled in (not null).
+ * Check if all required fields (par, handicap) are filled in.
  */
-function hasEmptyHandicaps(holes: HoleData[]): boolean {
-  return holes.some((hole) => hole.handicap === null);
+function hasEmptyRequiredFields(holes: HoleData[]): boolean {
+  return holes.some((hole) => hole.par === null || hole.handicap === null);
 }
 
 interface HoleRowProps {
@@ -106,7 +106,7 @@ function HoleRow({
       <Text style={styles.holeNumber}>{holeNumber}</Text>
       <TextInput
         testID={`hole-${holeNumber}-par`}
-        value={hole.par.toString()}
+        value={hole.par !== null ? hole.par.toString() : ""}
         placeholder=""
         onChangeText={(text) => onParChange(filterIntegerInput(text))}
         keyboardType="number-pad"
@@ -163,10 +163,10 @@ export function ManualCourseHoles({
   const numHoles = holesCount;
   const is18Holes = numHoles === 18;
 
-  // Initialize holes with default par 4 and empty handicap/yards (user must fill in handicap)
+  // Initialize holes with empty values (user must fill in par and handicap)
   const [holes, setHoles] = useState<HoleData[]>(() =>
     Array.from({ length: numHoles }, () => ({
-      par: 4,
+      par: null,
       handicap: null,
       yards: null,
     })),
@@ -224,11 +224,11 @@ export function ManualCourseHoles({
   }, [isEditMode, existingTee, numHoles]);
 
   const updateHolePar = useCallback((index: number, parStr: string): void => {
-    // Allow empty string temporarily during editing, default to 4
+    // Allow empty string (sets to null)
     if (parStr === "") {
       setHoles((prev) => {
         const updated = [...prev];
-        updated[index] = { ...updated[index], par: 4 };
+        updated[index] = { ...updated[index], par: null };
         return updated;
       });
       return;
@@ -348,7 +348,7 @@ export function ManualCourseHoles({
         for (let i = 0; i < holes.length; i++) {
           const hole = existingHoles[i];
           if (hole?.$isLoaded) {
-            hole.$jazz.set("par", holes[i].par);
+            hole.$jazz.set("par", holes[i].par as number);
             hole.$jazz.set("handicap", holes[i].handicap as number);
             const holeYards = holes[i].yards ?? 0;
             hole.$jazz.set("yards", holeYards);
@@ -373,13 +373,13 @@ export function ManualCourseHoles({
         const courseId = `manual-${Date.now()}`;
         const teeId = `manual-tee-${Date.now()}`;
 
-        // Create TeeHole objects (handicaps are guaranteed non-null at this point due to validation)
+        // Create TeeHole objects (par and handicap are guaranteed non-null at this point due to validation)
         const teeHoles: TeeHole[] = holes.map((hole, i) =>
           TeeHole.create(
             {
               id: `${teeId}-hole-${i + 1}`,
               number: i + 1,
-              par: hole.par,
+              par: hole.par as number,
               yards: hole.yards ?? 0,
               meters: hole.yards ? Math.round(hole.yards * 0.9144) : 0,
               handicap: hole.handicap as number,
@@ -489,14 +489,14 @@ export function ManualCourseHoles({
     );
   }
 
-  // Calculate total par
-  const totalPar = holes.reduce((sum, h) => sum + h.par, 0);
+  // Calculate total par (treat null as 0 for display)
+  const totalPar = holes.reduce((sum, h) => sum + (h.par ?? 0), 0);
 
   // Validation: check for empty, duplicate, or out-of-range handicaps
   const invalidHandicaps = findInvalidHandicaps(holes, numHoles);
   const hasInvalidHandicaps = invalidHandicaps.size > 0;
-  const hasIncompleteHandicaps = hasEmptyHandicaps(holes);
-  const canSave = !hasInvalidHandicaps && !hasIncompleteHandicaps;
+  const hasIncompleteFields = hasEmptyRequiredFields(holes);
+  const canSave = !hasInvalidHandicaps && !hasIncompleteFields;
 
   // Split holes for side-by-side layout (18 holes only)
   const frontNine = is18Holes ? holes.slice(0, 9) : holes;
@@ -611,13 +611,13 @@ export function ManualCourseHoles({
             </View>
           )}
 
-          {hasIncompleteHandicaps && (
+          {hasIncompleteFields && (
             <Text style={styles.errorText}>
-              Enter a handicap value (1-{numHoles}) for each hole.
+              Enter par and handicap for each hole.
             </Text>
           )}
 
-          {hasInvalidHandicaps && !hasIncompleteHandicaps && (
+          {hasInvalidHandicaps && !hasIncompleteFields && (
             <Text style={styles.errorText}>
               Each hole must have a unique handicap value (1-{numHoles}).
             </Text>
