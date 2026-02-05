@@ -552,6 +552,9 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     steps.push(...generateHoleEntrySteps(i));
   }
 
+  // Dismiss keyboard by tapping section header
+  steps.push({ tapOn: "Front 9" });
+
   // Save the course
   steps.push(
     {

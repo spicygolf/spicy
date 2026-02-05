@@ -334,6 +334,8 @@ platform:
 
 - inputText: "509"
 
+- tapOn: "Front 9"
+
 - tapOn:
     id: "manual-course-save-button"
 
