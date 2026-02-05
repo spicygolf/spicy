@@ -42,6 +42,11 @@ fi
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
 
+# Regenerate flows from DSL before running
+echo "Regenerating flows from DSL..."
+cd "$E2E_DIR/../.." && bun e2e:generate --quiet 2>/dev/null || bun e2e:generate
+echo ""
+
 # Determine which flow to run
 FLOW="${1:-main.yaml}"
 
