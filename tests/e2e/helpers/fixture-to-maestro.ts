@@ -507,11 +507,7 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
   );
 
   // On ManualCourseHoles screen - set par, handicap, and yards for each hole from fixture
-  // Par defaults to 4, Handicap and Yards start empty
-  // All fields are now TextInputs (no more Picker dropdowns)
-  //
-  // Strategy: Edit holes 1-8, then 10-17 (skipping 9 and 18 which are at the bottom
-  // of their sections and covered by keyboard), then scroll down for 9 and 18
+  // All fields are TextInputs - enter all 18 holes in order
 
   // Helper to generate steps for a single hole
   const generateHoleEntrySteps = (holeNum: number): MaestroStep[] => {
@@ -588,10 +584,16 @@ function calculateShotsOff(
   slope: number,
 ): Map<string, number> {
   // Calculate course handicap for each player
-  const playerHandicaps = players.map((p) => ({
-    id: p.id,
-    courseHandicap: courseHandicapFromSlope(p.handicapIndex, slope),
-  }));
+  // Use handicapOverride if present (this is what gets entered in Adjust Handicaps screen)
+  const playerHandicaps = players.map((p) => {
+    const effectiveIndex = p.handicapOverride
+      ? Number.parseFloat(p.handicapOverride)
+      : p.handicapIndex;
+    return {
+      id: p.id,
+      courseHandicap: courseHandicapFromSlope(effectiveIndex, slope),
+    };
+  });
 
   // Find the lowest course handicap
   const lowestHandicap = Math.min(
