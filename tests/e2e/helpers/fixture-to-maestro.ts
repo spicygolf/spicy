@@ -808,7 +808,11 @@ export function generateAssignTeamsSteps(fixture: Fixture): MaestroStep[] {
  */
 export function generateStartGameSteps(): MaestroStep[] {
   return [
-    { tapOn: "Start Game" },
+    {
+      tapOn: {
+        id: "game-header-toggle",
+      },
+    },
     {
       waitForAnimationToEnd: {
         timeout: TIMEOUT_NAVIGATION,
@@ -817,7 +821,9 @@ export function generateStartGameSteps(): MaestroStep[] {
     // Wait for scoring view to load
     {
       extendedWaitUntil: {
-        visible: "Hole 1",
+        visible: {
+          id: "hole-number",
+        },
         timeout: TIMEOUT_API_LOAD,
       },
     },
@@ -1277,7 +1283,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     startGame: stepsToYaml(
       generateStartGameSteps(),
       "golf.spicy",
-      `# Sub-flow: Start the game\n# Expects: Players added, teams assigned (if applicable), on game settings screen\n# Provides: Scoring screen visible, "Hole 1" visible`,
+      `# Sub-flow: Start the game\n# Expects: Players added, teams assigned (if applicable), on game settings screen\n# Provides: Scoring screen visible, hole 1 visible`,
     ),
     holes,
     leaderboard: stepsToYaml(
