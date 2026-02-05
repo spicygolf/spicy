@@ -334,14 +334,6 @@ platform:
 
 - inputText: "509"
 
-- hideKeyboard
-
-- scrollUntilVisible:
-    element:
-      id: "manual-course-save-button"
-    direction: "DOWN"
-    timeout: 3000
-
 - tapOn:
     id: "manual-course-save-button"
 

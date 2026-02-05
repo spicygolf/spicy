@@ -552,20 +552,6 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     steps.push(...generateHoleEntrySteps(i));
   }
 
-  // Dismiss keyboard before tapping save
-  steps.push({ hideKeyboard: true });
-
-  // Scroll to save button and tap
-  steps.push({
-    scrollUntilVisible: {
-      element: {
-        id: "manual-course-save-button",
-      },
-      direction: "DOWN",
-      timeout: TIMEOUT_NAVIGATION,
-    },
-  });
-
   // Save the course
   steps.push(
     {
