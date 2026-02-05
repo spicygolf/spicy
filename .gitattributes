@@ -1,0 +1,13 @@
+# Auto-detect text files and perform LF normalization
+* text=auto
+
+# Generated E2E test files - collapse in GitHub PRs
+# These are generated from .dsl files via `bun e2e:generate`
+tests/e2e/fixtures/**/*.json linguist-generated=true
+# Note: continue.yaml is hand-written, but the pattern below still applies
+# since it's just a development convenience file
+tests/e2e/flows/**/*.yaml linguist-generated=true
+
+# Lock files
+bun.lockb binary
+**/bun.lockb binary

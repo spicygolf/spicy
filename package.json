@@ -21,6 +21,8 @@
     "tsc": "bun run --filter './packages/*' tsc",
     "test": "bun test ./packages/app/ ./packages/api/ ./packages/lib/",
     "precommit": "bun format && bun lint && bun tsc",
+    "e2e:check": "bun tests/e2e/scripts/check-generated.ts",
+    "e2e:generate": "bun tests/e2e/scripts/dsl-to-json.ts --all && bun tests/e2e/scripts/generate-flows.ts",
     "prepare": "husky",
     "validate:seed": "bun run --filter spicylib validate:seed"
   },

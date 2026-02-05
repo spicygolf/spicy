@@ -7,12 +7,21 @@ platform:
   ios:
     snapshotKeyHonorModalViews: false
 ---
-# Navigate to hole 15
-- tapOn:
-    id: "hole-nav-next"
 
-- waitForAnimationToEnd:
-    timeout: 1000
+- runFlow:
+    when:
+      notVisible:
+        text: "Hole 15"
+    commands:
+    - swipe:
+        direction: "LEFT"
+        duration: 300
+    - waitForAnimationToEnd:
+        timeout: 1000
+
+- extendedWaitUntil:
+    visible: "Hole 15"
+    timeout: 3000
 
 - tapOn:
     id: "player-p1-score"

@@ -624,8 +624,43 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
 }
 
 /**
+ * Calculate course handicap from handicap index and slope
+ */
+function calculateCourseHandicap(handicapIndex: number, slope: number): number {
+  return Math.round((handicapIndex * slope) / 113);
+}
+
+/**
+ * Calculate "shots off" for each player (how many strokes they give/get relative to lowest handicap)
+ */
+function calculateShotsOff(
+  players: FixturePlayer[],
+  slope: number,
+): Map<string, number> {
+  // Calculate course handicap for each player
+  const playerHandicaps = players.map((p) => ({
+    id: p.id,
+    courseHandicap: calculateCourseHandicap(p.handicapIndex, slope),
+  }));
+
+  // Find the lowest course handicap
+  const lowestHandicap = Math.min(
+    ...playerHandicaps.map((p) => p.courseHandicap),
+  );
+
+  // Calculate shots off for each player
+  const shotsOff = new Map<string, number>();
+  for (const p of playerHandicaps) {
+    shotsOff.set(p.id, p.courseHandicap - lowestHandicap);
+  }
+
+  return shotsOff;
+}
+
+/**
  * Generate steps to adjust handicap index for players with overrides.
  * This navigates to the HandicapAdjustment screen for each player and enters the override value.
+ * Also generates assertions to verify the "shots off" column values.
  */
 export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
   const steps: MaestroStep[] = [];
@@ -692,6 +727,27 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
         },
       },
     );
+  }
+
+  // Add assertions for the "shots off" column
+  // This verifies handicap calculations are working correctly
+  if (fixture.course.slope) {
+    const shotsOff = calculateShotsOff(fixture.players, fixture.course.slope);
+
+    // Add assertions for each player's shots off value
+    for (const player of fixture.players) {
+      const playerSlug = player.name.toLowerCase().replace(/\s+/g, "-");
+      const shots = shotsOff.get(player.id);
+
+      if (shots !== undefined) {
+        steps.push({
+          assertVisible: {
+            id: `handicap-adjustment-${playerSlug}-shots`,
+            text: String(shots),
+          },
+        });
+      }
+    }
   }
 
   return steps;

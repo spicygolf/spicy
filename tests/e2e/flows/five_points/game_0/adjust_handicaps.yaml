@@ -7,6 +7,7 @@ platform:
   ios:
     snapshotKeyHonorModalViews: false
 ---
+
 - extendedWaitUntil:
     visible:
       id: "handicap-adjustment-brad"
@@ -31,22 +32,18 @@ platform:
 - waitForAnimationToEnd:
     timeout: 500
 
-# Assert shots off values for each player
-# Tim is lowest (course -1), so: Tim=0, Scott=6, Brad=7, Eric=16
 - assertVisible:
-    id: "handicap-adjustment-tim-shots"
-    text: "0"
+    id: "handicap-adjustment-brad-shots"
+    text: "7"
 
 - assertVisible:
     id: "handicap-adjustment-scott-shots"
     text: "6"
 
 - assertVisible:
-    id: "handicap-adjustment-brad-shots"
-    text: "7"
+    id: "handicap-adjustment-tim-shots"
+    text: "0"
 
 - assertVisible:
     id: "handicap-adjustment-eric-shots"
     text: "16"
-
-- takeScreenshot: "handicaps_with_shots"

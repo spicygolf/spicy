@@ -52,22 +52,45 @@ interface ParsedDSL {
 }
 
 /**
- * Parse players line: "p1 Brad 10, p2 Scott 12, p3 Tim 8, p4 Eric 14"
+ * Parse players line with support for plus handicaps and optional overrides.
+ *
+ * Format: "p1 Brad 5.1, p2 Scott 4.1, p3 Tim +0.9, p4 Eric 12.9 [5.1]"
+ *
+ * - Plus handicaps use + prefix (e.g., +0.9 becomes -0.9 internally)
+ * - Optional handicapOverride in brackets (e.g., [5.1])
  */
 function parsePlayers(line: string): FixturePlayer[] {
   const players: FixturePlayer[] = [];
   const parts = line.split(",").map((p) => p.trim());
 
   for (const part of parts) {
-    const match = part.match(/^(\w+)\s+(.+?)\s+(\d+(?:\.\d+)?)$/);
+    // Match: id name handicap [optional_override]
+    // Handicap can be: 10, 10.5, +0.9 (plus handicap)
+    const match = part.match(
+      /^(\w+)\s+(.+?)\s+(\+?\d+(?:\.\d+)?)(?:\s+\[([^\]]+)\])?$/,
+    );
     if (match) {
-      const [, id, name, handicap] = match;
-      players.push({
+      const [, id, name, handicapStr, overrideStr] = match;
+
+      // Parse handicap - plus handicaps (e.g., +0.9) become negative
+      let handicapIndex = Number.parseFloat(handicapStr);
+      if (handicapStr.startsWith("+")) {
+        handicapIndex = -Math.abs(handicapIndex);
+      }
+
+      const player: FixturePlayer = {
         id,
         name,
         short: name.substring(0, 3),
-        handicapIndex: Number.parseFloat(handicap),
-      });
+        handicapIndex,
+      };
+
+      // Add handicapOverride if specified
+      if (overrideStr) {
+        player.handicapOverride = overrideStr;
+      }
+
+      players.push(player);
     }
   }
 
