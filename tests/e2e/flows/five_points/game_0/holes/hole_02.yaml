@@ -1,5 +1,5 @@
 # Hole 2 (Par 4, Hdcp 7)
-# Scores: brad=6(+1), scott=5, tim=3, eric=6(+1)
+# Scores: brad=6(+1), scott=5, tim=4, eric=7(+1)
 # Junk: prox:tim
 
 appId: golf.spicy
@@ -25,10 +25,16 @@ platform:
     timeout: 500
 
 - tapOn:
-    id: "player-tim-decrement"
+    id: "player-tim-score"
 
 - waitForAnimationToEnd:
     timeout: 500
+
+- tapOn:
+    id: "player-eric-increment"
+
+- waitForAnimationToEnd:
+    timeout: 300
 
 - tapOn:
     id: "player-eric-increment"
@@ -60,6 +66,7 @@ platform:
 
 - assertVisible:
     id: "junk-low_ball-2"
+    text: "2"
 
 - takeScreenshot: "hole_2_complete"
 

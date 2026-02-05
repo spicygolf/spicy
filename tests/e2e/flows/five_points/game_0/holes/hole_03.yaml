@@ -66,6 +66,7 @@ platform:
 
 - assertVisible:
     id: "junk-low_ball-1"
+    text: "2"
 
 - takeScreenshot: "hole_3_complete"
 

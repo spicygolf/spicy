@@ -203,10 +203,10 @@
           "gross": 5
         },
         "tim": {
-          "gross": 3
+          "gross": 4
         },
         "eric": {
-          "gross": 6
+          "gross": 7
         }
       },
       "junk": {
@@ -224,7 +224,7 @@
         "awardedJunk": [
           {
             "name": "low_ball",
-            "points": 0,
+            "points": 2,
             "teamId": "2"
           }
         ]
@@ -260,7 +260,7 @@
         "awardedJunk": [
           {
             "name": "low_ball",
-            "points": 0,
+            "points": 2,
             "teamId": "1"
           }
         ]
@@ -296,7 +296,12 @@
         "awardedJunk": [
           {
             "name": "low_ball",
-            "points": 0,
+            "points": 2,
+            "teamId": "1"
+          },
+          {
+            "name": "low_total",
+            "points": 2,
             "teamId": "1"
           }
         ]

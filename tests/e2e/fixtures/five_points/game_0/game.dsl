@@ -25,13 +25,13 @@ holes: 1-4-3-444, 2-4-7-392, 3-4-15-320, 4-4-1-413, 5-4-5-380, 6-3-17-122, 7-5-1
 h1: (Brad Scott) vs (Tim Eric) | 5 5 4 5 | prox:Brad | | => 1 0 | 1 -1
 
 # Hole 2: basic, prox, low ball, 3pts
-h2: | 6 5 3 6 | prox:Tim | | => 0 3 | -2 2 | low_ball:t2
+h2: | 6 5 4 7 | prox:Tim | | => 0 3 | -2 2 | low_ball:2:t2
 
 # Hole 3: basic, prox, low ball other team 1pt
-h3: | 4 6 5 6 | prox:tim | | => 1 0 | -1 1 | low_ball:t1
+h3: | 4 6 5 6 | prox:tim | | => 1 0 | -1 1 | low_ball:2:t1
 
 # Hole 4: basic, prox, low ball, low team 5pts
-h4: | 5 4 5 5 | prox:scott | | => 5 0 | 4 -4 | low_ball:t1 low_team: t1
+h4: | 5 4 5 5 | prox:scott | | => 5 0 | 4 -4 | low_ball:2:t1 low_total:2:t1
 
 # Hole 5: Both teams press
 # h5: | 5 5 4 5 | | double:t1 double_back:t2
