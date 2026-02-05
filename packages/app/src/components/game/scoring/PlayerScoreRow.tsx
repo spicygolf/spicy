@@ -1,6 +1,7 @@
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
+import { slugify } from "spicylib/utils";
 import { useUIScale } from "@/hooks";
 import { Text } from "@/ui";
 import { type OptionButton, OptionsButtons } from "./OptionsButtons";
@@ -98,7 +99,7 @@ export function PlayerScoreRow({
             onUnscore={onUnscore}
             readonly={readonly}
             size={size}
-            playerId={player.name.toLowerCase().replace(/\s+/g, "-")}
+            playerId={slugify(player.name)}
           />
         </View>
 

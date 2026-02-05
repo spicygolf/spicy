@@ -24,7 +24,11 @@ import type {
   FixturePlayer,
 } from "../../lib/fixture-types";
 import type { OptionDefinitions } from "./dsl-parser";
-import { calculatePops } from "../../../packages/lib/utils/scores";
+import {
+  calculatePops,
+  courseHandicapFromSlope,
+  slugify,
+} from "../../../packages/lib/utils";
 
 interface MaestroStep {
   [key: string]: unknown;
@@ -577,13 +581,6 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
 }
 
 /**
- * Calculate course handicap from handicap index and slope
- */
-function calculateCourseHandicap(handicapIndex: number, slope: number): number {
-  return Math.round((handicapIndex * slope) / 113);
-}
-
-/**
  * Calculate "shots off" for each player (how many strokes they give/get relative to lowest handicap)
  */
 function calculateShotsOff(
@@ -593,7 +590,7 @@ function calculateShotsOff(
   // Calculate course handicap for each player
   const playerHandicaps = players.map((p) => ({
     id: p.id,
-    courseHandicap: calculateCourseHandicap(p.handicapIndex, slope),
+    courseHandicap: courseHandicapFromSlope(p.handicapIndex, slope),
   }));
 
   // Find the lowest course handicap
@@ -704,13 +701,6 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
   }
 
   return steps;
-}
-
-/**
- * Create a URL-safe slug from a player name for use in testIDs
- */
-function slugify(name: string): string {
-  return name.toLowerCase().replace(/\s+/g, "-");
 }
 
 /**

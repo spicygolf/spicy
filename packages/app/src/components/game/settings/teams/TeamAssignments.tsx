@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { Pressable, View } from "react-native";
 import { DraxScrollView, DraxView } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { slugify } from "spicylib/utils";
 import { Button, Text } from "@/ui";
 import type { PlayerRoundItem, TeamSection } from "./types";
 
@@ -18,13 +19,6 @@ interface TeamAssignmentsProps {
   specNumTeams?: number;
   /** Callback when a team is deleted */
   onDeleteTeam?: (teamNumber: number) => void;
-}
-
-/**
- * Create a URL-safe slug from a player name for use in testIDs
- */
-function slugify(name: string): string {
-  return name.toLowerCase().replace(/\s+/g, "-");
 }
 
 export function TeamAssignments({

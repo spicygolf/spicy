@@ -4,6 +4,6 @@
 # Generated E2E test files - collapse in GitHub PRs
 # These are generated from .dsl files via `bun e2e:generate`
 tests/e2e/fixtures/**/*.json linguist-generated=true
-# Note: continue.yaml is hand-written, but the pattern below still applies
-# since it's just a development convenience file
+# Note: continue.yaml files are hand-written but included in this pattern;
+# they're dev convenience files so collapsing them in PRs is acceptable
 tests/e2e/flows/**/*.yaml linguist-generated=true

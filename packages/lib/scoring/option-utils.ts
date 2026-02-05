@@ -382,21 +382,8 @@ export function copySpecOptions(
   const newSpec = MapOfOptions.create({}, { owner });
 
   if (!sourceSpec?.$isLoaded) {
-    console.log("[copySpecOptions] sourceSpec not loaded, returning empty");
     return newSpec;
   }
-
-  // Debug: Log available keys in source spec
-  const allKeys = Object.keys(sourceSpec).filter(
-    (k) => !k.startsWith("$") && k !== "_refs",
-  );
-  const hasKeys = allKeys.filter((k) => sourceSpec.$jazz.has(k));
-  console.log("[copySpecOptions] Available keys:", allKeys.length, allKeys);
-  console.log(
-    "[copySpecOptions] Keys with $jazz.has:",
-    hasKeys.length,
-    hasKeys,
-  );
 
   // Iterate over all options in source spec and deep-copy each one
   for (const key of Object.keys(sourceSpec)) {
@@ -409,12 +396,6 @@ export function copySpecOptions(
     // Options are plain JSON objects, so deep clone creates a copy
     newSpec.$jazz.set(key, deepClone(option));
   }
-
-  console.log(
-    "[copySpecOptions] Copied",
-    hasKeys.length,
-    "options to new spec",
-  );
   return newSpec;
 }
 
@@ -433,7 +414,6 @@ export function resetSpecFromRef(
   sourceSpec: GameSpec | MapOfOptions,
 ): number {
   if (!targetSpec?.$isLoaded || !sourceSpec?.$isLoaded) {
-    console.warn("[resetSpecFromRef] Specs not loaded");
     return 0;
   }
 
@@ -464,6 +444,5 @@ export function resetSpecFromRef(
     resetCount++;
   }
 
-  console.log("[resetSpecFromRef] Reset", resetCount, "options from catalog");
   return resetCount;
 }
