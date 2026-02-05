@@ -251,6 +251,7 @@ export function OptionsButtons({
                       color: borderColor,
                     },
                   ]}
+                  testID={testID ? `${testID}-points` : undefined}
                 >
                   {option.points}
                 </Text>

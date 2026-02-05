@@ -1,77 +1,86 @@
-# Five Points - Game 0 (18-Hole E2E Test)
-# Progressive complexity: basic scoring → junk → multipliers → stacking
+# Five Points - Full Game E2E Test
+# Comprehensive test covering scoring, junk, and multipliers at Druid Hills
 
-name: Five Points Game 0
+name: Five Points Full Game
 desc: Comprehensive E2E test covering scoring, junk, and multipliers
 spec: five_points
-priority: core
+priority: smoke
 tags: scoring junk multipliers full-game
 
-players: p1 Brad 10, p2 Scott 12, p3 Tim 8, p4 Eric 14
+# Players: name handicap [override]
+# Plus handicaps use + prefix (e.g., +0.9)
+players: Brad 5.1 [5.1], Scott 4.1, Tim +0.9, Eric 12.9
 
-course: E2E Test Course | Blue | 71.5/128
+# Course: name | tee | rating/slope
+course: Druid Hills Golf Club | Blue | 71.8/134
 
-# Hole definitions: hole-par-handicap
-holes: 1-4-5, 2-5-11, 3-3-15, 4-4-3, 5-4-7, 6-5-13, 7-3-17, 8-4-1, 9-4-9, 10-4-6, 11-5-12, 12-3-16, 13-4-4, 14-4-8, 15-5-14, 16-3-18, 17-4-2, 18-5-10
+# Junk definitions: name points (for assertion lookups)
+junk: prox 1 | low_ball 2 | low_total 2
 
-# ============================================
-# FRONT NINE - Basic Scoring & Junk
-# ============================================
+# Multiplier definitions: name value (for future use)
+mults: double 2 | pre_double 2 | double_back 2
 
-# Hole 1: Basic scoring - Team 1 wins low ball and low total
-h1: (p1 p2) vs (p3 p4) | 4 5 5 6
-
-# Hole 2: Team 2 wins - birdie by Tim
-h2: | 5 6 3 5 | birdie:p3
-
-# Hole 3: Par 3 with prox - Brad closest
-h3: | 3 4 3 4 | prox:p1
-
-# Hole 4: Double multiplier - Team 1 presses
-h4: | 4 5 5 5 | | t1:double
-
-# Hole 5: Double back - Team 2 responds
-h5: | 5 5 4 5 | | t1:double t2:double_back
-
-# Hole 6: Multiple junk - birdie + prox same player
-h6: | 5 6 4 6 | birdie:p3 prox:p3
-
-# Hole 7: Par 3 tie - no low ball awarded
-h7: | 3 4 3 4
-
-# Hole 8: All pars - Team 1 wins on low total tiebreaker
-h8: | 4 4 4 5
-
-# Hole 9: Front nine finish - double stacking
-h9: | 4 5 4 5 | | t1:double t2:double
+# Hole definitions: hole-par-handicap-yards
+holes: 1-4-3-444, 2-4-7-392, 3-4-15-320, 4-4-1-413, 5-4-5-380, 6-3-17-122, 7-5-11-485, 8-3-9-193, 9-5-13-485, 10-4-2-432, 11-4-6-416, 12-4-12-333, 13-3-18-160, 14-5-10-493, 15-4-4-352, 16-4-16-319, 17-3-14-192, 18-5-8-509
 
 # ============================================
-# BACK NINE - Advanced Scenarios
+# FRONT NINE
 # ============================================
 
-# Hole 10: Back nine start - clean scoring
-h10: | 5 5 4 5
+# Hole 1: Basic scoring, establish teams, only prox, 1pt
+h1: (Brad Scott) vs (Tim Eric) | 5 5 4 5 | prox:Brad | | => 1 0 | 1 -1
 
-# Hole 11: Eagle opportunity (par 5) - not scored though
-h11: | 5 6 5 6
+# Hole 2: basic, prox, low ball, 3pts
+h2: | 6 5 4 7 | prox:Tim | | => 0 3 | -2 2 | low_ball:t2
 
-# Hole 12: Par 3 - another prox
-h12: | 3 3 4 4 | prox:p2
+# Hole 3: basic, prox, low ball other team 1pt
+h3: | 4 6 5 6 | prox:tim | | => 1 0 | -1 1 | low_ball:t1
 
-# Hole 13: Team 2 presses
-h13: | 5 5 4 4 | | t2:double
+# Hole 4: basic, prox, low ball, low team 5pts
+h4: | 5 4 5 5 | prox:scott | | => 5 0 | 4 -4 | low_ball:t1 low_total:t1
 
-# Hole 14: Both teams press
-h14: | 4 5 5 4 | | t1:double t2:double
+# Hole 5: Both teams press
+# h5: | 5 5 4 5 | | double:t1 double_back:t2
 
-# Hole 15: Birdie on par 5
-h15: | 4 6 5 6 | birdie:p1
+# Hole 6: Par 3 - prox for Tim
+# h6: | 5 6 3 6 | prox:Tim
 
-# Hole 16: Par 3 - prox and birdie different players
-h16: | 2 4 3 4 | birdie:p1 prox:p3
+# Hole 7: Par 5 - eagles by Brad and Tim (score 3 on par 5)
+# h7: | 3 4 3 4
 
-# Hole 17: Second hardest hole - high scores
-h17: | 5 6 5 6
+# Hole 8: Par 3
+# h8: | 4 4 4 5
 
-# Hole 18: Finishing hole - everything
-h18: | 4 5 4 5 | birdie:p1 birdie:p3 | t1:double t2:double_back
+# Hole 9: Par 5 - both teams double
+# h9: | 4 5 4 5 | | double:t1 double:t2
+
+# ============================================
+# BACK NINE
+# ============================================
+
+# Hole 10: Par 4
+# h10: | 5 5 4 5
+
+# Hole 11: Par 4
+# h11: | 5 6 5 6
+
+# Hole 12: Par 4 - prox for Scott
+# h12: | 3 3 4 4 | prox:Scott
+
+# Hole 13: Par 3 - Team 2 doubles
+# h13: | 5 5 4 4 | | double:t2
+
+# Hole 14: Par 5 - both teams double
+# h14: | 4 5 5 4 | | double:t1 double:t2
+
+# Hole 15: Par 4 - birdie by Brad
+# h15: | 4 6 5 6
+
+# Hole 16: Par 4 - eagle by Brad (2 on par 4), prox for Tim
+# h16: | 2 4 3 4 | prox:Tim
+
+# Hole 17: Par 3
+# h17: | 5 6 5 6
+
+# Hole 18: Par 5 - birdies by Brad and Tim, multipliers
+# h18: | 4 5 4 5 | | double:t1 double_back:t2

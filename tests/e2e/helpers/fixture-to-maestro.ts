@@ -20,8 +20,15 @@
 import type {
   Fixture,
   FixtureHoleData,
+  FixtureHoleExpected,
   FixturePlayer,
 } from "../../lib/fixture-types";
+import type { OptionDefinitions } from "./dsl-parser";
+import {
+  calculatePops,
+  courseHandicapFromSlope,
+  slugify,
+} from "../../../packages/lib/utils";
 
 interface MaestroStep {
   [key: string]: unknown;
@@ -65,6 +72,8 @@ export interface E2EMetadata {
  */
 export interface E2EFixture extends Fixture {
   e2e?: E2EMetadata;
+  /** Option definitions for looking up junk/multiplier points values */
+  optionDefs?: OptionDefinitions;
 }
 
 /**
@@ -98,6 +107,8 @@ export interface GeneratedSubFlows {
   selectCourseTee: string;
   /** Adjust handicaps sub-flow (optional, only if players have handicap overrides) */
   adjustHandicaps: string | null;
+  /** Assign teams sub-flow (optional, only if fixture has team assignments) */
+  assignTeams: string | null;
   /** Start game sub-flow */
   startGame: string;
   /** Individual hole sub-flows, keyed by hole number (e.g., "01", "02") */
@@ -111,6 +122,7 @@ export interface GeneratedSubFlows {
     hasJunk: boolean;
     hasMultipliers: boolean;
     hasHandicapOverrides: boolean;
+    hasTeamAssignments: boolean;
   };
 }
 
@@ -494,13 +506,8 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     },
   );
 
-  // On ManualCourseHoles screen - set par and handicap for each hole from fixture
-  // Par defaults to 4, Handicap starts empty (user must fill in all)
-  // Note: Dropdown items use text matching (accessibilityLabel) not id matching
-  // (itemTestIDField doesn't work reliably on iOS)
-  //
-  // Strategy: Edit holes 1-8, then 10-17 (skipping 9 and 18 which are at the bottom
-  // of their sections and covered by keyboard), then scroll down for 9 and 18
+  // On ManualCourseHoles screen - set par, handicap, and yards for each hole from fixture
+  // All fields are TextInputs - enter all 18 holes in order
 
   // Helper to generate steps for a single hole
   const generateHoleEntrySteps = (holeNum: number): MaestroStep[] => {
@@ -509,33 +516,17 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
 
     const holeSteps: MaestroStep[] = [];
 
-    // Set par if not 4 (default)
-    if (holeData.par !== 4) {
-      holeSteps.push(
-        {
-          tapOn: {
-            id: `hole-${holeNum}-par`,
-          },
+    // Enter par
+    holeSteps.push(
+      {
+        tapOn: {
+          id: `hole-${holeNum}-par`,
         },
-        {
-          waitForAnimationToEnd: {
-            timeout: TIMEOUT_UI_UPDATE,
-          },
-        },
-        // Tap the par value in the dropdown using text matching (accessibilityLabel)
-        // IMPORTANT: Must use bare string, not { id: ... } - iOS testID doesn't work for dropdown items
-        {
-          tapOn: `hole-${holeNum}-par-item-${holeData.par}`,
-        },
-        {
-          waitForAnimationToEnd: {
-            timeout: TIMEOUT_UI_UPDATE,
-          },
-        },
-      );
-    }
+      },
+      { inputText: holeData.par.toString() },
+    );
 
-    // Enter handicap (always required since inputs start empty)
+    // Enter handicap
     holeSteps.push(
       {
         tapOn: {
@@ -545,63 +536,28 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
       { inputText: holeData.handicap.toString() },
     );
 
+    // Enter yards (optional - only if present in DSL)
+    if (holeData.yards) {
+      holeSteps.push(
+        {
+          tapOn: {
+            id: `hole-${holeNum}-yards`,
+          },
+        },
+        { inputText: holeData.yards.toString() },
+      );
+    }
+
     return holeSteps;
   };
 
-  // Holes 1-8 (skip hole 9 - at bottom of front 9, keyboard covers it)
-  for (let i = 1; i <= 8; i++) {
+  // Enter all 18 holes in order
+  for (let i = 1; i <= 18; i++) {
     steps.push(...generateHoleEntrySteps(i));
   }
 
-  // Holes 10-17 (skip hole 18 - at bottom of back 9, keyboard covers it)
-  for (let i = 10; i <= 17; i++) {
-    steps.push(...generateHoleEntrySteps(i));
-  }
-
-  // Dismiss keyboard and scroll down to reveal holes 9 and 18
-  steps.push(
-    { tapOn: "Front 9" },
-    {
-      waitForAnimationToEnd: {
-        timeout: TIMEOUT_ANIMATION,
-      },
-    },
-    {
-      scrollUntilVisible: {
-        element: {
-          id: "manual-course-save-button",
-        },
-        direction: "DOWN",
-        timeout: TIMEOUT_NAVIGATION,
-      },
-    },
-  );
-
-  // Hole 9 (now visible after scroll)
-  steps.push(...generateHoleEntrySteps(9));
-
-  // Dismiss keyboard before editing hole 18
-  steps.push(
-    { tapOn: "Front 9" },
-    {
-      waitForAnimationToEnd: {
-        timeout: TIMEOUT_ANIMATION,
-      },
-    },
-  );
-
-  // Hole 18 (now visible after scroll)
-  steps.push(...generateHoleEntrySteps(18));
-
-  // Dismiss keyboard before tapping save
-  steps.push(
-    { tapOn: "Front 9" },
-    {
-      waitForAnimationToEnd: {
-        timeout: TIMEOUT_ANIMATION,
-      },
-    },
-  );
+  // Dismiss keyboard by tapping section header
+  steps.push({ tapOn: "Front 9" });
 
   // Save the course
   steps.push(
@@ -621,8 +577,42 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
 }
 
 /**
+ * Calculate "shots off" for each player (how many strokes they give/get relative to lowest handicap)
+ */
+function calculateShotsOff(
+  players: FixturePlayer[],
+  slope: number,
+): Map<string, number> {
+  // Calculate course handicap for each player
+  // Use handicapOverride if present (this is what gets entered in Adjust Handicaps screen)
+  const playerHandicaps = players.map((p) => {
+    const effectiveIndex = p.handicapOverride
+      ? Number.parseFloat(p.handicapOverride)
+      : p.handicapIndex;
+    return {
+      id: p.id,
+      courseHandicap: courseHandicapFromSlope(effectiveIndex, slope),
+    };
+  });
+
+  // Find the lowest course handicap
+  const lowestHandicap = Math.min(
+    ...playerHandicaps.map((p) => p.courseHandicap),
+  );
+
+  // Calculate shots off for each player
+  const shotsOff = new Map<string, number>();
+  for (const p of playerHandicaps) {
+    shotsOff.set(p.id, p.courseHandicap - lowestHandicap);
+  }
+
+  return shotsOff;
+}
+
+/**
  * Generate steps to adjust handicap index for players with overrides.
  * This navigates to the HandicapAdjustment screen for each player and enters the override value.
+ * Also generates assertions to verify the "shots off" column values.
  */
 export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
   const steps: MaestroStep[] = [];
@@ -691,6 +681,121 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
     );
   }
 
+  // Add assertions for the "shots off" column
+  // This verifies handicap calculations are working correctly
+  if (fixture.course.slope) {
+    const shotsOff = calculateShotsOff(fixture.players, fixture.course.slope);
+
+    // Add assertions for each player's shots off value
+    for (const player of fixture.players) {
+      const playerSlug = player.name.toLowerCase().replace(/\s+/g, "-");
+      const shots = shotsOff.get(player.id);
+
+      if (shots !== undefined) {
+        steps.push({
+          assertVisible: {
+            id: `handicap-adjustment-${playerSlug}-shots`,
+            text: String(shots),
+          },
+        });
+      }
+    }
+  }
+
+  return steps;
+}
+
+/**
+ * Generate steps to assign players to teams.
+ * Navigates to Teams tab and taps on each player to cycle them to their target team.
+ *
+ * Players start in "Unassigned" (team 0). Tapping a player cycles them:
+ * - From Unassigned (0) -> Team 1
+ * - From Team 1 -> Team 2
+ * - From Team 2 -> Unassigned (0) (for 2 teams)
+ *
+ * So to get a player to Team N, tap them N times from Unassigned.
+ */
+export function generateAssignTeamsSteps(fixture: Fixture): MaestroStep[] {
+  const steps: MaestroStep[] = [];
+
+  // If no teams defined in fixture, return empty steps
+  if (!fixture.teams || Object.keys(fixture.teams).length === 0) {
+    return steps;
+  }
+
+  // Navigate to Teams tab
+  steps.push(
+    {
+      tapOn: {
+        text: "Teams",
+      },
+    },
+    {
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_NAVIGATION,
+      },
+    },
+  );
+
+  // Wait for Teams tab content to load
+  steps.push({
+    extendedWaitUntil: {
+      visible: "Team Assignments",
+      timeout: TIMEOUT_API_LOAD,
+    },
+  });
+
+  // Build a map of player ID to target team number
+  const playerIdToTeam = new Map<string, number>();
+  for (const [teamId, playerIds] of Object.entries(fixture.teams)) {
+    const teamNumber = Number.parseInt(teamId, 10);
+    for (const playerId of playerIds) {
+      playerIdToTeam.set(playerId, teamNumber);
+    }
+  }
+
+  // For each player, tap them the right number of times to reach their team
+  // Order: process by team to minimize tap count (Team 1 first, then Team 2, etc.)
+  const teamNumbers = Object.keys(fixture.teams)
+    .map((t) => Number.parseInt(t, 10))
+    .sort((a, b) => a - b);
+
+  for (const teamNumber of teamNumbers) {
+    const playerIds = fixture.teams[String(teamNumber)] || [];
+
+    for (const playerId of playerIds) {
+      // Find the player info from fixture
+      const player = fixture.players.find((p) => p.id === playerId);
+      if (!player) continue;
+
+      const playerSlug = slugify(player.name);
+      const playerTestId = `team-player-${playerSlug}`;
+
+      // Tap the player `teamNumber` times to cycle them from Unassigned to target team
+      // Unassigned (0) -> Team 1 (1 tap) -> Team 2 (2 taps) -> etc.
+      for (let i = 0; i < teamNumber; i++) {
+        steps.push(
+          {
+            tapOn: {
+              id: playerTestId,
+            },
+          },
+          {
+            waitForAnimationToEnd: {
+              timeout: TIMEOUT_UI_UPDATE,
+            },
+          },
+        );
+      }
+    }
+  }
+
+  // Take screenshot after team assignments
+  steps.push({
+    takeScreenshot: "team_assignments_complete",
+  });
+
   return steps;
 }
 
@@ -699,7 +804,11 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
  */
 export function generateStartGameSteps(): MaestroStep[] {
   return [
-    { tapOn: "Start Game" },
+    {
+      tapOn: {
+        id: "game-header-toggle",
+      },
+    },
     {
       waitForAnimationToEnd: {
         timeout: TIMEOUT_NAVIGATION,
@@ -708,7 +817,9 @@ export function generateStartGameSteps(): MaestroStep[] {
     // Wait for scoring view to load
     {
       extendedWaitUntil: {
-        visible: "Hole 1",
+        visible: {
+          id: "hole-number",
+        },
         timeout: TIMEOUT_API_LOAD,
       },
     },
@@ -716,38 +827,32 @@ export function generateStartGameSteps(): MaestroStep[] {
 }
 
 /**
- * Generate steps to navigate to a specific hole
+ * Generate steps to verify we're on a specific hole
  */
-export function generateNavigateToHoleSteps(holeNumber: number): MaestroStep[] {
+export function generateVerifyHoleSteps(holeNumber: number): MaestroStep[] {
   return [
-    // Swipe left to go to next hole (or implement hole picker)
-    // For now, we assume sequential navigation
     {
-      runFlow: {
-        when: {
-          notVisible: {
-            text: `Hole ${holeNumber}`,
-          },
-        },
-        commands: [
-          {
-            swipe: {
-              direction: "LEFT",
-              duration: 300,
-            },
-          },
-          {
-            waitForAnimationToEnd: {
-              timeout: TIMEOUT_HOLE_SWIPE,
-            },
-          },
-        ],
+      assertVisible: {
+        id: "hole-number",
+        text: String(holeNumber),
+      },
+    },
+  ];
+}
+
+/**
+ * Generate steps to navigate to the next hole
+ */
+export function generateNextHoleSteps(): MaestroStep[] {
+  return [
+    {
+      tapOn: {
+        id: "hole-nav-next",
       },
     },
     {
-      extendedWaitUntil: {
-        visible: `Hole ${holeNumber}`,
-        timeout: TIMEOUT_NAVIGATION,
+      waitForAnimationToEnd: {
+        timeout: TIMEOUT_HOLE_SWIPE,
       },
     },
   ];
@@ -871,31 +976,121 @@ export function generatePointsVerificationSteps(
 }
 
 /**
+ * Generate assertion steps for expected hole results
+ * Asserts hole points, running totals, and awarded junk
+ *
+ * @param expected - Expected results from DSL
+ * @param optionDefs - Option definitions for looking up junk points when not specified
+ */
+export function generateExpectedAssertionSteps(
+  expected: FixtureHoleExpected,
+  optionDefs?: OptionDefinitions,
+): MaestroStep[] {
+  const steps: MaestroStep[] = [];
+
+  // Assert hole points (points earned this hole)
+  if (expected.holePoints) {
+    const [team1Points, team2Points] = expected.holePoints;
+    steps.push({
+      assertVisible: {
+        id: "team-1-hole-points",
+        text: String(team1Points),
+      },
+    });
+    steps.push({
+      assertVisible: {
+        id: "team-2-hole-points",
+        text: String(team2Points),
+      },
+    });
+  }
+
+  // Assert running totals (cumulative)
+  if (expected.runningTotals) {
+    const [team1Total, team2Total] = expected.runningTotals;
+    // Format: +N or -N or 0
+    const formatTotal = (n: number) =>
+      n > 0 ? `+${n}` : n < 0 ? String(n) : "0";
+    steps.push({
+      assertVisible: {
+        id: "team-1-points",
+        text: formatTotal(team1Total),
+      },
+    });
+    steps.push({
+      assertVisible: {
+        id: "team-2-points",
+        text: formatTotal(team2Total),
+      },
+    });
+  }
+
+  // Assert awarded junk badges
+  if (expected.awardedJunk) {
+    for (const junk of expected.awardedJunk) {
+      const badgeId = `junk-${junk.name}-${junk.teamId}`;
+      // Assert badge is visible
+      steps.push({
+        assertVisible: {
+          id: badgeId,
+        },
+      });
+      // Look up points from optionDefs if not specified in DSL (points = 0)
+      let points = junk.points;
+      if (points === 0 && optionDefs?.junk[junk.name]) {
+        points = optionDefs.junk[junk.name];
+      }
+      // Assert points value (separate testID on nested text element)
+      if (points > 0) {
+        steps.push({
+          assertVisible: {
+            id: `${badgeId}-points`,
+            text: String(points),
+          },
+        });
+      }
+    }
+  }
+
+  return steps;
+}
+
+/**
  * Generate all steps for scoring a single hole
+ *
+ * @param fixture - The test fixture
+ * @param holeNumber - The hole number as string
+ * @param holeData - The hole's score/junk/multiplier data
+ * @param shotsOffMap - Pre-calculated shots off for each player (for pops calculation)
+ * @param optionDefs - Option definitions for looking up junk points
  */
 export function generateHoleScoringSteps(
   fixture: Fixture,
   holeNumber: string,
   holeData: FixtureHoleData,
+  shotsOffMap?: Map<string, number>,
+  optionDefs?: OptionDefinitions,
 ): MaestroStep[] {
   const steps: MaestroStep[] = [];
   const holeNum = Number.parseInt(holeNumber, 10);
 
-  // Navigate to this hole
-  steps.push(...generateNavigateToHoleSteps(holeNum));
+  // Verify we're on the correct hole
+  steps.push(...generateVerifyHoleSteps(holeNum));
 
   // Get hole info from course
   const courseHole = fixture.course.holes.find((h) => h.hole === holeNum);
   const par = courseHole?.par ?? 4;
+  const holeHandicap = courseHole?.handicap ?? holeNum;
 
   // Enter scores for each player
   for (const [playerId, scoreData] of Object.entries(holeData.scores)) {
     const player = fixture.players.find((p) => p.id === playerId);
     if (!player || !scoreData) continue;
 
-    // Calculate pops (simplified - assumes no pops for E2E tests)
-    // In real tests, this would need course handicap calculation
-    const pops = 0;
+    // Calculate pops using shots off (adjusted handicap relative to lowest)
+    // This assumes handicap_index_from = "low" (default)
+    const shotsOff = shotsOffMap?.get(playerId) ?? 0;
+    const pops = calculatePops(shotsOff, holeHandicap);
 
     const scoreSteps = generateScoreEntrySteps(
       playerId,
@@ -944,10 +1139,20 @@ export function generateHoleScoringSteps(
     }
   }
 
+  // Assert expected results (if provided)
+  if (holeData.expected) {
+    steps.push(
+      ...generateExpectedAssertionSteps(holeData.expected, optionDefs),
+    );
+  }
+
   // Take screenshot for debugging
   steps.push({
     takeScreenshot: `hole_${holeNumber}_complete`,
   });
+
+  // Navigate to next hole (or summary after last hole)
+  steps.push(...generateNextHoleSteps());
 
   return steps;
 }
@@ -984,14 +1189,26 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     (a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10),
   );
 
+  // Pre-calculate shots off for pops calculation
+  // This assumes handicap_index_from = "low" (default for Five Points)
+  const shotsOffMap = fixture.course.slope
+    ? calculateShotsOff(fixture.players, fixture.course.slope)
+    : new Map<string, number>();
+
   // Generate individual hole flows
   const holes: Record<string, string> = {};
   for (const holeNum of holeNumbers) {
     const holeData = fixture.holes[holeNum];
     if (holeData) {
       const paddedNum = holeNum.padStart(2, "0");
-      const steps = generateHoleScoringSteps(fixture, holeNum, holeData);
-      const comment = getHoleComment(fixture, holeNum, holeData);
+      const steps = generateHoleScoringSteps(
+        fixture,
+        holeNum,
+        holeData,
+        shotsOffMap,
+        fixture.optionDefs,
+      );
+      const comment = getHoleComment(fixture, holeNum, holeData, shotsOffMap);
       holes[paddedNum] = stepsToYaml(steps, "golf.spicy", comment);
     }
   }
@@ -1045,6 +1262,18 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     );
   }
 
+  // Check if fixture has team assignments
+  const hasTeamAssignments =
+    fixture.teams && Object.keys(fixture.teams).length > 0;
+
+  if (hasTeamAssignments) {
+    mainLines.push(
+      ``,
+      `# Assign players to teams`,
+      `- runFlow: "assign_teams.yaml"`,
+    );
+  }
+
   mainLines.push(
     ``,
     `# Start game`,
@@ -1083,7 +1312,29 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
       ? stepsToYaml(
           adjustHandicapsSteps,
           "golf.spicy",
-          `# Sub-flow: Adjust handicap indexes for players with overrides\n# Expects: Game settings screen with course/tee selected\n# Provides: Handicap indexes adjusted, ready to start game`,
+          `# Sub-flow: Adjust handicap indexes for players with overrides\n# Expects: Game settings screen with course/tee selected\n# Provides: Handicap indexes adjusted, ready to assign teams or start game`,
+        )
+      : null;
+
+  // Generate assign teams sub-flow if needed
+  const assignTeamsSteps = generateAssignTeamsSteps(fixture);
+  const teamNames = fixture.teams
+    ? Object.entries(fixture.teams)
+        .map(([teamId, playerIds]) => {
+          const names = playerIds
+            .map((pid) => fixture.players.find((p) => p.id === pid)?.name)
+            .filter(Boolean)
+            .join(", ");
+          return `Team ${teamId}: ${names}`;
+        })
+        .join("; ")
+    : "";
+  const assignTeamsYaml =
+    assignTeamsSteps.length > 0
+      ? stepsToYaml(
+          assignTeamsSteps,
+          "golf.spicy",
+          `# Sub-flow: Assign players to teams\n# Expects: Game settings screen (Players tab)\n# Provides: ${teamNames}`,
         )
       : null;
 
@@ -1108,13 +1359,14 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     selectCourseTee: stepsToYaml(
       generateSelectCourseTeeSteps(fixture),
       "golf.spicy",
-      `# Sub-flow: Select course and tee for ${fixture.players[0].name} (manual entry)\n# Expects: Game settings screen with players added\n# Provides: Course and tee configured, ready for handicap adjustment or start game`,
+      `# Sub-flow: Select course and tee for ${fixture.players[0].name} (manual entry)\n# Expects: Game settings screen with players added\n# Provides: Course and tee configured, ready for handicap adjustment or team assignment`,
     ),
     adjustHandicaps: adjustHandicapsYaml,
+    assignTeams: assignTeamsYaml,
     startGame: stepsToYaml(
       generateStartGameSteps(),
       "golf.spicy",
-      `# Sub-flow: Start the game\n# Expects: Players added, on game settings screen\n# Provides: Scoring screen visible, "Hole 1" visible`,
+      `# Sub-flow: Start the game\n# Expects: Players added, teams assigned (if applicable), on game settings screen\n# Provides: Scoring screen visible, hole 1 visible`,
     ),
     holes,
     leaderboard: stepsToYaml(
@@ -1128,6 +1380,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
       hasJunk,
       hasMultipliers,
       hasHandicapOverrides,
+      hasTeamAssignments: hasTeamAssignments ?? false,
     },
   };
 }
@@ -1139,14 +1392,27 @@ function getHoleComment(
   fixture: Fixture,
   holeNumber: string,
   holeData: FixtureHoleData,
+  shotsOffMap?: Map<string, number>,
 ): string {
-  const lines: string[] = [`# Hole ${holeNumber}`];
+  const holeNum = Number.parseInt(holeNumber, 10);
+  const courseHole = fixture.course.holes.find((h) => h.hole === holeNum);
+  const par = courseHole?.par ?? 4;
+  const holeHandicap = courseHole?.handicap ?? holeNum;
 
-  // Add scores
-  const scores = Object.entries(holeData.scores)
-    .map(([id, data]) => `${id}=${data?.gross}`)
+  const lines: string[] = [
+    `# Hole ${holeNumber} (Par ${par}, Hdcp ${holeHandicap})`,
+  ];
+
+  // Add scores with pops info
+  const scoresWithPops = Object.entries(holeData.scores)
+    .map(([id, data]) => {
+      const shotsOff = shotsOffMap?.get(id) ?? 0;
+      const pops = calculatePops(shotsOff, holeHandicap);
+      const popsStr = pops > 0 ? `+${pops}` : pops < 0 ? `${pops}` : "";
+      return `${id}=${data?.gross}${popsStr ? `(${popsStr})` : ""}`;
+    })
     .join(", ");
-  lines.push(`# Scores: ${scores}`);
+  lines.push(`# Scores: ${scoresWithPops}`);
 
   // Add junk if present
   if (holeData.junk) {
@@ -1201,10 +1467,24 @@ export function generateFullFlow(fixture: E2EFixture): GeneratedFlow {
   const holeNumbers = Object.keys(fixture.holes).sort(
     (a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10),
   );
+
+  // Pre-calculate shots off for pops calculation (same as sub-flows)
+  const shotsOffMap = fixture.course.slope
+    ? calculateShotsOff(fixture.players, fixture.course.slope)
+    : new Map<string, number>();
+
   for (const holeNum of holeNumbers) {
     const holeData = fixture.holes[holeNum];
     if (holeData) {
-      steps.push(...generateHoleScoringSteps(fixture, holeNum, holeData));
+      steps.push(
+        ...generateHoleScoringSteps(
+          fixture,
+          holeNum,
+          holeData,
+          shotsOffMap,
+          fixture.optionDefs,
+        ),
+      );
     }
   }
 

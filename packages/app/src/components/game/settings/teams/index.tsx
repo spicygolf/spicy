@@ -25,6 +25,7 @@ export function GameTeamsList() {
     resolve: {
       scope: { teamsConfig: true },
       spec: { $each: { $each: true } }, // Working copy of options (MapOfOptions -> Option fields)
+      specRef: { $each: { $each: true } }, // Catalog spec - for reading num_teams
       players: {
         $each: {
           name: true,
@@ -117,14 +118,33 @@ export function GameTeamsList() {
   }, [game]);
 
   // Check if spec has fixed num_teams (e.g., Five Points = 2 teams)
+  // Try spec first (working copy), fall back to specRef (catalog spec)
   // biome-ignore lint/correctness/useExhaustiveDependencies: Use game.$jazz.id to avoid recomputation on Jazz progressive loading
   const specNumTeams = useMemo(() => {
-    if (!game?.$isLoaded || !game.spec?.$isLoaded) return undefined;
-    return getSpecNumTeams(game.spec);
+    if (!game?.$isLoaded) return undefined;
+
+    // Try working copy first
+    if (game.$jazz.has("spec") && game.spec?.$isLoaded) {
+      const fromSpec = getSpecNumTeams(game.spec);
+      if (fromSpec !== undefined) return fromSpec;
+    }
+    // Fall back to catalog spec
+    if (game.$jazz.has("specRef") && game.specRef?.$isLoaded) {
+      const fromSpecRef = getSpecNumTeams(game.specRef);
+      return fromSpecRef;
+    }
+    return undefined;
   }, [game?.$jazz.id]);
 
-  // Only allow adding teams when num_teams is not fixed by the spec
-  const canAddTeam = specNumTeams === undefined;
+  // Only allow adding teams when:
+  // 1. Either spec or specRef is loaded (don't show button during loading)
+  // 2. num_teams is not fixed by the spec
+  const specLoaded = Boolean(
+    game?.$isLoaded &&
+      ((game.$jazz.has("spec") && game.spec?.$isLoaded) ||
+        (game.$jazz.has("specRef") && game.specRef?.$isLoaded)),
+  );
+  const canAddTeam = specLoaded && specNumTeams === undefined;
 
   const allPlayerRounds = useMemo(() => {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded) return [];
@@ -259,6 +279,25 @@ export function GameTeamsList() {
       game.scope.teamsConfig.$jazz.set("teamCount", newTeamCount);
     }
   }, [game, teamCount]);
+
+  const handleDeleteTeam = useCallback(
+    (teamNumber: number) => {
+      if (!game?.$isLoaded || !game.scope?.$isLoaded) return;
+
+      // Only allow deleting if it's the last team and count exceeds spec minimum
+      const minTeams = specNumTeams ?? 2; // Default to 2 teams minimum
+      if (teamNumber !== teamCount || teamCount <= minTeams) return;
+
+      const newTeamCount = teamCount - 1;
+
+      if (game.scope.teamsConfig?.$isLoaded) {
+        // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
+        // @ts-ignore - Jazz $jazz.set types are overly strict
+        game.scope.teamsConfig.$jazz.set("teamCount", newTeamCount);
+      }
+    },
+    [game, teamCount, specNumTeams],
+  );
 
   const handleRotationChange = useCallback(
     async (value: number) => {
@@ -459,6 +498,8 @@ export function GameTeamsList() {
           onTossBalls={handleTossBalls}
           canAddTeam={canAddTeam}
           onAddTeam={handleAddTeam}
+          specNumTeams={specNumTeams}
+          onDeleteTeam={handleDeleteTeam}
         />
       </>
     );

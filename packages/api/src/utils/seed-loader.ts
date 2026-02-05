@@ -108,6 +108,7 @@ export interface SeedSpec {
   long_description?: string;
   teams?: boolean;
   team_size?: number;
+  num_teams?: number;
   team_change_every?: number;
   options: OptionRef[]; // Game option names or objects with overrides
   junk: OptionRef[]; // Junk option names or objects with overrides
@@ -237,6 +238,7 @@ export async function loadSeedSpecsAsV03(): Promise<
     long_description?: string;
     teams?: boolean;
     team_size?: number;
+    num_teams?: number;
     team_change_every?: number;
     options?: Array<{
       name: string;
@@ -379,6 +381,7 @@ export async function loadSeedSpecsAsV03(): Promise<
       long_description: spec.long_description,
       teams: spec.teams,
       team_size: spec.team_size,
+      num_teams: spec.num_teams,
       team_change_every: spec.team_change_every,
       options: gameOptions as Array<{
         name: string;

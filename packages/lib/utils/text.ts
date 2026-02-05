@@ -140,3 +140,20 @@ export function stateCode(
   const parts = state.split("-");
   return parts.length > 1 ? parts[1] : state;
 }
+
+/**
+ * Creates a URL-safe slug from a string.
+ * Converts to lowercase and replaces whitespace with hyphens.
+ * Useful for creating testIDs from player names.
+ *
+ * @param text - The string to slugify
+ * @returns A URL-safe slug
+ *
+ * @example
+ * slugify("Brad Smith") // returns "brad-smith"
+ * slugify("Tim") // returns "tim"
+ * slugify("Mary Jane Watson") // returns "mary-jane-watson"
+ */
+export function slugify(text: string): string {
+  return text.toLowerCase().replace(/\s+/g, "-");
+}

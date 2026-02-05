@@ -96,6 +96,32 @@ export interface FixtureHoleMultipliers {
 }
 
 /**
+ * Expected team junk award parsed from DSL (e.g., "low_ball:2:t1")
+ */
+export interface FixtureExpectedJunk {
+  /** Junk name (e.g., "low_ball") */
+  name: string;
+  /** Points value */
+  points: number;
+  /** Team ID (e.g., "1" from "t1") */
+  teamId: string;
+}
+
+/**
+ * Expected results for a hole, parsed from DSL => syntax
+ * Format: => holePoints | runningTotals | awardedJunk
+ * Example: => 3 0 | -2 2 | low_ball:2:t2
+ */
+export interface FixtureHoleExpected {
+  /** Hole points [team1, team2] */
+  holePoints?: [number, number];
+  /** Running totals through this hole [team1, team2] */
+  runningTotals?: [number, number];
+  /** Awarded team junk with points */
+  awardedJunk?: FixtureExpectedJunk[];
+}
+
+/**
  * All data for a single hole
  */
 export interface FixtureHoleData {
@@ -105,6 +131,8 @@ export interface FixtureHoleData {
   junk?: FixtureHoleJunk;
   /** Multiplier activations (optional) */
   multipliers?: FixtureHoleMultipliers;
+  /** Expected results for assertions (from DSL => syntax) */
+  expected?: FixtureHoleExpected;
 }
 
 // =============================================================================

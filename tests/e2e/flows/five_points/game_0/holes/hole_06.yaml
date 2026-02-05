@@ -1,6 +1,6 @@
-# Hole 6
-# Scores: p1=5, p2=6, p3=4, p4=6
-# Junk: birdie:p3 prox:p3
+# Hole 6 (Par 3, Hdcp 17)
+# Scores: brad=5, scott=6, tim=4, eric=6
+# Junk: prox:tim
 
 appId: golf.spicy
 platform:
@@ -8,85 +8,74 @@ platform:
     snapshotKeyHonorModalViews: false
 ---
 
-- runFlow:
-    when:
-      notVisible:
-        text: "Hole 6"
-    commands:
-    - swipe:
-        direction: "LEFT"
-        duration: 300
-    - waitForAnimationToEnd:
-        timeout: 1000
-
-- extendedWaitUntil:
-    visible: "Hole 6"
-    timeout: 3000
+- assertVisible:
+    id: "hole-number"
+    text: "6"
 
 - tapOn:
-    id: "player-p1-increment"
+    id: "player-brad-increment"
 
 - waitForAnimationToEnd:
     timeout: 300
 
 - tapOn:
-    id: "player-p1-increment"
+    id: "player-brad-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p2-increment"
+    id: "player-scott-increment"
 
 - waitForAnimationToEnd:
     timeout: 300
 
 - tapOn:
-    id: "player-p2-increment"
+    id: "player-scott-increment"
 
 - waitForAnimationToEnd:
     timeout: 300
 
 - tapOn:
-    id: "player-p2-increment"
+    id: "player-scott-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p3-increment"
+    id: "player-tim-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-increment"
+    id: "player-eric-increment"
 
 - waitForAnimationToEnd:
     timeout: 300
 
 - tapOn:
-    id: "player-p4-increment"
+    id: "player-eric-increment"
 
 - waitForAnimationToEnd:
     timeout: 300
 
 - tapOn:
-    id: "player-p4-increment"
+    id: "player-eric-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "junk-birdie-p3"
-
-- waitForAnimationToEnd:
-    timeout: 300
-
-- tapOn:
-    id: "junk-prox-p3"
+    id: "junk-prox-tim"
 
 - waitForAnimationToEnd:
     timeout: 300
 
 - takeScreenshot: "hole_6_complete"
+
+- tapOn:
+    id: "hole-nav-next"
+
+- waitForAnimationToEnd:
+    timeout: 1000

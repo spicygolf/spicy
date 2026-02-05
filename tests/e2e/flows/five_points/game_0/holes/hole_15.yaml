@@ -1,6 +1,5 @@
-# Hole 15
-# Scores: p1=4, p2=6, p3=5, p4=6
-# Junk: birdie:p1
+# Hole 15 (Par 4, Hdcp 4)
+# Scores: brad=4(+1), scott=6(+1), tim=5, eric=6(+1)
 
 appId: golf.spicy
 platform:
@@ -8,61 +7,38 @@ platform:
     snapshotKeyHonorModalViews: false
 ---
 
-- runFlow:
-    when:
-      notVisible:
-        text: "Hole 15"
-    commands:
-    - swipe:
-        direction: "LEFT"
-        duration: 300
-    - waitForAnimationToEnd:
-        timeout: 1000
-
-- extendedWaitUntil:
-    visible: "Hole 15"
-    timeout: 3000
+- assertVisible:
+    id: "hole-number"
+    text: "15"
 
 - tapOn:
-    id: "player-p1-score"
+    id: "player-brad-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p2-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
-
-- tapOn:
-    id: "player-p2-increment"
+    id: "player-scott-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p3-increment"
+    id: "player-tim-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
-
-- tapOn:
-    id: "player-p4-increment"
+    id: "player-eric-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
-
-- tapOn:
-    id: "junk-birdie-p1"
-
-- waitForAnimationToEnd:
-    timeout: 300
 
 - takeScreenshot: "hole_15_complete"
+
+- tapOn:
+    id: "hole-nav-next"
+
+- waitForAnimationToEnd:
+    timeout: 1000

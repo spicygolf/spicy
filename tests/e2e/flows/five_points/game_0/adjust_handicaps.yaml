@@ -1,6 +1,6 @@
 # Sub-flow: Adjust handicap indexes for players with overrides
 # Expects: Game settings screen with course/tee selected
-# Provides: Handicap indexes adjusted, ready to start game
+# Provides: Handicap indexes adjusted, ready to assign teams or start game
 
 appId: golf.spicy
 platform:
@@ -31,3 +31,19 @@ platform:
 
 - waitForAnimationToEnd:
     timeout: 500
+
+- assertVisible:
+    id: "handicap-adjustment-brad-shots"
+    text: "7"
+
+- assertVisible:
+    id: "handicap-adjustment-scott-shots"
+    text: "6"
+
+- assertVisible:
+    id: "handicap-adjustment-tim-shots"
+    text: "0"
+
+- assertVisible:
+    id: "handicap-adjustment-eric-shots"
+    text: "16"

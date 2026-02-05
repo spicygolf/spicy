@@ -1,5 +1,6 @@
-# Hole 1
-# Scores: p1=4, p2=5, p3=5, p4=6
+# Hole 1 (Par 4, Hdcp 3)
+# Scores: brad=5(+1), scott=5(+1), tim=4, eric=5(+1)
+# Junk: prox:brad
 
 appId: golf.spicy
 platform:
@@ -7,49 +8,60 @@ platform:
     snapshotKeyHonorModalViews: false
 ---
 
-- runFlow:
-    when:
-      notVisible:
-        text: "Hole 1"
-    commands:
-    - swipe:
-        direction: "LEFT"
-        duration: 300
-    - waitForAnimationToEnd:
-        timeout: 1000
-
-- extendedWaitUntil:
-    visible: "Hole 1"
-    timeout: 3000
+- assertVisible:
+    id: "hole-number"
+    text: "1"
 
 - tapOn:
-    id: "player-p1-score"
+    id: "player-brad-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p2-increment"
+    id: "player-scott-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p3-increment"
+    id: "player-tim-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-increment"
+    id: "player-eric-score"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "junk-prox-brad"
 
 - waitForAnimationToEnd:
     timeout: 300
 
-- tapOn:
-    id: "player-p4-increment"
+- assertVisible:
+    id: "team-1-hole-points"
+    text: "1"
 
-- waitForAnimationToEnd:
-    timeout: 500
+- assertVisible:
+    id: "team-2-hole-points"
+    text: "0"
+
+- assertVisible:
+    id: "team-1-points"
+    text: "+1"
+
+- assertVisible:
+    id: "team-2-points"
+    text: "-1"
 
 - takeScreenshot: "hole_1_complete"
+
+- tapOn:
+    id: "hole-nav-next"
+
+- waitForAnimationToEnd:
+    timeout: 1000

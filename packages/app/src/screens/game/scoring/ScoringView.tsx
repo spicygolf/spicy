@@ -603,6 +603,7 @@ export function ScoringView({
               selected: true, // Always selected since we filter to only achieved
               points: junk.value,
               calculated: true, // Mark as calculated/automatic
+              ownerId: teamId, // For testID: junk-{name}-{teamId}
             }));
 
           // Get team result from scoreboard for this hole
@@ -669,6 +670,7 @@ export function ScoringView({
 
           return (
             <TeamGroup
+              teamId={teamId}
               multiplierOptions={multiplierButtons}
               earnedMultipliers={earnedMultiplierButtons}
               teamJunkOptions={teamJunkButtons}
@@ -736,6 +738,9 @@ export function ScoringView({
                 }
 
                 // Build user-markable junk options with selected state for this player
+                const playerSlug = player.name
+                  .toLowerCase()
+                  .replace(/\s+/g, "-");
                 const userJunkButtons: OptionButton[] = userJunkOptions.map(
                   (junk) => ({
                     name: junk.name,
@@ -745,6 +750,7 @@ export function ScoringView({
                     selected: hasPlayerJunk(team, round.playerId, junk.name),
                     points: junk.value,
                     calculated: false, // User-toggleable
+                    ownerId: playerSlug, // For testID: junk-{name}-{playerSlug}
                   }),
                 );
 

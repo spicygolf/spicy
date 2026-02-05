@@ -1,5 +1,5 @@
-# Hole 9
-# Scores: p1=4, p2=5, p3=4, p4=5
+# Hole 9 (Par 5, Hdcp 13)
+# Scores: brad=4, scott=5, tim=4, eric=5(+1)
 # Multipliers: t1:double t2:double
 
 appId: golf.spicy
@@ -8,41 +8,30 @@ platform:
     snapshotKeyHonorModalViews: false
 ---
 
-- runFlow:
-    when:
-      notVisible:
-        text: "Hole 9"
-    commands:
-    - swipe:
-        direction: "LEFT"
-        duration: 300
-    - waitForAnimationToEnd:
-        timeout: 1000
-
-- extendedWaitUntil:
-    visible: "Hole 9"
-    timeout: 3000
+- assertVisible:
+    id: "hole-number"
+    text: "9"
 
 - tapOn:
-    id: "player-p1-decrement"
+    id: "player-brad-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p2-score"
+    id: "player-scott-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p3-decrement"
+    id: "player-tim-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-score"
+    id: "player-eric-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
@@ -60,3 +49,9 @@ platform:
     timeout: 300
 
 - takeScreenshot: "hole_9_complete"
+
+- tapOn:
+    id: "hole-nav-next"
+
+- waitForAnimationToEnd:
+    timeout: 1000

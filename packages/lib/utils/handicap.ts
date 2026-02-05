@@ -1,5 +1,12 @@
 import type { Tee } from "../schema/courses";
 
+/**
+ * USGA standard slope rating used as the baseline for handicap calculations.
+ * All course slopes are compared against this value.
+ * @see https://www.usga.org/handicapping/roh/Content/rules/5%202%20Calculation%20of%20a%20Course%20Handicap.htm
+ */
+export const STANDARD_SLOPE_RATING = 113;
+
 interface CourseHandicapParams {
   handicapIndex: string;
   tee: Tee;
@@ -57,6 +64,34 @@ export function getEffectiveHandicap(
   return gameHandicap ?? courseHandicap;
 }
 
+/**
+ * Calculate course handicap from numeric handicap index and slope.
+ * This is the core calculation used by both app code and test fixtures.
+ *
+ * Formula: Course Handicap = round(Handicap Index × Slope Rating / 113)
+ *
+ * @param handicapIndex - Numeric handicap index (negative for plus handicaps)
+ * @param slope - Course slope rating
+ * @returns Course handicap rounded to nearest integer
+ *
+ * @example
+ * courseHandicapFromSlope(10.5, 139) // returns 13
+ * courseHandicapFromSlope(-2.0, 139) // returns -2 (plus handicap)
+ */
+export function courseHandicapFromSlope(
+  handicapIndex: number,
+  slope: number,
+): number {
+  return Math.round((handicapIndex * slope) / STANDARD_SLOPE_RATING);
+}
+
+/**
+ * Calculate course handicap from a Tee object (for app use with Jazz CoMaps).
+ * Handles string parsing and Tee rating lookups.
+ *
+ * @param params - Object containing handicapIndex string, Tee, and optional holesPlayed
+ * @returns Course handicap or null if inputs are invalid
+ */
 export function calculateCourseHandicap({
   handicapIndex,
   tee,
@@ -80,7 +115,7 @@ export function calculateCourseHandicap({
     return null;
   }
 
-  return Math.round(index * (slope / 113));
+  return courseHandicapFromSlope(index, slope);
 }
 
 export function formatCourseHandicap(courseHandicap: number | null): string {

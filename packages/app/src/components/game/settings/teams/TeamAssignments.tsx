@@ -1,8 +1,9 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useMemo } from "react";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { DraxScrollView, DraxView } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { slugify } from "spicylib/utils";
 import { Button, Text } from "@/ui";
 import type { PlayerRoundItem, TeamSection } from "./types";
 
@@ -14,6 +15,10 @@ interface TeamAssignmentsProps {
   onTossBalls: () => void;
   canAddTeam: boolean;
   onAddTeam: () => void;
+  /** Minimum number of teams required by spec (undefined = no minimum) */
+  specNumTeams?: number;
+  /** Callback when a team is deleted */
+  onDeleteTeam?: (teamNumber: number) => void;
 }
 
 export function TeamAssignments({
@@ -21,6 +26,8 @@ export function TeamAssignments({
   teamCount,
   teamAssignments,
   onDrop,
+  specNumTeams,
+  onDeleteTeam,
   onTossBalls,
   canAddTeam,
   onAddTeam,
@@ -44,13 +51,12 @@ export function TeamAssignments({
     const unassignedPlayers = allPlayerRounds.filter(
       (p) => !teamAssignments.has(p.id),
     );
-    if (unassignedPlayers.length > 0) {
-      sections.push({
-        teamNumber: 0,
-        teamName: "Unassigned",
-        players: unassignedPlayers,
-      });
-    }
+    // Always show Unassigned section so players can be moved back to it
+    sections.push({
+      teamNumber: 0,
+      teamName: "Unassigned",
+      players: unassignedPlayers,
+    });
 
     return sections;
   }, [allPlayerRounds, teamAssignments, teamCount]);
@@ -91,81 +97,157 @@ export function TeamAssignments({
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={true}
       >
-        {teamSections.map((section) => (
-          <DraxView
-            key={section.teamNumber}
-            style={styles.teamSection}
-            onReceiveDragDrop={(event) => {
-              if (event.dragged.payload) {
-                onDrop(event.dragged.payload as string, section.teamNumber);
-              }
-            }}
-            receivingStyle={styles.teamSectionReceiving}
-          >
-            <View
-              style={[
-                styles.teamHeader,
-                section.teamNumber === 0 && styles.unassignedHeader,
-              ]}
-            >
-              <Text style={styles.teamHeaderText}>{section.teamName}</Text>
-              <Text style={styles.playerCount}>
-                {section.players.length} player
-                {section.players.length !== 1 ? "s" : ""}
-              </Text>
-            </View>
+        {teamSections.map((section) => {
+          // Create testID: "team-1-dropzone", "team-2-dropzone", "team-unassigned-dropzone"
+          const sectionTestId =
+            section.teamNumber === 0
+              ? "team-unassigned-dropzone"
+              : `team-${section.teamNumber}-dropzone`;
 
-            <View style={styles.dropZone}>
-              {section.players.length > 0 ? (
-                <View style={styles.playersList}>
-                  {section.players.map((player) => {
-                    return (
-                      <DraxView
-                        key={player.id}
-                        style={styles.playerItem}
-                        draggingStyle={styles.playerDragging}
-                        dragReleasedStyle={styles.playerReleased}
-                        dragPayload={player.id}
-                        renderContent={({ viewState }) => (
-                          <View
-                            style={[
-                              styles.playerContent,
-                              viewState?.dragStatus === 2 &&
-                                styles.playerContentDragging,
-                            ]}
-                          >
-                            <View style={styles.dragHandle}>
-                              <FontAwesome6
-                                name="grip-lines"
-                                iconStyle="solid"
-                                size={16}
-                                color={theme.colors.secondary}
-                              />
-                            </View>
-                            <View style={styles.playerInfo}>
-                              <Text style={styles.playerName}>
-                                {player.playerName}
-                              </Text>
-                              {player.handicap && (
-                                <Text style={styles.handicap}>
-                                  HI: {player.handicap}
-                                </Text>
-                              )}
-                            </View>
-                          </View>
-                        )}
+          // A team can be deleted if:
+          // 1. It's not "Unassigned" (teamNumber > 0)
+          // 2. It's empty (no players)
+          // 3. Current team count exceeds spec minimum (default to 2 if no spec)
+          // 4. It's the last team (highest number) - to prevent gaps
+          const minTeams = specNumTeams ?? 2; // Default to 2 teams minimum
+          const canDeleteTeam =
+            section.teamNumber > 0 &&
+            section.players.length === 0 &&
+            teamCount > minTeams &&
+            section.teamNumber === teamCount; // Only allow deleting the last team
+
+          return (
+            <DraxView
+              key={section.teamNumber}
+              style={styles.teamSection}
+              testID={sectionTestId}
+              onReceiveDragDrop={(event) => {
+                if (event.dragged.payload) {
+                  onDrop(event.dragged.payload as string, section.teamNumber);
+                }
+              }}
+              receivingStyle={styles.teamSectionReceiving}
+            >
+              <View
+                style={[
+                  styles.teamHeader,
+                  section.teamNumber === 0 && styles.unassignedHeader,
+                ]}
+              >
+                <Text style={styles.teamHeaderText}>{section.teamName}</Text>
+                <View style={styles.teamHeaderRight}>
+                  {canDeleteTeam && onDeleteTeam && (
+                    <Pressable
+                      testID={`team-${section.teamNumber}-delete`}
+                      onPress={() => onDeleteTeam(section.teamNumber)}
+                      style={styles.deleteTeamButton}
+                      hitSlop={8}
+                    >
+                      <FontAwesome6
+                        name="trash"
+                        iconStyle="solid"
+                        size={14}
+                        color={theme.colors.error}
                       />
-                    );
-                  })}
+                    </Pressable>
+                  )}
+                  <Text style={styles.playerCount}>
+                    {section.players.length} player
+                    {section.players.length !== 1 ? "s" : ""}
+                  </Text>
                 </View>
-              ) : (
-                <View style={styles.emptyTeam}>
-                  <Text style={styles.emptyTeamText}>Drag players here</Text>
-                </View>
-              )}
-            </View>
-          </DraxView>
-        ))}
+              </View>
+
+              <View style={styles.dropZone}>
+                {section.players.length > 0 ? (
+                  <View style={styles.playersList}>
+                    {section.players.map((player) => {
+                      // Create testID based on player name slug: "team-player-brad", "team-player-scott"
+                      const playerSlug = slugify(player.playerName);
+                      const playerTestId = `team-player-${playerSlug}`;
+
+                      // Calculate next team for tap-to-cycle assignment
+                      // Unassigned (0) -> Team 1, Team 1 -> Team 2, ..., Team N -> Unassigned
+                      const currentTeam = section.teamNumber;
+                      const nextTeam =
+                        currentTeam >= teamCount ? 0 : currentTeam + 1;
+
+                      return (
+                        <View key={player.id} style={styles.playerItem}>
+                          {/* Drag handle - only this area triggers drag */}
+                          <DraxView
+                            testID={`${playerTestId}-drag`}
+                            style={styles.dragHandleContainer}
+                            draggingStyle={styles.dragHandleDragging}
+                            dragReleasedStyle={styles.dragHandleReleased}
+                            hoverStyle={styles.hoverView}
+                            dragPayload={player.id}
+                            renderContent={({ viewState }) => (
+                              <View
+                                style={[
+                                  styles.dragHandle,
+                                  viewState?.dragStatus === 2 &&
+                                    styles.dragHandleActive,
+                                ]}
+                              >
+                                <FontAwesome6
+                                  name="grip-lines"
+                                  iconStyle="solid"
+                                  size={16}
+                                  color={theme.colors.secondary}
+                                />
+                              </View>
+                            )}
+                            renderHoverContent={() => (
+                              <View style={styles.hoverContent}>
+                                <View style={styles.dragHandle}>
+                                  <FontAwesome6
+                                    name="grip-lines"
+                                    iconStyle="solid"
+                                    size={16}
+                                    color={theme.colors.secondary}
+                                  />
+                                </View>
+                                <Text style={styles.hoverPlayerName}>
+                                  {player.playerName}
+                                </Text>
+                                {player.handicap !== undefined && (
+                                  <Text style={styles.hoverHandicap}>
+                                    HI: {player.handicap}
+                                  </Text>
+                                )}
+                              </View>
+                            )}
+                          />
+                          {/* Player info - tappable to cycle teams */}
+                          <Pressable
+                            testID={playerTestId}
+                            accessibilityLabel={playerTestId}
+                            style={styles.playerInfo}
+                            onPress={() => onDrop(player.id, nextTeam)}
+                          >
+                            <Text style={styles.playerName}>
+                              {player.playerName}
+                            </Text>
+                            {player.handicap !== undefined && (
+                              <Text style={styles.handicap}>
+                                HI: {player.handicap}
+                              </Text>
+                            )}
+                          </Pressable>
+                        </View>
+                      );
+                    })}
+                  </View>
+                ) : (
+                  <View style={styles.emptyTeam}>
+                    <Text style={styles.emptyTeamText}>Drag players here</Text>
+                  </View>
+                )}
+              </View>
+            </DraxView>
+          );
+        })}
       </DraxScrollView>
     </>
   );
@@ -245,6 +327,14 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 12,
     color: theme.colors.secondary,
   },
+  teamHeaderRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(2),
+  },
+  deleteTeamButton: {
+    padding: theme.gap(1),
+  },
   dropZone: {
     minHeight: 80,
   },
@@ -256,44 +346,37 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
+    backgroundColor: theme.colors.background,
   },
-  playerContent: {
-    flexDirection: "row",
-    alignItems: "center",
+  dragHandleContainer: {
     paddingVertical: theme.gap(1),
-    paddingHorizontal: theme.gap(2),
-    backgroundColor: theme.colors.background,
-    width: "100%",
+    paddingLeft: theme.gap(2),
+    paddingRight: theme.gap(1),
   },
-  playerContentDragging: {
-    backgroundColor: theme.colors.background,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    opacity: 0.9,
-  },
-  playerDragging: {
+  dragHandleDragging: {
     opacity: 0.3,
   },
-  playerReleased: {
+  dragHandleReleased: {
     opacity: 1,
   },
   dragHandle: {
     width: 24,
+    height: 24,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: theme.gap(2),
+  },
+  dragHandleActive: {
+    backgroundColor: theme.colors.background,
+    borderRadius: 4,
   },
   playerInfo: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingVertical: theme.gap(1),
+    paddingRight: theme.gap(2),
+    paddingLeft: theme.gap(1),
   },
   playerName: {
     fontSize: 16,
@@ -320,5 +403,30 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.secondary,
     fontStyle: "italic",
     textAlign: "center",
+  },
+  hoverView: {
+    width: 280,
+    backgroundColor: theme.colors.background,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  hoverContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: theme.gap(1),
+    gap: theme.gap(1),
+  },
+  hoverPlayerName: {
+    fontSize: 16,
+    fontWeight: "500",
+    flex: 1,
+  },
+  hoverHandicap: {
+    fontSize: 14,
+    color: theme.colors.secondary,
   },
 }));

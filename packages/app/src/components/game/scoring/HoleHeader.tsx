@@ -41,6 +41,7 @@ export function HoleHeader({
           style={styles.navButton}
           onPress={onPrevious}
           accessibilityLabel="Previous hole"
+          testID="hole-nav-previous"
         >
           <FontAwesome6
             name="chevron-left"
@@ -53,7 +54,9 @@ export function HoleHeader({
         {/* Hole Info */}
         <View style={styles.holeInfo}>
           <View style={styles.holeNumberRow}>
-            <Text style={styles.holeNumber}>{hole.number}</Text>
+            <Text style={styles.holeNumber} testID="hole-number">
+              {hole.number}
+            </Text>
             {warningMessage && (
               <View style={styles.warningIndicator}>
                 <IncompleteIndicator message={warningMessage} />
@@ -78,6 +81,7 @@ export function HoleHeader({
           style={styles.navButton}
           onPress={onNext}
           accessibilityLabel="Next hole"
+          testID="hole-nav-next"
         >
           <FontAwesome6
             name="chevron-right"

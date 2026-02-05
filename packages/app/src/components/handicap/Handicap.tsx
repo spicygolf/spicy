@@ -6,11 +6,13 @@ interface Props {
   label: string;
   display?: string;
   color?: string;
+  /** Optional testID for E2E testing */
+  testID?: string;
 }
 
-export function Handicap({ label, display, color }: Props) {
+export function Handicap({ label, display, color, testID }: Props) {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID={testID}>
       <Text style={[styles.label, color && { color }]}>{label}</Text>
       <Text style={[styles.display, color && { color }]}>{display || "-"}</Text>
     </View>
@@ -28,6 +30,6 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 8,
   },
   display: {
-    fontSize: 16,
+    fontSize: 14,
   },
 }));

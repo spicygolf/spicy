@@ -1,5 +1,5 @@
-# Hole 11
-# Scores: p1=5, p2=6, p3=5, p4=6
+# Hole 11 (Par 4, Hdcp 6)
+# Scores: brad=5(+1), scott=6(+1), tim=5, eric=6(+1)
 
 appId: golf.spicy
 platform:
@@ -7,55 +7,38 @@ platform:
     snapshotKeyHonorModalViews: false
 ---
 
-- runFlow:
-    when:
-      notVisible:
-        text: "Hole 11"
-    commands:
-    - swipe:
-        direction: "LEFT"
-        duration: 300
-    - waitForAnimationToEnd:
-        timeout: 1000
-
-- extendedWaitUntil:
-    visible: "Hole 11"
-    timeout: 3000
+- assertVisible:
+    id: "hole-number"
+    text: "11"
 
 - tapOn:
-    id: "player-p1-increment"
+    id: "player-brad-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p2-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
-
-- tapOn:
-    id: "player-p2-increment"
+    id: "player-scott-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p3-increment"
+    id: "player-tim-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
-
-- tapOn:
-    id: "player-p4-increment"
+    id: "player-eric-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - takeScreenshot: "hole_11_complete"
+
+- tapOn:
+    id: "hole-nav-next"
+
+- waitForAnimationToEnd:
+    timeout: 1000

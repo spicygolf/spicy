@@ -42,9 +42,9 @@ jobs:
       - name: Run Unit Tests
         run: bun test ./packages/app/__tests__/ ./packages/api/src/ ./packages/lib/utils/ ./packages/lib/scoring/__tests__/
 
-  # Fixture-based integration tests - fast, no Jazz connection
-  fixture-tests:
-    name: Fixture Tests
+  # E2E test generation check - ensures generated files match DSL source
+  e2e-check:
+    name: E2E Generation Check
     needs: quality
     runs-on: ubuntu-latest
     steps:
@@ -57,8 +57,8 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Run Fixture-Based Tests
-        run: bun test ./tests/integration/
+      - name: Verify generated E2E files match DSL
+        run: bun e2e:check
 
   # Jazz integration tests - requires Jazz environment
   # Note: Skipped for fork PRs since they don't have access to environment secrets
