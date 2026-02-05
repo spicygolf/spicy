@@ -147,7 +147,16 @@
           "accessibilityLabel",
           "dropdown",
           "modal",
-          "run-ios-local"
+          "run-ios-local",
+          "game.dsl",
+          "dsl",
+          "fixture",
+          "e2e:generate",
+          "e2e:check",
+          "flows/",
+          "continue.yaml",
+          "main.yaml",
+          "holes/"
         ]
       },
       "skillPath": "e2e-testing",

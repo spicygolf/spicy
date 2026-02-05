@@ -1,5 +1,5 @@
-# Hole 12
-# Scores: p1=3, p2=3, p3=4, p4=4
+# Hole 12 (Par 4, Hdcp 12)
+# Scores: p1=3, p2=3, p3=4, p4=4(+1)
 # Junk: prox:p2
 
 appId: golf.spicy
@@ -42,7 +42,7 @@ platform:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-score"
+    id: "player-p4-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500

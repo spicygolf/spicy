@@ -1,5 +1,5 @@
-# Hole 2
-# Scores: p1=5, p2=6, p3=3, p4=5
+# Hole 2 (Par 4, Hdcp 7)
+# Scores: p1=5(+1), p2=6, p3=3, p4=5(+1)
 # Junk: birdie:p3
 
 appId: golf.spicy
@@ -24,7 +24,7 @@ platform:
     timeout: 3000
 
 - tapOn:
-    id: "player-p1-increment"
+    id: "player-p1-score"
 
 - waitForAnimationToEnd:
     timeout: 500
@@ -48,7 +48,7 @@ platform:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-increment"
+    id: "player-p4-score"
 
 - waitForAnimationToEnd:
     timeout: 500

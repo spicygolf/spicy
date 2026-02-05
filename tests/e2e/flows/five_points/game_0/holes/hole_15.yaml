@@ -1,5 +1,5 @@
-# Hole 15
-# Scores: p1=4, p2=6, p3=5, p4=6
+# Hole 15 (Par 4, Hdcp 4)
+# Scores: p1=4(+1), p2=6(+1), p3=5, p4=6(+1)
 # Junk: birdie:p1
 
 appId: golf.spicy
@@ -24,16 +24,10 @@ platform:
     timeout: 3000
 
 - tapOn:
-    id: "player-p1-score"
+    id: "player-p1-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
-
-- tapOn:
-    id: "player-p2-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
 
 - tapOn:
     id: "player-p2-increment"
@@ -46,12 +40,6 @@ platform:
 
 - waitForAnimationToEnd:
     timeout: 500
-
-- tapOn:
-    id: "player-p4-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
 
 - tapOn:
     id: "player-p4-increment"

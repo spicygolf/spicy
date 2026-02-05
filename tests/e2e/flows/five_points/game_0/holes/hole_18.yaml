@@ -1,5 +1,5 @@
-# Hole 18
-# Scores: p1=4, p2=5, p3=4, p4=5
+# Hole 18 (Par 5, Hdcp 8)
+# Scores: p1=4, p2=5, p3=4, p4=5(+1)
 # Junk: birdie:p1 birdie:p3
 # Multipliers: t1:double t2:double_back
 
@@ -43,7 +43,7 @@ platform:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-score"
+    id: "player-p4-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500

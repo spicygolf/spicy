@@ -1,5 +1,5 @@
-# Hole 7
-# Scores: p1=3, p2=4, p3=3, p4=4
+# Hole 7 (Par 5, Hdcp 11)
+# Scores: p1=3, p2=4, p3=3, p4=4(+1)
 
 appId: golf.spicy
 platform:
@@ -51,6 +51,12 @@ platform:
 
 - waitForAnimationToEnd:
     timeout: 500
+
+- tapOn:
+    id: "player-p4-decrement"
+
+- waitForAnimationToEnd:
+    timeout: 300
 
 - tapOn:
     id: "player-p4-decrement"

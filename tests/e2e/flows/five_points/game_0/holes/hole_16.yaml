@@ -1,5 +1,5 @@
-# Hole 16
-# Scores: p1=2, p2=4, p3=3, p4=4
+# Hole 16 (Par 4, Hdcp 16)
+# Scores: p1=2, p2=4, p3=3, p4=4(+1)
 # Junk: birdie:p1 prox:p3
 
 appId: golf.spicy
@@ -48,7 +48,7 @@ platform:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-score"
+    id: "player-p4-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500

@@ -1,5 +1,5 @@
-# Hole 5
-# Scores: p1=5, p2=5, p3=4, p4=5
+# Hole 5 (Par 4, Hdcp 5)
+# Scores: p1=5(+1), p2=5(+1), p3=4, p4=5(+1)
 # Multipliers: t1:double t2:double_back
 
 appId: golf.spicy
@@ -24,13 +24,13 @@ platform:
     timeout: 3000
 
 - tapOn:
-    id: "player-p1-increment"
+    id: "player-p1-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-p2-increment"
+    id: "player-p2-score"
 
 - waitForAnimationToEnd:
     timeout: 500
@@ -42,7 +42,7 @@ platform:
     timeout: 500
 
 - tapOn:
-    id: "player-p4-increment"
+    id: "player-p4-score"
 
 - waitForAnimationToEnd:
     timeout: 500

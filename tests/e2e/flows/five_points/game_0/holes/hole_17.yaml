@@ -1,5 +1,5 @@
-# Hole 17
-# Scores: p1=5, p2=6, p3=5, p4=6
+# Hole 17 (Par 3, Hdcp 14)
+# Scores: p1=5, p2=6, p3=5, p4=6(+1)
 
 appId: golf.spicy
 platform:
@@ -63,12 +63,6 @@ platform:
 
 - waitForAnimationToEnd:
     timeout: 500
-
-- tapOn:
-    id: "player-p4-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
 
 - tapOn:
     id: "player-p4-increment"

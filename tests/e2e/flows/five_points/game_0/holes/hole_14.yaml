@@ -1,5 +1,5 @@
-# Hole 14
-# Scores: p1=4, p2=5, p3=5, p4=4
+# Hole 14 (Par 5, Hdcp 10)
+# Scores: p1=4, p2=5, p3=5, p4=4(+1)
 # Multipliers: t1:double t2:double
 
 appId: golf.spicy
@@ -40,6 +40,12 @@ platform:
 
 - waitForAnimationToEnd:
     timeout: 500
+
+- tapOn:
+    id: "player-p4-decrement"
+
+- waitForAnimationToEnd:
+    timeout: 300
 
 - tapOn:
     id: "player-p4-decrement"

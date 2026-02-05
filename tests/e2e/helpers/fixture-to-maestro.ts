@@ -22,6 +22,7 @@ import type {
   FixtureHoleData,
   FixturePlayer,
 } from "../../lib/fixture-types";
+import { calculatePops } from "../../../packages/lib/utils/scores";
 
 interface MaestroStep {
   [key: string]: unknown;
@@ -1032,11 +1033,17 @@ export function generatePointsVerificationSteps(
 
 /**
  * Generate all steps for scoring a single hole
+ *
+ * @param fixture - The test fixture
+ * @param holeNumber - The hole number as string
+ * @param holeData - The hole's score/junk/multiplier data
+ * @param shotsOffMap - Pre-calculated shots off for each player (for pops calculation)
  */
 export function generateHoleScoringSteps(
   fixture: Fixture,
   holeNumber: string,
   holeData: FixtureHoleData,
+  shotsOffMap?: Map<string, number>,
 ): MaestroStep[] {
   const steps: MaestroStep[] = [];
   const holeNum = Number.parseInt(holeNumber, 10);
@@ -1047,15 +1054,17 @@ export function generateHoleScoringSteps(
   // Get hole info from course
   const courseHole = fixture.course.holes.find((h) => h.hole === holeNum);
   const par = courseHole?.par ?? 4;
+  const holeHandicap = courseHole?.handicap ?? holeNum;
 
   // Enter scores for each player
   for (const [playerId, scoreData] of Object.entries(holeData.scores)) {
     const player = fixture.players.find((p) => p.id === playerId);
     if (!player || !scoreData) continue;
 
-    // Calculate pops (simplified - assumes no pops for E2E tests)
-    // In real tests, this would need course handicap calculation
-    const pops = 0;
+    // Calculate pops using shots off (adjusted handicap relative to lowest)
+    // This assumes handicap_index_from = "low" (default)
+    const shotsOff = shotsOffMap?.get(playerId) ?? 0;
+    const pops = calculatePops(shotsOff, holeHandicap);
 
     const scoreSteps = generateScoreEntrySteps(
       playerId,
@@ -1144,14 +1153,25 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     (a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10),
   );
 
+  // Pre-calculate shots off for pops calculation
+  // This assumes handicap_index_from = "low" (default for Five Points)
+  const shotsOffMap = fixture.course.slope
+    ? calculateShotsOff(fixture.players, fixture.course.slope)
+    : new Map<string, number>();
+
   // Generate individual hole flows
   const holes: Record<string, string> = {};
   for (const holeNum of holeNumbers) {
     const holeData = fixture.holes[holeNum];
     if (holeData) {
       const paddedNum = holeNum.padStart(2, "0");
-      const steps = generateHoleScoringSteps(fixture, holeNum, holeData);
-      const comment = getHoleComment(fixture, holeNum, holeData);
+      const steps = generateHoleScoringSteps(
+        fixture,
+        holeNum,
+        holeData,
+        shotsOffMap,
+      );
+      const comment = getHoleComment(fixture, holeNum, holeData, shotsOffMap);
       holes[paddedNum] = stepsToYaml(steps, "golf.spicy", comment);
     }
   }
@@ -1335,14 +1355,27 @@ function getHoleComment(
   fixture: Fixture,
   holeNumber: string,
   holeData: FixtureHoleData,
+  shotsOffMap?: Map<string, number>,
 ): string {
-  const lines: string[] = [`# Hole ${holeNumber}`];
+  const holeNum = Number.parseInt(holeNumber, 10);
+  const courseHole = fixture.course.holes.find((h) => h.hole === holeNum);
+  const par = courseHole?.par ?? 4;
+  const holeHandicap = courseHole?.handicap ?? holeNum;
 
-  // Add scores
-  const scores = Object.entries(holeData.scores)
-    .map(([id, data]) => `${id}=${data?.gross}`)
+  const lines: string[] = [
+    `# Hole ${holeNumber} (Par ${par}, Hdcp ${holeHandicap})`,
+  ];
+
+  // Add scores with pops info
+  const scoresWithPops = Object.entries(holeData.scores)
+    .map(([id, data]) => {
+      const shotsOff = shotsOffMap?.get(id) ?? 0;
+      const pops = calculatePops(shotsOff, holeHandicap);
+      const popsStr = pops > 0 ? `+${pops}` : pops < 0 ? `${pops}` : "";
+      return `${id}=${data?.gross}${popsStr ? `(${popsStr})` : ""}`;
+    })
     .join(", ");
-  lines.push(`# Scores: ${scores}`);
+  lines.push(`# Scores: ${scoresWithPops}`);
 
   // Add junk if present
   if (holeData.junk) {

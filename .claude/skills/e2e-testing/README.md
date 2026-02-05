@@ -1,86 +1,124 @@
 # E2E Testing Skill
 
-This skill covers Maestro E2E testing patterns for React Native.
+Maestro E2E testing patterns for React Native.
 
-## Test Location
+## DSL-Driven Test Generation
 
-E2E tests are in `tests/e2e/`:
-- `flows/` - Maestro YAML flow files
-- `fixtures/` - Test data (games, scores, etc.)
-- `scripts/` - Helper scripts for running tests
+Tests are generated from DSL files (source of truth):
 
-## Running Tests
+```
+game.dsl → game.json → *.yaml flows
+```
+
+### Key Commands
 
 ```bash
-# Run specific flow on iOS simulator
-./tests/e2e/scripts/run-ios-local.sh <flow-name>.yaml
+# Regenerate all flows from DSL
+bun e2e:generate
 
-# Example
+# Verify generated files match DSL (CI check)
+bun e2e:check
+
+# Run a test locally
 ./tests/e2e/scripts/run-ios-local.sh five_points/game_0/main.yaml
+
+# Dev: continue from current app state
+./tests/e2e/scripts/run-ios-local.sh five_points/game_0/continue.yaml
 ```
+
+### Directory Structure
+
+```
+tests/e2e/
+├── fixtures/           # DSL source + generated JSON
+│   └── <spec>/<game_N>/
+│       ├── game.dsl    # Hand-written source of truth
+│       └── game.json   # Generated
+├── flows/              # Generated Maestro YAML
+│   └── <spec>/<game_N>/
+│       ├── main.yaml
+│       ├── continue.yaml  # Hand-written dev file
+│       └── holes/*.yaml
+├── helpers/            # Generator code
+│   ├── dsl-parser.ts
+│   └── fixture-to-maestro.ts
+└── scripts/            # CLI tools
+```
+
+### DSL Syntax
+
+```dsl
+name: Five Points Full Game
+spec: five_points
+players: p1 Brad 5.1 [5.1], p2 Tim +0.9
+course: Druid Hills | Blue | 71.8/134
+holes: 1-4-3-444, 2-4-7-392
+
+h1: (p1 p2) vs (p3 p4) | 4 5 5 6
+h2: | 5 6 3 5 | birdie:p3 | t1:double
+```
+
+- Plus handicaps: `+0.9` → stored as -0.9
+- Handicap override: `[5.1]` → manual adjustment
+- Teams: `(p1 p2) vs (p3 p4)` on first hole
+- Junk: `birdie:p3 prox:p1`
+- Multipliers: `t1:double t2:double_back`
+
+## Pops Calculation
+
+Generator calculates pops (handicap strokes) automatically:
+
+1. Course handicap = `round(index × slope / 113)`
+2. Shots off = `courseHandicap - lowestCourseHandicap`
+3. Pops = `shotsOff >= holeHandicap ? 1 : 0`
+
+Generated hole comments show pops: `# Scores: p1=4(+1), p2=5(+1), p3=5, p4=6(+1)`
+
+## Hand-Written vs Generated Files
+
+| File | Hand-written | Generated |
+|------|--------------|-----------|
+| `game.dsl` | ✓ | |
+| `game.json` | | ✓ |
+| `continue.yaml` | ✓ | |
+| All other YAML | | ✓ |
+
+**Never edit generated files directly** - changes will be lost on regenerate.
 
 ## Known Issues & Workarounds
 
 ### iOS Modal/Dropdown Elements Not Found
 
-**Problem**: Elements inside dropdown modals (react-native-element-dropdown) are not found by Maestro on iOS.
+Elements inside dropdown modals not found by Maestro.
 
-**Cause**: The dropdown library uses `accessibilityViewIsModal` which tells iOS accessibility APIs to ignore sibling views. Maestro relies on these APIs.
-
-**Solution**: Two-part fix required:
-
-1. **In flow YAML** - Add this configuration:
+**Fix in YAML header:**
 ```yaml
 appId: golf.spicy
 platform:
   ios:
     snapshotKeyHonorModalViews: false
----
 ```
 
-2. **In Picker component** - Use `accessibilityLabel` instead of `testID` for dropdown items:
-```typescript
-// itemTestIDField doesn't work reliably on iOS
-// Use itemAccessibilityLabelField instead
-const itemsWithTestID = items.map((item) => ({
-  ...item,
-  testID: `${testID}-item-${item.value}`,
-  accessibilityLabel: `${testID}-item-${item.value}`,
-}));
-
-<Dropdown
-  itemTestIDField="testID"
-  itemAccessibilityLabelField="accessibilityLabel"
-  // ...
-/>
-```
-
-3. **In flow YAML** - Use text matching (maps from accessibilityLabel), NOT id matching:
+**Fix for dropdown items** - use accessibilityLabel, not testID:
 ```yaml
-# CORRECT: Use bare string (text matching via accessibilityLabel)
+# CORRECT: bare string (accessibilityLabel)
 - tapOn: "hole-6-par-item-3"
 
-# WRONG: id matching doesn't work for dropdown items on iOS
+# WRONG: id matching fails for dropdown items
 - tapOn:
-    id: "hole-6-par-item-3"  # This will fail with "Element not found"
+    id: "hole-6-par-item-3"
 ```
 
 ### Keyboard Blocking Elements
 
-**Problem**: Keyboard covers buttons/inputs at bottom of screen.
-
-**Solution**: 
-1. Use `KeyboardAvoidingView` in the React Native component
-2. In flow, tap on a text label to dismiss keyboard instead of `hideKeyboard` (unreliable):
+Tap a text label to dismiss instead of `hideKeyboard`:
 ```yaml
-- tapOn: "Course Name"  # Tap header text to dismiss keyboard
+- tapOn: "Course Name"  # Dismiss keyboard
 ```
 
 ### Text Input Clearing
 
-**Problem**: `eraseText` doesn't reliably clear text inputs.
-
-**Solution**: Initialize inputs as empty so no clearing is needed, or use:
+`eraseText` is unreliable. Use:
 ```yaml
 - longPressOn:
     id: "my-input"
@@ -90,18 +128,13 @@ const itemsWithTestID = items.map((item) => ({
 
 ## Element Finding
 
-Maestro maps React Native props:
-- `testID` -> `id` in Maestro
-- `accessibilityLabel` -> `text` in Maestro
+- `testID` → `id` in Maestro
+- `accessibilityLabel` → `text` in Maestro
 
-Example:
 ```yaml
-# Find by testID
 - tapOn:
-    id: "my-button"
-
-# Find by accessibilityLabel or visible text
-- tapOn: "Submit"
+    id: "my-button"      # By testID
+- tapOn: "Submit"        # By text/accessibilityLabel
 ```
 
 ## Flow File Structure
@@ -116,28 +149,28 @@ platform:
 # Commands (after ---)
 - tapOn:
     id: "my-element"
-- inputText: "Hello"
 ```
 
 ## Useful Commands
 
 ```yaml
-# Wait for animation
 - waitForAnimationToEnd:
     timeout: 1000
 
-# Conditional execution
+- extendedWaitUntil:
+    visible:
+      id: "element"
+    timeout: 5000
+
 - runFlow:
     when:
       visible:
-        id: "some-element"
+        id: "element"
     commands:
       - tapOn:
-          id: "some-element"
+          id: "element"
 
-# Scroll
-- scroll
-- scrollUntilVisible:
-    element:
-      id: "target-element"
+- assertVisible:
+    id: "handicap-shots"
+    text: "7"
 ```

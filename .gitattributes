@@ -8,6 +8,5 @@ tests/e2e/fixtures/**/*.json linguist-generated=true
 # since it's just a development convenience file
 tests/e2e/flows/**/*.yaml linguist-generated=true
 
-# Lock files
-bun.lockb binary
-**/bun.lockb binary
+# Lock files (for future use if bun.lockb is added)
+# bun.lockb binary
