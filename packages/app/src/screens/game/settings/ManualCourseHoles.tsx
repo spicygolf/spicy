@@ -509,7 +509,7 @@ export function ManualCourseHoles({
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Hole Details</Text>
           <Text style={styles.subtitle}>
-            {courseName} - {teeName}
+            {courseName} - {teeName} • {numHoles} holes • Par {totalPar}
           </Text>
         </View>
       </View>
@@ -524,12 +524,6 @@ export function ManualCourseHoles({
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryText}>
-              {numHoles} holes • Total Par: {totalPar}
-            </Text>
-          </View>
-
           {is18Holes ? (
             // Side-by-side layout for 18 holes
             <View style={styles.twoColumnContainer}>
@@ -661,7 +655,7 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "bold",
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: theme.colors.secondary,
   },
   centerContainer: {
@@ -671,13 +665,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   scrollContent: {
     paddingBottom: theme.gap(4),
-  },
-  summaryRow: {
-    marginBottom: theme.gap(2),
-  },
-  summaryText: {
-    fontSize: 14,
-    color: theme.colors.secondary,
   },
   twoColumnContainer: {
     flexDirection: "row",

@@ -185,6 +185,21 @@ platform:
 - inputText: "193"
 
 - tapOn:
+    id: "hole-9-par"
+
+- inputText: "5"
+
+- tapOn:
+    id: "hole-9-handicap"
+
+- inputText: "13"
+
+- tapOn:
+    id: "hole-9-yards"
+
+- inputText: "485"
+
+- tapOn:
     id: "hole-10-par"
 
 - inputText: "4"
@@ -304,37 +319,6 @@ platform:
 
 - inputText: "192"
 
-- tapOn: "Front 9"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
-- scrollUntilVisible:
-    element:
-      id: "manual-course-save-button"
-    direction: "DOWN"
-    timeout: 3000
-
-- tapOn:
-    id: "hole-9-par"
-
-- inputText: "5"
-
-- tapOn:
-    id: "hole-9-handicap"
-
-- inputText: "13"
-
-- tapOn:
-    id: "hole-9-yards"
-
-- inputText: "485"
-
-- tapOn: "Front 9"
-
-- waitForAnimationToEnd:
-    timeout: 500
-
 - tapOn:
     id: "hole-18-par"
 
@@ -350,10 +334,13 @@ platform:
 
 - inputText: "509"
 
-- tapOn: "Front 9"
+- hideKeyboard
 
-- waitForAnimationToEnd:
-    timeout: 500
+- scrollUntilVisible:
+    element:
+      id: "manual-course-save-button"
+    direction: "DOWN"
+    timeout: 3000
 
 - tapOn:
     id: "manual-course-save-button"

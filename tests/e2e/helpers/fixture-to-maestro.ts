@@ -547,60 +547,24 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     return holeSteps;
   };
 
-  // Holes 1-8 (skip hole 9 - at bottom of front 9, keyboard covers it)
-  for (let i = 1; i <= 8; i++) {
+  // Enter all 18 holes in order
+  for (let i = 1; i <= 18; i++) {
     steps.push(...generateHoleEntrySteps(i));
   }
-
-  // Holes 10-17 (skip hole 18 - at bottom of back 9, keyboard covers it)
-  for (let i = 10; i <= 17; i++) {
-    steps.push(...generateHoleEntrySteps(i));
-  }
-
-  // Dismiss keyboard and scroll down to reveal holes 9 and 18
-  steps.push(
-    { tapOn: "Front 9" },
-    {
-      waitForAnimationToEnd: {
-        timeout: TIMEOUT_ANIMATION,
-      },
-    },
-    {
-      scrollUntilVisible: {
-        element: {
-          id: "manual-course-save-button",
-        },
-        direction: "DOWN",
-        timeout: TIMEOUT_NAVIGATION,
-      },
-    },
-  );
-
-  // Hole 9 (now visible after scroll)
-  steps.push(...generateHoleEntrySteps(9));
-
-  // Dismiss keyboard before editing hole 18
-  steps.push(
-    { tapOn: "Front 9" },
-    {
-      waitForAnimationToEnd: {
-        timeout: TIMEOUT_ANIMATION,
-      },
-    },
-  );
-
-  // Hole 18 (now visible after scroll)
-  steps.push(...generateHoleEntrySteps(18));
 
   // Dismiss keyboard before tapping save
-  steps.push(
-    { tapOn: "Front 9" },
-    {
-      waitForAnimationToEnd: {
-        timeout: TIMEOUT_ANIMATION,
+  steps.push({ hideKeyboard: true });
+
+  // Scroll to save button and tap
+  steps.push({
+    scrollUntilVisible: {
+      element: {
+        id: "manual-course-save-button",
       },
+      direction: "DOWN",
+      timeout: TIMEOUT_NAVIGATION,
     },
-  );
+  });
 
   // Save the course
   steps.push(
