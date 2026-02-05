@@ -1034,25 +1034,16 @@ export function generateExpectedAssertionSteps(
   }
 
   // Assert awarded junk badges
+  // Note: We only assert visibility, not the points text value, because the points
+  // are in a nested child element that Maestro can't match with the parent testID
   if (expected.awardedJunk) {
     for (const junk of expected.awardedJunk) {
       // TestID format: junk-{name}-{teamId}
-      const assertStep: MaestroStep = {
+      steps.push({
         assertVisible: {
           id: `junk-${junk.name}-${junk.teamId}`,
         },
-      };
-      // Look up points from optionDefs if not specified in DSL (points = 0)
-      let points = junk.points;
-      if (points === 0 && optionDefs?.junk[junk.name]) {
-        points = optionDefs.junk[junk.name];
-      }
-      // Assert points value if we have one
-      if (points > 0) {
-        (assertStep.assertVisible as Record<string, unknown>).text =
-          String(points);
-      }
-      steps.push(assertStep);
+      });
     }
   }
 
