@@ -128,7 +128,11 @@ export function Handicaps({
         color={hasCourseGameOverride ? "#FFA500" : undefined}
       />
       {shotsOff !== null && shotsOff !== undefined && (
-        <Handicap label="shots" display={String(shotsOff)} />
+        <Handicap
+          label="shots"
+          display={String(shotsOff)}
+          testID={testID ? `${testID}-shots` : undefined}
+        />
       )}
     </TouchableOpacity>
   );
