@@ -31,19 +31,19 @@ bun e2e:check
 ```dsl
 name: Five Points Full Game
 spec: five_points
-players: p1 Brad 5.1 [5.1], p2 Tim +0.9
+players: Brad 5.1 [5.1], Tim +0.9, Ana 7.2, Lee 4.4
 course: Druid Hills | Blue | 71.8/134
 holes: 1-4-3-444, 2-4-7-392
 
-h1: (p1 p2) vs (p3 p4) | 4 5 5 6
-h2: | 5 6 3 5 | birdie:p3 | t1:double
+h1: (Brad Tim) vs (Ana Lee) | 4 5 5 6
+h2: | 5 6 3 5 | birdie:Ana | double:t1
 ```
 
 - Plus handicaps: `+0.9` → stored as -0.9
 - Handicap override: `[5.1]` → manual adjustment
-- Teams: `(p1 p2) vs (p3 p4)` on first hole
-- Junk: `birdie:p3 prox:p1`
-- Multipliers: `t1:double t2:double_back`
+- Teams: `(Brad Tim) vs (Ana Lee)` on first hole
+- Junk: `birdie:Ana prox:Brad`
+- Multipliers: `double:t1 double_back:t2`
 
 ## Pops Calculation
 

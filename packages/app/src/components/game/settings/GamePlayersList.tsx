@@ -82,22 +82,31 @@ export function GamePlayersList() {
   // This gives us "shots off" for each player relative to the lowest handicap
   const adjustedHandicaps = ((): Map<string, number> | null => {
     if (handicapMode !== "low") return null;
-    if (!game?.$isLoaded || !game.rounds?.$isLoaded) return null;
+    if (!game?.$isLoaded) return null;
+    if (!game.$jazz.has("rounds") || !game.rounds?.$isLoaded) return null;
 
     const playerHandicaps: PlayerHandicap[] = [];
 
     for (const rtg of game.rounds) {
-      if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+      if (!rtg?.$isLoaded) continue;
+      if (!rtg.$jazz.has("round") || !rtg.round?.$isLoaded) continue;
 
       const round = rtg.round;
+      if (!round.$jazz.has("playerId")) continue;
       const playerId = round.playerId;
       if (!playerId) continue;
 
       // Get courseHandicap: prefer stored value, else calculate from tee data
-      let courseHandicap = rtg.courseHandicap;
+      let courseHandicap = rtg.$jazz.has("courseHandicap")
+        ? rtg.courseHandicap
+        : undefined;
       if (courseHandicap === undefined) {
-        const tee = round.tee;
-        if (tee?.$isLoaded && rtg.handicapIndex !== undefined) {
+        const tee = round.$jazz.has("tee") ? round.tee : undefined;
+        if (
+          tee?.$isLoaded &&
+          rtg.$jazz.has("handicapIndex") &&
+          rtg.handicapIndex !== undefined
+        ) {
           const calculated = calculateCourseHandicap({
             handicapIndex: String(rtg.handicapIndex),
             tee,
@@ -112,7 +121,9 @@ export function GamePlayersList() {
       playerHandicaps.push({
         playerId,
         courseHandicap,
-        gameHandicap: rtg.gameHandicap,
+        gameHandicap: rtg.$jazz.has("gameHandicap")
+          ? rtg.gameHandicap
+          : undefined,
       });
     }
 

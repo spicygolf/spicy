@@ -123,50 +123,14 @@ export function GameTeamsList() {
   const specNumTeams = useMemo(() => {
     if (!game?.$isLoaded) return undefined;
 
-    // Debug: Log spec and specRef contents
-    if (game.spec?.$isLoaded) {
-      const specKeys = Object.keys(game.spec).filter(
-        (k) => !k.startsWith("$") && k !== "_refs",
-      );
-      const hasNumTeams = game.spec.$jazz.has("num_teams");
-      const numTeamsValue = game.spec.num_teams;
-      console.log("[specNumTeams] spec keys:", specKeys.length, specKeys);
-      console.log(
-        "[specNumTeams] spec has num_teams:",
-        hasNumTeams,
-        "value:",
-        numTeamsValue,
-      );
-    }
-    if (game.specRef?.$isLoaded) {
-      const specRefKeys = Object.keys(game.specRef).filter(
-        (k) => !k.startsWith("$") && k !== "_refs",
-      );
-      const hasNumTeams = game.specRef.$jazz.has("num_teams");
-      const numTeamsValue = game.specRef.num_teams;
-      console.log(
-        "[specNumTeams] specRef keys:",
-        specRefKeys.length,
-        specRefKeys,
-      );
-      console.log(
-        "[specNumTeams] specRef has num_teams:",
-        hasNumTeams,
-        "value:",
-        numTeamsValue,
-      );
-    }
-
     // Try working copy first
-    if (game.spec?.$isLoaded) {
+    if (game.$jazz.has("spec") && game.spec?.$isLoaded) {
       const fromSpec = getSpecNumTeams(game.spec);
-      console.log("[specNumTeams] fromSpec:", fromSpec);
       if (fromSpec !== undefined) return fromSpec;
     }
     // Fall back to catalog spec
-    if (game.specRef?.$isLoaded) {
+    if (game.$jazz.has("specRef") && game.specRef?.$isLoaded) {
       const fromSpecRef = getSpecNumTeams(game.specRef);
-      console.log("[specNumTeams] fromSpecRef:", fromSpecRef);
       return fromSpecRef;
     }
     return undefined;
@@ -176,7 +140,9 @@ export function GameTeamsList() {
   // 1. Either spec or specRef is loaded (don't show button during loading)
   // 2. num_teams is not fixed by the spec
   const specLoaded = Boolean(
-    game?.$isLoaded && (game.spec?.$isLoaded || game.specRef?.$isLoaded),
+    game?.$isLoaded &&
+      ((game.$jazz.has("spec") && game.spec?.$isLoaded) ||
+        (game.$jazz.has("specRef") && game.specRef?.$isLoaded)),
   );
   const canAddTeam = specLoaded && specNumTeams === undefined;
 

@@ -1465,6 +1465,12 @@ export function generateFullFlow(fixture: E2EFixture): GeneratedFlow {
   const holeNumbers = Object.keys(fixture.holes).sort(
     (a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10),
   );
+
+  // Pre-calculate shots off for pops calculation (same as sub-flows)
+  const shotsOffMap = fixture.course.slope
+    ? calculateShotsOff(fixture.players, fixture.course.slope)
+    : new Map<string, number>();
+
   for (const holeNum of holeNumbers) {
     const holeData = fixture.holes[holeNum];
     if (holeData) {
@@ -1473,7 +1479,7 @@ export function generateFullFlow(fixture: E2EFixture): GeneratedFlow {
           fixture,
           holeNum,
           holeData,
-          undefined,
+          shotsOffMap,
           fixture.optionDefs,
         ),
       );

@@ -26,19 +26,27 @@ export function ResetSpecButton() {
   });
 
   const canReset =
-    game?.$isLoaded && game.spec?.$isLoaded && game.specRef?.$isLoaded;
+    game?.$isLoaded &&
+    game.$jazz.has("spec") &&
+    game.$jazz.has("specRef") &&
+    game.spec?.$isLoaded &&
+    game.specRef?.$isLoaded;
 
   const handleReset = () => {
     setError(null);
     setSuccess(false);
 
-    if (!game?.spec || !game?.specRef) {
+    if (!game?.$isLoaded) {
+      setError("Game not loaded. Please try again.");
+      return;
+    }
+    if (!game.$jazz.has("spec") || !game.$jazz.has("specRef")) {
       setError("Game spec not loaded. Please try again.");
       return;
     }
 
     try {
-      if (!game.spec.$isLoaded || !game.specRef.$isLoaded) {
+      if (!game.spec?.$isLoaded || !game.specRef?.$isLoaded) {
         setError("Specs not fully loaded. Please try again.");
         return;
       }
