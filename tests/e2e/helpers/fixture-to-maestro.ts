@@ -1034,16 +1034,29 @@ export function generateExpectedAssertionSteps(
   }
 
   // Assert awarded junk badges
-  // Note: We only assert visibility, not the points text value, because the points
-  // are in a nested child element that Maestro can't match with the parent testID
   if (expected.awardedJunk) {
     for (const junk of expected.awardedJunk) {
-      // TestID format: junk-{name}-{teamId}
+      const badgeId = `junk-${junk.name}-${junk.teamId}`;
+      // Assert badge is visible
       steps.push({
         assertVisible: {
-          id: `junk-${junk.name}-${junk.teamId}`,
+          id: badgeId,
         },
       });
+      // Look up points from optionDefs if not specified in DSL (points = 0)
+      let points = junk.points;
+      if (points === 0 && optionDefs?.junk[junk.name]) {
+        points = optionDefs.junk[junk.name];
+      }
+      // Assert points value (separate testID on nested text element)
+      if (points > 0) {
+        steps.push({
+          assertVisible: {
+            id: `${badgeId}-points`,
+            text: String(points),
+          },
+        });
+      }
     }
   }
 

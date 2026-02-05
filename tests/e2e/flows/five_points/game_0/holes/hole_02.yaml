@@ -67,6 +67,10 @@ platform:
 - assertVisible:
     id: "junk-low_ball-2"
 
+- assertVisible:
+    id: "junk-low_ball-2-points"
+    text: "2"
+
 - takeScreenshot: "hole_2_complete"
 
 - tapOn:

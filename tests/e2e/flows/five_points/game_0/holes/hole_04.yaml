@@ -62,7 +62,15 @@ platform:
     id: "junk-low_ball-1"
 
 - assertVisible:
+    id: "junk-low_ball-1-points"
+    text: "2"
+
+- assertVisible:
     id: "junk-low_total-1"
+
+- assertVisible:
+    id: "junk-low_total-1-points"
+    text: "2"
 
 - takeScreenshot: "hole_4_complete"
 
