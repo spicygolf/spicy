@@ -22,7 +22,7 @@ import {
 import { Back } from "@/components/Back";
 import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
-import { Button, Picker, Screen, Text, TextInput } from "@/ui";
+import { Button, Screen, Text, TextInput } from "@/ui";
 import { propagateCourseTeeToPlayers } from "@/utils/propagateCourseTee";
 import { reportError } from "@/utils/reportError";
 
@@ -34,13 +34,8 @@ type Props = NativeStackScreenProps<
 interface HoleData {
   par: number;
   handicap: number | null; // null = not yet entered
+  yards: number | null; // null = not yet entered (optional)
 }
-
-const PAR_OPTIONS = [
-  { label: "3", value: "3" },
-  { label: "4", value: "4" },
-  { label: "5", value: "5" },
-];
 
 /**
  * Filter input for integers only.
@@ -92,8 +87,9 @@ function hasEmptyHandicaps(holes: HoleData[]): boolean {
 interface HoleRowProps {
   holeNumber: number;
   hole: HoleData;
-  onParChange: (par: number) => void;
+  onParChange: (par: string) => void;
   onHandicapChange: (handicap: string) => void;
+  onYardsChange: (yards: string) => void;
   isDuplicate: boolean;
 }
 
@@ -102,20 +98,21 @@ function HoleRow({
   hole,
   onParChange,
   onHandicapChange,
+  onYardsChange,
   isDuplicate,
 }: HoleRowProps): React.ReactElement {
   return (
     <View style={styles.holeRow}>
       <Text style={styles.holeNumber}>{holeNumber}</Text>
-      <View style={styles.parPicker}>
-        <Picker
-          testID={`hole-${holeNumber}-par`}
-          title="Par"
-          items={PAR_OPTIONS}
-          selectedValue={hole.par.toString()}
-          onValueChange={(value) => onParChange(Number.parseInt(value, 10))}
-        />
-      </View>
+      <TextInput
+        testID={`hole-${holeNumber}-par`}
+        value={hole.par.toString()}
+        placeholder=""
+        onChangeText={(text) => onParChange(filterIntegerInput(text))}
+        keyboardType="number-pad"
+        maxLength={1}
+        style={styles.parInput}
+      />
       <TextInput
         testID={`hole-${holeNumber}-handicap`}
         value={hole.handicap !== null ? hole.handicap.toString() : ""}
@@ -125,6 +122,15 @@ function HoleRow({
         maxLength={2}
         style={[styles.hdcpInput, isDuplicate && styles.hdcpInputError]}
         hasError={isDuplicate}
+      />
+      <TextInput
+        testID={`hole-${holeNumber}-yards`}
+        value={hole.yards !== null ? hole.yards.toString() : ""}
+        placeholder=""
+        onChangeText={(text) => onYardsChange(filterIntegerInput(text))}
+        keyboardType="number-pad"
+        maxLength={3}
+        style={styles.yardsInput}
       />
     </View>
   );
@@ -157,11 +163,12 @@ export function ManualCourseHoles({
   const numHoles = holesCount;
   const is18Holes = numHoles === 18;
 
-  // Initialize holes with default par 4 and empty handicap (user must fill in)
+  // Initialize holes with default par 4 and empty handicap/yards (user must fill in handicap)
   const [holes, setHoles] = useState<HoleData[]>(() =>
     Array.from({ length: numHoles }, () => ({
       par: 4,
       handicap: null,
+      yards: null,
     })),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -205,9 +212,10 @@ export function ManualCourseHoles({
           loadedHoles.push({
             par: hole.par || 4,
             handicap: hole.handicap || i + 1,
+            yards: hole.yards || null,
           });
         } else {
-          loadedHoles.push({ par: 4, handicap: i + 1 });
+          loadedHoles.push({ par: 4, handicap: i + 1, yards: null });
         }
       }
       setHoles(loadedHoles);
@@ -215,12 +223,26 @@ export function ManualCourseHoles({
     hasInitializedRef.current = true;
   }, [isEditMode, existingTee, numHoles]);
 
-  const updateHolePar = useCallback((index: number, par: number): void => {
-    setHoles((prev) => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], par };
-      return updated;
-    });
+  const updateHolePar = useCallback((index: number, parStr: string): void => {
+    // Allow empty string temporarily during editing, default to 4
+    if (parStr === "") {
+      setHoles((prev) => {
+        const updated = [...prev];
+        updated[index] = { ...updated[index], par: 4 };
+        return updated;
+      });
+      return;
+    }
+
+    const par = Number.parseInt(parStr, 10);
+    // Allow any single digit par (1-9)
+    if (!Number.isNaN(par) && par >= 1 && par <= 9) {
+      setHoles((prev) => {
+        const updated = [...prev];
+        updated[index] = { ...updated[index], par };
+        return updated;
+      });
+    }
   }, []);
 
   const updateHoleHandicap = useCallback(
@@ -246,6 +268,31 @@ export function ManualCourseHoles({
       }
     },
     [numHoles],
+  );
+
+  const updateHoleYards = useCallback(
+    (index: number, yardsStr: string): void => {
+      // Allow empty string (sets to null)
+      if (yardsStr === "") {
+        setHoles((prev) => {
+          const updated = [...prev];
+          updated[index] = { ...updated[index], yards: null };
+          return updated;
+        });
+        return;
+      }
+
+      const yards = Number.parseInt(yardsStr, 10);
+      // Allow values 1-999
+      if (!Number.isNaN(yards) && yards >= 1 && yards <= 999) {
+        setHoles((prev) => {
+          const updated = [...prev];
+          updated[index] = { ...updated[index], yards };
+          return updated;
+        });
+      }
+    },
+    [],
   );
 
   const handleSave = useCallback(async (): Promise<void> => {
@@ -303,6 +350,12 @@ export function ManualCourseHoles({
           if (hole?.$isLoaded) {
             hole.$jazz.set("par", holes[i].par);
             hole.$jazz.set("handicap", holes[i].handicap as number);
+            const holeYards = holes[i].yards ?? 0;
+            hole.$jazz.set("yards", holeYards);
+            hole.$jazz.set(
+              "meters",
+              holeYards ? Math.round(holeYards * 0.9144) : 0,
+            );
           }
         }
 
@@ -327,8 +380,8 @@ export function ManualCourseHoles({
               id: `${teeId}-hole-${i + 1}`,
               number: i + 1,
               par: hole.par,
-              yards: 0,
-              meters: 0,
+              yards: hole.yards ?? 0,
+              meters: hole.yards ? Math.round(hole.yards * 0.9144) : 0,
               handicap: hole.handicap as number,
             },
             { owner: group },
@@ -487,6 +540,7 @@ export function ManualCourseHoles({
                   <Text style={styles.columnHeader}>#</Text>
                   <Text style={styles.columnHeader}>Par</Text>
                   <Text style={styles.columnHeader}>Hdcp</Text>
+                  <Text style={styles.columnHeader}>Yds</Text>
                 </View>
                 {frontNine.map((hole, index) => (
                   <HoleRow
@@ -495,6 +549,7 @@ export function ManualCourseHoles({
                     hole={hole}
                     onParChange={(par) => updateHolePar(index, par)}
                     onHandicapChange={(hcp) => updateHoleHandicap(index, hcp)}
+                    onYardsChange={(yds) => updateHoleYards(index, yds)}
                     isDuplicate={
                       hole.handicap !== null &&
                       invalidHandicaps.has(hole.handicap)
@@ -510,6 +565,7 @@ export function ManualCourseHoles({
                   <Text style={styles.columnHeader}>#</Text>
                   <Text style={styles.columnHeader}>Par</Text>
                   <Text style={styles.columnHeader}>Hdcp</Text>
+                  <Text style={styles.columnHeader}>Yds</Text>
                 </View>
                 {backNine.map((hole, index) => (
                   <HoleRow
@@ -520,6 +576,7 @@ export function ManualCourseHoles({
                     onHandicapChange={(hcp) =>
                       updateHoleHandicap(index + 9, hcp)
                     }
+                    onYardsChange={(yds) => updateHoleYards(index + 9, yds)}
                     isDuplicate={
                       hole.handicap !== null &&
                       invalidHandicaps.has(hole.handicap)
@@ -535,6 +592,7 @@ export function ManualCourseHoles({
                 <Text style={styles.columnHeader}>#</Text>
                 <Text style={styles.columnHeader}>Par</Text>
                 <Text style={styles.columnHeader}>Hdcp</Text>
+                <Text style={styles.columnHeader}>Yds</Text>
               </View>
               {holes.map((hole, index) => (
                 <HoleRow
@@ -543,6 +601,7 @@ export function ManualCourseHoles({
                   hole={hole}
                   onParChange={(par) => updateHolePar(index, par)}
                   onHandicapChange={(hcp) => updateHoleHandicap(index, hcp)}
+                  onYardsChange={(yds) => updateHoleYards(index, yds)}
                   isDuplicate={
                     hole.handicap !== null &&
                     invalidHandicaps.has(hole.handicap)
@@ -656,15 +715,22 @@ const styles = StyleSheet.create((theme) => ({
     paddingVertical: theme.gap(0.25),
   },
   holeNumber: {
-    flex: 1,
+    flex: 0.5,
     fontSize: 14,
     fontWeight: "bold",
     textAlign: "center",
   },
-  parPicker: {
-    flex: 1,
+  parInput: {
+    flex: 0.7,
+    textAlign: "center",
+    fontSize: 14,
   },
   hdcpInput: {
+    flex: 0.7,
+    textAlign: "center",
+    fontSize: 14,
+  },
+  yardsInput: {
     flex: 1,
     textAlign: "center",
     fontSize: 14,

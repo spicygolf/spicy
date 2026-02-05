@@ -498,10 +498,9 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
     },
   );
 
-  // On ManualCourseHoles screen - set par and handicap for each hole from fixture
-  // Par defaults to 4, Handicap starts empty (user must fill in all)
-  // Note: Dropdown items use text matching (accessibilityLabel) not id matching
-  // (itemTestIDField doesn't work reliably on iOS)
+  // On ManualCourseHoles screen - set par, handicap, and yards for each hole from fixture
+  // Par defaults to 4, Handicap and Yards start empty
+  // All fields are now TextInputs (no more Picker dropdowns)
   //
   // Strategy: Edit holes 1-8, then 10-17 (skipping 9 and 18 which are at the bottom
   // of their sections and covered by keyboard), then scroll down for 9 and 18
@@ -513,31 +512,15 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
 
     const holeSteps: MaestroStep[] = [];
 
-    // Set par if not 4 (default)
-    if (holeData.par !== 4) {
-      holeSteps.push(
-        {
-          tapOn: {
-            id: `hole-${holeNum}-par`,
-          },
+    // Enter par (always, even if 4 - simpler and more consistent)
+    holeSteps.push(
+      {
+        tapOn: {
+          id: `hole-${holeNum}-par`,
         },
-        {
-          waitForAnimationToEnd: {
-            timeout: TIMEOUT_UI_UPDATE,
-          },
-        },
-        // Tap the par value in the dropdown using text matching (accessibilityLabel)
-        // IMPORTANT: Must use bare string, not { id: ... } - iOS testID doesn't work for dropdown items
-        {
-          tapOn: `hole-${holeNum}-par-item-${holeData.par}`,
-        },
-        {
-          waitForAnimationToEnd: {
-            timeout: TIMEOUT_UI_UPDATE,
-          },
-        },
-      );
-    }
+      },
+      { inputText: holeData.par.toString() },
+    );
 
     // Enter handicap (always required since inputs start empty)
     holeSteps.push(
@@ -548,6 +531,18 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
       },
       { inputText: holeData.handicap.toString() },
     );
+
+    // Enter yards (optional - only if present in DSL)
+    if (holeData.yards) {
+      holeSteps.push(
+        {
+          tapOn: {
+            id: `hole-${holeNum}-yards`,
+          },
+        },
+        { inputText: holeData.yards.toString() },
+      );
+    }
 
     return holeSteps;
   };
