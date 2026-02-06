@@ -1,5 +1,6 @@
 import type { Game } from "spicylib/schema";
 import type { Scoreboard } from "spicylib/scoring";
+import { isHoleComplete } from "spicylib/scoring";
 
 export type ViewMode = "gross" | "net" | "points";
 
@@ -184,6 +185,8 @@ export function getScoreValue(
     case "net":
       return playerResult.net;
     case "points":
+      // Don't show points for incomplete holes
+      if (!isHoleComplete(scoreboard.holes[hole])) return null;
       // For team games, show the team's hole net total (vs opponent)
       // Fall back to individual player points if no team data
       return (
@@ -224,6 +227,8 @@ export function getSummaryValue(
             : true;
 
       if (inRange) {
+        // Skip incomplete holes
+        if (!isHoleComplete(scoreboard.holes[hole])) continue;
         // Use team points (same as getScoreValue for points mode)
         const teamPoints = getTeamPointsForPlayer(scoreboard, playerId, hole);
         if (teamPoints !== null) {

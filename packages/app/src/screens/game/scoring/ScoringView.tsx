@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole, Team } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
-import { getHoleTeeMultiplierTotal } from "spicylib/scoring";
+import { getHoleTeeMultiplierTotal, isHoleComplete } from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
@@ -360,8 +360,9 @@ export function ScoringView({
   // This is used for calculating display points
   const overallMultiplier = currentHoleResult?.holeMultiplier ?? 1;
 
-  // Get warnings for incomplete scoring (e.g., "Mark all possible points")
+  // Warnings and completeness come from the scoring engine
   const warnings = currentHoleResult?.warnings;
+  const holeComplete = isHoleComplete(currentHoleResult);
 
   // Get all teams for the current hole (needed for one_per_group junk limit)
   const allTeams: Team[] = currentHole?.teams?.$isLoaded
@@ -585,26 +586,28 @@ export function ScoringView({
           }
 
           // Build calculated team junk buttons (low_ball, low_total)
-          // Only show if the team has actually earned this junk (hide unachieved)
-          const teamJunkButtons: OptionButton[] = calculatedTeamJunkOptions
-            .filter((junk) =>
-              hasCalculatedTeamJunk(
-                scoreboard,
-                currentHoleNumber,
-                teamId,
-                junk.name,
-              ),
-            )
-            .map((junk) => ({
-              name: junk.name,
-              displayName: junk.disp,
-              icon: junk.icon,
-              type: "junk" as const,
-              selected: true, // Always selected since we filter to only achieved
-              points: junk.value,
-              calculated: true, // Mark as calculated/automatic
-              ownerId: teamId, // For testID: junk-{name}-{teamId}
-            }));
+          // Only show if the hole is complete AND the team has earned this junk
+          const teamJunkButtons: OptionButton[] = holeComplete
+            ? calculatedTeamJunkOptions
+                .filter((junk) =>
+                  hasCalculatedTeamJunk(
+                    scoreboard,
+                    currentHoleNumber,
+                    teamId,
+                    junk.name,
+                  ),
+                )
+                .map((junk) => ({
+                  name: junk.name,
+                  displayName: junk.disp,
+                  icon: junk.icon,
+                  type: "junk" as const,
+                  selected: true, // Always selected since we filter to only achieved
+                  points: junk.value,
+                  calculated: true, // Mark as calculated/automatic
+                  ownerId: teamId, // For testID: junk-{name}-{teamId}
+                }))
+            : [];
 
           // Get team result from scoreboard for this hole
           const teamHoleResult =
@@ -613,12 +616,14 @@ export function ScoringView({
           // For 2-team games, derive display junk from holeNetTotal
           // holeNetTotal = (myJunk - oppJunk) × multiplier
           // So displayJunk = holeNetTotal / multiplier (clamped to 0 for losing team)
+          // Only show scoring when hole is complete (all scores + required junk entered)
           const holeNetTotal = teamHoleResult?.holeNetTotal ?? 0;
-          const displayJunk =
-            overallMultiplier > 0
+          const displayJunk = holeComplete
+            ? overallMultiplier > 0
               ? Math.max(0, Math.round(holeNetTotal / overallMultiplier))
-              : 0;
-          const displayPoints = Math.max(0, holeNetTotal);
+              : 0
+            : 0;
+          const displayPoints = holeComplete ? Math.max(0, holeNetTotal) : 0;
 
           // Build earned multipliers from scoreboard (automatic multipliers like birdie_bbq)
           // These are multipliers that were automatically awarded based on junk conditions
@@ -645,7 +650,7 @@ export function ScoringView({
           // game.spec is the working copy of options
           const spec = game?.spec?.$isLoaded ? game.spec : null;
           const earnedMultiplierButtons: OptionButton[] = (
-            teamHoleResult?.multipliers ?? []
+            holeComplete ? (teamHoleResult?.multipliers ?? []) : []
           )
             .filter((m) => !userMultiplierNames.has(m.name))
             .map((m) => {
@@ -755,26 +760,27 @@ export function ScoringView({
                 );
 
                 // Build calculated junk options (birdie, eagle) from scoreboard
-                // Only include junk that was actually achieved (hide unachieved)
-                const calculatedJunkButtons: OptionButton[] =
-                  calculatedPlayerJunkOptions
-                    .filter((junk) =>
-                      hasCalculatedPlayerJunk(
-                        scoreboard,
-                        holeNum,
-                        round.playerId,
-                        junk.name,
-                      ),
-                    )
-                    .map((junk) => ({
-                      name: junk.name,
-                      displayName: junk.disp,
-                      icon: junk.icon,
-                      type: "junk" as const,
-                      selected: true, // Always selected since we filter to only achieved
-                      points: junk.value,
-                      calculated: true, // Automatic, not toggleable
-                    }));
+                // Only include junk that was actually achieved AND hole is complete
+                const calculatedJunkButtons: OptionButton[] = holeComplete
+                  ? calculatedPlayerJunkOptions
+                      .filter((junk) =>
+                        hasCalculatedPlayerJunk(
+                          scoreboard,
+                          holeNum,
+                          round.playerId,
+                          junk.name,
+                        ),
+                      )
+                      .map((junk) => ({
+                        name: junk.name,
+                        displayName: junk.disp,
+                        icon: junk.icon,
+                        type: "junk" as const,
+                        selected: true, // Always selected since we filter to only achieved
+                        points: junk.value,
+                        calculated: true, // Automatic, not toggleable
+                      }))
+                  : [];
 
                 // Combine: user junk first (prox), then calculated/awarded (birdie, eagle)
                 const junkButtons = [

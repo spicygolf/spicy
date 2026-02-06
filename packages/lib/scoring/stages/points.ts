@@ -6,6 +6,7 @@
  */
 
 import { deepClone } from "../../utils/clone";
+import { isHoleComplete } from "../junk-engine";
 import { calculateTotalMultiplier } from "../multiplier-engine";
 import type { MultiplierAward, ScoringContext } from "../types";
 
@@ -35,6 +36,10 @@ export function calculatePoints(ctx: ScoringContext): ScoringContext {
     const holeResult = newScoreboard.holes[holeNum];
 
     if (!holeResult) continue;
+
+    // Skip points calculation for incomplete holes (not all scores + required junk)
+    // Points should only be awarded when the hole is fully scored
+    if (!isHoleComplete(holeResult)) continue;
 
     // Collect ALL multipliers from ALL teams on this hole
     // In Five Points (and similar games), multipliers are hole-wide
