@@ -710,14 +710,8 @@ function calculateWarnings(
   const totalPlayers = Object.keys(holeResult.players).length;
   const scoresEntered = holeResult.scoresEntered ?? 0;
 
-  // Check if there's any activity on this hole (scores or junk marked)
-  const hasAnyJunkMarked = Object.values(holeResult.players).some(
-    (p) => p.junk.length > 0,
-  );
-  const hasActivity = scoresEntered > 0 || hasAnyJunkMarked;
-
-  // If there's activity but not all scores are entered yet
-  if (hasActivity && scoresEntered < totalPlayers) {
+  // If not all scores are entered yet
+  if (scoresEntered > 0 && scoresEntered < totalPlayers) {
     const remaining = totalPlayers - scoresEntered;
     warnings.push({
       type: "missing_scores",
