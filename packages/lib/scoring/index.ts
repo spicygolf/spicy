@@ -13,6 +13,7 @@
 export {
   evaluateJunkForHole,
   getJunkOptions,
+  isHoleComplete,
   parseLogicCondition,
   parseScoreToParCondition,
 } from "./junk-engine";

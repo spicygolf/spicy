@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole, Team } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
-import { getHoleTeeMultiplierTotal } from "spicylib/scoring";
+import { getHoleTeeMultiplierTotal, isHoleComplete } from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
@@ -363,17 +363,8 @@ export function ScoringView({
   // Get warnings for incomplete scoring (e.g., "Mark all possible points")
   const warnings = currentHoleResult?.warnings;
 
-  // Determine if the hole is fully scored (all scores entered + all required junk marked)
-  // Used to suppress calculated junk badges and scoring math until hole is complete
-  const totalPlayers = currentHoleResult
-    ? Object.keys(currentHoleResult.players).length
-    : 0;
-  const scoresEntered = currentHoleResult?.scoresEntered ?? 0;
-  const allScoresEntered = totalPlayers > 0 && scoresEntered === totalPlayers;
-  const hasIncompleteJunk = (warnings ?? []).some(
-    (w) => w.type === "incomplete_junk",
-  );
-  const holeIsComplete = allScoresEntered && !hasIncompleteJunk;
+  // Suppress calculated junk badges and scoring math until hole is complete
+  const holeComplete = isHoleComplete(currentHoleResult);
 
   // Get all teams for the current hole (needed for one_per_group junk limit)
   const allTeams: Team[] = currentHole?.teams?.$isLoaded
@@ -598,7 +589,7 @@ export function ScoringView({
 
           // Build calculated team junk buttons (low_ball, low_total)
           // Only show if the hole is complete AND the team has earned this junk
-          const teamJunkButtons: OptionButton[] = holeIsComplete
+          const teamJunkButtons: OptionButton[] = holeComplete
             ? calculatedTeamJunkOptions
                 .filter((junk) =>
                   hasCalculatedTeamJunk(
@@ -629,12 +620,12 @@ export function ScoringView({
           // So displayJunk = holeNetTotal / multiplier (clamped to 0 for losing team)
           // Only show scoring when hole is complete (all scores + required junk entered)
           const holeNetTotal = teamHoleResult?.holeNetTotal ?? 0;
-          const displayJunk = holeIsComplete
+          const displayJunk = holeComplete
             ? overallMultiplier > 0
               ? Math.max(0, Math.round(holeNetTotal / overallMultiplier))
               : 0
             : 0;
-          const displayPoints = holeIsComplete ? Math.max(0, holeNetTotal) : 0;
+          const displayPoints = holeComplete ? Math.max(0, holeNetTotal) : 0;
 
           // Build earned multipliers from scoreboard (automatic multipliers like birdie_bbq)
           // These are multipliers that were automatically awarded based on junk conditions
@@ -661,7 +652,7 @@ export function ScoringView({
           // game.spec is the working copy of options
           const spec = game?.spec?.$isLoaded ? game.spec : null;
           const earnedMultiplierButtons: OptionButton[] = (
-            holeIsComplete ? (teamHoleResult?.multipliers ?? []) : []
+            holeComplete ? (teamHoleResult?.multipliers ?? []) : []
           )
             .filter((m) => !userMultiplierNames.has(m.name))
             .map((m) => {
@@ -772,7 +763,7 @@ export function ScoringView({
 
                 // Build calculated junk options (birdie, eagle) from scoreboard
                 // Only include junk that was actually achieved AND hole is complete
-                const calculatedJunkButtons: OptionButton[] = holeIsComplete
+                const calculatedJunkButtons: OptionButton[] = holeComplete
                   ? calculatedPlayerJunkOptions
                       .filter((junk) =>
                         hasCalculatedPlayerJunk(

@@ -30,6 +30,30 @@ import type {
 // =============================================================================
 
 /**
+ * Check if a hole is fully scored: all scores entered and all required junk marked.
+ * Returns false if there are any warnings (missing_scores or incomplete_junk).
+ *
+ * @param holeResult - The hole result from the scoreboard (may be undefined)
+ * @returns true if the hole has no scoring warnings and all players have scores
+ */
+export function isHoleComplete(
+  holeResult: HoleResult | null | undefined,
+): boolean {
+  if (!holeResult) return false;
+
+  const totalPlayers = Object.keys(holeResult.players).length;
+  if (totalPlayers === 0) return false;
+
+  const scoresEntered = holeResult.scoresEntered ?? 0;
+  if (scoresEntered < totalPlayers) return false;
+
+  // Check for any warnings (incomplete_junk, missing_scores)
+  if (holeResult.warnings && holeResult.warnings.length > 0) return false;
+
+  return true;
+}
+
+/**
  * Evaluate all junk options for a hole and award to players/teams
  *
  * Also calculates v0.3 parity fields:
@@ -64,7 +88,7 @@ export function evaluateJunkForHole(
   result.possiblePoints = possiblePoints;
   result.markedJunk = markedJunk;
   result.requiredJunk = requiredJunk;
-  result.warnings = calculateWarnings(result, unmarkedJunkNames);
+  result.warnings = calculateWarnings(result, unmarkedJunkNames, ctx);
 
   return result;
 }
@@ -692,26 +716,57 @@ function calculatePossiblePointsAndJunkCounts(
 }
 
 /**
- * Generate warnings for incomplete scoring (v0.3 parity)
+ * Check if any user has marked junk (team options) on this hole.
+ * Reads directly from Jazz team options, not from awarded junk in the result.
+ */
+function hasUserMarkedJunkOnHole(
+  holeNum: string,
+  ctx: ScoringContext,
+): boolean {
+  const gameHole = ctx.gameHoles.find((h) => h.hole === holeNum);
+  if (!gameHole?.teams?.$isLoaded) return false;
+
+  for (const team of gameHole.teams) {
+    if (!team?.$isLoaded || !team.options?.$isLoaded) continue;
+    for (const opt of team.options) {
+      if (!opt?.$isLoaded) continue;
+      // Any player-scoped option with a value means someone marked junk
+      if (opt.playerId && opt.value === "true") return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Generate warnings for incomplete scoring.
  *
- * Creates a warning when all scores are entered but required junk
- * (scope=player, limit=one_per_group) isn't fully marked.
+ * Warns when:
+ * 1. There's any activity on the hole (scores entered or junk marked) but
+ *    not all scores are entered yet → "missing_scores"
+ * 2. All scores are entered but required junk (scope=player, limit=one_per_group)
+ *    isn't fully marked → "incomplete_junk"
  *
  * @param holeResult - The hole result with scores and junk data
  * @param unmarkedJunkNames - Display names of unmarked required junk items
+ * @param ctx - Scoring context for reading team options
  * @returns Array of warnings
  */
 function calculateWarnings(
   holeResult: HoleResult,
   unmarkedJunkNames: string[],
+  ctx: ScoringContext,
 ): ScoringWarning[] {
   const warnings: ScoringWarning[] = [];
 
   const totalPlayers = Object.keys(holeResult.players).length;
   const scoresEntered = holeResult.scoresEntered ?? 0;
 
-  // If not all scores are entered yet
-  if (scoresEntered > 0 && scoresEntered < totalPlayers) {
+  // Check if there's any activity on this hole (scores or user-marked junk)
+  const hasJunkMarked = hasUserMarkedJunkOnHole(holeResult.hole, ctx);
+  const hasActivity = scoresEntered > 0 || hasJunkMarked;
+
+  // If there's activity but not all scores are entered
+  if (hasActivity && scoresEntered < totalPlayers) {
     const remaining = totalPlayers - scoresEntered;
     warnings.push({
       type: "missing_scores",
@@ -721,7 +776,6 @@ function calculateWarnings(
 
   // If all scores entered but some required junk is not marked
   if (unmarkedJunkNames.length > 0 && scoresEntered === totalPlayers) {
-    // Create a descriptive message with all missing junk names
     const missingItems = unmarkedJunkNames.join(", ");
     warnings.push({
       type: "incomplete_junk",
