@@ -34,13 +34,8 @@ export function evaluateJunk(ctx: ScoringContext): ScoringContext {
 
     if (!holeResult) continue;
 
-    // Skip holes with no scores
-    const hasScores = Object.values(holeResult.players).some(
-      (p) => p.gross > 0,
-    );
-    if (!hasScores) continue;
-
-    // Evaluate junk for this hole
+    // Evaluate junk for this hole (even without scores, user-marked junk like
+    // prox can exist and we need warnings to fire for incomplete scoring)
     const updatedHoleResult = evaluateJunkForHole(holeResult, ctx);
 
     // Update the scoreboard

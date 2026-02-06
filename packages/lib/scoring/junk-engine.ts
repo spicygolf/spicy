@@ -88,7 +88,7 @@ export function evaluateJunkForHole(
   result.possiblePoints = possiblePoints;
   result.markedJunk = markedJunk;
   result.requiredJunk = requiredJunk;
-  result.warnings = calculateWarnings(result, unmarkedJunkNames, ctx);
+  result.warnings = calculateWarnings(result, unmarkedJunkNames);
 
   return result;
 }
@@ -716,70 +716,50 @@ function calculatePossiblePointsAndJunkCounts(
 }
 
 /**
- * Check if any user has marked junk (team options) on this hole.
- * Reads directly from Jazz team options, not from awarded junk in the result.
- */
-function hasUserMarkedJunkOnHole(
-  holeNum: string,
-  ctx: ScoringContext,
-): boolean {
-  const gameHole = ctx.gameHoles.find((h) => h.hole === holeNum);
-  if (!gameHole?.teams?.$isLoaded) return false;
-
-  for (const team of gameHole.teams) {
-    if (!team?.$isLoaded || !team.options?.$isLoaded) continue;
-    for (const opt of team.options) {
-      if (!opt?.$isLoaded) continue;
-      // Any player-scoped option with a value means someone marked junk
-      if (opt.playerId && opt.value === "true") return true;
-    }
-  }
-  return false;
-}
-
-/**
  * Generate warnings for incomplete scoring.
  *
  * Warns when:
- * 1. There's any activity on the hole (scores entered or junk marked) but
+ * 1. There's any activity on the hole (scores entered or junk awarded) but
  *    not all scores are entered yet → "missing_scores"
  * 2. All scores are entered but required junk (scope=player, limit=one_per_group)
  *    isn't fully marked → "incomplete_junk"
  *
- * @param holeResult - The hole result with scores and junk data
+ * @param holeResult - The hole result with scores and awarded junk data
  * @param unmarkedJunkNames - Display names of unmarked required junk items
- * @param ctx - Scoring context for reading team options
  * @returns Array of warnings
  */
 function calculateWarnings(
   holeResult: HoleResult,
   unmarkedJunkNames: string[],
-  ctx: ScoringContext,
 ): ScoringWarning[] {
   const warnings: ScoringWarning[] = [];
 
   const totalPlayers = Object.keys(holeResult.players).length;
   const scoresEntered = holeResult.scoresEntered ?? 0;
 
-  // Check if there's any activity on this hole (scores or user-marked junk)
-  const hasJunkMarked = hasUserMarkedJunkOnHole(holeResult.hole, ctx);
-  const hasActivity = scoresEntered > 0 || hasJunkMarked;
+  // Check if there's any activity: scores entered OR any junk awarded to players/teams
+  // Junk awards include user-marked junk (prox) which gets awarded by checkUserJunk
+  const hasAnyJunk =
+    Object.values(holeResult.players).some((p) => p.junk.length > 0) ||
+    Object.values(holeResult.teams).some((t) => t.junk.length > 0);
+  const hasActivity = scoresEntered > 0 || hasAnyJunk;
 
-  // If there's activity but not all scores are entered
-  if (hasActivity && scoresEntered < totalPlayers) {
-    const remaining = totalPlayers - scoresEntered;
-    warnings.push({
-      type: "missing_scores",
-      message: `${remaining} score${remaining > 1 ? "s" : ""} missing`,
-    });
-  }
+  // Build a combined warning message with all missing items
+  const missingScores = scoresEntered < totalPlayers;
+  const missingJunk = unmarkedJunkNames.length > 0;
 
-  // If all scores entered but some required junk is not marked
-  if (unmarkedJunkNames.length > 0 && scoresEntered === totalPlayers) {
-    const missingItems = unmarkedJunkNames.join(", ");
+  if (hasActivity && (missingScores || missingJunk)) {
+    const parts: string[] = [];
+    if (missingScores) {
+      const remaining = totalPlayers - scoresEntered;
+      parts.push(`${remaining} score${remaining > 1 ? "s" : ""}`);
+    }
+    if (missingJunk) {
+      parts.push(unmarkedJunkNames.join(", "));
+    }
     warnings.push({
-      type: "incomplete_junk",
-      message: `Mark ${missingItems}`,
+      type: missingScores ? "missing_scores" : "incomplete_junk",
+      message: `${parts.join(", ")} missing`,
     });
   }
 

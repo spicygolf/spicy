@@ -9,6 +9,7 @@
  */
 
 import { deepClone } from "../../utils/clone";
+import { isHoleComplete } from "../junk-engine";
 import { getOptionValueForHole, getSpecField } from "../option-utils";
 import { rankWithTies } from "../ranking-engine";
 import type { ScoringContext, TeamHoleResult } from "../types";
@@ -178,13 +179,12 @@ function calculateRunningTotals(
 
     const teams = Object.values(holeResult.teams);
 
-    // Check if all scores are entered for this hole
-    const allScoresEntered =
-      teams.length > 0 &&
-      teams.every((t) => t.playerIds.length > 0 && t.points !== undefined);
+    // Check if hole is fully scored using the canonical isHoleComplete check
+    const fullHoleResult = ctx.scoreboard.holes[holeNum];
+    const holeScored = isHoleComplete(fullHoleResult);
 
-    // Calculate holeNetTotal for 2-team games
-    if (isTwoTeamGame && teams.length === 2) {
+    // Calculate holeNetTotal for 2-team games (only when hole is complete)
+    if (holeScored && isTwoTeamGame && teams.length === 2) {
       const team1 = teams[0];
       const team2 = teams[1];
 
@@ -201,11 +201,11 @@ function calculateRunningTotals(
       }
     }
 
-    // Update running totals (only if all scores entered)
+    // Update running totals (only if hole is complete)
     for (const team of teams) {
       const prevTotal = runningTotals[team.teamId] ?? 0;
 
-      if (allScoresEntered) {
+      if (holeScored) {
         runningTotals[team.teamId] = prevTotal + team.points;
       }
 
@@ -293,10 +293,8 @@ function calculateMatchPlay(
     const team2 = teams[1];
     if (!team1 || !team2) continue;
 
-    // Check if all scores entered for this hole
-    const totalPlayers = Object.keys(holeResult.players).length;
-    const scoresEntered = holeResult.scoresEntered ?? 0;
-    if (scoresEntered < totalPlayers) {
+    // Check if hole is fully scored
+    if (!isHoleComplete(ctx.scoreboard.holes[holeNum])) {
       allHolesScoredSoFar = false;
     }
 

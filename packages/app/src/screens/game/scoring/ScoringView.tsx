@@ -360,10 +360,8 @@ export function ScoringView({
   // This is used for calculating display points
   const overallMultiplier = currentHoleResult?.holeMultiplier ?? 1;
 
-  // Get warnings for incomplete scoring (e.g., "Mark all possible points")
+  // Warnings and completeness come from the scoring engine
   const warnings = currentHoleResult?.warnings;
-
-  // Suppress calculated junk badges and scoring math until hole is complete
   const holeComplete = isHoleComplete(currentHoleResult);
 
   // Get all teams for the current hole (needed for one_per_group junk limit)
