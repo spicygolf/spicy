@@ -710,6 +710,15 @@ function calculateWarnings(
   const totalPlayers = Object.keys(holeResult.players).length;
   const scoresEntered = holeResult.scoresEntered ?? 0;
 
+  // If not all scores are entered yet
+  if (scoresEntered > 0 && scoresEntered < totalPlayers) {
+    const remaining = totalPlayers - scoresEntered;
+    warnings.push({
+      type: "missing_scores",
+      message: `${remaining} score${remaining > 1 ? "s" : ""} missing`,
+    });
+  }
+
   // If all scores entered but some required junk is not marked
   if (unmarkedJunkNames.length > 0 && scoresEntered === totalPlayers) {
     // Create a descriptive message with all missing junk names

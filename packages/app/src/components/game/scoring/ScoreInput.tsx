@@ -460,8 +460,8 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "bold",
   },
   scoreTextUnmodified: {
-    color: theme.colors.secondary,
-    opacity: 0.6,
+    color: theme.colors.border,
+    opacity: 0.5,
   },
   grossText: {
     fontWeight: "bold",
