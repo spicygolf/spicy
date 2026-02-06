@@ -31,7 +31,9 @@ import type {
 
 /**
  * Check if a hole is fully scored: all scores entered and all required junk marked.
- * Returns false if there are any warnings (missing_scores or incomplete_junk).
+ *
+ * IMPORTANT: This function relies on `warnings` being populated by `evaluateJunkForHole`,
+ * so it must be called after the junk stage has run. Pipeline order: junk → points → cumulative.
  *
  * @param holeResult - The hole result from the scoreboard (may be undefined)
  * @returns true if the hole has no scoring warnings and all players have scores
@@ -47,8 +49,14 @@ export function isHoleComplete(
   const scoresEntered = holeResult.scoresEntered ?? 0;
   if (scoresEntered < totalPlayers) return false;
 
-  // Check for any warnings (incomplete_junk, missing_scores)
-  if (holeResult.warnings && holeResult.warnings.length > 0) return false;
+  // Check specifically for incompleteness warnings (future informational
+  // warning types should not block hole completion)
+  if (
+    holeResult.warnings?.some(
+      (w) => w.type === "incomplete_junk" || w.type === "missing_scores",
+    )
+  )
+    return false;
 
   return true;
 }
