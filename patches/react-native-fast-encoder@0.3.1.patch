@@ -1,8 +1,11 @@
+diff --git a/node_modules/react-native-fast-encoder/.bun-tag-841db0ecb4772c4f b/.bun-tag-841db0ecb4772c4f
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/ios/FastEncoderModule.h b/ios/FastEncoderModule.h
-index cd701ca786fa0328d65b42ddac584449172f6eec..7117e383a769704f8323f6e5b49619997554d1ed 100644
+index cd701ca786fa0328d65b42ddac584449172f6eec..757160eba1ea126c821375e93a19cfc5f62e1e7f 100644
 --- a/ios/FastEncoderModule.h
 +++ b/ios/FastEncoderModule.h
-@@ -2,13 +2,9 @@
+@@ -2,13 +2,8 @@
  #import "react-native-fast-encoder.h"
  #endif
  
@@ -13,10 +16,10 @@ index cd701ca786fa0328d65b42ddac584449172f6eec..7117e383a769704f8323f6e5b4961999
 -  #import <React/RCTBridge.h>
 -  @interface FastEncoderModule : NSObject <RCTBridgeModule>
 -#endif
+-@property (nonatomic, assign) BOOL setBridgeOnMainQueue;
 +#import "generated/FastEncoderSpec/FastEncoderSpec.h"
 +#import <ReactCommon/RCTTurboModuleWithJSIBindings.h>
 +@interface FastEncoderModule : NSObject <NativeFastEncoderModuleSpec, RCTTurboModuleWithJSIBindings>
- @property (nonatomic, assign) BOOL setBridgeOnMainQueue;
  
  @end
 diff --git a/ios/FastEncoderModule.mm b/ios/FastEncoderModule.mm

@@ -129,7 +129,7 @@ android {
         pickFirst "**/libfbjni.so"
     }
 
-    // until https://github.com/facebook/react-native/pull/49449 is released in RN
+    // TODO: Remove once https://github.com/facebook/react-native/pull/49449 lands in a stable RN release
     androidResources {
         noCompress += ["bundle"]
     }
