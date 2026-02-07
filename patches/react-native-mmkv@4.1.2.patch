@@ -1,0 +1,75 @@
+diff --git a/lib/index.js b/lib/index.js
+index 1111111..2222222 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -1,5 +1,29 @@
+ // The create function
+ export { createMMKV } from './createMMKV/createMMKV';
++
++// Backwards-compatible MMKV class (v3 API shim for jazz-tools)
++import { createMMKV as _createMMKV } from './createMMKV/createMMKV';
++export class MMKV {
++  constructor(config) {
++    this._instance = _createMMKV(config);
++  }
++  getString(key) { return this._instance.getString(key); }
++  getNumber(key) { return this._instance.getNumber(key); }
++  getBoolean(key) { return this._instance.getBoolean(key); }
++  getBuffer(key) { return this._instance.getBuffer(key); }
++  set(key, value) { return this._instance.set(key, value); }
++  delete(key) { return this._instance.remove(key); }
++  remove(key) { return this._instance.remove(key); }
++  contains(key) { return this._instance.contains(key); }
++  getAllKeys() { return this._instance.getAllKeys(); }
++  clearAll() { return this._instance.clearAll(); }
++  recrypt(key) { return this._instance.recrypt(key); }
++  trim() { return this._instance.trim(); }
++  addOnValueChangedListener(fn) { return this._instance.addOnValueChangedListener(fn); }
++  get size() { return this._instance.size; }
++  get id() { return this._instance.id; }
++}
++
+ // Exists + Delete
+ export { existsMMKV } from './existsMMKV/existsMMKV';
+ export { deleteMMKV } from './deleteMMKV/deleteMMKV';
+diff --git a/src/index.ts b/src/index.ts
+index 3333333..4444444 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -1,10 +1,35 @@
+ // All types
+-export type { MMKV } from './specs/MMKV.nitro'
++export type { MMKV as MMKVInterface } from './specs/MMKV.nitro'
+ export type { Configuration, Mode } from './specs/MMKVFactory.nitro'
+ 
+ // The create function
+ export { createMMKV } from './createMMKV/createMMKV'
+ 
++// Backwards-compatible MMKV class (v3 API shim for jazz-tools)
++import { createMMKV as _createMMKV } from './createMMKV/createMMKV'
++import type { Configuration as _Configuration } from './specs/MMKVFactory.nitro'
++export class MMKV {
++  private _instance: ReturnType<typeof _createMMKV>
++  constructor(config?: _Configuration) {
++    this._instance = _createMMKV(config)
++  }
++  getString(key: string) { return this._instance.getString(key) }
++  getNumber(key: string) { return this._instance.getNumber(key) }
++  getBoolean(key: string) { return this._instance.getBoolean(key) }
++  getBuffer(key: string) { return this._instance.getBuffer(key) }
++  set(key: string, value: boolean | string | number | ArrayBuffer) { return this._instance.set(key, value) }
++  delete(key: string) { return this._instance.remove(key) }
++  remove(key: string) { return this._instance.remove(key) }
++  contains(key: string) { return this._instance.contains(key) }
++  getAllKeys() { return this._instance.getAllKeys() }
++  clearAll() { return this._instance.clearAll() }
++  recrypt(key: string | undefined) { return this._instance.recrypt(key) }
++  trim() { return this._instance.trim() }
++  addOnValueChangedListener(fn: (key: string) => void) { return this._instance.addOnValueChangedListener(fn) }
++  get size() { return this._instance.size }
++  get id() { return this._instance.id }
++}
++
+ // Exists + Delete
+ export { existsMMKV } from './existsMMKV/existsMMKV'
+ export { deleteMMKV } from './deleteMMKV/deleteMMKV'

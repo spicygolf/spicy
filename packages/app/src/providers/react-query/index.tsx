@@ -3,9 +3,9 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { onlineManager, QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { useEffect } from "react";
-import { MMKV } from "react-native-mmkv";
+import { createMMKV } from "react-native-mmkv";
 
-const storage = new MMKV({
+const storage = createMMKV({
   id: "spicygolf.react-query",
 });
 
@@ -17,7 +17,7 @@ const clientStorage = {
     return storage.getString(key) ?? null;
   },
   removeItem: (key: string) => {
-    storage.delete(key);
+    storage.remove(key);
   },
 };
 

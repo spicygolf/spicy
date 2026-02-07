@@ -1,0 +1,106 @@
+diff --git a/node_modules/react-native-fast-encoder/.bun-tag-841db0ecb4772c4f b/.bun-tag-841db0ecb4772c4f
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/ios/FastEncoderModule.h b/ios/FastEncoderModule.h
+index cd701ca786fa0328d65b42ddac584449172f6eec..757160eba1ea126c821375e93a19cfc5f62e1e7f 100644
+--- a/ios/FastEncoderModule.h
++++ b/ios/FastEncoderModule.h
+@@ -2,13 +2,8 @@
+ #import "react-native-fast-encoder.h"
+ #endif
+ 
+-#ifdef RCT_NEW_ARCH_ENABLED
+-  #import "generated/FastEncoderSpec/FastEncoderSpec.h"
+-  @interface FastEncoderModule : NSObject <NativeFastEncoderModuleSpec>
+-#else
+-  #import <React/RCTBridge.h>
+-  @interface FastEncoderModule : NSObject <RCTBridgeModule>
+-#endif
+-@property (nonatomic, assign) BOOL setBridgeOnMainQueue;
++#import "generated/FastEncoderSpec/FastEncoderSpec.h"
++#import <ReactCommon/RCTTurboModuleWithJSIBindings.h>
++@interface FastEncoderModule : NSObject <NativeFastEncoderModuleSpec, RCTTurboModuleWithJSIBindings>
+ 
+ @end
+diff --git a/ios/FastEncoderModule.mm b/ios/FastEncoderModule.mm
+index 281574702e2c80083ea63b839524c099a635f5d4..52252f8cb8ef8828f2a482aecf5da09c0bc2df1b 100644
+--- a/ios/FastEncoderModule.mm
++++ b/ios/FastEncoderModule.mm
+@@ -1,67 +1,35 @@
+ #import "FastEncoderModule.h"
+-#import <React/RCTBridge+Private.h>
+-#import <React/RCTUtils.h>
+ #include "encoder_bridge.h"
+ #import <jsi/jsi.h>
+ 
+ @implementation FastEncoderModule
+-#import <React/RCTUtils.h>
+ 
+-@synthesize bridge = _bridge;
+ @synthesize methodQueue = _methodQueue;
+-RCT_EXPORT_MODULE() 
+-#ifdef NEW_ARCH_ENABLED
+-static facebook::jsi::Value install(facebook::jsi::Runtime& runtime,
+-                                  facebook::react::TurboModule& turboModule,
+-                                  const facebook::jsi::Value* args,
+-                                  size_t count)
+-{
+-    try {
+-        fastEncoder::install(runtime);
+-        return jsi::Value(true);
+-    } catch (const std::exception& e) {
+-        return jsi::Value(false);
+-    }
+-}
+-#else
++RCT_EXPORT_MODULE()
++
+ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(install)
+ {
+-    RCTCxxBridge *cxxBridge = (RCTCxxBridge *)_bridge;
+-    if (cxxBridge == nil) {
+-        return @false;
+-    }
+-    
+-    auto jsiRuntime = (facebook::jsi::Runtime *)cxxBridge.runtime;
+-    if (jsiRuntime == nil) {
+-        return @false;
+-    }
+-    
+-    auto &runtime = *jsiRuntime;
+-    auto callInvoker = _bridge.jsCallInvoker;
+-    fastEncoder::install(runtime, callInvoker);
+-    NSNumber * val = [NSNumber numberWithBool:TRUE];
+-    return val;
++    return @true;
+ }
+-#endif
++
+ + (BOOL)requiresMainQueueSetup {
+     return YES;
+ }
+ 
+-- (void)setBridge:(RCTBridge *)bridge
+-{
+-    _bridge = bridge;
+-    _setBridgeOnMainQueue = RCTIsMainQueue();
+-}
+-
+ - (void)invalidate {
+     fastEncoder::cleanup();
+ }
+ 
+-
+ - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+     (const facebook::react::ObjCTurboModule::InitParams &)params
+ {
+     return std::make_shared<facebook::react::NativeFastEncoderModuleSpecJSI>(params);
+ }
+ 
++- (void)installJSIBindingsWithRuntime:(facebook::jsi::Runtime &)runtime
++                          callInvoker:(const std::shared_ptr<facebook::react::CallInvoker> &)callInvoker
++{
++    fastEncoder::install(runtime, callInvoker);
++}
++
+ @end

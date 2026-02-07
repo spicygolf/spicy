@@ -9,7 +9,9 @@
   },
   "license": "FSL-1.1-ALv2",
   "patchedDependencies": {
-    "react-native-element-dropdown@2.12.4": "patches/react-native-element-dropdown@2.12.4.patch"
+    "react-native-element-dropdown@2.12.4": "patches/react-native-element-dropdown@2.12.4.patch",
+    "react-native-fast-encoder@0.3.1": "patches/react-native-fast-encoder@0.3.1.patch",
+    "react-native-mmkv@4.1.2": "patches/react-native-mmkv@4.1.2.patch"
   },
   "scripts": {
     "clean": "del-cli node_modules && bun run --filter './packages/*' clean",
@@ -60,11 +62,19 @@
     ],
     "catalogs": {
       "shared": {
+        "react": "19.2.3",
+        "react-dom": "19.2.3",
+        "@types/react": "19.2.13",
+        "@types/react-dom": "19.2.3",
         "date-fns-tz": "3.2.0",
         "cojson-core-rn": "0.19.22",
         "jazz-tools": "0.19.22"
       }
     }
   },
-  "dependencies": {}
+  "dependencies": {},
+  "overrides": {
+    "react-native": "0.84.0-rc.5"
+  },
+  "//overrides": "TODO: Remove overrides (and app resolutions) once RN 0.84.0 stable is released — only needed because Bun's peer-dep ranges don't match prereleases"
 }

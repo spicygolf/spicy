@@ -10,7 +10,7 @@ const JAZZ_AUTH_SECRET_KEY = "jazz-logged-in-secret";
 
 export function clearAllAuthData(): void {
   // Clear Jazz's auth secret (enables offline logout)
-  storage.delete(JAZZ_AUTH_SECRET_KEY);
+  storage.remove(JAZZ_AUTH_SECRET_KEY);
 }
 
 /**
