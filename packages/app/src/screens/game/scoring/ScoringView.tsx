@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Game, GameHole, Team } from "spicylib/schema";
+import type { Game, GameHole, MultiplierOption, Team } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
-import { getHoleTeeMultiplierTotal, isHoleComplete } from "spicylib/scoring";
+import {
+  getHoleTeeMultiplierTotalWithOverride,
+  isHoleComplete,
+} from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
@@ -132,13 +135,73 @@ function togglePlayerJunk(
 }
 
 /**
- * Toggle a multiplier for a team
+ * Remove dependent multipliers from other teams when a foundation multiplier is removed.
+ *
+ * Finds multipliers whose availability uses `other_team_multiplied_with` referencing
+ * the removed multiplier, then removes those from other teams on the current hole.
+ * Example: removing "double" cascades to remove "double_back" from the opposing team.
+ *
+ * @param removedMultName - The multiplier being removed (e.g., "double")
+ * @param removingTeamId - The team removing the multiplier
+ * @param allTeams - All teams on the current hole
+ * @param multiplierOptions - All multiplier option definitions
+ * @param currentHoleNumber - Current hole number
+ */
+function removeDependentMultipliers(
+  removedMultName: string,
+  removingTeamId: string,
+  allTeams: Team[],
+  multiplierOptions: MultiplierOption[],
+  currentHoleNumber: string,
+): void {
+  // Find multipliers whose availability depends on the removed multiplier
+  const dependentMults = multiplierOptions.filter((m) => {
+    if (!m.availability) return false;
+    return (
+      m.availability.includes("other_team_multiplied_with") &&
+      (m.availability.includes(`'${removedMultName}'`) ||
+        m.availability.includes(`"${removedMultName}"`))
+    );
+  });
+
+  // Remove those from OTHER teams (not the team that removed the original)
+  for (const depMult of dependentMults) {
+    for (const team of allTeams) {
+      if (!team?.$isLoaded || team.team === removingTeamId) continue;
+      if (!team.options?.$isLoaded) continue;
+      for (let i = team.options.length - 1; i >= 0; i--) {
+        const opt = team.options[i];
+        if (
+          opt?.$isLoaded &&
+          opt.optionName === depMult.name &&
+          opt.firstHole === currentHoleNumber &&
+          !opt.playerId
+        ) {
+          team.options.$jazz.splice(i, 1);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Toggle a multiplier for a team.
+ *
+ * When removing a multiplier, also cascade-deletes dependent multipliers from other teams
+ * (e.g., removing "double" also removes "double_back" from the opposing team).
+ *
+ * @param team - The team toggling the multiplier
+ * @param multiplierName - The multiplier option name
  * @param currentHoleNumber - The current hole number (e.g., "17") to store as firstHole
+ * @param allTeams - All teams on the current hole (for cascade delete)
+ * @param multiplierOptions - All multiplier option definitions (for cascade delete)
  */
 function toggleTeamMultiplier(
   team: Team,
   multiplierName: string,
   currentHoleNumber: string,
+  allTeams: Team[],
+  multiplierOptions: MultiplierOption[],
 ): void {
   // Get the team's owner group to ensure new options are accessible
   const owner = team.$jazz.owner;
@@ -166,6 +229,14 @@ function toggleTeamMultiplier(
 
   if (existingIndex >= 0) {
     options.$jazz.splice(existingIndex, 1);
+    // Cascade: remove dependent multipliers from other teams
+    removeDependentMultipliers(
+      multiplierName,
+      team.team ?? "",
+      allTeams,
+      multiplierOptions,
+      currentHoleNumber,
+    );
   } else {
     const newOption = TeamOption.create(
       {
@@ -297,6 +368,16 @@ export function ScoringView({
   );
   const handicapMode = handicapIndexFromValue === "low" ? "low" : "full";
 
+  // Get max_off_tee cap for the custom multiplier modal
+  const maxOffTeeValue = useOptionValue(
+    game,
+    currentHole,
+    "max_off_tee",
+    "game",
+  );
+  const maxOffTee =
+    maxOffTeeValue !== undefined ? Number.parseInt(maxOffTeeValue, 10) : null;
+
   // Build adjusted handicaps map if in "low" mode and handicaps are used
   // Also build a map of calculated course handicaps for use in the render loop
   let adjustedHandicaps: Map<string, number> | null = null;
@@ -354,7 +435,10 @@ export function ScoringView({
 
   // Get tee multiplier (unearned/user-activated multipliers only, excludes birdie_bbq etc.)
   // This is what shows in the HoleToolbar - what teams committed to "off the tee"
-  const teeMultiplier = getHoleTeeMultiplierTotal(currentHoleResult ?? null);
+  // Uses override-aware logic so custom/twelve replace rather than stack with other multipliers
+  const teeMultiplier = getHoleTeeMultiplierTotalWithOverride(
+    currentHoleResult ?? null,
+  );
 
   // Get overall multiplier from scoreboard (all teams' multipliers combined, including earned)
   // This is used for calculating display points
@@ -426,6 +510,29 @@ export function ScoringView({
       currentHoleNumber,
       value,
     );
+
+    // Clean up hole-scoped multipliers from all teams (double, double_back)
+    // Custom is override=true so these are replaced in scoring anyway,
+    // and removing them avoids visual confusion
+    for (const t of allTeams) {
+      if (!t?.$isLoaded) continue;
+      if (!t.options?.$isLoaded) continue;
+      for (let i = t.options.length - 1; i >= 0; i--) {
+        const opt = t.options[i];
+        if (!opt?.$isLoaded) continue;
+        const multDef = teamMultiplierOptions.find(
+          (m) => m.name === opt.optionName,
+        );
+        if (
+          multDef &&
+          multDef.scope === "hole" &&
+          opt.firstHole === currentHoleNumber &&
+          !opt.playerId
+        ) {
+          t.options.$jazz.splice(i, 1);
+        }
+      }
+    }
   };
 
   // Handler for clearing custom multiplier
@@ -467,6 +574,7 @@ export function ScoringView({
         currentValue={
           customMultiplierState.isActive ? customMultiplierState.value : null
         }
+        maxValue={maxOffTee}
         onSet={handleSetCustomMultiplier}
         onClear={handleClearCustomMultiplier}
         onClose={() => setCustomMultiplierModalVisible(false)}
@@ -681,7 +789,13 @@ export function ScoringView({
               earnedMultipliers={earnedMultiplierButtons}
               teamJunkOptions={teamJunkButtons}
               onMultiplierToggle={(multName) =>
-                toggleTeamMultiplier(team, multName, currentHoleNumber)
+                toggleTeamMultiplier(
+                  team,
+                  multName,
+                  currentHoleNumber,
+                  allTeams,
+                  multiplierOptions,
+                )
               }
               junkTotal={displayJunk}
               holeMultiplier={overallMultiplier}

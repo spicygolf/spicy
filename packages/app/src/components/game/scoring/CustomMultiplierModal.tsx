@@ -6,6 +6,8 @@ import { Button, ModalHeader, Text, TextInput } from "@/ui";
 interface CustomMultiplierModalProps {
   visible: boolean;
   currentValue: number | null;
+  /** Maximum allowed value (from max_off_tee game option). Null means no cap. */
+  maxValue: number | null;
   onSet: (value: number) => void;
   onClear: () => void;
   onClose: () => void;
@@ -14,6 +16,7 @@ interface CustomMultiplierModalProps {
 export function CustomMultiplierModal({
   visible,
   currentValue,
+  maxValue,
   onSet,
   onClear,
   onClose,
@@ -30,9 +33,11 @@ export function CustomMultiplierModal({
     }
   }, [visible, currentValue]);
 
+  const upperLimit = maxValue && maxValue > 0 ? maxValue : 1000;
+
   const handleSet = (): void => {
     const numValue = Number.parseInt(inputValue, 10);
-    if (Number.isNaN(numValue) || numValue < 1 || numValue > 1000) {
+    if (Number.isNaN(numValue) || numValue < 1 || numValue > upperLimit) {
       return;
     }
     onSet(numValue);
@@ -61,9 +66,9 @@ export function CustomMultiplierModal({
           <ModalHeader title="Custom Tee Multiplier" onClose={onClose} />
 
           <Text style={styles.description}>
-            Set a custom "off the tee" multiplier (1-1000x). This replaces
-            pre-presses and doubles, but earned multipliers (birdie BBQ, etc.)
-            still stack on top.
+            Set a custom "off the tee" multiplier (1-{upperLimit}x). This
+            replaces pre-presses and doubles, but earned multipliers (birdie
+            BBQ, etc.) still stack on top.
           </Text>
 
           <View style={styles.inputContainer}>
@@ -146,7 +151,7 @@ const styles = StyleSheet.create((theme) => ({
   multiplierSuffix: {
     fontSize: 18,
     fontWeight: "bold",
-    color: theme.colors.multiplier,
+    color: theme.colors.secondary,
   },
   buttonRow: {
     flexDirection: "row",
