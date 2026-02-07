@@ -131,7 +131,7 @@
         "jazz-tools": "catalog:shared",
         "lucide-react": "0.562.0",
         "react": "catalog:shared",
-        "react-dom": "19.2.3",
+        "react-dom": "catalog:shared",
         "react-markdown": "^10.1.0",
         "react-router-dom": "6",
         "remark-gfm": "^4.0.1",
@@ -177,6 +177,7 @@
       "date-fns-tz": "3.2.0",
       "jazz-tools": "0.19.22",
       "react": "19.2.3",
+      "react-dom": "19.2.3",
     },
   },
   "packages": {
