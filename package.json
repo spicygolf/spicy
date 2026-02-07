@@ -69,5 +69,8 @@
       }
     }
   },
-  "dependencies": {}
+  "dependencies": {},
+  "overrides": {
+    "react-native": "0.84.0-rc.5"
+  }
 }
