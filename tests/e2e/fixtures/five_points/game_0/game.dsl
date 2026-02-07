@@ -27,20 +27,20 @@ holes: 1-4-3-444, 2-4-7-392, 3-4-15-320, 4-4-1-413, 5-4-5-380, 6-3-17-122, 7-5-1
 # FRONT NINE
 # ============================================
 
-# Hole 1: Basic scoring, establish teams, only prox, 1pt
+# Hole 1: establish teams, only prox, 1pt
 h1: (Brad Scott) vs (Tim Eric) | 5 5 4 5 | prox:Brad | | => 1 0 | 1 -1
 
-# Hole 2: basic, prox, low ball, 3pts
+# Hole 2: prox, low ball, 3pts
 h2: | 6 5 4 7 | prox:Tim | | => 0 3 | -2 2 | low_ball:t2
 
-# Hole 3: basic, prox, low ball other team 1pt
+# Hole 3: prox, low ball other team 1pt
 h3: | 4 6 5 6 | prox:tim | | => 1 0 | -1 1 | low_ball:t1
 
-# Hole 4: basic, prox, low ball, low team 5pts
+# Hole 4: prox, low ball, low team 5pts
 h4: | 5 4 5 5 | prox:scott | | => 5 0 | 4 -4 | low_ball:t1 low_total:t1
 
-# Hole 5: Both teams press
-# h5: | 5 5 4 5 | | double:t1 double_back:t2
+# Hole 5: low ball low total, prox other team 3pts
+h5: | 4 4 4 5 | prox:tim | | => 3 0 | 7 -7 | low_ball:t1 low_total:t1
 
 # Hole 6: Par 3 - prox for Tim
 # h6: | 5 6 3 6 | prox:Tim

@@ -32,6 +32,11 @@ platform:
 - waitForAnimationToEnd:
     timeout: 500
 
+- extendedWaitUntil:
+    visible:
+      id: "handicap-adjustment-brad-shots"
+    timeout: 3000
+
 - assertVisible:
     id: "handicap-adjustment-brad-shots"
     text: "7"

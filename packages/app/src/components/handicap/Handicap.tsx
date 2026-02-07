@@ -12,9 +12,11 @@ interface Props {
 
 export function Handicap({ label, display, color, testID }: Props) {
   return (
-    <View style={styles.container} testID={testID}>
+    <View style={styles.container}>
       <Text style={[styles.label, color && { color }]}>{label}</Text>
-      <Text style={[styles.display, color && { color }]}>{display || "-"}</Text>
+      <Text style={[styles.display, color && { color }]} testID={testID}>
+        {display || "-"}
+      </Text>
     </View>
   );
 }

@@ -306,6 +306,47 @@
           }
         ]
       }
+    },
+    "5": {
+      "scores": {
+        "brad": {
+          "gross": 4
+        },
+        "scott": {
+          "gross": 4
+        },
+        "tim": {
+          "gross": 4
+        },
+        "eric": {
+          "gross": 5
+        }
+      },
+      "junk": {
+        "prox": "tim"
+      },
+      "expected": {
+        "holePoints": [
+          3,
+          0
+        ],
+        "runningTotals": [
+          7,
+          -7
+        ],
+        "awardedJunk": [
+          {
+            "name": "low_ball",
+            "points": 0,
+            "teamId": "1"
+          },
+          {
+            "name": "low_total",
+            "points": 0,
+            "teamId": "1"
+          }
+        ]
+      }
     }
   },
   "optionDefs": {

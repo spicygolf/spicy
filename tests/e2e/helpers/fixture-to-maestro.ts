@@ -113,6 +113,8 @@ export interface GeneratedSubFlows {
   startGame: string;
   /** Individual hole sub-flows, keyed by hole number (e.g., "01", "02") */
   holes: Record<string, string>;
+  /** Holes orchestration sub-flow (runs all individual hole flows) */
+  holesOrchestration: string;
   /** Leaderboard sub-flow */
   leaderboard: string;
   /** Metadata about the generated flows */
@@ -686,6 +688,19 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
   if (fixture.course.slope) {
     const shotsOff = calculateShotsOff(fixture.players, fixture.course.slope);
 
+    // Wait for shots off values to render after handicap changes propagate
+    const firstPlayerSlug = fixture.players[0].name
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+    steps.push({
+      extendedWaitUntil: {
+        visible: {
+          id: `handicap-adjustment-${firstPlayerSlug}-shots`,
+        },
+        timeout: TIMEOUT_NAVIGATION,
+      },
+    });
+
     // Add assertions for each player's shots off value
     for (const player of fixture.players) {
       const playerSlug = player.name.toLowerCase().replace(/\s+/g, "-");
@@ -1182,6 +1197,31 @@ export function generateLeaderboardSteps(_fixture: Fixture): MaestroStep[] {
 }
 
 /**
+ * Generate holes orchestration sub-flow that runs all individual hole flows
+ */
+function generateHolesOrchestration(holeNumbers: string[]): string {
+  const lines: string[] = [
+    `# Sub-flow: Play all ${holeNumbers.length} holes`,
+    `# Expects: Scoring screen visible, hole 1 visible`,
+    `# Provides: All holes scored, ready for leaderboard`,
+    ``,
+    `appId: golf.spicy`,
+    `platform:`,
+    `  ios:`,
+    `    snapshotKeyHonorModalViews: false`,
+    `---`,
+    ``,
+  ];
+
+  for (const holeNum of holeNumbers) {
+    const paddedNum = holeNum.padStart(2, "0");
+    lines.push(`- runFlow: "holes/hole_${paddedNum}.yaml"`);
+  }
+
+  return lines.join("\n") + "\n";
+}
+
+/**
  * Generate sub-flows from a fixture (multi-file mode)
  */
 export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
@@ -1280,14 +1320,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
     `- runFlow: "start_game.yaml"`,
     ``,
     `# Play all ${holeNumbers.length} holes`,
-  );
-
-  for (const holeNum of holeNumbers) {
-    const paddedNum = holeNum.padStart(2, "0");
-    mainLines.push(`- runFlow: "holes/hole_${paddedNum}.yaml"`);
-  }
-
-  mainLines.push(
+    `- runFlow: "holes.yaml"`,
     ``,
     `# View final leaderboard`,
     `- runFlow: "leaderboard.yaml"`,
@@ -1369,6 +1402,7 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
       `# Sub-flow: Start the game\n# Expects: Players added, teams assigned (if applicable), on game settings screen\n# Provides: Scoring screen visible, hole 1 visible`,
     ),
     holes,
+    holesOrchestration: generateHolesOrchestration(holeNumbers),
     leaderboard: stepsToYaml(
       generateLeaderboardSteps(fixture),
       "golf.spicy",

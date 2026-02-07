@@ -182,6 +182,7 @@ function generateSubFlowFiles(
         }
         console.log(`  - start_game.yaml`);
         console.log(`  - leaderboard.yaml`);
+        console.log(`  - holes.yaml (orchestration)`);
         console.log(`  - holes/ (${Object.keys(flows.holes).length} files)`);
         console.log(`  (uses shared/cleanup_deep.yaml)`);
       }
@@ -189,7 +190,7 @@ function generateSubFlowFiles(
         success: true,
         outputPath: outputDir,
         fileCount:
-          7 +
+          8 +
           Object.keys(flows.holes).length +
           (flows.adjustHandicaps ? 1 : 0) +
           (flows.assignTeams ? 1 : 0),
@@ -227,13 +228,16 @@ function generateSubFlowFiles(
     writeFileSync(join(outputDir, "start_game.yaml"), flows.startGame);
     writeFileSync(join(outputDir, "leaderboard.yaml"), flows.leaderboard);
 
-    // Write hole flows
+    // Write holes orchestration flow
+    writeFileSync(join(outputDir, "holes.yaml"), flows.holesOrchestration);
+
+    // Write individual hole flows
     for (const [holeNum, yaml] of Object.entries(flows.holes)) {
       writeFileSync(join(holesDir, `hole_${holeNum}.yaml`), yaml);
     }
 
     const fileCount =
-      7 +
+      8 +
       Object.keys(flows.holes).length +
       (flows.adjustHandicaps ? 1 : 0) +
       (flows.assignTeams ? 1 : 0);
