@@ -74,5 +74,6 @@
   "dependencies": {},
   "overrides": {
     "react-native": "0.84.0-rc.5"
-  }
+  },
+  "//overrides": "TODO: Remove overrides (and app resolutions) once RN 0.84.0 stable is released — only needed because Bun's peer-dep ranges don't match prereleases"
 }
