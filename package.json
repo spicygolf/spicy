@@ -60,6 +60,8 @@
     ],
     "catalogs": {
       "shared": {
+        "react": "19.2.3",
+        "@types/react": "19.2.13",
         "date-fns-tz": "3.2.0",
         "cojson-core-rn": "0.19.22",
         "jazz-tools": "0.19.22"
