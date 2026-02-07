@@ -5,6 +5,9 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
+# Pinned to 16.6 instead of min_ios_version_supported because NitroModules
+# requires >=16.4 (https://github.com/mrousavy/nitro/issues/422).
+# Revert to min_ios_version_supported when RN's minimum catches up.
 platform :ios, '16.6'
 prepare_react_native_project!
 
