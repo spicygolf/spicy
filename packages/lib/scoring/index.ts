@@ -23,6 +23,7 @@ export {
   evaluateLogic,
   getHolePreDoubleTotal,
   getHoleTeeMultiplierTotal,
+  getHoleTeeMultiplierTotalWithOverride,
   getPreDoubleTotal,
   getTeeMultiplierTotal,
   isSimpleRankCheck,

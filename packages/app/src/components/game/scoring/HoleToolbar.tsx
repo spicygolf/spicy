@@ -95,7 +95,10 @@ export function HoleToolbar({
             accessibilityLabel="Set custom multiplier"
           >
             <Text
-              style={[styles.placeholderText, { color: theme.colors.border }]}
+              style={[
+                styles.placeholderText,
+                { color: theme.colors.secondary },
+              ]}
             >
               1x
             </Text>
@@ -177,9 +180,8 @@ const styles = StyleSheet.create((theme) => ({
     paddingVertical: theme.gap(0.5),
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: theme.colors.border,
-    borderStyle: "dashed",
-    opacity: 0.5,
+    borderColor: theme.colors.secondary,
+    opacity: 0.35,
   },
   multiplierText: {
     fontSize: 18,
