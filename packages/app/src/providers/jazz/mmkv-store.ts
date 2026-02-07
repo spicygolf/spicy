@@ -1,9 +1,9 @@
 import type { KvStore } from "jazz-tools/react-native";
-import { MMKV } from "react-native-mmkv";
+import { createMMKV } from "react-native-mmkv";
 
 // Singleton MMKV instance - exported for use by other modules that need
 // persistent storage before Jazz is initialized (e.g., useJazzCredentials)
-export const storage = new MMKV({
+export const storage = createMMKV({
   id: "spicygolf.default",
 });
 
@@ -17,7 +17,7 @@ export class MMKVStore implements KvStore {
   }
 
   async delete(key: string): Promise<void> {
-    return storage.delete(key);
+    storage.remove(key);
   }
 
   async clearAll(): Promise<void> {
