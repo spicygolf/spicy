@@ -135,6 +135,40 @@ function togglePlayerJunk(
 }
 
 /**
+ * Remove all hole-scoped team multipliers from all teams on the current hole.
+ *
+ * Used when setting a custom (override) multiplier to clear doubles/double_backs
+ * that would otherwise cause visual confusion (scoring already replaces them).
+ *
+ * @param allTeams - All teams on the current hole
+ * @param multiplierOptions - Multiplier option definitions (filtered to team-scoped)
+ * @param currentHoleNumber - Current hole number
+ */
+function removeHoleScopedMultipliers(
+  allTeams: Team[],
+  multiplierOptions: MultiplierOption[],
+  currentHoleNumber: string,
+): void {
+  for (const team of allTeams) {
+    if (!team?.$isLoaded) continue;
+    if (!team.options?.$isLoaded) continue;
+    for (let i = team.options.length - 1; i >= 0; i--) {
+      const opt = team.options[i];
+      if (!opt?.$isLoaded) continue;
+      const multDef = multiplierOptions.find((m) => m.name === opt.optionName);
+      if (
+        multDef &&
+        multDef.scope === "hole" &&
+        opt.firstHole === currentHoleNumber &&
+        !opt.playerId
+      ) {
+        team.options.$jazz.splice(i, 1);
+      }
+    }
+  }
+}
+
+/**
  * Remove dependent multipliers from other teams when a foundation multiplier is removed.
  *
  * Finds multipliers whose availability uses `other_team_multiplied_with` referencing
@@ -217,13 +251,14 @@ function toggleTeamMultiplier(
   const options = team.options;
   if (!options?.$isLoaded) return;
 
-  // Find existing team-level option
+  // Find existing team-level option for THIS hole
   let existingIndex = -1;
   for (let i = 0; i < options.length; i++) {
     const opt = options[i];
     if (
       opt?.$isLoaded &&
       opt.optionName === multiplierName &&
+      opt.firstHole === currentHoleNumber &&
       !opt.playerId // Team-level
     ) {
       existingIndex = i;
@@ -379,8 +414,12 @@ export function ScoringView({
     "max_off_tee",
     "game",
   );
-  const maxOffTee =
+  const maxOffTeeParsed =
     maxOffTeeValue !== undefined ? Number.parseInt(maxOffTeeValue, 10) : null;
+  const maxOffTee =
+    maxOffTeeParsed !== null && !Number.isNaN(maxOffTeeParsed)
+      ? maxOffTeeParsed
+      : null;
 
   // Build adjusted handicaps map if in "low" mode and handicaps are used
   // Also build a map of calculated course handicaps for use in the render loop
@@ -515,28 +554,14 @@ export function ScoringView({
       value,
     );
 
-    // Clean up hole-scoped multipliers from all teams (double, double_back)
+    // Clean up hole-scoped multipliers from all teams (double, double_back).
     // Custom is override=true so these are replaced in scoring anyway,
-    // and removing them avoids visual confusion
-    for (const t of allTeams) {
-      if (!t?.$isLoaded) continue;
-      if (!t.options?.$isLoaded) continue;
-      for (let i = t.options.length - 1; i >= 0; i--) {
-        const opt = t.options[i];
-        if (!opt?.$isLoaded) continue;
-        const multDef = teamMultiplierOptions.find(
-          (m) => m.name === opt.optionName,
-        );
-        if (
-          multDef &&
-          multDef.scope === "hole" &&
-          opt.firstHole === currentHoleNumber &&
-          !opt.playerId
-        ) {
-          t.options.$jazz.splice(i, 1);
-        }
-      }
-    }
+    // and removing them avoids visual confusion.
+    removeHoleScopedMultipliers(
+      allTeams,
+      teamMultiplierOptions,
+      currentHoleNumber,
+    );
   };
 
   // Handler for clearing custom multiplier
