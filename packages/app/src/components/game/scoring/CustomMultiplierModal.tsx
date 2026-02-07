@@ -84,7 +84,6 @@ export function CustomMultiplierModal({
                 autoFocus
                 selectTextOnFocus
               />
-              <Text style={styles.multiplierSuffix}>x</Text>
             </View>
 
             <View style={styles.buttonRow}>
@@ -147,11 +146,6 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
-  },
-  multiplierSuffix: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: theme.colors.secondary,
   },
   buttonRow: {
     flexDirection: "row",
