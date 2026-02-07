@@ -38,7 +38,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@types/node": "22.10.2",
     "@types/react": "catalog:shared",
-    "@types/react-dom": "19.2.3",
+    "@types/react-dom": "catalog:shared",
     "@vitejs/plugin-react-swc": "4.2.2",
     "autoprefixer": "10.4.23",
     "del-cli": "7.0.0",
