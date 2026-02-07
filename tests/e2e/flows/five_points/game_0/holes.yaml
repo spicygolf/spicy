@@ -1,4 +1,4 @@
-# Sub-flow: Play all 5 holes
+# Sub-flow: Play all 9 holes
 # Expects: Scoring screen visible, hole 1 visible
 # Provides: All holes scored, ready for leaderboard
 
@@ -13,3 +13,7 @@ platform:
 - runFlow: "holes/hole_03.yaml"
 - runFlow: "holes/hole_04.yaml"
 - runFlow: "holes/hole_05.yaml"
+- runFlow: "holes/hole_06.yaml"
+- runFlow: "holes/hole_07.yaml"
+- runFlow: "holes/hole_08.yaml"
+- runFlow: "holes/hole_09.yaml"

@@ -39,7 +39,7 @@ platform:
 # Start game
 - runFlow: "start_game.yaml"
 
-# Play all 5 holes
+# Play all 9 holes
 - runFlow: "holes.yaml"
 
 # View final leaderboard

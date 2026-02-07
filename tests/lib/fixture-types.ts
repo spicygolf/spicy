@@ -108,17 +108,41 @@ export interface FixtureExpectedJunk {
 }
 
 /**
+ * Expected player junk award parsed from DSL (e.g., "birdie:brad")
+ */
+export interface FixtureExpectedPlayerJunk {
+  /** Junk name (e.g., "birdie", "eagle") */
+  name: string;
+  /** Player ID (e.g., "brad") */
+  playerId: string;
+}
+
+/**
+ * Expected earned team multiplier parsed from DSL (e.g., "birdie_bbq:t1")
+ */
+export interface FixtureExpectedEarnedMultiplier {
+  /** Multiplier name (e.g., "birdie_bbq", "eagle_bbq") */
+  name: string;
+  /** Team ID (e.g., "1" from "t1") */
+  teamId: string;
+}
+
+/**
  * Expected results for a hole, parsed from DSL => syntax
  * Format: => holePoints | runningTotals | awardedJunk
- * Example: => 3 0 | -2 2 | low_ball:2:t2
+ * Example: => 3 0 | -2 2 | low_ball:t1 birdie:brad birdie_bbq:t1
  */
 export interface FixtureHoleExpected {
   /** Hole points [team1, team2] */
   holePoints?: [number, number];
   /** Running totals through this hole [team1, team2] */
   runningTotals?: [number, number];
-  /** Awarded team junk with points */
+  /** Awarded team junk with points (low_ball, low_total) */
   awardedJunk?: FixtureExpectedJunk[];
+  /** Awarded player junk (birdie, eagle) */
+  awardedPlayerJunk?: FixtureExpectedPlayerJunk[];
+  /** Earned team multipliers (birdie_bbq, eagle_bbq) */
+  earnedMultipliers?: FixtureExpectedEarnedMultiplier[];
 }
 
 /**

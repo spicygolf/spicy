@@ -7,18 +7,5 @@ platform:
   ios:
     snapshotKeyHonorModalViews: false
 ---
-# Adjust handicap indexes
-- runFlow: "adjust_handicaps.yaml"
-
-# Assign players to teams
-- runFlow: "assign_teams.yaml"
-
-# Start game
-- runFlow: "start_game.yaml"
-
-# Play all 5 holes
-- runFlow: "holes.yaml"
-
-# View final leaderboard
-- runFlow: "leaderboard.yaml"
-
+- runFlow: "holes/hole_08.yaml"
+- runFlow: "holes/hole_09.yaml"

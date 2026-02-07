@@ -1067,6 +1067,30 @@ export function generateExpectedAssertionSteps(
     }
   }
 
+  // Assert player-awarded junk badges (birdie, eagle)
+  if (expected.awardedPlayerJunk) {
+    for (const junk of expected.awardedPlayerJunk) {
+      // testID pattern: junk-{name}-{playerId}
+      steps.push({
+        assertVisible: {
+          id: `junk-${junk.name}-${junk.playerId}`,
+        },
+      });
+    }
+  }
+
+  // Assert earned team multipliers (birdie_bbq, eagle_bbq)
+  if (expected.earnedMultipliers) {
+    for (const mult of expected.earnedMultipliers) {
+      // testID pattern: multiplier-{name}-{teamId}
+      steps.push({
+        assertVisible: {
+          id: `multiplier-${mult.name}-${mult.teamId}`,
+        },
+      });
+    }
+  }
+
   return steps;
 }
 
