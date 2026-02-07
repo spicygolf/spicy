@@ -51,7 +51,7 @@ h7: | 5 5 4 5 | prox:scott | | => | 0 4 | 15 -15 | low_ball:t2 low_total:t2 bird
 # Hole 8: birdie prox, other team low total 2pts
 h8: | 5 2 3 4 | prox:scott | | => | 2 0 | 17 -17 | low_ball:t1 low_total:t2 birdie:scott
 
-# Hole 9: phantom zero
+# Hole 9: phantom zero - both teams net zero points this hole
 h9: | 5 5 8 4 | prox:brad | | => | 0 0 | 17 -17 | low_ball:t2 low_total:t1
 
 # ============================================

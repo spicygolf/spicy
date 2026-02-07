@@ -19,9 +19,15 @@
  *   course: Test Course | Blue | 71.5/128
  *   holes: 1-4-5, 2-5-11, 3-3-15, ...
  *
- *   h1: (p1 p2) vs (p3 p4) | 4 4 5 6 | prox:p1
+ *   h1: (p1 p2) vs (p3 p4) | 4 4 5 6 | prox:p1 | | => | 3 0 | 1 -1 | low_ball:t1
  *   h2: | 5 5 4 5 | birdie:p3 | t2:double
  *   h3: | 4 6 5 5 | | t1:double t2:double_back
+ *
+ * Expected Results (after =>):
+ *   => | holePoints | runningTotals | awards
+ *   The leading | after => is optional (empty segments are stripped).
+ *   Awards can be: team junk (low_ball:t1), player junk (birdie:brad),
+ *   or earned multipliers (birdie_bbq:t1) — disambiguated via optionDefs.
  *
  * IMPORTANT: Player Order Convention
  *   The FIRST player in the players list (p1) is assumed to be the logged-in
@@ -401,12 +407,18 @@ function parseExpected(
         if (optionDefs?.multipliers[name]) {
           earnedMultipliers.push({ name, teamId });
         } else {
-          awardedJunk.push({ name, points: 0, teamId });
+          awardedJunk.push({
+            name,
+            points: optionDefs?.junk[name] ?? 0,
+            teamId,
+          });
         }
         continue;
       }
 
       // Player-level: name:player (e.g., "birdie:brad")
+      // IMPORTANT: must come AFTER matchTeam since this is a broader pattern
+      // that would also match "name:t1" if checked first
       const matchPlayer = part.match(/^(\w+):(\w+)$/);
       if (matchPlayer) {
         awardedPlayerJunk.push({
