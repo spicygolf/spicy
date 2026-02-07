@@ -283,7 +283,7 @@ export function isMultiplierAvailable(
   const maxOffTee = getOptionValueForHole("max_off_tee", holeNum, ctx);
   if (typeof maxOffTee === "number" && maxOffTee > 0) {
     const currentTotal = getHoleTeeMultiplierTotalWithOverride(holeResult);
-    const multValue = mult.value ?? 2;
+    const multValue = getMultiplierValue(mult, ctx.gameHoles);
 
     // Calculate what the total would be if this multiplier is added
     let projectedTotal: number;

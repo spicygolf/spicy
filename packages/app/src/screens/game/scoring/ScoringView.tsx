@@ -154,7 +154,11 @@ function removeDependentMultipliers(
   multiplierOptions: MultiplierOption[],
   currentHoleNumber: string,
 ): void {
-  // Find multipliers whose availability depends on the removed multiplier
+  // Find multipliers whose availability depends on the removed multiplier.
+  // NOTE: This uses heuristic string matching on JSON Logic expressions.
+  // If the availability expression format changes (e.g., different quoting,
+  // nested references, or multiplier names that are substrings of others),
+  // this may need to be replaced with proper JSON parsing.
   const dependentMults = multiplierOptions.filter((m) => {
     if (!m.availability) return false;
     return (

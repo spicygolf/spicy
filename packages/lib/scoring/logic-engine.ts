@@ -460,8 +460,10 @@ export function getHoleTeeMultiplierTotalWithOverride(
   }
 
   if (overrides.length > 0) {
-    // Override replaces all non-override user multipliers (use first override)
-    return overrides[0] ?? 1;
+    // Override replaces all non-override user multipliers.
+    // Use max if multiple overrides exist (e.g., both teams set custom independently)
+    // to ensure deterministic results regardless of Object.values() iteration order.
+    return Math.max(...overrides);
   }
 
   // No override — multiply all non-override multipliers together
