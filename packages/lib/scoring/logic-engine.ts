@@ -427,6 +427,47 @@ export function getHoleTeeMultiplierTotal(
   return total;
 }
 
+/**
+ * Get the total of all user-activated (unearned) multipliers for a hole,
+ * respecting the override flag.
+ *
+ * Unlike getHoleTeeMultiplierTotal which naively multiplies all unearned multipliers,
+ * this function mirrors calculateTotalMultiplier() logic: if any unearned multiplier
+ * has override=true, its value replaces all non-override unearned multipliers.
+ *
+ * Used for HoleToolbar display and max_off_tee cap checks.
+ *
+ * @param holeResult - The hole result containing all teams
+ * @returns The effective tee multiplier total, respecting overrides
+ */
+export function getHoleTeeMultiplierTotalWithOverride(
+  holeResult: HoleResult | null,
+): number {
+  if (!holeResult) return 1;
+
+  const overrides: number[] = [];
+  const nonOverrides: number[] = [];
+
+  for (const team of Object.values(holeResult.teams)) {
+    for (const mult of team.multipliers) {
+      if (mult.earned) continue;
+      if (mult.override) {
+        overrides.push(mult.value);
+      } else {
+        nonOverrides.push(mult.value);
+      }
+    }
+  }
+
+  if (overrides.length > 0) {
+    // Override replaces all non-override user multipliers (use first override)
+    return overrides[0] ?? 1;
+  }
+
+  // No override — multiply all non-override multipliers together
+  return nonOverrides.reduce((product, v) => product * v, 1);
+}
+
 // getFrontNinePreDoubleTotal is imported from option-utils.ts
 
 // =============================================================================
