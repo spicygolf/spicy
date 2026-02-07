@@ -20,6 +20,8 @@ import type {
 import {
   evaluateAvailability,
   getFrontNinePreDoubleTotalFromHoles,
+  getHoleTeeMultiplierTotalWithOverride,
+  getOptionValueForHole,
 } from "spicylib/scoring";
 
 /**
@@ -228,11 +230,21 @@ export function getMultiplierValue(
 }
 
 /**
- * Check if a multiplier is available for a team based on its availability condition.
- * Uses the scoring engine's evaluateAvailability function to evaluate JSON Logic.
+ * Check if a multiplier is available for a team based on its availability condition
+ * and the max_off_tee cap.
  *
- * If the multiplier has no availability condition, it's always available.
+ * Two checks are performed:
+ * 1. JSON Logic availability condition (e.g., team_down_the_most)
+ * 2. max_off_tee cap: adding this multiplier must not push the hole's tee total above the cap
+ *
+ * If the multiplier has no availability condition, only the cap check applies.
  * If the context is not available, we can't evaluate so we return true (show it).
+ *
+ * @param mult - The multiplier option to check
+ * @param ctx - The scoring context
+ * @param holeNum - Current hole number as string
+ * @param teamId - The team ID to check availability for
+ * @returns true if the multiplier is available
  */
 export function isMultiplierAvailable(
   mult: MultiplierOption,
@@ -240,9 +252,6 @@ export function isMultiplierAvailable(
   holeNum: string,
   teamId: string,
 ): boolean {
-  // If no availability condition, always available
-  if (!mult.availability) return true;
-
   // If no context, can't evaluate - show the multiplier
   if (!ctx) return true;
 
@@ -255,17 +264,40 @@ export function isMultiplierAvailable(
   const teamResult = holeResult.teams[teamId];
   if (!teamResult) return true;
 
-  try {
-    return evaluateAvailability(
-      mult.availability,
-      teamResult as TeamHoleResult,
-      holeResult,
-      ctx,
-    );
-  } catch {
-    // If evaluation fails, show the multiplier
-    return true;
+  // 1. Check JSON Logic availability condition
+  if (mult.availability) {
+    try {
+      const logicResult = evaluateAvailability(
+        mult.availability,
+        teamResult as TeamHoleResult,
+        holeResult,
+        ctx,
+      );
+      if (!logicResult) return false;
+    } catch {
+      // If evaluation fails, continue to cap check
+    }
   }
+
+  // 2. Check max_off_tee cap (implied condition for all multipliers)
+  const maxOffTee = getOptionValueForHole("max_off_tee", holeNum, ctx);
+  if (typeof maxOffTee === "number" && maxOffTee > 0) {
+    const currentTotal = getHoleTeeMultiplierTotalWithOverride(holeResult);
+    const multValue = mult.value ?? 2;
+
+    // Calculate what the total would be if this multiplier is added
+    let projectedTotal: number;
+    if (mult.override) {
+      // Override multipliers replace all non-override, so just check their own value
+      projectedTotal = multValue;
+    } else {
+      projectedTotal = currentTotal * multValue;
+    }
+
+    if (projectedTotal > maxOffTee) return false;
+  }
+
+  return true;
 }
 
 /**
