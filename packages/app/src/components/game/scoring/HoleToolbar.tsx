@@ -178,6 +178,9 @@ const styles = StyleSheet.create((theme) => ({
   multiplierBadgePlaceholder: {
     paddingHorizontal: theme.gap(1.5),
     paddingVertical: theme.gap(0.5),
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: theme.colors.secondary,
     opacity: 0.35,
   },
   multiplierText: {
