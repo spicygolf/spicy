@@ -164,6 +164,7 @@
   ],
   "patchedDependencies": {
     "react-native-element-dropdown@2.12.4": "patches/react-native-element-dropdown@2.12.4.patch",
+    "react-native-fast-encoder@0.3.1": "patches/react-native-fast-encoder@0.3.1.patch",
   },
   "catalogs": {
     "shared": {

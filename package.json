@@ -9,7 +9,8 @@
   },
   "license": "FSL-1.1-ALv2",
   "patchedDependencies": {
-    "react-native-element-dropdown@2.12.4": "patches/react-native-element-dropdown@2.12.4.patch"
+    "react-native-element-dropdown@2.12.4": "patches/react-native-element-dropdown@2.12.4.patch",
+    "react-native-fast-encoder@0.3.1": "patches/react-native-fast-encoder@0.3.1.patch"
   },
   "scripts": {
     "clean": "del-cli node_modules && bun run --filter './packages/*' clean",
