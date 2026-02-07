@@ -178,8 +178,7 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: 16,
     borderWidth: 2,
     borderColor: theme.colors.border,
-    borderStyle: "dashed",
-    opacity: 0.5,
+    opacity: 0.35,
   },
   multiplierText: {
     fontSize: 18,
