@@ -19,9 +19,15 @@
  *   course: Test Course | Blue | 71.5/128
  *   holes: 1-4-5, 2-5-11, 3-3-15, ...
  *
- *   h1: (p1 p2) vs (p3 p4) | 4 4 5 6 | prox:p1
+ *   h1: (p1 p2) vs (p3 p4) | 4 4 5 6 | prox:p1 | | => | 3 0 | 1 -1 | low_ball:t1
  *   h2: | 5 5 4 5 | birdie:p3 | t2:double
  *   h3: | 4 6 5 5 | | t1:double t2:double_back
+ *
+ * Expected Results (after =>):
+ *   => | holePoints | runningTotals | awards
+ *   The leading | after => is optional (empty segments are stripped).
+ *   Awards can be: team junk (low_ball:t1), player junk (birdie:brad),
+ *   or earned multipliers (birdie_bbq:t1) — disambiguated via optionDefs.
  *
  * IMPORTANT: Player Order Convention
  *   The FIRST player in the players list (p1) is assumed to be the logged-in
@@ -33,7 +39,9 @@
 import type {
   Fixture,
   FixtureCourse,
+  FixtureExpectedEarnedMultiplier,
   FixtureExpectedJunk,
+  FixtureExpectedPlayerJunk,
   FixtureHole,
   FixtureHoleData,
   FixtureHoleExpected,
@@ -332,13 +340,26 @@ function looksLikeMultipliers(segment: string): boolean {
  */
 /**
  * Parse expected results from the right side of =>
- * Format: holePoints | runningTotals | awardedJunk
- * Example: 3 0 | -2 2 | low_ball:2:t2
+ * Format: holePoints | runningTotals | awards
+ * Example: 3 0 | -2 2 | low_ball:t1 birdie:brad birdie_bbq:t1
+ *
+ * Awards segment supports three types:
+ * - Team junk: name:t# (e.g., "low_ball:t1") — looked up from optionDefs.junk
+ * - Player junk: name:player (e.g., "birdie:brad") — name in optionDefs.junk, target is player
+ * - Earned multiplier: name:t# (e.g., "birdie_bbq:t1") — looked up from optionDefs.multipliers
  */
-function parseExpected(expectedStr: string): FixtureHoleExpected | undefined {
+function parseExpected(
+  expectedStr: string,
+  optionDefs?: OptionDefinitions,
+): FixtureHoleExpected | undefined {
   if (!expectedStr.trim()) return undefined;
 
-  const segments = expectedStr.split("|").map((s) => s.trim());
+  // Split by | and drop leading empty segments (supports "=> | 1 0 | ..." syntax)
+  const rawSegments = expectedStr.split("|").map((s) => s.trim());
+  // Drop leading empty segments
+  const firstNonEmpty = rawSegments.findIndex((s) => s !== "");
+  const segments =
+    firstNonEmpty >= 0 ? rawSegments.slice(firstNonEmpty) : rawSegments;
   const expected: FixtureHoleExpected = {};
 
   // First segment: hole points (e.g., "3 0")
@@ -357,12 +378,14 @@ function parseExpected(expectedStr: string): FixtureHoleExpected | undefined {
     }
   }
 
-  // Third+ segments: awarded junk (e.g., "low_ball:2:t1" or "low_ball:t1")
+  // Third segment: awards (team junk, player junk, earned multipliers)
   if (segments[2]) {
-    const junkParts = segments[2].split(/\s+/);
+    const parts = segments[2].split(/\s+/);
     const awardedJunk: FixtureExpectedJunk[] = [];
+    const awardedPlayerJunk: FixtureExpectedPlayerJunk[] = [];
+    const earnedMultipliers: FixtureExpectedEarnedMultiplier[] = [];
 
-    for (const part of junkParts) {
+    for (const part of parts) {
       // Format with points: name:points:team (e.g., "low_ball:2:t1")
       const matchWithPoints = part.match(/^(\w+):(\d+):t(\d+)$/);
       if (matchWithPoints) {
@@ -374,19 +397,45 @@ function parseExpected(expectedStr: string): FixtureHoleExpected | undefined {
         continue;
       }
 
-      // Format without points: name:team (e.g., "low_ball:t1") - points looked up from spec
-      const matchNoPoints = part.match(/^(\w+):t(\d+)$/);
-      if (matchNoPoints) {
-        awardedJunk.push({
-          name: matchNoPoints[1],
-          points: 0, // Will be looked up from spec during assertion generation
-          teamId: matchNoPoints[2],
+      // Team-level: name:t# (e.g., "low_ball:t1" or "birdie_bbq:t1")
+      const matchTeam = part.match(/^(\w+):t(\d+)$/);
+      if (matchTeam) {
+        const name = matchTeam[1];
+        const teamId = matchTeam[2];
+
+        // Use optionDefs to distinguish multipliers from junk
+        if (optionDefs?.multipliers[name]) {
+          earnedMultipliers.push({ name, teamId });
+        } else {
+          awardedJunk.push({
+            name,
+            points: optionDefs?.junk[name] ?? 0,
+            teamId,
+          });
+        }
+        continue;
+      }
+
+      // Player-level: name:player (e.g., "birdie:brad")
+      // IMPORTANT: must come AFTER matchTeam since this is a broader pattern
+      // that would also match "name:t1" if checked first
+      const matchPlayer = part.match(/^(\w+):(\w+)$/);
+      if (matchPlayer) {
+        awardedPlayerJunk.push({
+          name: matchPlayer[1],
+          playerId: matchPlayer[2].toLowerCase(),
         });
       }
     }
 
     if (awardedJunk.length > 0) {
       expected.awardedJunk = awardedJunk;
+    }
+    if (awardedPlayerJunk.length > 0) {
+      expected.awardedPlayerJunk = awardedPlayerJunk;
+    }
+    if (earnedMultipliers.length > 0) {
+      expected.earnedMultipliers = earnedMultipliers;
     }
   }
 
@@ -397,6 +446,7 @@ function parseHoleLine(
   line: string,
   players: FixturePlayer[],
   currentTeams: FixtureTeams,
+  optionDefs?: OptionDefinitions,
 ): { holeNum: string; data: FixtureHoleData; teams: FixtureTeams } {
   // Extract hole number
   const holeMatch = line.match(/^h(\d+):\s*/i);
@@ -451,7 +501,7 @@ function parseHoleLine(
   const multipliers = parseMultipliers(multipliersSegment);
 
   // Parse expected results (assertions)
-  const expected = parseExpected(expectedStr);
+  const expected = parseExpected(expectedStr, optionDefs);
 
   return {
     holeNum,
@@ -525,6 +575,7 @@ export function parseDSL(dsl: string): ParsedDSL {
         line,
         players,
         currentTeams,
+        optionDefs,
       );
       holes[holeNum] = data;
       currentTeams = teams;

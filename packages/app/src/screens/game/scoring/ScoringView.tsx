@@ -670,6 +670,7 @@ export function ScoringView({
                 selected: true,
                 earned: true, // Mark as earned/automatic
                 points: m.value, // Use points field to show multiplier value (e.g., 2 for 2x)
+                ownerId: teamId, // For testID: multiplier-{name}-{teamId}
               };
             });
 
@@ -779,6 +780,7 @@ export function ScoringView({
                         selected: true, // Always selected since we filter to only achieved
                         points: junk.value,
                         calculated: true, // Automatic, not toggleable
+                        ownerId: playerSlug, // For testID: junk-{name}-{playerSlug}
                       }))
                   : [];
 

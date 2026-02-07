@@ -1,6 +1,6 @@
 # Hole 9 (Par 5, Hdcp 13)
-# Scores: brad=4, scott=5, tim=4, eric=5(+1)
-# Multipliers: t1:double t2:double
+# Scores: brad=5, scott=5, tim=8, eric=4(+1)
+# Junk: prox:brad
 
 appId: golf.spicy
 platform:
@@ -13,7 +13,7 @@ platform:
     text: "9"
 
 - tapOn:
-    id: "player-brad-decrement"
+    id: "player-brad-score"
 
 - waitForAnimationToEnd:
     timeout: 500
@@ -25,7 +25,19 @@ platform:
     timeout: 500
 
 - tapOn:
-    id: "player-tim-decrement"
+    id: "player-tim-increment"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "player-tim-increment"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "player-tim-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
@@ -34,19 +46,49 @@ platform:
     id: "player-eric-decrement"
 
 - waitForAnimationToEnd:
+    timeout: 300
+
+- tapOn:
+    id: "player-eric-decrement"
+
+- waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "multiplier-double-1"
+    id: "junk-prox-brad"
 
 - waitForAnimationToEnd:
     timeout: 300
 
-- tapOn:
-    id: "multiplier-double-2"
+- assertVisible:
+    id: "team-1-hole-points"
+    text: "0"
 
-- waitForAnimationToEnd:
-    timeout: 300
+- assertVisible:
+    id: "team-2-hole-points"
+    text: "0"
+
+- assertVisible:
+    id: "team-1-points"
+    text: "+17"
+
+- assertVisible:
+    id: "team-2-points"
+    text: "-17"
+
+- assertVisible:
+    id: "junk-low_ball-2"
+
+- assertVisible:
+    id: "junk-low_ball-2-points"
+    text: "2"
+
+- assertVisible:
+    id: "junk-low_total-1"
+
+- assertVisible:
+    id: "junk-low_total-1-points"
+    text: "2"
 
 - takeScreenshot: "hole_9_complete"
 

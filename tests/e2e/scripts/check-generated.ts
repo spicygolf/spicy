@@ -176,6 +176,7 @@ function checkFlows(): CheckResult[] {
         "add_players.yaml",
         "select_course_tee.yaml",
         "start_game.yaml",
+        "holes.yaml",
         "leaderboard.yaml",
       ];
 

@@ -1,5 +1,6 @@
 # Hole 8 (Par 3, Hdcp 9)
-# Scores: brad=4, scott=4, tim=4, eric=5(+1)
+# Scores: brad=5, scott=2, tim=3, eric=4(+1)
+# Junk: prox:scott
 
 appId: golf.spicy
 platform:
@@ -15,25 +16,70 @@ platform:
     id: "player-brad-increment"
 
 - waitForAnimationToEnd:
-    timeout: 500
+    timeout: 300
 
 - tapOn:
-    id: "player-scott-increment"
+    id: "player-brad-increment"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-tim-increment"
+    id: "player-scott-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-eric-increment"
+    id: "player-tim-score"
 
 - waitForAnimationToEnd:
     timeout: 500
+
+- tapOn:
+    id: "player-eric-score"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn:
+    id: "junk-prox-scott"
+
+- waitForAnimationToEnd:
+    timeout: 300
+
+- assertVisible:
+    id: "team-1-hole-points"
+    text: "2"
+
+- assertVisible:
+    id: "team-2-hole-points"
+    text: "0"
+
+- assertVisible:
+    id: "team-1-points"
+    text: "+17"
+
+- assertVisible:
+    id: "team-2-points"
+    text: "-17"
+
+- assertVisible:
+    id: "junk-low_ball-1"
+
+- assertVisible:
+    id: "junk-low_ball-1-points"
+    text: "2"
+
+- assertVisible:
+    id: "junk-low_total-2"
+
+- assertVisible:
+    id: "junk-low_total-2-points"
+    text: "2"
+
+- assertVisible:
+    id: "junk-birdie-scott"
 
 - takeScreenshot: "hole_8_complete"
 

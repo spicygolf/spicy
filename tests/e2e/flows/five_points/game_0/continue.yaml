@@ -7,5 +7,5 @@ platform:
   ios:
     snapshotKeyHonorModalViews: false
 ---
-# Play all 18 holes
-- runFlow: "holes.yaml"
+- runFlow: "holes/hole_08.yaml"
+- runFlow: "holes/hole_09.yaml"

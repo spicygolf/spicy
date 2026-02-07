@@ -1,6 +1,6 @@
 # Hole 6 (Par 3, Hdcp 17)
-# Scores: brad=5, scott=6, tim=4, eric=6
-# Junk: prox:tim
+# Scores: brad=2, scott=3, tim=3, eric=3
+# Junk: prox:brad
 
 appId: golf.spicy
 platform:
@@ -13,64 +13,70 @@ platform:
     text: "6"
 
 - tapOn:
-    id: "player-brad-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
-
-- tapOn:
-    id: "player-brad-increment"
+    id: "player-brad-decrement"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-scott-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
-
-- tapOn:
-    id: "player-scott-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
-
-- tapOn:
-    id: "player-scott-increment"
+    id: "player-scott-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-tim-increment"
+    id: "player-tim-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "player-eric-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
-
-- tapOn:
-    id: "player-eric-increment"
-
-- waitForAnimationToEnd:
-    timeout: 300
-
-- tapOn:
-    id: "player-eric-increment"
+    id: "player-eric-score"
 
 - waitForAnimationToEnd:
     timeout: 500
 
 - tapOn:
-    id: "junk-prox-tim"
+    id: "junk-prox-brad"
 
 - waitForAnimationToEnd:
     timeout: 300
+
+- assertVisible:
+    id: "team-1-hole-points"
+    text: "12"
+
+- assertVisible:
+    id: "team-2-hole-points"
+    text: "0"
+
+- assertVisible:
+    id: "team-1-points"
+    text: "+19"
+
+- assertVisible:
+    id: "team-2-points"
+    text: "-19"
+
+- assertVisible:
+    id: "junk-low_ball-1"
+
+- assertVisible:
+    id: "junk-low_ball-1-points"
+    text: "2"
+
+- assertVisible:
+    id: "junk-low_total-1"
+
+- assertVisible:
+    id: "junk-low_total-1-points"
+    text: "2"
+
+- assertVisible:
+    id: "junk-birdie-brad"
+
+- assertVisible:
+    id: "multiplier-birdie_bbq-1"
 
 - takeScreenshot: "hole_6_complete"
 
