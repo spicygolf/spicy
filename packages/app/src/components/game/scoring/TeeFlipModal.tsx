@@ -1,23 +1,21 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Modal, View } from "react-native";
 import Animated, {
   Easing,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
-  withSequence,
   withTiming,
 } from "react-native-reanimated";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Text } from "@/ui";
+import { Button, Text } from "@/ui";
 
 interface TeeFlipModalProps {
   /** Whether the modal is visible */
   visible: boolean;
   /** The two team IDs in display order [left, right] */
   teamIds: [string, string];
-  /** Called when the flip animation completes with the winning team ID */
+  /** Called when the user dismisses the result with the winning team ID */
   onFlipComplete: (winnerTeamId: string) => void;
 }
 
@@ -25,15 +23,88 @@ interface TeeFlipModalProps {
 const SPIN_DURATION = 2000;
 /** Number of full rotations before landing */
 const FULL_ROTATIONS = 4;
-/** Delay after landing before calling onFlipComplete (ms) */
-const RESULT_DELAY = 1200;
+
+/**
+ * Golf tee shape drawn with React Native Views, themed for light/dark mode.
+ *
+ * Anatomy (top to bottom, in default upright orientation):
+ * - Cup: wide elliptical top with concave inner
+ * - Shaft: tapered body narrowing toward the bottom
+ * - Point: triangular pointed tip
+ *
+ * The tee is drawn upright and the parent rotates it -90° so it points right
+ * at 0° rotation and left at 180°.
+ */
+function GolfTee({
+  color,
+  borderColor,
+}: {
+  color: string;
+  borderColor: string;
+}) {
+  return (
+    <View style={teeStyles.container}>
+      {/* Cup - wide top with rim */}
+      <View style={[teeStyles.cupOuter, { borderColor }]}>
+        <View style={[teeStyles.cupInner, { backgroundColor: color }]} />
+      </View>
+      {/* Shaft - tapered body */}
+      <View
+        style={[teeStyles.shaft, { backgroundColor: color, borderColor }]}
+      />
+      {/* Point - triangular tip */}
+      <View style={[teeStyles.point, { borderTopColor: color }]} />
+    </View>
+  );
+}
+
+const teeStyles = StyleSheet.create((_theme) => ({
+  container: {
+    alignItems: "center",
+  },
+  cupOuter: {
+    width: 36,
+    height: 12,
+    borderWidth: 2,
+    borderBottomWidth: 0,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    overflow: "hidden",
+    justifyContent: "flex-end",
+  },
+  cupInner: {
+    width: "100%",
+    height: 6,
+    borderTopLeftRadius: 3,
+    borderTopRightRadius: 3,
+  },
+  shaft: {
+    width: 12,
+    height: 50,
+    borderWidth: 2,
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
+    // Slight taper via border radius at bottom
+    borderBottomLeftRadius: 2,
+    borderBottomRightRadius: 2,
+  },
+  point: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 14,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+  },
+}));
 
 /**
  * Animated tee flip modal that randomly selects a team.
  *
  * Displays a spinning golf tee that lands pointing at one of two teams.
  * The winner is pre-calculated at mount time and the animation is purely visual.
- * Result is announced briefly before dismissing via onFlipComplete.
+ * After the animation, the result is shown with an OK button for the user to dismiss.
  *
  * Follows the CustomMultiplierModal pattern for modal structure and styling.
  */
@@ -44,8 +115,8 @@ export function TeeFlipModal({
 }: TeeFlipModalProps): React.ReactElement {
   const { theme } = useUnistyles();
   const rotation = useSharedValue(0);
-  const resultOpacity = useSharedValue(0);
   const hasStarted = useRef(false);
+  const [showResult, setShowResult] = useState(false);
 
   // Pre-calculate winner: 0 = left team (teamIds[0]), 1 = right team (teamIds[1])
   const winnerIndex = useMemo(
@@ -58,17 +129,22 @@ export function TeeFlipModal({
   // Final angle: 0° = pointing right (team 2), 180° = pointing left (team 1)
   const finalAngle = winnerIndex === 0 ? 180 : 0;
 
-  const handleAnimationDone = useCallback(() => {
+  const onAnimationEnd = useCallback(() => {
+    setShowResult(true);
+  }, []);
+
+  const handleDismiss = useCallback(() => {
+    setShowResult(false);
     onFlipComplete(winnerTeamId);
   }, [onFlipComplete, winnerTeamId]);
 
   useEffect(() => {
     if (visible && !hasStarted.current) {
       hasStarted.current = true;
+      setShowResult(false);
 
       // Reset
       rotation.value = 0;
-      resultOpacity.value = 0;
 
       // Target: full rotations + final landing angle
       const targetDeg = FULL_ROTATIONS * 360 + finalAngle;
@@ -83,19 +159,7 @@ export function TeeFlipModal({
         (finished) => {
           "worklet";
           if (finished) {
-            // Show result text, then dismiss
-            resultOpacity.value = withSequence(
-              withTiming(1, { duration: 200 }),
-              withDelay(
-                RESULT_DELAY,
-                withTiming(1, { duration: 0 }, (done) => {
-                  "worklet";
-                  if (done) {
-                    runOnJS(handleAnimationDone)();
-                  }
-                }),
-              ),
-            );
+            runOnJS(onAnimationEnd)();
           }
         },
       );
@@ -103,16 +167,17 @@ export function TeeFlipModal({
 
     if (!visible) {
       hasStarted.current = false;
+      setShowResult(false);
     }
-  }, [visible, finalAngle, rotation, resultOpacity, handleAnimationDone]);
+  }, [visible, finalAngle, rotation, onAnimationEnd]);
 
-  const teeStyle = useAnimatedStyle(() => ({
+  const teeAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
-  const resultStyle = useAnimatedStyle(() => ({
-    opacity: resultOpacity.value,
-  }));
+  // Theme-aware tee colors
+  const teeColor = theme.colors.primary;
+  const teeBorderColor = theme.colors.secondary;
 
   return (
     <Modal
@@ -135,20 +200,10 @@ export function TeeFlipModal({
             </View>
 
             {/* Spinning tee */}
-            <Animated.View style={[styles.teeWrapper, teeStyle]}>
-              <View style={styles.teeShape}>
-                <View
-                  style={[
-                    styles.teeHead,
-                    { backgroundColor: theme.colors.action },
-                  ]}
-                />
-                <View
-                  style={[
-                    styles.teePoint,
-                    { borderTopColor: theme.colors.action },
-                  ]}
-                />
+            <Animated.View style={[styles.teeWrapper, teeAnimatedStyle]}>
+              {/* Rotate tee -90° so it points right at 0° */}
+              <View style={styles.teeRotator}>
+                <GolfTee color={teeColor} borderColor={teeBorderColor} />
               </View>
             </Animated.View>
 
@@ -160,12 +215,17 @@ export function TeeFlipModal({
             </View>
           </View>
 
-          {/* Winner announcement */}
-          <Animated.View style={[styles.resultContainer, resultStyle]}>
-            <Text style={[styles.resultText, { color: theme.colors.action }]}>
-              Team {winnerTeamId} wins the tee!
-            </Text>
-          </Animated.View>
+          {/* Winner announcement + OK button */}
+          {showResult && (
+            <View style={styles.resultContainer}>
+              <Text style={[styles.resultText, { color: theme.colors.action }]}>
+                Team {winnerTeamId} wins the tee!
+              </Text>
+              <View style={styles.okButton}>
+                <Button label="OK" onPress={handleDismiss} />
+              </View>
+            </View>
+          )}
         </View>
       </View>
     </Modal>
@@ -211,40 +271,25 @@ const styles = StyleSheet.create((theme) => ({
     textAlign: "center",
   },
   teeWrapper: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     alignItems: "center",
     justifyContent: "center",
   },
-  // CSS-drawn golf tee: a rectangle (head) with a triangle (point) below it,
-  // rotated so the tee points right at 0° and left at 180°.
-  // The whole shape is rotated -90° by default so the triangle points right.
-  teeShape: {
-    alignItems: "center",
+  // Rotate the tee shape -90° so its point faces right at 0° rotation
+  teeRotator: {
     transform: [{ rotate: "-90deg" }],
   },
-  teeHead: {
-    width: 40,
-    height: 10,
-    borderRadius: 3,
-  },
-  teePoint: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 8,
-    borderRightWidth: 8,
-    borderTopWidth: 40,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-  },
   resultContainer: {
-    minHeight: 30,
-    justifyContent: "center",
     alignItems: "center",
+    gap: theme.gap(2),
   },
   resultText: {
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  okButton: {
+    minWidth: 120,
   },
 }));
