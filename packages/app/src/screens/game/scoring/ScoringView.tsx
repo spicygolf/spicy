@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole, MultiplierOption, Team } from "spicylib/schema";
@@ -22,6 +22,7 @@ import {
   HoleToolbar,
   PlayerScoreRow,
   TeamGroup,
+  TeeFlipModal,
 } from "@/components/game/scoring";
 import type { OptionButton } from "@/components/game/scoring/OptionsButtons";
 import type { HoleInfo } from "@/hooks";
@@ -35,11 +36,13 @@ import {
   getMultiplierOptions,
   getMultiplierValue,
   getTeamMultiplierStatus,
+  getTeeFlipWinner,
   getUserJunkOptions,
   hasCalculatedPlayerJunk,
   hasCalculatedTeamJunk,
   hasPlayerJunk,
   isMultiplierAvailable,
+  isTeeFlipRequired,
 } from "./scoringUtils";
 
 export interface ScoringViewProps {
@@ -47,6 +50,8 @@ export interface ScoringViewProps {
   holeInfo: HoleInfo;
   currentHole: GameHole | null;
   currentHoleIndex: number;
+  /** Ordered list of hole number strings from useHoleNavigation */
+  holesList: string[];
   scoreboard: Scoreboard | null;
   scoringContext: ScoringContext | null;
   onPrevHole: () => void;
@@ -360,11 +365,39 @@ function clearCustomMultiplier(
   }
 }
 
+/**
+ * Record the tee flip winner by storing a TeamOption on the winning team.
+ *
+ * @param team - The team that won the tee flip
+ * @param currentHoleNumber - The hole number to record the result for
+ */
+function recordTeeFlipWinner(team: Team, currentHoleNumber: string): void {
+  const owner = team.$jazz.owner;
+
+  if (!team.$jazz.has("options")) {
+    team.$jazz.set("options", ListOfTeamOptions.create([], { owner }));
+  }
+
+  const options = team.options;
+  if (!options?.$isLoaded) return;
+
+  const newOption = TeamOption.create(
+    {
+      optionName: "tee_flip_winner",
+      value: "true",
+      firstHole: currentHoleNumber,
+    },
+    { owner },
+  );
+  options.$jazz.push(newOption);
+}
+
 export function ScoringView({
   game,
   holeInfo,
   currentHole,
   currentHoleIndex,
+  holesList,
   scoreboard,
   scoringContext,
   onPrevHole,
@@ -538,6 +571,41 @@ export function ScoringView({
     }
   }
 
+  // --- Tee Flip Logic ---
+  // Determines if a tee flip is needed (2-team game, tied going into this hole)
+  // and reads/stores the result as a TeamOption.
+  const teeFlipRequired = isTeeFlipRequired(
+    scoreboard,
+    currentHoleIndex,
+    holesList,
+    allTeams.length,
+    teamMultiplierOptions.length > 0,
+  );
+
+  const teeFlipWinner = getTeeFlipWinner(allTeams, currentHoleNumber);
+
+  const [showTeeFlipModal, setShowTeeFlipModal] = useState(false);
+
+  // Auto-show modal when flip is required but no winner stored yet
+  useEffect(() => {
+    if (teeFlipRequired && !teeFlipWinner && allTeams.length === 2) {
+      setShowTeeFlipModal(true);
+    } else {
+      setShowTeeFlipModal(false);
+    }
+  }, [teeFlipRequired, teeFlipWinner, allTeams.length]);
+
+  const handleTeeFlipComplete = useCallback(
+    (winnerTeamId: string) => {
+      const winnerTeam = allTeams.find((t) => t.team === winnerTeamId);
+      if (winnerTeam) {
+        recordTeeFlipWinner(winnerTeam, currentHoleNumber);
+      }
+      setShowTeeFlipModal(false);
+    },
+    [allTeams, currentHoleNumber],
+  );
+
   // Handler for setting custom multiplier
   const handleSetCustomMultiplier = (value: number): void => {
     if (!customMultiplierOption) return;
@@ -608,6 +676,13 @@ export function ScoringView({
         onClear={handleClearCustomMultiplier}
         onClose={() => setCustomMultiplierModalVisible(false)}
       />
+      {allTeams.length === 2 && (
+        <TeeFlipModal
+          visible={showTeeFlipModal}
+          teamIds={[allTeams[0]?.team ?? "1", allTeams[1]?.team ?? "2"]}
+          onFlipComplete={handleTeeFlipComplete}
+        />
+      )}
       <FlatList
         style={styles.content}
         data={allTeams}
@@ -633,8 +708,14 @@ export function ScoringView({
 
           const multiplierButtons: OptionButton[] = [];
 
+          // If tee flip is required, only the winning team sees multiplier buttons
+          const teeFlipBlocksTeam =
+            teeFlipRequired && (!teeFlipWinner || teeFlipWinner !== teamId);
+
           // If an override multiplier (non-custom) is active on this hole
-          if (holeHasActiveOverride && activeOverrideMult) {
+          if (teeFlipBlocksTeam) {
+            // This team lost the tee flip (or flip hasn't happened yet) — no multiplier buttons
+          } else if (holeHasActiveOverride && activeOverrideMult) {
             // Only show the override button on the team that owns it
             if (teamId === overrideOwnerTeamId) {
               multiplierButtons.push({
