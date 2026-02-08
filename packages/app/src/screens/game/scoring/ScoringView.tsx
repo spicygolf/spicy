@@ -608,12 +608,17 @@ export function ScoringView({
     null,
   );
 
+  // Reset modal when navigating to a different hole
+  useEffect(() => {
+    setTeeFlipMode(null);
+  }, [currentHoleIndex]);
+
   // Auto-show modal when flip is required but no winner stored yet
   useEffect(() => {
     if (teeFlipRequired && !teeFlipWinner && allTeams.length === 2) {
       setTeeFlipMode("flip");
     } else {
-      setTeeFlipMode((prev) => (prev === "flip" ? null : prev));
+      setTeeFlipMode(null);
     }
   }, [teeFlipRequired, teeFlipWinner, allTeams.length]);
 
