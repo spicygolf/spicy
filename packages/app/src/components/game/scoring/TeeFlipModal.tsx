@@ -135,8 +135,7 @@ export function TeeFlipModal({
       return idx >= 0 ? idx : 0;
     }
     return Math.random() < 0.5 ? 0 : 1;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, predeterminedWinner]);
+  }, [visible, predeterminedWinner, teamIds]);
   const winnerTeamId = teamIds[winnerIndex];
 
   // Final angle: 0° = pointing right (team 2), 180° = pointing left (team 1)

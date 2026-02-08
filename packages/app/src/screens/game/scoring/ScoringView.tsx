@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole, MultiplierOption, Team } from "spicylib/schema";
@@ -381,6 +381,17 @@ function recordTeeFlipWinner(team: Team, currentHoleNumber: string): void {
   const options = team.options;
   if (!options?.$isLoaded) return;
 
+  // Guard against duplicate entries for the same hole
+  for (const opt of options) {
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === "tee_flip_winner" &&
+      opt.firstHole === currentHoleNumber
+    ) {
+      return;
+    }
+  }
+
   const newOption = TeamOption.create(
     {
       optionName: "tee_flip_winner",
@@ -584,27 +595,39 @@ export function ScoringView({
 
   const teeFlipWinner = getTeeFlipWinner(allTeams, currentHoleNumber);
 
-  const [showTeeFlipModal, setShowTeeFlipModal] = useState(false);
-  const [showReplayModal, setShowReplayModal] = useState(false);
+  // Stabilize teamIds so TeeFlipModal's useMemo doesn't re-roll on every render
+  const team1Id = allTeams[0]?.team ?? "1";
+  const team2Id = allTeams[1]?.team ?? "2";
+  const teeFlipTeamIds = useMemo(
+    (): [string, string] => [team1Id, team2Id],
+    [team1Id, team2Id],
+  );
+
+  // Single modal: "flip" = random first flip, "replay" = replay previous result
+  const [teeFlipMode, setTeeFlipMode] = useState<"flip" | "replay" | null>(
+    null,
+  );
 
   // Auto-show modal when flip is required but no winner stored yet
   useEffect(() => {
     if (teeFlipRequired && !teeFlipWinner && allTeams.length === 2) {
-      setShowTeeFlipModal(true);
+      setTeeFlipMode("flip");
     } else {
-      setShowTeeFlipModal(false);
+      setTeeFlipMode((prev) => (prev === "flip" ? null : prev));
     }
   }, [teeFlipRequired, teeFlipWinner, allTeams.length]);
 
   const handleTeeFlipComplete = useCallback(
     (winnerTeamId: string) => {
-      const winnerTeam = allTeams.find((t) => t.team === winnerTeamId);
-      if (winnerTeam) {
-        recordTeeFlipWinner(winnerTeam, currentHoleNumber);
+      if (teeFlipMode === "flip") {
+        const winnerTeam = allTeams.find((t) => t.team === winnerTeamId);
+        if (winnerTeam) {
+          recordTeeFlipWinner(winnerTeam, currentHoleNumber);
+        }
       }
-      setShowTeeFlipModal(false);
+      setTeeFlipMode(null);
     },
-    [allTeams, currentHoleNumber],
+    [teeFlipMode, allTeams, currentHoleNumber],
   );
 
   // Handler for setting custom multiplier
@@ -678,19 +701,14 @@ export function ScoringView({
         onClose={() => setCustomMultiplierModalVisible(false)}
       />
       {allTeams.length === 2 && (
-        <>
-          <TeeFlipModal
-            visible={showTeeFlipModal}
-            teamIds={[allTeams[0]?.team ?? "1", allTeams[1]?.team ?? "2"]}
-            onFlipComplete={handleTeeFlipComplete}
-          />
-          <TeeFlipModal
-            visible={showReplayModal}
-            teamIds={[allTeams[0]?.team ?? "1", allTeams[1]?.team ?? "2"]}
-            predeterminedWinner={teeFlipWinner ?? undefined}
-            onFlipComplete={() => setShowReplayModal(false)}
-          />
-        </>
+        <TeeFlipModal
+          visible={teeFlipMode !== null}
+          teamIds={teeFlipTeamIds}
+          predeterminedWinner={
+            teeFlipMode === "replay" ? (teeFlipWinner ?? undefined) : undefined
+          }
+          onFlipComplete={handleTeeFlipComplete}
+        />
       )}
       <FlatList
         style={styles.content}
@@ -721,10 +739,11 @@ export function ScoringView({
           const teeFlipBlocksTeam =
             teeFlipRequired && (!teeFlipWinner || teeFlipWinner !== teamId);
 
-          // If an override multiplier (non-custom) is active on this hole
-          if (teeFlipBlocksTeam) {
-            // This team lost the tee flip (or flip hasn't happened yet) — no multiplier buttons
-          } else if (holeHasActiveOverride && activeOverrideMult) {
+          if (
+            !teeFlipBlocksTeam &&
+            holeHasActiveOverride &&
+            activeOverrideMult
+          ) {
             // Only show the override button on the team that owns it
             if (teamId === overrideOwnerTeamId) {
               multiplierButtons.push({
@@ -738,7 +757,7 @@ export function ScoringView({
               });
             }
             // Other teams show nothing
-          } else if (!customMultiplierState.isActive) {
+          } else if (!teeFlipBlocksTeam && !customMultiplierState.isActive) {
             // Normal case: build all multiplier buttons (but not when custom multiplier is active)
             for (const mult of teamMultiplierOptions) {
               const status = getTeamMultiplierStatus(
@@ -923,7 +942,7 @@ export function ScoringView({
               teeFlipWinner={teeFlipRequired && teeFlipWinner === teamId}
               onTeeFlipReplay={
                 teeFlipRequired && teeFlipWinner === teamId
-                  ? () => setShowReplayModal(true)
+                  ? () => setTeeFlipMode("replay")
                   : undefined
               }
             >
