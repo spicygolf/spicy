@@ -228,17 +228,18 @@ export function TeeFlipModal({
             </View>
           </View>
 
-          {/* Winner announcement + OK button */}
-          {showResult && (
-            <View style={styles.resultContainer}>
-              <Text style={[styles.resultText, { color: theme.colors.action }]}>
-                Team {winnerTeamId} wins the tee flip!
-              </Text>
-              <View style={styles.okButton}>
-                <Button label="OK" onPress={handleDismiss} />
-              </View>
+          {/* Winner announcement + OK button (always rendered for fixed height) */}
+          <View
+            style={[styles.resultContainer, { opacity: showResult ? 1 : 0 }]}
+            pointerEvents={showResult ? "auto" : "none"}
+          >
+            <Text style={[styles.resultText, { color: theme.colors.action }]}>
+              Team {winnerTeamId} wins the tee flip!
+            </Text>
+            <View style={styles.okButton}>
+              <Button label="OK" onPress={handleDismiss} />
             </View>
-          )}
+          </View>
         </View>
       </View>
     </Modal>
