@@ -187,13 +187,13 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "bold",
   },
   teeFlipIcon: {
-    // Constrain layout box to match the 0.35-scaled tee (~13x27)
-    // so it doesn't take extra space from the un-scaled 36x76 box
-    width: 14,
-    height: 28,
+    // Constrain layout box to roughly match the 0.35-scaled tee
+    // with a little breathing room so it doesn't clip
+    width: 20,
+    height: 32,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
-    marginRight: theme.gap(0.25),
+    marginRight: theme.gap(0.5),
   },
 }));
