@@ -17,6 +17,12 @@ interface TeeFlipModalProps {
   teamIds: [string, string];
   /** Called when the user dismisses the result with the winning team ID */
   onFlipComplete: (winnerTeamId: string) => void;
+  /**
+   * If set, the flip always lands on this team (replay mode).
+   * Used when tapping the tee icon to replay a previously decided flip.
+   * When undefined, winner is chosen randomly.
+   */
+  predeterminedWinner?: string;
 }
 
 /** Total spin duration in ms */
@@ -35,15 +41,18 @@ const FULL_ROTATIONS = 4;
  * The tee is drawn upright and the parent rotates it -90° so it points right
  * at 0° rotation and left at 180°.
  */
-function GolfTee({
+export function GolfTee({
   color,
   borderColor,
+  scale = 1,
 }: {
   color: string;
   borderColor: string;
+  /** Size multiplier (default 1.0, use ~0.35 for inline icon) */
+  scale?: number;
 }) {
   return (
-    <View style={teeStyles.container}>
+    <View style={[teeStyles.container, { transform: [{ scale }] }]}>
       {/* Cup - wide top with rim */}
       <View style={[teeStyles.cupOuter, { borderColor }]}>
         <View style={[teeStyles.cupInner, { backgroundColor: color }]} />
@@ -112,18 +121,22 @@ export function TeeFlipModal({
   visible,
   teamIds,
   onFlipComplete,
+  predeterminedWinner,
 }: TeeFlipModalProps): React.ReactElement {
   const { theme } = useUnistyles();
   const rotation = useSharedValue(0);
   const hasStarted = useRef(false);
   const [showResult, setShowResult] = useState(false);
 
-  // Pre-calculate winner: 0 = left team (teamIds[0]), 1 = right team (teamIds[1])
-  const winnerIndex = useMemo(
-    () => (Math.random() < 0.5 ? 0 : 1),
+  // Determine winner: use predetermined (replay) or random (first flip)
+  const winnerIndex = useMemo(() => {
+    if (predeterminedWinner !== undefined) {
+      const idx = teamIds.indexOf(predeterminedWinner);
+      return idx >= 0 ? idx : 0;
+    }
+    return Math.random() < 0.5 ? 0 : 1;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [visible],
-  );
+  }, [visible, predeterminedWinner]);
   const winnerTeamId = teamIds[winnerIndex];
 
   // Final angle: 0° = pointing right (team 2), 180° = pointing left (team 1)
@@ -219,7 +232,7 @@ export function TeeFlipModal({
           {showResult && (
             <View style={styles.resultContainer}>
               <Text style={[styles.resultText, { color: theme.colors.action }]}>
-                Team {winnerTeamId} wins the tee!
+                Team {winnerTeamId} wins the tee flip!
               </Text>
               <View style={styles.okButton}>
                 <Button label="OK" onPress={handleDismiss} />

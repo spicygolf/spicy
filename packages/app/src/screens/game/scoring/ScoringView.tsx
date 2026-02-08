@@ -585,6 +585,7 @@ export function ScoringView({
   const teeFlipWinner = getTeeFlipWinner(allTeams, currentHoleNumber);
 
   const [showTeeFlipModal, setShowTeeFlipModal] = useState(false);
+  const [showReplayModal, setShowReplayModal] = useState(false);
 
   // Auto-show modal when flip is required but no winner stored yet
   useEffect(() => {
@@ -677,11 +678,19 @@ export function ScoringView({
         onClose={() => setCustomMultiplierModalVisible(false)}
       />
       {allTeams.length === 2 && (
-        <TeeFlipModal
-          visible={showTeeFlipModal}
-          teamIds={[allTeams[0]?.team ?? "1", allTeams[1]?.team ?? "2"]}
-          onFlipComplete={handleTeeFlipComplete}
-        />
+        <>
+          <TeeFlipModal
+            visible={showTeeFlipModal}
+            teamIds={[allTeams[0]?.team ?? "1", allTeams[1]?.team ?? "2"]}
+            onFlipComplete={handleTeeFlipComplete}
+          />
+          <TeeFlipModal
+            visible={showReplayModal}
+            teamIds={[allTeams[0]?.team ?? "1", allTeams[1]?.team ?? "2"]}
+            predeterminedWinner={teeFlipWinner ?? undefined}
+            onFlipComplete={() => setShowReplayModal(false)}
+          />
+        </>
       )}
       <FlatList
         style={styles.content}
@@ -911,6 +920,12 @@ export function ScoringView({
               holeMultiplier={overallMultiplier}
               holePoints={displayPoints}
               runningDiff={teamHoleResult?.runningDiff ?? 0}
+              teeFlipWinner={teeFlipRequired && teeFlipWinner === teamId}
+              onTeeFlipReplay={
+                teeFlipRequired && teeFlipWinner === teamId
+                  ? () => setShowReplayModal(true)
+                  : undefined
+              }
             >
               {team.rounds.map((roundToTeam) => {
                 if (!roundToTeam?.$isLoaded) return null;
