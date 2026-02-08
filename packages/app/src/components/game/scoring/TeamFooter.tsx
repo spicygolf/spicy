@@ -1,7 +1,8 @@
-import { View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { Pressable, View } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";
 import { type OptionButton, OptionsButtons } from "./OptionsButtons";
+import { GolfTee } from "./TeeFlipModal";
 
 interface TeamFooterProps {
   /** Team ID for testID generation (e2e testing) */
@@ -22,6 +23,10 @@ interface TeamFooterProps {
   holePoints?: number;
   /** Running difference vs opponent (positive = winning, negative = losing) */
   runningDiff?: number;
+  /** Whether this team won the tee flip on this hole */
+  teeFlipWinner?: boolean;
+  /** Called when the tee flip icon is tapped to replay the animation */
+  onTeeFlipReplay?: () => void;
 }
 
 export function TeamFooter({
@@ -34,7 +39,10 @@ export function TeamFooter({
   holeMultiplier = 1,
   holePoints = 0,
   runningDiff = 0,
+  teeFlipWinner = false,
+  onTeeFlipReplay,
 }: TeamFooterProps) {
+  const { theme } = useUnistyles();
   const hasTeamJunk = teamJunkOptions.some((j) => j.selected);
   const hasMultipliers = multiplierOptions.length > 0;
   const hasEarnedMultipliers = earnedMultipliers.length > 0;
@@ -46,10 +54,27 @@ export function TeamFooter({
   return (
     <View style={styles.container}>
       {/* Options row: 50/50 split - Left (multipliers) / Right (junk) */}
-      {(hasMultipliers || hasEarnedMultipliers || hasTeamJunk) && (
+      {(hasMultipliers ||
+        hasEarnedMultipliers ||
+        hasTeamJunk ||
+        teeFlipWinner) && (
         <View style={styles.optionsRow}>
-          {/* Left half: Multiplier press buttons + earned multipliers */}
+          {/* Left half: Tee flip icon + Multiplier press buttons + earned multipliers */}
           <View style={styles.leftSection}>
+            {teeFlipWinner && (
+              <Pressable
+                onPress={onTeeFlipReplay}
+                hitSlop={12}
+                style={styles.teeFlipIcon}
+                accessibilityLabel="Replay tee flip"
+              >
+                <GolfTee
+                  color={theme.colors.primary}
+                  borderColor={theme.colors.secondary}
+                  scale={0.35}
+                />
+              </Pressable>
+            )}
             {hasMultipliers && (
               <OptionsButtons
                 options={multiplierOptions}
@@ -123,8 +148,10 @@ const styles = StyleSheet.create((theme) => ({
   },
   leftSection: {
     flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: theme.gap(0.5),
-    alignItems: "flex-start",
+    alignItems: "center",
   },
   rightSection: {
     flex: 1,
@@ -158,5 +185,15 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 18,
     color: theme.colors.primary,
     fontWeight: "bold",
+  },
+  teeFlipIcon: {
+    // Constrain layout box to roughly match the 0.35-scaled tee
+    // with a little breathing room so it doesn't clip
+    width: 20,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    marginRight: theme.gap(0.5),
   },
 }));

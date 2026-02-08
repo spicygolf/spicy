@@ -25,6 +25,10 @@ interface TeamGroupProps {
   holePoints?: number;
   /** Running difference vs opponent (positive = winning, negative = losing) */
   runningDiff?: number;
+  /** Whether this team won the tee flip on this hole */
+  teeFlipWinner?: boolean;
+  /** Called when the tee flip icon is tapped to replay the animation */
+  onTeeFlipReplay?: () => void;
   children: React.ReactNode;
 }
 
@@ -39,6 +43,8 @@ export function TeamGroup({
   holeMultiplier,
   holePoints,
   runningDiff,
+  teeFlipWinner,
+  onTeeFlipReplay,
   children,
 }: TeamGroupProps) {
   return (
@@ -64,6 +70,8 @@ export function TeamGroup({
         holeMultiplier={holeMultiplier}
         holePoints={holePoints}
         runningDiff={runningDiff}
+        teeFlipWinner={teeFlipWinner}
+        onTeeFlipReplay={onTeeFlipReplay}
       />
     </View>
   );

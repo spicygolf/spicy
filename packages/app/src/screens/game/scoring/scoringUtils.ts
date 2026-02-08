@@ -344,6 +344,77 @@ export function getTeamMultiplierStatus(
 }
 
 /**
+ * Check if a hole requires a tee flip to determine which team gets multiplier buttons.
+ *
+ * Required when teams are tied going into this hole (previous hole's runningDiff === 0
+ * for all teams) or when there is no previous hole result (first hole of the round).
+ * Only applies to 2-team games with user-based multiplier options.
+ *
+ * Uses holesList ordering (not hole number arithmetic) to find the previous hole,
+ * so it is forward-compatible with shotgun starts where the round may begin on any hole.
+ *
+ * @param scoreboard - Current game scoreboard
+ * @param currentHoleIndex - 0-based index into holesList
+ * @param holesList - Ordered list of hole number strings from useHoleNavigation
+ * @param teamCount - Number of teams on the current hole
+ * @param hasMultiplierOptions - Whether the game has user-based team multiplier options
+ * @returns true if a tee flip is needed before showing multiplier buttons
+ */
+export function isTeeFlipRequired(
+  scoreboard: Scoreboard | null,
+  currentHoleIndex: number,
+  holesList: string[],
+  teamCount: number,
+  hasMultiplierOptions: boolean,
+): boolean {
+  if (teamCount !== 2 || !hasMultiplierOptions) return false;
+
+  // Find previous hole by list position, not by hole number arithmetic
+  const prevHoleNumber =
+    currentHoleIndex > 0 ? holesList[currentHoleIndex - 1] : undefined;
+
+  // No previous hole (first hole of round) → always tied
+  if (!prevHoleNumber) return true;
+
+  const prevHoleResult = scoreboard?.holes?.[prevHoleNumber];
+  if (!prevHoleResult) return true;
+
+  const teams = Object.values(prevHoleResult.teams);
+  if (teams.length < 2) return false;
+
+  return teams.every((t) => (t.runningDiff ?? 0) === 0);
+}
+
+/**
+ * Get the tee flip winner team ID from the stored TeamOption.
+ *
+ * Scans all teams' options for a "tee_flip_winner" option matching the current hole.
+ * Returns null if no tee flip result has been recorded for this hole.
+ *
+ * @param allTeams - All teams on the current hole
+ * @param currentHoleNumber - Current hole number as string
+ * @returns The winning team's ID, or null if no result stored
+ */
+export function getTeeFlipWinner(
+  allTeams: Team[],
+  currentHoleNumber: string,
+): string | null {
+  for (const team of allTeams) {
+    if (!team?.$isLoaded || !team.options?.$isLoaded) continue;
+    for (const opt of team.options) {
+      if (
+        opt?.$isLoaded &&
+        opt.optionName === "tee_flip_winner" &&
+        opt.firstHole === currentHoleNumber
+      ) {
+        return team.team ?? null;
+      }
+    }
+  }
+  return null;
+}
+
+/**
  * Custom multiplier state for the hole toolbar
  */
 export interface CustomMultiplierState {
