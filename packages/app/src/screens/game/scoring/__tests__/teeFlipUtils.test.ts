@@ -5,6 +5,8 @@ import { getTeeFlipWinner, isTeeFlipRequired } from "../scoringUtils";
 
 // =============================================================================
 // Mock Helpers
+// These mocks use Symbol.iterator to mimic Jazz CoList iteration behavior.
+// If the CoList API changes, these mocks will need to be updated accordingly.
 // =============================================================================
 
 function makeScoreboard(
