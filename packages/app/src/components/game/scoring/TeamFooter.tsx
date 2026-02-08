@@ -148,8 +148,10 @@ const styles = StyleSheet.create((theme) => ({
   },
   leftSection: {
     flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: theme.gap(0.5),
-    alignItems: "flex-start",
+    alignItems: "center",
   },
   rightSection: {
     flex: 1,
@@ -185,9 +187,8 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "bold",
   },
   teeFlipIcon: {
-    width: 24,
-    height: 32,
     alignItems: "center",
     justifyContent: "center",
+    marginRight: theme.gap(0.25),
   },
 }));
