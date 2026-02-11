@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Button, Input, ModalHeader } from "@/ui";
@@ -16,28 +16,22 @@ export function GameNameModal({
   onSave,
   onClose,
 }: GameNameModalProps) {
+  // Component unmounts when not visible (early return below),
+  // so state is fresh from currentName on each mount.
   const [inputValue, setInputValue] = useState(currentName);
-  const prevVisibleRef = useRef(false);
-
-  // Reset input only when modal opens (visible transitions false → true).
-  useEffect(
-    function resetInputWhenModalOpens() {
-      if (visible && !prevVisibleRef.current) {
-        setInputValue(currentName);
-      }
-      prevVisibleRef.current = visible;
-    },
-    [visible, currentName],
-  );
 
   const handleSave = () => {
     const trimmed = inputValue.trim();
     if (trimmed === "") {
       return;
     }
-    onSave(trimmed);
     onClose();
+    onSave(trimmed);
   };
+
+  if (!visible) {
+    return null;
+  }
 
   return (
     <Modal

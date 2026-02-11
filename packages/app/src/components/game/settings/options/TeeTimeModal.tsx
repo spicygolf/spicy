@@ -1,6 +1,6 @@
 import type { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Modal, Platform, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { formatDate, formatTime } from "spicylib/utils";
@@ -22,22 +22,11 @@ export function TeeTimeModal({
   onClose,
 }: TeeTimeModalProps) {
   const { theme } = useUnistyles();
+  // Component unmounts when not visible (early return below),
+  // so state is fresh from currentDate on each mount.
   const [selectedDate, setSelectedDate] = useState<Date>(currentDate);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const prevVisibleRef = useRef(false);
-
-  // Reset selectedDate only when the modal opens (visible transitions false → true).
-  // Using a ref to avoid depending on currentDate which changes after save.
-  useEffect(
-    function resetSelectedDateOnOpen() {
-      if (visible && !prevVisibleRef.current) {
-        setSelectedDate(currentDate);
-      }
-      prevVisibleRef.current = visible;
-    },
-    [visible, currentDate],
-  );
 
   function handleDateChange(_event: DateTimePickerEvent, date?: Date): void {
     if (Platform.OS === "android") {
@@ -66,8 +55,12 @@ export function TeeTimeModal({
   }
 
   function handleSave(): void {
-    onSave(selectedDate);
     onClose();
+    onSave(selectedDate);
+  }
+
+  if (!visible) {
+    return null;
   }
 
   return (
