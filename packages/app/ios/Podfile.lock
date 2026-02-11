@@ -2133,6 +2133,28 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - RNDateTimePicker (8.6.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - RNDeviceInfo (15.0.1):
     - React-Core
   - RNGestureHandler (2.30.0):
@@ -2489,6 +2511,7 @@ DEPENDENCIES:
   - ReactNativeDependencies (from `../../../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - "RNCAsyncStorage (from `../../../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../../../node_modules/@react-native-clipboard/clipboard`)"
+  - "RNDateTimePicker (from `../../../node_modules/@react-native-community/datetimepicker`)"
   - RNDeviceInfo (from `../../../node_modules/react-native-device-info`)
   - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
   - RNLocalize (from `../../../node_modules/react-native-localize`)
@@ -2683,6 +2706,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@react-native-async-storage/async-storage"
   RNCClipboard:
     :path: "../../../node_modules/@react-native-clipboard/clipboard"
+  RNDateTimePicker:
+    :path: "../../../node_modules/@react-native-community/datetimepicker"
   RNDeviceInfo:
     :path: "../../../node_modules/react-native-device-info"
   RNGestureHandler:
@@ -2791,6 +2816,7 @@ SPEC CHECKSUMS:
   ReactNativeDependencies: 83f9c087ddd53b184282e568a9f8b3696ba3d0d1
   RNCAsyncStorage: 3a4f5e2777dae1688b781a487923a08569e27fe4
   RNCClipboard: 88d7eeb555d1183915f0885bdbc5c97eb6f7f3ba
+  RNDateTimePicker: 9c0a849bbe1c256f0854fea255734b715f5ea876
   RNDeviceInfo: 36d7f232bfe7c9b5c494cb7793230424ed32c388
   RNGestureHandler: 07de6f059e0ee5744ae9a56feb07ee345338cc31
   RNLocalize: 83a242b38886bf7e84073410c101e9ea39a1c1a5
@@ -2802,6 +2828,6 @@ SPEC CHECKSUMS:
   Unistyles: 8d7f0737e386c77f91c36ebe746fbb067812c71f
   Yoga: 190115321a7f88939365f5d6667bfdf75bbe30a8
 
-PODFILE CHECKSUM: f9ac4d89ed878213a5d35a59944cd91bf5701498
+PODFILE CHECKSUM: 1ff43681675691ef2ad39523ab50dfd93c50e6e0
 
 COCOAPODS: 1.15.2
