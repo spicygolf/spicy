@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Button, Input, ModalHeader } from "@/ui";
@@ -17,12 +17,15 @@ export function GameNameModal({
   onClose,
 }: GameNameModalProps) {
   const [inputValue, setInputValue] = useState(currentName);
+  const prevVisibleRef = useRef(false);
 
+  // Reset input only when modal opens (visible transitions false → true).
   useEffect(
     function resetInputWhenModalOpens() {
-      if (visible) {
+      if (visible && !prevVisibleRef.current) {
         setInputValue(currentName);
       }
+      prevVisibleRef.current = visible;
     },
     [visible, currentName],
   );
