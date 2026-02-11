@@ -2,10 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption, JunkOption, MultiplierOption } from "spicylib/schema";
+import { isEveningCreation } from "spicylib/utils";
 import { useGame, useSaveOptionToGame, useTeamsMode } from "@/hooks";
-import { Text } from "@/ui";
 import { BoolOptionModal } from "./BoolOptionModal";
 import { DeleteGameButton } from "./DeleteGameButton";
+import { GameNameModal } from "./GameNameModal";
+import { GameNameRow } from "./GameNameRow";
 import { GameOptionRow } from "./GameOptionRow";
 import { JunkOptionRow } from "./JunkOptionRow";
 import { MenuOptionModal } from "./MenuOptionModal";
@@ -14,6 +16,8 @@ import { NumOptionModal } from "./NumOptionModal";
 import { OptionSectionHeader } from "./OptionSectionHeader";
 import { RemoveOptionModal } from "./RemoveOptionModal";
 import { ResetSpecButton } from "./ResetSpecButton";
+import { TeeTimeModal } from "./TeeTimeModal";
+import { TeeTimeRow } from "./TeeTimeRow";
 import { TextOptionModal } from "./TextOptionModal";
 
 type ModalType = "game" | "junk" | "multiplier" | null;
@@ -36,6 +40,14 @@ export function GameOptionsList() {
   );
   const [modalType, setModalType] = useState<ModalType>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [showTeeTimeModal, setShowTeeTimeModal] = useState(false);
+
+  // Check if this game was created in the evening (for tee time caution banner)
+  const isEvening = useMemo(() => {
+    if (!game?.$isLoaded) return false;
+    return isEveningCreation(game.start);
+  }, [game]);
 
   const saveOptionToGame = useSaveOptionToGame(game);
 
@@ -94,6 +106,24 @@ export function GameOptionsList() {
       }
 
       return undefined;
+    },
+    [game],
+  );
+
+  const handleSaveName = useCallback(
+    (name: string) => {
+      if (game?.$isLoaded) {
+        game.$jazz.set("name", name);
+      }
+    },
+    [game],
+  );
+
+  const handleSaveTeeTime = useCallback(
+    (date: Date) => {
+      if (game?.$isLoaded) {
+        game.$jazz.set("start", date);
+      }
     },
     [game],
   );
@@ -184,23 +214,24 @@ export function GameOptionsList() {
     selectedMultiplierOption,
   ]);
 
-  const hasNoOptions =
-    gameOptions.length === 0 &&
-    junkOptions.length === 0 &&
-    multiplierOptions.length === 0;
-
-  if (hasNoOptions) {
-    return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>No options available</Text>
-        <DeleteGameButton />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
+        {/* Game Info Section */}
+        {game?.$isLoaded && (
+          <>
+            <OptionSectionHeader title="Game" />
+            <GameNameRow
+              name={game.name}
+              onPress={() => setShowNameModal(true)}
+            />
+            <TeeTimeRow
+              start={game.start}
+              onPress={() => setShowTeeTimeModal(true)}
+            />
+          </>
+        )}
+
         {/* Game Options Section */}
         {gameOptions.length > 0 && (
           <>
@@ -301,6 +332,27 @@ export function GameOptionsList() {
         onRemove={handleRemoveOption}
         onClose={handleCloseModal}
       />
+
+      {/* Game Name Modal */}
+      {game?.$isLoaded && (
+        <GameNameModal
+          visible={showNameModal}
+          currentName={game.name}
+          onSave={handleSaveName}
+          onClose={() => setShowNameModal(false)}
+        />
+      )}
+
+      {/* Tee Time Modal */}
+      {game?.$isLoaded && (
+        <TeeTimeModal
+          visible={showTeeTimeModal}
+          currentDate={game.start}
+          isEvening={isEvening}
+          onSave={handleSaveTeeTime}
+          onClose={() => setShowTeeTimeModal(false)}
+        />
+      )}
     </View>
   );
 }
@@ -311,15 +363,5 @@ const styles = StyleSheet.create((theme) => ({
   },
   scrollView: {
     flex: 1,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: theme.gap(4),
-  },
-  emptyText: {
-    fontSize: 16,
-    color: theme.colors.secondary,
   },
 }));
