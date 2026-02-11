@@ -6,6 +6,8 @@ import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import {
   getHoleTeeMultiplierTotalWithOverride,
+  getTeamHolePoints,
+  getTeamRunningScore,
   isHoleComplete,
 } from "spicylib/scoring";
 import {
@@ -864,17 +866,16 @@ export function ScoringView({
           const teamHoleResult =
             scoreboard?.holes?.[currentHoleNumber]?.teams?.[teamId];
 
-          // For 2-team games, derive display junk from holeNetTotal
-          // holeNetTotal = (myJunk - oppJunk) × multiplier
-          // So displayJunk = holeNetTotal / multiplier (clamped to 0 for losing team)
+          // Get effective hole points: holeNetTotal for 2-team games (net vs
+          // opponent), absolute points for individual/multi-team games.
           // Only show scoring when hole is complete (all scores + required junk entered)
-          const holeNetTotal = teamHoleResult?.holeNetTotal ?? 0;
+          const holePoints = getTeamHolePoints(teamHoleResult);
           const displayJunk = holeComplete
             ? overallMultiplier > 0
-              ? Math.max(0, Math.round(holeNetTotal / overallMultiplier))
+              ? Math.max(0, Math.round(holePoints / overallMultiplier))
               : 0
             : 0;
-          const displayPoints = holeComplete ? Math.max(0, holeNetTotal) : 0;
+          const displayPoints = holeComplete ? Math.max(0, holePoints) : 0;
 
           // Build earned multipliers from scoreboard (automatic multipliers like birdie_bbq)
           // These are multipliers that were automatically awarded based on junk conditions
@@ -943,7 +944,7 @@ export function ScoringView({
               junkTotal={displayJunk}
               holeMultiplier={overallMultiplier}
               holePoints={displayPoints}
-              runningDiff={teamHoleResult?.runningDiff ?? 0}
+              runningDiff={getTeamRunningScore(teamHoleResult)}
               teeFlipWinner={teeFlipRequired && teeFlipWinner === teamId}
               onTeeFlipReplay={
                 teeFlipRequired && teeFlipWinner === teamId
