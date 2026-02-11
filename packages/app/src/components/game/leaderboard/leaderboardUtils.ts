@@ -1,6 +1,6 @@
 import type { Game } from "spicylib/schema";
 import type { Scoreboard } from "spicylib/scoring";
-import { isHoleComplete } from "spicylib/scoring";
+import { getTeamHolePoints, isHoleComplete } from "spicylib/scoring";
 
 export type ViewMode = "gross" | "net" | "points";
 
@@ -37,8 +37,9 @@ function findPlayerTeam(
 }
 
 /**
- * Get team points for a player on a hole (for 2-team games like Five Points)
- * Returns the team's holeNetTotal which is the +/- vs opponent
+ * Get team points for a player on a hole.
+ * For 2-team games returns holeNetTotal (net vs opponent).
+ * For individual/multi-team games returns absolute points.
  */
 function getTeamPointsForPlayer(
   scoreboard: Scoreboard,
@@ -54,8 +55,7 @@ function getTeamPointsForPlayer(
   const teamResult = holeResult.teams[teamId];
   if (!teamResult) return null;
 
-  // holeNetTotal is the +/- points vs opponent for this hole
-  return teamResult.holeNetTotal ?? teamResult.points;
+  return getTeamHolePoints(teamResult);
 }
 
 /**
