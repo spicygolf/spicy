@@ -1,14 +1,12 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { Golfer } from "@spicygolf/ghin";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
 import { GameHeader } from "@/components/game/GameHeader";
-import { StaleHandicapModal } from "@/components/game/StaleHandicapModal";
+import { StaleHandicapChecker } from "@/components/game/StaleHandicapChecker";
 import { useGameContext } from "@/contexts/GameContext";
-import { useGame, useStaleHandicapCheck } from "@/hooks";
-import { apiPost } from "@/lib/api-client";
+import { useGame } from "@/hooks";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
 import { GameLeaderboard } from "@/screens/game/GameLeaderboard";
 import { GameScoring } from "@/screens/game/scoring";
@@ -78,11 +76,6 @@ export function GameNavigator({ route }: GameNavigatorProps) {
     resolve: {
       name: true,
       start: true,
-      players: {
-        $each: {
-          handicap: true,
-        },
-      },
       rounds: {
         $each: {
           round: true,
@@ -114,65 +107,6 @@ export function GameNavigator({ route }: GameNavigatorProps) {
     };
   }, [gameId, setGameId]);
 
-  // Stale handicap check
-  const { stalePlayers, dismissAll } = useStaleHandicapCheck(
-    game?.$isLoaded ? game.players : undefined,
-  );
-  const [showStaleModal, setShowStaleModal] = useState(false);
-  const [staleModalShown, setStaleModalShown] = useState(false);
-
-  // Show the modal once when stale players are detected
-  useEffect(() => {
-    if (stalePlayers.length > 0 && !staleModalShown) {
-      setShowStaleModal(true);
-      setStaleModalShown(true);
-    }
-  }, [stalePlayers, staleModalShown]);
-
-  const handleRefreshHandicaps = useCallback(
-    async (ghinIds: string[]) => {
-      setShowStaleModal(false);
-      if (!game?.$isLoaded || !game.players?.$isLoaded) return;
-
-      for (const ghinId of ghinIds) {
-        try {
-          const golfer = await apiPost<Golfer>("/ghin/players/get", {
-            ghinNumber: Number(ghinId),
-          });
-          if (!golfer) continue;
-
-          // Find the matching player and update their handicap
-          for (const player of game.players) {
-            if (!player?.$isLoaded || player.ghinId !== ghinId) continue;
-            if (!player.handicap?.$isLoaded) continue;
-
-            player.handicap.$jazz.set("display", golfer.hi_display);
-            if (typeof golfer.hi_value === "number") {
-              player.handicap.$jazz.set("value", golfer.hi_value);
-            }
-            if (golfer.rev_date instanceof Date) {
-              player.handicap.$jazz.set("revDate", golfer.rev_date);
-            } else if (golfer.rev_date) {
-              player.handicap.$jazz.set("revDate", new Date(golfer.rev_date));
-            }
-            break;
-          }
-        } catch (error) {
-          console.error(
-            `Failed to refresh handicap for GHIN ${ghinId}:`,
-            error,
-          );
-        }
-      }
-    },
-    [game],
-  );
-
-  const handleDismissStale = useCallback(() => {
-    setShowStaleModal(false);
-    dismissAll();
-  }, [dismissAll]);
-
   if (!game?.$isLoaded) {
     return null; // or a loading spinner
   }
@@ -195,12 +129,7 @@ export function GameNavigator({ route }: GameNavigatorProps) {
         {currentView === "settings" && <GameSettings />}
       </View>
 
-      <StaleHandicapModal
-        visible={showStaleModal}
-        stalePlayers={stalePlayers}
-        onRefresh={handleRefreshHandicaps}
-        onDismiss={handleDismissStale}
-      />
+      <StaleHandicapChecker gameId={gameId} />
     </View>
   );
 }
