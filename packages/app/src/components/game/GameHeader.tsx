@@ -87,8 +87,12 @@ export function GameHeader({
           />
         </TouchableOpacity>
 
-        {/* Center - Game Info */}
-        <View style={styles.gameInfo}>
+        {/* Center - Game Info (tappable to navigate to settings) */}
+        <TouchableOpacity
+          style={styles.gameInfo}
+          onPress={() => onViewChange?.("settings")}
+          activeOpacity={0.7}
+        >
           <Text style={styles.name}>{game.name}</Text>
           <Text style={styles.date}>
             {game.start.toDateString()} -{" "}
@@ -99,7 +103,7 @@ export function GameHeader({
             })}
           </Text>
           <Text style={styles.facilityName}>{facilityName}</Text>
-        </View>
+        </TouchableOpacity>
 
         {/* Right Icon - Settings */}
         <TouchableOpacity
