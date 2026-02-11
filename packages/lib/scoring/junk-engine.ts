@@ -699,8 +699,11 @@ function calculatePossiblePointsAndJunkCounts(
     }
   }
 
-  // Also add player junk that was actually awarded (no limit) to possiblePoints
-  // These don't have a limit, so they add to possible based on what was achieved
+  // Add player junk that was actually awarded (no limit) to possiblePoints.
+  // Unlike team junk (which uses max), player junk is summed across ALL players.
+  // This is intentional (matches app-0.3): BBQ requires your team to sweep all
+  // junk, so if an opponent's player also earned a birdie, possiblePoints rises
+  // and your team can't hit it — correctly preventing BBQ.
   for (const player of Object.values(holeResult.players)) {
     for (const award of player.junk) {
       const junkOpt = junkOptions.find((j) => j.name === award.name);
@@ -710,15 +713,22 @@ function calculatePossiblePointsAndJunkCounts(
     }
   }
 
-  // Also add team junk that was awarded (no limit)
+  // For unlimited team junk, add the MAX value across teams (not the sum).
+  // In games like Nine Points (3 teams get 5/3/1), possiblePoints should
+  // reflect the best a single team can achieve (5), not the total (9).
+  // This matches app-0.3's maxJunkPoints logic for BBQ availability checks.
+  let maxTeamJunkPoints = 0;
   for (const team of Object.values(holeResult.teams)) {
+    let teamUnlimitedJunk = 0;
     for (const award of team.junk) {
       const junkOpt = junkOptions.find((j) => j.name === award.name);
       if (junkOpt && !junkOpt.limit) {
-        possiblePoints += award.value;
+        teamUnlimitedJunk += award.value;
       }
     }
+    maxTeamJunkPoints = Math.max(maxTeamJunkPoints, teamUnlimitedJunk);
   }
+  possiblePoints += maxTeamJunkPoints;
 
   return { possiblePoints, markedJunk, requiredJunk, unmarkedJunkNames };
 }
