@@ -21,5 +21,6 @@ export * from "./useRound";
 export * from "./useSaveOptionToGame";
 export * from "./useScoreboard";
 export * from "./useScoreManagement";
+export * from "./useStaleHandicapCheck";
 export * from "./useTeamsMode";
 export * from "./useUIScale";
