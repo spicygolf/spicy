@@ -23,6 +23,29 @@ async function findPlayerByGhinId(ghinId: string): Promise<string | undefined> {
   }
 }
 
+/**
+ * Look up a single golfer by GHIN number and return their current handicap data.
+ * @param ghinNumber - The GHIN number to look up
+ * @returns The golfer data from GHIN, or null if not found
+ */
+export async function playerGetByGhin(
+  ghinNumber: number,
+): Promise<Golfer | null> {
+  if (!GHIN_USERNAME || !GHIN_PASSWORD) {
+    throw new Error("GHIN_USERNAME or GHIN_PASSWORD not set");
+  }
+
+  const ghin = new GhinClient({
+    username: GHIN_USERNAME,
+    password: GHIN_PASSWORD,
+    apiAccess: true,
+    baseUrl: GHIN_BASE_URL,
+  });
+
+  const golfer = await ghin.golfers.getOne(ghinNumber);
+  return golfer ?? null;
+}
+
 export async function playerSearch(
   body: GolfersSearchRequest,
 ): Promise<GolferWithJazzId[]> {
