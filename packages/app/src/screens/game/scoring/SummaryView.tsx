@@ -2,6 +2,7 @@ import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
 import type { Scoreboard } from "spicylib/scoring";
+import { getTeamRunningScore } from "spicylib/scoring";
 import { HoleHeader } from "@/components/game/scoring";
 import { Button, Text } from "@/ui";
 
@@ -59,8 +60,9 @@ function getParForPlayer(
 }
 
 /**
- * Get the final team points for each player from the last hole's runningDiff
- * For 2-team games, this is the net difference vs opponent
+ * Get the final team points for each player from the last hole's running score.
+ * For 2-team games, returns runningDiff (net vs opponent).
+ * For individual/multi-team games, returns runningTotal (cumulative points).
  */
 function getPlayerTeamPoints(scoreboard: Scoreboard): Map<string, number> {
   const playerPoints = new Map<string, number>();
@@ -70,7 +72,6 @@ function getPlayerTeamPoints(scoreboard: Scoreboard): Map<string, number> {
     return playerPoints;
   }
 
-  // Get the last hole to find final runningDiff
   const lastHoleNum = holesPlayed[holesPlayed.length - 1];
   const lastHole = scoreboard.holes[lastHoleNum];
 
@@ -78,9 +79,8 @@ function getPlayerTeamPoints(scoreboard: Scoreboard): Map<string, number> {
     return playerPoints;
   }
 
-  // For each team, assign the team's runningDiff to all players on that team
   for (const teamResult of Object.values(lastHole.teams)) {
-    const teamPoints = teamResult.runningDiff ?? 0;
+    const teamPoints = getTeamRunningScore(teamResult);
     for (const playerId of teamResult.playerIds) {
       playerPoints.set(playerId, teamPoints);
     }
