@@ -423,6 +423,106 @@ export function getTeeFlipWinner(
 }
 
 /**
+ * Get the tee flip declined state for a given hole.
+ *
+ * Scans all teams' options for a "tee_flip_declined" option matching the current hole.
+ * Returns true if the tee flip was declined (user chose "No" on the confirmation dialog).
+ *
+ * @param allTeams - All teams on the current hole
+ * @param currentHoleNumber - Current hole number as string
+ * @returns true if the tee flip was declined for this hole
+ */
+export function getTeeFlipDeclined(
+  allTeams: Team[],
+  currentHoleNumber: string,
+): boolean {
+  for (const team of allTeams) {
+    if (!team?.$isLoaded || !team.options?.$isLoaded) continue;
+    for (const opt of team.options) {
+      if (
+        opt?.$isLoaded &&
+        opt.optionName === "tee_flip_declined" &&
+        opt.firstHole === currentHoleNumber
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Check if the current hole is the earliest hole that needs a tee flip resolution.
+ *
+ * Scans from the start of holesList to find the first hole where:
+ * - isTeeFlipRequired is true (score is tied)
+ * - No tee_flip_winner AND no tee_flip_declined recorded
+ *
+ * Only auto-prompts on that earliest unresolved hole. Later tied holes still
+ * show teeFlipRequired (for replay icon, multiplier blocking) but do NOT auto-pop.
+ *
+ * @param scoreboard - Current game scoreboard
+ * @param holesList - Ordered list of hole number strings
+ * @param currentHoleIndex - 0-based index into holesList for the current hole
+ * @param allTeams - All teams (used to check for winner/declined across all holes)
+ * @param teamCount - Number of teams
+ * @param hasMultiplierOptions - Whether the game has multiplier options
+ * @param gameHoles - All game holes for accessing team options on other holes
+ * @returns true if this is the earliest hole needing a tee flip
+ */
+export function isEarliestUnflippedHole(
+  scoreboard: Scoreboard | null,
+  holesList: string[],
+  currentHoleIndex: number,
+  allTeams: Team[],
+  teamCount: number,
+  hasMultiplierOptions: boolean,
+  gameHoles: GameHole[],
+): boolean {
+  if (!scoreboard) return false;
+
+  // Find the first hole that needs a tee flip and has no result
+  for (let i = 0; i < holesList.length; i++) {
+    const holeNum = holesList[i];
+    const required = isTeeFlipRequired(
+      scoreboard,
+      i,
+      holesList,
+      teamCount,
+      hasMultiplierOptions,
+    );
+
+    if (!required) continue;
+
+    // Check if this hole already has a winner or was declined
+    // For the current hole, use allTeams directly
+    // For other holes, look up teams from gameHoles
+    let teamsForHole: Team[];
+    if (i === currentHoleIndex) {
+      teamsForHole = allTeams;
+    } else {
+      const gameHole = gameHoles.find((h) => h.hole === holeNum);
+      if (!gameHole?.teams?.$isLoaded) {
+        // Can't check — treat as unresolved, so this is the earliest
+        return i === currentHoleIndex;
+      }
+      teamsForHole = [...gameHole.teams].filter((t) => t?.$isLoaded) as Team[];
+    }
+
+    const hasWinner = getTeeFlipWinner(teamsForHole, holeNum) !== null;
+    const hasDeclined = getTeeFlipDeclined(teamsForHole, holeNum);
+
+    if (!hasWinner && !hasDeclined) {
+      // This is the earliest unresolved hole
+      return i === currentHoleIndex;
+    }
+  }
+
+  // No unresolved holes found
+  return false;
+}
+
+/**
  * Custom multiplier state for the hole toolbar
  */
 export interface CustomMultiplierState {
