@@ -302,19 +302,21 @@ export async function loadSeedSpecsAsV03(): Promise<
         const { name, overrides } = parseOptionRef(ref);
         const opt = optionsMap.get(name);
         if (!opt || opt.type !== "game") return null;
+        // Apply overrides to the seed option before V03 conversion
+        // so that field names like "defaultValue" map correctly
+        const merged = { ...opt, ...overrides } as SeedGameOption;
         return {
-          name: opt.name,
-          disp: opt.disp,
-          type: opt.valueType,
+          name: merged.name,
+          disp: merged.disp,
+          type: merged.valueType,
           default:
-            opt.valueType === "bool"
-              ? opt.defaultValue === "true"
-              : opt.valueType === "num" || opt.valueType === "pct"
-                ? Number(opt.defaultValue)
-                : opt.defaultValue,
-          choices: opt.choices,
-          teamOnly: opt.teamOnly,
-          ...overrides, // Apply per-spec overrides
+            merged.valueType === "bool"
+              ? merged.defaultValue === "true"
+              : merged.valueType === "num" || merged.valueType === "pct"
+                ? Number(merged.defaultValue)
+                : merged.defaultValue,
+          choices: merged.choices,
+          teamOnly: merged.teamOnly,
         };
       })
       .filter(Boolean);
