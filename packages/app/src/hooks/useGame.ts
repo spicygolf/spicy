@@ -1,4 +1,3 @@
-// @ts-nocheck - Jazz type inference for custom selectors is too complex
 import type { MaybeLoaded } from "jazz-tools";
 import { useCoState } from "jazz-tools/react-native";
 import { useEffect, useRef } from "react";
@@ -158,21 +157,15 @@ export function useGame(
   const game = useCoState(
     Game,
     effectiveGameId,
+    // @ts-expect-error Jazz type inference for dynamic resolve + select + equalityFn is too complex
     effectiveGameId
-      ? ({
+      ? {
           resolve: resolveQuery,
           select: options.select || defaultSelect,
           equalityFn: gameEqualityFn,
-        } as {
-          resolve: typeof resolveQuery;
-          select: (value: MaybeLoaded<Game>) => Game | null | undefined;
-          equalityFn: (
-            a: Game | null | undefined,
-            b: Game | null | undefined,
-          ) => boolean;
-        })
+        }
       : undefined,
-  ) as unknown as GameWithRelations;
+  ) as GameWithRelations;
 
   // Performance tracking (dev only)
   useEffect(() => {

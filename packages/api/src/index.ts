@@ -153,6 +153,10 @@ const app = new Elysia()
         };
       }
       const { ghinNumber } = body as { ghinNumber: number };
+      if (!Number.isInteger(ghinNumber) || ghinNumber <= 0) {
+        set.status = 400;
+        return { error: "ghinNumber must be a positive integer" };
+      }
       return playerGetByGhin(ghinNumber);
     },
     { jazzAuth: true },

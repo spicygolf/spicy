@@ -47,37 +47,40 @@ export function StaleHandicapChecker({ gameId }: StaleHandicapCheckerProps) {
     async (ghinIds: string[]) => {
       setShowModal(false);
       if (!game?.$isLoaded || !game.players?.$isLoaded) return;
+      const players = game.players;
 
-      for (const ghinId of ghinIds) {
-        try {
-          const golfer = await apiPost<Golfer>("/ghin/players/get", {
-            ghinNumber: Number(ghinId),
-          });
-          if (!golfer) continue;
+      await Promise.allSettled(
+        ghinIds.map(async (ghinId) => {
+          try {
+            const golfer = await apiPost<Golfer>("/ghin/players/get", {
+              ghinNumber: Number(ghinId),
+            });
+            if (!golfer) return;
 
-          // Find the matching player and update their handicap
-          for (const player of game.players) {
-            if (!player?.$isLoaded || player.ghinId !== ghinId) continue;
-            if (!player.handicap?.$isLoaded) continue;
+            // Find the matching player and update their handicap
+            for (const player of players) {
+              if (!player?.$isLoaded || player.ghinId !== ghinId) continue;
+              if (!player.handicap?.$isLoaded) continue;
 
-            player.handicap.$jazz.set("display", golfer.hi_display);
-            if (typeof golfer.hi_value === "number") {
-              player.handicap.$jazz.set("value", golfer.hi_value);
+              player.handicap.$jazz.set("display", golfer.hi_display);
+              if (typeof golfer.hi_value === "number") {
+                player.handicap.$jazz.set("value", golfer.hi_value);
+              }
+              if (golfer.rev_date instanceof Date) {
+                player.handicap.$jazz.set("revDate", golfer.rev_date);
+              } else if (golfer.rev_date) {
+                player.handicap.$jazz.set("revDate", new Date(golfer.rev_date));
+              }
+              break;
             }
-            if (golfer.rev_date instanceof Date) {
-              player.handicap.$jazz.set("revDate", golfer.rev_date);
-            } else if (golfer.rev_date) {
-              player.handicap.$jazz.set("revDate", new Date(golfer.rev_date));
-            }
-            break;
+          } catch (error) {
+            console.error(
+              `Failed to refresh handicap for GHIN ${ghinId}:`,
+              error,
+            );
           }
-        } catch (error) {
-          console.error(
-            `Failed to refresh handicap for GHIN ${ghinId}:`,
-            error,
-          );
-        }
-      }
+        }),
+      );
     },
     [game],
   );

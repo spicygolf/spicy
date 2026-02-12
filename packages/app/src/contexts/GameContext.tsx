@@ -128,14 +128,14 @@ function ScoringProvider({
   const scoreboard = scoreResult?.scoreboard ?? null;
   const scoringContext = scoreResult?.context ?? null;
 
-  const scoringValue = useMemo(
-    (): GameScoringContextType => ({
-      scoringGame,
-      scoreboard,
-      scoringContext,
-    }),
-    [scoringGame, scoreboard, scoringContext],
-  );
+  // Compute directly — Jazz CoValues must not be useMemo dependencies.
+  // ScoringProvider only re-renders when Jazz fires an update anyway,
+  // and the children prop pattern prevents cascade to child components.
+  const scoringValue: GameScoringContextType = {
+    scoringGame,
+    scoreboard,
+    scoringContext,
+  };
 
   return (
     <GameScoringContext.Provider value={scoringValue}>
@@ -151,6 +151,8 @@ export function GameProvider({ children }: GameProviderProps) {
     useState<LeaderboardViewMode>("points");
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("PlayersTab");
 
+  // useState setters are referentially stable (React guarantee) — only
+  // include the state values themselves as dependencies.
   const idValue = useMemo(
     (): GameIdContextType => ({
       gameId,
@@ -162,16 +164,7 @@ export function GameProvider({ children }: GameProviderProps) {
       settingsTab,
       setSettingsTab,
     }),
-    [
-      gameId,
-      setGameId,
-      currentHoleIndex,
-      setCurrentHoleIndex,
-      leaderboardViewMode,
-      setLeaderboardViewMode,
-      settingsTab,
-      setSettingsTab,
-    ],
+    [gameId, currentHoleIndex, leaderboardViewMode, settingsTab],
   );
 
   return (

@@ -46,11 +46,11 @@ export function GameOptionsList() {
   const [showNameModal, setShowNameModal] = useState(false);
   const [showTeeTimeModal, setShowTeeTimeModal] = useState(false);
 
-  // Check if this game was created in the evening (for tee time caution banner)
-  const isEvening = useMemo(() => {
-    if (!game?.$isLoaded) return false;
-    return isEveningCreation(game.start);
-  }, [game]);
+  // Check if this game was created in the evening (for tee time caution banner).
+  // Uses Jazz's immutable createdAt rather than the editable tee time (game.start).
+  const isEvening = game?.$isLoaded
+    ? isEveningCreation(new Date(game.$jazz.createdAt))
+    : false;
 
   const saveOptionToGame = useSaveOptionToGame(game);
 
