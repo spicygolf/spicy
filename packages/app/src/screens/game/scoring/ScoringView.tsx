@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, FlatList } from "react-native";
+import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole, MultiplierOption, Team } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
@@ -24,6 +24,7 @@ import {
   HoleToolbar,
   PlayerScoreRow,
   TeamGroup,
+  TeeFlipConfirmModal,
   TeeFlipModal,
 } from "@/components/game/scoring";
 import type { OptionButton } from "@/components/game/scoring/OptionsButtons";
@@ -674,50 +675,22 @@ export function ScoringView({
     [team1Id, team2Id],
   );
 
-  // Single modal: "flip" = random first flip, "replay" = replay previous result
-  const [teeFlipMode, setTeeFlipMode] = useState<"flip" | "replay" | null>(
-    null,
-  );
+  // Modal state: "confirm" = asking user, "flip" = random first flip, "replay" = replay previous result
+  const [teeFlipMode, setTeeFlipMode] = useState<
+    "confirm" | "flip" | "replay" | null
+  >(null);
 
   // Reset modal when navigating to a different hole
   useEffect(() => {
     setTeeFlipMode(null);
   }, [currentHoleIndex]);
 
-  // Show confirmation Alert when this is the earliest unflipped hole
+  // Show confirmation modal when this is the earliest unflipped hole
   useEffect(() => {
     if (earliestUnflipped && allTeams.length === 2) {
-      Alert.alert(
-        "Score is tied",
-        `${teeFlipLabel}?`,
-        [
-          {
-            text: "No",
-            style: "cancel",
-            onPress: () => {
-              const storageTeam = allTeams[0];
-              if (storageTeam) {
-                recordTeeFlipDeclined(storageTeam, currentHoleNumber);
-              }
-            },
-          },
-          {
-            text: "Yes",
-            onPress: () => {
-              setTeeFlipMode("flip");
-            },
-          },
-        ],
-        { cancelable: false },
-      );
+      setTeeFlipMode("confirm");
     }
-  }, [
-    earliestUnflipped,
-    allTeams.length,
-    teeFlipLabel,
-    currentHoleNumber,
-    allTeams,
-  ]);
+  }, [earliestUnflipped, allTeams.length]);
 
   const handleTeeFlipComplete = useCallback(
     (winnerTeamId: string) => {
@@ -803,14 +776,30 @@ export function ScoringView({
         onClose={() => setCustomMultiplierModalVisible(false)}
       />
       {allTeams.length === 2 && (
-        <TeeFlipModal
-          visible={teeFlipMode !== null}
-          teamIds={teeFlipTeamIds}
-          predeterminedWinner={
-            teeFlipMode === "replay" ? (teeFlipWinner ?? undefined) : undefined
-          }
-          onFlipComplete={handleTeeFlipComplete}
-        />
+        <>
+          <TeeFlipConfirmModal
+            visible={teeFlipMode === "confirm"}
+            label={teeFlipLabel}
+            onConfirm={() => setTeeFlipMode("flip")}
+            onDecline={() => {
+              const storageTeam = allTeams[0];
+              if (storageTeam) {
+                recordTeeFlipDeclined(storageTeam, currentHoleNumber);
+              }
+              setTeeFlipMode(null);
+            }}
+          />
+          <TeeFlipModal
+            visible={teeFlipMode === "flip" || teeFlipMode === "replay"}
+            teamIds={teeFlipTeamIds}
+            predeterminedWinner={
+              teeFlipMode === "replay"
+                ? (teeFlipWinner ?? undefined)
+                : undefined
+            }
+            onFlipComplete={handleTeeFlipComplete}
+          />
+        </>
       )}
       <FlatList
         style={styles.content}
