@@ -75,7 +75,6 @@ export function ErrorDisplay({
       accessibilityLabel={`${title}. ${errorMessage}`}
     >
       <Text style={styles.title}>{title}</Text>
-      <Text style={styles.message}>{errorMessage}</Text>
 
       {showDetailsToggle && (
         <TouchableOpacity
@@ -94,6 +93,9 @@ export function ErrorDisplay({
 
       {showDetails && (
         <ScrollView style={styles.detailsContainer}>
+          <Text style={styles.detailsLabel}>Error:</Text>
+          <Text style={styles.detailsText}>{errorMessage}</Text>
+
           <Text style={styles.detailsLabel}>Type:</Text>
           <Text style={styles.detailsText}>{errorName}</Text>
 
