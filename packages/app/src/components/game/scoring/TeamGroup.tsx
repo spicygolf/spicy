@@ -29,6 +29,10 @@ interface TeamGroupProps {
   teeFlipWinner?: boolean;
   /** Called when the tee flip icon is tapped to replay the animation */
   onTeeFlipReplay?: () => void;
+  /** Whether the tee flip was declined on this hole (shown as dimmed tee icon) */
+  teeFlipDeclined?: boolean;
+  /** Called when the declined tee icon is tapped to undo the decline */
+  onTeeFlipUndoDecline?: () => void;
   children: React.ReactNode;
 }
 
@@ -45,6 +49,8 @@ export function TeamGroup({
   runningDiff,
   teeFlipWinner,
   onTeeFlipReplay,
+  teeFlipDeclined,
+  onTeeFlipUndoDecline,
   children,
 }: TeamGroupProps) {
   return (
@@ -72,6 +78,8 @@ export function TeamGroup({
         runningDiff={runningDiff}
         teeFlipWinner={teeFlipWinner}
         onTeeFlipReplay={onTeeFlipReplay}
+        teeFlipDeclined={teeFlipDeclined}
+        onTeeFlipUndoDecline={onTeeFlipUndoDecline}
       />
     </View>
   );

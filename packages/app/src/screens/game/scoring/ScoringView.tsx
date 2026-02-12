@@ -446,6 +446,27 @@ function recordTeeFlipDeclined(team: Team, currentHoleNumber: string): void {
   options.$jazz.push(newOption);
 }
 
+/**
+ * Remove the tee flip declined record for a hole, allowing the confirmation to re-appear.
+ *
+ * @param team - The team that has the declined option stored
+ * @param currentHoleNumber - The hole number to remove the decline for
+ */
+function removeTeeFlipDeclined(team: Team, currentHoleNumber: string): void {
+  if (!team.options?.$isLoaded) return;
+  const options = team.options;
+  for (let i = options.length - 1; i >= 0; i--) {
+    const opt = options[i];
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === "tee_flip_declined" &&
+      opt.firstHole === currentHoleNumber
+    ) {
+      options.$jazz.splice(i, 1);
+    }
+  }
+}
+
 export function ScoringView({
   game,
   holeInfo,
@@ -1037,6 +1058,20 @@ export function ScoringView({
               onTeeFlipReplay={
                 teeFlipEnabled && teeFlipRequired && teeFlipWinner === teamId
                   ? () => setTeeFlipMode("replay")
+                  : undefined
+              }
+              teeFlipDeclined={
+                teeFlipEnabled &&
+                teeFlipRequired &&
+                teeFlipDeclined &&
+                teamId === allTeams[0]?.team
+              }
+              onTeeFlipUndoDecline={
+                teeFlipEnabled &&
+                teeFlipRequired &&
+                teeFlipDeclined &&
+                teamId === allTeams[0]?.team
+                  ? () => removeTeeFlipDeclined(team, currentHoleNumber)
                   : undefined
               }
             >

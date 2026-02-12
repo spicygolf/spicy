@@ -27,6 +27,10 @@ interface TeamFooterProps {
   teeFlipWinner?: boolean;
   /** Called when the tee flip icon is tapped to replay the animation */
   onTeeFlipReplay?: () => void;
+  /** Whether the tee flip was declined on this hole */
+  teeFlipDeclined?: boolean;
+  /** Called when the declined tee icon is tapped to undo the decline */
+  onTeeFlipUndoDecline?: () => void;
 }
 
 export function TeamFooter({
@@ -41,6 +45,8 @@ export function TeamFooter({
   runningDiff = 0,
   teeFlipWinner = false,
   onTeeFlipReplay,
+  teeFlipDeclined = false,
+  onTeeFlipUndoDecline,
 }: TeamFooterProps) {
   const { theme } = useUnistyles();
   const hasTeamJunk = teamJunkOptions.some((j) => j.selected);
@@ -57,7 +63,8 @@ export function TeamFooter({
       {(hasMultipliers ||
         hasEarnedMultipliers ||
         hasTeamJunk ||
-        teeFlipWinner) && (
+        teeFlipWinner ||
+        teeFlipDeclined) && (
         <View style={styles.optionsRow}>
           {/* Left half: Tee flip icon + Multiplier press buttons + earned multipliers */}
           <View style={styles.leftSection}>
@@ -70,6 +77,20 @@ export function TeamFooter({
               >
                 <GolfTee
                   color={theme.colors.primary}
+                  borderColor={theme.colors.secondary}
+                  scale={0.35}
+                />
+              </Pressable>
+            )}
+            {teeFlipDeclined && (
+              <Pressable
+                onPress={onTeeFlipUndoDecline}
+                hitSlop={12}
+                style={[styles.teeFlipIcon, { opacity: 0.4 }]}
+                accessibilityLabel="Undo declined tee flip"
+              >
+                <GolfTee
+                  color={theme.colors.secondary}
                   borderColor={theme.colors.secondary}
                   scale={0.35}
                 />
