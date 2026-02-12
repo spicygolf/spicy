@@ -5,6 +5,7 @@ import {
   type ReactNode,
   type SetStateAction,
   useContext,
+  useMemo,
   useState,
 } from "react";
 import { Game } from "spicylib/schema";
@@ -63,7 +64,9 @@ const SCORING_RESOLVE = {
   },
 } as const;
 
-interface GameContextType {
+// --- Stable context: gameId + UI state (rarely changes) ---
+
+interface GameIdContextType {
   gameId: string | null;
   setGameId: (gameId: string | null) => void;
   currentHoleIndex: number;
@@ -72,27 +75,44 @@ interface GameContextType {
   setLeaderboardViewMode: (mode: LeaderboardViewMode) => void;
   settingsTab: SettingsTab;
   setSettingsTab: (tab: SettingsTab) => void;
-  // Shared game data for scoring screens
+}
+
+const GameIdContext = createContext<GameIdContextType | undefined>(undefined);
+
+// --- Scoring context: Jazz-reactive data (changes frequently during progressive loading) ---
+
+interface GameScoringContextType {
   scoringGame: Game | null;
   scoreboard: Scoreboard | null;
   scoringContext: ScoringContext | null;
 }
 
-const GameContext = createContext<GameContextType | undefined>(undefined);
+const GameScoringContext = createContext<GameScoringContextType | undefined>(
+  undefined,
+);
+
+// --- Combined type for convenience (used by screens that need everything) ---
+
+type GameContextType = GameIdContextType & GameScoringContextType;
 
 interface GameProviderProps {
   children: ReactNode;
 }
 
-export function GameProvider({ children }: GameProviderProps) {
-  const [gameId, setGameId] = useState<string | null>(null);
-  const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
-  const [leaderboardViewMode, setLeaderboardViewMode] =
-    useState<LeaderboardViewMode>("points");
-  const [settingsTab, setSettingsTab] = useState<SettingsTab>("PlayersTab");
-
-  // Load game with unified scoring resolve - useCoState directly to avoid circular dep with useGame
-  // Pass undefined when no gameId to avoid Jazz subscription error with empty string
+/**
+ * Inner component that holds the Jazz subscription (useCoState) and provides
+ * the scoring context. Because it receives `children` as a prop from the
+ * stable GameProvider parent, re-renders from Jazz progressive loading
+ * updates do NOT cascade to children — React skips re-rendering prop children
+ * whose reference hasn't changed.
+ */
+function ScoringProvider({
+  gameId,
+  children,
+}: {
+  gameId: string | null;
+  children: ReactNode;
+}) {
   const scoringGame = useCoState(
     Game,
     gameId ?? undefined,
@@ -103,34 +123,83 @@ export function GameProvider({ children }: GameProviderProps) {
       : undefined,
   ) as Game | null;
 
-  // Compute scoreboard once, shared by all scoring screens
   const scoreResult = useScoreboard(scoringGame);
 
+  const scoreboard = scoreResult?.scoreboard ?? null;
+  const scoringContext = scoreResult?.context ?? null;
+
+  // Compute directly — Jazz CoValues must not be useMemo dependencies.
+  // ScoringProvider only re-renders when Jazz fires an update anyway,
+  // and the children prop pattern prevents cascade to child components.
+  const scoringValue: GameScoringContextType = {
+    scoringGame,
+    scoreboard,
+    scoringContext,
+  };
+
   return (
-    <GameContext.Provider
-      value={{
-        gameId,
-        setGameId,
-        currentHoleIndex,
-        setCurrentHoleIndex,
-        leaderboardViewMode,
-        setLeaderboardViewMode,
-        settingsTab,
-        setSettingsTab,
-        scoringGame,
-        scoreboard: scoreResult?.scoreboard ?? null,
-        scoringContext: scoreResult?.context ?? null,
-      }}
-    >
+    <GameScoringContext.Provider value={scoringValue}>
       {children}
-    </GameContext.Provider>
+    </GameScoringContext.Provider>
   );
 }
 
-export function useGameContext() {
-  const context = useContext(GameContext);
+export function GameProvider({ children }: GameProviderProps) {
+  const [gameId, setGameId] = useState<string | null>(null);
+  const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
+  const [leaderboardViewMode, setLeaderboardViewMode] =
+    useState<LeaderboardViewMode>("points");
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>("PlayersTab");
+
+  // useState setters are referentially stable (React guarantee) — only
+  // include the state values themselves as dependencies.
+  const idValue = useMemo(
+    (): GameIdContextType => ({
+      gameId,
+      setGameId,
+      currentHoleIndex,
+      setCurrentHoleIndex,
+      leaderboardViewMode,
+      setLeaderboardViewMode,
+      settingsTab,
+      setSettingsTab,
+    }),
+    [gameId, currentHoleIndex, leaderboardViewMode, settingsTab],
+  );
+
+  return (
+    <GameIdContext.Provider value={idValue}>
+      <ScoringProvider gameId={gameId}>{children}</ScoringProvider>
+    </GameIdContext.Provider>
+  );
+}
+
+/**
+ * Subscribe to stable game state (gameId + UI state).
+ * Does NOT re-render when scoringGame/scoreboard change from Jazz progressive loading.
+ * Use this in components that only need gameId, hole index, or view mode.
+ */
+export function useGameIdContext(): GameIdContextType {
+  const context = useContext(GameIdContext);
   if (context === undefined) {
-    throw new Error("useGameContext must be used within a GameProvider");
+    throw new Error("useGameIdContext must be used within a GameProvider");
   }
   return context;
+}
+
+/**
+ * Subscribe to all game context (stable state + scoring data).
+ * Re-renders on Jazz progressive loading updates.
+ * Use this in scoring screens that need scoringGame/scoreboard.
+ */
+export function useGameContext(): GameContextType {
+  const idContext = useContext(GameIdContext);
+  const scoringContext = useContext(GameScoringContext);
+  if (idContext === undefined || scoringContext === undefined) {
+    throw new Error("useGameContext must be used within a GameProvider");
+  }
+  return useMemo(
+    () => ({ ...idContext, ...scoringContext }),
+    [idContext, scoringContext],
+  );
 }

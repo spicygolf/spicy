@@ -350,6 +350,9 @@ export function getTeamMultiplierStatus(
  * for all teams) or when there is no previous hole result (first hole of the round).
  * Only applies to 2-team games with user-based multiplier options.
  *
+ * Returns false during progressive loading (scoreboard null) to prevent
+ * premature modal display that causes render oscillation.
+ *
  * Uses holesList ordering (not hole number arithmetic) to find the previous hole,
  * so it is forward-compatible with shotgun starts where the round may begin on any hole.
  *
@@ -369,6 +372,11 @@ export function isTeeFlipRequired(
 ): boolean {
   if (teamCount !== 2 || !hasMultiplierOptions) return false;
 
+  // Wait for scoreboard to be computed before deciding.
+  // During Jazz progressive loading scoreboard is null; showing the modal
+  // prematurely causes render oscillation as data loads and the decision flips.
+  if (!scoreboard) return false;
+
   // Find previous hole by list position, not by hole number arithmetic
   const prevHoleNumber =
     currentHoleIndex > 0 ? holesList[currentHoleIndex - 1] : undefined;
@@ -376,7 +384,7 @@ export function isTeeFlipRequired(
   // No previous hole (first hole of round) → always tied
   if (!prevHoleNumber) return true;
 
-  const prevHoleResult = scoreboard?.holes?.[prevHoleNumber];
+  const prevHoleResult = scoreboard.holes?.[prevHoleNumber];
   if (!prevHoleResult) return true;
 
   const teams = Object.values(prevHoleResult.teams);

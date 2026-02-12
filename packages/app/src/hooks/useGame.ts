@@ -1,9 +1,8 @@
-// @ts-nocheck - Jazz type inference for custom selectors is too complex
 import type { MaybeLoaded } from "jazz-tools";
 import { useCoState } from "jazz-tools/react-native";
 import { useEffect, useRef } from "react";
 import { Game } from "spicylib/schema";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGameIdContext } from "@/contexts/GameContext";
 
 interface UseGameOptions {
   requireGame?: boolean;
@@ -14,73 +13,112 @@ interface UseGameOptions {
 type GameWithRelations = Game | null;
 
 /**
+ * Default select function for useGame.
+ * Defined at module scope so the reference is stable across renders.
+ * Returns null for both loading and not-found states — consumers use
+ * game?.$isLoaded to distinguish "ready" from "not ready".
+ */
+function defaultSelect(value: MaybeLoaded<Game>): Game | null {
+  if (!value.$isLoaded) return null;
+  return value;
+}
+
+/**
+ * Build a fingerprint string that captures the Game's loaded state deeply
+ * enough to detect meaningful changes. Jazz fires dozens of notifications
+ * per logical change (one per child scope); this fingerprint collapses them
+ * into a single value that only changes when actual data changes.
+ *
+ * Uses only Jazz public API ($jazz.lastUpdatedAt) — not internal raw properties.
+ */
+function gameFingerprint(game: Game | null | undefined): string {
+  if (!game) return "null";
+  if (!game.$isLoaded) return "loading";
+
+  const parts: string[] = [`g:${game.$jazz.lastUpdatedAt}`];
+
+  // Include loaded state of key children — these change during progressive loading.
+  // Use $jazz.has() guards before accessing optional CoValue properties.
+  if (game.$jazz.has("spec") && game.spec?.$isLoaded) {
+    parts.push(`spec:${game.spec.$jazz.lastUpdatedAt}`);
+  } else {
+    parts.push("spec:_");
+  }
+
+  if (game.$jazz.has("players") && game.players?.$isLoaded) {
+    parts.push(`pl:${game.players.length}`);
+    for (const p of game.players) {
+      if (p?.$isLoaded) {
+        parts.push(`p:${p.$jazz.lastUpdatedAt}`);
+      }
+    }
+  } else {
+    parts.push("pl:_");
+  }
+
+  if (game.$jazz.has("rounds") && game.rounds?.$isLoaded) {
+    parts.push(`rd:${game.rounds.length}`);
+    for (const r of game.rounds) {
+      if (r?.$isLoaded) {
+        parts.push(`r:${r.$jazz.lastUpdatedAt}`);
+        if (r.$jazz.has("round") && r.round?.$isLoaded) {
+          parts.push(`rr:${r.round.$jazz.lastUpdatedAt}`);
+        }
+      }
+    }
+  } else {
+    parts.push("rd:_");
+  }
+
+  if (game.$jazz.has("holes") && game.holes?.$isLoaded) {
+    parts.push(`h:${game.holes.length}`);
+  } else {
+    parts.push("h:_");
+  }
+
+  if (game.$jazz.has("scope") && game.scope?.$isLoaded) {
+    parts.push(`sc:${game.scope.$jazz.lastUpdatedAt}`);
+  } else {
+    parts.push("sc:_");
+  }
+
+  return parts.join("|");
+}
+
+/**
+ * Equality function that prevents re-renders when the Game's meaningful
+ * data hasn't changed. Jazz fires triggerUpdate() for every child scope
+ * update (dozens per field change), each creating a new object reference.
+ * This compares a fingerprint of loaded state + version counters instead
+ * of comparing by object reference.
+ */
+function gameEqualityFn(
+  a: Game | null | undefined,
+  b: Game | null | undefined,
+): boolean {
+  return gameFingerprint(a) === gameFingerprint(b);
+}
+
+/**
  * Hook to load a Game with customizable resolve queries.
  *
- * PERFORMANCE: Always specify minimal resolve queries for your use case.
- * Loading unnecessary data can multiply load times by 10x or more.
+ * Uses a fingerprint-based equality function to prevent the render cascade
+ * caused by Jazz's subscription architecture. Jazz fires triggerUpdate() for
+ * each child scope update, creating dozens of new object references per
+ * single field change. The equality function compares a deep fingerprint
+ * of loaded state + version counters, collapsing these into a single
+ * effective re-render per meaningful change.
  *
  * @param gameId - Game ID to load (optional, falls back to context)
  * @param options - Configuration options
  * @param options.requireGame - Throw error if no game ID available
  * @param options.resolve - Custom Jazz resolve query (RECOMMENDED: always specify)
- *
- * @example
- * // Game List - minimal data (~10 objects, fast)
- * const { game } = useGame(id, {
- *   resolve: {
- *     name: true,
- *     start: true,
- *     players: { $each: { name: true } },
- *     rounds: { $each: { round: { course: { name: true } } } }
- *   }
- * });
- *
- * @example
- * // Game Header - just name and course info
- * const { game } = useGame(id, {
- *   resolve: {
- *     name: true,
- *     start: true,
- *     rounds: { $each: { round: { course: { name: true } } } }
- *   }
- * });
- *
- * @example
- * // Game Scoring - load holes shallowly, current hole loaded separately
- * const { game } = useGame(id, {
- *   resolve: {
- *     scope: { teamsConfig: true },
- *     holes: true, // Just IDs - useCurrentHole loads the active one
- *     players: { $each: { name: true, handicap: true, envs: true } },
- *     rounds: { $each: {
- *       handicapIndex: true,
- *       courseHandicap: true,
- *       round: { playerId: true, tee: { holes: { $each: true } }, scores: true }
- *     } }
- *   }
- * });
- *
- * @example
- * // Settings - player management
- * const { game } = useGame(id, {
- *   resolve: {
- *     players: { $each: { name: true, ghinId: true } },
- *     rounds: { $each: { round: true } }
- *   }
- * });
- *
- * ANTI-PATTERN: Don't load all 18 holes with full data
- * // BAD: Loads 100+ objects, very slow
- * holes: { $each: { teams: { $each: { rounds: { $each: true } } } } }
- *
- * // GOOD: Load holes shallowly, load current hole separately with useCurrentHole
- * holes: true
  */
 export function useGame(
   gameId?: string,
   options: UseGameOptions = {},
 ): { game: GameWithRelations } {
-  const { gameId: ctxGameId } = useGameContext();
+  const { gameId: ctxGameId } = useGameIdContext();
   const effectiveGameId = gameId || ctxGameId || undefined;
   const startTime = useRef(Date.now());
   const loggedLoad = useRef(false);
@@ -90,7 +128,7 @@ export function useGame(
     name: true,
     start: true,
     scope: { teamsConfig: true },
-    spec: { $each: { $each: true } }, // Working copy of options (MapOfOptions -> Option fields)
+    spec: { $each: { $each: true } },
     holes: true,
     players: { $each: { name: true, handicap: true, envs: true } },
     rounds: {
@@ -104,9 +142,6 @@ export function useGame(
           tee: {
             holes: { $each: true },
           },
-          // NOTE: course is NOT resolved here to avoid "value is unavailable" errors
-          // during progressive loading when rounds are added. Components that need
-          // course data should load it themselves asynchronously.
           scores: true,
         },
       },
@@ -116,25 +151,15 @@ export function useGame(
   const game = useCoState(
     Game,
     effectiveGameId,
+    // @ts-expect-error Jazz type inference for dynamic resolve + select + equalityFn is too complex
     effectiveGameId
-      ? ({
+      ? {
           resolve: resolveQuery,
-          select:
-            options.select ||
-            ((value) => {
-              if (!value.$isLoaded) {
-                return value.$jazz.loadingState === "loading"
-                  ? undefined
-                  : null;
-              }
-              return value;
-            }),
-        } as {
-          resolve: typeof resolveQuery;
-          select?: (value: MaybeLoaded<Game>) => Game | null | undefined;
-        })
+          select: options.select || defaultSelect,
+          equalityFn: gameEqualityFn,
+        }
       : undefined,
-  ) as unknown as GameWithRelations;
+  ) as GameWithRelations;
 
   // Performance tracking (dev only)
   useEffect(() => {

@@ -51,8 +51,16 @@ function makeTeamNoOptions(teamId: string): Team {
 // =============================================================================
 
 describe("isTeeFlipRequired", () => {
-  it("returns true when no previous hole exists (first hole of round)", () => {
+  it("returns false when scoreboard is null (progressive loading)", () => {
     const result = isTeeFlipRequired(null, 0, ["1"], 2, true);
+    expect(result).toBe(false);
+  });
+
+  it("returns true when no previous hole exists (first hole of round)", () => {
+    const scoreboard = makeScoreboard({
+      "1": { teams: {} },
+    });
+    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 2, true);
     expect(result).toBe(true);
   });
 
@@ -84,17 +92,20 @@ describe("isTeeFlipRequired", () => {
   });
 
   it("returns false when there are 3+ teams", () => {
-    const result = isTeeFlipRequired(null, 0, ["1"], 3, true);
+    const scoreboard = makeScoreboard({});
+    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 3, true);
     expect(result).toBe(false);
   });
 
   it("returns false when there is only 1 team", () => {
-    const result = isTeeFlipRequired(null, 0, ["1"], 1, true);
+    const scoreboard = makeScoreboard({});
+    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 1, true);
     expect(result).toBe(false);
   });
 
   it("returns false when there are no multiplier options", () => {
-    const result = isTeeFlipRequired(null, 0, ["1"], 2, false);
+    const scoreboard = makeScoreboard({});
+    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 2, false);
     expect(result).toBe(false);
   });
 
@@ -120,7 +131,10 @@ describe("isTeeFlipRequired", () => {
   });
 
   it("returns true on first hole of shotgun start (no previous)", () => {
-    const result = isTeeFlipRequired(null, 0, ["7", "8", "9"], 2, true);
+    const scoreboard = makeScoreboard({
+      "7": { teams: {} },
+    });
+    const result = isTeeFlipRequired(scoreboard, 0, ["7", "8", "9"], 2, true);
     expect(result).toBe(true);
   });
 });

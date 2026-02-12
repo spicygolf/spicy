@@ -122,7 +122,7 @@ export function TeeFlipModal({
   teamIds,
   onFlipComplete,
   predeterminedWinner,
-}: TeeFlipModalProps): React.ReactElement {
+}: TeeFlipModalProps): React.ReactElement | null {
   const { theme } = useUnistyles();
   const rotation = useSharedValue(0);
   const hasStarted = useRef(false);
@@ -191,9 +191,16 @@ export function TeeFlipModal({
   const teeColor = theme.colors.primary;
   const teeBorderColor = theme.colors.secondary;
 
+  // Unmount when not visible to reset all internal state (animation, result)
+  // and prevent useEffect oscillation during Jazz progressive loading.
+  // Matches the pattern from TeeTimeModal/GameNameModal (commit f781f328).
+  if (!visible) {
+    return null;
+  }
+
   return (
     <Modal
-      visible={visible}
+      visible={true}
       transparent={true}
       animationType="fade"
       statusBarTranslucent

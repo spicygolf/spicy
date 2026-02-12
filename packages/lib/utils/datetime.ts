@@ -74,6 +74,33 @@ export function isSameDay(
 }
 
 /**
+ * Check if a game is being created during evening hours (6 PM or later).
+ * Used to trigger caution UI and default tee time to next morning.
+ * @param now - The current date/time
+ * @returns true if hour >= 18 in local time
+ */
+export function isEveningCreation(now: Date): boolean {
+  return now.getHours() >= 18;
+}
+
+/**
+ * Get a sensible default tee time for a new game.
+ * If created during evening hours (6 PM+), defaults to tomorrow at 8 AM local time.
+ * Otherwise returns the current time.
+ * @param now - The current date/time
+ * @returns Default tee time Date
+ */
+export function getDefaultTeeTime(now: Date): Date {
+  if (!isEveningCreation(now)) {
+    return now;
+  }
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(8, 0, 0, 0);
+  return tomorrow;
+}
+
+/**
  * Format a date as a localized time string (h:mm AM/PM)
  * @param date - Date to format
  * @param locale - Locale string (defaults to 'en-US')

@@ -5,29 +5,22 @@ import { useAccount } from "jazz-tools/react-native";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import type { Game } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
-import { useDeleteGame, useGame } from "@/hooks";
+import { useDeleteGame } from "@/hooks";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
 import { Text } from "@/ui";
 
-export function DeleteGameButton() {
+interface DeleteGameButtonProps {
+  game: Game | null;
+}
+
+export function DeleteGameButton({ game }: DeleteGameButtonProps) {
   const { theme } = useUnistyles();
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigation =
     useNavigation<NativeStackNavigationProp<GamesNavigatorParamList>>();
-
-  const { game } = useGame(undefined, {
-    resolve: {
-      rounds: {
-        $each: {
-          round: {
-            scores: true,
-          },
-        },
-      },
-    },
-  });
 
   const me = useAccount(PlayerAccount, {
     resolve: {

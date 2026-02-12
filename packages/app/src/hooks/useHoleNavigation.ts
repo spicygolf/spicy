@@ -5,7 +5,7 @@ import {
   DEFAULT_PAR,
   DEFAULT_YARDS,
 } from "@/constants/golf";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGameIdContext } from "@/contexts/GameContext";
 
 export interface HoleInfo {
   number: string;
@@ -28,7 +28,7 @@ export interface UseHoleNavigationReturn {
 }
 
 export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
-  const { currentHoleIndex, setCurrentHoleIndex } = useGameContext();
+  const { currentHoleIndex, setCurrentHoleIndex } = useGameIdContext();
 
   // Jazz provides reactive updates - no useMemo needed (jazz.xml)
   let holesList: string[] = [];

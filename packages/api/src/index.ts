@@ -16,7 +16,7 @@ import {
   resetCatalog,
 } from "./lib/catalog";
 import { linkPlayerToUser, lookupPlayer } from "./lib/link";
-import { playerSearch } from "./players";
+import { playerGetByGhin, playerSearch } from "./players";
 import { isAdminAccount, requireAdminAccount } from "./utils/auth";
 import { authenticateJazzRequest } from "./utils/jazz-auth";
 import {
@@ -135,6 +135,29 @@ const app = new Elysia()
         };
       }
       return playerSearch(body as GolfersSearchRequest);
+    },
+    { jazzAuth: true },
+  )
+  .post(
+    `/${api}/ghin/players/get`,
+    async ({ body, jazzAccountId, set }) => {
+      const rateLimit = applyRateLimit(
+        jazzAccountId as string,
+        "ghin/players/get",
+        set,
+      );
+      if (rateLimit.blocked) {
+        return {
+          error: "Rate limit exceeded",
+          retryAfter: rateLimit.retryAfter,
+        };
+      }
+      const { ghinNumber } = body as { ghinNumber: number };
+      if (!Number.isInteger(ghinNumber) || ghinNumber <= 0) {
+        set.status = 400;
+        return { error: "ghinNumber must be a positive integer" };
+      }
+      return playerGetByGhin(ghinNumber);
     },
     { jazzAuth: true },
   )

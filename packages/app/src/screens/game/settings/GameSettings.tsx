@@ -7,7 +7,7 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { GamePlayersList } from "@/components/game/settings/GamePlayersList";
 import { GameOptionsList } from "@/components/game/settings/options/GameOptionsList";
 import { GameTeamsList } from "@/components/game/settings/teams";
-import { type SettingsTab, useGameContext } from "@/contexts/GameContext";
+import { type SettingsTab, useGameIdContext } from "@/contexts/GameContext";
 import { GhinCourseSearchProvider } from "@/contexts/GhinCourseSearchContext";
 import { AddPlayerNavigator } from "@/navigators/AddPlayerNavigator";
 import { SelectCourseNavigator } from "@/navigators/SelectCourseNavigator";
@@ -68,10 +68,11 @@ function OptionsTab() {
   );
 }
 
+const Tabs = createMaterialTopTabNavigator<GameSettingsTabParamList>();
+
 function GameSettingsTabs() {
   const { theme } = useUnistyles();
-  const { settingsTab, setSettingsTab } = useGameContext();
-  const Tabs = createMaterialTopTabNavigator<GameSettingsTabParamList>();
+  const { settingsTab, setSettingsTab } = useGameIdContext();
 
   const tabScreenOptions: MaterialTopTabNavigationOptions = {
     tabBarIndicatorStyle: styles.selectedTabLine,
@@ -90,7 +91,7 @@ function GameSettingsTabs() {
   return (
     <Tabs.Navigator
       initialRouteName={settingsTab}
-      screenOptions={tabScreenOptions}
+      screenOptions={{ ...tabScreenOptions, lazy: true }}
       screenListeners={{
         state: (e) => {
           const route = e.data.state?.routes[e.data.state.index];
@@ -119,9 +120,9 @@ function GameSettingsTabs() {
   );
 }
 
-export function GameSettings() {
-  const Stack = createNativeStackNavigator<GameSettingsStackParamList>();
+const Stack = createNativeStackNavigator<GameSettingsStackParamList>();
 
+export function GameSettings() {
   return (
     <Stack.Navigator
       initialRouteName="GameSettingsTabs"
@@ -149,20 +150,5 @@ const styles = StyleSheet.create((theme) => ({
   selectedTabLine: {
     backgroundColor: theme.colors.action,
     height: 4,
-  },
-  placeholderContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: theme.gap(4),
-  },
-  placeholderText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: theme.gap(1),
-  },
-  placeholderSubtext: {
-    fontSize: 14,
-    color: theme.colors.secondary,
   },
 }));

@@ -10,6 +10,7 @@ import {
   PlayerAccount,
 } from "spicylib/schema";
 import { copySpecOptions } from "spicylib/scoring";
+import { getDefaultTeeTime } from "spicylib/utils";
 import { addPlayerToGameCore } from "../utils/addPlayerToGameCore";
 import { reportError } from "../utils/reportError";
 import { useJazzWorker } from "./useJazzWorker";
@@ -129,7 +130,7 @@ export function useCreateGame() {
     // Create the game
     const game = Game.create(
       {
-        start: new Date(),
+        start: getDefaultTeeTime(new Date()),
         name,
         scope,
         spec,
