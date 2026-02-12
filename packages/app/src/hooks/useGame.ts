@@ -16,9 +16,6 @@ type GameWithRelations = Game | null;
 /**
  * Default select function for useGame.
  * Defined at module scope so the reference is stable across renders.
- * This prevents useSyncExternalStoreWithSelector from re-evaluating
- * on every render, which with 10+ useGame consumers can cascade past
- * React 19's synchronous update depth limit.
  */
 function defaultSelect(value: MaybeLoaded<Game>): Game | null | undefined {
   if (!value.$isLoaded) {
@@ -28,10 +25,96 @@ function defaultSelect(value: MaybeLoaded<Game>): Game | null | undefined {
 }
 
 /**
+ * Build a fingerprint string that captures the Game's loaded state deeply
+ * enough to detect meaningful changes. Jazz fires dozens of notifications
+ * per logical change (one per child scope); this fingerprint collapses them
+ * into a single value that only changes when actual data changes.
+ */
+function gameFingerprint(game: Game | null | undefined): string {
+  if (!game) return "null";
+  if (!game.$isLoaded) return "loading";
+
+  const raw = game.$jazz?.raw;
+  // Start with the Game's own version
+  const parts: string[] = [
+    `v:${raw?.totalValidTransactions ?? 0}:${raw?.version ?? 0}`,
+  ];
+
+  // Include loaded state of key children — these change during progressive loading
+  if (game.spec?.$isLoaded) {
+    const specRaw = game.spec.$jazz?.raw;
+    parts.push(`spec:${specRaw?.totalValidTransactions ?? 0}`);
+  } else {
+    parts.push("spec:_");
+  }
+
+  if (game.players?.$isLoaded) {
+    parts.push(`pl:${game.players.length}`);
+    for (const p of game.players) {
+      if (p?.$isLoaded) {
+        const pRaw = p.$jazz?.raw;
+        parts.push(`p:${pRaw?.totalValidTransactions ?? 0}`);
+      }
+    }
+  } else {
+    parts.push("pl:_");
+  }
+
+  if (game.rounds?.$isLoaded) {
+    parts.push(`rd:${game.rounds.length}`);
+    for (const r of game.rounds) {
+      if (r?.$isLoaded) {
+        const rRaw = r.$jazz?.raw;
+        parts.push(`r:${rRaw?.totalValidTransactions ?? 0}`);
+        if (r.round?.$isLoaded) {
+          const rrRaw = r.round.$jazz?.raw;
+          parts.push(`rr:${rrRaw?.totalValidTransactions ?? 0}`);
+        }
+      }
+    }
+  } else {
+    parts.push("rd:_");
+  }
+
+  if (game.holes?.$isLoaded) {
+    parts.push(`h:${game.holes.length}`);
+  } else {
+    parts.push("h:_");
+  }
+
+  if (game.scope?.$isLoaded) {
+    const sRaw = game.scope.$jazz?.raw;
+    parts.push(`sc:${sRaw?.totalValidTransactions ?? 0}`);
+  } else {
+    parts.push("sc:_");
+  }
+
+  return parts.join("|");
+}
+
+/**
+ * Equality function that prevents re-renders when the Game's meaningful
+ * data hasn't changed. Jazz fires triggerUpdate() for every child scope
+ * update (dozens per field change), each creating a new object reference.
+ * This compares a fingerprint of loaded state + version counters instead
+ * of comparing by object reference.
+ */
+function gameEqualityFn(
+  a: Game | null | undefined,
+  b: Game | null | undefined,
+): boolean {
+  return gameFingerprint(a) === gameFingerprint(b);
+}
+
+/**
  * Hook to load a Game with customizable resolve queries.
  *
- * PERFORMANCE: Always specify minimal resolve queries for your use case.
- * Loading unnecessary data can multiply load times by 10x or more.
+ * Uses a fingerprint-based equality function to prevent the render cascade
+ * caused by Jazz's subscription architecture. Jazz fires triggerUpdate() for
+ * each child scope update, creating dozens of new object references per
+ * single field change. The equality function compares a deep fingerprint
+ * of loaded state + version counters, collapsing these into a single
+ * effective re-render per meaningful change.
  *
  * @param gameId - Game ID to load (optional, falls back to context)
  * @param options - Configuration options
@@ -79,9 +162,14 @@ export function useGame(
       ? ({
           resolve: resolveQuery,
           select: options.select || defaultSelect,
+          equalityFn: gameEqualityFn,
         } as {
           resolve: typeof resolveQuery;
           select: (value: MaybeLoaded<Game>) => Game | null | undefined;
+          equalityFn: (
+            a: Game | null | undefined,
+            b: Game | null | undefined,
+          ) => boolean;
         })
       : undefined,
   ) as unknown as GameWithRelations;

@@ -2,9 +2,13 @@ import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import type { Game } from "spicylib/schema";
 import { resetSpecFromRef } from "spicylib/scoring";
-import { useGame } from "@/hooks";
 import { Text } from "@/ui";
+
+interface ResetSpecButtonProps {
+  game: Game | null;
+}
 
 /**
  * Button to reset a game's spec (options) back to catalog defaults.
@@ -12,18 +16,11 @@ import { Text } from "@/ui";
  * Uses the game's specRef (catalog spec) to restore all options
  * to their original values, reverting any user customizations.
  */
-export function ResetSpecButton() {
+export function ResetSpecButton({ game }: ResetSpecButtonProps) {
   const { theme } = useUnistyles();
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-
-  const { game } = useGame(undefined, {
-    resolve: {
-      spec: { $each: true },
-      specRef: { $each: true },
-    },
-  });
 
   const canReset =
     game?.$isLoaded &&

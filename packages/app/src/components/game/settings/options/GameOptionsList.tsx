@@ -23,13 +23,16 @@ import { TextOptionModal } from "./TextOptionModal";
 type ModalType = "game" | "junk" | "multiplier" | null;
 
 export function GameOptionsList() {
-  // game.spec is the working copy of options (user modifications go here)
-  // Options are plain JSON objects, so just need $each: true (not nested)
+  // Single subscription for the entire Options tab. ResetSpecButton and
+  // DeleteGameButton receive `game` as a prop instead of calling useGame()
+  // themselves, reducing the total Jazz subscription count on this screen.
   const { game } = useGame(undefined, {
     resolve: {
       spec: { $each: true },
+      specRef: { $each: true },
       scope: { teamsConfig: true },
       players: { $each: true },
+      rounds: { $each: { round: { scores: true } } },
     },
   });
 
@@ -277,8 +280,8 @@ export function GameOptionsList() {
 
         {/* Admin Section */}
         <OptionSectionHeader title="Admin" />
-        <ResetSpecButton />
-        <DeleteGameButton />
+        <ResetSpecButton game={game} />
+        <DeleteGameButton game={game} />
       </ScrollView>
 
       {/* Game Option Modals */}

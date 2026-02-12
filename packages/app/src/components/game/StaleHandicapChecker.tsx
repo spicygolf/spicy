@@ -15,9 +15,7 @@ interface StaleHandicapCheckerProps {
  * Isolated from the parent GameNavigator so that Jazz re-renders from the
  * players subscription don't cause render loops in the parent.
  */
-export function StaleHandicapChecker({
-  gameId,
-}: StaleHandicapCheckerProps): React.JSX.Element | null {
+export function StaleHandicapChecker({ gameId }: StaleHandicapCheckerProps) {
   const { game } = useGame(gameId, {
     resolve: {
       players: {
