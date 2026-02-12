@@ -55,6 +55,19 @@ for i in {1..30}; do
   sleep 1
 done
 
+# Wait for bundle to be compiled (status responds before bundle is ready)
+echo "Waiting for iOS bundle to be ready..."
+for i in {1..120}; do
+  if curl -sf "http://localhost:8081/index.bundle?platform=ios&dev=true&minify=false" > /dev/null 2>&1; then
+    echo "Bundle is ready!"
+    break
+  fi
+  if [ $i -eq 120 ]; then
+    echo "Warning: Bundle may not be ready after 120s, continuing anyway..."
+  fi
+  sleep 1
+done
+
 # Install app to simulator (Maestro will launch it)
 echo "Installing app to iOS Simulator..."
 xcrun simctl install booted "$APP_PATH"

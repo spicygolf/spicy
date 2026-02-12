@@ -54,6 +54,19 @@ for i in {1..30}; do
   sleep 1
 done
 
+# Wait for bundle to be compiled (status responds before bundle is ready)
+echo "Waiting for Android bundle to be ready..."
+for i in {1..120}; do
+  if curl -sf "http://localhost:8081/index.bundle?platform=android&dev=true&minify=false" > /dev/null 2>&1; then
+    echo "Bundle is ready!"
+    break
+  fi
+  if [ $i -eq 120 ]; then
+    echo "Warning: Bundle may not be ready after 120s, continuing anyway..."
+  fi
+  sleep 1
+done
+
 # Set up port forwarding so emulator can reach Metro on host
 echo "Setting up adb reverse for Metro..."
 adb reverse tcp:8081 tcp:8081
