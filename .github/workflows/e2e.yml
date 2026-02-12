@@ -306,7 +306,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-pixel6-${{ env.EMULATOR_API_LEVEL }}
+          key: avd-pixel7pro-${{ env.EMULATOR_API_LEVEL }}
 
       - name: Create AVD and Generate Snapshot for Caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -314,7 +314,7 @@ jobs:
         with:
           api-level: ${{ env.EMULATOR_API_LEVEL }}
           arch: x86_64
-          profile: pixel_6
+          profile: pixel_7_pro
           disk-size: 8G
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
@@ -328,7 +328,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-pixel6-${{ env.EMULATOR_API_LEVEL }}
+          key: avd-pixel7pro-${{ env.EMULATOR_API_LEVEL }}
 
       - name: Run E2E Tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -336,7 +336,7 @@ jobs:
         with:
           api-level: ${{ env.EMULATOR_API_LEVEL }}
           arch: x86_64
-          profile: pixel_6
+          profile: pixel_7_pro
           disk-size: 8G
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
