@@ -27,6 +27,8 @@ interface TeamFooterProps {
   teeFlipWinner?: boolean;
   /** Called when the tee flip icon is tapped to replay the animation */
   onTeeFlipReplay?: () => void;
+  /** Called when the tee flip icon is long-pressed to remove the result */
+  onTeeFlipRemove?: () => void;
   /** Whether the tee flip was declined on this hole */
   teeFlipDeclined?: boolean;
   /** Called when the declined tee icon is tapped to undo the decline */
@@ -45,6 +47,7 @@ export function TeamFooter({
   runningDiff = 0,
   teeFlipWinner = false,
   onTeeFlipReplay,
+  onTeeFlipRemove,
   teeFlipDeclined = false,
   onTeeFlipUndoDecline,
 }: TeamFooterProps) {
@@ -71,6 +74,7 @@ export function TeamFooter({
             {teeFlipWinner && (
               <Pressable
                 onPress={onTeeFlipReplay}
+                onLongPress={onTeeFlipRemove}
                 hitSlop={12}
                 style={styles.teeFlipIcon}
                 accessibilityLabel="Replay tee flip"
