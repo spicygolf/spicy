@@ -37,14 +37,15 @@ function gameFingerprint(game: Game | null | undefined): string {
 
   const parts: string[] = [`g:${game.$jazz.lastUpdatedAt}`];
 
-  // Include loaded state of key children — these change during progressive loading
-  if (game.spec?.$isLoaded) {
+  // Include loaded state of key children — these change during progressive loading.
+  // Use $jazz.has() guards before accessing optional CoValue properties.
+  if (game.$jazz.has("spec") && game.spec?.$isLoaded) {
     parts.push(`spec:${game.spec.$jazz.lastUpdatedAt}`);
   } else {
     parts.push("spec:_");
   }
 
-  if (game.players?.$isLoaded) {
+  if (game.$jazz.has("players") && game.players?.$isLoaded) {
     parts.push(`pl:${game.players.length}`);
     for (const p of game.players) {
       if (p?.$isLoaded) {
@@ -55,12 +56,12 @@ function gameFingerprint(game: Game | null | undefined): string {
     parts.push("pl:_");
   }
 
-  if (game.rounds?.$isLoaded) {
+  if (game.$jazz.has("rounds") && game.rounds?.$isLoaded) {
     parts.push(`rd:${game.rounds.length}`);
     for (const r of game.rounds) {
       if (r?.$isLoaded) {
         parts.push(`r:${r.$jazz.lastUpdatedAt}`);
-        if (r.round?.$isLoaded) {
+        if (r.$jazz.has("round") && r.round?.$isLoaded) {
           parts.push(`rr:${r.round.$jazz.lastUpdatedAt}`);
         }
       }
@@ -69,13 +70,13 @@ function gameFingerprint(game: Game | null | undefined): string {
     parts.push("rd:_");
   }
 
-  if (game.holes?.$isLoaded) {
+  if (game.$jazz.has("holes") && game.holes?.$isLoaded) {
     parts.push(`h:${game.holes.length}`);
   } else {
     parts.push("h:_");
   }
 
-  if (game.scope?.$isLoaded) {
+  if (game.$jazz.has("scope") && game.scope?.$isLoaded) {
     parts.push(`sc:${game.scope.$jazz.lastUpdatedAt}`);
   } else {
     parts.push("sc:_");
