@@ -1,0 +1,7 @@
+{
+  "name": "tee_flip",
+  "disp": "Tee flip",
+  "type": "game",
+  "valueType": "text",
+  "defaultValue": ""
+}
