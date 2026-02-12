@@ -370,13 +370,21 @@ function clearCustomMultiplier(
   }
 }
 
+type TeeFlipOptionName = "tee_flip_winner" | "tee_flip_declined";
+
 /**
- * Record the tee flip winner by storing a TeamOption on the winning team.
+ * Record a tee flip option (winner or declined) as a TeamOption on the given team.
+ * Guards against duplicate entries for the same hole.
  *
- * @param team - The team that won the tee flip
- * @param currentHoleNumber - The hole number to record the result for
+ * @param team - The team to store the option on
+ * @param currentHoleNumber - The hole number to record for
+ * @param optionName - Which tee flip option to record
  */
-function recordTeeFlipWinner(team: Team, currentHoleNumber: string): void {
+function recordTeeFlipOption(
+  team: Team,
+  currentHoleNumber: string,
+  optionName: TeeFlipOptionName,
+): void {
   const owner = team.$jazz.owner;
 
   if (!team.$jazz.has("options")) {
@@ -386,11 +394,10 @@ function recordTeeFlipWinner(team: Team, currentHoleNumber: string): void {
   const options = team.options;
   if (!options?.$isLoaded) return;
 
-  // Guard against duplicate entries for the same hole
   for (const opt of options) {
     if (
       opt?.$isLoaded &&
-      opt.optionName === "tee_flip_winner" &&
+      opt.optionName === optionName &&
       opt.firstHole === currentHoleNumber
     ) {
       return;
@@ -398,89 +405,31 @@ function recordTeeFlipWinner(team: Team, currentHoleNumber: string): void {
   }
 
   const newOption = TeamOption.create(
-    {
-      optionName: "tee_flip_winner",
-      value: "true",
-      firstHole: currentHoleNumber,
-    },
+    { optionName, value: "true", firstHole: currentHoleNumber },
     { owner },
   );
   options.$jazz.push(newOption);
 }
 
 /**
- * Record that the tee flip was declined by storing a TeamOption on the first team.
+ * Remove a tee flip option (winner or declined) from a team for a given hole.
  *
- * @param team - The team to store the declined option on (any team works, typically first)
- * @param currentHoleNumber - The hole number to record the decline for
+ * @param team - The team to remove the option from
+ * @param currentHoleNumber - The hole number to remove for
+ * @param optionName - Which tee flip option to remove
  */
-function recordTeeFlipDeclined(team: Team, currentHoleNumber: string): void {
-  const owner = team.$jazz.owner;
-
-  if (!team.$jazz.has("options")) {
-    team.$jazz.set("options", ListOfTeamOptions.create([], { owner }));
-  }
-
-  const options = team.options;
-  if (!options?.$isLoaded) return;
-
-  // Guard against duplicate entries for the same hole
-  for (const opt of options) {
-    if (
-      opt?.$isLoaded &&
-      opt.optionName === "tee_flip_declined" &&
-      opt.firstHole === currentHoleNumber
-    ) {
-      return;
-    }
-  }
-
-  const newOption = TeamOption.create(
-    {
-      optionName: "tee_flip_declined",
-      value: "true",
-      firstHole: currentHoleNumber,
-    },
-    { owner },
-  );
-  options.$jazz.push(newOption);
-}
-
-/**
- * Remove the tee flip winner record for a hole, reverting to the pre-flip state.
- *
- * @param team - The team that has the winner option stored (the winning team)
- * @param currentHoleNumber - The hole number to remove the result for
- */
-function removeTeeFlipWinner(team: Team, currentHoleNumber: string): void {
+function removeTeeFlipOption(
+  team: Team,
+  currentHoleNumber: string,
+  optionName: TeeFlipOptionName,
+): void {
   if (!team.options?.$isLoaded) return;
   const options = team.options;
   for (let i = options.length - 1; i >= 0; i--) {
     const opt = options[i];
     if (
       opt?.$isLoaded &&
-      opt.optionName === "tee_flip_winner" &&
-      opt.firstHole === currentHoleNumber
-    ) {
-      options.$jazz.splice(i, 1);
-    }
-  }
-}
-
-/**
- * Remove the tee flip declined record for a hole, allowing the confirmation to re-appear.
- *
- * @param team - The team that has the declined option stored
- * @param currentHoleNumber - The hole number to remove the decline for
- */
-function removeTeeFlipDeclined(team: Team, currentHoleNumber: string): void {
-  if (!team.options?.$isLoaded) return;
-  const options = team.options;
-  for (let i = options.length - 1; i >= 0; i--) {
-    const opt = options[i];
-    if (
-      opt?.$isLoaded &&
-      opt.optionName === "tee_flip_declined" &&
+      opt.optionName === optionName &&
       opt.firstHole === currentHoleNumber
     ) {
       options.$jazz.splice(i, 1);
@@ -739,7 +688,7 @@ export function ScoringView({
       if (teeFlipMode === "flip") {
         const winnerTeam = allTeams.find((t) => t.team === winnerTeamId);
         if (winnerTeam) {
-          recordTeeFlipWinner(winnerTeam, currentHoleNumber);
+          recordTeeFlipOption(winnerTeam, currentHoleNumber, "tee_flip_winner");
         }
       }
       setTeeFlipMode(null);
@@ -826,7 +775,11 @@ export function ScoringView({
             onDecline={() => {
               const storageTeam = allTeams[0];
               if (storageTeam) {
-                recordTeeFlipDeclined(storageTeam, currentHoleNumber);
+                recordTeeFlipOption(
+                  storageTeam,
+                  currentHoleNumber,
+                  "tee_flip_declined",
+                );
               }
               setTeeFlipMode(null);
             }}
@@ -854,6 +807,13 @@ export function ScoringView({
           }
 
           const teamId = team.team ?? "";
+          const isWinnerTeam =
+            teeFlipEnabled && teeFlipRequired && teeFlipWinner === teamId;
+          const isDeclinedTeam =
+            teeFlipEnabled &&
+            teeFlipRequired &&
+            teeFlipDeclined &&
+            teamId === allTeams[0]?.team;
 
           // Build multiplier buttons
           // For stackable multipliers (rest_of_nine scope like pre_double):
@@ -1073,31 +1033,29 @@ export function ScoringView({
               holeMultiplier={overallMultiplier}
               holePoints={displayPoints}
               runningDiff={getTeamRunningScore(teamHoleResult)}
-              teeFlipWinner={
-                teeFlipEnabled && teeFlipRequired && teeFlipWinner === teamId
-              }
+              teeFlipWinner={isWinnerTeam}
               onTeeFlipReplay={
-                teeFlipEnabled && teeFlipRequired && teeFlipWinner === teamId
-                  ? () => setTeeFlipMode("replay")
-                  : undefined
+                isWinnerTeam ? () => setTeeFlipMode("replay") : undefined
               }
               onTeeFlipRemove={
-                teeFlipEnabled && teeFlipRequired && teeFlipWinner === teamId
-                  ? () => removeTeeFlipWinner(team, currentHoleNumber)
+                isWinnerTeam
+                  ? () =>
+                      removeTeeFlipOption(
+                        team,
+                        currentHoleNumber,
+                        "tee_flip_winner",
+                      )
                   : undefined
               }
-              teeFlipDeclined={
-                teeFlipEnabled &&
-                teeFlipRequired &&
-                teeFlipDeclined &&
-                teamId === allTeams[0]?.team
-              }
+              teeFlipDeclined={isDeclinedTeam}
               onTeeFlipUndoDecline={
-                teeFlipEnabled &&
-                teeFlipRequired &&
-                teeFlipDeclined &&
-                teamId === allTeams[0]?.team
-                  ? () => removeTeeFlipDeclined(team, currentHoleNumber)
+                isDeclinedTeam
+                  ? () =>
+                      removeTeeFlipOption(
+                        team,
+                        currentHoleNumber,
+                        "tee_flip_declined",
+                      )
                   : undefined
               }
             >

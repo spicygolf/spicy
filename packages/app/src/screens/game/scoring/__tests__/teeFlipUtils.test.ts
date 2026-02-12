@@ -379,8 +379,9 @@ describe("isEarliestUnflippedHole", () => {
     expect(result).toBe(true);
   });
 
-  it("returns false when not a tied hole", () => {
-    // Current hole (2) has non-tied previous
+  it("returns false when an earlier hole cannot be verified", () => {
+    // Hole 1 is always tied (first hole, no previous) but gameHoles is empty
+    // so teams can't be looked up — treated as unresolved, blocking current hole
     const scoreboard = makeScoreboard({
       "1": { teams: { "1": { runningDiff: 3 }, "2": { runningDiff: -3 } } },
     });

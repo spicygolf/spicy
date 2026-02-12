@@ -71,7 +71,8 @@ export function TeamFooter({
         <View style={styles.optionsRow}>
           {/* Left half: Tee flip icon + Multiplier press buttons + earned multipliers */}
           <View style={styles.leftSection}>
-            {teeFlipWinner && (
+            {/* Winner and declined are mutually exclusive — winner takes priority */}
+            {teeFlipWinner ? (
               <Pressable
                 onPress={onTeeFlipReplay}
                 onLongPress={onTeeFlipRemove}
@@ -85,12 +86,11 @@ export function TeamFooter({
                   scale={0.35}
                 />
               </Pressable>
-            )}
-            {teeFlipDeclined && (
+            ) : teeFlipDeclined ? (
               <Pressable
                 onPress={onTeeFlipUndoDecline}
                 hitSlop={12}
-                style={[styles.teeFlipIcon, { opacity: 0.4 }]}
+                style={styles.teeFlipIconDeclined}
                 accessibilityLabel="Undo declined tee flip"
               >
                 <GolfTee
@@ -99,7 +99,7 @@ export function TeamFooter({
                   scale={0.35}
                 />
               </Pressable>
-            )}
+            ) : null}
             {hasMultipliers && (
               <OptionsButtons
                 options={multiplierOptions}
@@ -220,5 +220,14 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
     overflow: "hidden",
     marginRight: theme.gap(0.5),
+  },
+  teeFlipIconDeclined: {
+    width: 20,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    marginRight: theme.gap(0.5),
+    opacity: 0.4,
   },
 }));
