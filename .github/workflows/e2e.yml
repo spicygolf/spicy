@@ -48,21 +48,12 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
 
-      - name: Install ccache
-        run: brew install ccache
-
-      - name: Restore ccache
-        uses: WarpBuilds/cache/restore@v1
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
         with:
-          path: ~/Library/Caches/ccache
-          key: ccache-ios-${{ runner.os }}
-          restore-keys: |
-            ccache-ios-
-
-      - name: Configure ccache
-        run: |
-          ccache --set-config=max_size=2G
-          ccache --zero-stats
+          max-size: 2G
+          key: ${{ runner.os }}-ccache-ios-e2e
+          create-symlink: true
 
       - name: Create output directory
         run: mkdir -p /tmp/e2e-output
@@ -120,13 +111,6 @@ jobs:
         run: ./tests/e2e/scripts/build-ios.sh
         env:
           IOS_SIMULATOR_DEVICE: ${{ env.IOS_SIMULATOR_DEVICE }}
-
-      - name: Save ccache
-        if: always()
-        uses: WarpBuilds/cache/save@v1
-        with:
-          path: ~/Library/Caches/ccache
-          key: ccache-ios-${{ runner.os }}
 
       - name: Save iOS DerivedData cache
         if: always()
