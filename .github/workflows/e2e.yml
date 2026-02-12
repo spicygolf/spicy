@@ -87,9 +87,7 @@ jobs:
           path: |
             packages/app/ios/Pods
             ~/Library/Caches/CocoaPods
-          key: pods-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock') }}
-          restore-keys: |
-            pods-${{ runner.os }}-
+          key: ${{ runner.os }}-pods
 
       - name: Install CocoaPods
         working-directory: packages/app
@@ -102,7 +100,7 @@ jobs:
           path: |
             packages/app/ios/Pods
             ~/Library/Caches/CocoaPods
-          key: pods-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock') }}
+          key: ${{ runner.os }}-pods
 
       - name: Restore iOS DerivedData cache
         id: deriveddata-cache
@@ -110,9 +108,7 @@ jobs:
         with:
           path: |
             ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e
-          key: ios-deriveddata-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock', 'packages/app/ios/spicygolf.xcodeproj/project.pbxproj') }}
-          restore-keys: |
-            ios-deriveddata-${{ runner.os }}-
+          key: ${{ runner.os }}-ios-deriveddata
 
       - name: Make scripts executable
         run: chmod +x tests/e2e/scripts/*.sh
@@ -138,7 +134,7 @@ jobs:
         with:
           path: |
             ~/Library/Developer/Xcode/DerivedData/SpicyGolf-e2e
-          key: ios-deriveddata-${{ runner.os }}-${{ hashFiles('packages/app/ios/Podfile.lock', 'packages/app/ios/spicygolf.xcodeproj/project.pbxproj') }}
+          key: ${{ runner.os }}-ios-deriveddata
 
       - name: Upload Build Logs
         uses: actions/upload-artifact@v4
@@ -229,9 +225,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
+          key: ${{ runner.os }}-gradle
 
       - name: Restore Android Build cache
         id: android-build-cache
@@ -241,9 +235,7 @@ jobs:
             packages/app/android/.gradle
             packages/app/android/app/build
             packages/app/android/build
-          key: android-build-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle.properties') }}
-          restore-keys: |
-            android-build-${{ runner.os }}-
+          key: ${{ runner.os }}-android-build
 
       - name: Make scripts executable
         run: chmod +x tests/e2e/scripts/*.sh
@@ -258,7 +250,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle
 
       - name: Save Android Build cache
         if: always()
@@ -268,7 +260,7 @@ jobs:
             packages/app/android/.gradle
             packages/app/android/app/build
             packages/app/android/build
-          key: android-build-${{ runner.os }}-${{ hashFiles('packages/app/android/**/*.gradle*', 'packages/app/android/gradle.properties') }}
+          key: ${{ runner.os }}-android-build
 
       - name: Upload Build Logs
         uses: actions/upload-artifact@v4
