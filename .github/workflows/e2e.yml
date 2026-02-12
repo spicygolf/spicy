@@ -48,6 +48,13 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
 
+      - name: Setup Ruby (bundle)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4
+          bundler-cache: true
+          working-directory: packages/app
+
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
