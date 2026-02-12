@@ -593,8 +593,6 @@ export function ScoringView({
     holesList,
     allTeams.length,
     teamMultiplierOptions.length > 0,
-    allTeams,
-    currentHoleNumber,
   );
 
   const teeFlipWinner = getTeeFlipWinner(allTeams, currentHoleNumber);

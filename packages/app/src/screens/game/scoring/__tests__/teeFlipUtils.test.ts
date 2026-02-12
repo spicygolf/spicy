@@ -10,32 +10,18 @@ import { getTeeFlipWinner, isTeeFlipRequired } from "../scoringUtils";
 // =============================================================================
 
 function makeScoreboard(
-  holes: Record<
-    string,
-    {
-      teams: Record<string, Partial<TeamHoleResult>>;
-      scoresEntered?: number;
-    }
-  >,
+  holes: Record<string, { teams: Record<string, Partial<TeamHoleResult>> }>,
 ): Scoreboard {
   const sb: Record<string, unknown> = {};
   for (const [holeNum, data] of Object.entries(holes)) {
-    sb[holeNum] = {
-      teams: data.teams,
-      scoresEntered: data.scoresEntered ?? 0,
-    };
+    sb[holeNum] = { teams: data.teams };
   }
   return { holes: sb } as unknown as Scoreboard;
 }
 
 function makeTeam(
   teamId: string,
-  options: Array<{
-    optionName: string;
-    value: string;
-    firstHole?: string;
-    playerId?: string;
-  }>,
+  options: Array<{ optionName: string; value: string; firstHole?: string }>,
 ): Team {
   return {
     $isLoaded: true,
@@ -60,25 +46,21 @@ function makeTeamNoOptions(teamId: string): Team {
   } as unknown as Team;
 }
 
-/** Empty teams for tests that don't care about current hole teams */
-const noTeams: Team[] = [];
-
 // =============================================================================
 // isTeeFlipRequired
 // =============================================================================
 
 describe("isTeeFlipRequired", () => {
   it("returns false when scoreboard is null (progressive loading)", () => {
-    const result = isTeeFlipRequired(null, 0, ["1"], 2, true, noTeams, "1");
+    const result = isTeeFlipRequired(null, 0, ["1"], 2, true);
     expect(result).toBe(false);
   });
 
   it("returns true when no previous hole exists (first hole of round)", () => {
     const scoreboard = makeScoreboard({
-      "1": { teams: {}, scoresEntered: 0 },
+      "1": { teams: {} },
     });
-    const teams = [makeTeamNoOptions("1"), makeTeamNoOptions("2")];
-    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 2, true, teams, "1");
+    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 2, true);
     expect(result).toBe(true);
   });
 
@@ -90,19 +72,9 @@ describe("isTeeFlipRequired", () => {
           "2": { runningDiff: 0 },
         },
       },
-      "4": { teams: {}, scoresEntered: 0 },
     });
-    const teams = [makeTeamNoOptions("1"), makeTeamNoOptions("2")];
     // currentHoleIndex=1 means holesList[0] is the previous hole
-    const result = isTeeFlipRequired(
-      scoreboard,
-      1,
-      ["3", "4"],
-      2,
-      true,
-      teams,
-      "4",
-    );
+    const result = isTeeFlipRequired(scoreboard, 1, ["3", "4"], 2, true);
     expect(result).toBe(true);
   });
 
@@ -115,75 +87,31 @@ describe("isTeeFlipRequired", () => {
         },
       },
     });
-    const teams = [makeTeamNoOptions("1"), makeTeamNoOptions("2")];
-    const result = isTeeFlipRequired(
-      scoreboard,
-      1,
-      ["1", "2"],
-      2,
-      true,
-      teams,
-      "2",
-    );
+    const result = isTeeFlipRequired(scoreboard, 1, ["1", "2"], 2, true);
     expect(result).toBe(false);
   });
 
   it("returns false when there are 3+ teams", () => {
     const scoreboard = makeScoreboard({});
-    const result = isTeeFlipRequired(
-      scoreboard,
-      0,
-      ["1"],
-      3,
-      true,
-      noTeams,
-      "1",
-    );
+    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 3, true);
     expect(result).toBe(false);
   });
 
   it("returns false when there is only 1 team", () => {
     const scoreboard = makeScoreboard({});
-    const result = isTeeFlipRequired(
-      scoreboard,
-      0,
-      ["1"],
-      1,
-      true,
-      noTeams,
-      "1",
-    );
+    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 1, true);
     expect(result).toBe(false);
   });
 
   it("returns false when there are no multiplier options", () => {
     const scoreboard = makeScoreboard({});
-    const result = isTeeFlipRequired(
-      scoreboard,
-      0,
-      ["1"],
-      2,
-      false,
-      noTeams,
-      "1",
-    );
+    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 2, false);
     expect(result).toBe(false);
   });
 
   it("returns true when previous hole result is missing from scoreboard", () => {
-    const scoreboard = makeScoreboard({
-      "2": { teams: {}, scoresEntered: 0 },
-    });
-    const teams = [makeTeamNoOptions("1"), makeTeamNoOptions("2")];
-    const result = isTeeFlipRequired(
-      scoreboard,
-      1,
-      ["1", "2"],
-      2,
-      true,
-      teams,
-      "2",
-    );
+    const scoreboard = makeScoreboard({});
+    const result = isTeeFlipRequired(scoreboard, 1, ["1", "2"], 2, true);
     expect(result).toBe(true);
   });
 
@@ -198,91 +126,16 @@ describe("isTeeFlipRequired", () => {
         },
       },
     });
-    const teams = [makeTeamNoOptions("1"), makeTeamNoOptions("2")];
-    const result = isTeeFlipRequired(
-      scoreboard,
-      1,
-      ["7", "8", "9"],
-      2,
-      true,
-      teams,
-      "8",
-    );
+    const result = isTeeFlipRequired(scoreboard, 1, ["7", "8", "9"], 2, true);
     expect(result).toBe(false);
   });
 
   it("returns true on first hole of shotgun start (no previous)", () => {
     const scoreboard = makeScoreboard({
-      "7": { teams: {}, scoresEntered: 0 },
+      "7": { teams: {} },
     });
-    const teams = [makeTeamNoOptions("1"), makeTeamNoOptions("2")];
-    const result = isTeeFlipRequired(
-      scoreboard,
-      0,
-      ["7", "8", "9"],
-      2,
-      true,
-      teams,
-      "7",
-    );
+    const result = isTeeFlipRequired(scoreboard, 0, ["7", "8", "9"], 2, true);
     expect(result).toBe(true);
-  });
-
-  it("returns false when a team already has a multiplier on the current hole", () => {
-    const scoreboard = makeScoreboard({
-      "1": { teams: {}, scoresEntered: 0 },
-    });
-    // Team 1 has a "double" multiplier on hole 1 (no playerId = team-level)
-    const teams = [
-      makeTeam("1", [{ optionName: "double", value: "true", firstHole: "1" }]),
-      makeTeamNoOptions("2"),
-    ];
-    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 2, true, teams, "1");
-    expect(result).toBe(false);
-  });
-
-  it("ignores tee_flip_winner options when checking for existing multipliers", () => {
-    const scoreboard = makeScoreboard({
-      "1": { teams: {}, scoresEntered: 0 },
-    });
-    // Only a tee_flip_winner option — should NOT suppress the flip
-    const teams = [
-      makeTeam("1", [
-        { optionName: "tee_flip_winner", value: "true", firstHole: "1" },
-      ]),
-      makeTeamNoOptions("2"),
-    ];
-    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 2, true, teams, "1");
-    expect(result).toBe(true);
-  });
-
-  it("ignores player-level options when checking for existing multipliers", () => {
-    const scoreboard = makeScoreboard({
-      "1": { teams: {}, scoresEntered: 0 },
-    });
-    // Player-level junk option (has playerId) — should NOT suppress the flip
-    const teams = [
-      makeTeam("1", [
-        {
-          optionName: "prox",
-          value: "true",
-          firstHole: "1",
-          playerId: "player1",
-        },
-      ]),
-      makeTeamNoOptions("2"),
-    ];
-    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 2, true, teams, "1");
-    expect(result).toBe(true);
-  });
-
-  it("returns false when current hole already has scores entered", () => {
-    const scoreboard = makeScoreboard({
-      "1": { teams: {}, scoresEntered: 2 },
-    });
-    const teams = [makeTeamNoOptions("1"), makeTeamNoOptions("2")];
-    const result = isTeeFlipRequired(scoreboard, 0, ["1"], 2, true, teams, "1");
-    expect(result).toBe(false);
   });
 });
 
