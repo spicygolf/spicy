@@ -7,4 +7,5 @@ export { type OptionButton, OptionsButtons } from "./OptionsButtons";
 export { PlayerScoreRow } from "./PlayerScoreRow";
 export { ScoreInput } from "./ScoreInput";
 export { TeamGroup } from "./TeamGroup";
+export { TeeFlipConfirmModal } from "./TeeFlipConfirmModal";
 export { GolfTee, TeeFlipModal } from "./TeeFlipModal";
