@@ -58,8 +58,21 @@ jobs:
       - name: Create output directory
         run: mkdir -p /tmp/e2e-output
 
+      - name: Restore node_modules cache
+        uses: WarpBuilds/cache/restore@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('bun.lock') }}
+
       - name: Install dependencies
         run: bun install
+
+      - name: Save node_modules cache
+        if: always()
+        uses: WarpBuilds/cache/save@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('bun.lock') }}
 
       - name: Create app .env file
         run: |
@@ -189,8 +202,21 @@ jobs:
       - name: Create output directory
         run: mkdir -p /tmp/e2e-output
 
+      - name: Restore node_modules cache
+        uses: WarpBuilds/cache/restore@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('bun.lock') }}
+
       - name: Install dependencies
         run: bun install
+
+      - name: Save node_modules cache
+        if: always()
+        uses: WarpBuilds/cache/save@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('bun.lock') }}
 
       - name: Create app .env file
         run: |
