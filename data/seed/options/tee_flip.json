@@ -1,4 +1,5 @@
 {
+  "_comment": "Empty defaultValue disables the feature. Specs enable it by providing an override with a truthy string that becomes the confirmation dialog label.",
   "name": "tee_flip",
   "disp": "Tee flip",
   "type": "game",
