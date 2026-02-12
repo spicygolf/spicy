@@ -74,8 +74,8 @@ jobs:
         run: |
           cat > packages/app/.env << EOF
           DEV_API_HOST=
-          JAZZ_API_KEY=${{ secrets.JAZZ_API_KEY }}
-          JAZZ_WORKER_ACCOUNT=${{ secrets.JAZZ_WORKER_ACCOUNT }}
+          JAZZ_API_KEY=${{ vars.JAZZ_API_KEY }}
+          JAZZ_WORKER_ACCOUNT=${{ vars.JAZZ_WORKER_ACCOUNT }}
           POSTHOG_API_KEY=${{ secrets.POSTHOG_API_KEY }}
           POSTHOG_HOST=${{ vars.POSTHOG_HOST }}
           EOF
@@ -215,8 +215,8 @@ jobs:
         run: |
           cat > packages/app/.env << EOF
           DEV_API_HOST=
-          JAZZ_API_KEY=${{ secrets.JAZZ_API_KEY }}
-          JAZZ_WORKER_ACCOUNT=${{ secrets.JAZZ_WORKER_ACCOUNT }}
+          JAZZ_API_KEY=${{ vars.JAZZ_API_KEY }}
+          JAZZ_WORKER_ACCOUNT=${{ vars.JAZZ_WORKER_ACCOUNT }}
           POSTHOG_API_KEY=${{ secrets.POSTHOG_API_KEY }}
           POSTHOG_HOST=${{ vars.POSTHOG_HOST }}
           EOF
