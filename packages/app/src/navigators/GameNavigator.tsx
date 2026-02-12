@@ -5,14 +5,13 @@ import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
 import { GameHeader } from "@/components/game/GameHeader";
 import { StaleHandicapChecker } from "@/components/game/StaleHandicapChecker";
-import { useGameContext } from "@/contexts/GameContext";
+import { useGameIdContext } from "@/contexts/GameContext";
 import { useGame } from "@/hooks";
 import type { GamesNavigatorParamList } from "@/navigators/GamesNavigator";
 import { GameLeaderboard } from "@/screens/game/GameLeaderboard";
 import { GameScoring } from "@/screens/game/scoring";
 import { GameSettings } from "@/screens/game/settings/GameSettings";
 
-// Props type for the GameNavigator screen
 type GameNavigatorProps = NativeStackScreenProps<
   GamesNavigatorParamList,
   "Game"
@@ -33,10 +32,8 @@ async function getFacilityName(game: Game): Promise<string | undefined> {
     const round = rtg.round;
     if (!round?.$isLoaded) continue;
 
-    // Check if course field exists before accessing
     if (!round.$jazz.has("course")) continue;
 
-    // Load course data asynchronously
     try {
       const loadedRound = await round.$jazz.ensureLoaded({
         resolve: {
@@ -52,7 +49,6 @@ async function getFacilityName(game: Game): Promise<string | undefined> {
       if (firstFacilityName === undefined) {
         firstFacilityName = courseName;
       } else if (firstFacilityName !== courseName) {
-        // Mismatch - return undefined
         return undefined;
       }
     } catch {
@@ -64,11 +60,10 @@ async function getFacilityName(game: Game): Promise<string | undefined> {
 }
 
 export function GameNavigator({ route }: GameNavigatorProps) {
-  const { setGameId } = useGameContext();
+  const { setGameId } = useGameIdContext();
   const initialView = route.params.initialView || "scoring";
   const [currentView, setCurrentView] = useState<GameView>(initialView);
 
-  // Extract gameId from route params
   const gameId = route.params.gameId;
 
   const { game } = useGame(gameId, {
@@ -84,7 +79,6 @@ export function GameNavigator({ route }: GameNavigatorProps) {
     },
   });
 
-  // Calculate facility name - show only if all players are on the same course
   const [facilityName, setFacilityName] = useState<string | undefined>(
     undefined,
   );
@@ -99,7 +93,6 @@ export function GameNavigator({ route }: GameNavigatorProps) {
     getFacilityName(game).then(setFacilityName);
   }, [game?.$jazz.id]);
 
-  // Update the current game ID in context - use gameId as stable dependency
   useEffect(() => {
     setGameId(gameId);
     return () => {
@@ -108,7 +101,7 @@ export function GameNavigator({ route }: GameNavigatorProps) {
   }, [gameId, setGameId]);
 
   if (!game?.$isLoaded) {
-    return null; // or a loading spinner
+    return null;
   }
 
   return (
