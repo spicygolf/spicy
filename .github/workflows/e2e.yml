@@ -117,6 +117,9 @@ jobs:
       - name: Make scripts executable
         run: chmod +x tests/e2e/scripts/*.sh
 
+      - name: Boot iOS Simulator (background)
+        run: xcrun simctl boot "${{ env.IOS_SIMULATOR_DEVICE }}" &
+
       - name: Build iOS App
         run: ./tests/e2e/scripts/build-ios.sh
         env:
@@ -151,10 +154,8 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
-      - name: Start iOS Simulator
+      - name: Wait for iOS Simulator
         run: |
-          xcrun simctl list devices available
-          xcrun simctl boot "${{ env.IOS_SIMULATOR_DEVICE }}" || true
           xcrun simctl bootstatus "${{ env.IOS_SIMULATOR_DEVICE }}" -b
 
       - name: Run E2E Tests
