@@ -15,11 +15,11 @@ type GameWithRelations = Game | null;
 /**
  * Default select function for useGame.
  * Defined at module scope so the reference is stable across renders.
+ * Returns null for both loading and not-found states — consumers use
+ * game?.$isLoaded to distinguish "ready" from "not ready".
  */
-function defaultSelect(value: MaybeLoaded<Game>): Game | null | undefined {
-  if (!value.$isLoaded) {
-    return value.$jazz.loadingState === "loading" ? undefined : null;
-  }
+function defaultSelect(value: MaybeLoaded<Game>): Game | null {
+  if (!value.$isLoaded) return null;
   return value;
 }
 

@@ -4,20 +4,21 @@ import { StyleSheet } from "react-native-unistyles";
 import { Button, Input, ModalHeader } from "@/ui";
 
 interface GameNameModalProps {
-  visible: boolean;
   currentName: string;
   onSave: (name: string) => void;
   onClose: () => void;
 }
 
+/**
+ * Modal for editing the game name.
+ * Parent must conditionally render this component so that useState
+ * re-initializes from currentName on each mount.
+ */
 export function GameNameModal({
-  visible,
   currentName,
   onSave,
   onClose,
 }: GameNameModalProps) {
-  // Component unmounts when not visible (early return below),
-  // so state is fresh from currentName on each mount.
   const [inputValue, setInputValue] = useState(currentName);
 
   const handleSave = () => {
@@ -29,13 +30,9 @@ export function GameNameModal({
     onSave(trimmed);
   };
 
-  if (!visible) {
-    return null;
-  }
-
   return (
     <Modal
-      visible={visible}
+      visible={true}
       transparent={true}
       animationType="fade"
       onRequestClose={onClose}

@@ -7,23 +7,24 @@ import { formatDate, formatTime } from "spicylib/utils";
 import { Button, ModalHeader, Text } from "@/ui";
 
 interface TeeTimeModalProps {
-  visible: boolean;
   currentDate: Date;
   isEvening: boolean;
   onSave: (date: Date) => void;
   onClose: () => void;
 }
 
+/**
+ * Modal for editing the game tee time.
+ * Parent must conditionally render this component so that useState
+ * re-initializes from currentDate on each mount.
+ */
 export function TeeTimeModal({
-  visible,
   currentDate,
   isEvening,
   onSave,
   onClose,
 }: TeeTimeModalProps) {
   const { theme } = useUnistyles();
-  // Component unmounts when not visible (early return below),
-  // so state is fresh from currentDate on each mount.
   const [selectedDate, setSelectedDate] = useState<Date>(currentDate);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -59,13 +60,9 @@ export function TeeTimeModal({
     onSave(selectedDate);
   }
 
-  if (!visible) {
-    return null;
-  }
-
   return (
     <Modal
-      visible={visible}
+      visible={true}
       transparent={true}
       animationType="fade"
       onRequestClose={onClose}

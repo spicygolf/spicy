@@ -336,20 +336,18 @@ export function GameOptionsList() {
         onClose={handleCloseModal}
       />
 
-      {/* Game Name Modal */}
-      {game?.$isLoaded && (
+      {/* Game Name Modal — rendered only when open so useState resets on each mount */}
+      {game?.$isLoaded && showNameModal && (
         <GameNameModal
-          visible={showNameModal}
           currentName={game.name}
           onSave={handleSaveName}
           onClose={() => setShowNameModal(false)}
         />
       )}
 
-      {/* Tee Time Modal */}
-      {game?.$isLoaded && (
+      {/* Tee Time Modal — rendered only when open so useState resets on each mount */}
+      {game?.$isLoaded && showTeeTimeModal && (
         <TeeTimeModal
-          visible={showTeeTimeModal}
           currentDate={game.start}
           isEvening={isEvening}
           onSave={handleSaveTeeTime}
