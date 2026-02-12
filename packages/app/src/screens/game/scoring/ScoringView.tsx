@@ -813,7 +813,13 @@ export function ScoringView({
             teeFlipEnabled &&
             teeFlipRequired &&
             teeFlipDeclined &&
-            teamId === allTeams[0]?.team;
+            team.options?.$isLoaded === true &&
+            team.options.some(
+              (opt) =>
+                opt?.$isLoaded &&
+                opt.optionName === "tee_flip_declined" &&
+                opt.firstHole === currentHoleNumber,
+            );
 
           // Build multiplier buttons
           // For stackable multipliers (rest_of_nine scope like pre_double):
