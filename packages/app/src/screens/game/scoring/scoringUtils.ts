@@ -484,13 +484,17 @@ export function isEarliestUnflippedHole(
   // Find the first hole that needs a tee flip and has no result
   for (let i = 0; i < holesList.length; i++) {
     const holeNum = holesList[i];
-    const required = isTeeFlipRequired(
-      scoreboard,
-      i,
-      holesList,
-      teamCount,
-      hasMultiplierOptions,
-    );
+    // Caller already verified isTeeFlipRequired for the current hole, skip redundant check
+    const required =
+      i === currentHoleIndex
+        ? true
+        : isTeeFlipRequired(
+            scoreboard,
+            i,
+            holesList,
+            teamCount,
+            hasMultiplierOptions,
+          );
 
     if (!required) continue;
 
