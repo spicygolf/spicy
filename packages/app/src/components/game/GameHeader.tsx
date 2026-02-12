@@ -92,6 +92,8 @@ export function GameHeader({
           style={styles.gameInfo}
           onPress={() => onViewChange?.("settings")}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Game settings"
         >
           <Text style={styles.name}>{game.name}</Text>
           <Text style={styles.date}>

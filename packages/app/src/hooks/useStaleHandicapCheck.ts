@@ -45,12 +45,14 @@ export function useStaleHandicapCheck(
 
     for (const player of players) {
       if (!player?.$isLoaded) continue;
-      if (!player.handicap?.$isLoaded) continue;
+      if (!player.$jazz.has("handicap") || !player.handicap?.$isLoaded)
+        continue;
 
       // Only check GHIN-sourced handicaps
       if (player.handicap.source !== "ghin") continue;
 
       // Must have a ghinId to be refreshable
+      if (!player.$jazz.has("ghinId")) continue;
       const ghinId = player.ghinId;
       if (!ghinId) continue;
 

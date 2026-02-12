@@ -151,19 +151,4 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.action,
     height: 4,
   },
-  placeholderContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: theme.gap(4),
-  },
-  placeholderText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: theme.gap(1),
-  },
-  placeholderSubtext: {
-    fontSize: 14,
-    color: theme.colors.secondary,
-  },
 }));

@@ -200,7 +200,7 @@ export function TeeFlipModal({
 
   return (
     <Modal
-      visible={visible}
+      visible={true}
       transparent={true}
       animationType="fade"
       statusBarTranslucent

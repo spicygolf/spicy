@@ -158,12 +158,7 @@ const styles = StyleSheet.create((theme) => ({
     textAlign: "center",
     marginBottom: theme.gap(1),
   },
-  message: {
-    fontSize: 14,
-    color: theme.colors.primary,
-    textAlign: "center",
-    marginBottom: theme.gap(2),
-  },
+
   detailsToggle: {
     alignSelf: "center",
     padding: theme.gap(1),
