@@ -28,21 +28,18 @@ function defaultSelect(value: MaybeLoaded<Game>): Game | null | undefined {
  * enough to detect meaningful changes. Jazz fires dozens of notifications
  * per logical change (one per child scope); this fingerprint collapses them
  * into a single value that only changes when actual data changes.
+ *
+ * Uses only Jazz public API ($jazz.lastUpdatedAt) — not internal raw properties.
  */
 function gameFingerprint(game: Game | null | undefined): string {
   if (!game) return "null";
   if (!game.$isLoaded) return "loading";
 
-  const raw = game.$jazz?.raw;
-  // Start with the Game's own version
-  const parts: string[] = [
-    `v:${raw?.totalValidTransactions ?? 0}:${raw?.version ?? 0}`,
-  ];
+  const parts: string[] = [`g:${game.$jazz.lastUpdatedAt}`];
 
   // Include loaded state of key children — these change during progressive loading
   if (game.spec?.$isLoaded) {
-    const specRaw = game.spec.$jazz?.raw;
-    parts.push(`spec:${specRaw?.totalValidTransactions ?? 0}`);
+    parts.push(`spec:${game.spec.$jazz.lastUpdatedAt}`);
   } else {
     parts.push("spec:_");
   }
@@ -51,8 +48,7 @@ function gameFingerprint(game: Game | null | undefined): string {
     parts.push(`pl:${game.players.length}`);
     for (const p of game.players) {
       if (p?.$isLoaded) {
-        const pRaw = p.$jazz?.raw;
-        parts.push(`p:${pRaw?.totalValidTransactions ?? 0}`);
+        parts.push(`p:${p.$jazz.lastUpdatedAt}`);
       }
     }
   } else {
@@ -63,11 +59,9 @@ function gameFingerprint(game: Game | null | undefined): string {
     parts.push(`rd:${game.rounds.length}`);
     for (const r of game.rounds) {
       if (r?.$isLoaded) {
-        const rRaw = r.$jazz?.raw;
-        parts.push(`r:${rRaw?.totalValidTransactions ?? 0}`);
+        parts.push(`r:${r.$jazz.lastUpdatedAt}`);
         if (r.round?.$isLoaded) {
-          const rrRaw = r.round.$jazz?.raw;
-          parts.push(`rr:${rrRaw?.totalValidTransactions ?? 0}`);
+          parts.push(`rr:${r.round.$jazz.lastUpdatedAt}`);
         }
       }
     }
@@ -82,8 +76,7 @@ function gameFingerprint(game: Game | null | undefined): string {
   }
 
   if (game.scope?.$isLoaded) {
-    const sRaw = game.scope.$jazz?.raw;
-    parts.push(`sc:${sRaw?.totalValidTransactions ?? 0}`);
+    parts.push(`sc:${game.scope.$jazz.lastUpdatedAt}`);
   } else {
     parts.push("sc:_");
   }

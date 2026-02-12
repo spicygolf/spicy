@@ -1,5 +1,5 @@
 import type { MaybeLoaded } from "jazz-tools";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { ListOfPlayers } from "spicylib/schema";
 
 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -80,6 +80,11 @@ export function useStaleHandicapCheck(
     return stale;
   }, [players, dismissedIds]);
 
+  // Keep a ref so dismissAll always reads the latest list without
+  // needing stalePlayers in its dependency array (avoids stale closure).
+  const stalePlayersRef = useRef(stalePlayers);
+  stalePlayersRef.current = stalePlayers;
+
   const dismissPlayer = useCallback((playerId: string): void => {
     setDismissedIds((prev) => {
       const next = new Set(prev);
@@ -91,12 +96,12 @@ export function useStaleHandicapCheck(
   const dismissAll = useCallback((): void => {
     setDismissedIds((prev) => {
       const next = new Set(prev);
-      for (const sp of stalePlayers) {
+      for (const sp of stalePlayersRef.current) {
         next.add(sp.playerId);
       }
       return next;
     });
-  }, [stalePlayers]);
+  }, []);
 
   return { stalePlayers, dismissPlayer, dismissAll };
 }
