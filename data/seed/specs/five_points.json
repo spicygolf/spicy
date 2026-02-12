@@ -21,7 +21,8 @@
     "two_birdies_4x",
     "eagles_4x",
     "discount_threshold",
-    "discount_percent"
+    "discount_percent",
+    { "name": "tee_flip", "defaultValue": "Flip for presses" }
   ],
   "junk": [
     { "name": "low_ball", "value": 2 },
