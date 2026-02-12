@@ -350,6 +350,13 @@ export function getTeamMultiplierStatus(
  * for all teams) or when there is no previous hole result (first hole of the round).
  * Only applies to 2-team games with user-based multiplier options.
  *
+ * Skips the tee flip when the hole already has activity (scores entered or
+ * multipliers set), which handles imported games and holes where the tee flip
+ * ceremony already occurred in real life.
+ *
+ * Returns false during progressive loading (scoreboard null) to prevent
+ * premature modal display that causes render oscillation.
+ *
  * Uses holesList ordering (not hole number arithmetic) to find the previous hole,
  * so it is forward-compatible with shotgun starts where the round may begin on any hole.
  *
@@ -358,6 +365,8 @@ export function getTeamMultiplierStatus(
  * @param holesList - Ordered list of hole number strings from useHoleNavigation
  * @param teamCount - Number of teams on the current hole
  * @param hasMultiplierOptions - Whether the game has user-based team multiplier options
+ * @param allTeams - All teams on the current hole (for checking existing multipliers)
+ * @param currentHoleNumber - Current hole number string (for checking team options)
  * @returns true if a tee flip is needed before showing multiplier buttons
  */
 export function isTeeFlipRequired(
@@ -366,8 +375,37 @@ export function isTeeFlipRequired(
   holesList: string[],
   teamCount: number,
   hasMultiplierOptions: boolean,
+  allTeams: Team[],
+  currentHoleNumber: string,
 ): boolean {
   if (teamCount !== 2 || !hasMultiplierOptions) return false;
+
+  // Wait for scoreboard to be computed before deciding.
+  // During Jazz progressive loading scoreboard is null; showing the modal
+  // prematurely causes render oscillation as data loads and the decision flips.
+  if (!scoreboard) return false;
+
+  // Skip if any team already has a multiplier option set for this hole
+  // (indicates the tee flip ceremony already happened or game was imported)
+  for (const team of allTeams) {
+    if (!team?.$isLoaded || !team.options?.$isLoaded) continue;
+    for (const opt of team.options) {
+      if (
+        opt?.$isLoaded &&
+        opt.firstHole === currentHoleNumber &&
+        !opt.playerId &&
+        opt.optionName !== "tee_flip_winner"
+      ) {
+        return false;
+      }
+    }
+  }
+
+  // Skip if the current hole already has scores entered
+  const currentHoleResult = scoreboard.holes?.[currentHoleNumber];
+  if (currentHoleResult && (currentHoleResult.scoresEntered ?? 0) > 0) {
+    return false;
+  }
 
   // Find previous hole by list position, not by hole number arithmetic
   const prevHoleNumber =
@@ -376,7 +414,7 @@ export function isTeeFlipRequired(
   // No previous hole (first hole of round) → always tied
   if (!prevHoleNumber) return true;
 
-  const prevHoleResult = scoreboard?.holes?.[prevHoleNumber];
+  const prevHoleResult = scoreboard.holes?.[prevHoleNumber];
   if (!prevHoleResult) return true;
 
   const teams = Object.values(prevHoleResult.teams);
