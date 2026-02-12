@@ -596,9 +596,11 @@ export function ScoringView({
     (m) => m.scope !== "none",
   );
 
+  // All game holes (used for override detection, tee flip scanning, and multiplier display)
+  const gameHoles = scoringContext?.gameHoles ?? [];
+
   // Check if ANY team on this hole has an override multiplier active (excluding custom which is handled separately)
   // If so, we hide all multiplier buttons for ALL teams (only the override owner can toggle it off)
-  const gameHolesForOverride = scoringContext?.gameHoles ?? [];
   let holeHasActiveOverride = false;
   let overrideOwnerTeamId: string | null = null;
   let activeOverrideMult: (typeof teamMultiplierOptions)[0] | null = null;
@@ -616,7 +618,7 @@ export function ScoringView({
           holeHasActiveOverride = true;
           overrideOwnerTeamId = team.team ?? null;
           activeOverrideMult = mult;
-          activeOverrideValue = getMultiplierValue(mult, gameHolesForOverride);
+          activeOverrideValue = getMultiplierValue(mult, gameHoles);
           break;
         }
       }
@@ -649,7 +651,6 @@ export function ScoringView({
   const teeFlipWinner = getTeeFlipWinner(allTeams, currentHoleNumber);
   const teeFlipDeclined = getTeeFlipDeclined(allTeams, currentHoleNumber);
 
-  const gameHolesForTeeFlip = scoringContext?.gameHoles ?? [];
   const earliestUnflipped =
     teeFlipEnabled &&
     teeFlipRequired &&
@@ -662,7 +663,7 @@ export function ScoringView({
       allTeams,
       allTeams.length,
       teamMultiplierOptions.length > 0,
-      gameHolesForTeeFlip,
+      gameHoles,
     );
 
   // Stabilize teamIds so TeeFlipModal's useMemo doesn't re-roll on every render
@@ -832,8 +833,6 @@ export function ScoringView({
           // Special case: If an override multiplier is active on this hole (ANY team),
           // hide all multiplier buttons except for the override owner who can toggle it off.
           // Also hide buttons when custom multiplier is active (it's set via hole toolbar, not team buttons).
-          const gameHoles = scoringContext?.gameHoles ?? [];
-
           const multiplierButtons: OptionButton[] = [];
 
           // If tee flip is required and not declined, only the winning team sees multiplier buttons
