@@ -11,7 +11,8 @@
   "patchedDependencies": {
     "react-native-element-dropdown@2.12.4": "patches/react-native-element-dropdown@2.12.4.patch",
     "react-native-fast-encoder@0.3.1": "patches/react-native-fast-encoder@0.3.1.patch",
-    "react-native-mmkv@4.1.2": "patches/react-native-mmkv@4.1.2.patch"
+    "react-native-mmkv@4.1.2": "patches/react-native-mmkv@4.1.2.patch",
+    "jazz-tools@0.20.9": "patches/jazz-tools@0.20.9.patch"
   },
   "scripts": {
     "clean": "del-cli node_modules && bun run --filter './packages/*' clean",
