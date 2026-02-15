@@ -24,113 +24,13 @@ function defaultSelect(value: MaybeLoaded<Game>): Game | null {
 }
 
 /**
- * Build a fingerprint string that captures the Game's loaded state deeply
- * enough to detect meaningful changes. Jazz fires dozens of notifications
- * per logical change (one per child scope); this fingerprint collapses them
- * into a single value that only changes when actual data changes.
- *
- * Uses only Jazz public API ($jazz.lastUpdatedAt) — not internal raw properties.
- */
-function gameFingerprint(game: Game | null | undefined): string {
-  if (!game) return "null";
-  if (!game.$isLoaded) return "loading";
-
-  const parts: string[] = [`g:${game.$jazz.lastUpdatedAt}`];
-
-  // Include loaded state of key children — these change during progressive loading.
-  // Use $jazz.has() guards before accessing optional CoValue properties.
-  if (game.$jazz.has("spec") && game.spec?.$isLoaded) {
-    parts.push(`spec:${game.spec.$jazz.lastUpdatedAt}`);
-  } else {
-    parts.push("spec:_");
-  }
-
-  if (game.$jazz.has("players") && game.players?.$isLoaded) {
-    // Include list's own timestamp for push/splice detection
-    parts.push(`pl:${game.players.$jazz.lastUpdatedAt}:${game.players.length}`);
-    let unloadedPlayers = 0;
-    for (const p of game.players) {
-      if (p?.$isLoaded) {
-        parts.push(`p:${p.$jazz.lastUpdatedAt}`);
-      } else {
-        unloadedPlayers++;
-      }
-    }
-    // Track unloaded count so fingerprint changes when they finish loading
-    if (unloadedPlayers > 0) {
-      parts.push(`pu:${unloadedPlayers}`);
-    }
-  } else {
-    parts.push("pl:_");
-  }
-
-  if (game.$jazz.has("rounds") && game.rounds?.$isLoaded) {
-    // Include list's own timestamp for push/splice detection
-    parts.push(`rd:${game.rounds.$jazz.lastUpdatedAt}:${game.rounds.length}`);
-    let unloadedRounds = 0;
-    for (const r of game.rounds) {
-      if (r?.$isLoaded) {
-        parts.push(`r:${r.$jazz.lastUpdatedAt}`);
-        if (r.$jazz.has("round") && r.round?.$isLoaded) {
-          parts.push(`rr:${r.round.$jazz.lastUpdatedAt}`);
-          // Track course/tee identity — detect when reference changes (null → assigned)
-          if (r.round.$jazz.has("course") && r.round.course?.$isLoaded) {
-            parts.push(`rc:${r.round.course.$jazz.id}`);
-          }
-          if (r.round.$jazz.has("tee") && r.round.tee?.$isLoaded) {
-            parts.push(`rt:${r.round.tee.$jazz.id}`);
-          }
-        }
-      } else {
-        unloadedRounds++;
-      }
-    }
-    // Track unloaded count so fingerprint changes when they finish loading
-    if (unloadedRounds > 0) {
-      parts.push(`ru:${unloadedRounds}`);
-    }
-  } else {
-    parts.push("rd:_");
-  }
-
-  if (game.$jazz.has("holes") && game.holes?.$isLoaded) {
-    parts.push(`h:${game.holes.length}`);
-  } else {
-    parts.push("h:_");
-  }
-
-  if (game.$jazz.has("scope") && game.scope?.$isLoaded) {
-    parts.push(`sc:${game.scope.$jazz.lastUpdatedAt}`);
-  } else {
-    parts.push("sc:_");
-  }
-
-  return parts.join("|");
-}
-
-/**
- * Equality function that prevents re-renders when the Game's meaningful
- * data hasn't changed. Jazz fires triggerUpdate() for every child scope
- * update (dozens per field change), each creating a new object reference.
- * This compares a fingerprint of loaded state + version counters instead
- * of comparing by object reference.
- */
-function gameEqualityFn(
-  a: Game | null | undefined,
-  b: Game | null | undefined,
-): boolean {
-  return gameFingerprint(a) === gameFingerprint(b);
-}
-
-/**
  * Hook to load a Game with customizable resolve queries.
  *
- * Uses a fingerprint-based equality function to prevent the render cascade
- * caused by Jazz's subscription architecture. Jazz fires triggerUpdate() for
- * each child scope update, creating dozens of new object references per
- * single field change. The equality function compares a deep fingerprint
- * of loaded state + version counters, collapsing these into a single
- * effective re-render per meaningful change.
+ * Each consumer gets its own Jazz SubscriptionScope via useCoState, so
+ * resolve depth only affects the calling component. Jazz 0.20.9 batches
+ * initial child loading (silenceUpdates + pendingLoadedChildren), preventing
+ * the render cascade that previously exceeded React 19's synchronous
+ * update depth limit.
  *
  * @param gameId - Game ID to load (optional, falls back to context)
  * @param options - Configuration options
@@ -174,12 +74,11 @@ export function useGame(
   const game = useCoState(
     Game,
     effectiveGameId,
-    // @ts-expect-error Jazz type inference for dynamic resolve + select + equalityFn is too complex
+    // @ts-expect-error Jazz type inference for dynamic resolve + select is too complex
     effectiveGameId
       ? {
           resolve: resolveQuery,
           select: options.select || defaultSelect,
-          equalityFn: gameEqualityFn,
         }
       : undefined,
   ) as GameWithRelations;
