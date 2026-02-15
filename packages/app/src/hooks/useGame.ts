@@ -46,25 +46,48 @@ function gameFingerprint(game: Game | null | undefined): string {
   }
 
   if (game.$jazz.has("players") && game.players?.$isLoaded) {
-    parts.push(`pl:${game.players.length}`);
+    // Include list's own timestamp for push/splice detection
+    parts.push(`pl:${game.players.$jazz.lastUpdatedAt}:${game.players.length}`);
+    let unloadedPlayers = 0;
     for (const p of game.players) {
       if (p?.$isLoaded) {
         parts.push(`p:${p.$jazz.lastUpdatedAt}`);
+      } else {
+        unloadedPlayers++;
       }
+    }
+    // Track unloaded count so fingerprint changes when they finish loading
+    if (unloadedPlayers > 0) {
+      parts.push(`pu:${unloadedPlayers}`);
     }
   } else {
     parts.push("pl:_");
   }
 
   if (game.$jazz.has("rounds") && game.rounds?.$isLoaded) {
-    parts.push(`rd:${game.rounds.length}`);
+    // Include list's own timestamp for push/splice detection
+    parts.push(`rd:${game.rounds.$jazz.lastUpdatedAt}:${game.rounds.length}`);
+    let unloadedRounds = 0;
     for (const r of game.rounds) {
       if (r?.$isLoaded) {
         parts.push(`r:${r.$jazz.lastUpdatedAt}`);
         if (r.$jazz.has("round") && r.round?.$isLoaded) {
           parts.push(`rr:${r.round.$jazz.lastUpdatedAt}`);
+          // Track course/tee identity — detect when reference changes (null → assigned)
+          if (r.round.$jazz.has("course") && r.round.course?.$isLoaded) {
+            parts.push(`rc:${r.round.course.$jazz.id}`);
+          }
+          if (r.round.$jazz.has("tee") && r.round.tee?.$isLoaded) {
+            parts.push(`rt:${r.round.tee.$jazz.id}`);
+          }
         }
+      } else {
+        unloadedRounds++;
       }
+    }
+    // Track unloaded count so fingerprint changes when they finish loading
+    if (unloadedRounds > 0) {
+      parts.push(`ru:${unloadedRounds}`);
     }
   } else {
     parts.push("rd:_");
