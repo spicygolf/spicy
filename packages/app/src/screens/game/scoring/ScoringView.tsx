@@ -763,6 +763,17 @@ export function ScoringView({
             ? () => setCustomMultiplierModalVisible(true)
             : undefined
         }
+        teeFlipDeclined={teeFlipEnabled && teeFlipRequired && teeFlipDeclined}
+        onTeeFlipUndoDecline={() => {
+          const storageTeam = allTeams[0];
+          if (storageTeam) {
+            removeTeeFlipOption(
+              storageTeam,
+              currentHoleNumber,
+              "tee_flip_declined",
+            );
+          }
+        }}
       />
       <CustomMultiplierModal
         visible={customMultiplierModalVisible}
@@ -817,18 +828,6 @@ export function ScoringView({
           const teamId = team.team ?? "";
           const isWinnerTeam =
             teeFlipEnabled && teeFlipRequired && teeFlipWinner === teamId;
-          const isDeclinedTeam =
-            teeFlipEnabled &&
-            teeFlipRequired &&
-            teeFlipDeclined &&
-            team.options?.$isLoaded === true &&
-            team.options.some(
-              (opt) =>
-                opt?.$isLoaded &&
-                opt.optionName === "tee_flip_declined" &&
-                opt.firstHole === currentHoleNumber,
-            );
-
           // Build multiplier buttons
           // For stackable multipliers (rest_of_nine scope like pre_double):
           // 1. Show disabled filled button for each inherited instance from previous holes
@@ -1058,17 +1057,6 @@ export function ScoringView({
                         team,
                         currentHoleNumber,
                         "tee_flip_winner",
-                      )
-                  : undefined
-              }
-              teeFlipDeclined={isDeclinedTeam}
-              onTeeFlipUndoDecline={
-                isDeclinedTeam
-                  ? () =>
-                      removeTeeFlipOption(
-                        team,
-                        currentHoleNumber,
-                        "tee_flip_declined",
                       )
                   : undefined
               }
