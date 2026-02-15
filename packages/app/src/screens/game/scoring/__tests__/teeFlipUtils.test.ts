@@ -379,9 +379,9 @@ describe("isEarliestUnflippedHole", () => {
     expect(result).toBe(true);
   });
 
-  it("returns false when an earlier hole cannot be verified", () => {
-    // Hole 1 is always tied (first hole, no previous) but gameHoles is empty
-    // so teams can't be looked up — treated as unresolved, blocking current hole
+  it("returns false when an earlier hole is not tied (gameHoles irrelevant)", () => {
+    // Hole 1 has non-tied scores, so isTeeFlipRequired is false for hole 2.
+    // gameHoles is empty but never consulted since no hole reaches the lookup.
     const scoreboard = makeScoreboard({
       "1": { teams: { "1": { runningDiff: 3 }, "2": { runningDiff: -3 } } },
     });
@@ -397,6 +397,57 @@ describe("isEarliestUnflippedHole", () => {
       [],
     );
     expect(result).toBe(false);
+  });
+
+  it("skips earlier holes with unloaded teams during progressive loading", () => {
+    // Hole 1 is tied (first hole) but teams are not loaded yet (progressive loading).
+    // Hole 2 is tied (previous tied) and is the current hole with loaded teams.
+    // The unloadable earlier hole should be skipped, allowing hole 2 to show the modal.
+    const scoreboard = makeScoreboard({
+      "1": { teams: { "1": { runningDiff: 0 }, "2": { runningDiff: 0 } } },
+      "2": { teams: {} },
+    });
+    const teams = [makeTeamNoOptions("1"), makeTeamNoOptions("2")];
+
+    // gameHole for hole 1 has teams NOT loaded (simulating progressive loading)
+    const gameHoleNotLoaded = {
+      $isLoaded: true,
+      hole: "1",
+      teams: { $isLoaded: false },
+    } as unknown as GameHole;
+    const gameHoles = [gameHoleNotLoaded, makeGameHole("2", teams)];
+
+    const result = isEarliestUnflippedHole(
+      scoreboard,
+      ["1", "2", "3"],
+      1,
+      teams,
+      2,
+      true,
+      gameHoles,
+    );
+    expect(result).toBe(true);
+  });
+
+  it("skips earlier holes missing from gameHoles during progressive loading", () => {
+    // Hole 1 is tied (first hole) but not found in gameHoles at all.
+    // Hole 2 is the current hole and should still get the modal.
+    const scoreboard = makeScoreboard({
+      "1": { teams: { "1": { runningDiff: 0 }, "2": { runningDiff: 0 } } },
+      "2": { teams: {} },
+    });
+    const teams = [makeTeamNoOptions("1"), makeTeamNoOptions("2")];
+
+    const result = isEarliestUnflippedHole(
+      scoreboard,
+      ["1", "2", "3"],
+      1,
+      teams,
+      2,
+      true,
+      [], // empty gameHoles — hole 1 can't be looked up
+    );
+    expect(result).toBe(true);
   });
 
   it("skips non-tied holes when scanning for earliest", () => {

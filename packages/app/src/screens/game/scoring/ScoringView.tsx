@@ -548,8 +548,11 @@ export function ScoringView({
     }
   }
 
-  // Get the current hole number for scoreboard lookup
-  const currentHoleNumber = String(currentHoleIndex + 1);
+  // Get the current hole number for scoreboard lookup.
+  // Uses holesList (actual hole numbers from GameHole.hole) rather than
+  // position-based arithmetic, so it works correctly with shotgun starts.
+  const currentHoleNumber =
+    holesList[currentHoleIndex] ?? String(currentHoleIndex + 1);
 
   // Get current hole result from scoreboard
   const currentHoleResult = scoreboard?.holes?.[currentHoleNumber];
@@ -643,6 +646,8 @@ export function ScoringView({
   const teeFlipWinner = getTeeFlipWinner(allTeams, currentHoleNumber);
   const teeFlipDeclined = getTeeFlipDeclined(allTeams, currentHoleNumber);
 
+  // Computed directly — Jazz objects are reactive proxies so useMemo with
+  // CoValue dependencies would cache stale results during progressive loading.
   const earliestUnflipped =
     teeFlipEnabled &&
     teeFlipRequired &&
@@ -676,10 +681,13 @@ export function ScoringView({
     setTeeFlipMode(null);
   }, [currentHoleIndex]);
 
-  // Show confirmation modal when this is the earliest unflipped hole
+  // Show confirmation modal when this is the earliest unflipped hole.
+  // Guard: only set "confirm" if modal is currently dismissed (null).
+  // This prevents re-triggering after the user has already interacted
+  // (e.g., declined or completed the flip) on this hole.
   useEffect(() => {
     if (earliestUnflipped && allTeams.length === 2) {
-      setTeeFlipMode("confirm");
+      setTeeFlipMode((prev) => (prev === null ? "confirm" : prev));
     }
   }, [earliestUnflipped, allTeams.length]);
 
