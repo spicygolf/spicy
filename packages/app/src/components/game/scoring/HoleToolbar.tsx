@@ -63,9 +63,10 @@ export function HoleToolbar({
       {/* Left: Team chooser icon + declined tee flip indicator */}
       <View style={styles.leftSection}>
         {onChangeTeams && (
-          <TouchableOpacity
+          <Pressable
             style={styles.iconButton}
             onPress={onChangeTeams}
+            hitSlop={12}
             accessibilityLabel="Change teams"
           >
             <FontAwesome6
@@ -74,7 +75,7 @@ export function HoleToolbar({
               size={24}
               color={theme.colors.action}
             />
-          </TouchableOpacity>
+          </Pressable>
         )}
         {teeFlipDeclined && (
           <Pressable

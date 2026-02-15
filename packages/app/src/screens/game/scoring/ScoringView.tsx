@@ -685,11 +685,13 @@ export function ScoringView({
   // Guard: only set "confirm" if modal is currently dismissed (null).
   // This prevents re-triggering after the user has already interacted
   // (e.g., declined or completed the flip) on this hole.
+  // Depends on currentHoleIndex so re-navigating to an unresolved hole
+  // re-evaluates (the reset effect above sets mode to null first).
   useEffect(() => {
     if (earliestUnflipped && allTeams.length === 2) {
       setTeeFlipMode((prev) => (prev === null ? "confirm" : prev));
     }
-  }, [earliestUnflipped, allTeams.length]);
+  }, [earliestUnflipped, allTeams.length, currentHoleIndex]);
 
   const handleTeeFlipComplete = useCallback(
     (winnerTeamId: string) => {
@@ -763,7 +765,12 @@ export function ScoringView({
             ? () => setCustomMultiplierModalVisible(true)
             : undefined
         }
-        teeFlipDeclined={teeFlipEnabled && teeFlipRequired && teeFlipDeclined}
+        teeFlipDeclined={
+          teeFlipEnabled &&
+          teeFlipRequired &&
+          allTeams.length === 2 &&
+          teeFlipDeclined
+        }
         onTeeFlipUndoDecline={() => {
           const storageTeam = allTeams[0];
           if (storageTeam) {

@@ -64,7 +64,7 @@ export function TeamFooter({
         <View style={styles.optionsRow}>
           {/* Left half: Tee flip icon + Multiplier press buttons + earned multipliers */}
           <View style={styles.leftSection}>
-            {teeFlipWinner ? (
+            {teeFlipWinner && (
               <Pressable
                 onPress={onTeeFlipReplay}
                 onLongPress={onTeeFlipRemove}
@@ -78,7 +78,7 @@ export function TeamFooter({
                   scale={0.35}
                 />
               </Pressable>
-            ) : null}
+            )}
             {hasMultipliers && (
               <OptionsButtons
                 options={multiplierOptions}
