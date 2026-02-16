@@ -461,6 +461,10 @@ export function getTeeFlipDeclined(
  * Only auto-prompts on that earliest unresolved hole. Later tied holes still
  * show teeFlipRequired (for replay icon, multiplier blocking) but do NOT auto-pop.
  *
+ * During Jazz progressive loading, earlier holes' teams may not be loaded yet.
+ * These unverifiable holes are skipped rather than blocking the current hole,
+ * since the user can only act on the hole they're viewing.
+ *
  * @param scoreboard - Current game scoreboard
  * @param holesList - Ordered list of hole number strings
  * @param currentHoleIndex - 0-based index into holesList for the current hole
@@ -484,17 +488,13 @@ export function isEarliestUnflippedHole(
   // Find the first hole that needs a tee flip and has no result
   for (let i = 0; i < holesList.length; i++) {
     const holeNum = holesList[i];
-    // Caller already verified isTeeFlipRequired for the current hole, skip redundant check
-    const required =
-      i === currentHoleIndex
-        ? true
-        : isTeeFlipRequired(
-            scoreboard,
-            i,
-            holesList,
-            teamCount,
-            hasMultiplierOptions,
-          );
+    const required = isTeeFlipRequired(
+      scoreboard,
+      i,
+      holesList,
+      teamCount,
+      hasMultiplierOptions,
+    );
 
     if (!required) continue;
 
@@ -507,8 +507,12 @@ export function isEarliestUnflippedHole(
     } else {
       const gameHole = gameHoles.find((h) => h.hole === holeNum);
       if (!gameHole?.teams?.$isLoaded) {
-        // Can't check — treat as unresolved, so this is the earliest
-        return i === currentHoleIndex;
+        // Teams not loaded yet for this earlier hole — skip it.
+        // During progressive loading we can't verify whether this hole
+        // was already resolved. Blocking the current hole would prevent
+        // the modal from ever showing, so we optimistically skip and
+        // let the scan continue to the current hole.
+        continue;
       }
       teamsForHole = [...gameHole.teams].filter((t) => t?.$isLoaded) as Team[];
     }

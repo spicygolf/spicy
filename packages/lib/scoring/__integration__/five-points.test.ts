@@ -12,6 +12,7 @@
 
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { resolve } from "node:path";
+import { WasmCrypto } from "cojson/crypto/WasmCrypto";
 import { config } from "dotenv";
 import type { ID } from "jazz-tools";
 import { startWorker } from "jazz-tools/worker";
@@ -107,11 +108,14 @@ describe("Five Points Integration Tests", () => {
     }
 
     // Start Jazz worker
+    // Use createSync() to avoid fetch(dataURL) which hangs in Bun on Linux CI
     worker = await startWorker({
       AccountSchema: PlayerAccount,
       syncServer: `wss://cloud.jazz.tools/?key=${JAZZ_API_KEY}`,
       accountID: JAZZ_WORKER_ACCOUNT,
       accountSecret: JAZZ_WORKER_SECRET,
+      skipInboxLoad: true,
+      crypto: WasmCrypto.createSync(),
     });
 
     // Load the game from catalog.games by legacyId

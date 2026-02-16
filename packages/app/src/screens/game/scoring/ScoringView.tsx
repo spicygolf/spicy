@@ -548,8 +548,11 @@ export function ScoringView({
     }
   }
 
-  // Get the current hole number for scoreboard lookup
-  const currentHoleNumber = String(currentHoleIndex + 1);
+  // Get the current hole number for scoreboard lookup.
+  // Uses holesList (actual hole numbers from GameHole.hole) rather than
+  // position-based arithmetic, so it works correctly with shotgun starts.
+  const currentHoleNumber =
+    holesList[currentHoleIndex] ?? String(currentHoleIndex + 1);
 
   // Get current hole result from scoreboard
   const currentHoleResult = scoreboard?.holes?.[currentHoleNumber];
@@ -643,6 +646,8 @@ export function ScoringView({
   const teeFlipWinner = getTeeFlipWinner(allTeams, currentHoleNumber);
   const teeFlipDeclined = getTeeFlipDeclined(allTeams, currentHoleNumber);
 
+  // Computed directly — Jazz objects are reactive proxies so useMemo with
+  // CoValue dependencies would cache stale results during progressive loading.
   const earliestUnflipped =
     teeFlipEnabled &&
     teeFlipRequired &&
@@ -676,12 +681,17 @@ export function ScoringView({
     setTeeFlipMode(null);
   }, [currentHoleIndex]);
 
-  // Show confirmation modal when this is the earliest unflipped hole
+  // Show confirmation modal when this is the earliest unflipped hole.
+  // Guard: only set "confirm" if modal is currently dismissed (null).
+  // This prevents re-triggering after the user has already interacted
+  // (e.g., declined or completed the flip) on this hole.
+  // Depends on currentHoleIndex so re-navigating to an unresolved hole
+  // re-evaluates (the reset effect above sets mode to null first).
   useEffect(() => {
     if (earliestUnflipped && allTeams.length === 2) {
-      setTeeFlipMode("confirm");
+      setTeeFlipMode((prev) => (prev === null ? "confirm" : prev));
     }
-  }, [earliestUnflipped, allTeams.length]);
+  }, [earliestUnflipped, allTeams.length, currentHoleIndex]);
 
   const handleTeeFlipComplete = useCallback(
     (winnerTeamId: string) => {
@@ -755,6 +765,22 @@ export function ScoringView({
             ? () => setCustomMultiplierModalVisible(true)
             : undefined
         }
+        teeFlipDeclined={
+          teeFlipEnabled &&
+          teeFlipRequired &&
+          allTeams.length === 2 &&
+          teeFlipDeclined
+        }
+        onTeeFlipUndoDecline={() => {
+          const storageTeam = allTeams[0];
+          if (storageTeam) {
+            removeTeeFlipOption(
+              storageTeam,
+              currentHoleNumber,
+              "tee_flip_declined",
+            );
+          }
+        }}
       />
       <CustomMultiplierModal
         visible={customMultiplierModalVisible}
@@ -809,18 +835,6 @@ export function ScoringView({
           const teamId = team.team ?? "";
           const isWinnerTeam =
             teeFlipEnabled && teeFlipRequired && teeFlipWinner === teamId;
-          const isDeclinedTeam =
-            teeFlipEnabled &&
-            teeFlipRequired &&
-            teeFlipDeclined &&
-            team.options?.$isLoaded === true &&
-            team.options.some(
-              (opt) =>
-                opt?.$isLoaded &&
-                opt.optionName === "tee_flip_declined" &&
-                opt.firstHole === currentHoleNumber,
-            );
-
           // Build multiplier buttons
           // For stackable multipliers (rest_of_nine scope like pre_double):
           // 1. Show disabled filled button for each inherited instance from previous holes
@@ -1053,17 +1067,6 @@ export function ScoringView({
                       )
                   : undefined
               }
-              teeFlipDeclined={isDeclinedTeam}
-              onTeeFlipUndoDecline={
-                isDeclinedTeam
-                  ? () =>
-                      removeTeeFlipOption(
-                        team,
-                        currentHoleNumber,
-                        "tee_flip_declined",
-                      )
-                  : undefined
-              }
             >
               {team.rounds.map((roundToTeam) => {
                 if (!roundToTeam?.$isLoaded) return null;
@@ -1083,9 +1086,9 @@ export function ScoringView({
 
                 if (!player?.$isLoaded) return null;
 
-                // Get gross score for current hole (1-indexed: "1"-"18")
-                const holeNum = String(currentHoleIndex + 1);
-                const gross = getGrossScore(round, holeNum);
+                // Get gross score for current hole using actual hole number
+                // (not position-based, so shotgun starts work correctly)
+                const gross = getGrossScore(round, currentHoleNumber);
 
                 // Calculate pops and net only if handicaps are used
                 let calculatedPops = 0;
@@ -1144,7 +1147,7 @@ export function ScoringView({
                       .filter((junk) =>
                         hasCalculatedPlayerJunk(
                           scoreboard,
-                          holeNum,
+                          currentHoleNumber,
                           round.playerId,
                           junk.name,
                         ),

@@ -5,6 +5,7 @@ import { StyleSheet } from "react-native-unistyles";
 import type { GameSpec } from "spicylib/schema";
 import {
   FavoriteSpec,
+  Favorites,
   ListOfFavoriteSpecs,
   PlayerAccount,
 } from "spicylib/schema";
@@ -66,7 +67,6 @@ export function NewGameSearch({ viewMode }: NewGameSearchProps) {
 
         // Initialize favorites if it doesn't exist
         if (!root.$jazz.has("favorites")) {
-          const { Favorites } = await import("spicylib/schema");
           root.$jazz.set("favorites", Favorites.create({}, { owner: me }));
         }
 
@@ -151,7 +151,7 @@ export function NewGameSearch({ viewMode }: NewGameSearchProps) {
             />
           )}
           keyExtractor={(item) => item.$jazz.id}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={Separator}
           contentContainerStyle={styles.listContainer}
         />
       </View>
@@ -172,3 +172,5 @@ const styles = StyleSheet.create((theme) => ({
     marginLeft: theme.gap(4),
   },
 }));
+
+const Separator = () => <View style={styles.separator} />;

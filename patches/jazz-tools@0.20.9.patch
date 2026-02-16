@@ -1,0 +1,205 @@
+diff --git a/node_modules/jazz-tools/.bun-tag-16aff6ea3e681fc1 b/.bun-tag-16aff6ea3e681fc1
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/chunk-G7AMZRMZ.js b/dist/chunk-G7AMZRMZ.js
+index fa904efed0f1a7393f28de08501b713fbc5d66ea..ff276705f85241c814e382210894ffc367584a91 100644
+--- a/dist/chunk-G7AMZRMZ.js
++++ b/dist/chunk-G7AMZRMZ.js
+@@ -190,7 +190,7 @@ import { ControlledAccount } from "cojson";
+ var CoValueBase = class {
+   constructor() {
+     Object.defineProperties(this, {
+-      $isLoaded: { value: true, enumerable: false }
++      $isLoaded: { value: true, enumerable: false, configurable: true }
+     });
+   }
+   /** @category Internals */
+@@ -214,7 +214,8 @@ var CoValueJazzApi = class {
+     this.coValue = coValue;
+     Object.defineProperty(this, "_instanceID", {
+       value: `instance-${Math.random().toString(36).slice(2)}`,
+-      enumerable: false
++      enumerable: false,
++      configurable: true
+     });
+   }
+   get id() {
+@@ -343,7 +344,8 @@ var _CoMap = class _CoMap extends CoValueBase {
+         Object.defineProperties(this, {
+           $jazz: {
+             value: new CoMapJazzApi(proxy, () => options.fromRaw),
+-            enumerable: false
++            enumerable: false,
++            configurable: true
+           }
+         });
+       } else {
+@@ -424,7 +426,8 @@ var _CoMap = class _CoMap extends CoValueBase {
+     Object.defineProperties(instance, {
+       $jazz: {
+         value: new CoMapJazzApi(instance, () => raw),
+-        enumerable: false
++        enumerable: false,
++        configurable: true
+       }
+     });
+     const raw = _CoMap.rawFromInit(
+@@ -939,7 +942,7 @@ var CoMapProxyHandler = {
+   has(target, key) {
+     const descriptor = target.$jazz?.getDescriptor(key);
+     if (target.$jazz?.raw && typeof key === "string" && descriptor) {
+-      return target.$jazz.raw.get(key) !== void 0;
++      return true;
+     } else {
+       return Reflect.has(target, key);
+     }
+@@ -1022,9 +1025,10 @@ var _CoList = class _CoList extends Array {
+       Object.defineProperties(this, {
+         $jazz: {
+           value: new CoListJazzApi(proxy, () => options.fromRaw),
+-          enumerable: false
++          enumerable: false,
++          configurable: true
+         },
+-        $isLoaded: { value: true, enumerable: false }
++        $isLoaded: { value: true, enumerable: false, configurable: true }
+       });
+     }
+     return proxy;
+@@ -1057,9 +1061,10 @@ var _CoList = class _CoList extends Array {
+     Object.defineProperties(instance, {
+       $jazz: {
+         value: new CoListJazzApi(instance, () => raw),
+-        enumerable: false
++        enumerable: false,
++        configurable: true
+       },
+-      $isLoaded: { value: true, enumerable: false }
++      $isLoaded: { value: true, enumerable: false, configurable: true }
+     });
+     const initMeta = firstComesWins ? { fww: "init" } : void 0;
+     const raw = owner.$jazz.raw.createList(
+@@ -1796,7 +1801,8 @@ var _CoFeed = class _CoFeed extends CoValueBase {
+     Object.defineProperties(this, {
+       $jazz: {
+         value: new CoFeedJazzApi(this, options.fromRaw),
+-        enumerable: false
++        enumerable: false,
++        configurable: true
+       }
+     });
+     return this;
+@@ -2176,10 +2182,11 @@ var FileStream = class extends CoValueBase {
+       raw = rawOwner.createBinaryStream();
+     }
+     Object.defineProperties(this, {
+-      [TypeSym]: { value: "BinaryCoStream", enumerable: false },
++      [TypeSym]: { value: "BinaryCoStream", enumerable: false, configurable: true },
+       $jazz: {
+         value: new FileStreamJazzApi(this, raw),
+-        enumerable: false
++        enumerable: false,
++        configurable: true
+       }
+     });
+   }
+@@ -2433,10 +2440,11 @@ var _Account = class _Account extends CoValueBase {
+       AccountAndGroupProxyHandler
+     );
+     Object.defineProperties(this, {
+-      [TypeSym]: { value: "Account", enumerable: false },
++      [TypeSym]: { value: "Account", enumerable: false, configurable: true },
+       $jazz: {
+         value: new AccountJazzApi(proxy, options.fromRaw),
+-        enumerable: false
++        enumerable: false,
++        configurable: true
+       }
+     });
+     return proxy;
+@@ -2843,7 +2851,8 @@ var _Group = class _Group extends CoValueBase {
+     Object.defineProperties(this, {
+       $jazz: {
+         value: new GroupJazzApi(proxy, raw),
+-        enumerable: false
++        enumerable: false,
++        configurable: true
+       }
+     });
+     return proxy;
+@@ -3420,12 +3429,13 @@ var CoPlainText = class extends String {
+       super(options.fromRaw.toString());
+       const raw = options.fromRaw;
+       Object.defineProperties(this, {
+-        [TypeSym]: { value: "CoPlainText", enumerable: false },
++        [TypeSym]: { value: "CoPlainText", enumerable: false, configurable: true },
+         $jazz: {
+           value: new CoTextJazzApi(this, raw),
+-          enumerable: false
++          enumerable: false,
++          configurable: true
+         },
+-        $isLoaded: { value: true, enumerable: false }
++        $isLoaded: { value: true, enumerable: false, configurable: true }
+       });
+       return;
+     }
+@@ -3433,12 +3443,13 @@ var CoPlainText = class extends String {
+       super(options.text);
+       const raw = options.owner.$jazz.raw.createPlainText(options.text);
+       Object.defineProperties(this, {
+-        [TypeSym]: { value: "CoPlainText", enumerable: false },
++        [TypeSym]: { value: "CoPlainText", enumerable: false, configurable: true },
+         $jazz: {
+           value: new CoTextJazzApi(this, raw),
+-          enumerable: false
++          enumerable: false,
++          configurable: true
+         },
+-        $isLoaded: { value: true, enumerable: false }
++        $isLoaded: { value: true, enumerable: false, configurable: true }
+       });
+       return;
+     }
+@@ -3675,17 +3686,19 @@ var _CoVector = class _CoVector extends Float32Array {
+     const isFromRaw = "fromRaw" in options;
+     const raw = isFromRaw ? options.fromRaw : options.owner.$jazz.raw.createBinaryStream();
+     Object.defineProperties(this, {
+-      [TypeSym]: { value: "BinaryCoStream", enumerable: false },
++      [TypeSym]: { value: "BinaryCoStream", enumerable: false, configurable: true },
+       $jazz: {
+         value: new CoVectorJazzApi(this, raw),
+-        enumerable: false
++        enumerable: false,
++        configurable: true
+       },
+-      $isLoaded: { value: true, enumerable: false },
+-      _isVectorLoaded: { value: false, enumerable: false, writable: true },
++      $isLoaded: { value: true, enumerable: false, configurable: true },
++      _isVectorLoaded: { value: false, enumerable: false, writable: true, configurable: true },
+       _requiredDimensionsCount: {
+         value: dimensionsCount,
+         enumerable: false,
+-        writable: false
++        writable: false,
++        configurable: true
+       }
+     });
+     if (isFromRaw) {
+diff --git a/src/tools/coValues/coMap.ts b/src/tools/coValues/coMap.ts
+index cb280fdf3cf72aea48b0d242bd3c9fc72968e3d8..7ffe4ab07f1ca564bb5939484b5149c8d8957f5e 100644
+--- a/src/tools/coValues/coMap.ts
++++ b/src/tools/coValues/coMap.ts
+@@ -1055,7 +1055,11 @@ const CoMapProxyHandler: ProxyHandler<CoMap> = {
+     const descriptor = target.$jazz?.getDescriptor(key as string);
+ 
+     if (target.$jazz?.raw && typeof key === "string" && descriptor) {
+-      return target.$jazz.raw.get(key) !== undefined;
++      // Must return true for any key with a schema descriptor, even if the
++      // raw value is undefined. This ensures consistency with ownKeys and
++      // getOwnPropertyDescriptor, satisfying the Proxy invariant enforced
++      // by strict engines (e.g. Hermes in React Native 0.84+).
++      return true;
+     } else {
+       return Reflect.has(target, key);
+     }

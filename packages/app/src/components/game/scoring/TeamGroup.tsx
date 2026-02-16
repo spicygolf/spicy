@@ -31,10 +31,6 @@ interface TeamGroupProps {
   onTeeFlipReplay?: () => void;
   /** Called when the tee flip icon is long-pressed to remove the result */
   onTeeFlipRemove?: () => void;
-  /** Whether the tee flip was declined on this hole (shown as dimmed tee icon) */
-  teeFlipDeclined?: boolean;
-  /** Called when the declined tee icon is tapped to undo the decline */
-  onTeeFlipUndoDecline?: () => void;
   children: React.ReactNode;
 }
 
@@ -52,8 +48,6 @@ export function TeamGroup({
   teeFlipWinner,
   onTeeFlipReplay,
   onTeeFlipRemove,
-  teeFlipDeclined,
-  onTeeFlipUndoDecline,
   children,
 }: TeamGroupProps) {
   return (
@@ -82,8 +76,6 @@ export function TeamGroup({
         teeFlipWinner={teeFlipWinner}
         onTeeFlipReplay={onTeeFlipReplay}
         onTeeFlipRemove={onTeeFlipRemove}
-        teeFlipDeclined={teeFlipDeclined}
-        onTeeFlipUndoDecline={onTeeFlipUndoDecline}
       />
     </View>
   );

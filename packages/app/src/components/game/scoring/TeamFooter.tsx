@@ -29,10 +29,6 @@ interface TeamFooterProps {
   onTeeFlipReplay?: () => void;
   /** Called when the tee flip icon is long-pressed to remove the result */
   onTeeFlipRemove?: () => void;
-  /** Whether the tee flip was declined on this hole */
-  teeFlipDeclined?: boolean;
-  /** Called when the declined tee icon is tapped to undo the decline */
-  onTeeFlipUndoDecline?: () => void;
 }
 
 export function TeamFooter({
@@ -48,8 +44,6 @@ export function TeamFooter({
   teeFlipWinner = false,
   onTeeFlipReplay,
   onTeeFlipRemove,
-  teeFlipDeclined = false,
-  onTeeFlipUndoDecline,
 }: TeamFooterProps) {
   const { theme } = useUnistyles();
   const hasTeamJunk = teamJunkOptions.some((j) => j.selected);
@@ -66,13 +60,11 @@ export function TeamFooter({
       {(hasMultipliers ||
         hasEarnedMultipliers ||
         hasTeamJunk ||
-        teeFlipWinner ||
-        teeFlipDeclined) && (
+        teeFlipWinner) && (
         <View style={styles.optionsRow}>
           {/* Left half: Tee flip icon + Multiplier press buttons + earned multipliers */}
           <View style={styles.leftSection}>
-            {/* Winner and declined are mutually exclusive — winner takes priority */}
-            {teeFlipWinner ? (
+            {teeFlipWinner && (
               <Pressable
                 onPress={onTeeFlipReplay}
                 onLongPress={onTeeFlipRemove}
@@ -86,20 +78,7 @@ export function TeamFooter({
                   scale={0.35}
                 />
               </Pressable>
-            ) : teeFlipDeclined ? (
-              <Pressable
-                onPress={onTeeFlipUndoDecline}
-                hitSlop={12}
-                style={styles.teeFlipIconDeclined}
-                accessibilityLabel="Undo declined tee flip"
-              >
-                <GolfTee
-                  color={theme.colors.secondary}
-                  borderColor={theme.colors.secondary}
-                  scale={0.35}
-                />
-              </Pressable>
-            ) : null}
+            )}
             {hasMultipliers && (
               <OptionsButtons
                 options={multiplierOptions}
@@ -220,14 +199,5 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
     overflow: "hidden",
     marginRight: theme.gap(0.5),
-  },
-  teeFlipIconDeclined: {
-    width: 20,
-    height: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-    marginRight: theme.gap(0.5),
-    opacity: 0.4,
   },
 }));

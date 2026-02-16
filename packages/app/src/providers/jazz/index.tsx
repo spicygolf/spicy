@@ -1,5 +1,4 @@
 import { JazzReactNativeProvider } from "jazz-tools/react-native";
-import { RNCrypto } from "jazz-tools/react-native-core/crypto/RNCrypto";
 import type React from "react";
 import { useEffect } from "react";
 import { setJazzWorkerAccount } from "spicylib/config/env";
@@ -21,11 +20,7 @@ export function JazzAndAuth({ children }: { children: React.ReactNode }) {
     `wss://cloud.jazz.tools/?key=${credentials.apiKey}` as `wss://${string}`;
 
   return (
-    <JazzReactNativeProvider
-      sync={{ peer }}
-      CryptoProvider={RNCrypto}
-      AccountSchema={PlayerAccount}
-    >
+    <JazzReactNativeProvider sync={{ peer }} AccountSchema={PlayerAccount}>
       <AuthUI>{children}</AuthUI>
     </JazzReactNativeProvider>
   );

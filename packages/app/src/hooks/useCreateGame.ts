@@ -8,9 +8,10 @@ import {
   ListOfPlayers,
   ListOfRoundToGames,
   PlayerAccount,
+  TeamsConfig,
 } from "spicylib/schema";
-import { copySpecOptions } from "spicylib/scoring";
-import { getDefaultTeeTime } from "spicylib/utils";
+import { copySpecOptions, getSpecField } from "spicylib/scoring";
+import { calculateTeamCount, getDefaultTeeTime } from "spicylib/utils";
 import { addPlayerToGameCore } from "../utils/addPlayerToGameCore";
 import { reportError } from "../utils/reportError";
 import { useJazzWorker } from "./useJazzWorker";
@@ -83,8 +84,6 @@ export function useCreateGame() {
 
     // GameSpec IS the options map directly
     if (firstSpec?.$isLoaded) {
-      const { getSpecField } = await import("spicylib/scoring");
-      const { calculateTeamCount } = await import("spicylib/utils");
       const teams = getSpecField(firstSpec, "teams") as boolean;
       const teamChangeEvery = getSpecField(
         firstSpec,
@@ -97,8 +96,6 @@ export function useCreateGame() {
 
       // Only create teamsConfig if spec has teams enabled or team-related options
       if (teams || teamChangeEvery || teamSize || numTeams) {
-        const { TeamsConfig } = await import("spicylib/schema");
-
         const calculatedTeamCount = calculateTeamCount({
           numTeams,
           teamSize: teams ? teamSize : undefined, // Only use team_size if teams enabled

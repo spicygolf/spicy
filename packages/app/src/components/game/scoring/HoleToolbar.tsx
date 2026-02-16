@@ -1,7 +1,8 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { TouchableOpacity, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";
+import { GolfTee } from "./TeeFlipModal";
 
 interface HoleToolbarProps {
   onChangeTeams?: () => void;
@@ -11,6 +12,10 @@ interface HoleToolbarProps {
   isCustomMultiplier?: boolean;
   /** Handler for tapping the multiplier badge to open custom multiplier modal */
   onMultiplierPress?: () => void;
+  /** Whether the tee flip was declined on this hole */
+  teeFlipDeclined?: boolean;
+  /** Called when the declined tee icon is tapped to undo the decline */
+  onTeeFlipUndoDecline?: () => void;
   /** Whether explain mode is enabled (for future use) */
   explainMode?: boolean;
   onToggleExplain?: () => void;
@@ -21,6 +26,8 @@ export function HoleToolbar({
   overallMultiplier = 1,
   isCustomMultiplier = false,
   onMultiplierPress,
+  teeFlipDeclined = false,
+  onTeeFlipUndoDecline,
   explainMode = false,
   onToggleExplain,
 }: HoleToolbarProps): React.ReactElement {
@@ -53,12 +60,13 @@ export function HoleToolbar({
 
   return (
     <View style={styles.container}>
-      {/* Left: Team chooser icon */}
+      {/* Left: Team chooser icon + declined tee flip indicator */}
       <View style={styles.leftSection}>
         {onChangeTeams && (
-          <TouchableOpacity
+          <Pressable
             style={styles.iconButton}
             onPress={onChangeTeams}
+            hitSlop={12}
             accessibilityLabel="Change teams"
           >
             <FontAwesome6
@@ -67,7 +75,21 @@ export function HoleToolbar({
               size={24}
               color={theme.colors.action}
             />
-          </TouchableOpacity>
+          </Pressable>
+        )}
+        {teeFlipDeclined && (
+          <Pressable
+            onPress={onTeeFlipUndoDecline}
+            hitSlop={12}
+            style={styles.teeFlipDeclined}
+            accessibilityLabel="Undo declined tee flip"
+          >
+            <GolfTee
+              color={theme.colors.secondary}
+              borderColor={theme.colors.secondary}
+              scale={0.35}
+            />
+          </Pressable>
         )}
       </View>
 
@@ -75,8 +97,9 @@ export function HoleToolbar({
       <View style={styles.centerSection}>
         {isActive ? (
           isTappable ? (
-            <TouchableOpacity
+            <Pressable
               onPress={onMultiplierPress}
+              hitSlop={8}
               accessibilityLabel={
                 isCustomMultiplier
                   ? "Edit custom multiplier"
@@ -84,13 +107,14 @@ export function HoleToolbar({
               }
             >
               {multiplierBadge}
-            </TouchableOpacity>
+            </Pressable>
           ) : (
             multiplierBadge
           )
         ) : isTappable ? (
-          <TouchableOpacity
+          <Pressable
             onPress={onMultiplierPress}
+            hitSlop={8}
             style={styles.multiplierBadgePlaceholder}
             accessibilityLabel="Set custom multiplier"
           >
@@ -102,19 +126,20 @@ export function HoleToolbar({
             >
               1x
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         ) : null}
       </View>
 
       {/* Right: Explain mode icon (disabled/placeholder) */}
       <View style={styles.rightSection}>
-        <TouchableOpacity
+        <Pressable
           style={[
             styles.iconButton,
             (!onToggleExplain || !explainMode) && styles.iconButtonInactive,
           ]}
           onPress={onToggleExplain}
           disabled={!onToggleExplain}
+          hitSlop={12}
           accessibilityLabel="Explain mode (coming soon)"
         >
           <FontAwesome6
@@ -123,7 +148,7 @@ export function HoleToolbar({
             size={24}
             color={explainMode ? theme.colors.action : theme.colors.border}
           />
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
@@ -143,7 +168,9 @@ const styles = StyleSheet.create((theme) => ({
   },
   leftSection: {
     flex: 1,
-    alignItems: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(0.5),
   },
   centerSection: {
     flex: 1,
@@ -197,5 +224,13 @@ const styles = StyleSheet.create((theme) => ({
   placeholderText: {
     fontSize: 18,
     fontWeight: "bold",
+  },
+  teeFlipDeclined: {
+    width: 20,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    opacity: 0.4,
   },
 }));

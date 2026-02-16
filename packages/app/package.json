@@ -4,7 +4,7 @@
   "private": true,
   "resolutions": {
     "react-native-nitro-modules": "0.33.7",
-    "react-native": "0.84.0-rc.5"
+    "react-native": "0.84.0"
   },
   "scripts": {
     "android": "react-native run-android",
@@ -49,7 +49,7 @@
     "posthog-react-native-session-replay": "^1.2.3",
     "react": "catalog:shared",
     "react-hook-form": "7.69.0",
-    "react-native": "0.84.0-rc.5",
+    "react-native": "0.84.0",
     "react-native-device-info": "^15.0.1",
     "react-native-dotenv": "3.4.11",
     "react-native-draggable-flatlist": "4.0.3",
@@ -81,9 +81,9 @@
     "@react-native-community/cli": "20.1.1",
     "@react-native-community/cli-platform-android": "20.1.1",
     "@react-native-community/cli-platform-ios": "20.1.1",
-    "@react-native/babel-preset": "0.84.0-rc.5",
-    "@react-native/metro-config": "0.84.0-rc.5",
-    "@react-native/typescript-config": "0.84.0-rc.5",
+    "@react-native/babel-preset": "0.84.0",
+    "@react-native/metro-config": "0.84.0",
+    "@react-native/typescript-config": "0.84.0",
     "@types/jest": "29.5.13",
     "@types/node": "^25.0.5",
     "@types/react": "catalog:shared",
