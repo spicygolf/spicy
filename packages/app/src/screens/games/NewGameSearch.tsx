@@ -151,7 +151,7 @@ export function NewGameSearch({ viewMode }: NewGameSearchProps) {
             />
           )}
           keyExtractor={(item) => item.$jazz.id}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={Separator}
           contentContainerStyle={styles.listContainer}
         />
       </View>
@@ -172,3 +172,5 @@ const styles = StyleSheet.create((theme) => ({
     marginLeft: theme.gap(4),
   },
 }));
+
+const Separator = () => <View style={styles.separator} />;

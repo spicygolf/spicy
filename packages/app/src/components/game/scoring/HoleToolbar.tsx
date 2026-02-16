@@ -1,5 +1,5 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { Pressable, TouchableOpacity, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "@/ui";
 import { GolfTee } from "./TeeFlipModal";
@@ -97,8 +97,9 @@ export function HoleToolbar({
       <View style={styles.centerSection}>
         {isActive ? (
           isTappable ? (
-            <TouchableOpacity
+            <Pressable
               onPress={onMultiplierPress}
+              hitSlop={8}
               accessibilityLabel={
                 isCustomMultiplier
                   ? "Edit custom multiplier"
@@ -106,13 +107,14 @@ export function HoleToolbar({
               }
             >
               {multiplierBadge}
-            </TouchableOpacity>
+            </Pressable>
           ) : (
             multiplierBadge
           )
         ) : isTappable ? (
-          <TouchableOpacity
+          <Pressable
             onPress={onMultiplierPress}
+            hitSlop={8}
             style={styles.multiplierBadgePlaceholder}
             accessibilityLabel="Set custom multiplier"
           >
@@ -124,19 +126,20 @@ export function HoleToolbar({
             >
               1x
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         ) : null}
       </View>
 
       {/* Right: Explain mode icon (disabled/placeholder) */}
       <View style={styles.rightSection}>
-        <TouchableOpacity
+        <Pressable
           style={[
             styles.iconButton,
             (!onToggleExplain || !explainMode) && styles.iconButtonInactive,
           ]}
           onPress={onToggleExplain}
           disabled={!onToggleExplain}
+          hitSlop={12}
           accessibilityLabel="Explain mode (coming soon)"
         >
           <FontAwesome6
@@ -145,7 +148,7 @@ export function HoleToolbar({
             size={24}
             color={explainMode ? theme.colors.action : theme.colors.border}
           />
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );

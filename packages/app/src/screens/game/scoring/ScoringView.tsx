@@ -1086,9 +1086,9 @@ export function ScoringView({
 
                 if (!player?.$isLoaded) return null;
 
-                // Get gross score for current hole (1-indexed: "1"-"18")
-                const holeNum = String(currentHoleIndex + 1);
-                const gross = getGrossScore(round, holeNum);
+                // Get gross score for current hole using actual hole number
+                // (not position-based, so shotgun starts work correctly)
+                const gross = getGrossScore(round, currentHoleNumber);
 
                 // Calculate pops and net only if handicaps are used
                 let calculatedPops = 0;
@@ -1147,7 +1147,7 @@ export function ScoringView({
                       .filter((junk) =>
                         hasCalculatedPlayerJunk(
                           scoreboard,
-                          holeNum,
+                          currentHoleNumber,
                           round.playerId,
                           junk.name,
                         ),

@@ -24,6 +24,34 @@ function defaultSelect(value: MaybeLoaded<Game>): Game | null {
 }
 
 /**
+ * Default resolve query for useGame. Hoisted to module scope so the reference
+ * is stable across renders, preventing unnecessary Jazz re-subscriptions.
+ */
+const DEFAULT_RESOLVE_QUERY = {
+  name: true,
+  start: true,
+  scope: { teamsConfig: true },
+  spec: { $each: { $each: true } },
+  holes: true,
+  players: { $each: { name: true, handicap: true, envs: true } },
+  rounds: {
+    $each: {
+      handicapIndex: true,
+      courseHandicap: true,
+      gameHandicap: true,
+      round: {
+        playerId: true,
+        handicapIndex: true,
+        tee: {
+          holes: { $each: true },
+        },
+        scores: true,
+      },
+    },
+  },
+} as const;
+
+/**
  * Hook to load a Game with customizable resolve queries.
  *
  * Each consumer gets its own Jazz SubscriptionScope via useCoState, so
@@ -46,30 +74,7 @@ export function useGame(
   const startTime = useRef(Date.now());
   const loggedLoad = useRef(false);
 
-  // Use custom resolve if provided, otherwise use default minimal resolve
-  const resolveQuery = options.resolve || {
-    name: true,
-    start: true,
-    scope: { teamsConfig: true },
-    spec: { $each: { $each: true } },
-    holes: true,
-    players: { $each: { name: true, handicap: true, envs: true } },
-    rounds: {
-      $each: {
-        handicapIndex: true,
-        courseHandicap: true,
-        gameHandicap: true,
-        round: {
-          playerId: true,
-          handicapIndex: true,
-          tee: {
-            holes: { $each: true },
-          },
-          scores: true,
-        },
-      },
-    },
-  };
+  const resolveQuery = options.resolve || DEFAULT_RESOLVE_QUERY;
 
   const game = useCoState(
     Game,
