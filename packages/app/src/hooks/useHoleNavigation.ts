@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import type { Game, GameHole } from "spicylib/schema";
 import {
   DEFAULT_HANDICAP_ALLOCATION,
@@ -95,13 +95,30 @@ export function useHoleNavigation(game: Game | null): UseHoleNavigationReturn {
   // Total positions = holesList.length + 1 (holes + Summary)
   const totalPositions = holesList.length + 1;
 
+  // Use ref so callbacks always read the current value at call time,
+  // not a stale closure value captured during Jazz reconnection.
+  // During reconnection, totalPositions transiently becomes 1 (empty holesList),
+  // and useCallback would close over that broken value.
+  const totalPositionsRef = useRef(totalPositions);
+  totalPositionsRef.current = totalPositions;
+
   const handlePrevHole = useCallback(() => {
-    setCurrentHoleIndex((prev) => (prev === 0 ? totalPositions - 1 : prev - 1));
-  }, [totalPositions, setCurrentHoleIndex]);
+    const tp = totalPositionsRef.current;
+    if (tp <= 1) {
+      console.warn("[scoring_nav_blocked] prevHole: data not loaded");
+      return;
+    }
+    setCurrentHoleIndex((prev) => (prev === 0 ? tp - 1 : prev - 1));
+  }, [setCurrentHoleIndex]);
 
   const handleNextHole = useCallback(() => {
-    setCurrentHoleIndex((prev) => (prev === totalPositions - 1 ? 0 : prev + 1));
-  }, [totalPositions, setCurrentHoleIndex]);
+    const tp = totalPositionsRef.current;
+    if (tp <= 1) {
+      console.warn("[scoring_nav_blocked] nextHole: data not loaded");
+      return;
+    }
+    setCurrentHoleIndex((prev) => (prev === tp - 1 ? 0 : prev + 1));
+  }, [setCurrentHoleIndex]);
 
   return {
     currentHoleIndex,
