@@ -106,12 +106,13 @@ describe("Five Points Integration Tests", () => {
       return;
     }
 
-    // Start Jazz worker
+    // Start Jazz worker (skip inbox — not needed for scoring tests)
     worker = await startWorker({
       AccountSchema: PlayerAccount,
       syncServer: `wss://cloud.jazz.tools/?key=${JAZZ_API_KEY}`,
       accountID: JAZZ_WORKER_ACCOUNT,
       accountSecret: JAZZ_WORKER_SECRET,
+      skipInboxLoad: true,
     });
 
     // Load the game from catalog.games by legacyId
@@ -155,7 +156,7 @@ describe("Five Points Integration Tests", () => {
 
     // Run the scoring pipeline
     scoreboard = score(game);
-  }, 30000);
+  }, 60000);
 
   afterAll(async () => {
     if (worker) {
