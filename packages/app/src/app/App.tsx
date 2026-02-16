@@ -4,11 +4,13 @@ import { LogBox, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useAppLifecycleAnalytics } from "@/hooks/useAppLifecycleAnalytics";
 import { prefetchErrorMessages } from "@/hooks/useErrorMessages";
+import { useJazzConnectionMonitor } from "@/hooks/useJazzConnectionMonitor";
 import { RootNavigator } from "@/navigators/RootNavigator";
 import { JazzAndAuth } from "@/providers/jazz";
 import { NavigationProvider } from "@/providers/navigation";
-import { PostHogProvider } from "@/providers/posthog";
+import { PostHogIdentifier, PostHogProvider } from "@/providers/posthog";
 import { ReactQueryProvider } from "@/providers/react-query";
 
 if (__DEV__) {
@@ -21,6 +23,13 @@ if (__DEV__) {
       console.error(getPrettyStackTrace());
     },
   );
+}
+
+/** Activates app lifecycle and Jazz connection monitoring inside the provider tree. */
+function AppInstrumentation(): null {
+  useAppLifecycleAnalytics();
+  useJazzConnectionMonitor();
+  return null;
 }
 
 export function App() {
@@ -38,6 +47,8 @@ export function App() {
               <NavigationProvider>
                 <ReactQueryProvider>
                   <JazzAndAuth>
+                    <AppInstrumentation />
+                    <PostHogIdentifier />
                     <RootNavigator />
                   </JazzAndAuth>
                 </ReactQueryProvider>
