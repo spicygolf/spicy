@@ -1,5 +1,6 @@
 export * from "./useAddPlayerToGame";
 export * from "./useApi";
+export * from "./useAppState";
 export * from "./useCatalogCourses";
 export * from "./useCatalogPlayers";
 export * from "./useCreateGame";
