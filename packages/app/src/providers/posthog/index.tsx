@@ -1,6 +1,13 @@
 import { POSTHOG_API_KEY, POSTHOG_HOST } from "@env";
-import { PostHogProvider as PHProvider } from "posthog-react-native";
-import type { ReactNode } from "react";
+import { useAccount } from "jazz-tools/react-native";
+import {
+  PostHogProvider as PHProvider,
+  usePostHog,
+} from "posthog-react-native";
+import { type ReactNode, useEffect, useRef } from "react";
+import { Platform } from "react-native";
+import { PlayerAccount } from "spicylib/schema";
+import { APP_VERSION } from "@/constants/version";
 
 interface PostHogProviderProps {
   children: ReactNode;
@@ -45,8 +52,8 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
           captureLog: true,
           // Capture network telemetry (iOS only, no body data)
           captureNetworkTelemetry: true,
-          // Throttle snapshots for performance (1000ms default)
-          throttleDelayMs: 1000,
+          // Throttle snapshots for battery life (default 1000ms)
+          throttleDelayMs: 2000,
         },
         // Error tracking configuration
         errorTracking: {
@@ -59,12 +66,47 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
       }}
       autocapture={{
         captureTouches: true,
-        // Disabled: requires being inside NavigationContainer
-        // Screen tracking happens via session replay instead
+        // Screen tracking handled via NavigationContainer onStateChange
         captureScreens: false,
       }}
     >
       {children}
     </PHProvider>
   );
+}
+
+/**
+ * Identifies the current Jazz user in PostHog.
+ *
+ * Must be rendered inside both PostHogProvider and JazzAndAuth.
+ * Calls posthog.identify() once when the user account loads.
+ */
+export function PostHogIdentifier(): null {
+  const me = useAccount(PlayerAccount, {
+    resolve: { root: { player: true } },
+  });
+  const posthog = usePostHog();
+  const identifiedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!posthog || !me?.$isLoaded) return;
+
+    const accountId = me.$jazz.id;
+    if (identifiedRef.current === accountId) return;
+
+    identifiedRef.current = accountId;
+
+    const playerName =
+      me.root?.$isLoaded && me.root.player?.$isLoaded
+        ? me.root.player.name
+        : undefined;
+
+    posthog.identify(accountId, {
+      ...(playerName && { name: playerName }),
+      platform: Platform.OS,
+      app_version: APP_VERSION,
+    });
+  }, [me, posthog]);
+
+  return null;
 }
