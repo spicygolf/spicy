@@ -173,7 +173,6 @@ export function HandicapAdjustment({ route, navigation }: Props) {
   }
 
   // Save pending changes when navigating away (blur doesn't fire on back press)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Uses refs for current values, functions are stable
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", () => {
       saveIndexOverride(indexInputRef.current);

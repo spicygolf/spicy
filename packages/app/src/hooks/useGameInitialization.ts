@@ -12,7 +12,6 @@ import {
 export function useGameInitialization(game: Game | null) {
   const initialized = useRef(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: game causes infinite loops due to Jazz reactivity
   useEffect(() => {
     if (
       !game?.$isLoaded ||

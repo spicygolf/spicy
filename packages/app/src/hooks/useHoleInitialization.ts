@@ -13,7 +13,6 @@ export function useHoleInitialization(
 ) {
   const initializedHoles = useRef<Set<number>>(new Set());
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: game causes infinite loops due to Jazz reactivity
   useEffect(() => {
     if (
       !game?.$isLoaded ||

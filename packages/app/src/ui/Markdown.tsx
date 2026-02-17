@@ -36,7 +36,6 @@ function MarkdownRenderer({ node, listContext, listIndex }: RendererProps) {
   ) =>
     children?.map((child, i) => (
       <MarkdownRenderer
-        // biome-ignore lint/suspicious/noArrayIndexKey: AST nodes don't have stable IDs
         key={i}
         node={child}
         listContext={childListContext}
