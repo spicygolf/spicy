@@ -18,6 +18,7 @@ interface StaleHandicapCheckerProps {
 export function StaleHandicapChecker({ gameId }: StaleHandicapCheckerProps) {
   const { game } = useGame(gameId, {
     resolve: {
+      handicapCheckDismissedAt: true,
       players: {
         $each: {
           name: true,
@@ -28,8 +29,15 @@ export function StaleHandicapChecker({ gameId }: StaleHandicapCheckerProps) {
     },
   });
 
-  const { stalePlayers, dismissAll } = useStaleHandicapCheck(
+  const dismissedAt = game?.$isLoaded
+    ? game.handicapCheckDismissedAt
+      ? new Date(game.handicapCheckDismissedAt)
+      : undefined
+    : undefined;
+
+  const stalePlayers = useStaleHandicapCheck(
     game?.$isLoaded ? game.players : undefined,
+    dismissedAt,
   );
 
   const [showModal, setShowModal] = useState(false);
@@ -81,14 +89,21 @@ export function StaleHandicapChecker({ gameId }: StaleHandicapCheckerProps) {
           }
         }),
       );
+
+      // Persist dismiss regardless of refresh success/failure so the modal
+      // doesn't keep reappearing. If fresh data arrived, the hook will
+      // detect revDate > dismissedAt and re-show the modal next time.
+      game.$jazz.set("handicapCheckDismissedAt", new Date());
     },
     [game],
   );
 
   const handleDismiss = useCallback(() => {
     setShowModal(false);
-    dismissAll();
-  }, [dismissAll]);
+    if (game?.$isLoaded) {
+      game.$jazz.set("handicapCheckDismissedAt", new Date());
+    }
+  }, [game]);
 
   return (
     <StaleHandicapModal
