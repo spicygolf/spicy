@@ -210,30 +210,38 @@ export async function addPlayerToGameCore(
 
   const finalPlayer = gamePlayer?.$isLoaded ? gamePlayer : player;
 
-  // Auto-create round if requested and player has no rounds for the game date
+  // Auto-create round if requested and player has no rounds for the game date.
+  // Wrapped in try/catch so failures here don't escape the Result envelope —
+  // the player was already added, so we return ok with roundAutoCreated: false.
   let roundAutoCreated = false;
   if (options.autoCreateRound && game.rounds?.$isLoaded) {
-    // Check for existing rounds on the same date across all user games.
-    // This detects rounds from other games (not just player.rounds, which
-    // the app can't write to for catalog-imported players).
-    const roundsForGameDate = await getRoundsForDate(
-      finalPlayer.$jazz.id,
-      game.start,
-      options.allGames,
-      game.$jazz.id, // exclude current game
-    );
+    try {
+      const roundsForGameDate = await getRoundsForDate(
+        finalPlayer.$jazz.id,
+        game.start,
+        options.allGames,
+        game.$jazz.id, // exclude current game
+      );
 
-    if (roundsForGameDate.length === 0) {
-      const playerWithHandicap = await finalPlayer.$jazz.ensureLoaded({
-        resolve: { handicap: true },
-      });
-      const newRound = await createRoundForPlayer(game, playerWithHandicap);
-      roundAutoCreated = newRound !== null;
+      if (roundsForGameDate.length === 0) {
+        const playerWithHandicap = await finalPlayer.$jazz.ensureLoaded({
+          resolve: { handicap: true },
+        });
+        const newRound = await createRoundForPlayer(game, playerWithHandicap);
+        roundAutoCreated = newRound !== null;
 
-      // Auto-apply existing course/tee from other players if available
-      if (newRound) {
-        applyExistingCourseTeeToRound(game, newRound, playerWithHandicap);
+        if (newRound) {
+          applyExistingCourseTeeToRound(game, newRound, playerWithHandicap);
+        }
       }
+    } catch (error) {
+      reportError(error instanceof Error ? error : new Error(String(error)), {
+        source: "addPlayerToGameCore.autoCreateRound",
+        context: {
+          gameId: game.$jazz.id,
+          playerId: finalPlayer.$jazz.id,
+        },
+      });
     }
   }
 
