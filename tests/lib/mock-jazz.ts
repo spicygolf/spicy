@@ -126,7 +126,7 @@ export interface MockCourse extends MockJazzBase {
 // =============================================================================
 
 export interface MockRound extends MockJazzBase {
-  createdAt: Date;
+  start: Date;
   playerId: string;
   handicapIndex: string;
   course: MockCourse | undefined;
@@ -382,7 +382,7 @@ export function createMockRound(
   player: FixturePlayer,
 ): MockRound {
   return withJazzBase(nextMockId("round"), {
-    createdAt: new Date(),
+    start: new Date(),
     playerId: player.id,
     handicapIndex: String(player.handicapIndex),
     course: createMockCourse(fixture.course),

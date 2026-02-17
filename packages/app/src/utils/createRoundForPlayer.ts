@@ -24,7 +24,7 @@ export function getRoundsForDate(player: Player, date: Date): Round[] {
   }
 
   return player.rounds.filter((round): round is Round => {
-    if (!round?.$isLoaded) return false;
+    if (!round?.$isLoaded || !round.start) return false;
     return isSameDay(round.start, date);
   });
 }

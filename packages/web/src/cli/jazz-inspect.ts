@@ -506,7 +506,7 @@ async function inspect(
       "tee", // has name, gender, holes - check before player
       "course", // has name, city, tees
       "game", // has start, players
-      "round", // has createdAt, playerId
+      "round", // has start, playerId
       "roundtogame", // has round, handicapIndex
       "spec", // has name, spec_type
       "player", // has name, gender (least specific with those fields)

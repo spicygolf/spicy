@@ -202,7 +202,7 @@ export function GameOptionsList() {
       // so that getRoundsForDate() can match them in other games on the
       // same day. Without this, changing tee time from Feb 13 to Feb 14
       // leaves rounds stamped Feb 13, making them invisible to detection.
-      if (!isSameDay(oldStart, date) && game.rounds?.$isLoaded) {
+      if (oldStart && !isSameDay(oldStart, date) && game.rounds?.$isLoaded) {
         for (const rtg of game.rounds) {
           if (rtg?.$isLoaded && rtg.round?.$isLoaded) {
             rtg.round.$jazz.set("start", date);
