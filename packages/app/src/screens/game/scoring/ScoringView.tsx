@@ -21,6 +21,7 @@ import {
 import {
   CustomMultiplierModal,
   HoleHeader,
+  type HoleOptionOverride,
   HoleToolbar,
   PlayerScoreRow,
   TeamGroup,
@@ -572,15 +573,31 @@ export function ScoringView({
   const warnings = currentHoleResult?.warnings;
   const holeComplete = isHoleComplete(currentHoleResult);
 
-  // Check if this hole has per-hole option overrides
-  const hasOptionOverrides = useMemo(() => {
-    if (!currentHole?.$isLoaded) return false;
-    if (!currentHole.$jazz.has("options")) return false;
+  // Build list of per-hole option overrides for display
+  const optionOverrides = useMemo((): HoleOptionOverride[] => {
+    if (!currentHole?.$isLoaded) return [];
+    if (!currentHole.$jazz.has("options")) return [];
     const opts = currentHole.options;
-    if (!opts?.$isLoaded) return false;
-    return Object.keys(opts).some(
-      (k) => !k.startsWith("$") && k !== "_refs" && opts.$jazz.has(k),
-    );
+    if (!opts?.$isLoaded) return [];
+
+    const overrides: HoleOptionOverride[] = [];
+    for (const key of Object.keys(opts)) {
+      if (key.startsWith("$") || key === "_refs") continue;
+      if (!opts.$jazz.has(key)) continue;
+      const opt = opts[key];
+      if (!opt || opt.type !== "game") continue;
+
+      const val = opt.value ?? opt.defaultValue;
+      let displayVal = val;
+      if (opt.valueType === "bool") {
+        displayVal = val === "true" ? "Yes" : "No";
+      } else if (opt.valueType === "menu" && opt.choices) {
+        const choice = opt.choices.find((c) => c.name === val);
+        if (choice) displayVal = choice.disp;
+      }
+      overrides.push({ label: opt.disp, value: displayVal });
+    }
+    return overrides;
   }, [currentHole]);
 
   // Get all teams for the current hole (needed for one_per_group junk limit)
@@ -766,7 +783,6 @@ export function ScoringView({
         onPrevious={onPrevHole}
         onNext={onNextHole}
         warnings={warnings}
-        hasOptionOverrides={hasOptionOverrides}
       />
       <HoleToolbar
         onChangeTeams={onChangeTeams}
@@ -793,6 +809,8 @@ export function ScoringView({
             );
           }
         }}
+        optionOverrides={optionOverrides}
+        holeNumber={currentHoleNumber}
       />
       <CustomMultiplierModal
         visible={customMultiplierModalVisible}

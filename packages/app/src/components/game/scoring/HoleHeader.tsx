@@ -19,8 +19,6 @@ interface HoleHeaderProps {
   facility?: string;
   /** Warnings for incomplete scoring on this hole */
   warnings?: ScoringWarning[];
-  /** Whether this hole has per-hole option overrides active */
-  hasOptionOverrides?: boolean;
 }
 
 export function HoleHeader({
@@ -28,7 +26,6 @@ export function HoleHeader({
   onPrevious,
   onNext,
   warnings,
-  hasOptionOverrides,
 }: HoleHeaderProps) {
   const { theme } = useUnistyles();
 
@@ -60,15 +57,6 @@ export function HoleHeader({
             <Text style={styles.holeNumber} testID="hole-number">
               {hole.number}
             </Text>
-            {hasOptionOverrides && (
-              <FontAwesome6
-                name="sliders"
-                iconStyle="solid"
-                size={12}
-                color={theme.colors.action}
-                style={styles.overrideIcon}
-              />
-            )}
             {warningMessage && (
               <View style={styles.warningIndicator}>
                 <IncompleteIndicator message={warningMessage} />
@@ -137,9 +125,6 @@ const styles = StyleSheet.create((theme) => ({
   holeNumber: {
     fontSize: 24,
     fontWeight: "bold",
-  },
-  overrideIcon: {
-    marginLeft: theme.gap(0.5),
   },
   warningIndicator: {
     marginLeft: theme.gap(1),

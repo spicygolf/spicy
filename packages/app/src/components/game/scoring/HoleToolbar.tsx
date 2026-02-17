@@ -1,8 +1,15 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { Pressable, View } from "react-native";
+import { useState } from "react";
+import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Text } from "@/ui";
+import { ModalHeader, Text } from "@/ui";
 import { GolfTee } from "./TeeFlipModal";
+
+/** A per-hole option override summary for display */
+export interface HoleOptionOverride {
+  label: string;
+  value: string;
+}
 
 interface HoleToolbarProps {
   onChangeTeams?: () => void;
@@ -16,6 +23,10 @@ interface HoleToolbarProps {
   teeFlipDeclined?: boolean;
   /** Called when the declined tee icon is tapped to undo the decline */
   onTeeFlipUndoDecline?: () => void;
+  /** Per-hole option overrides active on this hole */
+  optionOverrides?: HoleOptionOverride[];
+  /** Hole number for the modal title */
+  holeNumber?: string;
   /** Whether explain mode is enabled (for future use) */
   explainMode?: boolean;
   onToggleExplain?: () => void;
@@ -28,10 +39,14 @@ export function HoleToolbar({
   onMultiplierPress,
   teeFlipDeclined = false,
   onTeeFlipUndoDecline,
+  optionOverrides,
+  holeNumber,
   explainMode = false,
   onToggleExplain,
 }: HoleToolbarProps): React.ReactElement {
   const { theme } = useUnistyles();
+  const [showOverridesModal, setShowOverridesModal] = useState(false);
+  const hasOverrides = optionOverrides && optionOverrides.length > 0;
 
   // Format multiplier display (1x, 2x, 4x, 8x)
   const multiplierText = `${overallMultiplier}x`;
@@ -130,8 +145,23 @@ export function HoleToolbar({
         ) : null}
       </View>
 
-      {/* Right: Explain mode icon (disabled/placeholder) */}
+      {/* Right: Option overrides + explain mode */}
       <View style={styles.rightSection}>
+        {hasOverrides && (
+          <Pressable
+            style={styles.iconButton}
+            onPress={() => setShowOverridesModal(true)}
+            hitSlop={12}
+            accessibilityLabel="View hole option overrides"
+          >
+            <FontAwesome6
+              name="sliders"
+              iconStyle="solid"
+              size={20}
+              color={theme.colors.action}
+            />
+          </Pressable>
+        )}
         <Pressable
           style={[
             styles.iconButton,
@@ -150,6 +180,38 @@ export function HoleToolbar({
           />
         </Pressable>
       </View>
+
+      {hasOverrides && (
+        <Modal
+          visible={showOverridesModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowOverridesModal(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowOverridesModal(false)}
+          >
+            <Pressable
+              style={styles.modalContent}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <ModalHeader
+                title={`Hole ${holeNumber ?? ""} Overrides`}
+                onClose={() => setShowOverridesModal(false)}
+              />
+              <View style={styles.overridesList}>
+                {optionOverrides!.map((override) => (
+                  <View key={override.label} style={styles.overrideRow}>
+                    <Text style={styles.overrideLabel}>{override.label}</Text>
+                    <Text style={styles.overrideValue}>{override.value}</Text>
+                  </View>
+                ))}
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -179,7 +241,10 @@ const styles = StyleSheet.create((theme) => ({
   },
   rightSection: {
     flex: 1,
-    alignItems: "flex-end",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: theme.gap(0.25),
   },
   iconButton: {
     padding: theme.gap(0.5),
@@ -232,5 +297,38 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
     overflow: "hidden",
     opacity: 0.4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: theme.colors.modalOverlay,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.gap(2),
+  },
+  modalContent: {
+    backgroundColor: theme.colors.background,
+    borderRadius: 12,
+    padding: theme.gap(2),
+    width: "100%",
+    maxWidth: 400,
+  },
+  overridesList: {
+    gap: theme.gap(1),
+  },
+  overrideRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: theme.gap(0.5),
+  },
+  overrideLabel: {
+    fontSize: 14,
+    color: theme.colors.primary,
+    flex: 1,
+  },
+  overrideValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.action,
   },
 }));
