@@ -52,7 +52,6 @@ export async function createRoundForPlayer(
   try {
     const gameDate = game.start;
     const roundGroup = game.rounds.$jazz.owner as Group;
-    const playerGroup = game.players.$jazz.owner as Group;
 
     // Create the new round
     const newRound = Round.create(
@@ -67,7 +66,9 @@ export async function createRoundForPlayer(
       { owner: roundGroup },
     );
 
-    // Add round to player's rounds list
+    // Add round to player's rounds list using the player's own group,
+    // not the game's group, so the rounds list persists across games.
+    const playerGroup = player.$jazz.owner as Group;
     if (!player.$jazz.has("rounds") || !player.rounds?.$isLoaded) {
       const roundsList = ListOfRounds.create([newRound], {
         owner: playerGroup,

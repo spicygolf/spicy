@@ -161,7 +161,7 @@ export async function addPlayerToGameCore(
         }
 
         player = await upsertedPlayer.$jazz.ensureLoaded({
-          resolve: { rounds: true, handicap: true },
+          resolve: { rounds: { $each: true }, handicap: true },
         });
       } else {
         player = Player.create(data, { owner: group });
@@ -218,9 +218,11 @@ export async function addPlayerToGameCore(
   // Auto-create round if requested and player has no rounds for the game date
   let roundAutoCreated = false;
   if (options.autoCreateRound && game.rounds?.$isLoaded) {
-    // Ensure player has rounds loaded for the check
+    // Ensure player has rounds loaded deeply enough to compare dates
+    // rounds: { $each: true } loads each Round item so getRoundsForDate
+    // can access round.createdAt for the isSameDay comparison.
     const playerWithRounds = await finalPlayer.$jazz.ensureLoaded({
-      resolve: { rounds: true, handicap: true },
+      resolve: { rounds: { $each: true }, handicap: true },
     });
 
     const roundsForGameDate = getRoundsForDate(playerWithRounds, game.start);

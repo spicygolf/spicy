@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption, JunkOption, MultiplierOption } from "spicylib/schema";
-import { isEveningCreation } from "spicylib/utils";
+import { isEveningCreation, isSameDay } from "spicylib/utils";
 import { useGame, useSaveOptionToGame, useTeamsMode } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { BoolOptionModal } from "./BoolOptionModal";
@@ -193,8 +193,21 @@ export function GameOptionsList() {
 
   const handleSaveTeeTime = useCallback(
     (date: Date) => {
-      if (game?.$isLoaded) {
-        game.$jazz.set("start", date);
+      if (!game?.$isLoaded) return;
+
+      const oldStart = game.start;
+      game.$jazz.set("start", date);
+
+      // When the game date changes, update round.createdAt for all rounds
+      // so that getRoundsForDate() can match them in other games on the
+      // same day. Without this, changing tee time from Feb 13 to Feb 14
+      // leaves rounds stamped Feb 13, making them invisible to detection.
+      if (!isSameDay(oldStart, date) && game.rounds?.$isLoaded) {
+        for (const rtg of game.rounds) {
+          if (rtg?.$isLoaded && rtg.round?.$isLoaded) {
+            rtg.round.$jazz.set("createdAt", date);
+          }
+        }
       }
     },
     [game],
