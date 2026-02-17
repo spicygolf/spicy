@@ -572,6 +572,17 @@ export function ScoringView({
   const warnings = currentHoleResult?.warnings;
   const holeComplete = isHoleComplete(currentHoleResult);
 
+  // Check if this hole has per-hole option overrides
+  const hasOptionOverrides = useMemo(() => {
+    if (!currentHole?.$isLoaded) return false;
+    if (!currentHole.$jazz.has("options")) return false;
+    const opts = currentHole.options;
+    if (!opts?.$isLoaded) return false;
+    return Object.keys(opts).some(
+      (k) => !k.startsWith("$") && k !== "_refs" && opts.$jazz.has(k),
+    );
+  }, [currentHole]);
+
   // Get all teams for the current hole (needed for one_per_group junk limit)
   const allTeams: Team[] = currentHole?.teams?.$isLoaded
     ? ([...currentHole.teams].filter((t) => t?.$isLoaded) as Team[])
@@ -755,6 +766,7 @@ export function ScoringView({
         onPrevious={onPrevHole}
         onNext={onNextHole}
         warnings={warnings}
+        hasOptionOverrides={hasOptionOverrides}
       />
       <HoleToolbar
         onChangeTeams={onChangeTeams}
