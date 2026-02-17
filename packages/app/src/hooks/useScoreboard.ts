@@ -146,6 +146,26 @@ function createScoringFingerprint(game: Game | null): number | null {
         parts.push(`tr:${holeNum}:${teamId}:${round.playerId ?? ""}`);
       }
     }
+
+    // 4b. Per-hole game option overrides (GameHole.options)
+    if (!hole.$jazz.has("options")) {
+      // No overrides for this hole - valid, continue
+    } else if (!hole.options?.$isLoaded) {
+      return null; // Options exist but not loaded yet
+    } else {
+      for (const key of Object.keys(hole.options)) {
+        if (key.startsWith("$") || key === "_refs") continue;
+        if (!hole.options.$jazz.has(key)) continue;
+        const opt = hole.options[key];
+        if (opt) {
+          if (opt.type === "game") {
+            parts.push(`ho:${holeNum}:${key}:${opt.value ?? opt.defaultValue}`);
+          } else if (opt.type === "junk" || opt.type === "multiplier") {
+            parts.push(`ho:${holeNum}:${key}:${opt.value}`);
+          }
+        }
+      }
+    }
   }
 
   // 5. Game spec options (includes any user modifications)
