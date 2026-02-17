@@ -1,6 +1,6 @@
 import type { Group } from "jazz-tools";
 import { useCallback } from "react";
-import type { Game, GameOption } from "spicylib/schema";
+import type { Game, GameHole, GameOption } from "spicylib/schema";
 import { MapOfOptions } from "spicylib/schema";
 import { deepClone } from "spicylib/utils";
 
@@ -83,18 +83,10 @@ export function useSaveOptionToHole(game: Game | null | undefined) {
   return { setHoleOption, removeHoleOption };
 }
 
-function removeHoleOptionInternal(
-  gameHole: NonNullable<ReturnType<typeof getLoadedHole>>,
-  optionName: string,
-) {
+function removeHoleOptionInternal(gameHole: GameHole, optionName: string) {
   if (!gameHole.$jazz.has("options") || !gameHole.options?.$isLoaded) return;
 
   if (gameHole.options.$jazz.has(optionName)) {
     gameHole.options.$jazz.delete(optionName);
   }
-}
-
-// Type helper - not exported, just for internal type narrowing
-function getLoadedHole() {
-  return null as unknown as import("spicylib/schema").GameHole;
 }

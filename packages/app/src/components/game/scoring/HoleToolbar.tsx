@@ -201,7 +201,7 @@ export function HoleToolbar({
                 onClose={() => setShowOverridesModal(false)}
               />
               <View style={styles.overridesList}>
-                {optionOverrides!.map((override) => (
+                {optionOverrides?.map((override) => (
                   <View key={override.label} style={styles.overrideRow}>
                     <Text style={styles.overrideLabel}>{override.label}</Text>
                     <Text style={styles.overrideValue}>{override.value}</Text>

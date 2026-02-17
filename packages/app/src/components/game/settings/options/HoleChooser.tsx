@@ -63,7 +63,9 @@ export function HoleChooser({
                     style={[
                       styles.holeText,
                       {
-                        color: isSelected ? "#FFFFFF" : theme.colors.primary,
+                        color: isSelected
+                          ? theme.colors.actionText
+                          : theme.colors.primary,
                       },
                     ]}
                   >

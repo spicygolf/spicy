@@ -9,6 +9,7 @@ import { useGame, useSaveOptionToGame, useTeamsMode } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { BoolOptionModal } from "./BoolOptionModal";
 import { DeleteGameButton } from "./DeleteGameButton";
+import { formatOptionValue } from "./formatOptionValue";
 import { GameNameModal } from "./GameNameModal";
 import { GameNameRow } from "./GameNameRow";
 import { GameOptionRow } from "./GameOptionRow";
@@ -168,21 +169,9 @@ export function GameOptionsList() {
 
       if (values.size <= 1) return undefined;
 
-      // Format each value for display
-      const formatVal = (v: string) => {
-        switch (option.valueType) {
-          case "bool":
-            return v === "true" || v === "1" ? "Yes" : "No";
-          case "menu": {
-            const choice = option.choices?.find((c) => c.name === v);
-            return choice ? choice.disp : v;
-          }
-          default:
-            return v;
-        }
-      };
-
-      return Array.from(values).map(formatVal).join(" / ");
+      return Array.from(values)
+        .map((v) => formatOptionValue(option, v))
+        .join(" / ");
     },
     [game, getHasOverrides, getCurrentValue],
   );

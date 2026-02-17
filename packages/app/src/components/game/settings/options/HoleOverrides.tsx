@@ -7,6 +7,7 @@ import { Back } from "@/components/Back";
 import { useGame, useSaveOptionToHole } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Input, Screen, Text } from "@/ui";
+import { formatOptionValue } from "./formatOptionValue";
 import { HoleChooser } from "./HoleChooser";
 import { OptionSectionHeader } from "./OptionSectionHeader";
 
@@ -97,7 +98,7 @@ export function HoleOverrides({ route }: Props) {
     sorted.sort((a, b) => {
       if (a === gameDefault) return -1;
       if (b === gameDefault) return 1;
-      return a.localeCompare(b);
+      return a.localeCompare(b, undefined, { numeric: true });
     });
 
     return sorted;
@@ -121,12 +122,14 @@ export function HoleOverrides({ route }: Props) {
       const currentValue = holeValueMap[holeNumber];
 
       if (currentValue === value) {
-        // Already set to this value — for binary options, toggle to other value
+        // Already set to this value — toggle back
         if (specOption.valueType === "bool") {
           const otherValue = value === "true" ? "false" : "true";
           setHoleOption(holeNumber, optionName, otherValue);
+        } else {
+          // Reset to game default (removes override if value matches default)
+          setHoleOption(holeNumber, optionName, gameDefault);
         }
-        // For non-binary, tapping the current value is a no-op
         return;
       }
 
@@ -140,15 +143,7 @@ export function HoleOverrides({ route }: Props) {
   const getValueDisplay = useCallback(
     (value: string): string => {
       if (!specOption) return value;
-
-      if (specOption.valueType === "bool") {
-        return value === "true" ? "Yes" : "No";
-      }
-      if (specOption.valueType === "menu" && specOption.choices) {
-        const choice = specOption.choices.find((c) => c.name === value);
-        return choice ? choice.disp : value;
-      }
-      return value;
+      return formatOptionValue(specOption, value);
     },
     [specOption],
   );
@@ -174,6 +169,9 @@ export function HoleOverrides({ route }: Props) {
     setNewValueInput("");
   }, [newValueInput, distinctValues]);
 
+  // Ephemeral: values added via "Add Value" only persist in React state.
+  // They disappear on navigation but reappear once holes are assigned to them
+  // (since assigned values surface through holeValueMap → distinctValues).
   const [additionalValues, setAdditionalValues] = useState<string[]>([]);
 
   const allValues = useMemo(() => {
@@ -181,7 +179,7 @@ export function HoleOverrides({ route }: Props) {
     return Array.from(merged).sort((a, b) => {
       if (a === gameDefault) return -1;
       if (b === gameDefault) return 1;
-      return a.localeCompare(b);
+      return a.localeCompare(b, undefined, { numeric: true });
     });
   }, [distinctValues, additionalValues, gameDefault]);
 

@@ -17,6 +17,7 @@ import {
   calculatePops,
   getEffectiveHandicap,
   getGrossScore,
+  isCoMapDataKey,
 } from "spicylib/utils";
 import {
   CustomMultiplierModal,
@@ -29,6 +30,7 @@ import {
   TeeFlipModal,
 } from "@/components/game/scoring";
 import type { OptionButton } from "@/components/game/scoring/OptionsButtons";
+import { formatOptionValue } from "@/components/game/settings/options/formatOptionValue";
 import type { HoleInfo } from "@/hooks";
 import { useOptionValue } from "@/hooks/useOptionValue";
 import {
@@ -582,20 +584,16 @@ export function ScoringView({
 
     const overrides: HoleOptionOverride[] = [];
     for (const key of Object.keys(opts)) {
-      if (key.startsWith("$") || key === "_refs") continue;
+      if (!isCoMapDataKey(key)) continue;
       if (!opts.$jazz.has(key)) continue;
       const opt = opts[key];
       if (!opt || opt.type !== "game") continue;
 
       const val = opt.value ?? opt.defaultValue;
-      let displayVal = val;
-      if (opt.valueType === "bool") {
-        displayVal = val === "true" ? "Yes" : "No";
-      } else if (opt.valueType === "menu" && opt.choices) {
-        const choice = opt.choices.find((c) => c.name === val);
-        if (choice) displayVal = choice.disp;
-      }
-      overrides.push({ label: opt.disp, value: displayVal });
+      overrides.push({
+        label: opt.disp,
+        value: formatOptionValue(opt, val),
+      });
     }
     return overrides;
   }, [currentHole]);
