@@ -1,11 +1,15 @@
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption, JunkOption, MultiplierOption } from "spicylib/schema";
 import { isEveningCreation } from "spicylib/utils";
 import { useGame, useSaveOptionToGame, useTeamsMode } from "@/hooks";
+import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { BoolOptionModal } from "./BoolOptionModal";
 import { DeleteGameButton } from "./DeleteGameButton";
+import { formatOptionValue } from "./formatOptionValue";
 import { GameNameModal } from "./GameNameModal";
 import { GameNameRow } from "./GameNameRow";
 import { GameOptionRow } from "./GameOptionRow";
@@ -26,6 +30,9 @@ export function GameOptionsList() {
   // Single subscription for the entire Options tab. ResetSpecButton and
   // DeleteGameButton receive `game` as a prop instead of calling useGame()
   // themselves, reducing the total Jazz subscription count on this screen.
+  const navigation =
+    useNavigation<NativeStackNavigationProp<GameSettingsStackParamList>>();
+
   const { game } = useGame(undefined, {
     resolve: {
       spec: { $each: true },
@@ -33,6 +40,7 @@ export function GameOptionsList() {
       scope: { teamsConfig: true },
       players: { $each: true },
       rounds: { $each: { round: { scores: true } } },
+      holes: { $each: { options: true } },
     },
   });
 
@@ -111,6 +119,67 @@ export function GameOptionsList() {
       return undefined;
     },
     [game],
+  );
+
+  // Check if any hole has an override for a given option
+  const getHasOverrides = useCallback(
+    (optionName: string): boolean => {
+      if (!game?.holes?.$isLoaded) return false;
+      for (const hole of game.holes) {
+        if (!hole?.$isLoaded) continue;
+        if (
+          hole.$jazz.has("options") &&
+          hole.options?.$isLoaded &&
+          hole.options.$jazz.has(optionName)
+        ) {
+          return true;
+        }
+      }
+      return false;
+    },
+    [game],
+  );
+
+  // Get a "val1 / val2" display string when per-hole overrides create mixed values
+  const getDisplayOverride = useCallback(
+    (option: GameOption): string | undefined => {
+      if (!game?.holes?.$isLoaded) return undefined;
+
+      const gameDefault = getCurrentValue(option.name) ?? option.defaultValue;
+      const values = new Set<string>();
+      values.add(gameDefault);
+
+      for (const hole of game.holes) {
+        if (!hole?.$isLoaded) continue;
+        if (
+          hole.$jazz.has("options") &&
+          hole.options?.$isLoaded &&
+          hole.options.$jazz.has(option.name)
+        ) {
+          const override = hole.options[option.name];
+          if (override && override.type === "game") {
+            const val =
+              (override as GameOption).value ??
+              (override as GameOption).defaultValue;
+            if (val !== undefined) values.add(val);
+          }
+        }
+      }
+
+      if (values.size <= 1) return undefined;
+
+      return Array.from(values)
+        .map((v) => formatOptionValue(option, v))
+        .join(" / ");
+    },
+    [game, getCurrentValue],
+  );
+
+  const handleCustomizePress = useCallback(
+    (optionName: string) => {
+      navigation.navigate("HoleOverrides", { optionName });
+    },
+    [navigation],
   );
 
   const handleSaveName = useCallback(
@@ -239,14 +308,22 @@ export function GameOptionsList() {
         {gameOptions.length > 0 && (
           <>
             <OptionSectionHeader title="Settings" />
-            {gameOptions.map((option) => (
-              <GameOptionRow
-                key={option.name}
-                option={option}
-                currentValue={getCurrentValue(option.name)}
-                onPress={() => handleGameOptionPress(option)}
-              />
-            ))}
+            {gameOptions.map((option) => {
+              const displayOverride = getDisplayOverride(option);
+              return (
+                <GameOptionRow
+                  key={option.name}
+                  option={option}
+                  currentValue={getCurrentValue(option.name)}
+                  onPress={
+                    displayOverride
+                      ? () => handleCustomizePress(option.name)
+                      : () => handleGameOptionPress(option)
+                  }
+                  displayOverride={displayOverride}
+                />
+              );
+            })}
           </>
         )}
 
@@ -294,6 +371,8 @@ export function GameOptionsList() {
               currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
+              onCustomize={() => handleCustomizePress(selectedGameOption.name)}
+              hasOverrides={getHasOverrides(selectedGameOption.name)}
             />
           )}
           {selectedGameOption.valueType === "menu" && (
@@ -303,6 +382,8 @@ export function GameOptionsList() {
               currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
+              onCustomize={() => handleCustomizePress(selectedGameOption.name)}
+              hasOverrides={getHasOverrides(selectedGameOption.name)}
             />
           )}
           {selectedGameOption.valueType === "num" && (
@@ -312,6 +393,8 @@ export function GameOptionsList() {
               currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
+              onCustomize={() => handleCustomizePress(selectedGameOption.name)}
+              hasOverrides={getHasOverrides(selectedGameOption.name)}
             />
           )}
           {selectedGameOption.valueType === "text" && (
@@ -321,6 +404,8 @@ export function GameOptionsList() {
               currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
+              onCustomize={() => handleCustomizePress(selectedGameOption.name)}
+              hasOverrides={getHasOverrides(selectedGameOption.name)}
             />
           )}
         </>

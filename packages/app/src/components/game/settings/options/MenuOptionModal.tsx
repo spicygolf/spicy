@@ -2,6 +2,7 @@ import { Modal, Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
 import { ModalHeader, Text } from "@/ui";
+import { CustomizePerHoleRow } from "./CustomizePerHoleRow";
 
 interface MenuOptionModalProps {
   visible: boolean;
@@ -9,6 +10,10 @@ interface MenuOptionModalProps {
   currentValue: string | undefined;
   onSelect: (value: string) => void;
   onClose: () => void;
+  /** Navigate to per-hole customization */
+  onCustomize?: () => void;
+  /** Whether per-hole overrides are active for this option */
+  hasOverrides?: boolean;
 }
 
 export function MenuOptionModal({
@@ -17,6 +22,8 @@ export function MenuOptionModal({
   currentValue,
   onSelect,
   onClose,
+  onCustomize,
+  hasOverrides,
 }: MenuOptionModalProps) {
   const value = currentValue ?? option.defaultValue;
 
@@ -66,6 +73,14 @@ export function MenuOptionModal({
               })}
             </View>
           </ScrollView>
+
+          {onCustomize && (
+            <CustomizePerHoleRow
+              hasOverrides={hasOverrides}
+              onClose={onClose}
+              onCustomize={onCustomize}
+            />
+          )}
         </Pressable>
       </Pressable>
     </Modal>

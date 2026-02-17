@@ -2,6 +2,7 @@ import { useMemo, useRef } from "react";
 import type { Game } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import { scoreWithContext } from "spicylib/scoring";
+import { isCoMapDataKey } from "spicylib/utils";
 
 /**
  * Fast, simple hash function (cyrb53)
@@ -144,6 +145,26 @@ function createScoringFingerprint(game: Game | null): number | null {
         if (!round?.$isLoaded) return null;
         // Include player assignment in fingerprint
         parts.push(`tr:${holeNum}:${teamId}:${round.playerId ?? ""}`);
+      }
+    }
+
+    // 4b. Per-hole game option overrides (GameHole.options)
+    if (!hole.$jazz.has("options")) {
+      // No overrides for this hole - valid, continue
+    } else if (!hole.options?.$isLoaded) {
+      return null; // Options exist but not loaded yet
+    } else {
+      for (const key of Object.keys(hole.options)) {
+        if (!isCoMapDataKey(key)) continue;
+        if (!hole.options.$jazz.has(key)) continue;
+        const opt = hole.options[key];
+        if (opt) {
+          if (opt.type === "game") {
+            parts.push(`ho:${holeNum}:${key}:${opt.value ?? opt.defaultValue}`);
+          } else if (opt.type === "junk" || opt.type === "multiplier") {
+            parts.push(`ho:${holeNum}:${key}:${opt.value}`);
+          }
+        }
       }
     }
   }

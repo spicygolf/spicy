@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Game, GameHole, MultiplierOption, Team } from "spicylib/schema";
+import type {
+  Game,
+  GameHole,
+  GameOption,
+  MultiplierOption,
+  Team,
+} from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import {
@@ -17,10 +23,12 @@ import {
   calculatePops,
   getEffectiveHandicap,
   getGrossScore,
+  isCoMapDataKey,
 } from "spicylib/utils";
 import {
   CustomMultiplierModal,
   HoleHeader,
+  type HoleOptionOverride,
   HoleToolbar,
   PlayerScoreRow,
   TeamGroup,
@@ -28,6 +36,7 @@ import {
   TeeFlipModal,
 } from "@/components/game/scoring";
 import type { OptionButton } from "@/components/game/scoring/OptionsButtons";
+import { formatOptionValue } from "@/components/game/settings/options/formatOptionValue";
 import type { HoleInfo } from "@/hooks";
 import { useOptionValue } from "@/hooks/useOptionValue";
 import {
@@ -572,6 +581,33 @@ export function ScoringView({
   const warnings = currentHoleResult?.warnings;
   const holeComplete = isHoleComplete(currentHoleResult);
 
+  // Build list of per-hole option overrides for display.
+  // Computed directly — Jazz objects are reactive proxies so useMemo with
+  // CoValue dependencies would cache stale results during progressive loading.
+  const optionOverrides: HoleOptionOverride[] = (() => {
+    if (!currentHole?.$isLoaded) return [];
+    if (!currentHole.$jazz.has("options")) return [];
+    const opts = currentHole.options;
+    if (!opts?.$isLoaded) return [];
+
+    const overrides: HoleOptionOverride[] = [];
+    for (const key of Object.keys(opts)) {
+      if (!isCoMapDataKey(key)) continue;
+      if (!opts.$jazz.has(key)) continue;
+      const opt = opts[key];
+      if (!opt || opt.type !== "game") continue;
+      const gameOpt = opt as GameOption;
+
+      const val = gameOpt.value ?? gameOpt.defaultValue;
+      if (val === undefined) continue;
+      overrides.push({
+        label: gameOpt.disp,
+        value: formatOptionValue(gameOpt, val),
+      });
+    }
+    return overrides;
+  })();
+
   // Get all teams for the current hole (needed for one_per_group junk limit)
   const allTeams: Team[] = currentHole?.teams?.$isLoaded
     ? ([...currentHole.teams].filter((t) => t?.$isLoaded) as Team[])
@@ -781,6 +817,8 @@ export function ScoringView({
             );
           }
         }}
+        optionOverrides={optionOverrides}
+        holeNumber={currentHoleNumber}
       />
       <CustomMultiplierModal
         visible={customMultiplierModalVisible}

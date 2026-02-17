@@ -3,6 +3,7 @@ import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
 import { Button, Input, ModalHeader } from "@/ui";
+import { CustomizePerHoleRow } from "./CustomizePerHoleRow";
 
 interface TextOptionModalProps {
   visible: boolean;
@@ -10,6 +11,10 @@ interface TextOptionModalProps {
   currentValue: string | undefined;
   onSelect: (value: string) => void;
   onClose: () => void;
+  /** Navigate to per-hole customization */
+  onCustomize?: () => void;
+  /** Whether per-hole overrides are active for this option */
+  hasOverrides?: boolean;
 }
 
 export function TextOptionModal({
@@ -18,6 +23,8 @@ export function TextOptionModal({
   currentValue,
   onSelect,
   onClose,
+  onCustomize,
+  hasOverrides,
 }: TextOptionModalProps) {
   const value = currentValue ?? option.defaultValue;
   const [inputValue, setInputValue] = useState(value);
@@ -55,6 +62,14 @@ export function TextOptionModal({
               <Button label="Set" onPress={handleSubmit} />
             </View>
           </View>
+
+          {onCustomize && (
+            <CustomizePerHoleRow
+              hasOverrides={hasOverrides}
+              onClose={onClose}
+              onCustomize={onCustomize}
+            />
+          )}
         </Pressable>
       </Pressable>
     </Modal>

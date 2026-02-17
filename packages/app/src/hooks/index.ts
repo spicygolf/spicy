@@ -22,6 +22,7 @@ export * from "./useOptionValue";
 export * from "./usePlayer";
 export * from "./useRound";
 export * from "./useSaveOptionToGame";
+export * from "./useSaveOptionToHole";
 export * from "./useScoreboard";
 export * from "./useScoreManagement";
 export * from "./useStaleHandicapCheck";

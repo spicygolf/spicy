@@ -2,6 +2,7 @@ import { Modal, Pressable, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
 import { ModalHeader, Text } from "@/ui";
+import { CustomizePerHoleRow } from "./CustomizePerHoleRow";
 
 interface BoolOptionModalProps {
   visible: boolean;
@@ -9,6 +10,10 @@ interface BoolOptionModalProps {
   currentValue: string | undefined;
   onSelect: (value: string) => void;
   onClose: () => void;
+  /** Navigate to per-hole customization */
+  onCustomize?: () => void;
+  /** Whether per-hole overrides are active for this option */
+  hasOverrides?: boolean;
 }
 
 export function BoolOptionModal({
@@ -17,6 +22,8 @@ export function BoolOptionModal({
   currentValue,
   onSelect,
   onClose,
+  onCustomize,
+  hasOverrides,
 }: BoolOptionModalProps) {
   const value = currentValue ?? option.defaultValue;
 
@@ -64,6 +71,14 @@ export function BoolOptionModal({
               );
             })}
           </View>
+
+          {onCustomize && (
+            <CustomizePerHoleRow
+              hasOverrides={hasOverrides}
+              onClose={onClose}
+              onCustomize={onCustomize}
+            />
+          )}
         </Pressable>
       </Pressable>
     </Modal>
