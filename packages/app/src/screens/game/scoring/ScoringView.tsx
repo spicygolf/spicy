@@ -581,8 +581,10 @@ export function ScoringView({
   const warnings = currentHoleResult?.warnings;
   const holeComplete = isHoleComplete(currentHoleResult);
 
-  // Build list of per-hole option overrides for display
-  const optionOverrides = useMemo((): HoleOptionOverride[] => {
+  // Build list of per-hole option overrides for display.
+  // Computed directly — Jazz objects are reactive proxies so useMemo with
+  // CoValue dependencies would cache stale results during progressive loading.
+  const optionOverrides: HoleOptionOverride[] = (() => {
     if (!currentHole?.$isLoaded) return [];
     if (!currentHole.$jazz.has("options")) return [];
     const opts = currentHole.options;
@@ -604,7 +606,7 @@ export function ScoringView({
       });
     }
     return overrides;
-  }, [currentHole]);
+  })();
 
   // Get all teams for the current hole (needed for one_per_group junk limit)
   const allTeams: Team[] = currentHole?.teams?.$isLoaded
