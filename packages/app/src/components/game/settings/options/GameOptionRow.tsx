@@ -8,12 +8,18 @@ interface GameOptionRowProps {
   option: GameOption;
   currentValue: string | undefined;
   onPress: () => void;
+  /** Navigate to per-hole customization screen */
+  onCustomizePress?: () => void;
+  /** Whether this option has per-hole overrides active */
+  hasOverrides?: boolean;
 }
 
 export function GameOptionRow({
   option,
   currentValue,
   onPress,
+  onCustomizePress,
+  hasOverrides,
 }: GameOptionRowProps) {
   const { theme } = useUnistyles();
 
@@ -43,6 +49,25 @@ export function GameOptionRow({
     <Pressable style={styles.optionRow} onPress={onPress}>
       <Text style={styles.optionLabel}>{option.disp}</Text>
       <View style={styles.optionValue}>
+        {onCustomizePress && (
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation();
+              onCustomizePress();
+            }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityLabel={`Customize ${option.disp} per hole`}
+          >
+            <FontAwesome6
+              name="sliders"
+              iconStyle="solid"
+              size={14}
+              color={
+                hasOverrides ? theme.colors.action : theme.colors.secondary
+              }
+            />
+          </Pressable>
+        )}
         <Text style={styles.optionValueText}>{displayValue()}</Text>
         <FontAwesome6
           name="chevron-right"

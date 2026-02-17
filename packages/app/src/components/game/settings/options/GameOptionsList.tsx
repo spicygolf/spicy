@@ -1,9 +1,12 @@
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption, JunkOption, MultiplierOption } from "spicylib/schema";
 import { isEveningCreation } from "spicylib/utils";
 import { useGame, useSaveOptionToGame, useTeamsMode } from "@/hooks";
+import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { BoolOptionModal } from "./BoolOptionModal";
 import { DeleteGameButton } from "./DeleteGameButton";
 import { GameNameModal } from "./GameNameModal";
@@ -26,6 +29,9 @@ export function GameOptionsList() {
   // Single subscription for the entire Options tab. ResetSpecButton and
   // DeleteGameButton receive `game` as a prop instead of calling useGame()
   // themselves, reducing the total Jazz subscription count on this screen.
+  const navigation =
+    useNavigation<NativeStackNavigationProp<GameSettingsStackParamList>>();
+
   const { game } = useGame(undefined, {
     resolve: {
       spec: { $each: true },
@@ -33,6 +39,7 @@ export function GameOptionsList() {
       scope: { teamsConfig: true },
       players: { $each: true },
       rounds: { $each: { round: { scores: true } } },
+      holes: { $each: { options: true } },
     },
   });
 
@@ -111,6 +118,32 @@ export function GameOptionsList() {
       return undefined;
     },
     [game],
+  );
+
+  // Check if any hole has an override for a given option
+  const getHasOverrides = useCallback(
+    (optionName: string): boolean => {
+      if (!game?.holes?.$isLoaded) return false;
+      for (const hole of game.holes) {
+        if (!hole?.$isLoaded) continue;
+        if (
+          hole.$jazz.has("options") &&
+          hole.options?.$isLoaded &&
+          hole.options.$jazz.has(optionName)
+        ) {
+          return true;
+        }
+      }
+      return false;
+    },
+    [game],
+  );
+
+  const handleCustomizePress = useCallback(
+    (optionName: string) => {
+      navigation.navigate("HoleOverrides", { optionName });
+    },
+    [navigation],
   );
 
   const handleSaveName = useCallback(
@@ -245,6 +278,8 @@ export function GameOptionsList() {
                 option={option}
                 currentValue={getCurrentValue(option.name)}
                 onPress={() => handleGameOptionPress(option)}
+                onCustomizePress={() => handleCustomizePress(option.name)}
+                hasOverrides={getHasOverrides(option.name)}
               />
             ))}
           </>
