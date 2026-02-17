@@ -1,9 +1,15 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { MaybeLoaded } from "jazz-tools";
+import type { ID, MaybeLoaded } from "jazz-tools";
+import { useAccount } from "jazz-tools/react-native";
 import { useState } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { RoundToGame, type Round as RoundType } from "spicylib/schema";
+import {
+  type Player,
+  PlayerAccount,
+  RoundToGame,
+  type Round as RoundType,
+} from "spicylib/schema";
 import {
   calculateCourseHandicap,
   formatDate,
@@ -33,16 +39,24 @@ export function AddRoundToGame({ route, navigation }: Props) {
         $each: {
           name: true,
           handicap: true,
-          rounds: {
-            $each: {
-              start: true,
-              playerId: true,
-              handicapIndex: true,
+        },
+      },
+      rounds: true,
+    },
+  });
+  const me = useAccount(PlayerAccount, {
+    resolve: {
+      root: {
+        games: {
+          $each: {
+            rounds: {
+              $each: {
+                round: true,
+              },
             },
           },
         },
       },
-      rounds: true,
     },
   });
   const [isCreating, setIsCreating] = useState(false);
@@ -63,8 +77,14 @@ export function AddRoundToGame({ route, navigation }: Props) {
 
   const gameDate = game?.$isLoaded ? game.start : new Date();
 
-  const roundsForToday = player?.$isLoaded
-    ? getRoundsForDate(player, gameDate)
+  const allGames = me?.$isLoaded ? me.root?.games : undefined;
+  const roundsForToday = game?.$isLoaded
+    ? getRoundsForDate(
+        playerId as ID<Player>,
+        gameDate,
+        allGames,
+        game.$jazz.id,
+      )
     : [];
 
   if (!player) {

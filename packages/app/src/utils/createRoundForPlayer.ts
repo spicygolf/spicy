@@ -1,7 +1,7 @@
-import type { Group } from "jazz-tools";
+import type { Group, ID } from "jazz-tools";
 import {
   type Game,
-  ListOfRounds,
+  type ListOfGames,
   type Player,
   Round,
   RoundScores,
@@ -11,27 +11,53 @@ import { isSameDay } from "spicylib/utils";
 import { reportError } from "./reportError";
 
 /**
- * Gets rounds for a player that were created on a specific date.
- * Uses timezone-aware date comparison.
+ * Gets rounds for a player on a specific date by scanning the user's games.
  *
- * @param player - The player to check (must be loaded with rounds resolved)
+ * Searches across all loaded games for same-date games containing rounds
+ * with matching playerId. This avoids relying on player.rounds (which may
+ * be owned by a catalog group the app can't write to).
+ *
+ * @param playerId - The player's CoValue ID to match
  * @param date - The date to check for rounds
- * @returns Array of rounds created on that date, or empty array if none/not loaded
+ * @param games - The user's games list (me.root.games), loaded with rounds resolved
+ * @param excludeGameId - Optional game ID to exclude from search (the current game)
+ * @returns Array of rounds for this player on that date from other games
  */
-export function getRoundsForDate(player: Player, date: Date): Round[] {
-  if (!player.$isLoaded || !player.rounds?.$isLoaded) {
-    return [];
+export function getRoundsForDate(
+  playerId: ID<Player>,
+  date: Date,
+  games: ListOfGames | undefined,
+  excludeGameId?: ID<Game>,
+): Round[] {
+  if (!games?.$isLoaded) return [];
+
+  const rounds: Round[] = [];
+
+  for (const game of games) {
+    if (!game?.$isLoaded) continue;
+    if (excludeGameId && game.$jazz.id === excludeGameId) continue;
+    if (!isSameDay(game.start, date)) continue;
+    if (!game.rounds?.$isLoaded) continue;
+
+    for (const rtg of game.rounds) {
+      if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+      if (rtg.round.playerId !== playerId) continue;
+      if (!rtg.round.start) continue;
+      rounds.push(rtg.round);
+    }
   }
 
-  return player.rounds.filter((round): round is Round => {
-    if (!round?.$isLoaded || !round.start) return false;
-    return isSameDay(round.start, date);
-  });
+  return rounds;
 }
 
 /**
  * Creates a new round for a player and adds it to a game.
  * This is the shared logic used by both "Create New Round" button and auto-round creation.
+ *
+ * The round is linked to the game via RoundToGame (added to game.rounds).
+ * We intentionally do NOT add the round to player.rounds — catalog-imported
+ * players' rounds lists are owned by server-side groups that the app can't
+ * write to (the transaction is silently invalidated by Jazz permissions).
  *
  * @param game - The game to add the round to (must be loaded with rounds and players resolved)
  * @param player - The player to create the round for (must be in game.players)
@@ -53,7 +79,6 @@ export async function createRoundForPlayer(
     const gameDate = game.start;
     const roundGroup = game.rounds.$jazz.owner as Group;
 
-    // Create the new round
     const newRound = Round.create(
       {
         start: gameDate,
@@ -66,20 +91,9 @@ export async function createRoundForPlayer(
       { owner: roundGroup },
     );
 
-    // Add round to player's rounds list
-    const playerGroup = game.players.$jazz.owner as Group;
-    if (!player.$jazz.has("rounds") || !player.rounds?.$isLoaded) {
-      const roundsList = ListOfRounds.create([newRound], {
-        owner: playerGroup,
-      });
-      player.$jazz.set("rounds", roundsList);
-    } else {
-      player.rounds.$jazz.push(newRound);
-    }
-
-    // Create the RoundToGame edge and add to game
-    // Note: courseHandicap is not set here because the round doesn't have a tee yet.
-    // It will be calculated when the user selects a course/tee.
+    // Link round to game via RoundToGame edge.
+    // game.rounds is owned by the game's group (created by the current user),
+    // so this push always succeeds.
     const roundToGame = RoundToGame.create(
       {
         round: newRound,

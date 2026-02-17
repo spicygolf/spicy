@@ -1,7 +1,7 @@
 import type { Account } from "jazz-tools";
 import { Group } from "jazz-tools";
 import { err, ok, type Result } from "neverthrow";
-import { type Game, Handicap, ListOfRounds, Player } from "spicylib/schema";
+import { type Game, Handicap, type ListOfGames, Player } from "spicylib/schema";
 import { createRoundForPlayer, getRoundsForDate } from "./createRoundForPlayer";
 import {
   autoAssignPlayerToTeam,
@@ -31,6 +31,13 @@ export interface AddPlayerOptions {
    * defaults to true for better UX.
    */
   autoCreateRound?: boolean;
+
+  /**
+   * The user's games list (me.root.games). Required for detecting existing
+   * rounds on the same date across other games. When provided, enables
+   * the "Other Rounds Today" flow instead of always auto-creating.
+   */
+  allGames?: ListOfGames;
 }
 
 export interface AddPlayerResult {
@@ -183,14 +190,6 @@ export async function addPlayerToGameCore(
     });
   }
 
-  // Initialize rounds if needed (for players that don't have a rounds list yet)
-  if (!player.$jazz.has("rounds")) {
-    // Use the player's own group for the rounds list, not the game's group
-    const playerGroup = player.$jazz.owner;
-    const roundsList = ListOfRounds.create([], { owner: playerGroup });
-    player.$jazz.set("rounds", roundsList);
-  }
-
   // Check if player is already in the game
   const existingPlayer = game.players.find(
     (p) => p?.$isLoaded && p.$jazz.id === player.$jazz.id,
@@ -199,13 +198,6 @@ export async function addPlayerToGameCore(
   // Only add if not already in the game
   if (!existingPlayer) {
     game.players.$jazz.push(player);
-  } else {
-    // If player exists but doesn't have rounds, initialize it
-    if (existingPlayer.$isLoaded && !existingPlayer.$jazz.has("rounds")) {
-      const playerGroup = existingPlayer.$jazz.owner;
-      const roundsList = ListOfRounds.create([], { owner: playerGroup });
-      existingPlayer.$jazz.set("rounds", roundsList);
-    }
   }
 
   // Return the player from the game context to ensure we have the latest version
@@ -218,22 +210,26 @@ export async function addPlayerToGameCore(
   // Auto-create round if requested and player has no rounds for the game date
   let roundAutoCreated = false;
   if (options.autoCreateRound && game.rounds?.$isLoaded) {
-    // Ensure player has rounds loaded deeply enough to compare dates.
-    // rounds: { $each: true } loads each Round item so getRoundsForDate
-    // can access round.start for the isSameDay comparison.
-    const playerWithRounds = await finalPlayer.$jazz.ensureLoaded({
-      resolve: { rounds: { $each: true }, handicap: true },
-    });
-
-    const roundsForGameDate = getRoundsForDate(playerWithRounds, game.start);
+    // Check for existing rounds on the same date across all user games.
+    // This detects rounds from other games (not just player.rounds, which
+    // the app can't write to for catalog-imported players).
+    const roundsForGameDate = getRoundsForDate(
+      finalPlayer.$jazz.id,
+      game.start,
+      options.allGames,
+      game.$jazz.id, // exclude current game
+    );
 
     if (roundsForGameDate.length === 0) {
-      const newRound = await createRoundForPlayer(game, playerWithRounds);
+      const playerWithHandicap = await finalPlayer.$jazz.ensureLoaded({
+        resolve: { handicap: true },
+      });
+      const newRound = await createRoundForPlayer(game, playerWithHandicap);
       roundAutoCreated = newRound !== null;
 
       // Auto-apply existing course/tee from other players if available
       if (newRound) {
-        applyExistingCourseTeeToRound(game, newRound, playerWithRounds);
+        applyExistingCourseTeeToRound(game, newRound, playerWithHandicap);
       }
     }
   }
