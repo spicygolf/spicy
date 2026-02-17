@@ -1,8 +1,9 @@
+import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
-import { Button, Input, ModalHeader } from "@/ui";
+import { Button, Input, ModalHeader, Text } from "@/ui";
 
 interface TextOptionModalProps {
   visible: boolean;
@@ -10,6 +11,10 @@ interface TextOptionModalProps {
   currentValue: string | undefined;
   onSelect: (value: string) => void;
   onClose: () => void;
+  /** Navigate to per-hole customization */
+  onCustomize?: () => void;
+  /** Whether per-hole overrides are active for this option */
+  hasOverrides?: boolean;
 }
 
 export function TextOptionModal({
@@ -18,7 +23,10 @@ export function TextOptionModal({
   currentValue,
   onSelect,
   onClose,
+  onCustomize,
+  hasOverrides,
 }: TextOptionModalProps) {
+  const { theme } = useUnistyles();
   const value = currentValue ?? option.defaultValue;
   const [inputValue, setInputValue] = useState(value);
 
@@ -55,6 +63,33 @@ export function TextOptionModal({
               <Button label="Set" onPress={handleSubmit} />
             </View>
           </View>
+
+          {onCustomize && (
+            <Pressable
+              style={styles.customizeRow}
+              onPress={() => {
+                onClose();
+                onCustomize();
+              }}
+            >
+              <FontAwesome6
+                name="sliders"
+                iconStyle="solid"
+                size={14}
+                color={
+                  hasOverrides ? theme.colors.action : theme.colors.secondary
+                }
+              />
+              <Text
+                style={[
+                  styles.customizeText,
+                  hasOverrides && { color: theme.colors.action },
+                ]}
+              >
+                Customize per hole
+              </Text>
+            </Pressable>
+          )}
         </Pressable>
       </Pressable>
     </Modal>
@@ -82,5 +117,18 @@ const styles = StyleSheet.create((theme) => ({
   },
   buttonContainer: {
     alignSelf: "flex-end",
+  },
+  customizeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(0.75),
+    marginTop: theme.gap(2),
+    paddingTop: theme.gap(1.5),
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+  },
+  customizeText: {
+    fontSize: 14,
+    color: theme.colors.secondary,
   },
 }));

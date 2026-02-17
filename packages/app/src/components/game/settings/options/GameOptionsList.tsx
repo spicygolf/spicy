@@ -278,8 +278,6 @@ export function GameOptionsList() {
                 option={option}
                 currentValue={getCurrentValue(option.name)}
                 onPress={() => handleGameOptionPress(option)}
-                onCustomizePress={() => handleCustomizePress(option.name)}
-                hasOverrides={getHasOverrides(option.name)}
               />
             ))}
           </>
@@ -329,6 +327,8 @@ export function GameOptionsList() {
               currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
+              onCustomize={() => handleCustomizePress(selectedGameOption.name)}
+              hasOverrides={getHasOverrides(selectedGameOption.name)}
             />
           )}
           {selectedGameOption.valueType === "menu" && (
@@ -338,6 +338,8 @@ export function GameOptionsList() {
               currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
+              onCustomize={() => handleCustomizePress(selectedGameOption.name)}
+              hasOverrides={getHasOverrides(selectedGameOption.name)}
             />
           )}
           {selectedGameOption.valueType === "num" && (
@@ -347,6 +349,8 @@ export function GameOptionsList() {
               currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
+              onCustomize={() => handleCustomizePress(selectedGameOption.name)}
+              hasOverrides={getHasOverrides(selectedGameOption.name)}
             />
           )}
           {selectedGameOption.valueType === "text" && (
@@ -356,6 +360,8 @@ export function GameOptionsList() {
               currentValue={getCurrentValue(selectedGameOption.name)}
               onSelect={handleOptionSelect}
               onClose={handleCloseModal}
+              onCustomize={() => handleCustomizePress(selectedGameOption.name)}
+              hasOverrides={getHasOverrides(selectedGameOption.name)}
             />
           )}
         </>
