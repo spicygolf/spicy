@@ -197,7 +197,9 @@ export function HoleToolbar({
               onPress={(e) => e.stopPropagation()}
             >
               <ModalHeader
-                title={`Hole ${holeNumber ?? ""} Overrides`}
+                title={
+                  holeNumber ? `Hole ${holeNumber} Overrides` : "Overrides"
+                }
                 onClose={() => setShowOverridesModal(false)}
               />
               <View style={styles.overridesList}>

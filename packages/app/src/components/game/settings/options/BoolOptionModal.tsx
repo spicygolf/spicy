@@ -1,8 +1,8 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { Modal, Pressable, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
 import { ModalHeader, Text } from "@/ui";
+import { CustomizePerHoleRow } from "./CustomizePerHoleRow";
 
 interface BoolOptionModalProps {
   visible: boolean;
@@ -25,7 +25,6 @@ export function BoolOptionModal({
   onCustomize,
   hasOverrides,
 }: BoolOptionModalProps) {
-  const { theme } = useUnistyles();
   const value = currentValue ?? option.defaultValue;
 
   const options = [
@@ -74,30 +73,11 @@ export function BoolOptionModal({
           </View>
 
           {onCustomize && (
-            <Pressable
-              style={styles.customizeRow}
-              onPress={() => {
-                onClose();
-                onCustomize();
-              }}
-            >
-              <FontAwesome6
-                name="sliders"
-                iconStyle="solid"
-                size={14}
-                color={
-                  hasOverrides ? theme.colors.action : theme.colors.secondary
-                }
-              />
-              <Text
-                style={[
-                  styles.customizeText,
-                  hasOverrides && { color: theme.colors.action },
-                ]}
-              >
-                Customize per hole
-              </Text>
-            </Pressable>
+            <CustomizePerHoleRow
+              hasOverrides={hasOverrides}
+              onClose={onClose}
+              onCustomize={onCustomize}
+            />
           )}
         </Pressable>
       </Pressable>
@@ -144,18 +124,5 @@ const styles = StyleSheet.create((theme) => ({
   },
   optionLabelSelected: {
     color: theme.colors.action,
-  },
-  customizeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.gap(0.75),
-    marginTop: theme.gap(2),
-    paddingTop: theme.gap(1.5),
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-  customizeText: {
-    fontSize: 14,
-    color: theme.colors.secondary,
   },
 }));

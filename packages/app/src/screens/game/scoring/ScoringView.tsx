@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Game, GameHole, MultiplierOption, Team } from "spicylib/schema";
+import type {
+  Game,
+  GameHole,
+  GameOption,
+  MultiplierOption,
+  Team,
+} from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import {
@@ -588,11 +594,13 @@ export function ScoringView({
       if (!opts.$jazz.has(key)) continue;
       const opt = opts[key];
       if (!opt || opt.type !== "game") continue;
+      const gameOpt = opt as GameOption;
 
-      const val = opt.value ?? opt.defaultValue;
+      const val = gameOpt.value ?? gameOpt.defaultValue;
+      if (val === undefined) continue;
       overrides.push({
-        label: opt.disp,
-        value: formatOptionValue(opt, val),
+        label: gameOpt.disp,
+        value: formatOptionValue(gameOpt, val),
       });
     }
     return overrides;

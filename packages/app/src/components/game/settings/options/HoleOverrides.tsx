@@ -75,6 +75,16 @@ export function HoleOverrides({ route }: Props) {
     return map;
   }, [game, optionName, gameDefault]);
 
+  // Shared comparator: game default first, then numeric-aware alphabetical
+  const sortDefaultFirst = useCallback(
+    (a: string, b: string) => {
+      if (a === gameDefault) return -1;
+      if (b === gameDefault) return 1;
+      return a.localeCompare(b, undefined, { numeric: true });
+    },
+    [gameDefault],
+  );
+
   // Get the distinct values currently in use (default + any overrides)
   const distinctValues = useMemo(() => {
     if (!specOption || !gameDefault) return [];
@@ -95,14 +105,10 @@ export function HoleOverrides({ route }: Props) {
 
     // Sort: default first, then others
     const sorted = Array.from(values);
-    sorted.sort((a, b) => {
-      if (a === gameDefault) return -1;
-      if (b === gameDefault) return 1;
-      return a.localeCompare(b, undefined, { numeric: true });
-    });
+    sorted.sort(sortDefaultFirst);
 
     return sorted;
-  }, [specOption, gameDefault, holeValueMap]);
+  }, [specOption, gameDefault, holeValueMap, sortDefaultFirst]);
 
   // Get holes for a given value
   const getHolesForValue = useCallback(
@@ -148,6 +154,11 @@ export function HoleOverrides({ route }: Props) {
     [specOption],
   );
 
+  // Ephemeral: values added via "Add Value" only persist in React state.
+  // They disappear on navigation but reappear once holes are assigned to them
+  // (since assigned values surface through holeValueMap → distinctValues).
+  const [additionalValues, setAdditionalValues] = useState<string[]>([]);
+
   // "Add Value" for numeric options
   const [newValueInput, setNewValueInput] = useState("");
 
@@ -155,12 +166,8 @@ export function HoleOverrides({ route }: Props) {
     const trimmed = newValueInput.trim();
     if (!trimmed) return;
     const num = Number.parseFloat(trimmed);
-    if (Number.isNaN(num)) return;
+    if (Number.isNaN(num) || num <= 0) return;
 
-    // No need to write anything yet — the value section will appear
-    // once the user assigns holes to it. But we need to add it to distinct values.
-    // We'll add it by setting the first hole without an override to this value.
-    // Actually, just show it as an empty section — the user can tap holes into it.
     setAdditionalValues((prev) => {
       if (prev.includes(trimmed) || distinctValues.includes(trimmed))
         return prev;
@@ -169,19 +176,10 @@ export function HoleOverrides({ route }: Props) {
     setNewValueInput("");
   }, [newValueInput, distinctValues]);
 
-  // Ephemeral: values added via "Add Value" only persist in React state.
-  // They disappear on navigation but reappear once holes are assigned to them
-  // (since assigned values surface through holeValueMap → distinctValues).
-  const [additionalValues, setAdditionalValues] = useState<string[]>([]);
-
   const allValues = useMemo(() => {
     const merged = new Set([...distinctValues, ...additionalValues]);
-    return Array.from(merged).sort((a, b) => {
-      if (a === gameDefault) return -1;
-      if (b === gameDefault) return 1;
-      return a.localeCompare(b, undefined, { numeric: true });
-    });
-  }, [distinctValues, additionalValues, gameDefault]);
+    return Array.from(merged).sort(sortDefaultFirst);
+  }, [distinctValues, additionalValues, sortDefaultFirst]);
 
   if (!specOption || !gameDefault) {
     return (

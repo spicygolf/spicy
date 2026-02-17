@@ -144,7 +144,6 @@ export function GameOptionsList() {
   const getDisplayOverride = useCallback(
     (option: GameOption): string | undefined => {
       if (!game?.holes?.$isLoaded) return undefined;
-      if (!getHasOverrides(option.name)) return undefined;
 
       const gameDefault = getCurrentValue(option.name) ?? option.defaultValue;
       const values = new Set<string>();
@@ -173,7 +172,7 @@ export function GameOptionsList() {
         .map((v) => formatOptionValue(option, v))
         .join(" / ");
     },
-    [game, getHasOverrides, getCurrentValue],
+    [game, getCurrentValue],
   );
 
   const handleCustomizePress = useCallback(
