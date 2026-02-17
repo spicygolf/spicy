@@ -69,7 +69,13 @@ Update `.claude/progress/claude-progress.md`:
 
 ## Commit Strategy
 
-Commit after each completed step:
+**NEVER commit to main.** Create a feature branch before the first commit:
+
+```bash
+git checkout -b feat/<descriptive-name>
+```
+
+Then commit after each completed step:
 
 ```bash
 git add -A

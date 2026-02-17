@@ -68,7 +68,6 @@ export function GameTeamsList() {
   const { theme } = useUnistyles();
 
   // Get spec for useTeamsMode (working copy from game.spec)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Use game.$jazz.id to avoid recomputation on Jazz progressive loading
   const specs = useMemo(() => {
     if (!game?.$isLoaded || !game.spec?.$isLoaded) return [];
     return [game.spec];
@@ -119,7 +118,6 @@ export function GameTeamsList() {
 
   // Check if spec has fixed num_teams (e.g., Five Points = 2 teams)
   // Try spec first (working copy), fall back to specRef (catalog spec)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Use game.$jazz.id to avoid recomputation on Jazz progressive loading
   const specNumTeams = useMemo(() => {
     if (!game?.$isLoaded) return undefined;
 

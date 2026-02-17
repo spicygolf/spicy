@@ -1,5 +1,7 @@
 export * from "./useAddPlayerToGame";
 export * from "./useApi";
+export * from "./useAppLifecycleAnalytics";
+export * from "./useAppState";
 export * from "./useCatalogCourses";
 export * from "./useCatalogPlayers";
 export * from "./useCreateGame";
@@ -14,6 +16,7 @@ export * from "./useGetCountriesAndStates";
 export * from "./useGhinSearchPlayerQuery";
 export * from "./useHoleInitialization";
 export * from "./useHoleNavigation";
+export * from "./useJazzConnectionMonitor";
 export * from "./useJazzCredentials";
 export * from "./useOptionValue";
 export * from "./usePlayer";

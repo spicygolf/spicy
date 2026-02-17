@@ -50,7 +50,13 @@ if (!player.rounds) { ... }
 
 See `.claude/skills/jazz-patterns/README.md`
 
-### 3. Quality Checks - MANDATORY
+### 3. Never Commit to Main
+- **ALWAYS** create a feature branch before the first commit
+- Branch naming: `feat/<name>`, `fix/<name>`, `refactor/<name>`
+- All changes go through PRs — never push directly to main
+- If you find yourself on main, create a branch before committing
+
+### 4. Quality Checks - MANDATORY
 ```bash
 ./scripts/code-quality.sh
 ```

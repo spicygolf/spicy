@@ -358,7 +358,7 @@ export function GameOptionsList() {
   );
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((_theme) => ({
   container: {
     flex: 1,
   },
