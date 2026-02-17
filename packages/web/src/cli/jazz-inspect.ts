@@ -506,7 +506,7 @@ async function inspect(
       "tee", // has name, gender, holes - check before player
       "course", // has name, city, tees
       "game", // has start, players
-      "round", // has createdAt, playerId
+      "round", // has start, playerId
       "roundtogame", // has round, handicapIndex
       "spec", // has name, spec_type
       "player", // has name, gender (least specific with those fields)
@@ -557,7 +557,7 @@ function checkSchemaMatch(obj: unknown, type: SchemaType): boolean {
     case "game":
       return "start" in o && "players" in o;
     case "round":
-      return "createdAt" in o && "playerId" in o;
+      return "start" in o && "playerId" in o;
     case "roundtogame":
       return "round" in o && "handicapIndex" in o;
     case "course":

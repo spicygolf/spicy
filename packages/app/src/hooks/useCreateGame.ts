@@ -156,7 +156,7 @@ export function useCreateGame() {
         game,
         { player: me.root.player }, // Pass reference, not data
         worker?.account?.$isLoaded ? worker.account : undefined,
-        { autoCreateRound: true },
+        { autoCreateRound: true, allGames: me.root.games },
       );
 
       if (result.isErr()) {

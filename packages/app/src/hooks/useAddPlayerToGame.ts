@@ -1,5 +1,7 @@
+import { useAccount } from "jazz-tools/react-native";
 import { err, type Result } from "neverthrow";
 import type { Player } from "spicylib/schema";
+import { PlayerAccount } from "spicylib/schema";
 import {
   type AddPlayerError,
   type AddPlayerInput,
@@ -74,7 +76,6 @@ export function useAddPlayerToGame() {
         $each: {
           name: true,
           handicap: true,
-          rounds: true,
         },
       },
       rounds: {
@@ -82,6 +83,9 @@ export function useAddPlayerToGame() {
       },
       holes: { $each: { teams: { $each: { rounds: true } } } },
     },
+  });
+  const me = useAccount(PlayerAccount, {
+    resolve: { root: { games: { $each: true } } },
   });
   const worker = useJazzWorker();
 
@@ -116,12 +120,11 @@ export function useAddPlayerToGame() {
 
     // Add the player to the game
     // Note: addPlayerToGameCore handles auto-team-assignment in seamless mode
-    const result = await addPlayerToGameCore(
-      game,
-      input,
-      worker.account,
-      options,
-    );
+    const allGames = me?.$isLoaded ? me.root?.games : undefined;
+    const result = await addPlayerToGameCore(game, input, worker.account, {
+      ...options,
+      allGames,
+    });
 
     return result;
   };

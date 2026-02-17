@@ -12,12 +12,11 @@ import {
 import { Back } from "@/components/Back";
 import { RoundCourseTeeName } from "@/components/game/settings/RoundCourseTeeName";
 import { useGame } from "@/hooks";
+import { useRoundsForDate } from "@/hooks/useRoundsForDate";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Screen, Text } from "@/ui";
-import {
-  createRoundForPlayer,
-  getRoundsForDate,
-} from "@/utils/createRoundForPlayer";
+import { createRoundForPlayer } from "@/utils/createRoundForPlayer";
+import { reportError } from "@/utils/reportError";
 
 type Props = NativeStackScreenProps<
   GameSettingsStackParamList,
@@ -33,13 +32,6 @@ export function AddRoundToGame({ route, navigation }: Props) {
         $each: {
           name: true,
           handicap: true,
-          rounds: {
-            $each: {
-              createdAt: true,
-              playerId: true,
-              handicapIndex: true,
-            },
-          },
         },
       },
       rounds: true,
@@ -62,16 +54,19 @@ export function AddRoundToGame({ route, navigation }: Props) {
   })();
 
   const gameDate = game?.$isLoaded ? game.start : new Date();
+  const gameId = game?.$isLoaded ? game.$jazz.id : undefined;
 
-  const roundsForToday = player?.$isLoaded
-    ? getRoundsForDate(player, gameDate)
-    : [];
+  const { rounds: roundsForToday, loaded: roundsLoaded } = useRoundsForDate(
+    playerId,
+    gameDate,
+    gameId,
+  );
 
   if (!player) {
     return null;
   }
 
-  async function handleCreateNewRound() {
+  async function handleCreateNewRound(): Promise<void> {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded || !game.players?.$isLoaded)
       return;
 
@@ -93,7 +88,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
     navigation.goBack();
   }
 
-  async function addRoundToGame(round: RoundType) {
+  async function addRoundToGame(round: RoundType): Promise<void> {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded) return;
 
     const group = game.rounds.$jazz.owner;
@@ -114,7 +109,6 @@ export function AddRoundToGame({ route, navigation }: Props) {
           tee: loadedRound.tee,
           holesPlayed: "all18",
         });
-        // calculateCourseHandicap returns number | null, but we only want number | undefined
         courseHandicap = calculated !== null ? calculated : undefined;
       }
     }
@@ -133,8 +127,12 @@ export function AddRoundToGame({ route, navigation }: Props) {
     navigation.goBack();
   }
 
-  function handleSelectRound(round: RoundType) {
-    addRoundToGame(round);
+  function handleSelectRound(round: RoundType): void {
+    addRoundToGame(round).catch((e) =>
+      reportError(e instanceof Error ? e : new Error(String(e)), {
+        source: "AddRoundToGame.handleSelectRound",
+      }),
+    );
   }
 
   return (
@@ -152,7 +150,11 @@ export function AddRoundToGame({ route, navigation }: Props) {
         Game Date: {gameDate.toLocaleDateString()}
       </Text>
 
-      {roundsForToday.length === 0 ? (
+      {!roundsLoaded ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>Loading rounds...</Text>
+        </View>
+      ) : roundsForToday.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>
             No rounds found for {gameDate.toLocaleDateString()}
@@ -174,13 +176,9 @@ export function AddRoundToGame({ route, navigation }: Props) {
             data={roundsForToday}
             renderItem={({ item, index }) => {
               const roundTime =
-                item?.$isLoaded && item.createdAt
-                  ? formatTime(item.createdAt)
-                  : "";
+                item?.$isLoaded && item.start ? formatTime(item.start) : "";
               const roundDate =
-                item?.$isLoaded && item.createdAt
-                  ? formatDate(item.createdAt)
-                  : "";
+                item?.$isLoaded && item.start ? formatDate(item.start) : "";
               const isLastItem = index === roundsForToday.length - 1;
 
               return (

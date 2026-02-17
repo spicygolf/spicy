@@ -2314,7 +2314,7 @@ async function upsertRound(
   const round = await Round.upsertUnique({
     unique: legacyId,
     value: {
-      createdAt: new Date(roundData.date),
+      start: new Date(roundData.date),
       playerId,
       handicapIndex: edgeData.handicap_index,
       scores: scoresMap,

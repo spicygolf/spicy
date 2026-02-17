@@ -33,61 +33,83 @@ export const TeeOverrides = co.map({
 });
 export type TeeOverrides = co.loaded<typeof TeeOverrides>;
 
-export const Round = co.map({
-  createdAt: z.date(),
+export const Round = co
+  .map({
+    /**
+     * When the round was played. Mirrors `game.start` — updated if the
+     * game's tee-time date changes. For the immutable creation timestamp
+     * use `$jazz.createdAt`.
+     */
+    start: z.date(),
 
-  /**
-   * The ID of the `Player` who played this round.
-   */
-  playerId: z.string(),
+    /**
+     * The ID of the `Player` who played this round.
+     */
+    playerId: z.string(),
 
-  /**
-   *  A string representing the handicap index in decimal form.  Plus handicaps
-   *  include the "+" sign, ex: "+1.5".  This is the player's index as of the
-   *  date of the round, persisted here to maintain history and consistency of
-   *  game scoring.  It may be overridden by the `RoundToGame` edge.
-   */
-  handicapIndex: z.string(),
+    /**
+     *  A string representing the handicap index in decimal form.  Plus handicaps
+     *  include the "+" sign, ex: "+1.5".  This is the player's index as of the
+     *  date of the round, persisted here to maintain history and consistency of
+     *  game scoring.  It may be overridden by the `RoundToGame` edge.
+     */
+    handicapIndex: z.string(),
 
-  /**
-   * The course where this round was played.
-   * Embedded for offline access during scoring.
-   */
-  course: co.optional(Course),
+    /**
+     * The course where this round was played.
+     * Embedded for offline access during scoring.
+     */
+    course: co.optional(Course),
 
-  /**
-   * The tee played for this round.
-   * Embedded for offline access during scoring (hole pars, yardages, handicaps).
-   */
-  tee: co.optional(Tee),
+    /**
+     * The tee played for this round.
+     * Embedded for offline access during scoring (hole pars, yardages, handicaps).
+     */
+    tee: co.optional(Tee),
 
-  /**
-   * Scores for this round, keyed by hole number (1-indexed: "1"-"18")
-   * Flat structure for direct access: round.scores["5"].gross
-   */
-  scores: RoundScores,
+    /**
+     * Scores for this round, keyed by hole number (1-indexed: "1"-"18")
+     * Flat structure for direct access: round.scores["5"].gross
+     */
+    scores: RoundScores,
 
-  /**
-   * Optional history feed (lazy-loaded) tracking score changes
-   * Append-only log of all score modifications
-   */
-  history: co.optional(ScoreHistory),
+    /**
+     * Optional history feed (lazy-loaded) tracking score changes
+     * Append-only log of all score modifications
+     */
+    history: co.optional(ScoreHistory),
 
-  /**
-   * Legacy ID from ArangoDB v0.3 import (_key field).
-   * Used for idempotent imports and tracking migrated rounds.
-   */
-  legacyId: z.string().optional(),
+    /**
+     * Legacy ID from ArangoDB v0.3 import (_key field).
+     * Used for idempotent imports and tracking migrated rounds.
+     */
+    legacyId: z.string().optional(),
 
-  /**
-   * Tee data overrides for this round.
-   * Used when importing legacy games where tee configuration differs from current GHIN data.
-   * Takes precedence over embedded tee data.
-   */
-  teeOverrides: co.optional(TeeOverrides),
+    /**
+     * Tee data overrides for this round.
+     * Used when importing legacy games where tee configuration differs from current GHIN data.
+     * Takes precedence over embedded tee data.
+     */
+    teeOverrides: co.optional(TeeOverrides),
 
-  // posting = co.ref(Posting);
-});
+    /** Schema version for migrations. Omitted on v1 rounds (pre-rename). */
+    _v: z.number().optional(),
+
+    // posting = co.ref(Posting);
+  })
+  .withMigration((round) => {
+    // v1 → v2: rename createdAt → start
+    // Old rounds stored the play date under "createdAt". Read the raw ISO
+    // string and copy it to "start", then stamp the version so this runs once.
+    if (!round._v) {
+      const raw = round.$jazz.raw as { get(key: string): unknown };
+      const legacy = raw.get("createdAt") as string | undefined;
+      if (legacy) {
+        round.$jazz.set("start", new Date(legacy));
+      }
+      round.$jazz.set("_v", 2);
+    }
+  });
 export type Round = co.loaded<typeof Round>;
 
 /**
