@@ -16,6 +16,7 @@ import { useRoundsForDate } from "@/hooks/useRoundsForDate";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Screen, Text } from "@/ui";
 import { createRoundForPlayer } from "@/utils/createRoundForPlayer";
+import { reportError } from "@/utils/reportError";
 
 type Props = NativeStackScreenProps<
   GameSettingsStackParamList,
@@ -127,7 +128,11 @@ export function AddRoundToGame({ route, navigation }: Props) {
   }
 
   function handleSelectRound(round: RoundType): void {
-    addRoundToGame(round);
+    addRoundToGame(round).catch((e) =>
+      reportError(e instanceof Error ? e : new Error(String(e)), {
+        source: "AddRoundToGame.handleSelectRound",
+      }),
+    );
   }
 
   return (

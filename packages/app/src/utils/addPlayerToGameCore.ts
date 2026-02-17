@@ -33,9 +33,12 @@ export interface AddPlayerOptions {
   autoCreateRound?: boolean;
 
   /**
-   * The user's games list (me.root.games). Required for detecting existing
+   * The user's games list (me.root.games). Used for detecting existing
    * rounds on the same date across other games. When provided, enables
    * the "Other Rounds Today" flow instead of always auto-creating.
+   *
+   * When omitted, `getRoundsForDate` returns `[]` and `autoCreateRound`
+   * will always create a new round (no duplicate detection).
    */
   allGames?: ListOfGames;
 }

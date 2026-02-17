@@ -39,17 +39,19 @@ export function useRoundsForDate(
     let cancelled = false;
     setLoaded(false);
 
-    getRoundsForDate(
-      playerId,
-      new Date(gameDateMs),
-      allGames,
-      excludeGameId,
-    ).then((result) => {
-      if (!cancelled) {
-        setRounds(result);
-        setLoaded(true);
-      }
-    });
+    getRoundsForDate(playerId, new Date(gameDateMs), allGames, excludeGameId)
+      .then((result) => {
+        if (!cancelled) {
+          setRounds(result);
+          setLoaded(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRounds([]);
+          setLoaded(true);
+        }
+      });
 
     return () => {
       cancelled = true;
