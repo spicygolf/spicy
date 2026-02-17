@@ -203,10 +203,18 @@ export function GameOptionsList() {
       // same day. Without this, changing tee time from Feb 13 to Feb 14
       // leaves rounds stamped Feb 13, making them invisible to detection.
       if (oldStart && !isSameDay(oldStart, date) && game.rounds?.$isLoaded) {
+        let skipped = 0;
         for (const rtg of game.rounds) {
           if (rtg?.$isLoaded && rtg.round?.$isLoaded) {
             rtg.round.$jazz.set("start", date);
+          } else {
+            skipped++;
           }
+        }
+        if (__DEV__ && skipped > 0) {
+          console.warn(
+            `[handleSaveTeeTime] ${skipped} round(s) not loaded, start not updated`,
+          );
         }
       }
     },

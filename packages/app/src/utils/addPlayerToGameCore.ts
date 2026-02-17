@@ -259,14 +259,3 @@ export async function addPlayerToGameCore(
 
   return ok({ player: finalPlayer, roundAutoCreated });
 }
-
-// Legacy signature for backwards compatibility during migration
-// TODO: Remove after all callers are updated to use AddPlayerInput
-export async function addPlayerToGameCoreLegacy(
-  game: Game,
-  playerData: PlayerData,
-  workerAccount?: Account,
-  options: AddPlayerOptions = {},
-): Promise<Result<AddPlayerResult, AddPlayerError>> {
-  return addPlayerToGameCore(game, { playerData }, workerAccount, options);
-}

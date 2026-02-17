@@ -1,15 +1,9 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { ID, MaybeLoaded } from "jazz-tools";
-import { useAccount } from "jazz-tools/react-native";
-import { useEffect, useState } from "react";
+import type { MaybeLoaded } from "jazz-tools";
+import { useState } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import {
-  type Player,
-  PlayerAccount,
-  RoundToGame,
-  type Round as RoundType,
-} from "spicylib/schema";
+import { RoundToGame, type Round as RoundType } from "spicylib/schema";
 import {
   calculateCourseHandicap,
   formatDate,
@@ -18,12 +12,10 @@ import {
 import { Back } from "@/components/Back";
 import { RoundCourseTeeName } from "@/components/game/settings/RoundCourseTeeName";
 import { useGame } from "@/hooks";
+import { useRoundsForDate } from "@/hooks/useRoundsForDate";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Screen, Text } from "@/ui";
-import {
-  createRoundForPlayer,
-  getRoundsForDate,
-} from "@/utils/createRoundForPlayer";
+import { createRoundForPlayer } from "@/utils/createRoundForPlayer";
 
 type Props = NativeStackScreenProps<
   GameSettingsStackParamList,
@@ -44,12 +36,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
       rounds: true,
     },
   });
-  const me = useAccount(PlayerAccount, {
-    resolve: { root: { games: { $each: true } } },
-  });
   const [isCreating, setIsCreating] = useState(false);
-  const [roundsForToday, setRoundsForToday] = useState<RoundType[]>([]);
-  const [roundsLoaded, setRoundsLoaded] = useState(false);
 
   // Get the player from the game context - direct access (Jazz is reactive)
   const player = (() => {
@@ -66,30 +53,19 @@ export function AddRoundToGame({ route, navigation }: Props) {
   })();
 
   const gameDate = game?.$isLoaded ? game.start : new Date();
-  const allGames = me?.$isLoaded ? me.root?.games : undefined;
   const gameId = game?.$isLoaded ? game.$jazz.id : undefined;
 
-  useEffect(() => {
-    if (!gameId || !allGames?.$isLoaded) return;
-    let cancelled = false;
-    getRoundsForDate(playerId as ID<Player>, gameDate, allGames, gameId).then(
-      (rounds) => {
-        if (!cancelled) {
-          setRoundsForToday(rounds);
-          setRoundsLoaded(true);
-        }
-      },
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [playerId, gameDate, allGames, gameId]);
+  const { rounds: roundsForToday, loaded: roundsLoaded } = useRoundsForDate(
+    playerId,
+    gameDate,
+    gameId,
+  );
 
   if (!player) {
     return null;
   }
 
-  async function handleCreateNewRound() {
+  async function handleCreateNewRound(): Promise<void> {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded || !game.players?.$isLoaded)
       return;
 
@@ -111,7 +87,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
     navigation.goBack();
   }
 
-  async function addRoundToGame(round: RoundType) {
+  async function addRoundToGame(round: RoundType): Promise<void> {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded) return;
 
     const group = game.rounds.$jazz.owner;
@@ -132,7 +108,6 @@ export function AddRoundToGame({ route, navigation }: Props) {
           tee: loadedRound.tee,
           holesPlayed: "all18",
         });
-        // calculateCourseHandicap returns number | null, but we only want number | undefined
         courseHandicap = calculated !== null ? calculated : undefined;
       }
     }
@@ -151,7 +126,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
     navigation.goBack();
   }
 
-  function handleSelectRound(round: RoundType) {
+  function handleSelectRound(round: RoundType): void {
     addRoundToGame(round);
   }
 

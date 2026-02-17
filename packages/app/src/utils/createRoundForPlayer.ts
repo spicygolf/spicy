@@ -48,17 +48,22 @@ export async function getRoundsForDate(
   // Second pass: deep-load only same-date games' rounds
   const rounds: Round[] = [];
   for (const game of sameDateGames) {
-    const loaded = await game.$jazz.ensureLoaded({
-      resolve: { rounds: { $each: { round: true } } },
-    });
-    if (!loaded.rounds?.$isLoaded) continue;
+    try {
+      const loaded = await game.$jazz.ensureLoaded({
+        resolve: { rounds: { $each: { round: true } } },
+      });
+      if (!loaded.rounds?.$isLoaded) continue;
 
-    for (let i = 0; i < loaded.rounds.length; i++) {
-      const rtg = loaded.rounds[i];
-      if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
-      if (rtg.round.playerId !== playerId) continue;
-      if (!rtg.round.start) continue;
-      rounds.push(rtg.round);
+      for (let i = 0; i < loaded.rounds.length; i++) {
+        const rtg = loaded.rounds[i];
+        if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+        if (rtg.round.playerId !== playerId) continue;
+        if (!rtg.round.start) continue;
+        rounds.push(rtg.round);
+      }
+    } catch {
+      // Skip games whose rounds fail to load (permissions, corrupted data)
+      continue;
     }
   }
 

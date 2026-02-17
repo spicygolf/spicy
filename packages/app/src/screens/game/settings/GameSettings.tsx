@@ -3,7 +3,9 @@ import {
   type MaterialTopTabNavigationOptions,
 } from "@react-navigation/material-top-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import type { ID } from "jazz-tools";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import type { Player } from "spicylib/schema";
 import { GamePlayersList } from "@/components/game/settings/GamePlayersList";
 import { GameOptionsList } from "@/components/game/settings/options/GameOptionsList";
 import { HoleOverrides } from "@/components/game/settings/options/HoleOverrides";
@@ -21,7 +23,7 @@ import { Screen } from "@/ui";
 export type GameSettingsStackParamList = {
   GameSettingsTabs: undefined;
   AddPlayerNavigator: undefined;
-  AddRoundToGame: { playerId: string };
+  AddRoundToGame: { playerId: ID<Player> };
   SelectCourseNavigator: { playerId: string; roundId?: string };
   HandicapAdjustment: { playerId: string; roundToGameId?: string };
   ManualCourseHoles: {
