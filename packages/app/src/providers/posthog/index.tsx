@@ -88,25 +88,25 @@ export function PostHogIdentifier(): null {
   const posthog = usePostHog();
   const identifiedRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    if (!posthog || !me?.$isLoaded) return;
+  // Derive stable primitives so the effect doesn't re-run on every Jazz reactive update
+  const accountId = me?.$isLoaded ? me.$jazz.id : undefined;
+  const playerName =
+    me?.$isLoaded && me.root?.$isLoaded && me.root.player?.$isLoaded
+      ? me.root.player.name
+      : undefined;
 
-    const accountId = me.$jazz.id;
+  useEffect(() => {
+    if (!posthog || !accountId) return;
     if (identifiedRef.current === accountId) return;
 
     identifiedRef.current = accountId;
-
-    const playerName =
-      me.root?.$isLoaded && me.root.player?.$isLoaded
-        ? me.root.player.name
-        : undefined;
 
     posthog.identify(accountId, {
       ...(playerName && { name: playerName }),
       platform: Platform.OS,
       app_version: APP_VERSION,
     });
-  }, [me, posthog]);
+  }, [accountId, playerName, posthog]);
 
   return null;
 }

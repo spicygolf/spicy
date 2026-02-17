@@ -6,8 +6,6 @@ interface AppStateInfo {
   appState: AppStateStatus;
   /** Increments each time the app returns to 'active' from background/inactive */
   foregroundCounter: number;
-  /** Timestamp (ms) when the app last went to background, or null if currently active */
-  backgroundSince: number | null;
   /** Duration in seconds of the last background period, or null if never backgrounded */
   lastBackgroundDuration: number | null;
 }
@@ -17,10 +15,10 @@ interface AppStateInfo {
  *
  * Tracks app state transitions (active/background/inactive) and exposes:
  * - foregroundCounter: increments on each return to active
- * - backgroundSince: timestamp of when app entered background
  * - lastBackgroundDuration: how long the last background period lasted
  *
- * Emits no side effects — consumers decide what to do with the state.
+ * Uses a ref for previous state so the listener callback is stable and
+ * never closes over stale state from batched React updates.
  */
 export function useAppState(): AppStateInfo {
   const [appState, setAppState] = useState<AppStateStatus>(
@@ -31,10 +29,12 @@ export function useAppState(): AppStateInfo {
     number | null
   >(null);
   const backgroundSinceRef = useRef<number | null>(null);
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
   const handleAppStateChange = useCallback(
     (nextAppState: AppStateStatus): void => {
-      const prevState = appState;
+      const prevState = appStateRef.current;
+      appStateRef.current = nextAppState;
 
       if (nextAppState === "background" || nextAppState === "inactive") {
         if (backgroundSinceRef.current === null) {
@@ -56,7 +56,7 @@ export function useAppState(): AppStateInfo {
 
       setAppState(nextAppState);
     },
-    [appState],
+    [],
   );
 
   useEffect(() => {
@@ -70,7 +70,6 @@ export function useAppState(): AppStateInfo {
   return {
     appState,
     foregroundCounter,
-    backgroundSince: backgroundSinceRef.current,
     lastBackgroundDuration,
   };
 }

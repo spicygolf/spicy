@@ -12,6 +12,7 @@ import { linking } from "./linking";
 /** Extract the active route name from a potentially nested navigation state. */
 function getActiveRouteName(state: NavigationState): string | undefined {
   const route = state.routes[state.index];
+  if (!route) return undefined;
   if (route.state) {
     return getActiveRouteName(route.state as NavigationState);
   }

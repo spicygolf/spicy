@@ -12,6 +12,10 @@ import { useAppState } from "./useAppState";
  * - `app_foregrounded` — when app returns to active, with background duration
  *
  * Must be called inside both PostHogProvider and JazzAndAuth.
+ *
+ * Note: If PostHog hasn't initialised by the first real transition, that
+ * event is silently dropped. In practice PostHog loads before any user-visible
+ * state change occurs.
  */
 export function useAppLifecycleAnalytics(): void {
   const { appState, foregroundCounter, lastBackgroundDuration } = useAppState();

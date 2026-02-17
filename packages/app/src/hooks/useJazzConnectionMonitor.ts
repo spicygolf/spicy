@@ -14,6 +14,7 @@ import { APP_VERSION } from "@/constants/version";
  * Must be called inside both PostHogProvider and JazzAndAuth.
  */
 export function useJazzConnectionMonitor(): void {
+  // useSyncConnectionStatus returns a boolean (true = WebSocket connected)
   const connected = useSyncConnectionStatus();
   const posthog = usePostHog();
   const disconnectedAtRef = useRef<number | null>(null);
