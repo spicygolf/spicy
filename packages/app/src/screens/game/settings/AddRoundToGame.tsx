@@ -35,7 +35,7 @@ export function AddRoundToGame({ route, navigation }: Props) {
           handicap: true,
           rounds: {
             $each: {
-              createdAt: true,
+              start: true,
               playerId: true,
               handicapIndex: true,
             },
@@ -174,13 +174,9 @@ export function AddRoundToGame({ route, navigation }: Props) {
             data={roundsForToday}
             renderItem={({ item, index }) => {
               const roundTime =
-                item?.$isLoaded && item.createdAt
-                  ? formatTime(item.createdAt)
-                  : "";
+                item?.$isLoaded && item.start ? formatTime(item.start) : "";
               const roundDate =
-                item?.$isLoaded && item.createdAt
-                  ? formatDate(item.createdAt)
-                  : "";
+                item?.$isLoaded && item.start ? formatDate(item.start) : "";
               const isLastItem = index === roundsForToday.length - 1;
 
               return (

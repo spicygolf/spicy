@@ -218,9 +218,9 @@ export async function addPlayerToGameCore(
   // Auto-create round if requested and player has no rounds for the game date
   let roundAutoCreated = false;
   if (options.autoCreateRound && game.rounds?.$isLoaded) {
-    // Ensure player has rounds loaded deeply enough to compare dates
+    // Ensure player has rounds loaded deeply enough to compare dates.
     // rounds: { $each: true } loads each Round item so getRoundsForDate
-    // can access round.createdAt for the isSameDay comparison.
+    // can access round.start for the isSameDay comparison.
     const playerWithRounds = await finalPlayer.$jazz.ensureLoaded({
       resolve: { rounds: { $each: true }, handicap: true },
     });

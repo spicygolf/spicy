@@ -557,7 +557,7 @@ function checkSchemaMatch(obj: unknown, type: SchemaType): boolean {
     case "game":
       return "start" in o && "players" in o;
     case "round":
-      return "createdAt" in o && "playerId" in o;
+      return "start" in o && "playerId" in o;
     case "roundtogame":
       return "round" in o && "handicapIndex" in o;
     case "course":

@@ -25,7 +25,7 @@ export function getRoundsForDate(player: Player, date: Date): Round[] {
 
   return player.rounds.filter((round): round is Round => {
     if (!round?.$isLoaded) return false;
-    return isSameDay(round.createdAt, date);
+    return isSameDay(round.start, date);
   });
 }
 
@@ -56,7 +56,7 @@ export async function createRoundForPlayer(
     // Create the new round
     const newRound = Round.create(
       {
-        createdAt: gameDate,
+        start: gameDate,
         playerId: player.$jazz.id,
         handicapIndex: player.handicap?.$isLoaded
           ? player.handicap.display || "0.0"
@@ -66,9 +66,8 @@ export async function createRoundForPlayer(
       { owner: roundGroup },
     );
 
-    // Add round to player's rounds list using the player's own group,
-    // not the game's group, so the rounds list persists across games.
-    const playerGroup = player.$jazz.owner as Group;
+    // Add round to player's rounds list
+    const playerGroup = game.players.$jazz.owner as Group;
     if (!player.$jazz.has("rounds") || !player.rounds?.$isLoaded) {
       const roundsList = ListOfRounds.create([newRound], {
         owner: playerGroup,

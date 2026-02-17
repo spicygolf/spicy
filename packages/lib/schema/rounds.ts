@@ -34,7 +34,12 @@ export const TeeOverrides = co.map({
 export type TeeOverrides = co.loaded<typeof TeeOverrides>;
 
 export const Round = co.map({
-  createdAt: z.date(),
+  /**
+   * When the round was played. Mirrors `game.start` — updated if the
+   * game's tee-time date changes. For the immutable creation timestamp
+   * use `$jazz.createdAt`.
+   */
+  start: z.date(),
 
   /**
    * The ID of the `Player` who played this round.
