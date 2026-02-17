@@ -34,6 +34,7 @@ export function useCurrentHole(
   options: UseCurrentHoleOptions,
 ): GameHole | null {
   const resolveQuery = options.resolve || {
+    options: true, // Per-hole game option overrides (MapOfOptions)
     teams: {
       $each: {
         options: { $each: true }, // Load team options (junk, multipliers)
@@ -57,6 +58,9 @@ export function useCurrentHole(
           select: (hole) => {
             if (!hole.$isLoaded) return null;
             if (!hole.teams?.$isLoaded) return null;
+            // Wait for hole-level options if they exist
+            if (hole.$jazz.has("options") && !hole.options?.$isLoaded)
+              return null;
 
             for (const team of hole.teams as Iterable<
               (typeof hole.teams)[number]

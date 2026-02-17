@@ -28,6 +28,7 @@ const SCORING_RESOLVE = {
   specRef: { $each: { $each: true } }, // Catalog spec reference (fallback for legacy games)
   holes: {
     $each: {
+      options: true, // Per-hole game option overrides (MapOfOptions)
       teams: {
         $each: {
           options: { $each: true }, // Needed for inherited multiplier checking (pre_double)
