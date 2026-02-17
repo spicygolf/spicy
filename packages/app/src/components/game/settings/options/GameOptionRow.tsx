@@ -49,14 +49,6 @@ export function GameOptionRow({
         <Text style={styles.optionValueText}>
           {displayOverride ?? displayValue()}
         </Text>
-        {displayOverride && (
-          <FontAwesome6
-            name="sliders"
-            iconStyle="solid"
-            size={12}
-            color={theme.colors.action}
-          />
-        )}
         <FontAwesome6
           name="chevron-right"
           iconStyle="solid"
