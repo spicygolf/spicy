@@ -8,12 +8,15 @@ interface GameOptionRowProps {
   option: GameOption;
   currentValue: string | undefined;
   onPress: () => void;
+  /** Override the displayed value text (e.g. "8 / 16" for mixed per-hole values) */
+  displayOverride?: string;
 }
 
 export function GameOptionRow({
   option,
   currentValue,
   onPress,
+  displayOverride,
 }: GameOptionRowProps) {
   const { theme } = useUnistyles();
 
@@ -43,7 +46,9 @@ export function GameOptionRow({
     <Pressable style={styles.optionRow} onPress={onPress}>
       <Text style={styles.optionLabel}>{option.disp}</Text>
       <View style={styles.optionValue}>
-        <Text style={styles.optionValueText}>{displayValue()}</Text>
+        <Text style={styles.optionValueText}>
+          {displayOverride ?? displayValue()}
+        </Text>
         <FontAwesome6
           name="chevron-right"
           iconStyle="solid"

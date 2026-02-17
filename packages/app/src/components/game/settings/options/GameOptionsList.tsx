@@ -139,6 +139,54 @@ export function GameOptionsList() {
     [game],
   );
 
+  // Get a "val1 / val2" display string when per-hole overrides create mixed values
+  const getDisplayOverride = useCallback(
+    (option: GameOption): string | undefined => {
+      if (!game?.holes?.$isLoaded) return undefined;
+      if (!getHasOverrides(option.name)) return undefined;
+
+      const gameDefault = getCurrentValue(option.name) ?? option.defaultValue;
+      const values = new Set<string>();
+      values.add(gameDefault);
+
+      for (const hole of game.holes) {
+        if (!hole?.$isLoaded) continue;
+        if (
+          hole.$jazz.has("options") &&
+          hole.options?.$isLoaded &&
+          hole.options.$jazz.has(option.name)
+        ) {
+          const override = hole.options[option.name];
+          if (override && override.type === "game") {
+            const val =
+              (override as GameOption).value ??
+              (override as GameOption).defaultValue;
+            if (val !== undefined) values.add(val);
+          }
+        }
+      }
+
+      if (values.size <= 1) return undefined;
+
+      // Format each value for display
+      const formatVal = (v: string) => {
+        switch (option.valueType) {
+          case "bool":
+            return v === "true" || v === "1" ? "Yes" : "No";
+          case "menu": {
+            const choice = option.choices?.find((c) => c.name === v);
+            return choice ? choice.disp : v;
+          }
+          default:
+            return v;
+        }
+      };
+
+      return Array.from(values).map(formatVal).join(" / ");
+    },
+    [game, getHasOverrides, getCurrentValue],
+  );
+
   const handleCustomizePress = useCallback(
     (optionName: string) => {
       navigation.navigate("HoleOverrides", { optionName });
@@ -272,14 +320,22 @@ export function GameOptionsList() {
         {gameOptions.length > 0 && (
           <>
             <OptionSectionHeader title="Settings" />
-            {gameOptions.map((option) => (
-              <GameOptionRow
-                key={option.name}
-                option={option}
-                currentValue={getCurrentValue(option.name)}
-                onPress={() => handleGameOptionPress(option)}
-              />
-            ))}
+            {gameOptions.map((option) => {
+              const displayOverride = getDisplayOverride(option);
+              return (
+                <GameOptionRow
+                  key={option.name}
+                  option={option}
+                  currentValue={getCurrentValue(option.name)}
+                  onPress={
+                    displayOverride
+                      ? () => handleCustomizePress(option.name)
+                      : () => handleGameOptionPress(option)
+                  }
+                  displayOverride={displayOverride}
+                />
+              );
+            })}
           </>
         )}
 
