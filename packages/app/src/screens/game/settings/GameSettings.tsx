@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { GamePlayersList } from "@/components/game/settings/GamePlayersList";
 import { GameOptionsList } from "@/components/game/settings/options/GameOptionsList";
+import { HoleOverrides } from "@/components/game/settings/options/HoleOverrides";
 import { GameTeamsList } from "@/components/game/settings/teams";
 import { type SettingsTab, useGameIdContext } from "@/contexts/GameContext";
 import { GhinCourseSearchProvider } from "@/contexts/GhinCourseSearchContext";
@@ -35,6 +36,7 @@ export type GameSettingsStackParamList = {
     slopeRating: number;
     isEditMode?: boolean;
   };
+  HoleOverrides: { optionName: string };
 };
 
 // Tab navigation for the main settings views
@@ -142,6 +144,7 @@ export function GameSettings() {
       </Stack.Screen>
       <Stack.Screen name="HandicapAdjustment" component={HandicapAdjustment} />
       <Stack.Screen name="ManualCourseHoles" component={ManualCourseHoles} />
+      <Stack.Screen name="HoleOverrides" component={HoleOverrides} />
     </Stack.Navigator>
   );
 }
