@@ -213,7 +213,7 @@ export async function addPlayerToGameCore(
     // Check for existing rounds on the same date across all user games.
     // This detects rounds from other games (not just player.rounds, which
     // the app can't write to for catalog-imported players).
-    const roundsForGameDate = getRoundsForDate(
+    const roundsForGameDate = await getRoundsForDate(
       finalPlayer.$jazz.id,
       game.start,
       options.allGames,

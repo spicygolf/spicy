@@ -23,11 +23,7 @@ export function useCreateGame() {
         player: {
           handicap: true,
         },
-        games: {
-          $each: {
-            rounds: { $each: { round: true } },
-          },
-        },
+        games: { $each: true },
       },
     },
   });

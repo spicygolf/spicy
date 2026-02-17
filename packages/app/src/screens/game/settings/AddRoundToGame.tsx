@@ -1,7 +1,7 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { ID, MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
@@ -45,21 +45,11 @@ export function AddRoundToGame({ route, navigation }: Props) {
     },
   });
   const me = useAccount(PlayerAccount, {
-    resolve: {
-      root: {
-        games: {
-          $each: {
-            rounds: {
-              $each: {
-                round: true,
-              },
-            },
-          },
-        },
-      },
-    },
+    resolve: { root: { games: { $each: true } } },
   });
   const [isCreating, setIsCreating] = useState(false);
+  const [roundsForToday, setRoundsForToday] = useState<RoundType[]>([]);
+  const [roundsLoaded, setRoundsLoaded] = useState(false);
 
   // Get the player from the game context - direct access (Jazz is reactive)
   const player = (() => {
@@ -76,16 +66,24 @@ export function AddRoundToGame({ route, navigation }: Props) {
   })();
 
   const gameDate = game?.$isLoaded ? game.start : new Date();
-
   const allGames = me?.$isLoaded ? me.root?.games : undefined;
-  const roundsForToday = game?.$isLoaded
-    ? getRoundsForDate(
-        playerId as ID<Player>,
-        gameDate,
-        allGames,
-        game.$jazz.id,
-      )
-    : [];
+  const gameId = game?.$isLoaded ? game.$jazz.id : undefined;
+
+  useEffect(() => {
+    if (!gameId || !allGames?.$isLoaded) return;
+    let cancelled = false;
+    getRoundsForDate(playerId as ID<Player>, gameDate, allGames, gameId).then(
+      (rounds) => {
+        if (!cancelled) {
+          setRoundsForToday(rounds);
+          setRoundsLoaded(true);
+        }
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [playerId, gameDate, allGames, gameId]);
 
   if (!player) {
     return null;
@@ -172,7 +170,11 @@ export function AddRoundToGame({ route, navigation }: Props) {
         Game Date: {gameDate.toLocaleDateString()}
       </Text>
 
-      {roundsForToday.length === 0 ? (
+      {!roundsLoaded ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>Loading rounds...</Text>
+        </View>
+      ) : roundsForToday.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>
             No rounds found for {gameDate.toLocaleDateString()}

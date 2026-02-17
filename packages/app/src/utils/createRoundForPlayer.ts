@@ -17,29 +17,44 @@ import { reportError } from "./reportError";
  * with matching playerId. This avoids relying on player.rounds (which may
  * be owned by a catalog group the app can't write to).
  *
+ * Only same-date games are deep-loaded (rounds → round refs), keeping
+ * the cost proportional to concurrent games (typically 1-2), not total games.
+ *
  * @param playerId - The player's CoValue ID to match
  * @param date - The date to check for rounds
- * @param games - The user's games list (me.root.games), loaded with rounds resolved
+ * @param games - The user's games list (me.root.games), shallowly loaded
  * @param excludeGameId - Optional game ID to exclude from search (the current game)
  * @returns Array of rounds for this player on that date from other games
  */
-export function getRoundsForDate(
+export async function getRoundsForDate(
   playerId: ID<Player>,
   date: Date,
   games: ListOfGames | undefined,
   excludeGameId?: ID<Game>,
-): Round[] {
+): Promise<Round[]> {
   if (!games?.$isLoaded) return [];
 
-  const rounds: Round[] = [];
-
+  // First pass: find same-date games (cheap — only checks game.start)
+  const sameDateGames: Game[] = [];
   for (const game of games) {
     if (!game?.$isLoaded) continue;
     if (excludeGameId && game.$jazz.id === excludeGameId) continue;
     if (!isSameDay(game.start, date)) continue;
-    if (!game.rounds?.$isLoaded) continue;
+    sameDateGames.push(game);
+  }
 
-    for (const rtg of game.rounds) {
+  if (sameDateGames.length === 0) return [];
+
+  // Second pass: deep-load only same-date games' rounds
+  const rounds: Round[] = [];
+  for (const game of sameDateGames) {
+    const loaded = await game.$jazz.ensureLoaded({
+      resolve: { rounds: { $each: { round: true } } },
+    });
+    if (!loaded.rounds?.$isLoaded) continue;
+
+    for (let i = 0; i < loaded.rounds.length; i++) {
+      const rtg = loaded.rounds[i];
       if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
       if (rtg.round.playerId !== playerId) continue;
       if (!rtg.round.start) continue;

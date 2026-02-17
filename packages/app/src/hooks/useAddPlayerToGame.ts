@@ -85,15 +85,7 @@ export function useAddPlayerToGame() {
     },
   });
   const me = useAccount(PlayerAccount, {
-    resolve: {
-      root: {
-        games: {
-          $each: {
-            rounds: { $each: { round: true } },
-          },
-        },
-      },
-    },
+    resolve: { root: { games: { $each: true } } },
   });
   const worker = useJazzWorker();
 
