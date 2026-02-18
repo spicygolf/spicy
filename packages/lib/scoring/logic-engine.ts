@@ -329,30 +329,6 @@ function existingPreMultiplierTotal(
 }
 
 /**
- * Get the total of pre-press multipliers for a team on the current hole.
- *
- * This counts pre_double and re_pre multipliers (rest_of_nine scope presses),
- * NOT other multipliers like double, double_back, or earned multipliers.
- *
- * Used for 12x availability: 3 pre_doubles = 2*2*2 = 8, which unlocks 12x.
- * Also counts re_pre, which carries front-nine pre_double total to the back nine.
- *
- * @param team - The team to check
- * @returns Product of pre-press multipliers (e.g., 8 if re_pre(4) + pre_double(2))
- */
-export function getPreDoubleTotal(team: TeamHoleResult | null): number {
-  if (!team) return 1;
-
-  let total = 1;
-  for (const mult of team.multipliers) {
-    if (mult.name === "pre_double" || mult.name === "re_pre") {
-      total *= mult.value;
-    }
-  }
-  return total;
-}
-
-/**
  * Get the total of pre-press multipliers for all teams on a hole.
  *
  * Pre-press multipliers are hole-wide - all teams' presses combine.

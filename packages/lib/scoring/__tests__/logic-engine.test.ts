@@ -614,8 +614,8 @@ describe("evaluateLogic - preDoubleTotal", () => {
     expect(result).toBe(true);
   });
 
-  it("includes re_pre multipliers in total (re_pre(4) + pre_double(2) = 8)", () => {
-    // Back nine scenario: re_pre carries 4x from front nine, plus a new pre_double = 8x
+  it("includes re_pre multipliers in total (re_pre(4) * pre_double(2) = 8)", () => {
+    // Back nine scenario: re_pre carries 4x from front nine, times a new pre_double = 8x
     const team1 = createMockTeamResult({
       teamId: "1",
       multipliers: [
@@ -642,6 +642,37 @@ describe("evaluateLogic - preDoubleTotal", () => {
     });
 
     // re_pre(4) * pre_double(2) = 8, which should unlock 12x
+    const result = evaluateLogic(
+      "{'>=': [{'preDoubleTotal': []}, 8]}",
+      logicCtx,
+    );
+    expect(result).toBe(true);
+  });
+
+  it("combines re_pre and pre_double across teams (Team1 re_pre(4) * Team2 pre_double(2) = 8)", () => {
+    const team1 = createMockTeamResult({
+      teamId: "1",
+      multipliers: [{ name: "re_pre", value: 4 }],
+    });
+    const team2 = createMockTeamResult({
+      teamId: "2",
+      multipliers: [{ name: "pre_double", value: 2 }],
+    });
+    const holeResult: HoleResult = {
+      hole: "14",
+      teams: { "1": team1, "2": team2 },
+      junk: [],
+      multipliers: [],
+      holeMultiplier: 1,
+      points: 0,
+    };
+    const logicCtx = createLogicContext({
+      holeResult,
+      team: team1,
+      teams: [team1, team2],
+    });
+
+    // re_pre(4) from team1 * pre_double(2) from team2 = 8
     const result = evaluateLogic(
       "{'>=': [{'preDoubleTotal': []}, 8]}",
       logicCtx,
