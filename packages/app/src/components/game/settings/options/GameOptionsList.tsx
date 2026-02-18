@@ -35,6 +35,7 @@ export function GameOptionsList() {
 
   const { game } = useGame(undefined, {
     resolve: {
+      start: true,
       spec: { $each: true },
       specRef: { $each: true },
       scope: { teamsConfig: true },
