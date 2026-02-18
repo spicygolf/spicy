@@ -647,7 +647,13 @@ describe("evaluateLogic - preDoubleTotal", () => {
       teams: [team1, team2],
     });
 
-    // re_pre(4) * pre_double(2) = 8, which should unlock 12x
+    // re_pre(4) * pre_double(2) = exactly 8, which should unlock 12x
+    const exactResult = evaluateLogic(
+      "{'==': [{'preDoubleTotal': []}, 8]}",
+      logicCtx,
+    );
+    expect(exactResult).toBe(true);
+
     const result = evaluateLogic(
       "{'>=': [{'preDoubleTotal': []}, 8]}",
       logicCtx,
@@ -680,7 +686,13 @@ describe("evaluateLogic - preDoubleTotal", () => {
       teams: [team1, team2],
     });
 
-    // re_pre(4) from team1 * pre_double(2) from team2 = 8
+    // re_pre(4) from team1 * pre_double(2) from team2 = exactly 8
+    const exactResult = evaluateLogic(
+      "{'==': [{'preDoubleTotal': []}, 8]}",
+      logicCtx,
+    );
+    expect(exactResult).toBe(true);
+
     const result = evaluateLogic(
       "{'>=': [{'preDoubleTotal': []}, 8]}",
       logicCtx,
