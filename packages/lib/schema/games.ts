@@ -52,6 +52,13 @@ export const Game = co.map({
   rounds: ListOfRoundToGames,
 
   /**
+   * Timestamp when the user dismissed the stale-handicap check for this game.
+   * Suppresses the modal until a player's handicap revDate becomes newer than
+   * this timestamp (indicating fresh data arrived after the dismiss).
+   */
+  handicapCheckDismissedAt: z.date().optional(),
+
+  /**
    * Legacy ID from ArangoDB v0.3 import (_key field).
    * Used for idempotent imports and tracking migrated games.
    */

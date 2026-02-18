@@ -1,5 +1,5 @@
 import type { MaybeLoaded } from "jazz-tools";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import type { ListOfPlayers } from "spicylib/schema";
 
 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -12,12 +12,6 @@ export interface StalePlayer {
   revDate: Date | undefined;
 }
 
-interface UseStaleHandicapCheckResult {
-  stalePlayers: StalePlayer[];
-  dismissPlayer: (playerId: string) => void;
-  dismissAll: () => void;
-}
-
 /**
  * Checks if any players in a game have stale (outdated) handicap data.
  *
@@ -28,17 +22,15 @@ interface UseStaleHandicapCheckResult {
  * Only players with `handicap.source === "ghin"` and a `ghinId` are checked,
  * since manual handicaps are never stale and ghinId is needed for refresh.
  *
- * Dismissed players are tracked in session-scoped state so they are not
- * flagged again until the app is restarted.
+ * The check is suppressed when `dismissedAt` is set and no player's revDate
+ * is newer than the dismiss timestamp (meaning no fresh data has arrived
+ * since the user last dismissed).
  */
 export function useStaleHandicapCheck(
   players: MaybeLoaded<ListOfPlayers> | null | undefined,
-): UseStaleHandicapCheckResult {
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(
-    () => new Set(),
-  );
-
-  const stalePlayers = useMemo((): StalePlayer[] => {
+  dismissedAt: Date | undefined,
+): StalePlayer[] {
+  return useMemo((): StalePlayer[] => {
     if (!players?.$isLoaded) return [];
 
     const stale: StalePlayer[] = [];
@@ -56,11 +48,6 @@ export function useStaleHandicapCheck(
       const ghinId = player.ghinId;
       if (!ghinId) continue;
 
-      const playerId = player.$jazz.id;
-
-      // Skip dismissed players
-      if (dismissedIds.has(playerId)) continue;
-
       const revDate = player.handicap.revDate
         ? new Date(player.handicap.revDate)
         : undefined;
@@ -70,7 +57,7 @@ export function useStaleHandicapCheck(
 
       if (isStale) {
         stale.push({
-          playerId,
+          playerId: player.$jazz.id,
           playerName: player.name,
           ghinId,
           currentDisplay: player.handicap.display,
@@ -79,31 +66,15 @@ export function useStaleHandicapCheck(
       }
     }
 
+    // If user already dismissed and no handicap data has been refreshed since,
+    // suppress the stale list so the modal doesn't reappear.
+    if (dismissedAt && stale.length > 0) {
+      const anyNewerThanDismiss = stale.some(
+        (sp) => sp.revDate && sp.revDate.getTime() > dismissedAt.getTime(),
+      );
+      if (!anyNewerThanDismiss) return [];
+    }
+
     return stale;
-  }, [players, dismissedIds]);
-
-  // Keep a ref so dismissAll always reads the latest list without
-  // needing stalePlayers in its dependency array (avoids stale closure).
-  const stalePlayersRef = useRef(stalePlayers);
-  stalePlayersRef.current = stalePlayers;
-
-  const dismissPlayer = useCallback((playerId: string): void => {
-    setDismissedIds((prev) => {
-      const next = new Set(prev);
-      next.add(playerId);
-      return next;
-    });
-  }, []);
-
-  const dismissAll = useCallback((): void => {
-    setDismissedIds((prev) => {
-      const next = new Set(prev);
-      for (const sp of stalePlayersRef.current) {
-        next.add(sp.playerId);
-      }
-      return next;
-    });
-  }, []);
-
-  return { stalePlayers, dismissPlayer, dismissAll };
+  }, [players, dismissedAt]);
 }
