@@ -329,46 +329,26 @@ function existingPreMultiplierTotal(
 }
 
 /**
- * Get the total of pre_double multipliers for a team on the current hole.
+ * Get the total of pre-press multipliers for all teams on a hole.
  *
- * This counts only pre_double multipliers (rest_of_nine scope presses),
- * NOT other multipliers like double, double_back, or earned multipliers.
- *
- * Used for 12x availability: 3 pre_doubles = 2*2*2 = 8, which unlocks 12x.
- *
- * @param team - The team to check
- * @returns Product of pre_double multipliers (e.g., 8 if 3 pre_doubles)
- */
-export function getPreDoubleTotal(team: TeamHoleResult | null): number {
-  if (!team) return 1;
-
-  let total = 1;
-  for (const mult of team.multipliers) {
-    if (mult.name === "pre_double") {
-      total *= mult.value;
-    }
-  }
-  return total;
-}
-
-/**
- * Get the total of pre_double multipliers for all teams on a hole.
- *
- * Pre_double is a hole-wide multiplier - all teams' pre_doubles combine.
+ * Pre-press multipliers are hole-wide - all teams' presses combine.
  * When Team A presses on Hole 1 and Team B presses on Hole 2,
  * both holes are 4x (2 * 2) for everyone.
  *
+ * Counts both pre_double and re_pre (which carries front-nine presses
+ * to the back nine).
+ *
  * @param holeResult - The hole result containing all teams
- * @returns Product of ALL pre_double multipliers from ALL teams (e.g., 8 if 3 total pre_doubles)
+ * @returns Product of ALL pre-press multipliers from ALL teams (e.g., 8 if re_pre(4) + pre_double(2))
  */
 export function getHolePreDoubleTotal(holeResult: HoleResult | null): number {
   if (!holeResult) return 1;
 
-  // Collect all pre_double multipliers from all teams
+  // Collect all pre-press multipliers from all teams
   let total = 1;
   for (const team of Object.values(holeResult.teams)) {
     for (const mult of team.multipliers) {
-      if (mult.name === "pre_double") {
+      if (mult.name === "pre_double" || mult.name === "re_pre") {
         total *= mult.value;
       }
     }

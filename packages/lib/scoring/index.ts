@@ -24,7 +24,6 @@ export {
   getHolePreDoubleTotal,
   getHoleTeeMultiplierTotal,
   getHoleTeeMultiplierTotalWithOverride,
-  getPreDoubleTotal,
   getTeeMultiplierTotal,
   isSimpleRankCheck,
 } from "./logic-engine";
