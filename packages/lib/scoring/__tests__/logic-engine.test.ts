@@ -475,6 +475,8 @@ function createHoleResultWithTeam(
   const team = createMockTeamResult(teamOverrides);
   return {
     hole: "1",
+    holeInfo: { hole: "1", par: 4, allocation: 1, yards: 400 },
+    players: {},
     teams: { [team.teamId]: team },
     junk: [],
     multipliers: [],
@@ -594,6 +596,8 @@ describe("evaluateLogic - preDoubleTotal", () => {
     });
     const holeResult: HoleResult = {
       hole: "4",
+      holeInfo: { hole: "4", par: 4, allocation: 4, yards: 400 },
+      players: {},
       teams: { "1": team1, "2": team2 },
       junk: [],
       multipliers: [],
@@ -629,6 +633,8 @@ describe("evaluateLogic - preDoubleTotal", () => {
     });
     const holeResult: HoleResult = {
       hole: "18",
+      holeInfo: { hole: "18", par: 4, allocation: 18, yards: 400 },
+      players: {},
       teams: { "1": team1, "2": team2 },
       junk: [],
       multipliers: [],
@@ -660,6 +666,8 @@ describe("evaluateLogic - preDoubleTotal", () => {
     });
     const holeResult: HoleResult = {
       hole: "14",
+      holeInfo: { hole: "14", par: 4, allocation: 14, yards: 400 },
+      players: {},
       teams: { "1": team1, "2": team2 },
       junk: [],
       multipliers: [],
@@ -687,6 +695,8 @@ describe("evaluateLogic - preDoubleTotal", () => {
     });
     const holeResult: HoleResult = {
       hole: "12",
+      holeInfo: { hole: "12", par: 4, allocation: 12, yards: 400 },
+      players: {},
       teams: { "1": team1 },
       junk: [],
       multipliers: [],
@@ -704,6 +714,13 @@ describe("evaluateLogic - preDoubleTotal", () => {
       logicCtx,
     );
     expect(result).toBe(true);
+
+    // re_pre(4) alone should NOT unlock 12x (needs >= 8)
+    const result12x = evaluateLogic(
+      "{'>=': [{'preDoubleTotal': []}, 8]}",
+      logicCtx,
+    );
+    expect(result12x).toBe(false);
   });
 });
 
