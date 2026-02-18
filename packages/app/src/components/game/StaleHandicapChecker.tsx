@@ -30,9 +30,7 @@ export function StaleHandicapChecker({ gameId }: StaleHandicapCheckerProps) {
   });
 
   const dismissedAt = game?.$isLoaded
-    ? game.handicapCheckDismissedAt
-      ? new Date(game.handicapCheckDismissedAt)
-      : undefined
+    ? (game.handicapCheckDismissedAt ?? undefined)
     : undefined;
 
   const stalePlayers = useStaleHandicapCheck(
@@ -44,10 +42,14 @@ export function StaleHandicapChecker({ gameId }: StaleHandicapCheckerProps) {
   const shownRef = useRef(false);
 
   // Show the modal once when stale players are first detected.
+  // Reset the flag when stalePlayers empties (e.g. after dismiss) so the
+  // modal can re-appear if fresh data later makes players stale again.
   useEffect(() => {
     if (stalePlayers.length > 0 && !shownRef.current) {
       shownRef.current = true;
       setShowModal(true);
+    } else if (stalePlayers.length === 0) {
+      shownRef.current = false;
     }
   }, [stalePlayers]);
 
