@@ -98,7 +98,11 @@ export function GameListItem({ game }: { game: Game | null | undefined }) {
         <Text style={styles.gameName}>{loadedGame.name}</Text>
         <Text style={styles.gameDateTime}>
           {loadedGame.start.toLocaleDateString()} -{" "}
-          {loadedGame.start.toLocaleTimeString()}
+          {loadedGame.start.toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })}
         </Text>
         <GameCourseTeeDisplay rounds={loadedGame.rounds} />
         {playerNames && <Text style={styles.playerNames}>{playerNames}</Text>}
