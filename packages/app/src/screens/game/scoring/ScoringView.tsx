@@ -9,8 +9,13 @@ import type {
   Team,
 } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
-import type { Scoreboard, ScoringContext } from "spicylib/scoring";
+import type {
+  InvalidationResult,
+  Scoreboard,
+  ScoringContext,
+} from "spicylib/scoring";
 import {
+  detectInvalidations,
   getHoleTeeMultiplierTotalWithOverride,
   getTeamHolePoints,
   getTeamRunningScore,
@@ -30,6 +35,7 @@ import {
   HoleHeader,
   type HoleOptionOverride,
   HoleToolbar,
+  InvalidationModal,
   PlayerScoreRow,
   TeamGroup,
   TeeFlipConfirmModal,
@@ -40,6 +46,7 @@ import { formatOptionValue } from "@/components/game/settings/options/formatOpti
 import type { HoleInfo } from "@/hooks";
 import { useOptionValue } from "@/hooks/useOptionValue";
 import {
+  applyInvalidationRemovals,
   getAllInheritedMultipliers,
   getCalculatedPlayerJunkOptions,
   getCalculatedTeamJunkOptions,
@@ -446,6 +453,12 @@ function removeTeeFlipOption(
   }
 }
 
+interface UndoSnapshot {
+  roundToGameId: string;
+  holeNum: string;
+  prevGross: number | null;
+}
+
 export function ScoringView({
   game,
   holeInfo,
@@ -784,6 +797,119 @@ export function ScoringView({
     );
   };
 
+  // --- Retroactive Edit Invalidation ---
+  // Detects invalidated multipliers and tee flips after a score edit on an earlier hole.
+  // Shows a modal with three options: Remove, Keep, or Undo Edit.
+
+  const [pendingInvalidationHole, setPendingInvalidationHole] = useState<
+    string | null
+  >(null);
+  const [invalidationResult, setInvalidationResult] =
+    useState<InvalidationResult | null>(null);
+  const [undoSnapshot, setUndoSnapshot] = useState<UndoSnapshot | null>(null);
+
+  // Wrap onScoreChange to capture undo snapshot and trigger invalidation check
+  const handleScoreChangeWithInvalidation = useCallback(
+    (roundToGameId: string, newGross: number) => {
+      // Capture previous gross score for undo
+      if (game?.rounds?.$isLoaded) {
+        const rtg = game.rounds.find(
+          (r) => r?.$isLoaded && r.$jazz.id === roundToGameId,
+        );
+        if (rtg?.$isLoaded && rtg.round?.$isLoaded) {
+          const prevGross = getGrossScore(rtg.round, currentHoleNumber);
+          setUndoSnapshot({
+            roundToGameId,
+            holeNum: currentHoleNumber,
+            prevGross,
+          });
+        }
+      }
+
+      onScoreChange(roundToGameId, newGross);
+      setPendingInvalidationHole(currentHoleNumber);
+    },
+    [onScoreChange, currentHoleNumber, game],
+  );
+
+  // Wrap onUnscore similarly
+  const handleUnscoreWithInvalidation = useCallback(
+    (roundToGameId: string) => {
+      // Capture previous gross score for undo
+      if (game?.rounds?.$isLoaded) {
+        const rtg = game.rounds.find(
+          (r) => r?.$isLoaded && r.$jazz.id === roundToGameId,
+        );
+        if (rtg?.$isLoaded && rtg.round?.$isLoaded) {
+          const prevGross = getGrossScore(rtg.round, currentHoleNumber);
+          setUndoSnapshot({
+            roundToGameId,
+            holeNum: currentHoleNumber,
+            prevGross,
+          });
+        }
+      }
+
+      onUnscore(roundToGameId);
+      setPendingInvalidationHole(currentHoleNumber);
+    },
+    [onUnscore, currentHoleNumber, game],
+  );
+
+  // Run invalidation detection after scoreboard recalculates
+  useEffect(() => {
+    if (!pendingInvalidationHole || !scoreboard || !scoringContext) return;
+
+    const result = detectInvalidations(
+      scoreboard,
+      scoringContext,
+      pendingInvalidationHole,
+      holesList,
+      teeFlipEnabled,
+    );
+
+    if (result.hasInvalidations) {
+      setInvalidationResult(result);
+    } else {
+      setUndoSnapshot(null);
+    }
+
+    setPendingInvalidationHole(null);
+  }, [
+    scoreboard,
+    pendingInvalidationHole,
+    scoringContext,
+    holesList,
+    teeFlipEnabled,
+  ]);
+
+  // Invalidation modal handlers
+  const handleInvalidationRemove = useCallback(() => {
+    if (!invalidationResult || !scoringContext) return;
+    applyInvalidationRemovals(
+      invalidationResult,
+      scoringContext.gameHoles,
+      multiplierOptions,
+    );
+    setInvalidationResult(null);
+    setUndoSnapshot(null);
+  }, [invalidationResult, scoringContext, multiplierOptions]);
+
+  const handleInvalidationKeep = useCallback(() => {
+    setInvalidationResult(null);
+    setUndoSnapshot(null);
+  }, []);
+
+  const handleInvalidationUndo = useCallback(() => {
+    if (undoSnapshot) {
+      if (undoSnapshot.prevGross !== null) {
+        onScoreChange(undoSnapshot.roundToGameId, undoSnapshot.prevGross);
+      }
+    }
+    setInvalidationResult(null);
+    setUndoSnapshot(null);
+  }, [undoSnapshot, onScoreChange]);
+
   return (
     <>
       <HoleHeader
@@ -860,6 +986,13 @@ export function ScoringView({
           />
         </>
       )}
+      <InvalidationModal
+        visible={!!invalidationResult}
+        result={invalidationResult}
+        onRemove={handleInvalidationRemove}
+        onKeep={handleInvalidationKeep}
+        onUndoEdit={handleInvalidationUndo}
+      />
       <FlatList
         style={styles.content}
         data={allTeams}
@@ -1218,9 +1351,11 @@ export function ScoringView({
                     pops={calculatedPops}
                     junkOptions={junkButtons}
                     onScoreChange={(newGross) =>
-                      onScoreChange(rtg.$jazz.id, newGross)
+                      handleScoreChangeWithInvalidation(rtg.$jazz.id, newGross)
                     }
-                    onUnscore={() => onUnscore(rtg.$jazz.id)}
+                    onUnscore={() =>
+                      handleUnscoreWithInvalidation(rtg.$jazz.id)
+                    }
                     onJunkToggle={(junkName) => {
                       const junkOption = userJunkOptions.find(
                         (j) => j.name === junkName,

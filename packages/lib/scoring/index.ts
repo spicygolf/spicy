@@ -9,6 +9,14 @@
  * const scoreboard = score(game);
  */
 
+export type {
+  InvalidatedItem,
+  InvalidationResult,
+  ScoreImpact,
+} from "./invalidation-engine";
+// Invalidation engine (retroactive edit detection)
+export { detectInvalidations } from "./invalidation-engine";
+
 // Junk engine (data-driven junk evaluation)
 export {
   evaluateJunkForHole,

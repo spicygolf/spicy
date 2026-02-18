@@ -13,6 +13,8 @@ import type {
   Team,
 } from "spicylib/schema";
 import type {
+  InvalidatedItem,
+  InvalidationResult,
   Scoreboard,
   ScoringContext,
   TeamHoleResult,
@@ -341,6 +343,170 @@ export function getTeamMultiplierStatus(
     }
   }
   return { active: false };
+}
+
+// =============================================================================
+// Invalidation Removal Functions
+// =============================================================================
+
+/**
+ * Remove a single invalidated item from Jazz data. Dispatches by kind.
+ *
+ * @param item - The invalidated item to remove
+ * @param gameHoles - All game holes
+ */
+export function removeInvalidatedItem(
+  item: InvalidatedItem,
+  gameHoles: GameHole[],
+): void {
+  switch (item.kind) {
+    case "multiplier":
+      removeTeamMultiplier(gameHoles, item.holeNum, item.teamId, item.name);
+      break;
+    case "tee_flip":
+      removeTeeFlipResult(gameHoles, item.holeNum);
+      break;
+  }
+}
+
+/**
+ * Remove all invalidated items, with cascade for multiplier dependencies.
+ *
+ * After removing each invalidated multiplier, also removes dependent
+ * multipliers from other teams on the same hole (e.g., double_back
+ * that depends on the removed double).
+ *
+ * @param result - The invalidation result from detectInvalidations
+ * @param gameHoles - All game holes
+ * @param multiplierOptions - All multiplier option definitions (for cascade)
+ */
+export function applyInvalidationRemovals(
+  result: InvalidationResult,
+  gameHoles: GameHole[],
+  multiplierOptions: MultiplierOption[],
+): void {
+  for (const item of result.items) {
+    removeInvalidatedItem(item, gameHoles);
+
+    // Cascade: when removing a multiplier, remove dependent multipliers
+    // from other teams on the same hole
+    if (item.kind === "multiplier") {
+      cascadeRemoveDependentMultipliers(
+        item.name,
+        item.teamId,
+        item.holeNum,
+        gameHoles,
+        multiplierOptions,
+      );
+    }
+  }
+}
+
+/**
+ * Remove a specific user-selected multiplier TeamOption from a team on a hole.
+ */
+function removeTeamMultiplier(
+  gameHoles: GameHole[],
+  holeNum: string,
+  teamId: string,
+  multiplierName: string,
+): void {
+  const gameHole = gameHoles.find((h) => h.hole === holeNum);
+  if (!gameHole?.teams?.$isLoaded) return;
+
+  for (const team of gameHole.teams) {
+    if (!team?.$isLoaded || team.team !== teamId) continue;
+    if (!team.options?.$isLoaded) continue;
+
+    for (let i = team.options.length - 1; i >= 0; i--) {
+      const opt = team.options[i];
+      if (
+        opt?.$isLoaded &&
+        opt.optionName === multiplierName &&
+        opt.firstHole === holeNum &&
+        !opt.playerId
+      ) {
+        team.options.$jazz.splice(i, 1);
+      }
+    }
+  }
+}
+
+/**
+ * Remove tee flip results (winner and declined) from a hole.
+ */
+function removeTeeFlipResult(gameHoles: GameHole[], holeNum: string): void {
+  const gameHole = gameHoles.find((h) => h.hole === holeNum);
+  if (!gameHole?.teams?.$isLoaded) return;
+
+  for (const team of gameHole.teams) {
+    if (!team?.$isLoaded || !team.options?.$isLoaded) continue;
+
+    for (let i = team.options.length - 1; i >= 0; i--) {
+      const opt = team.options[i];
+      if (
+        opt?.$isLoaded &&
+        (opt.optionName === "tee_flip_winner" ||
+          opt.optionName === "tee_flip_declined") &&
+        opt.firstHole === holeNum
+      ) {
+        team.options.$jazz.splice(i, 1);
+      }
+    }
+  }
+}
+
+/**
+ * Remove dependent multipliers from OTHER teams on the same hole.
+ *
+ * When a multiplier is removed (e.g., double), other multipliers that
+ * depend on it (e.g., double_back via other_team_multiplied_with) should
+ * also be removed.
+ *
+ * Uses the same string-match heuristic as removeDependentMultipliers
+ * in ScoringView.tsx.
+ */
+function cascadeRemoveDependentMultipliers(
+  removedMultName: string,
+  removingTeamId: string,
+  holeNum: string,
+  gameHoles: GameHole[],
+  multiplierOptions: MultiplierOption[],
+): void {
+  // Find multipliers with availability checking for the removed mult
+  const dependentMults = multiplierOptions.filter((m) => {
+    if (!m.availability) return false;
+    return (
+      m.availability.includes("other_team_multiplied_with") &&
+      (m.availability.includes(`'${removedMultName}'`) ||
+        m.availability.includes(`"${removedMultName}"`))
+    );
+  });
+
+  if (dependentMults.length === 0) return;
+
+  const gameHole = gameHoles.find((h) => h.hole === holeNum);
+  if (!gameHole?.teams?.$isLoaded) return;
+
+  // Remove from OTHER teams (not the team that had the original multiplier)
+  for (const depMult of dependentMults) {
+    for (const team of gameHole.teams) {
+      if (!team?.$isLoaded || team.team === removingTeamId) continue;
+      if (!team.options?.$isLoaded) continue;
+
+      for (let i = team.options.length - 1; i >= 0; i--) {
+        const opt = team.options[i];
+        if (
+          opt?.$isLoaded &&
+          opt.optionName === depMult.name &&
+          opt.firstHole === holeNum &&
+          !opt.playerId
+        ) {
+          team.options.$jazz.splice(i, 1);
+        }
+      }
+    }
+  }
 }
 
 /**
