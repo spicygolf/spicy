@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { co, z } from "jazz-tools";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
@@ -86,6 +86,16 @@ export function PlacesPaidScreen({ navigation }: Props) {
     () => currentPoolPcts ?? getDefaultPcts(currentPlaces),
   );
 
+  // Sync local state once Jazz data finishes loading
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (initialized.current) return;
+    if (!game?.spec?.$isLoaded) return;
+    initialized.current = true;
+    setPlaces(currentPlaces);
+    setPcts(currentPoolPcts ?? getDefaultPcts(currentPlaces));
+  }, [game?.spec?.$isLoaded, currentPlaces, currentPoolPcts]);
+
   const handlePlacesChange = useCallback((newPlaces: number) => {
     const clamped = Math.max(MIN_PLACES, Math.min(MAX_PLACES, newPlaces));
     setPlaces(clamped);
@@ -111,7 +121,8 @@ export function PlacesPaidScreen({ navigation }: Props) {
     });
   }, []);
 
-  const pctTotal = pcts.reduce((sum, p) => sum + p, 0);
+  const activePcts = pcts.slice(0, places);
+  const pctTotal = activePcts.reduce((sum, p) => sum + p, 0);
   const isValid = pctTotal === 100;
 
   const handleSave = useCallback(() => {
@@ -128,11 +139,10 @@ export function PlacesPaidScreen({ navigation }: Props) {
 
     // Update payout pools - set placesPaid and payoutPcts on all "places" type pools
     if (game.payoutPools?.$isLoaded) {
-      const activePcts = pcts.slice(0, places);
       for (const pool of game.payoutPools) {
         if (pool?.$isLoaded && pool.splitType === "places") {
           pool.$jazz.set("placesPaid", places);
-          const pctsList = co.list(z.number()).create(activePcts, {
+          const pctsList = co.list(z.number()).create(pcts.slice(0, places), {
             owner: pool.$jazz.owner,
           });
           pool.$jazz.set("payoutPcts", pctsList);
@@ -225,7 +235,6 @@ export function PlacesPaidScreen({ navigation }: Props) {
               )}
             </View>
             {(() => {
-              const activePcts = pcts.slice(0, places);
               const amounts = distributeAmounts(potTotal, activePcts);
               return activePcts.map((pct, i) => (
                 <View key={PLACE_LABELS[i]} style={styles.payoutRow}>

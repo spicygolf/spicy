@@ -419,6 +419,26 @@ async function createGame(organizerId?: string): Promise<void> {
       }
     }
 
+    // ── Idempotency guard ─────────────────────────────────────────────
+    if (
+      organizerAccount?.$isLoaded &&
+      organizerAccount.root?.games?.$isLoaded
+    ) {
+      const existing = [...organizerAccount.root.games].find(
+        // biome-ignore lint/suspicious/noExplicitAny: Jazz list item type
+        (g: any) => g?.$isLoaded && g.legacyId === "test-big-game-48",
+      );
+      if (existing) {
+        console.error(`\nTest game already exists: ${existing.$jazz.id}`);
+        console.error(
+          "Delete it first: bun run packages/web/src/cli/populate-test-game.ts " +
+            `--delete ${existing.$jazz.id} --organizer ${organizerId}\n`,
+        );
+        await done();
+        process.exit(1);
+      }
+    }
+
     // ── Create course & tee ────────────────────────────────────────────
     console.log("Creating course and tee...");
 

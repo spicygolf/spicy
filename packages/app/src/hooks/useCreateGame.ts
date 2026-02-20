@@ -202,10 +202,11 @@ function createPayoutPoolsFromSpec(
       metric: string;
       splitType: "places" | "per_unit" | "winner_take_all";
       placesPaid?: number;
-      payoutPcts?: number[];
     }>;
 
     for (const p of parsed) {
+      // payoutPcts is intentionally not set here — it's lazily initialized
+      // by PlacesPaidScreen when the organizer configures payout splits.
       const pool = PayoutPool.create(
         {
           name: p.name,
