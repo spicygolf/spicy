@@ -552,6 +552,8 @@ async function createGame(): Promise<void> {
         holes: gameHoles,
         players,
         rounds: roundToGames,
+        // Worker account is organizer — no mobile user will match, so all
+        // players see read-only settings (useful for testing the non-organizer view).
         organizer: worker.$jazz.id,
         legacyId: "test-big-game-48",
       },

@@ -63,6 +63,9 @@ export const Game = co.map({
    * Account ID of the game organizer (creator).
    * Only the organizer can modify game settings.
    * If absent (legacy games), all players can edit settings.
+   *
+   * Stored as a string (not co.ref) to avoid loading overhead —
+   * this is compared against the current user's ID on every render.
    */
   organizer: z.string().optional(),
 

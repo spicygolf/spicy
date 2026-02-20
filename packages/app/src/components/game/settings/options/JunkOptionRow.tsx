@@ -13,7 +13,7 @@ export function JunkOptionRow({ option, onPress }: JunkOptionRowProps) {
   const { theme } = useUnistyles();
 
   return (
-    <Pressable style={styles.optionRow} onPress={onPress}>
+    <Pressable style={styles.optionRow} onPress={onPress} disabled={!onPress}>
       <View style={styles.optionLeft}>
         <Text style={styles.optionLabel}>{option.disp}</Text>
       </View>
@@ -21,12 +21,14 @@ export function JunkOptionRow({ option, onPress }: JunkOptionRowProps) {
         <Text style={styles.optionValueText}>
           {option.value} {option.value === 1 ? "pt" : "pts"}
         </Text>
-        <FontAwesome6
-          name="chevron-right"
-          iconStyle="solid"
-          size={14}
-          color={theme.colors.secondary}
-        />
+        {onPress && (
+          <FontAwesome6
+            name="chevron-right"
+            iconStyle="solid"
+            size={14}
+            color={theme.colors.secondary}
+          />
+        )}
       </View>
     </Pressable>
   );

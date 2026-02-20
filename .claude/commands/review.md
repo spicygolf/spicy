@@ -31,3 +31,7 @@ When activated, perform a full code review of the commits since branching from m
    - Recommended actions (if any)
 
 Run `./scripts/code-quality.sh` to verify the code compiles and passes lint.
+
+## Follow-up
+
+After presenting the review, **fix all issues** identified above. Apply each fix directly — do not ask for confirmation on individual items. If any issue is ambiguous or has multiple reasonable approaches, ask the user which direction to take before proceeding. Run `./scripts/code-quality.sh` after all fixes are applied to verify everything is clean.

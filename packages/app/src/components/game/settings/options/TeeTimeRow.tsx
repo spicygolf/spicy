@@ -15,16 +15,18 @@ export function TeeTimeRow({ start, onPress }: TeeTimeRowProps) {
   const displayValue = `${formatDate(start)} - ${formatTime(start)}`;
 
   return (
-    <Pressable style={styles.optionRow} onPress={onPress}>
+    <Pressable style={styles.optionRow} onPress={onPress} disabled={!onPress}>
       <Text style={styles.optionLabel}>Tee Time</Text>
       <View style={styles.optionValue}>
         <Text style={styles.optionValueText}>{displayValue}</Text>
-        <FontAwesome6
-          name="chevron-right"
-          iconStyle="solid"
-          size={14}
-          color={theme.colors.secondary}
-        />
+        {onPress && (
+          <FontAwesome6
+            name="chevron-right"
+            iconStyle="solid"
+            size={14}
+            color={theme.colors.secondary}
+          />
+        )}
       </View>
     </Pressable>
   );

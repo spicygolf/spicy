@@ -1,5 +1,6 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { co, z } from "jazz-tools";
 import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -21,13 +22,29 @@ function getDefaultPcts(places: number): number[] {
 
 const PLACE_LABELS = ["1st", "2nd", "3rd", "4th", "5th"];
 
+/** Distribute potTotal across pcts so rounded amounts sum exactly to potTotal. */
+function distributeAmounts(potTotal: number, pcts: number[]): number[] {
+  if (potTotal <= 0) return pcts.map(() => 0);
+  const raw = pcts.map((p) => (potTotal * p) / 100);
+  const floored = raw.map((v) => Math.floor(v));
+  let remainder = potTotal - floored.reduce((s, v) => s + v, 0);
+  const fractions = raw.map((v, i) => ({ i, frac: v - (floored[i] ?? 0) }));
+  fractions.sort((a, b) => b.frac - a.frac);
+  for (const { i } of fractions) {
+    if (remainder <= 0) break;
+    floored[i] = (floored[i] ?? 0) + 1;
+    remainder--;
+  }
+  return floored;
+}
+
 export function PlacesPaidScreen({ navigation }: Props) {
   const { theme } = useUnistyles();
   const { game } = useGame(undefined, {
     resolve: {
       spec: { $each: true },
       players: { $each: true },
-      payoutPools: { $each: true },
+      payoutPools: { $each: { payoutPcts: true } },
     },
   });
 
@@ -60,10 +77,11 @@ export function PlacesPaidScreen({ navigation }: Props) {
   // Read current custom percentages from payoutPools (if any places-type pool exists)
   const currentPoolPcts = useMemo(() => {
     if (!game?.payoutPools?.$isLoaded) return null;
-    // Find the first "places" pool to get its custom pcts
     for (const pool of game.payoutPools) {
       if (pool?.$isLoaded && pool.splitType === "places" && pool.placesPaid) {
-        // TODO: read pool.payoutPcts CoList if it exists
+        if (pool.payoutPcts?.$isLoaded && pool.payoutPcts.length > 0) {
+          return Array.from(pool.payoutPcts) as number[];
+        }
         return null;
       }
     }
@@ -82,6 +100,15 @@ export function PlacesPaidScreen({ navigation }: Props) {
   }, []);
 
   const handlePctChange = useCallback((index: number, text: string) => {
+    // Allow empty string so user can clear and retype
+    if (text === "") {
+      setPcts((prev) => {
+        const next = [...prev];
+        next[index] = 0;
+        return next;
+      });
+      return;
+    }
     const num = Number.parseInt(text, 10);
     if (Number.isNaN(num) || num < 0 || num > 100) return;
     setPcts((prev) => {
@@ -106,12 +133,16 @@ export function PlacesPaidScreen({ navigation }: Props) {
       });
     }
 
-    // Update payout pools - set placesPaid on all "places" type pools
+    // Update payout pools - set placesPaid and payoutPcts on all "places" type pools
     if (game.payoutPools?.$isLoaded) {
+      const activePcts = pcts.slice(0, places);
       for (const pool of game.payoutPools) {
         if (pool?.$isLoaded && pool.splitType === "places") {
           pool.$jazz.set("placesPaid", places);
-          // TODO: create/update payoutPcts CoList with custom percentages
+          const pctsList = co.list(z.number()).create(activePcts, {
+            owner: pool.$jazz.owner,
+          });
+          pool.$jazz.set("payoutPcts", pctsList);
         }
       }
     }
@@ -200,10 +231,10 @@ export function PlacesPaidScreen({ navigation }: Props) {
                 <Text style={styles.payoutHeaderAmount}>Amount</Text>
               )}
             </View>
-            {pcts.slice(0, places).map((pct, i) => {
-              const amount =
-                potTotal > 0 ? Math.round((potTotal * pct) / 100) : 0;
-              return (
+            {(() => {
+              const activePcts = pcts.slice(0, places);
+              const amounts = distributeAmounts(potTotal, activePcts);
+              return activePcts.map((pct, i) => (
                 <View key={PLACE_LABELS[i]} style={styles.payoutRow}>
                   <Text style={styles.placeLabel}>{PLACE_LABELS[i]}</Text>
                   <View style={styles.pctInputWrapper}>
@@ -218,11 +249,11 @@ export function PlacesPaidScreen({ navigation }: Props) {
                     <Text style={styles.pctSuffix}>%</Text>
                   </View>
                   {potTotal > 0 && (
-                    <Text style={styles.amountText}>${amount}</Text>
+                    <Text style={styles.amountText}>${amounts[i]}</Text>
                   )}
                 </View>
-              );
-            })}
+              ));
+            })()}
           </View>
 
           {/* Total validation */}

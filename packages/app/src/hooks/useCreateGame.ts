@@ -219,8 +219,12 @@ function createPayoutPoolsFromSpec(
       );
       pools.$jazz.push(pool);
     }
-  } catch {
-    // Invalid JSON - return empty pools
+  } catch (e) {
+    reportError("Failed to parse payout_pools meta option", {
+      source: "createPayoutPoolsFromSpec",
+      type: "DataError",
+      context: { poolsJson, error: String(e) },
+    });
   }
 
   return pools;

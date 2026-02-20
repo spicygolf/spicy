@@ -43,18 +43,20 @@ export function GameOptionRow({
   };
 
   return (
-    <Pressable style={styles.optionRow} onPress={onPress}>
+    <Pressable style={styles.optionRow} onPress={onPress} disabled={!onPress}>
       <Text style={styles.optionLabel}>{option.disp}</Text>
       <View style={styles.optionValue}>
         <Text style={styles.optionValueText}>
           {displayOverride ?? displayValue()}
         </Text>
-        <FontAwesome6
-          name="chevron-right"
-          iconStyle="solid"
-          size={14}
-          color={theme.colors.secondary}
-        />
+        {onPress && (
+          <FontAwesome6
+            name="chevron-right"
+            iconStyle="solid"
+            size={14}
+            color={theme.colors.secondary}
+          />
+        )}
       </View>
     </Pressable>
   );

@@ -1,5 +1,5 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { JunkOption } from "spicylib/schema";
@@ -22,6 +22,11 @@ export function JunkValueModal({
 }: JunkValueModalProps) {
   const { theme } = useUnistyles();
   const [value, setValue] = useState(option.value);
+
+  // Reset value when a different option is selected
+  useEffect(() => {
+    setValue(option.value);
+  }, [option.name, option.value]);
 
   const handleIncrement = () => setValue((v) => v + 1);
   const handleDecrement = () => setValue((v) => Math.max(0, v - 1));

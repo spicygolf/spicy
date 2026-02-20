@@ -63,7 +63,6 @@ export async function getRoundsForDate(
       }
     } catch {
       // Skip games whose rounds fail to load (permissions, corrupted data)
-      continue;
     }
   }
 
