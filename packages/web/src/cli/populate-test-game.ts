@@ -328,16 +328,22 @@ async function createGame(organizerId?: string): Promise<void> {
     const group = Group.create(worker);
 
     // Add organizer account to group so they can load/edit the game
+    // biome-ignore lint/suspicious/noExplicitAny: Jazz loaded types are complex with resolve params
+    let organizerAccount: any = null;
     if (organizerId) {
-      const organizerAccount = await PlayerAccount.load(
-        organizerId as ID<typeof PlayerAccount>,
-        { loadAs: worker },
-      );
+      organizerAccount =
+        (await PlayerAccount.load(organizerId as ID<typeof PlayerAccount>, {
+          loadAs: worker,
+          resolve: { root: { games: true } },
+        })) ?? null;
       if (organizerAccount?.$isLoaded) {
         group.addMember(organizerAccount, "admin");
         console.log(`  Added organizer ${organizerId} as admin`);
       } else {
-        console.warn(`  Could not load organizer account ${organizerId} — game will be read-only`);
+        console.warn(
+          `  Could not load organizer account ${organizerId} — game will be read-only`,
+        );
+        organizerAccount = null;
       }
     }
 
@@ -574,10 +580,18 @@ async function createGame(organizerId?: string): Promise<void> {
       { owner: group },
     );
 
+    // Add game to organizer's games list so it appears in their app
+    if (organizerAccount?.$isLoaded && organizerAccount.root?.games?.$isLoaded) {
+      organizerAccount.root.games.$jazz.push(game);
+      console.log("  Added game to organizer's games list");
+    }
+
     console.log(`\nGame created successfully!`);
     console.log(`  Game ID: ${game.$jazz.id}`);
     console.log(`  Name: ${game.name}`);
-    console.log(`  Organizer: ${game.organizer}${organizerId ? "" : " (worker — read-only for all)"}`);
+    console.log(
+      `  Organizer: ${game.organizer}${organizerId ? "" : " (worker — read-only for all)"}`,
+    );
     console.log(`  Players: ${players.length}`);
     console.log(`  Rounds: ${roundToGames.length}`);
     console.log(`  Holes: ${gameHoles.length}`);
