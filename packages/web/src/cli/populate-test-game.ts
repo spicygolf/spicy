@@ -7,9 +7,11 @@
  *
  * Usage:
  *   bun run packages/web/src/cli/populate-test-game.ts
+ *   bun run packages/web/src/cli/populate-test-game.ts --organizer co_zXYZ...
  *   bun run packages/web/src/cli/populate-test-game.ts --delete <gameId>
  *
- * Without args: creates a new 48-player Big Game test game
+ * Without args: creates a new 48-player Big Game test game (worker as organizer)
+ * With --organizer <accountId>: sets a specific account as organizer
  * With --delete <gameId>: shows deletion info for the test game
  */
 
@@ -265,7 +267,7 @@ async function deleteMode(gameId: string): Promise<void> {
   await done();
 }
 
-async function createGame(): Promise<void> {
+async function createGame(organizerId?: string): Promise<void> {
   console.log("\nPopulating Big Game test with 48 players...\n");
 
   const { worker, done } = await startWorker({
@@ -324,6 +326,20 @@ async function createGame(): Promise<void> {
     // ── Create group ───────────────────────────────────────────────────
     console.log("Creating group...");
     const group = Group.create(worker);
+
+    // Add organizer account to group so they can load/edit the game
+    if (organizerId) {
+      const organizerAccount = await PlayerAccount.load(
+        organizerId as ID<typeof PlayerAccount>,
+        { loadAs: worker },
+      );
+      if (organizerAccount?.$isLoaded) {
+        group.addMember(organizerAccount, "admin");
+        console.log(`  Added organizer ${organizerId} as admin`);
+      } else {
+        console.warn(`  Could not load organizer account ${organizerId} — game will be read-only`);
+      }
+    }
 
     // ── Create course & tee ────────────────────────────────────────────
     console.log("Creating course and tee...");
@@ -552,9 +568,7 @@ async function createGame(): Promise<void> {
         holes: gameHoles,
         players,
         rounds: roundToGames,
-        // Worker account is organizer — no mobile user will match, so all
-        // players see read-only settings (useful for testing the non-organizer view).
-        organizer: worker.$jazz.id,
+        organizer: organizerId ?? worker.$jazz.id,
         legacyId: "test-big-game-48",
       },
       { owner: group },
@@ -563,6 +577,7 @@ async function createGame(): Promise<void> {
     console.log(`\nGame created successfully!`);
     console.log(`  Game ID: ${game.$jazz.id}`);
     console.log(`  Name: ${game.name}`);
+    console.log(`  Organizer: ${game.organizer}${organizerId ? "" : " (worker — read-only for all)"}`);
     console.log(`  Players: ${players.length}`);
     console.log(`  Rounds: ${roundToGames.length}`);
     console.log(`  Holes: ${gameHoles.length}`);
@@ -587,8 +602,14 @@ async function createGame(): Promise<void> {
 
 const args = process.argv.slice(2);
 
-if (args[0] === "--delete") {
-  const gameId = args[1];
+function parseFlag(flag: string): string | undefined {
+  const idx = args.indexOf(flag);
+  if (idx !== -1 && idx + 1 < args.length) return args[idx + 1];
+  return undefined;
+}
+
+if (args.includes("--delete")) {
+  const gameId = parseFlag("--delete");
   if (!gameId || !gameId.startsWith("co_")) {
     console.error(
       "Usage: bun run packages/web/src/cli/populate-test-game.ts --delete <gameId>",
@@ -596,13 +617,14 @@ if (args[0] === "--delete") {
     process.exit(1);
   }
   await deleteMode(gameId);
-} else if (args[0] === "--help" || args[0] === "-h") {
+} else if (args.includes("--help") || args.includes("-h")) {
   console.log(`
 Populate Test Big Game
 
 Usage:
-  bun run packages/web/src/cli/populate-test-game.ts             Create 48-player Big Game
-  bun run packages/web/src/cli/populate-test-game.ts --delete <gameId>  Show deletion info
+  bun run packages/web/src/cli/populate-test-game.ts                          Create 48-player Big Game
+  bun run packages/web/src/cli/populate-test-game.ts --organizer co_zXYZ...   Set organizer account
+  bun run packages/web/src/cli/populate-test-game.ts --delete <gameId>        Show deletion info
 
 Creates a test Big Game with:
   - 48 players with realistic handicaps (+2.0 to 36.0)
@@ -612,5 +634,6 @@ Creates a test Big Game with:
   - Stableford/quota scoring with gross skins
 `);
 } else {
-  await createGame();
+  const organizerId = parseFlag("--organizer");
+  await createGame(organizerId);
 }
