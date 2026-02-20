@@ -5,12 +5,14 @@ import {
   Game,
   GameScope,
   ListOfGameHoles,
+  ListOfPayoutPools,
   ListOfPlayers,
   ListOfRoundToGames,
+  PayoutPool,
   PlayerAccount,
   TeamsConfig,
 } from "spicylib/schema";
-import { copySpecOptions, getSpecField } from "spicylib/scoring";
+import { copySpecOptions, getMetaOption, getSpecField } from "spicylib/scoring";
 import { calculateTeamCount, getDefaultTeeTime } from "spicylib/utils";
 import { addPlayerToGameCore } from "../utils/addPlayerToGameCore";
 import { reportError } from "../utils/reportError";
@@ -124,6 +126,9 @@ export function useCreateGame() {
     // specRef = reference to catalog spec (for reset/diff)
     const spec = copySpecOptions(firstSpec, group);
 
+    // Create payout pools from the spec's payout_pools meta option (JSON string)
+    const payoutPools = createPayoutPoolsFromSpec(firstSpec, group);
+
     // Create the game
     const game = Game.create(
       {
@@ -135,6 +140,8 @@ export function useCreateGame() {
         holes,
         players,
         rounds: roundToGames,
+        organizer: me.$jazz.id,
+        payoutPools,
       },
       { owner: group },
     );
@@ -172,4 +179,54 @@ export function useCreateGame() {
   };
 
   return { createGame };
+}
+
+/**
+ * Parse payout_pools meta option (JSON string) and create PayoutPool CoMaps.
+ * Falls back to a single 100% winner-take-all pool if no pools are defined.
+ */
+function createPayoutPoolsFromSpec(
+  spec: GameSpec | undefined,
+  owner: Group,
+): ListOfPayoutPools {
+  const pools = ListOfPayoutPools.create([], { owner });
+
+  const poolsJson = getMetaOption(spec, "payout_pools") as string | undefined;
+  if (!poolsJson) return pools;
+
+  try {
+    const parsed = JSON.parse(poolsJson) as Array<{
+      name: string;
+      disp: string;
+      pct: number;
+      metric: string;
+      splitType: "places" | "per_unit" | "winner_take_all";
+      placesPaid?: number;
+    }>;
+
+    for (const p of parsed) {
+      // payoutPcts is intentionally not set here — it's lazily initialized
+      // by PlacesPaidScreen when the organizer configures payout splits.
+      const pool = PayoutPool.create(
+        {
+          name: p.name,
+          disp: p.disp,
+          pct: p.pct,
+          metric: p.metric,
+          splitType: p.splitType,
+          placesPaid: p.placesPaid,
+        },
+        { owner },
+      );
+      pools.$jazz.push(pool);
+    }
+  } catch (e) {
+    reportError("Failed to parse payout_pools meta option", {
+      source: "createPayoutPoolsFromSpec",
+      type: "DataError",
+      context: { poolsJson, error: String(e) },
+    });
+  }
+
+  return pools;
 }

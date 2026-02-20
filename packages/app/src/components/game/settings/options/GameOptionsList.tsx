@@ -5,7 +5,12 @@ import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption, JunkOption, MultiplierOption } from "spicylib/schema";
 import { isEveningCreation, isSameDay } from "spicylib/utils";
-import { useGame, useSaveOptionToGame, useTeamsMode } from "@/hooks";
+import {
+  useGame,
+  useIsOrganizer,
+  useSaveOptionToGame,
+  useTeamsMode,
+} from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { BoolOptionModal } from "./BoolOptionModal";
 import { DeleteGameButton } from "./DeleteGameButton";
@@ -14,6 +19,7 @@ import { GameNameModal } from "./GameNameModal";
 import { GameNameRow } from "./GameNameRow";
 import { GameOptionRow } from "./GameOptionRow";
 import { JunkOptionRow } from "./JunkOptionRow";
+import { JunkValueModal } from "./JunkValueModal";
 import { MenuOptionModal } from "./MenuOptionModal";
 import { MultiplierOptionRow } from "./MultiplierOptionRow";
 import { NumOptionModal } from "./NumOptionModal";
@@ -46,6 +52,7 @@ export function GameOptionsList() {
   });
 
   const { isTeamsMode } = useTeamsMode(game);
+  const isOrganizer = useIsOrganizer(game);
 
   const [selectedOptionName, setSelectedOptionName] = useState<string | null>(
     null,
@@ -222,11 +229,19 @@ export function GameOptionsList() {
     [game],
   );
 
-  const handleGameOptionPress = useCallback((option: GameOption) => {
-    setSelectedOptionName(option.name);
-    setModalType("game");
-    setShowModal(true);
-  }, []);
+  const handleGameOptionPress = useCallback(
+    (option: GameOption) => {
+      // Navigate to specialized screen for places_paid
+      if (option.name === "places_paid") {
+        navigation.navigate("PlacesPaid");
+        return;
+      }
+      setSelectedOptionName(option.name);
+      setModalType("game");
+      setShowModal(true);
+    },
+    [navigation],
+  );
 
   const handleJunkOptionPress = useCallback((option: JunkOption) => {
     setSelectedOptionName(option.name);
@@ -265,6 +280,14 @@ export function GameOptionsList() {
     setSelectedOptionName(null);
     setModalType(null);
   }, [selectedOptionName, game]);
+
+  const handleSaveJunkValue = useCallback(
+    (option: JunkOption, newValue: number) => {
+      if (!game?.spec?.$isLoaded) return;
+      game.spec.$jazz.set(option.name, { ...option, value: newValue });
+    },
+    [game],
+  );
 
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
@@ -317,18 +340,20 @@ export function GameOptionsList() {
             <OptionSectionHeader title="Game" />
             <GameNameRow
               name={game.name}
-              onPress={() => setShowNameModal(true)}
+              onPress={isOrganizer ? () => setShowNameModal(true) : undefined}
             />
             <TeeTimeRow
               start={game.start}
-              onPress={() => setShowTeeTimeModal(true)}
+              onPress={
+                isOrganizer ? () => setShowTeeTimeModal(true) : undefined
+              }
             />
           </>
         )}
 
         {/* Game Options Section */}
         {gameOptions.length > 0 && (
-          <>
+          <View style={!isOrganizer && styles.readOnly}>
             <OptionSectionHeader title="Settings" />
             {gameOptions.map((option) => {
               const displayOverride = getDisplayOverride(option);
@@ -338,49 +363,61 @@ export function GameOptionsList() {
                   option={option}
                   currentValue={getCurrentValue(option.name)}
                   onPress={
-                    displayOverride
-                      ? () => handleCustomizePress(option.name)
-                      : () => handleGameOptionPress(option)
+                    isOrganizer
+                      ? displayOverride
+                        ? () => handleCustomizePress(option.name)
+                        : () => handleGameOptionPress(option)
+                      : undefined
                   }
                   displayOverride={displayOverride}
                 />
               );
             })}
-          </>
+          </View>
         )}
 
         {/* Junk Options Section */}
         {junkOptions.length > 0 && (
-          <>
+          <View style={!isOrganizer && styles.readOnly}>
             <OptionSectionHeader title="Junk (Points)" />
             {junkOptions.map((option) => (
               <JunkOptionRow
                 key={option.name}
                 option={option}
-                onPress={() => handleJunkOptionPress(option)}
+                onPress={
+                  isOrganizer ? () => handleJunkOptionPress(option) : undefined
+                }
               />
             ))}
-          </>
+          </View>
         )}
 
         {/* Multiplier Options Section */}
         {multiplierOptions.length > 0 && (
-          <>
+          <View style={!isOrganizer && styles.readOnly}>
             <OptionSectionHeader title="Multipliers" />
             {multiplierOptions.map((option) => (
               <MultiplierOptionRow
                 key={option.name}
                 option={option}
-                onPress={() => handleMultiplierOptionPress(option)}
+                onPress={
+                  isOrganizer
+                    ? () => handleMultiplierOptionPress(option)
+                    : undefined
+                }
               />
             ))}
-          </>
+          </View>
         )}
 
-        {/* Admin Section */}
-        <OptionSectionHeader title="Admin" />
-        <ResetSpecButton game={game} />
-        <DeleteGameButton game={game} />
+        {/* Admin Section — organizer only */}
+        {isOrganizer && (
+          <>
+            <OptionSectionHeader title="Admin" />
+            <ResetSpecButton game={game} />
+            <DeleteGameButton game={game} />
+          </>
+        )}
       </ScrollView>
 
       {/* Game Option Modals */}
@@ -433,12 +470,21 @@ export function GameOptionsList() {
         </>
       )}
 
-      {/* Junk/Multiplier Remove Modal */}
+      {/* Junk Value Modal — edit point value or remove */}
+      {showModal && selectedJunkOption && (
+        <JunkValueModal
+          visible={true}
+          option={selectedJunkOption}
+          onSave={handleSaveJunkValue}
+          onRemove={handleRemoveOption}
+          onClose={handleCloseModal}
+        />
+      )}
+
+      {/* Multiplier Remove Modal */}
       <RemoveOptionModal
-        visible={
-          showModal && (modalType === "junk" || modalType === "multiplier")
-        }
-        option={selectedJunkOption || selectedMultiplierOption}
+        visible={showModal && modalType === "multiplier"}
+        option={selectedMultiplierOption}
         onRemove={handleRemoveOption}
         onClose={handleCloseModal}
       />
@@ -471,5 +517,8 @@ const styles = StyleSheet.create((_theme) => ({
   },
   scrollView: {
     flex: 1,
+  },
+  readOnly: {
+    opacity: 0.6,
   },
 }));

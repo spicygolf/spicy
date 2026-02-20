@@ -1,7 +1,10 @@
 import { useMemo } from "react";
 import type { Game, GameSpec } from "spicylib/schema";
 import { getSpecField } from "spicylib/scoring";
-import { computeSpecForcesTeams } from "@/utils/teamsMode";
+import {
+  computeSpecDisablesTeams,
+  computeSpecForcesTeams,
+} from "@/utils/teamsMode";
 
 // Re-export for backwards compatibility
 export { computeSpecForcesTeams } from "@/utils/teamsMode";
@@ -108,6 +111,11 @@ export function useTeamsMode(
     // Check if spec forces teams
     const specForcesTeams = gameSpec ? computeSpecForcesTeams(gameSpec) : false;
 
+    // Check if spec explicitly disables teams (teams: false)
+    const specDisablesTeams = gameSpec
+      ? computeSpecDisablesTeams(gameSpec)
+      : false;
+
     // Check if user has manually activated teams
     const isUserActivated = Boolean(
       game.scope?.$isLoaded &&
@@ -115,8 +123,8 @@ export function useTeamsMode(
         game.scope.teamsConfig.active === true,
     );
 
-    // Check if over player threshold
-    const isOverThreshold = playerCount > minPlayers;
+    // Check if over player threshold — suppressed when spec explicitly disables teams
+    const isOverThreshold = !specDisablesTeams && playerCount > minPlayers;
 
     // Determine mode
     const isTeamsMode = specForcesTeams || isUserActivated || isOverThreshold;

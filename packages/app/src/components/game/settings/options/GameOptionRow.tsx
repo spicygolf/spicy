@@ -7,7 +7,7 @@ import { Text } from "@/ui";
 interface GameOptionRowProps {
   option: GameOption;
   currentValue: string | undefined;
-  onPress: () => void;
+  onPress?: () => void;
   /** Override the displayed value text (e.g. "8 / 16" for mixed per-hole values) */
   displayOverride?: string;
 }
@@ -43,18 +43,20 @@ export function GameOptionRow({
   };
 
   return (
-    <Pressable style={styles.optionRow} onPress={onPress}>
+    <Pressable style={styles.optionRow} onPress={onPress} disabled={!onPress}>
       <Text style={styles.optionLabel}>{option.disp}</Text>
       <View style={styles.optionValue}>
         <Text style={styles.optionValueText}>
           {displayOverride ?? displayValue()}
         </Text>
-        <FontAwesome6
-          name="chevron-right"
-          iconStyle="solid"
-          size={14}
-          color={theme.colors.secondary}
-        />
+        {onPress && (
+          <FontAwesome6
+            name="chevron-right"
+            iconStyle="solid"
+            size={14}
+            color={theme.colors.secondary}
+          />
+        )}
       </View>
     </Pressable>
   );

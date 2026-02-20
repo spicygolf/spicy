@@ -6,7 +6,7 @@ import { Text } from "@/ui";
 
 interface MultiplierOptionRowProps {
   option: MultiplierOption;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 export function MultiplierOptionRow({
@@ -24,18 +24,20 @@ export function MultiplierOptionRow({
       : "variable";
 
   return (
-    <Pressable style={styles.optionRow} onPress={onPress}>
+    <Pressable style={styles.optionRow} onPress={onPress} disabled={!onPress}>
       <View style={styles.optionLeft}>
         <Text style={styles.optionLabel}>{option.disp}</Text>
       </View>
       <View style={styles.optionValue}>
         <Text style={styles.optionValueText}>{valueDisplay}</Text>
-        <FontAwesome6
-          name="chevron-right"
-          iconStyle="solid"
-          size={14}
-          color={theme.colors.secondary}
-        />
+        {onPress && (
+          <FontAwesome6
+            name="chevron-right"
+            iconStyle="solid"
+            size={14}
+            color={theme.colors.secondary}
+          />
+        )}
       </View>
     </Pressable>
   );

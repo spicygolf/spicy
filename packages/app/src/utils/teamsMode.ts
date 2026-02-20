@@ -23,6 +23,20 @@ export function computeSpecForcesTeams(spec: GameSpec): boolean {
 }
 
 /**
+ * Determines whether a spec explicitly disables teams (teams: false).
+ *
+ * When true, the auto-threshold (playerCount > minPlayers) should NOT
+ * activate teams mode — the spec is declaring this is an individual game
+ * regardless of player count (e.g., The Big Game with 48 players).
+ */
+export function computeSpecDisablesTeams(spec: GameSpec): boolean {
+  if (!spec?.$isLoaded) return false;
+
+  const teams = getSpecField(spec, "teams");
+  return teams === false;
+}
+
+/**
  * Returns the num_teams value from a spec if it's set and positive.
  * Used to determine if team count is fixed (e.g., Five Points = 2 teams).
  *

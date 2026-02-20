@@ -16,6 +16,7 @@ export * from "./useGetCountriesAndStates";
 export * from "./useGhinSearchPlayerQuery";
 export * from "./useHoleInitialization";
 export * from "./useHoleNavigation";
+export * from "./useIsOrganizer";
 export * from "./useJazzConnectionMonitor";
 export * from "./useJazzCredentials";
 export * from "./useOptionValue";

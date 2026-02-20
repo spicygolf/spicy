@@ -5,23 +5,25 @@ import { Text } from "@/ui";
 
 interface GameNameRowProps {
   name: string;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 export function GameNameRow({ name, onPress }: GameNameRowProps) {
   const { theme } = useUnistyles();
 
   return (
-    <Pressable style={styles.optionRow} onPress={onPress}>
+    <Pressable style={styles.optionRow} onPress={onPress} disabled={!onPress}>
       <Text style={styles.optionLabel}>Name</Text>
       <View style={styles.optionValue}>
         <Text style={styles.optionValueText}>{name}</Text>
-        <FontAwesome6
-          name="chevron-right"
-          iconStyle="solid"
-          size={14}
-          color={theme.colors.secondary}
-        />
+        {onPress && (
+          <FontAwesome6
+            name="chevron-right"
+            iconStyle="solid"
+            size={14}
+            color={theme.colors.secondary}
+          />
+        )}
       </View>
     </Pressable>
   );

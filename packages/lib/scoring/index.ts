@@ -81,6 +81,7 @@ export {
   calculateNetPositions,
   calculatePoolPayouts,
   calculateSettlement,
+  DEFAULT_PAYOUT_PCTS,
   extractQuotaMetrics,
   extractSkinsMetric,
   reconcileDebts,

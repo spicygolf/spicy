@@ -4,6 +4,7 @@ import { GameSpec } from "./gamespecs";
 import { MapOfOptions } from "./options";
 import { ListOfPlayers } from "./players";
 import { ListOfRoundToGames } from "./rounds";
+import { ListOfPayoutPools } from "./settlement";
 import { TeamsConfig } from "./teamsconfig";
 
 export const GameScope = co.map({
@@ -57,6 +58,23 @@ export const Game = co.map({
    * this timestamp (indicating fresh data arrived after the dismiss).
    */
   handicapCheckDismissedAt: z.date().optional(),
+
+  /**
+   * Account ID of the game organizer (creator).
+   * Only the organizer can modify game settings.
+   * If absent (legacy games), all players can edit settings.
+   *
+   * Stored as a string (not co.ref) to avoid loading overhead —
+   * this is compared against the current user's ID on every render.
+   */
+  organizer: z.string().optional(),
+
+  /**
+   * Payout pool configuration for settlement.
+   * Each pool defines how a portion of the pot is distributed.
+   * If absent, settlement uses a single 100% winner-take-all pool.
+   */
+  payoutPools: co.optional(ListOfPayoutPools),
 
   /**
    * Legacy ID from ArangoDB v0.3 import (_key field).
