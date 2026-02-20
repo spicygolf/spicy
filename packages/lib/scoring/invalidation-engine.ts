@@ -107,7 +107,12 @@ export function detectInvalidations(
     : [];
 
   const items = [...multiplierItems, ...teeFlipItems];
-  const scoreImpact = calculateScoreImpact(scoreboard, multiplierItems);
+  const scoreImpact = calculateScoreImpact(
+    scoreboard,
+    multiplierItems,
+    editedHoleNum,
+    holesList,
+  );
 
   return {
     items,
@@ -450,9 +455,9 @@ function areTeamsTied(
 /**
  * Calculate the per-team score impact of removing invalidated multipliers.
  *
- * For each invalidated multiplier, scans every hole in the scoreboard where
- * that team has the multiplier present (handles both hole-scoped and
- * rest_of_nine multipliers that span multiple holes).
+ * Scans only holes after the edited hole (matching the invalidation detection
+ * scope). For rest_of_nine multipliers that span multiple holes, all affected
+ * holes after the edit are included.
  *
  * The approach: on each affected hole, estimate the delta as
  * points * (1 - 1/removedMult). This is approximate but gives a good
@@ -461,6 +466,8 @@ function areTeamsTied(
 function calculateScoreImpact(
   scoreboard: Scoreboard,
   multiplierItems: InvalidatedItem[],
+  editedHoleNum: string,
+  holesList: string[],
 ): ScoreImpact[] {
   const invalidatedMults = multiplierItems.filter(
     (i): i is Extract<InvalidatedItem, { kind: "multiplier" }> =>
@@ -483,10 +490,16 @@ function calculateScoreImpact(
     invalidatedMults.map((m) => `${m.teamId}:${m.name}`),
   );
 
+  // Only scan holes after the edit (same scope as invalidation detection)
+  const editedIndex = holesList.indexOf(editedHoleNum);
+  const holesAfterEdit =
+    editedIndex >= 0 ? new Set(holesList.slice(editedIndex + 1)) : new Set();
+
   const teamDeltas: Record<string, number> = {};
 
-  // Scan every hole — rest_of_nine multipliers appear on each affected hole
-  for (const [, holeResult] of Object.entries(scoreboard.holes)) {
+  for (const [holeNum, holeResult] of Object.entries(scoreboard.holes)) {
+    if (!holesAfterEdit.has(holeNum)) continue;
+
     for (const [teamId, teamResult] of Object.entries(holeResult.teams)) {
       // Find invalidated multipliers present on this hole for this team
       const removedNames = new Set<string>();
