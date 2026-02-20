@@ -8,5 +8,6 @@
   "based_on": "user",
   "scope": "hole",
   "override": true,
-  "availability": "{\n  \"and\": [\n    {\"team_down_the_most\": [{\"getPrevHole\": []}, {\"var\": \"team\"}]},\n    {\">=\" : [{\"preDoubleTotal\": []}, 8]}\n  ]\n}"
+  "availability": "{\n  \"and\": [\n    {\"team_down_the_most\": [{\"getPrevHole\": []}, {\"var\": \"team\"}]},\n    {\">=\" : [{\"preDoubleTotal\": []}, 8]}\n  ]\n}",
+  "invalidation_reason": "Team is no longer losing or pre-press total changed"
 }

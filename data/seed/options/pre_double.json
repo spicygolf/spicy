@@ -7,5 +7,6 @@
   "icon": "album",
   "based_on": "user",
   "scope": "rest_of_nine",
-  "availability": "{\n        'team_down_the_most': [\n          {'getPrevHole': []},\n          {'var': 'team'}\n        ]\n      }"
+  "availability": "{\n        'team_down_the_most': [\n          {'getPrevHole': []},\n          {'var': 'team'}\n        ]\n      }",
+  "invalidation_reason": "Team is no longer losing"
 }

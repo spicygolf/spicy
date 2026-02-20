@@ -82,6 +82,45 @@ export interface ScoringViewProps {
   onChangeTeams: () => void;
 }
 
+/** Check if a team has a specific team-level option on a hole */
+function hasTeamOption(
+  team: Team,
+  optionName: string,
+  holeNum: string,
+): boolean {
+  if (!team.options?.$isLoaded) return false;
+  for (const opt of team.options) {
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === optionName &&
+      opt.firstHole === holeNum &&
+      !opt.playerId
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Check if a team has a specific player-level option */
+function hasPlayerOption(
+  team: Team,
+  optionName: string,
+  playerId: string,
+): boolean {
+  if (!team.options?.$isLoaded) return false;
+  for (const opt of team.options) {
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === optionName &&
+      opt.playerId === playerId
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Toggle a junk option for a player on a team
  * Creates the options list if it doesn't exist, then adds or removes the junk
@@ -453,11 +492,27 @@ function removeTeeFlipOption(
   }
 }
 
-interface UndoSnapshot {
-  roundToGameId: string;
-  holeNum: string;
-  prevGross: number | null;
-}
+type UndoSnapshot =
+  | {
+      kind: "score";
+      roundToGameId: string;
+      holeNum: string;
+      prevGross: number | null;
+    }
+  | {
+      kind: "junk";
+      teamId: string;
+      playerId: string;
+      junkName: string;
+      wasOn: boolean;
+    }
+  | {
+      kind: "multiplier";
+      teamId: string;
+      multiplierName: string;
+      holeNum: string;
+      wasOn: boolean;
+    };
 
 export function ScoringView({
   game,
@@ -801,69 +856,74 @@ export function ScoringView({
   // Detects invalidated multipliers and tee flips after a score edit on an earlier hole.
   // Shows a modal with three options: Remove, Keep, or Undo Edit.
 
-  const [pendingInvalidationHole, setPendingInvalidationHole] = useState<
-    string | null
-  >(null);
+  const [pendingInvalidation, setPendingInvalidation] = useState(false);
   const [invalidationResult, setInvalidationResult] =
     useState<InvalidationResult | null>(null);
   const [undoSnapshot, setUndoSnapshot] = useState<UndoSnapshot | null>(null);
 
-  // Wrap onScoreChange to capture undo snapshot and trigger invalidation check
+  /** Capture undo snapshot and schedule invalidation check after next scoreboard recalc. */
+  const triggerInvalidationCheck = useCallback((snapshot: UndoSnapshot) => {
+    setUndoSnapshot(snapshot);
+    setPendingInvalidation(true);
+  }, []);
+
   const handleScoreChangeWithInvalidation = useCallback(
     (roundToGameId: string, newGross: number) => {
-      // Capture previous gross score for undo
       if (game?.rounds?.$isLoaded) {
         const rtg = game.rounds.find(
           (r) => r?.$isLoaded && r.$jazz.id === roundToGameId,
         );
         if (rtg?.$isLoaded && rtg.round?.$isLoaded) {
           const prevGross = getGrossScore(rtg.round, currentHoleNumber);
-          setUndoSnapshot({
+          triggerInvalidationCheck({
+            kind: "score",
             roundToGameId,
             holeNum: currentHoleNumber,
             prevGross,
           });
         }
       }
-
       onScoreChange(roundToGameId, newGross);
-      setPendingInvalidationHole(currentHoleNumber);
     },
-    [onScoreChange, currentHoleNumber, game],
+    [onScoreChange, currentHoleNumber, game, triggerInvalidationCheck],
   );
 
-  // Wrap onUnscore similarly
   const handleUnscoreWithInvalidation = useCallback(
     (roundToGameId: string) => {
-      // Capture previous gross score for undo
       if (game?.rounds?.$isLoaded) {
         const rtg = game.rounds.find(
           (r) => r?.$isLoaded && r.$jazz.id === roundToGameId,
         );
         if (rtg?.$isLoaded && rtg.round?.$isLoaded) {
           const prevGross = getGrossScore(rtg.round, currentHoleNumber);
-          setUndoSnapshot({
+          // prevGross is null when there was no score before this action.
+          // Undo with null calls onUnscore to clear the newly entered value.
+          triggerInvalidationCheck({
+            kind: "score",
             roundToGameId,
             holeNum: currentHoleNumber,
             prevGross,
           });
         }
       }
-
       onUnscore(roundToGameId);
-      setPendingInvalidationHole(currentHoleNumber);
     },
-    [onUnscore, currentHoleNumber, game],
+    [onUnscore, currentHoleNumber, game, triggerInvalidationCheck],
   );
 
-  // Run invalidation detection after scoreboard recalculates
+  // Run invalidation detection after a user action triggers it AND the
+  // scoreboard has recalculated. Only fires when pendingInvalidation is true
+  // (set by triggerInvalidationCheck), so remote Jazz syncs and other
+  // non-user-initiated scoreboard changes won't show spurious modals.
   useEffect(() => {
-    if (!pendingInvalidationHole || !scoreboard || !scoringContext) return;
+    if (!pendingInvalidation || !scoreboard || !scoringContext) return;
+
+    setPendingInvalidation(false);
 
     const result = detectInvalidations(
       scoreboard,
       scoringContext,
-      pendingInvalidationHole,
+      currentHoleNumber,
       holesList,
       teeFlipEnabled,
     );
@@ -873,12 +933,11 @@ export function ScoringView({
     } else {
       setUndoSnapshot(null);
     }
-
-    setPendingInvalidationHole(null);
   }, [
+    pendingInvalidation,
     scoreboard,
-    pendingInvalidationHole,
     scoringContext,
+    currentHoleNumber,
     holesList,
     teeFlipEnabled,
   ]);
@@ -902,13 +961,60 @@ export function ScoringView({
 
   const handleInvalidationUndo = useCallback(() => {
     if (undoSnapshot) {
-      if (undoSnapshot.prevGross !== null) {
-        onScoreChange(undoSnapshot.roundToGameId, undoSnapshot.prevGross);
+      switch (undoSnapshot.kind) {
+        case "score":
+          if (undoSnapshot.prevGross !== null) {
+            onScoreChange(undoSnapshot.roundToGameId, undoSnapshot.prevGross);
+          } else {
+            // Previous score was empty — undo by removing the newly entered score
+            onUnscore(undoSnapshot.roundToGameId);
+          }
+          break;
+        case "junk":
+          // Toggle junk back — if it was on, re-add; if off, remove
+          if (currentHole?.teams?.$isLoaded) {
+            for (const team of currentHole.teams) {
+              if (team?.$isLoaded && team.team === undoSnapshot.teamId) {
+                togglePlayerJunk(
+                  team,
+                  allTeams,
+                  undoSnapshot.playerId,
+                  undoSnapshot.junkName,
+                );
+                break;
+              }
+            }
+          }
+          break;
+        case "multiplier":
+          // Toggle multiplier back
+          if (currentHole?.teams?.$isLoaded) {
+            for (const team of currentHole.teams) {
+              if (team?.$isLoaded && team.team === undoSnapshot.teamId) {
+                toggleTeamMultiplier(
+                  team,
+                  undoSnapshot.multiplierName,
+                  undoSnapshot.holeNum,
+                  allTeams,
+                  multiplierOptions,
+                );
+                break;
+              }
+            }
+          }
+          break;
       }
     }
     setInvalidationResult(null);
     setUndoSnapshot(null);
-  }, [undoSnapshot, onScoreChange]);
+  }, [
+    undoSnapshot,
+    onScoreChange,
+    onUnscore,
+    currentHole,
+    allTeams,
+    multiplierOptions,
+  ]);
 
   return (
     <>
@@ -989,6 +1095,7 @@ export function ScoringView({
       <InvalidationModal
         visible={!!invalidationResult}
         result={invalidationResult}
+        canUndo={!!undoSnapshot}
         onRemove={handleInvalidationRemove}
         onKeep={handleInvalidationKeep}
         onUndoEdit={handleInvalidationUndo}
@@ -1211,15 +1318,22 @@ export function ScoringView({
               multiplierOptions={multiplierButtons}
               earnedMultipliers={earnedMultiplierButtons}
               teamJunkOptions={teamJunkButtons}
-              onMultiplierToggle={(multName) =>
+              onMultiplierToggle={(multName) => {
+                triggerInvalidationCheck({
+                  kind: "multiplier",
+                  teamId,
+                  multiplierName: multName,
+                  holeNum: currentHoleNumber,
+                  wasOn: hasTeamOption(team, multName, currentHoleNumber),
+                });
                 toggleTeamMultiplier(
                   team,
                   multName,
                   currentHoleNumber,
                   allTeams,
                   multiplierOptions,
-                )
-              }
+                );
+              }}
               junkTotal={displayJunk}
               holeMultiplier={overallMultiplier}
               holePoints={displayPoints}
@@ -1357,6 +1471,13 @@ export function ScoringView({
                       handleUnscoreWithInvalidation(rtg.$jazz.id)
                     }
                     onJunkToggle={(junkName) => {
+                      triggerInvalidationCheck({
+                        kind: "junk",
+                        teamId,
+                        playerId: round.playerId,
+                        junkName,
+                        wasOn: hasPlayerOption(team, junkName, round.playerId),
+                      });
                       const junkOption = userJunkOptions.find(
                         (j) => j.name === junkName,
                       );

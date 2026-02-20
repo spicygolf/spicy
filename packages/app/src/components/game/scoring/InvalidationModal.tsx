@@ -8,6 +8,8 @@ interface InvalidationModalProps {
   visible: boolean;
   /** The invalidation result to display (null when hidden) */
   result: InvalidationResult | null;
+  /** Whether an undo snapshot is available (score change only) */
+  canUndo: boolean;
   /** Called when user taps "Remove" -- remove invalid items */
   onRemove: () => void;
   /** Called when user taps "Keep" -- dismiss without changes */
@@ -19,8 +21,8 @@ interface InvalidationModalProps {
 /**
  * Modal showing invalidated multipliers and tee flips after a score edit.
  *
- * Groups items by hole number and shows score impact per team.
- * Three buttons: Remove, Keep, Undo Edit.
+ * Lists each affected item with a reason, then shows Keep/Remove actions
+ * and an optional Undo Edit button.
  *
  * Follows the TeeFlipConfirmModal unmount pattern (returns null when not visible)
  * to avoid Jazz progressive loading oscillation.
@@ -28,6 +30,7 @@ interface InvalidationModalProps {
 export function InvalidationModal({
   visible,
   result,
+  canUndo,
   onRemove,
   onKeep,
   onUndoEdit,
@@ -42,15 +45,6 @@ export function InvalidationModal({
     (a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10),
   );
 
-  // Build score impact text
-  const impactText = result.scoreImpact
-    .filter((si) => si.currentTotal !== si.projectedTotal)
-    .map(
-      (si) =>
-        `Team ${si.teamId}: ${si.currentTotal} → ${si.projectedTotal} pts`,
-    )
-    .join(", ");
-
   return (
     <Modal
       visible={true}
@@ -60,40 +54,45 @@ export function InvalidationModal({
     >
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <Text style={styles.title}>Score Edit Affects Later Holes</Text>
+          <Text style={styles.title}>This change affects later holes</Text>
 
           <ScrollView style={styles.scrollArea}>
             {holeNums.map((holeNum) => (
               <View key={holeNum} style={styles.holeGroup}>
                 <Text style={styles.holeLabel}>Hole {holeNum}</Text>
                 {groupedItems[holeNum]?.map((item, idx) => (
-                  <Text key={`${holeNum}-${idx}`} style={styles.itemText}>
-                    {formatItem(item)}
-                  </Text>
+                  <View key={`${holeNum}-${idx}`} style={styles.itemRow}>
+                    <Text style={styles.itemName}>{formatItemName(item)}</Text>
+                    <Text style={styles.itemReason}>{item.reason}</Text>
+                  </View>
                 ))}
               </View>
             ))}
           </ScrollView>
 
-          {impactText.length > 0 && (
-            <Text style={styles.impactText}>Score impact: {impactText}</Text>
-          )}
+          <Text style={styles.question}>
+            Remove the affected {describeItemKinds(result.items)}, or keep{" "}
+            {result.items.length === 1 ? "it" : "them"}?
+          </Text>
 
-          <View style={styles.buttons}>
-            <View style={styles.button}>
+          <View style={styles.keepRemoveRow}>
+            <View style={styles.actionButton}>
+              <Button label="Keep" variant="secondary" onPress={onKeep} />
+            </View>
+            <View style={styles.actionButton}>
+              <Button label="Remove" onPress={onRemove} />
+            </View>
+          </View>
+
+          {canUndo && (
+            <View style={styles.undoRow}>
               <Button
                 label="Undo Edit"
                 variant="secondary"
                 onPress={onUndoEdit}
               />
             </View>
-            <View style={styles.button}>
-              <Button label="Keep" variant="secondary" onPress={onKeep} />
-            </View>
-            <View style={styles.button}>
-              <Button label="Remove" onPress={onRemove} />
-            </View>
-          </View>
+          )}
         </View>
       </View>
     </Modal>
@@ -117,17 +116,29 @@ function groupByHole(
 }
 
 /**
- * Format a single invalidated item for display.
+ * Format the name/label for an invalidated item.
  */
-function formatItem(item: InvalidatedItem): string {
+function formatItemName(item: InvalidatedItem): string {
   switch (item.kind) {
     case "multiplier":
-      return `Team ${item.teamId}'s ${item.disp}: ${item.reason}`;
+      return `${item.disp} (Team ${item.teamId})`;
     case "tee_flip":
-      return `Tee flip result: ${item.reason}`;
+      return "Tee flip";
     default:
-      return "Unknown invalidation";
+      return "Unknown";
   }
+}
+
+/**
+ * Describe the kinds of items present (e.g., "multipliers", "tee flips",
+ * "multipliers and tee flips") for the question prompt.
+ */
+function describeItemKinds(items: InvalidatedItem[]): string {
+  const hasMultiplier = items.some((i) => i.kind === "multiplier");
+  const hasTeeFlip = items.some((i) => i.kind === "tee_flip");
+  if (hasMultiplier && hasTeeFlip) return "multipliers and tee flips";
+  if (hasTeeFlip) return items.length === 1 ? "tee flip" : "tee flips";
+  return items.length === 1 ? "multiplier" : "multipliers";
 }
 
 const styles = StyleSheet.create((theme) => ({
@@ -146,43 +157,57 @@ const styles = StyleSheet.create((theme) => ({
     maxWidth: 360,
   },
   title: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "bold",
     color: theme.colors.primary,
     textAlign: "center",
     marginBottom: theme.gap(2),
   },
   scrollArea: {
-    maxHeight: 300,
+    maxHeight: 250,
     marginBottom: theme.gap(2),
   },
   holeGroup: {
     marginBottom: theme.gap(1.5),
+    alignItems: "center",
   },
   holeLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.secondary,
+    textAlign: "center",
+    marginBottom: theme.gap(0.5),
+  },
+  itemRow: {
+    marginBottom: theme.gap(0.75),
+    alignItems: "center",
+  },
+  itemName: {
     fontSize: 15,
     fontWeight: "600",
     color: theme.colors.primary,
-    marginBottom: theme.gap(0.5),
+    textAlign: "center",
   },
-  itemText: {
-    fontSize: 14,
-    color: theme.colors.secondary,
-    paddingLeft: theme.gap(1),
-    marginBottom: theme.gap(0.25),
-  },
-  impactText: {
+  itemReason: {
     fontSize: 13,
     color: theme.colors.secondary,
     textAlign: "center",
-    marginBottom: theme.gap(2),
-    fontStyle: "italic",
+    marginTop: 2,
   },
-  buttons: {
+  question: {
+    fontSize: 14,
+    color: theme.colors.secondary,
+    textAlign: "center",
+    marginBottom: theme.gap(2),
+  },
+  keepRemoveRow: {
     flexDirection: "row",
     gap: theme.gap(1),
   },
-  button: {
+  actionButton: {
     flex: 1,
+  },
+  undoRow: {
+    marginTop: theme.gap(1),
   },
 }));

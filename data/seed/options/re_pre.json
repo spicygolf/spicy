@@ -9,5 +9,6 @@
   "scope": "rest_of_nine",
   "value_from": "frontNinePreDoubleTotal",
   "description": "Carries over accumulated pre_double value from front nine. Only available on hole 10 when: (1) frontNinePreDoubleTotal > 2 (i.e., 4x or higher, requiring 2+ pre_doubles since each is 2x), and (2) team is down the most after hole 9.",
-  "availability": "{\n  \"and\": [\n    {\"==\": [{\"var\": \"holeNum\"}, \"10\"]},\n    {\">\": [{\"frontNinePreDoubleTotal\": [{\"var\": \"team\"}]}, 2]},\n    {\"team_down_the_most\": [{\"getPrevHole\": []}, {\"var\": \"team\"}]}\n  ]\n}"
+  "availability": "{\n  \"and\": [\n    {\"==\": [{\"var\": \"holeNum\"}, \"10\"]},\n    {\">\": [{\"frontNinePreDoubleTotal\": [{\"var\": \"team\"}]}, 2]},\n    {\"team_down_the_most\": [{\"getPrevHole\": []}, {\"var\": \"team\"}]}\n  ]\n}",
+  "invalidation_reason": "Team is no longer losing or front nine total changed"
 }

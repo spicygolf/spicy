@@ -107,7 +107,7 @@ export function detectInvalidations(
     : [];
 
   const items = [...multiplierItems, ...teeFlipItems];
-  const scoreImpact = calculateScoreImpact(scoreboard, ctx, multiplierItems);
+  const scoreImpact = calculateScoreImpact(scoreboard, multiplierItems);
 
   return {
     items,
@@ -149,6 +149,9 @@ function detectMultiplierInvalidations(
 
   const holesAfterEdit = holesList.slice(editedIndex + 1);
   const items: InvalidatedItem[] = [];
+  // Track rest_of_nine activations already checked to avoid duplicates
+  // (inherited copies on later holes all share the same firstHole)
+  const checkedRestOfNine = new Set<string>();
 
   for (const holeNum of holesAfterEdit) {
     const holeResult = scoreboard.holes[holeNum];
@@ -182,6 +185,10 @@ function detectMultiplierInvalidations(
         // For rest_of_nine scope, only check the instance where firstHole matches
         // (the option persists on the activation hole, inherited holes just count it)
         if (multDef.scope === "rest_of_nine" && optFirstHole !== holeNum) {
+          const dedupKey = `${multDef.name}:${teamId}:${optFirstHole}`;
+          if (checkedRestOfNine.has(dedupKey)) continue;
+          checkedRestOfNine.add(dedupKey);
+
           // Check if this inherited multiplier's ORIGINAL activation was valid
           // by checking against the hole where it was first activated
           const firstHoleResult = scoreboard.holes[optFirstHole];
@@ -201,7 +208,9 @@ function detectMultiplierInvalidations(
                   teamId,
                   name: multDef.name,
                   disp: multDef.disp,
-                  reason: buildAvailabilityReason(multDef, teamId),
+                  reason:
+                    multDef.invalidation_reason ??
+                    "Availability condition no longer met",
                 });
               }
             }
@@ -227,7 +236,9 @@ function detectMultiplierInvalidations(
             teamId,
             name: multDef.name,
             disp: multDef.disp,
-            reason: buildAvailabilityReason(multDef, teamId),
+            reason:
+              multDef.invalidation_reason ??
+              "Availability condition no longer met",
           });
         }
       }
@@ -326,31 +337,6 @@ function detectCascadeInvalidations(
   }
 
   return cascadeItems;
-}
-
-/**
- * Build a human-readable reason for why a multiplier's availability failed.
- */
-function buildAvailabilityReason(
-  mult: MultiplierOption,
-  teamId: string,
-): string {
-  const availability = mult.availability ?? "";
-
-  if (availability.includes("team_down_the_most")) {
-    return `Team ${teamId} is no longer down the most`;
-  }
-  if (availability.includes("team_second_to_last")) {
-    return `Team ${teamId} is no longer second to last`;
-  }
-  if (availability.includes("preDoubleTotal")) {
-    return "Pre-press total is no longer 8x or higher";
-  }
-  if (availability.includes("frontNinePreDoubleTotal")) {
-    return "Front nine pre-press total changed";
-  }
-
-  return "Availability condition no longer met";
 }
 
 // =============================================================================
@@ -470,7 +456,6 @@ function areTeamsTied(
  */
 function calculateScoreImpact(
   scoreboard: Scoreboard,
-  _ctx: ScoringContext,
   multiplierItems: InvalidatedItem[],
 ): ScoreImpact[] {
   const invalidatedMults = multiplierItems.filter(
@@ -489,30 +474,49 @@ function calculateScoreImpact(
     );
   }
 
-  // Calculate point deltas per team across all affected holes
+  // Group invalidated multipliers by (teamId, holeNum) so we can compute
+  // the combined delta when multiple multipliers are removed from the same
+  // team on the same hole (e.g., double + pre_double both invalidated).
+  const byTeamHole = new Map<string, typeof invalidatedMults>();
+  for (const item of invalidatedMults) {
+    const key = `${item.teamId}:${item.holeNum}`;
+    if (!byTeamHole.has(key)) byTeamHole.set(key, []);
+    byTeamHole.get(key)!.push(item);
+  }
+
   const teamDeltas: Record<string, number> = {};
 
-  for (const item of invalidatedMults) {
-    const holeResult = scoreboard.holes[item.holeNum];
+  for (const [, groupItems] of byTeamHole) {
+    const first = groupItems[0];
+    if (!first) continue;
+
+    const holeResult = scoreboard.holes[first.holeNum];
     if (!holeResult) continue;
 
-    const teamResult = holeResult.teams[item.teamId];
+    const teamResult = holeResult.teams[first.teamId];
     if (!teamResult) continue;
 
-    // Find the multiplier's value from the team's multiplier list
-    const multAward = teamResult.multipliers.find(
-      (m) => m.name === item.name && !m.earned,
-    );
-    if (!multAward || multAward.value <= 1) continue;
+    // Compute the combined multiplier for all user-activated (unearned)
+    // multipliers on this hole, then figure out what it would be without
+    // the invalidated ones.
+    let totalMult = 1;
+    let removedMult = 1;
+    for (const m of teamResult.multipliers) {
+      if (m.earned) continue;
+      totalMult *= m.value;
+      if (groupItems.some((gi) => gi.name === m.name)) {
+        removedMult *= m.value;
+      }
+    }
 
-    // Estimate points without this multiplier
-    // Current points = junkValue * totalMultiplier
-    // Without this mult = junkValue * (totalMultiplier / multValue)
-    // Delta = currentPoints - currentPoints / multValue
-    // = currentPoints * (1 - 1/multValue)
-    const delta = teamResult.points * (1 - 1 / multAward.value);
+    if (removedMult <= 1 || totalMult <= 1) continue;
 
-    teamDeltas[item.teamId] = (teamDeltas[item.teamId] ?? 0) + delta;
+    // points = baseJunk * totalMult
+    // pointsAfterRemoval = baseJunk * (totalMult / removedMult)
+    // delta = points - pointsAfterRemoval = points * (1 - 1/removedMult)
+    const delta = teamResult.points * (1 - 1 / removedMult);
+
+    teamDeltas[first.teamId] = (teamDeltas[first.teamId] ?? 0) + delta;
   }
 
   return Object.entries(scoreboard.cumulative.teams).map(
