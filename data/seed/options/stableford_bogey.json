@@ -1,6 +1,6 @@
 {
   "name": "stableford_bogey",
-  "disp": "Bogey (1 pt)",
+  "disp": "Bogey",
   "type": "junk",
   "sub_type": "dot",
   "value": 1,

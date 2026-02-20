@@ -14,6 +14,7 @@ import { GameNameModal } from "./GameNameModal";
 import { GameNameRow } from "./GameNameRow";
 import { GameOptionRow } from "./GameOptionRow";
 import { JunkOptionRow } from "./JunkOptionRow";
+import { JunkValueModal } from "./JunkValueModal";
 import { MenuOptionModal } from "./MenuOptionModal";
 import { MultiplierOptionRow } from "./MultiplierOptionRow";
 import { NumOptionModal } from "./NumOptionModal";
@@ -266,6 +267,14 @@ export function GameOptionsList() {
     setModalType(null);
   }, [selectedOptionName, game]);
 
+  const handleSaveJunkValue = useCallback(
+    (option: JunkOption, newValue: number) => {
+      if (!game?.spec?.$isLoaded) return;
+      game.spec.$jazz.set(option.name, { ...option, value: newValue });
+    },
+    [game],
+  );
+
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
     setSelectedOptionName(null);
@@ -433,12 +442,21 @@ export function GameOptionsList() {
         </>
       )}
 
-      {/* Junk/Multiplier Remove Modal */}
+      {/* Junk Value Modal — edit point value or remove */}
+      {showModal && selectedJunkOption && (
+        <JunkValueModal
+          visible={true}
+          option={selectedJunkOption}
+          onSave={handleSaveJunkValue}
+          onRemove={handleRemoveOption}
+          onClose={handleCloseModal}
+        />
+      )}
+
+      {/* Multiplier Remove Modal */}
       <RemoveOptionModal
-        visible={
-          showModal && (modalType === "junk" || modalType === "multiplier")
-        }
-        option={selectedJunkOption || selectedMultiplierOption}
+        visible={showModal && modalType === "multiplier"}
+        option={selectedMultiplierOption}
         onRemove={handleRemoveOption}
         onClose={handleCloseModal}
       />

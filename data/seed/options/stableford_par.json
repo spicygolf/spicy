@@ -1,6 +1,6 @@
 {
   "name": "stableford_par",
-  "disp": "Par (2 pts)",
+  "disp": "Par",
   "type": "junk",
   "sub_type": "dot",
   "value": 2,

@@ -1,6 +1,6 @@
 {
   "name": "stableford_birdie",
-  "disp": "Birdie (3 pts)",
+  "disp": "Birdie",
   "type": "junk",
   "sub_type": "dot",
   "value": 3,
