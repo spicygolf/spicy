@@ -137,6 +137,8 @@ function detectMultiplierInvalidations(
   holesList: string[],
 ): InvalidatedItem[] {
   const multiplierOptions = getMultiplierOptions(ctx);
+  // Presses are always included regardless of based_on (they have availability
+  // conditions even though they're automatic). All others must be user-selected.
   const userMultsWithAvailability = multiplierOptions.filter(
     (m) => (m.sub_type === "press" || m.based_on === "user") && m.availability,
   );
@@ -182,15 +184,14 @@ function detectMultiplierInvalidations(
         const optFirstHole = opt.firstHole;
         if (!optFirstHole) continue;
 
-        // For rest_of_nine scope, only check the instance where firstHole matches
-        // (the option persists on the activation hole, inherited holes just count it)
-        if (multDef.scope === "rest_of_nine" && optFirstHole !== holeNum) {
+        // For rest_of_nine scope, deduplicate across all holes (activation +
+        // inherited) so we only evaluate once per (name, team, firstHole).
+        if (multDef.scope === "rest_of_nine") {
           const dedupKey = `${multDef.name}:${teamId}:${optFirstHole}`;
           if (checkedRestOfNine.has(dedupKey)) continue;
           checkedRestOfNine.add(dedupKey);
 
-          // Check if this inherited multiplier's ORIGINAL activation was valid
-          // by checking against the hole where it was first activated
+          // Evaluate against the activation hole's data
           const firstHoleResult = scoreboard.holes[optFirstHole];
           if (firstHoleResult) {
             const firstHoleTeamResult = firstHoleResult.teams[teamId];
@@ -291,7 +292,10 @@ function detectCascadeInvalidations(
   );
 
   for (const invalidated of invalidatedMultipliers) {
-    // Find multipliers whose availability references the invalidated one
+    // Find multipliers whose availability references the invalidated one.
+    // TODO: This string-match heuristic is fragile — if availability
+    // expressions change format, this will silently break. Revisit if the
+    // availability format is ever restructured.
     const dependents = multiplierOptions.filter((m) => {
       if (!m.availability) return false;
       return (
@@ -446,13 +450,13 @@ function areTeamsTied(
 /**
  * Calculate the per-team score impact of removing invalidated multipliers.
  *
- * For each invalidated multiplier, estimates the point delta by looking at
- * the affected hole's team points and the multiplier's contribution.
+ * For each invalidated multiplier, scans every hole in the scoreboard where
+ * that team has the multiplier present (handles both hole-scoped and
+ * rest_of_nine multipliers that span multiple holes).
  *
- * The approach: on each affected hole, the team's points were calculated
- * with the stale multiplier included. We estimate the "without" points
- * by dividing the team's hole points by the invalid multiplier's value.
- * This is approximate but gives a good indication of impact.
+ * The approach: on each affected hole, estimate the delta as
+ * points * (1 - 1/removedMult). This is approximate but gives a good
+ * indication of impact.
  */
 function calculateScoreImpact(
   scoreboard: Scoreboard,
@@ -474,49 +478,39 @@ function calculateScoreImpact(
     );
   }
 
-  // Group invalidated multipliers by (teamId, holeNum) so we can compute
-  // the combined delta when multiple multipliers are removed from the same
-  // team on the same hole (e.g., double + pre_double both invalidated).
-  const byTeamHole = new Map<string, typeof invalidatedMults>();
-  for (const item of invalidatedMults) {
-    const key = `${item.teamId}:${item.holeNum}`;
-    if (!byTeamHole.has(key)) byTeamHole.set(key, []);
-    byTeamHole.get(key)!.push(item);
-  }
+  // Build a set of invalidated (teamId, multName) pairs for quick lookup
+  const invalidatedSet = new Set(
+    invalidatedMults.map((m) => `${m.teamId}:${m.name}`),
+  );
 
   const teamDeltas: Record<string, number> = {};
 
-  for (const [, groupItems] of byTeamHole) {
-    const first = groupItems[0];
-    if (!first) continue;
-
-    const holeResult = scoreboard.holes[first.holeNum];
-    if (!holeResult) continue;
-
-    const teamResult = holeResult.teams[first.teamId];
-    if (!teamResult) continue;
-
-    // Compute the combined multiplier for all user-activated (unearned)
-    // multipliers on this hole, then figure out what it would be without
-    // the invalidated ones.
-    let totalMult = 1;
-    let removedMult = 1;
-    for (const m of teamResult.multipliers) {
-      if (m.earned) continue;
-      totalMult *= m.value;
-      if (groupItems.some((gi) => gi.name === m.name)) {
-        removedMult *= m.value;
+  // Scan every hole — rest_of_nine multipliers appear on each affected hole
+  for (const [, holeResult] of Object.entries(scoreboard.holes)) {
+    for (const [teamId, teamResult] of Object.entries(holeResult.teams)) {
+      // Find invalidated multipliers present on this hole for this team
+      const removedNames = new Set<string>();
+      for (const m of teamResult.multipliers) {
+        if (m.earned) continue;
+        if (invalidatedSet.has(`${teamId}:${m.name}`)) {
+          removedNames.add(m.name);
+        }
       }
+      if (removedNames.size === 0) continue;
+
+      let removedMult = 1;
+      for (const m of teamResult.multipliers) {
+        if (m.earned) continue;
+        if (removedNames.has(m.name)) {
+          removedMult *= m.value;
+        }
+      }
+
+      if (removedMult <= 1) continue;
+
+      const delta = teamResult.points * (1 - 1 / removedMult);
+      teamDeltas[teamId] = (teamDeltas[teamId] ?? 0) + delta;
     }
-
-    if (removedMult <= 1 || totalMult <= 1) continue;
-
-    // points = baseJunk * totalMult
-    // pointsAfterRemoval = baseJunk * (totalMult / removedMult)
-    // delta = points - pointsAfterRemoval = points * (1 - 1/removedMult)
-    const delta = teamResult.points * (1 - 1 / removedMult);
-
-    teamDeltas[first.teamId] = (teamDeltas[first.teamId] ?? 0) + delta;
   }
 
   return Object.entries(scoreboard.cumulative.teams).map(
