@@ -7,7 +7,7 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
 import { DEFAULT_PAYOUT_PCTS } from "spicylib/scoring";
 import { Back } from "@/components/Back";
-import { useGame } from "@/hooks";
+import { useGame, useIsOrganizer } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Screen, Text, TextInput } from "@/ui";
 
@@ -21,6 +21,20 @@ function getDefaultPcts(places: number): number[] {
 }
 
 const PLACE_LABELS = ["1st", "2nd", "3rd", "4th", "5th"];
+const PayoutPctsList = co.list(z.number());
+
+function getGameOptionNumber(
+  // biome-ignore lint/suspicious/noExplicitAny: Jazz MaybeLoaded spec type is complex
+  spec: any,
+  key: string,
+  fallback: number,
+): number {
+  if (!spec?.$isLoaded) return fallback;
+  const opt = spec[key];
+  if (!opt || opt.type !== "game") return fallback;
+  const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
+  return Number.parseFloat(val) || fallback;
+}
 
 /** Distribute potTotal across pcts so rounded amounts sum exactly to potTotal. */
 function distributeAmounts(potTotal: number, pcts: number[]): number[] {
@@ -47,23 +61,11 @@ export function PlacesPaidScreen({ navigation }: Props) {
       payoutPools: { $each: { payoutPcts: true } },
     },
   });
+  const isOrganizer = useIsOrganizer(game);
 
   // Derive values directly from Jazz reactive data (no useMemo — Jazz handles reactivity)
-  const currentPlaces = (() => {
-    if (!game?.spec?.$isLoaded) return 3;
-    const opt = game.spec.places_paid;
-    if (!opt || opt.type !== "game") return 3;
-    const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
-    return Number.parseInt(val, 10) || 3;
-  })();
-
-  const buyIn = (() => {
-    if (!game?.spec?.$isLoaded) return 0;
-    const opt = game.spec.buy_in;
-    if (!opt || opt.type !== "game") return 0;
-    const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
-    return Number.parseFloat(val) || 0;
-  })();
+  const currentPlaces = getGameOptionNumber(game?.spec, "places_paid", 3);
+  const buyIn = getGameOptionNumber(game?.spec, "buy_in", 0);
 
   const playerCount = game?.players?.$isLoaded ? game.players.length : 0;
   const potTotal = buyIn * playerCount;
@@ -126,7 +128,7 @@ export function PlacesPaidScreen({ navigation }: Props) {
   const isValid = pctTotal === 100;
 
   const handleSave = useCallback(() => {
-    if (!game?.spec?.$isLoaded || !isValid) return;
+    if (!game?.spec?.$isLoaded || !isValid || isOrganizer === false) return;
 
     // Save places_paid game option
     const existingOpt = game.spec.places_paid;
@@ -142,7 +144,7 @@ export function PlacesPaidScreen({ navigation }: Props) {
       for (const pool of game.payoutPools) {
         if (pool?.$isLoaded && pool.splitType === "places") {
           pool.$jazz.set("placesPaid", places);
-          const pctsList = co.list(z.number()).create(pcts.slice(0, places), {
+          const pctsList = PayoutPctsList.create(pcts.slice(0, places), {
             owner: pool.$jazz.owner,
           });
           pool.$jazz.set("payoutPcts", pctsList);
@@ -151,7 +153,7 @@ export function PlacesPaidScreen({ navigation }: Props) {
     }
 
     navigation.goBack();
-  }, [game, places, pcts, isValid, navigation]);
+  }, [game, places, pcts, isValid, isOrganizer, navigation]);
 
   return (
     <Screen>

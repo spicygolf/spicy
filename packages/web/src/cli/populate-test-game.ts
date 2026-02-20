@@ -333,7 +333,7 @@ async function deleteMode(gameId: string, organizerId?: string): Promise<void> {
 
   // Wait for sync
   console.log("\nSyncing...");
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  await new Promise((r) => setTimeout(r, 3000));
   console.log("Done.\n");
 
   await done();
@@ -518,7 +518,7 @@ async function createGame(organizerId?: string): Promise<void> {
       {
         id: "test-course",
         status: "active",
-        name: "Test Links Golf Club",
+        name: "Test Links",
         city: "Scottsdale",
         state: "AZ",
         facility,
@@ -600,7 +600,7 @@ async function createGame(organizerId?: string): Promise<void> {
       }
 
       // Calculate course handicap
-      const slope = 130;
+      const slope = tee.ratings.total.slope;
       const courseHandicap = Math.round((pd.handicapIndex * slope) / 113);
 
       const round = Round.create(
@@ -659,7 +659,7 @@ async function createGame(organizerId?: string): Promise<void> {
     const game = Game.create(
       {
         start: new Date(),
-        name: "Big Game Test (48 players)",
+        name: "Big Game Test - 48",
         scope,
         spec,
         specRef: catalogSpec,
@@ -695,7 +695,7 @@ async function createGame(organizerId?: string): Promise<void> {
 
     // ── Wait for sync ──────────────────────────────────────────────────
     console.log("\nSyncing...");
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((r) => setTimeout(r, 5000));
     console.log("Done.");
     console.log(
       `\nTo delete: bun run packages/web/src/cli/populate-test-game.ts --delete ${game.$jazz.id}`,
