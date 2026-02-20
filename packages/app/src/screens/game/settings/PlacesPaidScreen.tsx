@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { co, z } from "jazz-tools";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
@@ -48,34 +48,27 @@ export function PlacesPaidScreen({ navigation }: Props) {
     },
   });
 
-  // Read current places_paid from game.spec
-  const currentPlaces = useMemo(() => {
+  // Derive values directly from Jazz reactive data (no useMemo — Jazz handles reactivity)
+  const currentPlaces = (() => {
     if (!game?.spec?.$isLoaded) return 3;
     const opt = game.spec.places_paid;
     if (!opt || opt.type !== "game") return 3;
     const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
     return Number.parseInt(val, 10) || 3;
-  }, [game]);
+  })();
 
-  // Read buy-in amount from game.spec
-  const buyIn = useMemo(() => {
+  const buyIn = (() => {
     if (!game?.spec?.$isLoaded) return 0;
     const opt = game.spec.buy_in;
     if (!opt || opt.type !== "game") return 0;
     const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
     return Number.parseFloat(val) || 0;
-  }, [game]);
+  })();
 
-  // Player count
-  const playerCount = useMemo(() => {
-    if (!game?.players?.$isLoaded) return 0;
-    return game.players.length;
-  }, [game]);
-
+  const playerCount = game?.players?.$isLoaded ? game.players.length : 0;
   const potTotal = buyIn * playerCount;
 
-  // Read current custom percentages from payoutPools (if any places-type pool exists)
-  const currentPoolPcts = useMemo(() => {
+  const currentPoolPcts = (() => {
     if (!game?.payoutPools?.$isLoaded) return null;
     for (const pool of game.payoutPools) {
       if (pool?.$isLoaded && pool.splitType === "places" && pool.placesPaid) {
@@ -86,7 +79,7 @@ export function PlacesPaidScreen({ navigation }: Props) {
       }
     }
     return null;
-  }, [game]);
+  })();
 
   const [places, setPlaces] = useState(currentPlaces);
   const [pcts, setPcts] = useState<number[]>(
