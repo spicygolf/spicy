@@ -79,7 +79,7 @@ jobs:
         run: bun install
 
       - name: Run Integration Tests
-        run: bun test ./packages/lib/scoring/__integration__/
+        run: bun test ./packages/lib/scoring/__integration__/ --timeout 120000
         env:
           JAZZ_API_KEY: ${{ vars.JAZZ_API_KEY }}
           JAZZ_WORKER_ACCOUNT: ${{ vars.JAZZ_WORKER_ACCOUNT }}
