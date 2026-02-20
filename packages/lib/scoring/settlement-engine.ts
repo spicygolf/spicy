@@ -63,7 +63,7 @@ export interface SettlementResult {
  * Default payout percentages based on places paid
  * These can be overridden per-pool via payoutPcts
  */
-const DEFAULT_PAYOUT_PCTS: Record<number, number[]> = {
+export const DEFAULT_PAYOUT_PCTS: Record<number, number[]> = {
   1: [100],
   2: [60, 40],
   3: [50, 30, 20],

@@ -17,6 +17,7 @@ import { SelectCourseNavigator } from "@/navigators/SelectCourseNavigator";
 import { AddRoundToGame } from "@/screens/game/settings/AddRoundToGame";
 import { HandicapAdjustment } from "@/screens/game/settings/HandicapAdjustment";
 import { ManualCourseHoles } from "@/screens/game/settings/ManualCourseHoles";
+import { PlacesPaidScreen } from "@/screens/game/settings/PlacesPaidScreen";
 import { Screen } from "@/ui";
 
 // Stack navigation for the settings flows (add player, select course, etc.)
@@ -39,6 +40,7 @@ export type GameSettingsStackParamList = {
     isEditMode?: boolean;
   };
   HoleOverrides: { optionName: string };
+  PlacesPaid: undefined;
 };
 
 // Tab navigation for the main settings views
@@ -147,6 +149,7 @@ export function GameSettings() {
       <Stack.Screen name="HandicapAdjustment" component={HandicapAdjustment} />
       <Stack.Screen name="ManualCourseHoles" component={ManualCourseHoles} />
       <Stack.Screen name="HoleOverrides" component={HoleOverrides} />
+      <Stack.Screen name="PlacesPaid" component={PlacesPaidScreen} />
     </Stack.Navigator>
   );
 }

@@ -223,11 +223,19 @@ export function GameOptionsList() {
     [game],
   );
 
-  const handleGameOptionPress = useCallback((option: GameOption) => {
-    setSelectedOptionName(option.name);
-    setModalType("game");
-    setShowModal(true);
-  }, []);
+  const handleGameOptionPress = useCallback(
+    (option: GameOption) => {
+      // Navigate to specialized screen for places_paid
+      if (option.name === "places_paid") {
+        navigation.navigate("PlacesPaid");
+        return;
+      }
+      setSelectedOptionName(option.name);
+      setModalType("game");
+      setShowModal(true);
+    },
+    [navigation],
+  );
 
   const handleJunkOptionPress = useCallback((option: JunkOption) => {
     setSelectedOptionName(option.name);
