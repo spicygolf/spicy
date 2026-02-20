@@ -7,5 +7,6 @@
   "icon": "album",
   "based_on": "user",
   "scope": "hole",
-  "availability": "{\n        'and': [\n          {'team_second_to_last': [\n            {'getPrevHole': []},\n            {'var': 'team'}\n          ]},\n          {'other_team_multiplied_with': [\n            {'getCurrHole': []},\n            {'var': 'team'},\n            'double'\n          ]}\n        ]\n      }"
+  "availability": "{\n        'and': [\n          {'team_second_to_last': [\n            {'getPrevHole': []},\n            {'var': 'team'}\n          ]},\n          {'other_team_multiplied_with': [\n            {'getCurrHole': []},\n            {'var': 'team'},\n            'double'\n          ]}\n        ]\n      }",
+  "invalidation_reason": "Other team's 2x was removed"
 }

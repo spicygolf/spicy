@@ -84,6 +84,9 @@ export const MultiplierOptionSchema = z.object({
   // If true, the multiplier value comes from user input (stored in TeamOption.value)
   // Used for custom multipliers where user specifies the multiplier amount
   input_value: z.boolean().optional(),
+  // Human-readable reason shown when this multiplier is invalidated by a retroactive edit
+  // e.g., "Team is no longer losing" — displayed in the invalidation modal
+  invalidation_reason: z.string().optional(),
 });
 export type MultiplierOption = z.infer<typeof MultiplierOptionSchema>;
 

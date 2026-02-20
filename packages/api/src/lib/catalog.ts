@@ -210,6 +210,7 @@ interface MultiplierOptionData {
   override?: boolean;
   input_value?: boolean;
   value_from?: string;
+  invalidation_reason?: string;
 }
 
 interface MetaOptionData {
@@ -750,6 +751,9 @@ export async function upsertGameSpec(
             ...(catalogOption.value_from && {
               value_from: catalogOption.value_from,
             }),
+            ...(catalogOption.invalidation_reason && {
+              invalidation_reason: catalogOption.invalidation_reason,
+            }),
           };
 
           spec.$jazz.set(opt.name, newMultOption);
@@ -888,6 +892,10 @@ async function upsertOptions(
           }),
         ...(opt.value_from &&
           typeof opt.value_from === "string" && { value_from: opt.value_from }),
+        ...(opt.invalidation_reason &&
+          typeof opt.invalidation_reason === "string" && {
+            invalidation_reason: opt.invalidation_reason,
+          }),
       };
 
       optionsMap.$jazz.set(opt.name, newOption);
@@ -1760,6 +1768,9 @@ export async function importGameSpecsToCatalog(
                   override: multData.override as boolean | undefined,
                   input_value: multData.input_value as boolean | undefined,
                   value_from: multData.value_from as string | undefined,
+                  invalidation_reason: multData.invalidation_reason as
+                    | string
+                    | undefined,
                 });
               }
             }

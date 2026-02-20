@@ -61,6 +61,7 @@ export interface SeedMultiplierOption {
   override?: boolean;
   input_value?: boolean;
   value_from?: string;
+  invalidation_reason?: string;
 }
 
 export interface SeedMetaOption {
@@ -277,6 +278,7 @@ export async function loadSeedSpecsAsV03(): Promise<
       override?: boolean;
       input_value?: boolean;
       value_from?: string;
+      invalidation_reason?: string;
     }>;
     meta?: Array<{
       name: string;
@@ -364,6 +366,7 @@ export async function loadSeedSpecsAsV03(): Promise<
           override: opt.override,
           input_value: opt.input_value,
           value_from: opt.value_from,
+          invalidation_reason: opt.invalidation_reason,
           ...overrides, // Apply per-spec overrides
         };
       })
@@ -421,6 +424,7 @@ export async function loadSeedSpecsAsV03(): Promise<
         override?: boolean;
         input_value?: boolean;
         value_from?: string;
+        invalidation_reason?: string;
       }>,
       // Pass through embedded meta options directly (new unified format)
       meta: spec.meta,

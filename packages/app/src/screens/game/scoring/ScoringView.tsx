@@ -9,8 +9,13 @@ import type {
   Team,
 } from "spicylib/schema";
 import { ListOfTeamOptions, TeamOption } from "spicylib/schema";
-import type { Scoreboard, ScoringContext } from "spicylib/scoring";
+import type {
+  InvalidationResult,
+  Scoreboard,
+  ScoringContext,
+} from "spicylib/scoring";
 import {
+  detectInvalidations,
   getHoleTeeMultiplierTotalWithOverride,
   getTeamHolePoints,
   getTeamRunningScore,
@@ -30,6 +35,7 @@ import {
   HoleHeader,
   type HoleOptionOverride,
   HoleToolbar,
+  InvalidationModal,
   PlayerScoreRow,
   TeamGroup,
   TeeFlipConfirmModal,
@@ -40,6 +46,7 @@ import { formatOptionValue } from "@/components/game/settings/options/formatOpti
 import type { HoleInfo } from "@/hooks";
 import { useOptionValue } from "@/hooks/useOptionValue";
 import {
+  applyInvalidationRemovals,
   getAllInheritedMultipliers,
   getCalculatedPlayerJunkOptions,
   getCalculatedTeamJunkOptions,
@@ -73,6 +80,45 @@ export interface ScoringViewProps {
   onScoreChange: (roundToGameId: string, newGross: number) => void;
   onUnscore: (roundToGameId: string) => void;
   onChangeTeams: () => void;
+}
+
+/** Check if a team has a specific team-level option on a hole */
+function hasTeamOption(
+  team: Team,
+  optionName: string,
+  holeNum: string,
+): boolean {
+  if (!team.options?.$isLoaded) return false;
+  for (const opt of team.options) {
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === optionName &&
+      opt.firstHole === holeNum &&
+      !opt.playerId
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Check if a team has a specific player-level option */
+function hasPlayerOption(
+  team: Team,
+  optionName: string,
+  playerId: string,
+): boolean {
+  if (!team.options?.$isLoaded) return false;
+  for (const opt of team.options) {
+    if (
+      opt?.$isLoaded &&
+      opt.optionName === optionName &&
+      opt.playerId === playerId
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -446,6 +492,28 @@ function removeTeeFlipOption(
   }
 }
 
+type UndoSnapshot =
+  | {
+      kind: "score";
+      roundToGameId: string;
+      holeNum: string;
+      prevGross: number | null;
+    }
+  | {
+      kind: "junk";
+      teamId: string;
+      playerId: string;
+      junkName: string;
+      wasOn: boolean;
+    }
+  | {
+      kind: "multiplier";
+      teamId: string;
+      multiplierName: string;
+      holeNum: string;
+      wasOn: boolean;
+    };
+
 export function ScoringView({
   game,
   holeInfo,
@@ -784,6 +852,170 @@ export function ScoringView({
     );
   };
 
+  // --- Retroactive Edit Invalidation ---
+  // Detects invalidated multipliers and tee flips after a score edit on an earlier hole.
+  // Shows a modal with three options: Remove, Keep, or Undo Edit.
+
+  const [pendingInvalidation, setPendingInvalidation] = useState(false);
+  const [invalidationResult, setInvalidationResult] =
+    useState<InvalidationResult | null>(null);
+  const [undoSnapshot, setUndoSnapshot] = useState<UndoSnapshot | null>(null);
+
+  /** Capture undo snapshot and schedule invalidation check after next scoreboard recalc. */
+  const triggerInvalidationCheck = useCallback((snapshot: UndoSnapshot) => {
+    setUndoSnapshot(snapshot);
+    setPendingInvalidation(true);
+  }, []);
+
+  const handleScoreChangeWithInvalidation = useCallback(
+    (roundToGameId: string, newGross: number) => {
+      if (game?.rounds?.$isLoaded) {
+        const rtg = game.rounds.find(
+          (r) => r?.$isLoaded && r.$jazz.id === roundToGameId,
+        );
+        if (rtg?.$isLoaded && rtg.round?.$isLoaded) {
+          const prevGross = getGrossScore(rtg.round, currentHoleNumber);
+          triggerInvalidationCheck({
+            kind: "score",
+            roundToGameId,
+            holeNum: currentHoleNumber,
+            prevGross,
+          });
+        }
+      }
+      onScoreChange(roundToGameId, newGross);
+    },
+    [onScoreChange, currentHoleNumber, game, triggerInvalidationCheck],
+  );
+
+  const handleUnscoreWithInvalidation = useCallback(
+    (roundToGameId: string) => {
+      if (game?.rounds?.$isLoaded) {
+        const rtg = game.rounds.find(
+          (r) => r?.$isLoaded && r.$jazz.id === roundToGameId,
+        );
+        if (rtg?.$isLoaded && rtg.round?.$isLoaded) {
+          const prevGross = getGrossScore(rtg.round, currentHoleNumber);
+          // prevGross is null when there was no score before this action.
+          // Undo with null calls onUnscore to clear the newly entered value.
+          triggerInvalidationCheck({
+            kind: "score",
+            roundToGameId,
+            holeNum: currentHoleNumber,
+            prevGross,
+          });
+        }
+      }
+      onUnscore(roundToGameId);
+    },
+    [onUnscore, currentHoleNumber, game, triggerInvalidationCheck],
+  );
+
+  // Run invalidation detection after a user action triggers it AND the
+  // scoreboard has recalculated. Only fires when pendingInvalidation is true
+  // (set by triggerInvalidationCheck), so remote Jazz syncs and other
+  // non-user-initiated scoreboard changes won't show spurious modals.
+  useEffect(() => {
+    if (!pendingInvalidation || !scoreboard || !scoringContext) return;
+
+    setPendingInvalidation(false);
+
+    const result = detectInvalidations(
+      scoreboard,
+      scoringContext,
+      currentHoleNumber,
+      holesList,
+      teeFlipEnabled,
+    );
+
+    if (result.hasInvalidations) {
+      setInvalidationResult(result);
+    } else {
+      setUndoSnapshot(null);
+    }
+  }, [
+    pendingInvalidation,
+    scoreboard,
+    scoringContext,
+    currentHoleNumber,
+    holesList,
+    teeFlipEnabled,
+  ]);
+
+  // Invalidation modal handlers
+  const handleInvalidationRemove = useCallback(() => {
+    if (!invalidationResult || !scoringContext) return;
+    applyInvalidationRemovals(
+      invalidationResult,
+      scoringContext.gameHoles,
+      multiplierOptions,
+    );
+    setInvalidationResult(null);
+    setUndoSnapshot(null);
+  }, [invalidationResult, scoringContext, multiplierOptions]);
+
+  const handleInvalidationKeep = useCallback(() => {
+    setInvalidationResult(null);
+    setUndoSnapshot(null);
+  }, []);
+
+  const handleInvalidationUndo = useCallback(() => {
+    if (undoSnapshot) {
+      switch (undoSnapshot.kind) {
+        case "score":
+          if (undoSnapshot.prevGross !== null) {
+            onScoreChange(undoSnapshot.roundToGameId, undoSnapshot.prevGross);
+          } else {
+            // Previous score was empty — undo by removing the newly entered score
+            onUnscore(undoSnapshot.roundToGameId);
+          }
+          break;
+        case "junk":
+          // Toggle junk back — if it was on, re-add; if off, remove
+          if (currentHole?.teams?.$isLoaded) {
+            for (const team of currentHole.teams) {
+              if (team?.$isLoaded && team.team === undoSnapshot.teamId) {
+                togglePlayerJunk(
+                  team,
+                  allTeams,
+                  undoSnapshot.playerId,
+                  undoSnapshot.junkName,
+                );
+                break;
+              }
+            }
+          }
+          break;
+        case "multiplier":
+          // Toggle multiplier back
+          if (currentHole?.teams?.$isLoaded) {
+            for (const team of currentHole.teams) {
+              if (team?.$isLoaded && team.team === undoSnapshot.teamId) {
+                toggleTeamMultiplier(
+                  team,
+                  undoSnapshot.multiplierName,
+                  undoSnapshot.holeNum,
+                  allTeams,
+                  multiplierOptions,
+                );
+                break;
+              }
+            }
+          }
+          break;
+      }
+    }
+    setInvalidationResult(null);
+    setUndoSnapshot(null);
+  }, [
+    undoSnapshot,
+    onScoreChange,
+    onUnscore,
+    currentHole,
+    allTeams,
+    multiplierOptions,
+  ]);
+
   return (
     <>
       <HoleHeader
@@ -860,6 +1092,14 @@ export function ScoringView({
           />
         </>
       )}
+      <InvalidationModal
+        visible={!!invalidationResult}
+        result={invalidationResult}
+        canUndo={!!undoSnapshot}
+        onRemove={handleInvalidationRemove}
+        onKeep={handleInvalidationKeep}
+        onUndoEdit={handleInvalidationUndo}
+      />
       <FlatList
         style={styles.content}
         data={allTeams}
@@ -1078,15 +1318,22 @@ export function ScoringView({
               multiplierOptions={multiplierButtons}
               earnedMultipliers={earnedMultiplierButtons}
               teamJunkOptions={teamJunkButtons}
-              onMultiplierToggle={(multName) =>
+              onMultiplierToggle={(multName) => {
+                triggerInvalidationCheck({
+                  kind: "multiplier",
+                  teamId,
+                  multiplierName: multName,
+                  holeNum: currentHoleNumber,
+                  wasOn: hasTeamOption(team, multName, currentHoleNumber),
+                });
                 toggleTeamMultiplier(
                   team,
                   multName,
                   currentHoleNumber,
                   allTeams,
                   multiplierOptions,
-                )
-              }
+                );
+              }}
               junkTotal={displayJunk}
               holeMultiplier={overallMultiplier}
               holePoints={displayPoints}
@@ -1218,10 +1465,19 @@ export function ScoringView({
                     pops={calculatedPops}
                     junkOptions={junkButtons}
                     onScoreChange={(newGross) =>
-                      onScoreChange(rtg.$jazz.id, newGross)
+                      handleScoreChangeWithInvalidation(rtg.$jazz.id, newGross)
                     }
-                    onUnscore={() => onUnscore(rtg.$jazz.id)}
+                    onUnscore={() =>
+                      handleUnscoreWithInvalidation(rtg.$jazz.id)
+                    }
                     onJunkToggle={(junkName) => {
+                      triggerInvalidationCheck({
+                        kind: "junk",
+                        teamId,
+                        playerId: round.playerId,
+                        junkName,
+                        wasOn: hasPlayerOption(team, junkName, round.playerId),
+                      });
                       const junkOption = userJunkOptions.find(
                         (j) => j.name === junkName,
                       );

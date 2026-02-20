@@ -99,67 +99,168 @@ function requireScoreboard(): asserts scoreboard is Scoreboard {
   }
 }
 
-describe("Five Points Integration Tests", () => {
-  beforeAll(async () => {
-    // Skip if credentials not available
-    if (!hasCredentials) {
-      console.warn("Skipping integration tests: Missing Jazz credentials");
-      return;
-    }
+// Monotonically increasing attempt ID so stale connectAndLoadGame completions
+// don't overwrite module-level state after a timeout.
+let currentAttemptId = 0;
 
-    // Start Jazz worker
-    // Use createSync() to avoid fetch(dataURL) which hangs in Bun on Linux CI
-    worker = await startWorker({
-      AccountSchema: PlayerAccount,
-      syncServer: `wss://cloud.jazz.tools/?key=${JAZZ_API_KEY}`,
-      accountID: JAZZ_WORKER_ACCOUNT,
-      accountSecret: JAZZ_WORKER_SECRET,
-      skipInboxLoad: true,
-      crypto: WasmCrypto.createSync(),
-    });
+/**
+ * Connect to Jazz Cloud, load the game, and run the scoring pipeline.
+ * Extracted so it can be retried on transient network failures.
+ *
+ * Uses `attemptId` to guard against zombie-worker leaks: if this attempt
+ * is no longer current (timed out and a retry started), it cleans up its
+ * own worker instead of writing to the shared module-level variables.
+ */
+async function connectAndLoadGame(attemptId: number): Promise<void> {
+  // Start Jazz worker
+  // Use createSync() to avoid fetch(dataURL) which hangs in Bun on Linux CI
+  const localWorker = await startWorker({
+    AccountSchema: PlayerAccount,
+    syncServer: `wss://cloud.jazz.tools/?key=${JAZZ_API_KEY}`,
+    accountID: JAZZ_WORKER_ACCOUNT,
+    accountSecret: JAZZ_WORKER_SECRET,
+    skipInboxLoad: true,
+    crypto: WasmCrypto.createSync(),
+  });
 
-    // Load the game from catalog.games by legacyId
-    const workerAccount = await PlayerAccount.load(
-      JAZZ_WORKER_ACCOUNT as ID<typeof PlayerAccount>,
-      {
-        loadAs: worker.worker,
-        resolve: {
-          profile: {
-            catalog: {
-              games: { $each: true },
-            },
+  // If this attempt is stale (timed out), clean up and bail
+  if (attemptId !== currentAttemptId) {
+    await localWorker.done();
+    return;
+  }
+
+  // Load the game from catalog.games by legacyId
+  const workerAccount = await PlayerAccount.load(
+    JAZZ_WORKER_ACCOUNT as ID<typeof PlayerAccount>,
+    {
+      loadAs: localWorker.worker,
+      resolve: {
+        profile: {
+          catalog: {
+            games: { $each: true },
           },
         },
       },
+    },
+  );
+
+  if (!workerAccount?.profile?.catalog?.games?.$isLoaded) {
+    await localWorker.done();
+    throw new Error("Failed to load catalog.games");
+  }
+
+  const catalogGame =
+    workerAccount.profile.catalog.games[FIVE_POINTS_GAME_LEGACY_ID];
+  if (!catalogGame?.$isLoaded) {
+    await localWorker.done();
+    throw new Error(
+      `Game with legacyId ${FIVE_POINTS_GAME_LEGACY_ID} not found in catalog`,
     );
+  }
 
-    if (!workerAccount?.profile?.catalog?.games?.$isLoaded) {
-      throw new Error("Failed to load catalog.games");
-    }
+  const localGameId = catalogGame.$jazz.id;
 
-    const catalogGame =
-      workerAccount.profile.catalog.games[FIVE_POINTS_GAME_LEGACY_ID];
-    if (!catalogGame?.$isLoaded) {
+  // Now load the game with full resolve query for scoring
+  const localGame = await Game.load(localGameId as ID<typeof Game>, {
+    loadAs: localWorker.worker,
+    resolve: GAME_RESOLVE,
+  });
+
+  if (!localGame?.$isLoaded) {
+    await localWorker.done();
+    throw new Error(`Failed to load game ${localGameId}`);
+  }
+
+  // Final stale check before committing to shared state
+  if (attemptId !== currentAttemptId) {
+    await localWorker.done();
+    return;
+  }
+
+  // Commit to shared module-level state
+  worker = localWorker;
+  gameId = localGameId;
+  game = localGame;
+  scoreboard = score(localGame);
+}
+
+/**
+ * Attempt an async operation with a per-attempt timeout.
+ * Rejects if the operation doesn't complete within `ms` milliseconds.
+ */
+function withTimeout<T>(fn: () => Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((res, rej) => {
+    const timer = setTimeout(
+      () => rej(new Error(`Operation timed out after ${ms}ms`)),
+      ms,
+    );
+    fn().then(
+      (v) => {
+        clearTimeout(timer);
+        res(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        rej(e);
+      },
+    );
+  });
+}
+
+const MAX_RETRIES = 3;
+const PER_ATTEMPT_TIMEOUT_MS = 30_000;
+
+describe("Five Points Integration Tests", () => {
+  beforeAll(
+    async () => {
+      // Skip if credentials not available
+      if (!hasCredentials) {
+        console.warn("Skipping integration tests: Missing Jazz credentials");
+        return;
+      }
+
+      // Retry with per-attempt timeout to handle transient Jazz Cloud issues
+      let lastError: unknown;
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          currentAttemptId = attempt;
+          await withTimeout(
+            () => connectAndLoadGame(attempt),
+            PER_ATTEMPT_TIMEOUT_MS,
+          );
+          return; // Success
+        } catch (err) {
+          lastError = err;
+          console.warn(
+            `Jazz connection attempt ${attempt}/${MAX_RETRIES} failed: ${err instanceof Error ? err.message : err}`,
+          );
+
+          // Clean up failed worker before retrying
+          if (worker) {
+            try {
+              await worker.done();
+            } catch {
+              // Ignore cleanup errors
+            }
+            worker = null;
+          }
+          game = null;
+          gameId = null;
+          scoreboard = null;
+
+          if (attempt < MAX_RETRIES) {
+            // Brief pause before retry (1s, 2s)
+            await new Promise((r) => setTimeout(r, attempt * 1000));
+          }
+        }
+      }
+
       throw new Error(
-        `Game with legacyId ${FIVE_POINTS_GAME_LEGACY_ID} not found in catalog`,
+        `Failed to connect to Jazz after ${MAX_RETRIES} attempts: ${lastError instanceof Error ? lastError.message : lastError}`,
       );
-    }
-
-    gameId = catalogGame.$jazz.id;
-
-    // Now load the game with full resolve query for scoring
-    game = await Game.load(gameId as ID<typeof Game>, {
-      loadAs: worker.worker,
-      resolve: GAME_RESOLVE,
-    });
-
-    if (!game?.$isLoaded) {
-      throw new Error(`Failed to load game ${gameId}`);
-    }
-
-    // Run the scoring pipeline
-    scoreboard = score(game);
-  }, 30000);
+    },
+    MAX_RETRIES * PER_ATTEMPT_TIMEOUT_MS + 10_000,
+  );
 
   afterAll(async () => {
     if (worker) {
