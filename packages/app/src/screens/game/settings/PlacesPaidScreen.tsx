@@ -33,7 +33,8 @@ function getGameOptionNumber(
   const opt = spec[key];
   if (!opt || opt.type !== "game") return fallback;
   const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
-  return Number.parseFloat(val) || fallback;
+  const parsed = Number.parseFloat(val);
+  return Number.isNaN(parsed) ? fallback : parsed;
 }
 
 /** Distribute potTotal across pcts so rounded amounts sum exactly to potTotal. */
@@ -88,15 +89,21 @@ export function PlacesPaidScreen({ navigation }: Props) {
     () => currentPoolPcts ?? getDefaultPcts(currentPlaces),
   );
 
-  // Sync local state once Jazz data finishes loading
+  // Sync local state once Jazz data finishes loading (both spec and payoutPools)
   const initialized = useRef(false);
   useEffect(() => {
     if (initialized.current) return;
     if (!game?.spec?.$isLoaded) return;
+    if (!game?.payoutPools?.$isLoaded) return;
     initialized.current = true;
     setPlaces(currentPlaces);
     setPcts(currentPoolPcts ?? getDefaultPcts(currentPlaces));
-  }, [game?.spec?.$isLoaded, currentPlaces, currentPoolPcts]);
+  }, [
+    game?.spec?.$isLoaded,
+    game?.payoutPools?.$isLoaded,
+    currentPlaces,
+    currentPoolPcts,
+  ]);
 
   const handlePlacesChange = useCallback((newPlaces: number) => {
     const clamped = Math.max(MIN_PLACES, Math.min(MAX_PLACES, newPlaces));
@@ -124,6 +131,7 @@ export function PlacesPaidScreen({ navigation }: Props) {
   }, []);
 
   const activePcts = pcts.slice(0, places);
+  const amounts = distributeAmounts(potTotal, activePcts);
   const pctTotal = activePcts.reduce((sum, p) => sum + p, 0);
   const isValid = pctTotal === 100;
 
@@ -236,28 +244,25 @@ export function PlacesPaidScreen({ navigation }: Props) {
                 <Text style={styles.payoutHeaderAmount}>Amount</Text>
               )}
             </View>
-            {(() => {
-              const amounts = distributeAmounts(potTotal, activePcts);
-              return activePcts.map((pct, i) => (
-                <View key={PLACE_LABELS[i]} style={styles.payoutRow}>
-                  <Text style={styles.placeLabel}>{PLACE_LABELS[i]}</Text>
-                  <View style={styles.pctInputWrapper}>
-                    <TextInput
-                      style={[styles.pctInput, { color: theme.colors.primary }]}
-                      value={String(pct)}
-                      onChangeText={(text) => handlePctChange(i, text)}
-                      keyboardType="number-pad"
-                      selectTextOnFocus
-                      maxLength={3}
-                    />
-                    <Text style={styles.pctSuffix}>%</Text>
-                  </View>
-                  {potTotal > 0 && (
-                    <Text style={styles.amountText}>${amounts[i]}</Text>
-                  )}
+            {activePcts.map((pct, i) => (
+              <View key={PLACE_LABELS[i]} style={styles.payoutRow}>
+                <Text style={styles.placeLabel}>{PLACE_LABELS[i]}</Text>
+                <View style={styles.pctInputWrapper}>
+                  <TextInput
+                    style={[styles.pctInput, { color: theme.colors.primary }]}
+                    value={String(pct)}
+                    onChangeText={(text) => handlePctChange(i, text)}
+                    keyboardType="number-pad"
+                    selectTextOnFocus
+                    maxLength={3}
+                  />
+                  <Text style={styles.pctSuffix}>%</Text>
                 </View>
-              ));
-            })()}
+                {potTotal > 0 && (
+                  <Text style={styles.amountText}>${amounts[i]}</Text>
+                )}
+              </View>
+            ))}
           </View>
 
           {/* Total validation */}
@@ -482,6 +487,6 @@ const styles = StyleSheet.create((theme) => ({
   saveButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#fff",
+    color: theme.colors.actionText,
   },
 }));

@@ -437,6 +437,13 @@ async function createGame(organizerId?: string): Promise<void> {
         await done();
         process.exit(1);
       }
+    } else if (!organizerId) {
+      console.warn(
+        "\nWarning: No --organizer specified. Game won't appear in any user's games list",
+      );
+      console.warn(
+        "and duplicate detection is disabled. Use --organizer <accountId> for production use.\n",
+      );
     }
 
     // ── Create course & tee ────────────────────────────────────────────
