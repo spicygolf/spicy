@@ -6,7 +6,7 @@ import { Text } from "@/ui";
 
 interface JunkOptionRowProps {
   option: JunkOption;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 export function JunkOptionRow({ option, onPress }: JunkOptionRowProps) {

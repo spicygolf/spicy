@@ -140,6 +140,7 @@ export function useCreateGame() {
         holes,
         players,
         rounds: roundToGames,
+        organizer: me.$jazz.id,
         payoutPools,
       },
       { owner: group },

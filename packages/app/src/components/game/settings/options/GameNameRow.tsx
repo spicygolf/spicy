@@ -5,7 +5,7 @@ import { Text } from "@/ui";
 
 interface GameNameRowProps {
   name: string;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 export function GameNameRow({ name, onPress }: GameNameRowProps) {

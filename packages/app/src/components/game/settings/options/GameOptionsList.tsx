@@ -5,7 +5,12 @@ import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { GameOption, JunkOption, MultiplierOption } from "spicylib/schema";
 import { isEveningCreation, isSameDay } from "spicylib/utils";
-import { useGame, useSaveOptionToGame, useTeamsMode } from "@/hooks";
+import {
+  useGame,
+  useIsOrganizer,
+  useSaveOptionToGame,
+  useTeamsMode,
+} from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { BoolOptionModal } from "./BoolOptionModal";
 import { DeleteGameButton } from "./DeleteGameButton";
@@ -47,6 +52,7 @@ export function GameOptionsList() {
   });
 
   const { isTeamsMode } = useTeamsMode(game);
+  const isOrganizer = useIsOrganizer(game);
 
   const [selectedOptionName, setSelectedOptionName] = useState<string | null>(
     null,
@@ -334,18 +340,20 @@ export function GameOptionsList() {
             <OptionSectionHeader title="Game" />
             <GameNameRow
               name={game.name}
-              onPress={() => setShowNameModal(true)}
+              onPress={isOrganizer ? () => setShowNameModal(true) : undefined}
             />
             <TeeTimeRow
               start={game.start}
-              onPress={() => setShowTeeTimeModal(true)}
+              onPress={
+                isOrganizer ? () => setShowTeeTimeModal(true) : undefined
+              }
             />
           </>
         )}
 
         {/* Game Options Section */}
         {gameOptions.length > 0 && (
-          <>
+          <View style={!isOrganizer && styles.readOnly}>
             <OptionSectionHeader title="Settings" />
             {gameOptions.map((option) => {
               const displayOverride = getDisplayOverride(option);
@@ -355,49 +363,61 @@ export function GameOptionsList() {
                   option={option}
                   currentValue={getCurrentValue(option.name)}
                   onPress={
-                    displayOverride
-                      ? () => handleCustomizePress(option.name)
-                      : () => handleGameOptionPress(option)
+                    isOrganizer
+                      ? displayOverride
+                        ? () => handleCustomizePress(option.name)
+                        : () => handleGameOptionPress(option)
+                      : undefined
                   }
                   displayOverride={displayOverride}
                 />
               );
             })}
-          </>
+          </View>
         )}
 
         {/* Junk Options Section */}
         {junkOptions.length > 0 && (
-          <>
+          <View style={!isOrganizer && styles.readOnly}>
             <OptionSectionHeader title="Junk (Points)" />
             {junkOptions.map((option) => (
               <JunkOptionRow
                 key={option.name}
                 option={option}
-                onPress={() => handleJunkOptionPress(option)}
+                onPress={
+                  isOrganizer ? () => handleJunkOptionPress(option) : undefined
+                }
               />
             ))}
-          </>
+          </View>
         )}
 
         {/* Multiplier Options Section */}
         {multiplierOptions.length > 0 && (
-          <>
+          <View style={!isOrganizer && styles.readOnly}>
             <OptionSectionHeader title="Multipliers" />
             {multiplierOptions.map((option) => (
               <MultiplierOptionRow
                 key={option.name}
                 option={option}
-                onPress={() => handleMultiplierOptionPress(option)}
+                onPress={
+                  isOrganizer
+                    ? () => handleMultiplierOptionPress(option)
+                    : undefined
+                }
               />
             ))}
-          </>
+          </View>
         )}
 
-        {/* Admin Section */}
-        <OptionSectionHeader title="Admin" />
-        <ResetSpecButton game={game} />
-        <DeleteGameButton game={game} />
+        {/* Admin Section — organizer only */}
+        {isOrganizer && (
+          <>
+            <OptionSectionHeader title="Admin" />
+            <ResetSpecButton game={game} />
+            <DeleteGameButton game={game} />
+          </>
+        )}
       </ScrollView>
 
       {/* Game Option Modals */}
@@ -497,5 +517,8 @@ const styles = StyleSheet.create((_theme) => ({
   },
   scrollView: {
     flex: 1,
+  },
+  readOnly: {
+    opacity: 0.6,
   },
 }));

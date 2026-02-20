@@ -60,6 +60,13 @@ export const Game = co.map({
   handicapCheckDismissedAt: z.date().optional(),
 
   /**
+   * Account ID of the game organizer (creator).
+   * Only the organizer can modify game settings.
+   * If absent (legacy games), all players can edit settings.
+   */
+  organizer: z.string().optional(),
+
+  /**
    * Payout pool configuration for settlement.
    * Each pool defines how a portion of the pot is distributed.
    * If absent, settlement uses a single 100% winner-take-all pool.

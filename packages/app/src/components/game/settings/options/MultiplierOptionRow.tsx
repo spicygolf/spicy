@@ -6,7 +6,7 @@ import { Text } from "@/ui";
 
 interface MultiplierOptionRowProps {
   option: MultiplierOption;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 export function MultiplierOptionRow({

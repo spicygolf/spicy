@@ -6,7 +6,7 @@ import { Text } from "@/ui";
 
 interface TeeTimeRowProps {
   start: Date;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 export function TeeTimeRow({ start, onPress }: TeeTimeRowProps) {

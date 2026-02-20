@@ -7,7 +7,7 @@ import { Text } from "@/ui";
 interface GameOptionRowProps {
   option: GameOption;
   currentValue: string | undefined;
-  onPress: () => void;
+  onPress?: () => void;
   /** Override the displayed value text (e.g. "8 / 16" for mixed per-hole values) */
   displayOverride?: string;
 }
