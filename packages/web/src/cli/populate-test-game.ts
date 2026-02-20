@@ -228,7 +228,7 @@ function generateScore(par: number, handicapIndex: number): number {
 
 // ─── Main ───────────────────────────────────────────────────────────────────
 
-async function deleteMode(gameId: string): Promise<void> {
+async function deleteMode(gameId: string, organizerId?: string): Promise<void> {
   console.log(`\nDelete mode for game: ${gameId}\n`);
 
   const { worker, done } = await startWorker({
@@ -242,7 +242,11 @@ async function deleteMode(gameId: string): Promise<void> {
     const game = await Game.load(gameId as ID<Game>, {
       loadAs: worker,
       resolve: {
-        players: { $each: true },
+        holes: {
+          $each: { teams: { $each: { rounds: true, options: true } } },
+        },
+        rounds: { $each: { round: { scores: true } } },
+        players: true,
       },
     });
 
@@ -256,13 +260,81 @@ async function deleteMode(gameId: string): Promise<void> {
     console.log(`Legacy ID: ${game.legacyId || "none"}`);
     console.log(`Players: ${game.players?.length ?? 0}`);
     console.log(`Start: ${game.start}`);
-    console.log(
-      "\nTo delete, remove this game from your games list in the app.",
-    );
-    console.log("Jazz CoValues cannot be easily deleted from the CLI.\n");
+
+    // Deep delete game data (same approach as e2eCleanup.ts)
+    // biome-ignore lint/suspicious/noExplicitAny: Jazz resolved types need assertion for mutations
+    const g = game as any;
+
+    if (g.holes?.$isLoaded) {
+      for (let i = 0; i < g.holes.length; i++) {
+        const hole = g.holes[i];
+        if (!hole?.$isLoaded || !hole.teams?.$isLoaded) continue;
+        for (let j = 0; j < hole.teams.length; j++) {
+          const team = hole.teams[j];
+          if (!team?.$isLoaded) continue;
+          if (team.$jazz.has("options") && team.options?.$isLoaded)
+            team.options.$jazz.splice(0, team.options.length);
+          if (team.rounds?.$isLoaded)
+            team.rounds.$jazz.splice(0, team.rounds.length);
+        }
+        hole.teams.$jazz.splice(0, hole.teams.length);
+      }
+      g.holes.$jazz.splice(0, g.holes.length);
+      console.log("  Cleared holes & teams");
+    }
+
+    if (g.rounds?.$isLoaded) {
+      for (let i = 0; i < g.rounds.length; i++) {
+        const rtg = g.rounds[i];
+        if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+        if (rtg.round.scores?.$isLoaded) {
+          for (const key of Object.keys(rtg.round.scores)) {
+            if (!key.startsWith("$") && key !== "_refs")
+              rtg.round.scores.$jazz.delete(key);
+          }
+        }
+      }
+      g.rounds.$jazz.splice(0, g.rounds.length);
+      console.log("  Cleared rounds & scores");
+    }
+
+    if (g.players?.$isLoaded) {
+      g.players.$jazz.splice(0, g.players.length);
+      console.log("  Cleared players");
+    }
+
+    // Remove from organizer's games list if provided
+    if (organizerId) {
+      const account = await PlayerAccount.load(
+        organizerId as ID<typeof PlayerAccount>,
+        { loadAs: worker, resolve: { root: { games: true } } },
+      );
+      if (account?.$isLoaded && account.root?.games?.$isLoaded) {
+        const games = account.root.games;
+        const idx = games.findIndex(
+          // biome-ignore lint/suspicious/noExplicitAny: Jazz list item type
+          (ga: any) => ga?.$jazz?.id === gameId,
+        );
+        if (idx !== -1) {
+          games.$jazz.splice(idx, 1);
+          console.log(`  Removed from ${organizerId}'s games list`);
+        } else {
+          console.log(`  Game not found in ${organizerId}'s games list`);
+        }
+      }
+    } else {
+      console.log(
+        "\nTip: pass --organizer <accountId> to also remove from their games list",
+      );
+    }
   } catch (err) {
     console.error("Error:", err);
   }
+
+  // Wait for sync
+  console.log("\nSyncing...");
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  console.log("Done.\n");
 
   await done();
 }
@@ -581,7 +653,10 @@ async function createGame(organizerId?: string): Promise<void> {
     );
 
     // Add game to organizer's games list so it appears in their app
-    if (organizerAccount?.$isLoaded && organizerAccount.root?.games?.$isLoaded) {
+    if (
+      organizerAccount?.$isLoaded &&
+      organizerAccount.root?.games?.$isLoaded
+    ) {
       organizerAccount.root.games.$jazz.push(game);
       console.log("  Added game to organizer's games list");
     }
@@ -626,11 +701,12 @@ if (args.includes("--delete")) {
   const gameId = parseFlag("--delete");
   if (!gameId || !gameId.startsWith("co_")) {
     console.error(
-      "Usage: bun run packages/web/src/cli/populate-test-game.ts --delete <gameId>",
+      "Usage: bun run packages/web/src/cli/populate-test-game.ts --delete <gameId> [--organizer <accountId>]",
     );
     process.exit(1);
   }
-  await deleteMode(gameId);
+  const organizerId = parseFlag("--organizer");
+  await deleteMode(gameId, organizerId);
 } else if (args.includes("--help") || args.includes("-h")) {
   console.log(`
 Populate Test Big Game
