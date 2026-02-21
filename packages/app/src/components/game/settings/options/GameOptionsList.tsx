@@ -39,6 +39,7 @@ function CopyGameIdButton({ gameId }: { gameId: string }) {
 
   const handleCopy = () => {
     Clipboard.setString(gameId);
+    opacity.stopAnimation();
     Animated.sequence([
       Animated.timing(opacity, {
         toValue: 0.3,

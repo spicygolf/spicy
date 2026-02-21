@@ -655,13 +655,16 @@ async function createGame(organizerId?: string): Promise<void> {
 
     // ── Assign each player to their own team on every hole ────────────
     console.log("Assigning players to individual teams...");
+    let assignedCount = 0;
     for (let pi = 0; pi < roundToGames.length; pi++) {
       const rtg = roundToGames[pi];
       if (!rtg) continue;
-      autoAssignPlayerToTeam(game, rtg, pi + 1);
+      if (autoAssignPlayerToTeam(game, rtg, pi + 1)) {
+        assignedCount++;
+      }
     }
     console.log(
-      `  Assigned ${roundToGames.length} players to individual teams`,
+      `  Assigned ${assignedCount}/${roundToGames.length} players to individual teams`,
     );
 
     // Add game to organizer's games list so it appears in their app
@@ -690,7 +693,7 @@ async function createGame(organizerId?: string): Promise<void> {
     await new Promise((r) => setTimeout(r, 5000));
     console.log("Done.");
     console.log(
-      `\nTo delete: bun run packages/web/src/cli/populate-test-game.ts --delete ${game.$jazz.id}${organizerId ? "" : ` --organizer ${game.organizer}`}`,
+      `\nTo delete: bun run packages/web/src/cli/populate-test-game.ts --delete ${game.$jazz.id}`,
     );
   } catch (err) {
     console.error("Error:", err);

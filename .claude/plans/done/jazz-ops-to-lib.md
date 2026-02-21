@@ -1,6 +1,6 @@
 # Move Jazz Operations to packages/lib
 
-**Status:** planned
+**Status:** done
 **Priority:** medium — improves code sharing between app/web/cli, no urgency
 
 ## Problem

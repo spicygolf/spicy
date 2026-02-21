@@ -47,8 +47,12 @@ export function GameCourseTeeDisplay({ rounds }: GameCourseTeeDisplayProps) {
 
   // Determine display text
   let displayText: string;
-  if (hasIncomplete || courseTeeStrings.size !== 1) {
-    displayText = courseTeeStrings.size > 0 ? "Mixed Tees" : "";
+  if (courseTeeStrings.size > 1) {
+    displayText = "Mixed Tees";
+  } else if (hasIncomplete) {
+    // Still loading — show the single tee if we have one, otherwise nothing
+    displayText =
+      courseTeeStrings.size === 1 ? Array.from(courseTeeStrings)[0] : "";
   } else {
     displayText = Array.from(courseTeeStrings)[0];
   }

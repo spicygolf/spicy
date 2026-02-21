@@ -397,7 +397,7 @@ function checkAndRevertToSeamlessMode(game: Game): void {
     game.scope.teamsConfig.active === true;
   if (userActivated) return;
 
-  const minPlayers = (getSpecField(spec, "min_players") as number) ?? 2;
+  const minPlayers = Number(getSpecField(spec, "min_players")) || 2;
   const playerCount = game.players?.$isLoaded ? game.players.length : 0;
 
   if (playerCount <= minPlayers) {

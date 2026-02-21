@@ -72,10 +72,14 @@ export function GameListItem({ game }: { game: Game | null | undefined }) {
   const loadedPlayers = loadedGame.players?.$isLoaded
     ? loadedGame.players.filter((p) => p?.$isLoaded)
     : [];
+  const totalPlayerCount = loadedGame.players?.length ?? 0;
   const playerNames =
-    loadedPlayers.length > 5
-      ? `${loadedPlayers.length} Players`
-      : loadedPlayers.map((p) => formatPlayerName(p?.name)).join(" • ");
+    totalPlayerCount > 5
+      ? `${totalPlayerCount} Players`
+      : loadedPlayers
+          .map((p) => formatPlayerName(p?.name))
+          .filter(Boolean)
+          .join(" • ");
 
   const handleGamePress = () => {
     navigation.navigate("Game", { gameId: game.$jazz.id });
