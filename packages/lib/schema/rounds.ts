@@ -145,6 +145,13 @@ export const RoundToGame = co.map({
    *  are negative here.  ex: -2
    */
   gameHandicap: z.optional(z.number()),
+
+  /**
+   *  Override for the 18-hole quota in quota-type games.  Normally computed
+   *  as 36 - courseHandicap.  When set, the front/back split is still
+   *  calculated from this value using the normal slope-based algorithm.
+   */
+  quotaOverride: z.optional(z.number()),
 });
 export type RoundToGame = co.loaded<typeof RoundToGame>;
 

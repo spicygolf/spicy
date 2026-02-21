@@ -51,6 +51,7 @@ export function GamePlayersList() {
           handicapIndex: true,
           courseHandicap: true,
           gameHandicap: true,
+          quotaOverride: true,
         },
       },
       spec: true,
@@ -170,6 +171,12 @@ export function GamePlayersList() {
       if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
       const playerId = rtg.round.playerId;
       if (!playerId) continue;
+
+      // Prefer explicit quota override on RoundToGame
+      if (rtg.quotaOverride !== undefined) {
+        quotas.set(playerId, rtg.quotaOverride);
+        continue;
+      }
 
       // Get courseHandicap: prefer gameHandicap override, else stored, else calculated
       let courseHandicap = rtg.gameHandicap ?? rtg.courseHandicap;

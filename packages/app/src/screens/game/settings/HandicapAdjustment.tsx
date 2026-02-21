@@ -4,11 +4,13 @@ import type { MaybeLoaded } from "jazz-tools";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { calculateQuota } from "spicylib/scoring";
 import { calculateCourseHandicap, formatCourseHandicap } from "spicylib/utils";
 import { Back } from "@/components/Back";
 import { HandicapIndexInput } from "@/components/common/HandicapIndexInput";
 import { HandicapIntegerInput } from "@/components/common/HandicapIntegerInput";
 import { useGame } from "@/hooks";
+import { useOptionValue } from "@/hooks/useOptionValue";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Screen, Text } from "@/ui";
 
@@ -27,6 +29,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
           handicapIndex: true,
           courseHandicap: true,
           gameHandicap: true,
+          quotaOverride: true,
           round: {
             playerId: true,
             handicapIndex: true,
@@ -34,6 +37,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
           },
         },
       },
+      spec: true,
     },
   });
   const { theme } = useUnistyles();
@@ -105,6 +109,47 @@ export function HandicapAdjustment({ route, navigation }: Props) {
   }, [roundToGame]);
 
   const hasGameHandicapOverride = currentGameHandicap !== null;
+
+  // Detect quota game via spec_type option
+  const specTypeValue = useOptionValue(game, null, "spec_type", "game");
+  const isQuotaGame = specTypeValue === "quota";
+
+  // Calculated quota from course handicap (36 - courseHandicap)
+  const calculatedQuota = useMemo(() => {
+    if (!isQuotaGame) return null;
+    // Use gameHandicap override first, then courseHandicap override, then calculated
+    const effectiveHandicap = currentGameHandicap ?? previewCourseHandicap;
+    if (effectiveHandicap === null) return null;
+    return calculateQuota(effectiveHandicap);
+  }, [isQuotaGame, currentGameHandicap, previewCourseHandicap]);
+
+  const currentQuotaOverride = useMemo(() => {
+    if (roundToGame?.$isLoaded && roundToGame.quotaOverride !== undefined) {
+      return roundToGame.quotaOverride;
+    }
+    return null;
+  }, [roundToGame]);
+
+  const hasQuotaOverride = currentQuotaOverride !== null;
+
+  // Local quota input state
+  const [quotaInput, setQuotaInput] = useState("");
+
+  // Sync quota input when data changes
+  useEffect(() => {
+    if (currentQuotaOverride !== null) {
+      setQuotaInput(String(currentQuotaOverride));
+    } else if (calculatedQuota !== null) {
+      setQuotaInput(String(calculatedQuota));
+    } else {
+      setQuotaInput("");
+    }
+  }, [currentQuotaOverride, calculatedQuota]);
+
+  const quotaInputRef = useRef(quotaInput);
+  quotaInputRef.current = quotaInput;
+  const calculatedQuotaRef = useRef(calculatedQuota);
+  calculatedQuotaRef.current = calculatedQuota;
 
   // Sync index input when Jazz data changes (e.g., after clearing override)
   useEffect(() => {
@@ -180,6 +225,7 @@ export function HandicapAdjustment({ route, navigation }: Props) {
         gameHandicapInputRef.current,
         previewCourseHandicapRef.current,
       );
+      saveQuotaOverride(quotaInputRef.current, calculatedQuotaRef.current);
     });
     return unsubscribe;
   }, [navigation]);
@@ -193,6 +239,31 @@ export function HandicapAdjustment({ route, navigation }: Props) {
     if (!roundToGame?.$isLoaded) return;
     if (roundToGame.$jazz.has("gameHandicap")) {
       roundToGame.$jazz.delete("gameHandicap");
+    }
+  }
+
+  function saveQuotaOverride(inputValue: string, calculated: number | null) {
+    if (!roundToGame?.$isLoaded || !isQuotaGame) return;
+
+    const calculatedStr = calculated !== null ? String(calculated) : "";
+
+    if (inputValue.trim() === "" || inputValue.trim() === calculatedStr) {
+      // User cleared it or matches calculated - remove override
+      if (roundToGame.$jazz.has("quotaOverride")) {
+        roundToGame.$jazz.delete("quotaOverride");
+      }
+    } else {
+      const parsed = Number.parseInt(inputValue.trim(), 10);
+      if (!Number.isNaN(parsed)) {
+        roundToGame.$jazz.set("quotaOverride", parsed);
+      }
+    }
+  }
+
+  function handleClearQuotaOverride() {
+    if (!roundToGame?.$isLoaded) return;
+    if (roundToGame.$jazz.has("quotaOverride")) {
+      roundToGame.$jazz.delete("quotaOverride");
     }
   }
 
@@ -318,6 +389,50 @@ export function HandicapAdjustment({ route, navigation }: Props) {
             )}
           </View>
         </View>
+
+        {isQuotaGame && (
+          <View style={styles.section}>
+            <Text style={styles.label}>Quota</Text>
+            <View style={styles.valueRow}>
+              <Text style={styles.valueLabel}>Calculated:</Text>
+              <Text style={styles.value}>
+                {calculatedQuota !== null ? String(calculatedQuota) : "N/A"}
+              </Text>
+            </View>
+            {hasQuotaOverride && (
+              <View style={styles.valueRow}>
+                <Text style={styles.valueLabel}>Current Override:</Text>
+                <Text style={styles.value}>{String(currentQuotaOverride)}</Text>
+              </View>
+            )}
+            <Text style={styles.helpText}>
+              Override the 18-hole quota (front/back split is still calculated)
+            </Text>
+            <View style={styles.inputRow}>
+              <View style={styles.inputWrapper}>
+                <HandicapIntegerInput
+                  value={quotaInput}
+                  onChangeText={setQuotaInput}
+                  onBlur={() => saveQuotaOverride(quotaInput, calculatedQuota)}
+                  placeholder="e.g., 28"
+                />
+              </View>
+              {hasQuotaOverride && (
+                <TouchableOpacity
+                  style={styles.clearButton}
+                  onPress={handleClearQuotaOverride}
+                >
+                  <FontAwesome6
+                    name="delete-left"
+                    size={18}
+                    color={theme.colors.secondary}
+                    iconStyle="solid"
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
       </ScrollView>
     </Screen>
   );

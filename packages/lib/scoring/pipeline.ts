@@ -397,8 +397,22 @@ function buildPlayerQuotas(
 
   const quotas = new Map<string, PlayerQuota>();
 
+  // Build a map of playerId → quotaOverride from RoundToGame
+  const quotaOverrides = new Map<string, number>();
+  for (const rtg of rounds) {
+    if (!rtg?.$isLoaded) continue;
+    if (rtg.quotaOverride !== undefined) {
+      const round = rtg.round;
+      if (round?.$isLoaded && round.playerId) {
+        quotaOverrides.set(round.playerId, rtg.quotaOverride);
+      }
+    }
+  }
+
   for (const [playerId, handicapInfo] of playerHandicaps) {
-    const totalQuota = calculateQuota(handicapInfo.courseHandicap);
+    const totalQuota =
+      quotaOverrides.get(playerId) ??
+      calculateQuota(handicapInfo.courseHandicap);
     const { front, back } = calculateNineHoleQuotas({
       totalQuota,
       frontSlope,
