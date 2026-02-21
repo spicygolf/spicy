@@ -19,12 +19,15 @@ interface GamePlayersListItemProps {
   roundToGame: MaybeLoaded<RoundToGame> | undefined;
   /** Shots off the lowest handicap player (only in "low" mode) */
   shotsOff: number | null;
+  /** Callback to delete this player from the game */
+  onDelete: (player: Player) => void;
 }
 
 export function GamePlayersListItem({
   player,
   roundToGame,
   shotsOff,
+  onDelete,
 }: GamePlayersListItemProps): React.ReactNode {
   usePerfRenderCount("GamePlayersListItem");
 
@@ -123,7 +126,7 @@ export function GamePlayersListItem({
         />
       </View>
       <View style={styles.delete}>
-        <PlayerDelete player={player} />
+        <PlayerDelete player={player} onDelete={onDelete} />
       </View>
     </View>
   );
