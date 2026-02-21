@@ -21,6 +21,8 @@ import {
   calculateCourseHandicap,
   type PlayerHandicap,
 } from "../utils/handicap";
+import { getMetaOption } from "./option-utils";
+import { calculateNineHoleQuotas, calculateQuota } from "./quota-engine";
 import {
   assignTeams,
   calculateCumulatives,
@@ -38,6 +40,7 @@ import {
 import type {
   HoleInfo,
   PlayerHandicapInfo,
+  PlayerQuota,
   Scoreboard,
   ScoringContext,
   ScoringStage,
@@ -107,6 +110,9 @@ export function buildContext(game: Game): ScoringContext {
   // Build player handicaps lookup (uses options for handicap mode)
   const playerHandicaps = buildPlayerHandicaps(rounds, options);
 
+  // Build player quotas for quota-type games
+  const playerQuotas = buildPlayerQuotas(gameSpec, rounds, playerHandicaps);
+
   // Build hole info lookup
   const holeInfoMap = buildHoleInfo(rounds, gameHoles);
 
@@ -141,6 +147,7 @@ export function buildContext(game: Game): ScoringContext {
     rounds,
     holeInfoMap,
     playerHandicaps,
+    playerQuotas,
     teamsPerHole,
     playerTeamMap,
     scoreboard,
@@ -362,6 +369,46 @@ function buildPlayerHandicaps(
   }
 
   return handicaps;
+}
+
+function buildPlayerQuotas(
+  gameSpec: GameSpec,
+  rounds: RoundToGame[],
+  playerHandicaps: Map<string, PlayerHandicapInfo>,
+): Map<string, PlayerQuota> | undefined {
+  const specType = getMetaOption(gameSpec, "spec_type");
+  if (specType !== "quota") return undefined;
+
+  // Get front/back slopes from first round's tee data
+  let frontSlope: number | null = null;
+  let backSlope: number | null = null;
+
+  for (const rtg of rounds) {
+    if (!rtg?.$isLoaded) continue;
+    const round = rtg.round;
+    if (!round?.$isLoaded) continue;
+    const tee = round.tee;
+    if (!tee?.$isLoaded || !tee.ratings) continue;
+
+    frontSlope = tee.ratings.front?.slope ?? null;
+    backSlope = tee.ratings.back?.slope ?? null;
+    break;
+  }
+
+  const quotas = new Map<string, PlayerQuota>();
+
+  for (const [playerId, handicapInfo] of playerHandicaps) {
+    const totalQuota = calculateQuota(handicapInfo.courseHandicap);
+    const { front, back } = calculateNineHoleQuotas({
+      totalQuota,
+      frontSlope,
+      backSlope,
+    });
+
+    quotas.set(playerId, { playerId, total: totalQuota, front, back });
+  }
+
+  return quotas;
 }
 
 function buildHoleInfo(

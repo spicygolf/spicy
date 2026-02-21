@@ -298,6 +298,9 @@ export interface ScoringContext {
   /** Player handicap info keyed by player ID */
   playerHandicaps: Map<string, PlayerHandicapInfo>;
 
+  /** Player quotas keyed by player ID (only for quota-type games) */
+  playerQuotas?: Map<string, PlayerQuota>;
+
   /** Teams per hole: holeNum -> teams for that hole */
   teamsPerHole: Map<string, Team[]>;
 
@@ -473,6 +476,24 @@ export interface FivePointsTeamScore {
   lowBall: number;
   /** Total (sum of nets) */
   total: number;
+}
+
+// =============================================================================
+// Player Quota Info (for quota-type games)
+// =============================================================================
+
+/**
+ * Quota breakdown for a player in a quota-type game
+ */
+export interface PlayerQuota {
+  /** Player ID */
+  playerId: string;
+  /** 18-hole quota (36 - courseHandicap) */
+  total: number;
+  /** Front nine quota */
+  front: number;
+  /** Back nine quota */
+  back: number;
 }
 
 // =============================================================================
