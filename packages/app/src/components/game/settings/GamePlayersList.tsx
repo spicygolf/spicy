@@ -371,7 +371,7 @@ function deletePlayerFromGame(game: Game, player: Player): void {
 
   // Remove the player
   const idx = game.players.findIndex((p) => p?.$jazz?.id === player.$jazz.id);
-  if (idx !== undefined && idx !== -1) {
+  if (idx !== -1) {
     game.players.$jazz.splice(idx, 1);
   }
 

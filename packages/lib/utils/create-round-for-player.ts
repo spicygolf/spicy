@@ -132,7 +132,7 @@ export async function createRoundForPlayer(
 
     return newRound;
   } catch (error) {
-    onError?.(error as Error, {
+    onError?.(error instanceof Error ? error : new Error(String(error)), {
       source: "createRoundForPlayer",
       context: {
         gameId: game.$jazz.id,

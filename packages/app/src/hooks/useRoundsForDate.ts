@@ -34,7 +34,12 @@ export function useRoundsForDate(
   const gameDateMs = gameDate.getTime();
 
   useEffect(() => {
-    if (!excludeGameId || !allGames?.$isLoaded) return;
+    if (!excludeGameId) {
+      setRounds([]);
+      setLoaded(true);
+      return;
+    }
+    if (!allGames?.$isLoaded) return;
 
     let cancelled = false;
     setLoaded(false);

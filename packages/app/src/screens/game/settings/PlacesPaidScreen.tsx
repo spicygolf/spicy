@@ -20,7 +20,18 @@ function getDefaultPcts(places: number): number[] {
   return DEFAULT_PAYOUT_PCTS[places] ?? DEFAULT_PAYOUT_PCTS[3] ?? [50, 30, 20];
 }
 
-const PLACE_LABELS = ["1st", "2nd", "3rd", "4th", "5th"];
+const PLACE_LABELS = [
+  "1st",
+  "2nd",
+  "3rd",
+  "4th",
+  "5th",
+  "6th",
+  "7th",
+  "8th",
+  "9th",
+  "10th",
+];
 const PayoutPctsList = co.list(z.number());
 
 function getGameOptionNumber(

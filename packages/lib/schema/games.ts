@@ -81,7 +81,7 @@ export const Game = co.map({
    * When true, scoring and fingerprinting bail out immediately,
    * preventing re-score storms as nested data is cleared.
    */
-  deleted: z.boolean().optional(),
+  deleted: z.literal(true).optional(),
 
   /**
    * Legacy ID from ArangoDB v0.3 import (_key field).

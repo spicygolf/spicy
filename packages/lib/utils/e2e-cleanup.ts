@@ -133,11 +133,23 @@ export async function deepDeleteAllGames(games: ListOfGames): Promise<number> {
   // Process games (iterate over a copy to avoid issues during deletion)
   const gamesList = [...games];
 
+  const errors: unknown[] = [];
   for (const game of gamesList) {
     if (game?.$isLoaded) {
-      await deepDeleteGame(game);
-      count++;
+      try {
+        await deepDeleteGame(game);
+        count++;
+      } catch (err) {
+        errors.push(err);
+      }
     }
+  }
+
+  if (errors.length > 0) {
+    console.error(
+      `deepDeleteAllGames: ${errors.length} game(s) failed to delete`,
+      errors,
+    );
   }
 
   // Clear the games list itself

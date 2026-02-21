@@ -231,10 +231,9 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
       return cachedResult.current;
     }
 
-    // At this point fingerprint !== null guarantees game is loaded
-    if (!game?.$isLoaded) {
-      return null;
-    }
+    // fingerprint !== null guarantees game is loaded (createScoringFingerprint
+    // returns null when !game?.$isLoaded), but TypeScript can't infer this.
+    if (!game) return null;
 
     try {
       const { result } = perfTime("useScoreboard.scoreWithContext", () =>

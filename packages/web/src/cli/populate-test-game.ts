@@ -405,8 +405,7 @@ async function createGame(organizerId?: string): Promise<void> {
       if (existing) {
         console.error(`\nTest game already exists: ${existing.$jazz.id}`);
         console.error(
-          "Delete it first: bun run packages/web/src/cli/populate-test-game.ts " +
-            `--delete ${existing.$jazz.id} --organizer ${organizerId}\n`,
+          `Delete it first: bun run packages/web/src/cli/populate-test-game.ts --delete ${existing.$jazz.id}\n`,
         );
         await done();
         process.exit(1);
