@@ -211,7 +211,6 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
   const lastGameRef = useRef<Game | null>(null);
   const lastFingerprintRef = useRef<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const nullCount = useRef(0);
 
   const [result, setResult] = useState<ScoreboardResult | null>(null);
 
@@ -222,14 +221,7 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
     lastFingerprintRef.current !== null;
 
   const { result: fingerprint } = perfTime("useScoreboard.fingerprint", () => {
-    if (canSkipFingerprint) {
-      if (__DEV__) {
-        console.log(
-          "[PERF] useScoreboard: game ref unchanged, skipping fingerprint",
-        );
-      }
-      return lastFingerprintRef.current;
-    }
+    if (canSkipFingerprint) return lastFingerprintRef.current;
     return createScoringFingerprint(game);
   });
 
@@ -238,12 +230,6 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
   useEffect(() => {
     // Game not ready — clear result
     if (fingerprint === null) {
-      nullCount.current += 1;
-      if (__DEV__ && nullCount.current % 10 === 0) {
-        console.log(
-          `[PERF] useScoreboard fingerprint null (${nullCount.current} times)`,
-        );
-      }
       // Clear cached result when game becomes unready (e.g. data destroyed)
       if (lastFingerprintRef.current !== null) {
         lastFingerprintRef.current = null;
@@ -253,31 +239,22 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
     }
 
     // Fingerprint unchanged — nothing to do
-    if (fingerprint === lastFingerprintRef.current) {
-      if (__DEV__) {
-        console.log(
-          "[PERF] useScoreboard: fingerprint stable, no re-score needed",
-        );
-      }
-      return;
-    }
+    if (fingerprint === lastFingerprintRef.current) return;
 
     const isFirstScore = lastFingerprintRef.current === null;
 
+    // doScore closes over `game` from the effect closure. When the timer fires
+    // 300ms later, `game` may be an older proxy ref — but Jazz proxies always
+    // resolve to current data, so scoring output is still correct.
     const doScore = () => {
       if (!game?.$isLoaded) return;
 
       try {
-        const { result: scored, ms } = perfTime(
+        // perfTime logs duration when ENABLED and ms > 1
+        const { result: scored } = perfTime(
           "useScoreboard.scoreWithContext",
           () => scoreWithContext(game),
         );
-
-        if (__DEV__) {
-          console.log(
-            `[PERF] useScoreboard: SCORED in ${ms.toFixed(1)}ms (fingerprint: ${fingerprint})`,
-          );
-        }
 
         lastFingerprintRef.current = fingerprint;
         setResult(scored);
@@ -296,11 +273,6 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
       // Cancel any pending timer — only the latest fingerprint matters
       if (timerRef.current !== null) {
         clearTimeout(timerRef.current);
-      }
-      if (__DEV__) {
-        console.log(
-          `[PERF] useScoreboard: fingerprint changed, throttling ${SCORING_THROTTLE_MS}ms`,
-        );
       }
       timerRef.current = setTimeout(() => {
         timerRef.current = null;

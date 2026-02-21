@@ -110,11 +110,6 @@ function GameSettingsTabs() {
         state: (e) => {
           const route = e.data.state?.routes[e.data.state.index];
           if (route?.name) {
-            if (__DEV__) {
-              console.log(
-                `[PERF] Tab switch → ${route.name} at ${performance.now().toFixed(0)}ms`,
-              );
-            }
             setSettingsTab(route.name as SettingsTab);
           }
         },

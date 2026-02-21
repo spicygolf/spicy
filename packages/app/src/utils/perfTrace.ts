@@ -2,12 +2,13 @@
  * Dev-only performance tracing utilities for diagnosing Big Game (48+ player) slowdowns.
  *
  * All functions are no-ops in production builds.
- * Remove this file once performance investigation is complete.
+ * Set ENABLED = true when actively diagnosing performance issues.
  */
 
 import { useEffect, useRef } from "react";
 
-const ENABLED = __DEV__;
+/** Flip to `__DEV__` when actively diagnosing perf; leave `false` for quiet dev. */
+const ENABLED = __DEV__ && false;
 
 /** Track how many instances of a component are currently mounted */
 const mountCounts = new Map<string, number>();

@@ -167,27 +167,34 @@ export function GamePlayersList() {
         return;
       if (!player?.$isLoaded) return;
 
-      // Load deep team data on-demand (only when user taps delete)
-      // biome-ignore lint/suspicious/noExplicitAny: Jazz resolved types need assertion for dynamic ensureLoaded
-      const loadedGame = await (game as any).$jazz.ensureLoaded({
-        resolve: {
-          scope: { teamsConfig: true },
-          spec: true,
-          players: true,
-          rounds: { $each: { round: true } },
-          holes: {
-            $each: {
-              teams: {
-                $each: {
-                  rounds: { $each: { roundToGame: true } },
+      try {
+        // Load deep team data on-demand (only when user taps delete)
+        // biome-ignore lint/suspicious/noExplicitAny: Jazz resolved types need assertion for dynamic ensureLoaded
+        const loadedGame = await (game as any).$jazz.ensureLoaded({
+          resolve: {
+            scope: { teamsConfig: true },
+            spec: true,
+            players: true,
+            rounds: { $each: { round: true } },
+            holes: {
+              $each: {
+                teams: {
+                  $each: {
+                    rounds: { $each: { roundToGame: true } },
+                  },
                 },
               },
             },
           },
-        },
-      });
+        });
 
-      deletePlayerFromGame(loadedGame, player);
+        deletePlayerFromGame(loadedGame, player);
+      } catch (error) {
+        console.warn(
+          "[GamePlayersList] Failed to load game data for delete:",
+          error,
+        );
+      }
     },
     // game ref identity changes on Jazz updates; the callback reads game at call-time
     // so this is safe — we just need a fresh closure when game changes.

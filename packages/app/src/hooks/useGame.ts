@@ -1,11 +1,8 @@
 import type { MaybeLoaded } from "jazz-tools";
 import { useCoState } from "jazz-tools/react-native";
-import { useEffect, useRef } from "react";
 import { Game } from "spicylib/schema";
 import { useGameIdContext } from "@/contexts/GameContext";
-
-/** Dev-only: track total active useGame subscriptions */
-let __activeSubscriptions = 0;
+import { usePerfMountTracker } from "@/utils/perfTrace";
 
 interface UseGameOptions {
   requireGame?: boolean;
@@ -74,8 +71,6 @@ export function useGame(
 ): { game: GameWithRelations } {
   const { gameId: ctxGameId } = useGameIdContext();
   const effectiveGameId = gameId || ctxGameId || undefined;
-  const startTime = useRef(Date.now());
-  const loggedLoad = useRef(false);
 
   const resolveQuery = options.resolve || DEFAULT_RESOLVE_QUERY;
 
@@ -91,32 +86,8 @@ export function useGame(
       : undefined,
   ) as GameWithRelations;
 
-  // Performance tracking (dev only)
-  useEffect(() => {
-    if (__DEV__ && game?.$isLoaded && !loggedLoad.current) {
-      loggedLoad.current = true;
-      const elapsed = Date.now() - startTime.current;
-      console.log("[PERF] useGame LOADED", {
-        elapsed,
-        gameId: game.$jazz.id,
-      });
-    }
-  }, [game]);
-
-  // Subscription count tracking (dev only)
-  useEffect(() => {
-    if (!__DEV__ || !effectiveGameId) return;
-    __activeSubscriptions += 1;
-    console.log(
-      `[PERF] useGame SUBSCRIBE (${__activeSubscriptions} active) caller=${new Error().stack?.split("\n")[2]?.trim().slice(0, 80)}`,
-    );
-    return () => {
-      __activeSubscriptions -= 1;
-      console.log(
-        `[PERF] useGame UNSUBSCRIBE (${__activeSubscriptions} active)`,
-      );
-    };
-  }, [effectiveGameId]);
+  // Track subscription mount/unmount (silent unless perfTrace ENABLED is true)
+  usePerfMountTracker(`useGame(${effectiveGameId?.slice(0, 12) ?? "none"})`);
 
   if (!effectiveGameId) {
     if (options.requireGame) {
