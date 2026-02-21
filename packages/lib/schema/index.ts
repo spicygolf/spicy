@@ -1,4 +1,5 @@
 export * from "./accounts";
+export * from "./bets";
 export * from "./catalog";
 // Export specific types that need to be explicitly available
 export { MapOfCourses, MapOfGames } from "./catalog";
