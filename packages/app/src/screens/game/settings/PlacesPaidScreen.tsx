@@ -14,7 +14,7 @@ import { Screen, Text, TextInput } from "@/ui";
 type Props = NativeStackScreenProps<GameSettingsStackParamList, "PlacesPaid">;
 
 const MIN_PLACES = 1;
-const MAX_PLACES = 5;
+const MAX_PLACES = 10;
 
 function getDefaultPcts(places: number): number[] {
   return DEFAULT_PAYOUT_PCTS[places] ?? DEFAULT_PAYOUT_PCTS[3] ?? [50, 30, 20];

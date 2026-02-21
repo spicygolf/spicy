@@ -69,6 +69,11 @@ export const DEFAULT_PAYOUT_PCTS: Record<number, number[]> = {
   3: [50, 30, 20],
   4: [45, 27, 18, 10],
   5: [40, 25, 17, 11, 7],
+  6: [35, 22, 16, 12, 9, 6],
+  7: [30, 20, 15, 12, 10, 8, 5],
+  8: [28, 18, 14, 11, 10, 8, 6, 5],
+  9: [25, 17, 13, 11, 9, 8, 7, 5, 5],
+  10: [24, 16, 12, 10, 9, 8, 7, 5, 5, 4],
 };
 
 function getPayoutPcts(placesPaid: number, customPcts?: number[]): number[] {
