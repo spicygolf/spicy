@@ -2,8 +2,10 @@ import { Group } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
 import type { GameSpec } from "spicylib/schema";
 import {
+  Bet,
   Game,
   GameScope,
+  ListOfBets,
   ListOfGameHoles,
   ListOfPayoutPools,
   ListOfPlayers,
@@ -129,7 +131,11 @@ export function useCreateGame() {
     // specRef = reference to catalog spec (for reset/diff)
     const spec = copySpecOptions(firstSpec, group);
 
+    // Create bets from the spec's bets meta option (JSON string)
+    const bets = createBetsFromSpec(firstSpec, group);
+
     // Create payout pools from the spec's payout_pools meta option (JSON string)
+    // @deprecated — use bets instead. Kept for backward compatibility with existing games.
     const payoutPools = createPayoutPoolsFromSpec(firstSpec, group);
 
     // Create the game
@@ -144,6 +150,7 @@ export function useCreateGame() {
         players,
         rounds: roundToGames,
         organizer: me.$jazz.id,
+        bets: bets.length > 0 ? bets : undefined,
         payoutPools,
       },
       { owner: group },
@@ -236,4 +243,54 @@ function createPayoutPoolsFromSpec(
   }
 
   return pools;
+}
+
+/**
+ * Parse bets meta option (JSON string) and create Bet CoMaps.
+ * Returns an empty list if no bets are defined in the spec.
+ */
+function createBetsFromSpec(
+  spec: GameSpec | undefined,
+  owner: Group,
+): ListOfBets {
+  const bets = ListOfBets.create([], { owner });
+
+  const betsJson = getMetaOption(spec, "bets") as string | undefined;
+  if (!betsJson) return bets;
+
+  try {
+    const parsed = JSON.parse(betsJson) as Array<{
+      name: string;
+      disp: string;
+      scope: "front9" | "back9" | "all18" | "rest_of_nine" | "rest_of_round";
+      scoringType: "quota" | "skins" | "points" | "match";
+      pct: number;
+      splitType: "places" | "per_unit" | "winner_take_all";
+      placesPaid?: number;
+    }>;
+
+    for (const b of parsed) {
+      const bet = Bet.create(
+        {
+          name: b.name,
+          disp: b.disp,
+          scope: b.scope,
+          scoringType: b.scoringType,
+          pct: b.pct,
+          splitType: b.splitType,
+          placesPaid: b.placesPaid,
+        },
+        { owner },
+      );
+      bets.$jazz.push(bet);
+    }
+  } catch (e) {
+    reportError("Failed to parse bets meta option", {
+      source: "createBetsFromSpec",
+      type: "DataError",
+      context: { betsJson, error: String(e) },
+    });
+  }
+
+  return bets;
 }
