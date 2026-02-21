@@ -39,7 +39,10 @@ export function useRoundsForDate(
       setLoaded(true);
       return;
     }
-    if (!allGames?.$isLoaded) return;
+    if (!allGames?.$isLoaded) {
+      setLoaded(false);
+      return;
+    }
 
     let cancelled = false;
     setLoaded(false);

@@ -524,17 +524,18 @@ export function computeIsSeamlessMode(game: Game): boolean {
     return false;
   }
 
+  // Check if spec explicitly disables teams (e.g. The Big Game)
+  // Must be before user config check — spec intent overrides stale teamsConfig
+  if (computeSpecDisablesTeams(spec)) {
+    return true;
+  }
+
   // Check if user has manually activated teams
   if (
     game.scope.teamsConfig?.$isLoaded &&
     game.scope.teamsConfig.active === true
   ) {
     return false;
-  }
-
-  // Check if spec explicitly disables teams (e.g. The Big Game)
-  if (computeSpecDisablesTeams(spec)) {
-    return true;
   }
 
   // Check if over player threshold (teams mode auto-activates)
