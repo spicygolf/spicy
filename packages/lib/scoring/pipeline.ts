@@ -269,10 +269,19 @@ function buildPlayerHandicaps(
 ): Map<string, PlayerHandicapInfo> {
   const handicaps = new Map<string, PlayerHandicapInfo>();
 
+  // Check if handicaps are enabled (default: true)
+  // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
+  const useHandicapsOption = options?.["use_handicaps"];
+  const useHandicaps =
+    !useHandicapsOption ||
+    useHandicapsOption.type !== "game" ||
+    (useHandicapsOption as { value?: string }).value !== "false";
+
   // Check handicap mode from options (default is "low")
   // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
   const handicapIndexFromOption = options?.["handicap_index_from"];
   const handicapMode =
+    useHandicaps &&
     handicapIndexFromOption &&
     handicapIndexFromOption.type === "game" &&
     handicapIndexFromOption.value === "full"
@@ -315,6 +324,21 @@ function buildPlayerHandicaps(
       courseHandicap,
       gameHandicap,
     });
+  }
+
+  // When handicaps are disabled, everyone gets effectiveHandicap = 0 (no pops)
+  // but we still store the real courseHandicap for quota calculation
+  if (!useHandicaps) {
+    for (const ph of playerHandicaps) {
+      handicaps.set(ph.playerId, {
+        playerId: ph.playerId,
+        roundToGameId: ph.playerId,
+        effectiveHandicap: 0,
+        courseHandicap: ph.courseHandicap,
+        gameHandicap: ph.gameHandicap,
+      });
+    }
+    return handicaps;
   }
 
   // Apply low handicap adjustment if needed
