@@ -35,6 +35,26 @@ You are a Jazz Tools data modeling specialist focused on **Jazz schema design an
    }
    ```
 
+**CRITICAL - SUBSCRIPTION PATTERNS:**
+
+1. **NEVER Subscribe Per List Item**
+   - Each `useCoState`/`useGame` call = separate Jazz SubscriptionScope
+   - N items × 1 subscription = N redundant subscriptions = render storms
+   - Subscribe ONCE in parent, pass data down as props
+   - For rare mutations (delete), use `$jazz.ensureLoaded` on-demand
+   - **Real impact**: 48-player game → 102 subscriptions, 384 renders, multi-second hangs
+
+2. **Throttle Expensive Derived Computations**
+   - NEVER use synchronous `useMemo` for expensive Jazz-derived work
+   - Use `useEffect` + `setTimeout` throttle pattern
+   - First result immediate, subsequent changes get 300ms cooldown
+   - **Real impact**: Scoring engine in `useMemo` ran 186× during bulk delete, crashed app
+
+3. **Bulk Mutations Cause Render Storms**
+   - Every `splice`/`set`/`delete` syncs to all subscribers immediately
+   - Remove references first (unsubscribe), then deep-delete internals
+   - Use single `splice` with replacement array instead of individual operations
+
 **CRITICAL - PERFORMANCE PATTERNS:**
 
 1. **NEVER Store Jazz Objects in React State**
