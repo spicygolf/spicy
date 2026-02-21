@@ -17,6 +17,8 @@ import type {
 import {
   detectInvalidations,
   getHoleTeeMultiplierTotalWithOverride,
+  getMetaOption,
+  getQuotaRunningScore,
   getTeamHolePoints,
   getTeamRunningScore,
   isHoleComplete,
@@ -575,6 +577,12 @@ export function ScoringView({
     maxOffTeeParsed !== null && !Number.isNaN(maxOffTeeParsed)
       ? maxOffTeeParsed
       : null;
+
+  // Detect quota game for quota-relative running totals
+  const isQuotaGame = scoringContext?.gameSpec?.$isLoaded
+    ? getMetaOption(scoringContext.gameSpec, "spec_type") === "quota"
+    : false;
+  const playerQuotas = isQuotaGame ? scoringContext?.playerQuotas : null;
 
   // Build adjusted handicaps map if in "low" mode and handicaps are used
   // Also build a map of calculated course handicaps for use in the render loop
@@ -1252,6 +1260,24 @@ export function ScoringView({
           const teamHoleResult =
             scoreboard?.holes?.[currentHoleNumber]?.teams?.[teamId];
 
+          // Compute quota-relative running score for quota games
+          // Uses the first player on the team (individual/seamless = 1 player per team)
+          let quotaRunning: number | null = null;
+          if (isQuotaGame && playerQuotas && teamHoleResult) {
+            const firstPlayerId = teamHoleResult.playerIds[0];
+            const quota = firstPlayerId
+              ? playerQuotas.get(firstPlayerId)
+              : undefined;
+            if (quota) {
+              quotaRunning = getQuotaRunningScore(
+                scoreboard,
+                firstPlayerId,
+                currentHoleNumber,
+                quota,
+              );
+            }
+          }
+
           // Get effective hole points: holeNetTotal for 2-team games (net vs
           // opponent), absolute points for individual/multi-team games.
           // Only show scoring when hole is complete (all scores + required junk entered)
@@ -1337,7 +1363,11 @@ export function ScoringView({
               junkTotal={displayJunk}
               holeMultiplier={overallMultiplier}
               holePoints={displayPoints}
-              runningDiff={getTeamRunningScore(teamHoleResult)}
+              runningDiff={
+                quotaRunning !== null
+                  ? quotaRunning
+                  : getTeamRunningScore(teamHoleResult)
+              }
               teeFlipWinner={isWinnerTeam}
               onTeeFlipReplay={
                 isWinnerTeam ? () => setTeeFlipMode("replay") : undefined

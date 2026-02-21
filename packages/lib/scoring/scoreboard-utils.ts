@@ -5,7 +5,7 @@
  * Used by both Scoring and Leaderboard screens.
  */
 
-import type { TeamHoleResult } from "./types";
+import type { PlayerQuota, Scoreboard, TeamHoleResult } from "./types";
 
 /**
  * Get the effective hole points for a team.
@@ -35,4 +35,63 @@ export function getTeamRunningScore(
 ): number {
   if (!team) return 0;
   return team.runningDiff ?? team.runningTotal ?? 0;
+}
+
+/**
+ * Get the quota-relative running score for a player through a given hole.
+ *
+ * Sums stableford junk earned on the current nine (front or back) through
+ * the given hole, then subtracts the nine's quota. The running score resets
+ * at hole 10 (back nine uses back quota).
+ *
+ * @param scoreboard - Scored scoreboard from the pipeline
+ * @param playerId - Player ID to compute for
+ * @param currentHole - Current hole number string (e.g., "5", "14")
+ * @param quota - Player's quota (front/back/total)
+ * @returns Performance vs quota (e.g., -2 means 2 under quota so far)
+ */
+export function getQuotaRunningScore(
+  scoreboard: Scoreboard | null,
+  playerId: string,
+  currentHole: string,
+  quota: PlayerQuota,
+): number {
+  if (!scoreboard) return 0;
+
+  const currentHoleNum = Number.parseInt(currentHole, 10);
+  if (Number.isNaN(currentHoleNum)) return 0;
+
+  const isBackNine = currentHoleNum >= 10;
+  const nineQuota = isBackNine ? quota.back : quota.front;
+
+  // Sum stableford points for this player on holes in the current nine,
+  // up to and including the current hole
+  let stablefordTotal = 0;
+  const holesPlayed = scoreboard.meta.holesPlayed;
+
+  for (const holeNum of holesPlayed) {
+    const hNum = Number.parseInt(holeNum, 10);
+    if (Number.isNaN(hNum)) continue;
+
+    // Only include holes in the same nine as current hole
+    const holeIsBackNine = hNum >= 10;
+    if (holeIsBackNine !== isBackNine) continue;
+
+    // Only include holes up to and including the current one
+    if (hNum > currentHoleNum) continue;
+
+    const holeResult = scoreboard.holes[holeNum];
+    if (!holeResult) continue;
+
+    const playerResult = holeResult.players[playerId];
+    if (!playerResult) continue;
+
+    for (const junk of playerResult.junk) {
+      if (junk.name.startsWith("stableford_")) {
+        stablefordTotal += junk.value;
+      }
+    }
+  }
+
+  return stablefordTotal - nineQuota;
 }

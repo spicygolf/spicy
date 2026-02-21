@@ -83,7 +83,11 @@ export {
 // Ranking engine
 export { rankWithTies } from "./ranking-engine";
 // Scoreboard utilities (shared helpers for reading team results)
-export { getTeamHolePoints, getTeamRunningScore } from "./scoreboard-utils";
+export {
+  getQuotaRunningScore,
+  getTeamHolePoints,
+  getTeamRunningScore,
+} from "./scoreboard-utils";
 export type {
   DebtRecord,
   Payout,
