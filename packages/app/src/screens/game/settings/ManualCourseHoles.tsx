@@ -19,11 +19,11 @@ import {
   TeeHole,
   Tee as TeeSchema,
 } from "spicylib/schema";
+import { propagateCourseTeeToPlayers } from "spicylib/utils";
 import { Back } from "@/components/Back";
 import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Screen, Text, TextInput } from "@/ui";
-import { propagateCourseTeeToPlayers } from "@/utils/propagateCourseTee";
 import { reportError } from "@/utils/reportError";
 
 type Props = NativeStackScreenProps<

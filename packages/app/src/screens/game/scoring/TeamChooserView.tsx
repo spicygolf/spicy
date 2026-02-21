@@ -1,11 +1,11 @@
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game, GameHole } from "spicylib/schema";
+import { getTeamAssignmentsFromHole } from "spicylib/utils";
 import { HoleHeader } from "@/components/game/scoring";
 import { TeamChooser } from "@/components/game/TeamChooser";
 import type { HoleInfo } from "@/hooks";
 import { Text } from "@/ui";
-import { getTeamAssignmentsFromHole } from "@/utils/gameTeams";
 
 export interface TeamChooserViewProps {
   game: Game;

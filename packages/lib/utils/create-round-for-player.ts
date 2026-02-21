@@ -7,8 +7,13 @@ import {
   RoundScores,
   RoundToGame,
 } from "spicylib/schema";
-import { isSameDay } from "spicylib/utils";
-import { reportError } from "./reportError";
+import { isSameDay } from "./datetime";
+
+/** Error callback signature for platform-specific error reporting. */
+export type OnError = (
+  error: Error,
+  options: { source: string; context?: Record<string, unknown> },
+) => void;
 
 /**
  * Gets rounds for a player on a specific date by scanning the user's games.
@@ -17,7 +22,7 @@ import { reportError } from "./reportError";
  * with matching playerId. This avoids relying on player.rounds (which may
  * be owned by a catalog group the app can't write to).
  *
- * Only same-date games are deep-loaded (rounds → round refs), keeping
+ * Only same-date games are deep-loaded (rounds -> round refs), keeping
  * the cost proportional to concurrent games (typically 1-2), not total games.
  *
  * @param playerId - The player's CoValue ID to match
@@ -80,11 +85,13 @@ export async function getRoundsForDate(
  *
  * @param game - The game to add the round to (must be loaded with rounds and players resolved)
  * @param player - The player to create the round for (must be in game.players)
+ * @param onError - Optional error callback for platform-specific reporting
  * @returns The created round, or null if creation failed
  */
 export async function createRoundForPlayer(
   game: Game,
   player: Player,
+  onError?: OnError,
 ): Promise<Round | null> {
   if (!game.$isLoaded || !game.rounds?.$isLoaded || !game.players?.$isLoaded) {
     return null;
@@ -125,7 +132,7 @@ export async function createRoundForPlayer(
 
     return newRound;
   } catch (error) {
-    reportError(error as Error, {
+    onError?.(error as Error, {
       source: "createRoundForPlayer",
       context: {
         gameId: game.$jazz.id,

@@ -29,6 +29,7 @@
   "dependencies": {
     "date-fns-tz": "catalog:shared",
     "jazz-tools": "catalog:shared",
-    "json-logic-js": "2.0.5"
+    "json-logic-js": "2.0.5",
+    "neverthrow": "catalog:shared"
   }
 }

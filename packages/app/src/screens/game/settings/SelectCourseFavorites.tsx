@@ -10,11 +10,11 @@ import DraggableFlatList, {
 import { StyleSheet } from "react-native-unistyles";
 import type { CourseTee } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
+import { propagateCourseTeeToPlayers } from "spicylib/utils";
 import { FavoriteTeeItem } from "@/components/game/settings/FavoriteTeeItem";
 import { useGame } from "@/hooks";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
 import { Screen, Text } from "@/ui";
-import { propagateCourseTeeToPlayers } from "@/utils/propagateCourseTee";
 
 type Props = MaterialTopTabScreenProps<
   SelectCourseTabParamList,

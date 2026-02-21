@@ -14,7 +14,7 @@ import {
 } from "spicylib/schema";
 import { getSpecField } from "spicylib/scoring";
 
-import { computeSpecForcesTeams } from "@/utils/teamsMode";
+import { computeSpecForcesTeams } from "./teams";
 
 /**
  * Ensures that holes exist for the game based on game.scope.holes configuration.

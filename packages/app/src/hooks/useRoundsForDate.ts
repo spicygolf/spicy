@@ -3,7 +3,7 @@ import { useAccount } from "jazz-tools/react-native";
 import { useEffect, useState } from "react";
 import type { Game, Player, Round } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
-import { getRoundsForDate } from "@/utils/createRoundForPlayer";
+import { getRoundsForDate } from "spicylib/utils";
 
 interface RoundsForDateResult {
   rounds: Round[];

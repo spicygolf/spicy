@@ -13,8 +13,11 @@ import {
   TeamsConfig,
 } from "spicylib/schema";
 import { copySpecOptions, getMetaOption, getSpecField } from "spicylib/scoring";
-import { calculateTeamCount, getDefaultTeeTime } from "spicylib/utils";
-import { addPlayerToGameCore } from "../utils/addPlayerToGameCore";
+import {
+  addPlayerToGameCore,
+  calculateTeamCount,
+  getDefaultTeeTime,
+} from "spicylib/utils";
 import { reportError } from "../utils/reportError";
 import { useJazzWorker } from "./useJazzWorker";
 
@@ -163,7 +166,11 @@ export function useCreateGame() {
         game,
         { player: me.root.player }, // Pass reference, not data
         worker?.account?.$isLoaded ? worker.account : undefined,
-        { autoCreateRound: true, allGames: me.root.games },
+        {
+          autoCreateRound: true,
+          allGames: me.root.games,
+          onError: (error, opts) => reportError(error, opts),
+        },
       );
 
       if (result.isErr()) {

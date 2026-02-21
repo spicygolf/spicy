@@ -6,6 +6,7 @@ import { StyleSheet } from "react-native-unistyles";
 import { RoundToGame, type Round as RoundType } from "spicylib/schema";
 import {
   calculateCourseHandicap,
+  createRoundForPlayer,
   formatDate,
   formatTime,
 } from "spicylib/utils";
@@ -15,7 +16,6 @@ import { useGame } from "@/hooks";
 import { useRoundsForDate } from "@/hooks/useRoundsForDate";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button, Screen, Text } from "@/ui";
-import { createRoundForPlayer } from "@/utils/createRoundForPlayer";
 import { reportError } from "@/utils/reportError";
 
 type Props = NativeStackScreenProps<

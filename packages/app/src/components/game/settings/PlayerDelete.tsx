@@ -3,9 +3,9 @@ import { TouchableOpacity } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 import type { Game, Player } from "spicylib/schema";
 import { getSpecField } from "spicylib/scoring";
+import { reassignAllPlayersSeamless } from "spicylib/utils";
 import { useGame } from "@/hooks";
 import { computeSpecForcesTeams } from "@/hooks/useTeamsMode";
-import { reassignAllPlayersSeamless } from "@/utils/gameTeams";
 
 export function PlayerDelete({ player }: { player: Player }) {
   const { game } = useGame(undefined, {

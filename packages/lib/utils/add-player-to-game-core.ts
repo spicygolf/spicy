@@ -2,14 +2,17 @@ import type { Account } from "jazz-tools";
 import { Group } from "jazz-tools";
 import { err, ok, type Result } from "neverthrow";
 import { type Game, Handicap, type ListOfGames, Player } from "spicylib/schema";
-import { createRoundForPlayer, getRoundsForDate } from "./createRoundForPlayer";
+import type { OnError } from "./create-round-for-player";
+import {
+  createRoundForPlayer,
+  getRoundsForDate,
+} from "./create-round-for-player";
 import {
   autoAssignPlayerToTeam,
   computeIsSeamlessMode,
   getNextAvailableTeamNumber,
-} from "./gameTeams";
-import { applyExistingCourseTeeToRound } from "./propagateCourseTee";
-import { reportError } from "./reportError";
+} from "./game-teams";
+import { applyExistingCourseTeeToRound } from "./propagate-course-tee";
 
 export type PlayerData = Parameters<typeof Player.create>[0];
 
@@ -41,6 +44,9 @@ export interface AddPlayerOptions {
    * will always create a new round (no duplicate detection).
    */
   allGames?: ListOfGames;
+
+  /** Optional error callback for platform-specific reporting. */
+  onError?: OnError;
 }
 
 export interface AddPlayerResult {
@@ -98,6 +104,7 @@ export async function addPlayerToGameCore(
   }
 
   const group = game.players.$jazz.owner;
+  const onError = options.onError;
 
   // Give worker account admin access if provided
   if (workerAccount?.$isLoaded && group instanceof Group) {
@@ -108,9 +115,8 @@ export async function addPlayerToGameCore(
       // Log unexpected errors for debugging
       const message = e instanceof Error ? e.message : String(e);
       if (!message.includes("already") && !message.includes("member")) {
-        reportError(e instanceof Error ? e : new Error(message), {
+        onError?.(e instanceof Error ? e : new Error(message), {
           source: "addPlayerToGameCore",
-          severity: "warning",
           context: { action: "addWorkerToGroup" },
         });
       }
@@ -227,7 +233,11 @@ export async function addPlayerToGameCore(
         const playerWithHandicap = await finalPlayer.$jazz.ensureLoaded({
           resolve: { handicap: true },
         });
-        const newRound = await createRoundForPlayer(game, playerWithHandicap);
+        const newRound = await createRoundForPlayer(
+          game,
+          playerWithHandicap,
+          onError,
+        );
         roundAutoCreated = newRound !== null;
 
         if (newRound) {
@@ -235,7 +245,7 @@ export async function addPlayerToGameCore(
         }
       }
     } catch (error) {
-      reportError(error instanceof Error ? error : new Error(String(error)), {
+      onError?.(error instanceof Error ? error : new Error(String(error)), {
         source: "addPlayerToGameCore.autoCreateRound",
         context: {
           gameId: game.$jazz.id,

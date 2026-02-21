@@ -10,8 +10,8 @@ import { useCallback, useState } from "react";
 import { Alert, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { PlayerAccount } from "spicylib/schema";
+import { clearPlayerRounds, deepDeleteAllGames } from "spicylib/utils";
 import { Button, Screen, Text } from "@/ui";
-import { clearPlayerRounds, deepDeleteAllGames } from "@/utils/e2eCleanup";
 
 export function DeveloperToolsScreen() {
   const [isDeleting, setIsDeleting] = useState(false);

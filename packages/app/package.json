@@ -44,7 +44,7 @@
     "axios": "1.13.2",
     "cojson-core-rn": "catalog:shared",
     "jazz-tools": "catalog:shared",
-    "neverthrow": "8.2.0",
+    "neverthrow": "catalog:shared",
     "posthog-react-native": "^4.17.0",
     "posthog-react-native-session-replay": "^1.2.3",
     "react": "catalog:shared",

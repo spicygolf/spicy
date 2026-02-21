@@ -5,14 +5,14 @@ import { Switch, View } from "react-native";
 import { DraxProvider } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { GameHole, ListOfTeams, TeamsConfig } from "spicylib/schema";
-import { useGame, useTeamsMode } from "@/hooks";
-import { Text } from "@/ui";
 import {
   ensureGameHoles,
+  getSpecNumTeams,
   reassignAllPlayersSeamless,
   saveTeamAssignmentsToAllRelevantHoles,
-} from "@/utils/gameTeams";
-import { getSpecNumTeams } from "@/utils/teamsMode";
+} from "spicylib/utils";
+import { useGame, useTeamsMode } from "@/hooks";
+import { Text } from "@/ui";
 import { RotationChangeModal } from "./RotationChangeModal";
 import { RotationFrequencyPicker } from "./RotationFrequencyPicker";
 import { TeamAssignments } from "./TeamAssignments";

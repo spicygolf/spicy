@@ -9,7 +9,8 @@ import {
   type AddPlayerResult,
   addPlayerToGameCore,
   type PlayerData,
-} from "../utils/addPlayerToGameCore";
+} from "spicylib/utils";
+import { reportError } from "../utils/reportError";
 import { useGame } from "./useGame";
 import { useJazzWorker } from "./useJazzWorker";
 
@@ -20,7 +21,7 @@ export type {
   AddPlayerOptions,
   AddPlayerResult,
   PlayerData,
-} from "../utils/addPlayerToGameCore";
+} from "spicylib/utils";
 
 /**
  * Type guard to check if the input is a Player CoValue reference.
@@ -124,6 +125,7 @@ export function useAddPlayerToGame() {
     const result = await addPlayerToGameCore(game, input, worker.account, {
       ...options,
       allGames,
+      onError: (error, opts) => reportError(error, opts),
     });
 
     return result;

@@ -33,7 +33,6 @@ import {
   ListOfGameHoles,
   ListOfPlayers,
   ListOfRoundToGames,
-  ListOfRoundToTeams,
   ListOfTeams,
   ListOfTeeHoles,
   ListOfTees,
@@ -42,12 +41,11 @@ import {
   Round,
   RoundScores,
   RoundToGame,
-  RoundToTeam,
-  Team,
   Tee,
   TeeHole,
 } from "spicylib/schema";
 import { copySpecOptions, getSpecField } from "spicylib/scoring";
+import { autoAssignPlayerToTeam, deepDeleteGame } from "spicylib/utils";
 
 // Load environment from API package
 config({ path: resolve(import.meta.dir, "../../../api/.env") });
@@ -264,47 +262,8 @@ async function deleteMode(gameId: string, organizerId?: string): Promise<void> {
     console.log(`Players: ${game.players?.length ?? 0}`);
     console.log(`Start: ${game.start}`);
 
-    // Deep delete game data (same approach as e2eCleanup.ts)
-    // biome-ignore lint/suspicious/noExplicitAny: Jazz resolved types need assertion for mutations
-    const g = game as any;
-
-    if (g.holes?.$isLoaded) {
-      for (let i = 0; i < g.holes.length; i++) {
-        const hole = g.holes[i];
-        if (!hole?.$isLoaded || !hole.teams?.$isLoaded) continue;
-        for (let j = 0; j < hole.teams.length; j++) {
-          const team = hole.teams[j];
-          if (!team?.$isLoaded) continue;
-          if (team.$jazz.has("options") && team.options?.$isLoaded)
-            team.options.$jazz.splice(0, team.options.length);
-          if (team.rounds?.$isLoaded)
-            team.rounds.$jazz.splice(0, team.rounds.length);
-        }
-        hole.teams.$jazz.splice(0, hole.teams.length);
-      }
-      g.holes.$jazz.splice(0, g.holes.length);
-      console.log("  Cleared holes & teams");
-    }
-
-    if (g.rounds?.$isLoaded) {
-      for (let i = 0; i < g.rounds.length; i++) {
-        const rtg = g.rounds[i];
-        if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
-        if (rtg.round.scores?.$isLoaded) {
-          for (const key of Object.keys(rtg.round.scores)) {
-            if (!key.startsWith("$") && key !== "_refs")
-              rtg.round.scores.$jazz.delete(key);
-          }
-        }
-      }
-      g.rounds.$jazz.splice(0, g.rounds.length);
-      console.log("  Cleared rounds & scores");
-    }
-
-    if (g.players?.$isLoaded) {
-      g.players.$jazz.splice(0, g.players.length);
-      console.log("  Cleared players");
-    }
+    await deepDeleteGame(game);
+    console.log("  Deep deleted game data");
 
     // Remove from organizer's games list if provided
     if (organizerId) {
@@ -656,32 +615,6 @@ async function createGame(organizerId?: string): Promise<void> {
       gameHoles.$jazz.push(gameHole);
     }
 
-    // ── Assign each player to their own team on every hole ────────────
-    console.log("Assigning players to individual teams...");
-    for (let pi = 0; pi < roundToGames.length; pi++) {
-      const rtg = roundToGames[pi];
-      if (!rtg) continue;
-      const teamNumber = pi + 1;
-
-      for (let hi = 0; hi < gameHoles.length; hi++) {
-        const gameHole = gameHoles[hi];
-        if (!gameHole?.teams) continue;
-
-        const roundToTeams = ListOfRoundToTeams.create([], { owner: group });
-        roundToTeams.$jazz.push(
-          RoundToTeam.create({ roundToGame: rtg }, { owner: group }),
-        );
-
-        gameHole.teams.$jazz.push(
-          Team.create(
-            { team: `${teamNumber}`, rounds: roundToTeams },
-            { owner: group },
-          ),
-        );
-      }
-    }
-    console.log(`  Assigned ${roundToGames.length} players to individual teams`);
-
     // ── Create scope ───────────────────────────────────────────────────
     console.log("Creating game scope...");
     const scope = GameScope.create({ holes: "all18" }, { owner: group });
@@ -706,6 +639,17 @@ async function createGame(organizerId?: string): Promise<void> {
         legacyId: "test-big-game-48",
       },
       { owner: group },
+    );
+
+    // ── Assign each player to their own team on every hole ────────────
+    console.log("Assigning players to individual teams...");
+    for (let pi = 0; pi < roundToGames.length; pi++) {
+      const rtg = roundToGames[pi];
+      if (!rtg) continue;
+      autoAssignPlayerToTeam(game, rtg, pi + 1);
+    }
+    console.log(
+      `  Assigned ${roundToGames.length} players to individual teams`,
     );
 
     // Add game to organizer's games list so it appears in their app

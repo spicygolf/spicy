@@ -3,7 +3,7 @@ import { type Game, ListOfTeams } from "spicylib/schema";
 import {
   saveTeamAssignmentsToAllRelevantHoles,
   shouldShowTeamChooser,
-} from "@/utils/gameTeams";
+} from "spicylib/utils";
 
 export interface UseTeamManagementReturn {
   showChooser: boolean;

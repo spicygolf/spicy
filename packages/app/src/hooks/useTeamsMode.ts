@@ -4,10 +4,10 @@ import { getSpecField } from "spicylib/scoring";
 import {
   computeSpecDisablesTeams,
   computeSpecForcesTeams,
-} from "@/utils/teamsMode";
+} from "spicylib/utils";
 
 // Re-export for backwards compatibility
-export { computeSpecForcesTeams } from "@/utils/teamsMode";
+export { computeSpecForcesTeams } from "spicylib/utils";
 
 export interface TeamsModeResult {
   /**
