@@ -11,6 +11,7 @@ import {
 import { Game } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import { useScoreboard } from "@/hooks/useScoreboard";
+import { usePerfRenderCount } from "@/utils/perfTrace";
 
 export type LeaderboardViewMode = "gross" | "net" | "points";
 export type SettingsTab = "PlayersTab" | "TeamsTab" | "OptionsTab";
@@ -114,6 +115,8 @@ function ScoringProvider({
   gameId: string | null;
   children: ReactNode;
 }) {
+  usePerfRenderCount("ScoringProvider");
+
   const scoringGame = useCoState(
     Game,
     gameId ?? undefined,

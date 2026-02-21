@@ -1,14 +1,16 @@
 /**
  * E2E Test Cleanup Utilities
  *
- * DEV/TEST ONLY - These functions are only available in development builds.
- * They provide deep cleanup of game data to minimize Jazz orphans during E2E testing.
+ * DEV/TEST ONLY - These functions provide deep cleanup of game data
+ * to minimize Jazz orphans during E2E testing and CLI scripts.
  *
  * Jazz does NOT support explicit deletion of CoValues. When we splice/clear a list,
  * items become orphaned (unreferenced but still in storage). These utilities
  * clear nested data structures first, leaving orphaned CoValues as "empty shells"
  * rather than full data trees.
  */
+
+declare const __DEV__: boolean | undefined;
 
 import type { Game, ListOfGames, Player } from "spicylib/schema";
 
@@ -24,12 +26,15 @@ import type { Game, ListOfGames, Player } from "spicylib/schema";
  * 6. Players list
  *
  * @param game - The game to deep delete (will be fully loaded)
- * @throws Error if called in production builds
+ * @throws Error if called in production builds (when __DEV__ is defined and false)
  */
 export async function deepDeleteGame(game: Game): Promise<void> {
-  if (!__DEV__) {
+  if (typeof __DEV__ !== "undefined" && !__DEV__) {
     throw new Error("deepDeleteGame is only available in development builds");
   }
+
+  // Tombstone: prevents scoring re-computation while we clear nested data
+  game.$jazz.set("deleted", true);
 
   // Ensure game is fully loaded with all nested data
   const loadedGame = await game.$jazz.ensureLoaded({
@@ -110,10 +115,10 @@ export async function deepDeleteGame(game: Game): Promise<void> {
  *
  * @param games - The games list to deep delete (typically me.root.games)
  * @returns Number of games that were deleted
- * @throws Error if called in production builds
+ * @throws Error if called in production builds (when __DEV__ is defined and false)
  */
 export async function deepDeleteAllGames(games: ListOfGames): Promise<number> {
-  if (!__DEV__) {
+  if (typeof __DEV__ !== "undefined" && !__DEV__) {
     throw new Error(
       "deepDeleteAllGames is only available in development builds",
     );
@@ -128,11 +133,23 @@ export async function deepDeleteAllGames(games: ListOfGames): Promise<number> {
   // Process games (iterate over a copy to avoid issues during deletion)
   const gamesList = [...games];
 
+  const errors: unknown[] = [];
   for (const game of gamesList) {
     if (game?.$isLoaded) {
-      await deepDeleteGame(game);
-      count++;
+      try {
+        await deepDeleteGame(game);
+        count++;
+      } catch (err) {
+        errors.push(err);
+      }
     }
+  }
+
+  if (errors.length > 0) {
+    console.error(
+      `deepDeleteAllGames: ${errors.length} game(s) failed to delete`,
+      errors,
+    );
   }
 
   // Clear the games list itself
@@ -150,10 +167,10 @@ export async function deepDeleteAllGames(games: ListOfGames): Promise<number> {
  *
  * @param player - The player whose rounds should be cleared
  * @returns Number of rounds that were cleared
- * @throws Error if called in production builds
+ * @throws Error if called in production builds (when __DEV__ is defined and false)
  */
 export async function clearPlayerRounds(player: Player): Promise<number> {
-  if (!__DEV__) {
+  if (typeof __DEV__ !== "undefined" && !__DEV__) {
     throw new Error(
       "clearPlayerRounds is only available in development builds",
     );

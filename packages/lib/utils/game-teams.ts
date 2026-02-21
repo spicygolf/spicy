@@ -14,7 +14,7 @@ import {
 } from "spicylib/schema";
 import { getSpecField } from "spicylib/scoring";
 
-import { computeSpecForcesTeams } from "@/utils/teamsMode";
+import { computeSpecDisablesTeams, computeSpecForcesTeams } from "./teams";
 
 /**
  * Ensures that holes exist for the game based on game.scope.holes configuration.
@@ -524,6 +524,12 @@ export function computeIsSeamlessMode(game: Game): boolean {
     return false;
   }
 
+  // Check if spec explicitly disables teams (e.g. The Big Game)
+  // Must be before user config check — spec intent overrides stale teamsConfig
+  if (computeSpecDisablesTeams(spec)) {
+    return true;
+  }
+
   // Check if user has manually activated teams
   if (
     game.scope.teamsConfig?.$isLoaded &&
@@ -533,7 +539,7 @@ export function computeIsSeamlessMode(game: Game): boolean {
   }
 
   // Check if over player threshold (teams mode auto-activates)
-  const minPlayers = (getSpecField(spec, "min_players") as number) ?? 2;
+  const minPlayers = Number(getSpecField(spec, "min_players")) || 2;
   const playerCount = game.players.length;
   if (playerCount > minPlayers) {
     return false;

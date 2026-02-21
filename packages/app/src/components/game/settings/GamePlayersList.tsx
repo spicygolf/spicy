@@ -1,25 +1,34 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import type { Game, Player, RoundToGame } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
+import { getSpecField } from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
   type PlayerHandicap,
+  reassignAllPlayersSeamless,
 } from "spicylib/utils";
 import { GamePlayersListItem } from "@/components/game/settings/GamePlayersListItem";
 import { useAddPlayerToGame, useGame } from "@/hooks";
 import { useOptionValue } from "@/hooks/useOptionValue";
+import { computeSpecForcesTeams } from "@/hooks/useTeamsMode";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button } from "@/ui";
+import { usePerfMountTracker, usePerfRenderCount } from "@/utils/perfTrace";
 import { EmptyPlayersList } from "./EmptyPlayersList";
 
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 
 export function GamePlayersList() {
+  usePerfRenderCount("GamePlayersList");
+  usePerfMountTracker("GamePlayersList");
+
   const { game } = useGame(undefined, {
     resolve: {
       players: {
@@ -33,6 +42,7 @@ export function GamePlayersList() {
         $each: {
           round: {
             playerId: true,
+            course: true,
             tee: {
               ratings: true,
             },
@@ -68,6 +78,20 @@ export function GamePlayersList() {
     game?.$isLoaded && game.players?.$isLoaded
       ? game.players.filter((p) => p?.$isLoaded)
       : [];
+
+  // Build playerId → RoundToGame lookup from the single parent subscription
+  // This replaces 48 individual useGame() calls in each GamePlayersListItem
+  const roundToGameByPlayer = new Map<string, MaybeLoaded<RoundToGame>>();
+  if (game?.$isLoaded && game.rounds?.$isLoaded) {
+    for (const rtg of game.rounds) {
+      if (!rtg?.$isLoaded) continue;
+      if (!rtg.round?.$isLoaded) continue;
+      const playerId = rtg.round.playerId;
+      if (playerId) {
+        roundToGameByPlayer.set(playerId, rtg);
+      }
+    }
+  }
 
   // Get handicap mode from game options (default is "low")
   const handicapIndexFromValue = useOptionValue(
@@ -131,6 +155,52 @@ export function GamePlayersList() {
     return adjustHandicapsToLow(playerHandicaps);
   })();
 
+  // Delete player handler — loads deep team data on-demand via ensureLoaded
+  // instead of maintaining 48 persistent subscriptions via useGame().
+  const handleDeletePlayer = useCallback(
+    async (player: Player) => {
+      if (
+        !game?.$isLoaded ||
+        !game.players?.$isLoaded ||
+        !game.rounds?.$isLoaded
+      )
+        return;
+      if (!player?.$isLoaded) return;
+
+      try {
+        // Load deep team data on-demand (only when user taps delete)
+        // biome-ignore lint/suspicious/noExplicitAny: Jazz resolved types need assertion for dynamic ensureLoaded
+        const loadedGame = await (game as any).$jazz.ensureLoaded({
+          resolve: {
+            scope: { teamsConfig: true },
+            spec: true,
+            players: true,
+            rounds: { $each: { round: true } },
+            holes: {
+              $each: {
+                teams: {
+                  $each: {
+                    rounds: { $each: { roundToGame: true } },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        deletePlayerFromGame(loadedGame, player);
+      } catch (error) {
+        console.warn(
+          "[GamePlayersList] Failed to load game data for delete:",
+          error,
+        );
+      }
+    },
+    // game ref identity changes on Jazz updates; the callback reads game at call-time
+    // so this is safe — we just need a fresh closure when game changes.
+    [game],
+  );
+
   // Check if current player is already in the game
   // Computed directly - no useMemo needed since this is a simple check
   // and Jazz reactive updates will trigger re-renders when data loads
@@ -185,6 +255,21 @@ export function GamePlayersList() {
     }
   };
 
+  // Stable keyExtractor (doesn't depend on render-scoped data)
+  const extractPlayerKey = useCallback((item: Player) => item.$jazz.id, []);
+
+  // renderItem closes over roundToGameByPlayer and adjustedHandicaps
+  // which change each render, so useCallback won't help here.
+  // The real win is eliminating 48 useGame() subscriptions in children.
+  const renderPlayerItem = ({ item }: { item: Player }) => (
+    <GamePlayersListItem
+      player={item}
+      roundToGame={roundToGameByPlayer.get(item.$jazz.id)}
+      shotsOff={adjustedHandicaps?.get(item.$jazz.id) ?? null}
+      onDelete={handleDeletePlayer}
+    />
+  );
+
   return (
     <View>
       <View style={styles.buttonRow}>
@@ -200,13 +285,8 @@ export function GamePlayersList() {
       </View>
       <FlatList
         data={players}
-        renderItem={({ item }) => (
-          <GamePlayersListItem
-            player={item}
-            shotsOff={adjustedHandicaps?.get(item.$jazz.id) ?? null}
-          />
-        )}
-        keyExtractor={(item) => item.$jazz.id}
+        renderItem={renderPlayerItem}
+        keyExtractor={extractPlayerKey}
         ListEmptyComponent={<EmptyPlayersList />}
         contentContainerStyle={styles.flatlist}
       />
@@ -226,3 +306,101 @@ const styles = StyleSheet.create((theme) => ({
     marginVertical: theme.gap(1),
   },
 }));
+
+/**
+ * Delete a player from the game, cleaning up rounds, team assignments, and
+ * optionally reverting to seamless mode.
+ *
+ * Extracted as a plain function so it can be called from the on-demand
+ * ensureLoaded callback without coupling to React hooks.
+ */
+function deletePlayerFromGame(game: Game, player: Player): void {
+  if (!game.$isLoaded || !game.players?.$isLoaded || !game.rounds?.$isLoaded)
+    return;
+  if (!player?.$isLoaded) return;
+
+  // Find all RoundToGame entries for this player using round.playerId
+  const playerRoundToGames = game.rounds.filter(
+    (rtg) =>
+      rtg?.$isLoaded &&
+      rtg.round?.$isLoaded &&
+      rtg.round.playerId === player.$jazz.id,
+  );
+
+  // Collect RoundToGame IDs for team cleanup
+  const roundToGameIds = new Set<string>();
+  const playerRoundIds = new Set<string>();
+
+  for (const rtg of playerRoundToGames) {
+    if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+    roundToGameIds.add(rtg.$jazz.id);
+    playerRoundIds.add(rtg.round.$jazz.id);
+  }
+
+  // Remove RoundToGame entries that reference this player's rounds
+  const roundsToKeep = game.rounds.filter((rtg) => {
+    if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) return true;
+    return !playerRoundIds.has(rtg.round.$jazz.id);
+  });
+  game.rounds.$jazz.splice(0, game.rounds.length, ...roundsToKeep);
+
+  // Remove team assignments for this player from all holes
+  if (game.holes?.$isLoaded) {
+    for (const hole of game.holes as Iterable<(typeof game.holes)[number]>) {
+      if (!hole?.$isLoaded || !hole.teams?.$isLoaded) continue;
+
+      for (const team of hole.teams as Iterable<(typeof hole.teams)[number]>) {
+        if (!team?.$isLoaded || !team.rounds?.$isLoaded) continue;
+
+        const teamRoundsToKeep = team.rounds.filter((roundToTeam) => {
+          if (!roundToTeam?.$isLoaded || !roundToTeam.roundToGame?.$isLoaded)
+            return true;
+          return !roundToGameIds.has(roundToTeam.roundToGame.$jazz.id);
+        });
+        team.rounds.$jazz.splice(0, team.rounds.length, ...teamRoundsToKeep);
+      }
+
+      // Remove teams that have no players left
+      const teamsToKeep = hole.teams.filter((team) => {
+        if (!team?.$isLoaded || !team.rounds?.$isLoaded) return true;
+        return team.rounds.length > 0;
+      });
+      hole.teams.$jazz.splice(0, hole.teams.length, ...teamsToKeep);
+    }
+  }
+
+  // Remove the player
+  const idx = game.players.findIndex((p) => p?.$jazz?.id === player.$jazz.id);
+  if (idx !== -1) {
+    game.players.$jazz.splice(idx, 1);
+  }
+
+  // Check if we should revert to seamless mode
+  checkAndRevertToSeamlessMode(game);
+}
+
+/**
+ * Checks if the game should revert to seamless mode after player removal.
+ * If so, reassigns all players to individual teams (1:1).
+ */
+function checkAndRevertToSeamlessMode(game: Game): void {
+  if (!game.$isLoaded) return;
+
+  const spec = game.spec?.$isLoaded ? game.spec : null;
+  if (!spec) return;
+
+  if (computeSpecForcesTeams(spec)) return;
+
+  const userActivated =
+    game.scope?.$isLoaded &&
+    game.scope.teamsConfig?.$isLoaded &&
+    game.scope.teamsConfig.active === true;
+  if (userActivated) return;
+
+  const minPlayers = Number(getSpecField(spec, "min_players")) || 2;
+  const playerCount = game.players?.$isLoaded ? game.players.length : 0;
+
+  if (playerCount <= minPlayers) {
+    reassignAllPlayersSeamless(game);
+  }
+}

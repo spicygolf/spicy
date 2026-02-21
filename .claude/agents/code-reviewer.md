@@ -37,6 +37,8 @@ Check for violations:
 | React state | Store IDs only | Store Jazz objects |
 | Optional fields | `$jazz.delete()` to remove | `$jazz.set(field, undefined)` |
 | Subscriptions | Shallow in parents, deep in children | Deep resolution in high-level components |
+| Per-item subscriptions | Subscribe once in parent, pass props | `useCoState`/`useGame` inside list items |
+| Expensive derivations | Throttled `useEffect` + fingerprint | Synchronous `useMemo` for heavy computation |
 
 **Flag if**: Any Jazz pattern violation found - these cause data loss
 

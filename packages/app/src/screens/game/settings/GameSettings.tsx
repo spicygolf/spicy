@@ -19,6 +19,7 @@ import { HandicapAdjustment } from "@/screens/game/settings/HandicapAdjustment";
 import { ManualCourseHoles } from "@/screens/game/settings/ManualCourseHoles";
 import { PlacesPaidScreen } from "@/screens/game/settings/PlacesPaidScreen";
 import { Screen } from "@/ui";
+import { usePerfMountTracker, usePerfRenderCount } from "@/utils/perfTrace";
 
 // Stack navigation for the settings flows (add player, select course, etc.)
 export type GameSettingsStackParamList = {
@@ -51,6 +52,8 @@ type GameSettingsTabParamList = {
 };
 
 function PlayersTab() {
+  usePerfRenderCount("PlayersTab");
+  usePerfMountTracker("PlayersTab");
   return (
     <Screen>
       <GamePlayersList />
@@ -59,6 +62,8 @@ function PlayersTab() {
 }
 
 function TeamsTab() {
+  usePerfRenderCount("TeamsTab");
+  usePerfMountTracker("TeamsTab");
   return (
     <Screen>
       <GameTeamsList />
@@ -67,6 +72,8 @@ function TeamsTab() {
 }
 
 function OptionsTab() {
+  usePerfRenderCount("OptionsTab");
+  usePerfMountTracker("OptionsTab");
   return (
     <Screen>
       <GameOptionsList />
@@ -77,6 +84,7 @@ function OptionsTab() {
 const Tabs = createMaterialTopTabNavigator<GameSettingsTabParamList>();
 
 function GameSettingsTabs() {
+  usePerfRenderCount("GameSettingsTabs");
   const { theme } = useUnistyles();
   const { settingsTab, setSettingsTab } = useGameIdContext();
 

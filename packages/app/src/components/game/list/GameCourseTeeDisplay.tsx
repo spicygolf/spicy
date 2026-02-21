@@ -11,7 +11,7 @@ interface GameCourseTeeDisplayProps {
 /**
  * Displays course/tee info from already-loaded rounds data.
  * Shows "SLUG • TeeName" if all rounds have the same course/tee.
- * Shows "various" if rounds have different courses/tees.
+ * Shows "Mixed Tees" if rounds have different courses/tees.
  * Data is pre-loaded by GameListItem's resolve query.
  */
 export function GameCourseTeeDisplay({ rounds }: GameCourseTeeDisplayProps) {
@@ -47,8 +47,8 @@ export function GameCourseTeeDisplay({ rounds }: GameCourseTeeDisplayProps) {
 
   // Determine display text
   let displayText: string;
-  if (hasIncomplete || courseTeeStrings.size !== 1) {
-    displayText = courseTeeStrings.size > 0 ? "various" : "";
+  if (courseTeeStrings.size > 1) {
+    displayText = "Mixed Tees";
   } else {
     displayText = Array.from(courseTeeStrings)[0];
   }
@@ -60,7 +60,7 @@ export function GameCourseTeeDisplay({ rounds }: GameCourseTeeDisplayProps) {
 
 const styles = StyleSheet.create((theme) => ({
   text: {
-    fontSize: 13,
+    fontSize: 11,
     color: theme.colors.secondary,
     marginTop: theme.gap(0.25),
     fontStyle: "italic",

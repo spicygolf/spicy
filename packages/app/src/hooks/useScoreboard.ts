@@ -3,6 +3,7 @@ import type { Game } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import { scoreWithContext } from "spicylib/scoring";
 import { isCoMapDataKey } from "spicylib/utils";
+import { perfTime, usePerfRenderCount } from "@/utils/perfTrace";
 
 /**
  * Fast, simple hash function (cyrb53)
@@ -46,6 +47,9 @@ export interface ScoreboardResult {
  */
 function createScoringFingerprint(game: Game | null): number | null {
   if (!game?.$isLoaded) return null;
+
+  // Tombstone: game marked for deletion — skip scoring entirely
+  if (game.deleted) return null;
 
   // Need either game.spec (working copy) or game.specRef (catalog spec) for options
   // game.spec is preferred, but specRef works as fallback
@@ -193,34 +197,30 @@ function createScoringFingerprint(game: Game | null): number | null {
  *
  * The scoreboard is memoized based on a fingerprint of scoring-relevant data,
  * not the game object reference. This prevents unnecessary recomputations
- * during Jazz's progressive loading.
+ * during Jazz's progressive loading. Uses useRef caching on top of useMemo
+ * so that game reference changes with unchanged fingerprints are free.
  *
- * IMPORTANT: We use useRef caching ON TOP of useMemo because:
- * - useMemo depends on [fingerprint, game]
- * - game reference changes on every Jazz progressive load update
- * - fingerprint stays stable when actual scoring data hasn't changed
- * - Without ref caching, scoreWithContext() runs on every game reference change
+ * Bulk mutation storms (e.g. CLI deep-delete) are handled by the `deleted`
+ * tombstone on Game — fingerprinting bails out immediately when set.
  *
  * @param game - The fully loaded game object
  * @returns The calculated scoreboard and context, or null if scoring fails
- *
- * @example
- * const result = useScoreboard(game);
- * if (result) {
- *   const holeResult = result.scoreboard.holes["1"];
- *   const playerJunk = holeResult.players[playerId].junk;
- *   const teamJunk = holeResult.teams[teamId].junk;
- * }
  */
 export function useScoreboard(game: Game | null): ScoreboardResult | null {
+  usePerfRenderCount("useScoreboard");
+
   const lastFingerprint = useRef<number | null>(null);
   const cachedResult = useRef<ScoreboardResult | null>(null);
 
-  // Create fingerprint from scoring-relevant data
-  const fingerprint = createScoringFingerprint(game);
+  // Create fingerprint from scoring-relevant data.
+  // Skip the expensive fingerprint walk entirely when game is tombstoned.
+  const isDeleted = game?.deleted === true;
+  const { result: fingerprint } = perfTime("useScoreboard.fingerprint", () =>
+    isDeleted ? null : createScoringFingerprint(game),
+  );
 
   return useMemo(() => {
-    // If fingerprint is null, game isn't ready
+    // If fingerprint is null, game isn't ready (or deleted)
     if (fingerprint === null) {
       return null;
     }
@@ -231,13 +231,14 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
       return cachedResult.current;
     }
 
-    // At this point fingerprint !== null guarantees game is loaded
-    if (!game?.$isLoaded) {
-      return null;
-    }
+    // fingerprint !== null guarantees game is loaded (createScoringFingerprint
+    // returns null when !game?.$isLoaded), but TypeScript can't infer this.
+    if (!game) return null;
 
     try {
-      const result = scoreWithContext(game);
+      const { result } = perfTime("useScoreboard.scoreWithContext", () =>
+        scoreWithContext(game),
+      );
 
       // Update cache
       lastFingerprint.current = fingerprint;

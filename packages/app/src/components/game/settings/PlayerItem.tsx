@@ -14,20 +14,21 @@ import {
   PlayerAccount,
 } from "spicylib/schema";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
-import { type PlayerData, useAddPlayerToGame, useGame } from "@/hooks";
+import { type PlayerData, useAddPlayerToGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Text } from "@/ui";
 
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 
-export function PlayerItem({ item }: { item: Golfer }) {
+interface PlayerItemProps {
+  item: Golfer;
+  /** Set of ghinIds already added to the game (provided by parent list) */
+  addedGhinIds: Set<string>;
+}
+
+export function PlayerItem({ item, addedGhinIds }: PlayerItemProps) {
   const navigation = useNavigation<NavigationProp>();
   const addPlayerToGame = useAddPlayerToGame();
-  const { game } = useGame(undefined, {
-    resolve: {
-      players: { $each: { ghinId: true } },
-    },
-  });
 
   const me = useAccount(PlayerAccount, {
     resolve: {
@@ -43,19 +44,12 @@ export function PlayerItem({ item }: { item: Golfer }) {
     },
   });
 
-  // Check if player is already in the game
   const full_name = [item.first_name, item.middle_name, item.last_name].join(
     " ",
   );
 
-  // Check if player is already in the game
-  const isPlayerAlreadyAdded =
-    (game?.$isLoaded &&
-      game.players?.$isLoaded &&
-      game.players.some(
-        (player) => player?.$isLoaded && player.ghinId === item.ghin.toString(),
-      )) ||
-    false;
+  // Check if player is already in the game (using set from parent)
+  const isPlayerAlreadyAdded = addedGhinIds.has(item.ghin.toString());
 
   // Check if player is in favorites - direct access, no useMemo (Jazz is already reactive)
   const isFavorited = (() => {

@@ -15,7 +15,7 @@ import {
   TeeHole,
   Tee as TeeSchema,
 } from "spicylib/schema";
-import { normalizeGender } from "spicylib/utils";
+import { normalizeGender, propagateCourseTeeToPlayers } from "spicylib/utils";
 import { ErrorDisplay } from "@/components/Error";
 import { GhinCourseSearchInput } from "@/components/ghin/course/SearchInput";
 import { GhinCourseSearchResults } from "@/components/ghin/course/SearchResults";
@@ -26,7 +26,6 @@ import { useGhinCourseDetailsQuery } from "@/hooks/useGhinCourseDetailsQuery";
 import { useGhinSearchCourseQuery } from "@/hooks/useGhinSearchCourseQuery";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
 import { Screen, Text } from "@/ui";
-import { propagateCourseTeeToPlayers } from "@/utils/propagateCourseTee";
 
 type Props = MaterialTopTabScreenProps<
   SelectCourseTabParamList,

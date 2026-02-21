@@ -515,6 +515,200 @@ const currentHole = useCoState(GameHole, currentHoleId, {
 
 ---
 
+## Never Subscribe Per List Item
+
+**Severity**: CRITICAL | **Enforcement**: BLOCKING
+
+Never call `useCoState` or `useGame` inside a component rendered once per list item (e.g., inside a FlatList `renderItem`). Each call creates a separate Jazz SubscriptionScope. With N items, you get N redundant subscriptions to the same (or overlapping) data.
+
+**Real-world impact**: A 48-player game with `useGame()` per player item created 102 concurrent subscriptions, 384 renders, and multi-second hangs.
+
+### Pattern: Subscribe Once in Parent, Pass Data Down
+
+```typescript
+// WRONG — 48 components × 1 useGame() each = 48 subscriptions
+function PlayerListItem({ player }: { player: Player }) {
+  const { game } = useGame(undefined, {
+    resolve: { rounds: { $each: { round: { playerId: true } } } },
+  });
+  const rtg = game?.rounds?.find(r => r.round?.playerId === player.$jazz.id);
+  return <Text>{rtg?.handicapIndex}</Text>;
+}
+
+// CORRECT — 1 subscription in parent, data passed as props
+function PlayerList() {
+  const { game } = useGame(undefined, {
+    resolve: { rounds: { $each: { round: { playerId: true } } } },
+  });
+
+  // Build lookup once
+  const rtgByPlayer = new Map<string, RoundToGame>();
+  if (game?.$isLoaded && game.rounds?.$isLoaded) {
+    for (const rtg of game.rounds) {
+      if (rtg?.$isLoaded && rtg.round?.$isLoaded && rtg.round.playerId) {
+        rtgByPlayer.set(rtg.round.playerId, rtg);
+      }
+    }
+  }
+
+  return (
+    <FlatList
+      data={players}
+      renderItem={({ item }) => (
+        <PlayerListItem player={item} roundToGame={rtgByPlayer.get(item.$jazz.id)} />
+      )}
+    />
+  );
+}
+
+// Child is now subscription-free
+function PlayerListItem({ player, roundToGame }: Props) {
+  return <Text>{roundToGame?.handicapIndex}</Text>;
+}
+```
+
+### Pattern: On-Demand ensureLoaded for Mutations
+
+When a child component needs deep data only for a rare user action (e.g., "delete player"), don't maintain a persistent subscription. Use `$jazz.ensureLoaded` on-demand.
+
+```typescript
+// WRONG — persistent deep subscription per item, just for delete
+function PlayerDelete({ player }: { player: Player }) {
+  const { game } = useGame(undefined, {
+    resolve: {
+      holes: { $each: { teams: { $each: { rounds: { $each: { roundToGame: true } } } } } },
+    },
+  });
+  // ... delete logic using game
+}
+
+// CORRECT — parent provides callback, loads deep data on tap
+function PlayerList() {
+  const { game } = useGame(undefined, { resolve: { players: true, rounds: true } });
+
+  const handleDelete = useCallback(async (player: Player) => {
+    if (!game?.$isLoaded) return;
+    // Load deep team data ONLY when user taps delete
+    const loaded = await game.$jazz.ensureLoaded({
+      resolve: {
+        holes: { $each: { teams: { $each: { rounds: { $each: { roundToGame: true } } } } } },
+      },
+    });
+    deletePlayerFromGame(loaded, player);
+  }, [game]);
+
+  return <FlatList renderItem={({ item }) => <PlayerDelete player={item} onDelete={handleDelete} />} />;
+}
+
+// Child is now a simple button — no hooks, no subscriptions
+function PlayerDelete({ player, onDelete }: { player: Player; onDelete: (p: Player) => void }) {
+  return <TouchableOpacity onPress={() => onDelete(player)}><Icon name="delete" /></TouchableOpacity>;
+}
+```
+
+---
+
+## Throttle Expensive Derived Computations
+
+**Severity**: HIGH | **Enforcement**: STRICT
+
+When deriving expensive computations from Jazz data (scoring engines, complex aggregations), **never use synchronous `useMemo`**. Jazz progressive loading and external mutations (CLI scripts, other devices) can fire hundreds of rapid updates. A synchronous computation blocks the JS thread on every update.
+
+**Real-world impact**: A scoring engine (80-250ms per run) inside `useMemo` ran 186 times during a bulk delete, blocking the JS thread for 30+ seconds and crashing the app.
+
+### Pattern: Throttled useEffect with Fingerprint
+
+```typescript
+const THROTTLE_MS = 300;
+
+function useExpensiveDerivation(game: Game | null): Result | null {
+  const [result, setResult] = useState<Result | null>(null);
+  const lastFingerprintRef = useRef<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Fingerprint: cheap hash of scoring-relevant data
+  const fingerprint = createFingerprint(game);
+
+  useEffect(() => {
+    if (fingerprint === null) {
+      if (lastFingerprintRef.current !== null) {
+        lastFingerprintRef.current = null;
+        setResult(null);
+      }
+      return;
+    }
+    if (fingerprint === lastFingerprintRef.current) return;
+
+    const isFirst = lastFingerprintRef.current === null;
+    const compute = () => {
+      const scored = expensiveComputation(game);
+      lastFingerprintRef.current = fingerprint;
+      setResult(scored);
+    };
+
+    if (isFirst) {
+      compute(); // No delay for initial load
+    } else {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        timerRef.current = null;
+        compute();
+      }, THROTTLE_MS);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [fingerprint, game]);
+
+  return result;
+}
+```
+
+**Key properties:**
+- First computation is immediate (no delay on initial load)
+- Subsequent changes get a 300ms cooldown; timer resets on new changes
+- Collapses rapid mutation storms into a single re-computation
+- Uses numeric fingerprint (cyrb53 hash) for fast comparison
+
+---
+
+## Bulk Jazz Mutations Cause Render Storms
+
+**Severity**: HIGH | **Enforcement**: AWARENESS
+
+Every Jazz CoValue mutation (splice, set, delete) syncs immediately to all subscribers. When a script or function mutates many CoValues in a loop (e.g., deleting scores one by one), each mutation triggers a re-render in any component subscribed to that data.
+
+**Real-world impact**: `deepDeleteGame` splicing 200+ scores/rounds/teams caused 186 re-scores at 80-250ms each, crashing the app.
+
+### Mitigation Strategies
+
+1. **Throttle derived computations** (see above) — most important defense
+2. **Remove references first, then deep-delete** — unsubscribe the app before the mutation storm:
+   ```typescript
+   // Remove game from organizer's list FIRST (app unsubscribes)
+   games.$jazz.splice(gameIndex, 1);
+   await pause(1000); // Let sync propagate
+   // THEN deep-delete internals (no one is listening)
+   await deepDeleteGame(game);
+   ```
+3. **Batch where possible** — use a single `splice` with replacement array instead of individual operations:
+   ```typescript
+   // WRONG — N individual mutations = N sync events
+   for (const key of keysToDelete) {
+     scores.$jazz.delete(key);
+   }
+
+   // BETTER — single splice replaces entire list
+   const filtered = list.filter(item => shouldKeep(item));
+   list.$jazz.splice(0, list.length, ...filtered);
+   ```
+
+---
+
 ## Jazz API Quick Reference
 
 | Operation | Method |

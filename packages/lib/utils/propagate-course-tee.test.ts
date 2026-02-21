@@ -12,7 +12,7 @@ import {
   findExistingCourseTeeInGame,
   isTeeCompatibleWithGender,
   propagateCourseTeeToPlayers,
-} from "./propagateCourseTee";
+} from "./propagate-course-tee";
 
 // =============================================================================
 // Mock Helpers

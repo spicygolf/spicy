@@ -1,12 +1,13 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { MaybeLoaded } from "jazz-tools";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Player } from "spicylib/schema";
+import type { Player, Round, RoundToGame } from "spicylib/schema";
 import { Handicaps } from "@/components/handicap/Handicaps";
-import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Text } from "@/ui";
+import { usePerfRenderCount } from "@/utils/perfTrace";
 import { PlayerCourseTeeInfo } from "./PlayerCourseTeeInfo";
 import { PlayerDelete } from "./PlayerDelete";
 
@@ -14,52 +15,29 @@ type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 
 interface GamePlayersListItemProps {
   player: Player | null;
+  /** The RoundToGame for this player in this game, found by the parent */
+  roundToGame: MaybeLoaded<RoundToGame> | undefined;
   /** Shots off the lowest handicap player (only in "low" mode) */
   shotsOff: number | null;
+  /** Callback to delete this player from the game */
+  onDelete: (player: Player) => void;
 }
 
 export function GamePlayersListItem({
   player,
+  roundToGame,
   shotsOff,
+  onDelete,
 }: GamePlayersListItemProps): React.ReactNode {
+  usePerfRenderCount("GamePlayersListItem");
+
   const navigation = useNavigation<NavigationProp>();
-  const { game } = useGame(undefined, {
-    resolve: {
-      rounds: {
-        $each: {
-          round: {
-            playerId: true,
-            course: {
-              name: true,
-              facility: { name: true },
-            },
-            tee: {
-              name: true,
-              ratings: true,
-            },
-          },
-          handicapIndex: true,
-          courseHandicap: true,
-          gameHandicap: true,
-        },
-      },
-    },
-  });
 
   if (!player?.$isLoaded) return null;
 
-  // Find the round for this player in this game
-  const roundToGame =
-    game?.$isLoaded && game.rounds?.$isLoaded
-      ? game.rounds.find(
-          (rtg) =>
-            rtg?.$isLoaded &&
-            rtg.round?.$isLoaded &&
-            rtg.round.playerId === player.$jazz.id,
-        )
-      : undefined;
-
-  const gameRound = roundToGame?.$isLoaded ? roundToGame.round : null;
+  const gameRound: MaybeLoaded<Round> | null = roundToGame?.$isLoaded
+    ? roundToGame.round
+    : null;
   const hasRounds = !!roundToGame;
 
   // Check if the round attached to THIS game has course/tee selected
@@ -148,7 +126,7 @@ export function GamePlayersListItem({
         />
       </View>
       <View style={styles.delete}>
-        <PlayerDelete player={player} />
+        <PlayerDelete player={player} onDelete={onDelete} />
       </View>
     </View>
   );

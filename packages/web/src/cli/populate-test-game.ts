@@ -12,7 +12,7 @@
  *
  * Without args: creates a new 48-player Big Game test game (worker as organizer)
  * With --organizer <accountId>: sets a specific account as organizer
- * With --delete <gameId>: shows deletion info for the test game
+ * With --delete <gameId>: deep deletes game data and removes from organizer's games list
  */
 
 import { resolve } from "node:path";
@@ -45,6 +45,7 @@ import {
   TeeHole,
 } from "spicylib/schema";
 import { copySpecOptions, getSpecField } from "spicylib/scoring";
+import { autoAssignPlayerToTeam, deepDeleteGame } from "spicylib/utils";
 
 // Load environment from API package
 config({ path: resolve(import.meta.dir, "../../../api/.env") });
@@ -261,52 +262,13 @@ async function deleteMode(gameId: string, organizerId?: string): Promise<void> {
     console.log(`Players: ${game.players?.length ?? 0}`);
     console.log(`Start: ${game.start}`);
 
-    // Deep delete game data (same approach as e2eCleanup.ts)
-    // biome-ignore lint/suspicious/noExplicitAny: Jazz resolved types need assertion for mutations
-    const g = game as any;
-
-    if (g.holes?.$isLoaded) {
-      for (let i = 0; i < g.holes.length; i++) {
-        const hole = g.holes[i];
-        if (!hole?.$isLoaded || !hole.teams?.$isLoaded) continue;
-        for (let j = 0; j < hole.teams.length; j++) {
-          const team = hole.teams[j];
-          if (!team?.$isLoaded) continue;
-          if (team.$jazz.has("options") && team.options?.$isLoaded)
-            team.options.$jazz.splice(0, team.options.length);
-          if (team.rounds?.$isLoaded)
-            team.rounds.$jazz.splice(0, team.rounds.length);
-        }
-        hole.teams.$jazz.splice(0, hole.teams.length);
-      }
-      g.holes.$jazz.splice(0, g.holes.length);
-      console.log("  Cleared holes & teams");
-    }
-
-    if (g.rounds?.$isLoaded) {
-      for (let i = 0; i < g.rounds.length; i++) {
-        const rtg = g.rounds[i];
-        if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
-        if (rtg.round.scores?.$isLoaded) {
-          for (const key of Object.keys(rtg.round.scores)) {
-            if (!key.startsWith("$") && key !== "_refs")
-              rtg.round.scores.$jazz.delete(key);
-          }
-        }
-      }
-      g.rounds.$jazz.splice(0, g.rounds.length);
-      console.log("  Cleared rounds & scores");
-    }
-
-    if (g.players?.$isLoaded) {
-      g.players.$jazz.splice(0, g.players.length);
-      console.log("  Cleared players");
-    }
-
-    // Remove from organizer's games list if provided
-    if (organizerId) {
+    // Remove from organizer's games list FIRST so the app unsubscribes
+    // before the mutation storm from deep delete begins.
+    // Use explicit --organizer flag if provided, otherwise read from game.organizer
+    const effectiveOrganizerId = organizerId || game.organizer;
+    if (effectiveOrganizerId) {
       const account = await PlayerAccount.load(
-        organizerId as ID<typeof PlayerAccount>,
+        effectiveOrganizerId as ID<typeof PlayerAccount>,
         { loadAs: worker, resolve: { root: { games: true } } },
       );
       if (account?.$isLoaded && account.root?.games?.$isLoaded) {
@@ -317,16 +279,28 @@ async function deleteMode(gameId: string, organizerId?: string): Promise<void> {
         );
         if (idx !== -1) {
           games.$jazz.splice(idx, 1);
-          console.log(`  Removed from ${organizerId}'s games list`);
+          console.log(`  Removed from ${effectiveOrganizerId}'s games list`);
         } else {
-          console.log(`  Game not found in ${organizerId}'s games list`);
+          console.log(
+            `  Game not found in ${effectiveOrganizerId}'s games list`,
+          );
         }
+      } else {
+        console.log(
+          `  Could not load organizer account ${effectiveOrganizerId}`,
+        );
       }
     } else {
       console.log(
-        "\nTip: pass --organizer <accountId> to also remove from their games list",
+        "  No organizer found on game — game shell may remain in lists",
       );
     }
+
+    // Brief pause so the list removal syncs before the mutation storm
+    await new Promise((r) => setTimeout(r, 1000));
+
+    await deepDeleteGame(game);
+    console.log("  Deep deleted game data");
   } catch (err) {
     console.error("Error:", err);
   }
@@ -431,8 +405,7 @@ async function createGame(organizerId?: string): Promise<void> {
       if (existing) {
         console.error(`\nTest game already exists: ${existing.$jazz.id}`);
         console.error(
-          "Delete it first: bun run packages/web/src/cli/populate-test-game.ts " +
-            `--delete ${existing.$jazz.id} --organizer ${organizerId}\n`,
+          `Delete it first: bun run packages/web/src/cli/populate-test-game.ts --delete ${existing.$jazz.id}\n`,
         );
         await done();
         process.exit(1);
@@ -679,6 +652,20 @@ async function createGame(organizerId?: string): Promise<void> {
       { owner: group },
     );
 
+    // ── Assign each player to their own team on every hole ────────────
+    console.log("Assigning players to individual teams...");
+    let assignedCount = 0;
+    for (let pi = 0; pi < roundToGames.length; pi++) {
+      const rtg = roundToGames[pi];
+      if (!rtg) continue;
+      if (autoAssignPlayerToTeam(game, rtg, pi + 1)) {
+        assignedCount++;
+      }
+    }
+    console.log(
+      `  Assigned ${assignedCount}/${roundToGames.length} players to individual teams`,
+    );
+
     // Add game to organizer's games list so it appears in their app
     if (
       organizerAccount?.$isLoaded &&
@@ -741,7 +728,7 @@ Populate Test Big Game
 Usage:
   bun run packages/web/src/cli/populate-test-game.ts                          Create 48-player Big Game
   bun run packages/web/src/cli/populate-test-game.ts --organizer co_zXYZ...   Set organizer account
-  bun run packages/web/src/cli/populate-test-game.ts --delete <gameId>        Show deletion info
+  bun run packages/web/src/cli/populate-test-game.ts --delete <gameId>        Delete game and remove from organizer's list
 
 Creates a test Big Game with:
   - 48 players with realistic handicaps (+2.0 to 36.0)
@@ -749,6 +736,9 @@ Creates a test Big Game with:
   - Standard course (Test Links Golf Club, par 72)
   - Blue tees (72.5/130)
   - Stableford/quota scoring with gross skins
+
+Delete mode reads game.organizer to automatically remove from the organizer's
+games list. Use --organizer to override if needed.
 `);
 } else {
   const organizerId = parseFlag("--organizer");

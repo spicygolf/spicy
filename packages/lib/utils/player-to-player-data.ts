@@ -1,5 +1,5 @@
 import type { Player } from "spicylib/schema";
-import type { PlayerData } from "../hooks/useAddPlayerToGame";
+import type { PlayerData } from "./add-player-to-game-core";
 
 /**
  * Converts a loaded Player CoMap to PlayerData format for use with addPlayerToGame.

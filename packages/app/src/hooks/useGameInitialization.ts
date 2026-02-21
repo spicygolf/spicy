@@ -1,9 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { Game } from "spicylib/schema";
-import {
-  ensureGameHoles,
-  ensureSeamlessTeamAssignments,
-} from "@/utils/gameTeams";
+import { ensureGameHoles, ensureSeamlessTeamAssignments } from "spicylib/utils";
 
 /**
  * One-time initialization hook for game data

@@ -4,11 +4,28 @@ import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { ErrorDisplay } from "@/components/Error";
 import { PlayerItem } from "@/components/game/settings/PlayerItem";
 import { GhinPlayerSearchContext } from "@/contexts/GhinPlayerSearchContext";
+import { useGame } from "@/hooks";
 import { useGhinSearchPlayerQuery } from "@/hooks/useGhinSearchPlayerQuery";
 import { Text } from "@/ui";
 
 export function GhinPlayerSearchResults() {
   const { state } = useContext(GhinPlayerSearchContext);
+
+  // Single subscription for all search results — builds a set of ghinIds
+  // already in the game so PlayerItem doesn't need its own useGame().
+  const { game } = useGame(undefined, {
+    resolve: {
+      players: { $each: { ghinId: true } },
+    },
+  });
+  const addedGhinIds = new Set<string>();
+  if (game?.$isLoaded && game.players?.$isLoaded) {
+    for (const p of game.players) {
+      if (p?.$isLoaded && p.ghinId) {
+        addedGhinIds.add(p.ghinId);
+      }
+    }
+  }
 
   const [page, setPage] = useState(1);
   const [golfers, setGolfers] = useState<Golfer[]>([]);
@@ -56,7 +73,9 @@ export function GhinPlayerSearchResults() {
   return (
     <FlatList
       data={golfers}
-      renderItem={({ item }) => <PlayerItem item={item} />}
+      renderItem={({ item }) => (
+        <PlayerItem item={item} addedGhinIds={addedGhinIds} />
+      )}
       keyExtractor={keyExtractor}
       onEndReachedThreshold={0.8}
       onEndReached={async () => {

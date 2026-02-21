@@ -1,8 +1,10 @@
+import Clipboard from "@react-native-clipboard/clipboard";
+import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
-import { StyleSheet } from "react-native-unistyles";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Animated, Pressable, ScrollView, View } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption, JunkOption, MultiplierOption } from "spicylib/schema";
 import { isEveningCreation, isSameDay } from "spicylib/utils";
 import {
@@ -12,6 +14,7 @@ import {
   useTeamsMode,
 } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
+import { Text } from "@/ui";
 import { BoolOptionModal } from "./BoolOptionModal";
 import { DeleteGameButton } from "./DeleteGameButton";
 import { formatOptionValue } from "./formatOptionValue";
@@ -29,6 +32,45 @@ import { ResetSpecButton } from "./ResetSpecButton";
 import { TeeTimeModal } from "./TeeTimeModal";
 import { TeeTimeRow } from "./TeeTimeRow";
 import { TextOptionModal } from "./TextOptionModal";
+
+function CopyGameIdButton({ gameId }: { gameId: string }) {
+  const { theme } = useUnistyles();
+  const opacity = useRef(new Animated.Value(1)).current;
+
+  const handleCopy = () => {
+    Clipboard.setString(gameId);
+    opacity.stopAnimation();
+    Animated.sequence([
+      Animated.timing(opacity, {
+        toValue: 0.3,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  return (
+    <Pressable style={devStyles.optionRow} onPress={handleCopy}>
+      <Text style={devStyles.optionLabel}>Game ID</Text>
+      <Animated.View style={[devStyles.optionValue, { opacity }]}>
+        <Text style={devStyles.optionValueText} numberOfLines={1}>
+          {gameId}
+        </Text>
+        <FontAwesome6
+          name="copy"
+          iconStyle="regular"
+          size={14}
+          color={theme.colors.secondary}
+        />
+      </Animated.View>
+    </Pressable>
+  );
+}
 
 type ModalType = "game" | "junk" | "multiplier" | null;
 
@@ -348,6 +390,7 @@ export function GameOptionsList() {
                 isOrganizer ? () => setShowTeeTimeModal(true) : undefined
               }
             />
+            {__DEV__ && <CopyGameIdButton gameId={game.$jazz.id} />}
           </>
         )}
 
@@ -520,5 +563,35 @@ const styles = StyleSheet.create((_theme) => ({
   },
   readOnly: {
     opacity: 0.6,
+  },
+}));
+
+const devStyles = StyleSheet.create((theme) => ({
+  optionRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: theme.gap(1),
+    paddingHorizontal: theme.gap(1),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    backgroundColor: theme.colors.background,
+  },
+  optionLabel: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: theme.colors.primary,
+    flex: 1,
+  },
+  optionValue: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(0.75),
+    flexShrink: 1,
+  },
+  optionValueText: {
+    fontSize: 14,
+    color: theme.colors.secondary,
+    flexShrink: 1,
   },
 }));

@@ -68,13 +68,18 @@ export function GameListItem({ game }: { game: Game | null | undefined }) {
     return <GameListItemSkeleton />;
   }
 
-  // Generate player names directly from Jazz data - no useState/useEffect needed
-  const playerNames = loadedGame.players?.$isLoaded
-    ? loadedGame.players
-        .filter((p) => p?.$isLoaded)
-        .map((p) => formatPlayerName(p?.name))
-        .join(" • ")
-    : "";
+  // Generate player display text - collapse to "X Players" when > 5
+  const loadedPlayers = loadedGame.players?.$isLoaded
+    ? loadedGame.players.filter((p) => p?.$isLoaded)
+    : [];
+  const totalPlayerCount = loadedGame.players?.length ?? 0;
+  const playerNames =
+    totalPlayerCount > 5
+      ? `${totalPlayerCount} Players`
+      : loadedPlayers
+          .map((p) => formatPlayerName(p?.name))
+          .filter(Boolean)
+          .join(" • ");
 
   const handleGamePress = () => {
     navigation.navigate("Game", { gameId: game.$jazz.id });
@@ -143,7 +148,7 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.secondary,
   },
   playerNames: {
-    fontSize: 12,
+    fontSize: 11,
     color: theme.colors.secondary,
     marginTop: theme.gap(0.5),
   },

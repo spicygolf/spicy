@@ -77,6 +77,13 @@ export const Game = co.map({
   payoutPools: co.optional(ListOfPayoutPools),
 
   /**
+   * Tombstone flag set before deep-delete begins.
+   * When true, scoring and fingerprinting bail out immediately,
+   * preventing re-score storms as nested data is cleared.
+   */
+  deleted: z.literal(true).optional(),
+
+  /**
    * Legacy ID from ArangoDB v0.3 import (_key field).
    * Used for idempotent imports and tracking migrated games.
    */
