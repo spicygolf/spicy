@@ -33,6 +33,7 @@ import {
   ListOfGameHoles,
   ListOfPlayers,
   ListOfRoundToGames,
+  ListOfRoundToTeams,
   ListOfTeams,
   ListOfTeeHoles,
   ListOfTees,
@@ -41,6 +42,8 @@ import {
   Round,
   RoundScores,
   RoundToGame,
+  RoundToTeam,
+  Team,
   Tee,
   TeeHole,
 } from "spicylib/schema";
@@ -652,6 +655,32 @@ async function createGame(organizerId?: string): Promise<void> {
       );
       gameHoles.$jazz.push(gameHole);
     }
+
+    // ── Assign each player to their own team on every hole ────────────
+    console.log("Assigning players to individual teams...");
+    for (let pi = 0; pi < roundToGames.length; pi++) {
+      const rtg = roundToGames[pi];
+      if (!rtg) continue;
+      const teamNumber = pi + 1;
+
+      for (let hi = 0; hi < gameHoles.length; hi++) {
+        const gameHole = gameHoles[hi];
+        if (!gameHole?.teams) continue;
+
+        const roundToTeams = ListOfRoundToTeams.create([], { owner: group });
+        roundToTeams.$jazz.push(
+          RoundToTeam.create({ roundToGame: rtg }, { owner: group }),
+        );
+
+        gameHole.teams.$jazz.push(
+          Team.create(
+            { team: `${teamNumber}`, rounds: roundToTeams },
+            { owner: group },
+          ),
+        );
+      }
+    }
+    console.log(`  Assigned ${roundToGames.length} players to individual teams`);
 
     // ── Create scope ───────────────────────────────────────────────────
     console.log("Creating game scope...");
