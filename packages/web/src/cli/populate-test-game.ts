@@ -12,7 +12,7 @@
  *
  * Without args: creates a new 48-player Big Game test game (worker as organizer)
  * With --organizer <accountId>: sets a specific account as organizer
- * With --delete <gameId>: shows deletion info for the test game
+ * With --delete <gameId>: deep deletes game data and removes from organizer's games list
  */
 
 import { resolve } from "node:path";
@@ -265,10 +265,12 @@ async function deleteMode(gameId: string, organizerId?: string): Promise<void> {
     await deepDeleteGame(game);
     console.log("  Deep deleted game data");
 
-    // Remove from organizer's games list if provided
-    if (organizerId) {
+    // Remove from organizer's games list
+    // Use explicit --organizer flag if provided, otherwise read from game.organizer
+    const effectiveOrganizerId = organizerId || game.organizer;
+    if (effectiveOrganizerId) {
       const account = await PlayerAccount.load(
-        organizerId as ID<typeof PlayerAccount>,
+        effectiveOrganizerId as ID<typeof PlayerAccount>,
         { loadAs: worker, resolve: { root: { games: true } } },
       );
       if (account?.$isLoaded && account.root?.games?.$isLoaded) {
@@ -279,14 +281,20 @@ async function deleteMode(gameId: string, organizerId?: string): Promise<void> {
         );
         if (idx !== -1) {
           games.$jazz.splice(idx, 1);
-          console.log(`  Removed from ${organizerId}'s games list`);
+          console.log(`  Removed from ${effectiveOrganizerId}'s games list`);
         } else {
-          console.log(`  Game not found in ${organizerId}'s games list`);
+          console.log(
+            `  Game not found in ${effectiveOrganizerId}'s games list`,
+          );
         }
+      } else {
+        console.log(
+          `  Could not load organizer account ${effectiveOrganizerId}`,
+        );
       }
     } else {
       console.log(
-        "\nTip: pass --organizer <accountId> to also remove from their games list",
+        "  No organizer found on game — game shell may remain in lists",
       );
     }
   } catch (err) {
@@ -678,7 +686,7 @@ async function createGame(organizerId?: string): Promise<void> {
     await new Promise((r) => setTimeout(r, 5000));
     console.log("Done.");
     console.log(
-      `\nTo delete: bun run packages/web/src/cli/populate-test-game.ts --delete ${game.$jazz.id}`,
+      `\nTo delete: bun run packages/web/src/cli/populate-test-game.ts --delete ${game.$jazz.id}${organizerId ? "" : ` --organizer ${game.organizer}`}`,
     );
   } catch (err) {
     console.error("Error:", err);
@@ -714,7 +722,7 @@ Populate Test Big Game
 Usage:
   bun run packages/web/src/cli/populate-test-game.ts                          Create 48-player Big Game
   bun run packages/web/src/cli/populate-test-game.ts --organizer co_zXYZ...   Set organizer account
-  bun run packages/web/src/cli/populate-test-game.ts --delete <gameId>        Show deletion info
+  bun run packages/web/src/cli/populate-test-game.ts --delete <gameId>        Delete game and remove from organizer's list
 
 Creates a test Big Game with:
   - 48 players with realistic handicaps (+2.0 to 36.0)
@@ -722,6 +730,9 @@ Creates a test Big Game with:
   - Standard course (Test Links Golf Club, par 72)
   - Blue tees (72.5/130)
   - Stableford/quota scoring with gross skins
+
+Delete mode reads game.organizer to automatically remove from the organizer's
+games list. Use --organizer to override if needed.
 `);
 } else {
   const organizerId = parseFlag("--organizer");
