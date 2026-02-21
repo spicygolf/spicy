@@ -1,9 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import type { Player, RoundToGame } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
 import {
   adjustHandicapsToLow,
@@ -37,6 +39,7 @@ export function GamePlayersList() {
         $each: {
           round: {
             playerId: true,
+            course: true,
             tee: {
               ratings: true,
             },
@@ -72,6 +75,20 @@ export function GamePlayersList() {
     game?.$isLoaded && game.players?.$isLoaded
       ? game.players.filter((p) => p?.$isLoaded)
       : [];
+
+  // Build playerId → RoundToGame lookup from the single parent subscription
+  // This replaces 48 individual useGame() calls in each GamePlayersListItem
+  const roundToGameByPlayer = new Map<string, MaybeLoaded<RoundToGame>>();
+  if (game?.$isLoaded && game.rounds?.$isLoaded) {
+    for (const rtg of game.rounds) {
+      if (!rtg?.$isLoaded) continue;
+      if (!rtg.round?.$isLoaded) continue;
+      const playerId = rtg.round.playerId;
+      if (playerId) {
+        roundToGameByPlayer.set(playerId, rtg);
+      }
+    }
+  }
 
   // Get handicap mode from game options (default is "low")
   const handicapIndexFromValue = useOptionValue(
@@ -189,6 +206,20 @@ export function GamePlayersList() {
     }
   };
 
+  // Stable keyExtractor (doesn't depend on render-scoped data)
+  const extractPlayerKey = useCallback((item: Player) => item.$jazz.id, []);
+
+  // renderItem closes over roundToGameByPlayer and adjustedHandicaps
+  // which change each render, so useCallback won't help here.
+  // The real win is eliminating 48 useGame() subscriptions in children.
+  const renderPlayerItem = ({ item }: { item: Player }) => (
+    <GamePlayersListItem
+      player={item}
+      roundToGame={roundToGameByPlayer.get(item.$jazz.id)}
+      shotsOff={adjustedHandicaps?.get(item.$jazz.id) ?? null}
+    />
+  );
+
   return (
     <View>
       <View style={styles.buttonRow}>
@@ -204,13 +235,8 @@ export function GamePlayersList() {
       </View>
       <FlatList
         data={players}
-        renderItem={({ item }) => (
-          <GamePlayersListItem
-            player={item}
-            shotsOff={adjustedHandicaps?.get(item.$jazz.id) ?? null}
-          />
-        )}
-        keyExtractor={(item) => item.$jazz.id}
+        renderItem={renderPlayerItem}
+        keyExtractor={extractPlayerKey}
         ListEmptyComponent={<EmptyPlayersList />}
         contentContainerStyle={styles.flatlist}
       />

@@ -217,13 +217,35 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
   usePerfRenderCount("useScoreboard");
   const lastFingerprint = useRef<number | null>(null);
   const cachedResult = useRef<ScoreboardResult | null>(null);
+  const lastGameRef = useRef<Game | null>(null);
   const nullCount = useRef(0);
 
-  // Create fingerprint from scoring-relevant data
+  // Fast path: if the game reference is the exact same object AND we already
+  // have a cached fingerprint, skip the expensive walk entirely.
+  // Jazz proxies give a new reference when data changes, so same ref = same data.
+  const canSkipFingerprint =
+    game !== null &&
+    game === lastGameRef.current &&
+    lastFingerprint.current !== null &&
+    cachedResult.current !== null;
+
   const { result: fingerprint, ms: fpMs } = perfTime(
     "useScoreboard.fingerprint",
-    () => createScoringFingerprint(game),
+    () => {
+      if (canSkipFingerprint) {
+        if (__DEV__) {
+          console.log(
+            "[PERF] useScoreboard: game ref unchanged, skipping fingerprint",
+          );
+        }
+        return lastFingerprint.current;
+      }
+      return createScoringFingerprint(game);
+    },
   );
+
+  // Track game reference for fast-path comparison
+  lastGameRef.current = game;
 
   return useMemo(() => {
     // If fingerprint is null, game isn't ready
