@@ -4,6 +4,9 @@ import { useEffect, useRef } from "react";
 import { Game } from "spicylib/schema";
 import { useGameIdContext } from "@/contexts/GameContext";
 
+/** Dev-only: track total active useGame subscriptions */
+let __activeSubscriptions = 0;
+
 interface UseGameOptions {
   requireGame?: boolean;
   resolve?: Record<string, unknown>;
@@ -99,6 +102,21 @@ export function useGame(
       });
     }
   }, [game]);
+
+  // Subscription count tracking (dev only)
+  useEffect(() => {
+    if (!__DEV__ || !effectiveGameId) return;
+    __activeSubscriptions += 1;
+    console.log(
+      `[PERF] useGame SUBSCRIBE (${__activeSubscriptions} active) caller=${new Error().stack?.split("\n")[2]?.trim().slice(0, 80)}`,
+    );
+    return () => {
+      __activeSubscriptions -= 1;
+      console.log(
+        `[PERF] useGame UNSUBSCRIBE (${__activeSubscriptions} active)`,
+      );
+    };
+  }, [effectiveGameId]);
 
   if (!effectiveGameId) {
     if (options.requireGame) {

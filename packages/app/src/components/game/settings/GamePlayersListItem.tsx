@@ -7,6 +7,7 @@ import { Handicaps } from "@/components/handicap/Handicaps";
 import { useGame } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Text } from "@/ui";
+import { usePerfMountTracker, usePerfRenderCount } from "@/utils/perfTrace";
 import { PlayerCourseTeeInfo } from "./PlayerCourseTeeInfo";
 import { PlayerDelete } from "./PlayerDelete";
 
@@ -22,6 +23,9 @@ export function GamePlayersListItem({
   player,
   shotsOff,
 }: GamePlayersListItemProps): React.ReactNode {
+  usePerfRenderCount("GamePlayersListItem");
+  usePerfMountTracker("GamePlayersListItem");
+
   const navigation = useNavigation<NavigationProp>();
   const { game } = useGame(undefined, {
     resolve: {

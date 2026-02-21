@@ -3,6 +3,7 @@ import type { Game } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import { scoreWithContext } from "spicylib/scoring";
 import { isCoMapDataKey } from "spicylib/utils";
+import { perfTime, usePerfRenderCount } from "@/utils/perfTrace";
 
 /**
  * Fast, simple hash function (cyrb53)
@@ -213,21 +214,37 @@ function createScoringFingerprint(game: Game | null): number | null {
  * }
  */
 export function useScoreboard(game: Game | null): ScoreboardResult | null {
+  usePerfRenderCount("useScoreboard");
   const lastFingerprint = useRef<number | null>(null);
   const cachedResult = useRef<ScoreboardResult | null>(null);
+  const nullCount = useRef(0);
 
   // Create fingerprint from scoring-relevant data
-  const fingerprint = createScoringFingerprint(game);
+  const { result: fingerprint, ms: fpMs } = perfTime(
+    "useScoreboard.fingerprint",
+    () => createScoringFingerprint(game),
+  );
 
   return useMemo(() => {
     // If fingerprint is null, game isn't ready
     if (fingerprint === null) {
+      nullCount.current += 1;
+      if (__DEV__ && nullCount.current % 10 === 0) {
+        console.log(
+          `[PERF] useScoreboard fingerprint null (${nullCount.current} times)`,
+        );
+      }
       return null;
     }
 
     // If fingerprint hasn't changed, return cached result
     // This prevents recomputation when game reference changes but data hasn't
     if (fingerprint === lastFingerprint.current && cachedResult.current) {
+      if (__DEV__) {
+        console.log(
+          "[PERF] useScoreboard: fingerprint stable, returning cache",
+        );
+      }
       return cachedResult.current;
     }
 
@@ -237,7 +254,15 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
     }
 
     try {
-      const result = scoreWithContext(game);
+      const { result, ms } = perfTime("useScoreboard.scoreWithContext", () =>
+        scoreWithContext(game),
+      );
+
+      if (__DEV__) {
+        console.log(
+          `[PERF] useScoreboard: SCORED in ${ms.toFixed(1)}ms (fp: ${fpMs.toFixed(1)}ms, fingerprint: ${fingerprint})`,
+        );
+      }
 
       // Update cache
       lastFingerprint.current = fingerprint;
@@ -248,5 +273,5 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
       console.warn("[useScoreboard] Scoring engine error:", error);
       return null;
     }
-  }, [fingerprint, game]);
+  }, [fingerprint, game, fpMs]);
 }

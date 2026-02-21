@@ -15,11 +15,15 @@ import { useAddPlayerToGame, useGame } from "@/hooks";
 import { useOptionValue } from "@/hooks/useOptionValue";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Button } from "@/ui";
+import { usePerfMountTracker, usePerfRenderCount } from "@/utils/perfTrace";
 import { EmptyPlayersList } from "./EmptyPlayersList";
 
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
 
 export function GamePlayersList() {
+  usePerfRenderCount("GamePlayersList");
+  usePerfMountTracker("GamePlayersList");
+
   const { game } = useGame(undefined, {
     resolve: {
       players: {

@@ -11,6 +11,7 @@ import {
   useScoreManagement,
 } from "@/hooks";
 import { Button, Screen, Text } from "@/ui";
+import { usePerfRenderCount } from "@/utils/perfTrace";
 import { ScoringView } from "./ScoringView";
 import { SummaryView } from "./SummaryView";
 import { TeamChooserView } from "./TeamChooserView";
@@ -21,6 +22,8 @@ interface GameScoringProps {
 }
 
 export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
+  usePerfRenderCount("GameScoring");
+
   // Use shared game and scoreboard from context
   const { scoringGame: game, scoreboard, scoringContext } = useGameContext();
 

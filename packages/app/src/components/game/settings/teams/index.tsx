@@ -13,12 +13,20 @@ import {
 } from "spicylib/utils";
 import { useGame, useTeamsMode } from "@/hooks";
 import { Text } from "@/ui";
+import {
+  usePerfMountTracker,
+  usePerfRenderCount,
+  usePerfValueTracker,
+} from "@/utils/perfTrace";
 import { RotationChangeModal } from "./RotationChangeModal";
 import { RotationFrequencyPicker } from "./RotationFrequencyPicker";
 import { TeamAssignments } from "./TeamAssignments";
 import type { PlayerRoundItem, RotationChangeOption } from "./types";
 
 export function GameTeamsList() {
+  usePerfRenderCount("GameTeamsList");
+  usePerfMountTracker("GameTeamsList");
+
   // Load game with shallow holes - we only need hole IDs for writing
   // Deep team data is loaded separately for just the first hole
   const { game } = useGame(undefined, {
@@ -83,6 +91,8 @@ export function GameTeamsList() {
   const [_rotationChangeOption, setRotationChangeOption] =
     useState<RotationChangeOption>("clearExceptFirst");
 
+  usePerfValueTracker("GameTeamsList.specs", specs);
+
   const rotateEvery = useMemo(() => {
     if (
       !game?.$isLoaded ||
@@ -97,6 +107,8 @@ export function GameTeamsList() {
     // Normalize null to undefined (can happen with legacy imported data)
     return value ?? undefined;
   }, [game]);
+
+  usePerfValueTracker("GameTeamsList.rotateEvery", rotateEvery);
 
   const teamCount = useMemo(() => {
     // If no teamsConfig exists, calculate from number of players (individual games)
@@ -115,6 +127,8 @@ export function GameTeamsList() {
     // Normalize null to defaultTeamCount (can happen with legacy imported data)
     return value ?? defaultTeamCount;
   }, [game]);
+
+  usePerfValueTracker("GameTeamsList.teamCount", teamCount);
 
   // Check if spec has fixed num_teams (e.g., Five Points = 2 teams)
   // Try spec first (working copy), fall back to specRef (catalog spec)
@@ -178,6 +192,8 @@ export function GameTeamsList() {
     }
     return items;
   }, [game]);
+
+  usePerfValueTracker("GameTeamsList.allPlayerRounds", allPlayerRounds);
 
   // Derive team assignments directly from Jazz data - no local state needed
   // Uses firstHole (deeply loaded) instead of game.holes[0] for efficiency
