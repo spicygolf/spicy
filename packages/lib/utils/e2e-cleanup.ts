@@ -33,6 +33,9 @@ export async function deepDeleteGame(game: Game): Promise<void> {
     throw new Error("deepDeleteGame is only available in development builds");
   }
 
+  // Tombstone: prevents scoring re-computation while we clear nested data
+  game.$jazz.set("deleted", true);
+
   // Ensure game is fully loaded with all nested data
   const loadedGame = await game.$jazz.ensureLoaded({
     resolve: {
