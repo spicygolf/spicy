@@ -13,7 +13,7 @@ import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import { useScoreboard } from "@/hooks/useScoreboard";
 import { usePerfRenderCount } from "@/utils/perfTrace";
 
-export type LeaderboardViewMode = "gross" | "net" | "points";
+export type LeaderboardViewMode = "gross" | "net" | "points" | "skins";
 export type SettingsTab = "PlayersTab" | "TeamsTab" | "OptionsTab";
 
 /**
