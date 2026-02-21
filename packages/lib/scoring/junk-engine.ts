@@ -89,6 +89,10 @@ export function evaluateJunkForHole(
     evaluateJunkOption(junk, result, ctx);
   }
 
+  // Eagle skins override birdie skins: if any player earned gross_eagle_skin,
+  // remove gross_skin from ALL players on this hole (eagle wins outright)
+  resolveConflictingSkins(result);
+
   // Calculate v0.3 parity fields
   result.scoresEntered = calculateScoresEntered(result);
   const { possiblePoints, markedJunk, requiredJunk, unmarkedJunkNames } =
@@ -141,6 +145,25 @@ function evaluateJunkOption(
     evaluatePlayerJunk(junk, holeResult, ctx);
   } else if (scope === "team") {
     evaluateTeamJunk(junk, holeResult, ctx);
+  }
+}
+
+/**
+ * Remove conflicting skin awards from a hole result.
+ *
+ * When gross_eagle_skin is awarded to any player on a hole, gross_skin
+ * is removed from ALL players on that hole. The eagle wins the skin outright —
+ * birdie-level skins don't apply when an eagle skin exists.
+ */
+function resolveConflictingSkins(holeResult: HoleResult): void {
+  const hasEagleSkin = Object.values(holeResult.players).some((p) =>
+    p.junk.some((j) => j.name === "gross_eagle_skin"),
+  );
+
+  if (hasEagleSkin) {
+    for (const player of Object.values(holeResult.players)) {
+      player.junk = player.junk.filter((j) => j.name !== "gross_skin");
+    }
   }
 }
 
@@ -199,6 +222,10 @@ function evaluateTeamJunk(
 
 /**
  * Check if a player should be awarded this junk
+ *
+ * When a junk option has both score_to_par AND logic conditions,
+ * BOTH must pass (AND logic). This is critical for skins: score_to_par
+ * checks "birdie or better" while logic checks "outright winner" (no ties).
  */
 function shouldAwardJunk(
   junk: JunkOption,
@@ -211,17 +238,16 @@ function shouldAwardJunk(
     return checkUserJunk(junk.name, evalCtx);
   }
 
-  // Score-to-par based junk (birdie, eagle)
-  if (junk.score_to_par) {
-    return evaluateScoreToPar(junk.score_to_par, evalCtx, basedOn);
-  }
+  // Check score_to_par condition (if present)
+  const scoreToParPasses =
+    !junk.score_to_par ||
+    evaluateScoreToPar(junk.score_to_par, evalCtx, basedOn);
 
-  // Logic-based junk (ranking conditions)
-  if (junk.logic) {
-    return evaluatePlayerLogic(junk.logic, evalCtx);
-  }
+  // Check logic condition (if present)
+  const logicPasses = !junk.logic || evaluatePlayerLogic(junk.logic, evalCtx);
 
-  return false;
+  // Both must pass when both are defined
+  return scoreToParPasses && logicPasses;
 }
 
 /**
