@@ -19,6 +19,8 @@ interface GamePlayersListItemProps {
   roundToGame: MaybeLoaded<RoundToGame> | undefined;
   /** Shots off the lowest handicap player (only in "low" mode) */
   shotsOff: number | null;
+  /** Player's 18-hole quota (for quota games) */
+  quota: number | null;
   /** Callback to delete this player from the game */
   onDelete: (player: Player) => void;
 }
@@ -27,6 +29,7 @@ export function GamePlayersListItem({
   player,
   roundToGame,
   shotsOff,
+  quota,
   onDelete,
 }: GamePlayersListItemProps): React.ReactNode {
   usePerfRenderCount("GamePlayersListItem");
@@ -113,6 +116,7 @@ export function GamePlayersListItem({
           round={gameRound}
           roundToGame={roundToGame}
           shotsOff={shotsOff}
+          quota={quota}
           onPress={
             roundToGame?.$isLoaded
               ? () =>
