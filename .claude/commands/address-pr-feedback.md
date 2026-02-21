@@ -52,14 +52,16 @@ gh api "repos/{owner}/{repo}/pulls/{pr}/comments" --paginate --jq '.[] | {
 To identify **new unaddressed root comments**, filter by:
 - `in_reply_to_id == null` (root comment, not a reply)
 - `user.login == "coderabbitai[bot]"`
-- No reply from `boorad` exists with matching `in_reply_to_id`
+- No reply from the PR author (`gh pr view --json author --jq '.author.login'`) exists with matching `in_reply_to_id`
 
 Useful shortcut to see how many batches exist:
+
 ```bash
 gh api "repos/{owner}/{repo}/pulls/{pr}/comments" --paginate \
   --jq '.[] | select(.user.login == "coderabbitai[bot]") | select(.in_reply_to_id == null) | .created_at' \
   | sort | uniq -c | sort -rn
 ```
+
 Each unique timestamp cluster represents one review pass.
 
 #### 3b. Outside-diff-range comments (in review body)
@@ -67,12 +69,13 @@ Each unique timestamp cluster represents one review pass.
 CodeRabbit posts "outside diff range" comments in the **review body**, not as inline comments. These are easy to miss.
 
 ```bash
-# Get ALL CodeRabbit CHANGES_REQUESTED reviews with their bodies
+# Get ALL CodeRabbit reviews with non-empty bodies (includes CHANGES_REQUESTED and COMMENTED states)
 gh api "repos/{owner}/{repo}/pulls/{pr}/reviews" --paginate \
   --jq '.[] | select(.user.login == "coderabbitai[bot]") | select(.body | length > 0) | {id: .id, state: .state, submitted_at: .submitted_at}'
 ```
 
 Then fetch each review body:
+
 ```bash
 gh api "repos/{owner}/{repo}/pulls/{pr}/reviews/{review_id}" --jq '.body'
 ```
@@ -82,11 +85,8 @@ Look for the `<summary>⚠️ Outside diff range comments (N)</summary>` section
 #### 3c. General PR comments
 
 ```bash
-gh pr view --json comments --jq '.comments[] | {
-  author: .author.login,
-  body: .body,
-  createdAt: .createdAt
-}'
+gh api "repos/{owner}/{repo}/issues/{pr}/comments" --paginate \
+  --jq '.[] | {id: .id, author: .user.login, body: .body, created_at: .created_at}'
 ```
 
 ### 4. Identify actionable feedback
@@ -118,6 +118,7 @@ For valid concerns:
 
 For false positives / stale:
 1. Reply to the review comment thread explaining why:
+
    ```bash
    gh api "repos/{owner}/{repo}/pulls/{pr}/comments" \
      -X POST -f body="<explanation of why this is safe / stale>" \
@@ -126,6 +127,7 @@ For false positives / stale:
 
 For outside-diff-range comments (no inline comment ID to reply to):
 1. Post a general PR comment summarizing fixes and dismissals for outside-diff items:
+
    ```bash
    gh pr comment {pr} --body "<summary of outside-diff responses>"
    ```
