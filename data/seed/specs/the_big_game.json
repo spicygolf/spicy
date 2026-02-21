@@ -11,7 +11,7 @@
   "teams": false,
   "team_size": 1,
   "team_change_every": 0,
-  "options": ["buy_in", "places_paid", "use_handicaps", "handicap_index_from"],
+  "options": ["buy_in", "places_paid"],
   "junk": [
     "stableford_double_eagle",
     "stableford_eagle",
