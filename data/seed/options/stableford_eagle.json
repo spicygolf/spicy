@@ -6,7 +6,7 @@
   "value": 4,
   "seq": 2,
   "scope": "player",
-  "icon": "star",
+  "icon": null,
   "show_in": "score",
   "based_on": "gross",
   "limit": null,
