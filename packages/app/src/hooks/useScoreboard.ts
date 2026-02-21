@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Game } from "spicylib/schema";
 import type { Scoreboard, ScoringContext } from "spicylib/scoring";
 import { scoreWithContext } from "spicylib/scoring";
@@ -36,6 +36,9 @@ export interface ScoreboardResult {
   /** The full scoring context (needed for availability checks) */
   context: ScoringContext;
 }
+
+/** Minimum ms between scoring runs. Collapses rapid mutations (e.g. bulk deletes). */
+const SCORING_THROTTLE_MS = 300;
 
 /**
  * Create a fingerprint of the scoring-relevant data in a game.
@@ -192,63 +195,48 @@ function createScoringFingerprint(game: Game | null): number | null {
  * - Team junk (low_ball, low_team) based on calculation rules
  * - Points, rankings, and cumulative totals
  *
- * The scoreboard is memoized based on a fingerprint of scoring-relevant data,
- * not the game object reference. This prevents unnecessary recomputations
- * during Jazz's progressive loading.
+ * Scoring is **throttled**: when the fingerprint changes, we wait up to
+ * SCORING_THROTTLE_MS before re-scoring. If more changes arrive during
+ * the cooldown, the timer resets. This collapses rapid mutation storms
+ * (e.g. CLI bulk deletes syncing via Jazz) into a single re-score.
  *
- * IMPORTANT: We use useRef caching ON TOP of useMemo because:
- * - useMemo depends on [fingerprint, game]
- * - game reference changes on every Jazz progressive load update
- * - fingerprint stays stable when actual scoring data hasn't changed
- * - Without ref caching, scoreWithContext() runs on every game reference change
+ * The first score after the game loads is immediate (no throttle delay).
  *
  * @param game - The fully loaded game object
  * @returns The calculated scoreboard and context, or null if scoring fails
- *
- * @example
- * const result = useScoreboard(game);
- * if (result) {
- *   const holeResult = result.scoreboard.holes["1"];
- *   const playerJunk = holeResult.players[playerId].junk;
- *   const teamJunk = holeResult.teams[teamId].junk;
- * }
  */
 export function useScoreboard(game: Game | null): ScoreboardResult | null {
   usePerfRenderCount("useScoreboard");
-  const lastFingerprint = useRef<number | null>(null);
-  const cachedResult = useRef<ScoreboardResult | null>(null);
+
   const lastGameRef = useRef<Game | null>(null);
+  const lastFingerprintRef = useRef<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const nullCount = useRef(0);
 
-  // Fast path: if the game reference is the exact same object AND we already
-  // have a cached fingerprint, skip the expensive walk entirely.
-  // Jazz proxies give a new reference when data changes, so same ref = same data.
+  const [result, setResult] = useState<ScoreboardResult | null>(null);
+
+  // Fast path: if game ref is identical, data hasn't changed (Jazz proxy invariant)
   const canSkipFingerprint =
     game !== null &&
     game === lastGameRef.current &&
-    lastFingerprint.current !== null &&
-    cachedResult.current !== null;
+    lastFingerprintRef.current !== null;
 
-  const { result: fingerprint, ms: fpMs } = perfTime(
-    "useScoreboard.fingerprint",
-    () => {
-      if (canSkipFingerprint) {
-        if (__DEV__) {
-          console.log(
-            "[PERF] useScoreboard: game ref unchanged, skipping fingerprint",
-          );
-        }
-        return lastFingerprint.current;
+  const { result: fingerprint } = perfTime("useScoreboard.fingerprint", () => {
+    if (canSkipFingerprint) {
+      if (__DEV__) {
+        console.log(
+          "[PERF] useScoreboard: game ref unchanged, skipping fingerprint",
+        );
       }
-      return createScoringFingerprint(game);
-    },
-  );
+      return lastFingerprintRef.current;
+    }
+    return createScoringFingerprint(game);
+  });
 
-  // Track game reference for fast-path comparison
   lastGameRef.current = game;
 
-  return useMemo(() => {
-    // If fingerprint is null, game isn't ready
+  useEffect(() => {
+    // Game not ready — clear result
     if (fingerprint === null) {
       nullCount.current += 1;
       if (__DEV__ && nullCount.current % 10 === 0) {
@@ -256,44 +244,77 @@ export function useScoreboard(game: Game | null): ScoreboardResult | null {
           `[PERF] useScoreboard fingerprint null (${nullCount.current} times)`,
         );
       }
-      return null;
+      // Clear cached result when game becomes unready (e.g. data destroyed)
+      if (lastFingerprintRef.current !== null) {
+        lastFingerprintRef.current = null;
+        setResult(null);
+      }
+      return;
     }
 
-    // If fingerprint hasn't changed, return cached result
-    // This prevents recomputation when game reference changes but data hasn't
-    if (fingerprint === lastFingerprint.current && cachedResult.current) {
+    // Fingerprint unchanged — nothing to do
+    if (fingerprint === lastFingerprintRef.current) {
       if (__DEV__) {
         console.log(
-          "[PERF] useScoreboard: fingerprint stable, returning cache",
+          "[PERF] useScoreboard: fingerprint stable, no re-score needed",
         );
       }
-      return cachedResult.current;
+      return;
     }
 
-    // At this point fingerprint !== null guarantees game is loaded
-    if (!game?.$isLoaded) {
-      return null;
-    }
+    const isFirstScore = lastFingerprintRef.current === null;
 
-    try {
-      const { result, ms } = perfTime("useScoreboard.scoreWithContext", () =>
-        scoreWithContext(game),
-      );
+    const doScore = () => {
+      if (!game?.$isLoaded) return;
 
+      try {
+        const { result: scored, ms } = perfTime(
+          "useScoreboard.scoreWithContext",
+          () => scoreWithContext(game),
+        );
+
+        if (__DEV__) {
+          console.log(
+            `[PERF] useScoreboard: SCORED in ${ms.toFixed(1)}ms (fingerprint: ${fingerprint})`,
+          );
+        }
+
+        lastFingerprintRef.current = fingerprint;
+        setResult(scored);
+      } catch (error) {
+        console.warn("[useScoreboard] Scoring engine error:", error);
+        lastFingerprintRef.current = fingerprint;
+        setResult(null);
+      }
+    };
+
+    // First score is immediate — no delay for initial load.
+    // Subsequent scores are throttled to collapse rapid mutation storms.
+    if (isFirstScore) {
+      doScore();
+    } else {
+      // Cancel any pending timer — only the latest fingerprint matters
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+      }
       if (__DEV__) {
         console.log(
-          `[PERF] useScoreboard: SCORED in ${ms.toFixed(1)}ms (fp: ${fpMs.toFixed(1)}ms, fingerprint: ${fingerprint})`,
+          `[PERF] useScoreboard: fingerprint changed, throttling ${SCORING_THROTTLE_MS}ms`,
         );
       }
-
-      // Update cache
-      lastFingerprint.current = fingerprint;
-      cachedResult.current = result;
-
-      return result;
-    } catch (error) {
-      console.warn("[useScoreboard] Scoring engine error:", error);
-      return null;
+      timerRef.current = setTimeout(() => {
+        timerRef.current = null;
+        doScore();
+      }, SCORING_THROTTLE_MS);
     }
-  }, [fingerprint, game, fpMs]);
+
+    return () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [fingerprint, game]);
+
+  return result;
 }

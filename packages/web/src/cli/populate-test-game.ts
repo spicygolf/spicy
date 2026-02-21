@@ -262,10 +262,8 @@ async function deleteMode(gameId: string, organizerId?: string): Promise<void> {
     console.log(`Players: ${game.players?.length ?? 0}`);
     console.log(`Start: ${game.start}`);
 
-    await deepDeleteGame(game);
-    console.log("  Deep deleted game data");
-
-    // Remove from organizer's games list
+    // Remove from organizer's games list FIRST so the app unsubscribes
+    // before the mutation storm from deep delete begins.
     // Use explicit --organizer flag if provided, otherwise read from game.organizer
     const effectiveOrganizerId = organizerId || game.organizer;
     if (effectiveOrganizerId) {
@@ -297,6 +295,12 @@ async function deleteMode(gameId: string, organizerId?: string): Promise<void> {
         "  No organizer found on game — game shell may remain in lists",
       );
     }
+
+    // Brief pause so the list removal syncs before the mutation storm
+    await new Promise((r) => setTimeout(r, 1000));
+
+    await deepDeleteGame(game);
+    console.log("  Deep deleted game data");
   } catch (err) {
     console.error("Error:", err);
   }
