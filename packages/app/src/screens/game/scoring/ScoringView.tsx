@@ -544,7 +544,14 @@ export function ScoringView({
   // Get multiplier options for this game (team-scoped)
   const multiplierOptions = getMultiplierOptions(game);
 
+  // Detect quota game — quota games never use pops (handicaps affect quota, not strokes)
+  const isQuotaGame = scoringContext?.gameSpec?.$isLoaded
+    ? getMetaOption(scoringContext.gameSpec, "spec_type") === "quota"
+    : false;
+  const playerQuotas = isQuotaGame ? scoringContext?.playerQuotas : null;
+
   // Check if handicaps are used in this game
+  // Quota games suppress pops — handicaps affect quota target, not per-hole strokes
   const useHandicapsValue = useOptionValue(
     game,
     currentHole,
@@ -552,7 +559,7 @@ export function ScoringView({
     "game",
   );
   const useHandicaps =
-    useHandicapsValue === "true" || useHandicapsValue === "1";
+    !isQuotaGame && (useHandicapsValue === "true" || useHandicapsValue === "1");
 
   // Check handicap mode from game options
   // Options come from gamespec, with optional hole-level overrides
@@ -577,12 +584,6 @@ export function ScoringView({
     maxOffTeeParsed !== null && !Number.isNaN(maxOffTeeParsed)
       ? maxOffTeeParsed
       : null;
-
-  // Detect quota game for quota-relative running totals
-  const isQuotaGame = scoringContext?.gameSpec?.$isLoaded
-    ? getMetaOption(scoringContext.gameSpec, "spec_type") === "quota"
-    : false;
-  const playerQuotas = isQuotaGame ? scoringContext?.playerQuotas : null;
 
   // Build adjusted handicaps map if in "low" mode and handicaps are used
   // Also build a map of calculated course handicaps for use in the render loop

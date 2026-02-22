@@ -766,6 +766,46 @@ export async function upsertGameSpec(
     }
   }
 
+  // Remove stale options from spec that are no longer in the seed data
+  if (isUpdate) {
+    // Build set of expected keys from this import
+    const expectedKeys = new Set<string>([
+      // Hardcoded meta keys always set above
+      "name",
+      "version",
+      "short",
+      "min_players",
+      "status",
+      "spec_type",
+      "teams",
+    ]);
+    // Conditionally-set hardcoded keys
+    if (specData._key) expectedKeys.add("legacyId");
+    if (specData.max_players !== undefined) expectedKeys.add("max_players");
+    if (transformed.location_type) expectedKeys.add("location_type");
+    if (transformed.long_description) expectedKeys.add("long_description");
+    if (specData.team_size && specData.team_size > 0)
+      expectedKeys.add("team_size");
+    if (specData.num_teams && specData.num_teams > 0)
+      expectedKeys.add("num_teams");
+    if (specData.team_change_every !== undefined)
+      expectedKeys.add("team_change_every");
+    // Keys from transformed options (game, junk, multiplier, meta)
+    if (transformed.options) {
+      for (const opt of transformed.options) {
+        expectedKeys.add(opt.name);
+      }
+    }
+
+    // Delete any existing keys not in the expected set
+    const existingKeys = Object.keys(spec);
+    for (const existingKey of existingKeys) {
+      if (!expectedKeys.has(existingKey)) {
+        spec.$jazz.delete(existingKey);
+      }
+    }
+  }
+
   // Only add to map if new (existing specs are already in the map)
   if (!isUpdate) {
     specs.$jazz.set(key, spec);

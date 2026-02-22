@@ -108,7 +108,7 @@ export function buildContext(game: Game): ScoringContext {
   const rounds = extractRounds(game);
 
   // Build player handicaps lookup (uses options for handicap mode)
-  const playerHandicaps = buildPlayerHandicaps(rounds, options);
+  const playerHandicaps = buildPlayerHandicaps(rounds, options, gameSpec);
 
   // Build player quotas for quota-type games
   const playerQuotas = buildPlayerQuotas(gameSpec, rounds, playerHandicaps);
@@ -273,16 +273,22 @@ function extractRounds(game: Game): RoundToGame[] {
 function buildPlayerHandicaps(
   rounds: RoundToGame[],
   options: MapOfOptions | undefined,
+  gameSpec: GameSpec | undefined,
 ): Map<string, PlayerHandicapInfo> {
   const handicaps = new Map<string, PlayerHandicapInfo>();
+
+  // Quota games never use pops — handicaps affect quota target, not per-hole strokes
+  const isQuotaGame =
+    gameSpec?.$isLoaded && getMetaOption(gameSpec, "spec_type") === "quota";
 
   // Check if handicaps are enabled (default: true)
   // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
   const useHandicapsOption = options?.["use_handicaps"];
   const useHandicaps =
-    !useHandicapsOption ||
-    useHandicapsOption.type !== "game" ||
-    (useHandicapsOption as { value?: string }).value !== "false";
+    !isQuotaGame &&
+    (!useHandicapsOption ||
+      useHandicapsOption.type !== "game" ||
+      (useHandicapsOption as { value?: string }).value !== "false");
 
   // Check handicap mode from options (default is "low")
   // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
