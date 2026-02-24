@@ -40,9 +40,9 @@ export function getTeamRunningScore(
 /**
  * Get the quota-relative running score for a player through a given hole.
  *
- * Sums stableford junk earned on the current nine (front or back) through
- * the given hole, then subtracts the nine's quota. The running score resets
- * at hole 10 (back nine uses back quota).
+ * Uses play order (scoreboard.meta.holesPlayed) to determine front/back nine,
+ * so shotgun starts work correctly. Sums stableford junk earned on the current
+ * nine through the given hole, then subtracts the nine's quota.
  *
  * @param scoreboard - Scored scoreboard from the pipeline
  * @param playerId - Player ID to compute for
@@ -58,27 +58,22 @@ export function getQuotaRunningScore(
 ): number {
   if (!scoreboard) return 0;
 
-  const currentHoleNum = Number.parseInt(currentHole, 10);
-  if (Number.isNaN(currentHoleNum)) return 0;
+  const holesPlayed = scoreboard.meta.holesPlayed;
+  const currentIndex = holesPlayed.indexOf(currentHole);
+  if (currentIndex === -1) return 0;
 
-  const isBackNine = currentHoleNum >= 10;
+  // First 9 holes in play order = front nine, rest = back nine
+  const isBackNine = currentIndex >= 9;
   const nineQuota = isBackNine ? quota.back : quota.front;
+  const nineStartIndex = isBackNine ? 9 : 0;
 
   // Sum stableford points for this player on holes in the current nine,
   // up to and including the current hole
   let stablefordTotal = 0;
-  const holesPlayed = scoreboard.meta.holesPlayed;
 
-  for (const holeNum of holesPlayed) {
-    const hNum = Number.parseInt(holeNum, 10);
-    if (Number.isNaN(hNum)) continue;
-
-    // Only include holes in the same nine as current hole
-    const holeIsBackNine = hNum >= 10;
-    if (holeIsBackNine !== isBackNine) continue;
-
-    // Only include holes up to and including the current one
-    if (hNum > currentHoleNum) continue;
+  for (let i = nineStartIndex; i <= currentIndex; i++) {
+    const holeNum = holesPlayed[i];
+    if (!holeNum) continue;
 
     const holeResult = scoreboard.holes[holeNum];
     if (!holeResult) continue;

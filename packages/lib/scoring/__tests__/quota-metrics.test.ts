@@ -22,20 +22,32 @@ function makeScoreboard(
   for (const holeNum of holesPlayed) {
     const players: Record<
       string,
-      { playerId: string; junk: { name: string; value: number }[] }
+      Scoreboard["holes"][string]["players"][string]
     > = {};
 
     for (const [playerId, holeJunk] of Object.entries(playerJunkByHole)) {
       players[playerId] = {
         playerId,
+        hasScore: true,
+        gross: 0,
+        pops: 0,
+        net: 0,
+        scoreToPar: 0,
+        netToPar: 0,
+        rank: 0,
+        tieCount: 0,
         junk: holeJunk[holeNum] ?? [],
-      } as any;
+        multipliers: [],
+        points: 0,
+      };
     }
 
     holes[holeNum] = {
       hole: holeNum,
+      holeInfo: { hole: holeNum, par: 4, allocation: 0, yards: 0 },
       players,
-    } as any;
+      teams: {},
+    };
   }
 
   return {
@@ -88,11 +100,12 @@ describe("extractStablefordTotals", () => {
     );
 
     const totals = extractStablefordTotals(scoreboard);
-    const p1 = totals.get("p1")!;
+    const p1 = totals.get("p1");
+    expect(p1).toBeDefined();
 
-    expect(p1.front).toBe(5); // hole 1 (2) + hole 5 (3)
-    expect(p1.back).toBe(6); // hole 10 (2) + hole 18 (4)
-    expect(p1.total).toBe(11);
+    expect(p1?.front).toBe(5); // hole 1 (2) + hole 5 (3)
+    expect(p1?.back).toBe(6); // hole 10 (2) + hole 18 (4)
+    expect(p1?.total).toBe(11);
   });
 
   test("handles multiple players", () => {
@@ -129,8 +142,8 @@ describe("extractStablefordTotals", () => {
     );
 
     const totals = extractStablefordTotals(scoreboard);
-    expect(totals.get("p1")!).toEqual({ front: 2, back: 0, total: 2 });
-    expect(totals.get("p2")!).toEqual({ front: 3, back: 1, total: 4 });
+    expect(totals.get("p1")).toEqual({ front: 2, back: 0, total: 2 });
+    expect(totals.get("p2")).toEqual({ front: 3, back: 1, total: 4 });
   });
 
   test("ignores non-stableford junk", () => {
@@ -166,7 +179,7 @@ describe("extractStablefordTotals", () => {
     );
 
     const totals = extractStablefordTotals(scoreboard);
-    expect(totals.get("p1")!.total).toBe(2);
+    expect(totals.get("p1")?.total).toBe(2);
   });
 
   test("handles shotgun start (play order differs from hole numbers)", () => {
@@ -200,12 +213,13 @@ describe("extractStablefordTotals", () => {
     });
 
     const totals = extractStablefordTotals(scoreboard);
-    const p1 = totals.get("p1")!;
+    const p1 = totals.get("p1");
+    expect(p1).toBeDefined();
 
     // In shotgun: holes 10-18 are "front" (first 9 played), 1-9 are "back"
-    expect(p1.front).toBe(3);
-    expect(p1.back).toBe(2);
-    expect(p1.total).toBe(5);
+    expect(p1?.front).toBe(3);
+    expect(p1?.back).toBe(2);
+    expect(p1?.total).toBe(5);
   });
 
   test("returns empty map for no stableford junk", () => {
@@ -236,11 +250,12 @@ describe("extractStablefordTotals", () => {
     );
 
     const totals = extractStablefordTotals(scoreboard);
-    const p1 = totals.get("p1")!;
+    const p1 = totals.get("p1");
+    expect(p1).toBeDefined();
 
-    expect(p1.front).toBe(5);
-    expect(p1.back).toBe(0);
-    expect(p1.total).toBe(5);
+    expect(p1?.front).toBe(5);
+    expect(p1?.back).toBe(0);
+    expect(p1?.total).toBe(5);
   });
 });
 
@@ -516,10 +531,12 @@ describe("calculateQuotaPerformances", () => {
     const perfs = calculateQuotaPerformances(scoreboard, playerQuotas);
     expect(perfs).toHaveLength(2);
 
-    const p1 = perfs.find((p) => p.playerId === "p1")!;
-    expect(p1.performance.total).toBe(-18); // 2 - 20
+    const p1 = perfs.find((p) => p.playerId === "p1");
+    expect(p1).toBeDefined();
+    expect(p1?.performance.total).toBe(-18); // 2 - 20
 
-    const p2 = perfs.find((p) => p.playerId === "p2")!;
-    expect(p2.performance.total).toBe(-25); // 5 - 30
+    const p2 = perfs.find((p) => p.playerId === "p2");
+    expect(p2).toBeDefined();
+    expect(p2?.performance.total).toBe(-25); // 5 - 30
   });
 });
