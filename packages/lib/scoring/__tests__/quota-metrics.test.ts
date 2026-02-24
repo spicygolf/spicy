@@ -333,7 +333,7 @@ describe("extractSkinCounts", () => {
     );
 
     const counts = extractSkinCounts(scoreboard);
-    // Both gross_skin and gross_eagle_skin start with "gross_skin"
+    // Both gross_skin and gross_eagle_skin end with "_skin"
     expect(counts.get("p1")).toBe(2);
   });
 

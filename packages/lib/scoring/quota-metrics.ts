@@ -52,7 +52,8 @@ export function extractStablefordTotals(
   const totals = new Map<string, StablefordTotals>();
   const holesPlayed = scoreboard.meta.holesPlayed;
 
-  // First 9 holes in play order = front, rest = back
+  // First 9 holes in play order = front, rest = back.
+  // For 9-hole rounds, all holes are "front" (back totals stay 0).
   const frontHoles = new Set(holesPlayed.slice(0, 9));
 
   for (const holeNum of holesPlayed) {
@@ -87,8 +88,8 @@ export function extractStablefordTotals(
 /**
  * Extract skin win counts from a scoreboard.
  *
- * Counts junk awards whose name contains "skin" for each player.
- * Matches gross_skin, gross_eagle_skin, skin, etc.
+ * Counts junk awards whose name ends with "_skin" for each player.
+ * Matches gross_skin, gross_eagle_skin, net_skin, etc.
  *
  * @param scoreboard - Scored scoreboard from the pipeline
  * @returns Map of playerId → number of skins won
@@ -102,7 +103,7 @@ export function extractSkinCounts(scoreboard: Scoreboard): Map<string, number> {
 
     for (const [playerId, playerResult] of Object.entries(holeResult.players)) {
       for (const junk of playerResult.junk) {
-        if (junk.name.includes("skin")) {
+        if (junk.name.endsWith("_skin")) {
           counts.set(playerId, (counts.get(playerId) ?? 0) + 1);
         }
       }

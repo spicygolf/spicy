@@ -10,7 +10,7 @@ The settlement engine (`packages/lib/scoring/settlement-engine.ts`) currently on
 
 ### Pool-funded (Big Game, future Nassau)
 
-```
+```text
 pot = buy_in × playerCount
 each bet gets: pot × bet.pct / 100
 within each bet: rank by metric, pay out by splitType
@@ -22,7 +22,7 @@ net position = sum(winnings across bets) - buy_in
 
 ### Zero-sum (Five Points, Vegas, Dots, Ten/Nine Points, Match Play)
 
-```
+```text
 no pot — direct transfers between players/teams
 each point of differential = stakes dollars
 net position = point_differential × stakes
@@ -44,7 +44,7 @@ Every game has bets (explicit or implicit default). The settlement engine:
 
 ### Pool settlement per bet
 
-```
+```text
 betPool = pot × bet.pct / 100
 rank players by metric within bet's scope
 splitType "places" → pay top N from betPool
@@ -54,7 +54,7 @@ splitType "winner_take_all" → winner gets betPool
 
 ### Zero-sum settlement per bet
 
-```
+```text
 compute metric (point differential) within bet's scope
 net = differential × stakes
 splitType "per_unit" → each unit = stakes dollars transferred

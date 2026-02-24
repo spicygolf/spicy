@@ -197,7 +197,7 @@ export function getScoreValue(
       if (!isHoleComplete(scoreboard.holes[hole])) return null;
       // Count skins won by this player on this hole
       const skinCount = playerResult.junk.filter((j) =>
-        j.name.includes("skin"),
+        j.name.endsWith("_skin"),
       ).length;
       return skinCount > 0 ? skinCount : null;
     }
@@ -240,7 +240,7 @@ export function getSummaryValue(
         const playerResult = scoreboard.holes[hole]?.players[playerId];
         if (playerResult) {
           total += playerResult.junk.filter((j) =>
-            j.name.includes("skin"),
+            j.name.endsWith("_skin"),
           ).length;
         }
       }

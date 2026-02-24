@@ -385,44 +385,43 @@ function buildPlayerQuotas(
   const specType = getMetaOption(gameSpec, "spec_type");
   if (specType !== "quota") return undefined;
 
-  // Get front/back slopes from first round's tee data
-  let frontSlope: number | null = null;
-  let backSlope: number | null = null;
+  // Build per-player slopes and quota overrides from RoundToGame data.
+  // Each player may play a different tee with different slopes (mixed-tee games).
+  const playerSlopes = new Map<
+    string,
+    { front: number | null; back: number | null }
+  >();
+  const quotaOverrides = new Map<string, number>();
 
   for (const rtg of rounds) {
     if (!rtg?.$isLoaded) continue;
     const round = rtg.round;
-    if (!round?.$isLoaded) continue;
-    const tee = round.tee;
-    if (!tee?.$isLoaded || !tee.ratings) continue;
+    if (!round?.$isLoaded || !round.playerId) continue;
 
-    frontSlope = tee.ratings.front?.slope ?? null;
-    backSlope = tee.ratings.back?.slope ?? null;
-    break;
+    const tee = round.tee;
+    if (tee?.$isLoaded && tee.ratings) {
+      playerSlopes.set(round.playerId, {
+        front: tee.ratings.front?.slope ?? null,
+        back: tee.ratings.back?.slope ?? null,
+      });
+    }
+
+    if (rtg.quotaOverride !== undefined) {
+      quotaOverrides.set(round.playerId, rtg.quotaOverride);
+    }
   }
 
   const quotas = new Map<string, PlayerQuota>();
-
-  // Build a map of playerId → quotaOverride from RoundToGame
-  const quotaOverrides = new Map<string, number>();
-  for (const rtg of rounds) {
-    if (!rtg?.$isLoaded) continue;
-    if (rtg.quotaOverride !== undefined) {
-      const round = rtg.round;
-      if (round?.$isLoaded && round.playerId) {
-        quotaOverrides.set(round.playerId, rtg.quotaOverride);
-      }
-    }
-  }
 
   for (const [playerId, handicapInfo] of playerHandicaps) {
     const totalQuota =
       quotaOverrides.get(playerId) ??
       calculateQuota(handicapInfo.courseHandicap);
+    const slopes = playerSlopes.get(playerId);
     const { front, back } = calculateNineHoleQuotas({
       totalQuota,
-      frontSlope,
-      backSlope,
+      frontSlope: slopes?.front ?? null,
+      backSlope: slopes?.back ?? null,
     });
 
     quotas.set(playerId, { playerId, total: totalQuota, front, back });

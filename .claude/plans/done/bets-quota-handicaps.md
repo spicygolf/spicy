@@ -1,6 +1,6 @@
 # Bets Data Model, Quota System, and Handicap Options
 
-## Status: PLANNED
+## Status: DONE
 
 ## Problem
 
@@ -231,7 +231,6 @@ Change `"based_on": "net"` → `"based_on": "gross"`. The junk engine (`junk-eng
 - Nassau / Florida / Closeout bets
 - Dynamic press creation
 - PayoutPool deprecation
-- Quota display in leaderboard
 - Migrating existing game specs to explicit bets (they work with the implicit default)
 
 ## Verification

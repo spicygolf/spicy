@@ -448,62 +448,68 @@ export function ManualCourseHoles({
         }
       }
 
-      // Add to favorites so it appears in Recents for other players
-      if (savedCourse && savedTee && me?.$isLoaded && me.root?.$isLoaded) {
-        const root = me.root;
-        const loaded = await root.$jazz.ensureLoaded({
-          resolve: { favorites: { courseTees: { $each: true } } },
-        });
+      // Add to favorites so it appears in Recents for other players.
+      // Wrapped in its own try/catch so a favorites failure doesn't block navigation
+      // after a successful save.
+      try {
+        if (savedCourse && savedTee && me?.$isLoaded && me.root?.$isLoaded) {
+          const root = me.root;
+          const loaded = await root.$jazz.ensureLoaded({
+            resolve: { favorites: { courseTees: { $each: true } } },
+          });
 
-        if (!loaded.$jazz.has("favorites")) {
-          const owner = root.$jazz.owner;
-          loaded.$jazz.set(
-            "favorites",
-            Favorites.create(
-              { courseTees: ListOfCourseTees.create([], { owner }) },
-              { owner },
-            ),
-          );
-        }
-
-        const favorites = loaded.favorites;
-        if (favorites?.$isLoaded) {
-          if (!favorites.$jazz.has("courseTees")) {
-            const owner = favorites.$jazz.owner;
-            favorites.$jazz.set(
-              "courseTees",
-              ListOfCourseTees.create([], { owner }),
+          if (!loaded.$jazz.has("favorites")) {
+            const owner = root.$jazz.owner;
+            loaded.$jazz.set(
+              "favorites",
+              Favorites.create(
+                { courseTees: ListOfCourseTees.create([], { owner }) },
+                { owner },
+              ),
             );
           }
 
-          const courseTees = favorites.courseTees;
-          if (courseTees?.$isLoaded) {
-            // Check if already favorited
-            const existing = courseTees.find(
-              (fav) =>
-                fav?.$isLoaded &&
-                fav.$jazz.has("tee") &&
-                fav.tee?.$jazz.id === savedTee?.$jazz.id,
-            );
-
-            if (existing?.$isLoaded) {
-              existing.$jazz.set("lastUsedAt", new Date());
-            } else {
-              const owner = courseTees.$jazz.owner;
-              courseTees.$jazz.push(
-                CourseTee.create(
-                  {
-                    course: savedCourse,
-                    tee: savedTee,
-                    addedAt: new Date(),
-                    lastUsedAt: new Date(),
-                  },
-                  { owner },
-                ),
+          const favorites = loaded.favorites;
+          if (favorites?.$isLoaded) {
+            if (!favorites.$jazz.has("courseTees")) {
+              const owner = favorites.$jazz.owner;
+              favorites.$jazz.set(
+                "courseTees",
+                ListOfCourseTees.create([], { owner }),
               );
+            }
+
+            const courseTees = favorites.courseTees;
+            if (courseTees?.$isLoaded) {
+              // Check if already favorited
+              const existing = courseTees.find(
+                (fav) =>
+                  fav?.$isLoaded &&
+                  fav.$jazz.has("tee") &&
+                  fav.tee?.$jazz.id === savedTee?.$jazz.id,
+              );
+
+              if (existing?.$isLoaded) {
+                existing.$jazz.set("lastUsedAt", new Date());
+              } else {
+                const owner = courseTees.$jazz.owner;
+                courseTees.$jazz.push(
+                  CourseTee.create(
+                    {
+                      course: savedCourse,
+                      tee: savedTee,
+                      addedAt: new Date(),
+                      lastUsedAt: new Date(),
+                    },
+                    { owner },
+                  ),
+                );
+              }
             }
           }
         }
+      } catch {
+        // Non-critical: favorites update failed but course save succeeded
       }
 
       // Navigate back to game settings tabs (pop both ManualCourseHoles and SelectCourseNavigator)

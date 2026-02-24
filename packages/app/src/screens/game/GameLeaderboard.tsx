@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
@@ -82,6 +82,13 @@ export function GameLeaderboard(): React.ReactElement | null {
     ? getMetaOption(scoringContext.gameSpec, "spec_type")
     : undefined;
   const isQuotaGame = specType === "quota";
+
+  // Normalize viewMode: quota games don't have "net" — redirect to "points"
+  useEffect(() => {
+    if (isQuotaGame && viewMode === "net") {
+      setLeaderboardViewMode("points");
+    }
+  }, [isQuotaGame, viewMode, setLeaderboardViewMode]);
 
   // Create fingerprints for derived data - these only change when actual data changes,
   // not when Jazz object references change during progressive loading

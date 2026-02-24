@@ -56,6 +56,7 @@ const SCORING_RESOLVE = {
       handicapIndex: true,
       courseHandicap: true,
       gameHandicap: true,
+      quotaOverride: true,
       round: {
         playerId: true,
         handicapIndex: true,

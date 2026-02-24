@@ -800,6 +800,8 @@ export async function upsertGameSpec(
     // Delete any existing keys not in the expected set
     const existingKeys = Object.keys(spec);
     for (const existingKey of existingKeys) {
+      // Skip Jazz internal keys (e.g., _refs) and $ prefixed properties
+      if (existingKey.startsWith("$") || existingKey.startsWith("_")) continue;
       if (!expectedKeys.has(existingKey)) {
         spec.$jazz.delete(existingKey);
       }

@@ -4,13 +4,12 @@ import type { MaybeLoaded } from "jazz-tools";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { calculateQuota } from "spicylib/scoring";
+import { calculateQuota, getMetaOption } from "spicylib/scoring";
 import { calculateCourseHandicap, formatCourseHandicap } from "spicylib/utils";
 import { Back } from "@/components/Back";
 import { HandicapIndexInput } from "@/components/common/HandicapIndexInput";
 import { HandicapIntegerInput } from "@/components/common/HandicapIntegerInput";
 import { useGame } from "@/hooks";
-import { useOptionValue } from "@/hooks/useOptionValue";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { Screen, Text } from "@/ui";
 
@@ -110,9 +109,11 @@ export function HandicapAdjustment({ route, navigation }: Props) {
 
   const hasGameHandicapOverride = currentGameHandicap !== null;
 
-  // Detect quota game via spec_type option
-  const specTypeValue = useOptionValue(game, null, "spec_type", "game");
-  const isQuotaGame = specTypeValue === "quota";
+  // Detect quota game via spec_type meta option
+  const spec = game?.$isLoaded ? game.spec : null;
+  const isQuotaGame = spec?.$isLoaded
+    ? getMetaOption(spec, "spec_type") === "quota"
+    : false;
 
   // Calculated quota from course handicap (36 - courseHandicap)
   const calculatedQuota = useMemo(() => {

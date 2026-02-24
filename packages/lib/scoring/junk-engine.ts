@@ -238,16 +238,17 @@ function shouldAwardJunk(
     return checkUserJunk(junk.name, evalCtx);
   }
 
-  // Check score_to_par condition (if present)
-  const scoreToParPasses =
-    !junk.score_to_par ||
-    evaluateScoreToPar(junk.score_to_par, evalCtx, basedOn);
-
-  // Check logic condition (if present)
-  const logicPasses = !junk.logic || evaluatePlayerLogic(junk.logic, evalCtx);
-
-  // Both must pass when both are defined
-  return scoreToParPasses && logicPasses;
+  // Both conditions must pass (AND). Short-circuit if the first fails.
+  if (
+    junk.score_to_par &&
+    !evaluateScoreToPar(junk.score_to_par, evalCtx, basedOn)
+  ) {
+    return false;
+  }
+  if (junk.logic && !evaluatePlayerLogic(junk.logic, evalCtx)) {
+    return false;
+  }
+  return true;
 }
 
 /**

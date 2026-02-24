@@ -39,22 +39,22 @@ interface NineHoleQuotaParams {
  * Split an 18-hole quota into front and back nine quotas.
  *
  * Uses Approach A: split the total quota, with odd remainder going to the
- * easier nine (higher slope = easier). Guarantees front + back = total.
+ * easier nine (lower slope = easier). Guarantees front + back = total.
  *
  * @param params.totalQuota - The 18-hole quota to split
- * @param params.frontSlope - Front nine slope (higher = easier for quota split)
- * @param params.backSlope - Back nine slope (higher = easier for quota split)
+ * @param params.frontSlope - Front nine slope (higher = harder)
+ * @param params.backSlope - Back nine slope (higher = harder)
  * @returns Front and back nine quotas that sum to totalQuota
  *
  * @example
  * // Even split
  * calculateNineHoleQuotas({ totalQuota: 28 }) // { front: 14, back: 14 }
  *
- * // Odd split, front harder (higher slope) — front gets lower quota
+ * // Odd split, front harder (higher slope) — extra point to easier back nine
  * calculateNineHoleQuotas({ totalQuota: 29, frontSlope: 140, backSlope: 130 })
  * // { front: 14, back: 15 }
  *
- * // Odd split, back harder (higher slope) — back gets lower quota
+ * // Odd split, back harder (higher slope) — extra point to easier front nine
  * calculateNineHoleQuotas({ totalQuota: 29, frontSlope: 130, backSlope: 140 })
  * // { front: 15, back: 14 }
  */
