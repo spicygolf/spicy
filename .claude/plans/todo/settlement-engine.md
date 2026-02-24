@@ -101,8 +101,8 @@ splitType "winner_take_all" → winner gets stakes × 1 (per hole won, etc.)
 
 - `packages/lib/scoring/settlement-engine.ts` — existing engine
 - `packages/lib/schema/settlement.ts` — Settlement, PayoutPool, Debt schemas
-- `packages/lib/schema/bets.ts` — (NEW) Bet schema
-- `packages/lib/scoring/quota-metrics.ts` — (NEW) metric extractors
+- `packages/lib/schema/bets.ts` — Bet schema
+- `packages/lib/scoring/quota-metrics.ts` — metric extractors
 - `packages/app/src/screens/game/settings/PlacesPaidScreen.tsx` — existing payout config UI
 - `data/seed/options/stakes.json` — zero-sum funding option
 - `data/seed/options/buy_in.json` — pool funding option

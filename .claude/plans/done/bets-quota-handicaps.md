@@ -39,18 +39,23 @@ Determined by which game option is present (`buy_in` → pool, `stakes` → zero
 ## Key Design Decisions
 
 ### 1. Gross Stableford
+
 Big Game Stableford points are based on **gross** score-to-par. Handicaps affect your *quota* (target), not per-hole strokes/pops. Stableford seed files currently have `based_on: "net"` — changing to `"gross"`.
 
 ### 2. Quota Split (Approach A)
+
 Compute one 18-hole quota (`36 - courseHandicap`), then split for odd values using front/back slope comparison. `front + back` always equals `overall`.
 
 ### 3. Bet scope is game.holes index-based
+
 Bet scope uses `game.holes` list indices (0-based play order), not hole numbers. This handles shotgun starts (#106) where hole 10 might be `game.holes[0]`. "Front nine" = indices 0-8, "back nine" = indices 9-17, regardless of actual hole numbers.
 
 ### 4. Bet subsumes PayoutPool
+
 A **Bet** = scope + scoring type + payout config. PayoutPool was payout-only (no scope or scoring type). The Bet model captures the full concept. Keep `payoutPools` on Game temporarily for backward compat; add `bets` as the new field.
 
 ### 5. Implicit default bet for existing games
+
 Games without explicit bets get an inferred default: `{ scope: "all18", scoringType: "points", pct: 100, splitType: "per_unit" }`. No schema migration needed for Five Points, Vegas, etc.
 
 ---
@@ -147,7 +152,7 @@ No seed changes for existing games — the settlement engine infers a default si
 **New file**: `packages/lib/scoring/quota-engine.ts`
 
 - `calculateQuota(courseHandicap): number` — `36 - courseHandicap`
-- `calculateNineHoleQuotas({ totalQuota, frontSlope?, backSlope? }): { front, back }` — split 18-hole quota; odd remainder to easier nine (higher slope = easier)
+- `calculateNineHoleQuotas({ totalQuota, frontSlope?, backSlope? }): { front, back }` — split 18-hole quota; odd remainder to easier nine (lower slope = easier)
 - `calculateQuotaPerformance(points, quota): number` — `points - quota`
 
 **New file**: `packages/lib/scoring/__tests__/quota-engine.test.ts`
@@ -155,7 +160,7 @@ No seed changes for existing games — the settlement engine infers a default si
 Test cases:
 - Scratch: `quota(0) = 36`, plus: `quota(-4) = 40`, 10-hdcp: `quota(10) = 26`
 - Even split: quota 28 → front 14, back 14
-- Odd split, front harder (lower slope): quota 29 → front 14, back 15
+- Odd split, front harder (higher slope): quota 29 → front 14, back 15
 - Odd split, back harder: quota 29 → front 15, back 14
 - Equal slopes, odd: quota 29 → front 14, back 15 (back gets remainder by default)
 - Performance: 18pts - 14q = +4, 12pts - 14q = -2

@@ -490,9 +490,9 @@ export interface PlayerQuota {
   playerId: string;
   /** 18-hole quota (36 - courseHandicap) */
   total: number;
-  /** Front nine quota */
+  /** First nine quota (play order indices 0-8) */
   front: number;
-  /** Back nine quota */
+  /** Second nine quota (play order indices 9-17) */
   back: number;
 }
 

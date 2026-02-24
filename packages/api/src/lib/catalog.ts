@@ -777,9 +777,13 @@ export async function upsertGameSpec(
       "min_players",
       "status",
       "spec_type",
-      "teams",
     ]);
     // Conditionally-set hardcoded keys
+    if (
+      specData.teams !== undefined ||
+      specData.team_change_every !== undefined
+    )
+      expectedKeys.add("teams");
     if (specData._key) expectedKeys.add("legacyId");
     if (specData.max_players !== undefined) expectedKeys.add("max_players");
     if (transformed.location_type) expectedKeys.add("location_type");

@@ -111,7 +111,12 @@ export function buildContext(game: Game): ScoringContext {
   const playerHandicaps = buildPlayerHandicaps(rounds, options, gameSpec);
 
   // Build player quotas for quota-type games
-  const playerQuotas = buildPlayerQuotas(gameSpec, rounds, playerHandicaps);
+  const playerQuotas = buildPlayerQuotas(
+    gameSpec,
+    rounds,
+    playerHandicaps,
+    gameHoles,
+  );
 
   // Build hole info lookup
   const holeInfoMap = buildHoleInfo(rounds, gameHoles);
@@ -381,9 +386,17 @@ function buildPlayerQuotas(
   gameSpec: GameSpec,
   rounds: RoundToGame[],
   playerHandicaps: Map<string, PlayerHandicapInfo>,
+  gameHoles: GameHole[],
 ): Map<string, PlayerQuota> | undefined {
   const specType = getMetaOption(gameSpec, "spec_type");
   if (specType !== "quota") return undefined;
+
+  // Determine if play order starts on the back nine (shotgun start).
+  // If the first hole played is >= 10, the first nine played is the physical
+  // back nine, so we swap slopes to align quota.front/back with play order.
+  const firstHole = gameHoles[0]?.hole;
+  const startsOnBack =
+    firstHole !== undefined && Number.parseInt(firstHole, 10) >= 10;
 
   // Build per-player slopes and quota overrides from RoundToGame data.
   // Each player may play a different tee with different slopes (mixed-tee games).
@@ -418,10 +431,21 @@ function buildPlayerQuotas(
       quotaOverrides.get(playerId) ??
       calculateQuota(handicapInfo.courseHandicap);
     const slopes = playerSlopes.get(playerId);
+
+    // Slopes for calculateNineHoleQuotas are physical course sides.
+    // Swap them when play order starts on back nine so quota.front/back
+    // align with the first/second nine played.
+    const firstNineSlope = startsOnBack
+      ? (slopes?.back ?? null)
+      : (slopes?.front ?? null);
+    const secondNineSlope = startsOnBack
+      ? (slopes?.front ?? null)
+      : (slopes?.back ?? null);
+
     const { front, back } = calculateNineHoleQuotas({
       totalQuota,
-      frontSlope: slopes?.front ?? null,
-      backSlope: slopes?.back ?? null,
+      frontSlope: firstNineSlope,
+      backSlope: secondNineSlope,
     });
 
     quotas.set(playerId, { playerId, total: totalQuota, front, back });
