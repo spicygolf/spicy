@@ -14,7 +14,11 @@ import { useScoreboard } from "@/hooks/useScoreboard";
 import { usePerfRenderCount } from "@/utils/perfTrace";
 
 export type LeaderboardViewMode = "gross" | "net" | "points" | "skins";
-export type SettingsTab = "PlayersTab" | "TeamsTab" | "OptionsTab";
+export type SettingsTab =
+  | "PlayersTab"
+  | "TeamsTab"
+  | "GroupsTab"
+  | "OptionsTab";
 
 /**
  * Unified resolve query for scoring-related screens (Leaderboard, Scoring).
@@ -24,7 +28,10 @@ export type SettingsTab = "PlayersTab" | "TeamsTab" | "OptionsTab";
 const SCORING_RESOLVE = {
   name: true,
   start: true,
-  scope: { teamsConfig: true },
+  scope: {
+    teamsConfig: true,
+    groups: { $each: { rounds: { $each: true } } },
+  },
   spec: { $each: { $each: true } }, // Working copy of options for scoring (preferred)
   specRef: { $each: { $each: true } }, // Catalog spec reference (fallback for legacy games)
   holes: {
