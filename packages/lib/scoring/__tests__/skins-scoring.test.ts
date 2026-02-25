@@ -365,6 +365,9 @@ describe("Skins scoring — ace (hole-in-one)", () => {
     const ctx = makeFullSkinsScoringCtx();
     const result = evaluateJunkForHole(holeResult, ctx);
     expect(getPlayerJunkNames(result, "A")).toContain("gross_ace_skin");
+    expect(getPlayerJunkNames(result, "A")).not.toContain(
+      "gross_albatross_skin",
+    );
     expect(getPlayerJunkNames(result, "A")).not.toContain("gross_eagle_skin");
     expect(getPlayerJunkNames(result, "A")).not.toContain("gross_skin");
     // B should also get no skins
