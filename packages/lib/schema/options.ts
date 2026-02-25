@@ -53,6 +53,10 @@ export const JunkOptionSchema = z.object({
   logic: z.string().optional(),
   better: z.enum(["lower", "higher"]).optional(),
   score_to_par: z.string().optional(),
+  /** Raw gross score condition (e.g., "exactly 1" for ace). Parallel to score_to_par. */
+  gross_score: z.string().optional(),
+  /** If true, winning this skin sweeps the entire skins pool for the round. */
+  pool_sweep: z.boolean().optional(),
 });
 export type JunkOption = z.infer<typeof JunkOptionSchema>;
 

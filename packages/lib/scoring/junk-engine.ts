@@ -5,10 +5,12 @@
  * NO game-specific code - all rules come from JunkOption fields:
  *
  * - score_to_par: "exactly -1" (birdie), "at_most -2" (eagle or better)
+ * - gross_score: "exactly 1" (ace / hole-in-one)
  * - logic: "{'rankWithTies': [1, 1]}" (outright winner)
  * - calculation: "best_ball", "sum" (for team-scoped junk)
  * - based_on: "gross", "net", "user"
  * - scope: "player", "team"
+ * - pool_sweep: true (ace/albatross — wins entire skins pool)
  */
 
 import type { JunkOption } from "../schema";
@@ -89,9 +91,9 @@ export function evaluateJunkForHole(
     evaluateJunkOption(junk, result, ctx);
   }
 
-  // Eagle skins override birdie skins: if any player earned gross_eagle_skin,
-  // remove gross_skin from ALL players on this hole (eagle wins outright)
-  resolveConflictingSkins(result);
+  // Higher-tier skins override lower-tier (derived from option metadata).
+  // When a higher tier is awarded, all lower-tier skins are removed from ALL players.
+  resolveConflictingSkins(result, junkOptions);
 
   // Calculate v0.3 parity fields
   result.scoresEntered = calculateScoresEntered(result);
@@ -151,18 +153,166 @@ function evaluateJunkOption(
 /**
  * Remove conflicting skin awards from a hole result.
  *
- * When gross_eagle_skin is awarded to any player on a hole, gross_skin
- * is removed from ALL players on that hole. The eagle wins the skin outright —
- * birdie-level skins don't apply when an eagle skin exists.
+ * Skin hierarchy (3 tiers, derived from option metadata):
+ * 1. Pool-sweep tier (pool_sweep: true) — overrides all non-sweep skins
+ * 2. Non-sweep skins — ordered by seq (lower seq = higher priority)
+ *
+ * When a higher-tier skin is awarded, all lower-tier skins are removed
+ * from ALL players on that hole.
+ *
+ * Within the sweep tier, if a player qualifies for multiple sweep skins
+ * (e.g., ace on par ≥ 4 also matches albatross), keep the most specific
+ * one (has gross_score condition) and drop the rest.
  */
-function resolveConflictingSkins(holeResult: HoleResult): void {
-  const hasEagleSkin = Object.values(holeResult.players).some((p) =>
-    p.junk.some((j) => j.name === "gross_eagle_skin"),
+function resolveConflictingSkins(
+  holeResult: HoleResult,
+  junkOptions: JunkOption[],
+): void {
+  const players = Object.values(holeResult.players);
+
+  // Build skin name sets from option metadata
+  const sweepSkinNames = new Set<string>();
+  const nonSweepSkinNames = new Set<string>();
+  for (const opt of junkOptions) {
+    if (opt.sub_type !== "skin") continue;
+    if (opt.pool_sweep) {
+      sweepSkinNames.add(opt.name);
+    } else {
+      nonSweepSkinNames.add(opt.name);
+    }
+  }
+
+  const hasSweepSkin = players.some((p) =>
+    p.junk.some((j) => sweepSkinNames.has(j.name)),
   );
 
-  if (hasEagleSkin) {
-    for (const player of Object.values(holeResult.players)) {
-      player.junk = player.junk.filter((j) => j.name !== "gross_skin");
+  // If a sweep skin was awarded, remove all non-sweep skins from all players
+  if (hasSweepSkin) {
+    for (const player of players) {
+      player.junk = player.junk.filter((j) => !nonSweepSkinNames.has(j.name));
+    }
+  } else {
+    // No sweep: remove lower-priority skins overridden by higher-priority ones.
+    // Skin options are sorted by seq (lower = higher priority). If any player
+    // earned a higher-priority skin, remove all lower-priority skins from everyone.
+    const skinsBySeq = junkOptions
+      .filter((o) => o.sub_type === "skin" && !o.pool_sweep)
+      .sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
+
+    // Find the highest-priority (lowest seq) skin that was actually awarded
+    let highestAwarded: JunkOption | null = null;
+    for (const skin of skinsBySeq) {
+      if (players.some((p) => p.junk.some((j) => j.name === skin.name))) {
+        highestAwarded = skin;
+        break;
+      }
+    }
+
+    if (highestAwarded) {
+      // Remove all skins with higher seq (lower priority) than the awarded one
+      const toRemove = new Set<string>();
+      for (const skin of skinsBySeq) {
+        if ((skin.seq ?? 999) > (highestAwarded.seq ?? 999)) {
+          toRemove.add(skin.name);
+        }
+      }
+      if (toRemove.size > 0) {
+        for (const player of players) {
+          player.junk = player.junk.filter((j) => !toRemove.has(j.name));
+        }
+      }
+    }
+  }
+
+  // Deduplicate within sweep tier: if a player qualifies for multiple sweep
+  // skins (e.g., ace on par ≥ 4 also matches albatross), keep only the most
+  // specific one (has gross_score condition). Drop the rest for THAT player only.
+  const sweepWithGrossScore = new Set<string>();
+  for (const opt of junkOptions) {
+    if (opt.sub_type === "skin" && opt.pool_sweep && opt.gross_score) {
+      sweepWithGrossScore.add(opt.name);
+    }
+  }
+  if (sweepWithGrossScore.size > 0) {
+    for (const player of players) {
+      const hasSpecificSweep = player.junk.some((j) =>
+        sweepWithGrossScore.has(j.name),
+      );
+      if (hasSpecificSweep) {
+        player.junk = player.junk.filter(
+          (j) => !sweepSkinNames.has(j.name) || sweepWithGrossScore.has(j.name),
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Resolve pool-sweep skins across all holes in the scoreboard.
+ *
+ * If any player earned a pool_sweep skin (ace or albatross) on any hole,
+ * all other `_skin` junk is removed from all players on all holes.
+ * Only the sweep winner's skin(s) remain.
+ *
+ * If multiple sweep events occur (e.g., two aces on different holes),
+ * all sweep skins are kept (the pool is split in settlement).
+ *
+ * @param scoreboard - The scoreboard with all holes evaluated
+ * @param junkOptions - Junk options to identify pool_sweep skins
+ */
+export function resolvePoolSweepSkins(
+  scoreboard: { holes: Record<string, HoleResult> },
+  junkOptions: JunkOption[],
+): void {
+  // Build set of pool_sweep skin names
+  const sweepSkinNames = new Set<string>();
+  for (const junk of junkOptions) {
+    if (junk.sub_type === "skin" && junk.pool_sweep) {
+      sweepSkinNames.add(junk.name);
+    }
+  }
+  if (sweepSkinNames.size === 0) return;
+
+  // Collect all sweep awards: { playerId, holeNum, skinName }
+  const sweepAwards: Array<{
+    playerId: string;
+    holeNum: string;
+    skinName: string;
+  }> = [];
+
+  for (const [holeNum, holeResult] of Object.entries(scoreboard.holes)) {
+    for (const [playerId, playerResult] of Object.entries(holeResult.players)) {
+      for (const junk of playerResult.junk) {
+        if (sweepSkinNames.has(junk.name)) {
+          sweepAwards.push({ playerId, holeNum, skinName: junk.name });
+        }
+      }
+    }
+  }
+
+  if (sweepAwards.length === 0) return;
+
+  // Build set of ALL skin names (to know which junk to remove)
+  const allSkinNames = new Set<string>();
+  for (const junk of junkOptions) {
+    if (junk.sub_type === "skin") {
+      allSkinNames.add(junk.name);
+    }
+  }
+
+  // Build a set of (holeNum, skinName, playerId) keys to preserve
+  const preserveKeys = new Set(
+    sweepAwards.map((a) => `${a.holeNum}:${a.skinName}:${a.playerId}`),
+  );
+
+  // Remove all skin junk from all players on all holes, except sweep awards
+  for (const [holeNum, holeResult] of Object.entries(scoreboard.holes)) {
+    for (const [playerId, playerResult] of Object.entries(holeResult.players)) {
+      playerResult.junk = playerResult.junk.filter((j) => {
+        if (!allSkinNames.has(j.name)) return true;
+        const key = `${holeNum}:${j.name}:${playerId}`;
+        return preserveKeys.has(key);
+      });
     }
   }
 }
@@ -238,11 +388,14 @@ function shouldAwardJunk(
     return checkUserJunk(junk.name, evalCtx);
   }
 
-  // Both conditions must pass (AND). Short-circuit if the first fails.
+  // All conditions must pass (AND). Short-circuit if any fails.
   if (
     junk.score_to_par &&
     !evaluateScoreToPar(junk.score_to_par, evalCtx, basedOn)
   ) {
+    return false;
+  }
+  if (junk.gross_score && !evaluateGrossScore(junk.gross_score, evalCtx)) {
     return false;
   }
   if (junk.logic && !evaluatePlayerLogic(junk.logic, evalCtx)) {
@@ -341,6 +494,36 @@ function evaluateScoreToPar(
       return score <= parsed.value;
     case "at_least":
       return score >= parsed.value;
+    default:
+      return false;
+  }
+}
+
+// =============================================================================
+// Gross Score Evaluation
+// =============================================================================
+
+/**
+ * Evaluate a gross_score condition against player's raw gross score.
+ * Uses the same format as score_to_par (e.g., "exactly 1" for ace).
+ */
+function evaluateGrossScore(
+  condition: string,
+  evalCtx: EvaluationContext,
+): boolean {
+  const parsed = parseScoreToParCondition(condition);
+  if (!parsed) return false;
+
+  const gross = evalCtx.player.gross;
+  if (gross === 0) return false;
+
+  switch (parsed.operator) {
+    case "exactly":
+      return gross === parsed.value;
+    case "at_most":
+      return gross <= parsed.value;
+    case "at_least":
+      return gross >= parsed.value;
     default:
       return false;
   }

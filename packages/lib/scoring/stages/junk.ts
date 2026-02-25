@@ -6,7 +6,11 @@
  */
 
 import { deepClone } from "../../utils/clone";
-import { evaluateJunkForHole } from "../junk-engine";
+import {
+  evaluateJunkForHole,
+  getJunkOptions,
+  resolvePoolSweepSkins,
+} from "../junk-engine";
 import type { ScoringContext } from "../types";
 
 /**
@@ -41,6 +45,10 @@ export function evaluateJunk(ctx: ScoringContext): ScoringContext {
     // Update the scoreboard
     newScoreboard.holes[holeNum] = updatedHoleResult;
   }
+
+  // After all holes: if any player earned a pool_sweep skin (ace/albatross),
+  // remove all other skins from all players on all holes.
+  resolvePoolSweepSkins(newScoreboard, getJunkOptions(ctx));
 
   return {
     ...ctx,
