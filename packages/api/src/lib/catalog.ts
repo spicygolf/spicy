@@ -788,12 +788,17 @@ export async function upsertGameSpec(
     if (specData.max_players !== undefined) expectedKeys.add("max_players");
     if (transformed.location_type) expectedKeys.add("location_type");
     if (transformed.long_description) expectedKeys.add("long_description");
-    if (specData.team_size && specData.team_size > 0)
-      expectedKeys.add("team_size");
-    if (specData.num_teams && specData.num_teams > 0)
-      expectedKeys.add("num_teams");
-    if (specData.team_change_every !== undefined)
-      expectedKeys.add("team_change_every");
+    if (
+      specData.teams !== undefined ||
+      specData.team_change_every !== undefined
+    ) {
+      if (specData.team_size && specData.team_size > 0)
+        expectedKeys.add("team_size");
+      if (specData.num_teams && specData.num_teams > 0)
+        expectedKeys.add("num_teams");
+      if (specData.team_change_every !== undefined)
+        expectedKeys.add("team_change_every");
+    }
     // Keys from transformed options (game, junk, multiplier, meta)
     if (transformed.options) {
       for (const opt of transformed.options) {

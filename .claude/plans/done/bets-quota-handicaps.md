@@ -186,8 +186,8 @@ Change `"based_on": "net"` → `"based_on": "gross"`. The junk engine (`junk-eng
 
 **Modify**: `packages/lib/scoring/pipeline.ts` — add `buildPlayerQuotas()`:
 - Only when `spec_type === "quota"`
-- `use_handicaps=false` → `{ front: 18, back: 18, overall: 36 }` for all
-- `use_handicaps=true` → per player: `calculateQuota(courseHandicap)` then `calculateNineHoleQuotas()` with front/back slopes from tee ratings
+- `use_handicaps=false` → no pops (`effectiveHandicap = 0`), quota still computed from `quotaOverride` or `calculateQuota(courseHandicap)` then `calculateNineHoleQuotas()`
+- `use_handicaps=true` → per player: `calculateQuota(courseHandicap)` then `calculateNineHoleQuotas()` with per-player front/back slopes from tee ratings; `quotaOverride` supersedes `courseHandicap` when present
 
 ### Step 6: Quota metrics extraction from scoreboard
 
