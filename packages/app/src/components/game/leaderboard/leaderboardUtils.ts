@@ -284,11 +284,21 @@ export function getSummaryValue(
     // For quota games, subtract quota to show performance (e.g., +2 over quota)
     const quota = playerQuotas?.get(playerId);
     if (quota) {
+      // quota.front/back are play-order aligned (first nine played / second nine played).
+      // The "out"/"in" summary rows show physical course sides (holes 1-9 / 10-18).
+      // For shotgun starts, these don't match — if play starts on hole 10+,
+      // physical "out" (1-9) was the second nine played, so use quota.back.
+      const firstHole = scoreboard.meta.holesPlayed[0];
+      const startsOnBack =
+        firstHole !== undefined && Number.parseInt(firstHole, 10) >= 10;
+      const outQuota = startsOnBack ? quota.back : quota.front;
+      const inQuota = startsOnBack ? quota.front : quota.back;
+
       const quotaValue =
         summaryType === "out"
-          ? quota.front
+          ? outQuota
           : summaryType === "in"
-            ? quota.back
+            ? inQuota
             : quota.total;
       return total - quotaValue;
     }

@@ -80,20 +80,24 @@ splitType "winner_take_all" → winner gets stakes × 1 (per hole won, etc.)
 ## What Needs to Be Built
 
 ### Phase 1: Zero-sum settlement engine
+
 - [ ] Add `calculateZeroSumSettlement(bets, playerMetrics, stakes)` to settlement-engine.ts
 - [ ] Handle governor (discount_threshold / discount_percent) — currently only enforced in app-0.3
 - [ ] Tests for zero-sum: 2-team, 3-player, with/without governor
 
 ### Phase 2: Unified bet → settlement bridge
+
 - [ ] `resolveBetMetrics(bet, scoreboard, context)` — given a Bet, extract the right metric for each player/team within the bet's scope
 - [ ] Handle implicit default bet for games without explicit bets
 - [ ] `settleBets(game)` — top-level function: get bets, determine funding, resolve metrics, settle
 
 ### Phase 3: Settlement UI (app)
+
 - [ ] Settlement results screen — show per-bet breakdown, net positions, who owes whom
 - [ ] Integrate with existing game screens (tab or post-round flow)
 
 ### Phase 4: Persist settlement results
+
 - [ ] Write Settlement CoMap to game (payouts, debts, netPositions)
 - [ ] Display saved settlement vs recompute on demand
 
