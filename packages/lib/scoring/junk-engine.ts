@@ -158,9 +158,9 @@ function evaluateJunkOption(
  * 2. Eagle — overrides birdie skins
  * 3. Birdie — base level
  *
- * Ace and albatross are the SAME tier — if both occur on one hole (e.g.,
- * ace on a par-4 where another player also albatrosses), both are kept
- * and they split the pool at settlement.
+ * Ace and albatross are the SAME tier (both sweep the pool).
+ * Cross-hole splitting (e.g., ace on hole 5, albatross on hole 12) is
+ * handled by resolvePoolSweepSkins, not here.
  */
 function resolveConflictingSkins(holeResult: HoleResult): void {
   const players = Object.values(holeResult.players);

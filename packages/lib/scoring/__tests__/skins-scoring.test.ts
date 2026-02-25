@@ -394,7 +394,7 @@ describe("Skins scoring — ace (hole-in-one)", () => {
     );
   });
 
-  it("ace and albatross by different players on same hole — both kept (split pot)", () => {
+  it("ace and albatross by different players on same par-5 — both sweep skins kept", () => {
     // Par 5: Player A aces (gross=1, scoreToPar=-4), Player B albatrosses (gross=2, scoreToPar=-3)
     const holeResult = makeHoleResult(
       {
