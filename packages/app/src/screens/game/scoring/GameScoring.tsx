@@ -1,7 +1,12 @@
+import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { getSpecField } from "spicylib/scoring";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ChangeTeamsModal } from "@/components/game/scoring";
+import {
+  ChangeTeamsModal,
+  type GroupPickerItem,
+} from "@/components/game/scoring";
 import { useGameContext } from "@/contexts/GameContext";
 import {
   useCurrentHole,
@@ -10,6 +15,7 @@ import {
   useHoleNavigation,
   useScoreManagement,
 } from "@/hooks";
+import { useTeamsMode } from "@/hooks/useTeamsMode";
 import { Button, Screen, Text } from "@/ui";
 import { usePerfRenderCount } from "@/utils/perfTrace";
 import { ScoringView } from "./ScoringView";
@@ -67,6 +73,72 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
     currentHoleIndex,
     holeInfo,
   );
+
+  // Teams mode — determines if teams button should be disabled in toolbar
+  const { isSeamlessMode } = useTeamsMode(game);
+
+  // Group filter state (persists across hole navigation)
+  const [selectedGroupId, setSelectedGroupId] = useState("");
+
+  // Build GroupPickerItem[] from game.scope.groups.
+  // Computed directly — Jazz objects are reactive proxies so useMemo with
+  // CoValue dependencies would cache stale results during progressive loading.
+  const groupPickerItems: GroupPickerItem[] = (() => {
+    if (!game?.$isLoaded || !game.scope?.$isLoaded) return [];
+    if (!game.scope.$jazz.has("groups") || !game.scope.groups?.$isLoaded) {
+      return [];
+    }
+
+    // Only show picker if multi_group is enabled
+    const spec = game.spec?.$isLoaded ? game.spec : null;
+    const specRef = game.specRef?.$isLoaded ? game.specRef : null;
+    let isMultiGroup = false;
+    if (spec) {
+      const v = getSpecField(spec, "multi_group");
+      if (v !== undefined) isMultiGroup = v === true || v === "true";
+    } else if (specRef) {
+      const v = getSpecField(specRef, "multi_group");
+      if (v !== undefined) isMultiGroup = v === true || v === "true";
+    }
+    if (!isMultiGroup) return [];
+
+    const items: GroupPickerItem[] = [];
+    for (let i = 0; i < game.scope.groups.length; i++) {
+      const group = game.scope.groups[i];
+      if (!group?.$isLoaded) continue;
+      const label = group.teeTime
+        ? `${group.name || `Group ${i + 1}`} — ${group.teeTime}`
+        : group.name || `Group ${i + 1}`;
+      items.push({ id: group.$jazz.id, label });
+    }
+    return items;
+  })();
+
+  // Build the Set of RoundToGame IDs for the selected group
+  const groupRoundIds: Set<string> | undefined = (() => {
+    if (!selectedGroupId) return undefined;
+    if (!game?.$isLoaded || !game.scope?.$isLoaded) return undefined;
+    if (!game.scope.$jazz.has("groups") || !game.scope.groups?.$isLoaded) {
+      return undefined;
+    }
+
+    for (let i = 0; i < game.scope.groups.length; i++) {
+      const group = game.scope.groups[i];
+      if (!group?.$isLoaded || group.$jazz.id !== selectedGroupId) continue;
+      if (!group.rounds?.$isLoaded) continue;
+
+      const ids = new Set<string>();
+      for (const rtg of group.rounds as Iterable<
+        (typeof group.rounds)[number]
+      >) {
+        if (rtg?.$isLoaded) {
+          ids.add(rtg.$jazz.id);
+        }
+      }
+      return ids;
+    }
+    return undefined;
+  })();
 
   if (!game) {
     return null;
@@ -179,6 +251,11 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               onScoreChange={handleScoreChange}
               onUnscore={handleUnscore}
               onChangeTeams={() => setShowChangeTeamsModal(true)}
+              teamsDisabled={isSeamlessMode}
+              groups={groupPickerItems}
+              selectedGroupId={selectedGroupId}
+              onGroupChange={setSelectedGroupId}
+              groupRoundIds={groupRoundIds}
             />
           )}
         </ErrorBoundary>

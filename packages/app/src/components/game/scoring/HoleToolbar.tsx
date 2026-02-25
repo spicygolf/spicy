@@ -11,8 +11,16 @@ export interface HoleOptionOverride {
   value: string;
 }
 
+/** A group option for the group picker dropdown */
+export interface GroupPickerItem {
+  id: string;
+  label: string;
+}
+
 interface HoleToolbarProps {
   onChangeTeams?: () => void;
+  /** When true, the teams button is shown but greyed out / non-pressable */
+  teamsDisabled?: boolean;
   /** Overall multiplier for the hole (1x, 2x, 4x, 8x, etc.) */
   overallMultiplier?: number;
   /** Whether a custom multiplier is active (shows "custom" label) */
@@ -30,10 +38,17 @@ interface HoleToolbarProps {
   /** Whether explain mode is enabled (for future use) */
   explainMode?: boolean;
   onToggleExplain?: () => void;
+  /** Available groups for filtering (shown as a picker when non-empty) */
+  groups?: GroupPickerItem[];
+  /** Currently selected group ID (empty string = "All") */
+  selectedGroupId?: string;
+  /** Called when the user picks a different group */
+  onGroupChange?: (groupId: string) => void;
 }
 
 export function HoleToolbar({
   onChangeTeams,
+  teamsDisabled = false,
   overallMultiplier = 1,
   isCustomMultiplier = false,
   onMultiplierPress,
@@ -43,6 +58,9 @@ export function HoleToolbar({
   holeNumber,
   explainMode = false,
   onToggleExplain,
+  groups,
+  selectedGroupId = "",
+  onGroupChange,
 }: HoleToolbarProps): React.ReactElement {
   const { theme } = useUnistyles();
   const [showOverridesModal, setShowOverridesModal] = useState(false);
@@ -75,12 +93,16 @@ export function HoleToolbar({
 
   return (
     <View style={styles.container}>
-      {/* Left: Team chooser icon + declined tee flip indicator */}
+      {/* Left: Team chooser icon + group picker + declined tee flip indicator */}
       <View style={styles.leftSection}>
         {onChangeTeams && (
           <Pressable
-            style={styles.iconButton}
-            onPress={onChangeTeams}
+            style={[
+              styles.iconButton,
+              teamsDisabled && styles.iconButtonInactive,
+            ]}
+            onPress={teamsDisabled ? undefined : onChangeTeams}
+            disabled={teamsDisabled}
             hitSlop={12}
             accessibilityLabel="Change teams"
           >
@@ -88,8 +110,48 @@ export function HoleToolbar({
               name="people-group"
               iconStyle="solid"
               size={24}
-              color={theme.colors.action}
+              color={teamsDisabled ? theme.colors.border : theme.colors.action}
             />
+          </Pressable>
+        )}
+        {groups && groups.length > 0 && onGroupChange && (
+          <Pressable
+            style={styles.groupPicker}
+            onPress={() => {
+              // Cycle through groups: "" -> first -> second -> ... -> ""
+              const currentIdx = groups.findIndex(
+                (g) => g.id === selectedGroupId,
+              );
+              const nextIdx = currentIdx + 1;
+              const nextId = nextIdx >= groups.length ? "" : groups[nextIdx].id;
+              onGroupChange(nextId);
+            }}
+            hitSlop={8}
+            accessibilityLabel="Select group"
+          >
+            <FontAwesome6
+              name="layer-group"
+              iconStyle="solid"
+              size={14}
+              color={
+                selectedGroupId ? theme.colors.action : theme.colors.secondary
+              }
+            />
+            <Text
+              style={[
+                styles.groupPickerText,
+                {
+                  color: selectedGroupId
+                    ? theme.colors.action
+                    : theme.colors.secondary,
+                },
+              ]}
+              numberOfLines={1}
+            >
+              {selectedGroupId
+                ? (groups.find((g) => g.id === selectedGroupId)?.label ?? "All")
+                : "All"}
+            </Text>
           </Pressable>
         )}
         {teeFlipDeclined && (
@@ -332,5 +394,20 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 14,
     fontWeight: "600",
     color: theme.colors.action,
+  },
+  groupPicker: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(0.25),
+    paddingVertical: theme.gap(0.25),
+    paddingHorizontal: theme.gap(0.5),
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  groupPickerText: {
+    fontSize: 12,
+    fontWeight: "600",
+    maxWidth: 80,
   },
 }));

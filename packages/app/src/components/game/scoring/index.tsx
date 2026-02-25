@@ -1,7 +1,11 @@
 export { ChangeTeamsModal } from "./ChangeTeamsModal";
 export { CustomMultiplierModal } from "./CustomMultiplierModal";
 export { HoleHeader } from "./HoleHeader";
-export { type HoleOptionOverride, HoleToolbar } from "./HoleToolbar";
+export {
+  type GroupPickerItem,
+  type HoleOptionOverride,
+  HoleToolbar,
+} from "./HoleToolbar";
 export { IncompleteIndicator } from "./IncompleteIndicator";
 export { InvalidationModal } from "./InvalidationModal";
 export { type OptionButton, OptionsButtons } from "./OptionsButtons";
