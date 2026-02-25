@@ -548,8 +548,6 @@ export function ScoringView({
   const isQuotaGame = scoringContext?.gameSpec?.$isLoaded
     ? getMetaOption(scoringContext.gameSpec, "spec_type") === "quota"
     : false;
-  const playerQuotas = isQuotaGame ? scoringContext?.playerQuotas : null;
-
   // Check if handicaps are used in this game
   // Quota games suppress pops — handicaps affect quota target, not per-hole strokes
   const useHandicapsValue = useOptionValue(
@@ -1264,17 +1262,13 @@ export function ScoringView({
           // Compute quota-relative running score for quota games
           // Uses the first player on the team (individual/seamless = 1 player per team)
           let quotaRunning: number | null = null;
-          if (isQuotaGame && playerQuotas && teamHoleResult) {
+          if (isQuotaGame && teamHoleResult) {
             const firstPlayerId = teamHoleResult.playerIds[0];
-            const quota = firstPlayerId
-              ? playerQuotas.get(firstPlayerId)
-              : undefined;
-            if (quota) {
+            if (firstPlayerId) {
               quotaRunning = getQuotaRunningScore(
                 scoreboard,
                 firstPlayerId,
                 currentHoleNumber,
-                quota,
               );
             }
           }
