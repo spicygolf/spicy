@@ -399,7 +399,7 @@ describe("Skins scoring — ace (hole-in-one)", () => {
     const holeResult = makeHoleResult(
       {
         A: makePlayer("A", 1, 5, 1, 1),
-        B: makePlayer("B", 2, 5, 1, 1),
+        B: makePlayer("B", 2, 5, 2, 1),
       },
       "1",
       5,
