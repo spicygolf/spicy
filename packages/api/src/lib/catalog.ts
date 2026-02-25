@@ -811,6 +811,7 @@ export async function upsertGameSpec(
     for (const existingKey of existingKeys) {
       // Skip Jazz internal keys (e.g., _refs) and $ prefixed properties
       if (existingKey.startsWith("$") || existingKey.startsWith("_")) continue;
+      if (!spec.$jazz.has(existingKey)) continue;
       if (!expectedKeys.has(existingKey)) {
         spec.$jazz.delete(existingKey);
       }
