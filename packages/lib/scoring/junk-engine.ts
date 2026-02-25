@@ -5,10 +5,12 @@
  * NO game-specific code - all rules come from JunkOption fields:
  *
  * - score_to_par: "exactly -1" (birdie), "at_most -2" (eagle or better)
+ * - gross_score: "exactly 1" (ace / hole-in-one)
  * - logic: "{'rankWithTies': [1, 1]}" (outright winner)
  * - calculation: "best_ball", "sum" (for team-scoped junk)
  * - based_on: "gross", "net", "user"
  * - scope: "player", "team"
+ * - pool_sweep: true (ace/albatross — wins entire skins pool)
  */
 
 import type { JunkOption } from "../schema";
@@ -151,18 +153,106 @@ function evaluateJunkOption(
 /**
  * Remove conflicting skin awards from a hole result.
  *
- * When gross_eagle_skin is awarded to any player on a hole, gross_skin
- * is removed from ALL players on that hole. The eagle wins the skin outright —
- * birdie-level skins don't apply when an eagle skin exists.
+ * Skin hierarchy (highest to lowest):
+ * 1. gross_ace_skin — overrides albatross, eagle, and birdie skins
+ * 2. gross_albatross_skin — overrides eagle and birdie skins
+ * 3. gross_eagle_skin — overrides birdie skins
+ * 4. gross_skin — base level (birdie)
+ *
+ * When a higher-tier skin is awarded, all lower-tier skins are removed
+ * from ALL players on that hole.
  */
 function resolveConflictingSkins(holeResult: HoleResult): void {
-  const hasEagleSkin = Object.values(holeResult.players).some((p) =>
+  const players = Object.values(holeResult.players);
+
+  const hasAceSkin = players.some((p) =>
+    p.junk.some((j) => j.name === "gross_ace_skin"),
+  );
+  const hasAlbatrossSkin = players.some((p) =>
+    p.junk.some((j) => j.name === "gross_albatross_skin"),
+  );
+  const hasEagleSkin = players.some((p) =>
     p.junk.some((j) => j.name === "gross_eagle_skin"),
   );
 
-  if (hasEagleSkin) {
-    for (const player of Object.values(holeResult.players)) {
-      player.junk = player.junk.filter((j) => j.name !== "gross_skin");
+  // Build set of skin names to remove based on highest tier present
+  const toRemove = new Set<string>();
+  if (hasAceSkin) {
+    toRemove.add("gross_albatross_skin");
+    toRemove.add("gross_eagle_skin");
+    toRemove.add("gross_skin");
+  } else if (hasAlbatrossSkin) {
+    toRemove.add("gross_eagle_skin");
+    toRemove.add("gross_skin");
+  } else if (hasEagleSkin) {
+    toRemove.add("gross_skin");
+  }
+
+  if (toRemove.size > 0) {
+    for (const player of players) {
+      player.junk = player.junk.filter((j) => !toRemove.has(j.name));
+    }
+  }
+}
+
+/**
+ * Resolve pool-sweep skins across all holes in the scoreboard.
+ *
+ * If any player earned a pool_sweep skin (ace or albatross) on any hole,
+ * all other `_skin` junk is removed from all players on all holes.
+ * Only the sweep winner's skin(s) remain.
+ *
+ * If multiple sweep events occur (e.g., two aces on different holes),
+ * all sweep skins are kept (the pool is split in settlement).
+ *
+ * @param scoreboard - The scoreboard with all holes evaluated
+ * @param junkOptions - Junk options to identify pool_sweep skins
+ */
+export function resolvePoolSweepSkins(
+  scoreboard: { holes: Record<string, HoleResult> },
+  junkOptions: JunkOption[],
+): void {
+  // Build set of pool_sweep skin names
+  const sweepSkinNames = new Set<string>();
+  for (const junk of junkOptions) {
+    if (junk.sub_type === "skin" && junk.pool_sweep) {
+      sweepSkinNames.add(junk.name);
+    }
+  }
+  if (sweepSkinNames.size === 0) return;
+
+  // Collect all sweep awards: { playerId, holeNum, skinName }
+  const sweepAwards: Array<{
+    playerId: string;
+    holeNum: string;
+    skinName: string;
+  }> = [];
+
+  for (const [holeNum, holeResult] of Object.entries(scoreboard.holes)) {
+    for (const [playerId, playerResult] of Object.entries(holeResult.players)) {
+      for (const junk of playerResult.junk) {
+        if (sweepSkinNames.has(junk.name)) {
+          sweepAwards.push({ playerId, holeNum, skinName: junk.name });
+        }
+      }
+    }
+  }
+
+  if (sweepAwards.length === 0) return;
+
+  // Build a set of (holeNum, skinName) pairs to preserve
+  const preserveKeys = new Set(
+    sweepAwards.map((a) => `${a.holeNum}:${a.skinName}:${a.playerId}`),
+  );
+
+  // Remove all _skin junk from all players on all holes, except sweep awards
+  for (const [holeNum, holeResult] of Object.entries(scoreboard.holes)) {
+    for (const [playerId, playerResult] of Object.entries(holeResult.players)) {
+      playerResult.junk = playerResult.junk.filter((j) => {
+        if (!j.name.endsWith("_skin")) return true;
+        const key = `${holeNum}:${j.name}:${playerId}`;
+        return preserveKeys.has(key);
+      });
     }
   }
 }
@@ -238,11 +328,14 @@ function shouldAwardJunk(
     return checkUserJunk(junk.name, evalCtx);
   }
 
-  // Both conditions must pass (AND). Short-circuit if the first fails.
+  // All conditions must pass (AND). Short-circuit if any fails.
   if (
     junk.score_to_par &&
     !evaluateScoreToPar(junk.score_to_par, evalCtx, basedOn)
   ) {
+    return false;
+  }
+  if (junk.gross_score && !evaluateGrossScore(junk.gross_score, evalCtx)) {
     return false;
   }
   if (junk.logic && !evaluatePlayerLogic(junk.logic, evalCtx)) {
@@ -341,6 +434,36 @@ function evaluateScoreToPar(
       return score <= parsed.value;
     case "at_least":
       return score >= parsed.value;
+    default:
+      return false;
+  }
+}
+
+// =============================================================================
+// Gross Score Evaluation
+// =============================================================================
+
+/**
+ * Evaluate a gross_score condition against player's raw gross score.
+ * Uses the same format as score_to_par (e.g., "exactly 1" for ace).
+ */
+function evaluateGrossScore(
+  condition: string,
+  evalCtx: EvaluationContext,
+): boolean {
+  const parsed = parseScoreToParCondition(condition);
+  if (!parsed) return false;
+
+  const gross = evalCtx.player.gross;
+  if (gross === 0) return false;
+
+  switch (parsed.operator) {
+    case "exactly":
+      return gross === parsed.value;
+    case "at_most":
+      return gross <= parsed.value;
+    case "at_least":
+      return gross >= parsed.value;
     default:
       return false;
   }

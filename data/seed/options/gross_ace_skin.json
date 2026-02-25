@@ -1,0 +1,16 @@
+{
+  "name": "gross_ace_skin",
+  "disp": "Ace (wins pool)",
+  "type": "junk",
+  "sub_type": "skin",
+  "value": 1,
+  "seq": 7,
+  "scope": "player",
+  "icon": "trophy",
+  "show_in": "score",
+  "based_on": "gross",
+  "limit": "one_per_hole",
+  "better": "lower",
+  "gross_score": "exactly 1",
+  "pool_sweep": true
+}

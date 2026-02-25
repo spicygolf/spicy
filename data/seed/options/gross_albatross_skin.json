@@ -1,0 +1,16 @@
+{
+  "name": "gross_albatross_skin",
+  "disp": "Albatross (wins pool)",
+  "type": "junk",
+  "sub_type": "skin",
+  "value": 1,
+  "seq": 8,
+  "scope": "player",
+  "icon": "trophy",
+  "show_in": "score",
+  "based_on": "gross",
+  "limit": "one_per_hole",
+  "better": "lower",
+  "score_to_par": "at_most -3",
+  "pool_sweep": true
+}
