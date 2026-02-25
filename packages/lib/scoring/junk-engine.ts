@@ -91,7 +91,7 @@ export function evaluateJunkForHole(
     evaluateJunkOption(junk, result, ctx);
   }
 
-  // Higher-tier skins override lower-tier: ace > albatross > eagle > birdie.
+  // Higher-tier skins override lower-tier: sweep (ace/albatross) > eagle > birdie.
   // When a higher tier is awarded, all lower-tier skins are removed from ALL players.
   resolveConflictingSkins(result);
 
@@ -153,23 +153,22 @@ function evaluateJunkOption(
 /**
  * Remove conflicting skin awards from a hole result.
  *
- * Skin hierarchy (highest to lowest):
- * 1. gross_ace_skin — overrides albatross, eagle, and birdie skins
- * 2. gross_albatross_skin — overrides eagle and birdie skins
- * 3. gross_eagle_skin — overrides birdie skins
- * 4. gross_skin — base level (birdie)
+ * Skin hierarchy (3 tiers, highest to lowest):
+ * 1. Pool-sweep tier (ace, albatross) — overrides eagle and birdie skins
+ * 2. Eagle — overrides birdie skins
+ * 3. Birdie — base level
  *
- * When a higher-tier skin is awarded, all lower-tier skins are removed
- * from ALL players on that hole.
+ * Ace and albatross are the SAME tier — if both occur on one hole (e.g.,
+ * ace on a par-4 where another player also albatrosses), both are kept
+ * and they split the pool at settlement.
  */
 function resolveConflictingSkins(holeResult: HoleResult): void {
   const players = Object.values(holeResult.players);
 
-  const hasAceSkin = players.some((p) =>
-    p.junk.some((j) => j.name === "gross_ace_skin"),
-  );
-  const hasAlbatrossSkin = players.some((p) =>
-    p.junk.some((j) => j.name === "gross_albatross_skin"),
+  const hasSweepSkin = players.some((p) =>
+    p.junk.some(
+      (j) => j.name === "gross_ace_skin" || j.name === "gross_albatross_skin",
+    ),
   );
   const hasEagleSkin = players.some((p) =>
     p.junk.some((j) => j.name === "gross_eagle_skin"),
@@ -177,11 +176,7 @@ function resolveConflictingSkins(holeResult: HoleResult): void {
 
   // Build set of skin names to remove based on highest tier present
   const toRemove = new Set<string>();
-  if (hasAceSkin) {
-    toRemove.add("gross_albatross_skin");
-    toRemove.add("gross_eagle_skin");
-    toRemove.add("gross_skin");
-  } else if (hasAlbatrossSkin) {
+  if (hasSweepSkin) {
     toRemove.add("gross_eagle_skin");
     toRemove.add("gross_skin");
   } else if (hasEagleSkin) {
@@ -191,6 +186,18 @@ function resolveConflictingSkins(holeResult: HoleResult): void {
   if (toRemove.size > 0) {
     for (const player of players) {
       player.junk = player.junk.filter((j) => !toRemove.has(j.name));
+    }
+  }
+
+  // Deduplicate within sweep tier: ace on par ≥ 4 also qualifies for
+  // albatross (scoreToPar ≤ -3), but a player should only get one sweep skin.
+  // Ace is more specific, so drop that player's albatross (not everyone's).
+  for (const player of players) {
+    const hasAce = player.junk.some((j) => j.name === "gross_ace_skin");
+    if (hasAce) {
+      player.junk = player.junk.filter(
+        (j) => j.name !== "gross_albatross_skin",
+      );
     }
   }
 }

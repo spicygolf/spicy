@@ -157,7 +157,7 @@ function makeSkinsScoringCtx(): ScoringContext {
   };
 }
 
-/** Full Big Game context with all four skin tiers */
+/** Full Big Game context with all skin tiers (sweep / eagle / birdie) */
 function makeFullSkinsScoringCtx(): ScoringContext {
   return {
     ...makeSkinsScoringCtx(),
@@ -369,6 +369,50 @@ describe("Skins scoring — ace (hole-in-one)", () => {
     expect(getPlayerJunkNames(result, "A")).not.toContain("gross_skin");
     // B should also get no skins
     expect(getPlayerJunkNames(result, "B")).not.toContain("gross_skin");
+  });
+
+  it("ace on par 4 gets ace skin only, not albatross (dedup within sweep tier)", () => {
+    // Ace on par 4: gross=1, scoreToPar=-3 qualifies for both ace AND albatross.
+    // Ace is more specific — albatross should be deduplicated for this player.
+    const holeResult = makeHoleResult(
+      {
+        A: makePlayer("A", 1, 4, 1, 1),
+        B: makePlayer("B", 4, 4, 2, 1),
+      },
+      "1",
+      4,
+    );
+
+    const ctx = makeFullSkinsScoringCtx();
+    const result = evaluateJunkForHole(holeResult, ctx);
+    expect(getPlayerJunkNames(result, "A")).toContain("gross_ace_skin");
+    expect(getPlayerJunkNames(result, "A")).not.toContain(
+      "gross_albatross_skin",
+    );
+  });
+
+  it("ace and albatross by different players on same hole — both kept (split pot)", () => {
+    // Par 5: Player A aces (gross=1, scoreToPar=-4), Player B albatrosses (gross=2, scoreToPar=-3)
+    const holeResult = makeHoleResult(
+      {
+        A: makePlayer("A", 1, 5, 1, 1),
+        B: makePlayer("B", 2, 5, 1, 1),
+      },
+      "1",
+      5,
+    );
+
+    const ctx = makeFullSkinsScoringCtx();
+    const result = evaluateJunkForHole(holeResult, ctx);
+    // A gets ace (deduped from albatross), B gets albatross — both sweep skins survive
+    expect(getPlayerJunkNames(result, "A")).toContain("gross_ace_skin");
+    expect(getPlayerJunkNames(result, "A")).not.toContain(
+      "gross_albatross_skin",
+    );
+    expect(getPlayerJunkNames(result, "B")).toContain("gross_albatross_skin");
+    // Neither should have eagle or birdie skins
+    expect(getPlayerJunkNames(result, "A")).not.toContain("gross_eagle_skin");
+    expect(getPlayerJunkNames(result, "B")).not.toContain("gross_eagle_skin");
   });
 
   it("eagle (gross=2) does NOT get ace skin", () => {
