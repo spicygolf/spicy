@@ -2,7 +2,7 @@
 
 How option fields flow from JSON seed files into Jazz CoValues. **Every new field must be added to ALL layers.**
 
-## The Pipeline (7 layers for junk, 6 for multipliers)
+## The Pipeline (7 layers for junk, 7 for multipliers)
 
 When you add a new field to a seed option JSON file, it must pass through every layer below or it will be silently dropped.
 
@@ -48,10 +48,13 @@ When you add a new field to a seed option JSON file, it must pass through every 
 - Junk fallback: maps fields from V03 format
 - Multiplier fallback: same pattern
 
+## Also Requires Changes
+
+- **Schema** (`packages/lib/schema/options.ts`) — Zod schema requires explicit field addition (see checklist step 2)
+
 ## Downstream (no changes needed)
 
 These layers pass fields through generically:
-- **Schema** (`packages/lib/schema/options.ts`) — Zod schema, add field here too
 - **`copySpecOptions()`** (`packages/lib/scoring/option-utils.ts`) — uses `deepClone`, passes all fields
 - **`resetSpecFromRef()`** — copies from catalog spec, passes all fields
 - **Scoring pipeline** (`packages/lib/scoring/pipeline.ts`) — reads options as-is from Jazz
