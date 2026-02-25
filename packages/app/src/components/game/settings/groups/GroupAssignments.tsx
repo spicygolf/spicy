@@ -1,5 +1,4 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { useMemo } from "react";
 import { Pressable, View } from "react-native";
 import { DraxScrollView, DraxView } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -23,7 +22,6 @@ interface GroupAssignmentsProps {
   onAddGroup: () => void;
   onDeleteGroup: (groupIndex: number) => void;
   onTeeTimeChange: (groupIndex: number, teeTime: string) => void;
-  groupCount: number;
 }
 
 export function GroupAssignments({
@@ -35,9 +33,9 @@ export function GroupAssignments({
   onAddGroup,
   onDeleteGroup,
   onTeeTimeChange,
-  groupCount,
 }: GroupAssignmentsProps) {
   const { theme } = useUnistyles();
+  const groupSizes = groups.map((g) => g.players.length);
 
   if (allPlayerRounds.length === 0) {
     return (
@@ -61,52 +59,54 @@ export function GroupAssignments({
   return (
     <>
       <View style={styles.header}>
-        <Text style={styles.title}>Group Assignments</Text>
+        <Text style={styles.title}>Groups</Text>
         <View style={styles.headerButtons}>
           <Button label="Add Group" onPress={onAddGroup} variant="secondary" />
           <Button label="Auto-Assign" onPress={onAutoAssign} />
         </View>
       </View>
 
-      <DraxScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={true}
-      >
-        <View style={styles.columnsContainer}>
-          {/* Left pane: Groups */}
-          <View style={styles.leftPane}>
-            {groups.map((group) => (
-              <GroupDropZone
-                key={group.groupIndex}
-                group={group}
-                groupCount={groupCount}
-                onDrop={onDrop}
-                onDeleteGroup={onDeleteGroup}
-                onTeeTimeChange={onTeeTimeChange}
-                theme={theme}
-              />
-            ))}
-          </View>
-
-          {/* Right pane: Unassigned */}
-          <View style={styles.rightPane}>
-            <UnassignedDropZone
-              unassigned={unassigned}
-              groupCount={groupCount}
+      <View style={styles.columnsContainer}>
+        {/* Left pane: Groups (independently scrollable) */}
+        <DraxScrollView
+          style={styles.leftPane}
+          contentContainerStyle={styles.paneContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {groups.map((group) => (
+            <GroupDropZone
+              key={group.groupIndex}
+              group={group}
+              groupSizes={groupSizes}
               onDrop={onDrop}
+              onDeleteGroup={onDeleteGroup}
+              onTeeTimeChange={onTeeTimeChange}
               theme={theme}
             />
-          </View>
-        </View>
-      </DraxScrollView>
+          ))}
+        </DraxScrollView>
+
+        {/* Right pane: Unassigned (independently scrollable) */}
+        <DraxScrollView
+          style={styles.rightPane}
+          contentContainerStyle={styles.paneContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <UnassignedDropZone
+            unassigned={unassigned}
+            groupSizes={groupSizes}
+            onDrop={onDrop}
+            theme={theme}
+          />
+        </DraxScrollView>
+      </View>
     </>
   );
 }
 
 interface GroupDropZoneProps {
   group: GroupSection;
-  groupCount: number;
+  groupSizes: number[];
   onDrop: (playerId: string, targetGroupIndex: number) => void;
   onDeleteGroup: (groupIndex: number) => void;
   onTeeTimeChange: (groupIndex: number, teeTime: string) => void;
@@ -115,7 +115,7 @@ interface GroupDropZoneProps {
 
 function GroupDropZone({
   group,
-  groupCount,
+  groupSizes,
   onDrop,
   onDeleteGroup,
   onTeeTimeChange,
@@ -123,8 +123,8 @@ function GroupDropZone({
 }: GroupDropZoneProps) {
   const sectionTestId = `group-${group.groupIndex}-dropzone`;
 
-  // A group can be deleted if it's empty and not the last remaining group
-  const canDelete = group.players.length === 0 && groupCount > 1;
+  // A group can be deleted if it's empty
+  const canDelete = group.players.length === 0;
 
   return (
     <DraxView
@@ -138,7 +138,7 @@ function GroupDropZone({
       receivingStyle={styles.groupSectionReceiving}
     >
       <View style={styles.groupHeader}>
-        <Text style={styles.groupHeaderText}>{group.groupName}</Text>
+        <Text style={styles.groupHeaderText}>{group.groupIndex + 1}</Text>
         <View style={styles.groupHeaderMiddle}>
           <TextInput
             testID={`group-${group.groupIndex}-tee-time`}
@@ -176,12 +176,12 @@ function GroupDropZone({
       <View style={styles.dropZone}>
         {group.players.length > 0 ? (
           <View style={styles.playersList}>
-            {group.players.map((player) => (
+            {group.players.map((player, index) => (
               <DraggablePlayer
-                key={player.id}
+                key={`${player.id}-${index}`}
                 player={player}
                 currentGroupIndex={group.groupIndex}
-                groupCount={groupCount}
+                groupSizes={groupSizes}
                 onDrop={onDrop}
                 theme={theme}
               />
@@ -205,14 +205,14 @@ function GroupDropZone({
 
 interface UnassignedDropZoneProps {
   unassigned: PlayerRoundItem[];
-  groupCount: number;
+  groupSizes: number[];
   onDrop: (playerId: string, targetGroupIndex: number) => void;
   theme: ReturnType<typeof useUnistyles>["theme"];
 }
 
 function UnassignedDropZone({
   unassigned,
-  groupCount,
+  groupSizes,
   onDrop,
   theme,
 }: UnassignedDropZoneProps) {
@@ -237,12 +237,12 @@ function UnassignedDropZone({
       <View style={styles.dropZone}>
         {unassigned.length > 0 ? (
           <View style={styles.playersList}>
-            {unassigned.map((player) => (
+            {unassigned.map((player, index) => (
               <DraggablePlayer
-                key={player.id}
+                key={`${player.id}-${index}`}
                 player={player}
                 currentGroupIndex={-1}
-                groupCount={groupCount}
+                groupSizes={groupSizes}
                 onDrop={onDrop}
                 theme={theme}
               />
@@ -261,7 +261,7 @@ function UnassignedDropZone({
 interface DraggablePlayerProps {
   player: PlayerRoundItem;
   currentGroupIndex: number;
-  groupCount: number;
+  groupSizes: number[];
   onDrop: (playerId: string, targetGroupIndex: number) => void;
   theme: ReturnType<typeof useUnistyles>["theme"];
 }
@@ -269,19 +269,22 @@ interface DraggablePlayerProps {
 function DraggablePlayer({
   player,
   currentGroupIndex,
-  groupCount,
+  groupSizes,
   onDrop,
   theme,
 }: DraggablePlayerProps) {
   const playerSlug = slugify(player.playerName);
   const playerTestId = `group-player-${playerSlug}`;
 
-  // Tap-to-cycle: unassigned (-1) -> group 0, group 0 -> group 1, ..., last group -> unassigned (-1)
-  const nextGroupIndex = useMemo((): number => {
-    if (currentGroupIndex === -1) return 0;
-    if (currentGroupIndex >= groupCount - 1) return -1;
-    return currentGroupIndex + 1;
-  }, [currentGroupIndex, groupCount]);
+  // Tap: assign to first group with < 4 players (skipping current group).
+  // If all groups full, move to unassigned. If already unassigned and all full, no-op.
+  const nextGroupIndex = ((): number => {
+    for (let i = 0; i < groupSizes.length; i++) {
+      if (i === currentGroupIndex) continue;
+      if (groupSizes[i] < 4) return i;
+    }
+    return -1;
+  })();
 
   return (
     <View style={styles.playerItem}>
@@ -378,22 +381,20 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 16,
     fontWeight: "bold",
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-  },
   columnsContainer: {
+    flex: 1,
     flexDirection: "row",
-    gap: theme.gap(2),
+    gap: theme.gap(1),
   },
   leftPane: {
-    flex: 6,
+    flex: 1,
+  },
+  paneContent: {
     gap: theme.gap(2),
+    paddingBottom: theme.gap(4),
   },
   rightPane: {
-    flex: 4,
+    flex: 1,
   },
   groupSection: {
     borderWidth: 1,
@@ -413,9 +414,9 @@ const styles = StyleSheet.create((theme) => ({
   groupHeader: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: theme.gap(1),
-    paddingHorizontal: theme.gap(1.5),
-    gap: theme.gap(1),
+    paddingVertical: theme.gap(0.75),
+    paddingHorizontal: theme.gap(0.75),
+    gap: theme.gap(0.5),
   },
   groupHeaderText: {
     fontSize: 14,
@@ -461,8 +462,8 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: theme.gap(1),
-    paddingHorizontal: theme.gap(1.5),
+    paddingVertical: theme.gap(0.75),
+    paddingHorizontal: theme.gap(0.75),
   },
   dropZone: {
     minHeight: 60,
@@ -479,8 +480,8 @@ const styles = StyleSheet.create((theme) => ({
   },
   dragHandleContainer: {
     paddingVertical: theme.gap(0.75),
-    paddingLeft: theme.gap(1.5),
-    paddingRight: theme.gap(0.5),
+    paddingLeft: theme.gap(0.5),
+    paddingRight: 2,
   },
   dragHandleDragging: {
     opacity: 0.3,
@@ -504,8 +505,8 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: theme.gap(0.75),
-    paddingRight: theme.gap(1.5),
-    paddingLeft: theme.gap(0.5),
+    paddingRight: theme.gap(0.5),
+    paddingLeft: 2,
   },
   playerName: {
     fontSize: 14,
@@ -517,8 +518,8 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 12,
     color: theme.colors.secondary,
     textAlign: "right",
-    minWidth: 36,
-    marginLeft: theme.gap(0.5),
+    minWidth: 30,
+    marginLeft: 2,
   },
   emptyGroup: {
     backgroundColor: theme.colors.background,

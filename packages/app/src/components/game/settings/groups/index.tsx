@@ -96,12 +96,18 @@ export function GameGroupsList(): React.ReactElement | null {
   // Auto-create empty groups on first render if none exist.
   // Runs synchronously during render (Jazz mutations are synchronous),
   // guarded by a ref to avoid repeating on subsequent renders.
+  const hasNoGroups =
+    game?.$isLoaded &&
+    game.scope?.$isLoaded &&
+    (!game.scope.$jazz.has("groups") ||
+      !game.scope.groups?.$isLoaded ||
+      game.scope.groups.length === 0);
+
   if (
     isMultiGroup &&
     !didAutoCreate.current &&
+    hasNoGroups &&
     game?.$isLoaded &&
-    game.scope?.$isLoaded &&
-    !game.scope.$jazz.has("groups") &&
     game.rounds?.$isLoaded &&
     game.rounds.length > 0
   ) {
@@ -210,8 +216,6 @@ export function GameGroupsList(): React.ReactElement | null {
 
   // Derive unassigned players
   const unassigned = allPlayerRounds.filter((p) => !playerGroupMap.has(p.id));
-
-  const groupCount = groups.length;
 
   // --- CRUD Handlers ---
 
@@ -351,11 +355,10 @@ export function GameGroupsList(): React.ReactElement | null {
         return;
       }
 
-      // Only delete if the group is empty and not the last group
+      // Only delete if the group is empty
       const group = game.scope.groups[groupIndex];
       if (!group?.$isLoaded) return;
       if (group.rounds?.$isLoaded && group.rounds.length > 0) return;
-      if (game.scope.groups.length <= 1) return;
 
       game.scope.groups.$jazz.splice(groupIndex, 1);
     },
@@ -414,7 +417,6 @@ export function GameGroupsList(): React.ReactElement | null {
           onAddGroup={handleAddGroup}
           onDeleteGroup={handleDeleteGroup}
           onTeeTimeChange={handleTeeTimeChange}
-          groupCount={groupCount}
         />
       </View>
     </DraxProvider>
