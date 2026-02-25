@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { getSpecField } from "spicylib/scoring";
@@ -17,6 +18,7 @@ import {
 import { useTeamsMode } from "@/hooks/useTeamsMode";
 import { Button, Screen, Text } from "@/ui";
 import { usePerfRenderCount } from "@/utils/perfTrace";
+import { RapidEntryView } from "./RapidEntryView";
 import { ScoringView } from "./ScoringView";
 import { SummaryView } from "./SummaryView";
 import { TeamChooserView } from "./TeamChooserView";
@@ -81,6 +83,9 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
 
   // Teams mode — determines if teams button should be disabled in toolbar
   const { isSeamlessMode } = useTeamsMode(game);
+
+  // Rapid per-player score entry mode
+  const [rapidEntryMode, setRapidEntryMode] = useState(false);
 
   // Build GroupPickerItem[] from game.scope.groups.
   // Computed directly — Jazz objects are reactive proxies so useMemo with
@@ -255,9 +260,16 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   return (
     <Screen style={styles.screenNoPadding}>
       <View style={styles.container}>
-        {/* Content: Summary, Team Chooser, or Scoring UI */}
+        {/* Content: Rapid Entry, Summary, Team Chooser, or Scoring UI */}
         <ErrorBoundary>
-          {showSummary ? (
+          {rapidEntryMode ? (
+            <RapidEntryView
+              game={game}
+              holesList={holesList}
+              groupRoundIds={groupRoundIds}
+              onExit={() => setRapidEntryMode(false)}
+            />
+          ) : showSummary ? (
             <SummaryView
               game={game}
               scoreboard={scoreboard}
@@ -294,6 +306,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               selectedGroupId={selectedGroupId}
               onGroupChange={setSelectedGroupId}
               groupRoundIds={groupRoundIds}
+              onRapidEntry={() => setRapidEntryMode(true)}
             />
           )}
         </ErrorBoundary>

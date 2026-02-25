@@ -93,6 +93,8 @@ export interface ScoringViewProps {
   onGroupChange?: (groupId: string) => void;
   /** Set of RoundToGame IDs in the selected group (for filtering teams) */
   groupRoundIds?: Set<string>;
+  /** Called to enter rapid per-player score entry mode */
+  onRapidEntry?: () => void;
 }
 
 /** Check if a team has a specific team-level option on a hole */
@@ -545,6 +547,7 @@ export function ScoringView({
   selectedGroupId,
   onGroupChange,
   groupRoundIds,
+  onRapidEntry,
 }: ScoringViewProps): React.ReactElement {
   // Modal state for custom multiplier
   const [customMultiplierModalVisible, setCustomMultiplierModalVisible] =
@@ -1094,6 +1097,7 @@ export function ScoringView({
         groups={groups}
         selectedGroupId={selectedGroupId}
         onGroupChange={onGroupChange}
+        onRapidEntry={onRapidEntry}
       />
       <CustomMultiplierModal
         visible={customMultiplierModalVisible}

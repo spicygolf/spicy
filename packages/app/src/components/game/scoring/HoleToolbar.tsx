@@ -47,6 +47,8 @@ interface HoleToolbarProps {
   selectedGroupId?: string;
   /** Called when the user picks a different group */
   onGroupChange?: (groupId: string) => void;
+  /** Called to enter rapid per-player score entry mode */
+  onRapidEntry?: () => void;
 }
 
 export function HoleToolbar({
@@ -64,6 +66,7 @@ export function HoleToolbar({
   groups,
   selectedGroupId = "",
   onGroupChange,
+  onRapidEntry,
 }: HoleToolbarProps): React.ReactElement {
   const { theme } = useUnistyles();
   const [showOverridesModal, setShowOverridesModal] = useState(false);
@@ -205,8 +208,23 @@ export function HoleToolbar({
         ) : null}
       </View>
 
-      {/* Right: Option overrides + explain mode */}
+      {/* Right: Rapid entry + option overrides + explain mode */}
       <View style={styles.rightSection}>
+        {onRapidEntry && (
+          <Pressable
+            style={styles.iconButton}
+            onPress={onRapidEntry}
+            hitSlop={12}
+            accessibilityLabel="Rapid score entry"
+          >
+            <FontAwesome6
+              name="bolt"
+              iconStyle="solid"
+              size={20}
+              color={theme.colors.action}
+            />
+          </Pressable>
+        )}
         {hasOverrides && (
           <Pressable
             style={styles.iconButton}
