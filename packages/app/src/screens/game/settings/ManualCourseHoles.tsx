@@ -8,14 +8,20 @@
 
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
+import { useAccount } from "jazz-tools/react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import type { Course, Tee } from "spicylib/schema";
 import {
   CourseDefaultTee,
   Course as CourseSchema,
+  CourseTee,
+  Favorites,
+  ListOfCourseTees,
   ListOfTeeHoles,
   ListOfTees,
+  PlayerAccount,
   TeeHole,
   Tee as TeeSchema,
 } from "spicylib/schema";
@@ -158,6 +164,10 @@ export function ManualCourseHoles({
       players: { $each: { gender: true } },
       rounds: { $each: { round: { course: true, tee: { holes: true } } } },
     },
+  });
+
+  const me = useAccount(PlayerAccount, {
+    resolve: { root: { favorites: { courseTees: { $each: true } } } },
   });
 
   const numHoles = holesCount;
@@ -324,6 +334,10 @@ export function ManualCourseHoles({
       const existingTeeObj =
         round.$jazz.has("tee") && round.tee?.$isLoaded ? round.tee : null;
 
+      // Track the saved course/tee for favorites
+      let savedCourse: Course | null = null;
+      let savedTee: Tee | null = null;
+
       if (
         isEditMode &&
         existingCourse &&
@@ -358,6 +372,9 @@ export function ManualCourseHoles({
             );
           }
         }
+
+        savedCourse = existingCourse;
+        savedTee = existingTeeObj;
 
         // Propagate updates to other players
         if (game?.$isLoaded && player?.$isLoaded) {
@@ -422,10 +439,77 @@ export function ManualCourseHoles({
         round.$jazz.set("course", course);
         round.$jazz.set("tee", tee);
 
+        savedCourse = course;
+        savedTee = tee;
+
         // Propagate to other players
         if (game?.$isLoaded && player?.$isLoaded) {
           propagateCourseTeeToPlayers(game, course, tee, player.$jazz.id);
         }
+      }
+
+      // Add to favorites so it appears in Recents for other players.
+      // Wrapped in its own try/catch so a favorites failure doesn't block navigation
+      // after a successful save.
+      try {
+        if (savedCourse && savedTee && me?.$isLoaded && me.root?.$isLoaded) {
+          const root = me.root;
+          const loaded = await root.$jazz.ensureLoaded({
+            resolve: { favorites: { courseTees: { $each: true } } },
+          });
+
+          if (!loaded.$jazz.has("favorites")) {
+            const owner = root.$jazz.owner;
+            loaded.$jazz.set(
+              "favorites",
+              Favorites.create(
+                { courseTees: ListOfCourseTees.create([], { owner }) },
+                { owner },
+              ),
+            );
+          }
+
+          const favorites = loaded.favorites;
+          if (favorites?.$isLoaded) {
+            if (!favorites.$jazz.has("courseTees")) {
+              const owner = favorites.$jazz.owner;
+              favorites.$jazz.set(
+                "courseTees",
+                ListOfCourseTees.create([], { owner }),
+              );
+            }
+
+            const courseTees = favorites.courseTees;
+            if (courseTees?.$isLoaded) {
+              // Check if already favorited
+              const existing = courseTees.find(
+                (fav) =>
+                  fav?.$isLoaded &&
+                  fav.$jazz.has("tee") &&
+                  fav.tee?.$jazz.id === savedTee?.$jazz.id,
+              );
+
+              if (existing?.$isLoaded) {
+                existing.$jazz.set("lastUsedAt", new Date());
+              } else {
+                const owner = courseTees.$jazz.owner;
+                courseTees.$jazz.push(
+                  CourseTee.create(
+                    {
+                      course: savedCourse,
+                      tee: savedTee,
+                      addedAt: new Date(),
+                      lastUsedAt: new Date(),
+                    },
+                    { owner },
+                  ),
+                );
+              }
+            }
+          }
+        }
+      } catch {
+        // Non-critical: favorites update failed but course save succeeded
       }
 
       // Navigate back to game settings tabs (pop both ManualCourseHoles and SelectCourseNavigator)
@@ -460,6 +544,7 @@ export function ManualCourseHoles({
     isEditMode,
     playerId,
     roundId,
+    me,
   ]);
 
   // Determine loading vs error states

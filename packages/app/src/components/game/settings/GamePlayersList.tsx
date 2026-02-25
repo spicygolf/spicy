@@ -7,7 +7,7 @@ import { FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game, Player, RoundToGame } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
-import { getSpecField } from "spicylib/scoring";
+import { calculateQuota, getMetaOption, getSpecField } from "spicylib/scoring";
 import {
   adjustHandicapsToLow,
   calculateCourseHandicap,
@@ -51,6 +51,7 @@ export function GamePlayersList() {
           handicapIndex: true,
           courseHandicap: true,
           gameHandicap: true,
+          quotaOverride: true,
         },
       },
       spec: true,
@@ -153,6 +154,49 @@ export function GamePlayersList() {
 
     if (playerHandicaps.length === 0) return null;
     return adjustHandicapsToLow(playerHandicaps);
+  })();
+
+  // Check if this is a quota game — compute quotas from course handicaps
+  const spec = game?.$isLoaded ? game.spec : null;
+  const isQuotaGame = spec?.$isLoaded
+    ? getMetaOption(spec, "spec_type") === "quota"
+    : false;
+
+  const playerQuotas = ((): Map<string, number> | null => {
+    if (!isQuotaGame) return null;
+    if (!game?.$isLoaded || !game.rounds?.$isLoaded) return null;
+
+    const quotas = new Map<string, number>();
+    for (const rtg of game.rounds) {
+      if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+      const playerId = rtg.round.playerId;
+      if (!playerId) continue;
+
+      // Prefer explicit quota override on RoundToGame
+      if (rtg.quotaOverride !== undefined) {
+        quotas.set(playerId, rtg.quotaOverride);
+        continue;
+      }
+
+      // Get courseHandicap: prefer gameHandicap override, else stored, else calculated
+      let courseHandicap = rtg.gameHandicap ?? rtg.courseHandicap;
+      if (courseHandicap === undefined) {
+        const tee = rtg.round.$jazz.has("tee") ? rtg.round.tee : undefined;
+        if (tee?.$isLoaded && rtg.handicapIndex !== undefined) {
+          courseHandicap =
+            calculateCourseHandicap({
+              handicapIndex: String(rtg.handicapIndex),
+              tee,
+              holesPlayed: "all18",
+            }) ?? 0;
+        } else {
+          courseHandicap = 0;
+        }
+      }
+
+      quotas.set(playerId, calculateQuota(courseHandicap));
+    }
+    return quotas.size > 0 ? quotas : null;
   })();
 
   // Delete player handler — loads deep team data on-demand via ensureLoaded
@@ -266,6 +310,7 @@ export function GamePlayersList() {
       player={item}
       roundToGame={roundToGameByPlayer.get(item.$jazz.id)}
       shotsOff={adjustedHandicaps?.get(item.$jazz.id) ?? null}
+      quota={playerQuotas?.get(item.$jazz.id) ?? null}
       onDelete={handleDeletePlayer}
     />
   );

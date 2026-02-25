@@ -64,10 +64,30 @@ export {
   pointsFromTable,
   splitPoints,
 } from "./points-engine";
+// Quota engine (quota/Stableford calculation functions)
+export {
+  calculateNineHoleQuotas,
+  calculateQuota,
+  calculateQuotaPerformance,
+} from "./quota-engine";
+// Quota metrics (scoreboard extraction for quota settlement)
+export type {
+  QuotaPerformance,
+  StablefordTotals,
+} from "./quota-metrics";
+export {
+  calculateQuotaPerformances,
+  extractSkinCounts,
+  extractStablefordTotals,
+} from "./quota-metrics";
 // Ranking engine
 export { rankWithTies } from "./ranking-engine";
 // Scoreboard utilities (shared helpers for reading team results)
-export { getTeamHolePoints, getTeamRunningScore } from "./scoreboard-utils";
+export {
+  getQuotaRunningScore,
+  getTeamHolePoints,
+  getTeamRunningScore,
+} from "./scoreboard-utils";
 export type {
   DebtRecord,
   Payout,
@@ -130,6 +150,7 @@ export type {
   PlayerHandicapInfo,
   PlayerHoleResult,
   PlayerInfo,
+  PlayerQuota,
   PointsTable,
   PointsTableEntry,
   RankDirection,

@@ -15,6 +15,8 @@ interface Props {
   roundToGame?: MaybeLoaded<RoundToGame>;
   /** Shots off the lowest handicap player (only shown when not null) */
   shotsOff?: number | null;
+  /** Player's 18-hole quota (shown instead of shots for quota games) */
+  quota?: number | null;
   onPress?: () => void;
   /** Optional testID for E2E testing */
   testID?: string;
@@ -25,6 +27,7 @@ export function Handicaps({
   round,
   roundToGame,
   shotsOff,
+  quota,
   onPress,
   testID,
 }: Props) {
@@ -127,12 +130,21 @@ export function Handicaps({
         }
         color={hasCourseGameOverride ? "#FFA500" : undefined}
       />
-      {shotsOff !== null && shotsOff !== undefined && (
+      {quota !== null && quota !== undefined ? (
         <Handicap
-          label="shots"
-          display={String(shotsOff)}
-          testID={testID ? `${testID}-shots` : undefined}
+          label="quota"
+          display={String(quota)}
+          testID={testID ? `${testID}-quota` : undefined}
         />
+      ) : (
+        shotsOff !== null &&
+        shotsOff !== undefined && (
+          <Handicap
+            label="shots"
+            display={String(shotsOff)}
+            testID={testID ? `${testID}-shots` : undefined}
+          />
+        )
       )}
     </TouchableOpacity>
   );

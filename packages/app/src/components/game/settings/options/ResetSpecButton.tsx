@@ -153,14 +153,15 @@ export function ResetSpecButton({ game }: ResetSpecButtonProps) {
 
             <View style={styles.buttonRow}>
               <Pressable
-                style={styles.cancelButton}
+                style={[styles.cancelButton, success && styles.disabledButton]}
                 onPress={() => setShowModal(false)}
+                disabled={success}
                 testID="reset-spec-cancel"
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </Pressable>
               <Pressable
-                style={styles.confirmButton}
+                style={[styles.confirmButton, success && styles.disabledButton]}
                 onPress={handleReset}
                 disabled={success}
                 testID="reset-spec-confirm"
@@ -292,5 +293,8 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 16,
     fontWeight: "600",
     color: "#fff",
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 }));

@@ -21,6 +21,8 @@ import {
   calculateCourseHandicap,
   type PlayerHandicap,
 } from "../utils/handicap";
+import { getMetaOption } from "./option-utils";
+import { calculateNineHoleQuotas, calculateQuota } from "./quota-engine";
 import {
   assignTeams,
   calculateCumulatives,
@@ -38,6 +40,7 @@ import {
 import type {
   HoleInfo,
   PlayerHandicapInfo,
+  PlayerQuota,
   Scoreboard,
   ScoringContext,
   ScoringStage,
@@ -105,7 +108,15 @@ export function buildContext(game: Game): ScoringContext {
   const rounds = extractRounds(game);
 
   // Build player handicaps lookup (uses options for handicap mode)
-  const playerHandicaps = buildPlayerHandicaps(rounds, options);
+  const playerHandicaps = buildPlayerHandicaps(rounds, options, gameSpec);
+
+  // Build player quotas for quota-type games
+  const playerQuotas = buildPlayerQuotas(
+    gameSpec,
+    rounds,
+    playerHandicaps,
+    gameHoles,
+  );
 
   // Build hole info lookup
   const holeInfoMap = buildHoleInfo(rounds, gameHoles);
@@ -141,6 +152,7 @@ export function buildContext(game: Game): ScoringContext {
     rounds,
     holeInfoMap,
     playerHandicaps,
+    playerQuotas,
     teamsPerHole,
     playerTeamMap,
     scoreboard,
@@ -266,13 +278,28 @@ function extractRounds(game: Game): RoundToGame[] {
 function buildPlayerHandicaps(
   rounds: RoundToGame[],
   options: MapOfOptions | undefined,
+  gameSpec: GameSpec | undefined,
 ): Map<string, PlayerHandicapInfo> {
   const handicaps = new Map<string, PlayerHandicapInfo>();
+
+  // Quota games never use pops — handicaps affect quota target, not per-hole strokes
+  const isQuotaGame =
+    gameSpec?.$isLoaded && getMetaOption(gameSpec, "spec_type") === "quota";
+
+  // Check if handicaps are enabled (default: true)
+  // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
+  const useHandicapsOption = options?.["use_handicaps"];
+  const useHandicaps =
+    !isQuotaGame &&
+    (!useHandicapsOption ||
+      useHandicapsOption.type !== "game" ||
+      (useHandicapsOption as { value?: string }).value !== "false");
 
   // Check handicap mode from options (default is "low")
   // biome-ignore lint/complexity/useLiteralKeys: option key has underscore
   const handicapIndexFromOption = options?.["handicap_index_from"];
   const handicapMode =
+    useHandicaps &&
     handicapIndexFromOption &&
     handicapIndexFromOption.type === "game" &&
     handicapIndexFromOption.value === "full"
@@ -317,6 +344,21 @@ function buildPlayerHandicaps(
     });
   }
 
+  // When handicaps are disabled, everyone gets effectiveHandicap = 0 (no pops)
+  // but we still store the real courseHandicap for quota calculation
+  if (!useHandicaps) {
+    for (const ph of playerHandicaps) {
+      handicaps.set(ph.playerId, {
+        playerId: ph.playerId,
+        roundToGameId: ph.playerId,
+        effectiveHandicap: 0,
+        courseHandicap: ph.courseHandicap,
+        gameHandicap: ph.gameHandicap,
+      });
+    }
+    return handicaps;
+  }
+
   // Apply low handicap adjustment if needed
   const adjustedHandicaps =
     handicapMode === "low" ? adjustHandicapsToLow(playerHandicaps) : null;
@@ -338,6 +380,78 @@ function buildPlayerHandicaps(
   }
 
   return handicaps;
+}
+
+function buildPlayerQuotas(
+  gameSpec: GameSpec,
+  rounds: RoundToGame[],
+  playerHandicaps: Map<string, PlayerHandicapInfo>,
+  gameHoles: GameHole[],
+): Map<string, PlayerQuota> | undefined {
+  const specType = getMetaOption(gameSpec, "spec_type");
+  if (specType !== "quota") return undefined;
+
+  // Determine if play order starts on the back nine (shotgun start).
+  // If the first hole played is >= 10, the first nine played is the physical
+  // back nine, so we swap slopes to align quota.front/back with play order.
+  const firstHole = gameHoles[0]?.hole;
+  const startsOnBack =
+    firstHole !== undefined && Number.parseInt(firstHole, 10) >= 10;
+
+  // Build per-player slopes and quota overrides from RoundToGame data.
+  // Each player may play a different tee with different slopes (mixed-tee games).
+  const playerSlopes = new Map<
+    string,
+    { front: number | null; back: number | null }
+  >();
+  const quotaOverrides = new Map<string, number>();
+
+  for (const rtg of rounds) {
+    if (!rtg?.$isLoaded) continue;
+    const round = rtg.round;
+    if (!round?.$isLoaded || !round.playerId) continue;
+
+    const tee = round.tee;
+    if (tee?.$isLoaded && tee.ratings) {
+      playerSlopes.set(round.playerId, {
+        front: tee.ratings.front?.slope ?? null,
+        back: tee.ratings.back?.slope ?? null,
+      });
+    }
+
+    if (rtg.quotaOverride !== undefined) {
+      quotaOverrides.set(round.playerId, rtg.quotaOverride);
+    }
+  }
+
+  const quotas = new Map<string, PlayerQuota>();
+
+  for (const [playerId, handicapInfo] of playerHandicaps) {
+    const totalQuota =
+      quotaOverrides.get(playerId) ??
+      calculateQuota(handicapInfo.courseHandicap);
+    const slopes = playerSlopes.get(playerId);
+
+    // Slopes for calculateNineHoleQuotas are physical course sides.
+    // Swap them when play order starts on back nine so quota.front/back
+    // align with the first/second nine played.
+    const firstNineSlope = startsOnBack
+      ? (slopes?.back ?? null)
+      : (slopes?.front ?? null);
+    const secondNineSlope = startsOnBack
+      ? (slopes?.front ?? null)
+      : (slopes?.back ?? null);
+
+    const { front, back } = calculateNineHoleQuotas({
+      totalQuota,
+      frontSlope: firstNineSlope,
+      backSlope: secondNineSlope,
+    });
+
+    quotas.set(playerId, { playerId, total: totalQuota, front, back });
+  }
+
+  return quotas;
 }
 
 function buildHoleInfo(

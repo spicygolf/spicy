@@ -1,4 +1,5 @@
 import { co, z } from "jazz-tools";
+import { ListOfBets } from "./bets";
 import { ListOfGameHoles } from "./gameholes";
 import { GameSpec } from "./gamespecs";
 import { MapOfOptions } from "./options";
@@ -70,9 +71,17 @@ export const Game = co.map({
   organizer: z.string().optional(),
 
   /**
+   * Scored sub-competitions within this game (e.g., front/back/overall/skins).
+   * Each bet has a scope (which holes), scoring type, and payout config.
+   * If absent, the game has an implicit single bet: all18, points, per_unit.
+   */
+  bets: co.optional(ListOfBets),
+
+  /**
    * Payout pool configuration for settlement.
    * Each pool defines how a portion of the pot is distributed.
    * If absent, settlement uses a single 100% winner-take-all pool.
+   * @deprecated Use bets instead. Kept for backward compatibility.
    */
   payoutPools: co.optional(ListOfPayoutPools),
 

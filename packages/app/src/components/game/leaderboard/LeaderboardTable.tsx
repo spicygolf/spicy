@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
 import { ScrollView, useWindowDimensions, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { Scoreboard } from "spicylib/scoring";
+import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
 import { IncompleteIndicator } from "@/components/game/scoring";
 import { Text } from "@/ui";
 import {
@@ -20,6 +20,7 @@ interface LeaderboardTableProps {
   holeRows: HoleData[];
   scoreboard: Scoreboard | null;
   viewMode: ViewMode;
+  playerQuotas?: Map<string, PlayerQuota> | null;
 }
 
 // Threshold for switching to constrained column widths
@@ -30,6 +31,7 @@ export const LeaderboardTable = memo(function LeaderboardTable({
   holeRows,
   scoreboard,
   viewMode,
+  playerQuotas,
 }: LeaderboardTableProps) {
   const { width: screenWidth } = useWindowDimensions();
 
@@ -54,6 +56,7 @@ export const LeaderboardTable = memo(function LeaderboardTable({
                 player.playerId,
                 row.summaryType,
                 viewMode,
+                playerQuotas,
               )
             : getScoreValue(scoreboard, player.playerId, row.hole, viewMode);
 
@@ -70,7 +73,7 @@ export const LeaderboardTable = memo(function LeaderboardTable({
     }
 
     return data;
-  }, [scoreboard, playerColumns, holeRows, viewMode]);
+  }, [scoreboard, playerColumns, holeRows, viewMode, playerQuotas]);
 
   return (
     <ScrollView style={styles.tableContainer} nestedScrollEnabled>

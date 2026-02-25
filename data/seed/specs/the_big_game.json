@@ -11,7 +11,7 @@
   "teams": false,
   "team_size": 1,
   "team_change_every": 0,
-  "options": ["buy_in", "places_paid", "use_handicaps", "handicap_index_from"],
+  "options": ["buy_in", "places_paid"],
   "junk": [
     "stableford_double_eagle",
     "stableford_eagle",
@@ -76,10 +76,10 @@
       ]
     },
     {
-      "name": "payout_pools",
-      "disp": "Payout Pools",
+      "name": "bets",
+      "disp": "Bets",
       "valueType": "text",
-      "value": "[{\"name\":\"front\",\"disp\":\"Front Nine\",\"pct\":25,\"metric\":\"quota_front\",\"splitType\":\"places\"},{\"name\":\"back\",\"disp\":\"Back Nine\",\"pct\":25,\"metric\":\"quota_back\",\"splitType\":\"places\"},{\"name\":\"overall\",\"disp\":\"Overall\",\"pct\":25,\"metric\":\"quota_overall\",\"splitType\":\"places\"},{\"name\":\"skins\",\"disp\":\"Skins\",\"pct\":25,\"metric\":\"skins_won\",\"splitType\":\"per_unit\"}]"
+      "value": "[{\"name\":\"front\",\"disp\":\"Front Nine\",\"scope\":\"front9\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"back\",\"disp\":\"Back Nine\",\"scope\":\"back9\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"overall\",\"disp\":\"Overall\",\"scope\":\"all18\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"skins\",\"disp\":\"Skins\",\"scope\":\"all18\",\"scoringType\":\"skins\",\"pct\":25,\"splitType\":\"per_unit\"}]"
     }
   ]
 }

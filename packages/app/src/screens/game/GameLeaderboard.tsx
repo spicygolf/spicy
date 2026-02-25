@@ -1,7 +1,8 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
+import { getMetaOption } from "spicylib/scoring";
 import {
   getHoleRows,
   getPlayerColumns,
@@ -9,6 +10,7 @@ import {
   LeaderboardTable,
   type PlayerColumn,
 } from "@/components/game/leaderboard";
+import type { LeaderboardViewMode } from "@/contexts/GameContext";
 import { useGameContext } from "@/contexts/GameContext";
 import { ButtonGroup, Screen, Text } from "@/ui";
 
@@ -53,13 +55,40 @@ function createHoleRowsFingerprint(game: Game | null): string | null {
   return parts.join("|");
 }
 
+function quotaViewModeIndex(viewMode: LeaderboardViewMode): number {
+  switch (viewMode) {
+    case "gross":
+      return 0;
+    case "points":
+      return 1;
+    case "skins":
+      return 2;
+    default:
+      return 1; // Default to points for quota games
+  }
+}
+
 export function GameLeaderboard(): React.ReactElement | null {
   const {
     leaderboardViewMode: viewMode,
     setLeaderboardViewMode,
     scoringGame: game,
     scoreboard,
+    scoringContext,
   } = useGameContext();
+
+  // Determine spec type for conditional button group
+  const specType = scoringContext
+    ? getMetaOption(scoringContext.gameSpec, "spec_type")
+    : undefined;
+  const isQuotaGame = specType === "quota";
+
+  // Normalize viewMode: quota games don't have "net" — redirect to "points"
+  useEffect(() => {
+    if (isQuotaGame && viewMode === "net") {
+      setLeaderboardViewMode("points");
+    }
+  }, [isQuotaGame, viewMode, setLeaderboardViewMode]);
 
   // Create fingerprints for derived data - these only change when actual data changes,
   // not when Jazz object references change during progressive loading
@@ -128,17 +157,45 @@ export function GameLeaderboard(): React.ReactElement | null {
     <Screen style={styles.screen}>
       {/* View Mode Toggle */}
       <View style={styles.toggleContainer}>
-        <ButtonGroup
-          buttons={[
-            { label: "gross", onPress: () => setLeaderboardViewMode("gross") },
-            { label: "net", onPress: () => setLeaderboardViewMode("net") },
-            {
-              label: "points",
-              onPress: () => setLeaderboardViewMode("points"),
-            },
-          ]}
-          selectedIndex={viewMode === "gross" ? 0 : viewMode === "net" ? 1 : 2}
-        />
+        {isQuotaGame ? (
+          <ButtonGroup
+            buttons={[
+              {
+                label: "gross",
+                onPress: () => setLeaderboardViewMode("gross"),
+              },
+              {
+                label: "points",
+                onPress: () => setLeaderboardViewMode("points"),
+              },
+              {
+                label: "skins",
+                onPress: () => setLeaderboardViewMode("skins"),
+              },
+            ]}
+            selectedIndex={quotaViewModeIndex(viewMode)}
+          />
+        ) : (
+          <ButtonGroup
+            buttons={[
+              {
+                label: "gross",
+                onPress: () => setLeaderboardViewMode("gross"),
+              },
+              {
+                label: "net",
+                onPress: () => setLeaderboardViewMode("net"),
+              },
+              {
+                label: "points",
+                onPress: () => setLeaderboardViewMode("points"),
+              },
+            ]}
+            selectedIndex={
+              viewMode === "gross" ? 0 : viewMode === "net" ? 1 : 2
+            }
+          />
+        )}
       </View>
 
       {/* Leaderboard Table */}
@@ -147,6 +204,7 @@ export function GameLeaderboard(): React.ReactElement | null {
         holeRows={holeRows}
         scoreboard={scoreboard}
         viewMode={viewMode}
+        playerQuotas={scoringContext?.playerQuotas}
       />
     </Screen>
   );

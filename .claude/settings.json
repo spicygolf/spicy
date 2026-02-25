@@ -1,13 +1,4 @@
 {
-  "permissions": {
-    "allow": [
-      "WebFetch(domain:jazz.tools)",
-      "WebFetch(domain:docs.bun.sh)",
-      "Bash(chmod:*)"
-    ],
-    "deny": [],
-    "ask": []
-  },
   "hooks": {
     "UserPromptSubmit": [
       {

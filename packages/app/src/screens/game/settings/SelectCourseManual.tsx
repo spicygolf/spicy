@@ -21,8 +21,8 @@ import { Button, Picker, Screen, Text, TextInput } from "@/ui";
 /**
  * Check if a course is manually created (has ID starting with "manual-")
  */
-function isManualCourse(courseId: string | undefined): boolean {
-  return courseId?.startsWith("manual-") ?? false;
+function isManualCourse(courseId: string | number | undefined): boolean {
+  return typeof courseId === "string" && courseId.startsWith("manual-");
 }
 
 type Props = MaterialTopTabScreenProps<
