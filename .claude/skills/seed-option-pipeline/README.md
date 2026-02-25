@@ -56,7 +56,7 @@ When you add a new field to a seed option JSON file, it must pass through every 
 
 These layers pass fields through generically:
 - **`copySpecOptions()`** (`packages/lib/scoring/option-utils.ts`) — uses `deepClone`, passes all fields
-- **`resetSpecFromRef()`** — copies from catalog spec, passes all fields
+- **`resetSpecFromRef()`** (`packages/lib/scoring/option-utils.ts`) — copies from catalog spec, passes all fields
 - **Scoring pipeline** (`packages/lib/scoring/pipeline.ts`) — reads options as-is from Jazz
 
 ## Checklist for Adding a New Option Field
