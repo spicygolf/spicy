@@ -12,6 +12,7 @@ Skills provide domain-specific knowledge that is auto-injected based on prompt k
 | `typescript-standards` | 80 | TypeScript and React Native best practices |
 | `error-handling` | 75 | Error tracking with Jazz CoFeed + PostHog |
 | `documentation` | 70 | Markdown, docstrings, and code documentation |
+| `seed-option-pipeline` | 65 | Checklist for adding new option fields through the import pipeline |
 
 ## How Skills Work
 

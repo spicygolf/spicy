@@ -45,6 +45,8 @@ export interface SeedJunkOption {
   logic?: string;
   better?: string;
   score_to_par?: string;
+  gross_score?: string;
+  pool_sweep?: boolean;
 }
 
 export interface SeedMultiplierOption {
@@ -264,6 +266,8 @@ export async function loadSeedSpecsAsV03(): Promise<
       logic?: string;
       better?: string;
       score_to_par?: string;
+      gross_score?: string;
+      pool_sweep?: boolean;
     }>;
     multipliers?: Array<{
       name: string;
@@ -343,6 +347,8 @@ export async function loadSeedSpecsAsV03(): Promise<
           logic: opt.logic,
           better: opt.better,
           score_to_par: opt.score_to_par,
+          gross_score: opt.gross_score,
+          pool_sweep: opt.pool_sweep,
           ...overrides, // Apply per-spec overrides
         };
       })
@@ -410,6 +416,8 @@ export async function loadSeedSpecsAsV03(): Promise<
         logic?: string;
         better?: string;
         score_to_par?: string;
+        gross_score?: string;
+        pool_sweep?: boolean;
       }>,
       multipliers: multiplierOptions as Array<{
         name: string;

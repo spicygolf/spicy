@@ -193,6 +193,8 @@ interface JunkOptionData {
   logic?: string;
   better?: string;
   score_to_par?: string;
+  gross_score?: string;
+  pool_sweep?: boolean;
 }
 
 interface MultiplierOptionData {
@@ -711,6 +713,10 @@ export async function upsertGameSpec(
               ...(catalogOption.score_to_par && {
                 score_to_par: catalogOption.score_to_par,
               }),
+              ...(catalogOption.gross_score && {
+                gross_score: catalogOption.gross_score,
+              }),
+              ...(catalogOption.pool_sweep === true && { pool_sweep: true }),
             };
 
             spec.$jazz.set(opt.name, newJunkOption);
@@ -913,6 +919,11 @@ async function upsertOptions(
           typeof opt.score_to_par === "string" && {
             score_to_par: opt.score_to_par,
           }),
+        ...(opt.gross_score &&
+          typeof opt.gross_score === "string" && {
+            gross_score: opt.gross_score,
+          }),
+        ...(opt.pool_sweep === true && { pool_sweep: true }),
       };
 
       optionsMap.$jazz.set(opt.name, newOption);
@@ -1798,6 +1809,8 @@ export async function importGameSpecsToCatalog(
                   logic: junkData.logic as string | undefined,
                   better: junkData.better as string | undefined,
                   score_to_par: junkData.score_to_par as string | undefined,
+                  gross_score: junkData.gross_score as string | undefined,
+                  pool_sweep: junkData.pool_sweep as boolean | undefined,
                 });
               }
             } else if (opt.type === "multiplier") {
