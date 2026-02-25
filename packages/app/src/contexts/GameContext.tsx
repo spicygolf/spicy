@@ -85,6 +85,8 @@ interface GameIdContextType {
   setLeaderboardViewMode: (mode: LeaderboardViewMode) => void;
   settingsTab: SettingsTab;
   setSettingsTab: (tab: SettingsTab) => void;
+  selectedGroupId: string;
+  setSelectedGroupId: (groupId: string) => void;
 }
 
 const GameIdContext = createContext<GameIdContextType | undefined>(undefined);
@@ -162,6 +164,7 @@ export function GameProvider({ children }: GameProviderProps) {
   const [leaderboardViewMode, setLeaderboardViewMode] =
     useState<LeaderboardViewMode>("points");
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("PlayersTab");
+  const [selectedGroupId, setSelectedGroupId] = useState("");
 
   // useState setters are referentially stable (React guarantee) — only
   // include the state values themselves as dependencies.
@@ -175,8 +178,16 @@ export function GameProvider({ children }: GameProviderProps) {
       setLeaderboardViewMode,
       settingsTab,
       setSettingsTab,
+      selectedGroupId,
+      setSelectedGroupId,
     }),
-    [gameId, currentHoleIndex, leaderboardViewMode, settingsTab],
+    [
+      gameId,
+      currentHoleIndex,
+      leaderboardViewMode,
+      settingsTab,
+      selectedGroupId,
+    ],
   );
 
   return (

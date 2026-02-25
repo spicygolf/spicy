@@ -14,6 +14,9 @@ export interface HoleOptionOverride {
 /** A group option for the group picker dropdown */
 export interface GroupPickerItem {
   id: string;
+  /** Short label for the toolbar badge (e.g. "Grp 2") */
+  shortLabel: string;
+  /** Full label for the modal list (e.g. "B Anderson \u2022 S Serafin \u2022 ...") */
   label: string;
 }
 
@@ -143,7 +146,7 @@ export function HoleToolbar({
               numberOfLines={1}
             >
               {selectedGroupId
-                ? (groups?.find((g) => g.id === selectedGroupId)?.label ??
+                ? (groups?.find((g) => g.id === selectedGroupId)?.shortLabel ??
                   "All")
                 : "All"}
             </Text>
@@ -507,7 +510,7 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: `${theme.colors.action}10`,
   },
   groupOptionText: {
-    fontSize: 16,
+    fontSize: 13,
     color: theme.colors.primary,
     flex: 1,
   },

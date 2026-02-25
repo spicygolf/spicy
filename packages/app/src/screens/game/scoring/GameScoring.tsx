@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { getSpecField } from "spicylib/scoring";
@@ -31,7 +30,13 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   usePerfRenderCount("GameScoring");
 
   // Use shared game and scoreboard from context
-  const { scoringGame: game, scoreboard, scoringContext } = useGameContext();
+  const {
+    scoringGame: game,
+    scoreboard,
+    scoringContext,
+    selectedGroupId,
+    setSelectedGroupId,
+  } = useGameContext();
 
   // One-time game initialization (creates holes if needed)
   useGameInitialization(game);
@@ -77,9 +82,6 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   // Teams mode — determines if teams button should be disabled in toolbar
   const { isSeamlessMode } = useTeamsMode(game);
 
-  // Group filter state (persists across hole navigation)
-  const [selectedGroupId, setSelectedGroupId] = useState("");
-
   // Build GroupPickerItem[] from game.scope.groups.
   // Computed directly — Jazz objects are reactive proxies so useMemo with
   // CoValue dependencies would cache stale results during progressive loading.
@@ -89,27 +91,63 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
       return [];
     }
 
-    // Only show picker if multi_group is enabled
-    const spec = game.spec?.$isLoaded ? game.spec : null;
-    const specRef = game.specRef?.$isLoaded ? game.specRef : null;
+    // Only show picker if multi_group is enabled (check both spec sources)
     let isMultiGroup = false;
-    if (spec) {
-      const v = getSpecField(spec, "multi_group");
+    if (game.spec?.$isLoaded) {
+      const v = getSpecField(game.spec, "multi_group");
       if (v !== undefined) isMultiGroup = v === true || v === "true";
-    } else if (specRef) {
-      const v = getSpecField(specRef, "multi_group");
+    }
+    if (!isMultiGroup && game.specRef?.$isLoaded) {
+      const v = getSpecField(game.specRef, "multi_group");
       if (v !== undefined) isMultiGroup = v === true || v === "true";
     }
     if (!isMultiGroup) return [];
+
+    // Build rtgId → last name initial lookup from game.rounds + game.players
+    const rtgPlayerName = new Map<string, string>();
+    if (game.rounds?.$isLoaded && game.players?.$isLoaded) {
+      for (const rtg of game.rounds as Iterable<(typeof game.rounds)[number]>) {
+        if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+        const playerId = rtg.round.playerId;
+        for (const p of game.players as Iterable<
+          (typeof game.players)[number]
+        >) {
+          if (p?.$isLoaded && p.$jazz.id === playerId && p.name) {
+            // Use first initial + last name, e.g. "B Anderson"
+            const parts = p.name.trim().split(/\s+/);
+            const short =
+              parts.length > 1
+                ? `${parts[0][0]} ${parts[parts.length - 1]}`
+                : parts[0];
+            rtgPlayerName.set(rtg.$jazz.id, short);
+            break;
+          }
+        }
+      }
+    }
 
     const items: GroupPickerItem[] = [];
     for (let i = 0; i < game.scope.groups.length; i++) {
       const group = game.scope.groups[i];
       if (!group?.$isLoaded) continue;
-      const label = group.teeTime
-        ? `${group.name || `Group ${i + 1}`} — ${group.teeTime}`
-        : group.name || `Group ${i + 1}`;
-      items.push({ id: group.$jazz.id, label });
+
+      // Build player names string from group rounds
+      const names: string[] = [];
+      if (group.rounds?.$isLoaded) {
+        for (const rtg of group.rounds as Iterable<
+          (typeof group.rounds)[number]
+        >) {
+          if (!rtg?.$isLoaded) continue;
+          const name = rtgPlayerName.get(rtg.$jazz.id);
+          if (name) names.push(name);
+        }
+      }
+
+      const groupNum = `${i + 1}`;
+      const shortLabel = group.teeTime || groupNum;
+      const playerNames = names.length > 0 ? names.join(" \u2022 ") : "";
+      const label = playerNames ? `${shortLabel} — ${playerNames}` : shortLabel;
+      items.push({ id: group.$jazz.id, shortLabel, label });
     }
     return items;
   })();
