@@ -91,8 +91,8 @@ export function evaluateJunkForHole(
     evaluateJunkOption(junk, result, ctx);
   }
 
-  // Eagle skins override birdie skins: if any player earned gross_eagle_skin,
-  // remove gross_skin from ALL players on this hole (eagle wins outright)
+  // Higher-tier skins override lower-tier: ace > albatross > eagle > birdie.
+  // When a higher tier is awarded, all lower-tier skins are removed from ALL players.
   resolveConflictingSkins(result);
 
   // Calculate v0.3 parity fields
