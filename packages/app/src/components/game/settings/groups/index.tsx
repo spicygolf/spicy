@@ -1,12 +1,13 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { useCallback, useMemo } from "react";
+import { useCallback, useRef } from "react";
 import { View } from "react-native";
 import { DraxProvider } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import {
   GameGroup,
   ListOfGameGroups,
-  ListOfRoundToGames,
+  type ListOfRoundToGames,
+  ListOfRoundToGames as ListOfRoundToGamesSchema,
 } from "spicylib/schema";
 import { getSpecField } from "spicylib/scoring";
 import type { PlayerRoundItem } from "@/components/game/settings/teams/types";
@@ -15,7 +16,32 @@ import { Text } from "@/ui";
 import type { GroupSection } from "./GroupAssignments";
 import { GroupAssignments } from "./GroupAssignments";
 
-export function GameGroupsList() {
+/**
+ * Create empty groups for initial display (ceil(playerCount / 4) groups).
+ * Called once when the tab first loads with players but no groups.
+ */
+function createInitialGroups(
+  playerCount: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  owner: any,
+): ListOfGameGroups {
+  const numGroups = Math.max(1, Math.ceil(playerCount / 4));
+  const groupsList = ListOfGameGroups.create([], { owner });
+
+  for (let i = 0; i < numGroups; i++) {
+    const group = GameGroup.create(
+      {
+        name: `Group ${i + 1}`,
+        rounds: ListOfRoundToGamesSchema.create([], { owner }),
+      },
+      { owner },
+    );
+    groupsList.$jazz.push(group);
+  }
+  return groupsList;
+}
+
+export function GameGroupsList(): React.ReactElement | null {
   const { game } = useGame(undefined, {
     resolve: {
       scope: {
@@ -47,8 +73,13 @@ export function GameGroupsList() {
 
   const { theme } = useUnistyles();
 
-  // Check if multi_group is enabled in the spec
-  const isMultiGroup = useMemo((): boolean => {
+  // Track whether we've already auto-created groups this mount
+  const didAutoCreate = useRef(false);
+
+  // Check if multi_group is enabled in the spec.
+  // Computed directly — Jazz CoValues are reactive proxies, so useMemo with
+  // [game] deps won't trigger on nested data loading.
+  const isMultiGroup = (() => {
     if (!game?.$isLoaded) return false;
 
     if (game.$jazz.has("spec") && game.spec?.$isLoaded) {
@@ -60,10 +91,29 @@ export function GameGroupsList() {
       if (value !== undefined) return value === true || value === "true";
     }
     return false;
-  }, [game?.$jazz.id]);
+  })();
 
-  // Build all player rounds from game.rounds
-  const allPlayerRounds = useMemo((): PlayerRoundItem[] => {
+  // Auto-create empty groups on first render if none exist.
+  // Runs synchronously during render (Jazz mutations are synchronous),
+  // guarded by a ref to avoid repeating on subsequent renders.
+  if (
+    isMultiGroup &&
+    !didAutoCreate.current &&
+    game?.$isLoaded &&
+    game.scope?.$isLoaded &&
+    !game.scope.$jazz.has("groups") &&
+    game.rounds?.$isLoaded &&
+    game.rounds.length > 0
+  ) {
+    didAutoCreate.current = true;
+    const groups = createInitialGroups(game.rounds.length, game.$jazz.owner);
+    // @ts-ignore Jazz dynamic field access
+    game.scope.$jazz.set("groups", groups);
+  }
+
+  // Build all player rounds from game.rounds.
+  // Computed directly — Jazz CoValues are reactive proxies.
+  const allPlayerRounds: PlayerRoundItem[] = (() => {
     if (!game?.$isLoaded || !game.rounds?.$isLoaded) return [];
 
     const items: PlayerRoundItem[] = [];
@@ -96,10 +146,11 @@ export function GameGroupsList() {
       });
     }
     return items;
-  }, [game]);
+  })();
 
-  // Build a lookup: roundToGameId -> groupIndex (or undefined if unassigned)
-  const playerGroupMap = useMemo((): Map<string, number> => {
+  // Build a lookup: roundToGameId -> groupIndex (or undefined if unassigned).
+  // Computed directly — Jazz CoValues are reactive proxies.
+  const playerGroupMap: Map<string, number> = (() => {
     const map = new Map<string, number>();
     if (
       !game?.$isLoaded ||
@@ -123,10 +174,11 @@ export function GameGroupsList() {
     }
 
     return map;
-  }, [game]);
+  })();
 
-  // Derive group sections from Jazz data
-  const groups = useMemo((): GroupSection[] => {
+  // Derive group sections from Jazz data.
+  // Computed directly — Jazz CoValues are reactive proxies.
+  const groups: GroupSection[] = (() => {
     if (
       !game?.$isLoaded ||
       !game.scope?.$isLoaded ||
@@ -154,12 +206,10 @@ export function GameGroupsList() {
     }
 
     return sections;
-  }, [game, allPlayerRounds, playerGroupMap]);
+  })();
 
   // Derive unassigned players
-  const unassigned = useMemo((): PlayerRoundItem[] => {
-    return allPlayerRounds.filter((p) => !playerGroupMap.has(p.id));
-  }, [allPlayerRounds, playerGroupMap]);
+  const unassigned = allPlayerRounds.filter((p) => !playerGroupMap.has(p.id));
 
   const groupCount = groups.length;
 
@@ -193,11 +243,12 @@ export function GameGroupsList() {
         const targetGroup = game.scope.groups[targetGroupIndex];
         if (targetGroup?.$isLoaded) {
           if (!targetGroup.$jazz.has("rounds")) {
-            // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
-            // @ts-ignore - Jazz $jazz.set types are overly strict
+            // @ts-ignore Jazz dynamic field access
             targetGroup.$jazz.set(
               "rounds",
-              ListOfRoundToGames.create([], { owner: game.$jazz.owner }),
+              ListOfRoundToGamesSchema.create([], {
+                owner: game.$jazz.owner,
+              }),
             );
           }
           if (targetGroup.rounds?.$isLoaded) {
@@ -222,7 +273,7 @@ export function GameGroupsList() {
     });
 
     for (let i = 0; i < numGroups; i++) {
-      const roundsList = ListOfRoundToGames.create([], {
+      const roundsList = ListOfRoundToGamesSchema.create([], {
         owner: game.$jazz.owner,
       });
 
@@ -242,15 +293,13 @@ export function GameGroupsList() {
       const groupIdx = i % numGroups;
       const group = newGroups[groupIdx];
       if (group?.$isLoaded && group.rounds?.$isLoaded) {
-        // biome-ignore lint/suspicious/noTsIgnore: Jazz CoList push MaybeLoaded type mismatch
-        // @ts-ignore - RoundToGame is loaded but CoList push expects deeper loaded type
+        // @ts-ignore Jazz dynamic field access Jazz MaybeLoaded CoList push type mismatch
         group.rounds.$jazz.push(shuffled[i].roundToGame);
       }
     }
 
     // Set on scope
-    // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
-    // @ts-ignore - Jazz $jazz.set types are overly strict
+    // @ts-ignore Jazz dynamic field access Jazz optional field type mismatch with $jazz.set
     game.scope.$jazz.set("groups", newGroups);
   }, [game, allPlayerRounds]);
 
@@ -264,13 +313,14 @@ export function GameGroupsList() {
       const group = GameGroup.create(
         {
           name: "Group 1",
-          rounds: ListOfRoundToGames.create([], { owner: game.$jazz.owner }),
+          rounds: ListOfRoundToGamesSchema.create([], {
+            owner: game.$jazz.owner,
+          }),
         },
         { owner: game.$jazz.owner },
       );
       groupsList.$jazz.push(group);
-      // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
-      // @ts-ignore - Jazz $jazz.set types are overly strict
+      // @ts-ignore Jazz dynamic field access Jazz optional field type mismatch with $jazz.set
       game.scope.$jazz.set("groups", groupsList);
       return;
     }
@@ -281,7 +331,9 @@ export function GameGroupsList() {
     const group = GameGroup.create(
       {
         name: `Group ${newIndex + 1}`,
-        rounds: ListOfRoundToGames.create([], { owner: game.$jazz.owner }),
+        rounds: ListOfRoundToGamesSchema.create([], {
+          owner: game.$jazz.owner,
+        }),
       },
       { owner: game.$jazz.owner },
     );
@@ -324,8 +376,7 @@ export function GameGroupsList() {
       const group = game.scope.groups[groupIndex];
       if (!group?.$isLoaded) return;
 
-      // biome-ignore lint/suspicious/noTsIgnore: Jazz $jazz.set types require this
-      // @ts-ignore - Jazz $jazz.set types are overly strict
+      // @ts-ignore Jazz dynamic field access Jazz optional field type mismatch with $jazz.set
       group.$jazz.set("teeTime", teeTime);
     },
     [game],
@@ -374,8 +425,7 @@ export function GameGroupsList() {
  * Find the index of a RoundToGame in a rounds CoList by its Jazz ID.
  */
 function findRoundIndex(
-  // biome-ignore lint/suspicious/noExplicitAny: Jazz CoList iteration requires dynamic typing
-  rounds: any,
+  rounds: ListOfRoundToGames,
   roundToGameId: string,
 ): number {
   for (let i = 0; i < rounds.length; i++) {

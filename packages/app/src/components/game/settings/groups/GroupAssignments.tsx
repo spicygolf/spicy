@@ -330,7 +330,9 @@ function DraggablePlayer({
         style={styles.playerInfo}
         onPress={() => onDrop(player.id, nextGroupIndex)}
       >
-        <Text style={styles.playerName}>{player.playerName}</Text>
+        <Text style={styles.playerName} numberOfLines={1}>
+          {player.playerName}
+        </Text>
         {player.handicap !== undefined && (
           <Text style={styles.handicap}>{player.handicap}</Text>
         )}
@@ -508,10 +510,15 @@ const styles = StyleSheet.create((theme) => ({
   playerName: {
     fontSize: 14,
     fontWeight: "500",
+    flex: 1,
+    flexShrink: 1,
   },
   handicap: {
     fontSize: 12,
     color: theme.colors.secondary,
+    textAlign: "right",
+    minWidth: 36,
+    marginLeft: theme.gap(0.5),
   },
   emptyGroup: {
     backgroundColor: theme.colors.background,
