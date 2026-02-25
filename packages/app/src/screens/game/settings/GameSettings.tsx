@@ -92,12 +92,12 @@ function GameSettingsTabs() {
     tabBarIndicatorStyle: styles.selectedTabLine,
     swipeEnabled: true,
     tabBarStyle: {
-      height: 35,
+      height: 42,
     },
     tabBarLabelStyle: {
       padding: 0,
       marginTop: 0,
-      marginBottom: 20,
+      marginBottom: 24,
       color: theme.colors.primary,
     },
   };
