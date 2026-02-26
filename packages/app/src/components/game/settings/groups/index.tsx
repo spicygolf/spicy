@@ -219,6 +219,20 @@ export function GameGroupsList(): React.ReactElement | null {
     const playerRound = allPlayerRounds.find((p) => p.id === playerId);
     if (!playerRound) return;
 
+    // Preflight: ensure target group's rounds are ready before removing from source
+    let targetGroup: (typeof game.scope.groups)[number] | undefined;
+    if (targetGroupIndex >= 0) {
+      targetGroup = game.scope.groups[targetGroupIndex];
+      if (!targetGroup?.$isLoaded) return;
+      if (!targetGroup.$jazz.has("rounds")) {
+        targetGroup.$jazz.set(
+          "rounds",
+          ListOfRoundToGamesSchema.create([], { owner: game.$jazz.owner }),
+        );
+      }
+      if (!targetGroup.rounds?.$isLoaded) return;
+    }
+
     // Remove from current group (if assigned)
     const currentGroupIndex = playerGroupMap.get(playerId);
     if (currentGroupIndex !== undefined) {
@@ -232,21 +246,8 @@ export function GameGroupsList(): React.ReactElement | null {
     }
 
     // Add to target group (unless moving to unassigned)
-    if (targetGroupIndex >= 0) {
-      const targetGroup = game.scope.groups[targetGroupIndex];
-      if (targetGroup?.$isLoaded) {
-        if (!targetGroup.$jazz.has("rounds")) {
-          targetGroup.$jazz.set(
-            "rounds",
-            ListOfRoundToGamesSchema.create([], {
-              owner: game.$jazz.owner,
-            }),
-          );
-        }
-        if (targetGroup.rounds?.$isLoaded) {
-          targetGroup.rounds.$jazz.push(playerRound.roundToGame);
-        }
-      }
+    if (targetGroup?.$isLoaded && targetGroup.rounds?.$isLoaded) {
+      targetGroup.rounds.$jazz.push(playerRound.roundToGame);
     }
   };
 
