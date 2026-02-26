@@ -47,6 +47,7 @@ export {
   copySpecOptions,
   getFrontNinePreDoubleTotalFromHoles,
   getGameOptions,
+  getGameSpecField,
   getJunkOptionsForHole,
   getMetaOption,
   getOptionForHole,

@@ -1,5 +1,5 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { useCallback, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { View } from "react-native";
 import { DraxProvider } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -9,15 +9,18 @@ import {
   type ListOfRoundToGames,
   ListOfRoundToGames as ListOfRoundToGamesSchema,
 } from "spicylib/schema";
-import { getSpecField } from "spicylib/scoring";
+import { getGameSpecField } from "spicylib/scoring";
 import type { PlayerRoundItem } from "@/components/game/settings/teams/types";
 import { useGame } from "@/hooks";
 import { Text } from "@/ui";
 import type { GroupSection } from "./GroupAssignments";
 import { GroupAssignments } from "./GroupAssignments";
 
+/** Default maximum players per group (standard golf foursome) */
+const MAX_GROUP_SIZE = 4;
+
 /**
- * Create empty groups for initial display (ceil(playerCount / 4) groups).
+ * Create empty groups for initial display (ceil(playerCount / MAX_GROUP_SIZE) groups).
  * Called once when the tab first loads with players but no groups.
  */
 function createInitialGroups(
@@ -25,7 +28,7 @@ function createInitialGroups(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   owner: any,
 ): ListOfGameGroups {
-  const numGroups = Math.max(1, Math.ceil(playerCount / 4));
+  const numGroups = Math.max(1, Math.ceil(playerCount / MAX_GROUP_SIZE));
   const groupsList = ListOfGameGroups.create([], { owner });
 
   for (let i = 0; i < numGroups; i++) {
@@ -77,25 +80,12 @@ export function GameGroupsList(): React.ReactElement | null {
   const didAutoCreate = useRef(false);
 
   // Check if multi_group is enabled in the spec.
-  // Computed directly — Jazz CoValues are reactive proxies, so useMemo with
-  // [game] deps won't trigger on nested data loading.
-  const isMultiGroup = (() => {
-    if (!game?.$isLoaded) return false;
+  // Computed directly — Jazz CoValues are reactive proxies.
+  const multiGroupValue = getGameSpecField(game, "multi_group");
+  const isMultiGroup = multiGroupValue === true || multiGroupValue === "true";
 
-    if (game.$jazz.has("spec") && game.spec?.$isLoaded) {
-      const value = getSpecField(game.spec, "multi_group");
-      if (value !== undefined) return value === true || value === "true";
-    }
-    if (game.$jazz.has("specRef") && game.specRef?.$isLoaded) {
-      const value = getSpecField(game.specRef, "multi_group");
-      if (value !== undefined) return value === true || value === "true";
-    }
-    return false;
-  })();
-
-  // Auto-create empty groups on first render if none exist.
-  // Runs synchronously during render (Jazz mutations are synchronous),
-  // guarded by a ref to avoid repeating on subsequent renders.
+  // Auto-create empty groups on first mount if none exist.
+  // Guarded by a ref to avoid repeating on subsequent renders.
   const hasNoGroups =
     game?.$isLoaded &&
     game.scope?.$isLoaded &&
@@ -103,19 +93,20 @@ export function GameGroupsList(): React.ReactElement | null {
       !game.scope.groups?.$isLoaded ||
       game.scope.groups.length === 0);
 
-  if (
+  const shouldAutoCreate =
     isMultiGroup &&
     !didAutoCreate.current &&
     hasNoGroups &&
     game?.$isLoaded &&
     game.rounds?.$isLoaded &&
-    game.rounds.length > 0
-  ) {
+    game.rounds.length > 0;
+
+  useEffect(() => {
+    if (!shouldAutoCreate || !game?.$isLoaded) return;
     didAutoCreate.current = true;
     const groups = createInitialGroups(game.rounds.length, game.$jazz.owner);
-    // @ts-ignore Jazz dynamic field access
     game.scope.$jazz.set("groups", groups);
-  }
+  }, [shouldAutoCreate, game]);
 
   // Build all player rounds from game.rounds.
   // Computed directly — Jazz CoValues are reactive proxies.
@@ -219,57 +210,53 @@ export function GameGroupsList(): React.ReactElement | null {
 
   // --- CRUD Handlers ---
 
-  const handleDrop = useCallback(
-    (playerId: string, targetGroupIndex: number) => {
-      if (!game?.$isLoaded || !game.scope?.$isLoaded) return;
-      if (!game.scope.$jazz.has("groups") || !game.scope.groups?.$isLoaded) {
-        return;
-      }
+  const handleDrop = (playerId: string, targetGroupIndex: number) => {
+    if (!game?.$isLoaded || !game.scope?.$isLoaded) return;
+    if (!game.scope.$jazz.has("groups") || !game.scope.groups?.$isLoaded) {
+      return;
+    }
 
-      // Find the RoundToGame object for this player
-      const playerRound = allPlayerRounds.find((p) => p.id === playerId);
-      if (!playerRound) return;
+    // Find the RoundToGame object for this player
+    const playerRound = allPlayerRounds.find((p) => p.id === playerId);
+    if (!playerRound) return;
 
-      // Remove from current group (if assigned)
-      const currentGroupIndex = playerGroupMap.get(playerId);
-      if (currentGroupIndex !== undefined) {
-        const currentGroup = game.scope.groups[currentGroupIndex];
-        if (currentGroup?.$isLoaded && currentGroup.rounds?.$isLoaded) {
-          const idx = findRoundIndex(currentGroup.rounds, playerId);
-          if (idx !== -1) {
-            currentGroup.rounds.$jazz.splice(idx, 1);
-          }
+    // Remove from current group (if assigned)
+    const currentGroupIndex = playerGroupMap.get(playerId);
+    if (currentGroupIndex !== undefined) {
+      const currentGroup = game.scope.groups[currentGroupIndex];
+      if (currentGroup?.$isLoaded && currentGroup.rounds?.$isLoaded) {
+        const idx = findRoundIndex(currentGroup.rounds, playerId);
+        if (idx !== -1) {
+          currentGroup.rounds.$jazz.splice(idx, 1);
         }
       }
+    }
 
-      // Add to target group (unless moving to unassigned)
-      if (targetGroupIndex >= 0) {
-        const targetGroup = game.scope.groups[targetGroupIndex];
-        if (targetGroup?.$isLoaded) {
-          if (!targetGroup.$jazz.has("rounds")) {
-            // @ts-ignore Jazz dynamic field access
-            targetGroup.$jazz.set(
-              "rounds",
-              ListOfRoundToGamesSchema.create([], {
-                owner: game.$jazz.owner,
-              }),
-            );
-          }
-          if (targetGroup.rounds?.$isLoaded) {
-            targetGroup.rounds.$jazz.push(playerRound.roundToGame);
-          }
+    // Add to target group (unless moving to unassigned)
+    if (targetGroupIndex >= 0) {
+      const targetGroup = game.scope.groups[targetGroupIndex];
+      if (targetGroup?.$isLoaded) {
+        if (!targetGroup.$jazz.has("rounds")) {
+          targetGroup.$jazz.set(
+            "rounds",
+            ListOfRoundToGamesSchema.create([], {
+              owner: game.$jazz.owner,
+            }),
+          );
+        }
+        if (targetGroup.rounds?.$isLoaded) {
+          targetGroup.rounds.$jazz.push(playerRound.roundToGame);
         }
       }
-    },
-    [game, allPlayerRounds, playerGroupMap],
-  );
+    }
+  };
 
-  const handleAutoAssign = useCallback(() => {
+  const handleAutoAssign = () => {
     if (!game?.$isLoaded || !game.scope?.$isLoaded) return;
 
     // Shuffle all players
     const shuffled = [...allPlayerRounds].sort(() => Math.random() - 0.5);
-    const numGroups = Math.max(1, Math.ceil(shuffled.length / 4));
+    const numGroups = Math.max(1, Math.ceil(shuffled.length / MAX_GROUP_SIZE));
 
     // Create fresh groups list
     const newGroups = ListOfGameGroups.create([], {
@@ -297,17 +284,16 @@ export function GameGroupsList(): React.ReactElement | null {
       const groupIdx = i % numGroups;
       const group = newGroups[groupIdx];
       if (group?.$isLoaded && group.rounds?.$isLoaded) {
-        // @ts-ignore Jazz dynamic field access Jazz MaybeLoaded CoList push type mismatch
+        // @ts-expect-error Jazz MaybeLoaded CoList push type mismatch
         group.rounds.$jazz.push(shuffled[i].roundToGame);
       }
     }
 
     // Set on scope
-    // @ts-ignore Jazz dynamic field access Jazz optional field type mismatch with $jazz.set
     game.scope.$jazz.set("groups", newGroups);
-  }, [game, allPlayerRounds]);
+  };
 
-  const handleAddGroup = useCallback(() => {
+  const handleAddGroup = () => {
     if (!game?.$isLoaded || !game.scope?.$isLoaded) return;
 
     if (!game.scope.$jazz.has("groups")) {
@@ -324,7 +310,6 @@ export function GameGroupsList(): React.ReactElement | null {
         { owner: game.$jazz.owner },
       );
       groupsList.$jazz.push(group);
-      // @ts-ignore Jazz dynamic field access Jazz optional field type mismatch with $jazz.set
       game.scope.$jazz.set("groups", groupsList);
       return;
     }
@@ -342,48 +327,41 @@ export function GameGroupsList(): React.ReactElement | null {
       { owner: game.$jazz.owner },
     );
     game.scope.groups.$jazz.push(group);
-  }, [game]);
+  };
 
-  const handleDeleteGroup = useCallback(
-    (groupIndex: number) => {
-      if (
-        !game?.$isLoaded ||
-        !game.scope?.$isLoaded ||
-        !game.scope.$jazz.has("groups") ||
-        !game.scope.groups?.$isLoaded
-      ) {
-        return;
-      }
+  const handleDeleteGroup = (groupIndex: number) => {
+    if (
+      !game?.$isLoaded ||
+      !game.scope?.$isLoaded ||
+      !game.scope.$jazz.has("groups") ||
+      !game.scope.groups?.$isLoaded
+    ) {
+      return;
+    }
 
-      // Only delete if the group is empty
-      const group = game.scope.groups[groupIndex];
-      if (!group?.$isLoaded) return;
-      if (group.rounds?.$isLoaded && group.rounds.length > 0) return;
+    // Only delete if the group is empty
+    const group = game.scope.groups[groupIndex];
+    if (!group?.$isLoaded) return;
+    if (group.rounds?.$isLoaded && group.rounds.length > 0) return;
 
-      game.scope.groups.$jazz.splice(groupIndex, 1);
-    },
-    [game],
-  );
+    game.scope.groups.$jazz.splice(groupIndex, 1);
+  };
 
-  const handleTeeTimeChange = useCallback(
-    (groupIndex: number, teeTime: string) => {
-      if (
-        !game?.$isLoaded ||
-        !game.scope?.$isLoaded ||
-        !game.scope.$jazz.has("groups") ||
-        !game.scope.groups?.$isLoaded
-      ) {
-        return;
-      }
+  const handleTeeTimeChange = (groupIndex: number, teeTime: string) => {
+    if (
+      !game?.$isLoaded ||
+      !game.scope?.$isLoaded ||
+      !game.scope.$jazz.has("groups") ||
+      !game.scope.groups?.$isLoaded
+    ) {
+      return;
+    }
 
-      const group = game.scope.groups[groupIndex];
-      if (!group?.$isLoaded) return;
+    const group = game.scope.groups[groupIndex];
+    if (!group?.$isLoaded) return;
 
-      // @ts-ignore Jazz dynamic field access Jazz optional field type mismatch with $jazz.set
-      group.$jazz.set("teeTime", teeTime);
-    },
-    [game],
-  );
+    group.$jazz.set("teeTime", teeTime);
+  };
 
   // Show non-multi-group message if spec doesn't enable it
   if (game?.$isLoaded && !isMultiGroup) {

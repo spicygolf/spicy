@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { getSpecField } from "spicylib/scoring";
+import { getGameSpecField } from "spicylib/scoring";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
   ChangeTeamsModal,
@@ -96,17 +96,9 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
       return [];
     }
 
-    // Only show picker if multi_group is enabled (check both spec sources)
-    let isMultiGroup = false;
-    if (game.spec?.$isLoaded) {
-      const v = getSpecField(game.spec, "multi_group");
-      if (v !== undefined) isMultiGroup = v === true || v === "true";
-    }
-    if (!isMultiGroup && game.specRef?.$isLoaded) {
-      const v = getSpecField(game.specRef, "multi_group");
-      if (v !== undefined) isMultiGroup = v === true || v === "true";
-    }
-    if (!isMultiGroup) return [];
+    // Only show picker if multi_group is enabled
+    const multiGroupValue = getGameSpecField(game, "multi_group");
+    if (multiGroupValue !== true && multiGroupValue !== "true") return [];
 
     // Build rtgId → last name initial lookup from game.rounds + game.players
     const rtgPlayerName = new Map<string, string>();
@@ -156,6 +148,16 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
     }
     return items;
   })();
+
+  // Clear stale selectedGroupId if the group no longer exists
+  if (
+    selectedGroupId &&
+    groupPickerItems.length > 0 &&
+    !groupPickerItems.some((g) => g.id === selectedGroupId)
+  ) {
+    // Schedule for next tick — can't setState during render
+    queueMicrotask(() => setSelectedGroupId(""));
+  }
 
   // Build the Set of RoundToGame IDs for the selected group
   const groupRoundIds: Set<string> | undefined = (() => {

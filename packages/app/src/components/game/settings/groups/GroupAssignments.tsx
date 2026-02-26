@@ -6,6 +6,9 @@ import { slugify } from "spicylib/utils";
 import type { PlayerRoundItem } from "@/components/game/settings/teams/types";
 import { Button, Text, TextInput } from "@/ui";
 
+/** Default maximum players per group (standard golf foursome) */
+const MAX_GROUP_SIZE = 4;
+
 export interface GroupSection {
   groupIndex: number;
   groupName: string;
@@ -176,9 +179,9 @@ function GroupDropZone({
       <View style={styles.dropZone}>
         {group.players.length > 0 ? (
           <View style={styles.playersList}>
-            {group.players.map((player, index) => (
+            {group.players.map((player) => (
               <DraggablePlayer
-                key={`${player.id}-${index}`}
+                key={player.id}
                 player={player}
                 currentGroupIndex={group.groupIndex}
                 groupSizes={groupSizes}
@@ -237,9 +240,9 @@ function UnassignedDropZone({
       <View style={styles.dropZone}>
         {unassigned.length > 0 ? (
           <View style={styles.playersList}>
-            {unassigned.map((player, index) => (
+            {unassigned.map((player) => (
               <DraggablePlayer
-                key={`${player.id}-${index}`}
+                key={player.id}
                 player={player}
                 currentGroupIndex={-1}
                 groupSizes={groupSizes}
@@ -276,12 +279,12 @@ function DraggablePlayer({
   const playerSlug = slugify(player.playerName);
   const playerTestId = `group-player-${playerSlug}`;
 
-  // Tap: assign to first group with < 4 players (skipping current group).
+  // Tap: assign to first group with room (skipping current group).
   // If all groups full, move to unassigned. If already unassigned and all full, no-op.
   const nextGroupIndex = ((): number => {
     for (let i = 0; i < groupSizes.length; i++) {
       if (i === currentGroupIndex) continue;
-      if (groupSizes[i] < 4) return i;
+      if (groupSizes[i] < MAX_GROUP_SIZE) return i;
     }
     return -1;
   })();

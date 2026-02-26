@@ -1,11 +1,6 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useEffect, useRef, useState } from "react";
-import {
-  Pressable,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { Pressable, useWindowDimensions, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
 import { getGrossScore, getScoreToPar } from "spicylib/utils";
@@ -72,32 +67,23 @@ export function RapidEntryView({
   const [pendingDigit, setPendingDigit] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // When switching players, auto-focus on first unscored hole
+  // Auto-focus first unscored hole when player changes.
+  // Uses a ref to track the previous player and detect changes during render,
+  // since Jazz reactive proxies make useEffect deps unreliable.
   const prevPlayerRef = useRef(currentPlayer?.roundToGameId);
   if (currentPlayer && currentPlayer.roundToGameId !== prevPlayerRef.current) {
     prevPlayerRef.current = currentPlayer.roundToGameId;
-    const firstUnscored = findFirstUnscoredHole(
-      currentPlayer.round,
-      totalHoles,
-    );
-    // Can't call setState during render — use a flag and effect
-    if (activeHole !== firstUnscored) {
-      // Schedule for next tick via effect
-    }
+    // Schedule state updates for next tick (can't setState during render)
+    queueMicrotask(() => {
+      const firstUnscored = findFirstUnscoredHole(
+        currentPlayer.round,
+        totalHoles,
+      );
+      setActiveHole(firstUnscored);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      setPendingDigit(null);
+    });
   }
-
-  // Effect to auto-focus first unscored hole on player change
-  useEffect(() => {
-    if (!currentPlayer) return;
-    const firstUnscored = findFirstUnscoredHole(
-      currentPlayer.round,
-      totalHoles,
-    );
-    setActiveHole(firstUnscored);
-    // Clear any pending digit
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setPendingDigit(null);
-  }, [currentPlayer?.roundToGameId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -277,7 +263,7 @@ function PlayerHeader({
 
   return (
     <View style={styles.headerContainer}>
-      <TouchableOpacity
+      <Pressable
         style={styles.headerNavButton}
         onPress={onPrev}
         accessibilityLabel="Previous player"
@@ -288,7 +274,7 @@ function PlayerHeader({
           size={20}
           color={theme.colors.action}
         />
-      </TouchableOpacity>
+      </Pressable>
 
       <View style={styles.headerCenter}>
         <Text style={styles.headerName} numberOfLines={1}>
@@ -299,7 +285,7 @@ function PlayerHeader({
         </Text>
       </View>
 
-      <TouchableOpacity
+      <Pressable
         style={styles.headerNavButton}
         onPress={onNext}
         accessibilityLabel="Next player"
@@ -310,9 +296,9 @@ function PlayerHeader({
           size={20}
           color={theme.colors.action}
         />
-      </TouchableOpacity>
+      </Pressable>
 
-      <TouchableOpacity
+      <Pressable
         style={styles.headerExitButton}
         onPress={onExit}
         accessibilityLabel="Exit rapid entry"
@@ -323,7 +309,7 @@ function PlayerHeader({
           size={20}
           color={theme.colors.secondary}
         />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }
