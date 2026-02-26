@@ -67,13 +67,17 @@ export function RapidEntryView({
   const [pendingDigit, setPendingDigit] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Cancel any pending digit and switch to a new hole
-  const handleHoleTap = (hole: number) => {
+  const cancelPendingDigit = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
     setPendingDigit(null);
+  };
+
+  // Cancel any pending digit and switch to a new hole
+  const handleHoleTap = (hole: number) => {
+    cancelPendingDigit();
     setActiveHole(hole);
   };
 
@@ -90,8 +94,7 @@ export function RapidEntryView({
         totalHoles,
       );
       setActiveHole(firstUnscored);
-      if (timerRef.current) clearTimeout(timerRef.current);
-      setPendingDigit(null);
+      cancelPendingDigit();
     });
   }
 
@@ -104,6 +107,7 @@ export function RapidEntryView({
 
   const handlePrevPlayer = () => {
     if (playerList.length === 0) return;
+    cancelPendingDigit();
     setCurrentPlayerIndex((prev) =>
       prev === 0 ? playerList.length - 1 : prev - 1,
     );
@@ -111,6 +115,7 @@ export function RapidEntryView({
 
   const handleNextPlayer = () => {
     if (playerList.length === 0) return;
+    cancelPendingDigit();
     setCurrentPlayerIndex((prev) =>
       prev === playerList.length - 1 ? 0 : prev + 1,
     );

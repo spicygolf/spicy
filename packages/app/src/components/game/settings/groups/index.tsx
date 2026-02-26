@@ -90,8 +90,7 @@ export function GameGroupsList(): React.ReactElement | null {
     game?.$isLoaded &&
     game.scope?.$isLoaded &&
     (!game.scope.$jazz.has("groups") ||
-      !game.scope.groups?.$isLoaded ||
-      game.scope.groups.length === 0);
+      (game.scope.groups?.$isLoaded && game.scope.groups.length === 0));
 
   const shouldAutoCreate =
     isMultiGroup &&
@@ -344,10 +343,11 @@ export function GameGroupsList(): React.ReactElement | null {
       return;
     }
 
-    // Only delete if the group is empty
+    // Only delete if the group is empty (wait for rounds to load before allowing)
     const group = game.scope.groups[groupIndex];
     if (!group?.$isLoaded) return;
-    if (group.rounds?.$isLoaded && group.rounds.length > 0) return;
+    if (!group.$jazz.has("rounds") || !group.rounds?.$isLoaded) return;
+    if (group.rounds.length > 0) return;
 
     game.scope.groups.$jazz.splice(groupIndex, 1);
   };
