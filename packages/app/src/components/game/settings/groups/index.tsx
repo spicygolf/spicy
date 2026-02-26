@@ -283,9 +283,14 @@ export function GameGroupsList(): React.ReactElement | null {
     for (let i = 0; i < shuffled.length; i++) {
       const groupIdx = i % numGroups;
       const group = newGroups[groupIdx];
-      if (group?.$isLoaded && group.rounds?.$isLoaded) {
-        // @ts-expect-error Jazz MaybeLoaded CoList push type mismatch
-        group.rounds.$jazz.push(shuffled[i].roundToGame);
+      const entry = shuffled[i];
+      if (
+        group?.$isLoaded &&
+        group.rounds?.$isLoaded &&
+        entry?.roundToGame?.$isLoaded
+      ) {
+        // @ts-expect-error Jazz CoList push requires deep-resolved type but $isLoaded only narrows top level
+        group.rounds.$jazz.push(entry.roundToGame);
       }
     }
 

@@ -67,6 +67,16 @@ export function RapidEntryView({
   const [pendingDigit, setPendingDigit] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Cancel any pending digit and switch to a new hole
+  const handleHoleTap = (hole: number) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setPendingDigit(null);
+    setActiveHole(hole);
+  };
+
   // Auto-focus first unscored hole when player changes.
   // Uses a ref to track the previous player and detect changes during render,
   // since Jazz reactive proxies make useEffect deps unreliable.
@@ -221,7 +231,7 @@ export function RapidEntryView({
           parMap={currentPlayer?.parMap ?? new Map()}
           activeHole={activeHole}
           pendingDigit={pendingDigit}
-          onHoleTap={setActiveHole}
+          onHoleTap={handleHoleTap}
         />
         {back9.length > 0 && (
           <NineHoleRow
@@ -232,7 +242,7 @@ export function RapidEntryView({
             parMap={currentPlayer?.parMap ?? new Map()}
             activeHole={activeHole}
             pendingDigit={pendingDigit}
-            onHoleTap={setActiveHole}
+            onHoleTap={handleHoleTap}
           />
         )}
       </View>
