@@ -2,13 +2,14 @@ import { useEffect, useMemo, useRef } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
-import { getMetaOption } from "spicylib/scoring";
+import { getGameSpecField, getMetaOption } from "spicylib/scoring";
 import {
   getHoleRows,
   getPlayerColumns,
   type HoleData,
   LeaderboardTable,
   type PlayerColumn,
+  VerticalLeaderboard,
 } from "@/components/game/leaderboard";
 import type { LeaderboardViewMode } from "@/contexts/GameContext";
 import { useGameContext } from "@/contexts/GameContext";
@@ -139,6 +140,11 @@ export function GameLeaderboard(): React.ReactElement | null {
     return result;
   }, [holeRowsFingerprint, game]);
 
+  // Use vertical layout for large games (multi-group or many players)
+  const multiGroupValue = getGameSpecField(game, "multi_group");
+  const isMultiGroup = multiGroupValue === true || multiGroupValue === "true";
+  const useVerticalLayout = isMultiGroup || playerColumns.length > 7;
+
   if (!game) {
     return null;
   }
@@ -198,14 +204,25 @@ export function GameLeaderboard(): React.ReactElement | null {
         )}
       </View>
 
-      {/* Leaderboard Table */}
-      <LeaderboardTable
-        playerColumns={playerColumns}
-        holeRows={holeRows}
-        scoreboard={scoreboard}
-        viewMode={viewMode}
-        playerQuotas={scoringContext?.playerQuotas}
-      />
+      {/* Leaderboard */}
+      {useVerticalLayout ? (
+        <VerticalLeaderboard
+          playerColumns={playerColumns}
+          holeRows={holeRows}
+          scoreboard={scoreboard}
+          viewMode={viewMode}
+          playerQuotas={scoringContext?.playerQuotas}
+          isQuotaGame={isQuotaGame}
+        />
+      ) : (
+        <LeaderboardTable
+          playerColumns={playerColumns}
+          holeRows={holeRows}
+          scoreboard={scoreboard}
+          viewMode={viewMode}
+          playerQuotas={scoringContext?.playerQuotas}
+        />
+      )}
     </Screen>
   );
 }

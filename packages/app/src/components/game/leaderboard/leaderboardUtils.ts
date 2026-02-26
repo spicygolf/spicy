@@ -374,3 +374,112 @@ export function getScoreToPar(
   // For gross: gross - par, for net: net - par
   return viewMode === "gross" ? playerResult.scoreToPar : playerResult.netToPar;
 }
+
+// =============================================================================
+// Vertical Leaderboard Helpers
+// =============================================================================
+
+export interface VerticalColumn {
+  key: string;
+  label: string;
+}
+
+export interface VerticalPlayerData {
+  playerId: string;
+  firstName: string;
+  lastName: string;
+  rank: number;
+  values: Record<string, number | null>;
+}
+
+/**
+ * Get column definitions for the vertical leaderboard.
+ * Quota games show Front/Back/Overall/Skins; others show Front/Back/Total.
+ */
+export function getVerticalColumns(isQuotaGame: boolean): VerticalColumn[] {
+  if (isQuotaGame) {
+    return [
+      { key: "front", label: "Front" },
+      { key: "back", label: "Back" },
+      { key: "overall", label: "Overall" },
+      { key: "skins", label: "Skins" },
+    ];
+  }
+  return [
+    { key: "front", label: "Front" },
+    { key: "back", label: "Back" },
+    { key: "total", label: "Total" },
+  ];
+}
+
+/**
+ * Get player data for the vertical leaderboard, sorted by rank.
+ * Reuses getSummaryValue() for all computations.
+ */
+export function getVerticalPlayerData(
+  scoreboard: Scoreboard | null,
+  playerColumns: PlayerColumn[],
+  viewMode: ViewMode,
+  playerQuotas: Map<string, PlayerQuota> | null | undefined,
+  isQuotaGame: boolean,
+): VerticalPlayerData[] {
+  const rows: VerticalPlayerData[] = [];
+
+  for (const player of playerColumns) {
+    const front = getSummaryValue(
+      scoreboard,
+      player.playerId,
+      "out",
+      viewMode,
+      playerQuotas,
+    );
+    const back = getSummaryValue(
+      scoreboard,
+      player.playerId,
+      "in",
+      viewMode,
+      playerQuotas,
+    );
+    const total = getSummaryValue(
+      scoreboard,
+      player.playerId,
+      "total",
+      viewMode,
+      playerQuotas,
+    );
+
+    const values: Record<string, number | null> = {
+      front,
+      back,
+    };
+
+    if (isQuotaGame) {
+      values.overall = total;
+      // Skins column always shows skin count, regardless of current viewMode
+      values.skins = getSummaryValue(
+        scoreboard,
+        player.playerId,
+        "total",
+        "skins",
+      );
+    } else {
+      values.total = total;
+    }
+
+    const cumulative = scoreboard?.cumulative.players[player.playerId];
+    const rank = cumulative?.rank ?? playerColumns.indexOf(player) + 1;
+
+    rows.push({
+      playerId: player.playerId,
+      firstName: player.firstName,
+      lastName: player.lastName,
+      rank,
+      values,
+    });
+  }
+
+  // Sort by rank (ascending)
+  rows.sort((a, b) => a.rank - b.rank);
+
+  return rows;
+}

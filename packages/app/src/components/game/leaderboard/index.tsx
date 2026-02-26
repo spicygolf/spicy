@@ -11,3 +11,4 @@ export {
   type ViewMode,
 } from "./leaderboardUtils";
 export { ScoreCell } from "./ScoreCell";
+export { VerticalLeaderboard } from "./VerticalLeaderboard";
