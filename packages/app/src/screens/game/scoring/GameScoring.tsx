@@ -152,7 +152,6 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   // Clear stale selectedGroupId if the group no longer exists
   if (
     selectedGroupId &&
-    groupPickerItems.length > 0 &&
     !groupPickerItems.some((g) => g.id === selectedGroupId)
   ) {
     // Schedule for next tick — can't setState during render

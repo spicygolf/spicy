@@ -112,7 +112,7 @@ export function RapidEntryView({
 
   const commitScore = (score: number) => {
     if (!currentPlayer) return;
-    const holeNum = String(activeHole);
+    const holeNum = holesList[activeHole - 1] ?? String(activeHole);
     const holeAllocation = currentPlayer.handicapMap.get(holeNum) ?? 10;
     writeRapidScore(
       game,
@@ -158,7 +158,11 @@ export function RapidEntryView({
     if (!currentPlayer) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     setPendingDigit(null);
-    removeRapidScore(game, currentPlayer.roundToGameId, String(activeHole));
+    removeRapidScore(
+      game,
+      currentPlayer.roundToGameId,
+      holesList[activeHole - 1] ?? String(activeHole),
+    );
   };
 
   const handleBackspace = () => {
@@ -186,7 +190,7 @@ export function RapidEntryView({
     );
   }
 
-  // Determine front/back 9 hole numbers
+  // Determine front/back 9 hole positions (1-indexed)
   const front9 = holesList.slice(0, 9).map((_, i) => i + 1);
   const back9 = holesList.slice(9, 18).map((_, i) => i + 10);
 
@@ -211,6 +215,7 @@ export function RapidEntryView({
       >
         <NineHoleRow
           holes={front9}
+          holesList={holesList}
           label="OUT"
           round={currentPlayer?.round ?? null}
           parMap={currentPlayer?.parMap ?? new Map()}
@@ -221,6 +226,7 @@ export function RapidEntryView({
         {back9.length > 0 && (
           <NineHoleRow
             holes={back9}
+            holesList={holesList}
             label="IN"
             round={currentPlayer?.round ?? null}
             parMap={currentPlayer?.parMap ?? new Map()}
@@ -316,6 +322,7 @@ function PlayerHeader({
 
 function NineHoleRow({
   holes,
+  holesList,
   label,
   round,
   parMap,
@@ -324,6 +331,7 @@ function NineHoleRow({
   onHoleTap,
 }: {
   holes: number[];
+  holesList: string[];
   label: string;
   round: import("spicylib/schema").Round | null;
   parMap: Map<string, number>;
@@ -343,7 +351,7 @@ function NineHoleRow({
       {/* Hole cells */}
       <View style={styles.nineCells}>
         {holes.map((holeNum) => {
-          const holeStr = String(holeNum);
+          const holeStr = holesList[holeNum - 1] ?? String(holeNum);
           const par = parMap.get(holeStr) ?? 4;
           const gross =
             round?.$isLoaded && round.scores?.$isLoaded

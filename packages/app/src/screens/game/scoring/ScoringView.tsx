@@ -710,18 +710,17 @@ export function ScoringView({
   // Filter teams by selected group for display in the FlatList.
   // A team passes the filter if ANY of its rounds' roundToGame IDs are in the group.
   // Game logic (multipliers, tee flips, junk) still uses allTeams (unfiltered).
-  const filteredTeams: Team[] =
-    groupRoundIds && groupRoundIds.size > 0
-      ? allTeams.filter((team) => {
-          if (!team.rounds?.$isLoaded) return false;
-          for (const rtt of team.rounds) {
-            if (!rtt?.$isLoaded) continue;
-            const rtg = rtt.roundToGame;
-            if (rtg?.$isLoaded && groupRoundIds.has(rtg.$jazz.id)) return true;
-          }
-          return false;
-        })
-      : allTeams;
+  const filteredTeams: Team[] = groupRoundIds
+    ? allTeams.filter((team) => {
+        if (!team.rounds?.$isLoaded) return false;
+        for (const rtt of team.rounds) {
+          if (!rtt?.$isLoaded) continue;
+          const rtg = rtt.roundToGame;
+          if (rtg?.$isLoaded && groupRoundIds.has(rtg.$jazz.id)) return true;
+        }
+        return false;
+      })
+    : allTeams;
 
   // Get custom multiplier option and state
   const customMultiplierOption = getCustomMultiplierOption(multiplierOptions);

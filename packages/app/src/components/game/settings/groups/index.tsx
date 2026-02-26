@@ -1,4 +1,5 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
+import type { Group } from "jazz-tools";
 import { useEffect, useRef } from "react";
 import { View } from "react-native";
 import { DraxProvider } from "react-native-drax";
@@ -25,8 +26,7 @@ const MAX_GROUP_SIZE = 4;
  */
 function createInitialGroups(
   playerCount: number,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  owner: any,
+  owner: Group,
 ): ListOfGameGroups {
   const numGroups = Math.max(1, Math.ceil(playerCount / MAX_GROUP_SIZE));
   const groupsList = ListOfGameGroups.create([], { owner });
