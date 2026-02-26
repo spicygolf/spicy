@@ -1,4 +1,5 @@
 export { GameScoring } from "./GameScoring";
+export { RapidEntryView } from "./RapidEntryView";
 export type { ScoringViewProps } from "./ScoringView";
 export { ScoringView } from "./ScoringView";
 export type { SummaryViewProps } from "./SummaryView";

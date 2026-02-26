@@ -1,7 +1,12 @@
+import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { getGameSpecField } from "spicylib/scoring";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ChangeTeamsModal } from "@/components/game/scoring";
+import {
+  ChangeTeamsModal,
+  type GroupPickerItem,
+} from "@/components/game/scoring";
 import { useGameContext } from "@/contexts/GameContext";
 import {
   useCurrentHole,
@@ -10,8 +15,10 @@ import {
   useHoleNavigation,
   useScoreManagement,
 } from "@/hooks";
+import { useTeamsMode } from "@/hooks/useTeamsMode";
 import { Button, Screen, Text } from "@/ui";
 import { usePerfRenderCount } from "@/utils/perfTrace";
+import { RapidEntryView } from "./RapidEntryView";
 import { ScoringView } from "./ScoringView";
 import { SummaryView } from "./SummaryView";
 import { TeamChooserView } from "./TeamChooserView";
@@ -25,7 +32,13 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   usePerfRenderCount("GameScoring");
 
   // Use shared game and scoreboard from context
-  const { scoringGame: game, scoreboard, scoringContext } = useGameContext();
+  const {
+    scoringGame: game,
+    scoreboard,
+    scoringContext,
+    selectedGroupId,
+    setSelectedGroupId,
+  } = useGameContext();
 
   // One-time game initialization (creates holes if needed)
   useGameInitialization(game);
@@ -67,6 +80,109 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
     currentHoleIndex,
     holeInfo,
   );
+
+  // Teams mode — determines if teams button should be disabled in toolbar
+  const { isSeamlessMode } = useTeamsMode(game);
+
+  // Rapid per-player score entry mode
+  const [rapidEntryMode, setRapidEntryMode] = useState(false);
+
+  // Build GroupPickerItem[] from game.scope.groups.
+  // Computed directly — Jazz objects are reactive proxies so useMemo with
+  // CoValue dependencies would cache stale results during progressive loading.
+  const groupPickerItems: GroupPickerItem[] = (() => {
+    if (!game?.$isLoaded || !game.scope?.$isLoaded) return [];
+    if (!game.scope.$jazz.has("groups") || !game.scope.groups?.$isLoaded) {
+      return [];
+    }
+
+    // Only show picker if multi_group is enabled
+    const multiGroupValue = getGameSpecField(game, "multi_group");
+    if (multiGroupValue !== true && multiGroupValue !== "true") return [];
+
+    // Build rtgId → last name initial lookup from game.rounds + game.players
+    const rtgPlayerName = new Map<string, string>();
+    if (game.rounds?.$isLoaded && game.players?.$isLoaded) {
+      for (const rtg of game.rounds as Iterable<(typeof game.rounds)[number]>) {
+        if (!rtg?.$isLoaded || !rtg.round?.$isLoaded) continue;
+        const playerId = rtg.round.playerId;
+        for (const p of game.players as Iterable<
+          (typeof game.players)[number]
+        >) {
+          if (p?.$isLoaded && p.$jazz.id === playerId && p.name) {
+            // Use first initial + last name, e.g. "B Anderson"
+            const parts = p.name.trim().split(/\s+/);
+            const short =
+              parts.length > 1
+                ? `${parts[0][0]} ${parts[parts.length - 1]}`
+                : parts[0];
+            rtgPlayerName.set(rtg.$jazz.id, short);
+            break;
+          }
+        }
+      }
+    }
+
+    const items: GroupPickerItem[] = [];
+    for (let i = 0; i < game.scope.groups.length; i++) {
+      const group = game.scope.groups[i];
+      if (!group?.$isLoaded) continue;
+
+      // Build player names string from group rounds
+      const names: string[] = [];
+      if (group.rounds?.$isLoaded) {
+        for (const rtg of group.rounds as Iterable<
+          (typeof group.rounds)[number]
+        >) {
+          if (!rtg?.$isLoaded) continue;
+          const name = rtgPlayerName.get(rtg.$jazz.id);
+          if (name) names.push(name);
+        }
+      }
+
+      const groupNum = `${i + 1}`;
+      const shortLabel = group.teeTime || groupNum;
+      const playerNames = names.length > 0 ? names.join(" \u2022 ") : "";
+      const label = playerNames ? `${shortLabel} — ${playerNames}` : shortLabel;
+      items.push({ id: group.$jazz.id, shortLabel, label });
+    }
+    return items;
+  })();
+
+  // Clear stale selectedGroupId if the group no longer exists
+  if (
+    selectedGroupId &&
+    !groupPickerItems.some((g) => g.id === selectedGroupId)
+  ) {
+    // Schedule for next tick — can't setState during render
+    queueMicrotask(() => setSelectedGroupId(""));
+  }
+
+  // Build the Set of RoundToGame IDs for the selected group
+  const groupRoundIds: Set<string> | undefined = (() => {
+    if (!selectedGroupId) return undefined;
+    if (!game?.$isLoaded || !game.scope?.$isLoaded) return undefined;
+    if (!game.scope.$jazz.has("groups") || !game.scope.groups?.$isLoaded) {
+      return undefined;
+    }
+
+    for (let i = 0; i < game.scope.groups.length; i++) {
+      const group = game.scope.groups[i];
+      if (!group?.$isLoaded || group.$jazz.id !== selectedGroupId) continue;
+      if (!group.rounds?.$isLoaded) continue;
+
+      const ids = new Set<string>();
+      for (const rtg of group.rounds as Iterable<
+        (typeof group.rounds)[number]
+      >) {
+        if (rtg?.$isLoaded) {
+          ids.add(rtg.$jazz.id);
+        }
+      }
+      return ids;
+    }
+    return undefined;
+  })();
 
   if (!game) {
     return null;
@@ -145,9 +261,16 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   return (
     <Screen style={styles.screenNoPadding}>
       <View style={styles.container}>
-        {/* Content: Summary, Team Chooser, or Scoring UI */}
+        {/* Content: Rapid Entry, Summary, Team Chooser, or Scoring UI */}
         <ErrorBoundary>
-          {showSummary ? (
+          {rapidEntryMode ? (
+            <RapidEntryView
+              game={game}
+              holesList={holesList}
+              groupRoundIds={groupRoundIds}
+              onExit={() => setRapidEntryMode(false)}
+            />
+          ) : showSummary ? (
             <SummaryView
               game={game}
               scoreboard={scoreboard}
@@ -179,6 +302,12 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               onScoreChange={handleScoreChange}
               onUnscore={handleUnscore}
               onChangeTeams={() => setShowChangeTeamsModal(true)}
+              teamsDisabled={isSeamlessMode}
+              groups={groupPickerItems}
+              selectedGroupId={selectedGroupId}
+              onGroupChange={setSelectedGroupId}
+              groupRoundIds={groupRoundIds}
+              onRapidEntry={() => setRapidEntryMode(true)}
             />
           )}
         </ErrorBoundary>

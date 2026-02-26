@@ -7,6 +7,7 @@ import type { ID } from "jazz-tools";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { Player } from "spicylib/schema";
 import { GamePlayersList } from "@/components/game/settings/GamePlayersList";
+import { GameGroupsList } from "@/components/game/settings/groups";
 import { GameOptionsList } from "@/components/game/settings/options/GameOptionsList";
 import { HoleOverrides } from "@/components/game/settings/options/HoleOverrides";
 import { GameTeamsList } from "@/components/game/settings/teams";
@@ -48,6 +49,7 @@ export type GameSettingsStackParamList = {
 type GameSettingsTabParamList = {
   PlayersTab: undefined;
   TeamsTab: undefined;
+  GroupsTab: undefined;
   OptionsTab: undefined;
 };
 
@@ -67,6 +69,16 @@ function TeamsTab() {
   return (
     <Screen>
       <GameTeamsList />
+    </Screen>
+  );
+}
+
+function GroupsTab() {
+  usePerfRenderCount("GroupsTab");
+  usePerfMountTracker("GroupsTab");
+  return (
+    <Screen>
+      <GameGroupsList />
     </Screen>
   );
 }
@@ -92,12 +104,12 @@ function GameSettingsTabs() {
     tabBarIndicatorStyle: styles.selectedTabLine,
     swipeEnabled: true,
     tabBarStyle: {
-      height: 35,
+      height: 42,
     },
     tabBarLabelStyle: {
       padding: 0,
       marginTop: 0,
-      marginBottom: 20,
+      marginBottom: 24,
       color: theme.colors.primary,
     },
   };
@@ -124,6 +136,11 @@ function GameSettingsTabs() {
         name="TeamsTab"
         component={TeamsTab}
         options={{ title: "Teams" }}
+      />
+      <Tabs.Screen
+        name="GroupsTab"
+        component={GroupsTab}
+        options={{ title: "Groups" }}
       />
       <Tabs.Screen
         name="OptionsTab"

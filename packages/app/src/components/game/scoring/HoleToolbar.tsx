@@ -1,6 +1,6 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { useState } from "react";
-import { Modal, Pressable, View } from "react-native";
+import { Modal, Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { ModalHeader, Text } from "@/ui";
 import { GolfTee } from "./TeeFlipModal";
@@ -11,8 +11,19 @@ export interface HoleOptionOverride {
   value: string;
 }
 
+/** A group option for the group picker dropdown */
+export interface GroupPickerItem {
+  id: string;
+  /** Short label for the toolbar badge (e.g. "Grp 2") */
+  shortLabel: string;
+  /** Full label for the modal list (e.g. "B Anderson \u2022 S Serafin \u2022 ...") */
+  label: string;
+}
+
 interface HoleToolbarProps {
   onChangeTeams?: () => void;
+  /** When true, the teams button is shown but greyed out / non-pressable */
+  teamsDisabled?: boolean;
   /** Overall multiplier for the hole (1x, 2x, 4x, 8x, etc.) */
   overallMultiplier?: number;
   /** Whether a custom multiplier is active (shows "custom" label) */
@@ -30,10 +41,19 @@ interface HoleToolbarProps {
   /** Whether explain mode is enabled (for future use) */
   explainMode?: boolean;
   onToggleExplain?: () => void;
+  /** Available groups for filtering (shown as a picker when non-empty) */
+  groups?: GroupPickerItem[];
+  /** Currently selected group ID (empty string = "All") */
+  selectedGroupId?: string;
+  /** Called when the user picks a different group */
+  onGroupChange?: (groupId: string) => void;
+  /** Called to enter rapid per-player score entry mode */
+  onRapidEntry?: () => void;
 }
 
 export function HoleToolbar({
   onChangeTeams,
+  teamsDisabled = false,
   overallMultiplier = 1,
   isCustomMultiplier = false,
   onMultiplierPress,
@@ -43,10 +63,16 @@ export function HoleToolbar({
   holeNumber,
   explainMode = false,
   onToggleExplain,
+  groups,
+  selectedGroupId = "",
+  onGroupChange,
+  onRapidEntry,
 }: HoleToolbarProps): React.ReactElement {
   const { theme } = useUnistyles();
   const [showOverridesModal, setShowOverridesModal] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
   const hasOverrides = optionOverrides && optionOverrides.length > 0;
+  const hasGroups = groups && groups.length > 0 && !!onGroupChange;
 
   // Format multiplier display (1x, 2x, 4x, 8x)
   const multiplierText = `${overallMultiplier}x`;
@@ -75,12 +101,16 @@ export function HoleToolbar({
 
   return (
     <View style={styles.container}>
-      {/* Left: Team chooser icon + declined tee flip indicator */}
+      {/* Left: Team chooser icon + group picker + declined tee flip indicator */}
       <View style={styles.leftSection}>
         {onChangeTeams && (
           <Pressable
-            style={styles.iconButton}
-            onPress={onChangeTeams}
+            style={[
+              styles.iconButton,
+              teamsDisabled && styles.iconButtonInactive,
+            ]}
+            onPress={teamsDisabled ? undefined : onChangeTeams}
+            disabled={teamsDisabled}
             hitSlop={12}
             accessibilityLabel="Change teams"
           >
@@ -88,8 +118,41 @@ export function HoleToolbar({
               name="people-group"
               iconStyle="solid"
               size={24}
-              color={theme.colors.action}
+              color={teamsDisabled ? theme.colors.border : theme.colors.action}
             />
+          </Pressable>
+        )}
+        {hasGroups && (
+          <Pressable
+            style={styles.groupPicker}
+            onPress={() => setShowGroupModal(true)}
+            hitSlop={8}
+            accessibilityLabel="Select group"
+          >
+            <FontAwesome6
+              name="layer-group"
+              iconStyle="solid"
+              size={14}
+              color={
+                selectedGroupId ? theme.colors.action : theme.colors.secondary
+              }
+            />
+            <Text
+              style={[
+                styles.groupPickerText,
+                {
+                  color: selectedGroupId
+                    ? theme.colors.action
+                    : theme.colors.secondary,
+                },
+              ]}
+              numberOfLines={1}
+            >
+              {selectedGroupId
+                ? (groups?.find((g) => g.id === selectedGroupId)?.shortLabel ??
+                  "All")
+                : "All"}
+            </Text>
           </Pressable>
         )}
         {teeFlipDeclined && (
@@ -145,8 +208,23 @@ export function HoleToolbar({
         ) : null}
       </View>
 
-      {/* Right: Option overrides + explain mode */}
+      {/* Right: Rapid entry + option overrides + explain mode */}
       <View style={styles.rightSection}>
+        {onRapidEntry && (
+          <Pressable
+            style={styles.iconButton}
+            onPress={onRapidEntry}
+            hitSlop={12}
+            accessibilityLabel="Rapid score entry"
+          >
+            <FontAwesome6
+              name="bolt"
+              iconStyle="solid"
+              size={20}
+              color={theme.colors.action}
+            />
+          </Pressable>
+        )}
         {hasOverrides && (
           <Pressable
             style={styles.iconButton}
@@ -210,6 +288,92 @@ export function HoleToolbar({
                   </View>
                 ))}
               </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
+      )}
+
+      {hasGroups && (
+        <Modal
+          visible={showGroupModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowGroupModal(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowGroupModal(false)}
+          >
+            <Pressable
+              style={styles.modalContent}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <ModalHeader
+                title="Select Group"
+                onClose={() => setShowGroupModal(false)}
+              />
+              <ScrollView style={styles.groupList}>
+                <Pressable
+                  style={[
+                    styles.groupOption,
+                    !selectedGroupId && styles.groupOptionSelected,
+                  ]}
+                  onPress={() => {
+                    onGroupChange?.("");
+                    setShowGroupModal(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.groupOptionText,
+                      !selectedGroupId && styles.groupOptionTextSelected,
+                    ]}
+                  >
+                    All Players
+                  </Text>
+                  {!selectedGroupId && (
+                    <FontAwesome6
+                      name="check"
+                      iconStyle="solid"
+                      size={14}
+                      color={theme.colors.action}
+                    />
+                  )}
+                </Pressable>
+                {groups?.map((group) => (
+                  <Pressable
+                    key={group.id}
+                    style={[
+                      styles.groupOption,
+                      selectedGroupId === group.id &&
+                        styles.groupOptionSelected,
+                    ]}
+                    onPress={() => {
+                      onGroupChange?.(group.id);
+                      setShowGroupModal(false);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.groupOptionText,
+                        selectedGroupId === group.id &&
+                          styles.groupOptionTextSelected,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {group.label}
+                    </Text>
+                    {selectedGroupId === group.id && (
+                      <FontAwesome6
+                        name="check"
+                        iconStyle="solid"
+                        size={14}
+                        color={theme.colors.action}
+                      />
+                    )}
+                  </Pressable>
+                ))}
+              </ScrollView>
             </Pressable>
           </Pressable>
         </Modal>
@@ -330,6 +494,45 @@ const styles = StyleSheet.create((theme) => ({
   },
   overrideValue: {
     fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.action,
+  },
+  groupPicker: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.gap(0.25),
+    paddingVertical: theme.gap(0.25),
+    paddingHorizontal: theme.gap(0.5),
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  groupPickerText: {
+    fontSize: 12,
+    fontWeight: "600",
+    maxWidth: 80,
+  },
+  groupList: {
+    maxHeight: 400,
+  },
+  groupOption: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: theme.gap(1.25),
+    paddingHorizontal: theme.gap(1),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  groupOptionSelected: {
+    backgroundColor: `${theme.colors.action}10`,
+  },
+  groupOptionText: {
+    fontSize: 13,
+    color: theme.colors.primary,
+    flex: 1,
+  },
+  groupOptionTextSelected: {
     fontWeight: "600",
     color: theme.colors.action,
   },

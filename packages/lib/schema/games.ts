@@ -8,6 +8,24 @@ import { ListOfRoundToGames } from "./rounds";
 import { ListOfPayoutPools } from "./settlement";
 import { TeamsConfig } from "./teamsconfig";
 
+/**
+ * A group of players within a multi-group game (e.g., a foursome).
+ * Groups are for score-entry logistics (filtering which players you see),
+ * not for competition pairing (that's the teams system).
+ */
+export const GameGroup = co.map({
+  /** Display name, e.g., "Group 1", "Group 2" */
+  name: z.string(),
+  /** Optional tee time for this group, e.g., "7:30 AM" */
+  teeTime: z.string().optional(),
+  /** Players assigned to this group (references to RoundToGame edges) */
+  rounds: ListOfRoundToGames,
+});
+export type GameGroup = co.loaded<typeof GameGroup>;
+
+export const ListOfGameGroups = co.list(GameGroup);
+export type ListOfGameGroups = co.loaded<typeof ListOfGameGroups>;
+
 export const GameScope = co.map({
   /**
    * Which holes are being played in this game.
@@ -23,6 +41,12 @@ export const GameScope = co.map({
    * whether teams are set in settings (0) or during play (>0).
    */
   teamsConfig: co.optional(TeamsConfig),
+
+  /**
+   * Player groups for multi-group games (e.g., foursomes in a 48-player tournament).
+   * Used for score-entry filtering — not for competition pairing (that's teams).
+   */
+  groups: co.optional(ListOfGameGroups),
 });
 export type GameScope = co.loaded<typeof GameScope>;
 

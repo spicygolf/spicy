@@ -34,6 +34,7 @@ import {
 } from "spicylib/utils";
 import {
   CustomMultiplierModal,
+  type GroupPickerItem,
   HoleHeader,
   type HoleOptionOverride,
   HoleToolbar,
@@ -82,6 +83,18 @@ export interface ScoringViewProps {
   onScoreChange: (roundToGameId: string, newGross: number) => void;
   onUnscore: (roundToGameId: string) => void;
   onChangeTeams: () => void;
+  /** When true, the teams button is shown but greyed out / non-pressable */
+  teamsDisabled?: boolean;
+  /** Available groups for filtering (shown as a picker in HoleToolbar) */
+  groups?: GroupPickerItem[];
+  /** Currently selected group ID (empty string = "All") */
+  selectedGroupId?: string;
+  /** Called when the user picks a different group */
+  onGroupChange?: (groupId: string) => void;
+  /** Set of RoundToGame IDs in the selected group (for filtering teams) */
+  groupRoundIds?: Set<string>;
+  /** Called to enter rapid per-player score entry mode */
+  onRapidEntry?: () => void;
 }
 
 /** Check if a team has a specific team-level option on a hole */
@@ -529,6 +542,12 @@ export function ScoringView({
   onScoreChange,
   onUnscore,
   onChangeTeams,
+  teamsDisabled,
+  groups,
+  selectedGroupId,
+  onGroupChange,
+  groupRoundIds,
+  onRapidEntry,
 }: ScoringViewProps): React.ReactElement {
   // Modal state for custom multiplier
   const [customMultiplierModalVisible, setCustomMultiplierModalVisible] =
@@ -687,6 +706,21 @@ export function ScoringView({
   const allTeams: Team[] = currentHole?.teams?.$isLoaded
     ? ([...currentHole.teams].filter((t) => t?.$isLoaded) as Team[])
     : [];
+
+  // Filter teams by selected group for display in the FlatList.
+  // A team passes the filter if ANY of its rounds' roundToGame IDs are in the group.
+  // Game logic (multipliers, tee flips, junk) still uses allTeams (unfiltered).
+  const filteredTeams: Team[] = groupRoundIds
+    ? allTeams.filter((team) => {
+        if (!team.rounds?.$isLoaded) return false;
+        for (const rtt of team.rounds) {
+          if (!rtt?.$isLoaded) continue;
+          const rtg = rtt.roundToGame;
+          if (rtg?.$isLoaded && groupRoundIds.has(rtg.$jazz.id)) return true;
+        }
+        return false;
+      })
+    : allTeams;
 
   // Get custom multiplier option and state
   const customMultiplierOption = getCustomMultiplierOption(multiplierOptions);
@@ -1033,6 +1067,7 @@ export function ScoringView({
       />
       <HoleToolbar
         onChangeTeams={onChangeTeams}
+        teamsDisabled={teamsDisabled}
         overallMultiplier={teeMultiplier}
         isCustomMultiplier={customMultiplierState.isActive}
         onMultiplierPress={
@@ -1058,6 +1093,10 @@ export function ScoringView({
         }}
         optionOverrides={optionOverrides}
         holeNumber={currentHoleNumber}
+        groups={groups}
+        selectedGroupId={selectedGroupId}
+        onGroupChange={onGroupChange}
+        onRapidEntry={onRapidEntry}
       />
       <CustomMultiplierModal
         visible={customMultiplierModalVisible}
@@ -1109,7 +1148,7 @@ export function ScoringView({
       />
       <FlatList
         style={styles.content}
-        data={allTeams}
+        data={filteredTeams}
         keyExtractor={(team, index) => team?.$jazz.id ?? String(index)}
         renderItem={({ item: team }) => {
           if (!team?.$isLoaded) return null;

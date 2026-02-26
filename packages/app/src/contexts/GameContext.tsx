@@ -14,7 +14,11 @@ import { useScoreboard } from "@/hooks/useScoreboard";
 import { usePerfRenderCount } from "@/utils/perfTrace";
 
 export type LeaderboardViewMode = "gross" | "net" | "points" | "skins";
-export type SettingsTab = "PlayersTab" | "TeamsTab" | "OptionsTab";
+export type SettingsTab =
+  | "PlayersTab"
+  | "TeamsTab"
+  | "GroupsTab"
+  | "OptionsTab";
 
 /**
  * Unified resolve query for scoring-related screens (Leaderboard, Scoring).
@@ -24,7 +28,10 @@ export type SettingsTab = "PlayersTab" | "TeamsTab" | "OptionsTab";
 const SCORING_RESOLVE = {
   name: true,
   start: true,
-  scope: { teamsConfig: true },
+  scope: {
+    teamsConfig: true,
+    groups: { $each: { rounds: { $each: true } } },
+  },
   spec: { $each: { $each: true } }, // Working copy of options for scoring (preferred)
   specRef: { $each: { $each: true } }, // Catalog spec reference (fallback for legacy games)
   holes: {
@@ -78,6 +85,8 @@ interface GameIdContextType {
   setLeaderboardViewMode: (mode: LeaderboardViewMode) => void;
   settingsTab: SettingsTab;
   setSettingsTab: (tab: SettingsTab) => void;
+  selectedGroupId: string;
+  setSelectedGroupId: (groupId: string) => void;
 }
 
 const GameIdContext = createContext<GameIdContextType | undefined>(undefined);
@@ -155,6 +164,7 @@ export function GameProvider({ children }: GameProviderProps) {
   const [leaderboardViewMode, setLeaderboardViewMode] =
     useState<LeaderboardViewMode>("points");
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("PlayersTab");
+  const [selectedGroupId, setSelectedGroupId] = useState("");
 
   // useState setters are referentially stable (React guarantee) — only
   // include the state values themselves as dependencies.
@@ -168,8 +178,16 @@ export function GameProvider({ children }: GameProviderProps) {
       setLeaderboardViewMode,
       settingsTab,
       setSettingsTab,
+      selectedGroupId,
+      setSelectedGroupId,
     }),
-    [gameId, currentHoleIndex, leaderboardViewMode, settingsTab],
+    [
+      gameId,
+      currentHoleIndex,
+      leaderboardViewMode,
+      settingsTab,
+      selectedGroupId,
+    ],
   );
 
   return (

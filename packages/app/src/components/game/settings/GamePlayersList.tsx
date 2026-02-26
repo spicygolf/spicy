@@ -343,12 +343,14 @@ const styles = StyleSheet.create((theme) => ({
   buttonRow: {
     flexDirection: "row",
     gap: theme.gap(1),
+    marginBottom: theme.gap(1),
   },
   addPlayerButton: {
     flex: 1,
   },
   flatlist: {
-    marginVertical: theme.gap(1),
+    flexGrow: 1,
+    paddingBottom: theme.gap(5),
   },
 }));
 

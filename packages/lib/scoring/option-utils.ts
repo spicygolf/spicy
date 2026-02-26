@@ -332,6 +332,26 @@ export function getSpecField(
 }
 
 /**
+ * Get a spec field value from a game, checking both spec (working copy)
+ * and specRef (catalog reference) sources.
+ */
+export function getGameSpecField(
+  game: Game | undefined | null,
+  fieldName: string,
+): string | number | boolean | string[] | undefined {
+  if (!game?.$isLoaded) return undefined;
+
+  if (game.spec?.$isLoaded) {
+    const value = getSpecField(game.spec, fieldName);
+    if (value !== undefined) return value;
+  }
+  if (game.specRef?.$isLoaded) {
+    return getSpecField(game.specRef, fieldName);
+  }
+  return undefined;
+}
+
+/**
  * Get the effective options source for a game.
  *
  * Returns game.spec (the working copy of options).

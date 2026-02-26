@@ -36,7 +36,7 @@ When you add a new field to a seed option JSON file, it must pass through every 
 - Junk option creation: builds the Jazz-stored object field by field
 - Multiplier option creation: same pattern
 
-### Layer 6: Spec-to-Catalog Junk Override
+### Layer 6: Spec-to-Catalog Overrides
 
 `packages/api/src/lib/catalog.ts` — `importSpecFromSeed()`
 - Junk override block: when a spec overrides a junk value, rebuilds the full object
