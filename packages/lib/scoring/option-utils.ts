@@ -466,3 +466,32 @@ export function resetSpecFromRef(
 
   return resetCount;
 }
+
+// =============================================================================
+// Game Option Value Helpers
+// =============================================================================
+
+/**
+ * Read a numeric game option from a spec/options map.
+ *
+ * Looks up the option by key, verifies it's a "game" type option,
+ * and parses its value (or defaultValue) as a number.
+ *
+ * @param spec - A GameSpec or MapOfOptions (may be partially loaded)
+ * @param key - Option name (e.g., "buy_in", "places_paid")
+ * @param fallback - Value to return if the option is missing or not numeric
+ * @returns The parsed number, or fallback
+ */
+export function getGameOptionNumber(
+  // biome-ignore lint/suspicious/noExplicitAny: Jazz MaybeLoaded spec type is complex
+  spec: any,
+  key: string,
+  fallback: number,
+): number {
+  if (!spec?.$isLoaded) return fallback;
+  const opt = spec[key];
+  if (!opt || opt.type !== "game") return fallback;
+  const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
+  const parsed = Number.parseFloat(val);
+  return Number.isNaN(parsed) ? fallback : parsed;
+}

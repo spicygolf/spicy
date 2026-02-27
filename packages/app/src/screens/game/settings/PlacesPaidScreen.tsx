@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
-import { DEFAULT_PAYOUT_PCTS } from "spicylib/scoring";
+import { DEFAULT_PAYOUT_PCTS, getGameOptionNumber } from "spicylib/scoring";
 import { Back } from "@/components/Back";
 import { useGame, useIsOrganizer } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
@@ -33,20 +33,6 @@ const PLACE_LABELS = [
   "10th",
 ];
 const PayoutPctsList = co.list(z.number());
-
-function getGameOptionNumber(
-  // biome-ignore lint/suspicious/noExplicitAny: Jazz MaybeLoaded spec type is complex
-  spec: any,
-  key: string,
-  fallback: number,
-): number {
-  if (!spec?.$isLoaded) return fallback;
-  const opt = spec[key];
-  if (!opt || opt.type !== "game") return fallback;
-  const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
-  const parsed = Number.parseFloat(val);
-  return Number.isNaN(parsed) ? fallback : parsed;
-}
 
 /** Distribute potTotal across pcts so rounded amounts sum exactly to potTotal. */
 function distributeAmounts(potTotal: number, pcts: number[]): number[] {
