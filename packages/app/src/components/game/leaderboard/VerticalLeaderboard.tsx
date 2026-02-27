@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native-unistyles";
 import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
 import { Text } from "@/ui";
 import {
+  type BetColumnInfo,
   getVerticalColumns,
   getVerticalPlayerData,
   type HoleData,
@@ -18,7 +19,7 @@ interface VerticalLeaderboardProps {
   scoreboard: Scoreboard | null;
   viewMode: ViewMode;
   playerQuotas?: Map<string, PlayerQuota> | null;
-  isQuotaGame: boolean;
+  bets: BetColumnInfo[];
 }
 
 export const VerticalLeaderboard = memo(function VerticalLeaderboard({
@@ -27,22 +28,22 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   scoreboard,
   viewMode,
   playerQuotas,
-  isQuotaGame,
+  bets,
 }: VerticalLeaderboardProps) {
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
 
-  const columns = useMemo(() => getVerticalColumns(isQuotaGame), [isQuotaGame]);
+  const columns = useMemo(() => getVerticalColumns(bets), [bets]);
 
   const playerData = useMemo(
     () =>
       getVerticalPlayerData(
         scoreboard,
         playerColumns,
+        columns,
         viewMode,
         playerQuotas,
-        isQuotaGame,
       ),
-    [scoreboard, playerColumns, viewMode, playerQuotas, isQuotaGame],
+    [scoreboard, playerColumns, columns, viewMode, playerQuotas],
   );
 
   const handleToggle = useCallback((playerId: string) => {
@@ -123,6 +124,5 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 12,
     fontWeight: "600",
     color: theme.colors.secondary,
-    textTransform: "uppercase",
   },
 }));

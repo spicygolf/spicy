@@ -49,13 +49,7 @@ export function ScoreCell({
     return <View style={styles.scoreCell} />;
   }
 
-  // Format value
-  let displayValue = String(value);
-  if (viewMode === "points" && value > 0) {
-    displayValue = `+${value}`;
-  } else if (viewMode === "points" && value < 0) {
-    displayValue = String(value);
-  }
+  const displayValue = String(value);
 
   // Get decoration for gross/net views (not points, not summary)
   const decoration =

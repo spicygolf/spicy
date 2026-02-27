@@ -66,27 +66,21 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
         <View style={styles.valuesContainer}>
           {columns.map((col) => {
             const val = summaryValues[col.key];
+            const isSkins = col.viewModeOverride === "skins";
+            const effectiveMode = col.viewModeOverride ?? viewMode;
+            const showColor =
+              !isSkins && effectiveMode === "points" && val != null;
             return (
               <View key={col.key} style={styles.valueCell}>
                 <Text
                   style={[
                     styles.valueText,
-                    col.key === "skins" && styles.skinsText,
-                    val !== null &&
-                      val !== undefined &&
-                      viewMode === "points" &&
-                      col.key !== "skins" &&
-                      val > 0 &&
-                      styles.positiveText,
-                    val !== null &&
-                      val !== undefined &&
-                      viewMode === "points" &&
-                      col.key !== "skins" &&
-                      val < 0 &&
-                      styles.negativeText,
+                    isSkins && styles.skinsText,
+                    showColor && val > 0 && styles.positiveText,
+                    showColor && val < 0 && styles.negativeText,
                   ]}
                 >
-                  {formatValue(val, viewMode, col.key)}
+                  {formatValue(val)}
                 </Text>
               </View>
             );
@@ -115,14 +109,8 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
   );
 });
 
-function formatValue(
-  val: number | null | undefined,
-  viewMode: ViewMode,
-  columnKey: string,
-): string {
+function formatValue(val: number | null | undefined): string {
   if (val === null || val === undefined) return "-";
-  if (columnKey === "skins") return String(val);
-  if (viewMode === "points" && val > 0) return `+${val}`;
   return String(val);
 }
 
@@ -200,8 +188,6 @@ function ExpandedDetail({
                     viewMode,
                     playerQuotas,
                   ),
-                  viewMode,
-                  "total",
                 )}
               </Text>
             </View>
@@ -262,7 +248,7 @@ function HoleStrip({
             return (
               <View key={h.hole} style={styles.stripSummaryCell}>
                 <Text style={[styles.stripScoreText, styles.summaryLabel]}>
-                  {formatValue(val, viewMode, h.summaryType)}
+                  {formatValue(val)}
                 </Text>
               </View>
             );

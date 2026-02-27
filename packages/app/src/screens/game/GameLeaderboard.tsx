@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
 import { getGameSpecField, getMetaOption } from "spicylib/scoring";
 import {
+  type BetColumnInfo,
   getHoleRows,
   getPlayerColumns,
   type HoleData,
@@ -145,6 +146,22 @@ export function GameLeaderboard(): React.ReactElement | null {
   const isMultiGroup = multiGroupValue === true || multiGroupValue === "true";
   const useVerticalLayout = isMultiGroup || playerColumns.length > 7;
 
+  // Extract bets from game for vertical leaderboard columns
+  const bets: BetColumnInfo[] = useMemo(() => {
+    if (!game?.bets?.$isLoaded) return [];
+    const result: BetColumnInfo[] = [];
+    for (const bet of game.bets) {
+      if (!bet?.$isLoaded) continue;
+      result.push({
+        name: bet.name,
+        disp: bet.disp,
+        scope: bet.scope,
+        scoringType: bet.scoringType,
+      });
+    }
+    return result;
+  }, [game?.bets]);
+
   if (!game) {
     return null;
   }
@@ -212,7 +229,7 @@ export function GameLeaderboard(): React.ReactElement | null {
           scoreboard={scoreboard}
           viewMode={viewMode}
           playerQuotas={scoringContext?.playerQuotas}
-          isQuotaGame={isQuotaGame}
+          bets={bets}
         />
       ) : (
         <LeaderboardTable

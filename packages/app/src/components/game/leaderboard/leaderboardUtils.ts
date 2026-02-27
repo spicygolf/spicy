@@ -382,6 +382,10 @@ export function getScoreToPar(
 export interface VerticalColumn {
   key: string;
   label: string;
+  /** Which summary type to use for getSummaryValue() */
+  summaryType: "out" | "in" | "total";
+  /** Override viewMode for this column (e.g., skins always uses "skins") */
+  viewModeOverride?: ViewMode;
 }
 
 export interface VerticalPlayerData {
@@ -392,24 +396,42 @@ export interface VerticalPlayerData {
   values: Record<string, number | null>;
 }
 
+/** Minimal bet info needed for column derivation */
+export interface BetColumnInfo {
+  name: string;
+  disp: string;
+  scope: string;
+  scoringType: string;
+}
+
+const SCOPE_TO_SUMMARY: Record<string, "out" | "in" | "total"> = {
+  front9: "out",
+  back9: "in",
+  all18: "total",
+};
+
 /**
- * Get column definitions for the vertical leaderboard.
- * Quota games show Front/Back/Overall/Skins; others show Front/Back/Total.
+ * Derive column definitions from game bets.
+ * Falls back to Front/Back/Total when no bets are available.
  */
-export function getVerticalColumns(isQuotaGame: boolean): VerticalColumn[] {
-  if (isQuotaGame) {
+export function getVerticalColumns(bets: BetColumnInfo[]): VerticalColumn[] {
+  if (bets.length === 0) {
     return [
-      { key: "front", label: "Front" },
-      { key: "back", label: "Back" },
-      { key: "overall", label: "Overall" },
-      { key: "skins", label: "Skins" },
+      { key: "front", label: "Front", summaryType: "out" },
+      { key: "back", label: "Back", summaryType: "in" },
+      { key: "total", label: "Total", summaryType: "total" },
     ];
   }
-  return [
-    { key: "front", label: "Front" },
-    { key: "back", label: "Back" },
-    { key: "total", label: "Total" },
-  ];
+
+  return bets
+    .filter((bet) => SCOPE_TO_SUMMARY[bet.scope] !== undefined)
+    .map((bet) => ({
+      key: bet.name,
+      label: bet.disp,
+      summaryType: SCOPE_TO_SUMMARY[bet.scope] as "out" | "in" | "total",
+      viewModeOverride:
+        bet.scoringType === "skins" ? ("skins" as ViewMode) : undefined,
+    }));
 }
 
 /**
@@ -419,51 +441,24 @@ export function getVerticalColumns(isQuotaGame: boolean): VerticalColumn[] {
 export function getVerticalPlayerData(
   scoreboard: Scoreboard | null,
   playerColumns: PlayerColumn[],
+  columns: VerticalColumn[],
   viewMode: ViewMode,
   playerQuotas: Map<string, PlayerQuota> | null | undefined,
-  isQuotaGame: boolean,
 ): VerticalPlayerData[] {
   const rows: VerticalPlayerData[] = [];
 
   for (const player of playerColumns) {
-    const front = getSummaryValue(
-      scoreboard,
-      player.playerId,
-      "out",
-      viewMode,
-      playerQuotas,
-    );
-    const back = getSummaryValue(
-      scoreboard,
-      player.playerId,
-      "in",
-      viewMode,
-      playerQuotas,
-    );
-    const total = getSummaryValue(
-      scoreboard,
-      player.playerId,
-      "total",
-      viewMode,
-      playerQuotas,
-    );
+    const values: Record<string, number | null> = {};
 
-    const values: Record<string, number | null> = {
-      front,
-      back,
-    };
-
-    if (isQuotaGame) {
-      values.overall = total;
-      // Skins column always shows skin count, regardless of current viewMode
-      values.skins = getSummaryValue(
+    for (const col of columns) {
+      const effectiveViewMode = col.viewModeOverride ?? viewMode;
+      values[col.key] = getSummaryValue(
         scoreboard,
         player.playerId,
-        "total",
-        "skins",
+        col.summaryType,
+        effectiveViewMode,
+        playerQuotas,
       );
-    } else {
-      values.total = total;
     }
 
     const cumulative = scoreboard?.cumulative.players[player.playerId];

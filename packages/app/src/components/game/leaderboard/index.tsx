@@ -1,5 +1,6 @@
 export { LeaderboardTable } from "./LeaderboardTable";
 export {
+  type BetColumnInfo,
   getHoleRows,
   getPlayerColumns,
   getPopsCount,
