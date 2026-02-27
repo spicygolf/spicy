@@ -488,8 +488,9 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
   },
   valueCell: {
-    width: 48,
+    minWidth: 48,
     alignItems: "center",
+    paddingHorizontal: 2,
   },
   valueText: {
     fontSize: 14,

@@ -168,7 +168,6 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
                     styles.headerText,
                     isActive && styles.headerTextActive,
                   ]}
-                  numberOfLines={1}
                 >
                   {col.label}
                   {arrow}
@@ -224,8 +223,9 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
   },
   headerValueCell: {
-    width: 48,
+    minWidth: 48,
     alignItems: "center",
+    paddingHorizontal: 2,
   },
   headerText: {
     fontSize: 12,
