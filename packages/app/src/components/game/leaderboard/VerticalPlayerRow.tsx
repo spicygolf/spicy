@@ -69,7 +69,9 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
           {columns.map((col) => {
             const val = summaryValues[col.key];
             const isSkins = col.viewModeOverride === "skins";
-            const showColor = !isSkins && val != null;
+            const isDollar = col.key === "$";
+            const isQuota = !isSkins && !isDollar;
+            const showColor = isQuota && val != null;
             const payout = betPayouts?.get(col.key);
             return (
               <View key={col.key} style={styles.valueCell}>
@@ -81,7 +83,7 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
                     showColor && val < 0 && styles.negativeText,
                   ]}
                 >
-                  {formatValue(val)}
+                  {formatValue(val, isQuota)}
                 </Text>
                 {payout && (
                   <Text style={styles.payoutText}>
@@ -108,8 +110,9 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
   );
 });
 
-function formatValue(val: number | null | undefined): string {
+function formatValue(val: number | null | undefined, showPlus = false): string {
   if (val === null || val === undefined) return "-";
+  if (showPlus && val > 0) return `+${val}`;
   return String(val);
 }
 
