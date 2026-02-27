@@ -166,18 +166,11 @@ function ExpandedDetail({
         )}
         {/* Total */}
         {totalRow && (
-          <View style={styles.totalStripRow}>
-            <View style={styles.totalLabel}>
-              <Text style={[styles.holeLabel, styles.summaryLabel]}>Total</Text>
-            </View>
-            <View style={styles.totalValue}>
-              <Text style={[styles.holeLabel, styles.summaryLabel]}>
-                {formatValue(
-                  getSummaryValue(scoreboard, playerId, "total", "gross"),
-                )}
-              </Text>
-            </View>
-          </View>
+          <TotalStrip
+            playerId={playerId}
+            scoreboard={scoreboard}
+            playerQuotas={playerQuotas}
+          />
         )}
       </View>
     </ScrollView>
@@ -185,21 +178,94 @@ function ExpandedDetail({
 }
 
 /**
- * Get stableford points for a player on a hole.
+ * Get stableford points for a player on a hole (excluding skin awards).
  * Returns null if hole is incomplete or no score.
  */
 function getStablefordPoints(
   scoreboard: Scoreboard | null,
   playerId: string,
   hole: string,
-  playerQuotas: Map<string, PlayerQuota> | null | undefined,
 ): number | null {
   if (!scoreboard) return null;
   const holeResult = scoreboard.holes[hole];
   if (!holeResult || !isHoleComplete(holeResult)) return null;
   const playerResult = holeResult.players[playerId];
   if (!playerResult || !playerResult.hasScore) return null;
-  return playerResult.points;
+  // Sum only stableford junk, excluding skins and other junk
+  let total = 0;
+  for (const junk of playerResult.junk) {
+    if (junk.name.startsWith("stableford_")) {
+      total += junk.value;
+    }
+  }
+  return total > 0 ? total : null;
+}
+
+/**
+ * Get stableford total for a player across a range of holes.
+ * "out" = holes 1-9, "in" = holes 10-18, "total" = all.
+ */
+function getStablefordTotal(
+  scoreboard: Scoreboard | null,
+  playerId: string,
+  summaryType: "out" | "in" | "total",
+): number | null {
+  if (!scoreboard) return null;
+  let total = 0;
+  let hasAny = false;
+  for (const [hole, holeResult] of Object.entries(scoreboard.holes)) {
+    const holeNum = Number.parseInt(hole, 10);
+    if (Number.isNaN(holeNum)) continue;
+    const inRange =
+      summaryType === "out"
+        ? holeNum >= 1 && holeNum <= 9
+        : summaryType === "in"
+          ? holeNum >= 10 && holeNum <= 18
+          : true;
+    if (!inRange || !isHoleComplete(holeResult)) continue;
+    const playerResult = holeResult.players[playerId];
+    if (!playerResult || !playerResult.hasScore) continue;
+    for (const junk of playerResult.junk) {
+      if (junk.name.startsWith("stableford_")) {
+        total += junk.value;
+        hasAny = true;
+      }
+    }
+  }
+  return hasAny ? total : null;
+}
+
+/**
+ * Get running total (quota performance) for a player across a range.
+ * Returns stableford points minus quota for the range, or just stableford
+ * total if no quotas are available.
+ */
+function getRunningTotal(
+  scoreboard: Scoreboard | null,
+  playerId: string,
+  summaryType: "out" | "in" | "total",
+  playerQuotas: Map<string, PlayerQuota> | null | undefined,
+): number | null {
+  const stableford = getStablefordTotal(scoreboard, playerId, summaryType);
+  if (stableford === null) return null;
+
+  const quota = playerQuotas?.get(playerId);
+  if (!quota || !scoreboard) return stableford;
+
+  // Align quota halves to physical course sides (same logic as getSummaryValue)
+  const firstHole = scoreboard.meta.holesPlayed[0];
+  const startsOnBack =
+    firstHole !== undefined && Number.parseInt(firstHole, 10) >= 10;
+  const outQuota = startsOnBack ? quota.back : quota.front;
+  const inQuota = startsOnBack ? quota.front : quota.back;
+
+  const quotaValue =
+    summaryType === "out"
+      ? outQuota
+      : summaryType === "in"
+        ? inQuota
+        : quota.total;
+  return stableford - quotaValue;
 }
 
 /**
@@ -263,11 +329,36 @@ function HoleStrip({
               h.summaryType,
               "gross",
             );
+            const summaryPts = getStablefordTotal(
+              scoreboard,
+              playerId,
+              h.summaryType,
+            );
+            const running = getRunningTotal(
+              scoreboard,
+              playerId,
+              h.summaryType,
+              playerQuotas,
+            );
             return (
               <View key={h.hole} style={styles.stripSummaryCell}>
-                <Text style={[styles.stripScoreText, styles.summaryLabel]}>
-                  {formatValue(val)}
-                </Text>
+                <View style={styles.richCell}>
+                  <View style={styles.superscript}>
+                    {summaryPts != null && (
+                      <Text style={styles.superscriptText}>{summaryPts}</Text>
+                    )}
+                  </View>
+                  <Text style={[styles.stripScoreText, styles.summaryLabel]}>
+                    {formatValue(val)}
+                  </Text>
+                  <View style={styles.subscript}>
+                    {running != null && (
+                      <Text style={styles.subscriptText}>
+                        {running > 0 ? `+${running}` : String(running)}
+                      </Text>
+                    )}
+                  </View>
+                </View>
               </View>
             );
           }
@@ -287,13 +378,8 @@ function HoleStrip({
           );
           const popsCount = getPopsCount(scoreboard, playerId, h.hole);
 
-          // Stableford points (superscript)
-          const points = getStablefordPoints(
-            scoreboard,
-            playerId,
-            h.hole,
-            playerQuotas,
-          );
+          // Stableford points (superscript) — excludes skin awards
+          const points = getStablefordPoints(scoreboard, playerId, h.hole);
 
           // Skin indicator (subscript)
           const wonSkin = hasSkin(scoreboard, playerId, h.hole);
@@ -323,6 +409,50 @@ function HoleStrip({
             </View>
           );
         })}
+      </View>
+    </View>
+  );
+}
+
+/**
+ * Total row with gross total, stableford superscript, and running total subscript.
+ */
+function TotalStrip({
+  playerId,
+  scoreboard,
+  playerQuotas,
+}: {
+  playerId: string;
+  scoreboard: Scoreboard | null;
+  playerQuotas?: Map<string, PlayerQuota> | null;
+}) {
+  const grossTotal = getSummaryValue(scoreboard, playerId, "total", "gross");
+  const totalPts = getStablefordTotal(scoreboard, playerId, "total");
+  const running = getRunningTotal(scoreboard, playerId, "total", playerQuotas);
+
+  return (
+    <View style={styles.totalStripRow}>
+      <View style={styles.totalLabel}>
+        <Text style={[styles.holeLabel, styles.summaryLabel]}>Total</Text>
+      </View>
+      <View style={styles.totalValue}>
+        <View style={styles.richCell}>
+          <View style={styles.superscript}>
+            {totalPts != null && (
+              <Text style={styles.superscriptText}>{totalPts}</Text>
+            )}
+          </View>
+          <Text style={[styles.holeLabel, styles.summaryLabel]}>
+            {formatValue(grossTotal)}
+          </Text>
+          <View style={styles.subscript}>
+            {running != null && (
+              <Text style={styles.subscriptText}>
+                {running > 0 ? `+${running}` : String(running)}
+              </Text>
+            )}
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -456,7 +586,13 @@ const styles = StyleSheet.create((theme) => ({
   subscript: {
     position: "absolute",
     bottom: 3,
-    right: 6,
+    right: 4,
+  },
+  subscriptText: {
+    fontSize: 8,
+    color: theme.colors.secondary,
+    fontWeight: "600",
+    fontVariant: ["tabular-nums"],
   },
   skinDot: {
     width: 4,
