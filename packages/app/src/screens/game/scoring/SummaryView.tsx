@@ -129,7 +129,11 @@ function buildPlayerSummaries(
       toPar: cumulative.grossTotal - parForPlayer,
       points,
       holesPlayed: cumulative.holesPlayed,
-      payout: netPositions?.[playerId] ?? null,
+      payout: (() => {
+        const net = netPositions?.[playerId] ?? null;
+        // Only show positive payouts — negative values are just the buy-in loss
+        return net != null && net > 0 ? net : null;
+      })(),
     });
   }
 

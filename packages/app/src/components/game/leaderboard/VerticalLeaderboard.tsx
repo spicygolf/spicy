@@ -23,6 +23,7 @@ interface VerticalLeaderboardProps {
   playerQuotas?: Map<string, PlayerQuota> | null;
   bets: BetColumnInfo[];
   netPositions?: Record<string, number> | null;
+  placesPaid?: number;
 }
 
 type SortDirection = "asc" | "desc";
@@ -104,6 +105,7 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   playerQuotas,
   bets,
   netPositions,
+  placesPaid,
 }: VerticalLeaderboardProps) {
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortState | null>(null);
@@ -111,10 +113,18 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   const columns = useMemo(() => {
     const base = getVerticalColumns(bets);
     if (netPositions) {
-      return [...base, { key: "$", label: "$", summaryType: "total" as const }];
+      return [
+        ...base,
+        {
+          key: "$",
+          label: "$",
+          summaryType: "total" as const,
+          placesPaid,
+        },
+      ];
     }
     return base;
-  }, [bets, netPositions]);
+  }, [bets, netPositions, placesPaid]);
 
   // Default sort to payout column when settlement data is available
   useEffect(
@@ -136,7 +146,9 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
     );
     if (netPositions) {
       for (const player of data) {
-        player.values["$"] = netPositions[player.playerId] ?? null;
+        const net = netPositions[player.playerId] ?? null;
+        // Only show positive payouts — negative values are just the buy-in loss
+        player.values["$"] = net != null && net > 0 ? net : null;
       }
     }
     return data;

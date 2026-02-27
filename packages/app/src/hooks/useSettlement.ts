@@ -63,7 +63,9 @@ export function useSettlement(
         splitType: VALID_SPLIT_TYPES.has(b.splitType ?? "")
           ? (b.splitType as BetConfig["splitType"])
           : "places",
-        placesPaid: b.placesPaid,
+        // Omit bet-level placesPaid — always use game option (defaultPlacesPaid)
+        // so changes from PlacesPaidScreen take effect immediately.
+        placesPaid: undefined,
       });
     }
 

@@ -2,7 +2,11 @@ import { useEffect, useMemo, useRef } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
-import { getGameSpecField, getMetaOption } from "spicylib/scoring";
+import {
+  getGameOptionNumber,
+  getGameSpecField,
+  getMetaOption,
+} from "spicylib/scoring";
 import {
   type BetColumnInfo,
   getHoleRows,
@@ -187,6 +191,7 @@ export function GameLeaderboard(): React.ReactElement | null {
 
   const settlement = useSettlement(game, scoreboard, scoringContext, bets);
   const netPositions = settlement?.netPositions ?? null;
+  const placesPaid = getGameOptionNumber(game?.spec, "places_paid", 3);
 
   if (!game) {
     return null;
@@ -258,6 +263,7 @@ export function GameLeaderboard(): React.ReactElement | null {
           playerQuotas={scoringContext?.playerQuotas}
           bets={bets}
           netPositions={netPositions}
+          placesPaid={placesPaid}
         />
       ) : (
         <LeaderboardTable
