@@ -142,6 +142,17 @@ export function PlacesPaidScreen({ navigation }: Props) {
         ...(existingOpt as GameOption),
         value: String(places),
       });
+    } else {
+      // Option doesn't exist yet (legacy game or missing from catalog) — create it
+      game.spec.$jazz.set("places_paid", {
+        name: "places_paid",
+        disp: "Places Paid",
+        type: "game",
+        version: "1",
+        valueType: "menu",
+        defaultValue: "3",
+        value: String(places),
+      } satisfies GameOption);
     }
 
     // Update payout pools - set placesPaid and payoutPcts on all "places" type pools
