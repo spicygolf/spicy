@@ -518,7 +518,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   payoutText: {
     fontSize: 10,
-    color: theme.colors.success,
+    color: theme.colors.secondary,
     fontVariant: ["tabular-nums"],
   },
   positiveText: {
