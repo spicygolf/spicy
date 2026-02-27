@@ -18,7 +18,7 @@ export const PayoutPool = co.map({
   /** Pool identifier (e.g., "front", "back", "overall", "skins") */
   name: z.string(),
 
-  /** Display name (e.g., "Front Nine", "Skins") */
+  /** Display name (e.g., "Front", "Skins") */
   disp: z.string(),
 
   /** Percentage of total pot (0-100) */

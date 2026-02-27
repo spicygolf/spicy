@@ -1,7 +1,6 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { memo } from "react";
 import { Pressable, ScrollView, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
 import { isHoleComplete } from "spicylib/scoring";
 import { Text } from "@/ui";
@@ -42,8 +41,6 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
   scoreboard,
   playerQuotas,
 }: VerticalPlayerRowProps) {
-  const { theme } = useUnistyles();
-
   const fullName = lastName ? `${firstName} ${lastName}` : firstName;
 
   return (
@@ -82,13 +79,6 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
             );
           })}
         </View>
-        <FontAwesome6
-          name={isExpanded ? "chevron-down" : "chevron-right"}
-          iconStyle="solid"
-          size={10}
-          color={theme.colors.secondary}
-          style={styles.chevron}
-        />
       </Pressable>
 
       {/* Expanded hole-by-hole detail */}
@@ -475,7 +465,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: theme.gap(1),
-    paddingHorizontal: theme.gap(1.5),
+    paddingHorizontal: theme.gap(1),
     minHeight: 44,
   },
   rankBadge: {
@@ -514,11 +504,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   negativeText: {
     color: theme.colors.error,
-  },
-  chevron: {
-    marginLeft: theme.gap(0.5),
-    width: 16,
-    textAlign: "center",
   },
   // Expanded detail styles
   expandedContainer: {

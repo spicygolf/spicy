@@ -177,8 +177,6 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
             );
           })}
         </View>
-        {/* Spacer for chevron width */}
-        <View style={styles.headerChevronSpacer} />
       </View>
 
       {/* Player rows */}
@@ -210,7 +208,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: theme.gap(0.75),
-    paddingHorizontal: theme.gap(1.5),
+    paddingHorizontal: theme.gap(1),
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: theme.colors.border,
   },
@@ -229,12 +227,8 @@ const styles = StyleSheet.create((theme) => ({
     width: 48,
     alignItems: "center",
   },
-  headerChevronSpacer: {
-    width: 24,
-  },
   headerText: {
     fontSize: 12,
-    fontWeight: "600",
     color: theme.colors.secondary,
   },
   headerTextActive: {
