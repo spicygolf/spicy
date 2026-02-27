@@ -398,12 +398,14 @@ export interface VerticalPlayerData {
   values: Record<string, number | null>;
 }
 
-/** Minimal bet info needed for column derivation */
+/** Bet info needed for column derivation and settlement */
 export interface BetColumnInfo {
   name: string;
   disp: string;
   scope: string;
   scoringType: string;
+  pct?: number;
+  splitType?: string;
   placesPaid?: number;
 }
 

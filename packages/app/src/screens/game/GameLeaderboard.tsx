@@ -162,6 +162,8 @@ export function GameLeaderboard(): React.ReactElement | null {
           disp: bet.disp,
           scope: bet.scope,
           scoringType: bet.scoringType,
+          pct: bet.pct,
+          splitType: bet.splitType,
           placesPaid: bet.placesPaid ?? undefined,
         });
       }

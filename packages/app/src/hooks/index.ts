@@ -26,6 +26,7 @@ export * from "./useSaveOptionToGame";
 export * from "./useSaveOptionToHole";
 export * from "./useScoreboard";
 export * from "./useScoreManagement";
+export * from "./useSettlement";
 export * from "./useStaleHandicapCheck";
 export * from "./useTeamsMode";
 export * from "./useUIScale";
