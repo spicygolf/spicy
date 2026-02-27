@@ -341,20 +341,28 @@ function HoleStrip({
               playerQuotas,
             );
             return (
-              <View key={h.hole} style={styles.summaryRichCell}>
-                <Text style={styles.superscriptText}>
-                  {summaryPts != null ? String(summaryPts) : " "}
-                </Text>
-                <Text style={[styles.stripScoreText, styles.summaryLabel]}>
-                  {formatValue(val)}
-                </Text>
-                <Text style={styles.subscriptText}>
-                  {running != null
-                    ? running > 0
-                      ? `+${running}`
-                      : String(running)
-                    : " "}
-                </Text>
+              <View key={h.hole} style={styles.stripCell}>
+                <View style={styles.richCell}>
+                  <View style={styles.superscript}>
+                    {summaryPts != null && (
+                      <Text style={styles.superscriptText}>{summaryPts}</Text>
+                    )}
+                  </View>
+                  <ScoreCell
+                    value={val}
+                    scoreToPar={null}
+                    popsCount={0}
+                    isSummaryRow={true}
+                    viewMode="gross"
+                  />
+                  <View style={styles.subscript}>
+                    {running != null && (
+                      <Text style={styles.subscriptText}>
+                        {running > 0 ? `+${running}` : String(running)}
+                      </Text>
+                    )}
+                  </View>
+                </View>
               </View>
             );
           }
@@ -431,20 +439,28 @@ function TotalStrip({
       <View style={styles.totalLabel}>
         <Text style={[styles.holeLabel, styles.summaryLabel]}>Total</Text>
       </View>
-      <View style={styles.summaryRichCell}>
-        <Text style={styles.superscriptText}>
-          {totalPts != null ? String(totalPts) : " "}
-        </Text>
-        <Text style={[styles.stripScoreText, styles.summaryLabel]}>
-          {formatValue(grossTotal)}
-        </Text>
-        <Text style={styles.subscriptText}>
-          {running != null
-            ? running > 0
-              ? `+${running}`
-              : String(running)
-            : " "}
-        </Text>
+      <View style={styles.stripCell}>
+        <View style={styles.richCell}>
+          <View style={styles.superscript}>
+            {totalPts != null && (
+              <Text style={styles.superscriptText}>{totalPts}</Text>
+            )}
+          </View>
+          <ScoreCell
+            value={grossTotal}
+            scoreToPar={null}
+            popsCount={0}
+            isSummaryRow={true}
+            viewMode="gross"
+          />
+          <View style={styles.subscript}>
+            {running != null && (
+              <Text style={styles.subscriptText}>
+                {running > 0 ? `+${running}` : String(running)}
+              </Text>
+            )}
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -524,13 +540,9 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
   },
   stripSummaryCell: {
-    width: 40,
+    width: 44,
     alignItems: "center",
     justifyContent: "center",
-  },
-  stripScoreText: {
-    fontSize: 12,
-    color: theme.colors.primary,
   },
   holeLabel: {
     fontSize: 10,
@@ -552,17 +564,7 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "center",
   },
-  totalValue: {
-    width: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  summaryRichCell: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 2,
-  },
-  // Rich cell: gross score + stableford superscript + skin subscript
+  // Rich cell: gross score + stableford superscript + skin/running subscript
   richCell: {
     alignItems: "center",
     justifyContent: "center",
