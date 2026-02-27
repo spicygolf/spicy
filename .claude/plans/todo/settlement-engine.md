@@ -1,6 +1,6 @@
 # Settlement Engine — Unified Payout System
 
-## Status: PLANNED (deferred — depends on bets-quota-handicaps)
+## Status: IN PROGRESS — Phase 2a (pool-funded bridge + UI)
 
 ## Problem
 
@@ -87,13 +87,52 @@ splitType "winner_take_all" → winner gets stakes × 1 (per hole won, etc.)
 
 ### Phase 2: Unified bet → settlement bridge
 
-- [ ] `resolveBetMetrics(bet, scoreboard, context)` — given a Bet, extract the right metric for each player/team within the bet's scope
+#### Phase 2a: Pool-funded bridge (current — #407 first pass)
+
+New file `packages/lib/scoring/bet-settlement.ts`:
+- [x] `betToPoolConfig(bet, defaultPlacesPaid)` — maps `scoringType + scope` → metric key
+  - `quota + front9` → `"quota_front"`, `back9` → `"quota_back"`, `all18` → `"quota_overall"`
+  - `skins + *` → `"skins_won"`
+- [x] `extractMetricsForBets(bets, scoreboard, playerQuotas, players)` → `PlayerMetrics[]`
+  - Calls `calculateQuotaPerformances()` for quota bets, `extractSkinCounts()` for skins bets
+- [x] `settleBets(input)` → `SettlementResult` — top-level bridge function
+  - Takes `{ bets, players, scoreboard, playerQuotas, buyIn, defaultPlacesPaid }`
+  - Converts bets → pools, extracts metrics, calls `calculateSettlement()`
+- [x] Tests in `packages/lib/scoring/__tests__/bet-settlement.test.ts`
+
+Shared helper extracted to `packages/lib/scoring/option-utils.ts`:
+- [x] `getGameOptionNumber(spec, key, fallback)` — moved from PlacesPaidScreen for reuse
+
+App hook `packages/app/src/hooks/useSettlement.ts`:
+- [x] `useSettlement(game, scoreboard, scoringContext, bets)` → `SettlementResult | null`
+  - Reads buyIn + placesPaid from game.spec, playerQuotas from scoringContext
+  - Returns null when buyIn=0 or no bets (non-pool-funded games)
+  - Fingerprint-memoized like useScoreboard
+
+#### Phase 2b: Zero-sum + unified dispatch (future)
+
+- [ ] `resolveBetMetrics(bet, scoreboard, context)` — generic for all scoring types
 - [ ] Handle implicit default bet for games without explicit bets
-- [ ] `settleBets(game)` — top-level function: get bets, determine funding, resolve metrics, settle
+- [ ] Determine funding model from game options (`buy_in` → pool, `stakes` → zero-sum)
 
 ### Phase 3: Settlement UI (app)
 
-- [ ] Settlement results screen — show per-bet breakdown, net positions, who owes whom
+#### Phase 3a: Leaderboard + Summary integration (current — #407 first pass)
+
+Vertical leaderboard (`VerticalLeaderboard.tsx`):
+- [x] Accept `netPositions?: Record<string, number> | null` prop
+- [x] Append "$" column when netPositions present
+- [x] Default sort: `{ columnKey: "$", direction: "desc" }` (highest payout first)
+- [x] Wired from `GameLeaderboard.tsx` via `useSettlement`
+
+Game Summary (`SummaryView.tsx`):
+- [x] Accept `netPositions` prop, add "$" column
+- [x] Sort by net position (descending) when payout data available
+- [x] Format: "+$120", "-$40"
+
+#### Phase 3b: Full settlement screen (future)
+
+- [ ] Dedicated settlement results screen — per-bet breakdown, net positions, who owes whom
 - [ ] Integrate with existing game screens (tab or post-round flow)
 
 ### Phase 4: Persist settlement results

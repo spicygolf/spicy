@@ -12,6 +12,7 @@ export interface SummaryViewProps {
   totalHoles: number;
   onPrevHole: () => void;
   onNextHole: () => void;
+  netPositions?: Record<string, number> | null;
 }
 
 interface PlayerSummary {
@@ -21,6 +22,7 @@ interface PlayerSummary {
   toPar: number;
   points: number;
   holesPlayed: number;
+  payout: number | null;
 }
 
 /**
@@ -95,6 +97,7 @@ function getPlayerTeamPoints(scoreboard: Scoreboard): Map<string, number> {
 function buildPlayerSummaries(
   game: Game,
   scoreboard: Scoreboard | null,
+  netPositions?: Record<string, number> | null,
 ): PlayerSummary[] {
   if (!scoreboard || !game.players?.$isLoaded) {
     return [];
@@ -126,13 +129,28 @@ function buildPlayerSummaries(
       toPar: cumulative.grossTotal - parForPlayer,
       points,
       holesPlayed: cumulative.holesPlayed,
+      payout: netPositions?.[playerId] ?? null,
     });
   }
 
-  // Sort by gross score (ascending - lowest score first)
-  summaries.sort((a, b) => a.gross - b.gross);
+  // Sort by payout (descending) when available, otherwise by gross (ascending)
+  if (netPositions) {
+    summaries.sort((a, b) => (b.payout ?? 0) - (a.payout ?? 0));
+  } else {
+    summaries.sort((a, b) => a.gross - b.gross);
+  }
 
   return summaries;
+}
+
+/**
+ * Format a dollar amount with sign prefix: "+$120", "-$40", "$0"
+ */
+function formatPayout(value: number): string {
+  const abs = Math.abs(value);
+  if (value > 0) return `+$${abs}`;
+  if (value < 0) return `-$${abs}`;
+  return "$0";
 }
 
 export function SummaryView({
@@ -141,8 +159,10 @@ export function SummaryView({
   totalHoles,
   onPrevHole,
   onNextHole,
+  netPositions,
 }: SummaryViewProps) {
-  const playerSummaries = buildPlayerSummaries(game, scoreboard);
+  const playerSummaries = buildPlayerSummaries(game, scoreboard, netPositions);
+  const hasPayout = netPositions != null;
 
   return (
     <>
@@ -167,6 +187,11 @@ export function SummaryView({
             <View style={styles.numberColumn}>
               <Text style={styles.headerText}>Points</Text>
             </View>
+            {hasPayout && (
+              <View style={styles.numberColumn}>
+                <Text style={styles.headerText}>$</Text>
+              </View>
+            )}
           </View>
 
           {/* Player Rows */}
@@ -197,6 +222,19 @@ export function SummaryView({
                     {formatWithSign(player.points)}
                   </Text>
                 </View>
+                {hasPayout && player.payout != null && (
+                  <View style={styles.numberColumn}>
+                    <Text
+                      style={[
+                        styles.scoreText,
+                        player.payout > 0 && styles.payoutPositive,
+                        player.payout < 0 && styles.payoutNegative,
+                      ]}
+                    >
+                      {formatPayout(player.payout)}
+                    </Text>
+                  </View>
+                )}
               </View>
             );
           })}
@@ -255,6 +293,12 @@ const styles = StyleSheet.create((theme) => ({
   },
   scoreText: {
     fontSize: 16,
+  },
+  payoutPositive: {
+    color: theme.colors.action,
+  },
+  payoutNegative: {
+    color: theme.colors.error,
   },
   buttonContainer: {
     marginTop: theme.gap(4),

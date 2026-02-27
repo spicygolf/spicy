@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { getGameSpecField } from "spicylib/scoring";
+import { getGameSpecField, getMetaOption } from "spicylib/scoring";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import type { BetColumnInfo } from "@/components/game/leaderboard";
 import {
   ChangeTeamsModal,
   type GroupPickerItem,
@@ -14,6 +15,7 @@ import {
   useHoleInitialization,
   useHoleNavigation,
   useScoreManagement,
+  useSettlement,
 } from "@/hooks";
 import { useTeamsMode } from "@/hooks/useTeamsMode";
 import { Button, Screen, Text } from "@/ui";
@@ -83,6 +85,43 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
 
   // Teams mode — determines if teams button should be disabled in toolbar
   const { isSeamlessMode } = useTeamsMode(game);
+
+  // Extract bets for settlement calculation.
+  // Computed directly (no useMemo) because game.bets is a Jazz reactive proxy.
+  const bets: BetColumnInfo[] = (() => {
+    if (game?.bets?.$isLoaded && game.bets.length > 0) {
+      const result: BetColumnInfo[] = [];
+      for (const bet of game.bets) {
+        if (!bet?.$isLoaded) continue;
+        result.push({
+          name: bet.name,
+          disp: bet.disp,
+          scope: bet.scope,
+          scoringType: bet.scoringType,
+          pct: bet.pct,
+          splitType: bet.splitType,
+          placesPaid: bet.placesPaid ?? undefined,
+        });
+      }
+      if (result.length > 0) return result;
+    }
+
+    // Fallback: parse bets from game spec JSON (for legacy games without game.bets)
+    if (!scoringContext?.gameSpec) return [];
+    const betsJson = getMetaOption(scoringContext.gameSpec, "bets") as
+      | string
+      | undefined;
+    if (!betsJson) return [];
+    try {
+      const parsed = JSON.parse(betsJson) as BetColumnInfo[];
+      return parsed.filter((b) => b.name && b.disp && b.scope && b.scoringType);
+    } catch {
+      return [];
+    }
+  })();
+
+  const settlement = useSettlement(game, scoreboard, scoringContext, bets);
+  const netPositions = settlement?.netPositions ?? null;
 
   // Rapid per-player score entry mode
   const [rapidEntryMode, setRapidEntryMode] = useState(false);
@@ -277,6 +316,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               totalHoles={holesList.length}
               onPrevHole={handlePrevHole}
               onNextHole={handleNextHole}
+              netPositions={netPositions}
             />
           ) : showChooser ? (
             <TeamChooserView
