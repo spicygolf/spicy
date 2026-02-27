@@ -443,11 +443,9 @@ const styles = StyleSheet.create((theme) => ({
   },
   superscript: {
     position: "absolute",
-    top: -2,
-    right: -2,
+    top: 1,
+    left: 0,
     zIndex: 1,
-    minWidth: 10,
-    alignItems: "center",
   },
   superscriptText: {
     fontSize: 8,
@@ -457,8 +455,8 @@ const styles = StyleSheet.create((theme) => ({
   },
   subscript: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
+    bottom: 2,
+    left: 2,
   },
   skinDot: {
     width: 4,
