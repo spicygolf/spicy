@@ -295,7 +295,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: theme.gap(0.75),
-    paddingHorizontal: theme.gap(1),
+    paddingHorizontal: theme.gap(0.5),
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: theme.colors.border,
   },
@@ -304,16 +304,16 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     flex: 1,
     // Account for rank badge width (24) + marginLeft (4)
-    paddingLeft: 28,
+    paddingLeft: 24,
   },
   headerValues: {
     flexDirection: "row",
     alignItems: "center",
   },
   headerValueCell: {
-    minWidth: 48,
+    minWidth: 42,
     alignItems: "center",
-    paddingHorizontal: 2,
+    paddingHorizontal: 1,
   },
   headerText: {
     fontSize: 12,

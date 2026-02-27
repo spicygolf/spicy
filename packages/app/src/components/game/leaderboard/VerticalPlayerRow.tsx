@@ -479,14 +479,15 @@ const styles = StyleSheet.create((theme) => ({
   },
   summaryRow: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: theme.gap(1),
-    paddingHorizontal: theme.gap(1),
+    alignItems: "flex-start",
+    paddingVertical: theme.gap(0.75),
+    paddingHorizontal: theme.gap(0.5),
     minHeight: 44,
   },
   rankBadge: {
-    width: 28,
+    width: 24,
     alignItems: "center",
+    paddingTop: 2,
   },
   rankText: {
     fontSize: 12,
@@ -495,18 +496,19 @@ const styles = StyleSheet.create((theme) => ({
   },
   playerName: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 13,
     color: theme.colors.primary,
     marginLeft: theme.gap(0.5),
+    paddingTop: 2,
   },
   valuesContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
   valueCell: {
-    minWidth: 48,
+    minWidth: 42,
     alignItems: "center",
-    paddingHorizontal: 2,
+    paddingHorizontal: 1,
   },
   valueText: {
     fontSize: 14,
