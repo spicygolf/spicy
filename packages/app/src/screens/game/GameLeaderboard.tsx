@@ -14,6 +14,7 @@ import {
 } from "@/components/game/leaderboard";
 import type { LeaderboardViewMode } from "@/contexts/GameContext";
 import { useGameContext } from "@/contexts/GameContext";
+import { useSettlement } from "@/hooks";
 import { ButtonGroup, Screen, Text } from "@/ui";
 
 /**
@@ -184,6 +185,9 @@ export function GameLeaderboard(): React.ReactElement | null {
     }
   })();
 
+  const settlement = useSettlement(game, scoreboard, scoringContext, bets);
+  const netPositions = settlement?.netPositions ?? null;
+
   if (!game) {
     return null;
   }
@@ -253,6 +257,7 @@ export function GameLeaderboard(): React.ReactElement | null {
           scoreboard={scoreboard}
           playerQuotas={scoringContext?.playerQuotas}
           bets={bets}
+          netPositions={netPositions}
         />
       ) : (
         <LeaderboardTable

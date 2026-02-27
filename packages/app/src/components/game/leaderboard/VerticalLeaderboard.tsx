@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
@@ -22,6 +22,7 @@ interface VerticalLeaderboardProps {
   scoreboard: Scoreboard | null;
   playerQuotas?: Map<string, PlayerQuota> | null;
   bets: BetColumnInfo[];
+  netPositions?: Record<string, number> | null;
 }
 
 type SortDirection = "asc" | "desc";
@@ -102,23 +103,44 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   scoreboard,
   playerQuotas,
   bets,
+  netPositions,
 }: VerticalLeaderboardProps) {
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortState | null>(null);
 
-  const columns = useMemo(() => getVerticalColumns(bets), [bets]);
+  const columns = useMemo(() => {
+    const base = getVerticalColumns(bets);
+    if (netPositions) {
+      return [...base, { key: "$", label: "$", summaryType: "total" as const }];
+    }
+    return base;
+  }, [bets, netPositions]);
 
-  const playerData = useMemo(
-    () =>
-      getVerticalPlayerData(
-        scoreboard,
-        playerColumns,
-        columns,
-        SUMMARY_VIEW_MODE,
-        playerQuotas,
-      ),
-    [scoreboard, playerColumns, columns, playerQuotas],
+  // Default sort to payout column when settlement data is available
+  useEffect(
+    function setDefaultPayoutSort() {
+      if (netPositions && sort === null) {
+        setSort({ columnKey: "$", direction: "desc" });
+      }
+    },
+    [netPositions, sort],
   );
+
+  const playerData = useMemo(() => {
+    const data = getVerticalPlayerData(
+      scoreboard,
+      playerColumns,
+      columns,
+      SUMMARY_VIEW_MODE,
+      playerQuotas,
+    );
+    if (netPositions) {
+      for (const player of data) {
+        player.values["$"] = netPositions[player.playerId] ?? null;
+      }
+    }
+    return data;
+  }, [scoreboard, playerColumns, columns, playerQuotas, netPositions]);
 
   const rankedPlayers = useMemo(
     () => sortAndRankPlayerData(playerData, sort, columns),
