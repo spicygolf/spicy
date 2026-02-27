@@ -39,7 +39,14 @@ function makeScoreboard(
           rank: 1,
           tieCount: 1,
           junk: hasScore
-            ? [{ name: "stableford_par", value: stableford, playerId: "P1" }]
+            ? [
+                {
+                  name: "stableford_par",
+                  value: stableford,
+                  playerId: "P1",
+                  subType: "dot" as const,
+                },
+              ]
             : [],
           multipliers: [],
           points: 0,

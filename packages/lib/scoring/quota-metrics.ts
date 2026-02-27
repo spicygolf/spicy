@@ -39,7 +39,7 @@ export interface QuotaPerformance {
 /**
  * Extract stableford point totals from a scoreboard, split by nine.
  *
- * Sums all junk awards whose name starts with "stableford_" for each player.
+ * Sums all junk awards with subType "dot" (stableford scoring dots).
  * Uses hole play order (scoreboard.meta.holesPlayed) to determine front vs back:
  * the first 9 holes in play order are front, the last 9 are back.
  *
@@ -70,7 +70,7 @@ export function extractStablefordTotals(
       }
 
       for (const junk of playerResult.junk) {
-        if (junk.name.startsWith("stableford_")) {
+        if (junk.subType === "dot") {
           playerTotals.total += junk.value;
           if (isFront) {
             playerTotals.front += junk.value;
@@ -88,8 +88,7 @@ export function extractStablefordTotals(
 /**
  * Extract skin win counts from a scoreboard.
  *
- * Counts junk awards whose name ends with "_skin" for each player.
- * Matches gross_skin, gross_eagle_skin, net_skin, etc.
+ * Counts junk awards with subType "skin" for each player.
  *
  * @param scoreboard - Scored scoreboard from the pipeline
  * @returns Map of playerId → number of skins won
@@ -103,7 +102,7 @@ export function extractSkinCounts(scoreboard: Scoreboard): Map<string, number> {
 
     for (const [playerId, playerResult] of Object.entries(holeResult.players)) {
       for (const junk of playerResult.junk) {
-        if (junk.name.endsWith("_skin")) {
+        if (junk.subType === "skin") {
           counts.set(playerId, (counts.get(playerId) ?? 0) + 1);
         }
       }

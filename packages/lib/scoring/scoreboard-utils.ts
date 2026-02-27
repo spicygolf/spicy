@@ -79,7 +79,7 @@ export function getQuotaRunningScore(
 
     holesWithScores++;
     for (const junk of playerResult.junk) {
-      if (junk.name.startsWith("stableford_")) {
+      if (junk.subType === "dot") {
         stablefordTotal += junk.value;
       }
     }

@@ -196,8 +196,8 @@ export function getScoreValue(
     case "skins": {
       if (!isHoleComplete(scoreboard.holes[hole])) return null;
       // Count skins won by this player on this hole
-      const skinCount = playerResult.junk.filter((j) =>
-        j.name.endsWith("_skin"),
+      const skinCount = playerResult.junk.filter(
+        (j) => j.subType === "skin",
       ).length;
       return skinCount > 0 ? skinCount : null;
     }
@@ -239,9 +239,7 @@ export function getSummaryValue(
         if (!isHoleComplete(scoreboard.holes[hole])) continue;
         const playerResult = scoreboard.holes[hole]?.players[playerId];
         if (playerResult) {
-          total += playerResult.junk.filter((j) =>
-            j.name.endsWith("_skin"),
-          ).length;
+          total += playerResult.junk.filter((j) => j.subType === "skin").length;
         }
       }
     }
@@ -250,6 +248,7 @@ export function getSummaryValue(
 
   // For points, calculate from team hole net totals
   if (viewMode === "points") {
+    const quota = playerQuotas?.get(playerId);
     let total = 0;
     const holes = Object.keys(scoreboard.holes);
 
@@ -267,22 +266,35 @@ export function getSummaryValue(
       if (inRange) {
         // Skip incomplete holes
         if (!isHoleComplete(scoreboard.holes[hole])) continue;
-        // Use team points (same as getScoreValue for points mode)
-        const teamPoints = getTeamPointsForPlayer(scoreboard, playerId, hole);
-        if (teamPoints !== null) {
-          total += teamPoints;
-        } else {
-          // Fall back to individual player points
+
+        if (quota) {
+          // Quota games: sum only dot-type junk (stableford scoring dots).
+          // This must match the settlement engine's extractStablefordTotals
+          // so ranks and payouts are consistent with displayed values.
           const playerResult = scoreboard.holes[hole]?.players[playerId];
           if (playerResult) {
-            total += playerResult.points;
+            for (const junk of playerResult.junk) {
+              if (junk.subType === "dot") {
+                total += junk.value;
+              }
+            }
+          }
+        } else {
+          // Non-quota games: use team points (includes all junk × multiplier)
+          const teamPoints = getTeamPointsForPlayer(scoreboard, playerId, hole);
+          if (teamPoints !== null) {
+            total += teamPoints;
+          } else {
+            const playerResult = scoreboard.holes[hole]?.players[playerId];
+            if (playerResult) {
+              total += playerResult.points;
+            }
           }
         }
       }
     }
 
     // For quota games, subtract quota to show performance (e.g., +2 over quota)
-    const quota = playerQuotas?.get(playerId);
     if (quota) {
       // quota.front/back are play-order aligned (first nine played / second nine played).
       // The "out"/"in" summary rows show physical course sides (holes 1-9 / 10-18).

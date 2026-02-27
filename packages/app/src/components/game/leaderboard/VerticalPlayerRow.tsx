@@ -197,10 +197,10 @@ function getStablefordPoints(
   if (!holeResult || !isHoleComplete(holeResult)) return null;
   const playerResult = holeResult.players[playerId];
   if (!playerResult || !playerResult.hasScore) return null;
-  // Sum only stableford junk, excluding skins and other junk
+  // Sum only dot-type junk (stableford scoring), excluding skins and other junk
   let total = 0;
   for (const junk of playerResult.junk) {
-    if (junk.name.startsWith("stableford_")) {
+    if (junk.subType === "dot") {
       total += junk.value;
     }
   }
@@ -232,7 +232,7 @@ function getStablefordTotal(
     const playerResult = holeResult.players[playerId];
     if (!playerResult || !playerResult.hasScore) continue;
     for (const junk of playerResult.junk) {
-      if (junk.name.startsWith("stableford_")) {
+      if (junk.subType === "dot") {
         total += junk.value;
         hasAny = true;
       }
@@ -287,7 +287,7 @@ function hasSkin(
   if (!holeResult || !isHoleComplete(holeResult)) return false;
   const playerResult = holeResult.players[playerId];
   if (!playerResult) return false;
-  return playerResult.junk.some((j) => j.name.endsWith("_skin"));
+  return playerResult.junk.some((j) => j.subType === "skin");
 }
 
 /**

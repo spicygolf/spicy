@@ -87,12 +87,12 @@ const ALL_18 = [
 
 /** Stableford junk helper: value = modified stableford points. */
 function stab(name: string, value: number) {
-  return { name: `stableford_${name}`, value };
+  return { name: `stableford_${name}`, value, subType: "dot" as const };
 }
 
 /** Skin junk helper. */
 function skin() {
-  return { name: "gross_skin", value: 1 };
+  return { name: "gross_skin", value: 1, subType: "skin" as const };
 }
 
 // =============================================================================
