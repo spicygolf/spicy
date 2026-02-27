@@ -19,7 +19,7 @@ interface VerticalPlayerRowProps {
   playerId: string;
   firstName: string;
   lastName: string;
-  rank: number;
+  rankLabel: string;
   summaryValues: Record<string, number | null>;
   columns: VerticalColumn[];
   isExpanded: boolean;
@@ -34,7 +34,7 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
   playerId,
   firstName,
   lastName,
-  rank,
+  rankLabel,
   summaryValues,
   columns,
   isExpanded,
@@ -58,7 +58,7 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
         accessibilityState={{ expanded: isExpanded }}
       >
         <View style={styles.rankBadge}>
-          <Text style={styles.rankText}>{rank}</Text>
+          <Text style={styles.rankText}>{rankLabel}</Text>
         </View>
         <Text style={styles.playerName} numberOfLines={1}>
           {fullName}
@@ -296,11 +296,11 @@ const styles = StyleSheet.create((theme) => ({
     minHeight: 44,
   },
   rankBadge: {
-    width: 24,
+    width: 28,
     alignItems: "center",
   },
   rankText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
     color: theme.colors.secondary,
   },

@@ -150,21 +150,37 @@ export function GameLeaderboard(): React.ReactElement | null {
 
   const useVerticalLayout = isMultiGroup || playerColumns.length > 7;
 
-  // Extract bets from game for vertical leaderboard columns
+  // Extract bets from game.bets CoList, falling back to spec JSON for legacy games
   const bets: BetColumnInfo[] = useMemo(() => {
-    if (!game?.bets?.$isLoaded) return [];
-    const result: BetColumnInfo[] = [];
-    for (const bet of game.bets) {
-      if (!bet?.$isLoaded) continue;
-      result.push({
-        name: bet.name,
-        disp: bet.disp,
-        scope: bet.scope,
-        scoringType: bet.scoringType,
-      });
+    // Try game.bets first (populated during game creation)
+    if (game?.bets?.$isLoaded && game.bets.length > 0) {
+      const result: BetColumnInfo[] = [];
+      for (const bet of game.bets) {
+        if (!bet?.$isLoaded) continue;
+        result.push({
+          name: bet.name,
+          disp: bet.disp,
+          scope: bet.scope,
+          scoringType: bet.scoringType,
+          placesPaid: bet.placesPaid ?? undefined,
+        });
+      }
+      if (result.length > 0) return result;
     }
-    return result;
-  }, [game?.bets]);
+
+    // Fallback: parse bets from game spec JSON (for legacy games without game.bets)
+    if (!scoringContext?.gameSpec) return [];
+    const betsJson = getMetaOption(scoringContext.gameSpec, "bets") as
+      | string
+      | undefined;
+    if (!betsJson) return [];
+    try {
+      const parsed = JSON.parse(betsJson) as BetColumnInfo[];
+      return parsed.filter((b) => b.name && b.disp && b.scope && b.scoringType);
+    } catch {
+      return [];
+    }
+  }, [game?.bets, scoringContext?.gameSpec]);
 
   if (!game) {
     return null;

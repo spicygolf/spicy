@@ -1,8 +1,8 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import { memo, useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
+import { rankWithTies } from "spicylib/scoring";
 import { Text } from "@/ui";
 import {
   type BetColumnInfo,
@@ -10,6 +10,7 @@ import {
   getVerticalPlayerData,
   type HoleData,
   type PlayerColumn,
+  type VerticalColumn,
   type VerticalPlayerData,
   type ViewMode,
 } from "./leaderboardUtils";
@@ -31,28 +32,66 @@ interface SortState {
   direction: SortDirection;
 }
 
+interface RankedPlayer {
+  player: VerticalPlayerData;
+  rankLabel: string;
+}
+
 /**
- * Sort player data by a column value.
- * Null values sort to the bottom regardless of direction.
+ * Sort player data by a column value and compute tie-aware rank labels.
+ * Uses rankWithTies from the scoring engine for proper golf ranking.
+ * Players beyond placesPaid get an empty rank label.
  */
-function sortPlayerData(
+function sortAndRankPlayerData(
   data: VerticalPlayerData[],
   sort: SortState | null,
-): VerticalPlayerData[] {
-  if (!sort) return data;
+  columns: VerticalColumn[],
+): RankedPlayer[] {
+  if (!sort) {
+    return data.map((player) => ({
+      player,
+      rankLabel: String(player.rank),
+    }));
+  }
 
-  return [...data].sort((a, b) => {
-    const aVal = a.values[sort.columnKey];
-    const bVal = b.values[sort.columnKey];
+  // Split into players with values and players with nulls
+  const withValues = data.filter(
+    (p) =>
+      p.values[sort.columnKey] !== null &&
+      p.values[sort.columnKey] !== undefined,
+  );
+  const withoutValues = data.filter(
+    (p) =>
+      p.values[sort.columnKey] === null ||
+      p.values[sort.columnKey] === undefined,
+  );
 
-    // Nulls to bottom
-    if (aVal === null && bVal === null) return 0;
-    if (aVal === null) return 1;
-    if (bVal === null) return -1;
+  // Use rankWithTies for proper tie handling
+  const ranked = rankWithTies(
+    withValues,
+    (p) => p.values[sort.columnKey] as number,
+    sort.direction === "asc" ? "lower" : "higher",
+  );
 
-    const diff = aVal - bVal;
-    return sort.direction === "asc" ? diff : -diff;
+  // Find placesPaid for the active sort column
+  const activeColumn = columns.find((c) => c.key === sort.columnKey);
+  const placesPaid = activeColumn?.placesPaid;
+
+  const result: RankedPlayer[] = ranked.map(({ item, rank, tieCount }) => {
+    // Beyond places paid = no rank
+    if (placesPaid !== undefined && rank > placesPaid) {
+      return { player: item, rankLabel: "" };
+    }
+    const label = tieCount > 1 ? `T${rank}` : String(rank);
+    return { player: item, rankLabel: label };
   });
+
+  // Append null-value players at the bottom with no rank
+  for (const player of withoutValues) {
+    result.push({ player, rankLabel: "" });
+  }
+
+  return result;
 }
 
 export const VerticalLeaderboard = memo(function VerticalLeaderboard({
@@ -63,7 +102,6 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   playerQuotas,
   bets,
 }: VerticalLeaderboardProps) {
-  const { theme } = useUnistyles();
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortState | null>(null);
 
@@ -81,9 +119,9 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
     [scoreboard, playerColumns, columns, viewMode, playerQuotas],
   );
 
-  const sortedPlayerData = useMemo(
-    () => sortPlayerData(playerData, sort),
-    [playerData, sort],
+  const rankedPlayers = useMemo(
+    () => sortAndRankPlayerData(playerData, sort, columns),
+    [playerData, sort, columns],
   );
 
   const handleToggle = useCallback((playerId: string) => {
@@ -93,13 +131,12 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   const handleColumnPress = useCallback((columnKey: string) => {
     setSort((prev) => {
       if (prev?.columnKey === columnKey) {
-        // Toggle direction
         return {
           columnKey,
           direction: prev.direction === "desc" ? "asc" : "desc",
         };
       }
-      // New column: default to descending (highest first, natural for points/skins)
+      // Default to descending (highest first, natural for points/skins)
       return { columnKey, direction: "desc" };
     });
   }, []);
@@ -114,6 +151,11 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
         <View style={styles.headerValues}>
           {columns.map((col) => {
             const isActive = sort?.columnKey === col.key;
+            const arrow = isActive
+              ? sort.direction === "asc"
+                ? " \u25B4"
+                : " \u25BE"
+              : "";
             return (
               <Pressable
                 key={col.key}
@@ -125,18 +167,11 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
                     styles.headerText,
                     isActive && styles.headerTextActive,
                   ]}
+                  numberOfLines={1}
                 >
                   {col.label}
+                  {arrow}
                 </Text>
-                {isActive && (
-                  <FontAwesome6
-                    name={sort.direction === "asc" ? "caret-up" : "caret-down"}
-                    iconStyle="solid"
-                    size={8}
-                    color={theme.colors.primary}
-                    style={styles.sortIcon}
-                  />
-                )}
               </Pressable>
             );
           })}
@@ -146,13 +181,13 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
       </View>
 
       {/* Player rows */}
-      {sortedPlayerData.map((player) => (
+      {rankedPlayers.map(({ player, rankLabel }) => (
         <VerticalPlayerRow
           key={player.playerId}
           playerId={player.playerId}
           firstName={player.firstName}
           lastName={player.lastName}
-          rank={player.rank}
+          rankLabel={rankLabel}
           summaryValues={player.values}
           columns={columns}
           isExpanded={expandedPlayerId === player.playerId}
@@ -204,8 +239,5 @@ const styles = StyleSheet.create((theme) => ({
   },
   headerTextActive: {
     color: theme.colors.primary,
-  },
-  sortIcon: {
-    marginTop: 1,
   },
 }));
