@@ -341,7 +341,7 @@ function HoleStrip({
               playerQuotas,
             );
             return (
-              <View key={h.hole} style={styles.stripCell}>
+              <View key={h.hole} style={styles.stripSummaryCell}>
                 <View style={styles.richCell}>
                   <View style={styles.superscript}>
                     {summaryPts != null && (
@@ -439,7 +439,7 @@ function TotalStrip({
       <View style={styles.totalLabel}>
         <Text style={[styles.holeLabel, styles.summaryLabel]}>Total</Text>
       </View>
-      <View style={styles.stripCell}>
+      <View style={styles.stripSummaryCell}>
         <View style={styles.richCell}>
           <View style={styles.superscript}>
             {totalPts != null && (
@@ -540,8 +540,8 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
   },
   stripSummaryCell: {
-    width: 44,
-    alignItems: "center",
+    width: 56,
+    alignItems: "stretch",
     justifyContent: "center",
   },
   holeLabel: {
