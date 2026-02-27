@@ -130,6 +130,13 @@ export function calculateQuotaPerformances(
   const stablefordTotals = extractStablefordTotals(scoreboard);
   const performances: QuotaPerformance[] = [];
 
+  // Stableford totals and quotas are in play order (first nine / second nine).
+  // Align to physical course sides (holes 1-9 = front, 10-18 = back) so that
+  // settlement metrics match the leaderboard column display values.
+  const firstHole = scoreboard.meta.holesPlayed[0];
+  const startsOnBack =
+    firstHole !== undefined && Number.parseInt(firstHole, 10) >= 10;
+
   for (const [playerId, quota] of playerQuotas) {
     const stableford = stablefordTotals.get(playerId) ?? {
       front: 0,
@@ -137,13 +144,21 @@ export function calculateQuotaPerformances(
       total: 0,
     };
 
+    // Play-order performance
+    const playFront = stableford.front - quota.front;
+    const playBack = stableford.back - quota.back;
+
+    // Align to physical course sides
+    const physFront = startsOnBack ? playBack : playFront;
+    const physBack = startsOnBack ? playFront : playBack;
+
     performances.push({
       playerId,
       stableford,
       quota: { front: quota.front, back: quota.back, total: quota.total },
       performance: {
-        front: stableford.front - quota.front,
-        back: stableford.back - quota.back,
+        front: physFront,
+        back: physBack,
         total: stableford.total - quota.total,
       },
     });

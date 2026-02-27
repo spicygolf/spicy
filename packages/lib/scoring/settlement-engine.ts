@@ -154,8 +154,11 @@ export function calculatePoolPayouts(
         group.items.push(entry);
       }
 
-      // Calculate payouts with remainder tracking to avoid drift
-      let totalPaid = 0;
+      // Calculate payouts using a running-total approach to avoid drift.
+      // Each rank group gets its exact share of the remaining pool money,
+      // and tied players within a group split their dollar total evenly.
+      let cumulativePct = 0;
+      let cumulativePaid = 0;
       const payoutEntries: Array<{
         entry: (typeof paidPlayers)[0];
         amount: number;
@@ -173,9 +176,12 @@ export function calculatePoolPayouts(
           }
         }
 
-        // Split evenly among all tied players using dollar amounts
-        // (avoids percentage rounding giving tied players different amounts)
-        const groupTotal = Math.round((poolAmount * totalPct) / 100);
+        // Running-total rounding: compute cumulative target to avoid drift
+        cumulativePct += totalPct;
+        const cumulativeTarget = Math.round((poolAmount * cumulativePct) / 100);
+        const groupTotal = cumulativeTarget - cumulativePaid;
+
+        // Split evenly among all tied players
         const perPlayer = Math.floor(groupTotal / group.tieCount);
         let remainder = groupTotal - perPlayer * group.tieCount;
 
@@ -183,18 +189,8 @@ export function calculatePoolPayouts(
           const amount = remainder > 0 ? perPlayer + 1 : perPlayer;
           remainder--;
           payoutEntries.push({ entry, amount });
-          totalPaid += amount;
         }
-      }
-
-      // Fix rounding drift: adjust last entry so total matches poolAmount exactly
-      // (only if we have entries and paid out to all expected positions)
-      if (payoutEntries.length > 0) {
-        const last = payoutEntries[payoutEntries.length - 1]!;
-        const drift = totalPaid - poolAmount;
-        if (drift !== 0) {
-          last.amount -= drift;
-        }
+        cumulativePaid += groupTotal;
       }
 
       for (const { entry, amount } of payoutEntries) {
