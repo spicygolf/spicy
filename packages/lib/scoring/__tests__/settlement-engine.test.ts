@@ -296,6 +296,40 @@ describe("settlement-engine", () => {
       expect(total).toBe(1000);
     });
 
+    it("gives tied players identical amounts with odd pool totals", () => {
+      // 3 players tied for 2nd share (30+20)% of $269 = $134.50
+      // Floor: $44 each, remainder 2 → first 2 get $45, last gets $44
+      // All should be within $1 of each other
+      const tiePlayers: PlayerMetrics[] = [
+        { playerId: "p1", playerName: "P1", metrics: { v: 10 } },
+        { playerId: "p2", playerName: "P2", metrics: { v: 5 } },
+        { playerId: "p3", playerName: "P3", metrics: { v: 5 } },
+        { playerId: "p4", playerName: "P4", metrics: { v: 5 } },
+      ];
+      const pool: PoolConfig = {
+        name: "test",
+        disp: "Test",
+        pct: 100,
+        metric: "v",
+        splitType: "places",
+        placesPaid: 3,
+      };
+
+      const payouts = calculatePoolPayouts(pool, tiePlayers, 269);
+      const tied = payouts.filter((p) => p.rankLabel === "T2");
+      expect(tied).toHaveLength(3);
+
+      // All tied amounts should differ by at most $1
+      const amounts = tied.map((p) => p.amount);
+      const max = Math.max(...amounts);
+      const min = Math.min(...amounts);
+      expect(max - min).toBeLessThanOrEqual(1);
+
+      // Total should equal pool amount
+      const total = payouts.reduce((s, p) => s + p.amount, 0);
+      expect(total).toBe(269);
+    });
+
     it("handles custom payout percentages", () => {
       const pool: PoolConfig = {
         name: "custom",

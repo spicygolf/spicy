@@ -40,14 +40,17 @@ interface RankedPlayer {
 }
 
 /**
- * Sort player data by a column value and compute tie-aware rank labels.
- * Uses rankWithTies from the scoring engine for proper golf ranking.
- * Players beyond placesPaid get an empty rank label.
+ * Sort player data by a column value and assign rank labels.
+ *
+ * When settlement payouts exist for the sort column, uses the settlement
+ * engine's pre-computed rank labels (single source of truth). Falls back
+ * to rankWithTies for columns without settlement data (e.g., "$" net).
  */
 function sortAndRankPlayerData(
   data: VerticalPlayerData[],
   sort: SortState | null,
   columns: VerticalColumn[],
+  betPayoutLookup: Map<string, Map<string, BetPayoutInfo>> | null,
 ): RankedPlayer[] {
   if (!sort) {
     return data.map((player) => ({
@@ -68,19 +71,29 @@ function sortAndRankPlayerData(
       p.values[sort.columnKey] === undefined,
   );
 
-  // Use rankWithTies for proper tie handling
+  // Check if settlement payouts exist for this column
+  const hasSettlementData =
+    betPayoutLookup !== null &&
+    [...betPayoutLookup.values()].some((m) => m.has(sort.columnKey));
+
+  // Sort by column value with rankWithTies (needed for ordering either way)
   const ranked = rankWithTies(
     withValues,
     (p) => p.values[sort.columnKey] as number,
     sort.direction === "asc" ? "lower" : "higher",
   );
 
-  // Find placesPaid for the active sort column
+  // Fallback: placesPaid for columns without settlement data (e.g., "$")
   const activeColumn = columns.find((c) => c.key === sort.columnKey);
   const placesPaid = activeColumn?.placesPaid;
 
   const result: RankedPlayer[] = ranked.map(({ item, rank, tieCount }) => {
-    // Beyond places paid = no rank
+    if (hasSettlementData) {
+      // Use settlement engine's pre-computed rank label
+      const payout = betPayoutLookup?.get(item.playerId)?.get(sort.columnKey);
+      return { player: item, rankLabel: payout?.rankLabel ?? "" };
+    }
+    // Fallback: compute rank label from rankWithTies (for "$" column etc.)
     if (placesPaid !== undefined && rank > placesPaid) {
       return { player: item, rankLabel: "" };
     }
@@ -182,14 +195,14 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
     return data;
   }, [scoreboard, playerColumns, columns, playerQuotas, netPositions]);
 
-  const rankedPlayers = useMemo(
-    () => sortAndRankPlayerData(playerData, sort, columns),
-    [playerData, sort, columns],
-  );
-
   const betPayoutLookup = useMemo(
     () => (payouts ? buildBetPayoutLookup(payouts) : null),
     [payouts],
+  );
+
+  const rankedPlayers = useMemo(
+    () => sortAndRankPlayerData(playerData, sort, columns, betPayoutLookup),
+    [playerData, sort, columns, betPayoutLookup],
   );
 
   const handleToggle = useCallback((playerId: string) => {

@@ -173,11 +173,15 @@ export function calculatePoolPayouts(
           }
         }
 
-        // Split evenly among all tied players
-        const perPlayerPct = totalPct / group.tieCount;
+        // Split evenly among all tied players using dollar amounts
+        // (avoids percentage rounding giving tied players different amounts)
+        const groupTotal = Math.round((poolAmount * totalPct) / 100);
+        const perPlayer = Math.floor(groupTotal / group.tieCount);
+        let remainder = groupTotal - perPlayer * group.tieCount;
 
         for (const entry of group.items) {
-          const amount = Math.round((poolAmount * perPlayerPct) / 100);
+          const amount = remainder > 0 ? perPlayer + 1 : perPlayer;
+          remainder--;
           payoutEntries.push({ entry, amount });
           totalPaid += amount;
         }
