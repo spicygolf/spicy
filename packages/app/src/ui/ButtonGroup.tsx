@@ -27,7 +27,7 @@ export function ButtonGroup({
         const isSelected = selectedIndex === index;
         return (
           <TouchableOpacity
-            key={button.label}
+            key={button.label ?? button.iconName ?? index}
             onPress={() => {
               button.onPress();
             }}
