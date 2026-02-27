@@ -3,6 +3,7 @@ import { memo } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
+import { isHoleComplete } from "spicylib/scoring";
 import { Text } from "@/ui";
 import {
   getPopsCount,
@@ -11,7 +12,6 @@ import {
   getSummaryValue,
   type HoleData,
   type VerticalColumn,
-  type ViewMode,
 } from "./leaderboardUtils";
 import { ScoreCell } from "./ScoreCell";
 
@@ -26,7 +26,6 @@ interface VerticalPlayerRowProps {
   onToggle: () => void;
   holeRows: HoleData[];
   scoreboard: Scoreboard | null;
-  viewMode: ViewMode;
   playerQuotas?: Map<string, PlayerQuota> | null;
 }
 
@@ -41,7 +40,6 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
   onToggle,
   holeRows,
   scoreboard,
-  viewMode,
   playerQuotas,
 }: VerticalPlayerRowProps) {
   const { theme } = useUnistyles();
@@ -66,13 +64,8 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
         <View style={styles.valuesContainer}>
           {columns.map((col) => {
             const val = summaryValues[col.key];
-            const effectiveMode =
-              viewMode === "gross"
-                ? "gross"
-                : (col.viewModeOverride ?? viewMode);
-            const isSkins = effectiveMode === "skins";
-            const showColor =
-              !isSkins && effectiveMode === "points" && val != null;
+            const isSkins = col.viewModeOverride === "skins";
+            const showColor = !isSkins && val != null;
             return (
               <View key={col.key} style={styles.valueCell}>
                 <Text
@@ -104,7 +97,6 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
           playerId={playerId}
           holeRows={holeRows}
           scoreboard={scoreboard}
-          viewMode={viewMode}
           playerQuotas={playerQuotas}
         />
       )}
@@ -119,19 +111,18 @@ function formatValue(val: number | null | undefined): string {
 
 /**
  * Expanded hole-by-hole scorecard for a single player.
- * Shows holes as columns with scores below.
+ * Shows gross score with birdie/bogey decoration, stableford points
+ * as superscript, and skin indicator as subscript dot.
  */
 function ExpandedDetail({
   playerId,
   holeRows,
   scoreboard,
-  viewMode,
   playerQuotas,
 }: {
   playerId: string;
   holeRows: HoleData[];
   scoreboard: Scoreboard | null;
-  viewMode: ViewMode;
   playerQuotas?: Map<string, PlayerQuota> | null;
 }) {
   // Split hole rows into front 9 + Out, back 9 + In, Total
@@ -161,7 +152,6 @@ function ExpandedDetail({
             holes={frontHoles}
             playerId={playerId}
             scoreboard={scoreboard}
-            viewMode={viewMode}
             playerQuotas={playerQuotas}
           />
         )}
@@ -171,7 +161,6 @@ function ExpandedDetail({
             holes={backHoles}
             playerId={playerId}
             scoreboard={scoreboard}
-            viewMode={viewMode}
             playerQuotas={playerQuotas}
           />
         )}
@@ -184,13 +173,7 @@ function ExpandedDetail({
             <View style={styles.totalValue}>
               <Text style={[styles.holeLabel, styles.summaryLabel]}>
                 {formatValue(
-                  getSummaryValue(
-                    scoreboard,
-                    playerId,
-                    "total",
-                    viewMode,
-                    playerQuotas,
-                  ),
+                  getSummaryValue(scoreboard, playerId, "total", "gross"),
                 )}
               </Text>
             </View>
@@ -202,19 +185,52 @@ function ExpandedDetail({
 }
 
 /**
- * A row of holes (front 9 or back 9) with hole labels on top and scores below.
+ * Get stableford points for a player on a hole.
+ * Returns null if hole is incomplete or no score.
+ */
+function getStablefordPoints(
+  scoreboard: Scoreboard | null,
+  playerId: string,
+  hole: string,
+  playerQuotas: Map<string, PlayerQuota> | null | undefined,
+): number | null {
+  if (!scoreboard) return null;
+  const holeResult = scoreboard.holes[hole];
+  if (!holeResult || !isHoleComplete(holeResult)) return null;
+  const playerResult = holeResult.players[playerId];
+  if (!playerResult || !playerResult.hasScore) return null;
+  return playerResult.points;
+}
+
+/**
+ * Check if a player won a skin on a hole.
+ */
+function hasSkin(
+  scoreboard: Scoreboard | null,
+  playerId: string,
+  hole: string,
+): boolean {
+  if (!scoreboard) return false;
+  const holeResult = scoreboard.holes[hole];
+  if (!holeResult || !isHoleComplete(holeResult)) return false;
+  const playerResult = holeResult.players[playerId];
+  if (!playerResult) return false;
+  return playerResult.junk.some((j) => j.name.endsWith("_skin"));
+}
+
+/**
+ * A row of holes (front 9 or back 9) with hole labels on top and rich scores below.
+ * Each cell shows: gross score with decoration, stableford points superscript, skin dot.
  */
 function HoleStrip({
   holes,
   playerId,
   scoreboard,
-  viewMode,
   playerQuotas,
 }: {
   holes: HoleData[];
   playerId: string;
   scoreboard: Scoreboard | null;
-  viewMode: ViewMode;
   playerQuotas?: Map<string, PlayerQuota> | null;
 }) {
   return (
@@ -245,8 +261,7 @@ function HoleStrip({
               scoreboard,
               playerId,
               h.summaryType,
-              viewMode,
-              playerQuotas,
+              "gross",
             );
             return (
               <View key={h.hole} style={styles.stripSummaryCell}>
@@ -257,24 +272,54 @@ function HoleStrip({
             );
           }
 
-          const value = getScoreValue(scoreboard, playerId, h.hole, viewMode);
+          // Gross score with decoration
+          const grossValue = getScoreValue(
+            scoreboard,
+            playerId,
+            h.hole,
+            "gross",
+          );
           const scoreToPar = getScoreToPar(
             scoreboard,
             playerId,
             h.hole,
-            viewMode,
+            "gross",
           );
           const popsCount = getPopsCount(scoreboard, playerId, h.hole);
 
+          // Stableford points (superscript)
+          const points = getStablefordPoints(
+            scoreboard,
+            playerId,
+            h.hole,
+            playerQuotas,
+          );
+
+          // Skin indicator (subscript)
+          const wonSkin = hasSkin(scoreboard, playerId, h.hole);
+
           return (
             <View key={h.hole} style={styles.stripCell}>
-              <ScoreCell
-                value={value}
-                scoreToPar={scoreToPar}
-                popsCount={popsCount}
-                isSummaryRow={false}
-                viewMode={viewMode}
-              />
+              <View style={styles.richCell}>
+                {/* Stableford points — top-right superscript */}
+                <View style={styles.superscript}>
+                  {points != null && (
+                    <Text style={styles.superscriptText}>{points}</Text>
+                  )}
+                </View>
+                {/* Gross score with decoration */}
+                <ScoreCell
+                  value={grossValue}
+                  scoreToPar={scoreToPar}
+                  popsCount={popsCount}
+                  isSummaryRow={false}
+                  viewMode="gross"
+                />
+                {/* Skin indicator — bottom-right subscript */}
+                <View style={styles.subscript}>
+                  {wonSkin && <View style={styles.skinDot} />}
+                </View>
+              </View>
             </View>
           );
         })}
@@ -342,31 +387,31 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.card,
   },
   expandedContent: {
-    paddingHorizontal: theme.gap(2),
-    paddingVertical: theme.gap(1),
+    paddingHorizontal: theme.gap(1),
+    paddingVertical: theme.gap(0.5),
   },
   stripContainer: {
-    marginBottom: theme.gap(0.5),
+    marginBottom: theme.gap(0.25),
   },
   stripRow: {
     flexDirection: "row",
   },
   stripCell: {
-    width: 44,
+    width: 36,
     alignItems: "center",
     justifyContent: "center",
   },
   stripSummaryCell: {
-    width: 48,
+    width: 40,
     alignItems: "center",
     justifyContent: "center",
   },
   stripScoreText: {
-    fontSize: 13,
+    fontSize: 12,
     color: theme.colors.primary,
   },
   holeLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: theme.colors.secondary,
     textAlign: "center",
   },
@@ -381,13 +426,44 @@ const styles = StyleSheet.create((theme) => ({
     borderTopColor: theme.colors.border,
   },
   totalLabel: {
-    width: 44,
+    width: 36,
     alignItems: "center",
     justifyContent: "center",
   },
   totalValue: {
-    width: 48,
+    width: 40,
     alignItems: "center",
     justifyContent: "center",
+  },
+  // Rich cell: gross score + stableford superscript + skin subscript
+  richCell: {
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  superscript: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    zIndex: 1,
+    minWidth: 10,
+    alignItems: "center",
+  },
+  superscriptText: {
+    fontSize: 8,
+    color: theme.colors.success,
+    fontWeight: "600",
+    fontVariant: ["tabular-nums"],
+  },
+  subscript: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+  },
+  skinDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: theme.colors.warning,
   },
 }));

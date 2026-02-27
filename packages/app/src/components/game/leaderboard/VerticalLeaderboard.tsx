@@ -20,7 +20,6 @@ interface VerticalLeaderboardProps {
   playerColumns: PlayerColumn[];
   holeRows: HoleData[];
   scoreboard: Scoreboard | null;
-  viewMode: ViewMode;
   playerQuotas?: Map<string, PlayerQuota> | null;
   bets: BetColumnInfo[];
 }
@@ -94,11 +93,13 @@ function sortAndRankPlayerData(
   return result;
 }
 
+/** Summary columns always show "points" mode (skins columns override to "skins") */
+const SUMMARY_VIEW_MODE: ViewMode = "points";
+
 export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   playerColumns,
   holeRows,
   scoreboard,
-  viewMode,
   playerQuotas,
   bets,
 }: VerticalLeaderboardProps) {
@@ -113,10 +114,10 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
         scoreboard,
         playerColumns,
         columns,
-        viewMode,
+        SUMMARY_VIEW_MODE,
         playerQuotas,
       ),
-    [scoreboard, playerColumns, columns, viewMode, playerQuotas],
+    [scoreboard, playerColumns, columns, playerQuotas],
   );
 
   const rankedPlayers = useMemo(
@@ -194,7 +195,6 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
           onToggle={() => handleToggle(player.playerId)}
           holeRows={holeRows}
           scoreboard={scoreboard}
-          viewMode={viewMode}
           playerQuotas={playerQuotas}
         />
       ))}

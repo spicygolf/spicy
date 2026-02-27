@@ -198,62 +198,50 @@ export function GameLeaderboard(): React.ReactElement | null {
 
   return (
     <Screen style={styles.screen}>
-      {/* View Mode Toggle */}
-      <View style={styles.toggleContainer}>
-        {useVerticalLayout ? (
-          <ButtonGroup
-            buttons={[
-              {
-                label: "gross",
-                onPress: () => setLeaderboardViewMode("gross"),
-              },
-              {
-                label: "bets",
-                onPress: () => setLeaderboardViewMode("points"),
-              },
-            ]}
-            selectedIndex={viewMode === "gross" ? 0 : 1}
-          />
-        ) : isQuotaGame ? (
-          <ButtonGroup
-            buttons={[
-              {
-                label: "gross",
-                onPress: () => setLeaderboardViewMode("gross"),
-              },
-              {
-                label: "points",
-                onPress: () => setLeaderboardViewMode("points"),
-              },
-              {
-                label: "skins",
-                onPress: () => setLeaderboardViewMode("skins"),
-              },
-            ]}
-            selectedIndex={quotaViewModeIndex(viewMode)}
-          />
-        ) : (
-          <ButtonGroup
-            buttons={[
-              {
-                label: "gross",
-                onPress: () => setLeaderboardViewMode("gross"),
-              },
-              {
-                label: "net",
-                onPress: () => setLeaderboardViewMode("net"),
-              },
-              {
-                label: "points",
-                onPress: () => setLeaderboardViewMode("points"),
-              },
-            ]}
-            selectedIndex={
-              viewMode === "gross" ? 0 : viewMode === "net" ? 1 : 2
-            }
-          />
-        )}
-      </View>
+      {/* View Mode Toggle — only for horizontal layout */}
+      {!useVerticalLayout && (
+        <View style={styles.toggleContainer}>
+          {isQuotaGame ? (
+            <ButtonGroup
+              buttons={[
+                {
+                  label: "gross",
+                  onPress: () => setLeaderboardViewMode("gross"),
+                },
+                {
+                  label: "points",
+                  onPress: () => setLeaderboardViewMode("points"),
+                },
+                {
+                  label: "skins",
+                  onPress: () => setLeaderboardViewMode("skins"),
+                },
+              ]}
+              selectedIndex={quotaViewModeIndex(viewMode)}
+            />
+          ) : (
+            <ButtonGroup
+              buttons={[
+                {
+                  label: "gross",
+                  onPress: () => setLeaderboardViewMode("gross"),
+                },
+                {
+                  label: "net",
+                  onPress: () => setLeaderboardViewMode("net"),
+                },
+                {
+                  label: "points",
+                  onPress: () => setLeaderboardViewMode("points"),
+                },
+              ]}
+              selectedIndex={
+                viewMode === "gross" ? 0 : viewMode === "net" ? 1 : 2
+              }
+            />
+          )}
+        </View>
+      )}
 
       {/* Leaderboard */}
       {useVerticalLayout ? (
@@ -261,7 +249,6 @@ export function GameLeaderboard(): React.ReactElement | null {
           playerColumns={playerColumns}
           holeRows={holeRows}
           scoreboard={scoreboard}
-          viewMode={viewMode}
           playerQuotas={scoringContext?.playerQuotas}
           bets={bets}
         />
