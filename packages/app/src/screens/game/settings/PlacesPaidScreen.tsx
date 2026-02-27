@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { co, z } from "jazz-tools";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
@@ -87,90 +87,106 @@ export function PlacesPaidScreen(_props: Props) {
   );
 
   // Sync local state once Jazz data finishes loading (both spec and payoutPools)
-  const initialized = useRef(false);
+  const [synced, setSynced] = useState(false);
   useEffect(() => {
-    if (initialized.current) return;
+    if (synced) return;
     if (!game?.spec?.$isLoaded) return;
     if (!game?.payoutPools?.$isLoaded) return;
-    initialized.current = true;
+    setSynced(true);
     setPlaces(currentPlaces);
     setPcts(currentPoolPcts ?? getDefaultPcts(currentPlaces));
   }, [
+    synced,
     game?.spec?.$isLoaded,
     game?.payoutPools?.$isLoaded,
     currentPlaces,
     currentPoolPcts,
   ]);
 
-  const handlePlacesChange = useCallback((newPlaces: number) => {
-    const clamped = Math.max(MIN_PLACES, Math.min(MAX_PLACES, newPlaces));
-    setPlaces(clamped);
-    setPcts(getDefaultPcts(clamped));
-  }, []);
+  /** Persist places + pcts to Jazz (spec option + payout pools). */
+  const saveToJazz = useCallback(
+    (newPlaces: number, newPcts: number[]) => {
+      if (!game?.spec?.$isLoaded || isOrganizer === false) return;
 
-  const handlePctChange = useCallback((index: number, text: string) => {
-    // Allow empty string so user can clear and retype
-    if (text === "") {
+      // Save places_paid game option
+      const existingOpt = game.spec.places_paid;
+      if (existingOpt && existingOpt.type === "game") {
+        game.spec.$jazz.set("places_paid", {
+          ...(existingOpt as GameOption),
+          value: String(newPlaces),
+        });
+      } else {
+        game.spec.$jazz.set("places_paid", {
+          name: "places_paid",
+          disp: "Places Paid",
+          type: "game",
+          version: "1",
+          valueType: "menu",
+          defaultValue: "3",
+          value: String(newPlaces),
+        } satisfies GameOption);
+      }
+
+      // Update payout pools
+      if (game.payoutPools?.$isLoaded) {
+        const activePctSlice = newPcts.slice(0, newPlaces);
+        for (const pool of game.payoutPools) {
+          if (pool?.$isLoaded && pool.splitType === "places") {
+            pool.$jazz.set("placesPaid", newPlaces);
+            const pctsList = PayoutPctsList.create(activePctSlice, {
+              owner: pool.$jazz.owner,
+            });
+            pool.$jazz.set("payoutPcts", pctsList);
+          }
+        }
+      }
+    },
+    [game, isOrganizer],
+  );
+
+  const handlePlacesChange = useCallback(
+    (newPlaces: number) => {
+      const clamped = Math.max(MIN_PLACES, Math.min(MAX_PLACES, newPlaces));
+      const newPcts = getDefaultPcts(clamped);
+      setPlaces(clamped);
+      setPcts(newPcts);
+      // Default pcts always sum to 100 — save immediately
+      saveToJazz(clamped, newPcts);
+    },
+    [saveToJazz],
+  );
+
+  const handlePctChange = useCallback(
+    (index: number, text: string) => {
+      // Allow empty string so user can clear and retype
+      if (text === "") {
+        setPcts((prev) => {
+          const next = [...prev];
+          next[index] = 0;
+          return next;
+        });
+        return;
+      }
+      const num = Number.parseInt(text, 10);
+      if (Number.isNaN(num) || num < 0 || num > 100) return;
       setPcts((prev) => {
         const next = [...prev];
-        next[index] = 0;
+        next[index] = num;
+        // Auto-save when percentages sum to 100
+        const activeSlice = next.slice(0, places);
+        if (activeSlice.reduce((s, p) => s + p, 0) === 100) {
+          saveToJazz(places, next);
+        }
         return next;
       });
-      return;
-    }
-    const num = Number.parseInt(text, 10);
-    if (Number.isNaN(num) || num < 0 || num > 100) return;
-    setPcts((prev) => {
-      const next = [...prev];
-      next[index] = num;
-      return next;
-    });
-  }, []);
+    },
+    [places, saveToJazz],
+  );
 
   const activePcts = pcts.slice(0, places);
   const amounts = distributeAmounts(potTotal, activePcts);
   const pctTotal = activePcts.reduce((sum, p) => sum + p, 0);
   const isValid = pctTotal === 100;
-
-  // Auto-save to Jazz whenever places/pcts change and are valid.
-  // Skip the initial sync (handled by the initialized effect above).
-  useEffect(() => {
-    if (!initialized.current) return;
-    if (!isValid) return;
-    if (!game?.spec?.$isLoaded || isOrganizer === false) return;
-
-    // Save places_paid game option
-    const existingOpt = game.spec.places_paid;
-    if (existingOpt && existingOpt.type === "game") {
-      game.spec.$jazz.set("places_paid", {
-        ...(existingOpt as GameOption),
-        value: String(places),
-      });
-    } else {
-      game.spec.$jazz.set("places_paid", {
-        name: "places_paid",
-        disp: "Places Paid",
-        type: "game",
-        version: "1",
-        valueType: "menu",
-        defaultValue: "3",
-        value: String(places),
-      } satisfies GameOption);
-    }
-
-    // Update payout pools
-    if (game.payoutPools?.$isLoaded) {
-      for (const pool of game.payoutPools) {
-        if (pool?.$isLoaded && pool.splitType === "places") {
-          pool.$jazz.set("placesPaid", places);
-          const pctsList = PayoutPctsList.create(pcts.slice(0, places), {
-            owner: pool.$jazz.owner,
-          });
-          pool.$jazz.set("payoutPcts", pctsList);
-        }
-      }
-    }
-  }, [places, pcts, isValid, game, isOrganizer]);
 
   return (
     <Screen>
