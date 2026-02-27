@@ -90,9 +90,7 @@ export function GameLeaderboard(): React.ReactElement | null {
   const multiGroupValue = getGameSpecField(game, "multi_group");
   const isMultiGroup = multiGroupValue === true || multiGroupValue === "true";
 
-  // Normalize viewMode for unsupported modes:
-  // - Quota games don't have "net" — redirect to "points"
-  // - Vertical layout only supports "gross" and "points" (shown as "bets")
+  // Quota games don't have "net" — redirect to "points"
   useEffect(() => {
     if (isQuotaGame && viewMode === "net") {
       setLeaderboardViewMode("points");
@@ -150,8 +148,10 @@ export function GameLeaderboard(): React.ReactElement | null {
 
   const useVerticalLayout = isMultiGroup || playerColumns.length > 7;
 
-  // Extract bets from game.bets CoList, falling back to spec JSON for legacy games
-  const bets: BetColumnInfo[] = useMemo(() => {
+  // Extract bets from game.bets CoList, falling back to spec JSON for legacy games.
+  // Computed directly (no useMemo) because game.bets is a Jazz reactive proxy —
+  // nested bet items load progressively and wouldn't trigger useMemo recalculation.
+  const bets: BetColumnInfo[] = (() => {
     // Try game.bets first (populated during game creation)
     if (game?.bets?.$isLoaded && game.bets.length > 0) {
       const result: BetColumnInfo[] = [];
@@ -180,7 +180,7 @@ export function GameLeaderboard(): React.ReactElement | null {
     } catch {
       return [];
     }
-  }, [game?.bets, scoringContext?.gameSpec]);
+  })();
 
   if (!game) {
     return null;

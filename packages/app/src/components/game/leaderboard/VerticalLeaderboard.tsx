@@ -189,7 +189,7 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
           summaryValues={player.values}
           columns={columns}
           isExpanded={expandedPlayerId === player.playerId}
-          onToggle={() => handleToggle(player.playerId)}
+          onToggle={handleToggle}
           holeRows={holeRows}
           scoreboard={scoreboard}
           playerQuotas={playerQuotas}

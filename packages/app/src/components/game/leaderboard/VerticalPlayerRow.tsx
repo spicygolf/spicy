@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
@@ -22,7 +22,7 @@ interface VerticalPlayerRowProps {
   summaryValues: Record<string, number | null>;
   columns: VerticalColumn[];
   isExpanded: boolean;
-  onToggle: () => void;
+  onToggle: (playerId: string) => void;
   holeRows: HoleData[];
   scoreboard: Scoreboard | null;
   playerQuotas?: Map<string, PlayerQuota> | null;
@@ -42,13 +42,17 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
   playerQuotas,
 }: VerticalPlayerRowProps) {
   const fullName = lastName ? `${firstName} ${lastName}` : firstName;
+  const handlePress = useCallback(
+    () => onToggle(playerId),
+    [onToggle, playerId],
+  );
 
   return (
     <View style={styles.container}>
       {/* Summary row */}
       <Pressable
         style={styles.summaryRow}
-        onPress={onToggle}
+        onPress={handlePress}
         accessibilityRole="button"
         accessibilityState={{ expanded: isExpanded }}
       >
@@ -116,16 +120,18 @@ function ExpandedDetail({
   playerQuotas?: Map<string, PlayerQuota> | null;
 }) {
   // Split hole rows into front 9 + Out, back 9 + In, Total
-  const frontHoles = holeRows.filter(
-    (r) =>
-      (!r.isSummaryRow && Number.parseInt(r.hole, 10) <= 9) ||
-      r.summaryType === "out",
-  );
-  const backHoles = holeRows.filter(
-    (r) =>
-      (!r.isSummaryRow && Number.parseInt(r.hole, 10) >= 10) ||
-      r.summaryType === "in",
-  );
+  const frontHoles = holeRows.filter((r) => {
+    if (r.summaryType === "out") return true;
+    if (r.isSummaryRow) return false;
+    const holeNum = Number.parseInt(r.hole, 10);
+    return !Number.isNaN(holeNum) && holeNum <= 9;
+  });
+  const backHoles = holeRows.filter((r) => {
+    if (r.summaryType === "in") return true;
+    if (r.isSummaryRow) return false;
+    const holeNum = Number.parseInt(r.hole, 10);
+    return !Number.isNaN(holeNum) && holeNum >= 10;
+  });
   const totalRow = holeRows.find((r) => r.summaryType === "total");
 
   return (
