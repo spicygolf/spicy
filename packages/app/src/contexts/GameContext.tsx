@@ -28,6 +28,7 @@ export type SettingsTab =
 const SCORING_RESOLVE = {
   name: true,
   start: true,
+  bets: { $each: true }, // Bet sub-competitions (front/back/overall/skins)
   scope: {
     teamsConfig: true,
     groups: { $each: { rounds: { $each: true } } },

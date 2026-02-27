@@ -1,6 +1,5 @@
 import type { FontAwesome6SolidIconName } from "@react-native-vector-icons/fontawesome6";
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { useState } from "react";
 import { TouchableOpacity, View, type ViewStyle } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "./Text";
@@ -17,21 +16,19 @@ interface ButtonGroupProps {
 
 export function ButtonGroup({
   buttons,
-  selectedIndex,
+  selectedIndex = 0,
   containerStyle,
 }: ButtonGroupProps) {
-  const [selected, setSelected] = useState(selectedIndex ?? 0);
   const { theme } = useUnistyles();
 
   return (
     <View style={[styles.container, containerStyle]}>
       {buttons.map((button, index) => {
-        const isSelected = selected === index;
+        const isSelected = selectedIndex === index;
         return (
           <TouchableOpacity
-            key={button.label}
+            key={button.label ?? button.iconName ?? index}
             onPress={() => {
-              setSelected(index);
               button.onPress();
             }}
             style={[styles.button, isSelected && styles.selected]}
@@ -47,13 +44,7 @@ export function ButtonGroup({
               />
             )}
             {button.label && (
-              <Text
-                style={
-                  isSelected
-                    ? { ...styles.label, ...styles.selectedText }
-                    : styles.label
-                }
-              >
+              <Text style={[styles.label, isSelected && styles.selectedText]}>
                 {button.label}
               </Text>
             )}
@@ -92,8 +83,6 @@ const styles = StyleSheet.create((theme) => ({
     textAlign: "center",
     flexShrink: 1,
     flexGrow: 0,
-    numberOfLines: 1,
-    ellipsizeMode: "tail",
   },
   selectedText: {
     color: theme.colors.background,

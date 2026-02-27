@@ -57,7 +57,7 @@ describe("settlement-engine", () => {
   const bigGamePools: PoolConfig[] = [
     {
       name: "front",
-      disp: "Front Nine",
+      disp: "Front",
       pct: 25,
       metric: "quota_front",
       splitType: "places",
@@ -65,7 +65,7 @@ describe("settlement-engine", () => {
     },
     {
       name: "back",
-      disp: "Back Nine",
+      disp: "Back",
       pct: 25,
       metric: "quota_back",
       splitType: "places",
@@ -73,7 +73,7 @@ describe("settlement-engine", () => {
     },
     {
       name: "overall",
-      disp: "Overall",
+      disp: "Total",
       pct: 25,
       metric: "quota_overall",
       splitType: "places",
@@ -92,7 +92,7 @@ describe("settlement-engine", () => {
     it("calculates places payouts correctly", () => {
       const pool: PoolConfig = {
         name: "front",
-        disp: "Front Nine",
+        disp: "Front",
         pct: 25,
         metric: "quota_front",
         splitType: "places",
@@ -340,7 +340,7 @@ describe("settlement-engine", () => {
       const simplePools: PoolConfig[] = [
         {
           name: "overall",
-          disp: "Overall",
+          disp: "Total",
           pct: 75,
           metric: "quota_overall",
           splitType: "places",

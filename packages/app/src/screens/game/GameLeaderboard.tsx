@@ -2,13 +2,15 @@ import { useEffect, useMemo, useRef } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
-import { getMetaOption } from "spicylib/scoring";
+import { getGameSpecField, getMetaOption } from "spicylib/scoring";
 import {
+  type BetColumnInfo,
   getHoleRows,
   getPlayerColumns,
   type HoleData,
   LeaderboardTable,
   type PlayerColumn,
+  VerticalLeaderboard,
 } from "@/components/game/leaderboard";
 import type { LeaderboardViewMode } from "@/contexts/GameContext";
 import { useGameContext } from "@/contexts/GameContext";
@@ -83,7 +85,12 @@ export function GameLeaderboard(): React.ReactElement | null {
     : undefined;
   const isQuotaGame = specType === "quota";
 
-  // Normalize viewMode: quota games don't have "net" — redirect to "points"
+  // Use vertical layout for large games (multi-group or many players)
+  // Computed early so normalization below can reference it
+  const multiGroupValue = getGameSpecField(game, "multi_group");
+  const isMultiGroup = multiGroupValue === true || multiGroupValue === "true";
+
+  // Quota games don't have "net" — redirect to "points"
   useEffect(() => {
     if (isQuotaGame && viewMode === "net") {
       setLeaderboardViewMode("points");
@@ -139,6 +146,42 @@ export function GameLeaderboard(): React.ReactElement | null {
     return result;
   }, [holeRowsFingerprint, game]);
 
+  const useVerticalLayout = isMultiGroup || playerColumns.length > 7;
+
+  // Extract bets from game.bets CoList, falling back to spec JSON for legacy games.
+  // Computed directly (no useMemo) because game.bets is a Jazz reactive proxy —
+  // nested bet items load progressively and wouldn't trigger useMemo recalculation.
+  const bets: BetColumnInfo[] = (() => {
+    // Try game.bets first (populated during game creation)
+    if (game?.bets?.$isLoaded && game.bets.length > 0) {
+      const result: BetColumnInfo[] = [];
+      for (const bet of game.bets) {
+        if (!bet?.$isLoaded) continue;
+        result.push({
+          name: bet.name,
+          disp: bet.disp,
+          scope: bet.scope,
+          scoringType: bet.scoringType,
+          placesPaid: bet.placesPaid ?? undefined,
+        });
+      }
+      if (result.length > 0) return result;
+    }
+
+    // Fallback: parse bets from game spec JSON (for legacy games without game.bets)
+    if (!scoringContext?.gameSpec) return [];
+    const betsJson = getMetaOption(scoringContext.gameSpec, "bets") as
+      | string
+      | undefined;
+    if (!betsJson) return [];
+    try {
+      const parsed = JSON.parse(betsJson) as BetColumnInfo[];
+      return parsed.filter((b) => b.name && b.disp && b.scope && b.scoringType);
+    } catch {
+      return [];
+    }
+  })();
+
   if (!game) {
     return null;
   }
@@ -155,57 +198,69 @@ export function GameLeaderboard(): React.ReactElement | null {
 
   return (
     <Screen style={styles.screen}>
-      {/* View Mode Toggle */}
-      <View style={styles.toggleContainer}>
-        {isQuotaGame ? (
-          <ButtonGroup
-            buttons={[
-              {
-                label: "gross",
-                onPress: () => setLeaderboardViewMode("gross"),
-              },
-              {
-                label: "points",
-                onPress: () => setLeaderboardViewMode("points"),
-              },
-              {
-                label: "skins",
-                onPress: () => setLeaderboardViewMode("skins"),
-              },
-            ]}
-            selectedIndex={quotaViewModeIndex(viewMode)}
-          />
-        ) : (
-          <ButtonGroup
-            buttons={[
-              {
-                label: "gross",
-                onPress: () => setLeaderboardViewMode("gross"),
-              },
-              {
-                label: "net",
-                onPress: () => setLeaderboardViewMode("net"),
-              },
-              {
-                label: "points",
-                onPress: () => setLeaderboardViewMode("points"),
-              },
-            ]}
-            selectedIndex={
-              viewMode === "gross" ? 0 : viewMode === "net" ? 1 : 2
-            }
-          />
-        )}
-      </View>
+      {/* View Mode Toggle — only for horizontal layout */}
+      {!useVerticalLayout && (
+        <View style={styles.toggleContainer}>
+          {isQuotaGame ? (
+            <ButtonGroup
+              buttons={[
+                {
+                  label: "gross",
+                  onPress: () => setLeaderboardViewMode("gross"),
+                },
+                {
+                  label: "points",
+                  onPress: () => setLeaderboardViewMode("points"),
+                },
+                {
+                  label: "skins",
+                  onPress: () => setLeaderboardViewMode("skins"),
+                },
+              ]}
+              selectedIndex={quotaViewModeIndex(viewMode)}
+            />
+          ) : (
+            <ButtonGroup
+              buttons={[
+                {
+                  label: "gross",
+                  onPress: () => setLeaderboardViewMode("gross"),
+                },
+                {
+                  label: "net",
+                  onPress: () => setLeaderboardViewMode("net"),
+                },
+                {
+                  label: "points",
+                  onPress: () => setLeaderboardViewMode("points"),
+                },
+              ]}
+              selectedIndex={
+                viewMode === "gross" ? 0 : viewMode === "net" ? 1 : 2
+              }
+            />
+          )}
+        </View>
+      )}
 
-      {/* Leaderboard Table */}
-      <LeaderboardTable
-        playerColumns={playerColumns}
-        holeRows={holeRows}
-        scoreboard={scoreboard}
-        viewMode={viewMode}
-        playerQuotas={scoringContext?.playerQuotas}
-      />
+      {/* Leaderboard */}
+      {useVerticalLayout ? (
+        <VerticalLeaderboard
+          playerColumns={playerColumns}
+          holeRows={holeRows}
+          scoreboard={scoreboard}
+          playerQuotas={scoringContext?.playerQuotas}
+          bets={bets}
+        />
+      ) : (
+        <LeaderboardTable
+          playerColumns={playerColumns}
+          holeRows={holeRows}
+          scoreboard={scoreboard}
+          viewMode={viewMode}
+          playerQuotas={scoringContext?.playerQuotas}
+        />
+      )}
     </Screen>
   );
 }

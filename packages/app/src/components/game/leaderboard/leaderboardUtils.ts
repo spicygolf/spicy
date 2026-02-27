@@ -374,3 +374,114 @@ export function getScoreToPar(
   // For gross: gross - par, for net: net - par
   return viewMode === "gross" ? playerResult.scoreToPar : playerResult.netToPar;
 }
+
+// =============================================================================
+// Vertical Leaderboard Helpers
+// =============================================================================
+
+export interface VerticalColumn {
+  key: string;
+  label: string;
+  /** Which summary type to use for getSummaryValue() */
+  summaryType: "out" | "in" | "total";
+  /** Override viewMode for this column (e.g., skins always uses "skins") */
+  viewModeOverride?: ViewMode;
+  /** Number of places paid for this bet (for ranking cutoff) */
+  placesPaid?: number;
+}
+
+export interface VerticalPlayerData {
+  playerId: string;
+  firstName: string;
+  lastName: string;
+  rank: number;
+  values: Record<string, number | null>;
+}
+
+/** Minimal bet info needed for column derivation */
+export interface BetColumnInfo {
+  name: string;
+  disp: string;
+  scope: string;
+  scoringType: string;
+  placesPaid?: number;
+}
+
+const SCOPE_TO_SUMMARY: Record<string, "out" | "in" | "total"> = {
+  front9: "out",
+  back9: "in",
+  all18: "total",
+};
+
+/**
+ * Derive column definitions from game bets.
+ * Falls back to Front/Back/Total when no bets are available.
+ */
+export function getVerticalColumns(bets: BetColumnInfo[]): VerticalColumn[] {
+  if (bets.length === 0) {
+    return [
+      { key: "front", label: "Front", summaryType: "out" },
+      { key: "back", label: "Back", summaryType: "in" },
+      { key: "total", label: "Total", summaryType: "total" },
+    ];
+  }
+
+  return bets
+    .filter((bet) => SCOPE_TO_SUMMARY[bet.scope] !== undefined)
+    .map((bet) => ({
+      key: bet.name,
+      label: bet.disp,
+      summaryType: SCOPE_TO_SUMMARY[bet.scope] as "out" | "in" | "total",
+      viewModeOverride:
+        bet.scoringType === "skins" ? ("skins" as ViewMode) : undefined,
+      placesPaid: bet.placesPaid,
+    }));
+}
+
+/**
+ * Get player data for the vertical leaderboard, sorted by rank.
+ * Reuses getSummaryValue() for all computations.
+ */
+export function getVerticalPlayerData(
+  scoreboard: Scoreboard | null,
+  playerColumns: PlayerColumn[],
+  columns: VerticalColumn[],
+  viewMode: ViewMode,
+  playerQuotas: Map<string, PlayerQuota> | null | undefined,
+): VerticalPlayerData[] {
+  const rows: VerticalPlayerData[] = [];
+
+  for (const player of playerColumns) {
+    const values: Record<string, number | null> = {};
+
+    for (const col of columns) {
+      // In gross mode, ignore column overrides — all columns show gross scores.
+      // In bets mode (viewMode="points"), skins columns override to "skins".
+      const effectiveViewMode =
+        viewMode === "gross" ? "gross" : (col.viewModeOverride ?? viewMode);
+      values[col.key] = getSummaryValue(
+        scoreboard,
+        player.playerId,
+        col.summaryType,
+        effectiveViewMode,
+        playerQuotas,
+      );
+    }
+
+    const cumulative = scoreboard?.cumulative.players[player.playerId];
+    const rank = cumulative?.rank ?? playerColumns.indexOf(player) + 1;
+
+    rows.push({
+      playerId: player.playerId,
+      firstName: player.firstName,
+      lastName: player.lastName,
+      rank,
+      values,
+    });
+  }
+
+  // Sort by rank (ascending)
+  rows.sort((a, b) => a.rank - b.rank);
+
+  return rows;
+}

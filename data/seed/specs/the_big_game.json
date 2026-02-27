@@ -81,7 +81,7 @@
       "name": "bets",
       "disp": "Bets",
       "valueType": "text",
-      "value": "[{\"name\":\"front\",\"disp\":\"Front Nine\",\"scope\":\"front9\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"back\",\"disp\":\"Back Nine\",\"scope\":\"back9\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"overall\",\"disp\":\"Overall\",\"scope\":\"all18\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"skins\",\"disp\":\"Skins\",\"scope\":\"all18\",\"scoringType\":\"skins\",\"pct\":25,\"splitType\":\"per_unit\"}]"
+      "value": "[{\"name\":\"front\",\"disp\":\"Front\",\"scope\":\"front9\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"back\",\"disp\":\"Back\",\"scope\":\"back9\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"overall\",\"disp\":\"Total\",\"scope\":\"all18\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"skins\",\"disp\":\"Skins\",\"scope\":\"all18\",\"scoringType\":\"skins\",\"pct\":25,\"splitType\":\"per_unit\"}]"
     },
     {
       "name": "multi_group",

@@ -15,7 +15,7 @@ export const Bet = co.map({
   /** Bet identifier (e.g., "front", "back", "overall", "skins", "press_1") */
   name: z.string(),
 
-  /** Display name (e.g., "Front Nine", "Skins", "Press (Hole 7)") */
+  /** Display name (e.g., "Front", "Skins", "Press (Hole 7)") */
   disp: z.string(),
 
   /**
