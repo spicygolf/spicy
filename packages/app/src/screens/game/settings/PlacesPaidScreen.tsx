@@ -50,7 +50,7 @@ function distributeAmounts(potTotal: number, pcts: number[]): number[] {
   return floored;
 }
 
-export function PlacesPaidScreen({ navigation }: Props) {
+export function PlacesPaidScreen(_props: Props) {
   const { theme } = useUnistyles();
   const { game } = useGame(undefined, {
     resolve: {
@@ -61,7 +61,7 @@ export function PlacesPaidScreen({ navigation }: Props) {
   });
   const isOrganizer = useIsOrganizer(game);
 
-  // Derive values directly from Jazz reactive data (no useMemo — Jazz handles reactivity)
+  // Derive values directly from Jazz reactive data
   const currentPlaces = getGameOptionNumber(game?.spec, "places_paid", 3);
   const buyIn = getGameOptionNumber(game?.spec, "buy_in", 0);
 
@@ -132,8 +132,12 @@ export function PlacesPaidScreen({ navigation }: Props) {
   const pctTotal = activePcts.reduce((sum, p) => sum + p, 0);
   const isValid = pctTotal === 100;
 
-  const handleSave = useCallback(() => {
-    if (!game?.spec?.$isLoaded || !isValid || isOrganizer === false) return;
+  // Auto-save to Jazz whenever places/pcts change and are valid.
+  // Skip the initial sync (handled by the initialized effect above).
+  useEffect(() => {
+    if (!initialized.current) return;
+    if (!isValid) return;
+    if (!game?.spec?.$isLoaded || isOrganizer === false) return;
 
     // Save places_paid game option
     const existingOpt = game.spec.places_paid;
@@ -143,7 +147,6 @@ export function PlacesPaidScreen({ navigation }: Props) {
         value: String(places),
       });
     } else {
-      // Option doesn't exist yet (legacy game or missing from catalog) — create it
       game.spec.$jazz.set("places_paid", {
         name: "places_paid",
         disp: "Places Paid",
@@ -155,7 +158,7 @@ export function PlacesPaidScreen({ navigation }: Props) {
       } satisfies GameOption);
     }
 
-    // Update payout pools - set placesPaid and payoutPcts on all "places" type pools
+    // Update payout pools
     if (game.payoutPools?.$isLoaded) {
       for (const pool of game.payoutPools) {
         if (pool?.$isLoaded && pool.splitType === "places") {
@@ -167,9 +170,7 @@ export function PlacesPaidScreen({ navigation }: Props) {
         }
       }
     }
-
-    navigation.goBack();
-  }, [game, places, pcts, isValid, isOrganizer, navigation]);
+  }, [places, pcts, isValid, game, isOrganizer]);
 
   return (
     <Screen>
@@ -288,15 +289,6 @@ export function PlacesPaidScreen({ navigation }: Props) {
             </Text>
           )}
         </View>
-
-        {/* Save Button */}
-        <Pressable
-          style={[styles.saveButton, !isValid && styles.saveButtonDisabled]}
-          onPress={handleSave}
-          disabled={!isValid}
-        >
-          <Text style={styles.saveButtonText}>Save</Text>
-        </Pressable>
       </ScrollView>
     </Screen>
   );
@@ -482,19 +474,5 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 12,
     color: theme.colors.error,
     textAlign: "center",
-  },
-  saveButton: {
-    backgroundColor: theme.colors.action,
-    borderRadius: 8,
-    paddingVertical: theme.gap(1.25),
-    alignItems: "center",
-  },
-  saveButtonDisabled: {
-    opacity: 0.5,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: theme.colors.actionText,
   },
 }));
