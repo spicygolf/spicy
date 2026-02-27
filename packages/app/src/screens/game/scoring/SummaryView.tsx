@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
-import type { Scoreboard } from "spicylib/scoring";
+import type { Payout, Scoreboard } from "spicylib/scoring";
 import { getTeamRunningScore } from "spicylib/scoring";
 import { HoleHeader } from "@/components/game/scoring";
 import { Button, Text } from "@/ui";
@@ -12,7 +12,7 @@ export interface SummaryViewProps {
   totalHoles: number;
   onPrevHole: () => void;
   onNextHole: () => void;
-  netPositions?: Record<string, number> | null;
+  payouts?: Payout[] | null;
 }
 
 interface PlayerSummary {
@@ -97,10 +97,23 @@ function getPlayerTeamPoints(scoreboard: Scoreboard): Map<string, number> {
 function buildPlayerSummaries(
   game: Game,
   scoreboard: Scoreboard | null,
-  netPositions?: Record<string, number> | null,
+  payouts?: Payout[] | null,
 ): PlayerSummary[] {
   if (!scoreboard || !game.players?.$isLoaded) {
     return [];
+  }
+
+  // Sum gross payouts per player (what they collect, not net profit)
+  const grossByPlayer = new Map<string, number>();
+  if (payouts) {
+    for (const p of payouts) {
+      if (p.amount > 0) {
+        grossByPlayer.set(
+          p.playerId,
+          (grossByPlayer.get(p.playerId) ?? 0) + p.amount,
+        );
+      }
+    }
   }
 
   // Get team-based points for each player (from last hole's runningDiff)
@@ -122,6 +135,8 @@ function buildPlayerSummaries(
     // Calculate par for only the holes THIS player has scored
     const parForPlayer = getParForPlayer(scoreboard, playerId);
 
+    const gross = grossByPlayer.get(playerId) ?? 0;
+
     summaries.push({
       playerId,
       name: player.name,
@@ -129,16 +144,12 @@ function buildPlayerSummaries(
       toPar: cumulative.grossTotal - parForPlayer,
       points,
       holesPlayed: cumulative.holesPlayed,
-      payout: (() => {
-        const net = netPositions?.[playerId] ?? null;
-        // Only show positive payouts — negative values are just the buy-in loss
-        return net != null && net > 0 ? net : null;
-      })(),
+      payout: gross > 0 ? gross : null,
     });
   }
 
   // Sort by payout (descending) when available, otherwise by gross (ascending)
-  if (netPositions) {
+  if (payouts) {
     summaries.sort((a, b) => (b.payout ?? 0) - (a.payout ?? 0));
   } else {
     summaries.sort((a, b) => a.gross - b.gross);
@@ -163,10 +174,10 @@ export function SummaryView({
   totalHoles,
   onPrevHole,
   onNextHole,
-  netPositions,
+  payouts,
 }: SummaryViewProps) {
-  const playerSummaries = buildPlayerSummaries(game, scoreboard, netPositions);
-  const hasPayout = netPositions != null;
+  const playerSummaries = buildPlayerSummaries(game, scoreboard, payouts);
+  const hasPayout = payouts != null;
 
   return (
     <>

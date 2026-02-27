@@ -121,7 +121,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   })();
 
   const settlement = useSettlement(game, scoreboard, scoringContext, bets);
-  const netPositions = settlement?.netPositions ?? null;
+  const payouts = settlement?.payouts ?? null;
 
   // Rapid per-player score entry mode
   const [rapidEntryMode, setRapidEntryMode] = useState(false);
@@ -316,7 +316,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               totalHoles={holesList.length}
               onPrevHole={handlePrevHole}
               onNextHole={handleNextHole}
-              netPositions={netPositions}
+              payouts={payouts}
             />
           ) : showChooser ? (
             <TeamChooserView

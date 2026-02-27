@@ -22,7 +22,6 @@ interface VerticalLeaderboardProps {
   scoreboard: Scoreboard | null;
   playerQuotas?: Map<string, PlayerQuota> | null;
   bets: BetColumnInfo[];
-  netPositions?: Record<string, number> | null;
   payouts?: Payout[] | null;
   placesPaid?: number;
 }
@@ -144,7 +143,6 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   scoreboard,
   playerQuotas,
   bets,
-  netPositions,
   payouts,
   placesPaid,
 }: VerticalLeaderboardProps) {
@@ -153,7 +151,7 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
 
   const columns = useMemo(() => {
     const base = getVerticalColumns(bets);
-    if (netPositions) {
+    if (payouts) {
       return [
         ...base,
         {
@@ -165,16 +163,16 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
       ];
     }
     return base;
-  }, [bets, netPositions, placesPaid]);
+  }, [bets, payouts, placesPaid]);
 
   // Default sort to payout column when settlement data is available
   useEffect(
     function setDefaultPayoutSort() {
-      if (netPositions && sort === null) {
+      if (payouts && sort === null) {
         setSort({ columnKey: "$", direction: "desc" });
       }
     },
-    [netPositions, sort],
+    [payouts, sort],
   );
 
   const playerData = useMemo(() => {
@@ -185,15 +183,24 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
       SUMMARY_VIEW_MODE,
       playerQuotas,
     );
-    if (netPositions) {
+    if (payouts) {
+      // Sum gross payouts per player (what they collect, not net profit)
+      const grossByPlayer = new Map<string, number>();
+      for (const p of payouts) {
+        if (p.amount > 0) {
+          grossByPlayer.set(
+            p.playerId,
+            (grossByPlayer.get(p.playerId) ?? 0) + p.amount,
+          );
+        }
+      }
       for (const player of data) {
-        const net = netPositions[player.playerId] ?? null;
-        // Only show positive payouts — negative values are just the buy-in loss
-        player.values["$"] = net != null && net > 0 ? net : null;
+        const gross = grossByPlayer.get(player.playerId) ?? 0;
+        player.values["$"] = gross > 0 ? gross : null;
       }
     }
     return data;
-  }, [scoreboard, playerColumns, columns, playerQuotas, netPositions]);
+  }, [scoreboard, playerColumns, columns, playerQuotas, payouts]);
 
   const betPayoutLookup = useMemo(
     () => (payouts ? buildBetPayoutLookup(payouts) : null),
