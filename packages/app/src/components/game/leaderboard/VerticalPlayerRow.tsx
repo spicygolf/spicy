@@ -66,8 +66,11 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
         <View style={styles.valuesContainer}>
           {columns.map((col) => {
             const val = summaryValues[col.key];
-            const isSkins = col.viewModeOverride === "skins";
-            const effectiveMode = col.viewModeOverride ?? viewMode;
+            const effectiveMode =
+              viewMode === "gross"
+                ? "gross"
+                : (col.viewModeOverride ?? viewMode);
+            const isSkins = effectiveMode === "skins";
             const showColor =
               !isSkins && effectiveMode === "points" && val != null;
             return (

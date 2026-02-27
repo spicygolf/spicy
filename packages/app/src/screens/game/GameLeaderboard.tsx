@@ -85,7 +85,14 @@ export function GameLeaderboard(): React.ReactElement | null {
     : undefined;
   const isQuotaGame = specType === "quota";
 
-  // Normalize viewMode: quota games don't have "net" — redirect to "points"
+  // Use vertical layout for large games (multi-group or many players)
+  // Computed early so normalization below can reference it
+  const multiGroupValue = getGameSpecField(game, "multi_group");
+  const isMultiGroup = multiGroupValue === true || multiGroupValue === "true";
+
+  // Normalize viewMode for unsupported modes:
+  // - Quota games don't have "net" — redirect to "points"
+  // - Vertical layout only supports "gross" and "points" (shown as "bets")
   useEffect(() => {
     if (isQuotaGame && viewMode === "net") {
       setLeaderboardViewMode("points");
@@ -141,9 +148,6 @@ export function GameLeaderboard(): React.ReactElement | null {
     return result;
   }, [holeRowsFingerprint, game]);
 
-  // Use vertical layout for large games (multi-group or many players)
-  const multiGroupValue = getGameSpecField(game, "multi_group");
-  const isMultiGroup = multiGroupValue === true || multiGroupValue === "true";
   const useVerticalLayout = isMultiGroup || playerColumns.length > 7;
 
   // Extract bets from game for vertical leaderboard columns
@@ -180,7 +184,21 @@ export function GameLeaderboard(): React.ReactElement | null {
     <Screen style={styles.screen}>
       {/* View Mode Toggle */}
       <View style={styles.toggleContainer}>
-        {isQuotaGame ? (
+        {useVerticalLayout ? (
+          <ButtonGroup
+            buttons={[
+              {
+                label: "gross",
+                onPress: () => setLeaderboardViewMode("gross"),
+              },
+              {
+                label: "bets",
+                onPress: () => setLeaderboardViewMode("points"),
+              },
+            ]}
+            selectedIndex={viewMode === "gross" ? 0 : 1}
+          />
+        ) : isQuotaGame ? (
           <ButtonGroup
             buttons={[
               {

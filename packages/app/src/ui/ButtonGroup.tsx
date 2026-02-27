@@ -44,13 +44,7 @@ export function ButtonGroup({
               />
             )}
             {button.label && (
-              <Text
-                style={
-                  isSelected
-                    ? { ...styles.label, ...styles.selectedText }
-                    : styles.label
-                }
-              >
+              <Text style={[styles.label, isSelected && styles.selectedText]}>
                 {button.label}
               </Text>
             )}
@@ -89,8 +83,6 @@ const styles = StyleSheet.create((theme) => ({
     textAlign: "center",
     flexShrink: 1,
     flexGrow: 0,
-    numberOfLines: 1,
-    ellipsizeMode: "tail",
   },
   selectedText: {
     color: theme.colors.background,

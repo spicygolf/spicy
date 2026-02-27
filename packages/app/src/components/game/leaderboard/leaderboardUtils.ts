@@ -451,7 +451,10 @@ export function getVerticalPlayerData(
     const values: Record<string, number | null> = {};
 
     for (const col of columns) {
-      const effectiveViewMode = col.viewModeOverride ?? viewMode;
+      // In gross mode, ignore column overrides — all columns show gross scores.
+      // In bets mode (viewMode="points"), skins columns override to "skins".
+      const effectiveViewMode =
+        viewMode === "gross" ? "gross" : (col.viewModeOverride ?? viewMode);
       values[col.key] = getSummaryValue(
         scoreboard,
         player.playerId,
