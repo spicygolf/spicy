@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
+import type { Payout, PlayerQuota, Scoreboard } from "spicylib/scoring";
 import { rankWithTies } from "spicylib/scoring";
 import { Text } from "@/ui";
 import {
@@ -23,6 +23,7 @@ interface VerticalLeaderboardProps {
   playerQuotas?: Map<string, PlayerQuota> | null;
   bets: BetColumnInfo[];
   netPositions?: Record<string, number> | null;
+  payouts?: Payout[] | null;
   placesPaid?: number;
 }
 
@@ -95,6 +96,32 @@ function sortAndRankPlayerData(
   return result;
 }
 
+/** Per-bet payout info for a single player on a single pool. */
+export interface BetPayoutInfo {
+  rankLabel: string;
+  amount: number;
+}
+
+/**
+ * Index payouts by playerId → poolName for fast lookup.
+ * rankLabel is pre-computed by the settlement engine.
+ */
+function buildBetPayoutLookup(
+  payouts: Payout[],
+): Map<string, Map<string, BetPayoutInfo>> {
+  const result = new Map<string, Map<string, BetPayoutInfo>>();
+  for (const p of payouts) {
+    if (p.amount <= 0) continue;
+    let playerMap = result.get(p.playerId);
+    if (!playerMap) {
+      playerMap = new Map();
+      result.set(p.playerId, playerMap);
+    }
+    playerMap.set(p.poolName, { rankLabel: p.rankLabel, amount: p.amount });
+  }
+  return result;
+}
+
 /** Summary columns always show "points" mode (skins columns override to "skins") */
 const SUMMARY_VIEW_MODE: ViewMode = "points";
 
@@ -105,6 +132,7 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   playerQuotas,
   bets,
   netPositions,
+  payouts,
   placesPaid,
 }: VerticalLeaderboardProps) {
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
@@ -157,6 +185,11 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   const rankedPlayers = useMemo(
     () => sortAndRankPlayerData(playerData, sort, columns),
     [playerData, sort, columns],
+  );
+
+  const betPayoutLookup = useMemo(
+    () => (payouts ? buildBetPayoutLookup(payouts) : null),
+    [payouts],
   );
 
   const handleToggle = useCallback((playerId: string) => {
@@ -227,6 +260,7 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
           holeRows={holeRows}
           scoreboard={scoreboard}
           playerQuotas={playerQuotas}
+          betPayouts={betPayoutLookup?.get(player.playerId) ?? null}
         />
       ))}
     </ScrollView>

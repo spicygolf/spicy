@@ -13,6 +13,7 @@ import {
   type VerticalColumn,
 } from "./leaderboardUtils";
 import { ScoreCell } from "./ScoreCell";
+import type { BetPayoutInfo } from "./VerticalLeaderboard";
 
 interface VerticalPlayerRowProps {
   playerId: string;
@@ -26,6 +27,7 @@ interface VerticalPlayerRowProps {
   holeRows: HoleData[];
   scoreboard: Scoreboard | null;
   playerQuotas?: Map<string, PlayerQuota> | null;
+  betPayouts?: Map<string, BetPayoutInfo> | null;
 }
 
 export const VerticalPlayerRow = memo(function VerticalPlayerRow({
@@ -40,6 +42,7 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
   holeRows,
   scoreboard,
   playerQuotas,
+  betPayouts,
 }: VerticalPlayerRowProps) {
   const fullName = lastName ? `${firstName} ${lastName}` : firstName;
   const handlePress = useCallback(
@@ -67,6 +70,7 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
             const val = summaryValues[col.key];
             const isSkins = col.viewModeOverride === "skins";
             const showColor = !isSkins && val != null;
+            const payout = betPayouts?.get(col.key);
             return (
               <View key={col.key} style={styles.valueCell}>
                 <Text
@@ -79,6 +83,12 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
                 >
                   {formatValue(val)}
                 </Text>
+                {payout && (
+                  <Text style={styles.payoutText}>
+                    {payout.rankLabel ? `${payout.rankLabel} ` : ""}$
+                    {payout.amount}
+                  </Text>
+                )}
               </View>
             );
           })}
@@ -505,6 +515,11 @@ const styles = StyleSheet.create((theme) => ({
   },
   skinsText: {
     color: theme.colors.secondary,
+  },
+  payoutText: {
+    fontSize: 10,
+    color: theme.colors.success,
+    fontVariant: ["tabular-nums"],
   },
   positiveText: {
     color: theme.colors.success,

@@ -10,6 +10,8 @@
  *   const debts = reconcileDebts(payouts, players.length, potTotal);
  */
 
+import { rankWithTies } from "./ranking-engine";
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -35,6 +37,8 @@ export interface Payout {
   playerName: string;
   poolName: string;
   place?: number;
+  /** Tie-aware rank label (e.g., "1", "T2"). Empty string for per_unit pools. */
+  rankLabel: string;
   metricValue: number;
   amount: number;
 }
@@ -127,25 +131,33 @@ export function calculatePoolPayouts(
       const placesPaid = Math.min(pool.placesPaid ?? 3, ranked.length);
       const pcts = getPayoutPcts(placesPaid, pool.payoutPcts);
 
+      // Compute tie-aware ranks for paid players
+      const paidPlayers = ranked.slice(0, placesPaid);
+      const tieRanked = rankWithTies(paidPlayers, (p) => p.value, "higher");
+
       // Calculate payouts with remainder tracking to avoid drift
       let totalPaid = 0;
-      for (let i = 0; i < placesPaid; i++) {
-        const player = ranked[i];
+      for (let i = 0; i < tieRanked.length; i++) {
+        const entry = tieRanked[i];
+        if (!entry) continue;
         const pct = pcts[i];
-        if (!player || pct === undefined) continue;
+        if (pct === undefined) continue;
 
         // For last payout, give remainder to avoid rounding drift
-        const isLast = i === placesPaid - 1;
+        const isLast = i === tieRanked.length - 1;
         const amount = isLast
           ? poolAmount - totalPaid
           : Math.round((poolAmount * pct) / 100);
 
+        const label =
+          entry.tieCount > 1 ? `T${entry.rank}` : String(entry.rank);
         payouts.push({
-          playerId: player.playerId,
-          playerName: player.playerName,
+          playerId: entry.item.playerId,
+          playerName: entry.item.playerName,
           poolName: pool.name,
-          place: i + 1,
-          metricValue: player.value,
+          place: entry.rank,
+          rankLabel: label,
+          metricValue: entry.item.value,
           amount,
         });
         totalPaid += amount;
@@ -177,6 +189,7 @@ export function calculatePoolPayouts(
           playerId: player.playerId,
           playerName: player.playerName,
           poolName: pool.name,
+          rankLabel: "",
           metricValue: player.value,
           amount,
         });
@@ -193,6 +206,7 @@ export function calculatePoolPayouts(
           playerName: winner.playerName,
           poolName: pool.name,
           place: 1,
+          rankLabel: "1",
           metricValue: winner.value,
           amount: poolAmount,
         });

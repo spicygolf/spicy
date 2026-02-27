@@ -191,6 +191,7 @@ export function GameLeaderboard(): React.ReactElement | null {
 
   const settlement = useSettlement(game, scoreboard, scoringContext, bets);
   const netPositions = settlement?.netPositions ?? null;
+  const payouts = settlement?.payouts ?? null;
   const placesPaid = getGameOptionNumber(game?.spec, "places_paid", 3);
 
   if (!game) {
@@ -263,6 +264,7 @@ export function GameLeaderboard(): React.ReactElement | null {
           playerQuotas={scoringContext?.playerQuotas}
           bets={bets}
           netPositions={netPositions}
+          payouts={payouts}
           placesPaid={placesPaid}
         />
       ) : (
