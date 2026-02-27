@@ -10,7 +10,6 @@ import {
   getVerticalPlayerData,
   type HoleData,
   type PlayerColumn,
-  type VerticalColumn,
   type VerticalPlayerData,
   type ViewMode,
 } from "./leaderboardUtils";
@@ -23,7 +22,6 @@ interface VerticalLeaderboardProps {
   playerQuotas?: Map<string, PlayerQuota> | null;
   bets: BetColumnInfo[];
   payouts?: Payout[] | null;
-  placesPaid?: number;
 }
 
 type SortDirection = "asc" | "desc";
@@ -48,7 +46,6 @@ interface RankedPlayer {
 function sortAndRankPlayerData(
   data: VerticalPlayerData[],
   sort: SortState | null,
-  columns: VerticalColumn[],
   betPayoutLookup: Map<string, Map<string, BetPayoutInfo>> | null,
 ): RankedPlayer[] {
   if (!sort) {
@@ -82,19 +79,11 @@ function sortAndRankPlayerData(
     sort.direction === "asc" ? "lower" : "higher",
   );
 
-  // Fallback: placesPaid for columns without settlement data (e.g., "$")
-  const activeColumn = columns.find((c) => c.key === sort.columnKey);
-  const placesPaid = activeColumn?.placesPaid;
-
   const result: RankedPlayer[] = ranked.map(({ item, rank, tieCount }) => {
     if (hasSettlementData) {
       // Use settlement engine's pre-computed rank label
       const payout = betPayoutLookup?.get(item.playerId)?.get(sort.columnKey);
       return { player: item, rankLabel: payout?.rankLabel ?? "" };
-    }
-    // Fallback: compute rank label from rankWithTies (for "$" column etc.)
-    if (placesPaid !== undefined && rank > placesPaid) {
-      return { player: item, rankLabel: "" };
     }
     const label = tieCount > 1 ? `T${rank}` : String(rank);
     return { player: item, rankLabel: label };
@@ -144,7 +133,6 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   playerQuotas,
   bets,
   payouts,
-  placesPaid,
 }: VerticalLeaderboardProps) {
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortState | null>(null);
@@ -158,12 +146,11 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
           key: "$",
           label: "$",
           summaryType: "total" as const,
-          placesPaid,
         },
       ];
     }
     return base;
-  }, [bets, payouts, placesPaid]);
+  }, [bets, payouts]);
 
   // Default sort to payout column when settlement data is available
   useEffect(
@@ -208,8 +195,8 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   );
 
   const rankedPlayers = useMemo(
-    () => sortAndRankPlayerData(playerData, sort, columns, betPayoutLookup),
-    [playerData, sort, columns, betPayoutLookup],
+    () => sortAndRankPlayerData(playerData, sort, betPayoutLookup),
+    [playerData, sort, betPayoutLookup],
   );
 
   const handleToggle = useCallback((playerId: string) => {

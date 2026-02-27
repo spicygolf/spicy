@@ -398,8 +398,6 @@ export interface VerticalColumn {
   summaryType: "out" | "in" | "total";
   /** Override viewMode for this column (e.g., skins always uses "skins") */
   viewModeOverride?: ViewMode;
-  /** Number of places paid for this bet (for ranking cutoff) */
-  placesPaid?: number;
 }
 
 export interface VerticalPlayerData {
@@ -448,7 +446,6 @@ export function getVerticalColumns(bets: BetColumnInfo[]): VerticalColumn[] {
       summaryType: SCOPE_TO_SUMMARY[bet.scope] as "out" | "in" | "total",
       viewModeOverride:
         bet.scoringType === "skins" ? ("skins" as ViewMode) : undefined,
-      placesPaid: bet.placesPaid,
     }));
 }
 
