@@ -137,9 +137,11 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
   const [userSort, setUserSort] = useState<SortState | null>(null);
 
+  const hasPayouts = payouts != null && payouts.length > 0;
+
   const columns = useMemo(() => {
     const base = getVerticalColumns(bets);
-    if (payouts) {
+    if (hasPayouts) {
       return [
         ...base,
         {
@@ -150,7 +152,7 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
       ];
     }
     return base;
-  }, [bets, payouts]);
+  }, [bets, hasPayouts]);
 
   // Default to payout column when settlement data is available and user hasn't sorted.
   // Validate userSort against current columns — the sorted column may have been removed
@@ -161,7 +163,7 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
       : null;
   const sort =
     validUserSort ??
-    (payouts ? { columnKey: "$", direction: "desc" as const } : null);
+    (hasPayouts ? { columnKey: "$", direction: "desc" as const } : null);
 
   const playerData = useMemo(() => {
     const data = getVerticalPlayerData(
@@ -171,7 +173,7 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
       SUMMARY_VIEW_MODE,
       playerQuotas,
     );
-    if (!payouts) return data;
+    if (!hasPayouts || !payouts) return data;
 
     const grossByPlayer = getGrossPayoutsByPlayer(payouts);
     return data.map((player) => {

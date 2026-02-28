@@ -103,7 +103,8 @@ function buildPlayerSummaries(
     return [];
   }
 
-  const grossByPlayer = payouts
+  const hasPayouts = payouts != null && payouts.length > 0;
+  const grossByPlayer = hasPayouts
     ? getGrossPayoutsByPlayer(payouts)
     : new Map<string, number>();
 
@@ -140,7 +141,7 @@ function buildPlayerSummaries(
   }
 
   // Sort by payout (descending) when available, otherwise by gross (ascending)
-  if (payouts) {
+  if (hasPayouts) {
     summaries.sort((a, b) => (b.payout ?? 0) - (a.payout ?? 0));
   } else {
     summaries.sort((a, b) => a.gross - b.gross);
@@ -201,7 +202,7 @@ export function SummaryView({
   payouts,
 }: SummaryViewProps) {
   const playerSummaries = buildPlayerSummaries(game, scoreboard, payouts);
-  const hasPayout = payouts != null;
+  const hasPayout = payouts != null && payouts.length > 0;
 
   return (
     <>
