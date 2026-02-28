@@ -36,6 +36,7 @@ export interface Payout {
   playerId: string;
   playerName: string;
   poolName: string;
+  poolDisp: string;
   place?: number;
   /** Tie-aware rank label (e.g., "1", "T2"). Empty string for per_unit pools. */
   rankLabel: string;
@@ -200,6 +201,7 @@ export function calculatePoolPayouts(
           playerId: entry.item.playerId,
           playerName: entry.item.playerName,
           poolName: pool.name,
+          poolDisp: pool.disp,
           place: entry.rank,
           rankLabel: label,
           metricValue: entry.item.value,
@@ -233,6 +235,7 @@ export function calculatePoolPayouts(
           playerId: player.playerId,
           playerName: player.playerName,
           poolName: pool.name,
+          poolDisp: pool.disp,
           rankLabel: "",
           metricValue: player.value,
           amount,
@@ -251,6 +254,7 @@ export function calculatePoolPayouts(
           playerId: winner.playerId,
           playerName: winner.playerName,
           poolName: pool.name,
+          poolDisp: pool.disp,
           place: 1,
           rankLabel: "1",
           metricValue: winner.value,

@@ -156,6 +156,42 @@ function formatPayout(value: number): string {
   return `$${value}`;
 }
 
+/** Convert a numeric rank to ordinal: 1→"1st", 2→"2nd", 3→"3rd", 4→"4th" */
+function toOrdinal(n: number): string {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return `${n}${s[(v - 20) % 10] ?? s[v] ?? s[0]}`;
+}
+
+/**
+ * Build a winnings summary string for a player.
+ * e.g. "Front: 1st, Back: T2, Total: 1st" or "Back: T1, Skins: 1"
+ */
+function buildWinningsSummary(
+  payouts: Payout[],
+  playerId: string,
+): string | null {
+  const playerPayouts = payouts.filter(
+    (p) => p.playerId === playerId && p.amount > 0,
+  );
+  if (playerPayouts.length === 0) return null;
+
+  return playerPayouts
+    .map((p) => {
+      // per_unit pools (skins): show count
+      if (p.rankLabel === "") {
+        return `${p.poolDisp}: ${p.metricValue}`;
+      }
+      // Tie rank (e.g. "T2"): use as-is
+      if (p.rankLabel.startsWith("T")) {
+        return `${p.poolDisp}: ${p.rankLabel}`;
+      }
+      // Solo rank: convert to ordinal
+      return `${p.poolDisp}: ${toOrdinal(Number(p.rankLabel))}`;
+    })
+    .join(", ");
+}
+
 export function SummaryView({
   game,
   scoreboard,
@@ -177,7 +213,7 @@ export function SummaryView({
       <View style={styles.content}>
         <View style={styles.card}>
           {/* Header Row */}
-          <View style={styles.row}>
+          <View style={[styles.row, styles.headerRow]}>
             <View style={styles.playerColumn}>
               <Text style={styles.headerText}>Player</Text>
             </View>
@@ -203,44 +239,54 @@ export function SummaryView({
               player.holesPlayed < totalHoles
                 ? `thru ${player.holesPlayed}`
                 : "";
+            const winnings = hasPayout
+              ? buildWinningsSummary(payouts, player.playerId)
+              : null;
 
             return (
-              <View key={player.playerId} style={styles.row}>
-                <View style={styles.playerColumn}>
-                  <Text style={styles.playerName} numberOfLines={1}>
-                    {player.name}
-                  </Text>
-                  {thru ? <Text style={styles.thruText}>{thru}</Text> : null}
-                </View>
-                <View style={styles.numberColumn}>
-                  <Text style={styles.scoreText}>{player.gross}</Text>
-                </View>
-                <View style={styles.numberColumn}>
-                  <Text style={styles.scoreText}>
-                    {formatWithSign(player.toPar, true)}
-                  </Text>
-                </View>
-                <View style={styles.numberColumn}>
-                  <Text style={styles.scoreText}>
-                    {formatWithSign(player.points)}
-                  </Text>
-                </View>
-                {hasPayout && (
-                  <View style={styles.numberColumn}>
-                    {player.payout != null ? (
-                      <Text
-                        style={[
-                          styles.scoreText,
-                          player.payout > 0 && styles.payoutPositive,
-                        ]}
-                      >
-                        {formatPayout(player.payout)}
-                      </Text>
-                    ) : (
-                      <Text style={styles.scoreText}>-</Text>
-                    )}
+              <View key={player.playerId} style={styles.playerBlock}>
+                <View style={styles.row}>
+                  <View style={styles.playerColumn}>
+                    <Text style={styles.playerName} numberOfLines={1}>
+                      {player.name}
+                    </Text>
+                    {thru ? <Text style={styles.thruText}>{thru}</Text> : null}
                   </View>
-                )}
+                  <View style={styles.numberColumn}>
+                    <Text style={styles.scoreText}>{player.gross}</Text>
+                  </View>
+                  <View style={styles.numberColumn}>
+                    <Text style={styles.scoreText}>
+                      {formatWithSign(player.toPar, true)}
+                    </Text>
+                  </View>
+                  <View style={styles.numberColumn}>
+                    <Text style={styles.scoreText}>
+                      {formatWithSign(player.points)}
+                    </Text>
+                  </View>
+                  {hasPayout && (
+                    <View style={styles.numberColumn}>
+                      {player.payout != null ? (
+                        <Text
+                          style={[
+                            styles.scoreText,
+                            player.payout > 0 && styles.payoutPositive,
+                          ]}
+                        >
+                          {formatPayout(player.payout)}
+                        </Text>
+                      ) : (
+                        <Text style={styles.scoreText}>-</Text>
+                      )}
+                    </View>
+                  )}
+                </View>
+                {winnings ? (
+                  <Text style={styles.winningsText} numberOfLines={1}>
+                    {winnings}
+                  </Text>
+                ) : null}
               </View>
             );
           })}
@@ -273,8 +319,13 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.background,
     borderRadius: 8,
   },
+  playerBlock: {
+    paddingVertical: theme.gap(1),
+  },
   row: {
     flexDirection: "row",
+  },
+  headerRow: {
     paddingVertical: theme.gap(1),
   },
   playerColumn: {
@@ -296,6 +347,11 @@ const styles = StyleSheet.create((theme) => ({
   thruText: {
     fontSize: 11,
     color: theme.colors.secondary,
+  },
+  winningsText: {
+    fontSize: 11,
+    color: theme.colors.secondary,
+    marginTop: 2,
   },
   scoreText: {
     fontSize: 16,
