@@ -1,6 +1,10 @@
-import type { Game } from "spicylib/schema";
+import type { Game, GameSpec } from "spicylib/schema";
 import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
-import { getTeamHolePoints, isHoleComplete } from "spicylib/scoring";
+import {
+  getMetaOption,
+  getTeamHolePoints,
+  isHoleComplete,
+} from "spicylib/scoring";
 
 export type ViewMode = "gross" | "net" | "points" | "skins";
 
@@ -495,4 +499,41 @@ export function getVerticalPlayerData(
   rows.sort((a, b) => a.rank - b.rank);
 
   return rows;
+}
+
+/**
+ * Extract BetColumnInfo from a game, falling back to spec JSON for legacy games.
+ * Computed directly (no useMemo) because game.bets is a Jazz reactive proxy.
+ */
+export function extractBets(
+  game: Game | null,
+  gameSpec: GameSpec | undefined,
+): BetColumnInfo[] {
+  if (game?.bets?.$isLoaded && game.bets.length > 0) {
+    const result: BetColumnInfo[] = [];
+    for (const bet of game.bets) {
+      if (!bet?.$isLoaded) continue;
+      result.push({
+        name: bet.name,
+        disp: bet.disp,
+        scope: bet.scope,
+        scoringType: bet.scoringType,
+        pct: bet.pct,
+        splitType: bet.splitType,
+        placesPaid: bet.placesPaid ?? undefined,
+      });
+    }
+    if (result.length > 0) return result;
+  }
+
+  // Fallback: parse bets from game spec JSON (for legacy games without game.bets)
+  if (!gameSpec) return [];
+  const betsJson = getMetaOption(gameSpec, "bets") as string | undefined;
+  if (!betsJson) return [];
+  try {
+    const parsed = JSON.parse(betsJson) as BetColumnInfo[];
+    return parsed.filter((b) => b.name && b.disp && b.scope && b.scoringType);
+  } catch {
+    return [];
+  }
 }

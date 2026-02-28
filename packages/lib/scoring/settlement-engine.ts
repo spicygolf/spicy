@@ -243,6 +243,8 @@ export function calculatePoolPayouts(
     }
 
     case "winner_take_all": {
+      // Note: ties are broken by original sort order (first player wins).
+      // Future: consider splitting among tied leaders for fairness.
       const winner = ranked[0];
       if (winner) {
         payouts.push({
@@ -425,6 +427,22 @@ export function calculateSettlement(
     netPositions,
     debts,
   };
+}
+
+/**
+ * Sum gross payouts per player (what they collect, not net profit).
+ * Players with zero total are omitted.
+ */
+export function getGrossPayoutsByPlayer(
+  payouts: Payout[],
+): Map<string, number> {
+  const gross = new Map<string, number>();
+  for (const p of payouts) {
+    if (p.amount > 0) {
+      gross.set(p.playerId, (gross.get(p.playerId) ?? 0) + p.amount);
+    }
+  }
+  return gross;
 }
 
 // =============================================================================

@@ -1,8 +1,8 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Payout, PlayerQuota, Scoreboard } from "spicylib/scoring";
-import { rankWithTies } from "spicylib/scoring";
+import { getGrossPayoutsByPlayer, rankWithTies } from "spicylib/scoring";
 import { Text } from "@/ui";
 import {
   type BetColumnInfo,
@@ -135,7 +135,7 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   payouts,
 }: VerticalLeaderboardProps) {
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortState | null>(null);
+  const [userSort, setUserSort] = useState<SortState | null>(null);
 
   const columns = useMemo(() => {
     const base = getVerticalColumns(bets);
@@ -152,15 +152,10 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
     return base;
   }, [bets, payouts]);
 
-  // Default sort to payout column when settlement data is available
-  useEffect(
-    function setDefaultPayoutSort() {
-      if (payouts && sort === null) {
-        setSort({ columnKey: "$", direction: "desc" });
-      }
-    },
-    [payouts, sort],
-  );
+  // Default to payout column when settlement data is available and user hasn't sorted
+  const sort =
+    userSort ??
+    (payouts ? { columnKey: "$", direction: "desc" as const } : null);
 
   const playerData = useMemo(() => {
     const data = getVerticalPlayerData(
@@ -171,16 +166,7 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
       playerQuotas,
     );
     if (payouts) {
-      // Sum gross payouts per player (what they collect, not net profit)
-      const grossByPlayer = new Map<string, number>();
-      for (const p of payouts) {
-        if (p.amount > 0) {
-          grossByPlayer.set(
-            p.playerId,
-            (grossByPlayer.get(p.playerId) ?? 0) + p.amount,
-          );
-        }
-      }
+      const grossByPlayer = getGrossPayoutsByPlayer(payouts);
       for (const player of data) {
         const gross = grossByPlayer.get(player.playerId) ?? 0;
         player.values["$"] = gross > 0 ? gross : null;
@@ -203,18 +189,22 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
     setExpandedPlayerId((prev) => (prev === playerId ? null : playerId));
   }, []);
 
-  const handleColumnPress = useCallback((columnKey: string) => {
-    setSort((prev) => {
-      if (prev?.columnKey === columnKey) {
-        return {
+  const handleColumnPress = useCallback(
+    (columnKey: string) => {
+      // Compare against effective sort (includes default) for toggle behavior
+      const current = sort;
+      if (current?.columnKey === columnKey) {
+        setUserSort({
           columnKey,
-          direction: prev.direction === "desc" ? "asc" : "desc",
-        };
+          direction: current.direction === "desc" ? "asc" : "desc",
+        });
+      } else {
+        // Default to descending (highest first, natural for points/skins)
+        setUserSort({ columnKey, direction: "desc" });
       }
-      // Default to descending (highest first, natural for points/skins)
-      return { columnKey, direction: "desc" };
-    });
-  }, []);
+    },
+    [sort],
+  );
 
   return (
     <ScrollView style={styles.container}>

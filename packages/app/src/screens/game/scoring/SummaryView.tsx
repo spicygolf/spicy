@@ -2,7 +2,7 @@ import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
 import type { Payout, Scoreboard } from "spicylib/scoring";
-import { getTeamRunningScore } from "spicylib/scoring";
+import { getGrossPayoutsByPlayer, getTeamRunningScore } from "spicylib/scoring";
 import { HoleHeader } from "@/components/game/scoring";
 import { Button, Text } from "@/ui";
 
@@ -103,18 +103,9 @@ function buildPlayerSummaries(
     return [];
   }
 
-  // Sum gross payouts per player (what they collect, not net profit)
-  const grossByPlayer = new Map<string, number>();
-  if (payouts) {
-    for (const p of payouts) {
-      if (p.amount > 0) {
-        grossByPlayer.set(
-          p.playerId,
-          (grossByPlayer.get(p.playerId) ?? 0) + p.amount,
-        );
-      }
-    }
-  }
+  const grossByPlayer = payouts
+    ? getGrossPayoutsByPlayer(payouts)
+    : new Map<string, number>();
 
   // Get team-based points for each player (from last hole's runningDiff)
   const teamPoints = getPlayerTeamPoints(scoreboard);
@@ -159,13 +150,10 @@ function buildPlayerSummaries(
 }
 
 /**
- * Format a dollar amount with sign prefix: "+$120", "-$40", "$0"
+ * Format a gross payout amount: "$120", "$0"
  */
 function formatPayout(value: number): string {
-  const abs = Math.abs(value);
-  if (value > 0) return `+$${abs}`;
-  if (value < 0) return `-$${abs}`;
-  return "$0";
+  return `$${value}`;
 }
 
 export function SummaryView({
@@ -237,17 +225,20 @@ export function SummaryView({
                     {formatWithSign(player.points)}
                   </Text>
                 </View>
-                {hasPayout && player.payout != null && (
+                {hasPayout && (
                   <View style={styles.numberColumn}>
-                    <Text
-                      style={[
-                        styles.scoreText,
-                        player.payout > 0 && styles.payoutPositive,
-                        player.payout < 0 && styles.payoutNegative,
-                      ]}
-                    >
-                      {formatPayout(player.payout)}
-                    </Text>
+                    {player.payout != null ? (
+                      <Text
+                        style={[
+                          styles.scoreText,
+                          player.payout > 0 && styles.payoutPositive,
+                        ]}
+                      >
+                        {formatPayout(player.payout)}
+                      </Text>
+                    ) : (
+                      <Text style={styles.scoreText}>-</Text>
+                    )}
                   </View>
                 )}
               </View>
@@ -311,9 +302,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   payoutPositive: {
     color: theme.colors.action,
-  },
-  payoutNegative: {
-    color: theme.colors.error,
   },
   buttonContainer: {
     marginTop: theme.gap(4),
