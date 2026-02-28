@@ -89,6 +89,24 @@ const StatusLabels: Record<Status, string> = {
 };
 ```
 
+## Scrollable List Pattern
+
+**Severity**: HIGH | **Enforcement**: STRICT
+
+When a `FlatList`, `DraggableFlatList`, or `ScrollView` lives inside a `Screen` (which has `flex: 1`), apply these styles to `contentContainerStyle` so content scrolls properly and doesn't get cut off at the bottom:
+
+```typescript
+contentContainerStyle={styles.listContainer}
+
+// In styles:
+listContainer: {
+  flexGrow: 1,       // Allows scroll content to fill available space
+  paddingBottom: theme.gap(5),  // Prevents last items from hiding behind bottom safe area / nav
+},
+```
+
+**Why**: Without `flexGrow: 1`, the list won't fill the screen when content is short. Without `paddingBottom`, the last items can be hidden behind the bottom safe area or obscured by floating buttons.
+
 ## Quality Checks Required
 
 **Severity**: HIGH | **Enforcement**: STRICT

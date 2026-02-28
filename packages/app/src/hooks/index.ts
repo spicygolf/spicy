@@ -8,6 +8,7 @@ export * from "./useCreateGame";
 export * from "./useCurrentHole";
 export * from "./useCurrentHoleScores";
 export * from "./useDeleteGame";
+export * from "./useFavoriteTeeActions";
 export * from "./useGame";
 export * from "./useGameInitialization";
 export * from "./useGameList";

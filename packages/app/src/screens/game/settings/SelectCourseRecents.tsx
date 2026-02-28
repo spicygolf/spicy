@@ -1,14 +1,9 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
 import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
 import { useCallback } from "react";
-import { View } from "react-native";
-import DraggableFlatList, {
-  type RenderItemParams,
-} from "react-native-draggable-flatlist";
+import { FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { CourseTee } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
 import { FavoriteTeeItem } from "@/components/game/settings/FavoriteTeeItem";
 import { useFavoriteTeeActions, useGame } from "@/hooks";
@@ -17,10 +12,10 @@ import { Screen, Text } from "@/ui";
 
 type Props = MaterialTopTabScreenProps<
   SelectCourseTabParamList,
-  "SelectCourseFavorites"
+  "SelectCourseRecents"
 >;
 
-export function SelectCourseFavorites({ route, navigation }: Props) {
+export function SelectCourseRecents({ route, navigation }: Props) {
   const { playerId, roundId } = route.params;
   const { game } = useGame(undefined, {
     resolve: {
@@ -53,8 +48,6 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     );
   })();
 
-  // Find the round via game.rounds (RoundToGame), not player.rounds
-  // This is necessary because catalog players may not have the new round in their rounds list
   const round = (() => {
     if (!roundId || !game?.$isLoaded || !game.rounds?.$isLoaded) return null;
     const rtg = game.rounds.find(
@@ -63,7 +56,7 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     return rtg?.$isLoaded && rtg.round?.$isLoaded ? rtg.round : null;
   })();
 
-  const allFavorites = (() => {
+  const recentTees = (() => {
     if (
       !me?.$isLoaded ||
       !me.root?.$isLoaded ||
@@ -72,14 +65,18 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     ) {
       return [];
     }
-    // Filter by player gender
-    return me.root.favorites.courseTees.filter((fav) => {
+    const playerGender = player?.$isLoaded ? player.gender : "M";
+    const withLastUsed = me.root.favorites.courseTees.filter((fav) => {
       if (!fav?.$isLoaded || !fav.$jazz.has("tee") || !fav.tee?.$isLoaded)
         return false;
+      if (!fav.lastUsedAt) return false;
       const teeGender = fav.tee.gender;
-      const playerGender = player?.$isLoaded ? player.gender : "M";
-      // Show mixed tees and gender-matching tees
       return teeGender === "Mixed" || teeGender === playerGender;
+    });
+    return withLastUsed.sort((a, b) => {
+      const aTime = a?.$isLoaded && a.lastUsedAt ? a.lastUsedAt.getTime() : 0;
+      const bTime = b?.$isLoaded && b.lastUsedAt ? b.lastUsedAt.getTime() : 0;
+      return bTime - aTime;
     });
   })();
 
@@ -94,57 +91,6 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     me,
     goBack,
   });
-
-  const handleReorder = useCallback(
-    ({ data }: { data: MaybeLoaded<CourseTee>[] }) => {
-      if (
-        !me?.$isLoaded ||
-        !me.root?.$isLoaded ||
-        !me.root.favorites?.$isLoaded ||
-        !me.root.favorites.courseTees?.$isLoaded
-      ) {
-        return;
-      }
-
-      const courseTees = me.root.favorites.courseTees;
-
-      // Preserve favorites hidden by gender filter (they aren't in `data`)
-      const reorderedIds = new Set(
-        data
-          .filter((d): d is CourseTee & { $isLoaded: true } => !!d?.$isLoaded)
-          .map((d) => d.$jazz.id),
-      );
-      const hiddenItems = courseTees.filter(
-        (existing) =>
-          !existing?.$isLoaded || !reorderedIds.has(existing.$jazz.id),
-      );
-
-      // Clear and rebuild: reordered visible items first, then hidden items
-      while (courseTees.length > 0) {
-        courseTees.$jazz.splice(0, 1);
-      }
-      for (const item of [...data, ...hiddenItems]) {
-        // biome-ignore lint/suspicious/noExplicitAny: Jazz list type compatibility
-        courseTees.$jazz.push(item as any);
-      }
-    },
-    [me],
-  );
-
-  const renderItem = useCallback(
-    ({ item, drag, isActive }: RenderItemParams<MaybeLoaded<CourseTee>>) => {
-      return (
-        <FavoriteTeeItem
-          item={item}
-          drag={drag}
-          isActive={isActive}
-          onPress={() => handleSelectTee(item)}
-          onRemove={() => removeFavorite(item)}
-        />
-      );
-    },
-    [handleSelectTee, removeFavorite],
-  );
 
   if (!player) {
     return (
@@ -166,21 +112,13 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     );
   }
 
-  if (allFavorites.length === 0) {
+  if (recentTees.length === 0) {
     return (
       <Screen>
         <View style={styles.centerContainer}>
-          <FontAwesome6
-            name="star"
-            iconStyle="regular"
-            size={48}
-            color="#999"
-            style={styles.emptyIcon}
-          />
-          <Text style={styles.emptyTitle}>No Favorite Tees Yet</Text>
+          <Text style={styles.emptyTitle}>No Recent Tees</Text>
           <Text style={styles.emptyText}>
-            When you favorite a tee from the search tab,{"\n"}it will appear
-            here for quick access.
+            Courses you've used in past games{"\n"}will appear here.
           </Text>
         </View>
       </Screen>
@@ -189,11 +127,16 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
 
   return (
     <Screen>
-      <DraggableFlatList
-        data={allFavorites}
+      <FlatList
+        data={recentTees}
         keyExtractor={(item) => item.$jazz.id}
-        renderItem={renderItem}
-        onDragEnd={handleReorder}
+        renderItem={({ item }) => (
+          <FavoriteTeeItem
+            item={item}
+            onPress={() => handleSelectTee(item)}
+            onRemove={() => removeFavorite(item)}
+          />
+        )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={styles.listContainer}
         initialNumToRender={10}
@@ -210,9 +153,6 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
     alignItems: "center",
     padding: theme.gap(4),
-  },
-  emptyIcon: {
-    marginBottom: theme.gap(2),
   },
   emptyTitle: {
     fontSize: 20,
