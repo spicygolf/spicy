@@ -9,9 +9,11 @@ import { GameNav } from "@/components/game/GameNav";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
 import { SelectCourseFavorites } from "@/screens/game/settings/SelectCourseFavorites";
 import { SelectCourseManual } from "@/screens/game/settings/SelectCourseManual";
+import { SelectCourseRecents } from "@/screens/game/settings/SelectCourseRecents";
 import { SelectCourseSearch } from "@/screens/game/settings/SelectCourseSearch";
 
 export type SelectCourseTabParamList = {
+  SelectCourseRecents: { playerId: string; roundId?: string };
   SelectCourseFavorites: { playerId: string; roundId?: string };
   SelectCourseSearch: { playerId: string; roundId?: string };
   SelectCourseManual: { playerId: string; roundId?: string };
@@ -46,8 +48,16 @@ export function SelectCourseNavigator({ route }: Props) {
       <GameNav title="Select Course & Tees" showBack={true} />
       <Tabs.Navigator
         screenOptions={tabScreenOptions}
-        initialRouteName="SelectCourseFavorites"
+        initialRouteName="SelectCourseRecents"
       >
+        <Tabs.Screen
+          name="SelectCourseRecents"
+          component={SelectCourseRecents}
+          options={{
+            title: "Recents",
+          }}
+          initialParams={{ playerId, roundId }}
+        />
         <Tabs.Screen
           name="SelectCourseFavorites"
           component={SelectCourseFavorites}

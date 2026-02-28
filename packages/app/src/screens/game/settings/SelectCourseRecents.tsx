@@ -1,12 +1,8 @@
-import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
 import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
 import { useCallback } from "react";
-import { View } from "react-native";
-import DraggableFlatList, {
-  type RenderItemParams,
-} from "react-native-draggable-flatlist";
+import { FlatList, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { CourseTee } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
@@ -18,10 +14,10 @@ import { Screen, Text } from "@/ui";
 
 type Props = MaterialTopTabScreenProps<
   SelectCourseTabParamList,
-  "SelectCourseFavorites"
+  "SelectCourseRecents"
 >;
 
-export function SelectCourseFavorites({ route, navigation }: Props) {
+export function SelectCourseRecents({ route, navigation }: Props) {
   const { playerId, roundId } = route.params;
   const { game } = useGame(undefined, {
     resolve: {
@@ -54,8 +50,6 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     );
   })();
 
-  // Find the round via game.rounds (RoundToGame), not player.rounds
-  // This is necessary because catalog players may not have the new round in their rounds list
   const round = (() => {
     if (!roundId || !game?.$isLoaded || !game.rounds?.$isLoaded) return null;
     const rtg = game.rounds.find(
@@ -64,7 +58,7 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     return rtg?.$isLoaded && rtg.round?.$isLoaded ? rtg.round : null;
   })();
 
-  const allFavorites = (() => {
+  const recentTees = (() => {
     if (
       !me?.$isLoaded ||
       !me.root?.$isLoaded ||
@@ -73,18 +67,20 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     ) {
       return [];
     }
-    // Filter by player gender
-    return me.root.favorites.courseTees.filter((fav) => {
+    const playerGender = player?.$isLoaded ? player.gender : "M";
+    const withLastUsed = me.root.favorites.courseTees.filter((fav) => {
       if (!fav?.$isLoaded || !fav.$jazz.has("tee") || !fav.tee?.$isLoaded)
         return false;
+      if (!fav.lastUsedAt) return false;
       const teeGender = fav.tee.gender;
-      const playerGender = player?.$isLoaded ? player.gender : "M";
-      // Show mixed tees and gender-matching tees
       return teeGender === "Mixed" || teeGender === playerGender;
     });
+    return withLastUsed.sort((a, b) => {
+      const aTime = a?.$isLoaded && a.lastUsedAt ? a.lastUsedAt.getTime() : 0;
+      const bTime = b?.$isLoaded && b.lastUsedAt ? b.lastUsedAt.getTime() : 0;
+      return bTime - aTime;
+    });
   })();
-
-  const favoritedTees = allFavorites;
 
   const handleSelectTee = useCallback(
     async (favorite: MaybeLoaded<CourseTee>) => {
@@ -92,7 +88,6 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
         return;
       }
 
-      // Ensure course and tee are loaded
       const loadedFavorite = await favorite.$jazz.ensureLoaded({
         resolve: {
           course: true,
@@ -104,14 +99,11 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
         return;
       }
 
-      // Update lastUsedAt for recents tracking
       loadedFavorite.$jazz.set("lastUsedAt", new Date());
 
-      // Set the course and tee on the round
       round.$jazz.set("course", loadedFavorite.course);
       round.$jazz.set("tee", loadedFavorite.tee);
 
-      // Propagate course/tee to other players who don't have one set
       if (game?.$isLoaded && player?.$isLoaded) {
         propagateCourseTeeToPlayers(
           game,
@@ -149,47 +141,6 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     [me],
   );
 
-  const handleReorder = useCallback(
-    ({ data }: { data: MaybeLoaded<CourseTee>[] }) => {
-      if (
-        !me?.$isLoaded ||
-        !me.root?.$isLoaded ||
-        !me.root.favorites?.$isLoaded ||
-        !me.root.favorites.courseTees?.$isLoaded
-      ) {
-        return;
-      }
-
-      const courseTees = me.root.favorites.courseTees;
-
-      // Clear and rebuild list in new order
-      while (courseTees.length > 0) {
-        courseTees.$jazz.splice(0, 1);
-      }
-      for (const item of data) {
-        // Type assertion needed because items from DraggableFlatList are already loaded
-        // biome-ignore lint/suspicious/noExplicitAny: Jazz list type compatibility
-        courseTees.$jazz.push(item as any);
-      }
-    },
-    [me],
-  );
-
-  const renderItem = useCallback(
-    ({ item, drag, isActive }: RenderItemParams<MaybeLoaded<CourseTee>>) => {
-      return (
-        <FavoriteTeeItem
-          item={item}
-          drag={drag}
-          isActive={isActive}
-          onPress={() => handleSelectTee(item)}
-          onRemove={() => removeFavorite(item)}
-        />
-      );
-    },
-    [handleSelectTee, removeFavorite],
-  );
-
   if (!player) {
     return (
       <Screen>
@@ -210,21 +161,13 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     );
   }
 
-  if (favoritedTees.length === 0) {
+  if (recentTees.length === 0) {
     return (
       <Screen>
         <View style={styles.centerContainer}>
-          <FontAwesome6
-            name="star"
-            iconStyle="regular"
-            size={48}
-            color="#999"
-            style={styles.emptyIcon}
-          />
-          <Text style={styles.emptyTitle}>No Favorite Tees Yet</Text>
+          <Text style={styles.emptyTitle}>No Recent Tees</Text>
           <Text style={styles.emptyText}>
-            When you favorite a tee from the search tab,{"\n"}it will appear
-            here for quick access.
+            Courses you've used in past games{"\n"}will appear here.
           </Text>
         </View>
       </Screen>
@@ -233,11 +176,16 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
 
   return (
     <Screen>
-      <DraggableFlatList
-        data={favoritedTees}
+      <FlatList
+        data={recentTees}
         keyExtractor={(item) => item.$jazz.id}
-        renderItem={renderItem}
-        onDragEnd={handleReorder}
+        renderItem={({ item }) => (
+          <FavoriteTeeItem
+            item={item}
+            onPress={() => handleSelectTee(item)}
+            onRemove={() => removeFavorite(item)}
+          />
+        )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={styles.listContainer}
       />
@@ -251,9 +199,6 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
     alignItems: "center",
     padding: theme.gap(4),
-  },
-  emptyIcon: {
-    marginBottom: theme.gap(2),
   },
   emptyTitle: {
     fontSize: 20,
