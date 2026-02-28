@@ -80,13 +80,13 @@ function sortAndRankPlayerData(
   );
 
   const result: RankedPlayer[] = ranked.map(({ item, rank, tieCount }) => {
+    const computedLabel = tieCount > 1 ? `T${rank}` : String(rank);
     if (hasSettlementData) {
-      // Use settlement engine's pre-computed rank label
+      // Use settlement engine's pre-computed rank label, fall back to computed
       const payout = betPayoutLookup?.get(item.playerId)?.get(sort.columnKey);
-      return { player: item, rankLabel: payout?.rankLabel ?? "" };
+      return { player: item, rankLabel: payout?.rankLabel ?? computedLabel };
     }
-    const label = tieCount > 1 ? `T${rank}` : String(rank);
-    return { player: item, rankLabel: label };
+    return { player: item, rankLabel: computedLabel };
   });
 
   // Append null-value players at the bottom with no rank
