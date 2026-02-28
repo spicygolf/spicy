@@ -152,9 +152,15 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
     return base;
   }, [bets, payouts]);
 
-  // Default to payout column when settlement data is available and user hasn't sorted
+  // Default to payout column when settlement data is available and user hasn't sorted.
+  // Validate userSort against current columns — the sorted column may have been removed
+  // (e.g. "$" disappears when payouts become null).
+  const validUserSort =
+    userSort && columns.some((c) => c.key === userSort.columnKey)
+      ? userSort
+      : null;
   const sort =
-    userSort ??
+    validUserSort ??
     (payouts ? { columnKey: "$", direction: "desc" as const } : null);
 
   const playerData = useMemo(() => {
