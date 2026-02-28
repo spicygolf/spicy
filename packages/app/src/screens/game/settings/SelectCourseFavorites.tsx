@@ -84,8 +84,6 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     });
   })();
 
-  const favoritedTees = allFavorites;
-
   const handleSelectTee = useCallback(
     async (favorite: MaybeLoaded<CourseTee>) => {
       if (!round?.$isLoaded || !favorite?.$isLoaded) {
@@ -210,7 +208,7 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     );
   }
 
-  if (favoritedTees.length === 0) {
+  if (allFavorites.length === 0) {
     return (
       <Screen>
         <View style={styles.centerContainer}>
@@ -234,12 +232,15 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
   return (
     <Screen>
       <DraggableFlatList
-        data={favoritedTees}
+        data={allFavorites}
         keyExtractor={(item) => item.$jazz.id}
         renderItem={renderItem}
         onDragEnd={handleReorder}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={styles.listContainer}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
       />
     </Screen>
   );

@@ -1,26 +1,13 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { MaybeLoaded } from "jazz-tools";
-import { useEffect, useState } from "react";
+import { useCoState } from "jazz-tools/react-native";
 import { TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { CourseTee, TeeStatus } from "spicylib/schema";
+import type { TeeStatus } from "spicylib/schema";
+import { CourseTee } from "spicylib/schema";
 import { stateCode } from "spicylib/utils";
 import { FavoriteButton } from "@/components/common/FavoriteButton";
 import { Text } from "@/ui";
-
-interface TeeData {
-  teeName: string;
-  courseName: string;
-  facilityName: string | null;
-  city: string;
-  state: string;
-  gender: string;
-  totalYardage: number;
-  par: number | null;
-  rating: number | null;
-  slope: number | null;
-  status: TeeStatus | undefined;
-}
 
 interface FavoriteTeeItemProps {
   item: MaybeLoaded<CourseTee>;
@@ -42,75 +29,48 @@ export function FavoriteTeeItem({
   onPress,
   onRemove,
 }: FavoriteTeeItemProps) {
-  const [teeData, setTeeData] = useState<TeeData | null>(null);
-
-  useEffect(() => {
-    if (!item?.$isLoaded) {
-      setTeeData(null);
-      return;
-    }
-
-    const loadData = async () => {
-      // Load course and tee data
-      const loadedItem = await item.$jazz.ensureLoaded({
-        resolve: {
-          course: {
-            facility: true,
-          },
-          tee: {
-            holes: { $each: true },
-          },
+  const courseTee = useCoState(
+    CourseTee,
+    item?.$isLoaded ? item.$jazz.id : undefined,
+    {
+      resolve: {
+        course: {
+          facility: true,
         },
-      });
+        tee: {
+          holes: { $each: true },
+        },
+      },
+    },
+  );
 
-      if (!loadedItem.course?.$isLoaded || !loadedItem.tee?.$isLoaded) {
-        setTeeData(null);
-        return;
-      }
-
-      const course = loadedItem.course;
-      const tee = loadedItem.tee;
-
-      const par = tee.holes?.$isLoaded
-        ? tee.holes.reduce((sum, h) => sum + (h?.$isLoaded ? h.par : 0), 0)
-        : null;
-
-      const rating = tee.ratings?.total?.rating ?? null;
-
-      const slope = tee.ratings?.total?.slope ?? null;
-
-      setTeeData({
-        teeName: tee.name,
-        courseName: course.name,
-        facilityName:
-          course.facility?.$isLoaded && course.facility.name !== course.name
-            ? course.facility.name
-            : null,
-        city: course.city,
-        state: course.state,
-        gender: tee.gender,
-        totalYardage: tee.totalYardage,
-        par,
-        rating,
-        slope,
-        status: tee.status,
-      });
-    };
-
-    loadData();
-  }, [item]);
-
-  if (!teeData) {
+  if (
+    !courseTee?.$isLoaded ||
+    !courseTee.course?.$isLoaded ||
+    !courseTee.tee?.$isLoaded
+  ) {
     return null;
   }
+
+  const course = courseTee.course;
+  const tee = courseTee.tee;
+
+  const par = tee.holes?.$isLoaded
+    ? tee.holes.reduce((sum, h) => sum + (h?.$isLoaded ? h.par : 0), 0)
+    : null;
+  const rating = tee.ratings?.total?.rating ?? null;
+  const slope = tee.ratings?.total?.slope ?? null;
+  const facilityName =
+    course.facility?.$isLoaded && course.facility.name !== course.name
+      ? course.facility.name
+      : null;
+  const status: TeeStatus | undefined = tee.status;
 
   // Default isDraggable to true if drag handler is provided
   const isDraggable = isDraggableProp ?? !!drag;
 
   // Generate testID from course name for E2E testing
-  const courseNameSlug = teeData.courseName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-");
+  const courseNameSlug = course.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   const testId = `favorite-tee-${courseNameSlug}`;
 
   return (
@@ -128,19 +88,19 @@ export function FavoriteTeeItem({
           <View style={styles.topRow}>
             <View style={styles.favoriteInfo}>
               <View style={styles.teeNameRow}>
-                <Text style={styles.teeName}>{teeData.teeName}</Text>
-                {teeData.status === "inactive" && (
+                <Text style={styles.teeName}>{tee.name}</Text>
+                {status === "inactive" && (
                   <View style={styles.inactiveBadge}>
                     <Text style={styles.inactiveBadgeText}>Inactive</Text>
                   </View>
                 )}
               </View>
-              <Text style={styles.courseName}>{teeData.courseName}</Text>
-              {teeData.facilityName && (
-                <Text style={styles.facilityName}>{teeData.facilityName}</Text>
+              <Text style={styles.courseName}>{course.name}</Text>
+              {facilityName && (
+                <Text style={styles.facilityName}>{facilityName}</Text>
               )}
               <Text style={styles.courseLocation}>
-                {teeData.city}, {stateCode(teeData.state)}
+                {course.city}, {stateCode(course.state)}
               </Text>
             </View>
 
@@ -157,12 +117,11 @@ export function FavoriteTeeItem({
           </View>
 
           <Text style={styles.teeDetailText}>
-            {teeData.gender} • {teeData.totalYardage} yards • Par{" "}
-            {teeData.par ?? "—"}
-            {teeData.rating !== null && teeData.slope !== null && (
+            {tee.gender} • {tee.totalYardage} yards • Par {par ?? "—"}
+            {rating !== null && slope !== null && (
               <>
                 {" "}
-                • Rating: {teeData.rating.toFixed(1)} • Slope: {teeData.slope}
+                • Rating: {rating.toFixed(1)} • Slope: {slope}
               </>
             )}
           </Text>

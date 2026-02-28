@@ -188,6 +188,9 @@ export function SelectCourseRecents({ route, navigation }: Props) {
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={styles.listContainer}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
       />
     </Screen>
   );
