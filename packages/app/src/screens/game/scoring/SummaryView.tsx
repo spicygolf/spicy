@@ -126,7 +126,7 @@ function buildPlayerSummaries(
     // Calculate par for only the holes THIS player has scored
     const parForPlayer = getParForPlayer(scoreboard, playerId);
 
-    const gross = grossByPlayer.get(playerId) ?? 0;
+    const grossPayout = grossByPlayer.get(playerId) ?? 0;
 
     summaries.push({
       playerId,
@@ -135,7 +135,7 @@ function buildPlayerSummaries(
       toPar: cumulative.grossTotal - parForPlayer,
       points,
       holesPlayed: cumulative.holesPlayed,
-      payout: gross > 0 ? gross : null,
+      payout: grossPayout > 0 ? grossPayout : null,
     });
   }
 

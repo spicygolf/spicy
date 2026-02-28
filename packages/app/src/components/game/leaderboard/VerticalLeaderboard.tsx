@@ -165,14 +165,16 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
       SUMMARY_VIEW_MODE,
       playerQuotas,
     );
-    if (payouts) {
-      const grossByPlayer = getGrossPayoutsByPlayer(payouts);
-      for (const player of data) {
-        const gross = grossByPlayer.get(player.playerId) ?? 0;
-        player.values["$"] = gross > 0 ? gross : null;
-      }
-    }
-    return data;
+    if (!payouts) return data;
+
+    const grossByPlayer = getGrossPayoutsByPlayer(payouts);
+    return data.map((player) => {
+      const gross = grossByPlayer.get(player.playerId) ?? 0;
+      return {
+        ...player,
+        values: { ...player.values, $: gross > 0 ? gross : null },
+      };
+    });
   }, [scoreboard, playerColumns, columns, playerQuotas, payouts]);
 
   const betPayoutLookup = useMemo(

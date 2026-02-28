@@ -70,7 +70,10 @@ export function extractStablefordTotals(
       }
 
       for (const junk of playerResult.junk) {
-        if (junk.subType === "dot") {
+        if (
+          junk.subType === "dot" ||
+          (junk.subType === undefined && junk.name.startsWith("stableford_"))
+        ) {
           playerTotals.total += junk.value;
           if (isFront) {
             playerTotals.front += junk.value;
@@ -102,7 +105,10 @@ export function extractSkinCounts(scoreboard: Scoreboard): Map<string, number> {
 
     for (const [playerId, playerResult] of Object.entries(holeResult.players)) {
       for (const junk of playerResult.junk) {
-        if (junk.subType === "skin") {
+        if (
+          junk.subType === "skin" ||
+          (junk.subType === undefined && junk.name.endsWith("_skin"))
+        ) {
           counts.set(playerId, (counts.get(playerId) ?? 0) + 1);
         }
       }

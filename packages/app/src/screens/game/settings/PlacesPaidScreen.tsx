@@ -110,7 +110,7 @@ export function PlacesPaidScreen(_props: Props) {
 
       // Save places_paid game option
       const existingOpt = game.spec.places_paid;
-      if (existingOpt && existingOpt.type === "game") {
+      if (game.spec.$jazz.has("places_paid") && existingOpt?.type === "game") {
         game.spec.$jazz.set("places_paid", {
           ...(existingOpt as GameOption),
           value: String(newPlaces),
@@ -169,18 +169,16 @@ export function PlacesPaidScreen(_props: Props) {
       }
       const num = Number.parseInt(text, 10);
       if (Number.isNaN(num) || num < 0 || num > 100) return;
-      setPcts((prev) => {
-        const next = [...prev];
-        next[index] = num;
-        // Auto-save when percentages sum to 100
-        const activeSlice = next.slice(0, places);
-        if (activeSlice.reduce((s, p) => s + p, 0) === 100) {
-          saveToJazz(places, next);
-        }
-        return next;
-      });
+      const next = [...pcts];
+      next[index] = num;
+      setPcts(next);
+      // Auto-save when percentages sum to 100
+      const activeSlice = next.slice(0, places);
+      if (activeSlice.reduce((s, p) => s + p, 0) === 100) {
+        saveToJazz(places, next);
+      }
     },
-    [places, saveToJazz],
+    [pcts, places, saveToJazz],
   );
 
   const activePcts = pcts.slice(0, places);

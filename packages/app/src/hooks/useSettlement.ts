@@ -46,20 +46,18 @@ export function useSettlement(
     }
 
     // Convert BetColumnInfo to BetConfig
+    const validBets = bets.filter(
+      (b) =>
+        VALID_SCOPES.has(b.scope) && VALID_SCORING_TYPES.has(b.scoringType),
+    );
     const betConfigs: BetConfig[] = [];
-    for (const b of bets) {
-      if (
-        !VALID_SCOPES.has(b.scope) ||
-        !VALID_SCORING_TYPES.has(b.scoringType)
-      ) {
-        continue;
-      }
+    for (const b of validBets) {
       betConfigs.push({
         name: b.name,
         disp: b.disp,
         scope: b.scope as BetConfig["scope"],
         scoringType: b.scoringType as BetConfig["scoringType"],
-        pct: b.pct ?? 100 / bets.length,
+        pct: b.pct ?? 100 / validBets.length,
         splitType: VALID_SPLIT_TYPES.has(b.splitType ?? "")
           ? (b.splitType as BetConfig["splitType"])
           : "places",
