@@ -108,12 +108,22 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
 
       const courseTees = me.root.favorites.courseTees;
 
-      // Clear and rebuild list in new order
+      // Preserve favorites hidden by gender filter (they aren't in `data`)
+      const reorderedIds = new Set(
+        data
+          .filter((d): d is CourseTee & { $isLoaded: true } => !!d?.$isLoaded)
+          .map((d) => d.$jazz.id),
+      );
+      const hiddenItems = courseTees.filter(
+        (existing) =>
+          !existing?.$isLoaded || !reorderedIds.has(existing.$jazz.id),
+      );
+
+      // Clear and rebuild: reordered visible items first, then hidden items
       while (courseTees.length > 0) {
         courseTees.$jazz.splice(0, 1);
       }
-      for (const item of data) {
-        // Type assertion needed because items from DraggableFlatList are already loaded
+      for (const item of [...data, ...hiddenItems]) {
         // biome-ignore lint/suspicious/noExplicitAny: Jazz list type compatibility
         courseTees.$jazz.push(item as any);
       }
