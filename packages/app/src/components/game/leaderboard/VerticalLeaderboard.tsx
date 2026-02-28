@@ -186,8 +186,8 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   }, [scoreboard, playerColumns, columns, playerQuotas, payouts]);
 
   const betPayoutLookup = useMemo(
-    () => (payouts ? buildBetPayoutLookup(payouts) : null),
-    [payouts],
+    () => (hasPayouts && payouts ? buildBetPayoutLookup(payouts) : null),
+    [hasPayouts, payouts],
   );
 
   const rankedPlayers = useMemo(
