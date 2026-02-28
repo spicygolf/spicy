@@ -10,9 +10,8 @@ import DraggableFlatList, {
 import { StyleSheet } from "react-native-unistyles";
 import type { CourseTee } from "spicylib/schema";
 import { PlayerAccount } from "spicylib/schema";
-import { propagateCourseTeeToPlayers } from "spicylib/utils";
 import { FavoriteTeeItem } from "@/components/game/settings/FavoriteTeeItem";
-import { useGame } from "@/hooks";
+import { useFavoriteTeeActions, useGame } from "@/hooks";
 import type { SelectCourseTabParamList } from "@/navigators/SelectCourseNavigator";
 import { Screen, Text } from "@/ui";
 
@@ -84,68 +83,17 @@ export function SelectCourseFavorites({ route, navigation }: Props) {
     });
   })();
 
-  const handleSelectTee = useCallback(
-    async (favorite: MaybeLoaded<CourseTee>) => {
-      if (!round?.$isLoaded || !favorite?.$isLoaded) {
-        return;
-      }
+  const goBack = useCallback(() => {
+    navigation.getParent()?.goBack();
+  }, [navigation]);
 
-      // Ensure course and tee are loaded
-      const loadedFavorite = await favorite.$jazz.ensureLoaded({
-        resolve: {
-          course: true,
-          tee: true,
-        },
-      });
-
-      if (!loadedFavorite.course?.$isLoaded || !loadedFavorite.tee?.$isLoaded) {
-        return;
-      }
-
-      // Update lastUsedAt for recents tracking
-      loadedFavorite.$jazz.set("lastUsedAt", new Date());
-
-      // Set the course and tee on the round
-      round.$jazz.set("course", loadedFavorite.course);
-      round.$jazz.set("tee", loadedFavorite.tee);
-
-      // Propagate course/tee to other players who don't have one set
-      if (game?.$isLoaded && player?.$isLoaded) {
-        propagateCourseTeeToPlayers(
-          game,
-          loadedFavorite.course,
-          loadedFavorite.tee,
-          player.$jazz.id,
-        );
-      }
-
-      navigation.getParent()?.goBack();
-    },
-    [round, navigation, game, player],
-  );
-
-  const removeFavorite = useCallback(
-    async (favorite: MaybeLoaded<CourseTee>) => {
-      if (
-        !me?.$isLoaded ||
-        !me.root?.$isLoaded ||
-        !me.root.favorites?.$isLoaded ||
-        !me.root.favorites.courseTees?.$isLoaded ||
-        !favorite?.$isLoaded
-      ) {
-        return;
-      }
-
-      const courseTees = me.root.favorites.courseTees;
-      const index = courseTees.findIndex(
-        (f) => f?.$jazz.id === favorite.$jazz.id,
-      );
-      if (index >= 0) {
-        courseTees.$jazz.splice(index, 1);
-      }
-    },
-    [me],
-  );
+  const { handleSelectTee, removeFavorite } = useFavoriteTeeActions({
+    round,
+    game,
+    player,
+    me,
+    goBack,
+  });
 
   const handleReorder = useCallback(
     ({ data }: { data: MaybeLoaded<CourseTee>[] }) => {
