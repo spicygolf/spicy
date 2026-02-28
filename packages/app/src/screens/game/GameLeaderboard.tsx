@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native-unistyles";
 import type { Game } from "spicylib/schema";
 import { getGameSpecField, getMetaOption } from "spicylib/scoring";
 import {
-  type BetColumnInfo,
+  extractBets,
   getHoleRows,
   getPlayerColumns,
   type HoleData,
@@ -14,6 +14,7 @@ import {
 } from "@/components/game/leaderboard";
 import type { LeaderboardViewMode } from "@/contexts/GameContext";
 import { useGameContext } from "@/contexts/GameContext";
+import { useSettlement } from "@/hooks";
 import { ButtonGroup, Screen, Text } from "@/ui";
 
 /**
@@ -148,39 +149,10 @@ export function GameLeaderboard(): React.ReactElement | null {
 
   const useVerticalLayout = isMultiGroup || playerColumns.length > 7;
 
-  // Extract bets from game.bets CoList, falling back to spec JSON for legacy games.
-  // Computed directly (no useMemo) because game.bets is a Jazz reactive proxy —
-  // nested bet items load progressively and wouldn't trigger useMemo recalculation.
-  const bets: BetColumnInfo[] = (() => {
-    // Try game.bets first (populated during game creation)
-    if (game?.bets?.$isLoaded && game.bets.length > 0) {
-      const result: BetColumnInfo[] = [];
-      for (const bet of game.bets) {
-        if (!bet?.$isLoaded) continue;
-        result.push({
-          name: bet.name,
-          disp: bet.disp,
-          scope: bet.scope,
-          scoringType: bet.scoringType,
-          placesPaid: bet.placesPaid ?? undefined,
-        });
-      }
-      if (result.length > 0) return result;
-    }
+  const bets = extractBets(game, scoringContext?.gameSpec);
 
-    // Fallback: parse bets from game spec JSON (for legacy games without game.bets)
-    if (!scoringContext?.gameSpec) return [];
-    const betsJson = getMetaOption(scoringContext.gameSpec, "bets") as
-      | string
-      | undefined;
-    if (!betsJson) return [];
-    try {
-      const parsed = JSON.parse(betsJson) as BetColumnInfo[];
-      return parsed.filter((b) => b.name && b.disp && b.scope && b.scoringType);
-    } catch {
-      return [];
-    }
-  })();
+  const settlement = useSettlement(game, scoreboard, scoringContext, bets);
+  const payouts = settlement?.payouts ?? null;
 
   if (!game) {
     return null;
@@ -251,6 +223,7 @@ export function GameLeaderboard(): React.ReactElement | null {
           scoreboard={scoreboard}
           playerQuotas={scoringContext?.playerQuotas}
           bets={bets}
+          payouts={payouts}
         />
       ) : (
         <LeaderboardTable

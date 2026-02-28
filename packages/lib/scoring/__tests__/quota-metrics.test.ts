@@ -14,7 +14,10 @@ function makeScoreboard(
   holesPlayed: string[],
   playerJunkByHole: Record<
     string,
-    Record<string, { name: string; value: number }[]>
+    Record<
+      string,
+      { name: string; value: number; subType?: "dot" | "skin" | "carryover" }[]
+    >
   >,
 ): Scoreboard {
   const holes: Scoreboard["holes"] = {};
@@ -91,10 +94,10 @@ describe("extractStablefordTotals", () => {
       ],
       {
         p1: {
-          "1": [{ name: "stableford_par", value: 2 }],
-          "5": [{ name: "stableford_birdie", value: 3 }],
-          "10": [{ name: "stableford_par", value: 2 }],
-          "18": [{ name: "stableford_eagle", value: 4 }],
+          "1": [{ name: "stableford_par", value: 2, subType: "dot" }],
+          "5": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "10": [{ name: "stableford_par", value: 2, subType: "dot" }],
+          "18": [{ name: "stableford_eagle", value: 4, subType: "dot" }],
         },
       },
     );
@@ -132,11 +135,11 @@ describe("extractStablefordTotals", () => {
       ],
       {
         p1: {
-          "1": [{ name: "stableford_par", value: 2 }],
+          "1": [{ name: "stableford_par", value: 2, subType: "dot" }],
         },
         p2: {
-          "1": [{ name: "stableford_birdie", value: 3 }],
-          "10": [{ name: "stableford_bogey", value: 1 }],
+          "1": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "10": [{ name: "stableford_bogey", value: 1, subType: "dot" }],
         },
       },
     );
@@ -171,7 +174,7 @@ describe("extractStablefordTotals", () => {
       {
         p1: {
           "1": [
-            { name: "stableford_par", value: 2 },
+            { name: "stableford_par", value: 2, subType: "dot" },
             { name: "birdie", value: 1 },
           ],
         },
@@ -207,8 +210,8 @@ describe("extractStablefordTotals", () => {
 
     const scoreboard = makeScoreboard(holesPlayed, {
       p1: {
-        "10": [{ name: "stableford_birdie", value: 3 }], // front (first 9 in play order)
-        "1": [{ name: "stableford_par", value: 2 }], // back (second 9 in play order)
+        "10": [{ name: "stableford_birdie", value: 3, subType: "dot" }], // front (first 9 in play order)
+        "1": [{ name: "stableford_par", value: 2, subType: "dot" }], // back (second 9 in play order)
       },
     });
 
@@ -243,8 +246,8 @@ describe("extractStablefordTotals", () => {
       ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
       {
         p1: {
-          "3": [{ name: "stableford_par", value: 2 }],
-          "7": [{ name: "stableford_birdie", value: 3 }],
+          "3": [{ name: "stableford_par", value: 2, subType: "dot" }],
+          "7": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
         },
       },
     );
@@ -288,11 +291,11 @@ describe("extractSkinCounts", () => {
       ],
       {
         p1: {
-          "3": [{ name: "gross_skin", value: 1 }],
-          "7": [{ name: "gross_skin", value: 1 }],
+          "3": [{ name: "gross_skin", value: 1, subType: "skin" }],
+          "7": [{ name: "gross_skin", value: 1, subType: "skin" }],
         },
         p2: {
-          "5": [{ name: "gross_skin", value: 1 }],
+          "5": [{ name: "gross_skin", value: 1, subType: "skin" }],
         },
       },
     );
@@ -326,8 +329,8 @@ describe("extractSkinCounts", () => {
       ],
       {
         p1: {
-          "3": [{ name: "gross_skin", value: 1 }],
-          "7": [{ name: "gross_eagle_skin", value: 2 }],
+          "3": [{ name: "gross_skin", value: 1, subType: "skin" }],
+          "7": [{ name: "gross_eagle_skin", value: 2, subType: "skin" }],
         },
       },
     );
@@ -340,7 +343,7 @@ describe("extractSkinCounts", () => {
   test("returns empty map for no skins", () => {
     const scoreboard = makeScoreboard(["1", "2", "3"], {
       p1: {
-        "1": [{ name: "stableford_par", value: 2 }],
+        "1": [{ name: "stableford_par", value: 2, subType: "dot" }],
       },
     });
 
@@ -379,13 +382,13 @@ describe("calculateQuotaPerformances", () => {
       {
         p1: {
           // Front: 2+3+2 = 7
-          "1": [{ name: "stableford_par", value: 2 }],
-          "5": [{ name: "stableford_birdie", value: 3 }],
-          "9": [{ name: "stableford_par", value: 2 }],
+          "1": [{ name: "stableford_par", value: 2, subType: "dot" }],
+          "5": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "9": [{ name: "stableford_par", value: 2, subType: "dot" }],
           // Back: 2+2+4 = 8
-          "10": [{ name: "stableford_par", value: 2 }],
-          "14": [{ name: "stableford_par", value: 2 }],
-          "18": [{ name: "stableford_eagle", value: 4 }],
+          "10": [{ name: "stableford_par", value: 2, subType: "dot" }],
+          "14": [{ name: "stableford_par", value: 2, subType: "dot" }],
+          "18": [{ name: "stableford_eagle", value: 4, subType: "dot" }],
         },
       },
     );
@@ -464,15 +467,15 @@ describe("calculateQuotaPerformances", () => {
       {
         p1: {
           // Front: birdie on every hole = 3*9 = 27
-          "1": [{ name: "stableford_birdie", value: 3 }],
-          "2": [{ name: "stableford_birdie", value: 3 }],
-          "3": [{ name: "stableford_birdie", value: 3 }],
-          "4": [{ name: "stableford_birdie", value: 3 }],
-          "5": [{ name: "stableford_birdie", value: 3 }],
-          "6": [{ name: "stableford_birdie", value: 3 }],
-          "7": [{ name: "stableford_birdie", value: 3 }],
-          "8": [{ name: "stableford_birdie", value: 3 }],
-          "9": [{ name: "stableford_birdie", value: 3 }],
+          "1": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "2": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "3": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "4": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "5": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "6": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "7": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "8": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "9": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
         },
       },
     );
@@ -514,11 +517,11 @@ describe("calculateQuotaPerformances", () => {
       ],
       {
         p1: {
-          "1": [{ name: "stableford_par", value: 2 }],
+          "1": [{ name: "stableford_par", value: 2, subType: "dot" }],
         },
         p2: {
-          "1": [{ name: "stableford_birdie", value: 3 }],
-          "10": [{ name: "stableford_par", value: 2 }],
+          "1": [{ name: "stableford_birdie", value: 3, subType: "dot" }],
+          "10": [{ name: "stableford_par", value: 2, subType: "dot" }],
         },
       },
     );

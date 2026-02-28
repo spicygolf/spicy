@@ -13,6 +13,7 @@ import {
   type VerticalColumn,
 } from "./leaderboardUtils";
 import { ScoreCell } from "./ScoreCell";
+import type { BetPayoutInfo } from "./VerticalLeaderboard";
 
 interface VerticalPlayerRowProps {
   playerId: string;
@@ -26,6 +27,7 @@ interface VerticalPlayerRowProps {
   holeRows: HoleData[];
   scoreboard: Scoreboard | null;
   playerQuotas?: Map<string, PlayerQuota> | null;
+  betPayouts?: Map<string, BetPayoutInfo> | null;
 }
 
 export const VerticalPlayerRow = memo(function VerticalPlayerRow({
@@ -40,6 +42,7 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
   holeRows,
   scoreboard,
   playerQuotas,
+  betPayouts,
 }: VerticalPlayerRowProps) {
   const fullName = lastName ? `${firstName} ${lastName}` : firstName;
   const handlePress = useCallback(
@@ -66,7 +69,10 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
           {columns.map((col) => {
             const val = summaryValues[col.key];
             const isSkins = col.viewModeOverride === "skins";
-            const showColor = !isSkins && val != null;
+            const isDollar = col.key === "$";
+            const isQuota = !isSkins && !isDollar;
+            const showColor = isQuota && val != null;
+            const payout = betPayouts?.get(col.key);
             return (
               <View key={col.key} style={styles.valueCell}>
                 <Text
@@ -77,8 +83,14 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
                     showColor && val < 0 && styles.negativeText,
                   ]}
                 >
-                  {formatValue(val)}
+                  {formatValue(val, isQuota)}
                 </Text>
+                {payout && (
+                  <Text style={styles.payoutText}>
+                    {payout.rankLabel ? `${payout.rankLabel} ` : ""}$
+                    {payout.amount}
+                  </Text>
+                )}
               </View>
             );
           })}
@@ -98,8 +110,10 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
   );
 });
 
-function formatValue(val: number | null | undefined): string {
+function formatValue(val: number | null | undefined, showPlus = false): string {
   if (val === null || val === undefined) return "-";
+  if (showPlus && val === 0) return "E";
+  if (showPlus && val > 0) return `+${val}`;
   return String(val);
 }
 
@@ -187,10 +201,10 @@ function getStablefordPoints(
   if (!holeResult || !isHoleComplete(holeResult)) return null;
   const playerResult = holeResult.players[playerId];
   if (!playerResult || !playerResult.hasScore) return null;
-  // Sum only stableford junk, excluding skins and other junk
+  // Sum only dot-type junk (stableford scoring), excluding skins and other junk
   let total = 0;
   for (const junk of playerResult.junk) {
-    if (junk.name.startsWith("stableford_")) {
+    if (junk.subType === "dot") {
       total += junk.value;
     }
   }
@@ -222,7 +236,7 @@ function getStablefordTotal(
     const playerResult = holeResult.players[playerId];
     if (!playerResult || !playerResult.hasScore) continue;
     for (const junk of playerResult.junk) {
-      if (junk.name.startsWith("stableford_")) {
+      if (junk.subType === "dot") {
         total += junk.value;
         hasAny = true;
       }
@@ -277,7 +291,7 @@ function hasSkin(
   if (!holeResult || !isHoleComplete(holeResult)) return false;
   const playerResult = holeResult.players[playerId];
   if (!playerResult) return false;
-  return playerResult.junk.some((j) => j.name.endsWith("_skin"));
+  return playerResult.junk.some((j) => j.subType === "skin");
 }
 
 /**
@@ -469,14 +483,15 @@ const styles = StyleSheet.create((theme) => ({
   },
   summaryRow: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: theme.gap(1),
-    paddingHorizontal: theme.gap(1),
+    alignItems: "flex-start",
+    paddingVertical: theme.gap(0.75),
+    paddingHorizontal: theme.gap(0.5),
     minHeight: 44,
   },
   rankBadge: {
-    width: 28,
+    width: 24,
     alignItems: "center",
+    paddingTop: 2,
   },
   rankText: {
     fontSize: 12,
@@ -485,18 +500,19 @@ const styles = StyleSheet.create((theme) => ({
   },
   playerName: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 13,
     color: theme.colors.primary,
     marginLeft: theme.gap(0.5),
+    paddingTop: 2,
   },
   valuesContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
   valueCell: {
-    minWidth: 48,
+    minWidth: 42,
     alignItems: "center",
-    paddingHorizontal: 2,
+    paddingHorizontal: 1,
   },
   valueText: {
     fontSize: 14,
@@ -505,6 +521,11 @@ const styles = StyleSheet.create((theme) => ({
   },
   skinsText: {
     color: theme.colors.secondary,
+  },
+  payoutText: {
+    fontSize: 10,
+    color: theme.colors.secondary,
+    fontVariant: ["tabular-nums"],
   },
   positiveText: {
     color: theme.colors.success,

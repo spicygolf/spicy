@@ -1,6 +1,10 @@
-import type { Game } from "spicylib/schema";
+import type { Game, GameSpec } from "spicylib/schema";
 import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
-import { getTeamHolePoints, isHoleComplete } from "spicylib/scoring";
+import {
+  getMetaOption,
+  getTeamHolePoints,
+  isHoleComplete,
+} from "spicylib/scoring";
 
 export type ViewMode = "gross" | "net" | "points" | "skins";
 
@@ -196,8 +200,8 @@ export function getScoreValue(
     case "skins": {
       if (!isHoleComplete(scoreboard.holes[hole])) return null;
       // Count skins won by this player on this hole
-      const skinCount = playerResult.junk.filter((j) =>
-        j.name.endsWith("_skin"),
+      const skinCount = playerResult.junk.filter(
+        (j) => j.subType === "skin",
       ).length;
       return skinCount > 0 ? skinCount : null;
     }
@@ -239,9 +243,7 @@ export function getSummaryValue(
         if (!isHoleComplete(scoreboard.holes[hole])) continue;
         const playerResult = scoreboard.holes[hole]?.players[playerId];
         if (playerResult) {
-          total += playerResult.junk.filter((j) =>
-            j.name.endsWith("_skin"),
-          ).length;
+          total += playerResult.junk.filter((j) => j.subType === "skin").length;
         }
       }
     }
@@ -250,6 +252,7 @@ export function getSummaryValue(
 
   // For points, calculate from team hole net totals
   if (viewMode === "points") {
+    const quota = playerQuotas?.get(playerId);
     let total = 0;
     const holes = Object.keys(scoreboard.holes);
 
@@ -267,22 +270,35 @@ export function getSummaryValue(
       if (inRange) {
         // Skip incomplete holes
         if (!isHoleComplete(scoreboard.holes[hole])) continue;
-        // Use team points (same as getScoreValue for points mode)
-        const teamPoints = getTeamPointsForPlayer(scoreboard, playerId, hole);
-        if (teamPoints !== null) {
-          total += teamPoints;
-        } else {
-          // Fall back to individual player points
+
+        if (quota) {
+          // Quota games: sum only dot-type junk (stableford scoring dots).
+          // This must match the settlement engine's extractStablefordTotals
+          // so ranks and payouts are consistent with displayed values.
           const playerResult = scoreboard.holes[hole]?.players[playerId];
           if (playerResult) {
-            total += playerResult.points;
+            for (const junk of playerResult.junk) {
+              if (junk.subType === "dot") {
+                total += junk.value;
+              }
+            }
+          }
+        } else {
+          // Non-quota games: use team points (includes all junk × multiplier)
+          const teamPoints = getTeamPointsForPlayer(scoreboard, playerId, hole);
+          if (teamPoints !== null) {
+            total += teamPoints;
+          } else {
+            const playerResult = scoreboard.holes[hole]?.players[playerId];
+            if (playerResult) {
+              total += playerResult.points;
+            }
           }
         }
       }
     }
 
     // For quota games, subtract quota to show performance (e.g., +2 over quota)
-    const quota = playerQuotas?.get(playerId);
     if (quota) {
       // quota.front/back are play-order aligned (first nine played / second nine played).
       // The "out"/"in" summary rows show physical course sides (holes 1-9 / 10-18).
@@ -386,8 +402,6 @@ export interface VerticalColumn {
   summaryType: "out" | "in" | "total";
   /** Override viewMode for this column (e.g., skins always uses "skins") */
   viewModeOverride?: ViewMode;
-  /** Number of places paid for this bet (for ranking cutoff) */
-  placesPaid?: number;
 }
 
 export interface VerticalPlayerData {
@@ -398,12 +412,14 @@ export interface VerticalPlayerData {
   values: Record<string, number | null>;
 }
 
-/** Minimal bet info needed for column derivation */
+/** Bet info needed for column derivation and settlement */
 export interface BetColumnInfo {
   name: string;
   disp: string;
   scope: string;
   scoringType: string;
+  pct?: number;
+  splitType?: string;
   placesPaid?: number;
 }
 
@@ -434,7 +450,6 @@ export function getVerticalColumns(bets: BetColumnInfo[]): VerticalColumn[] {
       summaryType: SCOPE_TO_SUMMARY[bet.scope] as "out" | "in" | "total",
       viewModeOverride:
         bet.scoringType === "skins" ? ("skins" as ViewMode) : undefined,
-      placesPaid: bet.placesPaid,
     }));
 }
 
@@ -484,4 +499,41 @@ export function getVerticalPlayerData(
   rows.sort((a, b) => a.rank - b.rank);
 
   return rows;
+}
+
+/**
+ * Extract BetColumnInfo from a game, falling back to spec JSON for legacy games.
+ * Computed directly (no useMemo) because game.bets is a Jazz reactive proxy.
+ */
+export function extractBets(
+  game: Game | null,
+  gameSpec: GameSpec | undefined,
+): BetColumnInfo[] {
+  if (game?.bets?.$isLoaded && game.bets.length > 0) {
+    const result: BetColumnInfo[] = [];
+    for (const bet of game.bets) {
+      if (!bet?.$isLoaded) continue;
+      result.push({
+        name: bet.name,
+        disp: bet.disp,
+        scope: bet.scope,
+        scoringType: bet.scoringType,
+        pct: bet.pct,
+        splitType: bet.splitType,
+        placesPaid: bet.placesPaid ?? undefined,
+      });
+    }
+    if (result.length > 0) return result;
+  }
+
+  // Fallback: parse bets from game spec JSON (for legacy games without game.bets)
+  if (!gameSpec) return [];
+  const betsJson = getMetaOption(gameSpec, "bets") as string | undefined;
+  if (!betsJson) return [];
+  try {
+    const parsed = JSON.parse(betsJson) as BetColumnInfo[];
+    return parsed.filter((b) => b.name && b.disp && b.scope && b.scoringType);
+  } catch {
+    return [];
+  }
 }

@@ -339,6 +339,7 @@ function evaluatePlayerJunk(
         name: junk.name,
         value: junk.value ?? 0,
         playerId,
+        subType: junk.sub_type,
       });
     }
   }
@@ -365,6 +366,7 @@ function evaluateTeamJunk(
       teamResult.junk.push({
         name: junk.name,
         value: junk.value ?? 0,
+        subType: junk.sub_type,
       });
     }
   }

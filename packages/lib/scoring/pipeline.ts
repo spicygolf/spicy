@@ -429,7 +429,7 @@ function buildPlayerQuotas(
   for (const [playerId, handicapInfo] of playerHandicaps) {
     const totalQuota =
       quotaOverrides.get(playerId) ??
-      calculateQuota(handicapInfo.courseHandicap);
+      calculateQuota(handicapInfo.gameHandicap ?? handicapInfo.courseHandicap);
     const slopes = playerSlopes.get(playerId);
 
     // Slopes for calculateNineHoleQuotas are physical course sides.

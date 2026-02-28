@@ -1,11 +1,11 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { co, z } from "jazz-tools";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
-import { DEFAULT_PAYOUT_PCTS } from "spicylib/scoring";
+import { DEFAULT_PAYOUT_PCTS, getGameOptionNumber } from "spicylib/scoring";
 import { Back } from "@/components/Back";
 import { useGame, useIsOrganizer } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
@@ -34,20 +34,6 @@ const PLACE_LABELS = [
 ];
 const PayoutPctsList = co.list(z.number());
 
-function getGameOptionNumber(
-  // biome-ignore lint/suspicious/noExplicitAny: Jazz MaybeLoaded spec type is complex
-  spec: any,
-  key: string,
-  fallback: number,
-): number {
-  if (!spec?.$isLoaded) return fallback;
-  const opt = spec[key];
-  if (!opt || opt.type !== "game") return fallback;
-  const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
-  const parsed = Number.parseFloat(val);
-  return Number.isNaN(parsed) ? fallback : parsed;
-}
-
 /** Distribute potTotal across pcts so rounded amounts sum exactly to potTotal. */
 function distributeAmounts(potTotal: number, pcts: number[]): number[] {
   if (potTotal <= 0) return pcts.map(() => 0);
@@ -64,7 +50,7 @@ function distributeAmounts(potTotal: number, pcts: number[]): number[] {
   return floored;
 }
 
-export function PlacesPaidScreen({ navigation }: Props) {
+export function PlacesPaidScreen(_props: Props) {
   const { theme } = useUnistyles();
   const { game } = useGame(undefined, {
     resolve: {
@@ -75,7 +61,7 @@ export function PlacesPaidScreen({ navigation }: Props) {
   });
   const isOrganizer = useIsOrganizer(game);
 
-  // Derive values directly from Jazz reactive data (no useMemo — Jazz handles reactivity)
+  // Derive values directly from Jazz reactive data
   const currentPlaces = getGameOptionNumber(game?.spec, "places_paid", 3);
   const buyIn = getGameOptionNumber(game?.spec, "buy_in", 0);
 
@@ -101,78 +87,104 @@ export function PlacesPaidScreen({ navigation }: Props) {
   );
 
   // Sync local state once Jazz data finishes loading (both spec and payoutPools)
-  const initialized = useRef(false);
+  const [synced, setSynced] = useState(false);
   useEffect(() => {
-    if (initialized.current) return;
+    if (synced) return;
     if (!game?.spec?.$isLoaded) return;
     if (!game?.payoutPools?.$isLoaded) return;
-    initialized.current = true;
+    setSynced(true);
     setPlaces(currentPlaces);
     setPcts(currentPoolPcts ?? getDefaultPcts(currentPlaces));
   }, [
+    synced,
     game?.spec?.$isLoaded,
     game?.payoutPools?.$isLoaded,
     currentPlaces,
     currentPoolPcts,
   ]);
 
-  const handlePlacesChange = useCallback((newPlaces: number) => {
-    const clamped = Math.max(MIN_PLACES, Math.min(MAX_PLACES, newPlaces));
-    setPlaces(clamped);
-    setPcts(getDefaultPcts(clamped));
-  }, []);
+  /** Persist places + pcts to Jazz (spec option + payout pools). */
+  const saveToJazz = useCallback(
+    (newPlaces: number, newPcts: number[]) => {
+      if (!game?.spec?.$isLoaded || isOrganizer === false) return;
 
-  const handlePctChange = useCallback((index: number, text: string) => {
-    // Allow empty string so user can clear and retype
-    if (text === "") {
-      setPcts((prev) => {
-        const next = [...prev];
-        next[index] = 0;
-        return next;
-      });
-      return;
-    }
-    const num = Number.parseInt(text, 10);
-    if (Number.isNaN(num) || num < 0 || num > 100) return;
-    setPcts((prev) => {
-      const next = [...prev];
+      // Save places_paid game option
+      const existingOpt = game.spec.places_paid;
+      if (game.spec.$jazz.has("places_paid") && existingOpt?.type === "game") {
+        game.spec.$jazz.set("places_paid", {
+          ...(existingOpt as GameOption),
+          value: String(newPlaces),
+        });
+      } else {
+        game.spec.$jazz.set("places_paid", {
+          name: "places_paid",
+          disp: "Places Paid",
+          type: "game",
+          version: "1",
+          valueType: "menu",
+          defaultValue: "3",
+          value: String(newPlaces),
+        } satisfies GameOption);
+      }
+
+      // Update payout pools
+      if (game.payoutPools?.$isLoaded) {
+        const activePctSlice = newPcts.slice(0, newPlaces);
+        for (const pool of game.payoutPools) {
+          if (pool?.$isLoaded && pool.splitType === "places") {
+            pool.$jazz.set("placesPaid", newPlaces);
+            const pctsList = PayoutPctsList.create(activePctSlice, {
+              owner: pool.$jazz.owner,
+            });
+            pool.$jazz.set("payoutPcts", pctsList);
+          }
+        }
+      }
+    },
+    [game, isOrganizer],
+  );
+
+  const handlePlacesChange = useCallback(
+    (newPlaces: number) => {
+      const clamped = Math.max(MIN_PLACES, Math.min(MAX_PLACES, newPlaces));
+      const newPcts = getDefaultPcts(clamped);
+      setPlaces(clamped);
+      setPcts(newPcts);
+      // Default pcts always sum to 100 — save immediately
+      saveToJazz(clamped, newPcts);
+    },
+    [saveToJazz],
+  );
+
+  const handlePctChange = useCallback(
+    (index: number, text: string) => {
+      // Allow empty string so user can clear and retype
+      if (text === "") {
+        setPcts((prev) => {
+          const next = [...prev];
+          next[index] = 0;
+          return next;
+        });
+        return;
+      }
+      const num = Number.parseInt(text, 10);
+      if (Number.isNaN(num) || num < 0 || num > 100) return;
+      const next = [...pcts];
       next[index] = num;
-      return next;
-    });
-  }, []);
+      setPcts(next);
+      // Auto-save when percentages sum to 100
+      const activeSlice = next.slice(0, places);
+      if (activeSlice.reduce((s, p) => s + p, 0) === 100) {
+        saveToJazz(places, next);
+      }
+    },
+    [pcts, places, saveToJazz],
+  );
 
   const activePcts = pcts.slice(0, places);
   const amounts = distributeAmounts(potTotal, activePcts);
   const pctTotal = activePcts.reduce((sum, p) => sum + p, 0);
   const isValid = pctTotal === 100;
-
-  const handleSave = useCallback(() => {
-    if (!game?.spec?.$isLoaded || !isValid || isOrganizer === false) return;
-
-    // Save places_paid game option
-    const existingOpt = game.spec.places_paid;
-    if (existingOpt && existingOpt.type === "game") {
-      game.spec.$jazz.set("places_paid", {
-        ...(existingOpt as GameOption),
-        value: String(places),
-      });
-    }
-
-    // Update payout pools - set placesPaid and payoutPcts on all "places" type pools
-    if (game.payoutPools?.$isLoaded) {
-      for (const pool of game.payoutPools) {
-        if (pool?.$isLoaded && pool.splitType === "places") {
-          pool.$jazz.set("placesPaid", places);
-          const pctsList = PayoutPctsList.create(pcts.slice(0, places), {
-            owner: pool.$jazz.owner,
-          });
-          pool.$jazz.set("payoutPcts", pctsList);
-        }
-      }
-    }
-
-    navigation.goBack();
-  }, [game, places, pcts, isValid, isOrganizer, navigation]);
 
   return (
     <Screen>
@@ -291,15 +303,6 @@ export function PlacesPaidScreen({ navigation }: Props) {
             </Text>
           )}
         </View>
-
-        {/* Save Button */}
-        <Pressable
-          style={[styles.saveButton, !isValid && styles.saveButtonDisabled]}
-          onPress={handleSave}
-          disabled={!isValid}
-        >
-          <Text style={styles.saveButtonText}>Save</Text>
-        </Pressable>
       </ScrollView>
     </Screen>
   );
@@ -485,19 +488,5 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 12,
     color: theme.colors.error,
     textAlign: "center",
-  },
-  saveButton: {
-    backgroundColor: theme.colors.action,
-    borderRadius: 8,
-    paddingVertical: theme.gap(1.25),
-    alignItems: "center",
-  },
-  saveButtonDisabled: {
-    opacity: 0.5,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: theme.colors.actionText,
   },
 }));

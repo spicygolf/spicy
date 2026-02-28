@@ -39,7 +39,7 @@ export interface QuotaPerformance {
 /**
  * Extract stableford point totals from a scoreboard, split by nine.
  *
- * Sums all junk awards whose name starts with "stableford_" for each player.
+ * Sums all junk awards with subType "dot" (stableford scoring dots).
  * Uses hole play order (scoreboard.meta.holesPlayed) to determine front vs back:
  * the first 9 holes in play order are front, the last 9 are back.
  *
@@ -70,7 +70,10 @@ export function extractStablefordTotals(
       }
 
       for (const junk of playerResult.junk) {
-        if (junk.name.startsWith("stableford_")) {
+        if (
+          junk.subType === "dot" ||
+          (junk.subType === undefined && junk.name.startsWith("stableford_"))
+        ) {
           playerTotals.total += junk.value;
           if (isFront) {
             playerTotals.front += junk.value;
@@ -88,8 +91,7 @@ export function extractStablefordTotals(
 /**
  * Extract skin win counts from a scoreboard.
  *
- * Counts junk awards whose name ends with "_skin" for each player.
- * Matches gross_skin, gross_eagle_skin, net_skin, etc.
+ * Counts junk awards with subType "skin" for each player.
  *
  * @param scoreboard - Scored scoreboard from the pipeline
  * @returns Map of playerId → number of skins won
@@ -103,7 +105,10 @@ export function extractSkinCounts(scoreboard: Scoreboard): Map<string, number> {
 
     for (const [playerId, playerResult] of Object.entries(holeResult.players)) {
       for (const junk of playerResult.junk) {
-        if (junk.name.endsWith("_skin")) {
+        if (
+          junk.subType === "skin" ||
+          (junk.subType === undefined && junk.name.endsWith("_skin"))
+        ) {
           counts.set(playerId, (counts.get(playerId) ?? 0) + 1);
         }
       }
@@ -130,6 +135,13 @@ export function calculateQuotaPerformances(
   const stablefordTotals = extractStablefordTotals(scoreboard);
   const performances: QuotaPerformance[] = [];
 
+  // Stableford totals and quotas are in play order (first nine / second nine).
+  // Align to physical course sides (holes 1-9 = front, 10-18 = back) so that
+  // settlement metrics match the leaderboard column display values.
+  const firstHole = scoreboard.meta.holesPlayed[0];
+  const startsOnBack =
+    firstHole !== undefined && Number.parseInt(firstHole, 10) >= 10;
+
   for (const [playerId, quota] of playerQuotas) {
     const stableford = stablefordTotals.get(playerId) ?? {
       front: 0,
@@ -137,13 +149,21 @@ export function calculateQuotaPerformances(
       total: 0,
     };
 
+    // Play-order performance
+    const playFront = stableford.front - quota.front;
+    const playBack = stableford.back - quota.back;
+
+    // Align to physical course sides
+    const physFront = startsOnBack ? playBack : playFront;
+    const physBack = startsOnBack ? playFront : playBack;
+
     performances.push({
       playerId,
       stableford,
       quota: { front: quota.front, back: quota.back, total: quota.total },
       performance: {
-        front: stableford.front - quota.front,
-        back: stableford.back - quota.back,
+        front: physFront,
+        back: physBack,
         total: stableford.total - quota.total,
       },
     });

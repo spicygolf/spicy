@@ -62,6 +62,8 @@ export interface JunkAward {
   value: number;
   /** Player who earned it (for team junk attribution) */
   playerId?: string;
+  /** Junk sub-type from the option definition (e.g., "dot", "skin", "carryover") */
+  subType?: "dot" | "skin" | "carryover";
 }
 
 /**

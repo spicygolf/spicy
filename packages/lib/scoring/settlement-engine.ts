@@ -10,6 +10,8 @@
  *   const debts = reconcileDebts(payouts, players.length, potTotal);
  */
 
+import { rankWithTies } from "./ranking-engine";
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -34,7 +36,10 @@ export interface Payout {
   playerId: string;
   playerName: string;
   poolName: string;
+  poolDisp: string;
   place?: number;
+  /** Tie-aware rank label (e.g., "1", "T2"). Empty string for per_unit pools. */
+  rankLabel: string;
   metricValue: number;
   amount: number;
 }
@@ -127,28 +132,81 @@ export function calculatePoolPayouts(
       const placesPaid = Math.min(pool.placesPaid ?? 3, ranked.length);
       const pcts = getPayoutPcts(placesPaid, pool.payoutPcts);
 
-      // Calculate payouts with remainder tracking to avoid drift
-      let totalPaid = 0;
-      for (let i = 0; i < placesPaid; i++) {
-        const player = ranked[i];
-        const pct = pcts[i];
-        if (!player || pct === undefined) continue;
+      // Rank ALL players first, then include everyone whose rank <= placesPaid
+      // (ties at the cutoff boundary pull in the full tied group)
+      const allRanked = rankWithTies(ranked, (p) => p.value, "higher");
+      const paidPlayers = allRanked.filter((e) => e.rank <= placesPaid);
 
-        // For last payout, give remainder to avoid rounding drift
-        const isLast = i === placesPaid - 1;
-        const amount = isLast
-          ? poolAmount - totalPaid
-          : Math.round((poolAmount * pct) / 100);
+      // For each tie group, average the payout percentages across the
+      // positions they span.  E.g. 2 players tied for 3rd in a 3-place
+      // pool share positions 3 (20%) — but if they straddle the boundary,
+      // only the in-range positions contribute.
+      // Group by rank to compute shared amounts.
+      const groupsByRank = new Map<
+        number,
+        { tieCount: number; items: typeof paidPlayers }
+      >();
+      for (const entry of paidPlayers) {
+        let group = groupsByRank.get(entry.rank);
+        if (!group) {
+          group = { tieCount: entry.tieCount, items: [] };
+          groupsByRank.set(entry.rank, group);
+        }
+        group.items.push(entry);
+      }
 
+      // Calculate payouts using a running-total approach to avoid drift.
+      // Each rank group gets its exact share of the remaining pool money,
+      // and tied players within a group split their dollar total evenly.
+      let cumulativePct = 0;
+      let cumulativePaid = 0;
+      const payoutEntries: Array<{
+        entry: (typeof paidPlayers)[0];
+        amount: number;
+      }> = [];
+
+      for (const [rank, group] of groupsByRank) {
+        // Sum the payout pcts for positions this tie group spans
+        // Positions occupied: rank, rank+1, ..., rank+tieCount-1
+        // But cap at placesPaid (ties may extend beyond paid places)
+        let totalPct = 0;
+        for (let pos = rank; pos < rank + group.tieCount; pos++) {
+          const pct = pcts[pos - 1]; // pcts is 0-indexed, rank is 1-indexed
+          if (pct !== undefined) {
+            totalPct += pct;
+          }
+        }
+
+        // Running-total rounding: compute cumulative target to avoid drift
+        cumulativePct += totalPct;
+        const cumulativeTarget = Math.round((poolAmount * cumulativePct) / 100);
+        const groupTotal = cumulativeTarget - cumulativePaid;
+
+        // Split evenly among all tied players
+        const perPlayer = Math.floor(groupTotal / group.tieCount);
+        let remainder = groupTotal - perPlayer * group.tieCount;
+
+        for (const entry of group.items) {
+          const amount = remainder > 0 ? perPlayer + 1 : perPlayer;
+          remainder--;
+          payoutEntries.push({ entry, amount });
+        }
+        cumulativePaid += groupTotal;
+      }
+
+      for (const { entry, amount } of payoutEntries) {
+        const label =
+          entry.tieCount > 1 ? `T${entry.rank}` : String(entry.rank);
         payouts.push({
-          playerId: player.playerId,
-          playerName: player.playerName,
+          playerId: entry.item.playerId,
+          playerName: entry.item.playerName,
           poolName: pool.name,
-          place: i + 1,
-          metricValue: player.value,
+          poolDisp: pool.disp,
+          place: entry.rank,
+          rankLabel: label,
+          metricValue: entry.item.value,
           amount,
         });
-        totalPaid += amount;
       }
       break;
     }
@@ -177,6 +235,8 @@ export function calculatePoolPayouts(
           playerId: player.playerId,
           playerName: player.playerName,
           poolName: pool.name,
+          poolDisp: pool.disp,
+          rankLabel: "",
           metricValue: player.value,
           amount,
         });
@@ -186,13 +246,17 @@ export function calculatePoolPayouts(
     }
 
     case "winner_take_all": {
+      // Note: ties are broken by original sort order (first player wins).
+      // Future: consider splitting among tied leaders for fairness.
       const winner = ranked[0];
       if (winner) {
         payouts.push({
           playerId: winner.playerId,
           playerName: winner.playerName,
           poolName: pool.name,
+          poolDisp: pool.disp,
           place: 1,
+          rankLabel: "1",
           metricValue: winner.value,
           amount: poolAmount,
         });
@@ -367,6 +431,22 @@ export function calculateSettlement(
     netPositions,
     debts,
   };
+}
+
+/**
+ * Sum gross payouts per player (what they collect, not net profit).
+ * Players with zero total are omitted.
+ */
+export function getGrossPayoutsByPlayer(
+  payouts: Payout[],
+): Map<string, number> {
+  const gross = new Map<string, number>();
+  for (const p of payouts) {
+    if (p.amount > 0) {
+      gross.set(p.playerId, (gross.get(p.playerId) ?? 0) + p.amount);
+    }
+  }
+  return gross;
 }
 
 // =============================================================================

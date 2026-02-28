@@ -84,8 +84,9 @@ function createScoringFingerprint(game: Game | null): number | null {
     const courseHandicap = rtg.courseHandicap ?? 0;
     const gameHandicap = rtg.gameHandicap;
 
+    const quotaOverride = rtg.quotaOverride;
     parts.push(
-      `p:${playerId}:hi${handicapIndex}:ch${courseHandicap}:gh${gameHandicap ?? ""}`,
+      `p:${playerId}:hi${handicapIndex}:ch${courseHandicap}:gh${gameHandicap ?? ""}:qo${quotaOverride ?? ""}`,
     );
 
     // Tee holes must be loaded for pops calculation (need par and handicap allocation)

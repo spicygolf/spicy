@@ -9,6 +9,14 @@
  * const scoreboard = score(game);
  */
 
+// Bet settlement bridge (bets + scoreboard → payouts)
+export type { BetConfig, SettleBetsInput } from "./bet-settlement";
+export {
+  betToPoolConfig,
+  extractMetricsForBets,
+  settleBets,
+} from "./bet-settlement";
+
 export type {
   InvalidatedItem,
   InvalidationResult,
@@ -46,6 +54,7 @@ export {
 export {
   copySpecOptions,
   getFrontNinePreDoubleTotalFromHoles,
+  getGameOptionNumber,
   getGameOptions,
   getGameSpecField,
   getJunkOptionsForHole,
@@ -105,6 +114,7 @@ export {
   DEFAULT_PAYOUT_PCTS,
   extractQuotaMetrics,
   extractSkinsMetric,
+  getGrossPayoutsByPlayer,
   reconcileDebts,
 } from "./settlement-engine";
 // Pipeline stages (for testing/debugging)

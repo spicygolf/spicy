@@ -3,6 +3,7 @@ import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { getGameSpecField } from "spicylib/scoring";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { extractBets } from "@/components/game/leaderboard";
 import {
   ChangeTeamsModal,
   type GroupPickerItem,
@@ -14,6 +15,7 @@ import {
   useHoleInitialization,
   useHoleNavigation,
   useScoreManagement,
+  useSettlement,
 } from "@/hooks";
 import { useTeamsMode } from "@/hooks/useTeamsMode";
 import { Button, Screen, Text } from "@/ui";
@@ -83,6 +85,11 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
 
   // Teams mode — determines if teams button should be disabled in toolbar
   const { isSeamlessMode } = useTeamsMode(game);
+
+  const bets = extractBets(game, scoringContext?.gameSpec);
+
+  const settlement = useSettlement(game, scoreboard, scoringContext, bets);
+  const payouts = settlement?.payouts ?? null;
 
   // Rapid per-player score entry mode
   const [rapidEntryMode, setRapidEntryMode] = useState(false);
@@ -277,6 +284,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               totalHoles={holesList.length}
               onPrevHole={handlePrevHole}
               onNextHole={handleNextHole}
+              payouts={payouts}
             />
           ) : showChooser ? (
             <TeamChooserView

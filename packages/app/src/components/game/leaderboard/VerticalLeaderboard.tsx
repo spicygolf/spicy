@@ -1,8 +1,8 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
-import { rankWithTies } from "spicylib/scoring";
+import type { Payout, PlayerQuota, Scoreboard } from "spicylib/scoring";
+import { getGrossPayoutsByPlayer, rankWithTies } from "spicylib/scoring";
 import { Text } from "@/ui";
 import {
   type BetColumnInfo,
@@ -10,7 +10,6 @@ import {
   getVerticalPlayerData,
   type HoleData,
   type PlayerColumn,
-  type VerticalColumn,
   type VerticalPlayerData,
   type ViewMode,
 } from "./leaderboardUtils";
@@ -22,6 +21,7 @@ interface VerticalLeaderboardProps {
   scoreboard: Scoreboard | null;
   playerQuotas?: Map<string, PlayerQuota> | null;
   bets: BetColumnInfo[];
+  payouts?: Payout[] | null;
 }
 
 type SortDirection = "asc" | "desc";
@@ -37,14 +37,16 @@ interface RankedPlayer {
 }
 
 /**
- * Sort player data by a column value and compute tie-aware rank labels.
- * Uses rankWithTies from the scoring engine for proper golf ranking.
- * Players beyond placesPaid get an empty rank label.
+ * Sort player data by a column value and assign rank labels.
+ *
+ * When settlement payouts exist for the sort column, uses the settlement
+ * engine's pre-computed rank labels (single source of truth). Falls back
+ * to rankWithTies for columns without settlement data (e.g., "$" net).
  */
 function sortAndRankPlayerData(
   data: VerticalPlayerData[],
   sort: SortState | null,
-  columns: VerticalColumn[],
+  betPayoutLookup: Map<string, Map<string, BetPayoutInfo>> | null,
 ): RankedPlayer[] {
   if (!sort) {
     return data.map((player) => ({
@@ -65,24 +67,26 @@ function sortAndRankPlayerData(
       p.values[sort.columnKey] === undefined,
   );
 
-  // Use rankWithTies for proper tie handling
+  // Check if settlement payouts exist for this column
+  const hasSettlementData =
+    betPayoutLookup !== null &&
+    [...betPayoutLookup.values()].some((m) => m.has(sort.columnKey));
+
+  // Sort by column value with rankWithTies (needed for ordering either way)
   const ranked = rankWithTies(
     withValues,
     (p) => p.values[sort.columnKey] as number,
     sort.direction === "asc" ? "lower" : "higher",
   );
 
-  // Find placesPaid for the active sort column
-  const activeColumn = columns.find((c) => c.key === sort.columnKey);
-  const placesPaid = activeColumn?.placesPaid;
-
   const result: RankedPlayer[] = ranked.map(({ item, rank, tieCount }) => {
-    // Beyond places paid = no rank
-    if (placesPaid !== undefined && rank > placesPaid) {
-      return { player: item, rankLabel: "" };
+    const computedLabel = tieCount > 1 ? `T${rank}` : String(rank);
+    if (hasSettlementData) {
+      // Use settlement engine's pre-computed rank label, fall back to computed
+      const payout = betPayoutLookup?.get(item.playerId)?.get(sort.columnKey);
+      return { player: item, rankLabel: payout?.rankLabel ?? computedLabel };
     }
-    const label = tieCount > 1 ? `T${rank}` : String(rank);
-    return { player: item, rankLabel: label };
+    return { player: item, rankLabel: computedLabel };
   });
 
   // Append null-value players at the bottom with no rank
@@ -90,6 +94,32 @@ function sortAndRankPlayerData(
     result.push({ player, rankLabel: "" });
   }
 
+  return result;
+}
+
+/** Per-bet payout info for a single player on a single pool. */
+export interface BetPayoutInfo {
+  rankLabel: string;
+  amount: number;
+}
+
+/**
+ * Index payouts by playerId → poolName for fast lookup.
+ * rankLabel is pre-computed by the settlement engine.
+ */
+function buildBetPayoutLookup(
+  payouts: Payout[],
+): Map<string, Map<string, BetPayoutInfo>> {
+  const result = new Map<string, Map<string, BetPayoutInfo>>();
+  for (const p of payouts) {
+    if (p.amount <= 0) continue;
+    let playerMap = result.get(p.playerId);
+    if (!playerMap) {
+      playerMap = new Map();
+      result.set(p.playerId, playerMap);
+    }
+    playerMap.set(p.poolName, { rankLabel: p.rankLabel, amount: p.amount });
+  }
   return result;
 }
 
@@ -102,45 +132,89 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
   scoreboard,
   playerQuotas,
   bets,
+  payouts,
 }: VerticalLeaderboardProps) {
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortState | null>(null);
+  const [userSort, setUserSort] = useState<SortState | null>(null);
 
-  const columns = useMemo(() => getVerticalColumns(bets), [bets]);
+  const hasPayouts = payouts != null && payouts.length > 0;
 
-  const playerData = useMemo(
-    () =>
-      getVerticalPlayerData(
-        scoreboard,
-        playerColumns,
-        columns,
-        SUMMARY_VIEW_MODE,
-        playerQuotas,
-      ),
-    [scoreboard, playerColumns, columns, playerQuotas],
+  const columns = useMemo(() => {
+    const base = getVerticalColumns(bets);
+    if (hasPayouts) {
+      return [
+        ...base,
+        {
+          key: "$",
+          label: "$",
+          summaryType: "total" as const,
+        },
+      ];
+    }
+    return base;
+  }, [bets, hasPayouts]);
+
+  // Default to payout column when settlement data is available and user hasn't sorted.
+  // Validate userSort against current columns — the sorted column may have been removed
+  // (e.g. "$" disappears when payouts become null).
+  const validUserSort =
+    userSort && columns.some((c) => c.key === userSort.columnKey)
+      ? userSort
+      : null;
+  const sort =
+    validUserSort ??
+    (hasPayouts ? { columnKey: "$", direction: "desc" as const } : null);
+
+  const playerData = useMemo(() => {
+    const data = getVerticalPlayerData(
+      scoreboard,
+      playerColumns,
+      columns,
+      SUMMARY_VIEW_MODE,
+      playerQuotas,
+    );
+    if (!hasPayouts || !payouts) return data;
+
+    const grossByPlayer = getGrossPayoutsByPlayer(payouts);
+    return data.map((player) => {
+      const gross = grossByPlayer.get(player.playerId) ?? 0;
+      return {
+        ...player,
+        values: { ...player.values, $: gross > 0 ? gross : null },
+      };
+    });
+  }, [scoreboard, playerColumns, columns, playerQuotas, payouts]);
+
+  const betPayoutLookup = useMemo(
+    () => (hasPayouts && payouts ? buildBetPayoutLookup(payouts) : null),
+    [hasPayouts, payouts],
   );
 
   const rankedPlayers = useMemo(
-    () => sortAndRankPlayerData(playerData, sort, columns),
-    [playerData, sort, columns],
+    () => sortAndRankPlayerData(playerData, sort, betPayoutLookup),
+    [playerData, sort, betPayoutLookup],
   );
 
   const handleToggle = useCallback((playerId: string) => {
     setExpandedPlayerId((prev) => (prev === playerId ? null : playerId));
   }, []);
 
-  const handleColumnPress = useCallback((columnKey: string) => {
-    setSort((prev) => {
-      if (prev?.columnKey === columnKey) {
-        return {
+  const handleColumnPress = useCallback(
+    (columnKey: string) => {
+      // Compare against effective sort (includes default) for toggle behavior
+      const current = sort;
+      if (current?.columnKey === columnKey) {
+        setUserSort({
           columnKey,
-          direction: prev.direction === "desc" ? "asc" : "desc",
-        };
+          direction: current.direction === "desc" ? "asc" : "desc",
+        });
+      } else {
+        // Default to descending (highest first, natural for points/skins)
+        setUserSort({ columnKey, direction: "desc" });
       }
-      // Default to descending (highest first, natural for points/skins)
-      return { columnKey, direction: "desc" };
-    });
-  }, []);
+    },
+    [sort],
+  );
 
   return (
     <ScrollView style={styles.container}>
@@ -193,6 +267,7 @@ export const VerticalLeaderboard = memo(function VerticalLeaderboard({
           holeRows={holeRows}
           scoreboard={scoreboard}
           playerQuotas={playerQuotas}
+          betPayouts={betPayoutLookup?.get(player.playerId) ?? null}
         />
       ))}
     </ScrollView>
@@ -207,7 +282,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: theme.gap(0.75),
-    paddingHorizontal: theme.gap(1),
+    paddingHorizontal: theme.gap(0.5),
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: theme.colors.border,
   },
@@ -216,16 +291,16 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     flex: 1,
     // Account for rank badge width (24) + marginLeft (4)
-    paddingLeft: 28,
+    paddingLeft: 24,
   },
   headerValues: {
     flexDirection: "row",
     alignItems: "center",
   },
   headerValueCell: {
-    minWidth: 48,
+    minWidth: 42,
     alignItems: "center",
-    paddingHorizontal: 2,
+    paddingHorizontal: 1,
   },
   headerText: {
     fontSize: 12,

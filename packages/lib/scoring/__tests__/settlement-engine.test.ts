@@ -172,6 +172,164 @@ describe("settlement-engine", () => {
       });
     });
 
+    it("assigns correct ranks with no false ties (13, 12, 11, 11)", () => {
+      // From screenshot: Front scores 13, 12, 11, 11
+      // Rank 1: 13, Rank 2: 12 (solo), Rank T3: 11, 11
+      const tiePlayers: PlayerMetrics[] = [
+        { playerId: "dean", playerName: "Dean", metrics: { front: 13 } },
+        { playerId: "vince", playerName: "Vince", metrics: { front: 12 } },
+        { playerId: "chip", playerName: "Chip", metrics: { front: 11 } },
+        { playerId: "bud", playerName: "Bud", metrics: { front: 11 } },
+      ];
+      const pool: PoolConfig = {
+        name: "front",
+        disp: "Front",
+        pct: 100,
+        metric: "front",
+        splitType: "places",
+        placesPaid: 3,
+      };
+
+      const payouts = calculatePoolPayouts(pool, tiePlayers, 1000);
+
+      // Dean = 1st ($500), Vince = 2nd alone ($300)
+      // Chip & Bud = T3, share (20%) → $100 each
+      expect(payouts).toHaveLength(4); // All 4 paid (tie at 3rd pulls in both)
+
+      const dean = payouts.find((p) => p.playerId === "dean")!;
+      expect(dean.rankLabel).toBe("1");
+      expect(dean.amount).toBe(500);
+
+      const vince = payouts.find((p) => p.playerId === "vince")!;
+      expect(vince.rankLabel).toBe("2");
+      expect(vince.amount).toBe(300);
+
+      const chip = payouts.find((p) => p.playerId === "chip")!;
+      expect(chip.rankLabel).toBe("T3");
+      expect(chip.amount).toBe(100);
+
+      const bud = payouts.find((p) => p.playerId === "bud")!;
+      expect(bud.rankLabel).toBe("T3");
+      expect(bud.amount).toBe(100);
+    });
+
+    it("splits pot correctly for 2-way tie at 3rd (positions 3+4)", () => {
+      // 2 players tied for 3rd in a placesPaid=4 pool
+      // They share positions 3 (18%) + 4 (10%) = 28% / 2 = 14% each
+      const tiePlayers: PlayerMetrics[] = [
+        { playerId: "p1", playerName: "P1", metrics: { v: 10 } },
+        { playerId: "p2", playerName: "P2", metrics: { v: 8 } },
+        { playerId: "p3", playerName: "P3", metrics: { v: 5 } },
+        { playerId: "p4", playerName: "P4", metrics: { v: 5 } },
+        { playerId: "p5", playerName: "P5", metrics: { v: 2 } },
+      ];
+      const pool: PoolConfig = {
+        name: "test",
+        disp: "Test",
+        pct: 100,
+        metric: "v",
+        splitType: "places",
+        placesPaid: 4,
+        payoutPcts: [45, 27, 18, 10],
+      };
+
+      const payouts = calculatePoolPayouts(pool, tiePlayers, 1000);
+
+      const p3 = payouts.find((p) => p.playerId === "p3")!;
+      const p4 = payouts.find((p) => p.playerId === "p4")!;
+      // (18 + 10) / 2 = 14% each = $140
+      expect(p3.rankLabel).toBe("T3");
+      expect(p3.amount).toBe(140);
+      expect(p4.rankLabel).toBe("T3");
+      expect(p4.amount).toBe(140);
+    });
+
+    it("includes all 5 tied players at 3rd when placesPaid=3", () => {
+      // From screenshot: Back column has 5 players tied at 10 for 3rd
+      // Only positions 1-3 are paid: 50, 30, 20
+      // 5 players at rank 3 share position 3 (20%) = 20/5 = 4% each
+      const tiePlayers: PlayerMetrics[] = [
+        { playerId: "p1", playerName: "P1", metrics: { back: 12 } },
+        { playerId: "p2", playerName: "P2", metrics: { back: 11 } },
+        { playerId: "p3", playerName: "P3", metrics: { back: 10 } },
+        { playerId: "p4", playerName: "P4", metrics: { back: 10 } },
+        { playerId: "p5", playerName: "P5", metrics: { back: 10 } },
+        { playerId: "p6", playerName: "P6", metrics: { back: 10 } },
+        { playerId: "p7", playerName: "P7", metrics: { back: 10 } },
+        { playerId: "p8", playerName: "P8", metrics: { back: 8 } },
+      ];
+      const pool: PoolConfig = {
+        name: "back",
+        disp: "Back",
+        pct: 100,
+        metric: "back",
+        splitType: "places",
+        placesPaid: 3,
+      };
+
+      const payouts = calculatePoolPayouts(pool, tiePlayers, 1000);
+
+      // P1 = 1st ($500), P2 = 2nd ($300)
+      // P3-P7 = T3, share 20% / 5 = 4% each = $40
+      expect(payouts).toHaveLength(7); // 1 + 1 + 5 tied
+
+      const p1 = payouts.find((p) => p.playerId === "p1")!;
+      expect(p1.rankLabel).toBe("1");
+      expect(p1.amount).toBe(500);
+
+      const p2 = payouts.find((p) => p.playerId === "p2")!;
+      expect(p2.rankLabel).toBe("2");
+      expect(p2.amount).toBe(300);
+
+      // All 5 tied players get T3 and $40 each
+      for (const id of ["p3", "p4", "p5", "p6", "p7"]) {
+        const p = payouts.find((pp) => pp.playerId === id)!;
+        expect(p.rankLabel).toBe("T3");
+        expect(p.amount).toBe(40);
+      }
+
+      // P8 not paid (rank 8 > placesPaid 3)
+      expect(payouts.find((p) => p.playerId === "p8")).toBeUndefined();
+
+      // Total should equal pool amount
+      const total = payouts.reduce((s, p) => s + p.amount, 0);
+      expect(total).toBe(1000);
+    });
+
+    it("gives tied players identical amounts with odd pool totals", () => {
+      // 3 players tied for 2nd share (30+20)% of $269 = $134.50
+      // Floor: $44 each, remainder 2 → first 2 get $45, last gets $44
+      // All should be within $1 of each other
+      const tiePlayers: PlayerMetrics[] = [
+        { playerId: "p1", playerName: "P1", metrics: { v: 10 } },
+        { playerId: "p2", playerName: "P2", metrics: { v: 5 } },
+        { playerId: "p3", playerName: "P3", metrics: { v: 5 } },
+        { playerId: "p4", playerName: "P4", metrics: { v: 5 } },
+      ];
+      const pool: PoolConfig = {
+        name: "test",
+        disp: "Test",
+        pct: 100,
+        metric: "v",
+        splitType: "places",
+        placesPaid: 3,
+      };
+
+      const payouts = calculatePoolPayouts(pool, tiePlayers, 269);
+      const tied = payouts.filter((p) => p.rankLabel === "T2");
+      expect(tied).toHaveLength(3);
+
+      // All tied amounts should differ by at most $1
+      const amounts = tied.map((p) => p.amount);
+      const max = Math.max(...amounts);
+      const min = Math.min(...amounts);
+      expect(max - min).toBeLessThanOrEqual(1);
+
+      // Total should equal pool amount
+      const total = payouts.reduce((s, p) => s + p.amount, 0);
+      expect(total).toBe(269);
+    });
+
     it("handles custom payout percentages", () => {
       const pool: PoolConfig = {
         name: "custom",
