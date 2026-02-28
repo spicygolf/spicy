@@ -134,6 +134,11 @@ export function Handicaps({
         <Handicap
           label="quota"
           display={String(quota)}
+          color={
+            roundToGame?.$isLoaded && roundToGame.quotaOverride !== undefined
+              ? "#FFA500"
+              : undefined
+          }
           testID={testID ? `${testID}-quota` : undefined}
         />
       ) : (

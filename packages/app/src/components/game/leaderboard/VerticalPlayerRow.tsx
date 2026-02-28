@@ -112,6 +112,7 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
 
 function formatValue(val: number | null | undefined, showPlus = false): string {
   if (val === null || val === undefined) return "-";
+  if (showPlus && val === 0) return "E";
   if (showPlus && val > 0) return `+${val}`;
   return String(val);
 }
