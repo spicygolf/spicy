@@ -5,8 +5,10 @@
  * and runs the payout calculation. Bridges the Bet schema (scope, scoringType)
  * to the settlement engine's PoolConfig + PlayerMetrics model.
  *
- * Currently supports pool-funded games (Big Game style: buy_in → pot → pools).
- * Zero-sum games (stakes × differential) will be added in a future phase.
+ * Two settlement models:
+ * - Pool-funded (Big Game): buy_in → pot → pools split by pct
+ * - Stakes (Nassau/Closeout/Florida Bet): each bet has a fixed amount,
+ *   loser pays winner directly
  */
 
 import { calculateQuotaPerformances, extractSkinCounts } from "./quota-metrics";
@@ -15,7 +17,11 @@ import type {
   PoolConfig,
   SettlementResult,
 } from "./settlement-engine";
-import { calculateSettlement } from "./settlement-engine";
+import {
+  calculatePoolPayouts,
+  calculateSettlement,
+  reconcileDebts,
+} from "./settlement-engine";
 import type { PlayerQuota, Scoreboard } from "./types";
 
 // =============================================================================
@@ -166,20 +172,109 @@ export function extractMetricsForBets(
 // =============================================================================
 
 /**
- * Settle bets for a pool-funded game.
+ * Determine settlement model from bet configs.
+ * Stakes if any bet has `amount`; pool-funded otherwise.
+ */
+function isStakesGame(bets: BetConfig[]): boolean {
+  return bets.some((b) => b.amount !== undefined && b.amount > 0);
+}
+
+/**
+ * Settle stakes-based bets (Nassau, Closeout, Florida Bet).
  *
- * Bridges game bets + scoreboard to the settlement engine:
- * 1. Converts each bet to a PoolConfig with the appropriate metric key
- * 2. Extracts player metrics from the scoreboard
- * 3. Runs the full settlement calculation (payouts, net positions, debts)
+ * Each bet has a fixed `amount`. Every player puts in that amount per bet,
+ * and the winner(s) take the pool for that bet. Uses the same payout split
+ * logic as pool-funded games but with absolute dollar amounts per bet.
  *
- * @param input - Bets, players, scoreboard, and game options
- * @returns Full settlement result with payouts, net positions, and reconciled debts
+ * Total buy-in per player = sum of all bet amounts.
+ */
+function settleStakesBets(input: SettleBetsInput): SettlementResult {
+  const { bets, players, scoreboard, playerQuotas } = input;
+
+  const playerMetrics = extractMetricsForBets(
+    bets,
+    scoreboard,
+    playerQuotas,
+    players,
+  );
+
+  const allPayouts: import("./settlement-engine").Payout[] = [];
+  let totalBuyIn = 0;
+
+  for (const bet of bets) {
+    const betAmount = bet.amount ?? 0;
+    const poolTotal = betAmount * players.length;
+    totalBuyIn += betAmount;
+
+    const pool: PoolConfig = {
+      name: bet.name,
+      disp: bet.disp,
+      pct: 0, // Not used — poolAmount is the absolute betAmount × playerCount
+      metric: getMetricKey(bet.scoringType, bet.scope),
+      splitType: bet.splitType,
+      placesPaid: bet.placesPaid,
+      payoutPcts: bet.payoutPcts,
+    };
+
+    const poolPayouts = calculatePoolPayouts(pool, playerMetrics, poolTotal);
+    allPayouts.push(...poolPayouts);
+  }
+
+  const potTotal = totalBuyIn * players.length;
+
+  // Net positions: start at -totalBuyIn (sum of all bet amounts), add winnings
+  const netPositions: Record<string, number> = {};
+  for (const pm of playerMetrics) {
+    netPositions[pm.playerId] = -totalBuyIn;
+  }
+  for (const payout of allPayouts) {
+    netPositions[payout.playerId] =
+      (netPositions[payout.playerId] ?? -totalBuyIn) + payout.amount;
+  }
+  // Round to avoid floating point issues
+  for (const playerId of Object.keys(netPositions)) {
+    const value = netPositions[playerId];
+    if (value !== undefined) {
+      netPositions[playerId] = Math.round(value * 100) / 100;
+    }
+  }
+
+  // Build player name lookup and reconcile debts
+  const playerNames: Record<string, string> = {};
+  for (const pm of playerMetrics) {
+    playerNames[pm.playerId] = pm.playerName;
+  }
+  const debts = reconcileDebts(netPositions, playerNames);
+
+  return {
+    potTotal,
+    buyIn: totalBuyIn,
+    payouts: allPayouts,
+    netPositions,
+    debts,
+  };
+}
+
+// =============================================================================
+// Public API
+// =============================================================================
+
+/**
+ * Settle bets for a game.
+ *
+ * Routes to the appropriate settlement model:
+ * - Pool-funded (bets have `pct`): buy_in → pot → pools split by pct
+ * - Stakes (bets have `amount`): each bet is an independent fixed-amount pool
  */
 export function settleBets(input: SettleBetsInput): SettlementResult {
   const { bets, players, scoreboard, playerQuotas, buyIn, defaultPlacesPaid } =
     input;
 
+  if (isStakesGame(bets)) {
+    return settleStakesBets(input);
+  }
+
+  // Pool-funded path (original)
   const pools = bets.map((bet) => betToPoolConfig(bet, defaultPlacesPaid));
   const playerMetrics = extractMetricsForBets(
     bets,
