@@ -1,0 +1,7 @@
+{
+  "name": "max_presses",
+  "disp": "Max Presses",
+  "type": "game",
+  "valueType": "num",
+  "defaultValue": "0"
+}
