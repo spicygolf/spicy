@@ -1,0 +1,9 @@
+{
+  "name": "overall_match",
+  "disp": "Overall",
+  "type": "bet",
+  "scope": "all18",
+  "scoringType": "match",
+  "splitType": "winner_take_all",
+  "amount": 20
+}

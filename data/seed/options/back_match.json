@@ -1,0 +1,9 @@
+{
+  "name": "back_match",
+  "disp": "Back",
+  "type": "bet",
+  "scope": "back9",
+  "scoringType": "match",
+  "splitType": "winner_take_all",
+  "amount": 10
+}

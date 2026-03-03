@@ -1,0 +1,9 @@
+{
+  "name": "skins_all",
+  "disp": "Skins",
+  "type": "bet",
+  "scope": "all18",
+  "scoringType": "skins",
+  "splitType": "per_unit",
+  "pct": 25
+}

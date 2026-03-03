@@ -1,0 +1,9 @@
+{
+  "name": "front_match",
+  "disp": "Front",
+  "type": "bet",
+  "scope": "front9",
+  "scoringType": "match",
+  "splitType": "winner_take_all",
+  "amount": 10
+}

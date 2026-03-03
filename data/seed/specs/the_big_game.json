@@ -24,6 +24,7 @@
     "gross_ace_skin"
   ],
   "multipliers": [],
+  "bets": ["front_quota", "back_quota", "overall_quota", "skins_all"],
   "meta": [
     {
       "name": "short",
@@ -76,12 +77,6 @@
         { "name": "local", "disp": "Local (Same Foursome)" },
         { "name": "virtual", "disp": "Virtual (Remote Players)" }
       ]
-    },
-    {
-      "name": "bets",
-      "disp": "Bets",
-      "valueType": "text",
-      "value": "[{\"name\":\"front\",\"disp\":\"Front\",\"scope\":\"front9\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"back\",\"disp\":\"Back\",\"scope\":\"back9\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"overall\",\"disp\":\"Total\",\"scope\":\"all18\",\"scoringType\":\"quota\",\"pct\":25,\"splitType\":\"places\"},{\"name\":\"skins\",\"disp\":\"Skins\",\"scope\":\"all18\",\"scoringType\":\"skins\",\"pct\":25,\"splitType\":\"per_unit\"}]"
     },
     {
       "name": "multi_group",
