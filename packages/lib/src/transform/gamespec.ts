@@ -70,6 +70,21 @@ export function transformGameSpec(v03Spec: GameSpecV03): TransformedGameSpec {
     allOptions.push(...multiplierOptions);
   }
 
+  // Transform bet options
+  if (v03Spec.bets && v03Spec.bets.length > 0) {
+    const betOpts = v03Spec.bets.map((bet) => ({
+      name: bet.name,
+      disp: bet.disp,
+      type: "bet" as const,
+      scope: bet.scope as string,
+      scoringType: bet.scoringType as string,
+      splitType: bet.splitType as string,
+      ...(bet.pct !== undefined && { pct: bet.pct }),
+      ...(bet.amount !== undefined && { amount: bet.amount }),
+    }));
+    allOptions.push(...betOpts);
+  }
+
   // Transform meta options (new unified format)
   if (v03Spec.meta && v03Spec.meta.length > 0) {
     const metaOptions = v03Spec.meta.map((meta) => ({

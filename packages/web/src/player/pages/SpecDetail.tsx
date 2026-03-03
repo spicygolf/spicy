@@ -143,7 +143,9 @@ function SpecDetailContent({
   }
 
   // Sort options by seq
-  const sortBySeq = (a: Option, b: Option) => (a.seq ?? 999) - (b.seq ?? 999);
+  const sortBySeq = (a: Option, b: Option) =>
+    (("seq" in a ? a.seq : undefined) ?? 999) -
+    (("seq" in b ? b.seq : undefined) ?? 999);
   gameOptions.sort(sortBySeq);
   junkOptions.sort(sortBySeq);
   multiplierOptions.sort(sortBySeq);

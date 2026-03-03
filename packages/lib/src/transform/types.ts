@@ -29,6 +29,17 @@ export interface TransformedMultiplierOption {
   value: number;
 }
 
+export interface TransformedBetOption {
+  name: string;
+  disp: string;
+  type: "bet";
+  scope: string;
+  scoringType: string;
+  splitType: string;
+  pct?: number;
+  amount?: number;
+}
+
 export interface TransformedMetaOption {
   name: string;
   disp: string;
@@ -45,6 +56,7 @@ export type TransformedOption =
   | TransformedGameOption
   | TransformedJunkOption
   | TransformedMultiplierOption
+  | TransformedBetOption
   | TransformedMetaOption;
 
 export interface TransformedGameSpec {

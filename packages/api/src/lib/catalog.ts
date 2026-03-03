@@ -31,6 +31,41 @@ const VALID_SHOW_IN = ["score", "faves", "none"] as const;
 const VALID_BASED_ON = ["gross", "net", "user"] as const;
 const VALID_BETTER = ["lower", "higher"] as const;
 
+const VALID_BET_SCOPES = ["front9", "back9", "all18"] as const;
+const VALID_BET_SCORING_TYPES = ["quota", "skins", "points", "match"] as const;
+const VALID_BET_SPLIT_TYPES = [
+  "places",
+  "per_unit",
+  "winner_take_all",
+] as const;
+
+function isValidBetScope(
+  value: unknown,
+): value is "front9" | "back9" | "all18" {
+  return (
+    typeof value === "string" &&
+    (VALID_BET_SCOPES as readonly string[]).includes(value)
+  );
+}
+
+function isValidBetScoringType(
+  value: unknown,
+): value is "quota" | "skins" | "points" | "match" {
+  return (
+    typeof value === "string" &&
+    (VALID_BET_SCORING_TYPES as readonly string[]).includes(value)
+  );
+}
+
+function isValidBetSplitType(
+  value: unknown,
+): value is "places" | "per_unit" | "winner_take_all" {
+  return (
+    typeof value === "string" &&
+    (VALID_BET_SPLIT_TYPES as readonly string[]).includes(value)
+  );
+}
+
 function isValidJunkSubType(
   value: unknown,
 ): value is "dot" | "skin" | "carryover" {
@@ -89,6 +124,7 @@ function isValidBetter(value: unknown): value is "lower" | "higher" {
 }
 
 import {
+  type BetOption,
   Club,
   Course,
   CourseDefaultTee,
@@ -215,6 +251,18 @@ interface MultiplierOptionData {
   invalidation_reason?: string;
 }
 
+interface BetOptionData {
+  type: "bet";
+  name: string;
+  disp: string;
+  version: string;
+  scope: string;
+  scoringType: string;
+  splitType: string;
+  pct?: number;
+  amount?: number;
+}
+
 interface MetaOptionData {
   type: "meta";
   name: string;
@@ -231,6 +279,7 @@ type OptionData =
   | GameOptionData
   | JunkOptionData
   | MultiplierOptionData
+  | BetOptionData
   | MetaOptionData;
 
 /**
@@ -725,6 +774,42 @@ export async function upsertGameSpec(
         }
       }
 
+      // For bet options, check if the spec has overridden pct/amount
+      if (opt.type === "bet") {
+        if (catalogOption.type !== "bet") {
+          spec.$jazz.set(opt.name, catalogOption);
+          continue;
+        }
+
+        const betData = specData.bets?.find((b) => b.name === opt.name);
+        if (betData) {
+          const hasPctOverride =
+            betData.pct !== undefined && catalogOption.pct !== betData.pct;
+          const hasAmountOverride =
+            betData.amount !== undefined &&
+            catalogOption.amount !== betData.amount;
+
+          if (hasPctOverride || hasAmountOverride) {
+            const newBetOption: BetOption = {
+              name: catalogOption.name,
+              disp: catalogOption.disp,
+              type: "bet",
+              version: catalogOption.version,
+              scope: catalogOption.scope,
+              scoringType: catalogOption.scoringType,
+              splitType: catalogOption.splitType,
+              ...(betData.pct !== undefined && { pct: betData.pct }),
+              ...(betData.amount !== undefined && { amount: betData.amount }),
+            };
+            spec.$jazz.set(opt.name, newBetOption);
+            continue;
+          }
+        }
+
+        spec.$jazz.set(opt.name, catalogOption);
+        continue;
+      }
+
       // For multiplier options, check if the spec has an overridden value
       if (opt.type === "multiplier" && "value" in opt) {
         // Options are plain JSON, so just check type
@@ -959,6 +1044,30 @@ async function upsertOptions(
           typeof opt.invalidation_reason === "string" && {
             invalidation_reason: opt.invalidation_reason,
           }),
+      };
+
+      optionsMap.$jazz.set(opt.name, newOption);
+    } else if (opt.type === "bet") {
+      if (
+        !isValidBetScope(opt.scope) ||
+        !isValidBetScoringType(opt.scoringType) ||
+        !isValidBetSplitType(opt.splitType)
+      ) {
+        console.warn(
+          `Skipping bet option ${opt.name}: invalid scope/scoringType/splitType`,
+        );
+        continue;
+      }
+      const newOption: BetOption = {
+        name: opt.name,
+        disp: opt.disp,
+        type: "bet",
+        version: opt.version,
+        scope: opt.scope,
+        scoringType: opt.scoringType,
+        splitType: opt.splitType,
+        ...(opt.pct !== undefined && { pct: opt.pct }),
+        ...(opt.amount !== undefined && { amount: opt.amount }),
       };
 
       optionsMap.$jazz.set(opt.name, newOption);
@@ -1836,6 +1945,21 @@ export async function importGameSpecsToCatalog(
                   invalidation_reason: multData.invalidation_reason as
                     | string
                     | undefined,
+                });
+              }
+            } else if (opt.type === "bet") {
+              const betData = spec.bets?.find((b) => b.name === opt.name);
+              if (betData) {
+                allOptions.set(opt.name, {
+                  type: "bet",
+                  name: opt.name,
+                  disp: opt.disp,
+                  version: String(spec.version),
+                  scope: betData.scope as string,
+                  scoringType: betData.scoringType as string,
+                  splitType: betData.splitType as string,
+                  pct: betData.pct as number | undefined,
+                  amount: betData.amount as number | undefined,
                 });
               }
             }

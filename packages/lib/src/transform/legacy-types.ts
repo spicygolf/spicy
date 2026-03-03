@@ -46,6 +46,15 @@ export interface GameSpecV03 {
     choices?: Array<{ name: string; disp: string }>;
     teamOnly?: boolean;
   }>;
+  bets?: Array<{
+    name: string;
+    disp: string;
+    scope: string;
+    scoringType: string;
+    splitType: string;
+    pct?: number;
+    amount?: number;
+  }>;
   meta?: Array<{
     name: string;
     disp: string;
