@@ -44,8 +44,11 @@ export const Bet = co.map({
    */
   scoringType: z.enum(["quota", "skins", "points", "match"]),
 
-  /** Percentage of total pot (0-100). For single-bet games, always 100. */
-  pct: z.number(),
+  /** Percentage of total pot (0-100). For pool-funded games. */
+  pct: z.optional(z.number()),
+
+  /** Fixed dollar amount per bet. For stakes games (Nassau, Closeout, etc.). */
+  amount: z.optional(z.number()),
 
   /**
    * How to split the bet's portion among winners.

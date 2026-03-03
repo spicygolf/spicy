@@ -28,7 +28,10 @@ export interface BetConfig {
   disp: string;
   scope: "front9" | "back9" | "all18";
   scoringType: "quota" | "skins" | "points" | "match";
-  pct: number;
+  /** Percentage of total pot (pool-funded games). */
+  pct?: number;
+  /** Fixed dollar amount per bet (stakes games). */
+  amount?: number;
   splitType: "places" | "per_unit" | "winner_take_all";
   placesPaid?: number;
   payoutPcts?: number[];
@@ -87,7 +90,7 @@ export function betToPoolConfig(
   return {
     name: bet.name,
     disp: bet.disp,
-    pct: bet.pct,
+    pct: bet.pct ?? 0,
     metric: getMetricKey(bet.scoringType, bet.scope),
     splitType: bet.splitType,
     placesPaid:
