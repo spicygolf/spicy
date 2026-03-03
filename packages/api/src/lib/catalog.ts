@@ -256,9 +256,9 @@ interface BetOptionData {
   name: string;
   disp: string;
   version: string;
-  scope: string;
-  scoringType: string;
-  splitType: string;
+  scope: "front9" | "back9" | "all18";
+  scoringType: "quota" | "skins" | "points" | "match";
+  splitType: "places" | "per_unit" | "winner_take_all";
   pct?: number;
   amount?: number;
 }
@@ -1955,9 +1955,10 @@ export async function importGameSpecsToCatalog(
                   name: opt.name,
                   disp: opt.disp,
                   version: String(spec.version),
-                  scope: betData.scope as string,
-                  scoringType: betData.scoringType as string,
-                  splitType: betData.splitType as string,
+                  scope: betData.scope as BetOptionData["scope"],
+                  scoringType:
+                    betData.scoringType as BetOptionData["scoringType"],
+                  splitType: betData.splitType as BetOptionData["splitType"],
                   pct: betData.pct as number | undefined,
                   amount: betData.amount as number | undefined,
                 });

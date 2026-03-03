@@ -13,6 +13,7 @@
 
 import { calculateQuotaPerformances, extractSkinCounts } from "./quota-metrics";
 import type {
+  Payout,
   PlayerMetrics,
   PoolConfig,
   SettlementResult,
@@ -168,7 +169,7 @@ export function extractMetricsForBets(
 }
 
 // =============================================================================
-// Public API
+// Settlement Paths
 // =============================================================================
 
 /**
@@ -198,7 +199,7 @@ function settleStakesBets(input: SettleBetsInput): SettlementResult {
     players,
   );
 
-  const allPayouts: import("./settlement-engine").Payout[] = [];
+  const allPayouts: Payout[] = [];
   let totalBuyIn = 0;
 
   for (const bet of bets) {
