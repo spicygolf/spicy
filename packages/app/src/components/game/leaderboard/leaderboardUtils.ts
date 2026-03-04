@@ -6,7 +6,7 @@ import {
   isHoleComplete,
 } from "spicylib/scoring";
 
-export type ViewMode = "gross" | "net" | "points" | "skins";
+export type ViewMode = "gross" | "match" | "net" | "points" | "skins";
 
 export interface PlayerColumn {
   playerId: string;
@@ -205,6 +205,24 @@ export function getScoreValue(
       ).length;
       return skinCount > 0 ? skinCount : null;
     }
+    case "match": {
+      if (!isHoleComplete(scoreboard.holes[hole])) return null;
+      // Show 1 if this player won the hole (sole lowest net), null otherwise
+      let lowestNet = Infinity;
+      let winnerId: string | null = null;
+      let tied = false;
+      for (const [pid, result] of Object.entries(holeResult.players)) {
+        if (!result.hasScore) continue;
+        if (result.net < lowestNet) {
+          lowestNet = result.net;
+          winnerId = pid;
+          tied = false;
+        } else if (result.net === lowestNet) {
+          tied = true;
+        }
+      }
+      return !tied && winnerId === playerId ? 1 : null;
+    }
   }
 }
 
@@ -248,6 +266,58 @@ export function getSummaryValue(
       }
     }
     return total > 0 ? total : null;
+  }
+
+  // For match, count holes won (sole lowest net) in range
+  if (viewMode === "match") {
+    let holesWon = 0;
+    const holesPlayed = scoreboard.meta.holesPlayed;
+
+    // Align play-order nines to physical course sides for shotgun starts
+    const firstHole = holesPlayed[0];
+    const startsOnBack =
+      firstHole !== undefined && Number.parseInt(firstHole, 10) >= 10;
+
+    for (const hole of holesPlayed) {
+      const holeNum = Number.parseInt(hole, 10);
+      if (Number.isNaN(holeNum)) continue;
+
+      // Physical course sides: out = holes 1-9, in = holes 10-18
+      const inRange =
+        summaryType === "out"
+          ? holeNum >= 1 && holeNum <= 9
+          : summaryType === "in"
+            ? holeNum >= 10 && holeNum <= 18
+            : true;
+
+      if (!inRange) continue;
+      if (!isHoleComplete(scoreboard.holes[hole])) continue;
+
+      const holeResult = scoreboard.holes[hole];
+      if (!holeResult) continue;
+
+      // Find sole lowest net
+      let lowestNet = Infinity;
+      let winnerId: string | null = null;
+      let tied = false;
+      for (const [pid, result] of Object.entries(holeResult.players)) {
+        if (!result.hasScore) continue;
+        if (result.net < lowestNet) {
+          lowestNet = result.net;
+          winnerId = pid;
+          tied = false;
+        } else if (result.net === lowestNet) {
+          tied = true;
+        }
+      }
+      if (!tied && winnerId === playerId) {
+        holesWon++;
+      }
+    }
+
+    // For "total" in a shotgun start, the value is the same either way
+    // For front/back nines, we use physical course sides (holes 1-9 / 10-18)
+    return holesWon > 0 ? holesWon : null;
   }
 
   // For points, calculate from team hole net totals
@@ -379,7 +449,13 @@ export function getScoreToPar(
   hole: string,
   viewMode: ViewMode,
 ): number | null {
-  if (!scoreboard || viewMode === "points" || viewMode === "skins") return null;
+  if (
+    !scoreboard ||
+    viewMode === "match" ||
+    viewMode === "points" ||
+    viewMode === "skins"
+  )
+    return null;
 
   const holeResult = scoreboard.holes[hole];
   if (!holeResult) return null;
@@ -389,6 +465,27 @@ export function getScoreToPar(
 
   // For gross: gross - par, for net: net - par
   return viewMode === "gross" ? playerResult.scoreToPar : playerResult.netToPar;
+}
+
+/**
+ * Format a match play state for display.
+ *
+ * @param diff - Holes up (positive) or down (negative). 0 = tied.
+ * @param holesRemaining - Holes left in the match. When diff > holesRemaining
+ *   the match is closed out (e.g., "3 & 2").
+ * @returns Formatted string: "2 up", "1 dn", "tied", or "3 & 2"
+ */
+export function formatMatchState(
+  diff: number,
+  holesRemaining?: number,
+): string {
+  if (diff === 0) return "tied";
+  const absDiff = Math.abs(diff);
+  // Closed out: lead exceeds remaining holes
+  if (holesRemaining !== undefined && absDiff > holesRemaining) {
+    return `${absDiff} & ${holesRemaining}`;
+  }
+  return diff > 0 ? `${absDiff} up` : `${absDiff} dn`;
 }
 
 // =============================================================================
@@ -451,7 +548,11 @@ export function getVerticalColumns(bets: BetColumnInfo[]): VerticalColumn[] {
       label: bet.disp,
       summaryType: SCOPE_TO_SUMMARY[bet.scope] as "out" | "in" | "total",
       viewModeOverride:
-        bet.scoringType === "skins" ? ("skins" as ViewMode) : undefined,
+        bet.scoringType === "skins"
+          ? ("skins" as ViewMode)
+          : bet.scoringType === "match"
+            ? ("match" as ViewMode)
+            : undefined,
     }));
 }
 
