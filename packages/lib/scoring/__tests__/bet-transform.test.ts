@@ -45,20 +45,19 @@ describe("transformGameSpec with bets", () => {
     expect(betOptions).toHaveLength(2);
 
     const front = betOptions?.find((o) => o.name === "front_quota");
-    expect(front).toBeDefined();
-    expect(front?.type).toBe("bet");
-    if (front && "scope" in front) {
-      expect(front.scope).toBe("front9");
-    }
-    if (front && "pct" in front) {
-      expect(front.pct).toBe(25);
-    }
+    expect(front).toMatchObject({
+      type: "bet",
+      name: "front_quota",
+      scope: "front9",
+      pct: 25,
+    });
 
     const skins = betOptions?.find((o) => o.name === "skins_all");
-    expect(skins).toBeDefined();
-    if (skins && "scoringType" in skins) {
-      expect(skins.scoringType).toBe("skins");
-    }
+    expect(skins).toMatchObject({
+      type: "bet",
+      name: "skins_all",
+      scoringType: "skins",
+    });
   });
 
   it("transforms stakes-style bets with amount", () => {
@@ -81,12 +80,11 @@ describe("transformGameSpec with bets", () => {
     expect(betOptions).toHaveLength(1);
 
     const front = betOptions?.[0];
-    if (front && "amount" in front) {
-      expect(front.amount).toBe(10);
-    }
-    if (front && "pct" in front) {
-      expect(front.pct).toBeUndefined();
-    }
+    expect(front).toMatchObject({
+      type: "bet",
+      amount: 10,
+    });
+    expect(front).not.toHaveProperty("pct");
   });
 
   it("preserves non-bet options alongside bets", () => {

@@ -190,7 +190,7 @@ function isStakesGame(bets: BetConfig[]): boolean {
  * Total buy-in per player = sum of all bet amounts.
  */
 function settleStakesBets(input: SettleBetsInput): SettlementResult {
-  const { bets, players, scoreboard, playerQuotas } = input;
+  const { bets, players, scoreboard, playerQuotas, defaultPlacesPaid } = input;
 
   const playerMetrics = extractMetricsForBets(
     bets,
@@ -213,7 +213,7 @@ function settleStakesBets(input: SettleBetsInput): SettlementResult {
       pct: 0, // Not used — poolAmount is the absolute betAmount × playerCount
       metric: getMetricKey(bet.scoringType, bet.scope),
       splitType: bet.splitType,
-      placesPaid: bet.placesPaid,
+      placesPaid: bet.placesPaid ?? defaultPlacesPaid,
       payoutPcts: bet.payoutPcts,
     };
 
@@ -272,6 +272,14 @@ export function settleBets(input: SettleBetsInput): SettlementResult {
     input;
 
   if (isStakesGame(bets)) {
+    const unsupported = bets
+      .filter((b) => b.scoringType === "match" || b.scoringType === "points")
+      .map((b) => b.scoringType);
+    if (unsupported.length > 0) {
+      throw new Error(
+        `Unsupported scoring types in stakes settlement: ${[...new Set(unsupported)].join(", ")}`,
+      );
+    }
     return settleStakesBets(input);
   }
 

@@ -1058,6 +1058,27 @@ async function upsertOptions(
         );
         continue;
       }
+      const hasPct = opt.pct !== undefined;
+      const hasAmount = opt.amount !== undefined;
+      if (hasPct === hasAmount) {
+        console.warn(
+          `Skipping bet option ${opt.name}: exactly one of pct or amount is required`,
+        );
+        continue;
+      }
+      if (
+        hasPct &&
+        (typeof opt.pct !== "number" || opt.pct <= 0 || opt.pct > 100)
+      ) {
+        console.warn(
+          `Skipping bet option ${opt.name}: pct must be > 0 and <= 100`,
+        );
+        continue;
+      }
+      if (hasAmount && (typeof opt.amount !== "number" || opt.amount <= 0)) {
+        console.warn(`Skipping bet option ${opt.name}: amount must be > 0`);
+        continue;
+      }
       const newOption: BetOption = {
         name: opt.name,
         disp: opt.disp,

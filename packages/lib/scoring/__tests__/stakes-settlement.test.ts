@@ -336,7 +336,7 @@ describe("stakes settlement", () => {
         (sum, n) => sum + n,
         0,
       );
-      expect(Math.abs(totalNet)).toBeLessThan(1);
+      expect(totalNet).toBeCloseTo(0, 6);
 
       // Alice should be positive (wins front and overall due to birdies)
       expect(result.netPositions.p1).toBeGreaterThan(0);
@@ -369,7 +369,7 @@ describe("stakes settlement", () => {
         (sum, n) => sum + n,
         0,
       );
-      expect(Math.abs(totalNet)).toBeLessThan(1);
+      expect(totalNet).toBeCloseTo(0, 6);
     });
 
     it("debt reconciliation covers total owed", () => {
@@ -403,7 +403,7 @@ describe("stakes settlement", () => {
         .filter((n) => n < 0)
         .reduce((sum, n) => sum + Math.abs(n), 0);
 
-      expect(Math.abs(totalDebt - totalOwed)).toBeLessThan(1);
+      expect(totalDebt).toBeCloseTo(totalOwed, 6);
     });
   });
 

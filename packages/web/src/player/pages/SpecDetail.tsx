@@ -153,6 +153,7 @@ function SpecDetailContent({
   gameOptions.sort(sortBySeq);
   junkOptions.sort(sortBySeq);
   multiplierOptions.sort(sortBySeq);
+  betOptions.sort(sortBySeq);
 
   // Format player count
   const playerCount =
