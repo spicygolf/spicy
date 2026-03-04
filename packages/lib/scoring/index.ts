@@ -60,7 +60,9 @@ export {
 export {
   copySpecOptions,
   getFrontNinePreDoubleTotalFromHoles,
+  getGameOptionBoolean,
   getGameOptionNumber,
+  getGameOptionString,
   getGameOptions,
   getGameSpecField,
   getJunkOptionsForHole,

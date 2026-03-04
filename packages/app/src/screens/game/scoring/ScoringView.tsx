@@ -95,6 +95,10 @@ export interface ScoringViewProps {
   groupRoundIds?: Set<string>;
   /** Called to enter rapid per-player score entry mode */
   onRapidEntry?: () => void;
+  /** Whether this game has match bets (enables press button) */
+  hasMatchBets?: boolean;
+  /** Called to manually create a press for a specific parent bet */
+  onManualPress?: (parentBetName: string) => void;
 }
 
 /** Check if a team has a specific team-level option on a hole */

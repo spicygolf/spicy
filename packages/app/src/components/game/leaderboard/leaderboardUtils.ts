@@ -273,11 +273,6 @@ export function getSummaryValue(
     let holesWon = 0;
     const holesPlayed = scoreboard.meta.holesPlayed;
 
-    // Align play-order nines to physical course sides for shotgun starts
-    const firstHole = holesPlayed[0];
-    const startsOnBack =
-      firstHole !== undefined && Number.parseInt(firstHole, 10) >= 10;
-
     for (const hole of holesPlayed) {
       const holeNum = Number.parseInt(hole, 10);
       if (Number.isNaN(holeNum)) continue;

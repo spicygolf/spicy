@@ -10,6 +10,7 @@ import {
 } from "@/components/game/scoring";
 import { useGameContext } from "@/contexts/GameContext";
 import {
+  useAutoPress,
   useCurrentHole,
   useGameInitialization,
   useHoleInitialization,
@@ -90,6 +91,14 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
 
   const settlement = useSettlement(game, scoreboard, scoringContext, bets);
   const payouts = settlement?.payouts ?? null;
+
+  // Press bet management (auto + manual)
+  const { runAutoPress, createManualPress, hasMatchBets } = useAutoPress(
+    game,
+    scoreboard,
+    bets,
+    currentHoleIndex,
+  );
 
   // Rapid per-player score entry mode
   const [rapidEntryMode, setRapidEntryMode] = useState(false);
@@ -306,7 +315,10 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               scoreboard={scoreboard}
               scoringContext={scoringContext}
               onPrevHole={handlePrevHole}
-              onNextHole={handleNextHole}
+              onNextHole={() => {
+                runAutoPress();
+                handleNextHole();
+              }}
               onScoreChange={handleScoreChange}
               onUnscore={handleUnscore}
               onChangeTeams={() => setShowChangeTeamsModal(true)}
@@ -316,6 +328,8 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               onGroupChange={setSelectedGroupId}
               groupRoundIds={groupRoundIds}
               onRapidEntry={() => setRapidEntryMode(true)}
+              hasMatchBets={hasMatchBets}
+              onManualPress={createManualPress}
             />
           )}
         </ErrorBoundary>

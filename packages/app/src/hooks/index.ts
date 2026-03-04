@@ -2,6 +2,7 @@ export * from "./useAddPlayerToGame";
 export * from "./useApi";
 export * from "./useAppLifecycleAnalytics";
 export * from "./useAppState";
+export * from "./useAutoPress";
 export * from "./useCatalogCourses";
 export * from "./useCatalogPlayers";
 export * from "./useCreateGame";
