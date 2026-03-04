@@ -78,10 +78,22 @@ export interface SeedMetaOption {
   required?: boolean;
 }
 
+export interface SeedBetOption {
+  name: string;
+  disp: string;
+  type: "bet";
+  scope: "front9" | "back9" | "all18";
+  scoringType: "quota" | "skins" | "points" | "match";
+  splitType: "places" | "per_unit" | "winner_take_all";
+  pct?: number;
+  amount?: number;
+}
+
 export type SeedOption =
   | SeedGameOption
   | SeedJunkOption
   | SeedMultiplierOption
+  | SeedBetOption
   | SeedMetaOption;
 
 /**
@@ -116,6 +128,7 @@ export interface SeedSpec {
   options: OptionRef[]; // Game option names or objects with overrides
   junk: OptionRef[]; // Junk option names or objects with overrides
   multipliers: OptionRef[]; // Multiplier option names or objects with overrides
+  bets?: OptionRef[]; // Bet option names or objects with overrides
   /** Embedded meta options for unified format (optional, new architecture) */
   meta?: SeedMetaOption[];
 }
@@ -284,6 +297,15 @@ export async function loadSeedSpecsAsV03(): Promise<
       value_from?: string;
       invalidation_reason?: string;
     }>;
+    bets?: Array<{
+      name: string;
+      disp: string;
+      scope: string;
+      scoringType: string;
+      splitType: string;
+      pct?: number;
+      amount?: number;
+    }>;
     meta?: Array<{
       name: string;
       disp: string;
@@ -378,6 +400,24 @@ export async function loadSeedSpecsAsV03(): Promise<
       })
       .filter(Boolean);
 
+    const betOptions = (spec.bets ?? [])
+      .map((ref) => {
+        const { name, overrides } = parseOptionRef(ref);
+        const opt = optionsMap.get(name);
+        if (!opt || opt.type !== "bet") return null;
+        const merged = { ...opt, ...overrides } as SeedBetOption;
+        return {
+          name: merged.name,
+          disp: merged.disp,
+          scope: merged.scope,
+          scoringType: merged.scoringType,
+          splitType: merged.splitType,
+          ...(merged.pct !== undefined && { pct: merged.pct }),
+          ...(merged.amount !== undefined && { amount: merged.amount }),
+        };
+      })
+      .filter(Boolean);
+
     return {
       _key: spec._key, // ArangoDB _key for legacyId matching during game import
       legacy_keys: spec.legacy_keys, // Additional legacy keys (for consolidated specs like Match Play)
@@ -433,6 +473,15 @@ export async function loadSeedSpecsAsV03(): Promise<
         input_value?: boolean;
         value_from?: string;
         invalidation_reason?: string;
+      }>,
+      bets: betOptions as Array<{
+        name: string;
+        disp: string;
+        scope: string;
+        scoringType: string;
+        splitType: string;
+        pct?: number;
+        amount?: number;
       }>,
       // Pass through embedded meta options directly (new unified format)
       meta: spec.meta,

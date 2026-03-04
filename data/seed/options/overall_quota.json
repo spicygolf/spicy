@@ -1,0 +1,9 @@
+{
+  "name": "overall_quota",
+  "disp": "Total",
+  "type": "bet",
+  "scope": "all18",
+  "scoringType": "quota",
+  "splitType": "places",
+  "pct": 25
+}

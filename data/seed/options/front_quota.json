@@ -1,0 +1,9 @@
+{
+  "name": "front_quota",
+  "disp": "Front",
+  "type": "bet",
+  "scope": "front9",
+  "scoringType": "quota",
+  "splitType": "places",
+  "pct": 25
+}

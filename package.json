@@ -5,6 +5,7 @@
     "@types/bun": "latest",
     "del-cli": "7.0.0",
     "husky": "9.1.7",
+    "markdownlint-cli2": "^0.21.0",
     "typescript": "5.9.3"
   },
   "license": "FSL-1.1-ALv2",

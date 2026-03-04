@@ -1,0 +1,9 @@
+{
+  "name": "back_quota",
+  "disp": "Back",
+  "type": "bet",
+  "scope": "back9",
+  "scoringType": "quota",
+  "splitType": "places",
+  "pct": 25
+}

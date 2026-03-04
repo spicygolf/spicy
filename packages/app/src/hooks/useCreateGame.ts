@@ -246,15 +246,59 @@ function createPayoutPoolsFromSpec(
 }
 
 /**
- * Parse bets meta option (JSON string) and create Bet CoMaps.
- * Returns an empty list if no bets are defined in the spec.
+ * Create Bet CoMaps from bet options on the spec.
+ *
+ * Reads type:"bet" options from the GameSpec options map.
+ * Falls back to parsing the legacy JSON meta option for existing games.
+ * Returns an empty list if no bets are defined.
  */
 function createBetsFromSpec(
   spec: GameSpec | undefined,
   owner: Group,
 ): ListOfBets {
   const bets = ListOfBets.create([], { owner });
+  if (!spec?.$isLoaded) return bets;
 
+  // Collect bet options from the spec's options map
+  const betOptions: Array<{
+    name: string;
+    disp: string;
+    scope: "front9" | "back9" | "all18" | "rest_of_nine" | "rest_of_round";
+    scoringType: "quota" | "skins" | "points" | "match";
+    pct?: number;
+    amount?: number;
+    splitType: "places" | "per_unit" | "winner_take_all";
+  }> = [];
+
+  for (const key of Object.keys(spec)) {
+    if (key.startsWith("$") || key.startsWith("_")) continue;
+    if (!spec.$jazz.has(key)) continue;
+    const opt = spec[key];
+    if (opt?.type === "bet") {
+      betOptions.push(opt);
+    }
+  }
+
+  if (betOptions.length > 0) {
+    for (const b of betOptions) {
+      const bet = Bet.create(
+        {
+          name: b.name,
+          disp: b.disp,
+          scope: b.scope,
+          scoringType: b.scoringType,
+          splitType: b.splitType,
+          ...(b.pct !== undefined && { pct: b.pct }),
+          ...(b.amount !== undefined && { amount: b.amount }),
+        },
+        { owner },
+      );
+      bets.$jazz.push(bet);
+    }
+    return bets;
+  }
+
+  // Legacy fallback: parse bets from JSON meta option
   const betsJson = getMetaOption(spec, "bets") as string | undefined;
   if (!betsJson) return bets;
 

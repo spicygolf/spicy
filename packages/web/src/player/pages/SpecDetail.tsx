@@ -118,6 +118,7 @@ function SpecDetailContent({
   const gameOptions: Option[] = [];
   const junkOptions: Option[] = [];
   const multiplierOptions: Option[] = [];
+  const betOptions: Option[] = [];
   const metaOptions: Option[] = [];
 
   for (const key of Object.keys(spec)) {
@@ -135,6 +136,9 @@ function SpecDetailContent({
         case "multiplier":
           multiplierOptions.push(opt);
           break;
+        case "bet":
+          betOptions.push(opt);
+          break;
         case "meta":
           metaOptions.push(opt);
           break;
@@ -143,10 +147,13 @@ function SpecDetailContent({
   }
 
   // Sort options by seq
-  const sortBySeq = (a: Option, b: Option) => (a.seq ?? 999) - (b.seq ?? 999);
+  const sortBySeq = (a: Option, b: Option) =>
+    (("seq" in a ? a.seq : undefined) ?? 999) -
+    (("seq" in b ? b.seq : undefined) ?? 999);
   gameOptions.sort(sortBySeq);
   junkOptions.sort(sortBySeq);
   multiplierOptions.sort(sortBySeq);
+  betOptions.sort(sortBySeq);
 
   // Format player count
   const playerCount =
@@ -270,6 +277,25 @@ function SpecDetailContent({
         </Card>
       )}
 
+      {/* Bet Options */}
+      {betOptions.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Bets</CardTitle>
+            <CardDescription>
+              Scored sub-competitions within the game
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {betOptions.map((opt) => (
+                <OptionRow key={opt.name} option={opt} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Future: Start Game / Customize buttons */}
       <div className="flex gap-4">
         <Button size="lg" disabled>
@@ -309,6 +335,14 @@ function OptionRow({ option }: OptionRowProps): React.JSX.Element {
       break;
     case "multiplier":
       valueDisplay = `${option.value}x`;
+      break;
+    case "bet":
+      valueDisplay =
+        option.pct !== undefined
+          ? `${option.pct}% of pot`
+          : option.amount !== undefined
+            ? `$${option.amount}`
+            : option.scope;
       break;
     default:
       valueDisplay = null;

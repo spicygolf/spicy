@@ -5,17 +5,24 @@
  * and runs the payout calculation. Bridges the Bet schema (scope, scoringType)
  * to the settlement engine's PoolConfig + PlayerMetrics model.
  *
- * Currently supports pool-funded games (Big Game style: buy_in → pot → pools).
- * Zero-sum games (stakes × differential) will be added in a future phase.
+ * Two settlement models:
+ * - Pool-funded (Big Game): buy_in → pot → pools split by pct
+ * - Stakes (Nassau/Closeout/Florida Bet): each bet has a fixed amount,
+ *   loser pays winner directly
  */
 
 import { calculateQuotaPerformances, extractSkinCounts } from "./quota-metrics";
 import type {
+  Payout,
   PlayerMetrics,
   PoolConfig,
   SettlementResult,
 } from "./settlement-engine";
-import { calculateSettlement } from "./settlement-engine";
+import {
+  calculatePoolPayouts,
+  calculateSettlement,
+  reconcileDebts,
+} from "./settlement-engine";
 import type { PlayerQuota, Scoreboard } from "./types";
 
 // =============================================================================
@@ -28,7 +35,10 @@ export interface BetConfig {
   disp: string;
   scope: "front9" | "back9" | "all18";
   scoringType: "quota" | "skins" | "points" | "match";
-  pct: number;
+  /** Percentage of total pot (pool-funded games). */
+  pct?: number;
+  /** Fixed dollar amount per bet (stakes games). */
+  amount?: number;
   splitType: "places" | "per_unit" | "winner_take_all";
   placesPaid?: number;
   payoutPcts?: number[];
@@ -87,7 +97,7 @@ export function betToPoolConfig(
   return {
     name: bet.name,
     disp: bet.disp,
-    pct: bet.pct,
+    pct: bet.pct ?? 0,
     metric: getMetricKey(bet.scoringType, bet.scope),
     splitType: bet.splitType,
     placesPaid:
@@ -159,24 +169,123 @@ export function extractMetricsForBets(
 }
 
 // =============================================================================
+// Settlement Paths
+// =============================================================================
+
+/**
+ * Determine settlement model from bet configs.
+ * Stakes if any bet has `amount`; pool-funded otherwise.
+ */
+function isStakesGame(bets: BetConfig[]): boolean {
+  return bets.some((b) => b.amount !== undefined && b.amount > 0);
+}
+
+/**
+ * Settle stakes-based bets (Nassau, Closeout, Florida Bet).
+ *
+ * Each bet has a fixed `amount`. Every player puts in that amount per bet,
+ * and the winner(s) take the pool for that bet. Uses the same payout split
+ * logic as pool-funded games but with absolute dollar amounts per bet.
+ *
+ * Total buy-in per player = sum of all bet amounts.
+ */
+function settleStakesBets(input: SettleBetsInput): SettlementResult {
+  const { bets, players, scoreboard, playerQuotas, defaultPlacesPaid } = input;
+
+  const playerMetrics = extractMetricsForBets(
+    bets,
+    scoreboard,
+    playerQuotas,
+    players,
+  );
+
+  const allPayouts: Payout[] = [];
+  let totalBuyIn = 0;
+
+  for (const bet of bets) {
+    const betAmount = bet.amount ?? 0;
+    const poolTotal = betAmount * players.length;
+    totalBuyIn += betAmount;
+
+    const pool: PoolConfig = {
+      ...betToPoolConfig(bet, defaultPlacesPaid),
+      pct: 0, // Not used — poolAmount is the absolute betAmount × playerCount
+    };
+
+    const poolPayouts = calculatePoolPayouts(pool, playerMetrics, poolTotal);
+    allPayouts.push(...poolPayouts);
+  }
+
+  const potTotal = totalBuyIn * players.length;
+
+  // Net positions: start at -totalBuyIn (sum of all bet amounts), add winnings
+  const netPositions: Record<string, number> = {};
+  for (const pm of playerMetrics) {
+    netPositions[pm.playerId] = -totalBuyIn;
+  }
+  for (const payout of allPayouts) {
+    netPositions[payout.playerId] =
+      (netPositions[payout.playerId] ?? -totalBuyIn) + payout.amount;
+  }
+  // Round to avoid floating point issues
+  for (const playerId of Object.keys(netPositions)) {
+    const value = netPositions[playerId];
+    if (value !== undefined) {
+      netPositions[playerId] = Math.round(value * 100) / 100;
+    }
+  }
+
+  // Build player name lookup and reconcile debts
+  const playerNames: Record<string, string> = {};
+  for (const pm of playerMetrics) {
+    playerNames[pm.playerId] = pm.playerName;
+  }
+  const debts = reconcileDebts(netPositions, playerNames);
+
+  return {
+    potTotal,
+    buyIn: totalBuyIn,
+    payouts: allPayouts,
+    netPositions,
+    debts,
+  };
+}
+
+// =============================================================================
 // Public API
 // =============================================================================
 
 /**
- * Settle bets for a pool-funded game.
+ * Settle bets for a game.
  *
- * Bridges game bets + scoreboard to the settlement engine:
- * 1. Converts each bet to a PoolConfig with the appropriate metric key
- * 2. Extracts player metrics from the scoreboard
- * 3. Runs the full settlement calculation (payouts, net positions, debts)
- *
- * @param input - Bets, players, scoreboard, and game options
- * @returns Full settlement result with payouts, net positions, and reconciled debts
+ * Routes to the appropriate settlement model:
+ * - Pool-funded (bets have `pct`): buy_in → pot → pools split by pct
+ * - Stakes (bets have `amount`): each bet is an independent fixed-amount pool
  */
 export function settleBets(input: SettleBetsInput): SettlementResult {
   const { bets, players, scoreboard, playerQuotas, buyIn, defaultPlacesPaid } =
     input;
 
+  const unsupported = bets
+    .filter((b) => b.scoringType === "match" || b.scoringType === "points")
+    .map((b) => b.scoringType);
+  if (unsupported.length > 0) {
+    throw new Error(
+      `Unsupported scoring types in settlement: ${[...new Set(unsupported)].join(", ")}`,
+    );
+  }
+
+  if (isStakesGame(bets)) {
+    const hasPoolBets = bets.some((b) => (b.pct ?? 0) > 0);
+    if (hasPoolBets) {
+      throw new Error(
+        "Mixed bet models are not supported: use either amount-based or pct-based bets.",
+      );
+    }
+    return settleStakesBets(input);
+  }
+
+  // Pool-funded path (original)
   const pools = bets.map((bet) => betToPoolConfig(bet, defaultPlacesPaid));
   const playerMetrics = extractMetricsForBets(
     bets,

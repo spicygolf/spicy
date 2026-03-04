@@ -9,7 +9,8 @@
   "max_players": 4,
   "location_type": "multiple",
   "teams": false,
-  "options": ["use_handicaps", "auto_press", "auto_press_trigger"],
+  "options": ["use_handicaps", "stakes", "auto_press", "auto_press_trigger", "press_scope"],
   "junk": [],
-  "multipliers": []
+  "multipliers": [],
+  "bets": ["front_match", "back_match", "overall_match"]
 }

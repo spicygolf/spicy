@@ -526,8 +526,28 @@ export function extractBets(
     if (result.length > 0) return result;
   }
 
-  // Fallback: parse bets from game spec JSON (for legacy games without game.bets)
-  if (!gameSpec) return [];
+  // Fallback: read bet options from spec options map
+  if (!gameSpec?.$isLoaded) return [];
+
+  const specBets: BetColumnInfo[] = [];
+  for (const key of Object.keys(gameSpec)) {
+    if (key.startsWith("$") || key.startsWith("_")) continue;
+    if (!gameSpec.$jazz.has(key)) continue;
+    const opt = gameSpec[key];
+    if (opt?.type === "bet") {
+      specBets.push({
+        name: opt.name,
+        disp: opt.disp,
+        scope: opt.scope,
+        scoringType: opt.scoringType,
+        pct: opt.pct,
+        splitType: opt.splitType,
+      });
+    }
+  }
+  if (specBets.length > 0) return specBets;
+
+  // Legacy fallback: parse bets from JSON meta option
   const betsJson = getMetaOption(gameSpec, "bets") as string | undefined;
   if (!betsJson) return [];
   try {

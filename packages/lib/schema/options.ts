@@ -95,6 +95,31 @@ export const MultiplierOptionSchema = z.object({
 export type MultiplierOption = z.infer<typeof MultiplierOptionSchema>;
 
 /**
+ * Bet option - defines a scored sub-competition within a game spec
+ * Examples: front quota, back match, overall skins
+ *
+ * Two settlement models:
+ * - Pool: pct of total pot (Big Game style)
+ * - Stakes: fixed amount per bet (Nassau/Closeout/Florida Bet)
+ *
+ * Plain JSON object stored in MapOfOptions co.record
+ */
+export const BetOptionSchema = z.object({
+  name: z.string(),
+  disp: z.string(),
+  type: z.literal("bet"),
+  version: z.string(),
+  scope: z.enum(["front9", "back9", "all18"]),
+  scoringType: z.enum(["quota", "skins", "points", "match"]),
+  splitType: z.enum(["places", "per_unit", "winner_take_all"]),
+  /** Percentage of total pot (0-100). For pool-funded games. */
+  pct: z.number().optional(),
+  /** Fixed dollar amount per bet. For stakes games. */
+  amount: z.number().optional(),
+});
+export type BetOption = z.infer<typeof BetOptionSchema>;
+
+/**
  * Meta option - spec-level metadata that doesn't affect scoring
  * Examples: short name, aliases, description, min/max players
  *
@@ -130,6 +155,7 @@ export const OptionSchema = z.discriminatedUnion("type", [
   GameOptionSchema,
   JunkOptionSchema,
   MultiplierOptionSchema,
+  BetOptionSchema,
   MetaOptionSchema,
 ]);
 export type Option = z.infer<typeof OptionSchema>;

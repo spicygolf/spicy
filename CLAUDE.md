@@ -32,12 +32,14 @@ At the start of every session:
 ## Critical Principles
 
 ### 1. Local-First with Jazz Tools
+
 - App MUST work offline
 - All user data in Jazz CoMaps/CoLists
 - API only for external data
 - **Rule**: If it can work offline, use Jazz
 
 ### 2. Jazz Patterns are NON-NEGOTIABLE
+
 ```typescript
 // CORRECT
 if (!player.$jazz.has("rounds")) {
@@ -51,12 +53,14 @@ if (!player.rounds) { ... }
 See `.claude/skills/jazz-patterns/README.md`
 
 ### 3. Never Commit to Main
+
 - **ALWAYS** create a feature branch before the first commit
 - Branch naming: `feat/<name>`, `fix/<name>`, `refactor/<name>`
 - All changes go through PRs — never push directly to main
 - If you find yourself on main, create a branch before committing
 
 ### 4. Quality Checks - MANDATORY
+
 ```bash
 ./scripts/code-quality.sh
 ```

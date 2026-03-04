@@ -1,0 +1,12 @@
+{
+  "name": "press_scope",
+  "disp": "Press Scope",
+  "type": "game",
+  "valueType": "menu",
+  "defaultValue": "same",
+  "choices": [
+    { "name": "same", "disp": "Same as original bet" },
+    { "name": "rest_of_nine", "disp": "Rest of nine" },
+    { "name": "rest_of_round", "disp": "Rest of round" }
+  ]
+}

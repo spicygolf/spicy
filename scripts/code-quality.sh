@@ -40,6 +40,9 @@ echo "Running code quality checks..."
 # Format check
 run_quiet "format" bun format
 
+# Markdown lint
+run_quiet "markdown" bunx markdownlint-cli2
+
 # Lint check
 run_quiet "lint" bun lint
 

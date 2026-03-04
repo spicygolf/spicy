@@ -1,0 +1,11 @@
+{
+  "name": "press_amount_rule",
+  "disp": "Press Amount",
+  "type": "game",
+  "valueType": "menu",
+  "defaultValue": "fixed",
+  "choices": [
+    { "name": "fixed", "disp": "Same as original bet" },
+    { "name": "double", "disp": "Double previous press" }
+  ]
+}
