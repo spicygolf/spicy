@@ -419,8 +419,10 @@ export interface BetColumnInfo {
   scope: string;
   scoringType: string;
   pct?: number;
+  amount?: number;
   splitType?: string;
   placesPaid?: number;
+  startHoleIndex?: number;
 }
 
 const SCOPE_TO_SUMMARY: Record<string, "out" | "in" | "total"> = {
@@ -519,8 +521,10 @@ export function extractBets(
         scope: bet.scope,
         scoringType: bet.scoringType,
         pct: bet.pct,
+        amount: bet.amount ?? undefined,
         splitType: bet.splitType,
         placesPaid: bet.placesPaid ?? undefined,
+        startHoleIndex: bet.startHoleIndex ?? undefined,
       });
     }
     if (result.length > 0) return result;
@@ -541,6 +545,7 @@ export function extractBets(
         scope: opt.scope,
         scoringType: opt.scoringType,
         pct: opt.pct,
+        amount: opt.amount,
         splitType: opt.splitType,
       });
     }
