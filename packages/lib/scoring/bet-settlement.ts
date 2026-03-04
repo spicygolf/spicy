@@ -208,16 +208,8 @@ function settleStakesBets(input: SettleBetsInput): SettlementResult {
     totalBuyIn += betAmount;
 
     const pool: PoolConfig = {
-      name: bet.name,
-      disp: bet.disp,
+      ...betToPoolConfig(bet, defaultPlacesPaid),
       pct: 0, // Not used — poolAmount is the absolute betAmount × playerCount
-      metric: getMetricKey(bet.scoringType, bet.scope),
-      splitType: bet.splitType,
-      placesPaid:
-        bet.splitType === "places"
-          ? (bet.placesPaid ?? defaultPlacesPaid)
-          : undefined,
-      payoutPcts: bet.payoutPcts,
     };
 
     const poolPayouts = calculatePoolPayouts(pool, playerMetrics, poolTotal);
@@ -274,19 +266,20 @@ export function settleBets(input: SettleBetsInput): SettlementResult {
   const { bets, players, scoreboard, playerQuotas, buyIn, defaultPlacesPaid } =
     input;
 
+  const unsupported = bets
+    .filter((b) => b.scoringType === "match" || b.scoringType === "points")
+    .map((b) => b.scoringType);
+  if (unsupported.length > 0) {
+    throw new Error(
+      `Unsupported scoring types in settlement: ${[...new Set(unsupported)].join(", ")}`,
+    );
+  }
+
   if (isStakesGame(bets)) {
     const hasPoolBets = bets.some((b) => (b.pct ?? 0) > 0);
     if (hasPoolBets) {
       throw new Error(
         "Mixed bet models are not supported: use either amount-based or pct-based bets.",
-      );
-    }
-    const unsupported = bets
-      .filter((b) => b.scoringType === "match" || b.scoringType === "points")
-      .map((b) => b.scoringType);
-    if (unsupported.length > 0) {
-      throw new Error(
-        `Unsupported scoring types in stakes settlement: ${[...new Set(unsupported)].join(", ")}`,
       );
     }
     return settleStakesBets(input);

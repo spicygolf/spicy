@@ -246,7 +246,7 @@ describe("stakes settlement", () => {
           playerQuotas: TWO_PLAYER_QUOTAS,
           buyIn: 0,
         }),
-      ).toThrow("Unsupported scoring types in stakes settlement: match");
+      ).toThrow("Unsupported scoring types in settlement: match");
     });
 
     it("throws for mixed pct and amount bet models", () => {
