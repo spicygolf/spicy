@@ -272,6 +272,12 @@ export function settleBets(input: SettleBetsInput): SettlementResult {
     input;
 
   if (isStakesGame(bets)) {
+    const hasPoolBets = bets.some((b) => (b.pct ?? 0) > 0);
+    if (hasPoolBets) {
+      throw new Error(
+        "Mixed bet models are not supported: use either amount-based or pct-based bets.",
+      );
+    }
     const unsupported = bets
       .filter((b) => b.scoringType === "match" || b.scoringType === "points")
       .map((b) => b.scoringType);

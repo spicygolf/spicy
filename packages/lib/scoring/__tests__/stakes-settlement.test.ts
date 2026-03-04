@@ -215,6 +215,80 @@ describe("stakes settlement", () => {
       expect(result.potTotal).toBe(80);
       expect(result.buyIn).toBe(40);
     });
+
+    it("throws for unsupported scoring types in stakes routing", () => {
+      const matchBets: BetConfig[] = [
+        {
+          name: "overall_match",
+          disp: "Overall",
+          scope: "all18",
+          scoringType: "match",
+          amount: 10,
+          splitType: "winner_take_all",
+        },
+      ];
+
+      const junk: Record<
+        string,
+        Record<string, { name: string; value: number }[]>
+      > = {};
+      for (const p of TWO_PLAYERS) {
+        junk[p.id] = {};
+        for (const h of ALL_18) junk[p.id]![h] = [stab("par", 2)];
+      }
+
+      const scoreboard = makeScoreboard(ALL_18, junk);
+      expect(() =>
+        settleBets({
+          bets: matchBets,
+          players: TWO_PLAYERS,
+          scoreboard,
+          playerQuotas: TWO_PLAYER_QUOTAS,
+          buyIn: 0,
+        }),
+      ).toThrow("Unsupported scoring types in stakes settlement: match");
+    });
+
+    it("throws for mixed pct and amount bet models", () => {
+      const mixedBets: BetConfig[] = [
+        {
+          name: "front",
+          disp: "Front",
+          scope: "front9",
+          scoringType: "quota",
+          amount: 10,
+          splitType: "winner_take_all",
+        },
+        {
+          name: "back",
+          disp: "Back",
+          scope: "back9",
+          scoringType: "quota",
+          pct: 50,
+          splitType: "places",
+        },
+      ];
+
+      const junk: Record<
+        string,
+        Record<string, { name: string; value: number }[]>
+      > = {};
+      for (const p of TWO_PLAYERS) {
+        junk[p.id] = {};
+        for (const h of ALL_18) junk[p.id]![h] = [stab("par", 2)];
+      }
+
+      const scoreboard = makeScoreboard(ALL_18, junk);
+      expect(() =>
+        settleBets({
+          bets: mixedBets,
+          players: TWO_PLAYERS,
+          scoreboard,
+          playerQuotas: TWO_PLAYER_QUOTAS,
+          buyIn: 40,
+        }),
+      ).toThrow("Mixed bet models are not supported");
+    });
   });
 
   describe("2-player Nassau", () => {

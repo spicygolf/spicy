@@ -790,6 +790,41 @@ export async function upsertGameSpec(
             catalogOption.amount !== betData.amount;
 
           if (hasPctOverride || hasAmountOverride) {
+            // Validate override pct/amount invariants
+            const overridePct = betData.pct ?? catalogOption.pct;
+            const overrideAmount = betData.amount ?? catalogOption.amount;
+            const hasP = overridePct !== undefined;
+            const hasA = overrideAmount !== undefined;
+            if (hasP === hasA) {
+              console.warn(
+                `Ignoring invalid bet override ${opt.name}: exactly one of pct or amount is required`,
+              );
+              spec.$jazz.set(opt.name, catalogOption);
+              continue;
+            }
+            if (
+              hasP &&
+              (typeof overridePct !== "number" ||
+                overridePct <= 0 ||
+                overridePct > 100)
+            ) {
+              console.warn(
+                `Ignoring invalid bet override ${opt.name}: pct must be > 0 and <= 100`,
+              );
+              spec.$jazz.set(opt.name, catalogOption);
+              continue;
+            }
+            if (
+              hasA &&
+              (typeof overrideAmount !== "number" || overrideAmount <= 0)
+            ) {
+              console.warn(
+                `Ignoring invalid bet override ${opt.name}: amount must be > 0`,
+              );
+              spec.$jazz.set(opt.name, catalogOption);
+              continue;
+            }
+
             const newBetOption: BetOption = {
               name: catalogOption.name,
               disp: catalogOption.disp,
@@ -798,8 +833,8 @@ export async function upsertGameSpec(
               scope: catalogOption.scope,
               scoringType: catalogOption.scoringType,
               splitType: catalogOption.splitType,
-              ...(betData.pct !== undefined && { pct: betData.pct }),
-              ...(betData.amount !== undefined && { amount: betData.amount }),
+              ...(overridePct !== undefined && { pct: overridePct }),
+              ...(overrideAmount !== undefined && { amount: overrideAmount }),
             };
             spec.$jazz.set(opt.name, newBetOption);
             continue;
