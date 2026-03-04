@@ -80,6 +80,14 @@ export {
   pointsFromTable,
   splitPoints,
 } from "./points-engine";
+// Press bet logic (creation + auto-press detection)
+export type {
+  AutoPressResult,
+  CheckAutoPressConfig,
+  CreatePressBetConfig,
+  PressBetProps,
+} from "./press";
+export { checkAutoPress, createPressBet } from "./press";
 // Quota engine (quota/Stableford calculation functions)
 export {
   calculateNineHoleQuotas,
