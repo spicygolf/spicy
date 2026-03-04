@@ -213,7 +213,10 @@ function settleStakesBets(input: SettleBetsInput): SettlementResult {
       pct: 0, // Not used — poolAmount is the absolute betAmount × playerCount
       metric: getMetricKey(bet.scoringType, bet.scope),
       splitType: bet.splitType,
-      placesPaid: bet.placesPaid ?? defaultPlacesPaid,
+      placesPaid:
+        bet.splitType === "places"
+          ? (bet.placesPaid ?? defaultPlacesPaid)
+          : undefined,
       payoutPcts: bet.payoutPcts,
     };
 

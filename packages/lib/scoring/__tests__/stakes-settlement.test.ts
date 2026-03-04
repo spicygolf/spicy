@@ -523,7 +523,8 @@ describe("stakes settlement", () => {
       expect(result.buyIn).toBe(20);
     });
 
-    it("handles zero amount gracefully", () => {
+    it("handles amount=0 gracefully (routes via pool-funded path, not stakes)", () => {
+      // Note: isStakesGame() requires amount > 0, so amount=0 doesn't exercise stakes routing
       const zeroBet: BetConfig[] = [
         {
           name: "match",
