@@ -43,6 +43,12 @@ export {
   getTeeMultiplierTotal,
   isSimpleRankCheck,
 } from "./logic-engine";
+// Match metrics (scoreboard extraction for match play settlement)
+export type { MatchMetrics, MatchScope } from "./match-metrics";
+export {
+  extractMatchMetrics,
+  extractMatchMetricsForScope,
+} from "./match-metrics";
 // Multiplier engine (data-driven multiplier evaluation)
 export {
   calculateTotalMultiplier,
