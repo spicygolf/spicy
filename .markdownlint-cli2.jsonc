@@ -1,0 +1,26 @@
+// markdownlint-cli2 configuration
+// https://github.com/DavidAnson/markdownlint-cli2
+{
+  "config": {
+    // Disable line length — too noisy for docs and plan files
+    "MD013": false,
+    // Allow inline HTML — common in markdown docs
+    "MD033": false,
+    // Don't require first line to be a top-level heading
+    "MD041": false,
+    // Allow bare URLs — common in TODOs and notes
+    "MD034": false,
+    // Allow compact table style (no spaces around pipes)
+    "MD060": false
+  },
+  "globs": ["**/*.md"],
+  "ignores": [
+    "**/node_modules/**",
+    ".claude/**",
+    "**/vendor/**",
+    "**/ios/Pods/**",
+    "packages/app-0.3/**",
+    "packages/api-0.3/**",
+    ".well-known/**"
+  ]
+}

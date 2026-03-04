@@ -11,6 +11,7 @@ bun i
 ```
 
 Current efforts are:
+
 - ~~switch to using `bun` instead of `yarn` for all development~~
 - ~~switch from `js` to `ts` for all packages~~
 - ~~modernize the mobile app to work offline and use [Jazz](https://jazz.tools) as a local-first data store~~
@@ -30,6 +31,7 @@ Current efforts are:
 The main mobile app of Spicy Golf, written in `react-native`.
 
 A bit of history:
+
 - The 0.3 version is in the `packages/app-0.3` folder.  It requires an API (`packages/api-0.3`) to be running, as well as an ArangoDB database.  Note that the `packages/api` folder just got some changes to support the new mobile app.
 - The 0.5 version is in the `packages/app` folder, and is the first version to use Jazz library for offline/local-first.  `packages/app` is the go-forward version.
 
@@ -67,6 +69,7 @@ The SpicyLib code is in the `packages/lib` folder, and is a library of useful fu
 The web code is in the `packages/web` folder, and is Spicy Golf's web app.  The purpose of the web app is to give players a larger screen before/after their round.  The mobile app is still for scoring / in-game experience.
 
 Activities envisioned for the website:
+
 - Customize the rules of a game
 - Customize the course
 - Set up a tournament / trip

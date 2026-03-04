@@ -80,6 +80,7 @@ h4: | 4 5 5 5 | | t1:double
 ### JSON Fixture (`game.json`)
 
 Generated from DSL, contains structured test data:
+
 - Players with handicap indexes
 - Course with holes (par, handicap, yards)
 - Hole-by-hole scores, junk, and multipliers
@@ -88,6 +89,7 @@ Generated from DSL, contains structured test data:
 ### YAML Flows
 
 Generated from JSON fixture:
+
 - Maestro commands for UI interactions
 - Calculated pops (handicap strokes) per hole
 - Assertions for shots column, etc.
@@ -106,6 +108,7 @@ This assumes `handicap_index_from = "low"` (Five Points default).
 ### Example
 
 With slope 134:
+
 - Brad: 5.1 → course 6 → shots 7 → gets pop on holes with hdcp ≤ 7
 - Tim: +0.9 → course -1 → shots 0 → no pops (lowest)
 
