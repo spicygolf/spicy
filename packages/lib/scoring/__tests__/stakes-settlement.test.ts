@@ -59,6 +59,57 @@ function makeScoreboard(
   };
 }
 
+/** Build a scoreboard with per-player net scores per hole (for match scoring). */
+function makeMatchScoreboard(
+  holesPlayed: string[],
+  playerNets: Record<string, Record<string, number>>,
+): Scoreboard {
+  const holes: Scoreboard["holes"] = {};
+
+  for (const holeNum of holesPlayed) {
+    const players: Record<
+      string,
+      Scoreboard["holes"][string]["players"][string]
+    > = {};
+
+    for (const [playerId, nets] of Object.entries(playerNets)) {
+      const net = nets[holeNum] ?? 0;
+      players[playerId] = {
+        playerId,
+        hasScore: nets[holeNum] !== undefined,
+        gross: net + 1,
+        pops: 1,
+        net,
+        scoreToPar: 0,
+        netToPar: 0,
+        rank: 0,
+        tieCount: 0,
+        junk: [],
+        multipliers: [],
+        points: 0,
+      };
+    }
+
+    holes[holeNum] = {
+      hole: holeNum,
+      holeInfo: { hole: holeNum, par: 4, allocation: 0, yards: 0 },
+      players,
+      teams: {},
+    };
+  }
+
+  return {
+    holes,
+    cumulative: { players: {}, teams: {} },
+    meta: {
+      gameId: "test",
+      holesPlayed,
+      hasTeams: false,
+      pointsPerHole: 0,
+    },
+  };
+}
+
 const ALL_18 = Array.from({ length: 18 }, (_, i) => String(i + 1));
 
 function stab(name: string, value: number) {
@@ -216,13 +267,13 @@ describe("stakes settlement", () => {
       expect(result.buyIn).toBe(40);
     });
 
-    it("throws for unsupported scoring types in stakes routing", () => {
-      const matchBets: BetConfig[] = [
+    it("throws for unsupported scoring types (points)", () => {
+      const pointsBets: BetConfig[] = [
         {
-          name: "overall_match",
+          name: "overall_points",
           disp: "Overall",
           scope: "all18",
-          scoringType: "match",
+          scoringType: "points",
           amount: 10,
           splitType: "winner_take_all",
         },
@@ -240,13 +291,13 @@ describe("stakes settlement", () => {
       const scoreboard = makeScoreboard(ALL_18, junk);
       expect(() =>
         settleBets({
-          bets: matchBets,
+          bets: pointsBets,
           players: TWO_PLAYERS,
           scoreboard,
           playerQuotas: TWO_PLAYER_QUOTAS,
           buyIn: 0,
         }),
-      ).toThrow("Unsupported scoring types in settlement: match");
+      ).toThrow("Unsupported scoring types in settlement: points");
     });
 
     it("throws for mixed pct and amount bet models", () => {
@@ -560,6 +611,177 @@ describe("stakes settlement", () => {
       expect(result.potTotal).toBe(0);
       expect(result.buyIn).toBe(0);
       expect(result.debts).toHaveLength(0);
+    });
+  });
+
+  describe("match scoring (Nassau)", () => {
+    const MATCH_NASSAU_BETS: BetConfig[] = [
+      {
+        name: "front_match",
+        disp: "Front",
+        scope: "front9",
+        scoringType: "match",
+        amount: 10,
+        splitType: "winner_take_all",
+      },
+      {
+        name: "back_match",
+        disp: "Back",
+        scope: "back9",
+        scoringType: "match",
+        amount: 10,
+        splitType: "winner_take_all",
+      },
+      {
+        name: "overall_match",
+        disp: "Overall",
+        scope: "all18",
+        scoringType: "match",
+        amount: 20,
+        splitType: "winner_take_all",
+      },
+    ];
+
+    it("Alice sweeps when she wins every hole", () => {
+      const nets: Record<string, Record<string, number>> = {
+        p1: {},
+        p2: {},
+      };
+      for (const h of ALL_18) {
+        nets.p1![h] = 3; // Alice wins every hole
+        nets.p2![h] = 5;
+      }
+
+      const scoreboard = makeMatchScoreboard(ALL_18, nets);
+      const result = settleBets({
+        bets: MATCH_NASSAU_BETS,
+        players: TWO_PLAYERS,
+        scoreboard,
+        buyIn: 0,
+      });
+
+      // Alice wins all 3 bets
+      expect(result.netPositions.p1).toBe(40);
+      expect(result.netPositions.p2).toBe(-40);
+      expect(result.debts).toHaveLength(1);
+    });
+
+    it("split bets: Alice wins front, Bob wins back, tied overall (halved)", () => {
+      const nets: Record<string, Record<string, number>> = {
+        p1: {},
+        p2: {},
+      };
+      for (const h of ALL_18) {
+        const n = Number.parseInt(h, 10);
+        // Alice wins front 9 (9 holes), Bob wins back 9 (9 holes)
+        nets.p1![h] = n <= 9 ? 3 : 5;
+        nets.p2![h] = n <= 9 ? 5 : 3;
+      }
+
+      const scoreboard = makeMatchScoreboard(ALL_18, nets);
+      const result = settleBets({
+        bets: MATCH_NASSAU_BETS,
+        players: TWO_PLAYERS,
+        scoreboard,
+        buyIn: 0,
+      });
+
+      // Front: Alice wins $20, Back: Bob wins $20
+      // Overall: tied (each won 9 holes) → pool split evenly
+      // Alice: -40 + 20 + 0 + 20 = 0
+      // Bob: -40 + 0 + 20 + 20 = 0
+      expect(result.netPositions.p1).toBe(0);
+      expect(result.netPositions.p2).toBe(0);
+      expect(result.debts).toHaveLength(0);
+    });
+
+    it("4-player match: winner of each bet takes entire pool", () => {
+      const nets: Record<string, Record<string, number>> = {
+        p1: {},
+        p2: {},
+        p3: {},
+        p4: {},
+      };
+      for (const h of ALL_18) {
+        const n = Number.parseInt(h, 10);
+        // p1 wins front (holes 1-6), p2 wins 3 front holes
+        // p3 sweeps back nine
+        if (n <= 6) {
+          nets.p1![h] = 3;
+          nets.p2![h] = 5;
+          nets.p3![h] = 5;
+          nets.p4![h] = 5;
+        } else if (n <= 9) {
+          nets.p1![h] = 5;
+          nets.p2![h] = 3;
+          nets.p3![h] = 5;
+          nets.p4![h] = 5;
+        } else {
+          nets.p1![h] = 5;
+          nets.p2![h] = 5;
+          nets.p3![h] = 3;
+          nets.p4![h] = 5;
+        }
+      }
+
+      const scoreboard = makeMatchScoreboard(ALL_18, nets);
+      const result = settleBets({
+        bets: MATCH_NASSAU_BETS,
+        players: FOUR_PLAYERS,
+        scoreboard,
+        buyIn: 0,
+      });
+
+      // Front: p1 wins 6 holes, p2 wins 3 → p1 takes $40 (10×4)
+      // Back: p3 wins all 9 → p3 takes $40 (10×4)
+      // Overall: p3 has 9 holes, p1 has 6, p2 has 3 → p3 takes $80 (20×4)
+      expect(result.potTotal).toBe(160);
+
+      // Net positions sum to zero
+      const totalNet = Object.values(result.netPositions).reduce(
+        (sum, n) => sum + n,
+        0,
+      );
+      expect(totalNet).toBeCloseTo(0, 6);
+
+      // p3 is the biggest winner (back + overall)
+      const p3Net = result.netPositions.p3 ?? 0;
+      expect(p3Net).toBeGreaterThan(0);
+    });
+
+    it("winner_take_all splits pool on tie", () => {
+      const singleBet: BetConfig[] = [
+        {
+          name: "front_match",
+          disp: "Front",
+          scope: "front9",
+          scoringType: "match",
+          amount: 10,
+          splitType: "winner_take_all",
+        },
+      ];
+
+      const nets: Record<string, Record<string, number>> = {
+        p1: {},
+        p2: {},
+      };
+      // All holes tied → 0 wins each → pool split evenly
+      for (const h of ALL_18) {
+        nets.p1![h] = 4;
+        nets.p2![h] = 4;
+      }
+
+      const scoreboard = makeMatchScoreboard(ALL_18, nets);
+      const result = settleBets({
+        bets: singleBet,
+        players: TWO_PLAYERS,
+        scoreboard,
+        buyIn: 0,
+      });
+
+      // Both tied at 0 holes won → pool ($20) split evenly
+      expect(result.netPositions.p1).toBe(0);
+      expect(result.netPositions.p2).toBe(0);
     });
   });
 });

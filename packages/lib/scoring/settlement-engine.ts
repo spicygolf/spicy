@@ -120,7 +120,12 @@ export function calculatePoolPayouts(
         value: metricValue ?? 0,
       };
     })
-    .filter((p) => p.value !== 0 || pool.splitType === "places") // Filter out zeros for per_unit
+    .filter(
+      (p) =>
+        p.value !== 0 ||
+        pool.splitType === "places" ||
+        pool.splitType === "winner_take_all",
+    )
     .sort((a, b) => b.value - a.value); // Higher is better
 
   if (ranked.length === 0) {
@@ -246,19 +251,27 @@ export function calculatePoolPayouts(
     }
 
     case "winner_take_all": {
-      // Note: ties are broken by original sort order (first player wins).
-      // Future: consider splitting among tied leaders for fairness.
-      const winner = ranked[0];
-      if (winner) {
+      // Split pool evenly among tied leaders (halved matches in match play).
+      const allRanked = rankWithTies(ranked, (p) => p.value, "higher");
+      const winners = allRanked.filter((e) => e.rank === 1);
+
+      if (winners.length === 0) break;
+
+      const perWinner = Math.floor(poolAmount / winners.length);
+      let remainder = poolAmount - perWinner * winners.length;
+
+      for (const winner of winners) {
+        const amount = remainder > 0 ? perWinner + 1 : perWinner;
+        remainder--;
         payouts.push({
-          playerId: winner.playerId,
-          playerName: winner.playerName,
+          playerId: winner.item.playerId,
+          playerName: winner.item.playerName,
           poolName: pool.name,
           poolDisp: pool.disp,
           place: 1,
-          rankLabel: "1",
-          metricValue: winner.value,
-          amount: poolAmount,
+          rankLabel: winners.length > 1 ? "T1" : "1",
+          metricValue: winner.item.value,
+          amount,
         });
       }
       break;
