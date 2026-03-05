@@ -15,6 +15,7 @@ import type {
   ScoringContext,
 } from "spicylib/scoring";
 import {
+  computeBetMatchStates,
   detectInvalidations,
   getHoleTeeMultiplierTotalWithOverride,
   getMetaOption,
@@ -32,6 +33,7 @@ import {
   getGrossScore,
   isCoMapDataKey,
 } from "spicylib/utils";
+import type { BetColumnInfo } from "@/components/game/leaderboard";
 import {
   CustomMultiplierModal,
   type GroupPickerItem,
@@ -99,6 +101,8 @@ export interface ScoringViewProps {
   hasMatchBets?: boolean;
   /** Called to manually create a press for a specific parent bet */
   onManualPress?: (parentBetName: string) => void;
+  /** Active bets for computing per-bet match states */
+  bets?: BetColumnInfo[];
 }
 
 /** Check if a team has a specific team-level option on a hole */
@@ -553,6 +557,7 @@ export function ScoringView({
   groupRoundIds,
   onRapidEntry,
   hasMatchBets,
+  bets = [],
 }: ScoringViewProps): React.ReactElement {
   // Modal state for custom multiplier
   const [customMultiplierModalVisible, setCustomMultiplierModalVisible] =
@@ -1303,6 +1308,16 @@ export function ScoringView({
           const teamHoleResult =
             scoreboard?.holes?.[currentHoleNumber]?.teams?.[teamId];
 
+          // Compute per-bet match states for this team
+          const teamBetStates =
+            hasMatchBets && scoreboard && teamHoleResult?.playerIds[0]
+              ? computeBetMatchStates(
+                  scoreboard,
+                  bets,
+                  teamHoleResult.playerIds[0],
+                )
+              : [];
+
           // Compute quota-relative running score for quota games
           // Uses the first player on the team (individual/seamless = 1 player per team)
           let quotaRunning: number | null = null;
@@ -1411,6 +1426,7 @@ export function ScoringView({
               holeMatchResult={
                 holeComplete ? teamHoleResult?.holeNetTotal : undefined
               }
+              betMatchStates={teamBetStates}
               teeFlipWinner={isWinnerTeam}
               onTeeFlipReplay={
                 isWinnerTeam ? () => setTeeFlipMode("replay") : undefined

@@ -515,6 +515,7 @@ export interface BetColumnInfo {
   splitType?: string;
   placesPaid?: number;
   startHoleIndex?: number;
+  parentBetName?: string;
 }
 
 const SCOPE_TO_SUMMARY: Record<string, "out" | "in" | "total"> = {
@@ -621,6 +622,7 @@ export function extractBets(
         splitType: bet.splitType,
         placesPaid: bet.placesPaid ?? undefined,
         startHoleIndex: bet.startHoleIndex ?? undefined,
+        parentBetName: bet.parentBetName ?? undefined,
       });
     }
     if (result.length > 0) return result;

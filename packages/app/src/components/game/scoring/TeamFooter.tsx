@@ -1,6 +1,8 @@
 import { Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import type { BetMatchState } from "spicylib/scoring";
 import { Text } from "@/ui";
+import { BetMatchStates } from "./BetMatchStates";
 import { type OptionButton, OptionsButtons } from "./OptionsButtons";
 import { GolfTee } from "./TeeFlipModal";
 
@@ -27,6 +29,8 @@ interface TeamFooterProps {
   isMatchPlay?: boolean;
   /** Per-hole match result: 1 = won, -1 = lost, 0 = halved */
   holeMatchResult?: number;
+  /** Per-bet match states for this team */
+  betMatchStates?: BetMatchState[];
   /** Whether this team won the tee flip on this hole */
   teeFlipWinner?: boolean;
   /** Called when the tee flip icon is tapped to replay the animation */
@@ -47,6 +51,7 @@ export function TeamFooter({
   runningDiff = 0,
   isMatchPlay = false,
   holeMatchResult,
+  betMatchStates = [],
   teeFlipWinner = false,
   onTeeFlipReplay,
   onTeeFlipRemove,
@@ -118,7 +123,7 @@ export function TeamFooter({
       <View style={styles.bottomRow}>
         {isMatchPlay ? (
           <>
-            {/* Left: Per-hole match result */}
+            {/* Left: Per-hole match result + per-bet states */}
             <View style={styles.holeMathSection}>
               {holeMatchResult != null && (
                 <Text
@@ -137,18 +142,22 @@ export function TeamFooter({
               )}
             </View>
 
-            {/* Right: Running match state */}
+            {/* Right: Per-bet match states or overall running state */}
             <View style={styles.runningDiffSection}>
-              <Text
-                style={styles.runningDiffValue}
-                testID={teamId ? `team-${teamId}-points` : undefined}
-              >
-                {runningDiff > 0
-                  ? `${runningDiff} up`
-                  : runningDiff < 0
-                    ? `${Math.abs(runningDiff)} dn`
-                    : "tied"}
-              </Text>
+              {betMatchStates.length > 0 ? (
+                <BetMatchStates betStates={betMatchStates} />
+              ) : (
+                <Text
+                  style={styles.runningDiffValue}
+                  testID={teamId ? `team-${teamId}-points` : undefined}
+                >
+                  {runningDiff > 0
+                    ? `${runningDiff} up`
+                    : runningDiff < 0
+                      ? `${Math.abs(runningDiff)} dn`
+                      : "tied"}
+                </Text>
+              )}
             </View>
           </>
         ) : (

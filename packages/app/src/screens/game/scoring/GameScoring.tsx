@@ -332,6 +332,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               onRapidEntry={() => setRapidEntryMode(true)}
               hasMatchBets={hasMatchBets}
               onManualPress={createManualPress}
+              bets={bets}
             />
           )}
         </ErrorBoundary>

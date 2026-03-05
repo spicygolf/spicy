@@ -44,8 +44,14 @@ export {
   isSimpleRankCheck,
 } from "./logic-engine";
 // Match metrics (scoreboard extraction for match play settlement)
-export type { MatchMetrics, MatchScope } from "./match-metrics";
+export type {
+  BetInfo,
+  BetMatchState,
+  MatchMetrics,
+  MatchScope,
+} from "./match-metrics";
 export {
+  computeBetMatchStates,
   extractMatchMetrics,
   extractMatchMetricsForScope,
 } from "./match-metrics";

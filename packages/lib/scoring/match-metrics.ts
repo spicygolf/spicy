@@ -211,5 +211,131 @@ function extractMatchMetricsForScope(
   return counts;
 }
 
-export type { MatchMetrics, MatchScope };
-export { extractMatchMetrics, extractMatchMetricsForScope, findHoleWinner };
+// =============================================================================
+// Per-Bet Match State
+// =============================================================================
+
+/** Match state for a single bet from one player's perspective. */
+interface BetMatchState {
+  /** Bet option name (e.g., "front_match", "press_front_match_1") */
+  betName: string;
+  /** Display label (e.g., "Front", "P1") */
+  betDisp: string;
+  /** Dollar amount for the bet */
+  amount?: number;
+  /** Diff: positive = up, negative = down, 0 = tied */
+  diff: number;
+  /** Parent bet name for grouping presses under their base bet */
+  parentBetName?: string;
+}
+
+/** Minimal bet info needed for computing match states. */
+interface BetInfo {
+  name: string;
+  disp: string;
+  scope: string;
+  scoringType: string;
+  amount?: number;
+  startHoleIndex?: number;
+  parentBetName?: string;
+}
+
+/**
+ * Compute per-bet match state for a player across all match-type bets.
+ *
+ * For each bet with scoringType "match", calculates how many holes the player
+ * has won vs the opponent within that bet's scope, and returns the diff.
+ *
+ * @param scoreboard - Scored scoreboard from the pipeline
+ * @param bets - Active bets (base + presses)
+ * @param playerId - The player to compute state for
+ * @returns Array of BetMatchState, one per match-type bet
+ */
+function computeBetMatchStates(
+  scoreboard: Scoreboard,
+  bets: BetInfo[],
+  playerId: string,
+): BetMatchState[] {
+  const states: BetMatchState[] = [];
+
+  for (const bet of bets) {
+    if (bet.scoringType !== "match") continue;
+
+    const scope = bet.scope as MatchScope;
+
+    // For standard scopes, use extractMatchMetrics which handles shotgun alignment
+    if (scope === "front9" || scope === "back9" || scope === "all18") {
+      const metrics = extractMatchMetrics(scoreboard);
+      const playerMetrics = metrics.get(playerId);
+      if (!playerMetrics) {
+        states.push({
+          betName: bet.name,
+          betDisp: bet.disp,
+          amount: bet.amount,
+          diff: 0,
+          parentBetName: bet.parentBetName,
+        });
+        continue;
+      }
+
+      // Sum opponent holes won in same scope
+      let playerWon: number;
+      let opponentWon = 0;
+
+      if (scope === "front9") {
+        playerWon = playerMetrics.front;
+      } else if (scope === "back9") {
+        playerWon = playerMetrics.back;
+      } else {
+        playerWon = playerMetrics.total;
+      }
+
+      for (const [pid, m] of metrics) {
+        if (pid === playerId) continue;
+        if (scope === "front9") opponentWon += m.front;
+        else if (scope === "back9") opponentWon += m.back;
+        else opponentWon += m.total;
+      }
+
+      states.push({
+        betName: bet.name,
+        betDisp: bet.disp,
+        amount: bet.amount,
+        diff: playerWon - opponentWon,
+        parentBetName: bet.parentBetName,
+      });
+    } else {
+      // Dynamic scope (rest_of_nine, rest_of_round) — use extractMatchMetricsForScope
+      const counts = extractMatchMetricsForScope(
+        scoreboard,
+        scope,
+        bet.startHoleIndex,
+      );
+      const playerWon = counts.get(playerId) ?? 0;
+
+      let opponentWon = 0;
+      for (const [pid, count] of counts) {
+        if (pid === playerId) continue;
+        opponentWon += count;
+      }
+
+      states.push({
+        betName: bet.name,
+        betDisp: bet.disp,
+        amount: bet.amount,
+        diff: playerWon - opponentWon,
+        parentBetName: bet.parentBetName,
+      });
+    }
+  }
+
+  return states;
+}
+
+export type { BetInfo, BetMatchState, MatchMetrics, MatchScope };
+export {
+  computeBetMatchStates,
+  extractMatchMetrics,
+  extractMatchMetricsForScope,
+  findHoleWinner,
+};

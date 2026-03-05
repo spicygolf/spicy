@@ -169,7 +169,8 @@ function calculateRunningTotals(
   // Detect match play: spec_type or match bets
   const specType = getSpecField(ctx.gameSpec, "spec_type");
   const isMatchPlayOption = getOptionValueForHole("match_play", "1", ctx);
-  const isMatchPlay = specType === "skins" || isMatchPlayOption === true;
+  const isMatchPlay =
+    specType === "skins" || specType === "match" || isMatchPlayOption === true;
 
   // Get betterPoints from game spec (determines if lower or higher points is better)
   // Default to "higher" for points games
@@ -323,7 +324,8 @@ function calculateMatchPlay(
   // Match play is determined by spec_type or a game option
   const specType = getSpecField(ctx.gameSpec, "spec_type");
   const isMatchPlayOption = getOptionValueForHole("match_play", "1", ctx);
-  const isMatchPlay = specType === "skins" || isMatchPlayOption === true;
+  const isMatchPlay =
+    specType === "skins" || specType === "match" || isMatchPlayOption === true;
 
   if (!isMatchPlay) return;
 
