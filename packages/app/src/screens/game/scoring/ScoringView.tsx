@@ -1315,6 +1315,7 @@ export function ScoringView({
                   scoreboard,
                   bets,
                   teamHoleResult.playerIds[0],
+                  currentHoleIndex,
                 )
               : [];
 
