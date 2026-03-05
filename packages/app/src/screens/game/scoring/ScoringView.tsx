@@ -590,7 +590,7 @@ export function ScoringView({
     "handicap_index_from",
     "game",
   );
-  const handicapMode = handicapIndexFromValue === "low" ? "low" : "full";
+  const handicapMode = handicapIndexFromValue === "full" ? "full" : "low";
 
   // Get max_off_tee cap for the custom multiplier modal
   const maxOffTeeValue = useOptionValue(
