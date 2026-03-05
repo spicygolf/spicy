@@ -552,6 +552,7 @@ export function ScoringView({
   onGroupChange,
   groupRoundIds,
   onRapidEntry,
+  hasMatchBets,
 }: ScoringViewProps): React.ReactElement {
   // Modal state for custom multiplier
   const [customMultiplierModalVisible, setCustomMultiplierModalVisible] =
@@ -1405,6 +1406,10 @@ export function ScoringView({
                 quotaRunning !== null
                   ? quotaRunning
                   : getTeamRunningScore(teamHoleResult)
+              }
+              isMatchPlay={hasMatchBets}
+              holeMatchResult={
+                holeComplete ? teamHoleResult?.holeNetTotal : undefined
               }
               teeFlipWinner={isWinnerTeam}
               onTeeFlipReplay={

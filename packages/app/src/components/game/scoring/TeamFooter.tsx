@@ -23,6 +23,10 @@ interface TeamFooterProps {
   holePoints?: number;
   /** Running difference vs opponent (positive = winning, negative = losing) */
   runningDiff?: number;
+  /** Whether this is a match play game (suppresses junk math, shows match state) */
+  isMatchPlay?: boolean;
+  /** Per-hole match result: 1 = won, -1 = lost, 0 = halved */
+  holeMatchResult?: number;
   /** Whether this team won the tee flip on this hole */
   teeFlipWinner?: boolean;
   /** Called when the tee flip icon is tapped to replay the animation */
@@ -41,6 +45,8 @@ export function TeamFooter({
   holeMultiplier = 1,
   holePoints = 0,
   runningDiff = 0,
+  isMatchPlay = false,
+  holeMatchResult,
   teeFlipWinner = false,
   onTeeFlipReplay,
   onTeeFlipRemove,
@@ -110,30 +116,69 @@ export function TeamFooter({
 
       {/* Bottom row: Hole math and running total (always shown) */}
       <View style={styles.bottomRow}>
-        {/* Left: Hole math (junk × multiplier = points) */}
-        <View style={styles.holeMathSection}>
-          <Text style={styles.holeMathLabel}>Hole:</Text>
-          <Text style={styles.holeMathText}>
-            {junkTotal} × {holeMultiplier} ={" "}
-          </Text>
-          <Text
-            style={styles.holeMathText}
-            testID={teamId ? `team-${teamId}-hole-points` : undefined}
-          >
-            {holePoints}
-          </Text>
-        </View>
+        {isMatchPlay ? (
+          <>
+            {/* Left: Per-hole match result */}
+            <View style={styles.holeMathSection}>
+              {holeMatchResult != null && (
+                <Text
+                  style={[
+                    styles.holeMathText,
+                    holeMatchResult > 0 && { color: theme.colors.action },
+                    holeMatchResult < 0 && { color: theme.colors.error },
+                  ]}
+                >
+                  {holeMatchResult > 0
+                    ? "Won"
+                    : holeMatchResult < 0
+                      ? "Lost"
+                      : "Halved"}
+                </Text>
+              )}
+            </View>
 
-        {/* Right: Running differential */}
-        <View style={styles.runningDiffSection}>
-          <Text
-            style={styles.runningDiffValue}
-            testID={teamId ? `team-${teamId}-points` : undefined}
-          >
-            {runningDiff > 0 ? "+" : ""}
-            {runningDiff}
-          </Text>
-        </View>
+            {/* Right: Running match state */}
+            <View style={styles.runningDiffSection}>
+              <Text
+                style={styles.runningDiffValue}
+                testID={teamId ? `team-${teamId}-points` : undefined}
+              >
+                {runningDiff > 0
+                  ? `${runningDiff} up`
+                  : runningDiff < 0
+                    ? `${Math.abs(runningDiff)} dn`
+                    : "tied"}
+              </Text>
+            </View>
+          </>
+        ) : (
+          <>
+            {/* Left: Hole math (junk × multiplier = points) */}
+            <View style={styles.holeMathSection}>
+              <Text style={styles.holeMathLabel}>Hole:</Text>
+              <Text style={styles.holeMathText}>
+                {junkTotal} × {holeMultiplier} ={" "}
+              </Text>
+              <Text
+                style={styles.holeMathText}
+                testID={teamId ? `team-${teamId}-hole-points` : undefined}
+              >
+                {holePoints}
+              </Text>
+            </View>
+
+            {/* Right: Running differential */}
+            <View style={styles.runningDiffSection}>
+              <Text
+                style={styles.runningDiffValue}
+                testID={teamId ? `team-${teamId}-points` : undefined}
+              >
+                {runningDiff > 0 ? "+" : ""}
+                {runningDiff}
+              </Text>
+            </View>
+          </>
+        )}
       </View>
     </View>
   );

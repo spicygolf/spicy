@@ -151,7 +151,13 @@ export function calculateCumulatives(ctx: ScoringContext): ScoringContext {
  */
 function calculateRunningTotals(
   scoreboard: {
-    holes: Record<string, { teams: Record<string, TeamHoleResult> }>;
+    holes: Record<
+      string,
+      {
+        teams: Record<string, TeamHoleResult>;
+        players: Record<string, { net: number; hasScore: boolean }>;
+      }
+    >;
     meta: { holesPlayed: string[] };
   },
   ctx: ScoringContext,
@@ -159,6 +165,11 @@ function calculateRunningTotals(
   const holes = scoreboard.meta.holesPlayed;
   const teamIds = Object.keys(Object.values(scoreboard.holes)[0]?.teams ?? {});
   const isTwoTeamGame = teamIds.length === 2;
+
+  // Detect match play: spec_type or match bets
+  const specType = getSpecField(ctx.gameSpec, "spec_type");
+  const isMatchPlayOption = getOptionValueForHole("match_play", "1", ctx);
+  const isMatchPlay = specType === "skins" || isMatchPlayOption === true;
 
   // Get betterPoints from game spec (determines if lower or higher points is better)
   // Default to "higher" for points games
@@ -182,6 +193,53 @@ function calculateRunningTotals(
     // Check if hole is fully scored using the canonical isHoleComplete check
     const fullHoleResult = ctx.scoreboard.holes[holeNum];
     const holeScored = isHoleComplete(fullHoleResult);
+
+    // For match play 2-team games, compute match points from net scores
+    // (1 = hole won, 0 = halved/lost) instead of junk-based points
+    if (isMatchPlay && isTwoTeamGame && teams.length === 2) {
+      const team1 = teams[0];
+      const team2 = teams[1];
+
+      if (team1 && team2 && holeScored) {
+        // Use team's lowBall (best net on team) to determine hole winner
+        const net1 = team1.lowBall;
+        const net2 = team2.lowBall;
+
+        if (net1 < net2) {
+          team1.holeNetTotal = 1;
+          team2.holeNetTotal = -1;
+        } else if (net2 < net1) {
+          team1.holeNetTotal = -1;
+          team2.holeNetTotal = 1;
+        } else {
+          team1.holeNetTotal = 0;
+          team2.holeNetTotal = 0;
+        }
+
+        // Running totals for match play = holes won
+        runningTotals[team1.teamId] =
+          (runningTotals[team1.teamId] ?? 0) + (team1.holeNetTotal > 0 ? 1 : 0);
+        runningTotals[team2.teamId] =
+          (runningTotals[team2.teamId] ?? 0) + (team2.holeNetTotal > 0 ? 1 : 0);
+      }
+
+      for (const team of teams) {
+        team.runningTotal = runningTotals[team.teamId];
+      }
+
+      // runningDiff = my holes won - opponent holes won
+      if (team1 && team2) {
+        const diff =
+          (runningTotals[team1.teamId] ?? 0) -
+          (runningTotals[team2.teamId] ?? 0);
+        team1.runningDiff = diff;
+        team2.runningDiff = -diff;
+      }
+
+      continue;
+    }
+
+    // Points-based running totals (non-match-play path)
 
     // Calculate holeNetTotal for 2-team games (only when hole is complete)
     if (holeScored && isTwoTeamGame && teams.length === 2) {

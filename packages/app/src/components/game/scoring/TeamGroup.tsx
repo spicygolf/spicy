@@ -25,6 +25,10 @@ interface TeamGroupProps {
   holePoints?: number;
   /** Running difference vs opponent (positive = winning, negative = losing) */
   runningDiff?: number;
+  /** Whether this is a match play game (suppresses junk math, shows match state) */
+  isMatchPlay?: boolean;
+  /** Per-hole match result: 1 = won, -1 = lost, 0 = halved */
+  holeMatchResult?: number;
   /** Whether this team won the tee flip on this hole */
   teeFlipWinner?: boolean;
   /** Called when the tee flip icon is tapped to replay the animation */
@@ -45,6 +49,8 @@ export function TeamGroup({
   holeMultiplier,
   holePoints,
   runningDiff,
+  isMatchPlay,
+  holeMatchResult,
   teeFlipWinner,
   onTeeFlipReplay,
   onTeeFlipRemove,
@@ -73,6 +79,8 @@ export function TeamGroup({
         holeMultiplier={holeMultiplier}
         holePoints={holePoints}
         runningDiff={runningDiff}
+        isMatchPlay={isMatchPlay}
+        holeMatchResult={holeMatchResult}
         teeFlipWinner={teeFlipWinner}
         onTeeFlipReplay={onTeeFlipReplay}
         onTeeFlipRemove={onTeeFlipRemove}
