@@ -91,6 +91,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
 
   const settlement = useSettlement(game, scoreboard, scoringContext, bets);
   const payouts = settlement?.payouts ?? null;
+  const netPositions = settlement?.netPositions ?? null;
 
   // Press bet management (auto + manual)
   const { runAutoPress, createManualPress, hasMatchBets } = useAutoPress(
@@ -294,6 +295,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               onPrevHole={handlePrevHole}
               onNextHole={handleNextHole}
               payouts={payouts}
+              netPositions={netPositions}
             />
           ) : showChooser ? (
             <TeamChooserView
