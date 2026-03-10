@@ -14,7 +14,7 @@
     "@elysiajs/cors": "1.4.0",
     "@spicygolf/ghin": "0.8.8",
     "arangojs": "10.1.2",
-    "elysia": "1.4.19",
+    "elysia": "1.4.26",
     "jazz-tools": "catalog:shared",
     "spicylib": "workspace:*"
   },
