@@ -250,7 +250,7 @@ export function SummaryView({
               <Text style={styles.headerText}>Points</Text>
             </View>
             {hasPayout && (
-              <View style={styles.numberColumn}>
+              <View style={styles.payoutColumn}>
                 <Text style={styles.headerText}>$</Text>
               </View>
             )}
@@ -289,7 +289,7 @@ export function SummaryView({
                     </Text>
                   </View>
                   {hasPayout && (
-                    <View style={styles.numberColumn}>
+                    <View style={styles.payoutColumn}>
                       {player.payout != null ? (
                         <Text
                           style={[
@@ -297,6 +297,7 @@ export function SummaryView({
                             player.payout > 0 && styles.payoutPositive,
                             player.payout < 0 && styles.payoutNegative,
                           ]}
+                          numberOfLines={1}
                         >
                           {formatPayout(player.payout)}
                         </Text>
@@ -348,25 +349,30 @@ const styles = StyleSheet.create((theme) => ({
   },
   row: {
     flexDirection: "row",
+    alignItems: "center",
   },
   headerRow: {
     paddingVertical: theme.gap(1),
   },
   playerColumn: {
-    flex: 3,
-    justifyContent: "center",
+    flex: 1,
   },
   numberColumn: {
-    flex: 1,
+    flexShrink: 0,
+    width: 48,
     alignItems: "flex-end",
-    paddingRight: theme.gap(1),
+  },
+  payoutColumn: {
+    flexShrink: 0,
+    width: 64,
+    alignItems: "flex-end",
   },
   headerText: {
     fontSize: 12,
     color: theme.colors.secondary,
   },
   playerName: {
-    fontSize: 16,
+    fontSize: 14,
   },
   thruText: {
     fontSize: 11,
@@ -378,7 +384,7 @@ const styles = StyleSheet.create((theme) => ({
     marginTop: 2,
   },
   scoreText: {
-    fontSize: 16,
+    fontSize: 14,
   },
   payoutPositive: {
     color: theme.colors.action,
