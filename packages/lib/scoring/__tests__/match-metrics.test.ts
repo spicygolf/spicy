@@ -559,4 +559,19 @@ describe("computeBetMatchStates clinch detection", () => {
     expect(states[0]!.clinched).toBe(true);
     expect(states[0]!.clinchLabel).toBe("Won 2 up");
   });
+
+  it("marks tied bet as clinched when all holes are scored", () => {
+    // All 9 holes halved → tied, but complete
+    const nets: Record<string, Record<string, number>> = { p1: {}, p2: {} };
+    for (let h = 1; h <= 9; h++) {
+      nets.p1![String(h)] = 4;
+      nets.p2![String(h)] = 4;
+    }
+
+    const sb = makeMatchScoreboard(FRONT_9, nets);
+    const states = computeBetMatchStates(sb, [frontBet], "p1", 8);
+    expect(states[0]!.diff).toBe(0);
+    expect(states[0]!.clinched).toBe(true);
+    expect(states[0]!.clinchLabel).toBe("Halved");
+  });
 });

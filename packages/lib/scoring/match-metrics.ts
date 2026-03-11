@@ -338,11 +338,13 @@ function computeBetMatchStates(
         opponentWon++;
       }
 
-      // Check clinch after each scored hole
+      // Check clinch after each scored hole.
+      // A bet is decided when lead > remaining holes, OR when no holes remain
+      // (covers tied bets that complete without a winner).
       if (!clinched) {
         const diff = playerWon - opponentWon;
         const remaining = totalInScope - holesScored;
-        if (Math.abs(diff) > remaining) {
+        if (Math.abs(diff) > remaining || remaining === 0) {
           clinched = true;
           clinchDiff = diff;
           clinchRemaining = remaining;
