@@ -50,33 +50,35 @@ export interface PressBetProps {
   parentBetName: string;
 }
 
+/** A bet (parent or press) passed into checkAutoPress. */
+export interface PressBetInfo {
+  name: string;
+  disp: string;
+  scope: string;
+  scoringType: string;
+  amount: number;
+  startHoleIndex?: number;
+  parentBetName?: string;
+}
+
 /** Configuration for checking auto-press conditions. */
 export interface CheckAutoPressConfig {
   /** Player IDs in the game. */
   playerIds: string[];
   /** The scored scoreboard. */
   scoreboard: Scoreboard;
-  /** Parent match bets (front, back, overall). */
-  parentBets: Array<{
-    name: string;
-    disp: string;
-    scope: "front9" | "back9" | "all18";
-    amount: number;
-  }>;
-  /** Names of existing press bets (to avoid duplicates). */
-  existingPressNames: Set<string>;
+  /** All match bets — parents and existing presses. */
+  allBets: PressBetInfo[];
   /** Current play-order hole index (0-based). */
   currentHoleIndex: number;
   /** Number of holes down that triggers a press. */
   trigger: number;
-  /** Maximum number of presses per parent bet (0 = unlimited). */
+  /** Maximum number of presses per parent bet chain (0 = unlimited). */
   maxPresses: number;
   /** How the press scope is determined. */
   pressScope: "same" | "rest_of_nine" | "rest_of_round";
   /** How the press amount is calculated. */
   pressAmountRule: "fixed" | "double";
-  /** Existing presses per parent bet, ordered by creation. */
-  existingPressesByParent: Map<string, Array<{ name: string; amount: number }>>;
 }
 
 /** Result of checkAutoPress — press bets that should be created. */
@@ -146,9 +148,13 @@ export function createPressBet(config: CreatePressBetConfig): PressBetProps {
 /**
  * Check which auto-presses should fire based on current match state.
  *
- * For each parent match bet, computes the match state (holes won by each player)
- * through the current hole. If any player is down by >= trigger holes and no
- * press already exists at this hole for this parent, returns a press to create.
+ * Builds a chain per parent bet (parent → press_1 → press_2 → ...) and only
+ * evaluates the tail (the bet with no child press yet). If someone is down by
+ * >= trigger holes within the tail's scope, a new press is created as its child.
+ * Each bet fires at most one press — once it has a child, it's inert.
+ *
+ * This makes the function idempotent: calling it multiple times with the same
+ * state produces no additional presses.
  *
  * @returns Array of press bets that should be created
  */
@@ -158,96 +164,90 @@ export function checkAutoPress(
   const {
     playerIds,
     scoreboard,
-    parentBets,
-    existingPressNames,
+    allBets,
     currentHoleIndex,
     trigger,
     maxPresses,
     pressScope,
     pressAmountRule,
-    existingPressesByParent,
   } = config;
 
   const results: AutoPressResult[] = [];
   const holesPlayed = scoreboard.meta.holesPlayed;
 
+  // Separate parent match bets from presses
+  const parentBets: PressBetInfo[] = [];
+  const pressesByParent = new Map<string, PressBetInfo[]>();
+
+  for (const bet of allBets) {
+    if (bet.scoringType !== "match") continue;
+    if (bet.parentBetName) {
+      // It's a press — group by root parent
+      const rootParent = getRootParentName(bet.name);
+      const list = pressesByParent.get(rootParent) ?? [];
+      list.push(bet);
+      pressesByParent.set(rootParent, list);
+    } else if (
+      bet.scope === "front9" ||
+      bet.scope === "back9" ||
+      bet.scope === "all18"
+    ) {
+      parentBets.push(bet);
+    }
+  }
+
   for (const parent of parentBets) {
-    // Determine which holes are in scope for this parent bet
-    const scopeHoles = getHolesInParentScope(holesPlayed, parent.scope);
+    // Skip completed scopes
+    if (parent.scope === "front9" && currentHoleIndex >= 9) continue;
+    if (parent.scope === "back9" && currentHoleIndex < 9) continue;
 
-    // Only consider holes up to currentHoleIndex
-    const relevantHoles = holesPlayed
-      .slice(0, currentHoleIndex + 1)
-      .filter((h) => scopeHoles.has(h));
+    // Build chain: [parent, press_1, press_2, ...] sorted by press number
+    const presses = pressesByParent.get(parent.name) ?? [];
+    presses.sort((a, b) => getPressNumber(a.name) - getPressNumber(b.name));
+    const chain = [parent, ...presses];
 
-    // Count holes won per player in scope
-    const holesWon = new Map<string, number>();
-    for (const pid of playerIds) {
-      holesWon.set(pid, 0);
-    }
-
-    for (const holeNum of relevantHoles) {
-      const holeResult = scoreboard.holes[holeNum];
-      if (!holeResult) continue;
-
-      // Find sole lowest net
-      let lowestNet = Infinity;
-      let winnerId: string | null = null;
-      let tied = false;
-      for (const [pid, result] of Object.entries(holeResult.players)) {
-        if (!result.hasScore) continue;
-        if (result.net < lowestNet) {
-          lowestNet = result.net;
-          winnerId = pid;
-          tied = false;
-        } else if (result.net === lowestNet) {
-          tied = true;
-        }
-      }
-      if (!tied && winnerId) {
-        holesWon.set(winnerId, (holesWon.get(winnerId) ?? 0) + 1);
-      }
-    }
-
-    // Find the leader's holes won count
-    let maxWon = 0;
-    for (const count of holesWon.values()) {
-      if (count > maxWon) maxWon = count;
-    }
-
-    // Check if any player is down by >= trigger
-    let shouldPress = false;
-    for (const [, count] of holesWon) {
-      if (maxWon - count >= trigger) {
-        shouldPress = true;
-        break;
-      }
-    }
-
-    if (!shouldPress) continue;
-
-    // Check max presses cap
-    const existingForParent = existingPressesByParent.get(parent.name) ?? [];
-    const pressCount = existingForParent.length;
+    // Check max presses cap (count of presses in chain, excluding parent)
+    const pressCount = chain.length - 1;
     if (maxPresses > 0 && pressCount >= maxPresses) continue;
 
-    // Generate proposed press name and check for duplicate
-    const proposedName = `press_${pressCount + 1}_${parent.name}`;
-    if (existingPressNames.has(proposedName)) continue;
+    // The tail is the last bet in the chain — the only one that can fire
+    const tail = chain[chain.length - 1]!;
 
-    // Get the amount of the most recent press for "double" rule
-    const lastPress = existingForParent[existingForParent.length - 1];
+    // Compute match state within the tail's scope and startHoleIndex
+    const tailScope = getHolesInScope(
+      holesPlayed,
+      tail.scope,
+      tail.startHoleIndex,
+    );
+
+    // Only consider holes from tail's startHoleIndex through currentHoleIndex
+    const startIdx = tail.startHoleIndex ?? 0;
+    const relevantHoles = holesPlayed
+      .slice(startIdx, currentHoleIndex + 1)
+      .filter((h) => tailScope.has(h));
+
+    if (relevantHoles.length === 0) continue;
+
+    // Count holes won per player within the tail's scope
+    const shouldPress = isDownByTrigger(
+      relevantHoles,
+      scoreboard,
+      playerIds,
+      trigger,
+    );
+
+    if (!shouldPress) continue;
 
     const pressBetProps = createPressBet({
       parentBetName: parent.name,
       parentDisp: parent.disp,
-      parentScope: parent.scope,
+      parentScope: parent.scope as "front9" | "back9" | "all18",
       parentAmount: parent.amount,
       currentHoleIndex,
       pressNumber: pressCount,
       pressScope,
       pressAmountRule,
-      previousPressAmount: lastPress?.amount,
+      previousPressAmount: tail.amount,
     });
 
     results.push({ parentBetName: parent.name, pressBetProps });
@@ -260,9 +260,24 @@ export function checkAutoPress(
 // Internal Helpers
 // =============================================================================
 
-function getHolesInParentScope(
+/** Extract the root parent name from a press bet name (e.g., "press_2_front_match" → "front_match"). */
+function getRootParentName(pressName: string): string {
+  const parts = pressName.split("_");
+  // "press_N_parent_parts..." → skip "press" and N
+  return parts.slice(2).join("_");
+}
+
+/** Extract the press number from a press bet name (e.g., "press_2_front_match" → 2). */
+function getPressNumber(name: string): number {
+  const match = name.match(/^press_(\d+)_/);
+  return match ? Number(match[1]) : 0;
+}
+
+/** Get the set of hole numbers in a scope. */
+function getHolesInScope(
   holesPlayed: string[],
-  scope: "front9" | "back9" | "all18",
+  scope: string,
+  startHoleIndex?: number,
 ): Set<string> {
   switch (scope) {
     case "front9":
@@ -271,5 +286,67 @@ function getHolesInParentScope(
       return new Set(holesPlayed.slice(9, 18));
     case "all18":
       return new Set(holesPlayed);
+    case "rest_of_nine": {
+      const start = startHoleIndex ?? 0;
+      const nineEnd = start < 9 ? 9 : 18;
+      return new Set(holesPlayed.slice(start, nineEnd));
+    }
+    case "rest_of_round": {
+      const start = startHoleIndex ?? 0;
+      return new Set(holesPlayed.slice(start));
+    }
+    default:
+      return new Set(holesPlayed);
   }
+}
+
+/** Check if any player is down by >= trigger holes in the given holes. */
+function isDownByTrigger(
+  relevantHoles: string[],
+  scoreboard: Scoreboard,
+  playerIds: string[],
+  trigger: number,
+): boolean {
+  const holesWon = new Map<string, number>();
+  for (const pid of playerIds) {
+    holesWon.set(pid, 0);
+  }
+
+  for (const holeNum of relevantHoles) {
+    const holeResult = scoreboard.holes[holeNum];
+    if (!holeResult) continue;
+
+    // Skip holes where not all players have scored
+    const allScored = playerIds.every(
+      (pid) => holeResult.players[pid]?.hasScore,
+    );
+    if (!allScored) continue;
+
+    let lowestNet = Infinity;
+    let winnerId: string | null = null;
+    let tied = false;
+    for (const [pid, result] of Object.entries(holeResult.players)) {
+      if (!result.hasScore) continue;
+      if (result.net < lowestNet) {
+        lowestNet = result.net;
+        winnerId = pid;
+        tied = false;
+      } else if (result.net === lowestNet) {
+        tied = true;
+      }
+    }
+    if (!tied && winnerId) {
+      holesWon.set(winnerId, (holesWon.get(winnerId) ?? 0) + 1);
+    }
+  }
+
+  let maxWon = 0;
+  for (const count of holesWon.values()) {
+    if (count > maxWon) maxWon = count;
+  }
+
+  for (const [, count] of holesWon) {
+    if (maxWon - count >= trigger) return true;
+  }
+  return false;
 }

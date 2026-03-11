@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import type { CheckAutoPressConfig } from "../press";
+import type { CheckAutoPressConfig, PressBetInfo } from "../press";
 import { checkAutoPress, createPressBet } from "../press";
 import type { Scoreboard } from "../types";
 
@@ -45,6 +45,50 @@ function makeScoreboard(
     holes,
     cumulative: { players: {}, teams: {} },
   } as Scoreboard;
+}
+
+/** Standard parent bets as PressBetInfo. */
+const parentBets: PressBetInfo[] = [
+  {
+    name: "front_match",
+    disp: "Front",
+    scope: "front9",
+    scoringType: "match",
+    amount: 10,
+  },
+  {
+    name: "back_match",
+    disp: "Back",
+    scope: "back9",
+    scoringType: "match",
+    amount: 10,
+  },
+  {
+    name: "overall_match",
+    disp: "Overall",
+    scope: "all18",
+    scoringType: "match",
+    amount: 20,
+  },
+];
+
+function makeConfig(
+  overrides: Partial<CheckAutoPressConfig> & { allBets?: PressBetInfo[] },
+): CheckAutoPressConfig {
+  return {
+    playerIds: ["alice", "bob"],
+    scoreboard: makeScoreboard(["1", "2", "3", "4", "5", "6", "7", "8", "9"], {
+      alice: { "1": 3, "2": 3, "3": 3, "4": 4, "5": 4 },
+      bob: { "1": 5, "2": 5, "3": 5, "4": 4, "5": 4 },
+    }),
+    allBets: [...parentBets],
+    currentHoleIndex: 2, // Through hole 3 (index 2)
+    trigger: 2,
+    maxPresses: 0,
+    pressScope: "same",
+    pressAmountRule: "fixed",
+    ...overrides,
+  };
 }
 
 // =============================================================================
@@ -173,8 +217,6 @@ describe("createPressBet", () => {
 // =============================================================================
 
 describe("checkAutoPress", () => {
-  const playerIds = ["alice", "bob"];
-
   // Alice wins holes 1,2,3 — she's 3 up through hole 3
   const scoreboard3up = makeScoreboard(
     ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
@@ -184,45 +226,11 @@ describe("checkAutoPress", () => {
     },
   );
 
-  const parentBets = [
-    {
-      name: "front_match",
-      disp: "Front",
-      scope: "front9" as const,
-      amount: 10,
-    },
-    { name: "back_match", disp: "Back", scope: "back9" as const, amount: 10 },
-    {
-      name: "overall_match",
-      disp: "Overall",
-      scope: "all18" as const,
-      amount: 20,
-    },
-  ];
-
-  function makeConfig(
-    overrides: Partial<CheckAutoPressConfig>,
-  ): CheckAutoPressConfig {
-    return {
-      playerIds,
-      scoreboard: scoreboard3up,
-      parentBets,
-      existingPressNames: new Set(),
-      currentHoleIndex: 2, // Through hole 3 (index 2)
-      trigger: 2,
-      maxPresses: 0,
-      pressScope: "same",
-      pressAmountRule: "fixed",
-      existingPressesByParent: new Map(),
-      ...overrides,
-    };
-  }
-
   it("fires press when player is down by >= trigger", () => {
     const results = checkAutoPress(makeConfig({}));
 
     // Should fire for front_match and overall_match (both have Alice 3-0)
-    // back_match has no holes played yet
+    // back_match has no holes played yet (currentHoleIndex 2 < 9, back9 skipped)
     const names = results.map((r) => r.pressBetProps.name);
     expect(names).toContain("press_1_front_match");
     expect(names).toContain("press_1_overall_match");
@@ -244,14 +252,20 @@ describe("checkAutoPress", () => {
   });
 
   it("respects max presses cap", () => {
-    const results = checkAutoPress(
-      makeConfig({
-        maxPresses: 1,
-        existingPressesByParent: new Map([
-          ["front_match", [{ name: "press_1_front_match", amount: 10 }]],
-        ]),
-      }),
-    );
+    const allBets: PressBetInfo[] = [
+      ...parentBets,
+      {
+        name: "press_1_front_match",
+        disp: "Press 1 (Front)",
+        scope: "front9",
+        scoringType: "match",
+        amount: 10,
+        startHoleIndex: 1,
+        parentBetName: "front_match",
+      },
+    ];
+
+    const results = checkAutoPress(makeConfig({ maxPresses: 1, allBets }));
 
     // front_match already has 1 press and max is 1 — should not fire
     const names = results.map((r) => r.pressBetProps.name);
@@ -260,32 +274,63 @@ describe("checkAutoPress", () => {
     expect(names).toContain("press_1_overall_match");
   });
 
-  it("does not create duplicate press at same hole", () => {
-    const results = checkAutoPress(
-      makeConfig({
-        existingPressNames: new Set(["press_1_front_match"]),
-        existingPressesByParent: new Map([
-          ["front_match", [{ name: "press_1_front_match", amount: 10 }]],
-        ]),
-      }),
-    );
+  it("is idempotent — does not create duplicate when press already exists", () => {
+    // Parent already has press_1 — since parent is done, and press_1 needs
+    // to be evaluated within its own scope. With Alice still 3-0 overall
+    // and press_1 starting at hole 1, within press_1's scope Alice is also
+    // ahead, so press_2 should fire.
+    const allBets: PressBetInfo[] = [
+      ...parentBets,
+      {
+        name: "press_1_front_match",
+        disp: "Press 1 (Front)",
+        scope: "front9",
+        scoringType: "match",
+        amount: 10,
+        startHoleIndex: 1,
+        parentBetName: "front_match",
+      },
+    ];
 
-    // press_2_front_match should fire since player is still down
+    const results = checkAutoPress(makeConfig({ allBets }));
+
+    // Should fire press_2 (tail is press_1, and Alice is 2-up within it)
     const frontPresses = results.filter(
       (r) => r.parentBetName === "front_match",
     );
-    // If there's a second press, it should be press_2, not duplicate press_1
-    for (const p of frontPresses) {
-      expect(p.pressBetProps.name).not.toBe("press_1_front_match");
-    }
+    expect(frontPresses).toHaveLength(1);
+    expect(frontPresses[0]!.pressBetProps.name).toBe("press_2_front_match");
+  });
+
+  it("does not fire when tail press match state is not down by trigger", () => {
+    // Press 1 starts at hole 3 — within its scope (holes 3+), Alice and Bob
+    // are tied (both score 4 on holes 4,5)
+    const allBets: PressBetInfo[] = [
+      ...parentBets,
+      {
+        name: "press_1_front_match",
+        disp: "Press 1 (Front)",
+        scope: "front9",
+        scoringType: "match",
+        amount: 10,
+        startHoleIndex: 3, // starts at hole 4 (index 3)
+        parentBetName: "front_match",
+      },
+    ];
+
+    const results = checkAutoPress(
+      makeConfig({ allBets, currentHoleIndex: 4 }),
+    );
+
+    // Within press_1's scope (holes 4,5), they're tied — no press_2
+    const frontPresses = results.filter(
+      (r) => r.parentBetName === "front_match",
+    );
+    expect(frontPresses).toHaveLength(0);
   });
 
   it("uses double amount rule for press", () => {
-    const results = checkAutoPress(
-      makeConfig({
-        pressAmountRule: "double",
-      }),
-    );
+    const results = checkAutoPress(makeConfig({ pressAmountRule: "double" }));
 
     const frontPress = results.find((r) => r.parentBetName === "front_match");
     expect(frontPress).toBeDefined();
@@ -294,11 +339,7 @@ describe("checkAutoPress", () => {
   });
 
   it("uses rest_of_nine scope for press", () => {
-    const results = checkAutoPress(
-      makeConfig({
-        pressScope: "rest_of_nine",
-      }),
-    );
+    const results = checkAutoPress(makeConfig({ pressScope: "rest_of_nine" }));
 
     const frontPress = results.find((r) => r.parentBetName === "front_match");
     expect(frontPress).toBeDefined();
@@ -307,7 +348,7 @@ describe("checkAutoPress", () => {
   });
 
   it("only considers holes in parent scope", () => {
-    // Use a scoreboard with back nine holes only scored
+    // Back nine scores only — Alice 3-0 on holes 10-12
     const backNineScoreboard = makeScoreboard(
       ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
       {
@@ -323,40 +364,97 @@ describe("checkAutoPress", () => {
       }),
     );
 
-    // front_match: no scores entered on holes 1-9 — no press
     const names = results.map((r) => r.pressBetProps.name);
+    // front_match: currentHoleIndex >= 9, scope completed — skipped
     expect(names).not.toContain("press_1_front_match");
-    // back_match: Alice 3-0, should press
+    // back_match: Alice 3-0 in back nine, should press
     expect(names).toContain("press_1_back_match");
   });
 
-  it("handles unlimited presses (maxPresses = 0)", () => {
+  it("skips front9 bets when on back nine", () => {
     const results = checkAutoPress(
       makeConfig({
-        maxPresses: 0, // unlimited
-        existingPressesByParent: new Map([
-          [
-            "front_match",
-            [
-              { name: "press_1_front_match", amount: 10 },
-              { name: "press_2_front_match", amount: 10 },
-              { name: "press_3_front_match", amount: 10 },
-            ],
-          ],
-        ]),
-        existingPressNames: new Set([
-          "press_1_front_match",
-          "press_2_front_match",
-          "press_3_front_match",
-        ]),
+        scoreboard: scoreboard3up,
+        currentHoleIndex: 10, // On back nine
       }),
     );
 
-    // Should still fire press_4_front_match
+    const names = results.map((r) => r.pressBetProps.name);
+    // front_match scope is completed — no press
+    expect(names).not.toContain("press_1_front_match");
+  });
+
+  it("chain: press 2 fires when 2-down within press 1 scope", () => {
+    // Alice wins holes 1-4 (4-0 up). Press 1 started at hole 2 (index 1).
+    // Within press 1 scope (holes 2-9), Alice won holes 2,3,4 = 3-0 → 2-down for Bob
+    const scoreboard4up = makeScoreboard(
+      ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+      {
+        alice: { "1": 3, "2": 3, "3": 3, "4": 3, "5": 4 },
+        bob: { "1": 5, "2": 5, "3": 5, "4": 5, "5": 4 },
+      },
+    );
+
+    const allBets: PressBetInfo[] = [
+      ...parentBets,
+      {
+        name: "press_1_front_match",
+        disp: "Press 1 (Front)",
+        scope: "front9",
+        scoringType: "match",
+        amount: 10,
+        startHoleIndex: 2, // started at hole 3
+        parentBetName: "front_match",
+      },
+    ];
+
+    const results = checkAutoPress(
+      makeConfig({
+        scoreboard: scoreboard4up,
+        allBets,
+        currentHoleIndex: 3, // through hole 4
+      }),
+    );
+
     const frontPresses = results.filter(
       (r) => r.parentBetName === "front_match",
     );
     expect(frontPresses).toHaveLength(1);
-    expect(frontPresses[0]!.pressBetProps.name).toBe("press_4_front_match");
+    expect(frontPresses[0]!.pressBetProps.name).toBe("press_2_front_match");
+  });
+
+  it("idempotent: calling twice returns no new presses", () => {
+    const config = makeConfig({});
+    const results1 = checkAutoPress(config);
+    expect(results1.length).toBeGreaterThan(0);
+
+    // Simulate adding the created presses to allBets
+    const updatedBets: PressBetInfo[] = [
+      ...config.allBets,
+      ...results1.map((r) => ({
+        name: r.pressBetProps.name,
+        disp: r.pressBetProps.disp,
+        scope: r.pressBetProps.scope,
+        scoringType: "match" as const,
+        amount: r.pressBetProps.amount,
+        startHoleIndex: r.pressBetProps.startHoleIndex,
+        parentBetName: r.pressBetProps.parentBetName,
+      })),
+    ];
+
+    // Call again — tails are now press_1 bets, and within their scope
+    // Alice is still ahead. They may fire press_2 if she's 2-down within
+    // the press scope. But we need to check the specific match state.
+    // With press_1_front starting at index 2, within its scope (holes 3+)
+    // only holes 3 are scored through currentHoleIndex=2, and Alice won hole 3.
+    // That's only 1-0, not >= trigger(2), so no new press.
+    const results2 = checkAutoPress({ ...config, allBets: updatedBets });
+
+    // Press 1 started at currentHoleIndex=2. Within front9 scope from index 2,
+    // only hole 3 (index 2) is relevant. Alice won it 1-0 — not >= 2 trigger.
+    const frontPresses2 = results2.filter(
+      (r) => r.parentBetName === "front_match",
+    );
+    expect(frontPresses2).toHaveLength(0);
   });
 });

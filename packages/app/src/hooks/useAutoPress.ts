@@ -1,5 +1,5 @@
 import type { Group } from "jazz-tools";
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import type { Game } from "spicylib/schema";
 import { Bet } from "spicylib/schema";
 import type { Scoreboard } from "spicylib/scoring";
@@ -47,9 +47,6 @@ export function useAutoPress(
   bets: BetColumnInfo[],
   currentHoleIndex: number,
 ): UseAutoPressResult {
-  // Track created presses to prevent duplicates across renders
-  const createdPresses = useRef(new Set<string>());
-
   const spec = game?.spec;
 
   // Read press options from game spec
@@ -67,44 +64,21 @@ export function useAutoPress(
   const maxPresses = getGameOptionNumber(spec, "max_presses", 0);
 
   // Identify match bets (parent bets that can be pressed)
-  const matchBets = bets.filter(
+  const hasMatchBets = bets.some(
     (b) =>
       b.scoringType === "match" &&
       !b.name.startsWith("press_") &&
       (b.scope === "front9" || b.scope === "back9" || b.scope === "all18"),
   );
-  const hasMatchBets = matchBets.length > 0;
-
-  // Build helper data from current bets
-  const getExistingPressData = useCallback(() => {
-    const existingPressNames = new Set<string>();
-    const existingPressesByParent = new Map<
-      string,
-      Array<{ name: string; amount: number }>
-    >();
-
-    for (const b of bets) {
-      if (b.name.startsWith("press_")) {
-        existingPressNames.add(b.name);
-        // Extract parent name from press name: "press_1_front_match" → "front_match"
-        const parts = b.name.split("_");
-        const parentName = parts.slice(2).join("_");
-        const existing = existingPressesByParent.get(parentName) ?? [];
-        existing.push({ name: b.name, amount: b.amount ?? 0 });
-        existingPressesByParent.set(parentName, existing);
-      }
-    }
-
-    return { existingPressNames, existingPressesByParent };
-  }, [bets]);
 
   const appendPressBet = useCallback(
     (props: ReturnType<typeof createPressBet>) => {
       if (!game?.$isLoaded || !game.bets?.$isLoaded) return;
 
-      // Prevent duplicate creation
-      if (createdPresses.current.has(props.name)) return;
-      createdPresses.current.add(props.name);
+      // Check if this press already exists (idempotency guard)
+      for (const existing of game.bets) {
+        if (existing?.$isLoaded && existing.name === props.name) return;
+      }
 
       const owner = game.bets.$jazz.owner as Group;
       const bet = Bet.create(
@@ -127,16 +101,24 @@ export function useAutoPress(
 
   const createManualPress = useCallback(
     (parentBetName: string) => {
-      const parent = matchBets.find((b) => b.name === parentBetName);
+      const parent = bets.find(
+        (b) => b.name === parentBetName && b.scoringType === "match",
+      );
       if (!parent) return;
 
-      const { existingPressesByParent } = getExistingPressData();
-      const existingForParent =
-        existingPressesByParent.get(parentBetName) ?? [];
+      // Count existing presses for this parent chain
+      const pressCount = bets.filter(
+        (b) =>
+          b.name.startsWith("press_") && b.name.endsWith(`_${parentBetName}`),
+      ).length;
 
-      if (maxPresses > 0 && existingForParent.length >= maxPresses) return;
+      if (maxPresses > 0 && pressCount >= maxPresses) return;
 
-      const lastPress = existingForParent[existingForParent.length - 1];
+      // Find the tail bet's amount for "double" rule
+      const tail =
+        pressCount > 0
+          ? bets.find((b) => b.name === `press_${pressCount}_${parentBetName}`)
+          : undefined;
 
       const props = createPressBet({
         parentBetName: parent.name,
@@ -144,17 +126,16 @@ export function useAutoPress(
         parentScope: parent.scope as "front9" | "back9" | "all18",
         parentAmount: parent.amount ?? 0,
         currentHoleIndex,
-        pressNumber: existingForParent.length,
+        pressNumber: pressCount,
         pressScope,
         pressAmountRule,
-        previousPressAmount: lastPress?.amount,
+        previousPressAmount: tail?.amount,
       });
 
       appendPressBet(props);
     },
     [
-      matchBets,
-      getExistingPressData,
+      bets,
       maxPresses,
       currentHoleIndex,
       pressScope,
@@ -168,7 +149,7 @@ export function useAutoPress(
       !autoPressEnabled ||
       !scoreboard ||
       !game?.players?.$isLoaded ||
-      matchBets.length === 0
+      !hasMatchBets
     ) {
       return;
     }
@@ -181,25 +162,23 @@ export function useAutoPress(
     }
     if (playerIds.length < 2) return;
 
-    const { existingPressNames, existingPressesByParent } =
-      getExistingPressData();
-
     const results = checkAutoPress({
       playerIds,
       scoreboard,
-      parentBets: matchBets.map((b) => ({
+      allBets: bets.map((b) => ({
         name: b.name,
         disp: b.disp,
-        scope: b.scope as "front9" | "back9" | "all18",
+        scope: b.scope,
+        scoringType: b.scoringType,
         amount: b.amount ?? 0,
+        startHoleIndex: b.startHoleIndex,
+        parentBetName: b.parentBetName,
       })),
-      existingPressNames,
       currentHoleIndex,
       trigger,
       maxPresses,
       pressScope,
       pressAmountRule,
-      existingPressesByParent,
     });
 
     for (const result of results) {
@@ -209,8 +188,8 @@ export function useAutoPress(
     autoPressEnabled,
     scoreboard,
     game,
-    matchBets,
-    getExistingPressData,
+    hasMatchBets,
+    bets,
     currentHoleIndex,
     trigger,
     maxPresses,

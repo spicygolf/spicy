@@ -93,6 +93,7 @@ export type {
   AutoPressResult,
   CheckAutoPressConfig,
   CreatePressBetConfig,
+  PressBetInfo,
   PressBetProps,
 } from "./press";
 export { checkAutoPress, createPressBet } from "./press";

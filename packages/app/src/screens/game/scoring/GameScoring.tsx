@@ -317,11 +317,11 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               scoreboard={scoreboard}
               scoringContext={scoringContext}
               onPrevHole={handlePrevHole}
-              onNextHole={() => {
+              onNextHole={handleNextHole}
+              onScoreChange={(roundToGameId, newGross) => {
+                handleScoreChange(roundToGameId, newGross);
                 runAutoPress();
-                handleNextHole();
               }}
-              onScoreChange={handleScoreChange}
               onUnscore={handleUnscore}
               onChangeTeams={() => setShowChangeTeamsModal(true)}
               teamsDisabled={isSeamlessMode}

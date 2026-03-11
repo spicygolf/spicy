@@ -50,9 +50,12 @@ function findHoleWinner(
   let lowestNet = Infinity;
   let winnerId: string | null = null;
   let tied = false;
+  let scoredCount = 0;
+  const totalPlayers = Object.keys(players).length;
 
   for (const [playerId, result] of Object.entries(players)) {
     if (!result.hasScore) continue;
+    scoredCount++;
 
     if (result.net < lowestNet) {
       lowestNet = result.net;
@@ -62,6 +65,9 @@ function findHoleWinner(
       tied = true;
     }
   }
+
+  // No winner unless all players have scored
+  if (scoredCount < totalPlayers) return null;
 
   return tied ? null : winnerId;
 }
