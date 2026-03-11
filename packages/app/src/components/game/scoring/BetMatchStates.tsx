@@ -62,9 +62,13 @@ interface BetRowProps {
 }
 
 function BetRow({ bet, isPress, theme }: BetRowProps): React.JSX.Element {
-  const stateText = formatDiff(bet.diff);
-  const stateColor =
-    bet.diff > 0
+  const clinched = bet.clinched === true;
+  const won = clinched && bet.diff > 0;
+  const stateText =
+    clinched && bet.clinchLabel ? bet.clinchLabel : formatDiff(bet.diff);
+  const stateColor = clinched
+    ? theme.colors.secondary
+    : bet.diff > 0
       ? theme.colors.action
       : bet.diff < 0
         ? theme.colors.error
@@ -72,11 +76,29 @@ function BetRow({ bet, isPress, theme }: BetRowProps): React.JSX.Element {
 
   return (
     <View style={[styles.row, isPress && styles.pressRow]}>
-      <Text style={[styles.label, isPress && styles.pressLabel]}>
+      <Text
+        style={[
+          styles.label,
+          isPress && styles.pressLabel,
+          clinched && styles.clinched,
+        ]}
+      >
         {bet.betDisp}:
       </Text>
-      <Text style={[styles.state, { color: stateColor }]}>{stateText}</Text>
-      {bet.amount != null && <Text style={styles.amount}>${bet.amount}</Text>}
+      <Text
+        style={[
+          styles.state,
+          { color: stateColor },
+          clinched && styles.clinched,
+        ]}
+      >
+        {stateText}
+      </Text>
+      {bet.amount != null && (
+        <Text style={[styles.amount, won && styles.amountWon]}>
+          ${bet.amount}
+        </Text>
+      )}
     </View>
   );
 }
@@ -115,5 +137,13 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 12,
     color: theme.colors.secondary,
     opacity: 0.6,
+  },
+  clinched: {
+    opacity: 0.5,
+  },
+  amountWon: {
+    color: theme.colors.action,
+    fontWeight: "700",
+    opacity: 1,
   },
 }));

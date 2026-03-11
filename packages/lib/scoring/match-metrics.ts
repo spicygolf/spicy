@@ -105,6 +105,29 @@ function getHolesInScope(
   }
 }
 
+/**
+ * Count halved holes (all players scored, but tied) within a scope.
+ */
+function countHalves(
+  betHoles: string[],
+  scopeHoles: Set<string>,
+  scoreboard: Scoreboard,
+): number {
+  let count = 0;
+  for (const holeNum of betHoles) {
+    if (!scopeHoles.has(holeNum)) continue;
+    const holeResult = scoreboard.holes[holeNum];
+    if (!holeResult) continue;
+    const winner = findHoleWinner(holeResult.players);
+    // If all players scored but no winner → halved
+    const allScored = Object.values(holeResult.players).every(
+      (p) => p.hasScore,
+    );
+    if (allScored && !winner) count++;
+  }
+  return count;
+}
+
 // =============================================================================
 // Public API
 // =============================================================================
@@ -233,6 +256,10 @@ interface BetMatchState {
   diff: number;
   /** Parent bet name for grouping presses under their base bet */
   parentBetName?: string;
+  /** Whether this bet is mathematically decided (lead > remaining holes) */
+  clinched?: boolean;
+  /** Display label for clinch result (e.g., "Won 3&2", "Lost 3&2") */
+  clinchLabel?: string;
 }
 
 /** Minimal bet info needed for computing match states. */
@@ -310,12 +337,38 @@ function computeBetMatchStates(
       }
     }
 
+    const diff = playerWon - opponentWon;
+
+    // Clinch detection: bet is decided when lead > remaining holes in scope
+    const fullScopeHoles = getHolesInScope(
+      holesPlayed,
+      scope,
+      bet.startHoleIndex,
+    );
+    const holesScored =
+      playerWon + opponentWon + countHalves(betHoles, scopeHoles, scoreboard);
+    const holesRemaining = fullScopeHoles.size - holesScored;
+    const absDiff = Math.abs(diff);
+    const clinched = absDiff > holesRemaining;
+
+    let clinchLabel: string | undefined;
+    if (clinched) {
+      const winLose = diff > 0 ? "Won" : "Lost";
+      if (holesRemaining > 0) {
+        clinchLabel = `${winLose} ${absDiff}&${holesRemaining}`;
+      } else {
+        clinchLabel = absDiff === 0 ? "Halved" : `${winLose} ${absDiff} up`;
+      }
+    }
+
     states.push({
       betName: bet.name,
       betDisp: bet.disp,
       amount: bet.amount,
-      diff: playerWon - opponentWon,
+      diff,
       parentBetName: bet.parentBetName,
+      clinched: clinched || undefined,
+      clinchLabel,
     });
   }
 

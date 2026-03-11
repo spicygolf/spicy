@@ -228,6 +228,10 @@ export function checkAutoPress(
 
     if (relevantHoles.length === 0) continue;
 
+    // Don't fire press if the tail bet is already clinched
+    if (isBetClinched(relevantHoles, tailScope, scoreboard, playerIds))
+      continue;
+
     // Count holes won per player within the tail's scope
     const shouldPress = isDownByTrigger(
       relevantHoles,
@@ -349,4 +353,55 @@ function isDownByTrigger(
     if (maxWon - count >= trigger) return true;
   }
   return false;
+}
+
+/** Check if a bet is clinched (one side's lead > remaining holes in scope). */
+function isBetClinched(
+  relevantHoles: string[],
+  scopeHoles: Set<string>,
+  scoreboard: Scoreboard,
+  playerIds: string[],
+): boolean {
+  const holesWon = new Map<string, number>();
+  for (const pid of playerIds) holesWon.set(pid, 0);
+
+  let scoredCount = 0;
+  for (const holeNum of relevantHoles) {
+    if (!scopeHoles.has(holeNum)) continue;
+    const holeResult = scoreboard.holes[holeNum];
+    if (!holeResult) continue;
+
+    const allScored = playerIds.every(
+      (pid) => holeResult.players[pid]?.hasScore,
+    );
+    if (!allScored) continue;
+    scoredCount++;
+
+    let lowestNet = Infinity;
+    let winnerId: string | null = null;
+    let tied = false;
+    for (const [pid, result] of Object.entries(holeResult.players)) {
+      if (!result.hasScore) continue;
+      if (result.net < lowestNet) {
+        lowestNet = result.net;
+        winnerId = pid;
+        tied = false;
+      } else if (result.net === lowestNet) {
+        tied = true;
+      }
+    }
+    if (!tied && winnerId) {
+      holesWon.set(winnerId, (holesWon.get(winnerId) ?? 0) + 1);
+    }
+  }
+
+  const holesRemaining = scopeHoles.size - scoredCount;
+  let maxWon = 0;
+  let minWon = Infinity;
+  for (const count of holesWon.values()) {
+    if (count > maxWon) maxWon = count;
+    if (count < minWon) minWon = count;
+  }
+
+  return maxWon - minWon > holesRemaining;
 }

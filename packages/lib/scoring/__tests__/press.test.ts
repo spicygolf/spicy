@@ -349,13 +349,12 @@ describe("checkAutoPress", () => {
 
   it("only considers holes in parent scope", () => {
     // Back nine scores only — Alice 3-0 on holes 10-12
-    const backNineScoreboard = makeScoreboard(
-      ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
-      {
-        alice: { "10": 3, "11": 3, "12": 3 },
-        bob: { "10": 5, "11": 5, "12": 5 },
-      },
-    );
+    // All 18 holes in holesPlayed (matching production behavior)
+    const all18 = Array.from({ length: 18 }, (_, i) => String(i + 1));
+    const backNineScoreboard = makeScoreboard(all18, {
+      alice: { "10": 3, "11": 3, "12": 3 },
+      bob: { "10": 5, "11": 5, "12": 5 },
+    });
 
     const results = checkAutoPress(
       makeConfig({
