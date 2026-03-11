@@ -129,7 +129,7 @@ const styles = StyleSheet.create((theme) => ({
     paddingLeft: theme.gap(1),
   },
   label: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "600",
     color: theme.colors.secondary,
   },
@@ -137,11 +137,11 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "400",
   },
   state: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "600",
   },
   amount: {
-    fontSize: 12,
+    fontSize: 11,
     color: theme.colors.secondary,
     opacity: 0.6,
   },
