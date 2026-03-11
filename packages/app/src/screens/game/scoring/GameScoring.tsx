@@ -94,7 +94,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   const netPositions = settlement?.netPositions ?? null;
 
   // Press bet management (auto + manual)
-  const { runAutoPress, createManualPress, hasMatchBets } = useAutoPress(
+  const { createManualPress, removePress, hasMatchBets } = useAutoPress(
     game,
     scoreboard,
     bets,
@@ -320,7 +320,6 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               onNextHole={handleNextHole}
               onScoreChange={(roundToGameId, newGross) => {
                 handleScoreChange(roundToGameId, newGross);
-                runAutoPress();
               }}
               onUnscore={handleUnscore}
               onChangeTeams={() => setShowChangeTeamsModal(true)}
@@ -332,6 +331,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               onRapidEntry={() => setRapidEntryMode(true)}
               hasMatchBets={hasMatchBets}
               onManualPress={createManualPress}
+              onRemovePress={removePress}
               bets={bets}
             />
           )}

@@ -103,6 +103,8 @@ export interface ScoringViewProps {
   onManualPress?: (parentBetName: string) => void;
   /** Active bets for computing per-bet match states */
   bets?: BetColumnInfo[];
+  /** Called to remove a press bet by name */
+  onRemovePress?: (betName: string) => void;
 }
 
 /** Check if a team has a specific team-level option on a hole */
@@ -558,6 +560,7 @@ export function ScoringView({
   onRapidEntry,
   hasMatchBets,
   bets = [],
+  onRemovePress,
 }: ScoringViewProps): React.ReactElement {
   // Modal state for custom multiplier
   const [customMultiplierModalVisible, setCustomMultiplierModalVisible] =
@@ -1107,6 +1110,15 @@ export function ScoringView({
         selectedGroupId={selectedGroupId}
         onGroupChange={onGroupChange}
         onRapidEntry={onRapidEntry}
+        pressBets={bets
+          .filter((b) => b.parentBetName)
+          .map((b) => ({
+            name: b.name,
+            disp: b.disp,
+            amount: b.amount,
+            startHoleIndex: b.startHoleIndex,
+          }))}
+        onRemovePress={onRemovePress}
       />
       <CustomMultiplierModal
         visible={customMultiplierModalVisible}

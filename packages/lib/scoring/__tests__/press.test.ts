@@ -114,7 +114,7 @@ describe("createPressBet", () => {
     expect(result.scoringType).toBe("match");
     expect(result.splitType).toBe("winner_take_all");
     expect(result.amount).toBe(10);
-    expect(result.startHoleIndex).toBe(3);
+    expect(result.startHoleIndex).toBe(4);
     expect(result.parentBetName).toBe("front_match");
   });
 
@@ -147,7 +147,7 @@ describe("createPressBet", () => {
     });
 
     expect(result.scope).toBe("rest_of_nine");
-    expect(result.startHoleIndex).toBe(4);
+    expect(result.startHoleIndex).toBe(5);
   });
 
   it("uses rest_of_round scope when configured", () => {
@@ -344,7 +344,7 @@ describe("checkAutoPress", () => {
     const frontPress = results.find((r) => r.parentBetName === "front_match");
     expect(frontPress).toBeDefined();
     expect(frontPress!.pressBetProps.scope).toBe("rest_of_nine");
-    expect(frontPress!.pressBetProps.startHoleIndex).toBe(2);
+    expect(frontPress!.pressBetProps.startHoleIndex).toBe(3);
   });
 
   it("only considers holes in parent scope", () => {
@@ -445,9 +445,8 @@ describe("checkAutoPress", () => {
     // Call again — tails are now press_1 bets, and within their scope
     // Alice is still ahead. They may fire press_2 if she's 2-down within
     // the press scope. But we need to check the specific match state.
-    // With press_1_front starting at index 2, within its scope (holes 3+)
-    // only holes 3 are scored through currentHoleIndex=2, and Alice won hole 3.
-    // That's only 1-0, not >= trigger(2), so no new press.
+    // With press_1_front starting at index 3 (created at currentHoleIndex=2),
+    // no holes are in range through currentHoleIndex=2, so no new press.
     const results2 = checkAutoPress({ ...config, allBets: updatedBets });
 
     // Press 1 started at currentHoleIndex=2. Within front9 scope from index 2,

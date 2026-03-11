@@ -277,14 +277,25 @@ function computeBetMatchStates(
   for (const bet of bets) {
     if (bet.scoringType !== "match") continue;
 
+    // Skip bets that haven't started yet at the viewed hole
+    if (
+      bet.startHoleIndex !== undefined &&
+      throughHoleIndex !== undefined &&
+      throughHoleIndex < bet.startHoleIndex
+    ) {
+      continue;
+    }
+
     const scope = bet.scope as MatchScope;
     const scopeHoles = getHolesInScope(limitedHoles, scope, bet.startHoleIndex);
 
-    // Count holes won per player within scope
+    // Count holes won per player within scope, starting from bet's startHoleIndex
     let playerWon = 0;
     let opponentWon = 0;
+    const startIdx = bet.startHoleIndex ?? 0;
+    const betHoles = startIdx > 0 ? limitedHoles.slice(startIdx) : limitedHoles;
 
-    for (const holeNum of limitedHoles) {
+    for (const holeNum of betHoles) {
       if (!scopeHoles.has(holeNum)) continue;
       const holeResult = scoreboard.holes[holeNum];
       if (!holeResult) continue;

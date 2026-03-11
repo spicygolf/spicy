@@ -1,5 +1,5 @@
 import type { Group } from "jazz-tools";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { Game } from "spicylib/schema";
 import { Bet } from "spicylib/schema";
 import type { Scoreboard } from "spicylib/scoring";
@@ -19,8 +19,8 @@ import type { BetColumnInfo } from "@/components/game/leaderboard";
 interface UseAutoPressResult {
   /** Manually create a press for a parent bet at the current hole. */
   createManualPress: (parentBetName: string) => void;
-  /** Run auto-press detection for the current hole. Call after scoring. */
-  runAutoPress: () => void;
+  /** Remove a press bet by name. */
+  removePress: (betName: string) => void;
   /** Whether auto-press is enabled for this game. */
   autoPressEnabled: boolean;
   /** Whether this game has any match bets (press button should show). */
@@ -144,7 +144,40 @@ export function useAutoPress(
     ],
   );
 
-  const runAutoPress = useCallback(() => {
+  // Track manually removed presses so auto-press doesn't re-create them.
+  // Cleared when the user advances to a new hole (fresh eligibility).
+  const suppressedPresses = useRef(new Set<string>());
+  const lastHoleIndex = useRef(currentHoleIndex);
+  if (currentHoleIndex !== lastHoleIndex.current) {
+    suppressedPresses.current.clear();
+    lastHoleIndex.current = currentHoleIndex;
+  }
+
+  const removePress = useCallback(
+    (betName: string) => {
+      if (!game?.$isLoaded || !game.bets?.$isLoaded) return;
+      const idx = game.bets.findIndex(
+        (b) => b?.$isLoaded && b.name === betName,
+      );
+      if (idx !== -1) {
+        suppressedPresses.current.add(betName);
+        game.bets.$jazz.splice(idx, 1);
+      }
+    },
+    [game],
+  );
+
+  // Auto-press fires reactively when scoreboard updates (after score change
+  // triggers a Jazz mutation → re-render → new scoreboard). This avoids the
+  // stale-closure bug where calling runAutoPress() synchronously from
+  // onScoreChange used the pre-mutation scoreboard.
+  // Skip the initial render to avoid firing during progressive loading.
+  const initialRender = useRef(true);
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
     if (
       !autoPressEnabled ||
       !scoreboard ||
@@ -182,25 +215,15 @@ export function useAutoPress(
     });
 
     for (const result of results) {
-      appendPressBet(result.pressBetProps);
+      if (!suppressedPresses.current.has(result.pressBetProps.name)) {
+        appendPressBet(result.pressBetProps);
+      }
     }
-  }, [
-    autoPressEnabled,
-    scoreboard,
-    game,
-    hasMatchBets,
-    bets,
-    currentHoleIndex,
-    trigger,
-    maxPresses,
-    pressScope,
-    pressAmountRule,
-    appendPressBet,
-  ]);
+  }, [scoreboard, currentHoleIndex, bets.length]);
 
   return {
     createManualPress,
-    runAutoPress,
+    removePress,
     autoPressEnabled,
     hasMatchBets,
   };

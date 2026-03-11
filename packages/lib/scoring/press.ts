@@ -140,7 +140,7 @@ export function createPressBet(config: CreatePressBetConfig): PressBetProps {
     scoringType: "match",
     splitType: "winner_take_all",
     amount,
-    startHoleIndex: currentHoleIndex,
+    startHoleIndex: currentHoleIndex + 1,
     parentBetName,
   };
 }
