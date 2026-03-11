@@ -64,6 +64,7 @@ interface BetRowProps {
 function BetRow({ bet, isPress, theme }: BetRowProps): React.JSX.Element {
   const clinched = bet.clinched === true;
   const won = clinched && bet.diff > 0;
+  const lost = clinched && bet.diff < 0;
   const stateText =
     clinched && bet.clinchLabel ? bet.clinchLabel : formatDiff(bet.diff);
   const stateColor = clinched
@@ -95,7 +96,13 @@ function BetRow({ bet, isPress, theme }: BetRowProps): React.JSX.Element {
         {stateText}
       </Text>
       {bet.amount != null && (
-        <Text style={[styles.amount, won && styles.amountWon]}>
+        <Text
+          style={[
+            styles.amount,
+            won && styles.amountWon,
+            lost && styles.amountLost,
+          ]}
+        >
           ${bet.amount}
         </Text>
       )}
@@ -143,6 +150,11 @@ const styles = StyleSheet.create((theme) => ({
   },
   amountWon: {
     color: theme.colors.action,
+    fontWeight: "700",
+    opacity: 1,
+  },
+  amountLost: {
+    color: theme.colors.error,
     fontWeight: "700",
     opacity: 1,
   },
