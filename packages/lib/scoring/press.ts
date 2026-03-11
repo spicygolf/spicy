@@ -228,8 +228,21 @@ export function checkAutoPress(
 
     if (relevantHoles.length === 0) continue;
 
-    // Don't fire press if the tail bet is already clinched
-    if (isBetClinched(relevantHoles, tailScope, scoreboard, playerIds))
+    // Don't fire press if the tail bet is already clinched.
+    // Effective scope = holes from startIdx onward that are in the tail's scope.
+    let effectiveScopeSize = 0;
+    for (const h of holesPlayed.slice(startIdx)) {
+      if (tailScope.has(h)) effectiveScopeSize++;
+    }
+    if (
+      isBetClinched(
+        relevantHoles,
+        tailScope,
+        effectiveScopeSize,
+        scoreboard,
+        playerIds,
+      )
+    )
       continue;
 
     // Count holes won per player within the tail's scope
@@ -359,6 +372,7 @@ function isDownByTrigger(
 function isBetClinched(
   relevantHoles: string[],
   scopeHoles: Set<string>,
+  totalScopeSize: number,
   scoreboard: Scoreboard,
   playerIds: string[],
 ): boolean {
@@ -395,7 +409,7 @@ function isBetClinched(
     }
   }
 
-  const holesRemaining = scopeHoles.size - scoredCount;
+  const holesRemaining = totalScopeSize - scoredCount;
   let maxWon = 0;
   let minWon = Infinity;
   for (const count of holesWon.values()) {

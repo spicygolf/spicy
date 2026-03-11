@@ -300,15 +300,25 @@ function computeBetMatchStates(
       scope,
       bet.startHoleIndex,
     );
-    const totalInScope = fullScopeHoles.size;
+    const startIdx = bet.startHoleIndex ?? 0;
+    const betHoles = startIdx > 0 ? limitedHoles.slice(startIdx) : limitedHoles;
+
+    // Total holes this bet covers: scope intersected with startHoleIndex.
+    // For presses with "same" scope (front9/back9/all18), the bet only covers
+    // holes from startHoleIndex onward, not the entire scope.
+    let totalInScope = 0;
+    const allBetHoles =
+      startIdx > 0 ? holesPlayed.slice(startIdx) : holesPlayed;
+    for (const h of allBetHoles) {
+      if (fullScopeHoles.has(h)) totalInScope++;
+    }
+
     let playerWon = 0;
     let opponentWon = 0;
     let holesScored = 0;
     let clinched = false;
     let clinchDiff = 0;
     let clinchRemaining = 0;
-    const startIdx = bet.startHoleIndex ?? 0;
-    const betHoles = startIdx > 0 ? limitedHoles.slice(startIdx) : limitedHoles;
 
     for (const holeNum of betHoles) {
       if (!scopeHoles.has(holeNum)) continue;

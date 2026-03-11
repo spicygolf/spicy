@@ -518,4 +518,45 @@ describe("computeBetMatchStates clinch detection", () => {
     expect(states[0]!.clinched).toBe(true);
     expect(states[0]!.clinchLabel).toBe("Lost 3&1");
   });
+
+  it("clinches press with 'same' scope (front9) when front is complete", () => {
+    // Press starts at index 3 with front9 scope — effective range is holes 4-9 (6 holes)
+    // Alternating wins so clinch only fires at the end
+    const nets: Record<string, Record<string, number>> = { p1: {}, p2: {} };
+    // Holes 1-3: halved (before press start)
+    for (let h = 1; h <= 3; h++) {
+      nets.p1![String(h)] = 4;
+      nets.p2![String(h)] = 4;
+    }
+    // Holes 4,6,8,9: p1 wins (4 holes)
+    for (const h of [4, 6, 8, 9]) {
+      nets.p1![String(h)] = 3;
+      nets.p2![String(h)] = 5;
+    }
+    // Holes 5,7: p2 wins (2 holes)
+    for (const h of [5, 7]) {
+      nets.p1![String(h)] = 5;
+      nets.p2![String(h)] = 3;
+    }
+
+    const sb = makeMatchScoreboard(FRONT_9, nets);
+    const bets = [
+      {
+        name: "press_1_front_match",
+        disp: "P1 (Front)",
+        scope: "front9",
+        scoringType: "match",
+        amount: 10,
+        startHoleIndex: 3,
+        parentBetName: "front_match",
+      },
+    ];
+
+    // throughHoleIndex = 8 (all 9 holes), press covers indices 3-8 (6 holes)
+    // p1 won 4, p2 won 2 → diff = 2, 0 remaining → clinched "Won 2 up"
+    const states = computeBetMatchStates(sb, bets, "p1", 8);
+    expect(states[0]!.diff).toBe(2);
+    expect(states[0]!.clinched).toBe(true);
+    expect(states[0]!.clinchLabel).toBe("Won 2 up");
+  });
 });
