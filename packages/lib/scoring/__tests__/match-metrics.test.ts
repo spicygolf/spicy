@@ -364,8 +364,31 @@ describe("extractMatchMetricsForScope", () => {
 // =============================================================================
 
 describe("computeBetMatchStates clinch detection", () => {
-  it("clinches front bet when up 3 with 2 to play", () => {
-    // p1 wins holes 1-5, p2 wins holes 6-7, holes 8-9 not yet scored
+  const frontBet = {
+    name: "front_match",
+    disp: "Front",
+    scope: "front9",
+    scoringType: "match",
+    amount: 10,
+  };
+
+  it("clinches at the earliest decisive hole", () => {
+    // p1 wins holes 1-5 straight → clinched at hole 5 (5&4)
+    const nets: Record<string, Record<string, number>> = { p1: {}, p2: {} };
+    for (let h = 1; h <= 5; h++) {
+      nets.p1![String(h)] = 3;
+      nets.p2![String(h)] = 5;
+    }
+
+    const sb = makeMatchScoreboard(FRONT_9, nets);
+    const states = computeBetMatchStates(sb, [frontBet], "p1", 4);
+    expect(states[0]!.diff).toBe(5);
+    expect(states[0]!.clinched).toBe(true);
+    expect(states[0]!.clinchLabel).toBe("Won 5&4");
+  });
+
+  it("freezes clinch result when more holes are scored after", () => {
+    // p1 wins holes 1-5, p2 wins holes 6-7 — clinch stays 5&4 from hole 5
     const nets: Record<string, Record<string, number>> = { p1: {}, p2: {} };
     for (let h = 1; h <= 5; h++) {
       nets.p1![String(h)] = 3;
@@ -375,59 +398,41 @@ describe("computeBetMatchStates clinch detection", () => {
       nets.p1![String(h)] = 5;
       nets.p2![String(h)] = 3;
     }
-    // holes 8-9: no scores yet
 
     const sb = makeMatchScoreboard(FRONT_9, nets);
-    const bets = [
-      {
-        name: "front_match",
-        disp: "Front",
-        scope: "front9",
-        scoringType: "match",
-        amount: 10,
-      },
-    ];
 
-    // throughHoleIndex = 6 (hole 7, 0-based), so 7 holes played, 2 remain
-    const states = computeBetMatchStates(sb, bets, "p1", 6);
-    expect(states).toHaveLength(1);
-    expect(states[0]!.diff).toBe(3); // 5 won - 2 won
-    expect(states[0]!.clinched).toBe(true);
-    expect(states[0]!.clinchLabel).toBe("Won 3&2");
+    // At hole 5: clinched 5&4
+    const atHole5 = computeBetMatchStates(sb, [frontBet], "p1", 4);
+    expect(atHole5[0]!.clinchLabel).toBe("Won 5&4");
+
+    // At hole 7: still 5&4, not 3&2
+    const atHole7 = computeBetMatchStates(sb, [frontBet], "p1", 6);
+    expect(atHole7[0]!.diff).toBe(5);
+    expect(atHole7[0]!.clinchLabel).toBe("Won 5&4");
   });
 
   it("does not clinch when lead equals remaining holes (dormie)", () => {
-    // p1 wins holes 1-4, p2 wins holes 5-6, holes 7-9 not scored
+    // Alternating wins: p1 wins 1,3,5 / p2 wins 2,4 → diff=1, 4 remain
     const nets: Record<string, Record<string, number>> = { p1: {}, p2: {} };
-    for (let h = 1; h <= 4; h++) {
+    for (const h of [1, 3, 5]) {
       nets.p1![String(h)] = 3;
       nets.p2![String(h)] = 5;
     }
-    for (let h = 5; h <= 6; h++) {
+    for (const h of [2, 4]) {
       nets.p1![String(h)] = 5;
       nets.p2![String(h)] = 3;
     }
 
     const sb = makeMatchScoreboard(FRONT_9, nets);
-    const bets = [
-      {
-        name: "front_match",
-        disp: "Front",
-        scope: "front9",
-        scoringType: "match",
-        amount: 10,
-      },
-    ];
-
-    // throughHoleIndex = 5 (hole 6), 6 holes played, 3 remain, diff = 2
-    // 2 <= 3, so NOT clinched (dormie)
-    const states = computeBetMatchStates(sb, bets, "p1", 5);
-    expect(states[0]!.diff).toBe(2);
+    // throughHoleIndex = 4 (hole 5), 5 scored, 4 remain, diff = 1
+    // 1 <= 4, NOT clinched
+    const states = computeBetMatchStates(sb, [frontBet], "p1", 4);
+    expect(states[0]!.diff).toBe(1);
     expect(states[0]!.clinched).toBeUndefined();
   });
 
-  it("clinches on last hole with a lead", () => {
-    // p1 wins 6 holes, p2 wins 3 holes on front 9 (all scored)
+  it("clinches early even when all holes scored", () => {
+    // p1 wins 1-6, p2 wins 7-9. Clinch fires at hole 5 (5&4).
     const nets: Record<string, Record<string, number>> = { p1: {}, p2: {} };
     for (let h = 1; h <= 6; h++) {
       nets.p1![String(h)] = 3;
@@ -439,49 +444,45 @@ describe("computeBetMatchStates clinch detection", () => {
     }
 
     const sb = makeMatchScoreboard(FRONT_9, nets);
-    const bets = [
-      {
-        name: "front_match",
-        disp: "Front",
-        scope: "front9",
-        scoringType: "match",
-        amount: 10,
-      },
-    ];
-
-    const states = computeBetMatchStates(sb, bets, "p1", 8);
-    expect(states[0]!.diff).toBe(3);
+    const states = computeBetMatchStates(sb, [frontBet], "p1", 8);
+    // Clinched at hole 5 (5-0, 4 remaining), frozen through hole 9
+    expect(states[0]!.diff).toBe(5);
     expect(states[0]!.clinched).toBe(true);
-    expect(states[0]!.clinchLabel).toBe("Won 3 up");
+    expect(states[0]!.clinchLabel).toBe("Won 5&4");
   });
 
-  it("shows clinch from losing perspective", () => {
-    // p1 wins 2 holes, p2 wins 5 holes through hole 7, 2 remain
+  it("clinches tight match on final hole", () => {
+    // p1 wins 5, p2 wins 4 — clinch on hole 9 (last hole, 0 remaining)
     const nets: Record<string, Record<string, number>> = { p1: {}, p2: {} };
-    for (let h = 1; h <= 2; h++) {
+    for (const h of [1, 3, 5, 7, 9]) {
       nets.p1![String(h)] = 3;
       nets.p2![String(h)] = 5;
     }
-    for (let h = 3; h <= 7; h++) {
+    for (const h of [2, 4, 6, 8]) {
       nets.p1![String(h)] = 5;
       nets.p2![String(h)] = 3;
     }
 
     const sb = makeMatchScoreboard(FRONT_9, nets);
-    const bets = [
-      {
-        name: "front_match",
-        disp: "Front",
-        scope: "front9",
-        scoringType: "match",
-        amount: 10,
-      },
-    ];
-
-    const states = computeBetMatchStates(sb, bets, "p1", 6);
-    expect(states[0]!.diff).toBe(-3);
+    const states = computeBetMatchStates(sb, [frontBet], "p1", 8);
+    expect(states[0]!.diff).toBe(1);
     expect(states[0]!.clinched).toBe(true);
-    expect(states[0]!.clinchLabel).toBe("Lost 3&2");
+    expect(states[0]!.clinchLabel).toBe("Won 1 up");
+  });
+
+  it("shows clinch from losing perspective", () => {
+    // p2 wins holes 1-5 straight → p1 lost 5&4
+    const nets: Record<string, Record<string, number>> = { p1: {}, p2: {} };
+    for (let h = 1; h <= 5; h++) {
+      nets.p1![String(h)] = 5;
+      nets.p2![String(h)] = 3;
+    }
+
+    const sb = makeMatchScoreboard(FRONT_9, nets);
+    const states = computeBetMatchStates(sb, [frontBet], "p1", 4);
+    expect(states[0]!.diff).toBe(-5);
+    expect(states[0]!.clinched).toBe(true);
+    expect(states[0]!.clinchLabel).toBe("Lost 5&4");
   });
 
   it("clinches press bet within its own scope", () => {

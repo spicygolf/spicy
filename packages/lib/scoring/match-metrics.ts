@@ -105,29 +105,6 @@ function getHolesInScope(
   }
 }
 
-/**
- * Count halved holes (all players scored, but tied) within a scope.
- */
-function countHalves(
-  betHoles: string[],
-  scopeHoles: Set<string>,
-  scoreboard: Scoreboard,
-): number {
-  let count = 0;
-  for (const holeNum of betHoles) {
-    if (!scopeHoles.has(holeNum)) continue;
-    const holeResult = scoreboard.holes[holeNum];
-    if (!holeResult) continue;
-    const winner = findHoleWinner(holeResult.players);
-    // If all players scored but no winner → halved
-    const allScored = Object.values(holeResult.players).every(
-      (p) => p.hasScore,
-    );
-    if (allScored && !winner) count++;
-  }
-  return count;
-}
-
 // =============================================================================
 // Public API
 // =============================================================================
@@ -316,9 +293,20 @@ function computeBetMatchStates(
     const scope = bet.scope as MatchScope;
     const scopeHoles = getHolesInScope(limitedHoles, scope, bet.startHoleIndex);
 
-    // Count holes won per player within scope, starting from bet's startHoleIndex
+    // Count holes won per player within scope, tracking clinch hole-by-hole.
+    // Once clinched, the result freezes — subsequent holes don't change it.
+    const fullScopeHoles = getHolesInScope(
+      holesPlayed,
+      scope,
+      bet.startHoleIndex,
+    );
+    const totalInScope = fullScopeHoles.size;
     let playerWon = 0;
     let opponentWon = 0;
+    let holesScored = 0;
+    let clinched = false;
+    let clinchDiff = 0;
+    let clinchRemaining = 0;
     const startIdx = bet.startHoleIndex ?? 0;
     const betHoles = startIdx > 0 ? limitedHoles.slice(startIdx) : limitedHoles;
 
@@ -327,35 +315,39 @@ function computeBetMatchStates(
       const holeResult = scoreboard.holes[holeNum];
       if (!holeResult) continue;
 
-      const winnerId = findHoleWinner(holeResult.players);
-      if (!winnerId) continue;
+      const allScored = Object.values(holeResult.players).every(
+        (p) => p.hasScore,
+      );
+      if (!allScored) continue;
+      holesScored++;
 
+      const winnerId = findHoleWinner(holeResult.players);
       if (winnerId === playerId) {
         playerWon++;
-      } else {
+      } else if (winnerId) {
         opponentWon++;
+      }
+
+      // Check clinch after each scored hole
+      if (!clinched) {
+        const diff = playerWon - opponentWon;
+        const remaining = totalInScope - holesScored;
+        if (Math.abs(diff) > remaining) {
+          clinched = true;
+          clinchDiff = diff;
+          clinchRemaining = remaining;
+        }
       }
     }
 
-    const diff = playerWon - opponentWon;
-
-    // Clinch detection: bet is decided when lead > remaining holes in scope
-    const fullScopeHoles = getHolesInScope(
-      holesPlayed,
-      scope,
-      bet.startHoleIndex,
-    );
-    const holesScored =
-      playerWon + opponentWon + countHalves(betHoles, scopeHoles, scoreboard);
-    const holesRemaining = fullScopeHoles.size - holesScored;
-    const absDiff = Math.abs(diff);
-    const clinched = absDiff > holesRemaining;
+    const diff = clinched ? clinchDiff : playerWon - opponentWon;
 
     let clinchLabel: string | undefined;
     if (clinched) {
-      const winLose = diff > 0 ? "Won" : "Lost";
-      if (holesRemaining > 0) {
-        clinchLabel = `${winLose} ${absDiff}&${holesRemaining}`;
+      const absDiff = Math.abs(clinchDiff);
+      const winLose = clinchDiff > 0 ? "Won" : "Lost";
+      if (clinchRemaining > 0) {
+        clinchLabel = `${winLose} ${absDiff}&${clinchRemaining}`;
       } else {
         clinchLabel = absDiff === 0 ? "Halved" : `${winLose} ${absDiff} up`;
       }
