@@ -17,6 +17,7 @@
   "ignores": [
     "**/node_modules/**",
     ".claude/**",
+    "plans/**",
     "**/vendor/**",
     "**/ios/Pods/**",
     "packages/app-0.3/**",
