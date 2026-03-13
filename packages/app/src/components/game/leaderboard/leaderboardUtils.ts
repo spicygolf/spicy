@@ -335,21 +335,24 @@ export function getSummaryValue(
             : true;
 
       if (inRange) {
+        // Skip incomplete holes
+        if (!isHoleComplete(scoreboard.holes[hole])) continue;
+        hasAnyCompleteHole = true;
+
         if (quota) {
-          // Quota games: individual scoring — only need this player's score,
-          // not all players on the hole.
+          // Quota games: sum only dot-type junk (stableford scoring dots).
+          // This must match the settlement engine's extractStablefordTotals
+          // so ranks and payouts are consistent with displayed values.
           const playerResult = scoreboard.holes[hole]?.players[playerId];
-          if (!playerResult?.hasScore) continue;
-          hasAnyCompleteHole = true;
-          for (const junk of playerResult.junk) {
-            if (junk.subType === "dot") {
-              total += junk.value;
+          if (playerResult) {
+            for (const junk of playerResult.junk) {
+              if (junk.subType === "dot") {
+                total += junk.value;
+              }
             }
           }
         } else {
-          // Non-quota games: hole results depend on all players (ranking, teams)
-          if (!isHoleComplete(scoreboard.holes[hole])) continue;
-          hasAnyCompleteHole = true;
+          // Non-quota games: use team points (includes all junk × multiplier)
           const teamPoints = getTeamPointsForPlayer(scoreboard, playerId, hole);
           if (teamPoints !== null) {
             total += teamPoints;
