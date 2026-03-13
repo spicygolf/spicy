@@ -1,7 +1,7 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { co, z } from "jazz-tools";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
@@ -86,6 +86,12 @@ export function PlacesPaidScreen(_props: Props) {
     () => currentPoolPcts ?? getDefaultPcts(currentPlaces),
   );
 
+  // Keep a ref so blur/save callbacks always see the latest pcts
+  const pctsRef = useRef(pcts);
+  pctsRef.current = pcts;
+  const placesRef = useRef(places);
+  placesRef.current = places;
+
   // Sync local state once Jazz data finishes loading (both spec and payoutPools)
   const [synced, setSynced] = useState(false);
   useEffect(() => {
@@ -169,22 +175,25 @@ export function PlacesPaidScreen(_props: Props) {
       }
       const num = Number.parseInt(text, 10);
       if (Number.isNaN(num) || num < 0 || num > 100) return;
-      const next = [...pcts];
-      next[index] = num;
-      setPcts(next);
-      // Auto-save when percentages sum to 100
-      const activeSlice = next.slice(0, places);
-      if (activeSlice.reduce((s, p) => s + p, 0) === 100) {
-        saveToJazz(places, next);
-      }
+      // Use functional update to avoid stale closure when editing multiple fields
+      setPcts((prev) => {
+        const next = [...prev];
+        next[index] = num;
+        // Auto-save when percentages sum to 100
+        const activeSlice = next.slice(0, placesRef.current);
+        if (activeSlice.reduce((s, p) => s + p, 0) === 100) {
+          saveToJazz(placesRef.current, next);
+        }
+        return next;
+      });
     },
-    [pcts, places, saveToJazz],
+    [saveToJazz],
   );
 
   /** Save on blur so edits persist even when the total isn't 100 yet. */
   const handlePctBlur = useCallback(() => {
-    saveToJazz(places, pcts);
-  }, [places, pcts, saveToJazz]);
+    saveToJazz(placesRef.current, pctsRef.current);
+  }, [saveToJazz]);
 
   const activePcts = pcts.slice(0, places);
   const amounts = distributeAmounts(potTotal, activePcts);
