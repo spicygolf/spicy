@@ -89,6 +89,12 @@ export function useSettlement(
 
     if (players.length === 0) return null;
 
+    // Don't settle until at least one player has a scored hole
+    const anyScored = Object.values(scoreboard.cumulative.players).some(
+      (p) => p.holesPlayed > 0,
+    );
+    if (!anyScored) return null;
+
     return settleBets({
       bets: betConfigs,
       players,
