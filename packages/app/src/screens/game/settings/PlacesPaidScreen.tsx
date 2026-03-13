@@ -181,6 +181,11 @@ export function PlacesPaidScreen(_props: Props) {
     [pcts, places, saveToJazz],
   );
 
+  /** Save on blur so edits persist even when the total isn't 100 yet. */
+  const handlePctBlur = useCallback(() => {
+    saveToJazz(places, pcts);
+  }, [places, pcts, saveToJazz]);
+
   const activePcts = pcts.slice(0, places);
   const amounts = distributeAmounts(potTotal, activePcts);
   const pctTotal = activePcts.reduce((sum, p) => sum + p, 0);
@@ -275,6 +280,7 @@ export function PlacesPaidScreen(_props: Props) {
                     style={[styles.pctInput, { color: theme.colors.primary }]}
                     value={String(pct)}
                     onChangeText={(text) => handlePctChange(i, text)}
+                    onBlur={handlePctBlur}
                     keyboardType="number-pad"
                     selectTextOnFocus
                     maxLength={3}
