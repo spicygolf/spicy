@@ -1,7 +1,11 @@
 import { useAccount } from "jazz-tools/react-native";
 import { err, type Result } from "neverthrow";
 import type { Player } from "spicylib/schema";
-import { PlayerAccount } from "spicylib/schema";
+import {
+  FavoritePlayer,
+  ListOfFavoritePlayers,
+  PlayerAccount,
+} from "spicylib/schema";
 import {
   type AddPlayerError,
   type AddPlayerInput,
@@ -86,7 +90,12 @@ export function useAddPlayerToGame() {
     },
   });
   const me = useAccount(PlayerAccount, {
-    resolve: { root: { games: { $each: true } } },
+    resolve: {
+      root: {
+        games: { $each: true },
+        favorites: { recentPlayers: { $each: { player: true } } },
+      },
+    },
   });
   const worker = useJazzWorker();
 
@@ -127,6 +136,45 @@ export function useAddPlayerToGame() {
       allGames,
       onError: (error, opts) => reportError(error, opts),
     });
+
+    // Track player in recentPlayers list
+    if (result.isOk() && me?.$isLoaded && me.root?.$isLoaded) {
+      const favorites = me.root.favorites;
+      if (favorites?.$isLoaded) {
+        if (!favorites.$jazz.has("recentPlayers")) {
+          favorites.$jazz.set(
+            "recentPlayers",
+            ListOfFavoritePlayers.create([], {
+              owner: favorites.$jazz.owner,
+            }),
+          );
+        }
+        const recentPlayers = favorites.recentPlayers;
+        if (recentPlayers?.$isLoaded) {
+          const player = result.value.player;
+          const existing = recentPlayers.find(
+            (fp) =>
+              fp?.$isLoaded &&
+              fp.player?.$isLoaded &&
+              fp.player.$jazz.id === player.$jazz.id,
+          );
+          if (existing?.$isLoaded) {
+            existing.$jazz.set("lastUsedAt", new Date());
+          } else {
+            recentPlayers.$jazz.push(
+              FavoritePlayer.create(
+                {
+                  player,
+                  addedAt: new Date(),
+                  lastUsedAt: new Date(),
+                },
+                { owner: recentPlayers.$jazz.owner },
+              ),
+            );
+          }
+        }
+      }
+    }
 
     return result;
   };

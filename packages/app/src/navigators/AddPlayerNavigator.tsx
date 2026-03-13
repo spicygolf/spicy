@@ -7,9 +7,11 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { GameNav } from "@/components/game/GameNav";
 import { AddPlayerFavorites } from "@/screens/game/settings/AddPlayerFavorites";
 import { AddPlayerManual } from "@/screens/game/settings/AddPlayerManual";
+import { AddPlayerRecents } from "@/screens/game/settings/AddPlayerRecents";
 import { AddPlayerSearch } from "@/screens/game/settings/AddPlayerSearch";
 
 export type AddPlayerTabParamList = {
+  AddPlayerRecents: undefined;
   AddPlayerFavorites: undefined;
   AddPlayerSearch: undefined;
   AddPlayerManual: undefined;
@@ -37,8 +39,15 @@ export function AddPlayerNavigator() {
       <GameNav title="Add Player" showBack={true} />
       <Tabs.Navigator
         screenOptions={tabScreenOptions}
-        initialRouteName="AddPlayerFavorites"
+        initialRouteName="AddPlayerRecents"
       >
+        <Tabs.Screen
+          name="AddPlayerRecents"
+          component={AddPlayerRecents}
+          options={{
+            title: "Recents",
+          }}
+        />
         <Tabs.Screen
           name="AddPlayerFavorites"
           component={AddPlayerFavorites}
