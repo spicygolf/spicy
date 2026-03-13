@@ -1352,7 +1352,6 @@ export function AdminApp(): React.JSX.Element {
               </CardContent>
             </Card>
           </TabsContent>
-
         </Tabs>
       </div>
     </div>
