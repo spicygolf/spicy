@@ -490,11 +490,11 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.background,
   },
   teeTimeText: {
-    fontSize: 11,
+    fontSize: 12,
     color: theme.colors.primary,
   },
   teeTimePlaceholder: {
-    fontSize: 11,
+    fontSize: 12,
     color: theme.colors.secondary,
   },
   iosPickerContainer: {
