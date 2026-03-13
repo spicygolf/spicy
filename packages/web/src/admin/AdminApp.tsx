@@ -11,7 +11,6 @@ import {
   Trash2,
   Upload,
   User,
-  Wrench,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -44,7 +43,6 @@ import {
   migrateUserSpecs,
 } from "../lib/user-migration";
 import { checkIsAdmin, isWorkerAccount, jazzFetch } from "../lib/worker-auth";
-import { BackfillPlayerRecents } from "./BackfillPlayerRecents";
 
 export function AdminApp(): React.JSX.Element {
   const { toast } = useToast();
@@ -700,7 +698,7 @@ export function AdminApp(): React.JSX.Element {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="import">
               <Upload className="mr-2 h-4 w-4" />
               Import
@@ -720,10 +718,6 @@ export function AdminApp(): React.JSX.Element {
             <TabsTrigger value="profile">
               <Settings className="mr-2 h-4 w-4" />
               Profile
-            </TabsTrigger>
-            <TabsTrigger value="tools">
-              <Wrench className="mr-2 h-4 w-4" />
-              Tools
             </TabsTrigger>
           </TabsList>
 
@@ -1359,9 +1353,6 @@ export function AdminApp(): React.JSX.Element {
             </Card>
           </TabsContent>
 
-          <TabsContent value="tools" className="space-y-4">
-            <BackfillPlayerRecents />
-          </TabsContent>
         </Tabs>
       </div>
     </div>
