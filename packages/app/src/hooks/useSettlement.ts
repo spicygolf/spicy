@@ -89,19 +89,24 @@ export function useSettlement(
 
     if (players.length === 0) return null;
 
-    // Don't settle until at least one player has a scored hole
-    const anyScored = Object.values(scoreboard.cumulative.players).some(
-      (p) => p.holesPlayed > 0,
+    // Only include players who have at least one scored hole in settlement.
+    // Pot is still based on all players (everyone paid buy-in).
+    const scoredPlayerIds = new Set(
+      Object.entries(scoreboard.cumulative.players)
+        .filter(([_, p]) => p.holesPlayed > 0)
+        .map(([id]) => id),
     );
-    if (!anyScored) return null;
+    const scoredPlayers = players.filter((p) => scoredPlayerIds.has(p.id));
+    if (scoredPlayers.length === 0) return null;
 
     return settleBets({
       bets: betConfigs,
-      players,
+      players: scoredPlayers,
       scoreboard,
       playerQuotas: scoringContext?.playerQuotas,
       buyIn,
       defaultPlacesPaid: placesPaid,
+      potTotal: buyIn * players.length,
     });
   }, [game, scoreboard, scoringContext?.playerQuotas, buyIn, placesPaid, bets]);
 }

@@ -59,6 +59,8 @@ export interface SettleBetsInput {
   playerQuotas?: Map<string, PlayerQuota>;
   buyIn: number;
   defaultPlacesPaid?: number;
+  /** Override pot total (e.g., when only scored players are included). */
+  potTotal?: number;
 }
 
 // =============================================================================
@@ -351,7 +353,7 @@ export function settleBets(input: SettleBetsInput): SettlementResult {
     playerQuotas,
     players,
   );
-  const potTotal = buyIn * players.length;
+  const potTotal = input.potTotal ?? buyIn * players.length;
 
   return calculateSettlement(pools, playerMetrics, potTotal);
 }
