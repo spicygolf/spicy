@@ -11,6 +11,7 @@ import {
   ListOfRoundToGames as ListOfRoundToGamesSchema,
 } from "spicylib/schema";
 import { getGameSpecField } from "spicylib/scoring";
+import { parseTimeString } from "spicylib/utils";
 import type { PlayerRoundItem } from "@/components/game/settings/teams/types";
 import { useGame } from "@/hooks";
 import { Text } from "@/ui";
@@ -200,6 +201,16 @@ export function GameGroupsList(): React.ReactElement | null {
         players,
       });
     }
+
+    // Sort by tee time, falling back to group index (CoList order)
+    sections.sort((a, b) => {
+      const timeA = a.teeTime ? parseTimeString(a.teeTime) : null;
+      const timeB = b.teeTime ? parseTimeString(b.teeTime) : null;
+      if (timeA && timeB) return timeA.getTime() - timeB.getTime();
+      if (timeA) return -1;
+      if (timeB) return 1;
+      return a.groupIndex - b.groupIndex;
+    });
 
     return sections;
   })();

@@ -101,6 +101,23 @@ export function getDefaultTeeTime(now: Date): Date {
 }
 
 /**
+ * Parse a time string like "7:30 AM" or "12:00 PM" into a Date (today).
+ * Returns null if the string doesn't match the expected format.
+ */
+export function parseTimeString(timeStr: string): Date | null {
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match?.[1] || !match[2] || !match[3]) return null;
+  let hours = Number.parseInt(match[1], 10);
+  const minutes = Number.parseInt(match[2], 10);
+  const ampm = match[3].toUpperCase();
+  if (ampm === "PM" && hours !== 12) hours += 12;
+  if (ampm === "AM" && hours === 12) hours = 0;
+  const d = new Date();
+  d.setHours(hours, minutes, 0, 0);
+  return d;
+}
+
+/**
  * Format a date as a localized time string (h:mm AM/PM)
  * @param date - Date to format
  * @param locale - Locale string (defaults to 'en-US')

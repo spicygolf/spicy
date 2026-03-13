@@ -1,10 +1,13 @@
+import type { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
-import { Pressable, View } from "react-native";
+import { useState } from "react";
+import { Platform, Pressable, View } from "react-native";
 import { DraxScrollView, DraxView } from "react-native-drax";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { slugify } from "spicylib/utils";
+import { formatTime, parseTimeString, slugify } from "spicylib/utils";
 import type { PlayerRoundItem } from "@/components/game/settings/teams/types";
-import { Button, Text, TextInput } from "@/ui";
+import { Button, Text } from "@/ui";
 
 /** Default maximum players per group (standard golf foursome) */
 const MAX_GROUP_SIZE = 4;
@@ -124,10 +127,37 @@ function GroupDropZone({
   onTeeTimeChange,
   theme,
 }: GroupDropZoneProps) {
+  const [showPicker, setShowPicker] = useState(false);
   const sectionTestId = `group-${group.groupIndex}-dropzone`;
 
   // A group can be deleted if it's empty
   const canDelete = group.players.length === 0;
+
+  const pickerDate =
+    parseTimeString(group.teeTime) ??
+    (() => {
+      const d = new Date();
+      d.setHours(8, 0, 0, 0);
+      return d;
+    })();
+
+  const handleTimeChange = (_event: DateTimePickerEvent, date?: Date) => {
+    if (Platform.OS === "android") {
+      setShowPicker(false);
+    }
+    if (date) {
+      onTeeTimeChange(group.groupIndex, formatTime(date));
+    }
+  };
+
+  const handleTeeTimeTap = () => {
+    if (Platform.OS === "ios" && !group.teeTime) {
+      // Set a default time so the compact picker renders on next frame
+      onTeeTimeChange(group.groupIndex, formatTime(pickerDate));
+    } else if (Platform.OS === "android") {
+      setShowPicker(true);
+    }
+  };
 
   return (
     <DraxView
@@ -143,16 +173,29 @@ function GroupDropZone({
       <View style={styles.groupHeader}>
         <Text style={styles.groupHeaderText}>{group.groupIndex + 1}</Text>
         <View style={styles.groupHeaderMiddle}>
-          <TextInput
-            testID={`group-${group.groupIndex}-tee-time`}
-            style={styles.teeTimeInput}
-            value={group.teeTime}
-            onChangeText={(text: string) =>
-              onTeeTimeChange(group.groupIndex, text)
-            }
-            placeholder="Tee time"
-            placeholderTextColor={theme.colors.secondary}
-          />
+          {Platform.OS === "ios" && group.teeTime ? (
+            <DateTimePicker
+              value={pickerDate}
+              mode="time"
+              display="compact"
+              onChange={handleTimeChange}
+              testID={`group-${group.groupIndex}-tee-time`}
+            />
+          ) : (
+            <Pressable
+              testID={`group-${group.groupIndex}-tee-time`}
+              style={styles.teeTimeButton}
+              onPress={handleTeeTimeTap}
+            >
+              <Text
+                style={
+                  group.teeTime ? styles.teeTimeText : styles.teeTimePlaceholder
+                }
+              >
+                {group.teeTime || "Tee time"}
+              </Text>
+            </Pressable>
+          )}
         </View>
         <View style={styles.groupHeaderRight}>
           {canDelete && (
@@ -175,6 +218,14 @@ function GroupDropZone({
           </View>
         </View>
       </View>
+
+      {showPicker && Platform.OS === "android" && (
+        <DateTimePicker
+          value={pickerDate}
+          mode="time"
+          onChange={handleTimeChange}
+        />
+      )}
 
       <View style={styles.dropZone}>
         {group.players.length > 0 ? (
@@ -429,15 +480,21 @@ const styles = StyleSheet.create((theme) => ({
   groupHeaderMiddle: {
     flex: 1,
   },
-  teeTimeInput: {
-    fontSize: 12,
+  teeTimeButton: {
     paddingVertical: theme.gap(0.5),
     paddingHorizontal: theme.gap(1),
     borderWidth: 1,
     borderColor: theme.colors.border,
     borderRadius: 4,
-    color: theme.colors.primary,
     backgroundColor: theme.colors.background,
+  },
+  teeTimeText: {
+    fontSize: 12,
+    color: theme.colors.primary,
+  },
+  teeTimePlaceholder: {
+    fontSize: 12,
+    color: theme.colors.secondary,
   },
   groupHeaderRight: {
     flexDirection: "row",
