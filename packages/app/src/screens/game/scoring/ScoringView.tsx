@@ -1077,7 +1077,11 @@ export function ScoringView({
         hole={holeInfo}
         onPrevious={onPrevHole}
         onNext={onNextHole}
-        warnings={warnings}
+        warnings={
+          isQuotaGame
+            ? warnings?.filter((w) => w.type !== "missing_scores")
+            : warnings
+        }
       />
       <HoleToolbar
         onChangeTeams={onChangeTeams}
