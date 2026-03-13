@@ -151,12 +151,7 @@ function GroupDropZone({
   };
 
   const handleTeeTimeTap = () => {
-    if (Platform.OS === "ios" && !group.teeTime) {
-      // Set a default time so the compact picker renders on next frame
-      onTeeTimeChange(group.groupIndex, formatTime(pickerDate));
-    } else if (Platform.OS === "android") {
-      setShowPicker(true);
-    }
+    setShowPicker(true);
   };
 
   return (
@@ -173,29 +168,19 @@ function GroupDropZone({
       <View style={styles.groupHeader}>
         <Text style={styles.groupHeaderText}>{group.groupIndex + 1}</Text>
         <View style={styles.groupHeaderMiddle}>
-          {Platform.OS === "ios" && group.teeTime ? (
-            <DateTimePicker
-              value={pickerDate}
-              mode="time"
-              display="compact"
-              onChange={handleTimeChange}
-              testID={`group-${group.groupIndex}-tee-time`}
-            />
-          ) : (
-            <Pressable
-              testID={`group-${group.groupIndex}-tee-time`}
-              style={styles.teeTimeButton}
-              onPress={handleTeeTimeTap}
+          <Pressable
+            testID={`group-${group.groupIndex}-tee-time`}
+            style={styles.teeTimeButton}
+            onPress={handleTeeTimeTap}
+          >
+            <Text
+              style={
+                group.teeTime ? styles.teeTimeText : styles.teeTimePlaceholder
+              }
             >
-              <Text
-                style={
-                  group.teeTime ? styles.teeTimeText : styles.teeTimePlaceholder
-                }
-              >
-                {group.teeTime || "Tee time"}
-              </Text>
-            </Pressable>
-          )}
+              {group.teeTime || "Tee time"}
+            </Text>
+          </Pressable>
         </View>
         <View style={styles.groupHeaderRight}>
           {canDelete && (
@@ -219,13 +204,29 @@ function GroupDropZone({
         </View>
       </View>
 
-      {showPicker && Platform.OS === "android" && (
-        <DateTimePicker
-          value={pickerDate}
-          mode="time"
-          onChange={handleTimeChange}
-        />
-      )}
+      {showPicker &&
+        (Platform.OS === "ios" ? (
+          <View style={styles.iosPickerContainer}>
+            <DateTimePicker
+              value={pickerDate}
+              mode="time"
+              display="spinner"
+              onChange={handleTimeChange}
+            />
+            <Pressable
+              style={styles.iosPickerDone}
+              onPress={() => setShowPicker(false)}
+            >
+              <Text style={styles.iosPickerDoneText}>Done</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <DateTimePicker
+            value={pickerDate}
+            mode="time"
+            onChange={handleTimeChange}
+          />
+        ))}
 
       <View style={styles.dropZone}>
         {group.players.length > 0 ? (
@@ -489,12 +490,26 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.background,
   },
   teeTimeText: {
-    fontSize: 12,
+    fontSize: 11,
     color: theme.colors.primary,
   },
   teeTimePlaceholder: {
-    fontSize: 12,
+    fontSize: 11,
     color: theme.colors.secondary,
+  },
+  iosPickerContainer: {
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+    alignItems: "center",
+  },
+  iosPickerDone: {
+    paddingVertical: theme.gap(0.5),
+    paddingHorizontal: theme.gap(2),
+  },
+  iosPickerDoneText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.action,
   },
   groupHeaderRight: {
     flexDirection: "row",
