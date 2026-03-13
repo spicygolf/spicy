@@ -65,24 +65,26 @@ export function getEffectiveHandicap(
 }
 
 /**
- * Calculate course handicap from numeric handicap index and slope.
- * This is the core calculation used by both app code and test fixtures.
+ * Calculate course handicap from numeric handicap index, slope, course rating, and par.
  *
- * Formula: Course Handicap = round(Handicap Index × Slope Rating / 113)
+ * USGA Formula: Course Handicap = round(Handicap Index × (Slope Rating / 113) + (Course Rating – Par))
+ * @see https://www.usga.org/handicapping/roh/Content/rules/6%201%20Course%20Handicap%20Calculation.htm
  *
  * @param handicapIndex - Numeric handicap index (negative for plus handicaps)
  * @param slope - Course slope rating
+ * @param courseRating - Course rating for the tees being played
+ * @param par - Par for the holes being played
  * @returns Course handicap rounded to nearest integer
- *
- * @example
- * courseHandicapFromSlope(10.5, 139) // returns 13
- * courseHandicapFromSlope(-2.0, 139) // returns -2 (plus handicap)
  */
 export function courseHandicapFromSlope(
   handicapIndex: number,
   slope: number,
+  courseRating: number,
+  par: number,
 ): number {
-  return Math.round((handicapIndex * slope) / STANDARD_SLOPE_RATING);
+  return Math.round(
+    (handicapIndex * slope) / STANDARD_SLOPE_RATING + (courseRating - par),
+  );
 }
 
 /**
@@ -110,12 +112,17 @@ export function calculateCourseHandicap({
     index *= -1;
   }
 
-  const { slope } = getRatings(tee, holesPlayed);
-  if (slope === null) {
+  const { slope, rating } = getRatings(tee, holesPlayed);
+  if (slope === null || rating === null) {
     return null;
   }
 
-  return courseHandicapFromSlope(index, slope);
+  const par = getTeePar(tee, holesPlayed);
+  if (par === null) {
+    return null;
+  }
+
+  return courseHandicapFromSlope(index, slope, rating, par);
 }
 
 export function formatCourseHandicap(courseHandicap: number | null): string {
@@ -157,6 +164,24 @@ export function formatHandicapDisplay(
 }
 
 type HolesPlayed = "front9" | "back9" | "all18";
+
+function getTeePar(tee: Tee, holesPlayed: HolesPlayed): number | null {
+  if (!tee?.holes?.$isLoaded) return null;
+
+  const start = holesPlayed === "back9" ? 9 : 0;
+  const end = holesPlayed === "front9" ? 9 : 18;
+
+  let total = 0;
+  let count = 0;
+  for (let i = start; i < end; i++) {
+    const hole = tee.holes[i];
+    if (!hole?.$isLoaded || typeof hole.par !== "number") return null;
+    total += hole.par;
+    count++;
+  }
+
+  return count > 0 ? total : null;
+}
 
 function getRatings(
   tee: Tee,
