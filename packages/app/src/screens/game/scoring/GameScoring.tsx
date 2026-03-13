@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { getGameSpecField } from "spicylib/scoring";
+import { compareTimeStrings } from "spicylib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { extractBets } from "@/components/game/leaderboard";
 import {
@@ -163,6 +164,10 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
       const label = playerNames ? `${shortLabel} — ${playerNames}` : shortLabel;
       items.push({ id: group.$jazz.id, shortLabel, label });
     }
+
+    // Sort by tee time, falling back to original order
+    items.sort((a, b) => compareTimeStrings(a.shortLabel, b.shortLabel));
+
     return items;
   })();
 

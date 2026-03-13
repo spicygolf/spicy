@@ -118,6 +118,23 @@ export function parseTimeString(timeStr: string): Date | null {
 }
 
 /**
+ * Compare two time strings for sorting. Items with valid times sort
+ * before items without. Among items with times, earlier times sort first.
+ * Returns a standard comparator value (-1, 0, 1).
+ */
+export function compareTimeStrings(
+  a: string | undefined,
+  b: string | undefined,
+): number {
+  const timeA = a ? parseTimeString(a) : null;
+  const timeB = b ? parseTimeString(b) : null;
+  if (timeA && timeB) return timeA.getTime() - timeB.getTime();
+  if (timeA) return -1;
+  if (timeB) return 1;
+  return 0;
+}
+
+/**
  * Format a date as a localized time string (h:mm AM/PM)
  * @param date - Date to format
  * @param locale - Locale string (defaults to 'en-US')
