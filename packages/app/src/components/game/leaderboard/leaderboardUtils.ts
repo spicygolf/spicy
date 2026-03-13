@@ -320,6 +320,7 @@ export function getSummaryValue(
   if (viewMode === "points") {
     const quota = playerQuotas?.get(playerId);
     let total = 0;
+    let hasAnyCompleteHole = false;
     const holes = Object.keys(scoreboard.holes);
 
     for (const hole of holes) {
@@ -336,6 +337,7 @@ export function getSummaryValue(
       if (inRange) {
         // Skip incomplete holes
         if (!isHoleComplete(scoreboard.holes[hole])) continue;
+        hasAnyCompleteHole = true;
 
         if (quota) {
           // Quota games: sum only dot-type junk (stableford scoring dots).
@@ -363,6 +365,9 @@ export function getSummaryValue(
         }
       }
     }
+
+    // Don't show anything until at least one hole in the range is complete
+    if (!hasAnyCompleteHole) return null;
 
     // For quota games, subtract quota to show performance (e.g., +2 over quota)
     if (quota) {
@@ -406,7 +411,7 @@ export function getSummaryValue(
 
     if (inRange) {
       const playerResult = scoreboard.holes[hole]?.players[playerId];
-      if (playerResult) {
+      if (playerResult?.hasScore) {
         total += viewMode === "gross" ? playerResult.gross : playerResult.net;
         hasAnyScore = true;
       }
