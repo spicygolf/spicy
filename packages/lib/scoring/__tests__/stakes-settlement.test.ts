@@ -73,10 +73,15 @@ function makeMatchScoreboard(
     > = {};
 
     for (const [playerId, nets] of Object.entries(playerNets)) {
-      const net = nets[holeNum] ?? 0;
+      const net = nets[holeNum];
+      if (net === undefined) {
+        throw new Error(
+          `Missing net score for player ${playerId} on hole ${holeNum}`,
+        );
+      }
       players[playerId] = {
         playerId,
-        hasScore: nets[holeNum] !== undefined,
+        hasScore: true,
         gross: net + 1,
         pops: 1,
         net,
@@ -735,18 +740,12 @@ describe("stakes settlement", () => {
       // Front: p1 wins 6 holes, p2 wins 3 → p1 takes $40 (10×4)
       // Back: p3 wins all 9 → p3 takes $40 (10×4)
       // Overall: p3 has 9 holes, p1 has 6, p2 has 3 → p3 takes $80 (20×4)
+      // Buy-in per player: $10 + $10 + $20 = $40
       expect(result.potTotal).toBe(160);
-
-      // Net positions sum to zero
-      const totalNet = Object.values(result.netPositions).reduce(
-        (sum, n) => sum + n,
-        0,
-      );
-      expect(totalNet).toBeCloseTo(0, 6);
-
-      // p3 is the biggest winner (back + overall)
-      const p3Net = result.netPositions.p3 ?? 0;
-      expect(p3Net).toBeGreaterThan(0);
+      expect(result.netPositions.p1).toBe(0); // $40 front - $40 buy-in
+      expect(result.netPositions.p2).toBe(-40); // $0 - $40 buy-in
+      expect(result.netPositions.p3).toBe(80); // $40 back + $80 overall - $40
+      expect(result.netPositions.p4).toBe(-40); // $0 - $40 buy-in
     });
 
     it("winner_take_all splits pool on tie", () => {

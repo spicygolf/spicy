@@ -106,18 +106,28 @@ export function useAutoPress(
       );
       if (!parent) return;
 
-      // Count existing presses for this parent chain
-      const pressCount = bets.filter(
-        (b) =>
-          b.name.startsWith("press_") && b.name.endsWith(`_${parentBetName}`),
-      ).length;
+      // Find existing presses for this parent chain and determine the max suffix
+      const pressNumbers = bets
+        .filter(
+          (b) =>
+            b.name.startsWith("press_") && b.name.endsWith(`_${parentBetName}`),
+        )
+        .map((b) => {
+          const match = b.name.match(/^press_(\d+)_/);
+          return match ? Number(match[1]) : 0;
+        });
+      const pressCount = pressNumbers.length;
+      const lastPressNumber =
+        pressNumbers.length > 0 ? Math.max(...pressNumbers) : 0;
 
       if (maxPresses > 0 && pressCount >= maxPresses) return;
 
       // Find the tail bet's amount for "double" rule
       const tail =
-        pressCount > 0
-          ? bets.find((b) => b.name === `press_${pressCount}_${parentBetName}`)
+        lastPressNumber > 0
+          ? bets.find(
+              (b) => b.name === `press_${lastPressNumber}_${parentBetName}`,
+            )
           : undefined;
 
       const props = createPressBet({
@@ -126,7 +136,7 @@ export function useAutoPress(
         parentScope: parent.scope as "front9" | "back9" | "all18",
         parentAmount: parent.amount ?? 0,
         currentHoleIndex,
-        pressNumber: pressCount,
+        pressNumber: lastPressNumber,
         pressScope,
         pressAmountRule,
         previousPressAmount: tail?.amount,

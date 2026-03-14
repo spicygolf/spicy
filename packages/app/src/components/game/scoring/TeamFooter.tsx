@@ -129,8 +129,8 @@ export function TeamFooter({
                 <Text
                   style={[
                     styles.holeMathText,
-                    holeMatchResult > 0 && { color: theme.colors.action },
-                    holeMatchResult < 0 && { color: theme.colors.error },
+                    holeMatchResult > 0 && styles.matchWonText,
+                    holeMatchResult < 0 && styles.matchLostText,
                   ]}
                 >
                   {holeMatchResult > 0
@@ -235,6 +235,12 @@ const styles = StyleSheet.create((theme) => ({
   holeMathText: {
     fontSize: 13,
     color: theme.colors.secondary,
+  },
+  matchWonText: {
+    color: theme.colors.action,
+  },
+  matchLostText: {
+    color: theme.colors.error,
   },
   runningDiffSection: {
     flexShrink: 0,

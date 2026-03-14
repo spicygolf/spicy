@@ -107,9 +107,8 @@ function buildPlayerSummaries(
 
   const hasPayouts = payouts != null && payouts.length > 0;
 
-  // Stakes games (Nassau, etc.) show net positions; pool-funded show gross payouts
-  const isStakes =
-    hasPayouts && payouts.some((p) => p.amount > 0) && netPositions != null;
+  // Stakes games (Nassau, etc.) explicitly provide netPositions; pool-funded don't
+  const isStakes = hasPayouts && netPositions != null;
 
   const grossByPlayer = hasPayouts
     ? getGrossPayoutsByPlayer(payouts)

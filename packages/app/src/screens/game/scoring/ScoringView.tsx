@@ -559,6 +559,7 @@ export function ScoringView({
   groupRoundIds,
   onRapidEntry,
   hasMatchBets,
+  onManualPress,
   bets = [],
   onRemovePress,
 }: ScoringViewProps): React.ReactElement {
@@ -1119,6 +1120,7 @@ export function ScoringView({
             startHoleIndex: b.startHoleIndex,
           }))}
         onRemovePress={onRemovePress}
+        onManualPress={onManualPress}
       />
       <CustomMultiplierModal
         visible={customMultiplierModalVisible}

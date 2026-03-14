@@ -107,18 +107,19 @@ export function calculatePoolPayouts(
 
   // Get metric values for this pool
   const ranked = playerMetrics
-    .map((pm) => {
+    .flatMap((pm) => {
       const metricValue = pm.metrics[pool.metric];
       if (metricValue === undefined) {
-        console.warn(
-          `Settlement: Metric "${pool.metric}" not found for player ${pm.playerName || pm.playerId}`,
-        );
+        // Player has no metric — exclude from ranking entirely
+        return [];
       }
-      return {
-        playerId: pm.playerId,
-        playerName: pm.playerName,
-        value: metricValue ?? 0,
-      };
+      return [
+        {
+          playerId: pm.playerId,
+          playerName: pm.playerName,
+          value: metricValue,
+        },
+      ];
     })
     .filter(
       (p) =>
@@ -257,12 +258,14 @@ export function calculatePoolPayouts(
 
       if (winners.length === 0) break;
 
-      const perWinner = Math.floor(poolAmount / winners.length);
-      let remainder = poolAmount - perWinner * winners.length;
+      const poolCents = Math.round(poolAmount * 100);
+      const perWinnerCents = Math.floor(poolCents / winners.length);
+      let remainderCents = poolCents - perWinnerCents * winners.length;
 
       for (const winner of winners) {
-        const amount = remainder > 0 ? perWinner + 1 : perWinner;
-        remainder--;
+        const amountCents =
+          remainderCents > 0 ? perWinnerCents + 1 : perWinnerCents;
+        if (remainderCents > 0) remainderCents--;
         payouts.push({
           playerId: winner.item.playerId,
           playerName: winner.item.playerName,
@@ -271,7 +274,7 @@ export function calculatePoolPayouts(
           place: 1,
           rankLabel: winners.length > 1 ? "T1" : "1",
           metricValue: winner.item.value,
-          amount,
+          amount: amountCents / 100,
         });
       }
       break;

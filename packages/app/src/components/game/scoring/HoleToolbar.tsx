@@ -61,6 +61,8 @@ interface HoleToolbarProps {
   pressBets?: PressBetItem[];
   /** Called to remove a press bet by name */
   onRemovePress?: (betName: string) => void;
+  /** Called to manually create a press for a parent bet */
+  onManualPress?: (parentBetName: string) => void;
 }
 
 export function HoleToolbar({
@@ -81,6 +83,7 @@ export function HoleToolbar({
   onRapidEntry,
   pressBets,
   onRemovePress,
+  onManualPress,
 }: HoleToolbarProps): React.ReactElement {
   const { theme } = useUnistyles();
   const [showOverridesModal, setShowOverridesModal] = useState(false);
@@ -654,7 +657,7 @@ const styles = StyleSheet.create((theme) => ({
   pressBadgeCountText: {
     fontSize: 10,
     fontWeight: "bold",
-    color: "#fff",
+    color: theme.colors.actionText,
   },
   pressList: {
     gap: theme.gap(0.5),
