@@ -34,7 +34,7 @@ export function useScoreManagement(
     "handicap_index_from",
     "game",
   );
-  const handicapMode = handicapIndexFromValue === "low" ? "low" : "full";
+  const handicapMode = handicapIndexFromValue === "full" ? "full" : "low";
 
   const handleScoreChange = useCallback(
     (roundToGameId: string, newGross: number) => {

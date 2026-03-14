@@ -11,6 +11,14 @@ export interface HoleOptionOverride {
   value: string;
 }
 
+/** A press bet for display in the press management modal */
+export interface PressBetItem {
+  name: string;
+  disp: string;
+  amount?: number;
+  startHoleIndex?: number;
+}
+
 /** A group option for the group picker dropdown */
 export interface GroupPickerItem {
   id: string;
@@ -49,6 +57,12 @@ interface HoleToolbarProps {
   onGroupChange?: (groupId: string) => void;
   /** Called to enter rapid per-player score entry mode */
   onRapidEntry?: () => void;
+  /** Active press bets (shown in press management modal) */
+  pressBets?: PressBetItem[];
+  /** Called to remove a press bet by name */
+  onRemovePress?: (betName: string) => void;
+  /** Called to manually create a press for a parent bet */
+  onManualPress?: (parentBetName: string) => void;
 }
 
 export function HoleToolbar({
@@ -67,12 +81,17 @@ export function HoleToolbar({
   selectedGroupId = "",
   onGroupChange,
   onRapidEntry,
+  pressBets,
+  onRemovePress,
+  onManualPress,
 }: HoleToolbarProps): React.ReactElement {
   const { theme } = useUnistyles();
   const [showOverridesModal, setShowOverridesModal] = useState(false);
   const [showGroupModal, setShowGroupModal] = useState(false);
+  const [showPressModal, setShowPressModal] = useState(false);
   const hasOverrides = optionOverrides && optionOverrides.length > 0;
   const hasGroups = groups && groups.length > 0 && !!onGroupChange;
+  const hasPresses = pressBets && pressBets.length > 0;
 
   // Format multiplier display (1x, 2x, 4x, 8x)
   const multiplierText = `${overallMultiplier}x`;
@@ -208,8 +227,35 @@ export function HoleToolbar({
         ) : null}
       </View>
 
-      {/* Right: Rapid entry + option overrides + explain mode */}
+      {/* Right: Presses + Rapid entry + option overrides + explain mode */}
       <View style={styles.rightSection}>
+        {hasPresses && (
+          <Pressable
+            style={styles.iconButton}
+            onPress={() => setShowPressModal(true)}
+            hitSlop={12}
+            accessibilityLabel="Manage press bets"
+          >
+            <View style={styles.pressBadgeContainer}>
+              <FontAwesome6
+                name="hand-point-right"
+                iconStyle="solid"
+                size={18}
+                color={theme.colors.action}
+              />
+              <View
+                style={[
+                  styles.pressBadgeCount,
+                  { backgroundColor: theme.colors.action },
+                ]}
+              >
+                <Text style={styles.pressBadgeCountText}>
+                  {pressBets!.length}
+                </Text>
+              </View>
+            </View>
+          </Pressable>
+        )}
         {onRapidEntry && (
           <Pressable
             style={styles.iconButton}
@@ -378,6 +424,64 @@ export function HoleToolbar({
           </Pressable>
         </Modal>
       )}
+
+      {hasPresses && (
+        <Modal
+          visible={showPressModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowPressModal(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowPressModal(false)}
+          >
+            <Pressable
+              style={styles.modalContent}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <ModalHeader
+                title="Press Bets"
+                onClose={() => setShowPressModal(false)}
+              />
+              <View style={styles.pressList}>
+                {pressBets?.map((press) => (
+                  <View key={press.name} style={styles.pressRow}>
+                    <View style={styles.pressInfo}>
+                      <Text style={styles.pressName}>{press.disp}</Text>
+                      <Text style={styles.pressDetail}>
+                        {press.amount != null && `$${press.amount}`}
+                        {press.startHoleIndex != null &&
+                          ` · Starts hole ${press.startHoleIndex + 1}`}
+                      </Text>
+                    </View>
+                    {onRemovePress && (
+                      <Pressable
+                        style={styles.pressRemoveButton}
+                        onPress={() => {
+                          onRemovePress(press.name);
+                          if (pressBets!.length <= 1) {
+                            setShowPressModal(false);
+                          }
+                        }}
+                        hitSlop={8}
+                        accessibilityLabel={`Remove ${press.disp}`}
+                      >
+                        <FontAwesome6
+                          name="trash-can"
+                          iconStyle="solid"
+                          size={16}
+                          color={theme.colors.error}
+                        />
+                      </Pressable>
+                    )}
+                  </View>
+                ))}
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -535,5 +639,52 @@ const styles = StyleSheet.create((theme) => ({
   groupOptionTextSelected: {
     fontWeight: "600",
     color: theme.colors.action,
+  },
+  pressBadgeContainer: {
+    position: "relative",
+  },
+  pressBadgeCount: {
+    position: "absolute",
+    top: -4,
+    right: -8,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  pressBadgeCountText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: theme.colors.actionText,
+  },
+  pressList: {
+    gap: theme.gap(0.5),
+  },
+  pressRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: theme.gap(1),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  pressInfo: {
+    flex: 1,
+    gap: theme.gap(0.25),
+  },
+  pressName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: theme.colors.primary,
+  },
+  pressDetail: {
+    fontSize: 12,
+    color: theme.colors.secondary,
+  },
+  pressRemoveButton: {
+    padding: theme.gap(0.75),
+    marginLeft: theme.gap(1),
   },
 }));

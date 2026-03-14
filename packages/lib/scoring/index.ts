@@ -43,6 +43,18 @@ export {
   getTeeMultiplierTotal,
   isSimpleRankCheck,
 } from "./logic-engine";
+// Match metrics (scoreboard extraction for match play settlement)
+export type {
+  BetInfo,
+  BetMatchState,
+  MatchMetrics,
+  MatchScope,
+} from "./match-metrics";
+export {
+  computeBetMatchStates,
+  extractMatchMetrics,
+  extractMatchMetricsForScope,
+} from "./match-metrics";
 // Multiplier engine (data-driven multiplier evaluation)
 export {
   calculateTotalMultiplier,
@@ -54,7 +66,9 @@ export {
 export {
   copySpecOptions,
   getFrontNinePreDoubleTotalFromHoles,
+  getGameOptionBoolean,
   getGameOptionNumber,
+  getGameOptionString,
   getGameOptions,
   getGameSpecField,
   getJunkOptionsForHole,
@@ -74,6 +88,15 @@ export {
   pointsFromTable,
   splitPoints,
 } from "./points-engine";
+// Press bet logic (creation + auto-press detection)
+export type {
+  AutoPressResult,
+  CheckAutoPressConfig,
+  CreatePressBetConfig,
+  PressBetInfo,
+  PressBetProps,
+} from "./press";
+export { checkAutoPress, createPressBet } from "./press";
 // Quota engine (quota/Stableford calculation functions)
 export {
   calculateNineHoleQuotas,

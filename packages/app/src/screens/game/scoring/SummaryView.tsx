@@ -13,6 +13,7 @@ export interface SummaryViewProps {
   onPrevHole: () => void;
   onNextHole: () => void;
   payouts?: Payout[] | null;
+  netPositions?: Record<string, number> | null;
 }
 
 interface PlayerSummary {
@@ -98,12 +99,17 @@ function buildPlayerSummaries(
   game: Game,
   scoreboard: Scoreboard | null,
   payouts?: Payout[] | null,
+  netPositions?: Record<string, number> | null,
 ): PlayerSummary[] {
   if (!scoreboard || !game.players?.$isLoaded) {
     return [];
   }
 
   const hasPayouts = payouts != null && payouts.length > 0;
+
+  // Stakes games (Nassau, etc.) explicitly provide netPositions; pool-funded don't
+  const isStakes = hasPayouts && netPositions != null;
+
   const grossByPlayer = hasPayouts
     ? getGrossPayoutsByPlayer(payouts)
     : new Map<string, number>();
@@ -127,7 +133,14 @@ function buildPlayerSummaries(
     // Calculate par for only the holes THIS player has scored
     const parForPlayer = getParForPlayer(scoreboard, playerId);
 
-    const grossPayout = grossByPlayer.get(playerId) ?? 0;
+    let payout: number | null;
+    if (isStakes) {
+      // Stakes: show net position (what the player wins or loses)
+      payout = netPositions[playerId] ?? 0;
+    } else {
+      const grossPayout = grossByPlayer.get(playerId) ?? 0;
+      payout = grossPayout > 0 ? grossPayout : null;
+    }
 
     summaries.push({
       playerId,
@@ -136,7 +149,7 @@ function buildPlayerSummaries(
       toPar: cumulative.grossTotal - parForPlayer,
       points,
       holesPlayed: cumulative.holesPlayed,
-      payout: grossPayout > 0 ? grossPayout : null,
+      payout,
     });
   }
 
@@ -151,10 +164,12 @@ function buildPlayerSummaries(
 }
 
 /**
- * Format a gross payout amount: "$120", "$0"
+ * Format a payout amount: "+$10", "-$10", "$0"
  */
 function formatPayout(value: number): string {
-  return `$${value}`;
+  if (value > 0) return `+$${value}`;
+  if (value < 0) return `-$${Math.abs(value)}`;
+  return "$0";
 }
 
 /** Convert a numeric rank to ordinal: 1→"1st", 2→"2nd", 3→"3rd", 4→"4th" */
@@ -200,8 +215,14 @@ export function SummaryView({
   onPrevHole,
   onNextHole,
   payouts,
+  netPositions,
 }: SummaryViewProps) {
-  const playerSummaries = buildPlayerSummaries(game, scoreboard, payouts);
+  const playerSummaries = buildPlayerSummaries(
+    game,
+    scoreboard,
+    payouts,
+    netPositions,
+  );
   const hasPayout = payouts != null && payouts.length > 0;
 
   return (
@@ -228,7 +249,7 @@ export function SummaryView({
               <Text style={styles.headerText}>Points</Text>
             </View>
             {hasPayout && (
-              <View style={styles.numberColumn}>
+              <View style={styles.payoutColumn}>
                 <Text style={styles.headerText}>$</Text>
               </View>
             )}
@@ -267,13 +288,15 @@ export function SummaryView({
                     </Text>
                   </View>
                   {hasPayout && (
-                    <View style={styles.numberColumn}>
+                    <View style={styles.payoutColumn}>
                       {player.payout != null ? (
                         <Text
                           style={[
                             styles.scoreText,
                             player.payout > 0 && styles.payoutPositive,
+                            player.payout < 0 && styles.payoutNegative,
                           ]}
+                          numberOfLines={1}
                         >
                           {formatPayout(player.payout)}
                         </Text>
@@ -325,25 +348,30 @@ const styles = StyleSheet.create((theme) => ({
   },
   row: {
     flexDirection: "row",
+    alignItems: "center",
   },
   headerRow: {
     paddingVertical: theme.gap(1),
   },
   playerColumn: {
-    flex: 3,
-    justifyContent: "center",
+    flex: 1,
   },
   numberColumn: {
-    flex: 1,
+    flexShrink: 0,
+    width: 48,
     alignItems: "flex-end",
-    paddingRight: theme.gap(1),
+  },
+  payoutColumn: {
+    flexShrink: 0,
+    width: 64,
+    alignItems: "flex-end",
   },
   headerText: {
     fontSize: 12,
     color: theme.colors.secondary,
   },
   playerName: {
-    fontSize: 16,
+    fontSize: 14,
   },
   thruText: {
     fontSize: 11,
@@ -355,10 +383,13 @@ const styles = StyleSheet.create((theme) => ({
     marginTop: 2,
   },
   scoreText: {
-    fontSize: 16,
+    fontSize: 14,
   },
   payoutPositive: {
     color: theme.colors.action,
+  },
+  payoutNegative: {
+    color: theme.colors.error,
   },
   buttonContainer: {
     marginTop: theme.gap(4),

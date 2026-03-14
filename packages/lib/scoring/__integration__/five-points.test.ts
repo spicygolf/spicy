@@ -730,9 +730,11 @@ describe("Five Points Integration Tests", () => {
       const hole18 = scoreboard.holes["18"];
 
       // Based on the verified scoring data:
-      // T1 final: 72, T2 final: 87 (T1 increased by 6 due to birdie_bbq fix)
+      // T1 final: 72, T2 final: 85
+      // (T2 changed from 87 to 85 after USGA course handicap formula fix:
+      //  added (Course Rating - Par) term, which shifted pops allocation)
       expect(hole18.teams["1"].runningTotal).toBe(72);
-      expect(hole18.teams["2"].runningTotal).toBe(87);
+      expect(hole18.teams["2"].runningTotal).toBe(85);
     });
   });
 

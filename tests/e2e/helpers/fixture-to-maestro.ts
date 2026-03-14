@@ -583,8 +583,9 @@ export function generateSelectCourseTeeSteps(fixture: Fixture): MaestroStep[] {
  */
 function calculateShotsOff(
   players: FixturePlayer[],
-  slope: number,
+  course: { slope: number; rating: number; holes: { par: number }[] },
 ): Map<string, number> {
+  const totalPar = course.holes.reduce((sum, h) => sum + h.par, 0);
   // Calculate course handicap for each player
   // Use handicapOverride if present (this is what gets entered in Adjust Handicaps screen)
   const playerHandicaps = players.map((p) => {
@@ -593,7 +594,12 @@ function calculateShotsOff(
       : p.handicapIndex;
     return {
       id: p.id,
-      courseHandicap: courseHandicapFromSlope(effectiveIndex, slope),
+      courseHandicap: courseHandicapFromSlope(
+        effectiveIndex,
+        course.slope,
+        course.rating,
+        totalPar,
+      ),
     };
   });
 
@@ -685,8 +691,8 @@ export function generateAdjustHandicapsSteps(fixture: Fixture): MaestroStep[] {
 
   // Add assertions for the "shots off" column
   // This verifies handicap calculations are working correctly
-  if (fixture.course.slope) {
-    const shotsOff = calculateShotsOff(fixture.players, fixture.course.slope);
+  if (fixture.course.slope && fixture.course.rating) {
+    const shotsOff = calculateShotsOff(fixture.players, fixture.course as { slope: number; rating: number; holes: { par: number }[] });
 
     // Wait for shots off values to render after handicap changes propagate
     const firstPlayerSlug = fixture.players[0].name
@@ -1255,9 +1261,10 @@ export function generateSubFlows(fixture: E2EFixture): GeneratedSubFlows {
 
   // Pre-calculate shots off for pops calculation
   // This assumes handicap_index_from = "low" (default for Five Points)
-  const shotsOffMap = fixture.course.slope
-    ? calculateShotsOff(fixture.players, fixture.course.slope)
-    : new Map<string, number>();
+  const shotsOffMap =
+    fixture.course.slope && fixture.course.rating
+      ? calculateShotsOff(fixture.players, fixture.course as { slope: number; rating: number; holes: { par: number }[] })
+      : new Map<string, number>();
 
   // Generate individual hole flows
   const holes: Record<string, string> = {};
@@ -1527,9 +1534,10 @@ export function generateFullFlow(fixture: E2EFixture): GeneratedFlow {
   );
 
   // Pre-calculate shots off for pops calculation (same as sub-flows)
-  const shotsOffMap = fixture.course.slope
-    ? calculateShotsOff(fixture.players, fixture.course.slope)
-    : new Map<string, number>();
+  const shotsOffMap =
+    fixture.course.slope && fixture.course.rating
+      ? calculateShotsOff(fixture.players, fixture.course as { slope: number; rating: number; holes: { par: number }[] })
+      : new Map<string, number>();
 
   for (const holeNum of holeNumbers) {
     const holeData = fixture.holes[holeNum];

@@ -45,7 +45,7 @@ export function RapidEntryView({
     "game",
   );
   const handicapMode: "full" | "low" =
-    handicapIndexFromValue === "low" ? "low" : "full";
+    handicapIndexFromValue === "full" ? "full" : "low";
 
   const totalHoles = holesList.length;
 

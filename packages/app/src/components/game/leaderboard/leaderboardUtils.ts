@@ -1,12 +1,13 @@
 import type { Game, GameSpec } from "spicylib/schema";
-import type { PlayerQuota, Scoreboard } from "spicylib/scoring";
+import type { MatchScope, PlayerQuota, Scoreboard } from "spicylib/scoring";
 import {
+  extractMatchMetricsForScope,
   getMetaOption,
   getTeamHolePoints,
   isHoleComplete,
 } from "spicylib/scoring";
 
-export type ViewMode = "gross" | "net" | "points" | "skins";
+export type ViewMode = "gross" | "match" | "net" | "points" | "skins";
 
 export interface PlayerColumn {
   playerId: string;
@@ -205,6 +206,24 @@ export function getScoreValue(
       ).length;
       return skinCount > 0 ? skinCount : null;
     }
+    case "match": {
+      if (!isHoleComplete(scoreboard.holes[hole])) return null;
+      // Show 1 if this player won the hole (sole lowest net), null otherwise
+      let lowestNet = Infinity;
+      let winnerId: string | null = null;
+      let tied = false;
+      for (const [pid, result] of Object.entries(holeResult.players)) {
+        if (!result.hasScore) continue;
+        if (result.net < lowestNet) {
+          lowestNet = result.net;
+          winnerId = pid;
+          tied = false;
+        } else if (result.net === lowestNet) {
+          tied = true;
+        }
+      }
+      return !tied && winnerId === playerId ? 1 : null;
+    }
   }
 }
 
@@ -248,6 +267,53 @@ export function getSummaryValue(
       }
     }
     return total > 0 ? total : null;
+  }
+
+  // For match, count holes won (sole lowest net) in range
+  if (viewMode === "match") {
+    let holesWon = 0;
+    const holesPlayed = scoreboard.meta.holesPlayed;
+
+    for (const hole of holesPlayed) {
+      const holeNum = Number.parseInt(hole, 10);
+      if (Number.isNaN(holeNum)) continue;
+
+      // Physical course sides: out = holes 1-9, in = holes 10-18
+      const inRange =
+        summaryType === "out"
+          ? holeNum >= 1 && holeNum <= 9
+          : summaryType === "in"
+            ? holeNum >= 10 && holeNum <= 18
+            : true;
+
+      if (!inRange) continue;
+      if (!isHoleComplete(scoreboard.holes[hole])) continue;
+
+      const holeResult = scoreboard.holes[hole];
+      if (!holeResult) continue;
+
+      // Find sole lowest net
+      let lowestNet = Infinity;
+      let winnerId: string | null = null;
+      let tied = false;
+      for (const [pid, result] of Object.entries(holeResult.players)) {
+        if (!result.hasScore) continue;
+        if (result.net < lowestNet) {
+          lowestNet = result.net;
+          winnerId = pid;
+          tied = false;
+        } else if (result.net === lowestNet) {
+          tied = true;
+        }
+      }
+      if (!tied && winnerId === playerId) {
+        holesWon++;
+      }
+    }
+
+    // For "total" in a shotgun start, the value is the same either way
+    // For front/back nines, we use physical course sides (holes 1-9 / 10-18)
+    return holesWon > 0 ? holesWon : null;
   }
 
   // For points, calculate from team hole net totals
@@ -379,7 +445,13 @@ export function getScoreToPar(
   hole: string,
   viewMode: ViewMode,
 ): number | null {
-  if (!scoreboard || viewMode === "points" || viewMode === "skins") return null;
+  if (
+    !scoreboard ||
+    viewMode === "match" ||
+    viewMode === "points" ||
+    viewMode === "skins"
+  )
+    return null;
 
   const holeResult = scoreboard.holes[hole];
   if (!holeResult) return null;
@@ -391,17 +463,68 @@ export function getScoreToPar(
   return viewMode === "gross" ? playerResult.scoreToPar : playerResult.netToPar;
 }
 
+/**
+ * Format a match play state for display.
+ *
+ * @param diff - Holes up (positive) or down (negative). 0 = tied.
+ * @param holesRemaining - Holes left in the match. When diff > holesRemaining
+ *   the match is closed out (e.g., "3 & 2").
+ * @returns Formatted string: "2 up", "1 dn", "tied", or "3 & 2"
+ */
+export function formatMatchState(
+  diff: number,
+  holesRemaining?: number,
+): string {
+  if (diff === 0) return "tied";
+  const absDiff = Math.abs(diff);
+  // Closed out: lead exceeds remaining holes
+  if (holesRemaining !== undefined && absDiff > holesRemaining) {
+    return `${absDiff} & ${holesRemaining}`;
+  }
+  return diff > 0 ? `${absDiff} up` : `${absDiff} dn`;
+}
+
 // =============================================================================
 // Vertical Leaderboard Helpers
 // =============================================================================
+
+/**
+ * Get value for a custom-scope column (press bets).
+ * For match viewMode, counts holes won within the custom scope.
+ */
+function getCustomScopeValue(
+  scoreboard: Scoreboard,
+  playerId: string,
+  col: VerticalColumn,
+  viewMode: ViewMode,
+): number | null {
+  const effectiveViewMode =
+    viewMode === "gross" ? "gross" : (col.viewModeOverride ?? viewMode);
+
+  if (effectiveViewMode === "match" && col.customScope) {
+    const counts = extractMatchMetricsForScope(
+      scoreboard,
+      col.customScope as MatchScope,
+      col.startHoleIndex,
+    );
+    const holesWon = counts.get(playerId) ?? 0;
+    return holesWon > 0 ? holesWon : null;
+  }
+
+  return null;
+}
 
 export interface VerticalColumn {
   key: string;
   label: string;
   /** Which summary type to use for getSummaryValue() */
-  summaryType: "out" | "in" | "total";
+  summaryType: "out" | "in" | "total" | "custom";
   /** Override viewMode for this column (e.g., skins always uses "skins") */
   viewModeOverride?: ViewMode;
+  /** Custom scope for press bets (rest_of_nine, rest_of_round) */
+  customScope?: string;
+  /** Starting hole index for custom scope */
+  startHoleIndex?: number;
 }
 
 export interface VerticalPlayerData {
@@ -419,8 +542,11 @@ export interface BetColumnInfo {
   scope: string;
   scoringType: string;
   pct?: number;
+  amount?: number;
   splitType?: string;
   placesPaid?: number;
+  startHoleIndex?: number;
+  parentBetName?: string;
 }
 
 const SCOPE_TO_SUMMARY: Record<string, "out" | "in" | "total"> = {
@@ -442,15 +568,34 @@ export function getVerticalColumns(bets: BetColumnInfo[]): VerticalColumn[] {
     ];
   }
 
-  return bets
-    .filter((bet) => SCOPE_TO_SUMMARY[bet.scope] !== undefined)
-    .map((bet) => ({
+  return bets.map((bet) => {
+    const standardSummary = SCOPE_TO_SUMMARY[bet.scope];
+    const viewModeOverride: ViewMode | undefined =
+      bet.scoringType === "skins"
+        ? "skins"
+        : bet.scoringType === "match"
+          ? "match"
+          : undefined;
+
+    if (standardSummary) {
+      return {
+        key: bet.name,
+        label: bet.disp,
+        summaryType: standardSummary,
+        viewModeOverride,
+      };
+    }
+
+    // Press bets with dynamic scope (rest_of_nine, rest_of_round)
+    return {
       key: bet.name,
       label: bet.disp,
-      summaryType: SCOPE_TO_SUMMARY[bet.scope] as "out" | "in" | "total",
-      viewModeOverride:
-        bet.scoringType === "skins" ? ("skins" as ViewMode) : undefined,
-    }));
+      summaryType: "custom" as const,
+      viewModeOverride,
+      customScope: bet.scope,
+      startHoleIndex: bet.startHoleIndex,
+    };
+  });
 }
 
 /**
@@ -470,17 +615,27 @@ export function getVerticalPlayerData(
     const values: Record<string, number | null> = {};
 
     for (const col of columns) {
-      // In gross mode, ignore column overrides — all columns show gross scores.
-      // In bets mode (viewMode="points"), skins columns override to "skins".
-      const effectiveViewMode =
-        viewMode === "gross" ? "gross" : (col.viewModeOverride ?? viewMode);
-      values[col.key] = getSummaryValue(
-        scoreboard,
-        player.playerId,
-        col.summaryType,
-        effectiveViewMode,
-        playerQuotas,
-      );
+      if (col.summaryType === "custom" && scoreboard) {
+        // Custom scope (press bets): compute directly from match metrics
+        values[col.key] = getCustomScopeValue(
+          scoreboard,
+          player.playerId,
+          col,
+          viewMode,
+        );
+      } else if (col.summaryType !== "custom") {
+        // In gross mode, ignore column overrides — all columns show gross scores.
+        // In bets mode (viewMode="points"), skins columns override to "skins".
+        const effectiveViewMode =
+          viewMode === "gross" ? "gross" : (col.viewModeOverride ?? viewMode);
+        values[col.key] = getSummaryValue(
+          scoreboard,
+          player.playerId,
+          col.summaryType,
+          effectiveViewMode,
+          playerQuotas,
+        );
+      }
     }
 
     const cumulative = scoreboard?.cumulative.players[player.playerId];
@@ -519,8 +674,11 @@ export function extractBets(
         scope: bet.scope,
         scoringType: bet.scoringType,
         pct: bet.pct,
+        amount: bet.amount ?? undefined,
         splitType: bet.splitType,
         placesPaid: bet.placesPaid ?? undefined,
+        startHoleIndex: bet.startHoleIndex ?? undefined,
+        parentBetName: bet.parentBetName ?? undefined,
       });
     }
     if (result.length > 0) return result;
@@ -541,6 +699,7 @@ export function extractBets(
         scope: opt.scope,
         scoringType: opt.scoringType,
         pct: opt.pct,
+        amount: opt.amount,
         splitType: opt.splitType,
       });
     }

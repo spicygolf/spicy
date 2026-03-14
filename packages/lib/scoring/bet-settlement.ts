@@ -11,6 +11,11 @@
  *   loser pays winner directly
  */
 
+import type { MatchScope } from "./match-metrics";
+import {
+  extractMatchMetrics,
+  extractMatchMetricsForScope,
+} from "./match-metrics";
 import { calculateQuotaPerformances, extractSkinCounts } from "./quota-metrics";
 import type {
   Payout,
@@ -33,7 +38,7 @@ import type { PlayerQuota, Scoreboard } from "./types";
 export interface BetConfig {
   name: string;
   disp: string;
-  scope: "front9" | "back9" | "all18";
+  scope: "front9" | "back9" | "all18" | "rest_of_nine" | "rest_of_round";
   scoringType: "quota" | "skins" | "points" | "match";
   /** Percentage of total pot (pool-funded games). */
   pct?: number;
@@ -42,6 +47,8 @@ export interface BetConfig {
   splitType: "places" | "per_unit" | "winner_take_all";
   placesPaid?: number;
   payoutPcts?: number[];
+  /** Starting play-order index for dynamic scopes (press bets). */
+  startHoleIndex?: number;
 }
 
 /** Input for the settleBets bridge function. */
@@ -65,15 +72,23 @@ const SCOPE_METRIC_SUFFIX: Record<string, string> = {
 };
 
 /**
- * Build a metric key from scoring type and scope.
+ * Build a metric key from scoring type, scope, and optional start index.
  *
  * @example
  * getMetricKey("quota", "front9") // "quota_front"
  * getMetricKey("skins", "all18")  // "skins_won"
+ * getMetricKey("match", "rest_of_nine", 4) // "match_rest_of_nine_4"
  */
-function getMetricKey(scoringType: string, scope: string): string {
+function getMetricKey(
+  scoringType: string,
+  scope: string,
+  startHoleIndex?: number,
+): string {
   if (scoringType === "skins") {
     return "skins_won";
+  }
+  if (scope === "rest_of_nine" || scope === "rest_of_round") {
+    return `${scoringType}_${scope}_${startHoleIndex ?? 0}`;
   }
   const suffix = SCOPE_METRIC_SUFFIX[scope] ?? "overall";
   return `${scoringType}_${suffix}`;
@@ -98,7 +113,7 @@ export function betToPoolConfig(
     name: bet.name,
     disp: bet.disp,
     pct: bet.pct ?? 0,
-    metric: getMetricKey(bet.scoringType, bet.scope),
+    metric: getMetricKey(bet.scoringType, bet.scope, bet.startHoleIndex),
     splitType: bet.splitType,
     placesPaid:
       bet.splitType === "places"
@@ -145,6 +160,37 @@ export function extractMetricsForBets(
     skinsByPlayer = extractSkinCounts(scoreboard);
   }
 
+  // Extract match metrics if any bet uses match scoring
+  let matchByPlayer:
+    | Map<string, { front: number; back: number; total: number }>
+    | undefined;
+  const dynamicMatchMetrics = new Map<string, Map<string, number>>();
+  if (scoringTypes.has("match")) {
+    matchByPlayer = extractMatchMetrics(scoreboard);
+
+    // Also extract per-bet metrics for dynamic scopes (press bets)
+    for (const bet of bets) {
+      if (
+        bet.scoringType === "match" &&
+        (bet.scope === "rest_of_nine" || bet.scope === "rest_of_round")
+      ) {
+        const key = getMetricKey(
+          bet.scoringType,
+          bet.scope,
+          bet.startHoleIndex,
+        );
+        dynamicMatchMetrics.set(
+          key,
+          extractMatchMetricsForScope(
+            scoreboard,
+            bet.scope as MatchScope,
+            bet.startHoleIndex,
+          ),
+        );
+      }
+    }
+  }
+
   // Build PlayerMetrics for each player
   return players.map((player) => {
     const metrics: Record<string, number> = {};
@@ -158,6 +204,18 @@ export function extractMetricsForBets(
 
     if (skinsByPlayer) {
       metrics.skins_won = skinsByPlayer.get(player.id) ?? 0;
+    }
+
+    if (matchByPlayer) {
+      const match = matchByPlayer.get(player.id);
+      metrics.match_front = match?.front ?? 0;
+      metrics.match_back = match?.back ?? 0;
+      metrics.match_overall = match?.total ?? 0;
+    }
+
+    // Add dynamic scope metrics (press bets)
+    for (const [key, scopeMap] of dynamicMatchMetrics) {
+      metrics[key] = scopeMap.get(player.id) ?? 0;
     }
 
     return {
@@ -267,7 +325,7 @@ export function settleBets(input: SettleBetsInput): SettlementResult {
     input;
 
   const unsupported = bets
-    .filter((b) => b.scoringType === "match" || b.scoringType === "points")
+    .filter((b) => b.scoringType === "points")
     .map((b) => b.scoringType);
   if (unsupported.length > 0) {
     throw new Error(

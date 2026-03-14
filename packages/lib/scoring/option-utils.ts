@@ -495,3 +495,38 @@ export function getGameOptionNumber(
   const parsed = Number.parseFloat(val);
   return Number.isNaN(parsed) ? fallback : parsed;
 }
+
+/**
+ * Read a string-valued game option, falling back to a default.
+ */
+export function getGameOptionString(
+  // biome-ignore lint/suspicious/noExplicitAny: Jazz MaybeLoaded spec type is complex
+  spec: any,
+  key: string,
+  fallback: string,
+): string {
+  if (!spec?.$isLoaded) return fallback;
+  const opt = spec[key];
+  if (!opt || opt.type !== "game") return fallback;
+  const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
+  return typeof val === "string" ? val : fallback;
+}
+
+/**
+ * Read a boolean-valued game option, falling back to a default.
+ */
+export function getGameOptionBoolean(
+  // biome-ignore lint/suspicious/noExplicitAny: Jazz MaybeLoaded spec type is complex
+  spec: any,
+  key: string,
+  fallback: boolean,
+): boolean {
+  if (!spec?.$isLoaded) return fallback;
+  const opt = spec[key];
+  if (!opt || opt.type !== "game") return fallback;
+  const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
+  if (typeof val === "boolean") return val;
+  if (val === "true") return true;
+  if (val === "false") return false;
+  return fallback;
+}

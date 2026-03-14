@@ -15,6 +15,7 @@ import type {
   ScoringContext,
 } from "spicylib/scoring";
 import {
+  computeBetMatchStates,
   detectInvalidations,
   getHoleTeeMultiplierTotalWithOverride,
   getMetaOption,
@@ -32,6 +33,7 @@ import {
   getGrossScore,
   isCoMapDataKey,
 } from "spicylib/utils";
+import type { BetColumnInfo } from "@/components/game/leaderboard";
 import {
   CustomMultiplierModal,
   type GroupPickerItem,
@@ -95,6 +97,14 @@ export interface ScoringViewProps {
   groupRoundIds?: Set<string>;
   /** Called to enter rapid per-player score entry mode */
   onRapidEntry?: () => void;
+  /** Whether this game has match bets (enables press button) */
+  hasMatchBets?: boolean;
+  /** Called to manually create a press for a specific parent bet */
+  onManualPress?: (parentBetName: string) => void;
+  /** Active bets for computing per-bet match states */
+  bets?: BetColumnInfo[];
+  /** Called to remove a press bet by name */
+  onRemovePress?: (betName: string) => void;
 }
 
 /** Check if a team has a specific team-level option on a hole */
@@ -548,6 +558,10 @@ export function ScoringView({
   onGroupChange,
   groupRoundIds,
   onRapidEntry,
+  hasMatchBets,
+  onManualPress,
+  bets = [],
+  onRemovePress,
 }: ScoringViewProps): React.ReactElement {
   // Modal state for custom multiplier
   const [customMultiplierModalVisible, setCustomMultiplierModalVisible] =
@@ -586,7 +600,7 @@ export function ScoringView({
     "handicap_index_from",
     "game",
   );
-  const handicapMode = handicapIndexFromValue === "low" ? "low" : "full";
+  const handicapMode = handicapIndexFromValue === "full" ? "full" : "low";
 
   // Get max_off_tee cap for the custom multiplier modal
   const maxOffTeeValue = useOptionValue(
@@ -1097,6 +1111,16 @@ export function ScoringView({
         selectedGroupId={selectedGroupId}
         onGroupChange={onGroupChange}
         onRapidEntry={onRapidEntry}
+        pressBets={bets
+          .filter((b) => b.parentBetName)
+          .map((b) => ({
+            name: b.name,
+            disp: b.disp,
+            amount: b.amount,
+            startHoleIndex: b.startHoleIndex,
+          }))}
+        onRemovePress={onRemovePress}
+        onManualPress={onManualPress}
       />
       <CustomMultiplierModal
         visible={customMultiplierModalVisible}
@@ -1298,6 +1322,17 @@ export function ScoringView({
           const teamHoleResult =
             scoreboard?.holes?.[currentHoleNumber]?.teams?.[teamId];
 
+          // Compute per-bet match states for this team
+          const teamBetStates =
+            hasMatchBets && scoreboard && teamHoleResult?.playerIds[0]
+              ? computeBetMatchStates(
+                  scoreboard,
+                  bets,
+                  teamHoleResult.playerIds[0],
+                  currentHoleIndex,
+                )
+              : [];
+
           // Compute quota-relative running score for quota games
           // Uses the first player on the team (individual/seamless = 1 player per team)
           let quotaRunning: number | null = null;
@@ -1402,6 +1437,11 @@ export function ScoringView({
                   ? quotaRunning
                   : getTeamRunningScore(teamHoleResult)
               }
+              isMatchPlay={hasMatchBets}
+              holeMatchResult={
+                holeComplete ? teamHoleResult?.holeNetTotal : undefined
+              }
+              betMatchStates={teamBetStates}
               teeFlipWinner={isWinnerTeam}
               onTeeFlipReplay={
                 isWinnerTeam ? () => setTeeFlipMode("replay") : undefined

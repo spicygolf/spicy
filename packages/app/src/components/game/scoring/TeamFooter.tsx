@@ -1,6 +1,8 @@
 import { Pressable, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import type { BetMatchState } from "spicylib/scoring";
 import { Text } from "@/ui";
+import { BetMatchStates } from "./BetMatchStates";
 import { type OptionButton, OptionsButtons } from "./OptionsButtons";
 import { GolfTee } from "./TeeFlipModal";
 
@@ -23,6 +25,12 @@ interface TeamFooterProps {
   holePoints?: number;
   /** Running difference vs opponent (positive = winning, negative = losing) */
   runningDiff?: number;
+  /** Whether this is a match play game (suppresses junk math, shows match state) */
+  isMatchPlay?: boolean;
+  /** Per-hole match result: 1 = won, -1 = lost, 0 = halved */
+  holeMatchResult?: number;
+  /** Per-bet match states for this team */
+  betMatchStates?: BetMatchState[];
   /** Whether this team won the tee flip on this hole */
   teeFlipWinner?: boolean;
   /** Called when the tee flip icon is tapped to replay the animation */
@@ -41,6 +49,9 @@ export function TeamFooter({
   holeMultiplier = 1,
   holePoints = 0,
   runningDiff = 0,
+  isMatchPlay = false,
+  holeMatchResult,
+  betMatchStates = [],
   teeFlipWinner = false,
   onTeeFlipReplay,
   onTeeFlipRemove,
@@ -110,30 +121,73 @@ export function TeamFooter({
 
       {/* Bottom row: Hole math and running total (always shown) */}
       <View style={styles.bottomRow}>
-        {/* Left: Hole math (junk × multiplier = points) */}
-        <View style={styles.holeMathSection}>
-          <Text style={styles.holeMathLabel}>Hole:</Text>
-          <Text style={styles.holeMathText}>
-            {junkTotal} × {holeMultiplier} ={" "}
-          </Text>
-          <Text
-            style={styles.holeMathText}
-            testID={teamId ? `team-${teamId}-hole-points` : undefined}
-          >
-            {holePoints}
-          </Text>
-        </View>
+        {isMatchPlay ? (
+          <>
+            {/* Left: Per-hole match result + per-bet states */}
+            <View style={styles.holeMathSection}>
+              {holeMatchResult != null && (
+                <Text
+                  style={[
+                    styles.holeMathText,
+                    holeMatchResult > 0 && styles.matchWonText,
+                    holeMatchResult < 0 && styles.matchLostText,
+                  ]}
+                >
+                  {holeMatchResult > 0
+                    ? "Won"
+                    : holeMatchResult < 0
+                      ? "Lost"
+                      : "Halved"}
+                </Text>
+              )}
+            </View>
 
-        {/* Right: Running differential */}
-        <View style={styles.runningDiffSection}>
-          <Text
-            style={styles.runningDiffValue}
-            testID={teamId ? `team-${teamId}-points` : undefined}
-          >
-            {runningDiff > 0 ? "+" : ""}
-            {runningDiff}
-          </Text>
-        </View>
+            {/* Right: Per-bet match states or overall running state */}
+            <View style={styles.runningDiffSection}>
+              {betMatchStates.length > 0 ? (
+                <BetMatchStates betStates={betMatchStates} />
+              ) : (
+                <Text
+                  style={styles.runningDiffValue}
+                  testID={teamId ? `team-${teamId}-points` : undefined}
+                >
+                  {runningDiff > 0
+                    ? `${runningDiff} up`
+                    : runningDiff < 0
+                      ? `${Math.abs(runningDiff)} dn`
+                      : "tied"}
+                </Text>
+              )}
+            </View>
+          </>
+        ) : (
+          <>
+            {/* Left: Hole math (junk × multiplier = points) */}
+            <View style={styles.holeMathSection}>
+              <Text style={styles.holeMathLabel}>Hole:</Text>
+              <Text style={styles.holeMathText}>
+                {junkTotal} × {holeMultiplier} ={" "}
+              </Text>
+              <Text
+                style={styles.holeMathText}
+                testID={teamId ? `team-${teamId}-hole-points` : undefined}
+              >
+                {holePoints}
+              </Text>
+            </View>
+
+            {/* Right: Running differential */}
+            <View style={styles.runningDiffSection}>
+              <Text
+                style={styles.runningDiffValue}
+                testID={teamId ? `team-${teamId}-points` : undefined}
+              >
+                {runningDiff > 0 ? "+" : ""}
+                {runningDiff}
+              </Text>
+            </View>
+          </>
+        )}
       </View>
     </View>
   );
@@ -181,6 +235,12 @@ const styles = StyleSheet.create((theme) => ({
   holeMathText: {
     fontSize: 13,
     color: theme.colors.secondary,
+  },
+  matchWonText: {
+    color: theme.colors.action,
+  },
+  matchLostText: {
+    color: theme.colors.error,
   },
   runningDiffSection: {
     flexShrink: 0,

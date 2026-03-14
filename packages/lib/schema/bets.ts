@@ -63,6 +63,9 @@ export const Bet = co.map({
 
   /** Custom payout percentages by place */
   payoutPcts: co.optional(co.list(z.number())),
+
+  /** Parent bet name for press bets (e.g., "front_match" for a front nine press). */
+  parentBetName: z.optional(z.string()),
 });
 export type Bet = co.loaded<typeof Bet>;
 

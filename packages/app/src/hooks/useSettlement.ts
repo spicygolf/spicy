@@ -9,16 +9,24 @@ import type {
 import { getGameOptionNumber, settleBets } from "spicylib/scoring";
 import type { BetColumnInfo } from "@/components/game/leaderboard";
 
-const VALID_SCOPES = new Set(["front9", "back9", "all18"]);
+const VALID_SCOPES = new Set([
+  "front9",
+  "back9",
+  "all18",
+  "rest_of_nine",
+  "rest_of_round",
+]);
 const VALID_SCORING_TYPES = new Set(["quota", "skins", "points", "match"]);
 const VALID_SPLIT_TYPES = new Set(["places", "per_unit", "winner_take_all"]);
 
 /**
- * Compute settlement (payouts, net positions, debts) for a pool-funded game.
+ * Compute settlement (payouts, net positions, debts) for a game with bets.
  *
- * Returns null when the game doesn't use pool funding (no buy-in or no bets).
- * The result is memoized based on the scoreboard reference (which is already
- * fingerprint-gated by useScoreboard) and game option values.
+ * Supports two settlement models:
+ * - Pool-funded (bets with pct, e.g., Big Game): requires buy_in > 0
+ * - Stakes (bets with amount, e.g., Nassau): no buy_in needed
+ *
+ * Returns null when the game has no applicable bets.
  *
  * @param game - The loaded game object (for players and options)
  * @param scoreboard - Scored scoreboard from useScoreboard
@@ -36,12 +44,7 @@ export function useSettlement(
   const placesPaid = getGameOptionNumber(game?.spec, "places_paid", 3);
 
   return useMemo(() => {
-    if (
-      !game?.players?.$isLoaded ||
-      !scoreboard ||
-      buyIn <= 0 ||
-      bets.length === 0
-    ) {
+    if (!game?.players?.$isLoaded || !scoreboard || bets.length === 0) {
       return null;
     }
 
@@ -50,6 +53,12 @@ export function useSettlement(
       (b) =>
         VALID_SCOPES.has(b.scope) && VALID_SCORING_TYPES.has(b.scoringType),
     );
+
+    const isStakes = validBets.some((b) => (b.amount ?? 0) > 0);
+
+    // Pool-funded games require buy_in; stakes games don't
+    if (!isStakes && buyIn <= 0) return null;
+
     const betConfigs: BetConfig[] = [];
     for (const b of validBets) {
       betConfigs.push({
@@ -57,7 +66,9 @@ export function useSettlement(
         disp: b.disp,
         scope: b.scope as BetConfig["scope"],
         scoringType: b.scoringType as BetConfig["scoringType"],
-        pct: b.pct ?? 100 / validBets.length,
+        pct: isStakes ? undefined : (b.pct ?? 100 / validBets.length),
+        amount: b.amount,
+        startHoleIndex: b.startHoleIndex,
         splitType: VALID_SPLIT_TYPES.has(b.splitType ?? "")
           ? (b.splitType as BetConfig["splitType"])
           : "places",

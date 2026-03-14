@@ -10,6 +10,7 @@ import {
 } from "@/components/game/scoring";
 import { useGameContext } from "@/contexts/GameContext";
 import {
+  useAutoPress,
   useCurrentHole,
   useGameInitialization,
   useHoleInitialization,
@@ -90,6 +91,15 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
 
   const settlement = useSettlement(game, scoreboard, scoringContext, bets);
   const payouts = settlement?.payouts ?? null;
+  const netPositions = settlement?.netPositions ?? null;
+
+  // Press bet management (auto + manual)
+  const { createManualPress, removePress, hasMatchBets } = useAutoPress(
+    game,
+    scoreboard,
+    bets,
+    currentHoleIndex,
+  );
 
   // Rapid per-player score entry mode
   const [rapidEntryMode, setRapidEntryMode] = useState(false);
@@ -285,6 +295,7 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               onPrevHole={handlePrevHole}
               onNextHole={handleNextHole}
               payouts={payouts}
+              netPositions={netPositions}
             />
           ) : showChooser ? (
             <TeamChooserView
@@ -307,7 +318,9 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               scoringContext={scoringContext}
               onPrevHole={handlePrevHole}
               onNextHole={handleNextHole}
-              onScoreChange={handleScoreChange}
+              onScoreChange={(roundToGameId, newGross) => {
+                handleScoreChange(roundToGameId, newGross);
+              }}
               onUnscore={handleUnscore}
               onChangeTeams={() => setShowChangeTeamsModal(true)}
               teamsDisabled={isSeamlessMode}
@@ -316,6 +329,10 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
               onGroupChange={setSelectedGroupId}
               groupRoundIds={groupRoundIds}
               onRapidEntry={() => setRapidEntryMode(true)}
+              hasMatchBets={hasMatchBets}
+              onManualPress={createManualPress}
+              onRemovePress={removePress}
+              bets={bets}
             />
           )}
         </ErrorBoundary>
