@@ -76,6 +76,7 @@ export {
   getMetaOption,
   getOptionForHole,
   getOptionValueForHole,
+  getPayoutPctsForPlaceCount,
   getSpecField,
   isOptionOnHole,
   resetSpecFromRef,

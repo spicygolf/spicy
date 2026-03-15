@@ -5,9 +5,9 @@ import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
 import {
-  DEFAULT_PAYOUT_PCTS,
   getGameOptionIntArray,
   getGameOptionNumber,
+  getPayoutPctsForPlaceCount,
 } from "spicylib/scoring";
 import { Back } from "@/components/Back";
 import { useGame, useIsOrganizer } from "@/hooks";
@@ -18,10 +18,6 @@ type Props = NativeStackScreenProps<GameSettingsStackParamList, "PlacesPaid">;
 
 const MIN_PLACES = 1;
 const MAX_PLACES = 10;
-
-function getDefaultPcts(places: number): number[] {
-  return DEFAULT_PAYOUT_PCTS[places] ?? DEFAULT_PAYOUT_PCTS[3] ?? [50, 30, 20];
-}
 
 const PLACE_LABELS = [
   "1st",
@@ -74,9 +70,11 @@ export function PlacesPaidScreen(_props: Props) {
   const playerCount = game?.players?.$isLoaded ? game.players.length : 0;
   const potTotal = buyIn * playerCount;
 
-  // Derive current pcts: payout_pcts option → DEFAULT_PAYOUT_PCTS fallback
+  // Derive current pcts: payout_pcts value → spec defaultValue map → DEFAULT_PAYOUT_PCTS
   const currentPcts =
-    specPcts.length > 0 ? specPcts : getDefaultPcts(currentPlaces);
+    specPcts.length > 0
+      ? specPcts
+      : getPayoutPctsForPlaceCount(game?.spec, currentPlaces);
 
   const [places, setPlaces] = useState(currentPlaces);
   const [pcts, setPcts] = useState<number[]>(() => currentPcts);
@@ -121,7 +119,7 @@ export function PlacesPaidScreen(_props: Props) {
           type: "game",
           version: "1",
           valueType: "int_array",
-          defaultValue: "[50,30,20]",
+          defaultValue: JSON.stringify({ "3": [50, 30, 20] }),
           value: JSON.stringify(activePctSlice),
         } satisfies GameOption);
       }
@@ -151,13 +149,14 @@ export function PlacesPaidScreen(_props: Props) {
   const handlePlacesChange = useCallback(
     (newPlaces: number) => {
       const clamped = Math.max(MIN_PLACES, Math.min(MAX_PLACES, newPlaces));
-      const newPcts = getDefaultPcts(clamped);
+      // Look up the spec's defaultValue map for this place count, fall back to DEFAULT_PAYOUT_PCTS
+      const newPcts = getPayoutPctsForPlaceCount(game?.spec, clamped);
       setPlaces(clamped);
       setPcts(newPcts);
       // Default pcts always sum to 100 — save immediately
       saveToJazz(clamped, newPcts);
     },
-    [saveToJazz],
+    [game?.spec, saveToJazz],
   );
 
   const handlePctChange = useCallback(

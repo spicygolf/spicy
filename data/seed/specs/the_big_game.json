@@ -11,7 +11,7 @@
   "teams": false,
   "team_size": 1,
   "team_change_every": 0,
-  "options": ["buy_in", "places_paid", { "name": "payout_pcts", "defaultValue": "[45,27,18,10]" }],
+  "options": ["buy_in", "places_paid", { "name": "payout_pcts", "defaultValue": "{\"3\":[50,30,20],\"4\":[40,30,20,10],\"5\":[35,25,20,12,8]}" }],
   "junk": [
     "stableford_double_eagle",
     "stableford_eagle",
