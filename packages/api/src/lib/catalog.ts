@@ -205,7 +205,7 @@ interface GameOptionData {
   name: string;
   disp: string;
   version: string;
-  valueType: "bool" | "num" | "menu" | "text";
+  valueType: "bool" | "num" | "menu" | "text" | "int_array";
   defaultValue: string;
   seq?: number;
   choices?: Array<{ name: string; disp: string }>;

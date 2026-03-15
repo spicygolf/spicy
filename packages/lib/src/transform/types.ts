@@ -9,7 +9,7 @@ export interface TransformedGameOption {
   name: string;
   disp: string;
   type: "game";
-  valueType: "bool" | "num" | "menu" | "text";
+  valueType: "bool" | "num" | "menu" | "text" | "int_array";
   choices?: Array<{ name: string; disp: string }>;
   defaultValue: string;
   teamOnly?: boolean;

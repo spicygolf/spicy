@@ -23,7 +23,7 @@ export interface SeedGameOption {
   name: string;
   disp: string;
   type: "game";
-  valueType: "bool" | "num" | "menu" | "text" | "pct";
+  valueType: "bool" | "num" | "menu" | "text" | "pct" | "int_array";
   defaultValue: string;
   choices?: Array<{ name: string; disp: string }>;
   teamOnly?: boolean;

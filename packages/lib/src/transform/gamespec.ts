@@ -120,12 +120,13 @@ function inferValueType(option: {
   type?: string;
   choices?: Array<{ name: string; disp: string }>;
   default?: unknown;
-}): "bool" | "num" | "menu" | "text" {
+}): "bool" | "num" | "menu" | "text" | "int_array" {
   // Use explicit type if available (v0.3 options have type field)
   if (option.type === "bool") return "bool";
   if (option.type === "text") return "text";
   if (option.type === "menu") return "menu";
   if (option.type === "num" || option.type === "pct") return "num";
+  if (option.type === "int_array") return "int_array";
 
   // Fallback to inference for legacy data
   if (option.choices && option.choices.length > 0) {

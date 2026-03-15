@@ -20,7 +20,7 @@ export const GameOptionSchema = z.object({
   disp: z.string(),
   type: z.literal("game"),
   version: z.string(),
-  valueType: z.enum(["bool", "num", "menu", "text"]),
+  valueType: z.enum(["bool", "num", "menu", "text", "int_array"]),
   choices: z.array(ChoiceSchema).optional(),
   defaultValue: z.string(),
   value: z.string().optional(),
