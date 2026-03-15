@@ -530,3 +530,31 @@ export function getGameOptionBoolean(
   if (val === "false") return false;
   return fallback;
 }
+
+/**
+ * Read an int_array game option (JSON-encoded number array), falling back to a default.
+ *
+ * The value is stored as a JSON string like "[45,27,18,10]".
+ * Returns the parsed array, or fallback if missing/invalid.
+ */
+export function getGameOptionIntArray(
+  // biome-ignore lint/suspicious/noExplicitAny: Jazz MaybeLoaded spec type is complex
+  spec: any,
+  key: string,
+  fallback: number[],
+): number[] {
+  if (!spec?.$isLoaded) return fallback;
+  const opt = spec[key];
+  if (!opt || opt.type !== "game") return fallback;
+  const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
+  if (typeof val !== "string") return fallback;
+  try {
+    const parsed = JSON.parse(val);
+    if (Array.isArray(parsed) && parsed.every((n) => typeof n === "number")) {
+      return parsed;
+    }
+  } catch {
+    // Invalid JSON — fall through
+  }
+  return fallback;
+}
