@@ -126,7 +126,7 @@ export function useSettlement(
     scoringContext?.playerQuotas,
     buyIn,
     placesPaid,
-    specPcts,
+    customPayoutPcts,
     bets,
   ]);
 }
