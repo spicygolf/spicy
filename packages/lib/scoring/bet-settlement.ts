@@ -59,6 +59,10 @@ export interface SettleBetsInput {
   playerQuotas?: Map<string, PlayerQuota>;
   buyIn: number;
   defaultPlacesPaid?: number;
+  /** Game-level custom payout percentages (used when bet doesn't specify its own). */
+  defaultPayoutPcts?: number[];
+  /** Override pot total (e.g., when only scored players are included). */
+  potTotal?: number;
 }
 
 // =============================================================================
@@ -108,6 +112,7 @@ function getMetricKey(
 export function betToPoolConfig(
   bet: BetConfig,
   defaultPlacesPaid?: number,
+  defaultPayoutPcts?: number[],
 ): PoolConfig {
   return {
     name: bet.name,
@@ -119,7 +124,7 @@ export function betToPoolConfig(
       bet.splitType === "places"
         ? (bet.placesPaid ?? defaultPlacesPaid)
         : undefined,
-    payoutPcts: bet.payoutPcts,
+    payoutPcts: bet.payoutPcts ?? defaultPayoutPcts,
   };
 }
 
@@ -248,7 +253,14 @@ function isStakesGame(bets: BetConfig[]): boolean {
  * Total buy-in per player = sum of all bet amounts.
  */
 function settleStakesBets(input: SettleBetsInput): SettlementResult {
-  const { bets, players, scoreboard, playerQuotas, defaultPlacesPaid } = input;
+  const {
+    bets,
+    players,
+    scoreboard,
+    playerQuotas,
+    defaultPlacesPaid,
+    defaultPayoutPcts,
+  } = input;
 
   const playerMetrics = extractMetricsForBets(
     bets,
@@ -266,7 +278,7 @@ function settleStakesBets(input: SettleBetsInput): SettlementResult {
     totalBuyIn += betAmount;
 
     const pool: PoolConfig = {
-      ...betToPoolConfig(bet, defaultPlacesPaid),
+      ...betToPoolConfig(bet, defaultPlacesPaid, defaultPayoutPcts),
       pct: 0, // Not used — poolAmount is the absolute betAmount × playerCount
     };
 
@@ -321,8 +333,15 @@ function settleStakesBets(input: SettleBetsInput): SettlementResult {
  * - Stakes (bets have `amount`): each bet is an independent fixed-amount pool
  */
 export function settleBets(input: SettleBetsInput): SettlementResult {
-  const { bets, players, scoreboard, playerQuotas, buyIn, defaultPlacesPaid } =
-    input;
+  const {
+    bets,
+    players,
+    scoreboard,
+    playerQuotas,
+    buyIn,
+    defaultPlacesPaid,
+    defaultPayoutPcts,
+  } = input;
 
   const unsupported = bets
     .filter((b) => b.scoringType === "points")
@@ -344,14 +363,16 @@ export function settleBets(input: SettleBetsInput): SettlementResult {
   }
 
   // Pool-funded path (original)
-  const pools = bets.map((bet) => betToPoolConfig(bet, defaultPlacesPaid));
+  const pools = bets.map((bet) =>
+    betToPoolConfig(bet, defaultPlacesPaid, defaultPayoutPcts),
+  );
   const playerMetrics = extractMetricsForBets(
     bets,
     scoreboard,
     playerQuotas,
     players,
   );
-  const potTotal = buyIn * players.length;
+  const potTotal = input.potTotal ?? buyIn * players.length;
 
   return calculateSettlement(pools, playerMetrics, potTotal);
 }

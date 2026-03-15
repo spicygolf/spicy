@@ -1,10 +1,11 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { co, z } from "jazz-tools";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
+import { ListOfPayoutPools, PayoutPool } from "spicylib/schema";
 import { DEFAULT_PAYOUT_PCTS, getGameOptionNumber } from "spicylib/scoring";
 import { Back } from "@/components/Back";
 import { useGame, useIsOrganizer } from "@/hooks";
@@ -50,6 +51,7 @@ function distributeAmounts(potTotal: number, pcts: number[]): number[] {
   return floored;
 }
 
+/** Screen for configuring the number of places paid and their payout percentages. */
 export function PlacesPaidScreen(_props: Props) {
   const { theme } = useUnistyles();
   const { game } = useGame(undefined, {
@@ -85,6 +87,12 @@ export function PlacesPaidScreen(_props: Props) {
   const [pcts, setPcts] = useState<number[]>(
     () => currentPoolPcts ?? getDefaultPcts(currentPlaces),
   );
+
+  // Keep a ref so blur/save callbacks always see the latest pcts
+  const pctsRef = useRef(pcts);
+  pctsRef.current = pcts;
+  const placesRef = useRef(places);
+  placesRef.current = places;
 
   // Sync local state once Jazz data finishes loading (both spec and payoutPools)
   const [synced, setSynced] = useState(false);
@@ -128,16 +136,45 @@ export function PlacesPaidScreen(_props: Props) {
       }
 
       // Update payout pools
-      if (game.payoutPools?.$isLoaded) {
-        const activePctSlice = newPcts.slice(0, newPlaces);
-        for (const pool of game.payoutPools) {
+      const activePctSlice = newPcts.slice(0, newPlaces);
+      const owner = game.$jazz.owner;
+
+      // Ensure payoutPools list exists on the game
+      if (!game.$jazz.has("payoutPools")) {
+        const newPools = ListOfPayoutPools.create([], { owner });
+        game.$jazz.set("payoutPools", newPools);
+      }
+
+      const pools = game.payoutPools;
+      if (pools?.$isLoaded) {
+        // Find existing places pool
+        let found = false;
+        for (const pool of pools) {
           if (pool?.$isLoaded && pool.splitType === "places") {
             pool.$jazz.set("placesPaid", newPlaces);
-            const pctsList = PayoutPctsList.create(activePctSlice, {
-              owner: pool.$jazz.owner,
-            });
+            const pctsList = PayoutPctsList.create(activePctSlice, { owner });
             pool.$jazz.set("payoutPcts", pctsList);
+            found = true;
+            break;
           }
+        }
+
+        // Create pool if none exists
+        if (!found) {
+          const pctsList = PayoutPctsList.create(activePctSlice, { owner });
+          const newPool = PayoutPool.create(
+            {
+              name: "main",
+              disp: "Main",
+              pct: 100,
+              metric: "performance",
+              splitType: "places",
+              placesPaid: newPlaces,
+              payoutPcts: pctsList,
+            },
+            { owner },
+          );
+          pools.$jazz.push(newPool);
         }
       }
     },
@@ -158,28 +195,34 @@ export function PlacesPaidScreen(_props: Props) {
 
   const handlePctChange = useCallback(
     (index: number, text: string) => {
-      // Allow empty string so user can clear and retype
       if (text === "") {
-        setPcts((prev) => {
-          const next = [...prev];
-          next[index] = 0;
-          return next;
-        });
+        const next = [...pctsRef.current];
+        next[index] = 0;
+        pctsRef.current = next;
+        setPcts(next);
         return;
       }
       const num = Number.parseInt(text, 10);
       if (Number.isNaN(num) || num < 0 || num > 100) return;
-      const next = [...pcts];
+      // Build new array from ref (always current) and update ref immediately
+      const next = [...pctsRef.current];
       next[index] = num;
+      pctsRef.current = next;
       setPcts(next);
       // Auto-save when percentages sum to 100
-      const activeSlice = next.slice(0, places);
+      const pl = placesRef.current;
+      const activeSlice = next.slice(0, pl);
       if (activeSlice.reduce((s, p) => s + p, 0) === 100) {
-        saveToJazz(places, next);
+        saveToJazz(pl, next);
       }
     },
-    [pcts, places, saveToJazz],
+    [saveToJazz],
   );
+
+  /** Save on blur so edits persist even when the total isn't 100 yet. */
+  const handlePctBlur = useCallback(() => {
+    saveToJazz(placesRef.current, pctsRef.current);
+  }, [saveToJazz]);
 
   const activePcts = pcts.slice(0, places);
   const amounts = distributeAmounts(potTotal, activePcts);
@@ -275,6 +318,7 @@ export function PlacesPaidScreen(_props: Props) {
                     style={[styles.pctInput, { color: theme.colors.primary }]}
                     value={String(pct)}
                     onChangeText={(text) => handlePctChange(i, text)}
+                    onBlur={handlePctBlur}
                     keyboardType="number-pad"
                     selectTextOnFocus
                     maxLength={3}

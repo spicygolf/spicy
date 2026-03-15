@@ -1077,7 +1077,11 @@ export function ScoringView({
         hole={holeInfo}
         onPrevious={onPrevHole}
         onNext={onNextHole}
-        warnings={warnings}
+        warnings={
+          isQuotaGame
+            ? warnings?.filter((w) => w.type !== "missing_scores")
+            : warnings
+        }
       />
       <HoleToolbar
         onChangeTeams={onChangeTeams}
@@ -1181,6 +1185,21 @@ export function ScoringView({
           }
 
           const teamId = team.team ?? "";
+
+          // For quota games, completion is per-team (each player's dots depend
+          // only on their own score). Check if all players in this team have scored.
+          const teamComplete = isQuotaGame
+            ? team.rounds.every((rtt) => {
+                if (!rtt?.$isLoaded) return false;
+                const rtg = rtt.roundToGame;
+                if (!rtg?.$isLoaded) return false;
+                const round = rtg.round;
+                if (!round?.$isLoaded) return false;
+                const pr = currentHoleResult?.players[round.playerId];
+                return pr?.hasScore === true;
+              })
+            : holeComplete;
+
           const isWinnerTeam =
             teeFlipEnabled && teeFlipRequired && teeFlipWinner === teamId;
           // Build multiplier buttons
@@ -1296,7 +1315,7 @@ export function ScoringView({
 
           // Build calculated team junk buttons (low_ball, low_total)
           // Only show if the hole is complete AND the team has earned this junk
-          const teamJunkButtons: OptionButton[] = holeComplete
+          const teamJunkButtons: OptionButton[] = teamComplete
             ? calculatedTeamJunkOptions
                 .filter((junk) =>
                   hasCalculatedTeamJunk(
@@ -1351,12 +1370,12 @@ export function ScoringView({
           // opponent), absolute points for individual/multi-team games.
           // Only show scoring when hole is complete (all scores + required junk entered)
           const holePoints = getTeamHolePoints(teamHoleResult);
-          const displayJunk = holeComplete
+          const displayJunk = teamComplete
             ? overallMultiplier > 0
               ? Math.max(0, Math.round(holePoints / overallMultiplier))
               : 0
             : 0;
-          const displayPoints = holeComplete ? Math.max(0, holePoints) : 0;
+          const displayPoints = teamComplete ? Math.max(0, holePoints) : 0;
 
           // Build earned multipliers from scoreboard (automatic multipliers like birdie_bbq)
           // These are multipliers that were automatically awarded based on junk conditions
@@ -1383,7 +1402,7 @@ export function ScoringView({
           // game.spec is the working copy of options
           const spec = game?.spec?.$isLoaded ? game.spec : null;
           const earnedMultiplierButtons: OptionButton[] = (
-            holeComplete ? (teamHoleResult?.multipliers ?? []) : []
+            teamComplete ? (teamHoleResult?.multipliers ?? []) : []
           )
             .filter((m) => !userMultiplierNames.has(m.name))
             .map((m) => {
@@ -1439,7 +1458,7 @@ export function ScoringView({
               }
               isMatchPlay={hasMatchBets}
               holeMatchResult={
-                holeComplete ? teamHoleResult?.holeNetTotal : undefined
+                teamComplete ? teamHoleResult?.holeNetTotal : undefined
               }
               betMatchStates={teamBetStates}
               teeFlipWinner={isWinnerTeam}
@@ -1531,7 +1550,7 @@ export function ScoringView({
 
                 // Build calculated junk options (birdie, eagle) from scoreboard
                 // Only include junk that was actually achieved AND hole is complete
-                const calculatedJunkButtons: OptionButton[] = holeComplete
+                const calculatedJunkButtons: OptionButton[] = teamComplete
                   ? calculatedPlayerJunkOptions
                       .filter((junk) =>
                         hasCalculatedPlayerJunk(

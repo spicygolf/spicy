@@ -50,6 +50,16 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
     [onToggle, playerId],
   );
 
+  const holesPlayed =
+    scoreboard?.cumulative.players[playerId]?.holesPlayed ?? 0;
+  const totalHoles = scoreboard ? Object.keys(scoreboard.holes).length : 0;
+  const thruLabel =
+    holesPlayed === 0
+      ? null
+      : holesPlayed >= totalHoles
+        ? "F"
+        : `thru ${holesPlayed}`;
+
   return (
     <View style={styles.container}>
       {/* Summary row */}
@@ -62,9 +72,12 @@ export const VerticalPlayerRow = memo(function VerticalPlayerRow({
         <View style={styles.rankBadge}>
           <Text style={styles.rankText}>{rankLabel}</Text>
         </View>
-        <Text style={styles.playerName} numberOfLines={1}>
-          {fullName}
-        </Text>
+        <View style={styles.nameContainer}>
+          <Text style={styles.playerName} numberOfLines={1}>
+            {fullName}
+          </Text>
+          {thruLabel && <Text style={styles.thruText}>{thruLabel}</Text>}
+        </View>
         <View style={styles.valuesContainer}>
           {columns.map((col) => {
             const val = summaryValues[col.key];
@@ -498,12 +511,18 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "600",
     color: theme.colors.secondary,
   },
-  playerName: {
+  nameContainer: {
     flex: 1,
+    marginLeft: theme.gap(0.5),
+  },
+  playerName: {
     fontSize: 13,
     color: theme.colors.primary,
-    marginLeft: theme.gap(0.5),
     paddingTop: 2,
+  },
+  thruText: {
+    fontSize: 10,
+    color: theme.colors.secondary,
   },
   valuesContainer: {
     flexDirection: "row",

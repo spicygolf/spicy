@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { getGameSpecField } from "spicylib/scoring";
+import { compareTimeStrings } from "spicylib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { extractBets } from "@/components/game/leaderboard";
 import {
@@ -31,6 +32,7 @@ interface GameScoringProps {
   onNavigateToSettings?: () => void;
 }
 
+/** Main scoring screen with group picker, hole navigation, and leaderboard. */
 export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
   usePerfRenderCount("GameScoring");
 
@@ -163,6 +165,15 @@ export function GameScoring({ onNavigateToSettings }: GameScoringProps) {
       const label = playerNames ? `${shortLabel} — ${playerNames}` : shortLabel;
       items.push({ id: group.$jazz.id, shortLabel, label });
     }
+
+    // Sort by tee time, falling back to original index for stability
+    const originalOrder = new Map(items.map((item, idx) => [item.id, idx]));
+    items.sort(
+      (a, b) =>
+        compareTimeStrings(a.shortLabel, b.shortLabel) ||
+        (originalOrder.get(a.id) ?? 0) - (originalOrder.get(b.id) ?? 0),
+    );
+
     return items;
   })();
 

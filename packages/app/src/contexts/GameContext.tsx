@@ -29,6 +29,7 @@ const SCORING_RESOLVE = {
   name: true,
   start: true,
   bets: { $each: true }, // Bet sub-competitions (front/back/overall/skins)
+  payoutPools: { $each: { payoutPcts: true } }, // Custom payout percentages
   scope: {
     teamsConfig: true,
     groups: { $each: { rounds: { $each: true } } },

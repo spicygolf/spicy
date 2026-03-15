@@ -43,6 +43,22 @@ export function useSettlement(
   const buyIn = getGameOptionNumber(game?.spec, "buy_in", 0);
   const placesPaid = getGameOptionNumber(game?.spec, "places_paid", 3);
 
+  // Read custom payout pcts from the first "places" pool (if any)
+  const customPayoutPcts: number[] | undefined = (() => {
+    if (!game?.payoutPools?.$isLoaded) return undefined;
+    for (const pool of game.payoutPools) {
+      if (
+        pool?.$isLoaded &&
+        pool.splitType === "places" &&
+        pool.payoutPcts?.$isLoaded &&
+        pool.payoutPcts.length > 0
+      ) {
+        return Array.from(pool.payoutPcts) as number[];
+      }
+    }
+    return undefined;
+  })();
+
   return useMemo(() => {
     if (!game?.players?.$isLoaded || !scoreboard || bets.length === 0) {
       return null;
@@ -89,13 +105,33 @@ export function useSettlement(
 
     if (players.length === 0) return null;
 
+    // Only include players who have at least one scored hole in settlement.
+    // Pot is still based on all players (everyone paid buy-in).
+    const scoredPlayerIds = new Set(
+      Object.entries(scoreboard.cumulative.players)
+        .filter(([_, p]) => p.holesPlayed > 0)
+        .map(([id]) => id),
+    );
+    const scoredPlayers = players.filter((p) => scoredPlayerIds.has(p.id));
+    if (scoredPlayers.length === 0) return null;
+
     return settleBets({
       bets: betConfigs,
-      players,
+      players: scoredPlayers,
       scoreboard,
       playerQuotas: scoringContext?.playerQuotas,
       buyIn,
       defaultPlacesPaid: placesPaid,
+      defaultPayoutPcts: customPayoutPcts,
+      potTotal: buyIn * players.length,
     });
-  }, [game, scoreboard, scoringContext?.playerQuotas, buyIn, placesPaid, bets]);
+  }, [
+    game,
+    scoreboard,
+    scoringContext?.playerQuotas,
+    buyIn,
+    placesPaid,
+    customPayoutPcts,
+    bets,
+  ]);
 }

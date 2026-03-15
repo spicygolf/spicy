@@ -320,6 +320,7 @@ export function getSummaryValue(
   if (viewMode === "points") {
     const quota = playerQuotas?.get(playerId);
     let total = 0;
+    let hasAnyCompleteHole = false;
     const holes = Object.keys(scoreboard.holes);
 
     for (const hole of holes) {
@@ -334,22 +335,21 @@ export function getSummaryValue(
             : true;
 
       if (inRange) {
-        // Skip incomplete holes
-        if (!isHoleComplete(scoreboard.holes[hole])) continue;
-
         if (quota) {
-          // Quota games: sum only dot-type junk (stableford scoring dots).
-          // This must match the settlement engine's extractStablefordTotals
-          // so ranks and payouts are consistent with displayed values.
+          // Quota games: individual scoring — only need this player's score,
+          // not all players on the hole. Sum dot-type junk (stableford scoring dots).
           const playerResult = scoreboard.holes[hole]?.players[playerId];
-          if (playerResult) {
-            for (const junk of playerResult.junk) {
-              if (junk.subType === "dot") {
-                total += junk.value;
-              }
+          if (!playerResult?.hasScore) continue;
+          hasAnyCompleteHole = true;
+          for (const junk of playerResult.junk) {
+            if (junk.subType === "dot") {
+              total += junk.value;
             }
           }
         } else {
+          // Non-quota: require full hole completion (all players scored + junk marked)
+          if (!isHoleComplete(scoreboard.holes[hole])) continue;
+          hasAnyCompleteHole = true;
           // Non-quota games: use team points (includes all junk × multiplier)
           const teamPoints = getTeamPointsForPlayer(scoreboard, playerId, hole);
           if (teamPoints !== null) {
@@ -363,6 +363,9 @@ export function getSummaryValue(
         }
       }
     }
+
+    // Don't show anything until at least one hole in the range is complete
+    if (!hasAnyCompleteHole) return null;
 
     // For quota games, subtract quota to show performance (e.g., +2 over quota)
     if (quota) {
@@ -406,7 +409,7 @@ export function getSummaryValue(
 
     if (inRange) {
       const playerResult = scoreboard.holes[hole]?.players[playerId];
-      if (playerResult) {
+      if (playerResult?.hasScore) {
         total += viewMode === "gross" ? playerResult.gross : playerResult.net;
         hasAnyScore = true;
       }
