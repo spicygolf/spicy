@@ -27,6 +27,8 @@ export const GameOptionSchema = z.object({
   seq: z.number().optional(),
   /** If true, option only shown when teams mode is active */
   teamOnly: z.boolean().optional(),
+  /** If true, option is not shown in the game settings list */
+  hidden: z.boolean().optional(),
 });
 export type GameOption = z.infer<typeof GameOptionSchema>;
 

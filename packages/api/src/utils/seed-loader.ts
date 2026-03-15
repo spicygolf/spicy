@@ -27,6 +27,7 @@ export interface SeedGameOption {
   defaultValue: string;
   choices?: Array<{ name: string; disp: string }>;
   teamOnly?: boolean;
+  hidden?: boolean;
 }
 
 export interface SeedJunkOption {
@@ -263,6 +264,7 @@ export async function loadSeedSpecsAsV03(): Promise<
       default: string | number | boolean;
       choices?: Array<{ name: string; disp: string }>;
       teamOnly?: boolean;
+      hidden?: boolean;
     }>;
     junk?: Array<{
       name: string;
@@ -345,6 +347,7 @@ export async function loadSeedSpecsAsV03(): Promise<
                 : merged.defaultValue,
           choices: merged.choices,
           teamOnly: merged.teamOnly,
+          hidden: merged.hidden,
         };
       })
       .filter(Boolean);

@@ -4,5 +4,6 @@
   "type": "game",
   "version": "1",
   "valueType": "int_array",
-  "defaultValue": "{\"3\":[50,30,20]}"
+  "defaultValue": "{\"3\":[50,30,20]}",
+  "hidden": true
 }

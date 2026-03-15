@@ -13,6 +13,7 @@ export interface TransformedGameOption {
   choices?: Array<{ name: string; disp: string }>;
   defaultValue: string;
   teamOnly?: boolean;
+  hidden?: boolean;
 }
 
 export interface TransformedJunkOption {

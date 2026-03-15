@@ -210,6 +210,7 @@ interface GameOptionData {
   seq?: number;
   choices?: Array<{ name: string; disp: string }>;
   teamOnly?: boolean;
+  hidden?: boolean;
 }
 
 interface JunkOptionData {
@@ -1004,6 +1005,7 @@ async function upsertOptions(
         ...(opt.seq !== undefined &&
           typeof opt.seq === "number" && { seq: opt.seq }),
         ...(opt.teamOnly === true && { teamOnly: true }),
+        ...(opt.hidden === true && { hidden: true }),
         ...(opt.choices &&
           opt.choices.length > 0 && {
             choices: opt.choices.map((c) => ({ name: c.name, disp: c.disp })),
@@ -1951,6 +1953,7 @@ export async function importGameSpecsToCatalog(
                 defaultValue: opt.defaultValue,
                 choices: opt.choices,
                 teamOnly: opt.teamOnly,
+                hidden: opt.hidden,
               });
             } else if (opt.type === "junk") {
               // For junk and multiplier options, we still need the full v0.3 data
