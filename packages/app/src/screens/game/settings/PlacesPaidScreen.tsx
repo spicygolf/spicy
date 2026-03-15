@@ -103,45 +103,18 @@ export function PlacesPaidScreen(_props: Props) {
       const activePctSlice = newPcts.slice(0, newPlaces);
 
       // Save payout_pcts game option (single source of truth)
-      const existingPctOpt = game.spec.payout_pcts;
-      if (
-        game.spec.$jazz.has("payout_pcts") &&
-        existingPctOpt?.type === "game"
-      ) {
-        game.spec.$jazz.set("payout_pcts", {
-          ...(existingPctOpt as GameOption),
-          value: JSON.stringify(activePctSlice),
-        });
-      } else {
-        game.spec.$jazz.set("payout_pcts", {
-          name: "payout_pcts",
-          disp: "Payout Percentages",
-          type: "game",
-          version: "1",
-          valueType: "int_array",
-          defaultValue: JSON.stringify({ "3": [50, 30, 20] }),
-          value: JSON.stringify(activePctSlice),
-        } satisfies GameOption);
-      }
+      const existingPctOpt = game.spec.payout_pcts as GameOption;
+      game.spec.$jazz.set("payout_pcts", {
+        ...existingPctOpt,
+        value: JSON.stringify(activePctSlice),
+      });
 
-      // Keep places_paid in sync (backward compat + display)
-      const existingOpt = game.spec.places_paid;
-      if (game.spec.$jazz.has("places_paid") && existingOpt?.type === "game") {
-        game.spec.$jazz.set("places_paid", {
-          ...(existingOpt as GameOption),
-          value: String(newPlaces),
-        });
-      } else {
-        game.spec.$jazz.set("places_paid", {
-          name: "places_paid",
-          disp: "Places Paid",
-          type: "game",
-          version: "1",
-          valueType: "menu",
-          defaultValue: "3",
-          value: String(newPlaces),
-        } satisfies GameOption);
-      }
+      // Keep places_paid in sync for display
+      const existingOpt = game.spec.places_paid as GameOption;
+      game.spec.$jazz.set("places_paid", {
+        ...existingOpt,
+        value: String(newPlaces),
+      });
     },
     [game, isOrganizer],
   );
