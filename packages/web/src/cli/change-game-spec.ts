@@ -86,7 +86,11 @@ async function main() {
     const currentSpecName = game.specRef?.$isLoaded
       ? getSpecField(game.specRef, "name")
       : "(none)";
+    const currentSpecDisp = game.specRef?.$isLoaded
+      ? (getSpecField(game.specRef, "disp") as string)
+      : undefined;
     console.log(`\n  Current spec: ${currentSpecName}`);
+    console.log(`  Game name: ${game.name}`);
 
     // Load catalog from worker account profile
     const account = await PlayerAccount.load(
@@ -187,6 +191,13 @@ async function main() {
     game.$jazz.set("spec", specCopy);
     game.$jazz.set("specRef", targetSpec);
     game.$jazz.set("bets", bets);
+
+    // Update game name if it still matches the old spec's display name
+    const targetDisp = getSpecField(targetSpec, "disp") as string;
+    if (currentSpecDisp && game.name === currentSpecDisp) {
+      game.$jazz.set("name", targetDisp);
+      console.log(`\n  Renamed game: "${currentSpecDisp}" → "${targetDisp}"`);
+    }
 
     console.log(`\n  Updated spec, specRef, and bets (${betCount} bets)`);
 
