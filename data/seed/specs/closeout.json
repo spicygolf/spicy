@@ -1,0 +1,16 @@
+{
+  "_key": "closeout",
+  "name": "closeout",
+  "disp": "Closeout",
+  "version": 1,
+  "status": "prod",
+  "type": "skins",
+  "min_players": 2,
+  "max_players": 4,
+  "location_type": "any",
+  "teams": false,
+  "options": ["use_handicaps", "handicap_index_from", "auto_press", "auto_press_trigger", "press_scope", "press_amount_rule", "max_presses"],
+  "junk": [],
+  "multipliers": [],
+  "bets": ["all_match"]
+}
