@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MaybeLoaded } from "jazz-tools";
 import { useAccount } from "jazz-tools/react-native";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { type FavoritePlayer, PlayerAccount } from "spicylib/schema";
@@ -12,6 +12,10 @@ import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSet
 import { Screen, Text } from "@/ui";
 
 type NavigationProp = NativeStackNavigationProp<GameSettingsStackParamList>;
+
+function ItemSeparator(): React.ReactElement {
+  return <View style={styles.separator} />;
+}
 
 export function AddPlayerRecents() {
   const navigation = useNavigation<NavigationProp>();
@@ -202,9 +206,11 @@ export function AddPlayerRecents() {
     <Screen>
       <FlatList
         data={recentPlayers as MaybeLoaded<FavoritePlayer>[]}
-        keyExtractor={(item) => item.$jazz.id}
+        keyExtractor={(item) =>
+          item?.$isLoaded ? item.$jazz.id : String(Math.random())
+        }
         renderItem={renderItem}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={ItemSeparator}
         contentContainerStyle={styles.listContainer}
         initialNumToRender={10}
         maxToRenderPerBatch={10}
