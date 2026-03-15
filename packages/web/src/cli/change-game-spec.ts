@@ -162,7 +162,14 @@ async function main() {
     // Recreate bets from new spec's canonical bet list
     const bets = ListOfBets.create([], { owner: game.$jazz.owner });
     let betCount = 0;
-    const betKeys = (getSpecField(targetSpec, "bets") as string[]) ?? [];
+    const rawBetKeys = getSpecField(targetSpec, "bets");
+    if (!Array.isArray(rawBetKeys) || rawBetKeys.length === 0) {
+      console.error(
+        `Target spec "${specName}" has no valid canonical bets list; aborting.`,
+      );
+      process.exit(1);
+    }
+    const betKeys = rawBetKeys as string[];
     for (const key of betKeys) {
       if (!targetSpec.$jazz.has(key)) continue;
       const opt = targetSpec[key];
@@ -187,7 +194,13 @@ async function main() {
       }
     }
 
-    // Apply changes
+    // Apply changes (guard against empty bets from malformed spec)
+    if (betCount === 0) {
+      console.error(
+        `No bets were recreated for spec "${specName}"; refusing to overwrite existing bets.`,
+      );
+      process.exit(1);
+    }
     game.$jazz.set("spec", specCopy);
     game.$jazz.set("specRef", targetSpec);
     game.$jazz.set("bets", bets);
