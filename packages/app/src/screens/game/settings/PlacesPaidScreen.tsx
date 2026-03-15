@@ -51,6 +51,7 @@ function distributeAmounts(potTotal: number, pcts: number[]): number[] {
   return floored;
 }
 
+/** Screen for configuring the number of places paid and their payout percentages. */
 export function PlacesPaidScreen(_props: Props) {
   const { theme } = useUnistyles();
   const { game } = useGame(undefined, {
@@ -154,6 +155,7 @@ export function PlacesPaidScreen(_props: Props) {
             const pctsList = PayoutPctsList.create(activePctSlice, { owner });
             pool.$jazz.set("payoutPcts", pctsList);
             found = true;
+            break;
           }
         }
 

@@ -30,6 +30,7 @@ interface GroupAssignmentsProps {
   onTeeTimeChange: (groupIndex: number, teeTime: string) => void;
 }
 
+/** Renders group assignments with drag-drop player assignment and tee time pickers. */
 export function GroupAssignments({
   allPlayerRounds,
   groups,

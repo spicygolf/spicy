@@ -45,6 +45,7 @@ function createInitialGroups(
   return groupsList;
 }
 
+/** Manages game groups — creating, deleting, and assigning players to groups. */
 export function GameGroupsList(): React.ReactElement | null {
   const { game } = useGame(undefined, {
     resolve: {
