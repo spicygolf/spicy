@@ -8,6 +8,7 @@
   "min_players": 2,
   "max_players": 4,
   "location_type": "any",
+  "long_description": "### AKA\n* Hammer\n### Description\n* A single match play bet for the full 18 holes with escalating press amounts.\n* Lower net score wins each hole. Ties are halved.\n* When a player falls behind by the press trigger (default 2 down), a new press bet is automatically created.\n* Each press doubles the previous bet amount ($10, $20, $40, ...).\n### How It Differs from Closeout\n* Press amounts double with each new press instead of staying fixed.\n* Stakes can escalate quickly — use the max presses option to set a cap.",
   "teams": false,
   "options": ["use_handicaps", "handicap_index_from", "auto_press", "auto_press_trigger", "press_scope", { "name": "press_amount_rule", "defaultValue": "double" }, "max_presses"],
   "junk": [],
