@@ -159,11 +159,11 @@ async function main() {
     const specCopy = copySpecOptions(targetSpec, game.$jazz.owner);
     console.log(`  Created working copy of spec options`);
 
-    // Recreate bets from new spec
+    // Recreate bets from new spec's canonical bet list
     const bets = ListOfBets.create([], { owner: game.$jazz.owner });
     let betCount = 0;
-    for (const key of Object.keys(targetSpec)) {
-      if (key.startsWith("$") || key.startsWith("_")) continue;
+    const betKeys = (getSpecField(targetSpec, "bets") as string[]) ?? [];
+    for (const key of betKeys) {
       if (!targetSpec.$jazz.has(key)) continue;
       const opt = targetSpec[key];
       if (opt?.type === "bet") {
