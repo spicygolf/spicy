@@ -1,0 +1,17 @@
+{
+  "_key": "closeout",
+  "name": "closeout",
+  "disp": "Closeout",
+  "version": 1,
+  "status": "prod",
+  "type": "skins",
+  "min_players": 2,
+  "max_players": 4,
+  "location_type": "any",
+  "long_description": "### Description\n* A single match play bet for the full 18 holes.\n* Lower net score wins each hole. Ties are halved.\n* When a player falls behind by the press trigger (default 2 down), a new press bet is automatically created.\n* Press bets are for the same amount as the original bet.",
+  "teams": false,
+  "options": ["use_handicaps", "handicap_index_from", "auto_press", "auto_press_trigger", "press_scope", "press_amount_rule", "max_presses"],
+  "junk": [],
+  "multipliers": [],
+  "bets": ["all_match"]
+}

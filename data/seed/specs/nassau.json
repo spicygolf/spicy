@@ -8,6 +8,7 @@
   "min_players": 2,
   "max_players": 4,
   "location_type": "multiple",
+  "long_description": "### Description\n* Three separate match play bets: front nine, back nine, and overall 18.\n* Lower net score wins each hole. Ties are halved.\n* Each bet is settled independently — you can win the front, lose the back, and halve overall.\n* When a player falls behind by the press trigger (default 2 down) on any bet, a press is automatically created for that bet.\n### Press Bets\n* Presses fire independently on each of the three bets.\n* Press amount and scope are configurable (fixed or doubling, same scope or rest of nine/round).",
   "teams": false,
   "options": ["use_handicaps", "handicap_index_from", "auto_press", "auto_press_trigger", "press_scope", "press_amount_rule", "max_presses"],
   "junk": [],
