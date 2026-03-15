@@ -140,7 +140,7 @@ export function PlacesPaidScreen(_props: Props) {
       const owner = game.$jazz.owner;
 
       // Ensure payoutPools list exists on the game
-      if (!game.$jazz.has("payoutPools") || !game.payoutPools?.$isLoaded) {
+      if (!game.$jazz.has("payoutPools")) {
         const newPools = ListOfPayoutPools.create([], { owner });
         game.$jazz.set("payoutPools", newPools);
       }
