@@ -9,6 +9,7 @@ import type {
 import {
   getGameOptionIntArray,
   getGameOptionNumber,
+  getPayoutPctsForPlaceCount,
   settleBets,
 } from "spicylib/scoring";
 import type { BetColumnInfo } from "@/components/game/leaderboard";
@@ -47,12 +48,17 @@ export function useSettlement(
   const buyIn = getGameOptionNumber(game?.spec, "buy_in", 0);
 
   // Read payout_pcts from spec (single source of truth)
-  const specPcts = getGameOptionIntArray(game?.spec, "payout_pcts", []);
+  // Explicit value is a flat array; defaultValue is a map keyed by place count.
+  const explicitPcts = getGameOptionIntArray(game?.spec, "payout_pcts", []);
   const placesPaid =
-    specPcts.length > 0
-      ? specPcts.length
+    explicitPcts.length > 0
+      ? explicitPcts.length
       : getGameOptionNumber(game?.spec, "places_paid", 3);
-  const customPayoutPcts = specPcts.length > 0 ? specPcts : undefined;
+  // Resolve payout pcts: explicit value → spec defaultValue map → DEFAULT_PAYOUT_PCTS
+  const payoutPcts =
+    explicitPcts.length > 0
+      ? explicitPcts
+      : getPayoutPctsForPlaceCount(game?.spec, placesPaid);
 
   return useMemo(() => {
     if (!game?.players?.$isLoaded || !scoreboard || bets.length === 0) {
@@ -117,7 +123,7 @@ export function useSettlement(
       playerQuotas: scoringContext?.playerQuotas,
       buyIn,
       defaultPlacesPaid: placesPaid,
-      defaultPayoutPcts: customPayoutPcts,
+      defaultPayoutPcts: payoutPcts,
       potTotal: buyIn * players.length,
     });
   }, [
@@ -126,7 +132,7 @@ export function useSettlement(
     scoringContext?.playerQuotas,
     buyIn,
     placesPaid,
-    customPayoutPcts,
+    payoutPcts,
     bets,
   ]);
 }
