@@ -6,7 +6,11 @@ import type {
   ScoringContext,
   SettlementResult,
 } from "spicylib/scoring";
-import { getGameOptionNumber, settleBets } from "spicylib/scoring";
+import {
+  getGameOptionIntArray,
+  getGameOptionNumber,
+  settleBets,
+} from "spicylib/scoring";
 import type { BetColumnInfo } from "@/components/game/leaderboard";
 
 const VALID_SCOPES = new Set([
@@ -41,23 +45,14 @@ export function useSettlement(
   bets: BetColumnInfo[],
 ): SettlementResult | null {
   const buyIn = getGameOptionNumber(game?.spec, "buy_in", 0);
-  const placesPaid = getGameOptionNumber(game?.spec, "places_paid", 3);
 
-  // Read custom payout pcts from the first "places" pool (if any)
-  const customPayoutPcts: number[] | undefined = (() => {
-    if (!game?.payoutPools?.$isLoaded) return undefined;
-    for (const pool of game.payoutPools) {
-      if (
-        pool?.$isLoaded &&
-        pool.splitType === "places" &&
-        pool.payoutPcts?.$isLoaded &&
-        pool.payoutPcts.length > 0
-      ) {
-        return Array.from(pool.payoutPcts) as number[];
-      }
-    }
-    return undefined;
-  })();
+  // Read payout_pcts from spec (single source of truth)
+  const specPcts = getGameOptionIntArray(game?.spec, "payout_pcts", []);
+  const placesPaid =
+    specPcts.length > 0
+      ? specPcts.length
+      : getGameOptionNumber(game?.spec, "places_paid", 3);
+  const customPayoutPcts = specPcts.length > 0 ? specPcts : undefined;
 
   return useMemo(() => {
     if (!game?.players?.$isLoaded || !scoreboard || bets.length === 0) {
@@ -131,7 +126,7 @@ export function useSettlement(
     scoringContext?.playerQuotas,
     buyIn,
     placesPaid,
-    customPayoutPcts,
+    specPcts,
     bets,
   ]);
 }
