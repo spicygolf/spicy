@@ -136,6 +136,8 @@ export function GameOptionsList() {
 
       if (option.type === "game") {
         const gameOpt = option as GameOption;
+        // payout_pcts is displayed inline via the places_paid row
+        if (gameOpt.name === "payout_pcts") continue;
         // Filter out teamOnly options when teams mode is not active
         if (gameOpt.teamOnly && !isTeamsMode) {
           continue;
