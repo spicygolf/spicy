@@ -19,6 +19,7 @@ export const ListOfCourseTees = co.list(CourseTee);
 export const FavoritePlayer = co.map({
   player: Player,
   addedAt: z.date(),
+  lastUsedAt: z.optional(z.date()),
 });
 
 export type FavoritePlayer = co.loaded<typeof FavoritePlayer>;
@@ -39,6 +40,7 @@ export const ListOfFavoriteSpecs = co.list(FavoriteSpec);
 export const Favorites = co.map({
   courseTees: co.optional(ListOfCourseTees),
   players: co.optional(ListOfFavoritePlayers),
+  recentPlayers: co.optional(ListOfFavoritePlayers),
   specs: co.optional(ListOfFavoriteSpecs),
 });
 
