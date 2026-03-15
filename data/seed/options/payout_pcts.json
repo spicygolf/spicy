@@ -1,0 +1,9 @@
+{
+  "name": "payout_pcts",
+  "disp": "Payout Percentages",
+  "type": "game",
+  "version": "1",
+  "valueType": "int_array",
+  "defaultValue": "{\"3\":[50,30,20]}",
+  "hidden": true
+}

@@ -1,12 +1,14 @@
 import FontAwesome6 from "@react-native-vector-icons/fontawesome6";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { co, z } from "jazz-tools";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption } from "spicylib/schema";
-import { ListOfPayoutPools, PayoutPool } from "spicylib/schema";
-import { DEFAULT_PAYOUT_PCTS, getGameOptionNumber } from "spicylib/scoring";
+import {
+  getGameOptionIntArray,
+  getGameOptionNumber,
+  getPayoutPctsForPlaceCount,
+} from "spicylib/scoring";
 import { Back } from "@/components/Back";
 import { useGame, useIsOrganizer } from "@/hooks";
 import type { GameSettingsStackParamList } from "@/screens/game/settings/GameSettings";
@@ -16,10 +18,6 @@ type Props = NativeStackScreenProps<GameSettingsStackParamList, "PlacesPaid">;
 
 const MIN_PLACES = 1;
 const MAX_PLACES = 10;
-
-function getDefaultPcts(places: number): number[] {
-  return DEFAULT_PAYOUT_PCTS[places] ?? DEFAULT_PAYOUT_PCTS[3] ?? [50, 30, 20];
-}
 
 const PLACE_LABELS = [
   "1st",
@@ -33,7 +31,6 @@ const PLACE_LABELS = [
   "9th",
   "10th",
 ];
-const PayoutPctsList = co.list(z.number());
 
 /** Distribute potTotal across pcts so rounded amounts sum exactly to potTotal. */
 function distributeAmounts(potTotal: number, pcts: number[]): number[] {
@@ -58,35 +55,29 @@ export function PlacesPaidScreen(_props: Props) {
     resolve: {
       spec: { $each: true },
       players: { $each: true },
-      payoutPools: { $each: { payoutPcts: true } },
     },
   });
   const isOrganizer = useIsOrganizer(game);
 
-  // Derive values directly from Jazz reactive data
-  const currentPlaces = getGameOptionNumber(game?.spec, "places_paid", 3);
+  // Read payout_pcts from spec (single source of truth)
+  const specPcts = getGameOptionIntArray(game?.spec, "payout_pcts", []);
+  const currentPlaces =
+    specPcts.length > 0
+      ? specPcts.length
+      : getGameOptionNumber(game?.spec, "places_paid", 3);
   const buyIn = getGameOptionNumber(game?.spec, "buy_in", 0);
 
   const playerCount = game?.players?.$isLoaded ? game.players.length : 0;
   const potTotal = buyIn * playerCount;
 
-  const currentPoolPcts = (() => {
-    if (!game?.payoutPools?.$isLoaded) return null;
-    for (const pool of game.payoutPools) {
-      if (pool?.$isLoaded && pool.splitType === "places" && pool.placesPaid) {
-        if (pool.payoutPcts?.$isLoaded && pool.payoutPcts.length > 0) {
-          return Array.from(pool.payoutPcts) as number[];
-        }
-        return null;
-      }
-    }
-    return null;
-  })();
+  // Derive current pcts: payout_pcts value → spec defaultValue map → DEFAULT_PAYOUT_PCTS
+  const currentPcts =
+    specPcts.length > 0
+      ? specPcts
+      : getPayoutPctsForPlaceCount(game?.spec, currentPlaces);
 
   const [places, setPlaces] = useState(currentPlaces);
-  const [pcts, setPcts] = useState<number[]>(
-    () => currentPoolPcts ?? getDefaultPcts(currentPlaces),
-  );
+  const [pcts, setPcts] = useState<number[]>(() => currentPcts);
 
   // Keep a ref so blur/save callbacks always see the latest pcts
   const pctsRef = useRef(pcts);
@@ -94,89 +85,36 @@ export function PlacesPaidScreen(_props: Props) {
   const placesRef = useRef(places);
   placesRef.current = places;
 
-  // Sync local state once Jazz data finishes loading (both spec and payoutPools)
+  // Sync local state once Jazz data finishes loading
   const [synced, setSynced] = useState(false);
   useEffect(() => {
     if (synced) return;
     if (!game?.spec?.$isLoaded) return;
-    if (!game?.payoutPools?.$isLoaded) return;
     setSynced(true);
     setPlaces(currentPlaces);
-    setPcts(currentPoolPcts ?? getDefaultPcts(currentPlaces));
-  }, [
-    synced,
-    game?.spec?.$isLoaded,
-    game?.payoutPools?.$isLoaded,
-    currentPlaces,
-    currentPoolPcts,
-  ]);
+    setPcts(currentPcts);
+  }, [synced, game?.spec?.$isLoaded, currentPlaces, currentPcts]);
 
-  /** Persist places + pcts to Jazz (spec option + payout pools). */
+  /** Persist places + pcts to Jazz spec options. */
   const saveToJazz = useCallback(
     (newPlaces: number, newPcts: number[]) => {
       if (!game?.spec?.$isLoaded || isOrganizer === false) return;
 
-      // Save places_paid game option
-      const existingOpt = game.spec.places_paid;
-      if (game.spec.$jazz.has("places_paid") && existingOpt?.type === "game") {
-        game.spec.$jazz.set("places_paid", {
-          ...(existingOpt as GameOption),
-          value: String(newPlaces),
-        });
-      } else {
-        game.spec.$jazz.set("places_paid", {
-          name: "places_paid",
-          disp: "Places Paid",
-          type: "game",
-          version: "1",
-          valueType: "menu",
-          defaultValue: "3",
-          value: String(newPlaces),
-        } satisfies GameOption);
-      }
-
-      // Update payout pools
       const activePctSlice = newPcts.slice(0, newPlaces);
-      const owner = game.$jazz.owner;
 
-      // Ensure payoutPools list exists on the game
-      if (!game.$jazz.has("payoutPools")) {
-        const newPools = ListOfPayoutPools.create([], { owner });
-        game.$jazz.set("payoutPools", newPools);
-      }
+      // Save payout_pcts game option (single source of truth)
+      const existingPctOpt = game.spec.payout_pcts as GameOption;
+      game.spec.$jazz.set("payout_pcts", {
+        ...existingPctOpt,
+        value: JSON.stringify(activePctSlice),
+      });
 
-      const pools = game.payoutPools;
-      if (pools?.$isLoaded) {
-        // Find existing places pool
-        let found = false;
-        for (const pool of pools) {
-          if (pool?.$isLoaded && pool.splitType === "places") {
-            pool.$jazz.set("placesPaid", newPlaces);
-            const pctsList = PayoutPctsList.create(activePctSlice, { owner });
-            pool.$jazz.set("payoutPcts", pctsList);
-            found = true;
-            break;
-          }
-        }
-
-        // Create pool if none exists
-        if (!found) {
-          const pctsList = PayoutPctsList.create(activePctSlice, { owner });
-          const newPool = PayoutPool.create(
-            {
-              name: "main",
-              disp: "Main",
-              pct: 100,
-              metric: "performance",
-              splitType: "places",
-              placesPaid: newPlaces,
-              payoutPcts: pctsList,
-            },
-            { owner },
-          );
-          pools.$jazz.push(newPool);
-        }
-      }
+      // Keep places_paid in sync for display
+      const existingOpt = game.spec.places_paid as GameOption;
+      game.spec.$jazz.set("places_paid", {
+        ...existingOpt,
+        value: String(newPlaces),
+      });
     },
     [game, isOrganizer],
   );
@@ -184,13 +122,14 @@ export function PlacesPaidScreen(_props: Props) {
   const handlePlacesChange = useCallback(
     (newPlaces: number) => {
       const clamped = Math.max(MIN_PLACES, Math.min(MAX_PLACES, newPlaces));
-      const newPcts = getDefaultPcts(clamped);
+      // Look up the spec's defaultValue map for this place count, fall back to DEFAULT_PAYOUT_PCTS
+      const newPcts = getPayoutPctsForPlaceCount(game?.spec, clamped);
       setPlaces(clamped);
       setPcts(newPcts);
       // Default pcts always sum to 100 — save immediately
       saveToJazz(clamped, newPcts);
     },
-    [saveToJazz],
+    [game?.spec, saveToJazz],
   );
 
   const handlePctChange = useCallback(

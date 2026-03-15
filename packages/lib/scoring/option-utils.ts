@@ -22,6 +22,7 @@ import {
   type Option,
 } from "../schema";
 import { deepClone } from "../utils/clone";
+import { DEFAULT_PAYOUT_PCTS } from "./settlement-engine";
 import type { ScoringContext } from "./types";
 
 // =============================================================================
@@ -529,4 +530,69 @@ export function getGameOptionBoolean(
   if (val === "true") return true;
   if (val === "false") return false;
   return fallback;
+}
+
+/**
+ * Read an int_array game option (JSON-encoded number array), falling back to a default.
+ *
+ * The value is stored as a JSON string like "[45,27,18,10]".
+ * Returns the parsed array, or fallback if missing/invalid.
+ */
+export function getGameOptionIntArray(
+  // biome-ignore lint/suspicious/noExplicitAny: Jazz MaybeLoaded spec type is complex
+  spec: any,
+  key: string,
+  fallback: number[],
+): number[] {
+  if (!spec?.$isLoaded) return fallback;
+  const opt = spec[key];
+  if (!opt || opt.type !== "game") return fallback;
+  const val = (opt as GameOption).value ?? (opt as GameOption).defaultValue;
+  if (typeof val !== "string") return fallback;
+  try {
+    const parsed = JSON.parse(val);
+    if (Array.isArray(parsed) && parsed.every((n) => typeof n === "number")) {
+      return parsed;
+    }
+  } catch {
+    // Invalid JSON — fall through
+  }
+  return fallback;
+}
+
+/**
+ * Look up payout percentages for a specific place count from the spec's
+ * defaultValue map. The defaultValue is a JSON map keyed by place count,
+ * e.g. {"3":[50,30,20],"4":[40,30,20,10]}. Falls back to DEFAULT_PAYOUT_PCTS.
+ */
+export function getPayoutPctsForPlaceCount(
+  // biome-ignore lint/suspicious/noExplicitAny: Jazz MaybeLoaded spec type is complex
+  spec: any,
+  placeCount: number,
+): number[] {
+  if (spec?.$isLoaded) {
+    const opt = spec.payout_pcts;
+    if (opt?.type === "game") {
+      const dv = (opt as GameOption).defaultValue;
+      if (typeof dv === "string") {
+        try {
+          const parsed = JSON.parse(dv);
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            const entry = parsed[String(placeCount)];
+            if (
+              Array.isArray(entry) &&
+              entry.every((n: unknown) => typeof n === "number")
+            ) {
+              return entry;
+            }
+          }
+        } catch {
+          // Invalid JSON — fall through
+        }
+      }
+    }
+  }
+  return (
+    DEFAULT_PAYOUT_PCTS[placeCount] ?? DEFAULT_PAYOUT_PCTS[3] ?? [50, 30, 20]
+  );
 }

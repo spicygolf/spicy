@@ -8,53 +8,6 @@ import { co, z } from "jazz-tools";
  */
 
 /**
- * A single payout pool configuration
- *
- * Example pools for The Big Game:
- * - { name: "front", pct: 25, metric: "quota_front", placesPaid: 3 }
- * - { name: "skins", pct: 25, metric: "skins_won", splitType: "per_unit" }
- */
-export const PayoutPool = co.map({
-  /** Pool identifier (e.g., "front", "back", "overall", "skins") */
-  name: z.string(),
-
-  /** Display name (e.g., "Front", "Skins") */
-  disp: z.string(),
-
-  /** Percentage of total pot (0-100) */
-  pct: z.number(),
-
-  /**
-   * Metric to rank players by for this pool
-   * Built-in metrics: quota_front, quota_back, quota_overall, skins_won
-   * Future: JSON logic expression for custom metrics
-   */
-  metric: z.string(),
-
-  /**
-   * How to split the pool among winners
-   * - "places": Pay top N places (use placesPaid + payoutPcts)
-   * - "per_unit": Split equally per unit (e.g., per skin won)
-   * - "winner_take_all": Single winner takes all
-   */
-  splitType: z.enum(["places", "per_unit", "winner_take_all"]),
-
-  /** Number of places paid (for splitType: "places") */
-  placesPaid: z.optional(z.number()),
-
-  /**
-   * Payout percentages by place (for splitType: "places")
-   * Example: [50, 30, 20] for 1st/2nd/3rd
-   * If not provided, defaults based on placesPaid
-   */
-  payoutPcts: co.optional(co.list(z.number())),
-});
-export type PayoutPool = co.loaded<typeof PayoutPool>;
-
-export const ListOfPayoutPools = co.list(PayoutPool);
-export type ListOfPayoutPools = co.loaded<typeof ListOfPayoutPools>;
-
-/**
  * A computed payout for a single player in a single pool
  */
 export const PlayerPayout = co.map({

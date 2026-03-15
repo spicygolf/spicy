@@ -6,7 +6,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Pressable, ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { GameOption, JunkOption, MultiplierOption } from "spicylib/schema";
-import { DEFAULT_PAYOUT_PCTS, getGameOptionNumber } from "spicylib/scoring";
+import {
+  DEFAULT_PAYOUT_PCTS,
+  getGameOptionIntArray,
+  getGameOptionNumber,
+} from "spicylib/scoring";
 import { isEveningCreation, isSameDay } from "spicylib/utils";
 import {
   useGame,
@@ -91,7 +95,6 @@ export function GameOptionsList() {
       players: { $each: true },
       rounds: { $each: { round: { scores: true } } },
       holes: { $each: { options: true } },
-      payoutPools: { $each: { payoutPcts: true } },
     },
   });
 
@@ -133,6 +136,7 @@ export function GameOptionsList() {
 
       if (option.type === "game") {
         const gameOpt = option as GameOption;
+        if (gameOpt.hidden) continue;
         // Filter out teamOnly options when teams mode is not active
         if (gameOpt.teamOnly && !isTeamsMode) {
           continue;
@@ -402,28 +406,21 @@ export function GameOptionsList() {
             <OptionSectionHeader title="Settings" />
             {gameOptions.map((option) => {
               let displayOverride = getDisplayOverride(option);
-              // For places_paid, show actual payout pcts from pool data
+              // For places_paid, show actual payout pcts from spec option
               if (option.name === "places_paid" && !displayOverride) {
-                const places = getGameOptionNumber(
+                const specPcts = getGameOptionIntArray(
                   game?.spec,
-                  "places_paid",
-                  3,
+                  "payout_pcts",
+                  [],
                 );
-                let poolPcts: number[] | null = null;
-                if (game?.payoutPools?.$isLoaded) {
-                  for (const pool of game.payoutPools) {
-                    if (
-                      pool?.$isLoaded &&
-                      pool.splitType === "places" &&
-                      pool.payoutPcts?.$isLoaded &&
-                      pool.payoutPcts.length > 0
-                    ) {
-                      poolPcts = Array.from(pool.payoutPcts) as number[];
-                      break;
-                    }
-                  }
-                }
-                const pcts = poolPcts ?? DEFAULT_PAYOUT_PCTS[places] ?? [];
+                const places =
+                  specPcts.length > 0
+                    ? specPcts.length
+                    : getGameOptionNumber(game?.spec, "places_paid", 3);
+                const pcts =
+                  specPcts.length > 0
+                    ? specPcts
+                    : (DEFAULT_PAYOUT_PCTS[places] ?? []);
                 displayOverride = `${places} (${pcts.join("/")})`;
               }
               return (

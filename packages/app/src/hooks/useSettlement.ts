@@ -6,7 +6,12 @@ import type {
   ScoringContext,
   SettlementResult,
 } from "spicylib/scoring";
-import { getGameOptionNumber, settleBets } from "spicylib/scoring";
+import {
+  getGameOptionIntArray,
+  getGameOptionNumber,
+  getPayoutPctsForPlaceCount,
+  settleBets,
+} from "spicylib/scoring";
 import type { BetColumnInfo } from "@/components/game/leaderboard";
 
 const VALID_SCOPES = new Set([
@@ -41,23 +46,19 @@ export function useSettlement(
   bets: BetColumnInfo[],
 ): SettlementResult | null {
   const buyIn = getGameOptionNumber(game?.spec, "buy_in", 0);
-  const placesPaid = getGameOptionNumber(game?.spec, "places_paid", 3);
 
-  // Read custom payout pcts from the first "places" pool (if any)
-  const customPayoutPcts: number[] | undefined = (() => {
-    if (!game?.payoutPools?.$isLoaded) return undefined;
-    for (const pool of game.payoutPools) {
-      if (
-        pool?.$isLoaded &&
-        pool.splitType === "places" &&
-        pool.payoutPcts?.$isLoaded &&
-        pool.payoutPcts.length > 0
-      ) {
-        return Array.from(pool.payoutPcts) as number[];
-      }
-    }
-    return undefined;
-  })();
+  // Read payout_pcts from spec (single source of truth)
+  // Explicit value is a flat array; defaultValue is a map keyed by place count.
+  const explicitPcts = getGameOptionIntArray(game?.spec, "payout_pcts", []);
+  const placesPaid =
+    explicitPcts.length > 0
+      ? explicitPcts.length
+      : getGameOptionNumber(game?.spec, "places_paid", 3);
+  // Resolve payout pcts: explicit value → spec defaultValue map → DEFAULT_PAYOUT_PCTS
+  const payoutPcts =
+    explicitPcts.length > 0
+      ? explicitPcts
+      : getPayoutPctsForPlaceCount(game?.spec, placesPaid);
 
   return useMemo(() => {
     if (!game?.players?.$isLoaded || !scoreboard || bets.length === 0) {
@@ -122,7 +123,7 @@ export function useSettlement(
       playerQuotas: scoringContext?.playerQuotas,
       buyIn,
       defaultPlacesPaid: placesPaid,
-      defaultPayoutPcts: customPayoutPcts,
+      defaultPayoutPcts: payoutPcts,
       potTotal: buyIn * players.length,
     });
   }, [
@@ -131,7 +132,7 @@ export function useSettlement(
     scoringContext?.playerQuotas,
     buyIn,
     placesPaid,
-    customPayoutPcts,
+    payoutPcts,
     bets,
   ]);
 }

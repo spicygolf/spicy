@@ -45,6 +45,7 @@ export interface GameSpecV03 {
     default?: unknown;
     choices?: Array<{ name: string; disp: string }>;
     teamOnly?: boolean;
+    hidden?: boolean;
   }>;
   bets?: Array<{
     name: string;
